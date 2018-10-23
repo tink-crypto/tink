@@ -296,8 +296,8 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <ul class="blockList">
 <li class="blockList">
 <h4>getPrimitive</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&nbsp;getPrimitive(com.google.protobuf.ByteString&nbsp;serializedKey)
-               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public final&nbsp;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&nbsp;getPrimitive(com.google.protobuf.ByteString&nbsp;serializedKey)
+                     throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html#getPrimitive-com.google.protobuf.ByteString-">KeyManager</a></code></span></div>
 <div class="block">Constructs an instance of P for the key given in <code>serializedKey</code>, which must be a
  serialized key protocol buffer handled by this manager.</div>
@@ -318,8 +318,8 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <ul class="blockList">
 <li class="blockList">
 <h4>getPrimitive</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&nbsp;getPrimitive(com.google.protobuf.MessageLite&nbsp;key)
-               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public final&nbsp;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&nbsp;getPrimitive(com.google.protobuf.MessageLite&nbsp;key)
+                     throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html#getPrimitive-com.google.protobuf.MessageLite-">KeyManager</a></code></span></div>
 <div class="block">Constructs an instance of P for the key given in <code>key</code>.</div>
 <dl>
@@ -338,8 +338,8 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <ul class="blockList">
 <li class="blockList">
 <h4>newKey</h4>
-<pre>public&nbsp;com.google.protobuf.MessageLite&nbsp;newKey(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)
-                                       throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public final&nbsp;com.google.protobuf.MessageLite&nbsp;newKey(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)
+                                             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html#newKey-com.google.protobuf.ByteString-">KeyManager</a></code></span></div>
 <div class="block">Generates a new key according to specification in <code>serializedKeyFormat</code>, which must be a
  serialized key format protocol buffer handled by this manager.</div>
@@ -361,8 +361,8 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <ul class="blockList">
 <li class="blockList">
 <h4>newKey</h4>
-<pre>public&nbsp;com.google.protobuf.MessageLite&nbsp;newKey(com.google.protobuf.MessageLite&nbsp;keyFormat)
-                                       throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public final&nbsp;com.google.protobuf.MessageLite&nbsp;newKey(com.google.protobuf.MessageLite&nbsp;keyFormat)
+                                             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html#newKey-com.google.protobuf.MessageLite-">KeyManager</a></code></span></div>
 <div class="block">Generates a new key according to specification in <code>keyFormat</code>.</div>
 <dl>
@@ -383,7 +383,7 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <ul class="blockList">
 <li class="blockList">
 <h4>doesSupport</h4>
-<pre>public&nbsp;boolean&nbsp;doesSupport(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</pre>
+<pre>public final&nbsp;boolean&nbsp;doesSupport(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../com/google/crypto/tink/KeyManager.html#doesSupport-java.lang.String-">doesSupport</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&gt;</code></dd>
@@ -398,7 +398,7 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <ul class="blockList">
 <li class="blockList">
 <h4>getKeyType</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getKeyType()</pre>
+<pre>public final&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getKeyType()</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../com/google/crypto/tink/KeyManager.html#getKeyType--">getKeyType</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&gt;</code></dd>
@@ -413,8 +413,8 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <ul class="blockList">
 <li class="blockList">
 <h4>newKeyData</h4>
-<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;newKeyData(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)
-                   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public final&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;newKeyData(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)
+                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html#newKeyData-com.google.protobuf.ByteString-">KeyManager</a></code></span></div>
 <div class="block">Generates a new <code>KeyData</code> according to specification in <code>serializedkeyFormat</code>.
 
