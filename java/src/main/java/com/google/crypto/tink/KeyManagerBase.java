@@ -49,14 +49,17 @@ public abstract class KeyManagerBase<
         P, KeyProto extends MessageLite, KeyFormatProto extends MessageLite>
     implements KeyManager<P> {
   protected KeyManagerBase(
+      final Class<P> primitiveClass,
       final Class<KeyProto> keyProtoClass,
       final Class<KeyFormatProto> keyFormatProtoClass,
       final String typeUrl) {
+    this.primitiveClass = primitiveClass;
     this.keyProtoClass = keyProtoClass;
     this.keyFormatProtoClass = keyFormatProtoClass;
     this.typeUrl = typeUrl;
   }
 
+  private final Class<P> primitiveClass;
   private final Class<KeyProto> keyProtoClass;
   private final Class<KeyFormatProto> keyFormatProtoClass;
   private final String typeUrl;
@@ -147,6 +150,10 @@ public abstract class KeyManagerBase<
         .build();
   }
 
+  @Override
+  public final Class<P> getPrimitiveClass() {
+    return primitiveClass;
+  }
 
   /**
    * Returns the {@code KeyMaterialType} for this proto.

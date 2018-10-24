@@ -38,7 +38,7 @@ class Ed25519PrivateKeyManager
     extends KeyManagerBase<PublicKeySign, Ed25519PrivateKey, Empty>
     implements PrivateKeyManager<PublicKeySign> {
   public Ed25519PrivateKeyManager() {
-    super(Ed25519PrivateKey.class, Empty.class, TYPE_URL);
+    super(PublicKeySign.class, Ed25519PrivateKey.class, Empty.class, TYPE_URL);
   }
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";

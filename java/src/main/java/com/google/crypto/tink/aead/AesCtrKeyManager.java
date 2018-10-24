@@ -35,7 +35,7 @@ import java.security.GeneralSecurityException;
  */
 class AesCtrKeyManager extends KeyManagerBase<IndCpaCipher, AesCtrKey, AesCtrKeyFormat> {
   public AesCtrKeyManager() {
-    super(AesCtrKey.class, AesCtrKeyFormat.class, TYPE_URL);
+    super(IndCpaCipher.class, AesCtrKey.class, AesCtrKeyFormat.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;

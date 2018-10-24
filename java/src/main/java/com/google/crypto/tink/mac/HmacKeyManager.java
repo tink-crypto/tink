@@ -36,7 +36,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
   public HmacKeyManager() {
-    super(HmacKey.class, HmacKeyFormat.class, TYPE_URL);
+    super(Mac.class, HmacKey.class, HmacKeyFormat.class, TYPE_URL);
   }
   /** Type url that this manager does support. */
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";

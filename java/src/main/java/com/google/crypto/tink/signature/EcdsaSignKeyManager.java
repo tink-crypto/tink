@@ -44,7 +44,7 @@ class EcdsaSignKeyManager
     extends KeyManagerBase<PublicKeySign, EcdsaPrivateKey, EcdsaKeyFormat>
     implements PrivateKeyManager<PublicKeySign> {
   public EcdsaSignKeyManager() {
-    super(EcdsaPrivateKey.class, EcdsaKeyFormat.class, TYPE_URL);
+    super(PublicKeySign.class, EcdsaPrivateKey.class, EcdsaKeyFormat.class, TYPE_URL);
   }
 
   /** Type url that this manager supports */

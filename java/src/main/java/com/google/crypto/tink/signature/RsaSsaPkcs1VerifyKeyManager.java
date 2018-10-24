@@ -39,7 +39,7 @@ import java.security.spec.RSAPublicKeySpec;
 class RsaSsaPkcs1VerifyKeyManager
     extends KeyManagerBase<PublicKeyVerify, RsaSsaPkcs1PublicKey, Empty> {
   public RsaSsaPkcs1VerifyKeyManager() {
-    super(RsaSsaPkcs1PublicKey.class, Empty.class, TYPE_URL);
+    super(PublicKeyVerify.class, RsaSsaPkcs1PublicKey.class, Empty.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;

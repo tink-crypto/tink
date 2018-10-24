@@ -37,7 +37,11 @@ import java.security.GeneralSecurityException;
 class AesGcmHkdfStreamingKeyManager
     extends KeyManagerBase<StreamingAead, AesGcmHkdfStreamingKey, AesGcmHkdfStreamingKeyFormat> {
   public AesGcmHkdfStreamingKeyManager() {
-    super(AesGcmHkdfStreamingKey.class, AesGcmHkdfStreamingKeyFormat.class, TYPE_URL);
+    super(
+        StreamingAead.class,
+        AesGcmHkdfStreamingKey.class,
+        AesGcmHkdfStreamingKeyFormat.class,
+        TYPE_URL);
   }
 
   private static final int VERSION = 0;

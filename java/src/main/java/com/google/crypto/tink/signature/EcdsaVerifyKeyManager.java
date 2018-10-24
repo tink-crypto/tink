@@ -35,7 +35,7 @@ import java.security.interfaces.ECPublicKey;
  */
 class EcdsaVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, EcdsaPublicKey, Empty> {
   public EcdsaVerifyKeyManager() {
-    super(EcdsaPublicKey.class, Empty.class, TYPE_URL);
+    super(PublicKeyVerify.class, EcdsaPublicKey.class, Empty.class, TYPE_URL);
   }
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";

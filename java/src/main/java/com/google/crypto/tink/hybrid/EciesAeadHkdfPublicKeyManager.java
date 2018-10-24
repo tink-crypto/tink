@@ -39,7 +39,7 @@ import java.security.interfaces.ECPublicKey;
 class EciesAeadHkdfPublicKeyManager
     extends KeyManagerBase<HybridEncrypt, EciesAeadHkdfPublicKey, Empty> {
   public EciesAeadHkdfPublicKeyManager() {
-    super(EciesAeadHkdfPublicKey.class, Empty.class, TYPE_URL);
+    super(HybridEncrypt.class, EciesAeadHkdfPublicKey.class, Empty.class, TYPE_URL);
   }
   
   private static final int VERSION = 0;

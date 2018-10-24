@@ -34,7 +34,7 @@ import java.security.GeneralSecurityException;
  */
 class AesEaxKeyManager extends KeyManagerBase<Aead, AesEaxKey, AesEaxKeyFormat> {
   public AesEaxKeyManager() {
-    super(AesEaxKey.class, AesEaxKeyFormat.class, TYPE_URL);
+    super(Aead.class, AesEaxKey.class, AesEaxKeyFormat.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;

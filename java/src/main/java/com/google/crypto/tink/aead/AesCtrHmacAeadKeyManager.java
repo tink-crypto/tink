@@ -40,7 +40,7 @@ import java.security.GeneralSecurityException;
 class AesCtrHmacAeadKeyManager
     extends KeyManagerBase<Aead, AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {
   public AesCtrHmacAeadKeyManager() throws GeneralSecurityException {
-    super(AesCtrHmacAeadKey.class, AesCtrHmacAeadKeyFormat.class, TYPE_URL);
+    super(Aead.class, AesCtrHmacAeadKey.class, AesCtrHmacAeadKeyFormat.class, TYPE_URL);
     Registry.registerKeyManager(new AesCtrKeyManager());
   }
 

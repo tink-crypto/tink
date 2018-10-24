@@ -34,7 +34,7 @@ import java.security.GeneralSecurityException;
  */
 class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305Key, Empty> {
   public XChaCha20Poly1305KeyManager() {
-    super(XChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
+    super(Aead.class, XChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
   }
 
   public static final String TYPE_URL =

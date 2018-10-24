@@ -35,7 +35,7 @@ import java.security.GeneralSecurityException;
 class KmsEnvelopeAeadKeyManager
     extends KeyManagerBase<Aead, KmsEnvelopeAeadKey, KmsEnvelopeAeadKeyFormat> {
   public KmsEnvelopeAeadKeyManager() {
-    super(KmsEnvelopeAeadKey.class, KmsEnvelopeAeadKeyFormat.class, TYPE_URL);
+    super(Aead.class, KmsEnvelopeAeadKey.class, KmsEnvelopeAeadKeyFormat.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;

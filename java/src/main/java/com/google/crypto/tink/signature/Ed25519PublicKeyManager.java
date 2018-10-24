@@ -33,7 +33,7 @@ import java.security.GeneralSecurityException;
  */
 class Ed25519PublicKeyManager extends KeyManagerBase<PublicKeyVerify, Ed25519PublicKey, Empty> {
   public Ed25519PublicKeyManager() {
-    super(Ed25519PublicKey.class, Empty.class, TYPE_URL);
+    super(PublicKeyVerify.class, Ed25519PublicKey.class, Empty.class, TYPE_URL);
   }
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
 

@@ -40,7 +40,7 @@ public final class KeyManagerBaseTest {
   /** Keymanager for testing. Only produces dummy aeads, and wants the key size to be exactly 16. */
   static class TestKeyManager extends KeyManagerBase<Aead, AesGcmKey, AesGcmKeyFormat> {
     public TestKeyManager() {
-      super(AesGcmKey.class, AesGcmKeyFormat.class, TYPE_URL);
+      super(Aead.class, AesGcmKey.class, AesGcmKeyFormat.class, TYPE_URL);
     }
 
     private static final int VERSION = 0;
@@ -236,5 +236,11 @@ public final class KeyManagerBaseTest {
                 .newKeyData(AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString())
                 .getKeyMaterialType())
         .isEqualTo(KeyMaterialType.SYMMETRIC);
+  }
+
+  @Test
+  public void getPrimitiveClass() throws Exception {
+    TestKeyManager keyManager = new TestKeyManager();
+    assertThat(keyManager.getPrimitiveClass()).isEqualTo(Aead.class);
   }
 }

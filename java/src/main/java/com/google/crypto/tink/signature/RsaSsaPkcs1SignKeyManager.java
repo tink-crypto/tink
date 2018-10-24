@@ -51,7 +51,7 @@ class RsaSsaPkcs1SignKeyManager
     extends KeyManagerBase<PublicKeySign, RsaSsaPkcs1PrivateKey, RsaSsaPkcs1KeyFormat>
     implements PrivateKeyManager<PublicKeySign> {
   public RsaSsaPkcs1SignKeyManager() {
-    super(RsaSsaPkcs1PrivateKey.class, RsaSsaPkcs1KeyFormat.class, TYPE_URL);
+    super(PublicKeySign.class, RsaSsaPkcs1PrivateKey.class, RsaSsaPkcs1KeyFormat.class, TYPE_URL);
   }
 
   public static final String TYPE_URL =

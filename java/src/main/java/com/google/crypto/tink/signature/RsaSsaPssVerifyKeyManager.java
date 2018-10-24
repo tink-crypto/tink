@@ -39,7 +39,7 @@ import java.security.spec.RSAPublicKeySpec;
  */
 class RsaSsaPssVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, RsaSsaPssPublicKey, Empty> {
   public RsaSsaPssVerifyKeyManager() {
-    super(RsaSsaPssPublicKey.class, Empty.class, TYPE_URL);
+    super(PublicKeyVerify.class, RsaSsaPssPublicKey.class, Empty.class, TYPE_URL);
   }
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey";

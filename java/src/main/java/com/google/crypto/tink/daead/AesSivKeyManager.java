@@ -36,7 +36,7 @@ import java.security.InvalidKeyException;
  */
 class AesSivKeyManager extends KeyManagerBase<DeterministicAead, AesSivKey, AesSivKeyFormat> {
   public AesSivKeyManager() {
-    super(AesSivKey.class, AesSivKeyFormat.class, TYPE_URL);
+    super(DeterministicAead.class, AesSivKey.class, AesSivKeyFormat.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;

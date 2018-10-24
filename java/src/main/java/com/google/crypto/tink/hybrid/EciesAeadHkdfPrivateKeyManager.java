@@ -46,7 +46,8 @@ class EciesAeadHkdfPrivateKeyManager
     extends KeyManagerBase<HybridDecrypt, EciesAeadHkdfPrivateKey, EciesAeadHkdfKeyFormat>
     implements PrivateKeyManager<HybridDecrypt> {
   public EciesAeadHkdfPrivateKeyManager() {
-    super(EciesAeadHkdfPrivateKey.class, EciesAeadHkdfKeyFormat.class, TYPE_URL);
+    super(
+        HybridDecrypt.class, EciesAeadHkdfPrivateKey.class, EciesAeadHkdfKeyFormat.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;
