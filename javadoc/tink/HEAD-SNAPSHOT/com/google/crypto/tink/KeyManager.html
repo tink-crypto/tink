@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -162,23 +162,29 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i4" class="altColor">
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#getPrimitiveClass--">getPrimitiveClass</a></span>()</code>
+<div class="block">Returns the primitive class object of the P.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#getVersion--">getVersion</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#newKey-com.google.protobuf.ByteString-">newKey</a></span>(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)</code>
 <div class="block">Generates a new key according to specification in <code>serializedKeyFormat</code>, which must be a
  serialized key format protocol buffer handled by this manager.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#newKey-com.google.protobuf.MessageLite-">newKey</a></span>(com.google.protobuf.MessageLite&nbsp;keyFormat)</code>
 <div class="block">Generates a new key according to specification in <code>keyFormat</code>.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#newKeyData-com.google.protobuf.ByteString-">newKeyData</a></span>(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)</code>
 <div class="block">Generates a new <code>KeyData</code> according to specification in <code>serializedkeyFormat</code>.</div>
@@ -306,6 +312,21 @@ var activeTableTab = "activeTableTab";
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the version number of this KeyManager.</dd>
+</dl>
+</li>
+</ul>
+<a name="getPrimitiveClass--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPrimitiveClass</h4>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt;&nbsp;getPrimitiveClass()</pre>
+<div class="block">Returns the primitive class object of the P. Should be implemented as <code>return P.class;</code>
+ when implementing a key manager for primitive {$code P}.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd><code>P.class</code></dd>
 </dl>
 </li>
 </ul>
