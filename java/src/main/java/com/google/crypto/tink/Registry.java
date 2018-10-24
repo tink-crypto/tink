@@ -163,6 +163,16 @@ public final class Registry {
   }
 
   /**
+   * Helper method to check if an instance is not null; taken from guava's Precondition.java
+   */
+  private static <T> T checkNotNull(T reference) {
+    if (reference == null) {
+      throw new NullPointerException();
+    }
+    return reference;
+  }
+
+  /**
    * Tries to register {@code manager} for {@code manager.getKeyType()}. Users can generate new keys
    * with this manager using the {@link Registry#newKey} methods.
    *
@@ -259,16 +269,41 @@ public final class Registry {
 
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl} (if found).
-   *     <p>TODO(przydatek): find a way for verifying the primitive type.
    */
-  @SuppressWarnings("unchecked")
   public static <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
+    return getKeyManagerInternal(typeUrl, null);
+  }
+
+  /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
+  public static KeyManager<?> getUntypedKeyManager(String typeUrl)
+      throws GeneralSecurityException {
+    return getKeyManagerInternal(typeUrl, null);
+  }
+
+  /** @return a {@link KeyManager} for the given {@code typeUrl} (if found). */
+  public static <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
+      throws GeneralSecurityException {
+    return getKeyManagerInternal(typeUrl, checkNotNull(primitiveClass));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <P> KeyManager<P> getKeyManagerInternal(String typeUrl, Class<P> primitiveClass)
+      throws GeneralSecurityException {
     KeyManager<P> manager = keyManagerMap.get(typeUrl);
     if (manager == null) {
       throw new GeneralSecurityException(
           "No key manager found for key type: "
               + typeUrl
               + ".  Check the configuration of the registry.");
+    }
+    if (primitiveClass != null && !manager.getPrimitiveClass().equals(primitiveClass)) {
+      throw new GeneralSecurityException(
+          "Primitive type "
+              + manager.getPrimitiveClass().getName()
+              + " of keymanager for type "
+              + typeUrl
+              + " does not match requested primitive type "
+              + primitiveClass.getName());
     }
     return manager;
   }
@@ -361,7 +396,25 @@ public final class Registry {
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, MessageLite key)
       throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManager(typeUrl);
+    return getPrimitiveInternal(typeUrl, key, null);
+  }
+
+  /**
+   * Convenience method for creating a new primitive for the key given in {@code key}.
+   *
+   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
+   * KeyManager#getPrimitive} with {@code key} as the parameter.
+   *
+   * @return a new primitive
+   */
+  public static <P> P getPrimitive(String typeUrl, MessageLite key, Class<P> primitiveClass)
+      throws GeneralSecurityException {
+    return getPrimitiveInternal(typeUrl, key, checkNotNull(primitiveClass));
+  }
+
+  private static <P> P getPrimitiveInternal(
+      String typeUrl, MessageLite key, Class<P> primitiveClass) throws GeneralSecurityException {
+    KeyManager<P> manager = getKeyManagerInternal(typeUrl, primitiveClass);
     return manager.getPrimitive(key);
   }
 
@@ -376,12 +429,32 @@ public final class Registry {
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, ByteString serialized)
       throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManager(typeUrl);
-    return manager.getPrimitive(serialized);
+    return getPrimitiveInternal(typeUrl, serialized, null);
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code proto}.
+   * Convenience method for creating a new primitive for the key given in {@code serializedKey}.
+   *
+   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
+   * KeyManager#getPrimitive} with {@code serialized} as the parameter.
+   *
+   * @return a new primitive
+   */
+  public static <P> P getPrimitive(
+      String typeUrl, ByteString serializedKey, Class<P> primitiveClass)
+      throws GeneralSecurityException {
+    return getPrimitiveInternal(typeUrl, serializedKey, checkNotNull(primitiveClass));
+  }
+
+  private static <P> P getPrimitiveInternal(
+      String typeUrl, ByteString serializedKey, Class<P> primitiveClass)
+      throws GeneralSecurityException {
+    KeyManager<P> manager = getKeyManagerInternal(typeUrl, primitiveClass);
+    return manager.getPrimitive(serializedKey);
+  }
+
+  /**
+   * Convenience method for creating a new primitive for the key given in {@code serializedKey}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code serialized} as the parameter.
@@ -389,13 +462,25 @@ public final class Registry {
    * @return a new primitive
    */
   @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <P> P getPrimitive(String typeUrl, byte[] serialized)
+  public static <P> P getPrimitive(String typeUrl, byte[] serializedKey)
       throws GeneralSecurityException {
-    return getPrimitive(typeUrl, ByteString.copyFrom(serialized));
+    return getPrimitive(typeUrl, ByteString.copyFrom(serializedKey));
+  }
+  /**
+   * Convenience method for creating a new primitive for the key given in {@code serializedKey}.
+   *
+   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
+   * KeyManager#getPrimitive} with {@code serialized} as the parameter.
+   *
+   * @return a new primitive
+   */
+  public static <P> P getPrimitive(String typeUrl, byte[] serializedKey, Class<P> primitiveClass)
+      throws GeneralSecurityException {
+    return getPrimitive(typeUrl, ByteString.copyFrom(serializedKey), primitiveClass);
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code proto}.
+   * Convenience method for creating a new primitive for the key given in {@code keyData}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code keyData.type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code keyData.value} as the parameter.
@@ -405,6 +490,19 @@ public final class Registry {
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue());
+  }
+
+  /**
+   * Convenience method for creating a new primitive for the key given in {@code keyData}.
+   *
+   * <p>It looks up a {@link KeyManager} identified by {@code keyData.type_url}, and calls {@link
+   * KeyManager#getPrimitive} with {@code keyData.value} as the parameter.
+   *
+   * @return a new primitive
+   */
+  public static <P> P getPrimitive(KeyData keyData, Class<P> primitiveClass)
+      throws GeneralSecurityException {
+    return getPrimitive(keyData.getTypeUrl(), keyData.getValue(), primitiveClass);
   }
 
   /**
@@ -419,8 +517,24 @@ public final class Registry {
    */
   public static <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitives(keysetHandle, /* customManager= */ null);
+    return getPrimitives(keysetHandle, /* customManager= */ (KeyManager<P>) null);
   }
+
+  /**
+   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
+   * in {@code keysetHandle}, assuming all the corresponding key managers are present (keys with
+   * status!=ENABLED are skipped).
+   *
+   * <p>The returned set is usually later "wrapped" into a class that implements the corresponding
+   * Primitive-interface.
+   *
+   * @return a PrimitiveSet with all instantiated primitives
+   */
+  public static <P> PrimitiveSet<P> getPrimitives(
+      KeysetHandle keysetHandle, Class<P> primitiveClass) throws GeneralSecurityException {
+    return getPrimitives(keysetHandle, /* customManager= */ null, primitiveClass);
+  }
+
 
   /**
    * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
@@ -440,6 +554,33 @@ public final class Registry {
   public static <P> PrimitiveSet<P> getPrimitives(
       KeysetHandle keysetHandle, final KeyManager<P> customManager)
       throws GeneralSecurityException {
+    return getPrimitivesInternal(keysetHandle, customManager, null);
+  }
+
+  /**
+   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
+   * in {@code keysetHandle}, using {@code customManager} (instead of registered key managers) for
+   * keys supported by it. Keys not supported by {@code customManager} are handled by matching
+   * registered key managers (if present), and keys with status!=ENABLED are skipped.
+   *
+   * <p>This enables custom treatment of keys, for example providing extra context (e.g.,
+   * credentials for accessing keys managed by a KMS), or gathering custom monitoring/profiling
+   * information.
+   *
+   * <p>The returned set is usually later "wrapped" into a class that implements the corresponding
+   * Primitive-interface.
+   *
+   * @return a PrimitiveSet with all instantiated primitives
+   */
+  public static <P> PrimitiveSet<P> getPrimitives(
+      KeysetHandle keysetHandle, final KeyManager<P> customManager, Class<P> primitiveClass)
+      throws GeneralSecurityException {
+    return getPrimitivesInternal(keysetHandle, customManager, checkNotNull(primitiveClass));
+  }
+
+  private static <P> PrimitiveSet<P> getPrimitivesInternal(
+      KeysetHandle keysetHandle, final KeyManager<P> customManager, Class<P> primitiveClass)
+      throws GeneralSecurityException {
     Util.validateKeyset(keysetHandle.getKeyset());
     PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
     for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
@@ -448,7 +589,9 @@ public final class Registry {
         if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
           primitive = customManager.getPrimitive(key.getKeyData().getValue());
         } else {
-          primitive = getPrimitive(key.getKeyData().getTypeUrl(), key.getKeyData().getValue());
+          primitive =
+              getPrimitiveInternal(
+                  key.getKeyData().getTypeUrl(), key.getKeyData().getValue(), primitiveClass);
         }
         PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {

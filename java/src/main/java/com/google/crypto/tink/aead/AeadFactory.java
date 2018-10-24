@@ -25,7 +25,6 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -67,8 +66,7 @@ public final class AeadFactory {
    */
   public static Aead getPrimitive(KeysetHandle keysetHandle, final KeyManager<Aead> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<Aead> pset = Registry.getPrimitives(keysetHandle, keyManager);
-    validate(pset);
+    final PrimitiveSet<Aead> pset = Registry.getPrimitives(keysetHandle, keyManager, Aead.class);
     return new Aead() {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
@@ -109,16 +107,5 @@ public final class AeadFactory {
         throw new GeneralSecurityException("decryption failed");
       }
     };
-  }
-
-  // Check that all primitives in <code>pset</code> are Aead instances.
-  private static void validate(final PrimitiveSet<Aead> pset) throws GeneralSecurityException {
-    for (Collection<PrimitiveSet.Entry<Aead>> entries : pset.getAll()) {
-      for (PrimitiveSet.Entry<Aead> entry : entries) {
-        if (!(entry.getPrimitive() instanceof Aead)) {
-          throw new GeneralSecurityException("invalid AEAD key material");
-        }
-      }
-    }
   }
 }
