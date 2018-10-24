@@ -269,7 +269,10 @@ public final class Registry {
 
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl} (if found).
+   * @deprecated Use {@code getKeyManager(typeUrl, Primitive.class)} or
+   * {@code getUntypedKeyManager typeUrl} instead.
    */
+  @Deprecated
   public static <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
     return getKeyManagerInternal(typeUrl, null);
   }
@@ -392,7 +395,9 @@ public final class Registry {
    * KeyManager#getPrimitive} with {@code key} as the parameter.
    *
    * @return a new primitive
+   * @deprecated Use {@code getPrimitive(typeUrl, key, P.class)} instead.
    */
+  @Deprecated
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, MessageLite key)
       throws GeneralSecurityException {
@@ -422,14 +427,16 @@ public final class Registry {
    * Convenience method for creating a new primitive for the key given in {@code proto}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
-   * KeyManager#getPrimitive} with {@code serialized} as the parameter.
+   * KeyManager#getPrimitive} with {@code serializedKey} as the parameter.
    *
    * @return a new primitive
+   * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, Primitive.class} instead.
    */
+  @Deprecated
   @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <P> P getPrimitive(String typeUrl, ByteString serialized)
+  public static <P> P getPrimitive(String typeUrl, ByteString serializedKey)
       throws GeneralSecurityException {
-    return getPrimitiveInternal(typeUrl, serialized, null);
+    return getPrimitiveInternal(typeUrl, serializedKey, null);
   }
 
   /**
@@ -486,7 +493,9 @@ public final class Registry {
    * KeyManager#getPrimitive} with {@code keyData.value} as the parameter.
    *
    * @return a new primitive
+   * @deprecated Use {@code getPrimitive(keyData, Primitive.class)} instead.
    */
+  @Deprecated
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue());
@@ -514,7 +523,9 @@ public final class Registry {
    * Primitive-interface.
    *
    * @return a PrimitiveSet with all instantiated primitives
+   * @deprecated Use {@code getPrimitives(keysetHandle, Primitive.class)} instead.
    */
+  @Deprecated
   public static <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitives(keysetHandle, /* customManager= */ (KeyManager<P>) null);
@@ -535,7 +546,6 @@ public final class Registry {
     return getPrimitives(keysetHandle, /* customManager= */ null, primitiveClass);
   }
 
-
   /**
    * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
    * in {@code keysetHandle}, using {@code customManager} (instead of registered key managers) for
@@ -550,7 +560,9 @@ public final class Registry {
    * Primitive-interface.
    *
    * @return a PrimitiveSet with all instantiated primitives
+   * @deprecated Use {@code getPrimitives(keysetHandle, customManager, Primitive.class)} instead.
    */
+  @Deprecated
   public static <P> PrimitiveSet<P> getPrimitives(
       KeysetHandle keysetHandle, final KeyManager<P> customManager)
       throws GeneralSecurityException {

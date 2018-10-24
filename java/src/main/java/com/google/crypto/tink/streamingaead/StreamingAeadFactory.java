@@ -22,7 +22,6 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import java.security.GeneralSecurityException;
-import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -72,20 +71,8 @@ public final class StreamingAeadFactory {
       KeysetHandle keysetHandle,
       final KeyManager<StreamingAead> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<StreamingAead> primitives = Registry.getPrimitives(keysetHandle, keyManager);
-    validate(primitives);
+    final PrimitiveSet<StreamingAead> primitives =
+        Registry.getPrimitives(keysetHandle, keyManager, StreamingAead.class);
     return new StreamingAeadHelper(primitives);
-  }
-
-  // Check that all primitives in <code>pset</code> are StreamingAead instances.
-  private static void validate(final PrimitiveSet<StreamingAead> pset)
-      throws GeneralSecurityException {
-    for (Collection<PrimitiveSet.Entry<StreamingAead>> entries : pset.getAll()) {
-      for (PrimitiveSet.Entry<StreamingAead> entry : entries) {
-        if (!(entry.getPrimitive() instanceof StreamingAead)) {
-          throw new GeneralSecurityException("invalid StreamingAead key material");
-        }
-      }
-    }
   }
 }

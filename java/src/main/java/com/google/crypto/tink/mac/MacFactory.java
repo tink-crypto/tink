@@ -26,7 +26,6 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -68,8 +67,8 @@ public final class MacFactory {
    */
   public static Mac getPrimitive(KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<Mac> primitives = Registry.getPrimitives(keysetHandle, keyManager);
-    validate(primitives);
+    final PrimitiveSet<Mac> primitives =
+        Registry.getPrimitives(keysetHandle, keyManager, Mac.class);
     final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
     return new Mac() {
       @Override
@@ -124,16 +123,5 @@ public final class MacFactory {
         throw new GeneralSecurityException("invalid MAC");
       }
     };
-  }
-
-  // Check that all primitives in <code>pset</code> are Mac instances.
-  private static void validate(final PrimitiveSet<Mac> pset) throws GeneralSecurityException {
-    for (Collection<PrimitiveSet.Entry<Mac>> entries : pset.getAll()) {
-      for (PrimitiveSet.Entry<Mac> entry : entries) {
-        if (!(entry.getPrimitive() instanceof Mac)) {
-          throw new GeneralSecurityException("invalid MAC key material");
-        }
-      }
-    }
   }
 }

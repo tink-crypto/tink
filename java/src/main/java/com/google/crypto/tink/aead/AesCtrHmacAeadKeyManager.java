@@ -52,8 +52,9 @@ class AesCtrHmacAeadKeyManager
   public Aead getPrimitiveFromKey(AesCtrHmacAeadKey keyProto) throws GeneralSecurityException {
     validate(keyProto);
     return new EncryptThenAuthenticate(
-        (IndCpaCipher) Registry.getPrimitive(AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
-        (Mac) Registry.getPrimitive(MacConfig.HMAC_TYPE_URL, keyProto.getHmacKey()),
+        Registry.getPrimitive(
+            AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey(), IndCpaCipher.class),
+        Registry.getPrimitive(MacConfig.HMAC_TYPE_URL, keyProto.getHmacKey(), Mac.class),
         keyProto.getHmacKey().getParams().getTagSize());
   }
 

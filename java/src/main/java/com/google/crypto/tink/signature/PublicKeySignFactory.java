@@ -25,7 +25,6 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
-import java.util.Collection;
 
 /**
  * Static methods for obtaining {@link PublicKeySign} instances.
@@ -62,8 +61,8 @@ public final class PublicKeySignFactory {
   public static PublicKeySign getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<PublicKeySign> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<PublicKeySign> primitives = Registry.getPrimitives(keysetHandle, keyManager);
-    validate(primitives);
+    final PrimitiveSet<PublicKeySign> primitives =
+        Registry.getPrimitives(keysetHandle, keyManager, PublicKeySign.class);
     return new PublicKeySign() {
       @Override
       public byte[] sign(final byte[] data) throws GeneralSecurityException {
@@ -78,17 +77,5 @@ public final class PublicKeySignFactory {
             primitives.getPrimary().getPrimitive().sign(data));
       }
     };
-  }
-
-  // Check that all primitives in <code>pset</code> are PublicKeySign instances.
-  private static void validate(final PrimitiveSet<PublicKeySign> pset)
-      throws GeneralSecurityException {
-    for (Collection<PrimitiveSet.Entry<PublicKeySign>> entries : pset.getAll()) {
-      for (PrimitiveSet.Entry<PublicKeySign> entry : entries) {
-        if (!(entry.getPrimitive() instanceof PublicKeySign)) {
-          throw new GeneralSecurityException("invalid PublicKeySign key material");
-        }
-      }
-    }
   }
 }

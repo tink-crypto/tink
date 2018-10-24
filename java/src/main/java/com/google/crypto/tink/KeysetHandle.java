@@ -168,6 +168,7 @@ public final class KeysetHandle {
     return publicKeyData;
   }
 
+  @SuppressWarnings("deprecation")
   private static void validate(KeyData keyData) throws GeneralSecurityException {
     // This will throw GeneralSecurityException if the keyData is invalid.
     Registry.getPrimitive(keyData);

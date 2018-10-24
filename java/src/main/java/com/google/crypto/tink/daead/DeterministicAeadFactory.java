@@ -25,7 +25,6 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -71,8 +70,7 @@ public final class DeterministicAeadFactory {
       KeysetHandle keysetHandle, final KeyManager<DeterministicAead> keyManager)
       throws GeneralSecurityException {
     final PrimitiveSet<DeterministicAead> primitives =
-        Registry.getPrimitives(keysetHandle, keyManager);
-    validate(primitives);
+        Registry.getPrimitives(keysetHandle, keyManager, DeterministicAead.class);
     return new DeterministicAead() {
       @Override
       public byte[] encryptDeterministically(final byte[] plaintext, final byte[] associatedData)
@@ -118,17 +116,5 @@ public final class DeterministicAeadFactory {
         throw new GeneralSecurityException("decryption failed");
       }
     };
-  }
-
-  // Check that all primitives in <code>pset</code> are DeterministicAead instances.
-  private static void validate(final PrimitiveSet<DeterministicAead> pset)
-      throws GeneralSecurityException {
-    for (Collection<PrimitiveSet.Entry<DeterministicAead>> entries : pset.getAll()) {
-      for (PrimitiveSet.Entry<DeterministicAead> entry : entries) {
-        if (!(entry.getPrimitive() instanceof DeterministicAead)) {
-          throw new GeneralSecurityException("invalid Deterministic AEAD key material");
-        }
-      }
-    }
   }
 }
