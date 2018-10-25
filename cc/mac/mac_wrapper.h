@@ -14,12 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_MAC_MAC_SET_WRAPPER_H_
-#define TINK_MAC_MAC_SET_WRAPPER_H_
+#ifndef TINK_MAC_MAC_WRAPPER_H_
+#define TINK_MAC_MAC_WRAPPER_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"
+#include "tink/primitive_wrapper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -32,30 +33,13 @@ namespace tink {
 // instances, depending on the context:
 //   * Mac::ComputeMac(...) uses the primary instance from the set
 //   * Mac::VerifyMac(...) uses the instance that matches the MAC prefix.
-class MacSetWrapper : public Mac {
+class MacWrapper : public PrimitiveWrapper<Mac> {
  public:
-  // Returns an Mac-primitive that uses Mac-instances provided in 'mac_set',
-  // which must be non-NULL and must contain a primary instance.
-  static crypto::tink::util::StatusOr<std::unique_ptr<Mac>> NewMac(
-      std::unique_ptr<PrimitiveSet<Mac>> mac_set);
-
-  crypto::tink::util::StatusOr<std::string> ComputeMac(
-      absl::string_view data) const override;
-
-  crypto::tink::util::Status VerifyMac(
-      absl::string_view mac_value,
-      absl::string_view data) const override;
-
-  virtual ~MacSetWrapper() {}
-
- private:
-  std::unique_ptr<PrimitiveSet<Mac>> mac_set_;
-
-  MacSetWrapper(std::unique_ptr<PrimitiveSet<Mac>> mac_set)
-      : mac_set_(std::move(mac_set)) {}
+  util::StatusOr<std::unique_ptr<Mac>> Wrap(
+      std::unique_ptr<PrimitiveSet<Mac>> mac_set) const override;
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_MAC_MAC_SET_WRAPPER_H_
+#endif  // TINK_MAC_MAC_WRAPPER_H_

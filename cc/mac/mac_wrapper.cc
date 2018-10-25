@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/mac/mac_set_wrapper.h"
+#include "tink/mac/mac_wrapper.h"
 
 #include "tink/crypto_format.h"
 #include "tink/mac.h"
@@ -31,6 +31,23 @@ using google::crypto::tink::OutputPrefixType;
 
 namespace {
 
+class MacSetWrapper : public Mac {
+ public:
+  explicit MacSetWrapper(std::unique_ptr<PrimitiveSet<Mac>> mac_set)
+      : mac_set_(std::move(mac_set)) {}
+
+  crypto::tink::util::StatusOr<std::string> ComputeMac(
+      absl::string_view data) const override;
+
+  crypto::tink::util::Status VerifyMac(absl::string_view mac_value,
+                                       absl::string_view data) const override;
+
+  ~MacSetWrapper() override {}
+
+ private:
+  std::unique_ptr<PrimitiveSet<Mac>> mac_set_;
+};
+
 util::Status Validate(PrimitiveSet<Mac>* mac_set) {
   if (mac_set == nullptr) {
     return util::Status(util::error::INTERNAL, "mac_set must be non-NULL");
@@ -40,17 +57,6 @@ util::Status Validate(PrimitiveSet<Mac>* mac_set) {
                         "mac_set has no primary");
   }
   return util::Status::OK;
-}
-
-}  // anonymous namespace
-
-// static
-util::StatusOr<std::unique_ptr<Mac>> MacSetWrapper::NewMac(
-    std::unique_ptr<PrimitiveSet<Mac>> mac_set) {
-  util::Status status = Validate(mac_set.get());
-  if (!status.ok()) return status;
-  std::unique_ptr<Mac> mac(new MacSetWrapper(std::move(mac_set)));
-  return std::move(mac);
 }
 
 util::StatusOr<std::string> MacSetWrapper::ComputeMac(
@@ -116,6 +122,16 @@ util::Status MacSetWrapper::VerifyMac(
     }
   }
   return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+}
+
+}  // namespace
+
+util::StatusOr<std::unique_ptr<Mac>> MacWrapper::Wrap(
+      std::unique_ptr<PrimitiveSet<Mac>> mac_set) const {
+  util::Status status = Validate(mac_set.get());
+  if (!status.ok()) return status;
+  std::unique_ptr<Mac> mac(new MacSetWrapper(std::move(mac_set)));
+  return std::move(mac);
 }
 
 }  // namespace tink
