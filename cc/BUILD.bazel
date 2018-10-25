@@ -624,9 +624,12 @@ genrule(
     ],
     # The command below collects headers of Tink dependencies in two steps:
     #  * First a tar-archive with all Abseil .h-files is created.
+    #  * Then, absl .inc files are added to the tar-archive.
     #  * Then .h-files of Protobuf library are added to the tar-archive.
     cmd = "tar -cv -f $@ -C external/com_google_absl --dereference " +
           "    `cd external/com_google_absl; find absl/ -name \"*.h\"`; " +
+          "tar -rv -f $@ -C external/com_google_absl --dereference " +
+          "    `cd external/com_google_absl; find absl/ -name \"*.inc\"`; " +
           "tar -rv -f $@ -C external/com_google_protobuf/src --dereference " +
           "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\"`",
     local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
