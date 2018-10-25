@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":6,"i6":6,"i7":10,"i8":10,"i9":10,"i10":6,"i11":6,"i12":6};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":6,"i5":6,"i6":10,"i7":10,"i8":10,"i9":6,"i10":6,"i11":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -153,8 +153,7 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected </code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#KeyManagerBase-java.lang.Class-java.lang.Class-java.lang.Class-java.lang.String-">KeyManagerBase</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&gt;&nbsp;primitiveClass,
-              <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a>&gt;&nbsp;keyProtoClass,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#KeyManagerBase-java.lang.Class-java.lang.Class-java.lang.String-">KeyManagerBase</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a>&gt;&nbsp;keyProtoClass,
               <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyFormatProto</a>&gt;&nbsp;keyFormatProtoClass,
               <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</code>&nbsp;</td>
 </tr>
@@ -195,55 +194,49 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 </td>
 </tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#getPrimitiveClass--">getPrimitiveClass</a></span>()</code>
-<div class="block">Returns the primitive class object of the P.</div>
-</td>
-</tr>
-<tr id="i5" class="rowColor">
 <td class="colFirst"><code>protected abstract <a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#getPrimitiveFromKey-KeyProto-">getPrimitiveFromKey</a></span>(<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a>&nbsp;keyProto)</code>
 <div class="block">Creates a primitive from a given key.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>protected abstract <a href="../../../../com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto">KeyData.KeyMaterialType</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#keyMaterialType--">keyMaterialType</a></span>()</code>
 <div class="block">Returns the <code>KeyMaterialType</code> for this proto.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#newKey-com.google.protobuf.ByteString-">newKey</a></span>(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)</code>
 <div class="block">Generates a new key according to specification in <code>serializedKeyFormat</code>, which must be a
  serialized key format protocol buffer handled by this manager.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#newKey-com.google.protobuf.MessageLite-">newKey</a></span>(com.google.protobuf.MessageLite&nbsp;keyFormat)</code>
 <div class="block">Generates a new key according to specification in <code>keyFormat</code>.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#newKeyData-com.google.protobuf.ByteString-">newKeyData</a></span>(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)</code>
 <div class="block">Generates a new <code>KeyData</code> according to specification in <code>serializedkeyFormat</code>.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>protected abstract <a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#newKeyFromFormat-KeyFormatProto-">newKeyFromFormat</a></span>(<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyFormatProto</a>&nbsp;keyFormatProto)</code>
 <div class="block">Creates a new key for a given format.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>protected abstract <a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyFormatProto</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#parseKeyFormatProto-com.google.protobuf.ByteString-">parseKeyFormatProto</a></span>(com.google.protobuf.ByteString&nbsp;byteString)</code>
 <div class="block">Parses a serialized key format proto.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>protected abstract <a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html#parseKeyProto-com.google.protobuf.ByteString-">parseKeyProto</a></span>(com.google.protobuf.ByteString&nbsp;byteString)</code>
 <div class="block">Parses a serialized key proto.</div>
@@ -278,14 +271,13 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="KeyManagerBase-java.lang.Class-java.lang.Class-java.lang.Class-java.lang.String-">
+<a name="KeyManagerBase-java.lang.Class-java.lang.Class-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>KeyManagerBase</h4>
-<pre>protected&nbsp;KeyManagerBase(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&gt;&nbsp;primitiveClass,
-                         <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a>&gt;&nbsp;keyProtoClass,
+<pre>protected&nbsp;KeyManagerBase(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a>&gt;&nbsp;keyProtoClass,
                          <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyFormatProto</a>&gt;&nbsp;keyFormatProtoClass,
                          <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</pre>
 </li>
@@ -436,24 +428,6 @@ implements <a href="../../../../com/google/crypto/tink/KeyManager.html" title="i
 <dd><code>KeyData</code> proto with a new <code>AesGcmKey</code> proto</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the specified format is wrong or not supported</dd>
-</dl>
-</li>
-</ul>
-<a name="getPrimitiveClass--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getPrimitiveClass</h4>
-<pre>public final&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&gt;&nbsp;getPrimitiveClass()</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html#getPrimitiveClass--">KeyManager</a></code></span></div>
-<div class="block">Returns the primitive class object of the P. Should be implemented as <code>return P.class;</code>
- when implementing a key manager for primitive {$code P}.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/google/crypto/tink/KeyManager.html#getPrimitiveClass--">getPrimitiveClass</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>&gt;</code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd><code>P.class</code></dd>
 </dl>
 </li>
 </ul>
