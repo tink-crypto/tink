@@ -46,7 +46,7 @@ class RegistryImpl {
 
   template <class P>
   crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
-      const std::string& catalogue_name) LOCKS_EXCLUDED(maps_mutex_);
+      const std::string& catalogue_name) const LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::Status AddCatalogue(const std::string& catalogue_name,
@@ -68,7 +68,7 @@ class RegistryImpl {
 
   template <class P>
   crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
-      const std::string& type_url) LOCKS_EXCLUDED(maps_mutex_);
+      const std::string& type_url) const LOCKS_EXCLUDED(maps_mutex_);
 
 
   template <class P>
@@ -78,29 +78,30 @@ class RegistryImpl {
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data)
-      LOCKS_EXCLUDED(maps_mutex_);
+      const LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const std::string& type_url, const portable_proto::MessageLite& key)
-      LOCKS_EXCLUDED(maps_mutex_);
+      const LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
       const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager)
-      LOCKS_EXCLUDED(maps_mutex_);
+      const LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(const google::crypto::tink::KeyTemplate& key_template)
-      LOCKS_EXCLUDED(maps_mutex_);
+      const LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   GetPublicKeyData(const std::string& type_url, const std::string& serialized_private_key)
-      LOCKS_EXCLUDED(maps_mutex_);
+      const LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> Wrap(
-      std::unique_ptr<PrimitiveSet<P>> primitive_set);
+      std::unique_ptr<PrimitiveSet<P>> primitive_set) const
+      LOCKS_EXCLUDED(maps_mutex_);
 
   void Reset() LOCKS_EXCLUDED(maps_mutex_);
 
@@ -144,10 +145,10 @@ class RegistryImpl {
 
   template <class P>
   crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*> get_wrapper()
-      LOCKS_EXCLUDED(maps_mutex_);
+      const LOCKS_EXCLUDED(maps_mutex_);
 
 
-  absl::Mutex maps_mutex_;
+  mutable absl::Mutex maps_mutex_;
   std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_
       GUARDED_BY(maps_mutex_);
   std::unordered_map<std::string, std::unique_ptr<void, void (*)(void*)>>
@@ -202,7 +203,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
 
 template <class P>
 crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
-    const std::string& catalogue_name) {
+    const std::string& catalogue_name) const {
   absl::MutexLock lock(&maps_mutex_);
   auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
@@ -289,7 +290,7 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
 
 template <class P>
 crypto::tink::util::StatusOr<const KeyManager<P>*>
-RegistryImpl::get_key_manager(const std::string& type_url) {
+RegistryImpl::get_key_manager(const std::string& type_url) const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
@@ -309,7 +310,7 @@ RegistryImpl::get_key_manager(const std::string& type_url) {
 
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
-    const google::crypto::tink::KeyData& key_data) {
+    const google::crypto::tink::KeyData& key_data) const {
   auto key_manager_result = get_key_manager<P>(key_data.type_url());
   if (key_manager_result.ok()) {
     return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
@@ -319,7 +320,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
 
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
-    const std::string& type_url, const portable_proto::MessageLite& key) {
+    const std::string& type_url, const portable_proto::MessageLite& key) const {
   auto key_manager_result = get_key_manager<P>(type_url);
   if (key_manager_result.ok()) {
     return key_manager_result.ValueOrDie()->GetPrimitive(key);
@@ -330,7 +331,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
 RegistryImpl::GetPrimitives(const KeysetHandle& keyset_handle,
-                            const KeyManager<P>* custom_manager) {
+                            const KeyManager<P>* custom_manager) const {
   crypto::tink::util::Status status =
       ValidateKeyset(keyset_handle.get_keyset());
   if (!status.ok()) return status;
@@ -361,7 +362,7 @@ RegistryImpl::GetPrimitives(const KeysetHandle& keyset_handle,
 
 template <class P>
 crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*>
-RegistryImpl::get_wrapper() {
+RegistryImpl::get_wrapper() const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = primitive_to_wrapper_.find(typeid(P).name());
   if (it == primitive_to_wrapper_.end()) {
@@ -374,7 +375,7 @@ RegistryImpl::get_wrapper() {
 
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
-    std::unique_ptr<PrimitiveSet<P>> primitive_set) {
+    std::unique_ptr<PrimitiveSet<P>> primitive_set) const {
   if (primitive_set == nullptr) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,

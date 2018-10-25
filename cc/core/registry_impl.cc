@@ -27,7 +27,7 @@ namespace crypto {
 namespace tink {
 
 StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
-    const KeyTemplate& key_template) {
+    const KeyTemplate& key_template) const {
   absl::MutexLock lock(&maps_mutex_);
   const std::string& type_url = key_template.type_url();
   auto it = type_url_to_info_.find(type_url);
@@ -46,7 +46,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
 }
 
 StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
-    const std::string& type_url, const std::string& serialized_private_key) {
+    const std::string& type_url, const std::string& serialized_private_key) const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
