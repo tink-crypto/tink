@@ -143,6 +143,7 @@ public final class X25519Test {
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
       JSONArray tests = group.getJSONArray("tests");
+      String curve = group.getString("curve");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
         String tcId =
@@ -152,7 +153,6 @@ public final class X25519Test {
         String hexPubKey = testcase.getString("public");
         String hexPrivKey = testcase.getString("private");
         String expectedSharedSecret = testcase.getString("shared");
-        String curve = testcase.getString("curve");
         if (!curve.equals("curve25519")) {
           System.out.printf("Skipping %s, unknown curve name: %s", tcId, curve);
           cntSkippedTests++;
