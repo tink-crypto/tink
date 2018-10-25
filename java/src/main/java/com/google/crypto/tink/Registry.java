@@ -466,8 +466,10 @@ public final class Registry {
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code serialized} as the parameter.
    *
+   * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, Primitive.class)} instead.
    * @return a new primitive
    */
+  @Deprecated
   @SuppressWarnings("TypeParameterUnusedInFormals")
   public static <P> P getPrimitive(String typeUrl, byte[] serializedKey)
       throws GeneralSecurityException {
