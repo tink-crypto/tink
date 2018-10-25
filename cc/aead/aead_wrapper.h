@@ -20,6 +20,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/primitive_set.h"
+#include "tink/primitive_wrapper.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -31,28 +32,12 @@ namespace tink {
 // instances, depending on the context:
 //   * Aead::Encrypt(...) uses the primary instance from the set
 //   * Aead::Decrypt(...) uses the instance that matches the ciphertext prefix.
-class AeadSetWrapper : public Aead {
+class AeadWrapper : public PrimitiveWrapper<Aead> {
  public:
   // Returns an Aead-primitive that uses Aead-instances provided in 'aead_set',
   // which must be non-NULL and must contain a primary instance.
-  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> NewAead(
-      std::unique_ptr<PrimitiveSet<Aead>> aead_set);
-
-  crypto::tink::util::StatusOr<std::string> Encrypt(
-      absl::string_view plaintext,
-      absl::string_view associated_data) const override;
-
-  crypto::tink::util::StatusOr<std::string> Decrypt(
-      absl::string_view ciphertext,
-      absl::string_view associated_data) const override;
-
-  virtual ~AeadSetWrapper() {}
-
- private:
-  std::unique_ptr<PrimitiveSet<Aead>> aead_set_;
-
-  AeadSetWrapper(std::unique_ptr<PrimitiveSet<Aead>> aead_set)
-      : aead_set_(std::move(aead_set)) {}
+  util::StatusOr<std::unique_ptr<Aead>> Wrap(
+      std::unique_ptr<PrimitiveSet<Aead>> aead_set) const override;
 };
 
 }  // namespace tink

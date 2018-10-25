@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/aead/aead_set_wrapper.h"
+#include "tink/aead/aead_wrapper.h"
 
 #include "tink/aead.h"
 #include "tink/crypto_format.h"
@@ -39,16 +39,24 @@ util::Status Validate(PrimitiveSet<Aead>* aead_set) {
   return util::Status::OK;
 }
 
-}  // anonymous namespace
+class AeadSetWrapper : public Aead {
+ public:
+  explicit AeadSetWrapper(std::unique_ptr<PrimitiveSet<Aead>> aead_set)
+      : aead_set_(std::move(aead_set)) {}
 
-// static
-util::StatusOr<std::unique_ptr<Aead>> AeadSetWrapper::NewAead(
-    std::unique_ptr<PrimitiveSet<Aead>> aead_set) {
-  util::Status status = Validate(aead_set.get());
-  if (!status.ok()) return status;
-  std::unique_ptr<Aead> aead(new AeadSetWrapper(std::move(aead_set)));
-  return std::move(aead);
-}
+  crypto::tink::util::StatusOr<std::string> Encrypt(
+      absl::string_view plaintext,
+      absl::string_view associated_data) const override;
+
+  crypto::tink::util::StatusOr<std::string> Decrypt(
+      absl::string_view ciphertext,
+      absl::string_view associated_data) const override;
+
+  ~AeadSetWrapper() override {}
+
+ private:
+  std::unique_ptr<PrimitiveSet<Aead>> aead_set_;
+};
 
 util::StatusOr<std::string> AeadSetWrapper::Encrypt(
     absl::string_view plaintext,
@@ -103,6 +111,16 @@ util::StatusOr<std::string> AeadSetWrapper::Decrypt(
     }
   }
   return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+}
+
+}  // anonymous namespace
+
+util::StatusOr<std::unique_ptr<Aead>> AeadWrapper::Wrap(
+    std::unique_ptr<PrimitiveSet<Aead>> aead_set) const {
+  util::Status status = Validate(aead_set.get());
+  if (!status.ok()) return status;
+  std::unique_ptr<Aead> aead(new AeadSetWrapper(std::move(aead_set)));
+  return std::move(aead);
 }
 
 }  // namespace tink

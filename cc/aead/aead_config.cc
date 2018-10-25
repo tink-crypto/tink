@@ -17,6 +17,7 @@
 #include "tink/aead/aead_config.h"
 
 #include "absl/memory/memory.h"
+#include "tink/aead/aead_wrapper.h"
 #include "tink/config.h"
 #include "tink/registry.h"
 #include "tink/aead/aead_catalogue.h"
@@ -70,7 +71,9 @@ util::Status AeadConfig::Register() {
   status = Registry::AddCatalogue(kCatalogueName,
                                   absl::make_unique<AeadCatalogue>());
   if (!status.ok()) return status;
-  return Config::Register(Latest());
+  status = Config::Register(Latest());
+  // TODO(tholenst): Add the AeadWrapper to the catalogue.
+  return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
 }
 
 }  // namespace tink

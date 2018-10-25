@@ -349,6 +349,17 @@ cc_library(
 )
 
 cc_library(
+    name = "primitive_wrapper",
+    hdrs = ["primitive_wrapper.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":primitive_set",
+        "//cc/util:statusor",
+    ],
+)
+
+cc_library(
     name = "registry",
     hdrs = ["registry.h"],
     include_prefix = "tink",
@@ -372,6 +383,7 @@ cc_library(
         ":key_manager",
         ":keyset_handle_hdr",
         ":primitive_set",
+        ":primitive_wrapper",
         "//cc/util:errors",
         "//cc/util:protobuf_helper",
         "//cc/util:status",
@@ -680,8 +692,10 @@ cc_test(
         ":aead",
         ":catalogue",
         ":crypto_format",
+        ":keyset_manager",
         ":registry",
         "//cc/aead:aead_catalogue",
+        "//cc/aead:aead_wrapper",
         "//cc/aead:aes_gcm_key_manager",
         "//cc/hybrid:ecies_aead_hkdf_private_key_manager",
         "//cc/hybrid:ecies_aead_hkdf_public_key_manager",

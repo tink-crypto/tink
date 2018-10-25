@@ -3,16 +3,17 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
-    name = "aead_set_wrapper",
-    srcs = ["aead_set_wrapper.cc"],
-    hdrs = ["aead_set_wrapper.h"],
+    name = "aead_wrapper",
+    srcs = ["aead_wrapper.cc"],
+    hdrs = ["aead_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:aead",
         "//cc:crypto_format",
         "//cc:primitive_set",
+        "//cc:primitive_wrapper",
+        "//cc:registry",
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -47,6 +48,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":aead_catalogue",
+        ":aead_wrapper",
         "//cc:config",
         "//cc/mac:mac_config",
         "//cc/util:status",
@@ -62,7 +64,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":aead_set_wrapper",
+        ":aead_wrapper",
         "//cc:aead",
         "//cc:key_manager",
         "//cc:keyset_handle",
@@ -193,12 +195,12 @@ cc_library(
 # tests
 
 cc_test(
-    name = "aead_set_wrapper_test",
+    name = "aead_wrapper_test",
     size = "small",
-    srcs = ["aead_set_wrapper_test.cc"],
+    srcs = ["aead_wrapper_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":aead_set_wrapper",
+        ":aead_wrapper",
         "//cc:aead",
         "//cc:primitive_set",
         "//cc/util:status",

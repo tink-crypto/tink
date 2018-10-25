@@ -23,11 +23,13 @@
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_catalogue.h"
+#include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
-#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/catalogue.h"
 #include "tink/crypto_format.h"
+#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "tink/keyset_manager.h"
 #include "tink/registry.h"
 #include "tink/util/keyset_util.h"
 #include "tink/util/protobuf_helper.h"
@@ -59,6 +61,7 @@ using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
+using google::crypto::tink::OutputPrefixType;
 using portable_proto::MessageLite;
 
 class RegistryTest : public ::testing::Test {
@@ -132,7 +135,6 @@ class TestAeadKeyManager : public KeyManager<Aead> {
   TestKeyFactory key_factory_;
 };
 
-
 class TestAeadCatalogue : public Catalogue<Aead> {
  public:
   TestAeadCatalogue() {}
@@ -143,6 +145,16 @@ class TestAeadCatalogue : public Catalogue<Aead> {
                     uint32_t min_version) const override {
     return util::Status(util::error::UNIMPLEMENTED,
                         "This is a test catalogue.");
+  }
+};
+
+template <typename P>
+class TestWrapper : public PrimitiveWrapper<P> {
+ public:
+  TestWrapper() {}
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> Wrap(
+      std::unique_ptr<PrimitiveSet<P>> primitive_set) const override {
+    return util::Status(util::error::UNIMPLEMENTED, "This is a test wrapper.");
   }
 };
 
@@ -574,6 +586,124 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
             bad_key_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Could not parse",
                       bad_key_result.status().error_message());
+}
+
+// Tests that if we register the same type of wrapper twice, the second call
+// succeeds.
+TEST_F(RegistryTest, RegisterWrapperTwice) {
+  EXPECT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>())
+          .ok());
+  EXPECT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>())
+          .ok());
+}
+
+// Tests that if we register different wrappers for the same primitive twice,
+// the second call fails.
+TEST_F(RegistryTest, RegisterDifferentWrappers) {
+  EXPECT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>())
+          .ok());
+  util::Status result = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<TestWrapper<Aead>>());
+  EXPECT_FALSE(result.ok());
+  EXPECT_EQ(util::error::ALREADY_EXISTS, result.error_code());
+}
+
+// Tests that if we register different wrappers for different primitives, this
+// returns ok.
+TEST_F(RegistryTest, RegisterDifferentWrappersDifferentPrimitives) {
+  EXPECT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<TestWrapper<Aead>>())
+          .ok());
+  EXPECT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<TestWrapper<Mac>>())
+          .ok());
+}
+
+// Tests that if we do not register a wrapper, then calls to Wrap
+// fail with "No wrapper registered" -- even if there is a wrapper for a
+// different primitive registered.
+TEST_F(RegistryTest, NoWrapperRegistered) {
+  EXPECT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<TestWrapper<Mac>>())
+          .ok());
+
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> result =
+      Registry::Wrap<Aead>(absl::make_unique<PrimitiveSet<Aead>>());
+  EXPECT_FALSE(result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "No wrapper registered",
+                      result.status().error_message());
+}
+
+// Tests that if the wrapper fails, the error of the wrapped is forwarded
+// in GetWrappedPrimitive.
+TEST_F(RegistryTest, WrapperFails) {
+  EXPECT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<TestWrapper<Aead>>())
+          .ok());
+
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> result =
+      Registry::Wrap<Aead>(absl::make_unique<PrimitiveSet<Aead>>());
+  EXPECT_FALSE(result.ok());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "This is a test wrapper",
+                      result.status().error_message());
+}
+
+// Tests that wrapping works as expected in the usual case.
+TEST_F(RegistryTest, UsualWrappingTest) {
+  Keyset keyset;
+
+  keyset.add_key();
+  keyset.mutable_key(0)->set_output_prefix_type(OutputPrefixType::TINK);
+  keyset.mutable_key(0)->set_key_id(1234543);
+  keyset.add_key();
+  keyset.mutable_key(1)->set_output_prefix_type(OutputPrefixType::LEGACY);
+  keyset.mutable_key(1)->set_key_id(726329);
+  keyset.add_key();
+  keyset.mutable_key(2)->set_output_prefix_type(OutputPrefixType::TINK);
+  keyset.mutable_key(2)->set_key_id(7213743);
+
+  auto primitive_set = absl::make_unique<PrimitiveSet<Aead>>();
+  ASSERT_TRUE(
+      primitive_set
+          ->AddPrimitive(absl::make_unique<DummyAead>("aead0"), keyset.key(0))
+          .ok());
+  ASSERT_TRUE(
+      primitive_set
+          ->AddPrimitive(absl::make_unique<DummyAead>("aead1"), keyset.key(1))
+          .ok());
+  auto entry_result = primitive_set->AddPrimitive(
+      absl::make_unique<DummyAead>("primary_aead"), keyset.key(2));
+  primitive_set->set_primary(entry_result.ValueOrDie());
+
+  EXPECT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>())
+          .ok());
+
+  auto aead_result = Registry::Wrap<Aead>(std::move(primitive_set));
+  EXPECT_TRUE(aead_result.ok()) << aead_result.status();
+  std::unique_ptr<Aead> aead = std::move(aead_result.ValueOrDie());
+  std::string plaintext = "some_plaintext";
+  std::string aad = "some_aad";
+
+  auto encrypt_result = aead->Encrypt(plaintext, aad);
+  EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
+  std::string ciphertext = encrypt_result.ValueOrDie();
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "primary_aead", ciphertext);
+
+  auto decrypt_result = aead->Decrypt(ciphertext, aad);
+  EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
+  EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+
+  decrypt_result = aead->Decrypt("some bad ciphertext", aad);
+  EXPECT_FALSE(decrypt_result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
+            decrypt_result.status().error_code());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
+                      decrypt_result.status().error_message());
 }
 
 }  // namespace

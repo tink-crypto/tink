@@ -110,6 +110,13 @@ class Registry {
     return RegisterKeyManager(absl::WrapUnique(manager), new_key_allowed);
   }
 
+  template <class ConcretePrimitiveWrapper>
+  static crypto::tink::util::Status RegisterPrimitiveWrapper(
+      std::unique_ptr<ConcretePrimitiveWrapper> wrapper) {
+    return RegistryImpl::GlobalInstance().RegisterPrimitiveWrapper(
+        wrapper.release());
+  }
+
   // Returns a key manager for the given type_url (if any found).
   // Keeps the ownership of the manager.
   // TODO(przydatek): consider changing return value to
@@ -174,6 +181,14 @@ class Registry {
                    const std::string& serialized_private_key) {
     return RegistryImpl::GlobalInstance().GetPublicKeyData(
         type_url, serialized_private_key);
+  }
+
+  // Looks up the globally registered PrimitiveWrapper for this primitive
+  // and wraps the given PrimitiveSet with it.
+  template <class P>
+  static crypto::tink::util::StatusOr<std::unique_ptr<P>> Wrap(
+      std::unique_ptr<PrimitiveSet<P>> primitive_set) {
+    return RegistryImpl::GlobalInstance().Wrap<P>(std::move(primitive_set));
   }
 
   // Resets the registry.
