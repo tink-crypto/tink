@@ -43,7 +43,7 @@ const generateKeyPair = async function(curve) {
   const ephemeralKeyPair = await window.crypto.subtle.generateKey(
       ecdhParams, true /* extractable */,
       ['deriveKey', 'deriveBits'] /* usage */);
-  return ephemeralKeyPair;
+  return /** @type {!webCrypto.CryptoKey} */ (ephemeralKeyPair);
 };
 
 /**
@@ -52,7 +52,7 @@ const generateKeyPair = async function(curve) {
  */
 const exportCryptoKey = async function(cryptoKey) {
   const jwk = await window.crypto.subtle.exportKey('jwk', cryptoKey);
-  return jwk;
+  return /** @type {!webCrypto.JsonWebKey} */ (jwk);
 };
 
 /**
