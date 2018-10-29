@@ -191,6 +191,12 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AeadKeyTemplates--">AeadKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">AeadWrapper</span></a> - Class in <a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a></dt>
+<dd>
+<div class="block">AeadWrapper is the implementation of SetWrapper for the Aead primitive.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadWrapper.html#AeadWrapper--">AeadWrapper()</a></span> - Constructor for class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead">AeadWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_CTR_HMAC_SHA256">AES128_CTR_HMAC_SHA256</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
 <div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
@@ -4708,12 +4714,20 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive(KeysetHandle, KeyManager&lt;StreamingAead&gt;)</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadFactory.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead">AeadWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>
 <div class="block">Returns the primitive class object of the P.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a></dt>
+<dd>
+<div class="block">Returns the primitive class object of the primitive managed.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitiveFromKey-KeyProto-">getPrimitiveFromKey(KeyProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
 <dd>
 <div class="block">Creates a primitive from a given key.</div>
@@ -7294,7 +7308,7 @@
 <dd>
 <div class="block">Returns a new <publicKey, privateKey> KeyPair.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#newPrimitiveSet--">newPrimitiveSet()</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#newPrimitiveSet-java.lang.Class-">newPrimitiveSet(Class&lt;P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/StreamingAead.html#newSeekableDecryptingChannel-java.nio.channels.SeekableByteChannel-byte:A-">newSeekableDecryptingChannel(SeekableByteChannel, byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink">StreamingAead</a></dt>
 <dd>
@@ -8722,11 +8736,13 @@
 <div class="block">A container class for a set of primitives -- implementations of cryptographic primitives offered
  by Tink.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#PrimitiveSet--">PrimitiveSet()</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink"><span class="typeNameLink">PrimitiveSet.Entry</span></a>&lt;<a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="type parameter in PrimitiveSet.Entry">P</a>&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">A single entry in the set.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PrimitiveWrapper</span></a>&lt;<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&gt; - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
+<dd>
+<div class="block">Basic interface for wrapping a primitive.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PrivateKeyManager</span></a>&lt;<a href="com/google/crypto/tink/PrivateKeyManager.html" title="type parameter in PrivateKeyManager">P</a>&gt; - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
@@ -8974,6 +8990,10 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Config.html#registerKeyType-com.google.crypto.tink.proto.KeyTypeEntry-">registerKeyType(KeyTypeEntry)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink">Config</a></dt>
 <dd>
 <div class="block">Tries to register a key manager according to the specification in <code>entry</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#registerPrimitiveWrapper-com.google.crypto.tink.PrimitiveWrapper-">registerPrimitiveWrapper(PrimitiveWrapper&lt;P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
+<dd>
+<div class="block">Tries to register <code>wrapper</code> as a new SetWrapper for primitive <code>P</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#registerStandardKeyTypes--">registerStandardKeyTypes()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
 <dd>
@@ -10915,9 +10935,20 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withUrlSafeBase64--">withUrlSafeBase64()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;Aead&gt;)</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead">AeadWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyWrap.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></dt>
 <dd>
 <div class="block">Wraps some key material <code>data</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;P&gt;)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a></dt>
+<dd>
+<div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
+<dd>
+<div class="block">Looks up the globally registered PrimitiveWrapper for this primitive and wraps the given
+ PrimitiveSet with it.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
 <dd>

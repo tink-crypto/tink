@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":41,"i3":9,"i4":41,"i5":9,"i6":41,"i7":9,"i8":41,"i9":9,"i10":41,"i11":9,"i12":41,"i13":9,"i14":41,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":41,"i24":41};
+var methods = {"i0":9,"i1":9,"i2":41,"i3":9,"i4":41,"i5":9,"i6":41,"i7":9,"i8":41,"i9":9,"i10":41,"i11":9,"i12":41,"i13":9,"i14":41,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":41,"i24":41,"i25":9,"i26":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -375,6 +375,19 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </div>
 </td>
 </tr>
+<tr id="i25" class="rowColor">
+<td class="colFirst"><code>static &lt;P&gt;&nbsp;void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerPrimitiveWrapper-com.google.crypto.tink.PrimitiveWrapper-">registerPrimitiveWrapper</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;P&gt;&nbsp;wrapper)</code>
+<div class="block">Tries to register <code>wrapper</code> as a new SetWrapper for primitive <code>P</code>.</div>
+</td>
+</tr>
+<tr id="i26" class="altColor">
+<td class="colFirst"><code>static &lt;P&gt;&nbsp;P</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;&nbsp;primitiveSet)</code>
+<div class="block">Looks up the globally registered PrimitiveWrapper for this primitive and wraps the given
+ PrimitiveSet with it.</div>
+</td>
+</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -539,6 +552,27 @@ public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerKeyManager(<a href="https://
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager is not an instance of the
      class of <code>manager</code></dd>
+</dl>
+</li>
+</ul>
+<a name="registerPrimitiveWrapper-com.google.crypto.tink.PrimitiveWrapper-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>registerPrimitiveWrapper</h4>
+<pre>public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerPrimitiveWrapper(<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;P&gt;&nbsp;wrapper)
+                                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Tries to register <code>wrapper</code> as a new SetWrapper for primitive <code>P</code>.
+
+ <p>If no SetWrapper is registered for <code>P</code> registers the given one. If already is a
+ SetWrapper registered which is of the same class ass the passed in set wrapper, the call is
+ silently ignored. If the new set wrapper is of a different type, the call fails with a <code>GeneralSecurityException</code>.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager is not an instance of the
+     class of <code>manager</code>, or the registration tries to re-enable the generation of new
+     keys.</dd>
 </dl>
 </li>
 </ul>
@@ -927,7 +961,7 @@ public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/Pr
 <a name="getPrimitives-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-java.lang.Class-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getPrimitives</h4>
 <pre>public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;&nbsp;getPrimitives(<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle,
@@ -948,6 +982,22 @@ public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/Pr
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a PrimitiveSet with all instantiated primitives</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="wrap-com.google.crypto.tink.PrimitiveSet-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>wrap</h4>
+<pre>public static&nbsp;&lt;P&gt;&nbsp;P&nbsp;wrap(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;&nbsp;primitiveSet)
+                  throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Looks up the globally registered PrimitiveWrapper for this primitive and wraps the given
+ PrimitiveSet with it.</div>
+<dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
