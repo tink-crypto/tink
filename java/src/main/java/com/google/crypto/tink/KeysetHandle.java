@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -204,5 +205,38 @@ public final class KeysetHandle {
     if (keyset == null || keyset.getEncryptedKeyset().size() == 0) {
       throw new GeneralSecurityException("empty keyset");
     }
+  }
+
+  /**
+   * Returns a primitive from this keyset, using the global registry to create resources creating
+   * the primitive.
+   *
+   * <p>This does not yet work for all primitives, since the set-wrapper for the primitive needs to
+   * be registered. TODO(tholenst): Make this work for all primitives we have, then remove the alpha
+   * annotation.
+   */
+  @Alpha
+  public <P> P getPrimitive(Class<P> classObject) throws GeneralSecurityException {
+    PrimitiveSet<P> primitiveSet = Registry.getPrimitives(this, classObject);
+    return Registry.wrap(primitiveSet);
+  }
+
+  /**
+   * Returns a primitive from this keyset, using the given {@code customKeyManager} and the global
+   * registry to get resources creating the primitive. The given keyManager will take precedence
+   * when creating primitives over the globally registered keyManagers.
+   *
+   * <p>This does not yet work for all primitives, since the set-wrapper for the primitive needs to
+   * be registered. TODO(tholenst): Make this work for all primitives we have, then remove the alpha
+   * annotation.
+   */
+  @Alpha
+  public <P> P getPrimitive(KeyManager<P> customKeyManager, Class<P> classObject)
+      throws GeneralSecurityException {
+    if (customKeyManager == null) {
+      throw new IllegalArgumentException("customKeyManager must be non-null.");
+    }
+    PrimitiveSet<P> primitiveSet = Registry.getPrimitives(this, customKeyManager, classObject);
+    return Registry.wrap(primitiveSet);
   }
 }
