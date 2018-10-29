@@ -80,6 +80,10 @@ public final class Registry {
   @SuppressWarnings("rawtypes")
   private static final ConcurrentMap<String, Catalogue> catalogueMap =
       new ConcurrentHashMap<String, Catalogue>(); //  name -> catalogue mapping
+
+  private static final ConcurrentMap<Class<?>, PrimitiveWrapper<?>> primitiveWrapperMap =
+      new ConcurrentHashMap<Class<?>, PrimitiveWrapper<?>>();
+
   /**
    * Resets the registry.
    *
@@ -92,6 +96,7 @@ public final class Registry {
     keyManagerMap.clear();
     newKeyAllowedMap.clear();
     catalogueMap.clear();
+    primitiveWrapperMap.clear();
   }
 
   /**
@@ -265,6 +270,43 @@ public final class Registry {
           + typeUrl + ".");
     }
     registerKeyManager(manager, newKeyAllowed);
+  }
+
+  /**
+   * Tries to register {@code wrapper} as a new SetWrapper for primitive {@code P}.
+   *
+   * <p>If no SetWrapper is registered for {@code P} registers the given one. If already is a
+   * SetWrapper registered which is of the same class ass the passed in set wrapper, the call is
+   * silently ignored. If the new set wrapper is of a different type, the call fails with a {@code
+   * GeneralSecurityException}.
+   *
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}, or the registration tries to re-enable the generation of new
+   *     keys.
+   */
+  @SuppressWarnings("unchecked")
+  public static synchronized <P> void registerPrimitiveWrapper(final PrimitiveWrapper<P> wrapper)
+      throws GeneralSecurityException {
+    if (wrapper == null) {
+      throw new IllegalArgumentException("wrapper must be non-null");
+    }
+    Class<P> classObject = wrapper.getPrimitiveClass();
+    if (primitiveWrapperMap.containsKey(classObject)) {
+      PrimitiveWrapper<P> existingWrapper =
+          (PrimitiveWrapper<P>) (primitiveWrapperMap.get(classObject));
+      if (!wrapper.getClass().equals(existingWrapper.getClass())) {
+        logger.warning(
+            "Attempted overwrite of a registered SetWrapper for type " + classObject.toString());
+        throw new GeneralSecurityException(
+            String.format(
+                "SetWrapper for primitive (%s) is already registered to be %s, "
+                    + "cannot be re-registered with %s",
+                classObject.getName(),
+                existingWrapper.getClass().getName(),
+                wrapper.getClass().getName()));
+      }
+    }
+    primitiveWrapperMap.put(classObject, wrapper);
   }
 
   /**
@@ -596,7 +638,7 @@ public final class Registry {
       KeysetHandle keysetHandle, final KeyManager<P> customManager, Class<P> primitiveClass)
       throws GeneralSecurityException {
     Util.validateKeyset(keysetHandle.getKeyset());
-    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
+    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet(primitiveClass);
     for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         P primitive;
@@ -614,5 +656,21 @@ public final class Registry {
       }
     }
     return primitives;
+  }
+
+  /**
+   * Looks up the globally registered PrimitiveWrapper for this primitive and wraps the given
+   * PrimitiveSet with it.
+   */
+  public static <P> P wrap(PrimitiveSet<P> primitiveSet)
+      throws GeneralSecurityException {
+    @SuppressWarnings("unchecked") // We know that we only inserted Class<P> -> PrimitiveWrapper<P>
+    PrimitiveWrapper<P> wrapper =
+        (PrimitiveWrapper<P>) primitiveWrapperMap.get(primitiveSet.getPrimitiveClass());
+    if (wrapper == null) {
+      throw new GeneralSecurityException(
+          "No key manager found for primitive class " + primitiveSet.getPrimitiveClass().getName());
+    }
+    return wrapper.wrap(primitiveSet);
   }
 }

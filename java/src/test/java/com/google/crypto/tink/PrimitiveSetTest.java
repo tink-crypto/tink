@@ -66,7 +66,7 @@ public class PrimitiveSetTest {
 
   @Test
   public void testBasicFunctionality() throws Exception {
-    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet();
+    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 =
         Key.newBuilder()
             .setKeyId(1)
@@ -131,7 +131,7 @@ public class PrimitiveSetTest {
 
   @Test
   public void testDuplicateKeys() throws Exception {
-    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet();
+    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 =
         Key.newBuilder()
             .setKeyId(1)
@@ -235,7 +235,7 @@ public class PrimitiveSetTest {
 
   @Test
   public void testAddInvalidKey() throws Exception {
-    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet();
+    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 = Key.newBuilder().setKeyId(1).setStatus(KeyStatusType.ENABLED).build();
     try {
       pset.addPrimitive(new DummyMac1(), key1);

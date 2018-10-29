@@ -142,6 +142,7 @@ public final class AeadConfig {
     MacConfig.register();
     Registry.addCatalogue(CATALOGUE_NAME, new AeadCatalogue());
     Config.register(LATEST);
+    Registry.registerPrimitiveWrapper(new AeadWrapper());
   }
 
   /**
