@@ -72,6 +72,7 @@ util::Status AeadConfig::Register() {
                                   absl::make_unique<AeadCatalogue>());
   if (!status.ok()) return status;
   status = Config::Register(Latest());
+  if (!status.ok()) return status;
   // TODO(tholenst): Add the AeadWrapper to the catalogue.
   return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
 }
