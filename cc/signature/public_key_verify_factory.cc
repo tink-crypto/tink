@@ -37,8 +37,8 @@ PublicKeyVerifyFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
 util::StatusOr<std::unique_ptr<PublicKeyVerify>>
 PublicKeyVerifyFactory::GetPrimitive(const KeysetHandle& keyset_handle,
     const KeyManager<PublicKeyVerify>* custom_key_manager) {
-  auto primitives_result = Registry::GetPrimitives<PublicKeyVerify>(
-      keyset_handle, custom_key_manager);
+  auto primitives_result =
+      keyset_handle.GetPrimitives<PublicKeyVerify>(custom_key_manager);
   if (primitives_result.ok()) {
     return PublicKeyVerifySetWrapper::NewPublicKeyVerify(
         std::move(primitives_result.ValueOrDie()));

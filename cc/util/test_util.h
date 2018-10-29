@@ -59,6 +59,16 @@ std::string HexDecodeOrDie(absl::string_view hex);
 // Converts a std::string of bytes into a hexadecimal std::string.
 std::string HexEncode(absl::string_view bytes);
 
+// Adds the given 'keyData' with specified status, key_id, and
+// output_prefix_type to the keyset.
+void AddKeyData(
+    const google::crypto::tink::KeyData& key_data,
+    uint32_t key_id,
+    google::crypto::tink::OutputPrefixType output_prefix,
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::Keyset* keyset);
+
+
 // Adds the given 'key' with specified parameters and output_prefix_type=TINK
 // to the specified 'keyset'.
 void AddTinkKey(

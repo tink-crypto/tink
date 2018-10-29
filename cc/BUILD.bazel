@@ -381,7 +381,6 @@ cc_library(
     deps = [
         ":catalogue",
         ":key_manager",
-        ":keyset_handle_hdr",
         ":primitive_set",
         ":primitive_wrapper",
         "//cc/util:errors",
@@ -414,22 +413,6 @@ cc_library(
 )
 
 cc_library(
-    name = "keyset_handle_hdr",
-    srcs = ["keyset_handle.h"],
-    hdrs = ["keyset_handle.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":aead",
-        ":keyset_reader",
-        ":keyset_writer",
-        "//cc/util:errors",
-        "//proto:tink_cc_proto",
-        "@com_google_absl//absl/memory",
-    ],
-)
-
-cc_library(
     name = "keyset_handle",
     srcs = ["core/keyset_handle.cc"],
     hdrs = ["keyset_handle.h"],
@@ -437,7 +420,6 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":aead",
-        ":keyset_manager",
         ":keyset_reader",
         ":keyset_writer",
         ":registry",
@@ -454,7 +436,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":keyset_handle_hdr",
+        ":keyset_handle",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -469,7 +451,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":keyset_handle_hdr",
+        ":keyset_handle",
         ":keyset_reader",
         "//cc/util:errors",
         "//cc/util:status",
@@ -521,7 +503,7 @@ cc_library(
     strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        ":keyset_handle_hdr",
+        ":keyset_handle",
         ":keyset_reader",
         ":registry",
         "//cc/util:enums",

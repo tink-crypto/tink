@@ -37,8 +37,8 @@ PublicKeySignFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
 util::StatusOr<std::unique_ptr<PublicKeySign>>
 PublicKeySignFactory::GetPrimitive(const KeysetHandle& keyset_handle,
     const KeyManager<PublicKeySign>* custom_key_manager) {
-  auto primitives_result = Registry::GetPrimitives<PublicKeySign>(
-      keyset_handle, custom_key_manager);
+  auto primitives_result =
+      keyset_handle.GetPrimitives<PublicKeySign>(custom_key_manager);
   if (primitives_result.ok()) {
     return PublicKeySignSetWrapper::NewPublicKeySign(
         std::move(primitives_result.ValueOrDie()));

@@ -38,8 +38,8 @@ HybridEncryptFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
 util::StatusOr<std::unique_ptr<HybridEncrypt>>
 HybridEncryptFactory::GetPrimitive(const KeysetHandle& keyset_handle,
     const KeyManager<HybridEncrypt>* custom_key_manager) {
-  auto primitives_result = Registry::GetPrimitives<HybridEncrypt>(
-      keyset_handle, custom_key_manager);
+  auto primitives_result =
+      keyset_handle.GetPrimitives<HybridEncrypt>(custom_key_manager);
   if (primitives_result.ok()) {
     return HybridEncryptSetWrapper::NewHybridEncrypt(
         std::move(primitives_result.ValueOrDie()));

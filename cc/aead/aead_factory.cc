@@ -44,7 +44,7 @@ util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
     return status;
   }
   auto primitives_result =
-      Registry::GetPrimitives<Aead>(keyset_handle, custom_key_manager);
+      keyset_handle.GetPrimitives<Aead>(custom_key_manager);
   if (!primitives_result.ok()) {
     return primitives_result.status();
   }

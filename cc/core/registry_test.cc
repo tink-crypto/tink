@@ -435,42 +435,6 @@ TEST_F(RegistryTest, testGettingPrimitives) {
     EXPECT_EQ(DummyAead(key_type_2).Encrypt(plaintext, aad).ValueOrDie(),
               aead->Encrypt(plaintext, aad).ValueOrDie());
   }
-
-  // Keyset without custom key manager.
-  {
-    auto result = Registry::GetPrimitives<Aead>(
-        *KeysetUtil::GetKeysetHandle(keyset), nullptr);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto aead_set = std::move(result.ValueOrDie());
-
-    // Check primary.
-    EXPECT_FALSE(aead_set->get_primary() == nullptr);
-    EXPECT_EQ(CryptoFormat::get_output_prefix(keyset.key(2)).ValueOrDie(),
-              aead_set->get_primary()->get_identifier());
-
-    // Check raw.
-    auto& raw = *(aead_set->get_raw_primitives().ValueOrDie());
-    EXPECT_EQ(2, raw.size());
-    EXPECT_EQ(DummyAead(key_type_1).Encrypt(plaintext, aad).ValueOrDie(),
-              raw[0]->get_primitive().Encrypt(plaintext, aad).ValueOrDie());
-    EXPECT_EQ(DummyAead(key_type_2).Encrypt(plaintext, aad).ValueOrDie(),
-              raw[1]->get_primitive().Encrypt(plaintext, aad).ValueOrDie());
-
-    // Check Tink.
-    auto& tink = *(aead_set->get_primitives(CryptoFormat::get_output_prefix(
-        keyset.key(0)).ValueOrDie()).ValueOrDie());
-    EXPECT_EQ(1, tink.size());
-    EXPECT_EQ(DummyAead(key_type_1).Encrypt(plaintext, aad).ValueOrDie(),
-              tink[0]->get_primitive().Encrypt(plaintext, aad).ValueOrDie());
-
-    // Check DISABLED.
-    auto disabled = aead_set->get_primitives(
-        CryptoFormat::get_output_prefix(keyset.key(1)).ValueOrDie());
-    EXPECT_FALSE(disabled.ok());
-    EXPECT_EQ(util::error::NOT_FOUND, disabled.status().error_code());
-  }
-
-  // TODO(przydatek): add test: Keyset with custom key manager.
 }
 
 TEST_F(RegistryTest, testNewKeyData) {

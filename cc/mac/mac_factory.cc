@@ -41,8 +41,7 @@ util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
   if (!status.ok()) {
     return status;
   }
-  auto primitives_result =
-      Registry::GetPrimitives<Mac>(keyset_handle, custom_key_manager);
+  auto primitives_result = keyset_handle.GetPrimitives<Mac>(custom_key_manager);
   if (!primitives_result.ok()) {
     return primitives_result.status();
   }

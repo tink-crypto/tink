@@ -25,7 +25,6 @@
 #include "tink/catalogue.h"
 #include "tink/core/registry_impl.h"
 #include "tink/key_manager.h"
-#include "tink/keyset_handle.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/errors.h"
@@ -83,11 +82,6 @@ class RegistryImpl {
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const std::string& type_url, const portable_proto::MessageLite& key)
-      const LOCKS_EXCLUDED(maps_mutex_);
-
-  template <class P>
-  crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
-      const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager)
       const LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
@@ -326,38 +320,6 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     return key_manager_result.ValueOrDie()->GetPrimitive(key);
   }
   return key_manager_result.status();
-}
-
-template <class P>
-crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
-RegistryImpl::GetPrimitives(const KeysetHandle& keyset_handle,
-                            const KeyManager<P>* custom_manager) const {
-  crypto::tink::util::Status status =
-      ValidateKeyset(keyset_handle.get_keyset());
-  if (!status.ok()) return status;
-  std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
-  for (const google::crypto::tink::Keyset::Key& key :
-       keyset_handle.get_keyset().key()) {
-    if (key.status() == google::crypto::tink::KeyStatusType::ENABLED) {
-      std::unique_ptr<P> primitive;
-      if (custom_manager != nullptr &&
-          custom_manager->DoesSupport(key.key_data().type_url())) {
-        auto primitive_result = custom_manager->GetPrimitive(key.key_data());
-        if (!primitive_result.ok()) return primitive_result.status();
-        primitive = std::move(primitive_result.ValueOrDie());
-      } else {
-        auto primitive_result = GetPrimitive<P>(key.key_data());
-        if (!primitive_result.ok()) return primitive_result.status();
-        primitive = std::move(primitive_result.ValueOrDie());
-      }
-      auto entry_result = primitives->AddPrimitive(std::move(primitive), key);
-      if (!entry_result.ok()) return entry_result.status();
-      if (key.key_id() == keyset_handle.get_keyset().primary_key_id()) {
-        primitives->set_primary(entry_result.ValueOrDie());
-      }
-    }
-  }
-  return std::move(primitives);
 }
 
 template <class P>

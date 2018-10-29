@@ -146,21 +146,6 @@ class Registry {
     return RegistryImpl::GlobalInstance().GetPrimitive<P>(type_url, key);
   }
 
-  // Creates a set of primitives corresponding to the keys with
-  // (status == ENABLED) in the keyset given in 'keyset_handle',
-  // assuming all the corresponding key managers are present (keys
-  // with (status != ENABLED) are skipped).
-  //
-  // The returned set is usually later "wrapped" into a class that
-  // implements the corresponding Primitive-interface.
-  template <class P>
-  static crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
-  GetPrimitives(const KeysetHandle& keyset_handle,
-                const KeyManager<P>* custom_manager) {
-    return RegistryImpl::GlobalInstance().GetPrimitives<P>(keyset_handle,
-                                                           custom_manager);
-  }
-
   // Generates a new KeyData for the specified 'key_template'.
   // It looks up a KeyManager identified by key_template.type_url,
   // and calls KeyManager::NewKeyData.

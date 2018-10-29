@@ -107,9 +107,6 @@ class KeysetManager {
 
   mutable absl::Mutex keyset_mutex_;
   google::crypto::tink::Keyset keyset_ GUARDED_BY(keyset_mutex_);
-
-  // Generates a new key_id avoiding collisions in the managed keyset.
-  uint32_t GenerateNewKeyId() SHARED_LOCKS_REQUIRED(keyset_mutex_);
 };
 
 }  // namespace tink

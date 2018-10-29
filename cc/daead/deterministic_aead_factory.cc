@@ -38,8 +38,8 @@ util::StatusOr<std::unique_ptr<DeterministicAead>>
 DeterministicAeadFactory::GetPrimitive(
     const KeysetHandle& keyset_handle,
     const KeyManager<DeterministicAead>* custom_key_manager) {
-  auto primitives_result = Registry::GetPrimitives<DeterministicAead>(
-      keyset_handle, custom_key_manager);
+  auto primitives_result =
+      keyset_handle.GetPrimitives<DeterministicAead>(custom_key_manager);
   if (primitives_result.ok()) {
     return DeterministicAeadSetWrapper::NewDeterministicAead(
         std::move(primitives_result.ValueOrDie()));

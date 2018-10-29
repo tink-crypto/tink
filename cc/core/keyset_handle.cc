@@ -13,11 +13,11 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#include "tink/keyset_handle.h"
 
+#include <random>
 #include "absl/memory/memory.h"
 #include "tink/aead.h"
-#include "tink/keyset_handle.h"
-#include "tink/keyset_manager.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/registry.h"
@@ -56,6 +56,27 @@ Decrypt(const EncryptedKeyset& enc_keyset, const Aead& master_key_aead) {
         "Could not parse the decrypted data as a Keyset-proto.");
   }
   return std::move(keyset);
+}
+
+uint32_t NewKeyId() {
+  std::random_device rd;
+  std::minstd_rand0 gen(rd());
+  std::uniform_int_distribution<uint32_t> dist;
+  return dist(gen);
+}
+
+uint32_t GenerateUnusedKeyId(const Keyset& keyset) {
+  while (true) {
+    uint32_t key_id = NewKeyId();
+    bool already_exists = false;
+    for (auto& key : keyset.key()) {
+      if (key.key_id() == key_id) {
+        already_exists = true;
+        break;
+      }
+    }
+    if (!already_exists) return key_id;
+  }
 }
 
 }  // anonymous namespace
@@ -101,13 +122,13 @@ util::Status KeysetHandle::Write(KeysetWriter* writer,
 // static
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
     const KeyTemplate& key_template) {
-  auto manager_result = KeysetManager::New(key_template);
-  if (!manager_result.ok()) {
-    return manager_result.status();
+  Keyset keyset;
+  auto result = AddToKeyset(key_template, /*as_primary=*/true, &keyset);
+  if (!result.ok()) {
+    return result.status();
   }
-  return manager_result.ValueOrDie()->GetKeysetHandle();
+  return absl::WrapUnique<KeysetHandle>(new KeysetHandle(std::move(keyset)));
 }
-
 
 util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
     const Keyset::Key& key) {
@@ -135,6 +156,24 @@ KeysetHandle::GetPublicKeysetHandle() {
   std::unique_ptr<KeysetHandle> handle(
       new KeysetHandle(std::move(public_keyset)));
   return std::move(handle);
+}
+
+crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
+    const google::crypto::tink::KeyTemplate& key_template,
+    bool as_primary, Keyset* keyset) {
+  auto key_data_result = Registry::NewKeyData(key_template);
+  if (!key_data_result.ok()) return key_data_result.status();
+  auto key_data = std::move(key_data_result.ValueOrDie());
+  Keyset::Key* key = keyset->add_key();
+  uint32_t key_id = GenerateUnusedKeyId(*keyset);
+  *(key->mutable_key_data()) = *key_data;
+  key->set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key->set_key_id(key_id);
+  key->set_output_prefix_type(key_template.output_prefix_type());
+  if (as_primary) {
+    keyset->set_primary_key_id(key_id);
+  }
+  return key_id;
 }
 
 KeysetHandle::KeysetHandle(Keyset keyset)

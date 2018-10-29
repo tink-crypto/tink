@@ -18,8 +18,11 @@
 #define TINK_KEYSET_HANDLE_H_
 
 #include "tink/aead.h"
+#include "tink/key_manager.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
+#include "tink/primitive_set.h"
+#include "tink/registry.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -52,6 +55,16 @@ class KeysetHandle {
   crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GetPublicKeysetHandle();
 
+  // Creates a set of primitives corresponding to the keys with
+  // (status == ENABLED) in the keyset given in 'keyset_handle',
+  // assuming all the corresponding key managers are present (keys
+  // with (status != ENABLED) are skipped).
+  //
+  // The returned set is usually later "wrapped" into a class that
+  // implements the corresponding Primitive-interface.
+  template <class P>
+  crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
+      GetPrimitives(const KeyManager<P>* custom_manager) const;
 
  private:
   // The classes below need access to get_keyset();
@@ -68,11 +81,51 @@ class KeysetHandle {
   // Creates a handle that contains the given keyset.
   KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
 
+  // Helper function which generates a key from a template, then adds it
+  // to the keyset. TODO(tholenst): Change this to a proper member operating
+  // on the internal keyset.
+  static crypto::tink::util::StatusOr<uint32_t> AddToKeyset(
+      const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
+      google::crypto::tink::Keyset* keyset);
+
   // Returns keyset held by this handle.
   const google::crypto::tink::Keyset& get_keyset() const;
 
   google::crypto::tink::Keyset keyset_;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// Implementation details of templated methods.
+
+// static
+template <class P>
+crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
+KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
+  crypto::tink::util::Status status = ValidateKeyset(get_keyset());
+  if (!status.ok()) return status;
+  std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
+  for (const google::crypto::tink::Keyset::Key& key : get_keyset().key()) {
+    if (key.status() == google::crypto::tink::KeyStatusType::ENABLED) {
+      std::unique_ptr<P> primitive;
+      if (custom_manager != nullptr &&
+          custom_manager->DoesSupport(key.key_data().type_url())) {
+        auto primitive_result = custom_manager->GetPrimitive(key.key_data());
+        if (!primitive_result.ok()) return primitive_result.status();
+        primitive = std::move(primitive_result.ValueOrDie());
+      } else {
+        auto primitive_result = Registry::GetPrimitive<P>(key.key_data());
+        if (!primitive_result.ok()) return primitive_result.status();
+        primitive = std::move(primitive_result.ValueOrDie());
+      }
+      auto entry_result = primitives->AddPrimitive(std::move(primitive), key);
+      if (!entry_result.ok()) return entry_result.status();
+      if (key.key_id() == get_keyset().primary_key_id()) {
+        primitives->set_primary(entry_result.ValueOrDie());
+      }
+    }
+  }
+  return std::move(primitives);
+}
 
 }  // namespace tink
 }  // namespace crypto
