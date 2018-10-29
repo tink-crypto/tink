@@ -18,17 +18,19 @@
 
 #include "gtest/gtest.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/aead/aead_wrapper.h"
+#include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead_key_templates.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/config/tink_config.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
-#include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/config/tink_config.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/util/keyset_util.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
@@ -429,6 +431,76 @@ TEST_F(KeysetHandleTest, GetPrimitives) {
                 ->Decrypt(encryption, aad)
                 .ValueOrDie(),
             plaintext);
+}
+
+
+TEST_F(KeysetHandleTest, GetPrimitive) {
+  Keyset keyset;
+  KeyData key_data_0 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes128Gcm()).ValueOrDie();
+  AddKeyData(key_data_0, /*key_id=*/0,
+             google::crypto::tink::OutputPrefixType::TINK,
+             KeyStatusType::ENABLED, &keyset);
+  KeyData key_data_1 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).ValueOrDie();
+  AddKeyData(key_data_1, /*key_id=*/1,
+             google::crypto::tink::OutputPrefixType::TINK,
+             KeyStatusType::ENABLED, &keyset);
+  KeyData key_data_2 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).ValueOrDie();
+  AddKeyData(key_data_2, /*key_id=*/2,
+             google::crypto::tink::OutputPrefixType::RAW,
+             KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(1);
+  std::unique_ptr<KeysetHandle> keyset_handle =
+      KeysetUtil::GetKeysetHandle(keyset);
+
+  // Check that encryption with the primary can be decrypted with key_data_1.
+  auto aead_result = keyset_handle->GetPrimitive<Aead>();
+  ASSERT_TRUE(aead_result.ok()) << aead_result.status();
+  std::unique_ptr<Aead> aead = std::move(aead_result.ValueOrDie());
+
+  std::string plaintext = "plaintext";
+  std::string aad = "aad";
+  std::string encryption = aead->Encrypt(plaintext, aad).ValueOrDie();
+  EXPECT_EQ(aead->Decrypt(encryption, aad).ValueOrDie(), plaintext);
+
+  std::unique_ptr<Aead> raw_aead =
+      Registry::GetPrimitive<Aead>(key_data_2).ValueOrDie();
+  EXPECT_FALSE(raw_aead->Decrypt(encryption, aad).ok());
+
+  std::string raw_encryption = raw_aead->Encrypt(plaintext, aad).ValueOrDie();
+  EXPECT_EQ(aead->Decrypt(raw_encryption, aad).ValueOrDie(), plaintext);
+}
+
+// Tests that GetPrimitive(nullptr) fails with a non-ok status.
+TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
+  Keyset keyset;
+  AddKeyData(*Registry::NewKeyData(AeadKeyTemplates::Aes128Gcm()).ValueOrDie(),
+             /*key_id=*/0, google::crypto::tink::OutputPrefixType::TINK,
+             KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(0);
+  std::unique_ptr<KeysetHandle> keyset_handle =
+      KeysetUtil::GetKeysetHandle(keyset);
+  ASSERT_THAT(keyset_handle->GetPrimitive<Aead>(nullptr).status(),
+              test::StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+// Test creating with custom key manager. For this, we reset the registry before
+// asking for the primitive.
+TEST_F(KeysetHandleTest, GetPrimitiveCustomKeyManager) {
+  auto handle_result = KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
+  ASSERT_TRUE(handle_result.ok()) << handle_result.status();
+  std::unique_ptr<KeysetHandle> handle = std::move(handle_result.ValueOrDie());
+  Registry::Reset();
+  ASSERT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>())
+          .ok());
+  // Without custom key manager it now fails.
+  ASSERT_FALSE(handle->GetPrimitive<Aead>().ok());
+  AesGcmKeyManager key_manager;
+  // With custom key manager it works ok.
+  ASSERT_TRUE(handle->GetPrimitive<Aead>(&key_manager).ok());
 }
 
 // Compile time check: ensures that the KeysetHandle can be copied.

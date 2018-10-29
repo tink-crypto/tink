@@ -31,7 +31,12 @@ namespace tink {
 // static
 util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
     const KeysetHandle& keyset_handle) {
-  return GetPrimitive(keyset_handle, nullptr);
+  util::Status status =
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
+  if (!status.ok()) {
+    return status;
+  }
+  return keyset_handle.GetPrimitive<Aead>();
 }
 
 // static
@@ -43,12 +48,7 @@ util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
   if (!status.ok()) {
     return status;
   }
-  auto primitives_result =
-      keyset_handle.GetPrimitives<Aead>(custom_key_manager);
-  if (!primitives_result.ok()) {
-    return primitives_result.status();
-  }
-  return Registry::Wrap<Aead>(std::move(primitives_result.ValueOrDie()));
+  return keyset_handle.GetPrimitive<Aead>(custom_key_manager);
 }
 
 }  // namespace tink

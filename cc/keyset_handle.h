@@ -55,6 +55,21 @@ class KeysetHandle {
   crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GetPublicKeysetHandle();
 
+  // Creates a wrapped primitive corresponding to this keyset or fails with
+  // a non-ok status. Uses the KeyManager and PrimitiveWrapper objects in the
+  // global registry to create the primitive. This function is the most common
+  // way of creating a primitive.
+  template <class P>
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive() const;
+
+  // Creates a wrapped primitive corresponding to this keyset. Uses the given
+  // KeyManager, as well as the KeyManager and PrimitiveWrapper objects in the
+  // global registry to create the primitive. The given KeyManager is used for
+  // keys supported by it. For those, the registry is ignored.
+  template <class P>
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
+      const KeyManager<P>* custom_manager) const;
+
   // Creates a set of primitives corresponding to the keys with
   // (status == ENABLED) in the keyset given in 'keyset_handle',
   // assuming all the corresponding key managers are present (keys
@@ -97,7 +112,6 @@ class KeysetHandle {
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation details of templated methods.
 
-// static
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
 KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
@@ -126,6 +140,31 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
   }
   return std::move(primitives);
 }
+
+template <class P>
+crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
+    const {
+  auto primitives_result = this->GetPrimitives<P>(nullptr);
+  if (!primitives_result.ok()) {
+    return primitives_result.status();
+  }
+  return Registry::Wrap<P>(std::move(primitives_result.ValueOrDie()));
+}
+
+template <class P>
+crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
+    const KeyManager<P>* custom_manager) const {
+  if (custom_manager == nullptr) {
+    return crypto::tink::util::Status(util::error::INVALID_ARGUMENT,
+                                      "custom_manager must not be null");
+  }
+  auto primitives_result = this->GetPrimitives<P>(custom_manager);
+  if (!primitives_result.ok()) {
+    return primitives_result.status();
+  }
+  return Registry::Wrap<P>(std::move(primitives_result.ValueOrDie()));
+}
+
 
 }  // namespace tink
 }  // namespace crypto
