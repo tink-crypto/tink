@@ -38,7 +38,10 @@ const SecurityException = goog.require('tink.exception.SecurityException');
  * @final
  */
 class EciesAeadHkdfPrivateKeyFactory {
-  /** @override */
+  /**
+   * @override
+   * @return {!Promise<!PbMessage>}
+   */
   async newKey(keyFormat) {
     if (!keyFormat) {
       throw new SecurityException('Key format has to be non-null.');
@@ -49,7 +52,10 @@ class EciesAeadHkdfPrivateKeyFactory {
     return await EciesAeadHkdfPrivateKeyFactory.newKeyImpl_(keyFormatProto);
   }
 
-  /** @override */
+  /**
+   * @override
+   * @return {!Promise<!PbKeyData>}
+   */
   async newKeyData(serializedKeyFormat) {
     const key = await this.newKey(serializedKeyFormat);
 
