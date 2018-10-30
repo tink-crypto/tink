@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/signature/public_key_verify_set_wrapper.h"
-#include "tink/public_key_verify.h"
+#include "tink/signature/public_key_verify_wrapper.h"
+#include "gtest/gtest.h"
 #include "tink/primitive_set.h"
+#include "tink/public_key_verify.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 using crypto::tink::test::DummyPublicKeySign;
 using crypto::tink::test::DummyPublicKeyVerify;
@@ -40,8 +40,7 @@ class PublicKeyVerifySetWrapperTest : public ::testing::Test {
 
 TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
   { // pk_verify_set is nullptr.
-    auto pk_verify_result =
-        PublicKeyVerifySetWrapper::NewPublicKeyVerify(nullptr);
+    auto pk_verify_result = PublicKeyVerifyWrapper().Wrap(nullptr);
     EXPECT_FALSE(pk_verify_result.ok());
     EXPECT_EQ(util::error::INTERNAL, pk_verify_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
@@ -52,7 +51,7 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
     std::unique_ptr<PrimitiveSet<PublicKeyVerify>>
         pk_verify_set(new PrimitiveSet<PublicKeyVerify>());
     auto pk_verify_result =
-        PublicKeyVerifySetWrapper::NewPublicKeyVerify(std::move(pk_verify_set));
+        PublicKeyVerifyWrapper().Wrap(std::move(pk_verify_set));
     EXPECT_FALSE(pk_verify_result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT,
         pk_verify_result.status().error_code());
@@ -105,8 +104,8 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
     pk_verify_set->set_primary(entry_result.ValueOrDie());
 
     // Wrap pk_verify_set and test the resulting PublicKeyVerify.
-    auto pk_verify_result = PublicKeyVerifySetWrapper::NewPublicKeyVerify(
-        std::move(pk_verify_set));
+    auto pk_verify_result =
+        PublicKeyVerifyWrapper().Wrap(std::move(pk_verify_set));
     EXPECT_TRUE(pk_verify_result.ok()) << pk_verify_result.status();
     pk_verify = std::move(pk_verify_result.ValueOrDie());
     std::string data = "some data to sign";

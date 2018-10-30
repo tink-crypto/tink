@@ -3,15 +3,16 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
-    name = "public_key_verify_set_wrapper",
-    srcs = ["public_key_verify_set_wrapper.cc"],
-    hdrs = ["public_key_verify_set_wrapper.h"],
+    name = "public_key_verify_wrapper",
+    srcs = ["public_key_verify_wrapper.cc"],
+    hdrs = ["public_key_verify_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:primitive_set",
+        "//cc:primitive_wrapper",
         "//cc:public_key_verify",
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:status",
@@ -28,7 +29,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":public_key_verify_set_wrapper",
+        ":public_key_verify_wrapper",
         "//cc:key_manager",
         "//cc:keyset_handle",
         "//cc:primitive_set",
@@ -40,15 +41,16 @@ cc_library(
 )
 
 cc_library(
-    name = "public_key_sign_set_wrapper",
-    srcs = ["public_key_sign_set_wrapper.cc"],
-    hdrs = ["public_key_sign_set_wrapper.h"],
+    name = "public_key_sign_wrapper",
+    srcs = ["public_key_sign_wrapper.cc"],
+    hdrs = ["public_key_sign_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:primitive_set",
+        "//cc:primitive_wrapper",
         "//cc:public_key_sign",
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:status",
@@ -65,7 +67,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":public_key_sign_set_wrapper",
+        ":public_key_sign_wrapper",
         "//cc:key_manager",
         "//cc:keyset_handle",
         "//cc:primitive_set",
@@ -316,12 +318,12 @@ cc_library(
 # tests
 
 cc_test(
-    name = "public_key_verify_set_wrapper_test",
+    name = "public_key_verify_wrapper_test",
     size = "small",
-    srcs = ["public_key_verify_set_wrapper_test.cc"],
+    srcs = ["public_key_verify_wrapper_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":public_key_verify_set_wrapper",
+        ":public_key_verify_wrapper",
         "//cc:primitive_set",
         "//cc:public_key_sign",
         "//cc:public_key_verify",
@@ -355,12 +357,12 @@ cc_test(
 )
 
 cc_test(
-    name = "public_key_sign_set_wrapper_test",
+    name = "public_key_sign_wrapper_test",
     size = "small",
-    srcs = ["public_key_sign_set_wrapper_test.cc"],
+    srcs = ["public_key_sign_wrapper_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":public_key_sign_set_wrapper",
+        ":public_key_sign_wrapper",
         "//cc:crypto_format",
         "//cc:primitive_set",
         "//cc:public_key_sign",

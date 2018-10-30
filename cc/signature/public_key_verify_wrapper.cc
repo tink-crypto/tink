@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/signature/public_key_verify_set_wrapper.h"
+#include "tink/signature/public_key_verify_wrapper.h"
 
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
@@ -43,18 +43,20 @@ util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
   return util::Status::OK;
 }
 
-}  // anonymous namespace
+class PublicKeyVerifySetWrapper : public PublicKeyVerify {
+ public:
+  explicit PublicKeyVerifySetWrapper(
+      std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set)
+      : public_key_verify_set_(std::move(public_key_verify_set)) {}
 
-// static
-util::StatusOr<std::unique_ptr<PublicKeyVerify>>
-PublicKeyVerifySetWrapper::NewPublicKeyVerify(
-    std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set) {
-  util::Status status = Validate(public_key_verify_set.get());
-  if (!status.ok()) return status;
-  std::unique_ptr<PublicKeyVerify> public_key_verify(
-      new PublicKeyVerifySetWrapper(std::move(public_key_verify_set)));
-  return std::move(public_key_verify);
-}
+  crypto::tink::util::Status Verify(absl::string_view signature,
+                                    absl::string_view data) const override;
+
+  ~PublicKeyVerifySetWrapper() override {}
+
+ private:
+  std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set_;
+};
 
 util::Status PublicKeyVerifySetWrapper::Verify(
     absl::string_view signature,
@@ -106,6 +108,18 @@ util::Status PublicKeyVerifySetWrapper::Verify(
     }
   }
   return util::Status(util::error::INVALID_ARGUMENT, "Invalid signature.");
+}
+
+}  // anonymous namespace
+
+util::StatusOr<std::unique_ptr<PublicKeyVerify>> PublicKeyVerifyWrapper::Wrap(
+    std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set)
+    const {
+  util::Status status = Validate(public_key_verify_set.get());
+  if (!status.ok()) return status;
+  std::unique_ptr<PublicKeyVerify> public_key_verify(
+      new PublicKeyVerifySetWrapper(std::move(public_key_verify_set)));
+  return std::move(public_key_verify);
 }
 
 }  // namespace tink

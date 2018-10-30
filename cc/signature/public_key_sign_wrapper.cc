@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/signature/public_key_sign_set_wrapper.h"
+#include "tink/signature/public_key_sign_wrapper.h"
 
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
@@ -42,18 +42,20 @@ util::Status Validate(PrimitiveSet<PublicKeySign>* public_key_sign_set) {
   return util::Status::OK;
 }
 
-}  // anonymous namespace
+class PublicKeySignSetWrapper : public PublicKeySign {
+ public:
+  explicit PublicKeySignSetWrapper(
+      std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set)
+      : public_key_sign_set_(std::move(public_key_sign_set)) {}
 
-// static
-util::StatusOr<std::unique_ptr<PublicKeySign>>
-PublicKeySignSetWrapper::NewPublicKeySign(
-    std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set) {
-  util::Status status = Validate(public_key_sign_set.get());
-  if (!status.ok()) return status;
-  std::unique_ptr<PublicKeySign> public_key_sign(
-      new PublicKeySignSetWrapper(std::move(public_key_sign_set)));
-  return std::move(public_key_sign);
-}
+  crypto::tink::util::StatusOr<std::string> Sign(
+      absl::string_view data) const override;
+
+  ~PublicKeySignSetWrapper() override {}
+
+ private:
+  std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set_;
+};
 
 util::StatusOr<std::string> PublicKeySignSetWrapper::Sign(
     absl::string_view data) const {
@@ -72,6 +74,17 @@ util::StatusOr<std::string> PublicKeySignSetWrapper::Sign(
   if (!sign_result.ok()) return sign_result.status();
   const std::string& key_id = primary->get_identifier();
   return key_id + sign_result.ValueOrDie();
+}
+
+}  // anonymous namespace
+
+util::StatusOr<std::unique_ptr<PublicKeySign>> PublicKeySignWrapper::Wrap(
+    std::unique_ptr<PrimitiveSet<PublicKeySign>> primitive_set) const {
+  util::Status status = Validate(primitive_set.get());
+  if (!status.ok()) return status;
+  std::unique_ptr<PublicKeySign> public_key_sign(
+      new PublicKeySignSetWrapper(std::move(primitive_set)));
+  return std::move(public_key_sign);
 }
 
 }  // namespace tink

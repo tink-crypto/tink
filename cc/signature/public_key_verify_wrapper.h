@@ -14,45 +14,35 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_SIGNATURE_PUBLIC_KEY_SIGN_SET_WRAPPER_H_
-#define TINK_SIGNATURE_PUBLIC_KEY_SIGN_SET_WRAPPER_H_
+#ifndef TINK_SIGNATURE_PUBLIC_KEY_VERIFY_WRAPPER_H_
+#define TINK_SIGNATURE_PUBLIC_KEY_VERIFY_WRAPPER_H_
 
 #include "absl/strings/string_view.h"
-#include "tink/public_key_sign.h"
 #include "tink/primitive_set.h"
+#include "tink/primitive_wrapper.h"
+#include "tink/public_key_verify.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-// Wraps a set of PublicKeySign-instances that correspond to a keyset,
-// and combines them into a single PublicKeySign-primitive,
+// Wraps a set of PublicKeyVerify-instances that correspond to a keyset,
+// and combines them into a single PublicKeyVerify-primitive,
 // that for the actual verification uses the instance that maches the
 // signature prefix.
-class PublicKeySignSetWrapper : public PublicKeySign {
+class PublicKeyVerifyWrapper : public PrimitiveWrapper<PublicKeyVerify> {
  public:
-  // Returns an PublicKeySign-primitive that uses the primary
-  // PublicKeySign-instance provided in 'public_key_sign_set',
+  // Returns an PublicKeyVerify-primitive that uses the primary
+  // PublicKeyVerify-instance provided in 'public_key_verify_set',
   // which must be non-NULL (and must contain a primary instance).
-  static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>>
-      NewPublicKeySign(
-          std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set);
-
-  crypto::tink::util::StatusOr<std::string> Sign(absl::string_view data)
+  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>> Wrap(
+      std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set)
       const override;
-
-  virtual ~PublicKeySignSetWrapper() {}
-
- private:
-  std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set_;
-
-  PublicKeySignSetWrapper(
-      std::unique_ptr<PrimitiveSet<PublicKeySign>> public_key_sign_set)
-      : public_key_sign_set_(std::move(public_key_sign_set)) {}
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_SIGNATURE_PUBLIC_KEY_SIGN_SET_WRAPPER_H_
+#endif  // TINK_SIGNATURE_PUBLIC_KEY_VERIFY_WRAPPER_H_

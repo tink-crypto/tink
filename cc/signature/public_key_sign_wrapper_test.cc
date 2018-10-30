@@ -14,13 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/signature/public_key_sign_set_wrapper.h"
+#include "tink/signature/public_key_sign_wrapper.h"
+#include "gtest/gtest.h"
 #include "tink/crypto_format.h"
-#include "tink/public_key_sign.h"
 #include "tink/primitive_set.h"
+#include "tink/public_key_sign.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 using crypto::tink::test::DummyPublicKeySign;
 using crypto::tink::test::DummyPublicKeyVerify;
@@ -41,8 +41,7 @@ class PublicKeySignSetWrapperTest : public ::testing::Test {
 
 TEST_F(PublicKeySignSetWrapperTest, testBasic) {
   { // pk_sign_set is nullptr.
-    auto pk_sign_result =
-        PublicKeySignSetWrapper::NewPublicKeySign(nullptr);
+    auto pk_sign_result = PublicKeySignWrapper().Wrap(nullptr);
     EXPECT_FALSE(pk_sign_result.ok());
     EXPECT_EQ(util::error::INTERNAL, pk_sign_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
@@ -52,8 +51,7 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
   { // pk_sign_set has no primary primitive.
     std::unique_ptr<PrimitiveSet<PublicKeySign>>
         pk_sign_set(new PrimitiveSet<PublicKeySign>());
-    auto pk_sign_result =
-        PublicKeySignSetWrapper::NewPublicKeySign(std::move(pk_sign_set));
+    auto pk_sign_result = PublicKeySignWrapper().Wrap(std::move(pk_sign_set));
     EXPECT_FALSE(pk_sign_result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT,
         pk_sign_result.status().error_code());
@@ -106,8 +104,7 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
     pk_sign_set->set_primary(entry_result.ValueOrDie());
 
     // Wrap pk_sign_set and test the resulting PublicKeySign.
-    auto pk_sign_result = PublicKeySignSetWrapper::NewPublicKeySign(
-        std::move(pk_sign_set));
+    auto pk_sign_result = PublicKeySignWrapper().Wrap(std::move(pk_sign_set));
     EXPECT_TRUE(pk_sign_result.ok()) << pk_sign_result.status();
     pk_sign = std::move(pk_sign_result.ValueOrDie());
     std::string data = "some data to sign";
@@ -139,8 +136,7 @@ TEST_F(PublicKeySignSetWrapperTest, testLegacySignatures) {
     pk_sign_set->set_primary(entry_result.ValueOrDie());
 
     // Wrap pk_sign_set and test the resulting PublicKeySign.
-    auto pk_sign_result = PublicKeySignSetWrapper::NewPublicKeySign(
-        std::move(pk_sign_set));
+    auto pk_sign_result = PublicKeySignWrapper().Wrap(std::move(pk_sign_set));
     EXPECT_TRUE(pk_sign_result.ok()) << pk_sign_result.status();
     pk_sign = std::move(pk_sign_result.ValueOrDie());
 
