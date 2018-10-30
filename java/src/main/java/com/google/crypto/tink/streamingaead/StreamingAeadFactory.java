@@ -22,7 +22,6 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import java.security.GeneralSecurityException;
-import java.util.logging.Logger;
 
 /**
  * Static methods for obtaining {@link StreamingAead} instances.
@@ -52,8 +51,6 @@ import java.util.logging.Logger;
  * @since 1.1.0
  */
 public final class StreamingAeadFactory {
-  private static final Logger logger = Logger.getLogger(StreamingAeadFactory.class.getName());
-
   /**
    * @return a StreamingAead primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
@@ -71,8 +68,9 @@ public final class StreamingAeadFactory {
       KeysetHandle keysetHandle,
       final KeyManager<StreamingAead> keyManager)
       throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
     final PrimitiveSet<StreamingAead> primitives =
         Registry.getPrimitives(keysetHandle, keyManager, StreamingAead.class);
-    return new StreamingAeadHelper(primitives);
+    return Registry.wrap(primitives);
   }
 }
