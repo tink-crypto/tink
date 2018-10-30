@@ -16,18 +16,12 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Static methods for obtaining {@link Mac} instances.
@@ -51,8 +45,6 @@ import java.util.logging.Logger;
  * @since 1.0.0
  */
 public final class MacFactory {
-  private static final Logger logger = Logger.getLogger(MacFactory.class.getName());
-
   /**
    * @return a Mac primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
@@ -67,61 +59,9 @@ public final class MacFactory {
    */
   public static Mac getPrimitive(KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
       throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new MacWrapper());
     final PrimitiveSet<Mac> primitives =
         Registry.getPrimitives(keysetHandle, keyManager, Mac.class);
-    final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
-    return new Mac() {
-      @Override
-      public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
-        if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-          return Bytes.concat(
-              primitives.getPrimary().getIdentifier(),
-              primitives.getPrimary().getPrimitive().computeMac(Bytes.concat(data, formatVersion)));
-        }
-        return Bytes.concat(
-            primitives.getPrimary().getIdentifier(),
-            primitives.getPrimary().getPrimitive().computeMac(data));
-      }
-
-      @Override
-      public void verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException {
-        if (mac.length <= CryptoFormat.NON_RAW_PREFIX_SIZE) {
-          // This also rejects raw MAC with size of 4 bytes or fewer. Those MACs are
-          // clearly insecure, thus should be discouraged.
-          throw new GeneralSecurityException("tag too short");
-        }
-        byte[] prefix = Arrays.copyOfRange(mac, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-        byte[] macNoPrefix = Arrays.copyOfRange(mac, CryptoFormat.NON_RAW_PREFIX_SIZE, mac.length);
-        List<PrimitiveSet.Entry<Mac>> entries = primitives.getPrimitive(prefix);
-        for (PrimitiveSet.Entry<Mac> entry : entries) {
-          try {
-            if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-              entry.getPrimitive().verifyMac(macNoPrefix, Bytes.concat(data, formatVersion));
-            } else {
-              entry.getPrimitive().verifyMac(macNoPrefix, data);
-            }
-            // If there is no exception, the MAC is valid and we can return.
-            return;
-          } catch (GeneralSecurityException e) {
-            logger.info("tag prefix matches a key, but cannot verify: " + e.toString());
-            // Ignored as we want to continue verification with the remaining keys.
-          }
-        }
-
-        // None "non-raw" key matched, so let's try the raw keys (if any exist).
-        entries = primitives.getRawPrimitives();
-        for (PrimitiveSet.Entry<Mac> entry : entries) {
-          try {
-            entry.getPrimitive().verifyMac(mac, data);
-            // If there is no exception, the MAC is valid and we can return.
-            return;
-          } catch (GeneralSecurityException ignored) {
-            // Ignored as we want to continue verification with other raw keys.
-          }
-        }
-        // nothing works.
-        throw new GeneralSecurityException("invalid MAC");
-      }
-    };
+    return Registry.wrap(primitives);
   }
 }
