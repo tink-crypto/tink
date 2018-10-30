@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/hybrid/hybrid_encrypt_set_wrapper.h"
+#include "tink/hybrid/hybrid_encrypt_wrapper.h"
 
 #include "tink/crypto_format.h"
 #include "tink/hybrid_encrypt.h"
@@ -40,18 +40,25 @@ util::Status Validate(PrimitiveSet<HybridEncrypt>* hybrid_encrypt_set) {
   return util::Status::OK;
 }
 
-}  // anonymous namespace
 
-// static
-util::StatusOr<std::unique_ptr<HybridEncrypt>>
-HybridEncryptSetWrapper::NewHybridEncrypt(
-    std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set) {
-  util::Status status = Validate(hybrid_encrypt_set.get());
-  if (!status.ok()) return status;
-  std::unique_ptr<HybridEncrypt> hybrid_encrypt(
-      new HybridEncryptSetWrapper(std::move(hybrid_encrypt_set)));
-  return std::move(hybrid_encrypt);
-}
+// Returns an HybridEncrypt-primitive that uses the primary
+// HybridEncrypt-instance provided in 'hybrid_encrypt_set',
+// which must be non-NULL (and must contain a primary instance).
+class HybridEncryptSetWrapper : public HybridEncrypt {
+ public:
+  explicit HybridEncryptSetWrapper(
+      std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set)
+      : hybrid_encrypt_set_(std::move(hybrid_encrypt_set)) {}
+
+  crypto::tink::util::StatusOr<std::string> Encrypt(
+      absl::string_view plaintext,
+      absl::string_view context_info) const override;
+
+  ~HybridEncryptSetWrapper() override {}
+
+ private:
+  std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set_;
+};
 
 util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
     absl::string_view plaintext,
@@ -67,6 +74,17 @@ util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
   if (!encrypt_result.ok()) return encrypt_result.status();
   const std::string& key_id = primary->get_identifier();
   return key_id + encrypt_result.ValueOrDie();
+}
+
+}  // anonymous namespace
+
+util::StatusOr<std::unique_ptr<HybridEncrypt>> HybridEncryptWrapper::Wrap(
+    std::unique_ptr<PrimitiveSet<HybridEncrypt>> primitive_set) const {
+  util::Status status = Validate(primitive_set.get());
+  if (!status.ok()) return status;
+  std::unique_ptr<HybridEncrypt> hybrid_encrypt(
+      new HybridEncryptSetWrapper(std::move(primitive_set)));
+  return std::move(hybrid_encrypt);
 }
 
 }  // namespace tink

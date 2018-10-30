@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/hybrid/hybrid_decrypt_set_wrapper.h"
+#include "tink/hybrid/hybrid_decrypt_wrapper.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
@@ -42,7 +42,7 @@ class HybridDecryptSetWrapperTest : public ::testing::Test {
 TEST_F(HybridDecryptSetWrapperTest, Basic) {
   { // hybrid_decrypt_set is nullptr.
     auto hybrid_decrypt_result =
-        HybridDecryptSetWrapper::NewHybridDecrypt(nullptr);
+        HybridDecryptWrapper().Wrap(nullptr);
     EXPECT_FALSE(hybrid_decrypt_result.ok());
     EXPECT_EQ(util::error::INTERNAL,
         hybrid_decrypt_result.status().error_code());
@@ -53,7 +53,7 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
   { // hybrid_decrypt_set has no primary primitive.
     std::unique_ptr<PrimitiveSet<HybridDecrypt>>
         hybrid_decrypt_set(new PrimitiveSet<HybridDecrypt>());
-    auto hybrid_decrypt_result = HybridDecryptSetWrapper::NewHybridDecrypt(
+    auto hybrid_decrypt_result = HybridDecryptWrapper().Wrap(
         std::move(hybrid_decrypt_set));
     EXPECT_FALSE(hybrid_decrypt_result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT,
@@ -104,7 +104,7 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     hybrid_decrypt_set->set_primary(entry_result.ValueOrDie());
 
     // Wrap hybrid_decrypt_set and test the resulting HybridDecrypt.
-    auto hybrid_decrypt_result = HybridDecryptSetWrapper::NewHybridDecrypt(
+    auto hybrid_decrypt_result = HybridDecryptWrapper().Wrap(
         std::move(hybrid_decrypt_set));
     EXPECT_TRUE(hybrid_decrypt_result.ok()) << hybrid_decrypt_result.status();
     hybrid_decrypt = std::move(hybrid_decrypt_result.ValueOrDie());

@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/hybrid/hybrid_decrypt_set_wrapper.h"
+#include "tink/hybrid/hybrid_decrypt_wrapper.h"
 
 #include "tink/crypto_format.h"
 #include "tink/hybrid_decrypt.h"
@@ -28,30 +28,21 @@ namespace tink {
 
 namespace {
 
-util::Status Validate(PrimitiveSet<HybridDecrypt>* hybrid_decrypt_set) {
-  if (hybrid_decrypt_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
-                        "hybrid_decrypt_set must be non-NULL");
-  }
-  if (hybrid_decrypt_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "hybrid_decrypt_set has no primary");
-  }
-  return util::Status::OK;
-}
+class HybridDecryptSetWrapper : public HybridDecrypt {
+ public:
+  explicit HybridDecryptSetWrapper(
+      std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set)
+      : hybrid_decrypt_set_(std::move(hybrid_decrypt_set)) {}
 
-}  // anonymous namespace
+  crypto::tink::util::StatusOr<std::string> Decrypt(
+      absl::string_view ciphertext,
+      absl::string_view context_info) const override;
 
-// static
-util::StatusOr<std::unique_ptr<HybridDecrypt>>
-HybridDecryptSetWrapper::NewHybridDecrypt(
-    std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set) {
-  util::Status status = Validate(hybrid_decrypt_set.get());
-  if (!status.ok()) return status;
-  std::unique_ptr<HybridDecrypt> hybrid_decrypt(
-      new HybridDecryptSetWrapper(std::move(hybrid_decrypt_set)));
-  return std::move(hybrid_decrypt);
-}
+  ~HybridDecryptSetWrapper() override {}
+
+ private:
+  std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set_;
+};
 
 util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
     absl::string_view ciphertext,
@@ -92,6 +83,31 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
     }
   }
   return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+}
+
+util::Status Validate(PrimitiveSet<HybridDecrypt>* hybrid_decrypt_set) {
+  if (hybrid_decrypt_set == nullptr) {
+    return util::Status(util::error::INTERNAL,
+                        "hybrid_decrypt_set must be non-NULL");
+  }
+  if (hybrid_decrypt_set->get_primary() == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "hybrid_decrypt_set has no primary");
+  }
+  return util::Status::OK;
+}
+
+}  // anonymous namespace
+
+// static
+util::StatusOr<std::unique_ptr<HybridDecrypt>>
+HybridDecryptWrapper::Wrap(
+    std::unique_ptr<PrimitiveSet<HybridDecrypt>> primitive_set) const {
+  util::Status status = Validate(primitive_set.get());
+  if (!status.ok()) return status;
+  std::unique_ptr<HybridDecrypt> hybrid_decrypt(
+      new HybridDecryptSetWrapper(std::move(primitive_set)));
+  return std::move(hybrid_decrypt);
 }
 
 }  // namespace tink

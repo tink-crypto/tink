@@ -14,12 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_HYBRID_HYBRID_ENCRYPT_SET_WRAPPER_H_
-#define TINK_HYBRID_HYBRID_ENCRYPT_SET_WRAPPER_H_
+#ifndef TINK_HYBRID_HYBRID_ENCRYPT_WRAPPER_H_
+#define TINK_HYBRID_HYBRID_ENCRYPT_WRAPPER_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/primitive_set.h"
+#include "tink/primitive_wrapper.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -29,30 +30,14 @@ namespace tink {
 // Wraps a set of HybridEncrypt-instances that correspond to a keyset,
 // and combines them into a single HybridEncrypt-primitive, that uses
 // the primary instance to do the actual encryption.
-class HybridEncryptSetWrapper : public HybridEncrypt {
+class HybridEncryptWrapper : public PrimitiveWrapper<HybridEncrypt> {
  public:
-  // Returns an HybridEncrypt-primitive that uses the primary
-  // HybridEncrypt-instance provided in 'hybrid_encrypt_set',
-  // which must be non-NULL (and must contain a primary instance).
-  static crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>>
-      NewHybridEncrypt(
-          std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set);
-
-  crypto::tink::util::StatusOr<std::string> Encrypt(
-      absl::string_view plaintext,
-      absl::string_view context_info) const override;
-
-  virtual ~HybridEncryptSetWrapper() {}
-
- private:
-  std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set_;
-
-  HybridEncryptSetWrapper(
-      std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set)
-      : hybrid_encrypt_set_(std::move(hybrid_encrypt_set)) {}
+  util::StatusOr<std::unique_ptr<HybridEncrypt>> Wrap(
+      std::unique_ptr<PrimitiveSet<HybridEncrypt>> primitive_set)
+      const override;
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_HYBRID_HYBRID_ENCRYPT_SET_WRAPPER_H_
+#endif  // TINK_HYBRID_HYBRID_ENCRYPT_WRAPPER_H_
