@@ -40,7 +40,7 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 class EciesAeadHkdfPrivateKeyFactory {
   /**
    * @override
-   * @return {!Promise<!PbMessage>}
+   * @return {!Promise<!PbEciesAeadHkdfPrivateKey>}
    */
   async newKey(keyFormat) {
     if (!keyFormat) {
@@ -96,8 +96,10 @@ class EciesAeadHkdfPrivateKeyFactory {
     const curveName = EllipticCurves.curveToString(curveTypeSubtle);
     const keyPair = await Ecdh.generateKeyPair(curveName);
 
-    const jsonPublicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
-    const jsonPrivateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+    const jsonPublicKey =
+        await Ecdh.exportCryptoKey(/** @type {?} */ (keyPair).publicKey);
+    const jsonPrivateKey =
+        await Ecdh.exportCryptoKey(/** @type {?} */ (keyPair).privateKey);
     return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey_(
         jsonPrivateKey, jsonPublicKey, params);
   }

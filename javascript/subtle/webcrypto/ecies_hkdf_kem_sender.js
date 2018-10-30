@@ -68,8 +68,9 @@ class EciesHkdfKemSender {
     const ephemeralKeyPair =
         await Ecdh.generateKeyPair(this.publicKey_.algorithm['namedCurve']);
     const sharedSecret = await Ecdh.computeSharedSecret(
-        ephemeralKeyPair.privateKey, this.publicKey_);
-    const jwk = await Ecdh.exportCryptoKey(ephemeralKeyPair.publicKey);
+        /** @type {?} */ (ephemeralKeyPair).privateKey, this.publicKey_);
+    const jwk = await Ecdh.exportCryptoKey(
+        /** @type {?} */ (ephemeralKeyPair).publicKey);
     const kemToken = EllipticCurves.pointEncode(jwk.crv, pointFormat, jwk);
     const hkdfIkm = Bytes.concat(kemToken, sharedSecret);
     const kemKey = await Hkdf.compute(
