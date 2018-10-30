@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/daead/deterministic_aead_set_wrapper.h"
+#include "tink/daead/deterministic_aead_wrapper.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/deterministic_aead.h"
@@ -41,7 +41,7 @@ class DeterministicAeadSetWrapperTest : public ::testing::Test {
 TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
   {  // daead_set is nullptr.
     auto daead_result =
-        DeterministicAeadSetWrapper::NewDeterministicAead(nullptr);
+        DeterministicAeadWrapper().Wrap(nullptr);
     EXPECT_FALSE(daead_result.ok());
     EXPECT_EQ(util::error::INTERNAL, daead_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
@@ -52,7 +52,7 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set(
         new PrimitiveSet<DeterministicAead>());
     auto daead_result =
-        DeterministicAeadSetWrapper::NewDeterministicAead(std::move(daead_set));
+        DeterministicAeadWrapper().Wrap(std::move(daead_set));
     EXPECT_FALSE(daead_result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT,
               daead_result.status().error_code());
@@ -100,7 +100,7 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
 
     // Wrap daead_set and test the resulting DeterministicAead.
     auto daead_result =
-        DeterministicAeadSetWrapper::NewDeterministicAead(std::move(daead_set));
+        DeterministicAeadWrapper().Wrap(std::move(daead_set));
     EXPECT_TRUE(daead_result.ok()) << daead_result.status();
     daead = std::move(daead_result.ValueOrDie());
     std::string plaintext = "some_plaintext";

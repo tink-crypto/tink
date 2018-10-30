@@ -14,12 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_DAEAD_DETERMINISTIC_AEAD_SET_WRAPPER_H_
-#define TINK_DAEAD_DETERMINISTIC_AEAD_SET_WRAPPER_H_
+#ifndef TINK_DAEAD_DETERMINISTIC_AEAD_WRAPPER_H_
+#define TINK_DAEAD_DETERMINISTIC_AEAD_WRAPPER_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/deterministic_aead.h"
 #include "tink/primitive_set.h"
+#include "tink/primitive_wrapper.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -33,33 +34,16 @@ namespace tink {
 //     instance from the set
 //   * DeterministicAead::DecryptDeterministically(...) uses the instance
 //     that matches the ciphertext prefix.
-class DeterministicAeadSetWrapper : public DeterministicAead {
+class DeterministicAeadWrapper : public PrimitiveWrapper<DeterministicAead> {
  public:
   // Returns a DeterministicAead-primitive that uses Daead-instances provided
   // in 'daead_set', which must be non-NULL and must contain a primary instance.
-  static crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>>
-  NewDeterministicAead(
-      std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set);
-
-  crypto::tink::util::StatusOr<std::string> EncryptDeterministically(
-      absl::string_view plaintext,
-      absl::string_view associated_data) const override;
-
-  crypto::tink::util::StatusOr<std::string> DecryptDeterministically(
-      absl::string_view ciphertext,
-      absl::string_view associated_data) const override;
-
-  virtual ~DeterministicAeadSetWrapper() {}
-
- private:
-  std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set_;
-
-  DeterministicAeadSetWrapper(
-      std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set)
-      : daead_set_(std::move(daead_set)) {}
+  crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>> Wrap(
+      std::unique_ptr<PrimitiveSet<DeterministicAead>> primitive_set)
+      const override;
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_DAEAD_DETERMINISTIC_AEAD_SET_WRAPPER_H_
+#endif  // TINK_DAEAD_DETERMINISTIC_AEAD_WRAPPER_H_

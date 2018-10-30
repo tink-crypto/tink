@@ -16,7 +16,7 @@
 
 #include "tink/daead/deterministic_aead_factory.h"
 
-#include "tink/daead/deterministic_aead_set_wrapper.h"
+#include "tink/daead/deterministic_aead_wrapper.h"
 #include "tink/deterministic_aead.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
@@ -30,7 +30,12 @@ namespace tink {
 // static
 util::StatusOr<std::unique_ptr<DeterministicAead>>
 DeterministicAeadFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
-  return GetPrimitive(keyset_handle, nullptr);
+  util::Status status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<DeterministicAeadWrapper>());
+  if (!status.ok()) {
+    return status;
+  }
+  return keyset_handle.GetPrimitive<DeterministicAead>();
 }
 
 // static
@@ -38,13 +43,12 @@ util::StatusOr<std::unique_ptr<DeterministicAead>>
 DeterministicAeadFactory::GetPrimitive(
     const KeysetHandle& keyset_handle,
     const KeyManager<DeterministicAead>* custom_key_manager) {
-  auto primitives_result =
-      keyset_handle.GetPrimitives<DeterministicAead>(custom_key_manager);
-  if (primitives_result.ok()) {
-    return DeterministicAeadSetWrapper::NewDeterministicAead(
-        std::move(primitives_result.ValueOrDie()));
+  util::Status status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<DeterministicAeadWrapper>());
+  if (!status.ok()) {
+    return status;
   }
-  return primitives_result.status();
+  return keyset_handle.GetPrimitive<DeterministicAead>(custom_key_manager);
 }
 
 }  // namespace tink

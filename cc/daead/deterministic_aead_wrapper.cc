@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/daead/deterministic_aead_set_wrapper.h"
+#include "tink/daead/deterministic_aead_wrapper.h"
 
 #include "tink/crypto_format.h"
 #include "tink/deterministic_aead.h"
@@ -39,18 +39,25 @@ util::Status Validate(PrimitiveSet<DeterministicAead>* daead_set) {
   return util::Status::OK;
 }
 
-}  // anonymous namespace
+class  DeterministicAeadSetWrapper : public DeterministicAead {
+ public:
+  explicit DeterministicAeadSetWrapper(
+      std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set)
+      : daead_set_(std::move(daead_set)) {}
 
-// static
-util::StatusOr<std::unique_ptr<DeterministicAead>>
-DeterministicAeadSetWrapper::NewDeterministicAead(
-    std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set) {
-  util::Status status = Validate(daead_set.get());
-  if (!status.ok()) return status;
-  std::unique_ptr<DeterministicAead> daead(
-      new DeterministicAeadSetWrapper(std::move(daead_set)));
-  return std::move(daead);
-}
+  crypto::tink::util::StatusOr<std::string> EncryptDeterministically(
+      absl::string_view plaintext,
+      absl::string_view associated_data) const override;
+
+  crypto::tink::util::StatusOr<std::string> DecryptDeterministically(
+      absl::string_view ciphertext,
+      absl::string_view associated_data) const override;
+
+  ~DeterministicAeadSetWrapper() override {}
+
+ private:
+  std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set_;
+};
 
 util::StatusOr<std::string> DeterministicAeadSetWrapper::EncryptDeterministically(
     absl::string_view plaintext, absl::string_view associated_data) const {
@@ -106,6 +113,18 @@ util::StatusOr<std::string> DeterministicAeadSetWrapper::DecryptDeterministicall
     }
   }
   return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+}
+
+}  // anonymous namespace
+
+util::StatusOr<std::unique_ptr<DeterministicAead>>
+DeterministicAeadWrapper::Wrap(
+    std::unique_ptr<PrimitiveSet<DeterministicAead>> primitive_set) const {
+  util::Status status = Validate(primitive_set.get());
+  if (!status.ok()) return status;
+  std::unique_ptr<DeterministicAead> daead(
+      new DeterministicAeadSetWrapper(std::move(primitive_set)));
+  return std::move(daead);
 }
 
 }  // namespace tink
