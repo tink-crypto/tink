@@ -16,16 +16,12 @@
 
 package com.google.crypto.tink.daead;
 
-import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -69,52 +65,9 @@ public final class DeterministicAeadFactory {
   public static DeterministicAead getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<DeterministicAead> keyManager)
       throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
     final PrimitiveSet<DeterministicAead> primitives =
         Registry.getPrimitives(keysetHandle, keyManager, DeterministicAead.class);
-    return new DeterministicAead() {
-      @Override
-      public byte[] encryptDeterministically(final byte[] plaintext, final byte[] associatedData)
-          throws GeneralSecurityException {
-        return Bytes.concat(
-            primitives.getPrimary().getIdentifier(),
-            primitives
-                .getPrimary()
-                .getPrimitive()
-                .encryptDeterministically(plaintext, associatedData));
-      }
-
-      @Override
-      public byte[] decryptDeterministically(final byte[] ciphertext, final byte[] associatedData)
-          throws GeneralSecurityException {
-        if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
-          byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-          byte[] ciphertextNoPrefix =
-              Arrays.copyOfRange(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
-          List<PrimitiveSet.Entry<DeterministicAead>> entries = primitives.getPrimitive(prefix);
-          for (PrimitiveSet.Entry<DeterministicAead> entry : entries) {
-            try {
-              return entry
-                  .getPrimitive()
-                  .decryptDeterministically(ciphertextNoPrefix, associatedData);
-            } catch (GeneralSecurityException e) {
-              logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
-              continue;
-            }
-          }
-        }
-
-        // Let's try all RAW keys.
-        List<PrimitiveSet.Entry<DeterministicAead>> entries = primitives.getRawPrimitives();
-        for (PrimitiveSet.Entry<DeterministicAead> entry : entries) {
-          try {
-            return entry.getPrimitive().decryptDeterministically(ciphertext, associatedData);
-          } catch (GeneralSecurityException e) {
-            continue;
-          }
-        }
-        // nothing works.
-        throw new GeneralSecurityException("decryption failed");
-      }
-    };
+    return Registry.wrap(primitives);
   }
 }
