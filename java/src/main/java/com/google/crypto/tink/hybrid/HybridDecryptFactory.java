@@ -15,16 +15,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -65,50 +61,9 @@ public final class HybridDecryptFactory {
   public static HybridDecrypt getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<HybridDecrypt> keyManager)
       throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
     final PrimitiveSet<HybridDecrypt> primitives =
         Registry.getPrimitives(keysetHandle, keyManager, HybridDecrypt.class);
-    return new HybridDecrypt() {
-      @Override
-      public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
-          throws GeneralSecurityException {
-        if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
-          byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-          byte[] ciphertextNoPrefix =
-              Arrays.copyOfRange(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
-          List<PrimitiveSet.Entry<HybridDecrypt>> entries = primitives.getPrimitive(prefix);
-          for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
-            try {
-              return entry.getPrimitive().decrypt(ciphertextNoPrefix, contextInfo);
-            } catch (GeneralSecurityException e) {
-              logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
-              continue;
-            }
-          }
-        }
-        // Let's try all RAW keys.
-        List<PrimitiveSet.Entry<HybridDecrypt>> entries = primitives.getRawPrimitives();
-        for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
-          try {
-            return entry.getPrimitive().decrypt(ciphertext, contextInfo);
-          } catch (GeneralSecurityException e) {
-            continue;
-          }
-        }
-        // nothing works.
-        throw new GeneralSecurityException("decryption failed");
-      }
-    };
-  }
-
-  // Check that all primitives in <code>pset</code> are HybridDecrypt instances.
-  private static void validate(final PrimitiveSet<HybridDecrypt> pset)
-      throws GeneralSecurityException {
-    for (Collection<PrimitiveSet.Entry<HybridDecrypt>> entries : pset.getAll()) {
-      for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
-        if (!(entry.getPrimitive() instanceof HybridDecrypt)) {
-          throw new GeneralSecurityException("invalid HybridDecrypt key material");
-        }
-      }
-    }
+    return Registry.wrap(primitives);
   }
 }
