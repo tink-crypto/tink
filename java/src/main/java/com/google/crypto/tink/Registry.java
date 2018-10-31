@@ -109,8 +109,7 @@ public final class Registry {
    * @throws GeneralSecurityException if there's an existing catalogue is not an instance of the
    *     same class as {@code catalogue}
    */
-  @SuppressWarnings("unchecked")
-  public static synchronized <P> void addCatalogue(String catalogueName, Catalogue<P> catalogue)
+  public static synchronized void addCatalogue(String catalogueName, Catalogue<?> catalogue)
       throws GeneralSecurityException {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
@@ -119,7 +118,7 @@ public final class Registry {
       throw new IllegalArgumentException("catalogue must be non-null.");
     }
     if (catalogueMap.containsKey(catalogueName.toLowerCase())) {
-      Catalogue<P> existing = catalogueMap.get(catalogueName.toLowerCase());
+      Catalogue<?> existing = catalogueMap.get(catalogueName.toLowerCase());
       if (!catalogue.getClass().equals(existing.getClass())) {
         logger.warning(
             "Attempted overwrite of a catalogueName catalogue for name " + catalogueName);
@@ -135,13 +134,12 @@ public final class Registry {
    *
    * @throws GeneralSecurityException if cannot find any catalogue
    */
-  public static <P> Catalogue<P> getCatalogue(String catalogueName)
+  public static Catalogue<?> getCatalogue(String catalogueName)
       throws GeneralSecurityException {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
     }
-    @SuppressWarnings("unchecked")
-    Catalogue<P> catalogue = catalogueMap.get(catalogueName.toLowerCase());
+    Catalogue<?> catalogue = catalogueMap.get(catalogueName.toLowerCase());
     if (catalogue == null) {
       String error = String.format("no catalogue found for %s. ", catalogueName);
       if (catalogueName.toLowerCase().startsWith("tinkaead")) {
