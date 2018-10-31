@@ -16,17 +16,12 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -67,52 +62,9 @@ public final class PublicKeyVerifyFactory {
   public static PublicKeyVerify getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<PublicKeyVerify> keyManager)
       throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new PublicKeyVerifyWrapper());
     final PrimitiveSet<PublicKeyVerify> primitives =
         Registry.getPrimitives(keysetHandle, keyManager, PublicKeyVerify.class);
-    return new PublicKeyVerify() {
-      @Override
-      public void verify(final byte[] signature, final byte[] data)
-          throws GeneralSecurityException {
-        if (signature.length <= CryptoFormat.NON_RAW_PREFIX_SIZE) {
-          // This also rejects raw signatures with size of 4 bytes or fewer. We're not aware of any
-          // schemes that output signatures that small.
-          throw new GeneralSecurityException("signature too short");
-        }
-        byte[] prefix = Arrays.copyOfRange(signature, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-        byte[] sigNoPrefix =
-            Arrays.copyOfRange(signature, CryptoFormat.NON_RAW_PREFIX_SIZE, signature.length);
-        List<PrimitiveSet.Entry<PublicKeyVerify>> entries = primitives.getPrimitive(prefix);
-        for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
-          try {
-            if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-              final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
-              final byte[] dataWithFormatVersion = Bytes.concat(data, formatVersion);
-              entry.getPrimitive().verify(sigNoPrefix, dataWithFormatVersion);
-            } else {
-              entry.getPrimitive().verify(sigNoPrefix, data);
-            }
-            // If there is no exception, the signature is valid and we can return.
-            return;
-          } catch (GeneralSecurityException e) {
-            logger.info("signature prefix matches a key, but cannot verify: " + e.toString());
-            // Ignored as we want to continue verification with the remaining keys.
-          }
-        }
-
-        // None "non-raw" key matched, so let's try the raw keys (if any exist).
-        entries = primitives.getRawPrimitives();
-        for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
-          try {
-            entry.getPrimitive().verify(signature, data);
-            // If there is no exception, the signature is valid and we can return.
-            return;
-          } catch (GeneralSecurityException e) {
-            // Ignored as we want to continue verification with raw keys.
-          }
-        }
-        // nothing works.
-        throw new GeneralSecurityException("invalid signature");
-      }
-    };
+    return Registry.wrap(primitives);
   }
 }

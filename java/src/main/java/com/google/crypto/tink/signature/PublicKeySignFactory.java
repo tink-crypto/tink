@@ -16,14 +16,11 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 
 /**
@@ -61,21 +58,9 @@ public final class PublicKeySignFactory {
   public static PublicKeySign getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<PublicKeySign> keyManager)
       throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());
     final PrimitiveSet<PublicKeySign> primitives =
         Registry.getPrimitives(keysetHandle, keyManager, PublicKeySign.class);
-    return new PublicKeySign() {
-      @Override
-      public byte[] sign(final byte[] data) throws GeneralSecurityException {
-        if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-          byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
-          return Bytes.concat(
-              primitives.getPrimary().getIdentifier(),
-              primitives.getPrimary().getPrimitive().sign(Bytes.concat(data, formatVersion)));
-        }
-        return Bytes.concat(
-            primitives.getPrimary().getIdentifier(),
-            primitives.getPrimary().getPrimitive().sign(data));
-      }
-    };
+    return Registry.wrap(primitives);
   }
 }
