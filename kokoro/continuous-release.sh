@@ -21,8 +21,8 @@ set -e
 # Display commands to stderr.
 set -x
 
-# Change to repo root
-cd git*/tink
+# Change to the root directory of the repository.
+cd git*/tink-release
 
 source ./kokoro/run_tests.sh
 
