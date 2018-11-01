@@ -233,9 +233,11 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead_config",
+        ":aead_key_templates",
         "//cc:aead",
         "//cc:catalogue",
         "//cc:config",
+        "//cc:keyset_handle",
         "//cc:registry",
         "//cc/util:status",
         "@com_google_googletest//:gtest_main",

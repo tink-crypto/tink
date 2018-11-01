@@ -8,7 +8,6 @@ cc_library(
     hdrs = ["public_key_verify_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:primitive_set",
@@ -46,7 +45,6 @@ cc_library(
     hdrs = ["public_key_sign_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:primitive_set",
@@ -573,8 +571,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":signature_config",
+        ":signature_key_templates",
         "//cc:catalogue",
         "//cc:config",
+        "//cc:keyset_handle",
         "//cc:public_key_sign",
         "//cc:public_key_verify",
         "//cc:registry",

@@ -32,7 +32,6 @@ cc_library(
     hdrs = ["deterministic_aead_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:deterministic_aead",
@@ -169,9 +168,11 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":deterministic_aead_config",
+        ":deterministic_aead_key_templates",
         "//cc:catalogue",
         "//cc:config",
         "//cc:deterministic_aead",
+        "//cc:keyset_handle",
         "//cc:registry",
         "//cc/util:status",
         "@com_google_absl//absl/memory",

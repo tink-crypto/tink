@@ -18,7 +18,9 @@
 
 #include "tink/catalogue.h"
 #include "tink/config.h"
+#include "tink/keyset_handle.h"
 #include "tink/mac.h"
+#include "tink/mac/mac_key_templates.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "gtest/gtest.h"
@@ -98,6 +100,33 @@ TEST_F(MacConfigTest, testRegister) {
   status = MacConfig::Register();
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
+}
+
+// Tests that the MacWrapper has been properly registered and we can wrap
+// primitives.
+TEST_F(MacConfigTest, WrappersRegistered) {
+  ASSERT_TRUE(MacConfig::Register().ok());
+  auto keyset_handle_result =
+      KeysetHandle::GenerateNew(MacKeyTemplates::HmacSha256HalfSizeTag());
+  ASSERT_TRUE(keyset_handle_result.ok());
+
+  auto primitive_set_result =
+      keyset_handle_result.ValueOrDie()->GetPrimitives<Mac>(
+          nullptr);
+  ASSERT_TRUE(primitive_set_result.ok());
+
+  auto primitive_result =
+      Registry::Wrap(std::move(primitive_set_result.ValueOrDie()));
+  ASSERT_TRUE(primitive_result.ok());
+
+  auto mac_result =
+      primitive_result.ValueOrDie()->ComputeMac("verified text");
+  ASSERT_TRUE(mac_result.ok());
+
+  EXPECT_TRUE(primitive_result.ValueOrDie()->VerifyMac(
+      mac_result.ValueOrDie(), "verified text").ok());
+  EXPECT_FALSE(primitive_result.ValueOrDie()->VerifyMac(
+      mac_result.ValueOrDie(), "faked text").ok());
 }
 
 }  // namespace

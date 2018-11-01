@@ -272,8 +272,12 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":hybrid_config",
+        ":hybrid_key_templates",
         "//cc:catalogue",
         "//cc:config",
+        "//cc:hybrid_decrypt",
+        "//cc:hybrid_encrypt",
+        "//cc:keyset_handle",
         "//cc:registry",
         "//cc/util:status",
         "@com_google_googletest//:gtest_main",

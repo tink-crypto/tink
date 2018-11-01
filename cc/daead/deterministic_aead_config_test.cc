@@ -19,7 +19,9 @@
 #include "gtest/gtest.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
+#include "tink/daead/deterministic_aead_key_templates.h"
 #include "tink/deterministic_aead.h"
+#include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 
@@ -98,6 +100,35 @@ TEST_F(DeterministicAeadConfigTest, testRegister) {
   status = DeterministicAeadConfig::Register();
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
+}
+
+// Tests that the DeterministicAeadWrapper has been properly registered and we
+// can wrap primitives.
+TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
+  ASSERT_TRUE(DeterministicAeadConfig::Register().ok());
+  auto keyset_handle_result =
+      KeysetHandle::GenerateNew(DeterministicAeadKeyTemplates::Aes256Siv());
+  ASSERT_TRUE(keyset_handle_result.ok());
+
+  auto primitive_set_result =
+      keyset_handle_result.ValueOrDie()->GetPrimitives<DeterministicAead>(
+          nullptr);
+  ASSERT_TRUE(primitive_set_result.ok());
+
+  auto primitive_result =
+      Registry::Wrap(std::move(primitive_set_result.ValueOrDie()));
+  ASSERT_TRUE(primitive_result.ok());
+
+  auto encryption_result =
+      primitive_result.ValueOrDie()->EncryptDeterministically("encrypted text",
+                                                              "");
+  ASSERT_TRUE(encryption_result.ok());
+
+  auto decryption_result =
+      primitive_result.ValueOrDie()->DecryptDeterministically(
+          encryption_result.ValueOrDie(), "");
+  ASSERT_TRUE(decryption_result.ok());
+  EXPECT_EQ(decryption_result.ValueOrDie(), "encrypted text");
 }
 
 }  // namespace

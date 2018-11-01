@@ -18,12 +18,19 @@
 
 #include "absl/strings/ascii.h"
 #include "tink/aead.h"
+#include "tink/aead/aead_wrapper.h"
+#include "tink/daead/deterministic_aead_wrapper.h"
 #include "tink/deterministic_aead.h"
+#include "tink/hybrid/hybrid_decrypt_wrapper.h"
+#include "tink/hybrid/hybrid_encrypt_wrapper.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/mac.h"
+#include "tink/mac/mac_wrapper.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/signature/public_key_sign_wrapper.h"
+#include "tink/signature/public_key_verify_wrapper.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -98,8 +105,42 @@ util::Status Config::Register(
                          );
     }
     if (!status.ok()) return status;
+    status = RegisterWrapper(primitive_name);
+    if (!status.ok()) return status;
   }
   return util::Status::OK;
+}
+
+// static
+util::Status Config::RegisterWrapper(
+    absl::string_view lowercase_primitive_name) {
+  if (lowercase_primitive_name == "mac") {
+    return Registry::RegisterPrimitiveWrapper(absl::make_unique<MacWrapper>());
+  } else if (lowercase_primitive_name == "aead") {
+    return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
+  } else if (lowercase_primitive_name == "deterministicaead") {
+    return Registry::RegisterPrimitiveWrapper(
+        absl::make_unique<DeterministicAeadWrapper>());
+  } else if (lowercase_primitive_name == "hybriddecrypt") {
+    return Registry::RegisterPrimitiveWrapper(
+        absl::make_unique<HybridDecryptWrapper>());
+  } else if (lowercase_primitive_name == "hybridencrypt") {
+    return Registry::RegisterPrimitiveWrapper(
+        absl::make_unique<HybridEncryptWrapper>());
+  } else if (lowercase_primitive_name == "publickeysign") {
+    return Registry::RegisterPrimitiveWrapper(
+        absl::make_unique<PublicKeySignWrapper>());
+  } else if (lowercase_primitive_name == "publickeyverify") {
+    return Registry::RegisterPrimitiveWrapper(
+        absl::make_unique<PublicKeyVerifyWrapper>());
+  } else {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT,
+        StrCat("Cannot register primitive wrapper for non-standard "
+               "primitive ",
+               lowercase_primitive_name,
+               " (call Registry::RegisterPrimitiveWrapper directly)"));
+  }
 }
 
 }  // namespace tink
