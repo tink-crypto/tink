@@ -667,7 +667,7 @@ public final class Registry {
         (PrimitiveWrapper<P>) primitiveWrapperMap.get(primitiveSet.getPrimitiveClass());
     if (wrapper == null) {
       throw new GeneralSecurityException(
-          "No key manager found for primitive class " + primitiveSet.getPrimitiveClass().getName());
+          "No wrapper found for " + primitiveSet.getPrimitiveClass().getName());
     }
     return wrapper.wrap(primitiveSet);
   }

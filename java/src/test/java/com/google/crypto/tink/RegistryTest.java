@@ -43,7 +43,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -104,9 +104,9 @@ public class RegistryTest {
     }
   }
 
-  @BeforeClass
-  public static void setUp() throws GeneralSecurityException {
-    Config.register(TinkConfig.TINK_1_0_0);
+  @Before
+  public void setUp() throws GeneralSecurityException {
+    TinkConfig.register();
   }
 
   private void testGetKeyManager_shouldWork(String typeUrl, String className) throws Exception {
@@ -205,26 +205,14 @@ public class RegistryTest {
   public void testRegisterKeyManager_MoreRestrictedNewKeyAllowed_shouldWork() throws Exception {
     String typeUrl = "someTypeUrl";
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl));
-
-    try {
-      Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
-    } catch (GeneralSecurityException e) {
-      throw new AssertionError(
-          "repeated registrations of the same key manager should work", e);
-    }
+    Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
   }
 
   @Test
   public void testRegisterKeyManager_SameNewKeyAllowed_shouldWork() throws Exception {
     String typeUrl = "someOtherTypeUrl";
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl));
-
-    try {
-      Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true);
-    } catch (GeneralSecurityException e) {
-      throw new AssertionError(
-          "repeated registrations of the same key manager should work", e);
-    }
+    Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true);
   }
 
   @Test
@@ -274,12 +262,11 @@ public class RegistryTest {
     String differentTypeUrl = "differentTypeUrl";
     try {
       Registry.registerKeyManager(differentTypeUrl, new CustomAeadKeyManager(typeUrl));
+      fail("Should throw an exception.");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e,
           "Manager does not support key type " + differentTypeUrl);
-      return;
     }
-    fail("Should throw an exception.");
   }
 
   @Test
@@ -740,26 +727,23 @@ public class RegistryTest {
     }
   }
 
-  private static class Catalogue1 implements Catalogue {
+  private static class Catalogue1 implements Catalogue<Aead> {
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+    public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
       return null;
     }
   }
 
-  private static class Catalogue2 implements Catalogue {
+  private static class Catalogue2 implements Catalogue<Aead> {
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+    public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
       return null;
     }
   }
 
-  private static class Catalogue3 implements Catalogue {
+  private static class Catalogue3 implements Catalogue<Aead> {
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+    public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
       return null;
     }
   }
@@ -829,5 +813,54 @@ public class RegistryTest {
   }
   // TODO(przydatek): Add more tests for creation of PrimitiveSets.
 
+  @Test
+  public void testWrap_wrapperRegistered() throws Exception {
+    KeyData key = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(1)
+                .build());
 
+    // Get a PrimitiveSet using a custom key manager for key1.
+    KeyManager<Aead> customManager = new CustomAeadKeyManager(AeadConfig.AES_EAX_TYPE_URL);
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager, Aead.class);
+    Registry.wrap(aeadSet);
+  }
+
+  @Test
+  public void testWrap_noWrapperRegistered_throws() throws Exception {
+    KeyData key = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    Registry.reset();
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(1)
+                .build());
+
+    // Get a PrimitiveSet using a custom key manager for key1.
+    KeyManager<Aead> customManager = new CustomAeadKeyManager(AeadConfig.AES_EAX_TYPE_URL);
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager, Aead.class);
+    try {
+      Registry.wrap(aeadSet);
+      fail("Expected GeneralSecurityException.");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "No wrapper found");
+      assertExceptionContains(e, "Aead");
+    }
+  }
 }
