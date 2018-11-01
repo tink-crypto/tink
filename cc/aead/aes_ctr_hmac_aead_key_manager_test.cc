@@ -123,13 +123,6 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyDataErrors) {
       if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
-        if (len < 16) {
-          EXPECT_FALSE(result.ok());
-          EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                    result.status().error_code());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring, "too short",
-                              result.status().error_message());
-        } else {
           EXPECT_FALSE(result.ok());
           EXPECT_EQ(util::error::INVALID_ARGUMENT,
                     result.status().error_code());
@@ -139,7 +132,6 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyDataErrors) {
           EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
                               result.status().error_message());
         }
-      }
     }
   }
 }
@@ -173,22 +165,13 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyMessageErrors) {
       if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
-        if (len < 16) {
-          EXPECT_FALSE(result.ok());
-          EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                    result.status().error_code());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring, "too short",
-                              result.status().error_message());
-        } else {
-          EXPECT_FALSE(result.ok());
-          EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                    result.status().error_code());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                              std::to_string(len) + " bytes",
-                              result.status().error_message());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
-                              result.status().error_message());
-        }
+        EXPECT_FALSE(result.ok());
+        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+        EXPECT_PRED_FORMAT2(testing::IsSubstring,
+                            std::to_string(len) + " bytes",
+                            result.status().error_message());
+        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
+                            result.status().error_message());
       }
     }
   }
@@ -264,14 +247,17 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyErrors) {
     auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "8 bytes",
                         result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
                         result.status().error_message());
   }
 
   {  // Bad AesCtrHmacAeadKeyFormat: small HMAC key_size.
     AesCtrHmacAeadKeyFormat key_format;
+    auto aes_ctr_key_format = key_format.mutable_aes_ctr_key_format();
+    aes_ctr_key_format->set_key_size(16);
+    aes_ctr_key_format->mutable_params()->set_iv_size(12);
     key_format.mutable_hmac_key_format()->set_key_size(8);
     auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());

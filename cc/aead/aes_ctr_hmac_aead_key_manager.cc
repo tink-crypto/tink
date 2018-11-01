@@ -137,15 +137,9 @@ Status AesCtrHmacAeadKeyManager::Validate(const AesCtrHmacAeadKey& key) {
   // Validate AesCtrKey.
   auto aes_ctr_key = key.aes_ctr_key();
   uint32_t aes_key_size = aes_ctr_key.key_value().size();
-  if (aes_key_size < kMinKeySizeInBytes) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid AesCtrHmacAeadKey: AES key_value is too short.");
-  }
-  if (aes_key_size != 16 && aes_key_size != 32) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid AesCtrHmacAeadKey: AES key_value has %d bytes; "
-                     "supported sizes: 16 or 32 bytes.",
-                     aes_key_size);
+  status = ValidateAesKeySize(aes_key_size);
+  if (!status.ok()) {
+    return status;
   }
   if (aes_ctr_key.params().iv_size() < kMinIvSizeInBytes ||
       aes_ctr_key.params().iv_size() > 16) {
@@ -160,10 +154,9 @@ Status AesCtrHmacAeadKeyManager::Validate(
     const AesCtrHmacAeadKeyFormat& key_format) {
   // Validate AesCtrKeyFormat.
   auto aes_ctr_key_format = key_format.aes_ctr_key_format();
-  if (aes_ctr_key_format.key_size() < kMinKeySizeInBytes) {
-    return ToStatusF(
-        util::error::INVALID_ARGUMENT,
-        "Invalid AesCtrHmacAeadKeyFormat: AES key_size is too small.");
+  auto status = ValidateAesKeySize(aes_ctr_key_format.key_size());
+  if (!status.ok()) {
+    return status;
   }
   if (aes_ctr_key_format.params().iv_size() < kMinIvSizeInBytes ||
       aes_ctr_key_format.params().iv_size() > 16) {

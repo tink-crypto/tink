@@ -89,26 +89,12 @@ StatusOr<std::unique_ptr<Aead>> AesGcmKeyManager::GetPrimitiveFromKey(
 Status AesGcmKeyManager::Validate(const AesGcmKey& key) {
   Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
-  uint32_t key_size = key.key_value().size();
-  if (key_size < kMinKeySizeInBytes) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Invalid AesGcmKey: key_value is too short.");
-  }
-  if (key_size != 16 && key_size != 32) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Invalid AesGcmKey: key_value has %d bytes; "
-                       "supported sizes: 16 or 32 bytes.", key_size);
-  }
-  return Status::OK;
+  return ValidateAesKeySize(key.key_value().size());
 }
 
 // static
 Status AesGcmKeyManager::Validate(const AesGcmKeyFormat& key_format) {
-  if (key_format.key_size() < kMinKeySizeInBytes) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Invalid AesGcmKeyFormat: key_size is too small.");
-  }
-  return Status::OK;
+  return ValidateAesKeySize(key_format.key_size());
 }
 
 }  // namespace tink
