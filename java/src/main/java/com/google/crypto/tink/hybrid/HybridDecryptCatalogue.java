@@ -19,6 +19,7 @@ package com.google.crypto.tink.hybrid;
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrimitiveWrapper;
 import java.security.GeneralSecurityException;
 
 /** A catalogue of {@link HybridDecrypt} key managers. */
@@ -58,5 +59,10 @@ class HybridDecryptCatalogue implements Catalogue<HybridDecrypt> {
         throw new GeneralSecurityException(
             String.format("No support for primitive 'HybridEncrypt' with key type '%s'.", typeUrl));
     }
+  }
+
+  @Override
+  public PrimitiveWrapper<HybridDecrypt> getPrimitiveWrapper() {
+    return new HybridDecryptWrapper();
   }
 }

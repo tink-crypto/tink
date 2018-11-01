@@ -732,6 +732,11 @@ public class RegistryTest {
     public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
       return null;
     }
+
+    @Override
+    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
+      return null;
+    }
   }
 
   private static class Catalogue2 implements Catalogue<Aead> {
@@ -739,11 +744,21 @@ public class RegistryTest {
     public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
       return null;
     }
+
+    @Override
+    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
+      return null;
+    }
   }
 
   private static class Catalogue3 implements Catalogue<Aead> {
     @Override
     public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+      return null;
+    }
+
+    @Override
+    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
       return null;
     }
   }

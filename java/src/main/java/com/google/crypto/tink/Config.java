@@ -82,6 +82,7 @@ public final class Config {
   public static void registerKeyType(KeyTypeEntry entry) throws GeneralSecurityException {
     validate(entry);
     Catalogue<?> catalogue = Registry.getCatalogue(entry.getCatalogueName());
+    Registry.registerPrimitiveWrapper(catalogue.getPrimitiveWrapper());
     KeyManager<?> keyManager =
         catalogue.getKeyManager(
             entry.getTypeUrl(), entry.getPrimitiveName(), entry.getKeyManagerVersion());
