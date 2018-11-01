@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6};
+var methods = {"i0":6,"i1":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -139,6 +139,12 @@ var activeTableTab = "activeTableTab";
              <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;primitiveName,
              int&nbsp;minVersion)</code>&nbsp;</td>
 </tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../com/google/crypto/tink/Catalogue.html" title="type parameter in Catalogue">P</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Catalogue.html#getPrimitiveWrapper--">getPrimitiveWrapper</a></span>()</code>
+<div class="block">Returns a new primitive wrapper for this primitive.</div>
+</td>
+</tr>
 </table>
 </li>
 </ul>
@@ -157,7 +163,7 @@ var activeTableTab = "activeTableTab";
 <a name="getKeyManager-java.lang.String-java.lang.String-int-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getKeyManager</h4>
 <pre><a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../com/google/crypto/tink/Catalogue.html" title="type parameter in Catalogue">P</a>&gt;&nbsp;getKeyManager(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
@@ -168,6 +174,21 @@ var activeTableTab = "activeTableTab";
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> for the given <code>typeUrl</code>, <code>primitiveName</code>, and version
      at least <code>minVersion</code> (if it exists in the catalogue).</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getPrimitiveWrapper--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getPrimitiveWrapper</h4>
+<pre><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../com/google/crypto/tink/Catalogue.html" title="type parameter in Catalogue">P</a>&gt;&nbsp;getPrimitiveWrapper()
+                                 throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Returns a new primitive wrapper for this primitive.</div>
+<dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
