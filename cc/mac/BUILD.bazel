@@ -8,7 +8,6 @@ cc_library(
     hdrs = ["mac_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:mac",
