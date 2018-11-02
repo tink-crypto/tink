@@ -19,11 +19,9 @@
 
 #include "tink/hybrid_decrypt.h"
 #include "tink/keyset_handle.h"
-#include "tink/hybrid/hybrid_decrypt_factory.h"
 #include "tink/util/status.h"
 #include "tools/testing/cc/cli_util.h"
 
-using crypto::tink::HybridDecryptFactory;
 using crypto::tink::KeysetHandle;
 
 // A command-line utility for testing HybridDecrypt-primitives.
@@ -58,7 +56,8 @@ int main(int argc, char** argv) {
       CliUtil::ReadKeyset(keyset_filename);
 
   // Get the primitive.
-  auto primitive_result = HybridDecryptFactory::GetPrimitive(*keyset_handle);
+  auto primitive_result =
+      keyset_handle->GetPrimitive<crypto::tink::HybridDecrypt>();
   if (!primitive_result.ok()) {
     std::clog << "Getting HybridDecrypt-primitive from the factory failed: "
               << primitive_result.status().error_message() << std::endl;
