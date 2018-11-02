@@ -32,8 +32,6 @@ import java.security.GeneralSecurityException;
  * AeadConfig.register();
  * }</pre>
  *
- * <p>For more information on how to obtain and use instances of Aead, see {@link AeadFactory}.
- *
  * @since 1.0.0
  */
 public final class AeadConfig {

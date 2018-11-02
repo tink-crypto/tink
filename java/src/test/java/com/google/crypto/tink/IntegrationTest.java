@@ -20,8 +20,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.hybrid.HybridDecryptFactory;
-import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.crypto.tink.subtle.Random;
 import java.io.File;
 import java.security.GeneralSecurityException;
@@ -49,13 +47,17 @@ public class IntegrationTest {
       System.out.println("testWithTinkeyEciesAesGcmHkdf doesn't work on Android, skipping");
       return;
     }
-    HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        CleartextKeysetHandle.read(BinaryKeysetReader.withFile(
-            new File("testdata/ecies_private_keyset2.bin"))));
+    HybridDecrypt hybridDecrypt =
+        CleartextKeysetHandle.read(
+                BinaryKeysetReader.withFile(
+                    new File("testdata/ecies_private_keyset2.bin")))
+            .getPrimitive(HybridDecrypt.class);
 
-    HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        CleartextKeysetHandle.read(BinaryKeysetReader.withFile(
-            new File("testdata/ecies_public_keyset2.bin"))));
+    HybridEncrypt hybridEncrypt =
+        CleartextKeysetHandle.read(
+                BinaryKeysetReader.withFile(
+                    new File("testdata/ecies_public_keyset2.bin")))
+            .getPrimitive(HybridEncrypt.class);
 
     byte[] plaintext = Random.randBytes(20);
     byte[] contextInfo = Random.randBytes(20);
@@ -80,13 +82,17 @@ public class IntegrationTest {
       return;
     }
 
-    HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        CleartextKeysetHandle.read(BinaryKeysetReader.withFile(
-            new File("testdata/ecies_private_keyset.bin"))));
+    HybridDecrypt hybridDecrypt =
+        CleartextKeysetHandle.read(
+                BinaryKeysetReader.withFile(
+                    new File("testdata/ecies_private_keyset.bin")))
+            .getPrimitive(HybridDecrypt.class);
 
-    HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        CleartextKeysetHandle.read(BinaryKeysetReader.withFile(
-            new File("testdata/ecies_public_keyset.bin"))));
+    HybridEncrypt hybridEncrypt =
+        CleartextKeysetHandle.read(
+                BinaryKeysetReader.withFile(
+                    new File("testdata/ecies_public_keyset.bin")))
+            .getPrimitive(HybridEncrypt.class);
 
     byte[] plaintext = Random.randBytes(20);
     byte[] contextInfo = Random.randBytes(20);

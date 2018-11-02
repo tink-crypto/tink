@@ -19,7 +19,6 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.JsonKeysetWriter;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -78,7 +77,7 @@ public final class Commands {
       // 1. Obtain a keyset handle.
       KeysetHandle handle = getKeysetHandle(keyset);
       // 2. Get a primitive.
-      Aead aead = AeadFactory.getPrimitive(handle);
+      Aead aead = handle.getPrimitive(Aead.class);
       // 3. Do crypto. It's that simple!
       byte[] plaintext = Files.readAllBytes(inFile.toPath());
       byte[] ciphertext = aead.encrypt(plaintext, new byte[0] /* additionalData */);
@@ -98,7 +97,7 @@ public final class Commands {
     @Override
     public void run() throws Exception {
       KeysetHandle handle = getKeysetHandle(keyset);
-      Aead aead = AeadFactory.getPrimitive(handle);
+      Aead aead = handle.getPrimitive(Aead.class);
       byte[] ciphertext = Files.readAllBytes(inFile.toPath());
       byte[] plaintext = aead.decrypt(ciphertext, new byte[0] /* additionalData */);
       FileOutputStream stream = new FileOutputStream(outFile);

@@ -18,7 +18,6 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
-import com.google.crypto.tink.streamingaead.StreamingAeadFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -119,7 +118,7 @@ public class StreamingAeadCli {
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    StreamingAead streamingAead = StreamingAeadFactory.getPrimitive(keysetHandle);
+    StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
 
     // Read the input.
     InputStream inputStream = new FileInputStream(Paths.get(inputFilename).toFile());

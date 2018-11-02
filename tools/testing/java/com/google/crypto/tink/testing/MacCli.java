@@ -18,7 +18,6 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.mac.MacFactory;
 import java.security.GeneralSecurityException;
 
 /**
@@ -70,7 +69,7 @@ public class MacCli {
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    Mac mac = MacFactory.getPrimitive(keysetHandle);
+    Mac mac = keysetHandle.getPrimitive(Mac.class);
 
     // Read the data.
     byte[] data = CliUtil.read(dataFilename);

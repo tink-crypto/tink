@@ -55,14 +55,12 @@ import java.util.logging.Logger;
  * AeadConfig.register();
  * }</pre>
  *
- * <p>After the Registry has been initialized, one can use {@link
- * com.google.crypto.tink.aead.AeadFactory}, {@link com.google.crypto.tink.mac.MacFactory}, etc., to
- * obtain corresponding primitive instances. For example, here's how to obtain an {@link Aead}
- * primitive:
+ * <p>After the Registry has been initialized, one can use {@keysetHandle.getPrimitive} to get a
+ * primitive. For example, to obtain an {@link Aead} primitive:
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
- * Aead aead = AeadFactory.getPrimitive(keysetHandle);
+ * Aead aead = keysetHandle.getPrimitive(Aead.class);
  * }</pre>
  *
  * @since 1.0.0

@@ -18,7 +18,6 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.daead.DeterministicAeadFactory;
 
 /**
  * A command-line utility for testing DeterministicAead-primitives.
@@ -62,7 +61,7 @@ public class DeterministicAeadCli {
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    DeterministicAead daead = DeterministicAeadFactory.getPrimitive(keysetHandle);
+    DeterministicAead daead = keysetHandle.getPrimitive(DeterministicAead.class);
 
     // Read the input.
     byte[] input = CliUtil.read(inputFilename);
