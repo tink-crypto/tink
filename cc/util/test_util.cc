@@ -18,6 +18,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <cstdlib>
 
 #include "absl/memory/memory.h"
 #include "tink/keyset_handle.h"
@@ -85,6 +86,23 @@ std::string HexEncode(absl::string_view bytes) {
   }
   return res;
 }
+
+#if defined(PLATFORM_GOOGLE)
+std::string TmpDir() { return FLAGS_test_tmpdir; }
+#else
+std::string TmpDir() {
+  // 'bazel test' sets TEST_TMPDIR
+  const char* env = getenv("TEST_TMPDIR");
+  if (env && env[0] != '\0') {
+    return env;
+  }
+  env = getenv("TMPDIR");
+  if (env && env[0] != '\0') {
+    return env;
+  }
+  return "/tmp";
+}
+#endif
 
 void AddKeyData(
     const google::crypto::tink::KeyData& key_data,

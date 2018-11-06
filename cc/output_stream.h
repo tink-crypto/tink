@@ -17,7 +17,6 @@
 #ifndef TINK_OUTPUT_STREAM_H_
 #define TINK_OUTPUT_STREAM_H_
 
-#include "absl/base/integral_types.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -105,7 +104,7 @@ class OutputStream {
   //   successful call to Next(), excluding the ones that were backed up
   //   via BackUp() (if any).
   // * If the last call to Next() ended with a failure, -1 is returned;
-  virtual int64 Position() const = 0;
+  virtual int64_t Position() const = 0;
 };
 
 }  // namespace tink

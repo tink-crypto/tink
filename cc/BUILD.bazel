@@ -114,20 +114,22 @@ cc_library(
 cc_library(
     name = "input_stream",
     hdrs = ["input_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
-        "@com_google_absl//absl/base",
     ],
 )
 
 cc_library(
     name = "output_stream",
     hdrs = ["output_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
-        "@com_google_absl//absl/base",
     ],
 )
 
@@ -156,6 +158,8 @@ cc_library(
 cc_library(
     name = "streaming_aead",
     hdrs = ["streaming_aead.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":input_stream",
         ":output_stream",

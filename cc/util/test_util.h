@@ -59,6 +59,9 @@ std::string HexDecodeOrDie(absl::string_view hex);
 // Converts a std::string of bytes into a hexadecimal std::string.
 std::string HexEncode(absl::string_view bytes);
 
+// Returns a temporary directory suitable for temporary testing files.
+std::string TmpDir();
+
 // Adds the given 'keyData' with specified status, key_id, and
 // output_prefix_type to the keyset.
 void AddKeyData(

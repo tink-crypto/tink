@@ -17,7 +17,6 @@
 #ifndef TINK_INPUT_STREAM_H_
 #define TINK_INPUT_STREAM_H_
 
-#include "absl/base/integral_types.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -90,7 +89,7 @@ class InputStream {
   // * If the last call to Next() reached end of stream (status OUT_OF_RANGE),
   //   then returned value is the total number of bytes in the stream.
   // * If the last call to Next() ended with a failure, -1 is returned;
-  virtual int64 Position() const = 0;
+  virtual int64_t Position() const = 0;
 };
 
 }  // namespace tink
