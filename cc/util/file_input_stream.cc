@@ -33,7 +33,8 @@ FileInputStream::FileInputStream(int file_descriptor, int buffer_size) {
   if (buffer_size > 0) {
     buffer_size_ = buffer_size;
   } else {
-    buffer_size_ = 1024;
+    // On linux systems, 128kB is a good buffer size and used e.g. by cp.
+    buffer_size_ = 128 * 1024;
   }
   count_in_buffer_ = 0;
   count_backedup_ = 0;
