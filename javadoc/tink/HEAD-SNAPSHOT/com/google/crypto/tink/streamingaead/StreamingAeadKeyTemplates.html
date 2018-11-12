@@ -119,7 +119,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  <pre><code>
  Config.register(StreamingAeadConfig.TINK_1_0_0);
  KeysetHandle handle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB);
- StreamingAead ags = StreamingAeadFactory.getPrimitive(handle);
+ StreamingAead ags = handle.getPrimitive(StreamingAead.class);
  </code></pre></div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
