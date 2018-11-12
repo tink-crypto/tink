@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class MacWrapper implements PrimitiveWrapper<Mac> {
-  private static final Logger logger = Logger.getLogger(MacFactory.class.getName());
+  private static final Logger logger = Logger.getLogger(MacWrapper.class.getName());
 
   private static class WrappedMac implements Mac {
     private final PrimitiveSet<Mac> primitives;

@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  * com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
-  private static final Logger logger = Logger.getLogger(HybridDecryptFactory.class.getName());
+  private static final Logger logger = Logger.getLogger(HybridDecryptWrapper.class.getName());
 
   private static class WrappedHybridDecrypt implements HybridDecrypt {
     private final PrimitiveSet<HybridDecrypt> primitives;

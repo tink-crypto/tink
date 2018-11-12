@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  * simply throw a GeneralSecurityException.
  */
 public class AeadWrapper implements PrimitiveWrapper<Aead> {
-  private static final Logger logger = Logger.getLogger(AeadFactory.class.getName());
+  private static final Logger logger = Logger.getLogger(AeadWrapper.class.getName());
 
   private static class WrappedAead implements Aead {
     private final PrimitiveSet<Aead> pSet;
