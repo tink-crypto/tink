@@ -65,7 +65,6 @@ AEAD primitive in Java:
 ```java
     import com.google.crypto.tink.Aead;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.aead.AeadFactory;
     import com.google.crypto.tink.aead.AeadKeyTemplates;
 
     // 1. Generate the key material.
@@ -73,7 +72,7 @@ AEAD primitive in Java:
         AeadKeyTemplates.AES128_GCM);
 
     // 2. Get the primitive.
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
 
     // 3. Use the primitive.
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);

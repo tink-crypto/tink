@@ -270,9 +270,9 @@ currently available or planned (the latter are listed in brackets).
 Exact listings of primitives and their implementations available in a release _x.y.z_ of Tink
 are given in a corresponding [`TinkConfig.TINK_x_y_z`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/TinkConfig.java)-variable.
 
-Tink user accesses implementations of a primitive via a factory that corresponds
-to the primitive: AEAD via `AeadFactory`, MAC via `MacFactory`, etc. where each
-factory offers corresponding `getPrimitive(...)` methods.
+The user obtains a primitive by calling the function `getPrimitive(classObject)`
+of the `KeysetHandle`, where the `classObject` is the class object corresponding
+to the primitive (for example `Aead.class` for AEAD).
 
 ### Symmetric Key Encryption
 
@@ -283,7 +283,6 @@ primitive to encrypt or decrypt data:
 ```java
     import com.google.crypto.tink.Aead;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.aead.AeadFactory;
     import com.google.crypto.tink.aead.AeadKeyTemplates;
 
     // 1. Generate the key material.
@@ -291,7 +290,7 @@ primitive to encrypt or decrypt data:
         AeadKeyTemplates.AES128_GCM);
 
     // 2. Get the primitive.
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
 
     // 3. Use the primitive to encrypt a plaintext,
     byte[] ciphertext = aead.encrypt(plaintext, aad);
@@ -310,7 +309,6 @@ primitive to encrypt or decrypt data:
 ```java
     import com.google.crypto.tink.DeterministicAead;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.daead.DeterministicAeadFactory;
     import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 
     // 1. Generate the key material.
@@ -319,7 +317,7 @@ primitive to encrypt or decrypt data:
 
     // 2. Get the primitive.
     DeterministicAead daead =
-        DeterministicAeadFactory.getPrimitive(keysetHandle);
+       keysetHandle.getPrimitive(DeterministicAead.class);
 
     // 3. Use the primitive to deterministically encrypt a plaintext,
     byte[] ciphertext = daead.encryptDeterministically(plaintext, aad);
@@ -337,7 +335,6 @@ to encrypt or decrypt data streams:
 ```java
     import com.google.crypto.tink.StreamingAead;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.streamingaead.StreamingAeadFactory;
     import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
     import java.nio.ByteBuffer
     import java.nio.channels.FileChannel;
@@ -349,10 +346,11 @@ to encrypt or decrypt data streams:
         StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB);
 
     // 2. Get the primitive.
-    StreamingAead streamingAead = StreamingAeadFactory.getPrimitive(keysetHandle);
+    StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
 
     // 3. Use the primitive to encrypt some data and write the ciphertext to a file,
-    FileChannel ciphertextDestination = new FileOutputStream(ciphertextFileName).getChannel();
+    FileChannel ciphertextDestination =
+        new FileOutputStream(ciphertextFileName).getChannel();
     byte[] aad = ...
     WritableByteChannel encryptingChannel =
         streamingAead.newEncryptingChannel(ciphertextDestination, aad);
@@ -365,9 +363,11 @@ to encrypt or decrypt data streams:
     encryptingChannel.close();
 
     // ... or to decrypt an existing ciphertext stream.
-    FileChannel ciphertextSource = new FileInputStream(ciphertextFileName).getChannel();
+    FileChannel ciphertextSource =
+        new FileInputStream(ciphertextFileName).getChannel();
     byte[] aad = ...
-    ReadableByteChannel decryptingChannel = s.newDecryptingChannel(ciphertextSource, aad);
+    ReadableByteChannel decryptingChannel =
+        s.newDecryptingChannel(ciphertextSource, aad);
     ByteBuffer buffer = ByteBuffer.allocate(chunkSize);
     do {
       buffer.clear();
@@ -391,7 +391,6 @@ Authentication Code)](PRIMITIVES.md#message-authentication-code):
 ```java
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.Mac;
-    import com.google.crypto.tink.mac.MacFactory;
     import com.google.crypto.tink.mac.MacKeyTemplates;
 
     // 1. Generate the key material.
@@ -399,7 +398,7 @@ Authentication Code)](PRIMITIVES.md#message-authentication-code):
         MacKeyTemplates.HMAC_SHA256_128BITTAG);
 
     // 2. Get the primitive.
-    Mac mac = MacFactory.getPrimitive(keysetHandle);
+    Mac mac = keysetHandle.getPrimitive(Mac.class);
 
     // 3. Use the primitive to compute a tag,
     byte[] tag = mac.computeMac(data);
@@ -417,8 +416,6 @@ signature](PRIMITIVES.md#digital-signatures):
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.PublicKeySign;
     import com.google.crypto.tink.PublicKeyVerify;
-    import com.google.crypto.tink.signature.PublicKeySignFactory;
-    import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
     import com.google.crypto.tink.signature.SignatureKeyTemplates;
 
     // SIGNING
@@ -428,8 +425,7 @@ signature](PRIMITIVES.md#digital-signatures):
         SignatureKeyTemplates.ECDSA_P256);
 
     // 2. Get the primitive.
-    PublicKeySign signer = PublicKeySignFactory.getPrimitive(
-        privateKeysetHandle);
+    PublicKeySign signer = privateKeysetHandle.getPrimitive(PublicKeySign.class);
 
     // 3. Use the primitive to sign.
     byte[] signature = signer.sign(data);
@@ -441,8 +437,7 @@ signature](PRIMITIVES.md#digital-signatures):
         privateKeysetHandle.getPublicKeysetHandle();
 
     // 2. Get the primitive.
-    PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(
-        publicKeysetHandle);
+    PublicKeyVerify verifier = publicKeysetHandle.getPrimitive(PublicKeyVerify.class);
 
     // 4. Use the primitive to verify.
     verifier.verify(signature, data);
@@ -457,8 +452,6 @@ use the following:
 ```java
     import com.google.crypto.tink.HybridDecrypt;
     import com.google.crypto.tink.HybridEncrypt;
-    import com.google.crypto.tink.hybrid.HybridDecryptFactory;
-    import com.google.crypto.tink.hybrid.HybridEncryptFactory;
     import com.google.crypto.tink.hybrid.HybridKeyTemplates;
     import com.google.crypto.tink.KeysetHandle;
 
@@ -473,8 +466,8 @@ use the following:
     // ENCRYPTING
 
     // 2. Get the primitive.
-    HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        publicKeysetHandle);
+    HybridEncrypt hybridEncrypt =
+        publicKeysetHandle.getPrimitive(HybridEncrypt.class);
 
     // 3. Use the primitive.
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
@@ -482,8 +475,8 @@ use the following:
     // DECRYPTING
 
     // 2. Get the primitive.
-    HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        privateKeysetHandle);
+    HybridDecrypt hybridDecrypt = privateKeysetHandle.getPrimitive(
+        HybridDecrypt.class);
 
     // 3. Use the primitive.
     byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
@@ -512,7 +505,6 @@ using the credentials in `credentials.json` as follows:
     import com.google.crypto.tink.Aead;
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.KmsClients;
-    import com.google.crypto.tink.aead.AeadFactory;
     import com.google.crypto.tink.aead.AeadKeyTemplates;
     import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 
@@ -527,7 +519,7 @@ using the credentials in `credentials.json` as follows:
         .withCredentials("credentials.json"));
 
     // 3. Get the primitive.
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
 
     // 4. Use the primitive.
     byte[] ciphertext = aead.encrypt(plaintext, aad);
@@ -609,9 +601,10 @@ type (from step #2 above):
     Registry.registerKeyManager(keyManager);
 ```
 
-Afterwards the implementation will be accessed automatically by the `Factory`
-corresponding to the primitive (when keys of the specific key type are in use),
-or can be retrieved directly via `Registry.getKeyManager(keyType)`.
+Afterwards the implementation will be accessed automatically by the
+`keysetHandle.getPrimitive` corresponding to the primitive (when keys of the
+specific key type are in use). It can also be retrieved directly via
+`Registry.getKeyManager(keyType)`.
 
 When defining the protocol buffers for the key material and parameters (step #2
 above), you should provide definitions of three messages:
@@ -683,5 +676,5 @@ and the corresponding _key manager_ implements (step #3) the interface
     }
 ```
 
-After registering `MyCustomAeadKeyManager` with the Registry we can use it
-via [`AeadFactory`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/aead/AeadFactory.java).
+After registering `MyCustomAeadKeyManager` with the Registry it will be used
+when a user calls `keysetHandle.getPrimitive(Aead.class)`.
