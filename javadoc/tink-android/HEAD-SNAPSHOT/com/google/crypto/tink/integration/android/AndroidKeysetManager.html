@@ -125,7 +125,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
     .withKeyTemplate(SignatureKeyTemplates.ECDSA_P256)
     .withMasterKeyUri(masterKeyUri)
     .build();
- PublicKeySign signer = PublicKeySignFactory.getPrimitive(manager.getKeysetHandle());
+ PublicKeySign signer = manager.getKeysetHandle().getPrimitive(PublicKeySign.class);
  </code></pre>
 
  <p>This will read a keyset stored in the <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> preferences file. If the preference file name is null, it uses the default
