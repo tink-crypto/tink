@@ -17,6 +17,7 @@
 #ifndef TINK_AEAD_AEAD_FACTORY_H_
 #define TINK_AEAD_AEAD_FACTORY_H_
 
+#include "absl/base/macros.h"
 #include "tink/aead.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
@@ -26,21 +27,17 @@ namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// AeadFactory allows for obtaining an Aead primitive from a KeysetHandle.
+// This class is deprecated. Call keyset_handle->GetPrimitive<Aead>() instead.
 //
-// AeadFactory gets primitives from the Registry, which can be initialized
-// via a convenience method from AeadConfig-class. Here is an example
-// how one can obtain and use a Aead primitive:
-//
-//   auto status = AeadConfig::Register();
-//   if (!status.ok()) { /* fail with error */ }
-//   KeysetHandle keyset_handle = ...;
-//   std::unique_ptr<Aead> aead =
-//       std::move(AeadFactory::GetPrimitive(keyset_handle).ValueOrDie());
-//   std::string plaintext = ...;
-//   std::string aad = ...;
-//   std::string ciphertext = aead.Encrypt(plaintext, aad).ValueOrDie();
-//
+// Note that in order to for this change to be safe, the AeadSetWrapper has to
+// be registered in your binary before this call. This happens automatically if
+// you call one of
+// * AeadConfig::Register()
+// * HybridConfig::Register()
+// * TinkConfig::Register()
+ABSL_DEPRECATED(
+    "Call getPrimitive<Aead>() on the keyset_handle after registering the "
+    "AeadWrapper instead.")
 class AeadFactory {
  public:
   // Returns an Aead-primitive that uses key material from the keyset

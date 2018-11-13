@@ -17,6 +17,7 @@
 #ifndef TINK_DAEAD_DETERMINISTIC_AEAD_FACTORY_H_
 #define TINK_DAEAD_DETERMINISTIC_AEAD_FACTORY_H_
 
+#include "absl/base/macros.h"
 #include "tink/deterministic_aead.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
@@ -26,23 +27,17 @@ namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// DeterministicAeadFactory allows for obtaining an DeterministicAead primitive
-// from a KeysetHandle.
+// This class is deprecated. Call
+// keyset_handle->GetPrimitive<DeterministicAead>() instead.
 //
-// DeterministicAeadFactory gets primitives from the Registry, which can be
-// initialized via a convenience method from DeterministicAeadConfig-class.
-// Here is an example how one can obtain and use a DeterministicAead primitive:
-//
-//   auto status = DeterministicAeadConfig::Register();
-//   if (!status.ok()) { /* fail with error */ }
-//   KeysetHandle keyset_handle = ...;
-//   std::unique_ptr<DeterministicAead> daead = std::move(
-//       DeterministicAeadFactory::GetPrimitive(keyset_handle).ValueOrDie());
-//   std::string plaintext = ...;
-//   std::string aad = ...;
-//   std::string ciphertext =
-//       daead.DeterministicallyEncrypt(plaintext, aad).ValueOrDie();
-//
+// Note that in order to for this change to be safe, the
+// DeterministicAeadWrapper has to be registered in your binary before this
+// call. This happens automatically if you call one of
+// * DeterministicAeadConfig::Register()
+// * TinkConfig::Register()
+ABSL_DEPRECATED(
+    "Call getPrimitive<DeterministicAeadFactory>() on the keyset_handle after "
+    "registering the DeterministicAeadWrapper instead.")
 class DeterministicAeadFactory {
  public:
   // Returns an DeterministicAead-primitive that uses key material from
