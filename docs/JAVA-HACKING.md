@@ -6,7 +6,7 @@
 
 *   To build Java, install Android SDK 23 or newer and set the ANDROID_HOME
     environment variable to the path of your Android SDK. On macOS, the SDK is
-    usually installed at /Users/username/Library/Android/sdk/. You also need
+    usually installed at `/Users/username/Library/Android/sdk/`. You also need
     Android SDK Build Tools 24.0.3 or newer.
 
 *   Check out source code and build
@@ -82,7 +82,7 @@ bazel test java/...
     *   API backward-compatibility guarantee: yes
 
 *   **com.google.crypto.tink.integration.android** This package allows Android
-    users to store keys in private perferences, wrapped with master key in
+    users to store keys in private preferences, wrapped with master key in
     [Android
     Keystore](https://developer.android.com/training/articles/keystore.html).
     The integration with Android Keystore only works on Android M (API level 23)
