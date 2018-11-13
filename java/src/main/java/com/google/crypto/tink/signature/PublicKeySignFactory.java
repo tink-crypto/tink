@@ -24,28 +24,29 @@ import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods for obtaining {@link PublicKeySign} instances.
+ * Deprecated class to create {@code PublicKeySign} primitives. Instead of using this class, make
+ * sure that the {@code PublicKeySignWrapper} is registered in your binary, then call {@code
+ * keysetHandle.GetPrimitive(PublicKeySign.class)} instead. The required registration happens
+ * automatically if you called one of the following in your binary:
  *
- * <h3>Usage</h3>
+ * <ul>
+ *   <li>{@code SignatureConfig.register()}
+ *   <li>{@code TinkConfig.register()}
+ * </ul>
  *
- * <pre>{@code
- * KeysetHandle keysetHandle = ...;
- * PublicKeySign signer = PublicKeySignFactory.getPrimitive(keysetHandle);
- * byte[] data = ...;
- * byte[] signature = signer.sign(data);
- * }</pre>
- *
- * <p>The returned primitive works with a keyset (rather than a single key). To sign a message, it
- * uses the primary key in the keyset, and prepends to the signature a certain prefix associated
- * with the primary key.
- *
+ * @deprecated Use {@code keysetHandle.GetPrimitive(PublicKeySign.class)} after registering the
+ *     {@code PublicKeySignWrapper} instead.
  * @since 1.0.0
  */
+@Deprecated
 public final class PublicKeySignFactory {
   /**
    * @return a PublicKeySign primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(PublicKeySign.class)} after registering the
+   *     {@code PublicKeySignWrapper} instead.
    */
+  @Deprecated
   public static PublicKeySign getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitive(keysetHandle, /* keyManager= */ null);
@@ -54,7 +55,10 @@ public final class PublicKeySignFactory {
   /**
    * @return a PublicKeySign primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, PublicKeySign.class)} after
+   *     registering the {@code PublicKeySignWrapper} instead.
    */
+  @Deprecated
   public static PublicKeySign getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<PublicKeySign> keyManager)
       throws GeneralSecurityException {

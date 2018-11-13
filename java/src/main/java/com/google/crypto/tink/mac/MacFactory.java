@@ -24,31 +24,31 @@ import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods for obtaining {@link Mac} instances.
+ * Deprecated class to create {@code Mac} primitives. Instead of using this class, make sure that
+ * the {@code MacWrapper} is registered in your binary, then call {@code
+ * keysetHandle.GetPrimitive(Mac.class)} instead. The required registration happens automatically if
+ * you called one of the following in your binary:
  *
- * <h3>Usage</h3>
+ * <ul>
+ *   <li>{@code MacConfig.register()}
+ *   <li>{@code HybridConfig.register()}
+ *   <li>{@code AeadConfig.register()}
+ *   <li>{@code TinkConfig.register()}
+ * </ul>
  *
- * <pre>{@code
- * KeysetHandle keysetHandle = ...;
- * Mac mac = MacFactory.getPrimitive(keysetHandle);
- * byte[] data = ...;
- * byte[] tag = mac.computeMac(data);
- *
- * }</pre>
- *
- * <p>The returned primitive works with a keyset (rather than a single key). To compute a MAC tag,
- * it uses the primary key in the keyset, and prepends to the tag a certain prefix associated with
- * the primary key. To verify a tag, the primitive uses the prefix of the tag to efficiently select
- * the right key in the set. If the keys associated with the prefix do not validate the tag, the
- * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
- *
+ * @deprecated Use {@code keysetHandle.GetPrimitive(Mac.class)} after registering the {@code
+ *     MacWrapper} instead.
  * @since 1.0.0
  */
+@Deprecated
 public final class MacFactory {
   /**
    * @return a Mac primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(Mac.class)} after registering the {@code
+   *     MacWrapper} instead.
    */
+  @Deprecated
   public static Mac getPrimitive(KeysetHandle keysetHandle) throws GeneralSecurityException {
     return getPrimitive(keysetHandle, /* keyManager= */ null);
   }
@@ -56,7 +56,10 @@ public final class MacFactory {
   /**
    * @return a Mac primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, Mac.class)} after registering the
+   *     {@code MacWrapper} instead.
    */
+  @Deprecated
   public static Mac getPrimitive(KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
       throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(new MacWrapper());

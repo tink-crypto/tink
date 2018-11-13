@@ -22,36 +22,31 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
-import java.util.logging.Logger;
 
 /**
- * Static methods for obtaining {@link DeterministicAead} instances.
+ * Deprecated class to create {@code DeterministicAead} primitives. Instead of using this class,
+ * make sure that the {@code DeterministicAeadWrapper} is registered in your binary, then call
+ * {@code keysetHandle.GetPrimitive(DeterministicAead.class)} instead. The required registration
+ * happens automatically if you called one of the following in your binary:
  *
- * <h3>Usage</h3>
+ * <ul>
+ *   <li>{@code DeterministicAeadConfig.register()}
+ *   <li>{@code TinkConfig.register()}
+ * </ul>
  *
- * <pre>{@code
- * KeysetHandle keysetHandle = ...;
- * DeterministicAead daead = DeterministicAeadFactory.getPrimitive(keysetHandle);
- * byte[] plaintext = ...;
- * byte[] aad = ...;
- * byte[] ciphertext = daead.encrypt(plaintext, aad);
- * }</pre>
- *
- * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
- * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix associated
- * with the primary key. To decrypt, the primitive uses the prefix of the ciphertext to efficiently
- * select the right key in the set. If the keys associated with the prefix do not work, the
- * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
- *
+ * @deprecated Use {@code keysetHandle.GetPrimitive(DeterministicAead.class)} after registering the
+ *     {@code DeterministicAeadWrapper} instead.
  * @since 1.1.0
  */
+@Deprecated
 public final class DeterministicAeadFactory {
-  private static final Logger logger = Logger.getLogger(DeterministicAeadFactory.class.getName());
-
   /**
    * @return a DeterministicAead primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(DeterministicAead.class)} after registering
+   *     the {@code DeterministicAeadWrapper} instead.
    */
+  @Deprecated
   public static DeterministicAead getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitive(keysetHandle, /* keyManager= */ null);
@@ -61,7 +56,10 @@ public final class DeterministicAeadFactory {
    * @return a DeterministicAead primitive from a {@code keysetHandle} and a custom {@code
    *     keyManager}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, DeterministicAead.class)} after
+   *     registering the {@code DeterministicAeadWrapper} instead.
    */
+  @Deprecated
   public static DeterministicAead getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<DeterministicAead> keyManager)
       throws GeneralSecurityException {

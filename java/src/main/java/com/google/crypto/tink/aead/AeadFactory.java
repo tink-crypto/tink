@@ -24,31 +24,30 @@ import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods for obtaining {@link Aead} instances.
+ * Deprecated class to create {@code Aead} primitives. Instead of using this class, make sure that
+ * the {@code AeadWrapper} is registered in your binary, then call {@code
+ * keysetHandle.GetPrimitive(Aead.class)} instead. The required registration happens automatically
+ * if you called one of the following in your binary:
  *
- * <h3>Usage</h3>
+ * <ul>
+ *   <li>{@code HybridConfig.register()}
+ *   <li>{@code AeadConfig.register()}
+ *   <li>{@code TinkConfig.register()}
+ * </ul>
  *
- * <pre>{@code
- * KeysetHandle keysetHandle = ...;
- * Aead aead = AeadFactory.getPrimitive(keysetHandle);
- * byte[] plaintext = ...;
- * byte[] aad = ...;
- * byte[] ciphertext = aead.encrypt(plaintext, aad);
- * }</pre>
- *
- * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
- * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix associated
- * with the primary key. To decrypt, the primitive uses the prefix of the ciphertext to efficiently
- * select the right key in the set. If the keys associated with the prefix do not work, the
- * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
- *
+ * @deprecated Use {@code keysetHandle.GetPrimitive(Aead.class)} after registering the {@code
+ *     AeadWrapper} instead.
  * @since 1.0.0
  */
+@Deprecated
 public final class AeadFactory {
   /**
    * @return a Aead primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(Aead.class)} after registering the {@code
+   *     AeadWrapper} instead.
    */
+  @Deprecated
   public static Aead getPrimitive(KeysetHandle keysetHandle) throws GeneralSecurityException {
     return getPrimitive(keysetHandle, /* keyManager= */ null);
   }
@@ -56,7 +55,10 @@ public final class AeadFactory {
   /**
    * @return a Aead primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, Aead.class)} after registering the
+   *     {@code AeadWrapper} instead.
    */
+  @Deprecated
   public static Aead getPrimitive(KeysetHandle keysetHandle, final KeyManager<Aead> keyManager)
       throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(new AeadWrapper());

@@ -22,33 +22,31 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
-import java.util.logging.Logger;
 
 /**
- * Static methods for obtaining {@link PublicKeyVerify} instances.
+ * Deprecated class to create {@code PublicKeyVerify} primitives. Instead of using this class, make
+ * sure that the {@code PublicKeyVerifyWrapper} is registered in your binary, then call {@code
+ * keysetHandle.GetPrimitive(PublicKeyVerify.class)} instead. The required registration happens
+ * automatically if you called one of the following in your binary:
  *
- * <h3>Usage</h3>
+ * <ul>
+ *   <li>{@code SignatureConfig.register()}
+ *   <li>{@code TinkConfig.register()}
+ * </ul>
  *
- * <pre>{@code
- * KeysetHandle keysetHandle = ...;
- * PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
- * verifier.verify(signature, data);
- * }</pre>
- *
- * <p>The returned primitive works with a keyset (rather than a single key). To verify a signature,
- * the primitive uses the prefix of the signature to efficiently select the right key in the set. If
- * there is no key associated with the prefix or if the keys associated with the prefix do not work,
- * the primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
- *
+ * @deprecated Use {@code keysetHandle.GetPrimitive(PublicKeyVerify.class)} after registering the
+ *     {@code PublicKeyVerifyWrapper} instead.
  * @since 1.0.0
  */
+@Deprecated
 public final class PublicKeyVerifyFactory {
-  private static final Logger logger = Logger.getLogger(PublicKeyVerifyFactory.class.getName());
-
   /**
    * @return a PublicKeyVerify primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(PublicKeyVerify.class)} after registering the
+   *     {@code PublicKeyVerifyWrapper} instead.
    */
+  @Deprecated
   public static PublicKeyVerify getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitive(keysetHandle, /* keyManager= */ null);
@@ -58,7 +56,10 @@ public final class PublicKeyVerifyFactory {
    * @return a PublicKeyVerify primitive from a {@code keysetHandle} and a custom {@code
    *     keyManager}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, PublicKeyVerify.class)} after
+   *     registering the {@code PublicKeyVerifyWrapper} instead.
    */
+  @Deprecated
   public static PublicKeyVerify getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<PublicKeyVerify> keyManager)
       throws GeneralSecurityException {
