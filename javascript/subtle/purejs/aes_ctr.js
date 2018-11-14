@@ -21,7 +21,6 @@ const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
 const Random = goog.require('tink.subtle.Random');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
-const array = goog.require('goog.array');
 
 /**
  * AES block size.
@@ -71,9 +70,9 @@ class AesCtr {
       throw new SecurityException('ciphertext too short');
     }
     const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
-    counter.set(array.slice(ciphertext, 0, this.ivSize_));
+    counter.set(ciphertext.subarray(0, this.ivSize_));
     return new Uint8Array(
-        this.ctr_.decrypt(array.slice(ciphertext, this.ivSize_), counter));
+        this.ctr_.decrypt(ciphertext.subarray(this.ivSize_), counter));
   }
 }
 

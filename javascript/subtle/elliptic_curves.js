@@ -20,7 +20,6 @@ goog.module('tink.subtle.EllipticCurves');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
-const array = goog.require('goog.array');
 
 /**
  * Supported elliptic curves.
@@ -112,10 +111,10 @@ const pointDecode = function(curve, format, point) {
         'kty': 'EC',
         'crv': curve,
         'x': Bytes.toBase64(
-            new Uint8Array(array.slice(point, 1, 1 + fieldSize)),
+            new Uint8Array(point.subarray(1, 1 + fieldSize)),
             true /* websafe */),
         'y': Bytes.toBase64(
-            new Uint8Array(array.slice(point, 1 + fieldSize, point.length)),
+            new Uint8Array(point.subarray(1 + fieldSize, point.length)),
             true /* websafe */),
         'ext': true,
       });

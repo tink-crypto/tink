@@ -19,7 +19,6 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
-const array = goog.require('goog.array');
 
 /**
  * The only supported IV size.
@@ -104,7 +103,7 @@ class AesGcm {
       aad = opt_associatedData;
     }
     const iv = new Uint8Array(IV_SIZE_IN_BYTES);
-    iv.set(array.slice(ciphertext, 0, IV_SIZE_IN_BYTES));
+    iv.set(ciphertext.subarray(0, IV_SIZE_IN_BYTES));
     const alg = {
       'name': 'AES-GCM',
       'iv': iv,
@@ -114,7 +113,7 @@ class AesGcm {
     try {
       return new Uint8Array(await window.crypto.subtle.decrypt(
           alg, this.key_,
-          new Uint8Array(array.slice(ciphertext, IV_SIZE_IN_BYTES))));
+          new Uint8Array(ciphertext.subarray(IV_SIZE_IN_BYTES))));
     } catch (e) {
       throw new SecurityException(e.toString());
     }

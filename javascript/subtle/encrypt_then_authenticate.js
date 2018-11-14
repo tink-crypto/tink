@@ -23,7 +23,6 @@ const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsE
 const Mac = goog.require('tink.Mac');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
-const array = goog.require('goog.array');
 
 /**
  * This primitive performs an encrypt-then-Mac operation on plaintext and
@@ -116,7 +115,7 @@ class EncryptThenAuthenticate {
       throw new SecurityException('ciphertext too short');
     }
     const payload = new Uint8Array(
-        array.slice(ciphertext, 0, ciphertext.length - this.tagSize_));
+        ciphertext.subarray(0, ciphertext.length - this.tagSize_));
     let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       aad = opt_associatedData;
@@ -124,7 +123,7 @@ class EncryptThenAuthenticate {
     }
     const aadLength = Bytes.fromNumber(aad.length * 8);
     const input = Bytes.concat(aad, payload, aadLength);
-    const tag = new Uint8Array(array.slice(ciphertext, payload.length));
+    const tag = new Uint8Array(ciphertext.subarray(payload.length));
     const isValidMac = await this.mac_.verifyMac(tag, input);
     if (!isValidMac) {
       throw new SecurityException('invalid MAC');

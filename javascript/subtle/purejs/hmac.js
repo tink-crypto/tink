@@ -22,7 +22,6 @@ const Sha1 = goog.require('goog.crypt.Sha1');
 const Sha256 = goog.require('goog.crypt.Sha256');
 const Sha512 = goog.require('goog.crypt.Sha512');
 const Validators = goog.require('tink.subtle.Validators');
-const array = goog.require('goog.array');
 
 /**
  * Implementation of HMAC.
@@ -65,8 +64,8 @@ class Hmac {
    */
   async computeMac(data) {
     Validators.requireUint8Array(data);
-    return new Uint8Array(
-        array.slice(this.hmac_.getHmac(data), 0, this.tagSize_));
+    const tag = this.hmac_.getHmac(data);
+    return new Uint8Array(tag.slice(0, this.tagSize_));
   }
 
   /**

@@ -21,7 +21,6 @@ goog.module('tink.subtle.Hkdf');
 const Hmac = goog.require('tink.subtle.Hmac');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const Validators = goog.require('tink.subtle.Validators');
-const array = goog.require('goog.array');
 
 /**
  * Computes an HKDF.
@@ -100,7 +99,7 @@ const compute = async function(size, hash, ikm, info, opt_salt) {
       pos += digest.length;
       ctr++;
     } else {
-      result.set(array.slice(digest, 0, size - pos), pos);
+      result.set(digest.subarray(0, size - pos), pos);
       break;
     }
   }

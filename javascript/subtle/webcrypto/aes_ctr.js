@@ -19,7 +19,6 @@ const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
 const Random = goog.require('tink.subtle.Random');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
-const array = goog.require('goog.array');
 
 /**
  * AES block size.
@@ -85,10 +84,10 @@ class AesCtr {
       throw new SecurityException('ciphertext too short');
     }
     const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
-    counter.set(array.slice(ciphertext, 0, this.ivSize_));
+    counter.set(ciphertext.subarray(0, this.ivSize_));
     const alg = {'name': 'AES-CTR', 'counter': counter, 'length': 128};
     return new Uint8Array(await window.crypto.subtle.decrypt(
-        alg, this.key_, new Uint8Array(array.slice(ciphertext, this.ivSize_))));
+        alg, this.key_, new Uint8Array(ciphertext.subarray(this.ivSize_))));
   }
 }
 
