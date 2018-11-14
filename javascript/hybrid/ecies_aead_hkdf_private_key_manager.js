@@ -118,13 +118,16 @@ class EciesAeadHkdfPrivateKeyFactory {
     const publicKeyProto = new PbEciesAeadHkdfPublicKey();
     publicKeyProto.setVersion(EciesAeadHkdfPublicKeyManager.VERSION);
     publicKeyProto.setParams(params);
-    publicKeyProto.setX(Bytes.fromBase64(jsonPublicKey['x']));
-    publicKeyProto.setY(Bytes.fromBase64(jsonPublicKey['y']));
+    publicKeyProto.setX(
+        Bytes.fromBase64(jsonPublicKey['x'], /* opt_webSafe = */ true));
+    publicKeyProto.setY(
+        Bytes.fromBase64(jsonPublicKey['y'], /* opt_webSafe = */ true));
 
     const privateKeyProto = new PbEciesAeadHkdfPrivateKey();
     privateKeyProto.setVersion(EciesAeadHkdfPrivateKeyManager.VERSION_);
     privateKeyProto.setPublicKey(publicKeyProto);
-    privateKeyProto.setKeyValue(Bytes.fromBase64(jsonPrivateKey['d']));
+    privateKeyProto.setKeyValue(
+        Bytes.fromBase64(jsonPrivateKey['d'], /* opt_webSafe = */ true));
     return privateKeyProto;
   }
 

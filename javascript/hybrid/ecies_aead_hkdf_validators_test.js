@@ -491,15 +491,18 @@ const createPrivateKey = async function(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
   const keyPair = await Ecdh.generateKeyPair(curveName);
   const jsonPublicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
-  publicKeyProto.setX(Bytes.fromBase64(jsonPublicKey['x']));
-  publicKeyProto.setY(Bytes.fromBase64(jsonPublicKey['y']));
+  publicKeyProto.setX(
+      Bytes.fromBase64(jsonPublicKey['x'], /* opt_webSafe = */ true));
+  publicKeyProto.setY(
+      Bytes.fromBase64(jsonPublicKey['y'], /* opt_webSafe = */ true));
 
 
   const privateKeyProto = new PbEciesAeadHkdfPrivateKey();
   privateKeyProto.setVersion(0);
   privateKeyProto.setPublicKey(publicKeyProto);
   const jsonPrivateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
-  privateKeyProto.setKeyValue(Bytes.fromBase64(jsonPrivateKey['d']));
+  privateKeyProto.setKeyValue(
+      Bytes.fromBase64(jsonPrivateKey['d'], /* opt_webSafe = */ true));
 
   return privateKeyProto;
 };

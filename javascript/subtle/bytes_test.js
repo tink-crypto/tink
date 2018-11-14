@@ -93,20 +93,52 @@ testSuite({
     });
   },
 
-  testToBase64_removeAllDotsPadding() {
+  testToBase64_removeAllPadding() {
     for (let i = 0; i < 10; i++) {
       const array = new Uint8Array(i);
       const base64Representation = Bytes.toBase64(array, true);
       assertNotEquals(
-          '.', base64Representation[base64Representation.length - 1]);
+          '=', base64Representation[base64Representation.length - 1]);
     }
   },
 
   testToBase64_fromBase64() {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 100; i++) {
       const array = Random.randBytes(i);
       const base64Representation = Bytes.toBase64(array, true);
-      const arrayRepresentation = Bytes.fromBase64(base64Representation);
+      const arrayRepresentation = Bytes.fromBase64(base64Representation, true);
+      assertObjectEquals(array, arrayRepresentation);
+    }
+  },
+
+  testFromByteString() {
+    assertObjectEquals(
+        'empty string', new Uint8Array(), Bytes.fromByteString(''));
+
+    let arr = new Uint8Array(
+        [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]);
+    assertObjectEquals('ASCII', arr, Bytes.fromByteString('Hello, world'));
+
+    arr = new Uint8Array([83, 99, 104, 246, 110]);
+    assertObjectEquals('Latin', arr, Bytes.fromByteString('Sch\u00f6n'));
+  },
+
+  testToByteString() {
+    assertEquals('empty string', '', Bytes.toByteString(new Uint8Array()));
+
+    let arr = new Uint8Array(
+        [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]);
+    assertEquals('ASCII', 'Hello, world', Bytes.toByteString(arr));
+
+    arr = new Uint8Array([83, 99, 104, 246, 110]);
+    assertEquals('Latin', 'Sch\u00f6n', Bytes.toByteString(arr));
+  },
+
+  testToString_fromString() {
+    for (let i = 0; i < 100; i++) {
+      const array = Random.randBytes(i);
+      const str = Bytes.toByteString(array);
+      const arrayRepresentation = Bytes.fromByteString(str);
       assertObjectEquals(array, arrayRepresentation);
     }
   },

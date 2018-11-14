@@ -434,8 +434,8 @@ const createKey = async function(
 
   const keyPair = await Ecdh.generateKeyPair(curveName);
   const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
-  key.setX(Bytes.fromBase64(publicKey['x']));
-  key.setY(Bytes.fromBase64(publicKey['y']));
+  key.setX(Bytes.fromBase64(publicKey['x'], /* opt_webSafe = */ true));
+  key.setY(Bytes.fromBase64(publicKey['y'], /* opt_webSafe = */ true));
 
   return key;
 };

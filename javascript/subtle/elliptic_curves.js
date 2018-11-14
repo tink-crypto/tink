@@ -87,8 +87,9 @@ const pointEncode = function(curve, format, point) {
     case PointFormatType.UNCOMPRESSED:
       let result = new Uint8Array(1 + 2 * fieldSize);
       result[0] = 0x04;
-      result.set(Bytes.fromBase64(point.x), 1);
-      result.set(Bytes.fromBase64(point.y), 1 + fieldSize);
+      result.set(Bytes.fromBase64(point.x, /* opt_webSafe = */ true), 1);
+      result.set(
+          Bytes.fromBase64(point.y, /* opt_webSafe = */ true), 1 + fieldSize);
       return result;
   }
   throw new InvalidArgumentsException('invalid format');

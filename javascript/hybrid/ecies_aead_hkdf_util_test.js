@@ -61,9 +61,11 @@ testSuite({
       assertEquals('EC', jwk['kty']);
       assertEquals(curveTypeString, jwk['crv']);
       assertObjectEquals(
-          key.getPublicKey().getX_asU8(), Bytes.fromBase64(jwk['x']));
+          key.getPublicKey().getX_asU8(),
+          Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
       assertObjectEquals(
-          key.getPublicKey().getY_asU8(), Bytes.fromBase64(jwk['y']));
+          key.getPublicKey().getY_asU8(),
+          Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
       assertObjectEquals(undefined, jwk['d']);
       assertTrue(jwk['ext']);
     }
@@ -90,8 +92,10 @@ testSuite({
 
       assertEquals('EC', jwk['kty']);
       assertEquals(curveTypeString, jwk['crv']);
-      assertObjectEquals(x, Bytes.fromBase64(jwk['x']));
-      assertObjectEquals(y, Bytes.fromBase64(jwk['y']));
+      assertObjectEquals(
+          x, Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
+      assertObjectEquals(
+          y, Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
       assertObjectEquals(undefined, jwk['d']);
       assertTrue(jwk['ext']);
     }
@@ -129,10 +133,14 @@ testSuite({
       assertEquals('EC', jwk['kty']);
       assertEquals(curveTypeString, jwk['crv']);
       assertObjectEquals(
-          key.getPublicKey().getX_asU8(), Bytes.fromBase64(jwk['x']));
+          key.getPublicKey().getX_asU8(),
+          Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
       assertObjectEquals(
-          key.getPublicKey().getY_asU8(), Bytes.fromBase64(jwk['y']));
-      assertObjectEquals(key.getKeyValue_asU8(), Bytes.fromBase64(jwk['d']));
+          key.getPublicKey().getY_asU8(),
+          Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
+      assertObjectEquals(
+          key.getKeyValue_asU8(),
+          Bytes.fromBase64(jwk['d'], /* opt_webSafe = */ true));
       assertTrue(jwk['ext']);
     }
   },
@@ -156,10 +164,13 @@ testSuite({
       assertEquals('EC', jwk['kty']);
       assertEquals(curveTypeString, jwk['crv']);
       assertObjectEquals(
-          key.getPublicKey().getX_asU8(), Bytes.fromBase64(jwk['x']));
+          key.getPublicKey().getX_asU8(),
+          Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
       assertObjectEquals(
-          key.getPublicKey().getY_asU8(), Bytes.fromBase64(jwk['y']));
-      assertObjectEquals(d, Bytes.fromBase64(jwk['d']));
+          key.getPublicKey().getY_asU8(),
+          Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
+      assertObjectEquals(
+          d, Bytes.fromBase64(jwk['d'], /* opt_webSafe = */ true));
       assertTrue(jwk['ext']);
     }
   },
@@ -282,12 +293,15 @@ const createKey = async function(
 
   const keyPair = await Ecdh.generateKeyPair(curveName);
   const publicKeyJson = await Ecdh.exportCryptoKey(keyPair.publicKey);
-  publicKeyProto.setX(Bytes.fromBase64(publicKeyJson['x']));
-  publicKeyProto.setY(Bytes.fromBase64(publicKeyJson['y']));
+  publicKeyProto.setX(
+      Bytes.fromBase64(publicKeyJson['x'], /* opt_webSafe = */ true));
+  publicKeyProto.setY(
+      Bytes.fromBase64(publicKeyJson['y'], /* opt_webSafe = */ true));
 
   const privateKeyProto = new PbEciesAeadHkdfPrivateKey();
   const privateKeyJson = await Ecdh.exportCryptoKey(keyPair.privateKey);
-  privateKeyProto.setKeyValue(Bytes.fromBase64(privateKeyJson['d']));
+  privateKeyProto.setKeyValue(
+      Bytes.fromBase64(privateKeyJson['d'], /* opt_webSafe = */ true));
   privateKeyProto.setVersion(0);
   privateKeyProto.setPublicKey(publicKeyProto);
 

@@ -15,7 +15,6 @@
 goog.module('tink.subtle.Bytes');
 
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
-const base64 = goog.require('goog.crypt.base64');
 
 /**
  * Does near constant time byte array comparison.
@@ -55,26 +54,6 @@ const concat = function(var_args) {
 };
 
 /**
- * Converts the hex string to a byte array.
- *
- * @param {string} hex the input
- * @return {!Uint8Array} the byte array output
- * @throws {!InvalidArgumentsException}
- * @static
- */
-const fromHex = function(hex) {
-  if (hex.length % 2 != 0) {
-    throw new InvalidArgumentsException(
-        'Hex string length must be multiple of 2');
-  }
-  var arr = new Uint8Array(hex.length / 2);
-  for (var i = 0; i < hex.length; i += 2) {
-    arr[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-  }
-  return arr;
-};
-
-/**
  * Converts a non-negative integer number to a 64-bit big-endian byte array.
  * @param {number} value The number to convert.
  * @return {!Uint8Array} The number as a big-endian byte array.
@@ -108,6 +87,26 @@ const fromNumber = function(value) {
 };
 
 /**
+ * Converts the hex string to a byte array.
+ *
+ * @param {string} hex the input
+ * @return {!Uint8Array} the byte array output
+ * @throws {!InvalidArgumentsException}
+ * @static
+ */
+const fromHex = function(hex) {
+  if (hex.length % 2 != 0) {
+    throw new InvalidArgumentsException(
+        'Hex string length must be multiple of 2');
+  }
+  var arr = new Uint8Array(hex.length / 2);
+  for (var i = 0; i < hex.length; i += 2) {
+    arr[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return arr;
+};
+
+/**
  * Converts a byte array to hex.
  *
  * @param {!Uint8Array} bytes the byte array input
@@ -126,12 +125,18 @@ const toHex = function(bytes) {
 /**
  * Converts the Base64 string to a byte array.
  *
- * @param {string} input the base64 string
+ * @param {string} encoded the base64 string
+ * @param {boolean=} opt_webSafe True indicates we should use the alternative
+ *     alphabet, which does not require escaping for use in URLs.
  * @return {!Uint8Array} the byte array output
  * @static
  */
-const fromBase64 = function(input) {
-  return new Uint8Array(base64.decodeStringToByteArray(input));
+const fromBase64 = function(encoded, opt_webSafe) {
+  if (opt_webSafe) {
+    const normalBase64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    return fromByteString(window.atob(normalBase64));
+  }
+  return fromByteString(window.atob(encoded));
 };
 
 /**
@@ -144,8 +149,47 @@ const fromBase64 = function(input) {
  * @static
  */
 const toBase64 = function(bytes, opt_webSafe) {
-  return base64.encodeByteArray(bytes, opt_webSafe)
-      .replace(/\./g, '') /* padding */;
+  let encoded =
+      window.btoa(toByteString(bytes)).replace(/=/g, '') /* padding */;
+  if (opt_webSafe) {
+    return encoded.replace(/\+/g, '-').replace(/\//g, '_');
+  }
+  return encoded;
+};
+
+/**
+ * Converts a byte string to a byte array. Only support ASCII and Latin-1
+ * strings, does not support multi-byte characters.
+ *
+ * @param {string} str the input
+ * @return {!Uint8Array} the byte array output
+ * @static
+ */
+const fromByteString = function(str) {
+  let output = [];
+  let p = 0;
+  for (let i = 0; i < str.length; i++) {
+    let c = str.charCodeAt(i);
+    output[p++] = c;
+  }
+  return new Uint8Array(output);
+};
+
+/**
+ * Turns a byte array into the string given by the concatenation of the
+ * characters to which the numbers correspond. Each byte is corresponding to a
+ * character. Does not support multi-byte characters.
+ *
+ * @param {!Uint8Array} bytes Array of numbers representing
+ *     characters.
+ * @return {string} Stringification of the array.
+ */
+const toByteString = function(bytes) {
+  var str = '';
+  for (var i = 0; i < bytes.length; i += 1) {
+    str += String.fromCharCode(bytes[i]);
+  }
+  return str;
 };
 
 exports = {
@@ -153,7 +197,9 @@ exports = {
   fromBase64,
   fromHex,
   fromNumber,
+  fromByteString,
   isEqual,
   toBase64,
   toHex,
+  toByteString,
 };
