@@ -1,3 +1,7 @@
+Version 1.2.1
+==================================
+No changes to the Obj-C implementation.
+
 Version 1.2.0
 ==================================
 Added support for IEEE P1363 signature encoding.
