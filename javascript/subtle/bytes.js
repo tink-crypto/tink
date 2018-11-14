@@ -16,7 +16,6 @@ goog.module('tink.subtle.Bytes');
 
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const base64 = goog.require('goog.crypt.base64');
-const crypt = goog.require('goog.crypt');
 
 /**
  * Does near constant time byte array comparison.
@@ -60,10 +59,19 @@ const concat = function(var_args) {
  *
  * @param {string} hex the input
  * @return {!Uint8Array} the byte array output
+ * @throws {!InvalidArgumentsException}
  * @static
  */
 const fromHex = function(hex) {
-  return new Uint8Array(crypt.hexToByteArray(hex));
+  if (hex.length % 2 != 0) {
+    throw new InvalidArgumentsException(
+        'Hex string length must be multiple of 2');
+  }
+  var arr = new Uint8Array(hex.length / 2);
+  for (var i = 0; i < hex.length; i += 2) {
+    arr[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return arr;
 };
 
 /**
@@ -107,7 +115,12 @@ const fromNumber = function(value) {
  * @static
  */
 const toHex = function(bytes) {
-  return crypt.byteArrayToHex(bytes);
+  let result = '';
+  for (let i = 0; i < bytes.length; i++) {
+    let hexByte = bytes[i].toString(16);
+    result += hexByte.length > 1 ? hexByte : '0' + hexByte;
+  }
+  return result;
 };
 
 /**
