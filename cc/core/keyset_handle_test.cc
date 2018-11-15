@@ -43,7 +43,8 @@ using crypto::tink::test::AddLegacyKey;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
-
+using crypto::tink::test::IsOk;
+using crypto::tink::test::StatusIs;
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
@@ -509,6 +510,84 @@ TEST_F(KeysetHandleTest, Copiable) {
   ASSERT_TRUE(handle_result.ok()) << handle_result.status();
   std::unique_ptr<KeysetHandle> handle = std::move(handle_result.ValueOrDie());
   KeysetHandle handle_copy = *handle;
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecret) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::REMOTE, &keyset);
+  keyset.set_primary_key_id(42);
+  auto handle_result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  ASSERT_THAT(handle_result.status(), IsOk());
+  std::unique_ptr<KeysetHandle>& keyset_handle = handle_result.ValueOrDie();
+
+  const Keyset& result = CleartextKeysetHandle::GetKeyset(*keyset_handle);
+  // We check that result equals keyset. For lack of a better method we do this
+  // by hand.
+  EXPECT_EQ(result.primary_key_id(), keyset.primary_key_id());
+  ASSERT_EQ(result.key_size(), keyset.key_size());
+  ASSERT_EQ(result.key(0).key_id(), keyset.key(0).key_id());
+  ASSERT_EQ(result.key(1).key_id(), keyset.key(1).key_id());
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeUnknown) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::UNKNOWN_KEYMATERIAL, &keyset);
+  keyset.set_primary_key_id(42);
+  auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeSymmetric) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+  auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeAssymmetricPrivate) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  keyset.set_primary_key_id(42);
+  auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForHidden) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
+            KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key,
+              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+
+  keyset.set_primary_key_id(42);
+  auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForInvalidString) {
+  auto result = KeysetHandle::ReadNoSecret("bad serialized keyset");
+  EXPECT_FALSE(result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
 }
 
 }  // namespace

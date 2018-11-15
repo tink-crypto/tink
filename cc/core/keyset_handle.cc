@@ -79,6 +79,20 @@ uint32_t GenerateUnusedKeyId(const Keyset& keyset) {
   }
 }
 
+util::Status ValidateNoSecret(const Keyset& keyset) {
+  for (const Keyset::Key& key : keyset.key()) {
+    if (key.key_data().key_material_type() == KeyData::UNKNOWN_KEYMATERIAL ||
+        key.key_data().key_material_type() == KeyData::SYMMETRIC ||
+        key.key_data().key_material_type() == KeyData::ASYMMETRIC_PRIVATE) {
+      return util::Status(
+          util::error::FAILED_PRECONDITION,
+          "Cannot create KeysetHandle with secret key material from "
+          "potentially unencrypted source.");
+    }
+  }
+  return util::Status::OK;
+}
+
 }  // anonymous namespace
 
 // static
@@ -102,6 +116,19 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
   std::unique_ptr<KeysetHandle> handle(
       new KeysetHandle(std::move(keyset_result.ValueOrDie())));
   return std::move(handle);
+}
+
+// static
+util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::ReadNoSecret(
+    const std::string& serialized_keyset) {
+  Keyset keyset;
+  if (!keyset.ParseFromString(serialized_keyset)) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Could not parse the input string as a Keyset-proto.");
+  }
+  util::Status validation = ValidateNoSecret(keyset);
+  if (!validation.ok()) return validation;
+  return absl::WrapUnique(new KeysetHandle(std::move(keyset)));
 }
 
 util::Status KeysetHandle::Write(KeysetWriter* writer,
