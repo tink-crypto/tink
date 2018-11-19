@@ -375,6 +375,8 @@ cc_library(
         "aes_gcm_siv_boringssl.cc",
     ],
     hdrs = ["aes_gcm_siv_boringssl.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":random",
         ":subtle_util_boringssl",
@@ -736,13 +738,13 @@ cc_test(
         ":aes_gcm_siv_boringssl",
         ":common_enums",
         ":wycheproof_util",
-        "//testing/base/public:gunit_main_no_google3",
         "//cc:aead",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
         "@rapidjson",
     ],
 )
