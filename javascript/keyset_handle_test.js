@@ -16,12 +16,9 @@ goog.module('tink.KeysetHandleTest');
 goog.setTestOnly('tink.KeysetHandleTest');
 
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
-
 const testSuite = goog.require('goog.testing.testSuite');
+const {createKeyset} = goog.require('tink.testUtils');
 
 testSuite({
   /////////////////////////////////////////////////////////////////////////////
@@ -119,64 +116,3 @@ class ExceptionText {
         'and must contain at least one key.';
   }
 }
-
-/**
- * Function for creating keys for testing purposes.
- *
- * It generates a new key with id, output prefix type and status given
- * by optional arguments. The default values are the following:
- *     id = 0x12345678,
- *     output prefix type = TINK, and
- *     status = ENABLED.
- *
- * @param {number=} opt_keyId
- * @param {boolean=} opt_legacy
- * @param {boolean=} opt_enabled
- *
- * @return{!PbKeyset.Key}
- */
-const createKey = function (opt_keyId = 0x12345678, opt_legacy=false,
-    opt_enabled=true) {
-  let key = new PbKeyset.Key();
-
-  if (opt_enabled) {
-    key.setStatus(PbKeyStatusType.ENABLED);
-  } else {
-    key.setStatus(PbKeyStatusType.DISABLED);
-  }
-
-  if (opt_legacy) {
-    key.setOutputPrefixType(PbOutputPrefixType.LEGACY);
-  } else {
-    key.setOutputPrefixType(PbOutputPrefixType.TINK);
-  }
-
-  key.setKeyId(opt_keyId);
-
-  const keyData = new PbKeyData();
-  keyData.setTypeUrl('someTypeUrl');
-  keyData.setValue(new Uint8Array(10));
-  keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
-  key.setKeyData(keyData);
-
-  return key;
-};
-
-/**
- * Returns a valid PbKeyset which primary has id equal to 1.
- *
- * @param {number=} opt_keysetSize
- *
- * @return {!PbKeyset}
- */
-const createKeyset = function(opt_keysetSize = 20) {
-  const keyset = new PbKeyset();
-  for (let i = 0; i < opt_keysetSize; i++) {
-    const key = createKey(i + 1, /* opt_legacy = */ (i % 2) < 1,
-        /* opt_enabled = */ (i % 4) < 2);
-    keyset.addKey(key);
-  }
-
-  keyset.setPrimaryKeyId(1);
-  return keyset;
-};
