@@ -56,7 +56,6 @@ class XChaCha20Poly1305KeyManager
  private:
   friend class XChaCha20Poly1305KeyFactory;
 
-  std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
 
   static crypto::tink::util::Status Validate(

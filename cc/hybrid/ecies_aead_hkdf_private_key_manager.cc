@@ -46,46 +46,31 @@ using portable_proto::MessageLite;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-class EciesAeadHkdfPrivateKeyFactory : public PrivateKeyFactory {
+class EciesAeadHkdfPrivateKeyFactory
+    : public PrivateKeyFactory,
+      public KeyFactoryBase<EciesAeadHkdfPrivateKey,
+                            EciesAeadHkdfKeyFormat> {
  public:
   EciesAeadHkdfPrivateKeyFactory() {}
 
-  // Generates a new random EciesAeadHkdfPrivateKey, based on
-  // the given 'key_format', which must contain EciesAeadHkdfKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(const portable_proto::MessageLite& key_format) const override;
-
-  // Generates a new random EciesAeadHkdfPrivateKey, based on
-  // the given 'serialized_key_format', which must contain
-  // EciesAeadHkdfKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(absl::string_view serialized_key_format) const override;
-
-  // Generates a new random EciesAeadHkdfPrivateKey based on
-  // the given 'serialized_key_format' (which must contain
-  // EciesAeadHkdfKeyFormat-proto), and wraps it in a KeyData-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(absl::string_view serialized_key_format) const override;
+  KeyData::KeyMaterialType key_material_type() const override {
+    return KeyData::ASYMMETRIC_PRIVATE;
+  }
 
   // Returns KeyData proto that contains EciesAeadHkdfPublicKey
   // extracted from the given serialized_private_key, which must contain
   // EciesAeadHkdfPrivateKey-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   GetPublicKeyData(absl::string_view serialized_private_key) const override;
+
+ protected:
+  StatusOr<std::unique_ptr<EciesAeadHkdfPrivateKey>> NewKeyFromFormat(
+      const EciesAeadHkdfKeyFormat& ecies_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
-    const portable_proto::MessageLite& key_format) const {
-  std::string key_format_url =
-      std::string(EciesAeadHkdfPrivateKeyManager::kKeyTypePrefix) +
-      key_format.GetTypeName();
-  if (key_format_url != EciesAeadHkdfPrivateKeyManager::kKeyFormatUrl) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key format proto '%s' is not supported by this manager.",
-                     key_format_url.c_str());
-  }
-  const EciesAeadHkdfKeyFormat& ecies_key_format =
-        reinterpret_cast<const EciesAeadHkdfKeyFormat&>(key_format);
+StatusOr<std::unique_ptr<EciesAeadHkdfPrivateKey>>
+EciesAeadHkdfPrivateKeyFactory::NewKeyFromFormat(
+    const EciesAeadHkdfKeyFormat& ecies_key_format) const {
   Status status = EciesAeadHkdfPublicKeyManager::Validate(ecies_key_format);
   if (!status.ok()) return status;
 
@@ -107,32 +92,9 @@ StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
   ecies_public_key->set_y(ec_key.pub_y);
   *(ecies_public_key->mutable_params()) = ecies_key_format.params();
 
-  std::unique_ptr<MessageLite> key = std::move(ecies_private_key);
-  return std::move(key);
-}
-
-StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
-    absl::string_view serialized_key_format) const {
-  EciesAeadHkdfKeyFormat key_format;
-  if (!key_format.ParseFromString(std::string(serialized_key_format))) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Could not parse the passed string as proto '%s'.",
-                     EciesAeadHkdfPrivateKeyManager::kKeyFormatUrl);
-  }
-  return NewKey(key_format);
-}
-
-StatusOr<std::unique_ptr<KeyData>> EciesAeadHkdfPrivateKeyFactory::NewKeyData(
-    absl::string_view serialized_key_format) const {
-  auto new_key_result = NewKey(serialized_key_format);
-  if (!new_key_result.ok()) return new_key_result.status();
-  auto new_key = reinterpret_cast<const EciesAeadHkdfPrivateKey&>(
-      *(new_key_result.ValueOrDie()));
-  std::unique_ptr<KeyData> key_data(new KeyData());
-  key_data->set_type_url(EciesAeadHkdfPrivateKeyManager::kKeyType);
-  key_data->set_value(new_key.SerializeAsString());
-  key_data->set_key_material_type(KeyData::ASYMMETRIC_PRIVATE);
-  return std::move(key_data);
+  return absl::implicit_cast<
+      StatusOr<std::unique_ptr<EciesAeadHkdfPrivateKey>>>(
+      std::move(ecies_private_key));
 }
 
 StatusOr<std::unique_ptr<KeyData>>
@@ -142,7 +104,7 @@ EciesAeadHkdfPrivateKeyFactory::GetPublicKeyData(
   if (!private_key.ParseFromString(std::string(serialized_private_key))) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Could not parse the passed string as proto '%s'.",
-                     EciesAeadHkdfPrivateKeyManager::kKeyType);
+                     EciesAeadHkdfPrivateKeyManager::static_key_type().c_str());
   }
   auto status = EciesAeadHkdfPrivateKeyManager::Validate(private_key);
   if (!status.ok()) return status;
@@ -153,17 +115,10 @@ EciesAeadHkdfPrivateKeyFactory::GetPublicKeyData(
   return std::move(key_data);
 }
 
-constexpr char EciesAeadHkdfPrivateKeyManager::kKeyFormatUrl[];
-constexpr char EciesAeadHkdfPrivateKeyManager::kKeyTypePrefix[];
-constexpr char EciesAeadHkdfPrivateKeyManager::kKeyType[];
 constexpr uint32_t EciesAeadHkdfPrivateKeyManager::kVersion;
 
 EciesAeadHkdfPrivateKeyManager::EciesAeadHkdfPrivateKeyManager()
-    : key_type_(kKeyType), key_factory_(new EciesAeadHkdfPrivateKeyFactory()) {
-}
-
-const std::string& EciesAeadHkdfPrivateKeyManager::get_key_type() const {
-  return key_type_;
+    : key_factory_(new EciesAeadHkdfPrivateKeyFactory()) {
 }
 
 const KeyFactory& EciesAeadHkdfPrivateKeyManager::get_key_factory() const {
