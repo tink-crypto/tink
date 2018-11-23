@@ -50,7 +50,7 @@ class OutputStream {
   // * It is legal for the returned buffer to have zero size, as long
   //   as repeatedly calling Next() eventually yields a buffer with non-zero
   //   size.
-  virtual crypto::tink::util::StatusOr<int> Next(const void** data) = 0;
+  virtual crypto::tink::util::StatusOr<int> Next(void** data) = 0;
 
   // Backs up a number of bytes, so that the end of the last buffer returned
   // by Next() is not actually written.  This is needed when you finish

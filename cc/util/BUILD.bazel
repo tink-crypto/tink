@@ -88,6 +88,21 @@ cc_library(
 )
 
 cc_library(
+    name = "file_output_stream",
+    srcs = ["file_output_stream.cc"],
+    hdrs = ["file_output_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":errors",
+        ":status",
+        ":statusor",
+        "//cc:output_stream",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
     name = "test_util",
     testonly = 1,
     srcs = ["test_util.cc"],
@@ -193,6 +208,22 @@ cc_test(
     linkopts = ["-lpthread"],
     deps = [
         ":file_input_stream",
+        ":test_util",
+        "//cc/subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "file_output_stream_test",
+    size = "medium",
+    srcs = ["file_output_stream_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":file_output_stream",
         ":test_util",
         "//cc/subtle:random",
         "@com_google_absl//absl/memory",
