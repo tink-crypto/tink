@@ -53,7 +53,6 @@ class AesGcmHkdfStreamingKeyManager
   @Override
   public StreamingAead getPrimitiveFromKey(AesGcmHkdfStreamingKey keyProto)
       throws GeneralSecurityException {
-    validate(keyProto);
     return new AesGcmHkdfStreaming(
         keyProto.getKeyValue().toByteArray(),
         StreamingAeadUtil.toHmacAlgo(
@@ -70,7 +69,6 @@ class AesGcmHkdfStreamingKeyManager
   @Override
   public AesGcmHkdfStreamingKey newKeyFromFormat(AesGcmHkdfStreamingKeyFormat format)
       throws GeneralSecurityException {
-    validate(format);
     return AesGcmHkdfStreamingKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
         .setParams(format.getParams())
@@ -100,12 +98,15 @@ class AesGcmHkdfStreamingKeyManager
     return AesGcmHkdfStreamingKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(AesGcmHkdfStreamingKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(AesGcmHkdfStreamingKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     validate(key.getParams());
   }
 
-  private void validate(AesGcmHkdfStreamingKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesGcmHkdfStreamingKeyFormat format)
+      throws GeneralSecurityException {
     if (format.getKeySize() < 16) {
       throw new GeneralSecurityException("key_size must be at least 16 bytes");
     }

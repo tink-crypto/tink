@@ -58,7 +58,6 @@ class EciesAeadHkdfPrivateKeyManager
   @Override
   public HybridDecrypt getPrimitiveFromKey(EciesAeadHkdfPrivateKey recipientKeyProto)
       throws GeneralSecurityException {
-    validate(recipientKeyProto);
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getPublicKey().getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
 
@@ -79,7 +78,6 @@ class EciesAeadHkdfPrivateKeyManager
   @Override
   public EciesAeadHkdfPrivateKey newKeyFromFormat(EciesAeadHkdfKeyFormat eciesKeyFormat)
       throws GeneralSecurityException {
-    HybridUtil.validate(eciesKeyFormat.getParams());
     EciesHkdfKemParams kemParams = eciesKeyFormat.getParams().getKemParams();
     KeyPair keyPair =
         EllipticCurves.generateKeyPair(HybridUtil.toCurveType(kemParams.getCurveType()));
@@ -140,9 +138,16 @@ class EciesAeadHkdfPrivateKeyManager
     return VERSION;
   }
 
-  private void validate(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
     // TODO(b/74249437): add more checks.
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     HybridUtil.validate(keyProto.getPublicKey().getParams());
+  }
+
+  @Override
+  protected void validateKeyFormat(EciesAeadHkdfKeyFormat eciesKeyFormat)
+      throws GeneralSecurityException {
+    HybridUtil.validate(eciesKeyFormat.getParams());
   }
 }

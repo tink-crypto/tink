@@ -67,7 +67,6 @@ class RsaSsaPssSignKeyManager
   @Override
   public PublicKeySign getPrimitiveFromKey(RsaSsaPssPrivateKey keyProto)
       throws GeneralSecurityException {
-    validateKey(keyProto);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
     RSAPrivateCrtKey privateKey =
         (RSAPrivateCrtKey)
@@ -118,7 +117,6 @@ class RsaSsaPssSignKeyManager
   @Override
   protected RsaSsaPssPrivateKey newKeyFromFormat(RsaSsaPssKeyFormat format)
       throws GeneralSecurityException {
-    validateKeyFormat(format);
     RsaSsaPssParams params = format.getParams();
     Validators.validateRsaModulusSize(format.getModulusSizeInBits());
     Validators.validateSignatureHash(SigUtil.toHashType(params.getSigHash()));
@@ -190,12 +188,14 @@ class RsaSsaPssSignKeyManager
     return VERSION;
   }
 
-  private void validateKeyFormat(RsaSsaPssKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(RsaSsaPssKeyFormat format) throws GeneralSecurityException {
     SigUtil.validateRsaSsaPssParams(format.getParams());
     Validators.validateRsaModulusSize(format.getModulusSizeInBits());
   }
 
-  private void validateKey(RsaSsaPssPrivateKey privKey) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(RsaSsaPssPrivateKey privKey) throws GeneralSecurityException {
     Validators.validateVersion(privKey.getVersion(), VERSION);
     Validators.validateRsaModulusSize(
         new BigInteger(1, privKey.getPublicKey().getN().toByteArray()).bitLength());

@@ -87,9 +87,13 @@ class RsaSsaPkcs1VerifyKeyManager
     return Empty.parseFrom(byteString);
   }
 
-  private void validateKey(RsaSsaPkcs1PublicKey pubKey) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(RsaSsaPkcs1PublicKey pubKey) throws GeneralSecurityException {
     Validators.validateVersion(pubKey.getVersion(), VERSION);
     Validators.validateRsaModulusSize((new BigInteger(1, pubKey.getN().toByteArray())).bitLength());
     SigUtil.validateRsaSsaPkcs1Params(pubKey.getParams());
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) {}
 }

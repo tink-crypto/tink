@@ -50,7 +50,6 @@ class AesCtrHmacAeadKeyManager
 
   @Override
   public Aead getPrimitiveFromKey(AesCtrHmacAeadKey keyProto) throws GeneralSecurityException {
-    validate(keyProto);
     return new EncryptThenAuthenticate(
         Registry.getPrimitive(
             AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey(), IndCpaCipher.class),
@@ -93,11 +92,13 @@ class AesCtrHmacAeadKeyManager
     return AesCtrHmacAeadKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(AesCtrHmacAeadKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesCtrHmacAeadKeyFormat format) throws GeneralSecurityException {
     Validators.validateAesKeySize(format.getAesCtrKeyFormat().getKeySize());
   }
 
-  private void validate(AesCtrHmacAeadKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(AesCtrHmacAeadKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
   }
 }

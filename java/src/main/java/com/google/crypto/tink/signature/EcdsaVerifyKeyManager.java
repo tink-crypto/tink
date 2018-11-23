@@ -45,7 +45,6 @@ class EcdsaVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, EcdsaPublicK
   @Override
   public PublicKeyVerify getPrimitiveFromKey(EcdsaPublicKey keyProto)
       throws GeneralSecurityException {
-    validate(keyProto);
     ECPublicKey publicKey =
         EllipticCurves.getEcPublicKey(
             SigUtil.toCurveType(keyProto.getParams().getCurve()),
@@ -84,8 +83,12 @@ class EcdsaVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, EcdsaPublicK
     return Empty.parseFrom(byteString);
   }
 
-  private void validate(EcdsaPublicKey pubKey) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {
     Validators.validateVersion(pubKey.getVersion(), VERSION);
     SigUtil.validateEcdsaParams(pubKey.getParams());
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }
