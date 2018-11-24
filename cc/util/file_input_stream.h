@@ -48,8 +48,10 @@ class FileInputStream : public crypto::tink::InputStream {
   util::Status status_;
   int fd_;
   std::unique_ptr<uint8_t[]> buffer_;
-  int buffer_size_;
-  int64_t position_;
+  const int buffer_size_;
+  int64_t position_;     // current position in the file (from the beginning)
+
+  // Counters that describe the state of the data in buffer_.
   int count_in_buffer_;  // # of bytes available in buffer_
   int count_backedup_;   // # of bytes available in buffer_ that were backed up
   int buffer_offset_;    // offset at which the returned bytes start in buffer_

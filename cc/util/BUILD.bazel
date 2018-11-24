@@ -84,6 +84,7 @@ cc_library(
         ":status",
         ":statusor",
         "//cc:input_stream",
+        "@com_google_absl//absl/memory",
     ],
 )
 
