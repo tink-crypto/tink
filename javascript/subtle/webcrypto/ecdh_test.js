@@ -20,6 +20,7 @@ const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
+const wycheproofTestVectors = goog.require('tink.subtle.webcrypto.wycheproofTestVectors');
 
 
 testSuite({
@@ -44,9 +45,15 @@ testSuite({
   },
 
   async testWycheproof_wycheproofWebcrypto() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    await runOnWycheproofTestVectors('ecdh_webcrypto_test.json');
+    for (let testGroup of wycheproofTestVectors['testGroups']) {
+      let errors = '';
+      for (let test of testGroup['tests']) {
+        errors += await runWycheproofTest(test);
+      }
+      if (errors !== '') {
+        fail(errors);
+      }
+    }
   },
 
   // Test that both public and private key are defined in the result.
@@ -109,27 +116,6 @@ testSuite({
     }
   },
 });
-
-/**
- * Runs all test cases from the given file.
- *
- * @param {string} fileName
- */
-const runOnWycheproofTestVectors = async function(fileName) {
-  const testVectorFile =
-      '/google3/third_party/wycheproof/testvectors/' + fileName;
-  const content = await (await fetch(testVectorFile)).text();
-  const testVector = JSON.parse(content);
-  for (let testGroup of testVector['testGroups']) {
-    let errors = '';
-    for (let test of testGroup['tests']) {
-      errors += await runWycheproofTest(test);
-    }
-    if (errors !== '') {
-      fail(errors);
-    }
-  }
-};
 
 /**
  * Runs the test with test vector given as an input and returns either empty
