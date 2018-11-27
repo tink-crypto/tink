@@ -255,6 +255,39 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
     return false;
   }
 
+  /**
+   * Skips over and discards <code>n</code> bytes of plaintext from the input stream. The
+   * implementation reads and decrypts the plaintext that is skipped. Hence skipping a large number
+   * of bytes is slow.
+   *
+   * <p>Returns the number of bytes skipped. This number can be smaller than the number of bytes
+   * requested. This can happend for a number of reasons: e.g., this happens when the underlying
+   * stream is non-blocking and not enough bytes are available or when the stream reaches the end of
+   * the stream.
+   *
+   * @throws IOException when an exception occurs while reading from @code{in} or when the
+   *     ciphertext is corrupt. Currently all corrupt ciphertext will be detected. However this
+   *     behaviour may change.
+   */
+  @Override
+  public long skip(long n) throws IOException {
+    long maxSkipBufferSize = ciphertextSegmentSize;
+    long remaining = n;
+    if (n <= 0) {
+      return 0;
+    }
+    int size = (int) Math.min(maxSkipBufferSize, remaining);
+    byte[] skipBuffer = new byte[size];
+    while (remaining > 0) {
+      int bytesRead = read(skipBuffer, 0, (int) Math.min(size, remaining));
+      if (bytesRead <= 0) {
+        break;
+      }
+      remaining -= bytesRead;
+    }
+    return n - remaining;
+  }
+
   /* Returns the state of the channel. */
   @Override
   public synchronized String toString() {

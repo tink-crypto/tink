@@ -452,7 +452,7 @@ public class StreamingTestUtil {
     assertEquals(plaintext.length, decryptedSize);
   }
 
-    /**
+  /**
    * Encrypts and decrypts some plaintext in a stream and checks that the expected plaintext is
    * returned.
    *
@@ -528,6 +528,85 @@ public class StreamingTestUtil {
         String actual = TestUtil.hexEncode(Arrays.copyOf(pt.array(), pt.position()));
         assertEquals("start: " + start, expected, actual);
       }
+    }
+  }
+
+  /**
+   * Encrypts and decrypts some plaintext in a stream using skips and checks that the expected
+   * plaintext is returned for the parts not skipped.
+   *
+   * @param ags the StreamingAead test object.
+   * @param firstSegmentOffset number of bytes prepended to the ciphertext stream.
+   * @param plaintextSize the size of the plaintext
+   * @param chunkSize decryption skips and reads chunks of this size.
+   */
+  public static void testSkipWithStream(
+      StreamingAead ags, int firstSegmentOffset, int plaintextSize, int chunkSize)
+      throws Exception {
+    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] plaintext = generatePlaintext(plaintextSize);
+    byte[] ciphertext = encryptWithStream(ags, plaintext, aad, firstSegmentOffset);
+
+    // Runs this part twice skips the chunk number i if skipChunk == i % 2.
+    for (int skipChunk = 0; skipChunk < 2; skipChunk++) {
+      // Construct an InputStream from the ciphertext where the first
+      // firstSegmentOffset bytes have already been read.
+      InputStream ctStream = new ByteArrayInputStream(ciphertext);
+      ctStream.read(new byte[firstSegmentOffset]);
+
+      // Construct an InputStream that returns the plaintext.
+      InputStream ptStream = ags.newDecryptingStream(ctStream, aad);
+      int decryptedSize = 0;
+      int chunkNumber = 0;
+      while (true) {
+        if (chunkNumber % 2 == skipChunk) {
+          int bytesSkipped = (int) ptStream.skip(chunkSize);
+          if (bytesSkipped < 0) {
+            fail("skip must not return a negative integer (not even at eof).");
+          }
+          if (bytesSkipped == 0) {
+            // The implementation here is blocking. Hence getting 0 here implies that
+            // the end of the stream has been reached. However, this has not been
+            // verified yet.
+            assertEquals("Expecting end of stream after a 0-byte skip.", -1, ptStream.read());
+            break;
+          }
+          decryptedSize += bytesSkipped;
+          if (decryptedSize < plaintextSize) {
+            // The stream is blocking. Hence we expect the number of requested
+            // bytes unless the end of the stream has been reached.
+            assertEquals("Size of skipped chunk is invalid", chunkSize, bytesSkipped);
+          }
+        } else {
+          byte[] chunk = new byte[chunkSize];
+          int read = ptStream.read(chunk);
+          if (read == -1) {
+            break;
+          }
+          byte[] expected = Arrays.copyOfRange(plaintext, decryptedSize, decryptedSize + read);
+          TestUtil.assertByteArrayEquals(expected, Arrays.copyOf(chunk, read));
+          decryptedSize += read;
+          if (read < chunkSize && decryptedSize < plaintextSize) {
+            // read should block until either all requested bytes are read, the end of the stream
+            // has been reached or an error occurred.
+            fail("read did not return enough bytes");
+          }
+        }
+        chunkNumber += 1;
+      }
+      assertEquals("Size of decryption does not match plaintext", plaintextSize, decryptedSize);
+    }
+
+    // Checks whether skipping at the end of a broken ciphertext is detected.
+    InputStream brokenCtStream = new ByteArrayInputStream(ciphertext, 0, ciphertext.length - 1);
+    brokenCtStream.read(new byte[firstSegmentOffset]);
+    InputStream brokenPtStream = ags.newDecryptingStream(brokenCtStream, aad);
+    try {
+      brokenPtStream.skip(2 * plaintextSize);
+      brokenPtStream.read();
+      fail("Failed to detect invalid ciphertext");
+    } catch (IOException ex) {
+      // expected
     }
   }
 
@@ -914,10 +993,9 @@ public class StreamingTestUtil {
   // Methods for testFileEncryption.
 
   /** Encrypt some plaintext to a file, then decrypt from the file */
-  private static void testFileEncryptionWithChannel(StreamingAead ags, File tmpFile)
-      throws Exception {
+  private static void testFileEncryptionWithChannel(
+      StreamingAead ags, File tmpFile, int plaintextSize) throws Exception {
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int plaintextSize = 1 << 18;
     SeekableByteBufferChannel plaintext =
         new SeekableByteBufferChannel(generatePlaintext(plaintextSize));
 
@@ -989,10 +1067,9 @@ public class StreamingTestUtil {
    * Encrypts some plaintext to a file using FileOutputStream, then decrypt with a FileInputStream.
    * Reading and writing is done byte by byte.
    */
-  private static void testFileEncryptionWithStream(StreamingAead ags, File tmpFile)
-      throws Exception {
+  private static void testFileEncryptionWithStream(
+      StreamingAead ags, File tmpFile, int plaintextSize) throws Exception {
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int plaintextSize = 1 << 15;
     byte[] pt = generatePlaintext(plaintextSize);
     FileOutputStream ctStream = new FileOutputStream(tmpFile);
     WritableByteChannel channel = Channels.newChannel(ctStream);
@@ -1030,8 +1107,9 @@ public class StreamingTestUtil {
     assertEquals(plaintextSize, decryptedSize);
   }
 
-  public static void testFileEncryption(StreamingAead ags, File tmpFile) throws Exception {
-    testFileEncryptionWithChannel(ags, tmpFile);
-    testFileEncryptionWithStream(ags, tmpFile);
+  public static void testFileEncryption(StreamingAead ags, File tmpFile, int plaintextSize)
+      throws Exception {
+    testFileEncryptionWithChannel(ags, tmpFile, plaintextSize);
+    testFileEncryptionWithStream(ags, tmpFile, plaintextSize);
   }
 }
