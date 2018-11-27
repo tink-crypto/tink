@@ -40,7 +40,7 @@ type DeterministicAead interface {
 	// but there are no guarantees wrt. secrecy of that data.
 	EncryptDeterministically(plaintext, additionalData []byte) ([]byte, error)
 
-	// DecryptDeterministically deterministically decrypts ciphertext with {@code additionalData} as
+	// DecryptDeterministically deterministically decrypts ciphertext with additionalData as
 	// additional authenticated data. The decryption verifies the authenticity and integrity
 	// of the additional data, but there are no guarantees wrt. secrecy of that data.
 	DecryptDeterministically(ciphertext, additionalData []byte) ([]byte, error)
