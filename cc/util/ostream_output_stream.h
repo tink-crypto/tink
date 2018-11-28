@@ -14,10 +14,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_UTIL_FILE_OUTPUT_STREAM_H_
-#define TINK_UTIL_FILE_OUTPUT_STREAM_H_
+#ifndef TINK_UTIL_OSTREAM_OUTPUT_STREAM_H_
+#define TINK_UTIL_OSTREAM_OUTPUT_STREAM_H_
 
 #include <memory>
+#include <ostream>
 
 #include "tink/output_stream.h"
 #include "tink/util/status.h"
@@ -27,16 +28,16 @@ namespace crypto {
 namespace tink {
 namespace util {
 
-// An OutputStream that writes to a file descriptor.
-class FileOutputStream : public crypto::tink::OutputStream {
+// An OutputStream that writes to an ostream.
+class OstreamOutputStream : public crypto::tink::OutputStream {
  public:
-  // Constructs an OutputStream that will write to the file specified
-  // via 'file_descriptor', using a buffer of the specified size, if any
+  // Constructs an OutputStream that will write to the ostream specified
+  // via 'output', using a buffer of the specified size, if any
   // (if no legal 'buffer_size' is given, a reasonable default will be used).
-  // Takes the ownership of the file, and will close it upon destruction.
-  explicit FileOutputStream(int file_descriptor, int buffer_size = -1);
+  explicit OstreamOutputStream(std::unique_ptr<std::ostream> output,
+                               int buffer_size = -1);
 
-  ~FileOutputStream() override;
+  ~OstreamOutputStream() override;
 
   crypto::tink::util::StatusOr<int> Next(void** data) override;
 
@@ -48,10 +49,10 @@ class FileOutputStream : public crypto::tink::OutputStream {
 
  private:
   util::Status status_;
-  int fd_;
+  std::unique_ptr<std::ostream> output_;
   std::unique_ptr<uint8_t[]> buffer_;
   const int buffer_size_;
-  int64_t position_;     // current position in the file (from the beginning)
+  int64_t position_;     // current position in the ostream (from the beginning)
 
   // Counters that describe the state of the data in buffer_.
   // count_in_buffer_ is always equal to (buffer_size_ - count_backedup_),
@@ -67,4 +68,4 @@ class FileOutputStream : public crypto::tink::OutputStream {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_UTIL_FILE_OUTPUT_STREAM_H_
+#endif  // TINK_UTIL_OSTREAM_OUTPUT_STREAM_H_

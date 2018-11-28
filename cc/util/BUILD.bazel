@@ -119,6 +119,21 @@ cc_library(
 )
 
 cc_library(
+    name = "ostream_output_stream",
+    srcs = ["ostream_output_stream.cc"],
+    hdrs = ["ostream_output_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":errors",
+        ":status",
+        ":statusor",
+        "//cc:output_stream",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
     name = "test_util",
     testonly = 1,
     srcs = ["test_util.cc"],
@@ -264,3 +279,18 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "ostream_output_stream_test",
+    size = "medium",
+    srcs = ["ostream_output_stream_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":ostream_output_stream",
+        ":test_util",
+        "//cc/subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
