@@ -11214,14 +11214,10 @@
 </dd>
 <dt><a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink"><span class="typeNameLink">NoSecretKeysetHandle</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/KeysetHandle.html#readNoSecret-com.google.crypto.tink.KeysetReader-"><code>KeysetHandle.readNoSecret(com.google.crypto.tink.KeysetReader)</code></a> instead</span></div>
-</div>
+<div class="block">Static methods for reading cleartext keysets that don't contain any secret key material.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/NoSecretKeysetHandle.html#NoSecretKeysetHandle--">NoSecretKeysetHandle()</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">NoSecretKeysetHandle</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
+<dd>&nbsp;</dd>
 </dl>
 <a name="I:O">
 <!--   -->
@@ -12985,9 +12981,7 @@
 <div class="block">Tries to read and return a cleartext <a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/NoSecretKeysetHandle.html#read-com.google.crypto.tink.KeysetReader-">read(KeysetReader)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">NoSecretKeysetHandle</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RewindableReadableByteChannel.html#read-java.nio.ByteBuffer-">read(ByteBuffer)</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RewindableReadableByteChannel.html" title="class in com.google.crypto.tink.subtle">RewindableReadableByteChannel</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--">readEncrypted()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetReader.html" title="class in com.google.crypto.tink">BinaryKeysetReader</a></dt>
@@ -12997,16 +12991,6 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetReader.html#readEncrypted--">readEncrypted()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></dt>
 <dd>
 <div class="block">Tries to read and return an <a href="com/google/crypto/tink/proto/EncryptedKeyset.html" title="class in com.google.crypto.tink.proto"><code>EncryptedKeyset</code></a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#readNoSecret-com.google.crypto.tink.KeysetReader-">readNoSecret(KeysetReader)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
-<dd>
-<div class="block">Tries to create a <a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from a keyset, obtained via <code>reader</code>, which
- contains no secret key material.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#readNoSecret-byte:A-">readNoSecret(byte[])</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
-<dd>
-<div class="block">Tries to create a <a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from a serialized keyset which contains no secret key
- material.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/util/KeysDownloader.html#refreshInBackground--">refreshInBackground()</a></span> - Method in class com.google.crypto.tink.util.<a href="com/google/crypto/tink/util/KeysDownloader.html" title="class in com.google.crypto.tink.util">KeysDownloader</a></dt>
 <dd>
@@ -15201,14 +15185,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Validators.html#validateExists-java.io.File-">validateExists(File)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#validateKey-KeyProto-">validateKey(KeyProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>
-<div class="block">Checks if the given <code>keyProto</code> is a valid key.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#validateKeyFormat-KeyFormatProto-">validateKeyFormat(KeyFormatProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>
-<div class="block">Checks if the given <code>keyProto</code> is a valid key format.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Validators.html#validateKmsKeyUriAndRemovePrefix-java.lang.String-java.lang.String-">validateKmsKeyUriAndRemovePrefix(String, String)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></dt>
 <dd>
 <div class="block">Validates that <code>kmsKeyUri</code> starts with <code>expectedPrefix</code>, and removes the prefix.</div>
