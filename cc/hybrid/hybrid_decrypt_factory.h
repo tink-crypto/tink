@@ -35,22 +35,25 @@ namespace tink {
 // you call one of
 // * HybridConfig::Register()
 // * TinkConfig::Register()
-ABSL_DEPRECATED(
+class ABSL_DEPRECATED(
     "Call getPrimitive<HybridDecrypt>() on the keyset_handle after registering "
-    "the HybridEncryptWrapper instead.")
-class HybridDecryptFactory {
+    "the HybridDecryptWrapper instead.") HybridDecryptFactory {
  public:
   // Returns a HybridDecrypt-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
+  ABSL_DEPRECATED(
+      "Call getPrimitive<HybridDecrypt>() on the keyset_handle after "
+      "registering "
+      "the HybridEncryptWrapper instead.")
   static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
-      GetPrimitive(const KeysetHandle& keyset_handle);
+  GetPrimitive(const KeysetHandle& keyset_handle);
 
   // Returns a HybridDecrypt-primitive that uses key material from the keyset
   // specified via 'keyset_handle' and is instantiated by the given
   // 'custom_key_manager' (instead of the key manager from the Registry).
   static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
-      GetPrimitive(const KeysetHandle& keyset_handle,
-                   const KeyManager<HybridDecrypt>* custom_key_manager);
+  GetPrimitive(const KeysetHandle& keyset_handle,
+               const KeyManager<HybridDecrypt>* custom_key_manager);
 
  private:
   HybridDecryptFactory() {}

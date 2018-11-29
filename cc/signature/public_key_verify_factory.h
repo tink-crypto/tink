@@ -18,9 +18,9 @@
 #define TINK_SIGNATURE_PUBLIC_KEY_VERIFY_FACTORY_H_
 
 #include "absl/base/macros.h"
-#include "tink/public_key_verify.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
+#include "tink/public_key_verify.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -35,22 +35,21 @@ namespace tink {
 // you call one of
 // * SignatureConfig::Register()
 // * TinkConfig::Register()
-ABSL_DEPRECATED(
+class ABSL_DEPRECATED(
     "Call getPrimitive<PublicKeyVerify>() on the keyset_handle after "
-    "registering the PublicKeyVerifyWrapper instead.")
-class PublicKeyVerifyFactory {
+    "registering the PublicKeyVerifyWrapper instead.") PublicKeyVerifyFactory {
  public:
   // Returns a PublicKeyVerify-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
   static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>>
-      GetPrimitive(const KeysetHandle& keyset_handle);
+  GetPrimitive(const KeysetHandle& keyset_handle);
 
   // Returns a PublicKeyVerify-primitive that uses key material from the keyset
   // specified via 'keyset_handle' and is instantiated by the given
   // 'custom_key_manager' (instead of the key manager from the Registry).
   static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>>
-      GetPrimitive(const KeysetHandle& keyset_handle,
-                   const KeyManager<PublicKeyVerify>* custom_key_manager);
+  GetPrimitive(const KeysetHandle& keyset_handle,
+               const KeyManager<PublicKeyVerify>* custom_key_manager);
 
  private:
   PublicKeyVerifyFactory() {}

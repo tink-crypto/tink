@@ -35,10 +35,10 @@ namespace tink {
 // call. This happens automatically if you call one of
 // * DeterministicAeadConfig::Register()
 // * TinkConfig::Register()
-ABSL_DEPRECATED(
+class ABSL_DEPRECATED(
     "Call getPrimitive<DeterministicAeadFactory>() on the keyset_handle after "
     "registering the DeterministicAeadWrapper instead.")
-class DeterministicAeadFactory {
+    DeterministicAeadFactory {
  public:
   // Returns an DeterministicAead-primitive that uses key material from
   // the keyset specified via 'keyset_handle'.

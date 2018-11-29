@@ -37,10 +37,9 @@ namespace tink {
 // * AeadConfig::Register()
 // * HybridConfig::Register()
 // * TinkConfig::Register()
-ABSL_DEPRECATED(
+class ABSL_DEPRECATED(
     "Call getPrimitive<Mac>() on the keyset_handle after registering the "
-    "MacWrapper instead.")
-class MacFactory {
+    "MacWrapper instead.") MacFactory {
  public:
   // Returns a Mac-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
