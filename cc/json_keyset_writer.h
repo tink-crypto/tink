@@ -43,7 +43,7 @@ class JsonKeysetWriter : public KeysetWriter {
   Write(const google::crypto::tink::EncryptedKeyset& encrypted_keyset) override;
 
  private:
-  JsonKeysetWriter(std::unique_ptr<std::ostream> destination_stream)
+  explicit JsonKeysetWriter(std::unique_ptr<std::ostream> destination_stream)
       : destination_stream_(std::move(destination_stream)) {}
 
   std::unique_ptr<std::ostream> destination_stream_;

@@ -97,9 +97,9 @@ class KeysetHandle {
   friend class KeysetUtil;
 
   // Creates a handle that contains the given keyset.
-  KeysetHandle(google::crypto::tink::Keyset keyset);
+  explicit KeysetHandle(google::crypto::tink::Keyset keyset);
   // Creates a handle that contains the given keyset.
-  KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
+  explicit KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
 
   // Helper function which generates a key from a template, then adds it
   // to the keyset. TODO(tholenst): Change this to a proper member operating
