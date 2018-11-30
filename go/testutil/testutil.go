@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"golang.org/x/crypto/ed25519"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/signature"
@@ -31,6 +32,7 @@ import (
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
+	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -160,6 +162,30 @@ func NewECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticC
 // NewECDSAPublicKey creates an ECDSAPublicKey with the specified parameters.
 func NewECDSAPublicKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPublicKey {
 	return NewECDSAPrivateKey(hashType, curve).PublicKey
+}
+
+// NewED25519PrivateKey creates an ED25519PrivateKey with a randomly generated key material.
+func NewED25519PrivateKey() *ed25519pb.Ed25519PrivateKey {
+	public, private, _ := ed25519.GenerateKey(rand.Reader)
+	pub := signature.NewED25519PublicKey(signature.ED25519SignerKeyVersion, &public)
+	return signature.NewED25519PrivateKey(signature.ED25519SignerKeyVersion,
+		pub, &private)
+}
+
+// NewED25519PrivateKeyData creates a KeyData containing an ED25519PrivateKey with a randomly generated key material.
+func NewED25519PrivateKeyData() *tinkpb.KeyData {
+	key := NewED25519PrivateKey()
+	serializedKey, _ := proto.Marshal(key)
+	return &tinkpb.KeyData{
+		TypeUrl:         signature.ED25519SignerTypeURL,
+		Value:           serializedKey,
+		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
+	}
+}
+
+// NewED25519PublicKey creates an ED25519PublicKey with the specified parameters.
+func NewED25519PublicKey() *ed25519pb.Ed25519PublicKey {
+	return NewED25519PrivateKey().PublicKey
 }
 
 // NewAESGCMKey creates a randomly generated AESGCMKey.

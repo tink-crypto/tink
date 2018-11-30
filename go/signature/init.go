@@ -22,10 +22,19 @@ import (
 )
 
 func init() {
-  if err := tink.RegisterKeyManager(newECDSASignerKeyManager()); err != nil {
+	// ECDSA
+	if err := tink.RegisterKeyManager(newECDSASignerKeyManager()); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
-  if err := tink.RegisterKeyManager(newECDSAVerifierKeyManager()); err != nil {
+	if err := tink.RegisterKeyManager(newECDSAVerifierKeyManager()); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
-  }
+	}
+
+	// ED25519
+	if err := tink.RegisterKeyManager(newED25519SignerKeyManager()); err != nil {
+		panic(fmt.Sprintf("signature.init() failed: %v", err))
+	}
+	if err := tink.RegisterKeyManager(newED25519VerifierKeyManager()); err != nil {
+		panic(fmt.Sprintf("signature.init() failed: %v", err))
+	}
 }

@@ -25,7 +25,7 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-var errInvalidSignature = errors.New("ecdsa_verifier: invalid signature")
+var errInvalidECDSASignature = errors.New("ecdsa_verifier: invalid signature")
 
 // ECDSAVerifier is an implementation of Verifier for ECDSA.
 // At the moment, the implementation only accepts signatures with strict DER encoding.
@@ -75,7 +75,7 @@ func (e *ECDSAVerifier) Verify(signatureBytes, data []byte) error {
 	hashed := subtle.ComputeHash(e.hashFunc, data)
 	valid := ecdsa.Verify(e.publicKey, hashed, signature.R, signature.S)
 	if !valid {
-		return errInvalidSignature
+		return errInvalidECDSASignature
 	}
 	return nil
 }
