@@ -4,6 +4,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "aes_gcm.go",
+        "aes_ctr.go",
         "chacha20poly1305.go",
         "xchacha20poly1305.go",
     ],
@@ -20,6 +21,7 @@ go_test(
     name = "go_default_test",
     srcs = [
         "aes_gcm_test.go",
+        "aes_ctr_test.go",
         "chacha20poly1305_test.go",
         "chacha20poly1305_vectors_test.go",
         "xchacha20poly1305_test.go",
