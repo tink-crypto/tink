@@ -1,5 +1,7 @@
 workspace(name="tink")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+
 #-----------------------------------------------------------------------------
 # wycheproof, for JSON test vectors
 #-----------------------------------------------------------------------------
@@ -35,44 +37,44 @@ http_archive(
     sha256 = "9431adb18d26a304d864c2b05f6e5a165e73108fc89a110f5b27d65d7e51680b",
 )
 
-new_http_archive(
+http_archive(
     name = "rapidjson",
     urls = [
         "https://github.com/Tencent/rapidjson/archive/v1.1.0.tar.gz",
     ],
     sha256 = "bf7ced29704a1e696fbccf2a2b4ea068e7774fa37f6d7dd4039d0787f8bed98e",
     strip_prefix = "rapidjson-1.1.0",
-    build_file = "third_party/rapidjson.BUILD.bazel",
+    build_file = "//:third_party/rapidjson.BUILD.bazel",
 )
 
-new_http_archive(
+http_archive(
     name = "aws_cpp_sdk",
     # Must be in sync with defines in third_party/aws_sdk_cpp.BUILD.bazel.
     urls = [
         "https://github.com/aws/aws-sdk-cpp/archive/1.4.80.tar.gz",
     ],
     strip_prefix = "aws-sdk-cpp-1.4.80/",
-    build_file = "third_party/aws_sdk_cpp.BUILD.bazel",
+    build_file = "//:third_party/aws_sdk_cpp.BUILD.bazel",
 )
 
-new_http_archive(
+http_archive(
     name = "curl",
     urls = [
         "https://mirror.bazel.build/curl.haxx.se/download/curl-7.49.1.tar.gz",
     ],
     sha256 = "ff3e80c1ca6a068428726cd7dd19037a47cc538ce58ef61c59587191039b2ca6",
     strip_prefix = "curl-7.49.1",
-    build_file = "third_party/curl.BUILD.bazel",
+    build_file = "//:third_party/curl.BUILD.bazel",
 )
 
-new_http_archive(
+http_archive(
     name = "zlib_archive",
     urls = [
         "https://mirror.bazel.build/zlib.net/zlib-1.2.11.tar.gz",
     ],
     sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
     strip_prefix = "zlib-1.2.11",
-    build_file = "third_party/zlib.BUILD.bazel",
+    build_file = "//:third_party/zlib.BUILD.bazel",
 )
 
 #-----------------------------------------------------------------------------
@@ -570,7 +572,9 @@ http_archive(
 http_file(
     name = "xctestrunner",
     executable = 1,
-    url = "https://github.com/google/xctestrunner/releases/download/0.2.1/ios_test_runner.par",
+    urls = [
+        "https://github.com/google/xctestrunner/releases/download/0.2.1/ios_test_runner.par"
+    ],
     sha256 = "5bfbd45c5ac89305e8bf3296999d490611b88d4d828b2a39ef6037027411aa94",
 )
 
