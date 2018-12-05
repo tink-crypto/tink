@@ -283,6 +283,7 @@ primitive to encrypt or decrypt data:
 ```java
     import com.google.crypto.tink.Aead;
     import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.aead.AeadFactory;
     import com.google.crypto.tink.aead.AeadKeyTemplates;
 
     // 1. Generate the key material.
@@ -290,7 +291,7 @@ primitive to encrypt or decrypt data:
         AeadKeyTemplates.AES128_GCM);
 
     // 2. Get the primitive.
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
 
     // 3. Use the primitive to encrypt a plaintext,
     byte[] ciphertext = aead.encrypt(plaintext, aad);
@@ -309,6 +310,7 @@ primitive to encrypt or decrypt data:
 ```java
     import com.google.crypto.tink.DeterministicAead;
     import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.daead.DeterministicAeadFactory;
     import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 
     // 1. Generate the key material.
@@ -317,7 +319,7 @@ primitive to encrypt or decrypt data:
 
     // 2. Get the primitive.
     DeterministicAead daead =
-       keysetHandle.getPrimitive(DeterministicAead.class);
+       DeterministicAeadFactory.getPrimitive(keysetHandle);
 
     // 3. Use the primitive to deterministically encrypt a plaintext,
     byte[] ciphertext = daead.encryptDeterministically(plaintext, aad);
@@ -335,8 +337,9 @@ to encrypt or decrypt data streams:
 ```java
     import com.google.crypto.tink.StreamingAead;
     import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.streamingaead.StreamingAeadFactory;
     import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
-    import java.nio.ByteBuffer
+    import java.nio.ByteBuffer;
     import java.nio.channels.FileChannel;
     import java.nio.channels.SeekableByteChannel;
     import java.nio.channels.WritableByteChannel;
@@ -346,7 +349,7 @@ to encrypt or decrypt data streams:
         StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB);
 
     // 2. Get the primitive.
-    StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
+    StreamingAead streamingAead = StreamingAeadFactory.getPrimitive(keysetHandle);
 
     // 3. Use the primitive to encrypt some data and write the ciphertext to a file,
     FileChannel ciphertextDestination =
@@ -391,6 +394,7 @@ Authentication Code)](PRIMITIVES.md#message-authentication-code):
 ```java
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.Mac;
+    import com.google.crypto.tink.mac.MacFactory;
     import com.google.crypto.tink.mac.MacKeyTemplates;
 
     // 1. Generate the key material.
@@ -398,7 +402,7 @@ Authentication Code)](PRIMITIVES.md#message-authentication-code):
         MacKeyTemplates.HMAC_SHA256_128BITTAG);
 
     // 2. Get the primitive.
-    Mac mac = keysetHandle.getPrimitive(Mac.class);
+    Mac mac = MacFactory.getPrimitive(keysetHandle);;
 
     // 3. Use the primitive to compute a tag,
     byte[] tag = mac.computeMac(data);
@@ -407,7 +411,7 @@ Authentication Code)](PRIMITIVES.md#message-authentication-code):
     mac.verifyMac(tag, data);
 ```
 
-### Digitial Signatures
+### Digital Signatures
 
 Here is an example of how to sign or verify a [digital
 signature](PRIMITIVES.md#digital-signatures):
@@ -452,6 +456,8 @@ use the following:
 ```java
     import com.google.crypto.tink.HybridDecrypt;
     import com.google.crypto.tink.HybridEncrypt;
+    import com.google.crypto.tink.hybrid.HybridDecryptFactory;
+    import com.google.crypto.tink.hybrid.HybridEncryptFactory;
     import com.google.crypto.tink.hybrid.HybridKeyTemplates;
     import com.google.crypto.tink.KeysetHandle;
 
@@ -466,8 +472,7 @@ use the following:
     // ENCRYPTING
 
     // 2. Get the primitive.
-    HybridEncrypt hybridEncrypt =
-        publicKeysetHandle.getPrimitive(HybridEncrypt.class);
+    HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(publicKeysetHandle);
 
     // 3. Use the primitive.
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
@@ -475,8 +480,7 @@ use the following:
     // DECRYPTING
 
     // 2. Get the primitive.
-    HybridDecrypt hybridDecrypt = privateKeysetHandle.getPrimitive(
-        HybridDecrypt.class);
+    HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(privateKeysetHandle);
 
     // 3. Use the primitive.
     byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
@@ -505,6 +509,7 @@ using the credentials in `credentials.json` as follows:
     import com.google.crypto.tink.Aead;
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.KmsClients;
+    import com.google.crypto.tink.aead.AeadFactory;
     import com.google.crypto.tink.aead.AeadKeyTemplates;
     import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 
@@ -519,7 +524,7 @@ using the credentials in `credentials.json` as follows:
         .withCredentials("credentials.json"));
 
     // 3. Get the primitive.
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
 
     // 4. Use the primitive.
     byte[] ciphertext = aead.encrypt(plaintext, aad);
