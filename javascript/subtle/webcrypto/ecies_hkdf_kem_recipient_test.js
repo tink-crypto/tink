@@ -23,9 +23,15 @@ const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
+const userAgent = goog.require('goog.userAgent');
 
 
 testSuite({
+  shouldRunTests() {
+    // https://msdn.microsoft.com/en-us/library/mt801195(v=vs.85).aspx
+    return !userAgent.EDGE;
+  },
+
   setUp() {
     // Use a generous promise timeout for running continuously.
     TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s

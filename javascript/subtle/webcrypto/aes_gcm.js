@@ -69,19 +69,19 @@ class AesGcm {
    */
   async encrypt(plaintext, opt_associatedData) {
     Validators.requireUint8Array(plaintext);
-
-    let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       Validators.requireUint8Array(opt_associatedData);
-      aad = opt_associatedData;
     }
     const iv = Random.randBytes(IV_SIZE_IN_BYTES);
     const alg = {
       'name': 'AES-GCM',
       'iv': iv,
-      'additionalData': aad,
       'tagLength': TAG_SIZE_IN_BITS,
     };
+    // Edge can't handle an empty array
+    if (goog.isDefAndNotNull(opt_associatedData) && opt_associatedData.length) {
+      alg['additionalData'] = opt_associatedData;
+    }
     const ciphertext =
         await window.crypto.subtle.encrypt(alg, this.key_, plaintext);
     return Bytes.concat(iv, new Uint8Array(ciphertext));
@@ -92,24 +92,23 @@ class AesGcm {
    */
   async decrypt(ciphertext, opt_associatedData) {
     Validators.requireUint8Array(ciphertext);
-
     if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BITS / 8) {
       throw new SecurityException('ciphertext too short');
     }
-
-    let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       Validators.requireUint8Array(opt_associatedData);
-      aad = opt_associatedData;
     }
     const iv = new Uint8Array(IV_SIZE_IN_BYTES);
     iv.set(ciphertext.subarray(0, IV_SIZE_IN_BYTES));
     const alg = {
       'name': 'AES-GCM',
       'iv': iv,
-      'additionalData': aad,
       'tagLength': TAG_SIZE_IN_BITS,
     };
+    // Edge can't handle an empty array
+    if (goog.isDefAndNotNull(opt_associatedData) && opt_associatedData.length) {
+      alg['additionalData'] = opt_associatedData;
+    }
     try {
       return new Uint8Array(await window.crypto.subtle.decrypt(
           alg, this.key_,

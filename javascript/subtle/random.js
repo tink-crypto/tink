@@ -29,12 +29,14 @@ const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsE
  * @static
  */
 const randBytes = function(n) {
-  if (!Number.isInteger(n)) {
-    throw new InvalidArgumentsException('n must be an integer');
+  if (!Number.isInteger(n) || n < 0) {
+    throw new InvalidArgumentsException('n must be a nonnegative integer');
   }
-  const crypto = goog.global['crypto'] || goog.global['msCrypto'];
   const result = new Uint8Array(n);
-  crypto.getRandomValues(result);
+  if (n) {  // Edge can't handle an empty array
+    const crypto = goog.global['crypto'] || goog.global['msCrypto'];
+    crypto.getRandomValues(result);
+  }
   return result;
 };
 

@@ -26,8 +26,14 @@ const Registry = goog.require('tink.Registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
+const userAgent = goog.require('goog.userAgent');
 
 testSuite({
+  shouldRunTests() {
+    // https://msdn.microsoft.com/en-us/library/mt801195(v=vs.85).aspx
+    return !userAgent.EDGE;
+  },
+
   setUp() {
     AeadConfig.register();
     // Use a generous promise timeout for running continuously.

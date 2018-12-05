@@ -21,6 +21,22 @@ const Environment = goog.require('tink.subtle.Environment');
 const Random = goog.require('tink.subtle.Random');
 const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
+const userAgent = goog.require('goog.userAgent');
+
+/**
+ * Asserts that an exception is the result of a Web Crypto error.
+ *
+ * @param {*} exception A thrown exception.
+ */
+function assertCryptoError(exception) {
+  const message = exception.toString();
+  assertTrue(
+      message.startsWith('CustomError: OperationError') ||
+      // Edge uses a nonstandard error message.
+      message ===
+          'CustomError: Error: ' +
+              'Could not complete the operation due to error 8070000b.');
+}
 
 if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
   testSuite({
@@ -37,7 +53,8 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
 
     async testBasic() {
       const aead = await AesGcm.newInstance(Random.randBytes(16));
-      for (let i = 0; i < 100; i++) {
+      const minLength = userAgent.EDGE ? 1 : 0;  // b/120299887
+      for (let i = minLength; i < 100; i++) {
         const msg = Random.randBytes(i);
         let ciphertext = await aead.encrypt(msg);
         let plaintext = await aead.decrypt(ciphertext);
@@ -126,7 +143,7 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
             await aead.decrypt(c1, aad);
             fail('expected aead.decrypt to fail');
           } catch (e) {
-            assertTrue(e.toString().startsWith('CustomError: OperationError'));
+            assertCryptoError(e);
           }
         }
       }
@@ -145,7 +162,7 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
             await aead.decrypt(ciphertext, aad1);
             fail('expected aead.decrypt to fail');
           } catch (e) {
-            assertTrue(e.toString().startsWith('CustomError: OperationError'));
+            assertCryptoError(e);
           }
         }
       }
@@ -165,7 +182,7 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
           if (c1.length < 12 /* iv */ + 16 /* tag */) {
             assertEquals('CustomError: ciphertext too short', e.toString());
           } else {
-            assertTrue(e.toString().startsWith('CustomError: OperationError'));
+            assertCryptoError(e);
           }
         }
       }
@@ -663,6 +680,9 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
           ];
       for (let i = 0; i < NIST_TEST_VECTORS.length; i++) {
         const testVector = NIST_TEST_VECTORS[i];
+        if (userAgent.EDGE && !testVector['PT']) {
+          continue;  // b/120299887
+        }
         const aead = await AesGcm.newInstance(Bytes.fromHex(testVector['Key']));
         const ciphertext = Bytes.fromHex(
             testVector['IV'] + testVector['CT'] + testVector['Tag']);

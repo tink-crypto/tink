@@ -44,8 +44,8 @@ const PbMessage = goog.require('jspb.Message');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
-
 const testSuite = goog.require('goog.testing.testSuite');
+const userAgent = goog.require('goog.userAgent');
 
 ////////////////////////////////////////////////////////////////////////////////
 // tests
@@ -661,49 +661,56 @@ testSuite({
     }
   },
 
-  testGetPublicKeyData_notPrivateKeyFactory() {
-    AeadConfig.register();
-    const notPrivateTypeUrl = AeadConfig.AES_GCM_TYPE_URL;
-    try {
-      Registry.getPublicKeyData(notPrivateTypeUrl, new Uint8Array(8));
-      fail('An exception should be thrown.');
-    } catch (e) {
+  testGetPublicKeyData: {
+    shouldRunTests() {
+      return !userAgent.EDGE;  // b/120286783
+    },
+
+    testNotPrivateKeyFactory() {
+      AeadConfig.register();
+      const notPrivateTypeUrl = AeadConfig.AES_GCM_TYPE_URL;
+      try {
+        Registry.getPublicKeyData(notPrivateTypeUrl, new Uint8Array(8));
+        fail('An exception should be thrown.');
+      } catch (e) {
+        assertEquals(
+            ExceptionText.notPrivateKeyFactory(notPrivateTypeUrl),
+            e.toString());
+      }
+    },
+
+    testInvalidPrivateKeyProtoSerialization() {
+      HybridConfig.register();
+      const typeUrl = HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE;
+      try {
+        Registry.getPublicKeyData(typeUrl, new Uint8Array(10));
+        fail('An exception should be thrown.');
+      } catch (e) {
+        assertEquals(ExceptionText.couldNotParse(typeUrl), e.toString());
+      }
+    },
+
+    async testShouldWork() {
+      HybridConfig.register();
+      const privateKeyData = await Registry.newKeyData(
+          HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
+      const privateKey = PbEciesAeadHkdfPrivateKey.deserializeBinary(
+          privateKeyData.getValue());
+
+      const publicKeyData = Registry.getPublicKeyData(
+          privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
       assertEquals(
-          ExceptionText.notPrivateKeyFactory(notPrivateTypeUrl), e.toString());
-    }
-  },
+          publicKeyData.getTypeUrl(),
+          HybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
+      assertEquals(
+          publicKeyData.getKeyMaterialType(),
+          PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
 
-  testGetPublicKeyData_invalidPrivateKeyProtoSerialization() {
-    HybridConfig.register();
-    const typeUrl = HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE;
-    try {
-      Registry.getPublicKeyData(typeUrl, new Uint8Array(10));
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(ExceptionText.couldNotParse(typeUrl), e.toString());
-    }
-  },
-
-  async testGetPublicKeyData_shouldWork() {
-    HybridConfig.register();
-    const privateKeyData = await Registry.newKeyData(
-        HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
-    const privateKey =
-        PbEciesAeadHkdfPrivateKey.deserializeBinary(privateKeyData.getValue());
-
-    const publicKeyData = Registry.getPublicKeyData(
-        privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
-    assertEquals(
-        publicKeyData.getTypeUrl(),
-        HybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
-    assertEquals(
-        publicKeyData.getKeyMaterialType(),
-        PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
-
-    const expectedPublicKey = privateKey.getPublicKey();
-    const publicKey = PbEciesAeadHkdfPublicKey.deserializeBinary(
-        publicKeyData.getValue_asU8());
-    assertObjectEquals(expectedPublicKey, publicKey);
+      const expectedPublicKey = privateKey.getPublicKey();
+      const publicKey = PbEciesAeadHkdfPublicKey.deserializeBinary(
+          publicKeyData.getValue_asU8());
+      assertObjectEquals(expectedPublicKey, publicKey);
+    },
   },
 });
 

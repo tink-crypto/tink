@@ -37,8 +37,8 @@ const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
-
 const testSuite = goog.require('goog.testing.testSuite');
+const userAgent = goog.require('goog.userAgent');
 
 const KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
@@ -46,6 +46,10 @@ const VERSION = 0;
 const PRIMITIVE = HybridEncrypt;
 
 testSuite({
+  shouldRunTests() {
+    return !userAgent.EDGE;  // b/120286783
+  },
+
   setUp() {
     AeadConfig.register();
     // Use a generous promise timeout for running continuously.
