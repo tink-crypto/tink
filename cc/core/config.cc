@@ -136,10 +136,10 @@ util::Status Config::RegisterWrapper(
   } else {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
-        StrCat("Cannot register primitive wrapper for non-standard "
-               "primitive ",
-               lowercase_primitive_name,
-               " (call Registry::RegisterPrimitiveWrapper directly)"));
+        absl::StrCat("Cannot register primitive wrapper for non-standard "
+                     "primitive ",
+                     lowercase_primitive_name,
+                     " (call Registry::RegisterPrimitiveWrapper directly)"));
   }
 }
 
