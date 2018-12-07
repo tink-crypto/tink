@@ -50,7 +50,7 @@ class Hmac {
    * @static
    */
   static async newInstance(hash, key, tagSize) {
-    let cryptoKey = await window.crypto.subtle.importKey(
+    let cryptoKey = await self.crypto.subtle.importKey(
       'raw', key,
       {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8},
       false, ['sign', 'verify']);
@@ -63,7 +63,7 @@ class Hmac {
    */
   async computeMac(data) {
     Validators.requireUint8Array(data);
-    const tag = await window.crypto.subtle.sign(
+    const tag = await self.crypto.subtle.sign(
         {'name': 'HMAC', 'hash': {'name': this.hash_}}, this.key_, data);
     return new Uint8Array(tag.slice(0, this.tagSize_));
   }
