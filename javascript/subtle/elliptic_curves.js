@@ -44,7 +44,7 @@ const PointFormatType = {
 };
 
 /**
- * @param {CurveType} curve
+ * @param {!CurveType} curve
  * @return {string}
  */
 const curveToString = function(curve) {
@@ -61,7 +61,7 @@ const curveToString = function(curve) {
 
 /**
  * @param {string} curve
- * @return {CurveType}
+ * @return {!CurveType}
  */
 const curveFromString = function(curve) {
   switch (curve) {
@@ -77,7 +77,7 @@ const curveFromString = function(curve) {
 
 /**
  * @param {string} curve
- * @param {PointFormatType} format
+ * @param {!PointFormatType} format
  * @param {!webCrypto.JsonWebKey} point
  * @return {!Uint8Array}
  */
@@ -97,7 +97,7 @@ const pointEncode = function(curve, format, point) {
 
 /**
  * @param {string} curve
- * @param {PointFormatType} format
+ * @param {!PointFormatType} format
  * @param {!Uint8Array} point
  * @return {!webCrypto.JsonWebKey}
  */
@@ -158,14 +158,80 @@ const encodingSizeInBytes = function(curve, pointFormat) {
   throw new InvalidArgumentsException('invalid format');
 };
 
+/**
+ * @param {!webCrypto.CryptoKey} privateKey
+ * @param {!webCrypto.CryptoKey} publicKey
+ * @return {!Promise<!Uint8Array>}
+ */
+const computeEcdhSharedSecret = async function(privateKey, publicKey) {
+  const ecdhParams =
+      /** @type {!webCrypto.AlgorithmIdentifier} */ (privateKey.algorithm);
+  ecdhParams['public'] = publicKey;
+  const fieldSizeInBits =
+      8 * fieldSizeInBytes(curveFromString(ecdhParams['namedCurve']));
+  const sharedSecret = await window.crypto.subtle.deriveBits(
+      ecdhParams, privateKey, fieldSizeInBits);
+  return new Uint8Array(sharedSecret);
+};
+
+/**
+ * @param {string} curve
+ * @return {!Promise<!webCrypto.CryptoKey>}
+ */
+const generateKeyPair = async function(curve) {
+  const ecdhParams = /** @type {!webCrypto.AlgorithmIdentifier} */ (
+      {'name': 'ECDH', 'namedCurve': curve});
+  const ephemeralKeyPair = await window.crypto.subtle.generateKey(
+      ecdhParams, true /* extractable */,
+      ['deriveKey', 'deriveBits'] /* usage */);
+  return /** @type {!webCrypto.CryptoKey} */ (ephemeralKeyPair);
+};
+
+/**
+ * @param {!webCrypto.CryptoKey} cryptoKey
+ * @return {!Promise<!webCrypto.JsonWebKey>}
+ */
+const exportCryptoKey = async function(cryptoKey) {
+  const jwk = await window.crypto.subtle.exportKey('jwk', cryptoKey);
+  return /** @type {!webCrypto.JsonWebKey} */ (jwk);
+};
+
+/**
+ * @param {!webCrypto.JsonWebKey} jwk
+ * @return {!Promise<!webCrypto.CryptoKey>}
+ */
+const importPublicKey = async function(jwk) {
+  const publicKey = await window.crypto.subtle.importKey(
+      'jwk' /* format */, jwk,
+      {'name': 'ECDH', 'namedCurve': jwk.crv} /* algorithm */,
+      true /* extractable */, [] /* usage, empty for public key */);
+  return publicKey;
+};
+
+/**
+ * @param {!webCrypto.JsonWebKey} jwk
+ * @return {!Promise<!webCrypto.CryptoKey>}
+ */
+const importPrivateKey = async function(jwk) {
+  const privateKey = await window.crypto.subtle.importKey(
+      'jwk' /* format */, jwk /* key material */,
+      {'name': 'ECDH', 'namedCurve': jwk.crv} /* algorithm */,
+      true /* extractable */, ['deriveKey', 'deriveBits'] /* usage */);
+  return privateKey;
+};
 
 exports = {
   CurveType,
   PointFormatType,
+  computeEcdhSharedSecret,
   curveToString,
   curveFromString,
+  encodingSizeInBytes,
+  exportCryptoKey,
+  fieldSizeInBytes,
+  generateKeyPair,
+  importPrivateKey,
+  importPublicKey,
   pointDecode,
   pointEncode,
-  fieldSizeInBytes,
-  encodingSizeInBytes,
 };

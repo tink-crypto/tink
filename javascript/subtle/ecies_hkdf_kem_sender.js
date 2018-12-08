@@ -12,10 +12,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.subtle.webcrypto.EciesHkdfKemSender');
+goog.module('tink.subtle.EciesHkdfKemSender');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Hkdf = goog.require('tink.subtle.Hkdf');
 const SecurityException = goog.require('tink.exception.SecurityException');
@@ -45,7 +44,7 @@ class EciesHkdfKemSender {
    * @static
    */
   static async newInstance(jwk) {
-    const publicKey = await Ecdh.importPublicKey(jwk);
+    const publicKey = await EllipticCurves.importPublicKey(jwk);
     return new EciesHkdfKemSender(publicKey);
   }
 
@@ -53,7 +52,7 @@ class EciesHkdfKemSender {
    * @param {number} keySizeInBytes The length of the generated pseudorandom
    *     string in bytes. The maximal size is 255 * DigestSize, where DigestSize
    *     is the size of the underlying HMAC.
-   * @param {EllipticCurves.PointFormatType} pointFormat The format of the
+   * @param {!EllipticCurves.PointFormatType} pointFormat The format of the
    *     public ephemeral point.
    * @param {string} hkdfHash the name of the hash function. Accepted names are
    *     SHA-1, SHA-256 and SHA-512.
@@ -61,15 +60,16 @@ class EciesHkdfKemSender {
    *     information (can be a zero-length array).
    * @param {!Uint8Array=} opt_hkdfSalt Salt value (a non-secret random
    *     value). If not provided, it is set to a string of hash length zeros.
-   * @return {!Promise.<{key:!Uint8Array, token:!Uint8Array}>} The KEM key and token.
+   * @return {!Promise.<{key:!Uint8Array, token:!Uint8Array}>} The KEM key and
+   *     token.
    */
   async encapsulate(
       keySizeInBytes, pointFormat, hkdfHash, hkdfInfo, opt_hkdfSalt) {
-    const ephemeralKeyPair =
-        await Ecdh.generateKeyPair(this.publicKey_.algorithm['namedCurve']);
-    const sharedSecret = await Ecdh.computeSharedSecret(
+    const ephemeralKeyPair = await EllipticCurves.generateKeyPair(
+        this.publicKey_.algorithm['namedCurve']);
+    const sharedSecret = await EllipticCurves.computeEcdhSharedSecret(
         /** @type {?} */ (ephemeralKeyPair).privateKey, this.publicKey_);
-    const jwk = await Ecdh.exportCryptoKey(
+    const jwk = await EllipticCurves.exportCryptoKey(
         /** @type {?} */ (ephemeralKeyPair).publicKey);
     const kemToken = EllipticCurves.pointEncode(jwk.crv, pointFormat, jwk);
     const hkdfIkm = Bytes.concat(kemToken, sharedSecret);

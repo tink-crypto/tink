@@ -12,10 +12,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.subtle.webcrypto.EciesHkdfKemRecipient');
+goog.module('tink.subtle.EciesHkdfKemRecipient');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Hkdf = goog.require('tink.subtle.Hkdf');
 const SecurityException = goog.require('tink.exception.SecurityException');
@@ -45,7 +44,7 @@ class EciesHkdfKemRecipient {
    * @static
    */
   static async newInstance(jwk) {
-    const privateKey = await Ecdh.importPrivateKey(jwk);
+    const privateKey = await EllipticCurves.importPrivateKey(jwk);
     return new EciesHkdfKemRecipient(privateKey);
   }
 
@@ -68,9 +67,9 @@ class EciesHkdfKemRecipient {
       kemToken, keySizeInBytes, pointFormat, hkdfHash, hkdfInfo, opt_hkdfSalt) {
     const jwk = EllipticCurves.pointDecode(
         this.privateKey_.algorithm['namedCurve'], pointFormat, kemToken);
-    const publicKey = await Ecdh.importPublicKey(jwk);
-    const sharedSecret =
-        await Ecdh.computeSharedSecret(this.privateKey_, publicKey);
+    const publicKey = await EllipticCurves.importPublicKey(jwk);
+    const sharedSecret = await EllipticCurves.computeEcdhSharedSecret(
+        this.privateKey_, publicKey);
     const hkdfIkm = Bytes.concat(kemToken, sharedSecret);
     const kemKey = await Hkdf.compute(
         keySizeInBytes, hkdfHash, hkdfIkm, hkdfInfo, opt_hkdfSalt);

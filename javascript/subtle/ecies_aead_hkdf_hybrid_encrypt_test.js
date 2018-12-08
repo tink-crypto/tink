@@ -17,7 +17,6 @@ goog.setTestOnly('tink.subtle.EciesAeadHkdfHybridEncryptTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
 const EciesAeadHkdfHybridEncrypt = goog.require('tink.subtle.EciesAeadHkdfHybridEncrypt');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
@@ -45,8 +44,8 @@ testSuite({
   },
 
   async testNewInstance_shouldWork() {
-    const keyPair = await Ecdh.generateKeyPair('P-256');
-    const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const hkdfHash = 'SHA-256';
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const demHelper = new RegistryEciesAeadHkdfDemHelper(
@@ -57,8 +56,8 @@ testSuite({
   },
 
   async testNewInstance_nullParameters() {
-    const keyPair = await Ecdh.generateKeyPair('P-256');
-    const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const hkdfHash = 'SHA-256';
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const demHelper = new RegistryEciesAeadHkdfDemHelper(
@@ -114,8 +113,9 @@ testSuite({
       for (let curve of Object.keys(EllipticCurves.CurveType)) {
         const curveName =
             EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
-        const keyPair = await Ecdh.generateKeyPair(curveName);
-        const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+        const keyPair = await EllipticCurves.generateKeyPair(curveName);
+        const publicKey =
+            await EllipticCurves.exportCryptoKey(keyPair.publicKey);
 
         const hybridEncrypt = await EciesAeadHkdfHybridEncrypt.newInstance(
             publicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);

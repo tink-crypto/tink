@@ -15,7 +15,6 @@
 goog.module('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
 const EciesAeadHkdfHybridDecrypt = goog.require('tink.subtle.EciesAeadHkdfHybridDecrypt');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
@@ -94,12 +93,12 @@ class EciesAeadHkdfPrivateKeyFactory {
     const curveTypeSubtle =
         EciesAeadHkdfUtil.curveTypeProtoToSubtle(curveTypeProto);
     const curveName = EllipticCurves.curveToString(curveTypeSubtle);
-    const keyPair = await Ecdh.generateKeyPair(curveName);
+    const keyPair = await EllipticCurves.generateKeyPair(curveName);
 
     const jsonPublicKey =
-        await Ecdh.exportCryptoKey(/** @type {?} */ (keyPair).publicKey);
+        await EllipticCurves.exportCryptoKey(/** @type {?} */ (keyPair).publicKey);
     const jsonPrivateKey =
-        await Ecdh.exportCryptoKey(/** @type {?} */ (keyPair).privateKey);
+        await EllipticCurves.exportCryptoKey(/** @type {?} */ (keyPair).privateKey);
     return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey_(
         jsonPrivateKey, jsonPublicKey, params);
   }

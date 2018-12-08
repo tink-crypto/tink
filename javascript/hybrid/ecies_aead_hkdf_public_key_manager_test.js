@@ -18,7 +18,6 @@ goog.setTestOnly('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const Bytes = goog.require('tink.subtle.Bytes');
-const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
@@ -436,8 +435,8 @@ const createKey = async function(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
 
 
-  const keyPair = await Ecdh.generateKeyPair(curveName);
-  const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+  const keyPair = await EllipticCurves.generateKeyPair(curveName);
+  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
   key.setX(Bytes.fromBase64(publicKey['x'], /* opt_webSafe = */ true));
   key.setY(Bytes.fromBase64(publicKey['y'], /* opt_webSafe = */ true));
 

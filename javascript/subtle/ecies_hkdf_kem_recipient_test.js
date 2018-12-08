@@ -12,13 +12,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.subtle.webcrypto.EciesHkdfKemRecipientTest');
-goog.setTestOnly('tink.subtle.webcrypto.EciesHkdfKemRecipientTest');
+goog.module('tink.subtle.EciesHkdfKemRecipientTest');
+goog.setTestOnly('tink.subtle.EciesHkdfKemRecipientTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
-const EciesHkdfKemRecipient = goog.require('tink.subtle.webcrypto.EciesHkdfKemRecipient');
-const EciesHkdfKemSender = goog.require('tink.subtle.webcrypto.EciesHkdfKemSender');
+const EciesHkdfKemRecipient = goog.require('tink.subtle.EciesHkdfKemRecipient');
+const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const TestCase = goog.require('goog.testing.TestCase');
@@ -29,7 +28,7 @@ const userAgent = goog.require('goog.userAgent');
 testSuite({
   shouldRunTests() {
     // https://msdn.microsoft.com/en-us/library/mt801195(v=vs.85).aspx
-    return !userAgent.EDGE;
+    return !userAgent.EDGE;  // b/120286783
   },
 
   setUp() {
@@ -43,9 +42,9 @@ testSuite({
   },
 
   async testEncapDecap() {
-    const keyPair = await Ecdh.generateKeyPair('P-256');
-    const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
-    const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const sender = await EciesHkdfKemSender.newInstance(publicKey);
     const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
     for (let i = 1; i < 20; i++) {
@@ -67,9 +66,9 @@ testSuite({
   },
 
   async testDecap_nonIntegerKeySize() {
-    const keyPair = await Ecdh.generateKeyPair('P-256');
-    const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
-    const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const sender = await EciesHkdfKemSender.newInstance(publicKey);
     const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
     const keySizeInBytes = 16;
@@ -116,8 +115,8 @@ testSuite({
     }
 
     // Test newInstance with public key instead private key.
-    const keyPair = await Ecdh.generateKeyPair('P-256');
-    const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     try {
       await EciesHkdfKemRecipient.newInstance(publicKey);
       fail('An exception should be thrown.');
@@ -176,7 +175,7 @@ testSuite({
     }
 
     // Test public key instead of private key.
-    const keyPair = await Ecdh.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('P-256');
     try {
       new EciesHkdfKemRecipient(keyPair.publicKey);
       fail('An exception should be thrown.');
@@ -186,7 +185,7 @@ testSuite({
     }
 
     // Test that JSON key cannot be used instead of CryptoKey.
-    const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     try {
       new EciesHkdfKemRecipient(privateKey);
       fail('An exception should be thrown.');
@@ -201,18 +200,20 @@ testSuite({
       const curveString =
           EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
       for (let hashType of hashTypes) {
-        const keyPair = await Ecdh.generateKeyPair(curveString);
+        const keyPair = await EllipticCurves.generateKeyPair(curveString);
         const keySizeInBytes = 32;
         const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
         const hkdfInfo = Random.randBytes(8);
         const hkdfSalt = Random.randBytes(16);
 
-        const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+        const publicKey =
+            await EllipticCurves.exportCryptoKey(keyPair.publicKey);
         const sender = await EciesHkdfKemSender.newInstance(publicKey);
         const kemKeyToken = await sender.encapsulate(
             keySizeInBytes, pointFormat, hashType, hkdfInfo, hkdfSalt);
 
-        const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+        const privateKey =
+            await EllipticCurves.exportCryptoKey(keyPair.privateKey);
         const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
         const key = await recipient.decapsulate(
             kemKeyToken['token'], keySizeInBytes, pointFormat, hashType,
@@ -231,8 +232,9 @@ testSuite({
       const curve = EllipticCurves.CurveType[crvId];
       const curveString = EllipticCurves.curveToString(curve);
       for (let hashType of hashTypes) {
-        const keyPair = await Ecdh.generateKeyPair(curveString);
-        const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+        const keyPair = await EllipticCurves.generateKeyPair(curveString);
+        const privateKey =
+            await EllipticCurves.exportCryptoKey(keyPair.privateKey);
         const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
         const keySizeInBytes = 32;
         const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
