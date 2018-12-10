@@ -93,7 +93,7 @@ class EciesAeadHkdfPrivateKeyFactory {
     const curveTypeSubtle =
         EciesAeadHkdfUtil.curveTypeProtoToSubtle(curveTypeProto);
     const curveName = EllipticCurves.curveToString(curveTypeSubtle);
-    const keyPair = await EllipticCurves.generateKeyPair(curveName);
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
 
     const jsonPublicKey =
         await EllipticCurves.exportCryptoKey(/** @type {?} */ (keyPair).publicKey);

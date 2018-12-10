@@ -41,8 +41,8 @@ testSuite({
   },
 
   async testcomputeEcdhSharedSecret() {
-    const aliceKeyPair = await EllipticCurves.generateKeyPair('P-256');
-    const bobKeyPair = await EllipticCurves.generateKeyPair('P-256');
+    const aliceKeyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
+    const bobKeyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const sharedSecret1 = await EllipticCurves.computeEcdhSharedSecret(
         aliceKeyPair.privateKey, bobKeyPair.publicKey);
     const sharedSecret2 = await EllipticCurves.computeEcdhSharedSecret(
@@ -62,44 +62,83 @@ testSuite({
     }
   },
 
-  // Test that both public and private key are defined in the result.
-  async testGenerateKeyPair() {
+  // Test that both ECDH public and private key are defined in the result.
+  async testGenerateKeyPairECDH() {
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
       const curveTypeString =
           EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
-      const keyPair = await EllipticCurves.generateKeyPair(curveTypeString);
+      const keyPair =
+          await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
       assertTrue(keyPair.privateKey != null);
       assertTrue(keyPair.publicKey != null);
     }
   },
 
-  // Test that when crypto key is exported and imported it gives the same key
-  // as the original one.
-  async testExportImportCryptoKey() {
+  // Test that both ECDSA public and private key are defined in the result.
+  async testGenerateKeyPairECDSA() {
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
       const curveTypeString =
           EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
-      const keyPair = await EllipticCurves.generateKeyPair(curveTypeString);
+      const keyPair =
+          await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
+      assertTrue(keyPair.privateKey != null);
+      assertTrue(keyPair.publicKey != null);
+    }
+  },
+
+  // Test that when ECDH crypto key is exported and imported it gives the same
+  // key as the original one.
+  async testImportExportCryptoKeyECDH() {
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
+    for (let curve of curveTypes) {
+      const curveTypeString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
+      const keyPair =
+          await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
 
       const publicKey = keyPair.publicKey;
       const publicCryptoKey = await EllipticCurves.exportCryptoKey(publicKey);
       const importedPublicKey =
-          await EllipticCurves.importPublicKey(publicCryptoKey);
+          await EllipticCurves.importPublicKey('ECDH', publicCryptoKey);
       assertObjectEquals(publicKey, importedPublicKey);
 
       const privateKey = keyPair.privateKey;
       const privateCryptoKey = await EllipticCurves.exportCryptoKey(privateKey);
       const importedPrivateKey =
-          await EllipticCurves.importPrivateKey(privateCryptoKey);
+          await EllipticCurves.importPrivateKey('ECDH', privateCryptoKey);
       assertObjectEquals(privateKey, importedPrivateKey);
     }
   },
 
-  // Test that when JSON web key is imported and exported it gives the same key
-  // as the original one.
-  async testImportExportJsonKey() {
+  // Test that when ECDSA crypto key is exported and imported it gives the same
+  // key as the original one.
+  async testImportExportCryptoKeyECDSA() {
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
+    for (let curve of curveTypes) {
+      const curveTypeString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
+      const keyPair =
+          await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
+
+      const publicKey = keyPair.publicKey;
+      const publicCryptoKey = await EllipticCurves.exportCryptoKey(publicKey);
+      const importedPublicKey =
+          await EllipticCurves.importPublicKey('ECDSA', publicCryptoKey);
+      assertObjectEquals(publicKey, importedPublicKey);
+
+      const privateKey = keyPair.privateKey;
+      const privateCryptoKey = await EllipticCurves.exportCryptoKey(privateKey);
+      const importedPrivateKey =
+          await EllipticCurves.importPrivateKey('ECDSA', privateCryptoKey);
+      assertObjectEquals(privateKey, importedPrivateKey);
+    }
+  },
+
+  // Test that when JSON ECDH web key is imported and exported it gives the same
+  // key as the original one.
+  async testImportExportJsonKeyECDH() {
     for (let testKey of TEST_KEYS) {
       const jwk = /** @type{!webCrypto.JsonWebKey} */ ({
         'kty': 'EC',
@@ -112,11 +151,38 @@ testSuite({
       let importedKey;
       if (!testKey.d) {
         jwk['key_ops'] = [];
-        importedKey = await EllipticCurves.importPublicKey(jwk);
+        importedKey = await EllipticCurves.importPublicKey('ECDH', jwk);
       } else {
         jwk['key_ops'] = ['deriveKey', 'deriveBits'];
         jwk['d'] = Bytes.toBase64(Bytes.fromHex(testKey.d), true);
-        importedKey = await EllipticCurves.importPrivateKey(jwk);
+        importedKey = await EllipticCurves.importPrivateKey('ECDH', jwk);
+      }
+
+      const exportedKey = await EllipticCurves.exportCryptoKey(importedKey);
+      assertObjectEquals(jwk, exportedKey);
+    }
+  },
+
+  // Test that when JSON ECDSA web key is imported and exported it gives the
+  // same key as the original one.
+  async testImportExportJsonKeyECDSA() {
+    for (let testKey of TEST_KEYS) {
+      const jwk = /** @type{!webCrypto.JsonWebKey} */ ({
+        'kty': 'EC',
+        'crv': testKey.curve,
+        'x': Bytes.toBase64(Bytes.fromHex(testKey.x), true),
+        'y': Bytes.toBase64(Bytes.fromHex(testKey.y), true),
+        'ext': true,
+      });
+
+      let importedKey;
+      if (!testKey.d) {
+        jwk['key_ops'] = ['verify'];
+        importedKey = await EllipticCurves.importPublicKey('ECDSA', jwk);
+      } else {
+        jwk['key_ops'] = ['sign'];
+        jwk['d'] = Bytes.toBase64(Bytes.fromHex(testKey.d), true);
+        importedKey = await EllipticCurves.importPrivateKey('ECDSA', jwk);
       }
 
       const exportedKey = await EllipticCurves.exportCryptoKey(importedKey);
@@ -311,8 +377,10 @@ testSuite({
  */
 const runWycheproofTest = async function(test) {
   try {
-    const publicKey = await EllipticCurves.importPublicKey(test['public']);
-    const privateKey = await EllipticCurves.importPrivateKey(test['private']);
+    const publicKey =
+        await EllipticCurves.importPublicKey('ECDH', test['public']);
+    const privateKey =
+        await EllipticCurves.importPrivateKey('ECDH', test['private']);
     const sharedSecret =
         await EllipticCurves.computeEcdhSharedSecret(privateKey, publicKey);
     if (test['result'] === 'invalid') {

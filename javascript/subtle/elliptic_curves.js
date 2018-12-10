@@ -175,15 +175,21 @@ const computeEcdhSharedSecret = async function(privateKey, publicKey) {
 };
 
 /**
+ * @param {string} algorithm
  * @param {string} curve
  * @return {!Promise<!webCrypto.CryptoKey>}
  */
-const generateKeyPair = async function(curve) {
-  const ecdhParams = /** @type {!webCrypto.AlgorithmIdentifier} */ (
-      {'name': 'ECDH', 'namedCurve': curve});
+const generateKeyPair = async function(algorithm, curve) {
+  if (algorithm != 'ECDH' && algorithm != 'ECDSA') {
+    throw new InvalidArgumentsException(
+        'algorithm must be either ECDH or ECDSA');
+  }
+  const params = /** @type {!webCrypto.AlgorithmIdentifier} */ (
+      {'name': algorithm, 'namedCurve': curve});
   const ephemeralKeyPair = await window.crypto.subtle.generateKey(
-      ecdhParams, true /* extractable */,
-      ['deriveKey', 'deriveBits'] /* usage */);
+      params, true /* extractable */,
+      algorithm == 'ECDH' ? ['deriveKey', 'deriveBits'] :
+                            ['sign', 'verify'] /* usage */);
   return /** @type {!webCrypto.CryptoKey} */ (ephemeralKeyPair);
 };
 
@@ -197,26 +203,38 @@ const exportCryptoKey = async function(cryptoKey) {
 };
 
 /**
+ * @param {string} algorithm
  * @param {!webCrypto.JsonWebKey} jwk
  * @return {!Promise<!webCrypto.CryptoKey>}
  */
-const importPublicKey = async function(jwk) {
+const importPublicKey = async function(algorithm, jwk) {
+  if (algorithm != 'ECDH' && algorithm != 'ECDSA') {
+    throw new InvalidArgumentsException(
+        'algorithm must be either ECDH or ECDSA');
+  }
   const publicKey = await window.crypto.subtle.importKey(
       'jwk' /* format */, jwk,
-      {'name': 'ECDH', 'namedCurve': jwk.crv} /* algorithm */,
-      true /* extractable */, [] /* usage, empty for public key */);
+      {'name': algorithm, 'namedCurve': jwk.crv} /* algorithm */,
+      true /* extractable */,
+      algorithm == 'ECDH' ? [] : ['verify'] /* usage */);
   return publicKey;
 };
 
 /**
+ * @param {string} algorithm
  * @param {!webCrypto.JsonWebKey} jwk
  * @return {!Promise<!webCrypto.CryptoKey>}
  */
-const importPrivateKey = async function(jwk) {
+const importPrivateKey = async function(algorithm, jwk) {
+  if (algorithm != 'ECDH' && algorithm != 'ECDSA') {
+    throw new InvalidArgumentsException(
+        'algorithm must be either ECDH or ECDSA');
+  }
   const privateKey = await window.crypto.subtle.importKey(
       'jwk' /* format */, jwk /* key material */,
-      {'name': 'ECDH', 'namedCurve': jwk.crv} /* algorithm */,
-      true /* extractable */, ['deriveKey', 'deriveBits'] /* usage */);
+      {'name': algorithm, 'namedCurve': jwk.crv} /* algorithm */,
+      true /* extractable */,
+      algorithm == 'ECDH' ? ['deriveKey', 'deriveBits'] : ['sign'] /* usage */);
   return privateKey;
 };
 

@@ -44,7 +44,7 @@ testSuite({
   },
 
   async testNewInstance_shouldWork() {
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const hkdfHash = 'SHA-256';
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -56,7 +56,7 @@ testSuite({
   },
 
   async testNewInstance_nullParameters() {
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const hkdfHash = 'SHA-256';
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -113,7 +113,7 @@ testSuite({
       for (let curve of Object.keys(EllipticCurves.CurveType)) {
         const curveName =
             EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
-        const keyPair = await EllipticCurves.generateKeyPair(curveName);
+        const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
         const publicKey =
             await EllipticCurves.exportCryptoKey(keyPair.publicKey);
 

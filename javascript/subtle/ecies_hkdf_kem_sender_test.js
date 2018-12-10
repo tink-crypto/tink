@@ -30,7 +30,7 @@ testSuite({
   },
 
   async testEncapsulate_alwaysGenerateRandomKey() {
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const sender = await EciesHkdfKemSender.newInstance(publicKey);
     const keySizeInBytes = 32;
@@ -51,7 +51,7 @@ testSuite({
   },
 
   async testEncapsulate_nonIntegerKeySize() {
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const sender = await EciesHkdfKemSender.newInstance(publicKey);
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -88,7 +88,7 @@ testSuite({
     }
 
     // Test newInstance with public key instead private key.
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     try {
       await EciesHkdfKemSender.newInstance(privateKey);
@@ -108,7 +108,7 @@ testSuite({
     for (let crv of Object.keys(EllipticCurves.CurveType)) {
       const curve = EllipticCurves.CurveType[crv];
       const crvString = EllipticCurves.curveToString(curve);
-      const keyPair = await EllipticCurves.generateKeyPair(crvString);
+      const keyPair = await EllipticCurves.generateKeyPair('ECDH', crvString);
       const publicJwk = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
       // Change the 'x' value to make the public key invalid. Either getting new
       // recipient with corrupted public key or trying to encapsulate with this
@@ -142,7 +142,7 @@ testSuite({
     }
 
     // Test constructor with public key instead private key.
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     try {
       new EciesHkdfKemSender(keyPair.privateKey);
       fail('An exception should be thrown.');

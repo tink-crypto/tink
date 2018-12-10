@@ -294,7 +294,7 @@ const createKey = async function(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
 
 
-  const keyPair = await EllipticCurves.generateKeyPair(curveName);
+  const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
   const publicKeyJson = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
   publicKeyProto.setX(
       Bytes.fromBase64(publicKeyJson['x'], /* opt_webSafe = */ true));

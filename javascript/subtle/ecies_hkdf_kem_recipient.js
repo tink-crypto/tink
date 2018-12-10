@@ -44,7 +44,7 @@ class EciesHkdfKemRecipient {
    * @static
    */
   static async newInstance(jwk) {
-    const privateKey = await EllipticCurves.importPrivateKey(jwk);
+    const privateKey = await EllipticCurves.importPrivateKey('ECDH', jwk);
     return new EciesHkdfKemRecipient(privateKey);
   }
 
@@ -67,7 +67,7 @@ class EciesHkdfKemRecipient {
       kemToken, keySizeInBytes, pointFormat, hkdfHash, hkdfInfo, opt_hkdfSalt) {
     const jwk = EllipticCurves.pointDecode(
         this.privateKey_.algorithm['namedCurve'], pointFormat, kemToken);
-    const publicKey = await EllipticCurves.importPublicKey(jwk);
+    const publicKey = await EllipticCurves.importPublicKey('ECDH', jwk);
     const sharedSecret = await EllipticCurves.computeEcdhSharedSecret(
         this.privateKey_, publicKey);
     const hkdfIkm = Bytes.concat(kemToken, sharedSecret);

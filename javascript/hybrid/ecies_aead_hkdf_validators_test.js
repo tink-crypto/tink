@@ -492,7 +492,7 @@ const createPrivateKey = async function(
   publicKeyProto.setVersion(0);
   publicKeyProto.setParams(createParams(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
-  const keyPair = await EllipticCurves.generateKeyPair(curveName);
+  const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
   const jsonPublicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
   publicKeyProto.setX(
       Bytes.fromBase64(jsonPublicKey['x'], /* opt_webSafe = */ true));

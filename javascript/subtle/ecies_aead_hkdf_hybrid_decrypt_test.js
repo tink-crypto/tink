@@ -47,7 +47,7 @@ testSuite({
   },
 
   async testConstructor_nullParameters() {
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const recipient = new EciesHkdfKemRecipient(keyPair.privateKey);
     const hkdfHash = 'SHA-256';
@@ -101,7 +101,7 @@ testSuite({
   },
 
   async testNewInstance_shouldWork() {
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const hkdfSalt = new Uint8Array(0);
     const hkdfHash = 'SHA-256';
@@ -113,7 +113,7 @@ testSuite({
   },
 
   async testNewInstance_nullParameters() {
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const hkdfHash = 'SHA-256';
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -162,7 +162,7 @@ testSuite({
     const curveEncodingSize =
         EllipticCurves.encodingSizeInBytes(curve, pointFormat);
 
-    const keyPair = await EllipticCurves.generateKeyPair(curveName);
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
 
@@ -182,7 +182,7 @@ testSuite({
   },
 
   async testDecrypt_differentDemHelpersFromOneTemplate_shouldWork() {
-    const keyPair = await EllipticCurves.generateKeyPair('P-256');
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -219,7 +219,7 @@ testSuite({
       for (let curve of curves) {
         const curveName =
             EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
-        const keyPair = await EllipticCurves.generateKeyPair(curveName);
+        const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
         const privateKey =
             await EllipticCurves.exportCryptoKey(keyPair.privateKey);
         const publicKey =
