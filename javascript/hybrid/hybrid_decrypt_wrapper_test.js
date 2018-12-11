@@ -12,14 +12,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.hybrid.HybridDecryptSetWrapperTest');
-goog.setTestOnly('tink.hybrid.HybridDecryptSetWrapperTest');
+goog.module('tink.hybrid.HybridDecryptWrapperTest');
+goog.setTestOnly('tink.hybrid.HybridDecryptWrapperTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const HybridDecrypt = goog.require('tink.HybridDecrypt');
-const HybridDecryptSetWrapper = goog.require('tink.hybrid.HybridDecryptSetWrapper');
+const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
-const HybridEncryptSetWrapper = goog.require('tink.hybrid.HybridEncryptSetWrapper');
+const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
@@ -32,7 +32,7 @@ const testSuite = goog.require('goog.testing.testSuite');
 testSuite({
   async testNewHybridDecrypt_nullPrimitiveSet() {
     try {
-      HybridDecryptSetWrapper.newHybridDecrypt(null);
+      new HybridDecryptWrapper().wrap(null);
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
@@ -42,9 +42,8 @@ testSuite({
   async testDecrypt_invalidCiphertext() {
     const primitiveSets = createDummyPrimitiveSets();
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
-    const hybridDecrypt =
-        HybridDecryptSetWrapper.newHybridDecrypt(decryptPrimitiveSet);
-    // Ciphertext which cannnot be decrypted by any primitive in the primitive
+    const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
+    // Ciphertext which cannot be decrypted by any primitive in the primitive
     // set.
     const ciphertext = new Uint8Array([9, 8, 7, 6, 5, 4, 3]);
 
@@ -72,8 +71,7 @@ testSuite({
     const entry = encryptPrimitiveSet.addPrimitive(encryptPrimitive, key);
     // Has to be set to primary as then it is used in encryption.
     encryptPrimitiveSet.setPrimary(entry);
-    const hybridEncrypt =
-        HybridEncryptSetWrapper.newHybridEncrypt(encryptPrimitiveSet);
+    const hybridEncrypt = new HybridEncryptWrapper().wrap(encryptPrimitiveSet);
     const ciphertext = await hybridEncrypt.encrypt(plaintext);
 
     // Create a primitive set containing the primitive which can be used for
@@ -89,8 +87,7 @@ testSuite({
         new DummyHybridDecrypt(Random.randBytes(5)), key);
 
     // Decrypt the ciphertext.
-    const hybridDecrypt =
-        HybridDecryptSetWrapper.newHybridDecrypt(decryptPrimitiveSet);
+    const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
     const decryptedCiphertext = await hybridDecrypt.decrypt(ciphertext);
 
     // Test that the result is the original plaintext.
@@ -115,7 +112,7 @@ testSuite({
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
     const decryptPrimitive = new DummyHybridDecrypt(ciphertextSuffix);
     decryptPrimitiveSet.addPrimitive(decryptPrimitive, key);
-    const hybridDecrypt = new HybridDecryptSetWrapper(decryptPrimitiveSet);
+    const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
     const decryptedCiphertext = await hybridDecrypt.decrypt(ciphertext);
 
     // Test that the result is the original plaintext.
@@ -141,7 +138,7 @@ testSuite({
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
     const decryptPrimitive = new DummyHybridDecrypt(ciphertextSuffix);
     decryptPrimitiveSet.addPrimitive(decryptPrimitive, key);
-    const hybridDecrypt = new HybridDecryptSetWrapper(decryptPrimitiveSet);
+    const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
 
     // Check that contextInfo was passed correctly (decryption without
     // contextInfo argument should not work, but with contextInfo it should work
@@ -173,8 +170,7 @@ testSuite({
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
     const decryptPrimitive = new DummyHybridDecrypt(ciphertextSuffix);
     decryptPrimitiveSet.addPrimitive(decryptPrimitive, key);
-    const hybridDecrypt =
-        HybridDecryptSetWrapper.newHybridDecrypt(decryptPrimitiveSet);
+    const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
 
     try {
       await hybridDecrypt.decrypt(ciphertext);
@@ -187,8 +183,7 @@ testSuite({
   async testDecrypt_withNullCiphertext() {
     const primitiveSets = createDummyPrimitiveSets();
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
-    const hybridDecrypt =
-        HybridDecryptSetWrapper.newHybridDecrypt(decryptPrimitiveSet);
+    const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
 
     try {
       await hybridDecrypt.decrypt(null);

@@ -12,18 +12,19 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.hybrid.HybridEncryptSetWrapper');
+goog.module('tink.hybrid.HybridEncryptWrapper');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
  * @implements {HybridEncrypt}
  * @final
  */
-class HybridEncryptSetWrapper {
+class WrappedHybridEncrypt {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   /** @param {!PrimitiveSet.PrimitiveSet} hybridEncryptPrimitiveSet */
@@ -34,7 +35,7 @@ class HybridEncryptSetWrapper {
 
   /**
    * @param {!PrimitiveSet.PrimitiveSet} hybridEncryptPrimitiveSet
-   * @return {!HybridEncryptSetWrapper}
+   * @return {!HybridEncrypt}
    */
   static newHybridEncrypt(hybridEncryptPrimitiveSet) {
     if (!hybridEncryptPrimitiveSet) {
@@ -43,7 +44,7 @@ class HybridEncryptSetWrapper {
     if (!hybridEncryptPrimitiveSet.getPrimary()) {
       throw new SecurityException('Primary has to be non-null.');
     }
-    return new HybridEncryptSetWrapper(hybridEncryptPrimitiveSet);
+    return new WrappedHybridEncrypt(hybridEncryptPrimitiveSet);
   }
 
   /** @override */
@@ -60,4 +61,27 @@ class HybridEncryptSetWrapper {
   }
 }
 
-exports = HybridEncryptSetWrapper;
+/**
+ * @implements {PrimitiveWrapper<HybridEncrypt>}
+ */
+class HybridEncryptWrapper {
+  // The constructor should be @private, but it is not supported by Closure
+  // (see https://github.com/google/closure-compiler/issues/2761).
+  constructor() {}
+
+  /**
+   * @override
+   */
+  wrap(primitiveSet) {
+    return WrappedHybridEncrypt.newHybridEncrypt(primitiveSet);
+  }
+
+  /**
+   * @override
+   */
+  getPrimitiveType() {
+    return HybridEncrypt;
+  }
+}
+
+exports = HybridEncryptWrapper;

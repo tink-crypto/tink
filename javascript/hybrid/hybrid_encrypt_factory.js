@@ -15,7 +15,7 @@
 goog.module('tink.hybrid.HybridEncryptFactory');
 
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
-const HybridEncryptSetWrapper = goog.require('tink.hybrid.HybridEncryptSetWrapper');
+const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const Registry = goog.require('tink.Registry');
@@ -51,9 +51,8 @@ class HybridEncryptFactory {
    * @return {!Promise<!HybridEncrypt>}
    */
   static async getPrimitive(keysetHandle, opt_customKeyManager) {
-    const primitives = await Registry.getPrimitives(
-        HybridEncrypt, keysetHandle, opt_customKeyManager);
-    return HybridEncryptSetWrapper.newHybridEncrypt(primitives);
+    Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
+    return keysetHandle.getPrimitive(HybridEncrypt, opt_customKeyManager);
   }
 }
 

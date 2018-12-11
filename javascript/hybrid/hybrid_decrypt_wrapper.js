@@ -12,80 +12,55 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.aead.AeadSetWrapper');
+goog.module('tink.hybrid.HybridDecryptWrapper');
 
-const Aead = goog.require('tink.Aead');
 const CryptoFormat = goog.require('tink.CryptoFormat');
+const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
- * @implements {Aead}
+ * @implements {HybridDecrypt}
  * @final
  */
-class AeadSetWrapper {
-  /**
-   * @param {!PrimitiveSet.PrimitiveSet} aeadSet
-   */
+class WrappedHybridDecrypt {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
-  constructor(aeadSet) {
+  /** @param {!PrimitiveSet.PrimitiveSet} hybridDecryptPrimitiveSet */
+  constructor(hybridDecryptPrimitiveSet) {
     /** @private @const {!PrimitiveSet.PrimitiveSet} */
-    this.aeadSet_ = aeadSet;
+    this.primitiveSet_ = hybridDecryptPrimitiveSet;
   }
 
   /**
-   * @param {!PrimitiveSet.PrimitiveSet} aeadSet
-   *
-   * @return {!AeadSetWrapper}
+   * @param {!PrimitiveSet.PrimitiveSet} hybridDecryptPrimitiveSet
+   * @return {!HybridDecrypt}
    */
-  static newAead(aeadSet) {
-    if (!aeadSet) {
+  static newHybridDecrypt(hybridDecryptPrimitiveSet) {
+    if (!hybridDecryptPrimitiveSet) {
       throw new SecurityException('Primitive set has to be non-null.');
     }
-    if (!aeadSet.getPrimary()) {
-      throw new SecurityException('Primary has to be non-null.');
-    }
-    return new AeadSetWrapper(aeadSet);
+    return new WrappedHybridDecrypt(hybridDecryptPrimitiveSet);
   }
 
-  /**
-   * @override
-   */
-  async encrypt(plaintext, opt_associatedData) {
-    if (!plaintext) {
-      throw new SecurityException('Plaintext has to be non-null.');
-    }
-    const primitive = this.aeadSet_.getPrimary().getPrimitive();
-    const encryptedText =
-        await primitive.encrypt(plaintext, opt_associatedData);
-    const keyId = this.aeadSet_.getPrimary().getIdentifier();
-
-    const ciphertext = new Uint8Array(keyId.length + encryptedText.length);
-    ciphertext.set(keyId, 0);
-    ciphertext.set(encryptedText, keyId.length);
-    return ciphertext;
-  }
-
-  /**
-   * @override
-   */
-  async decrypt(ciphertext, opt_associatedData) {
+  /** @override */
+  async decrypt(ciphertext, opt_contextInfo) {
     if (!ciphertext) {
       throw new SecurityException('Ciphertext has to be non-null.');
     }
 
     if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
       const keyId = ciphertext.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-      const entries = await this.aeadSet_.getPrimitives(keyId);
+      const primitives = await this.primitiveSet_.getPrimitives(keyId);
 
       const rawCiphertext = ciphertext.subarray(
           CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
-      let /** @type {Uint8Array} */ decryptedText;
+      let /** @type {!Uint8Array} */ decryptedText;
       try {
         decryptedText = await this.tryDecryption_(
-            entries, rawCiphertext, opt_associatedData);
+            primitives, rawCiphertext, opt_contextInfo);
       } catch (e) {
       }
 
@@ -94,35 +69,33 @@ class AeadSetWrapper {
       }
     }
 
-    const entries = await this.aeadSet_.getRawPrimitives();
-    const decryptedText =
-        await this.tryDecryption_(entries, ciphertext, opt_associatedData);
-    return decryptedText;
+    const primitives = await this.primitiveSet_.getRawPrimitives();
+    return await this.tryDecryption_(primitives, ciphertext, opt_contextInfo);
   }
 
   /**
-   * Tries to decrypt the ciphertext using each entry in entriesArray and
+   * Tries to decrypt the ciphertext using each entry in primitives and
    * returns the ciphertext decrypted by first primitive which succeed. It
    * throws an exception if no entry succeeds.
    *
-   * @private
-   * @param {!Array<!PrimitiveSet.Entry>} entriesArray
+   * @param {!Array<!PrimitiveSet.Entry>} primitives
    * @param {!Uint8Array} ciphertext
-   * @param {?Uint8Array=} opt_associatedData
+   * @param {?Uint8Array=} opt_contextInfo
    *
    * @return {!Promise<!Uint8Array>}
+   * @private
    */
-  async tryDecryption_(entriesArray, ciphertext, opt_associatedData) {
-    const entriesArrayLength = entriesArray.length;
-    for (let i = 0; i < entriesArrayLength; i++) {
-      if (entriesArray[i].getKeyStatus() != PbKeyStatusType.ENABLED) {
+  async tryDecryption_(primitives, ciphertext, opt_contextInfo) {
+    const primitivesLength = primitives.length;
+    for (let i = 0; i < primitivesLength; i++) {
+      if (primitives[i].getKeyStatus() != PbKeyStatusType.ENABLED) {
         continue;
       }
-      const primitive = entriesArray[i].getPrimitive();
+      const primitive = primitives[i].getPrimitive();
+
       let decryptionResult;
       try {
-        decryptionResult =
-            await primitive.decrypt(ciphertext, opt_associatedData);
+        decryptionResult = await primitive.decrypt(ciphertext, opt_contextInfo);
       } catch (e) {
         continue;
       }
@@ -132,4 +105,27 @@ class AeadSetWrapper {
   }
 }
 
-exports = AeadSetWrapper;
+/**
+ * @implements {PrimitiveWrapper<HybridDecrypt>}
+ */
+class HybridDecryptWrapper {
+  // The constructor should be @private, but it is not supported by Closure
+  // (see https://github.com/google/closure-compiler/issues/2761).
+  constructor() {}
+
+  /**
+   * @override
+   */
+  wrap(primitiveSet) {
+    return WrappedHybridDecrypt.newHybridDecrypt(primitiveSet);
+  }
+
+  /**
+   * @override
+   */
+  getPrimitiveType() {
+    return HybridDecrypt;
+  }
+}
+
+exports = HybridDecryptWrapper;

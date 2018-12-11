@@ -12,12 +12,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.hybrid.HybridEncryptSetWrapperTest');
-goog.setTestOnly('tink.hybrid.HybridEncryptSetWrapperTest');
+goog.module('tink.hybrid.HybridEncryptWrapperTest');
+goog.setTestOnly('tink.hybrid.HybridEncryptWrapperTest');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
-const HybridEncryptSetWrapper = goog.require('tink.hybrid.HybridEncryptSetWrapper');
+const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
@@ -29,7 +29,7 @@ const testSuite = goog.require('goog.testing.testSuite');
 testSuite({
   testNewHybridEncrypt_nullPrimitiveSet() {
     try {
-      HybridEncryptSetWrapper.newHybridEncrypt(null);
+      new HybridEncryptWrapper().wrap(null);
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
@@ -39,7 +39,7 @@ testSuite({
   testNewHybridEncrypt_primitiveSetWithoutPrimary() {
     const primitiveSet = createDummyPrimitiveSet(/* opt_withPrimary = */ false);
     try {
-      HybridEncryptSetWrapper.newHybridEncrypt(primitiveSet);
+      new HybridEncryptWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(ExceptionText.primitiveSetWithoutPrimary(), e.toString());
@@ -48,15 +48,13 @@ testSuite({
 
   testNewHybridEncrypt_shouldWork() {
     const primitiveSet = createDummyPrimitiveSet();
-    const hybridEncrypt =
-        HybridEncryptSetWrapper.newHybridEncrypt(primitiveSet);
+    const hybridEncrypt = new HybridEncryptWrapper().wrap(primitiveSet);
     assertTrue(hybridEncrypt != null && hybridEncrypt != undefined);
   },
 
   async testEncrypt_nullPlaintext() {
     const primitiveSet = createDummyPrimitiveSet();
-    const hybridEncrypt =
-        HybridEncryptSetWrapper.newHybridEncrypt(primitiveSet);
+    const hybridEncrypt = new HybridEncryptWrapper().wrap(primitiveSet);
 
     try {
       await hybridEncrypt.encrypt(null);
@@ -68,8 +66,7 @@ testSuite({
 
   async testEncrypt_shouldWork() {
     const primitiveSet = createDummyPrimitiveSet();
-    const hybridEncrypt =
-        HybridEncryptSetWrapper.newHybridEncrypt(primitiveSet);
+    const hybridEncrypt = new HybridEncryptWrapper().wrap(primitiveSet);
 
     const plaintext = Random.randBytes(10);
 

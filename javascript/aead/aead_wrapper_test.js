@@ -12,11 +12,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.aead.AeadSetWrapperTest');
-goog.setTestOnly('tink.aead.AeadSetWrapperTest');
+goog.module('tink.aead.AeadWrapperTest');
+goog.setTestOnly('tink.aead.AeadWrapperTest');
 
 const Aead = goog.require('tink.Aead');
-const AeadSetWrapper = goog.require('tink.aead.AeadSetWrapper');
+const AeadWrapper = goog.require('tink.aead.AeadWrapper');
 const Bytes = goog.require('tink.subtle.Bytes');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
@@ -30,7 +30,7 @@ const testSuite = goog.require('goog.testing.testSuite');
 testSuite({
   async testNewAeadNullPrimitiveSet() {
     try {
-      AeadSetWrapper.newAead(null);
+      new AeadWrapper().wrap(null);
     } catch (e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
       return;
@@ -41,7 +41,7 @@ testSuite({
   async testNewAeadPrimitiveSetWithoutPrimary() {
     const primitiveSet = createPrimitiveSet(/* opt_withPrimary = */ false);
     try {
-      AeadSetWrapper.newAead(primitiveSet);
+      new AeadWrapper().wrap(primitiveSet);
     } catch (e) {
       assertEquals(ExceptionText.primitiveSetWithoutPrimary(), e.toString());
       return;
@@ -51,13 +51,13 @@ testSuite({
 
   async testNewAeadPrimitiveShouldWork() {
     const primitiveSet = createPrimitiveSet();
-    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const aead = new AeadWrapper().wrap(primitiveSet);
     assertTrue(aead != null && aead != undefined);
   },
 
   async testEncrypt() {
     const primitiveSet = createPrimitiveSet();
-    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const aead = new AeadWrapper().wrap(primitiveSet);
 
     const plaintext = new Uint8Array([0, 1, 2, 3]);
 
@@ -72,7 +72,7 @@ testSuite({
 
   async testDecryptBadCiphertext() {
     const primitiveSet = createPrimitiveSet();
-    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const aead = new AeadWrapper().wrap(primitiveSet);
 
     const ciphertext = new Uint8Array([9, 8, 7, 6, 5, 4, 3]);
 
@@ -87,7 +87,7 @@ testSuite({
 
   async testDecryptWithCiphertextEncryptedByPrimaryKey() {
     const primitiveSet = createPrimitiveSet();
-    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const aead = new AeadWrapper().wrap(primitiveSet);
 
     const plaintext = new Uint8Array([12, 51, 45, 200, 120, 111]);
 
@@ -99,7 +99,7 @@ testSuite({
 
   async testDecryptCiphertextEncryptedByNonPrimaryKey() {
     const primitiveSet = createPrimitiveSet();
-    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const aead = new AeadWrapper().wrap(primitiveSet);
 
     // Encrypt the plaintext with primary.
     const plaintext = new Uint8Array([0xAA, 0xBB, 0xAB, 0xBA, 0xFF]);
@@ -113,7 +113,7 @@ testSuite({
     const entry =
         primitiveSet.addPrimitive(new DummyAead(Uint8Array[0xFF]), key);
     primitiveSet.setPrimary(entry);
-    const aead2 = AeadSetWrapper.newAead(primitiveSet);
+    const aead2 = new AeadWrapper().wrap(primitiveSet);
 
     // Check that the ciphertext can be decrypted by the setWrapper with new
     // primary and that the decryption corresponds to the plaintext.
@@ -136,7 +136,7 @@ testSuite({
     const ciphertext = await rawKeyAead.encrypt(plaintext);
 
     // Create aead which should be able to decrypt the ciphertext.
-    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const aead = new AeadWrapper().wrap(primitiveSet);
 
     // Try to decrypt the ciphertext by aead and check that the result
     // corresponds to the plaintext.
@@ -158,7 +158,7 @@ testSuite({
     const ciphertext = await disabledKeyAead.encrypt(plaintext);
 
     // Create aead containing the primitive with disabled key.
-    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const aead = new AeadWrapper().wrap(primitiveSet);
 
     // Check that the ciphertext cannot be decrypted as disabled keys cannot be
     // used to neither encryption nor decryption.
@@ -173,7 +173,7 @@ testSuite({
 
   async testEncryptDecrypt_AssociatedDataShouldBePassed() {
     const primitiveSet = createPrimitiveSet();
-    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const aead = new AeadWrapper().wrap(primitiveSet);
     const plaintext = new Uint8Array([0, 1, 2, 3, 4, 5, 6]);
     const aad = new Uint8Array([8, 9, 10, 11, 12]);
 

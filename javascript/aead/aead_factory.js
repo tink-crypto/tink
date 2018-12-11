@@ -15,7 +15,7 @@
 goog.module('tink.aead.AeadFactory');
 
 const Aead = goog.require('tink.Aead');
-const AeadSetWrapper = goog.require('tink.aead.AeadSetWrapper');
+const AeadWrapper = goog.require('tink.aead.AeadWrapper');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const Registry = goog.require('tink.Registry');
@@ -49,9 +49,8 @@ class AeadFactory {
    * @return {!Promise<!Aead>}
    */
   static async getPrimitive(keysetHandle, opt_customKeyManager) {
-    const primitives =
-        await Registry.getPrimitives(Aead, keysetHandle, opt_customKeyManager);
-    return AeadSetWrapper.newAead(primitives);
+    Registry.registerPrimitiveWrapper(new AeadWrapper());
+    return keysetHandle.getPrimitive(Aead, opt_customKeyManager);
   }
 }
 

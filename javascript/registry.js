@@ -16,15 +16,12 @@ goog.module('tink.Registry');
 
 const Catalogue = goog.require('tink.Catalogue');
 const KeyManager = goog.require('tink.KeyManager');
-const KeysetHandle = goog.require('tink.KeysetHandle');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const SecurityException = goog.require('tink.exception.SecurityException');
-const Util = goog.require('tink.Util');
 
 /**
  * Registry for KeyManagers.
@@ -189,56 +186,6 @@ class Registry {
 
     const manager = Registry.getKeyManager(opt_typeUrl);
     return await manager.getPrimitive(primitiveType, key);
-  }
-
-  /**
-   * Creates a set of primitives corresponding to the keys with status Enabled
-   * in the given keysetHandle, assuming all the correspoding key managers are
-   * present (keys with status different from Enabled are skipped). If provided
-   * uses customKeyManager instead of registered key managers for keys supported
-   * by the customKeyManager.
-   *
-   * @template P
-   * @static
-   *
-   * @param {!Object} primitiveType
-   * @param {!KeysetHandle} keysetHandle
-   * @param {?KeyManager.KeyManager<P>=} opt_customKeyManager
-   *
-   * @return {!Promise.<!PrimitiveSet.PrimitiveSet<P>>}
-   */
-  static async getPrimitives(
-      primitiveType, keysetHandle, opt_customKeyManager) {
-    if (!keysetHandle) {
-      throw new SecurityException('Keyset handle has to be non-null.');
-    }
-    Util.validateKeyset(keysetHandle.getKeyset());
-    const primitives = new PrimitiveSet.PrimitiveSet(primitiveType);
-
-    const keys = keysetHandle.getKeyset().getKeyList();
-    const keysLength = keys.length;
-    for (let i = 0; i < keysLength; i++) {
-      const key = keys[i];
-      if (key.getStatus() === PbKeyStatusType.ENABLED) {
-        const keyData = key.getKeyData();
-        if (!keyData) {
-          throw new SecurityException('Key data has to be non null.');
-        }
-        let primitive;
-        if (opt_customKeyManager &&
-            opt_customKeyManager.getKeyType() === keyData.getTypeUrl()) {
-          primitive =
-              await opt_customKeyManager.getPrimitive(primitiveType, keyData);
-        } else {
-          primitive = await Registry.getPrimitive(primitiveType, keyData);
-        }
-        const entry = primitives.addPrimitive(primitive, key);
-        if (key.getKeyId() === keysetHandle.getKeyset().getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
-        }
-      }
-    }
-    return primitives;
   }
 
   /**

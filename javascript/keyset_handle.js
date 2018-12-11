@@ -15,10 +15,15 @@
 goog.module('tink.KeysetHandle');
 
 const Aead = goog.require('tink.Aead');
+const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const KeyManager = goog.require('tink.KeyManager');
 const KeysetReader = goog.require('tink.KeysetReader');
 const KeysetWriter = goog.require('tink.KeysetWriter');
+const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Util = goog.require('tink.Util');
 
@@ -66,6 +71,71 @@ class KeysetHandle {
     throw new SecurityException(
         'KeysetHandle -- generateNew: Not implemented yet.');
   }
+
+  /**
+   * Returns a primitive that uses key material from this keyset handle. If
+   * opt_customKeyManager is defined then the provided key manager is used to
+   * instantiate primitives. Otherwise key manager from Registry is used.
+   *
+   * @template P
+   *
+   * @param {!Object} primitiveType
+   * @param {?KeyManager.KeyManager<P>=} opt_customKeyManager
+   *
+   * @return {!Promise<!P>}
+   */
+  async getPrimitive(primitiveType, opt_customKeyManager) {
+    if (!primitiveType) {
+      throw new InvalidArgumentsException('primitive type must be non-null');
+    }
+    const primitiveSet =
+        await this.getPrimitiveSet_(primitiveType, opt_customKeyManager);
+    return Registry.wrap(primitiveSet);
+  }
+
+  /**
+   * Creates a set of primitives corresponding to the keys with status Enabled
+   * in the given keysetHandle, assuming all the correspoding key managers are
+   * present (keys with status different from Enabled are skipped). If provided
+   * uses customKeyManager instead of registered key managers for keys supported
+   * by the customKeyManager.
+   *
+   * @template P
+   * @private
+   *
+   * @param {!Object} primitiveType
+   * @param {?KeyManager.KeyManager<P>=} opt_customKeyManager
+   *
+   * @return {!Promise.<!PrimitiveSet.PrimitiveSet<P>>}
+   */
+  async getPrimitiveSet_(primitiveType, opt_customKeyManager) {
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(primitiveType);
+    const keys = this.keyset_.getKeyList();
+    const keysLength = keys.length;
+    for (let i = 0; i < keysLength; i++) {
+      const key = keys[i];
+      if (key.getStatus() === PbKeyStatusType.ENABLED) {
+        const keyData = key.getKeyData();
+        if (!keyData) {
+          throw new SecurityException('Key data has to be non null.');
+        }
+        let primitive;
+        if (opt_customKeyManager &&
+            opt_customKeyManager.getKeyType() === keyData.getTypeUrl()) {
+          primitive =
+              await opt_customKeyManager.getPrimitive(primitiveType, keyData);
+        } else {
+          primitive = await Registry.getPrimitive(primitiveType, keyData);
+        }
+        const entry = primitiveSet.addPrimitive(primitive, key);
+        if (key.getKeyId() === this.keyset_.getPrimaryKeyId()) {
+          primitiveSet.setPrimary(entry);
+        }
+      }
+    }
+    return primitiveSet;
+  }
+
 
   /**
    * Encrypts the underlying keyset with the provided masterKeyAead wnd writes

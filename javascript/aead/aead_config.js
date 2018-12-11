@@ -15,12 +15,14 @@
 goog.module('tink.aead.AeadConfig');
 
 const AeadCatalogue = goog.require('tink.aead.AeadCatalogue');
+const AeadWrapper = goog.require('tink.aead.AeadWrapper');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const Config = goog.require('tink.Config');
 const PbKeyTypeEntry = goog.require('proto.google.crypto.tink.KeyTypeEntry');
 const PbRegistryConfig = goog.require('proto.google.crypto.tink.RegistryConfig');
 const Registry = goog.require('tink.Registry');
+
 
 /**
  * Static methods and constants for registering with the Registry all instances
@@ -61,6 +63,7 @@ class AeadConfig {
   static register() {
     // TODO MacConfig.register() should be here.
     Registry.addCatalogue(AeadConfig.CATALOGUE_NAME, new AeadCatalogue());
+    Registry.registerPrimitiveWrapper(new AeadWrapper());
     Config.register(AeadConfig.latest());
   }
 

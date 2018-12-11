@@ -40,15 +40,6 @@ testSuite({
     Registry.reset();
   },
 
-  async testGetPrimitive_nullKeysetHandle() {
-    try {
-      await HybridEncryptFactory.getPrimitive(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(ExceptionText.nullKeysetHandle(), e.toString());
-    }
-  },
-
   async testGetPrimitive_keysetContainsKeyCorrespondingToDifferentPrimitive() {
     const keyset = createKeysetAndInitializeRegistry();
 

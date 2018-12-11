@@ -19,7 +19,9 @@ const Config = goog.require('tink.Config');
 const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const HybridDecryptCatalogue = goog.require('tink.hybrid.HybridDecryptCatalogue');
+const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');
 const HybridEncryptCatalogue = goog.require('tink.hybrid.HybridEncryptCatalogue');
+const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const PbKeyTypeEntry = goog.require('proto.google.crypto.tink.KeyTypeEntry');
 const PbRegistryConfig = goog.require('proto.google.crypto.tink.RegistryConfig');
 const Registry = goog.require('tink.Registry');
@@ -62,7 +64,9 @@ const latest = function() {
 const register = function() {
   AeadConfig.register();
   Registry.addCatalogue(ENCRYPT_CATALOGUE_NAME, new HybridEncryptCatalogue());
+  Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
   Registry.addCatalogue(DECRYPT_CATALOGUE_NAME, new HybridDecryptCatalogue());
+  Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
   Config.register(latest());
 };
 

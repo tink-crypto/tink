@@ -34,15 +34,6 @@ testSuite({
     await Registry.reset();
   },
 
-  async testGetPrimitive_nullKeysetHandle() {
-    try {
-      await AeadFactory.getPrimitive(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(ExceptionText.nullKeysetHandle(), e.toString());
-    }
-  },
-
   async testGetPrimitive_badType() {
     const keyset = createKeysetAndInitializeRegistry();
 
