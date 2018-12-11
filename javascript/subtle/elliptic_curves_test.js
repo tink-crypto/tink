@@ -366,6 +366,36 @@ testSuite({
       assertObjectEquals(point, decodedPoint);
     }
   },
+
+  testEcdsaDer2Ieee() {
+    for (let test of ECDSA_IEEE_DER_TEST_VECTORS) {
+      assertObjectEquals(
+          test.ieee, EllipticCurves.ecdsaDer2Ieee(test.der, test.ieee.length));
+    }
+  },
+
+  testEcdsaDer2IeeeWithInvalidSignatures() {
+    for (let test of INVALID_DER_ECDSA_SIGNATURES) {
+      try {
+        EllipticCurves.ecdsaDer2Ieee(
+            Bytes.fromHex(test), 1 /* ieeeLength, ignored */);
+      } catch (e) {
+        assertEquals('CustomError: invalid DER signature', e.toString());
+      }
+    }
+  },
+
+  testEcdsaIeee2Der() {
+    for (let test of ECDSA_IEEE_DER_TEST_VECTORS) {
+      assertObjectEquals(test.der, EllipticCurves.ecdsaIeee2Der(test.ieee));
+    }
+  },
+
+  testIsValidDerEcdsaSignature() {
+    for (let test of INVALID_DER_ECDSA_SIGNATURES) {
+      assertFalse(EllipticCurves.isValidDerEcdsaSignature(Bytes.fromHex(test)));
+    }
+  },
 });
 
 /**
@@ -467,4 +497,52 @@ const TEST_KEYS = [
       '0036bea90db019304719d269e5335f9790e730e241a1b02cfdab8bdcfd0bcff8bdcb3ddeb9c3a94ecff1ab6abb80b0c1655f871c6089d3a4bf8625cf6bd182897f1b',
       /* opt_d = */
       '00b9f9f5d91cbfa9b7f92b041b137ac9822ca4a38f71ce227f624cac6178ca8351fab24bc2cc3f85d7ab72f54a0f9d1bb11a888a79a9c7b1ca267ddc82043585e437')
+];
+
+class EcdsaIeeeDerTestVector {
+  /**
+   * @param {string} ieee
+   * @param {string} der
+   */
+  constructor(ieee, der) {
+    /** @const {!Uint8Array} */
+    this.ieee = Bytes.fromHex(ieee);
+    /** @const {!Uint8Array} */
+    this.der = Bytes.fromHex(der);
+  }
+}
+
+/** {!Array<!EcdsaIeeeDerTestVector>} */
+const ECDSA_IEEE_DER_TEST_VECTORS = [
+  new EcdsaIeeeDerTestVector(  // normal case, short-form length
+      '0102030405060708090a0b0c0d0e0f100102030405060708090a0b0c0d0e0f10',
+      '302402100102030405060708090a0b0c0d0e0f1002100102030405060708090a0b0c0d0e0f10'),
+  new EcdsaIeeeDerTestVector(  // normal case, long-form length
+      '010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000203010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000203',
+      '30818802420100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000002030242010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000203'),
+  new EcdsaIeeeDerTestVector(  // zero prefix.
+      '0002030405060708090a0b0c0d0e0f100002030405060708090a0b0c0d0e0f10',
+      '3022020f02030405060708090a0b0c0d0e0f10020f02030405060708090a0b0c0d0e0f10'),
+  new EcdsaIeeeDerTestVector(  // highest bit is set.
+      '00ff030405060708090a0b0c0d0e0f1000ff030405060708090a0b0c0d0e0f10',
+      '3024021000ff030405060708090a0b0c0d0e0f10021000ff030405060708090a0b0c0d0e0f10'),
+  new EcdsaIeeeDerTestVector(  // highest bit is set, full length.
+      'ff02030405060708090a0b0c0d0e0f10ff02030405060708090a0b0c0d0e0f10',
+      '3026021100ff02030405060708090a0b0c0d0e0f10021100ff02030405060708090a0b0c0d0e0f10'),
+  new EcdsaIeeeDerTestVector(  // all zeros.
+      '0000000000000000000000000000000000000000000000000000000000000000',
+      '3006020100020100'),
+];
+
+/** {!Array<string>} */
+const INVALID_DER_ECDSA_SIGNATURES = [
+  '2006020101020101',    // 1st byte is not 0x30 (SEQUENCE tag)
+  '3006050101020101',    // 3rd byte is not 0x02 (INTEGER tag)
+  '3006020101050101',    // 6th byte is not 0x02 (INTEGER tag)
+  '308206020101020101',  // long form length is not 0x81
+  '30ff020101020101',    // invalid total length
+  '3006020201020101',    // invalid rLength
+  '3006020101020201',    // invalid sLength
+  '30060201ff020101',    // no extra zero when highest bit of r is set
+  '30060201010201ff',    // no extra zero when highest bit of s is set
 ];
