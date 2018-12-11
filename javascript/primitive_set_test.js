@@ -32,7 +32,7 @@ testSuite({
     const primitive = new DummyAead1();
     const key = createKey();
     key.setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
     try {
       primitiveSet.addPrimitive(primitive, key);
@@ -46,7 +46,7 @@ testSuite({
   testAddPrimitiveNullPrimitive() {
     const primitive = null;
     const key = createKey();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
     try {
       primitiveSet.addPrimitive(primitive, key);
@@ -59,7 +59,7 @@ testSuite({
 
   testAddPrimitiveNullKey() {
     const primitive = new DummyAead1();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
     try {
       primitiveSet.addPrimitive(primitive, null);
@@ -72,7 +72,7 @@ testSuite({
 
   testAddPrimitiveMultipleTimesShouldWork() {
     const key = createKey();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
     for (let i = 0; i < 4; i++) {
       let primitive;
@@ -108,7 +108,7 @@ testSuite({
   testGetPrimitivesDifferentIdentifiers() {
     // Fill in the structure with some primitives.
     const n = 100;
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
     let added = [];
     for (let id = 0; id < n; id++) {
@@ -203,7 +203,7 @@ testSuite({
   /////////////////////////////////////////////////////////////////////////////
   // tests for setPrimary and getPrimary methods
   testSetPrimaryToNull() {
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     try {
       primitiveSet.setPrimary(null);
     } catch (e) {
@@ -214,7 +214,7 @@ testSuite({
   },
 
   testSetPrimaryToNonholdedEntry() {
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     const entry = new PrimitiveSet.Entry(
         new DummyAead1(), new Uint8Array(10), PbKeyStatusType.ENABLED,
         PbOutputPrefixType.TINK);
@@ -231,7 +231,7 @@ testSuite({
   testSetPrimaryToEntryWithDisabledKeyStatus() {
     const key = createKey(/* opt_keyId = */ 0x12345678,
         /* opt_legacy = */ false, /* opt_enabled = */ false);
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
     const primary = primitiveSet.addPrimitive(new DummyAead1(), key);
 
@@ -245,7 +245,7 @@ testSuite({
   },
 
   testSetAndGetPrimary() {
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     assertEquals(null, primitiveSet.getPrimary());
 
     const key1 = createKey(/* opt_keyId = */ 0xBBBCCC);
@@ -268,7 +268,7 @@ testSuite({
   },
 
   testSetPrimary_rawPrimitives() {
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     for (let i = 0; i < 3; i++) {
       const key = createKey(/* opt_keyId = */ i);
       key.setOutputPrefixType(PbOutputPrefixType.RAW);
@@ -280,6 +280,12 @@ testSuite({
         primitiveSet.addPrimitive(new DummyAead1(), primaryKey);
     primitiveSet.setPrimary(primaryEntry);
   },
+
+  testGetPrimaryType() {
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
+    assertObjectEquals(Aead, primitiveSet.getPrimitiveType());
+  },
+
 });
 
 // Helper classes and functions used for testing purposes.
@@ -368,7 +374,7 @@ class DummyAead2 {
  * @return {!PrimitiveSet.PrimitiveSet}
  */
 const initPrimitiveSet = function(n) {
-  let primitiveSet = new PrimitiveSet.PrimitiveSet();
+  let primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
   // Set primary.
   const primaryKey = createKey(/* opt_id = */ 0, /* opt_legacy = */ false,

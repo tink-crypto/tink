@@ -42,6 +42,7 @@ const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const PbMessage = goog.require('jspb.Message');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const testSuite = goog.require('goog.testing.testSuite');
@@ -126,7 +127,76 @@ testSuite({
     }
   },
 
+  /////////////////////////////////////////////////////////////////////////////
+  // tests for registerPrimitiveWrapper method
+  testRegisterPrimitiveWrapper_emptyManager() {
+    try {
+      Registry.registerPrimitiveWrapper(null);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: primitive wrapper cannot be null', e.toString());
+    }
+  },
 
+  testRegisterPrimitiveWrapper_overwritingWithSameClass() {
+    const primitive = 'somePrimitive';
+    const primitiveType = 'somePrimitiveType';
+    Registry.registerPrimitiveWrapper(
+        new DummyPrimitiveWrapper1(primitive, primitiveType));
+    Registry.registerPrimitiveWrapper(
+        new DummyPrimitiveWrapper1(primitive, primitiveType));
+  },
+
+  testRegisterPrimitiveWrapper_overwritingWithDifferentClass() {
+    const primitive = 'somePrimitive';
+    const primitiveType = 'somePrimitiveType';
+    Registry.registerPrimitiveWrapper(
+        new DummyPrimitiveWrapper1(primitive, primitiveType));
+    try {
+      Registry.registerPrimitiveWrapper(
+          new DummyPrimitiveWrapper2(primitive, primitiveType));
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: primitive wrapper for type ' + primitiveType +
+              ' has already been registered and cannot be overwritten',
+          e.toString());
+    }
+  },
+
+  /////////////////////////////////////////////////////////////////////////////
+  // tests for wrap method
+  testWrap_shouldWork() {
+    const primitive = 'somePrimitive';
+    const primitiveType = 'somePrimitiveType';
+    const numberOfKeyManagers = 10;
+
+    for (let i = 0; i < numberOfKeyManagers; i++) {
+      Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
+          primitive + i.toString(), primitiveType + i.toString()));
+    }
+
+    let result;
+    for (let i = 0; i < numberOfKeyManagers; i++) {
+      result = Registry.wrap(
+          new PrimitiveSet.PrimitiveSet(primitiveType + i.toString()));
+      assertObjectEquals(primitive + i.toString(), result);
+    }
+  },
+
+  testWrap_notRegisteredPrimitiveType() {
+    const primitiveType = 'does not exist';
+
+    try {
+      Registry.wrap(new PrimitiveSet.PrimitiveSet(primitiveType));
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: no primitive wrapper found for type ' + primitiveType,
+          e.toString());
+    }
+  },
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for registerKeyManager  method
@@ -1215,5 +1285,79 @@ class DummyKeyManagerForNewKeyTests {
   /** @override */
   getKeyFactory() {
     return this.KEY_FACTORY_;
+  }
+}
+
+// PrimitiveWrapper classes for testing purposes
+/**
+ * @final
+ * @implements {PrimitiveWrapper<string>}
+ */
+class DummyPrimitiveWrapper1 {
+  /**
+   * @param {string} primitive
+   * @param {?Object} primitiveType
+   */
+  constructor(primitive, primitiveType) {
+    /**
+     * @private @const {string}
+     */
+    this.PRIMITIVE_ = primitive;
+
+    /**
+     * @private @const {!Object}
+     */
+    this.PRIMITIVE_TYPE_ = primitiveType;
+  }
+
+  /**
+   * @override
+   */
+  wrap(primitiveSet) {
+    return this.PRIMITIVE_;
+  }
+
+  /**
+   * @override
+   */
+  getPrimitiveType() {
+    return this.PRIMITIVE_TYPE_;
+  }
+}
+
+// PrimitiveWrapper classes for testing purposes
+/**
+ * @final
+ * @implements {PrimitiveWrapper<string>}
+ */
+class DummyPrimitiveWrapper2 {
+  /**
+   * @param {string} primitive
+   * @param {?Object} primitiveType
+   */
+  constructor(primitive, primitiveType) {
+    /**
+     * @private @const {string}
+     */
+    this.PRIMITIVE_ = primitive;
+
+    /**
+     * @private @const {!Object}
+     */
+    this.PRIMITIVE_TYPE_ = primitiveType;
+  }
+
+  /**
+   * @override
+   */
+  wrap(primitiveSet) {
+    return this.PRIMITIVE_;
+  }
+
+  /**
+   * @override
+   */
+  getPrimitiveType() {
+    return this.PRIMITIVE_TYPE_;
   }
 }

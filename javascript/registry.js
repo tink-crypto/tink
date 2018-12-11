@@ -22,6 +22,7 @@ const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Util = goog.require('tink.Util');
 
@@ -116,14 +117,16 @@ class Registry {
       // Cannot overwrite the existing key manager by a new one.
       if (!(Registry.typeToManagerMap_.get(typeUrl) instanceof
             manager.constructor)) {
-        throw new SecurityException('Key manager for key type ' + typeUrl +
+        throw new SecurityException(
+            'Key manager for key type ' + typeUrl +
             ' has already been registered and cannot be overwritten.');
       }
 
       // It is forbidden to change new_key_allowed from false to true.
       if (!(Registry.typeToNewKeyAllowedMap_.get(typeUrl)) &&
           opt_newKeyAllowed) {
-        throw new SecurityException('Key manager for key type ' + typeUrl +
+        throw new SecurityException(
+            'Key manager for key type ' + typeUrl +
             ' has already been registered with forbidden new key operation.');
       }
       Registry.typeToNewKeyAllowedMap_.set(typeUrl, opt_newKeyAllowed);
@@ -200,7 +203,7 @@ class Registry {
    *
    * @param {!Object} primitiveType
    * @param {!KeysetHandle} keysetHandle
-   * @param {KeyManager.KeyManager<P>=} opt_customKeyManager
+   * @param {?KeyManager.KeyManager<P>=} opt_customKeyManager
    *
    * @return {!Promise.<!PrimitiveSet.PrimitiveSet<P>>}
    */
@@ -210,7 +213,7 @@ class Registry {
       throw new SecurityException('Keyset handle has to be non-null.');
     }
     Util.validateKeyset(keysetHandle.getKeyset());
-    const primitives = new PrimitiveSet.PrimitiveSet();
+    const primitives = new PrimitiveSet.PrimitiveSet(primitiveType);
 
     const keys = keysetHandle.getKeyset().getKeyList();
     const keysLength = keys.length;
@@ -329,22 +332,80 @@ class Registry {
 
     return manager;
   }
+
+  /**
+   * Tries to register a primitive wrapper.
+   *
+   * @template P
+   * @static
+   *
+   * @param {!PrimitiveWrapper<P>} wrapper
+   */
+  static registerPrimitiveWrapper(wrapper) {
+    if (!wrapper) {
+      throw new SecurityException('primitive wrapper cannot be null');
+    }
+    const primitiveType = wrapper.getPrimitiveType();
+    if (!primitiveType) {
+      throw new SecurityException('primitive wrapper cannot be undefined');
+    }
+
+    if (Registry.primitiveTypeToWrapper_.has(primitiveType)) {
+      // Cannot overwrite the existing key manager by a new one.
+      if (!(Registry.primitiveTypeToWrapper_.get(primitiveType) instanceof
+            wrapper.constructor)) {
+        throw new SecurityException(
+            'primitive wrapper for type ' + primitiveType +
+            ' has already been registered and cannot be overwritten');
+      }
+    }
+
+    Registry.primitiveTypeToWrapper_.set(primitiveType, wrapper);
+  }
+
+  /**
+   * Wraps a PrimitiveSet and returns a single instance.
+   *
+   * @template P
+   * @static
+   *
+   * @param {!PrimitiveSet.PrimitiveSet<P>} primitiveSet
+   * @return {!P}
+   */
+  static wrap(primitiveSet) {
+    if (!primitiveSet) {
+      throw new SecurityException('primitive set cannot be null.');
+    }
+    const primitiveType = primitiveSet.getPrimitiveType();
+    const wrapper = Registry.primitiveTypeToWrapper_.get(primitiveType);
+    if (!wrapper) {
+      throw new SecurityException(
+          'no primitive wrapper found for type ' + primitiveType);
+    }
+    return wrapper.wrap(primitiveSet);
+  }
 }
 // key managers maps
 /**
- * @static @private {Map<string,KeyManager.KeyManager>}
+ * @static @private {!Map<string,!KeyManager.KeyManager>}
  *
  */
 Registry.typeToManagerMap_ = new Map();
 /**
- * @static @private {Map<string,boolean>}
+ * @static @private {!Map<string,boolean>}
  */
 Registry.typeToNewKeyAllowedMap_ = new Map();
 
 // catalogues maps
 /**
- * @static @private {Map<string,Catalogue>}
+ * @static @private {!Map<string,!Catalogue>}
  */
 Registry.nameToCatalogueMap_ = new Map();
+
+// primitive wrappers map
+/**
+ * @static @private {!Map<!Object,!PrimitiveWrapper>}
+ */
+Registry.primitiveTypeToWrapper_ = new Map();
 
 exports = Registry;

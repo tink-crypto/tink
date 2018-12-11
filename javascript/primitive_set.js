@@ -96,17 +96,33 @@ class Entry {
  * @final
  */
 class PrimitiveSet {
-  constructor() {
+  /**
+   * @param {!Object} primitiveType
+   */
+  constructor(primitiveType) {
     /**
-     * @private {Entry<P>}
+     * @private {!Object}
+     */
+    this.primitiveType_ = primitiveType;
+    /**
+     * @private {?Entry<P>}
      */
     this.primary_ = null;
     // Keys have to be stored as strings as two Uint8Arrays holding the same
     // digits are still different objects.
     /**
-     * @private {Map<string, !Array<!Entry<P>>>}
+     * @private {!Map<string, !Array<!Entry<P>>>}
      */
     this.identifierToPrimitivesMap_ = new Map();
+  }
+
+  /**
+   * Returns the type of primitives contained in this set.
+   *
+   * @return {!Object}
+   */
+  getPrimitiveType() {
+    return this.primitiveType_;
   }
 
   /**
@@ -137,7 +153,7 @@ class PrimitiveSet {
   /**
    * Returns the entry with the primary primitive.
    *
-   * @return {Entry<P>}
+   * @return {?Entry<P>}
    */
   getPrimary() {
     return this.primary_;
@@ -208,7 +224,7 @@ class PrimitiveSet {
    * @private
    * @param {!Uint8Array|string} identifier
    *
-   * @return {!Array<Entry<P>>|undefined}
+   * @return {!Array<!Entry<P>>|undefined}
    */
   getPrimitivesFromMap_(identifier) {
     if (identifier instanceof Uint8Array) {
