@@ -22,7 +22,7 @@ const Random = goog.require('tink.subtle.Random');
 const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
-const wycheproofTestVectors = goog.require('tink.subtle.webcrypto.wycheproofTestVectors');
+const wycheproofEcdhTestVectors = goog.require('tink.subtle.wycheproofEcdhTestVectors');
 
 testSuite({
   shouldRunTests() {
@@ -51,7 +51,7 @@ testSuite({
   },
 
   async testWycheproof_wycheproofWebcrypto() {
-    for (let testGroup of wycheproofTestVectors['testGroups']) {
+    for (let testGroup of wycheproofEcdhTestVectors['testGroups']) {
       let errors = '';
       for (let test of testGroup['tests']) {
         errors += await runWycheproofTest(test);

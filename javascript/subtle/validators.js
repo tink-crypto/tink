@@ -18,7 +18,7 @@ const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsE
 const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
- * @const @public {Array.<number>}
+ * @const @public {!Array.<number>}
  */
 const SUPPORTED_AES_KEY_SIZES = [16, 32];
 
@@ -27,7 +27,7 @@ const SUPPORTED_AES_KEY_SIZES = [16, 32];
  * supported.
  *
  * @param {number} n the key size in bytes
- * @throws {InvalidArgumentsException}
+ * @throws {!InvalidArgumentsException}
  * @static
  */
 const validateAesKeySize = function(n) {
@@ -40,7 +40,7 @@ const validateAesKeySize = function(n) {
  * Validates that the input is a non null Uint8Array.
  *
  * @param {!Uint8Array} input
- * @throws {InvalidArgumentsException}
+ * @throws {!InvalidArgumentsException}
  * @static
  */
 const requireUint8Array = function(input) {
@@ -55,7 +55,7 @@ const requireUint8Array = function(input) {
  *
  * @param {number} candidate - version to be validated
  * @param {number} maxVersion - upper bound on version
- * @throws {SecurityException}
+ * @throws {!SecurityException}
  * @static
  */
 const validateVersion = function(candidate, maxVersion) {
@@ -66,8 +66,41 @@ const validateVersion = function(candidate, maxVersion) {
   }
 };
 
+/**
+ * Validates ECDSA parameters.
+ *
+ * @param {string} curve
+ * @param {string} hash
+ * @throws {!SecurityException}
+ */
+const validateEcdsaParams = function(curve, hash) {
+  switch (curve) {
+    case 'P-256':
+      if (hash != 'SHA-256') {
+        throw new SecurityException(
+            'expected SHA-256 hash (because curve is P-256) but got ' + hash);
+      }
+      break;
+    case 'P-384':
+      if (hash != 'SHA-384') {
+        throw new SecurityException(
+            'expected SHA-384 hash (because curve is P-384) but got ' + hash);
+      }
+      break;
+    case 'P-521':
+      if (hash != 'SHA-512') {
+        throw new SecurityException(
+            'expected SHA-512 hash (because curve is P-521) but got ' + hash);
+      }
+      break;
+    default:
+      throw new SecurityException('unsupported curve: ' + curve);
+  }
+};
+
 exports = {
   validateAesKeySize,
+  validateEcdsaParams,
   requireUint8Array,
   validateVersion
 };
