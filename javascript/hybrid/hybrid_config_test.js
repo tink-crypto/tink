@@ -18,8 +18,8 @@ goog.setTestOnly('tink.hybrid.HybridConfigTest');
 const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
-const HybridDecryptFactory = goog.require('tink.hybrid.HybridDecryptFactory');
-const HybridEncryptFactory = goog.require('tink.hybrid.HybridEncryptFactory');
+const HybridDecrypt = goog.require('tink.HybridDecrypt');
+const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
@@ -147,13 +147,13 @@ testSuite({
       const privateKeyData = await Registry.newKeyData(template);
       const privateKeysetHandle = createKeysetHandleFromKeyData(privateKeyData);
       const hybridDecrypt =
-          await HybridDecryptFactory.getPrimitive(privateKeysetHandle);
+          await privateKeysetHandle.getPrimitive(HybridDecrypt);
 
       const publicKeyData = Registry.getPublicKeyData(
           privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
       const publicKeysetHandle = createKeysetHandleFromKeyData(publicKeyData);
       const hybridEncrypt =
-          await HybridEncryptFactory.getPrimitive(publicKeysetHandle);
+          await publicKeysetHandle.getPrimitive(HybridEncrypt);
 
       const plaintext = new Uint8Array(Random.randBytes(10));
       const contextInfo = new Uint8Array(Random.randBytes(8));

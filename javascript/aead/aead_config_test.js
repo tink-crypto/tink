@@ -15,8 +15,8 @@
 goog.module('tink.aead.AeadConfigTest');
 goog.setTestOnly('tink.aead.AeadConfigTest');
 
+const Aead = goog.require('tink.Aead');
 const AeadConfig = goog.require('tink.aead.AeadConfig');
-const AeadFactory = goog.require('tink.aead.AeadFactory');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
@@ -134,7 +134,7 @@ testSuite({
       const keyData = await Registry.newKeyData(template);
       const keysetHandle = createKeysetHandleFromKeyData(keyData);
 
-      const aead = await AeadFactory.getPrimitive(keysetHandle);
+      const aead = await keysetHandle.getPrimitive(Aead);
       const plaintext = Random.randBytes(10);
       const aad = Random.randBytes(8);
       const ciphertext = await aead.encrypt(plaintext, aad);
