@@ -29,6 +29,7 @@ const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const TestCase = goog.require('goog.testing.TestCase');
+const Util = goog.require('tink.Util');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
 
@@ -47,7 +48,7 @@ testSuite({
     TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
   },
 
-  async testGetJsonKeyFromProto_publicKey() {
+  async testGetJsonWebKeyFromProto_publicKey() {
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
@@ -55,10 +56,10 @@ testSuite({
         continue;
       }
       const key = await createKey(curve);
-      const jwk = EciesAeadHkdfUtil.getJsonKeyFromProto(key.getPublicKey());
+      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key.getPublicKey());
 
       // Test the returned jwk.
-      const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(curve);
+      const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
       const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
 
       assertEquals('EC', jwk['kty']);
@@ -74,7 +75,7 @@ testSuite({
     }
   },
 
-  async testGetJsonKeyFromProto_publicKey_withLeadingZeros() {
+  async testGetJsonWebKeyFromProto_publicKey_withLeadingZeros() {
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
@@ -87,10 +88,10 @@ testSuite({
       const y = key.getPublicKey().getY();
       key.getPublicKey().setX(Bytes.concat(new Uint8Array([0, 0, 0, 0, 0]), x));
       key.getPublicKey().setY(Bytes.concat(new Uint8Array([0, 0, 0]), y));
-      const jwk = EciesAeadHkdfUtil.getJsonKeyFromProto(key.getPublicKey());
+      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key.getPublicKey());
 
       // Test the returned jwk.
-      const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(curve);
+      const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
       const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
 
       assertEquals('EC', jwk['kty']);
@@ -104,13 +105,13 @@ testSuite({
     }
   },
 
-  async testGetJsonKeyFromProto_publicKey_leadingNonzero() {
+  async testGetJsonWebKeyFromProto_publicKey_leadingNonzero() {
     const curve = PbEllipticCurveType.NIST_P256;
     const key = await createKey(curve);
     const x = key.getPublicKey().getX();
     key.getPublicKey().setX(Bytes.concat(new Uint8Array([1, 0]), x));
     try {
-      EciesAeadHkdfUtil.getJsonKeyFromProto(key.getPublicKey());
+      EciesAeadHkdfUtil.getJsonWebKeyFromProto(key.getPublicKey());
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
@@ -119,7 +120,7 @@ testSuite({
     }
   },
 
-  async testGetJsonKeyFromProto_privateKey() {
+  async testGetJsonWebKeyFromProto_privateKey() {
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
@@ -127,10 +128,10 @@ testSuite({
         continue;
       }
       const key = await createKey(curve);
-      const jwk = EciesAeadHkdfUtil.getJsonKeyFromProto(key);
+      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key);
 
       // Test the returned jwk.
-      const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(curve);
+      const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
       const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
 
       assertEquals('EC', jwk['kty']);
@@ -148,7 +149,7 @@ testSuite({
     }
   },
 
-  async testGetJsonKeyFromProto_privateKey_leadingZeros() {
+  async testGetJsonWebKeyFromProto_privateKey_leadingZeros() {
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
@@ -158,10 +159,10 @@ testSuite({
       const key = await createKey(curve);
       const d = key.getKeyValue_asU8();
       key.setKeyValue(Bytes.concat(new Uint8Array([0, 0, 0]), d));
-      const jwk = EciesAeadHkdfUtil.getJsonKeyFromProto(key);
+      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key);
 
       // Test the returned jwk.
-      const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(curve);
+      const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
       const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
 
       assertEquals('EC', jwk['kty']);
@@ -177,51 +178,11 @@ testSuite({
       assertTrue(jwk['ext']);
     }
   },
-
-  // tests for protoToSubtle methods
-  testCurveTypeProtoToSubtle() {
-    assertEquals(
-        EllipticCurves.CurveType.P256,
-        EciesAeadHkdfUtil.curveTypeProtoToSubtle(
-            PbEllipticCurveType.NIST_P256));
-    assertEquals(
-        EllipticCurves.CurveType.P384,
-        EciesAeadHkdfUtil.curveTypeProtoToSubtle(
-            PbEllipticCurveType.NIST_P384));
-    assertEquals(
-        EllipticCurves.CurveType.P521,
-        EciesAeadHkdfUtil.curveTypeProtoToSubtle(
-            PbEllipticCurveType.NIST_P521));
-  },
-
-  testPointFormatProtoToSubtle() {
-    assertEquals(
-        EllipticCurves.PointFormatType.UNCOMPRESSED,
-        EciesAeadHkdfUtil.pointFormatProtoToSubtle(PbPointFormat.UNCOMPRESSED));
-    assertEquals(
-        EllipticCurves.PointFormatType.COMPRESSED,
-        EciesAeadHkdfUtil.pointFormatProtoToSubtle(PbPointFormat.COMPRESSED));
-    assertEquals(
-        EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
-        EciesAeadHkdfUtil.pointFormatProtoToSubtle(
-            PbPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
-  },
-
-  testHashTypeProtoToString() {
-    assertEquals(
-        'SHA-1', EciesAeadHkdfUtil.hashTypeProtoToString(PbHashType.SHA1));
-    assertEquals(
-        'SHA-256', EciesAeadHkdfUtil.hashTypeProtoToString(PbHashType.SHA256));
-    assertEquals(
-        'SHA-512', EciesAeadHkdfUtil.hashTypeProtoToString(PbHashType.SHA512));
-  },
-
-
 });
 
 /**
- * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
  *
  * @return {!PbEciesHkdfKemParams}
  */
@@ -253,10 +214,10 @@ const createDemParams = function(opt_keyTemplate) {
 };
 
 /**
- * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
  * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
+ * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
  *
  * @return {!PbEciesAeadHkdfParams}
  */
@@ -274,18 +235,18 @@ const createKeyParams = function(
 
 
 /**
- * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
  * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
+ * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
  *
  * @return {!Promise<!PbEciesAeadHkdfPrivateKey>}
  */
 const createKey = async function(
     opt_curveType = PbEllipticCurveType.NIST_P256, opt_hashType,
     opt_keyTemplate, opt_pointFormat) {
-  const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(
-      /** @type {PbEllipticCurveType} */ (opt_curveType));
+  const curveTypeSubtle = Util.curveTypeProtoToSubtle(
+      /** @type {!PbEllipticCurveType} */ (opt_curveType));
   const curveName = EllipticCurves.curveToString(curveTypeSubtle);
 
   const publicKeyProto = new PbEciesAeadHkdfPublicKey();

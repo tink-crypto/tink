@@ -14,9 +14,14 @@
 
 goog.module('tink.Util');
 
+const Bytes = goog.require('tink.subtle.Bytes');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
+const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
@@ -73,7 +78,94 @@ const validateKeyset = function(keyset) {
   }
 };
 
+// Functions which are useful for implementation of
+// private and public EC keys.
+
+/**
+ * Either prolong or shrinks the array representing number in BigEndian encoding
+ * to have the specified size. As webcrypto API assumes that x, y and d values
+ * has exactly the supposed number of bytes, whereas corresponding x, y and
+ * keyValue values in proto might either have some leading zeros or the leading
+ * zeros might be missing.
+ *
+ * @param {!Uint8Array} bigEndianNumber
+ * @param {number} sizeInBytes
+ * @return {!Uint8Array}
+ */
+const bigEndianNumberToCorrectLength = function(bigEndianNumber, sizeInBytes) {
+  const numberLen = bigEndianNumber.length;
+  if (numberLen < sizeInBytes) {
+    const zeros = new Uint8Array(sizeInBytes - numberLen);
+    return Bytes.concat(zeros, bigEndianNumber);
+  }
+  if (numberLen > sizeInBytes) {
+    for (let i = 0; i < numberLen - sizeInBytes; i++) {
+      if (bigEndianNumber[i] != 0) {
+        throw new SecurityException(
+            'Number needs more bytes to be represented.');
+      }
+    }
+    return bigEndianNumber.slice(numberLen - sizeInBytes, numberLen);
+  }
+  return bigEndianNumber;
+};
+
+/**
+ * @param {!PbEllipticCurveType} curveTypeProto
+ * @return {!EllipticCurves.CurveType}
+ */
+const curveTypeProtoToSubtle = function(curveTypeProto) {
+  switch (curveTypeProto) {
+    case PbEllipticCurveType.NIST_P256:
+      return EllipticCurves.CurveType.P256;
+    case PbEllipticCurveType.NIST_P384:
+      return EllipticCurves.CurveType.P384;
+    case PbEllipticCurveType.NIST_P521:
+      return EllipticCurves.CurveType.P521;
+    default:
+      throw new SecurityException('Unknown curve type.');
+  }
+};
+
+/**
+ * @param {!PbHashType} hashTypeProto
+ * @return {string}
+ */
+const hashTypeProtoToString = function(hashTypeProto) {
+  switch (hashTypeProto) {
+    case PbHashType.SHA1:
+      return 'SHA-1';
+    case PbHashType.SHA256:
+      return 'SHA-256';
+    case PbHashType.SHA512:
+      return 'SHA-512';
+    default:
+      throw new SecurityException('Unknown hash type.');
+  }
+};
+
+/**
+ * @param {!PbPointFormat} pointFormatProto
+ * @return {!EllipticCurves.PointFormatType}
+ */
+const pointFormatProtoToSubtle = function(pointFormatProto) {
+  switch (pointFormatProto) {
+    case PbPointFormat.UNCOMPRESSED:
+      return EllipticCurves.PointFormatType.UNCOMPRESSED;
+    case PbPointFormat.COMPRESSED:
+      return EllipticCurves.PointFormatType.COMPRESSED;
+    case PbPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+      return EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
+    default:
+      throw new SecurityException('Unknown point format.');
+  }
+};
+
 exports = {
+  bigEndianNumberToCorrectLength,
+  curveTypeProtoToSubtle,
+  hashTypeProtoToString,
+  pointFormatProtoToSubtle,
   validateKey,
   validateKeyset,
 };

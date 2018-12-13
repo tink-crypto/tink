@@ -26,6 +26,7 @@ const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const Util = goog.require('tink.Util');
 
 /**
  * @implements {KeyManager.KeyFactory}
@@ -68,15 +69,15 @@ class EciesAeadHkdfPublicKeyManager {
     const keyProto = EciesAeadHkdfPublicKeyManager.getKeyProto_(key);
     EciesAeadHkdfValidators.validatePublicKey(keyProto, this.getVersion());
 
-    const recepientPublicKey = EciesAeadHkdfUtil.getJsonKeyFromProto(keyProto);
+    const recepientPublicKey = EciesAeadHkdfUtil.getJsonWebKeyFromProto(keyProto);
     const params = /** @type{!PbEciesAeadHkdfParams} */ (keyProto.getParams());
     const keyTemplate =
         /** @type {!PbKeyTemplate} */ (params.getDemParams().getAeadDem());
     const demHelper = new RegistryEciesAeadHkdfDemHelper(keyTemplate);
     const pointFormat =
-        EciesAeadHkdfUtil.pointFormatProtoToSubtle(params.getEcPointFormat());
-    const hkdfHash = EciesAeadHkdfUtil.hashTypeProtoToString(
-        params.getKemParams().getHkdfHashType());
+        Util.pointFormatProtoToSubtle(params.getEcPointFormat());
+    const hkdfHash =
+        Util.hashTypeProtoToString(params.getKemParams().getHkdfHashType());
     const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
 
     return await EciesAeadHkdfHybridEncrypt.newInstance(

@@ -14,89 +14,13 @@
 
 goog.module('tink.hybrid.EciesAeadHkdfUtil');
 
-const Bytes = goog.require('tink.subtle.Bytes');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const PbEciesAeadHkdfPrivateKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPrivateKey');
 const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const Util = goog.require('tink.Util');
 
 // This file contains only functions which are useful for implementation of
 // private and public ECIES AEAD HKDF key manager.
-
-
-/**
- * @package
- * @param {!PbEllipticCurveType} curveTypeProto
- * @return {!EllipticCurves.CurveType}
- */
-const curveTypeProtoToSubtle = function(curveTypeProto) {
-  switch (curveTypeProto) {
-    case PbEllipticCurveType.NIST_P256:
-      return EllipticCurves.CurveType.P256;
-    case PbEllipticCurveType.NIST_P384:
-      return EllipticCurves.CurveType.P384;
-    case PbEllipticCurveType.NIST_P521:
-      return EllipticCurves.CurveType.P521;
-    default:
-      throw new SecurityException('Unknown curve type.');
-  }
-};
-
-/**
- * @private
- * @param {EllipticCurves.CurveType} curve
- * @param {!Uint8Array} x
- * @param {!Uint8Array} y
- * @param {?Uint8Array=} d
- *
- * @return {!webCrypto.JsonWebKey}
- */
-const getJsonKey = function(curve, x, y, d) {
-  const key = /** @type {!webCrypto.JsonWebKey} */ ({
-    'kty': 'EC',
-    'crv': EllipticCurves.curveToString(curve),
-    'x': Bytes.toBase64(x, true /* websafe */),
-    'y': Bytes.toBase64(y, true /* websafe */),
-    'ext': true,
-  });
-  if (d) {
-    key['d'] = Bytes.toBase64(d, true /* websafe */);
-  }
-  return key;
-};
-
-/**
- * Either prolong or shrinks the array representing number in BigEndian encoding
- * to have the specified size. As webcrypto API assumes that x, y and d values
- * has exactly the supposed number of bytes, whereas corresponding x, y and
- * keyValue values in proto might either have some leading zeros or the leading
- * zeros might be missing.
- *
- * @private
- * @param {!Uint8Array} bigEndianNumber
- * @param {number} sizeInBytes
- * @return {!Uint8Array}
- */
-const bigEndianNumberToCorrectLength = function(bigEndianNumber, sizeInBytes) {
-  const numberLen = bigEndianNumber.length;
-  if (numberLen < sizeInBytes) {
-    const zeros = new Uint8Array(sizeInBytes - numberLen);
-    return Bytes.concat(zeros, bigEndianNumber);
-  }
-  if (numberLen > sizeInBytes) {
-    for (let i = 0; i < numberLen - sizeInBytes; i++) {
-      if (bigEndianNumber[i] != 0) {
-        throw new SecurityException(
-            'Number needs more bytes to be represented.');
-      }
-    }
-    return bigEndianNumber.slice(numberLen - sizeInBytes, numberLen);
-  }
-  return bigEndianNumber;
-};
 
 /**
  * WARNING: This method assumes that the given key proto is valid.
@@ -105,7 +29,7 @@ const bigEndianNumberToCorrectLength = function(bigEndianNumber, sizeInBytes) {
  * @param {!PbEciesAeadHkdfPrivateKey|!PbEciesAeadHkdfPublicKey} key
  * @return {!webCrypto.JsonWebKey}
  */
-const getJsonKeyFromProto = function(key) {
+const getJsonWebKeyFromProto = function(key) {
   let /** @type {!PbEciesAeadHkdfPublicKey} */ publicKey;
   let /** @type {!Uint8Array} */ d;
   if (key instanceof PbEciesAeadHkdfPrivateKey) {
@@ -114,56 +38,20 @@ const getJsonKeyFromProto = function(key) {
     publicKey = key;
   }
 
-  const curveType = curveTypeProtoToSubtle(
+  const curveType = Util.curveTypeProtoToSubtle(
       publicKey.getParams().getKemParams().getCurveType());
   const expectedLength = EllipticCurves.fieldSizeInBytes(curveType);
-  let x = bigEndianNumberToCorrectLength(publicKey.getX_asU8(), expectedLength);
-  let y = bigEndianNumberToCorrectLength(publicKey.getY_asU8(), expectedLength);
+  let x = Util.bigEndianNumberToCorrectLength(
+      publicKey.getX_asU8(), expectedLength);
+  let y = Util.bigEndianNumberToCorrectLength(
+      publicKey.getY_asU8(), expectedLength);
   if (key instanceof PbEciesAeadHkdfPrivateKey) {
-    d = bigEndianNumberToCorrectLength(key.getKeyValue_asU8(), expectedLength);
+    d = Util.bigEndianNumberToCorrectLength(
+        key.getKeyValue_asU8(), expectedLength);
   }
-  return getJsonKey(curveType, x, y, d);
-};
-
-/**
- * @package
- * @param {!PbHashType} hashTypeProto
- * @return {string}
- */
-const hashTypeProtoToString = function(hashTypeProto) {
-  switch (hashTypeProto) {
-    case PbHashType.SHA1:
-      return 'SHA-1';
-    case PbHashType.SHA256:
-      return 'SHA-256';
-    case PbHashType.SHA512:
-      return 'SHA-512';
-    default:
-      throw new SecurityException('Unknown hash type.');
-  }
-};
-
-/**
- * @package
- * @param {!PbPointFormat} pointFormatProto
- * @return {!EllipticCurves.PointFormatType}
- */
-const pointFormatProtoToSubtle = function(pointFormatProto) {
-  switch (pointFormatProto) {
-    case PbPointFormat.UNCOMPRESSED:
-      return EllipticCurves.PointFormatType.UNCOMPRESSED;
-    case PbPointFormat.COMPRESSED:
-      return EllipticCurves.PointFormatType.COMPRESSED;
-    case PbPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
-      return EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
-    default:
-      throw new SecurityException('Unknown point format.');
-  }
+  return EllipticCurves.getJsonWebKey(curveType, x, y, d);
 };
 
 exports = {
-  curveTypeProtoToSubtle,
-  getJsonKeyFromProto,
-  hashTypeProtoToString,
-  pointFormatProtoToSubtle,
+  getJsonWebKeyFromProto,
 };

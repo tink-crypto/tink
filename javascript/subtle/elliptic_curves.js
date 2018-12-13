@@ -376,6 +376,28 @@ const pointDecode = function(curve, format, point) {
 
 /**
  * @param {!CurveType} curve
+ * @param {!Uint8Array} x
+ * @param {!Uint8Array} y
+ * @param {?Uint8Array=} d
+ *
+ * @return {!webCrypto.JsonWebKey}
+ */
+const getJsonWebKey = function(curve, x, y, d) {
+  const key = /** @type {!webCrypto.JsonWebKey} */ ({
+    'kty': 'EC',
+    'crv': curveToString(curve),
+    'x': Bytes.toBase64(x, true /* websafe */),
+    'y': Bytes.toBase64(y, true /* websafe */),
+    'ext': true,
+  });
+  if (d) {
+    key['d'] = Bytes.toBase64(d, true /* websafe */);
+  }
+  return key;
+};
+
+/**
+ * @param {!CurveType} curve
  * @return {number}
  */
 const fieldSizeInBytes = function(curve) {
@@ -497,9 +519,8 @@ exports = {
   curveFromString,
   ecdsaDer2Ieee,
   ecdsaIeee2Der,
-  isValidDerEcdsaSignature
-
-  ,
+  getJsonWebKey,
+  isValidDerEcdsaSignature,
   encodingSizeInBytes,
   exportCryptoKey,
   fieldSizeInBytes,

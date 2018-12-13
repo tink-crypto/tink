@@ -17,7 +17,6 @@ goog.setTestOnly('tink.hybrid.EciesAeadHkdfValidatorsTest');
 
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const Bytes = goog.require('tink.subtle.Bytes');
-const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const PbEciesAeadDemParams = goog.require('proto.google.crypto.tink.EciesAeadDemParams');
@@ -31,6 +30,7 @@ const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const TestCase = goog.require('goog.testing.TestCase');
+const Util = goog.require('tink.Util');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
 
@@ -484,8 +484,7 @@ const createParams = function(
 const createPrivateKey = async function(
     opt_curveType = PbEllipticCurveType.NIST_P256, opt_hashType,
     opt_keyTemplate, opt_pointFormat) {
-  const curveSubtleType =
-      EciesAeadHkdfUtil.curveTypeProtoToSubtle(opt_curveType);
+  const curveSubtleType = Util.curveTypeProtoToSubtle(opt_curveType);
   const curveName = EllipticCurves.curveToString(curveSubtleType);
 
   const publicKeyProto = new PbEciesAeadHkdfPublicKey();

@@ -19,7 +19,6 @@ const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
-const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const Mac = goog.require('tink.Mac');
@@ -36,6 +35,7 @@ const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
+const Util = goog.require('tink.Util');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
 
@@ -425,8 +425,7 @@ const createKeyParams = function(
 const createKey = async function(
     opt_curveType = PbEllipticCurveType.NIST_P256, opt_hashType,
     opt_keyTemplate, opt_pointFormat) {
-  const curveSubtleType =
-      EciesAeadHkdfUtil.curveTypeProtoToSubtle(opt_curveType);
+  const curveSubtleType = Util.curveTypeProtoToSubtle(opt_curveType);
   const curveName = EllipticCurves.curveToString(curveSubtleType);
 
   const key = new PbEciesAeadHkdfPublicKey();

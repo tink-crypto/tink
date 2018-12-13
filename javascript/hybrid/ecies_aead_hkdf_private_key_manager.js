@@ -31,6 +31,7 @@ const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const Util = goog.require('tink.Util');
 
 /**
  * @implements {KeyManager.PrivateKeyFactory}
@@ -90,8 +91,7 @@ class EciesAeadHkdfPrivateKeyFactory {
     const params =
         /** @type {!PbEciesAeadHkdfParams} */ (keyFormat.getParams());
     const curveTypeProto = params.getKemParams().getCurveType();
-    const curveTypeSubtle =
-        EciesAeadHkdfUtil.curveTypeProtoToSubtle(curveTypeProto);
+    const curveTypeSubtle = Util.curveTypeProtoToSubtle(curveTypeProto);
     const curveName = EllipticCurves.curveToString(curveTypeSubtle);
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
 
@@ -198,16 +198,16 @@ class EciesAeadHkdfPrivateKeyManager {
         keyProto, EciesAeadHkdfPrivateKeyManager.VERSION_,
         EciesAeadHkdfPublicKeyManager.VERSION);
 
-    const recepientPrivateKey = EciesAeadHkdfUtil.getJsonKeyFromProto(keyProto);
+    const recepientPrivateKey = EciesAeadHkdfUtil.getJsonWebKeyFromProto(keyProto);
     const params = /** @type {!PbEciesAeadHkdfParams} */ (
         keyProto.getPublicKey().getParams());
     const keyTemplate =
         /** @type {!PbKeyTemplate} */ (params.getDemParams().getAeadDem());
     const demHelper = new RegistryEciesAeadHkdfDemHelper(keyTemplate);
     const pointFormat =
-        EciesAeadHkdfUtil.pointFormatProtoToSubtle(params.getEcPointFormat());
-    const hkdfHash = EciesAeadHkdfUtil.hashTypeProtoToString(
-        params.getKemParams().getHkdfHashType());
+        Util.pointFormatProtoToSubtle(params.getEcPointFormat());
+    const hkdfHash =
+        Util.hashTypeProtoToString(params.getKemParams().getHkdfHashType());
     const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
 
     return await EciesAeadHkdfHybridDecrypt.newInstance(

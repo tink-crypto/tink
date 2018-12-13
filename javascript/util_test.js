@@ -15,10 +15,14 @@
 goog.module('tink.UtilTest');
 goog.setTestOnly('tink.UtilTest');
 
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
+const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Util = goog.require('tink.Util');
 
 const testSuite = goog.require('goog.testing.testSuite');
@@ -146,6 +150,38 @@ testSuite({
     const keyset = createKeyset();
 
     await Util.validateKeyset(keyset);
+  },
+
+  // tests for protoToSubtle methods
+  testCurveTypeProtoToSubtle() {
+    assertEquals(
+        EllipticCurves.CurveType.P256,
+        Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P256));
+    assertEquals(
+        EllipticCurves.CurveType.P384,
+        Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P384));
+    assertEquals(
+        EllipticCurves.CurveType.P521,
+        Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P521));
+  },
+
+  testPointFormatProtoToSubtle() {
+    assertEquals(
+        EllipticCurves.PointFormatType.UNCOMPRESSED,
+        Util.pointFormatProtoToSubtle(PbPointFormat.UNCOMPRESSED));
+    assertEquals(
+        EllipticCurves.PointFormatType.COMPRESSED,
+        Util.pointFormatProtoToSubtle(PbPointFormat.COMPRESSED));
+    assertEquals(
+        EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
+        Util.pointFormatProtoToSubtle(
+            PbPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
+  },
+
+  testHashTypeProtoToString() {
+    assertEquals('SHA-1', Util.hashTypeProtoToString(PbHashType.SHA1));
+    assertEquals('SHA-256', Util.hashTypeProtoToString(PbHashType.SHA256));
+    assertEquals('SHA-512', Util.hashTypeProtoToString(PbHashType.SHA512));
   },
 });
 
