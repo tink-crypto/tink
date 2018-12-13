@@ -78,19 +78,20 @@ const validateEcdsaParams = function(curve, hash) {
     case 'P-256':
       if (hash != 'SHA-256') {
         throw new SecurityException(
-            'expected SHA-256 hash (because curve is P-256) but got ' + hash);
+            'expected SHA-256 (because curve is P-256) but got ' + hash);
       }
       break;
     case 'P-384':
-      if (hash != 'SHA-384') {
+      if (hash != 'SHA-384' && hash != 'SHA-512') {
         throw new SecurityException(
-            'expected SHA-384 hash (because curve is P-384) but got ' + hash);
+            'expected SHA-384 or SHA-512 (because curve is P-384) but got ' +
+            hash);
       }
       break;
     case 'P-521':
       if (hash != 'SHA-512') {
         throw new SecurityException(
-            'expected SHA-512 hash (because curve is P-521) but got ' + hash);
+            'expected SHA-512 (because curve is P-521) but got ' + hash);
       }
       break;
     default:

@@ -120,7 +120,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'CustomError: expected SHA-256 hash (because curve is P-256) but ' +
+          'CustomError: expected SHA-256 (because curve is P-256) but ' +
               'got SHA-1',
           e.toString());
     }
@@ -132,7 +132,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'CustomError: expected SHA-384 hash (because curve is P-384) but got SHA-256',
+          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
     }
 
@@ -143,7 +143,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'CustomError: expected SHA-512 hash (because curve is P-521) but got SHA-256',
+          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
     }
   },
