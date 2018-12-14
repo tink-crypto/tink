@@ -41,22 +41,7 @@ const Status& GetUnknown() {
 
 }  // namespace
 
-// Keep synchronized with google3/third_party/tink/copybara/cc.bara.sky
-#ifndef __APPLE__
-Status::Status(const ::util::Status& status)
-    : code_(::crypto::tink::util::error::OK) {
-  if (status.ok()) return;
-  code_ = static_cast<::crypto::tink::util::error::Code>(
-      ::util::RetrieveErrorCode(status));
-  message_ = std::string(status.message());
-}
-
-Status::operator ::util::Status() const {
-  if (ok()) return ::util::OkStatus();
-  return ::util::Status(static_cast<absl::StatusCode>(code_), message_);
-}
-#endif
-// end of block in sync with google3/third_party/tink/copybara/cc.bara.sky
+// placeholder_implicit_type_conversion, please ignore
 
 Status::Status() : code_(::crypto::tink::util::error::OK), message_("") {
 }
