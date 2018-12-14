@@ -19,6 +19,7 @@ const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsE
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetReader = goog.require('tink.KeysetReader');
 const KeysetWriter = goog.require('tink.KeysetWriter');
+const PbKeyMaterialType = goog.require('proto.google.crypto.tink.KeyData.KeyMaterialType');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
@@ -56,6 +57,33 @@ class KeysetHandle {
   static async read(reader, masterKeyAead) {
     // TODO implement
     throw new SecurityException('KeysetHandle -- read: Not implemented yet.');
+  }
+
+  /**
+   * Creates a KeysetHandle from a keyset, obtained via reader, which
+   * must contain no secret key material.
+   *
+   * This can be used to load public keysets or envelope encryption keysets.
+   * Users that need to load cleartext keysets can use CleartextKeysetHandle.
+   *
+   * @param {!KeysetReader} reader
+   * @return {!KeysetHandle}
+   */
+  static readNoSecret(reader) {
+    if (reader === null) {
+      throw new SecurityException('Reader has to be non-null.');
+    }
+    const keyset = reader.read();
+    const keyList = keyset.getKeyList();
+    for (let key of keyList) {
+      switch (key.getKeyData().getKeyMaterialType()) {
+        case PbKeyMaterialType.ASYMMETRIC_PUBLIC:  // fall through
+        case PbKeyMaterialType.REMOTE:
+          continue;
+      }
+      throw new SecurityException('Keyset contains secret key material.');
+    }
+    return new KeysetHandle(keyset);
   }
 
   /**

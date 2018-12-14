@@ -16,6 +16,7 @@ goog.module('tink.KeysetHandleTest');
 goog.setTestOnly('tink.KeysetHandleTest');
 
 const Aead = goog.require('tink.Aead');
+const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
 const Bytes = goog.require('tink.subtle.Bytes');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
 const HybridDecrypt = goog.require('tink.HybridDecrypt');
@@ -24,6 +25,7 @@ const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const Mac = goog.require('tink.Mac');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
+const PbKeyMaterialType = goog.require('proto.google.crypto.tink.KeyData.KeyMaterialType');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
@@ -497,6 +499,66 @@ testSuite({
     const primary = primitiveSet.getPrimary();
     assertEquals(customPrimitive, primary.getPrimitive());
   },
+
+  /////////////////////////////////////////////////////////////////////////////
+  // tests for readNoSecret method
+
+  testReadNoSecret_keysetContainingSecretKeyMaterial() {
+    const secretKeyMaterialTypes = [
+      PbKeyMaterialType.SYMMETRIC, PbKeyMaterialType.ASYMMETRIC_PRIVATE,
+      PbKeyMaterialType.UNKNOWN_KEYMATERIAL
+    ];
+    for (let secretKeyMaterialType of secretKeyMaterialTypes) {
+      // Create a public keyset.
+      const keyset = new PbKeyset();
+      for (let i = 0; i < 3; i++) {
+        const key = createKey(
+            /* keyId = */ i + 1,
+            /* outputPrefix = */ PbOutputPrefixType.TINK,
+            /* keyTypeUrl = */ 'someType',
+            /* enabled = */ (i % 4) < 2,
+            /* opt_keyMaterialType */ PbKeyMaterialType.ASYMMETRIC_PUBLIC);
+        keyset.addKey(key);
+      }
+      keyset.setPrimaryKeyId(1);
+      const key = createKey(
+          /* keyId = */ 0xFFFFFFFF,
+          /* outputPrefix = */ PbOutputPrefixType.RAW,
+          /* keyTypeUrl = */ 'someType',
+          /* enabled = */ true,
+          /* opt_keyMaterialType = */ secretKeyMaterialType);
+      keyset.addKey(key);
+      const reader =
+          BinaryKeysetReader.withUint8Array(keyset.serializeBinary());
+      try {
+        KeysetHandle.readNoSecret(reader);
+        fail('An exception should be thrown.');
+      } catch (e) {
+        assertEquals(
+            'CustomError: Keyset contains secret key material.', e.toString());
+      }
+    }
+  },
+
+  testReadNoSecret_shouldWork() {
+    // Create a public keyset.
+    const keyset = new PbKeyset();
+    for (let i = 0; i < 3; i++) {
+      const key = createKey(
+          /* keyId = */ i + 1,
+          /* outputPrefix = */ PbOutputPrefixType.TINK,
+          /* keyTypeUrl = */ 'someType',
+          /* enabled = */ (i % 4) < 2,
+          /* opt_keyMaterialType = */ PbKeyMaterialType.ASYMMETRIC_PUBLIC);
+      keyset.addKey(key);
+    }
+    keyset.setPrimaryKeyId(1);
+
+    const reader = BinaryKeysetReader.withUint8Array(keyset.serializeBinary());
+    const keysetHandle = KeysetHandle.readNoSecret(reader);
+
+    assertObjectEquals(keyset, keysetHandle.getKeyset());
+  },
 });
 
 /**
@@ -506,10 +568,13 @@ testSuite({
  * @param {!PbOutputPrefixType} outputPrefix
  * @param {string} keyTypeUrl
  * @param {boolean} enabled
+ * @param {?PbKeyMaterialType=} opt_keyMaterialType (default: SYMMETRIC)
  *
  * @return {!PbKeyset.Key}
  */
-const createKey = function(keyId, outputPrefix, keyTypeUrl, enabled) {
+const createKey = function(
+    keyId, outputPrefix, keyTypeUrl, enabled,
+    opt_keyMaterialType = PbKeyMaterialType.SYMMETRIC) {
   let key = new PbKeyset.Key();
 
   if (enabled) {
@@ -523,7 +588,8 @@ const createKey = function(keyId, outputPrefix, keyTypeUrl, enabled) {
 
   const keyData = new PbKeyData();
   keyData.setTypeUrl(keyTypeUrl);
-  keyData.setValue(new Uint8Array(0));
+  keyData.setValue(new Uint8Array([1]));
+  keyData.setKeyMaterialType(opt_keyMaterialType);
   key.setKeyData(keyData);
 
   return key;
