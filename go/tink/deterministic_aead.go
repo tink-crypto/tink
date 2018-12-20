@@ -15,7 +15,7 @@
 package tink
 
 /*
-DeterministicAead is the interface for deterministic authenticated encryption with associated data.
+DeterministicAEAD is the interface for deterministic authenticated encryption with associated data.
 
 Warning:
 Unlike AEAD, implementations of this interface are not semantically secure, because
@@ -33,7 +33,7 @@ References:
 https://tools.ietf.org/html/rfc5116
 https://tools.ietf.org/html/rfc5297#section-1.3
 */
-type DeterministicAead interface {
+type DeterministicAEAD interface {
 	// EncryptDeterministically deterministically encrypts plaintext with additionalData as
 	// additional authenticated data. The resulting ciphertext allows for checking
 	// authenticity and integrity of additional data additionalData,

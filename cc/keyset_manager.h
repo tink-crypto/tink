@@ -30,7 +30,7 @@ namespace tink {
 class KeysetHandle;
 
 // KeysetManager provides convenience methods for creation of Keysets, and for
-// rotating, disabling, enabling, or destroing keys.
+// rotating, disabling, enabling, or destroying keys.
 // An instance of this class takes care of a single Keyset, that can be
 // accessed via GetKeysetHandle()-method.
 class KeysetManager {

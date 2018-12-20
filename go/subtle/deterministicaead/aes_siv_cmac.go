@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package deterministicaead provides subtle implementations of the DeterministicAead primitive.
+// Package deterministicaead provides subtle implementations of the DeterministicAEAD primitive.
 package deterministicaead
 
 import (
@@ -25,10 +25,10 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// AesSivCmac is an implemenatation of AES-SIV-CMAC as defined in
+// AESSIVCMAC is an implemenatation of AES-SIV-CMAC as defined in
 // https://tools.ietf.org/html/rfc5297 .
-// AesSivCmac implements a deterministic encryption with additional
-// data (i.e. the DeterministicAead interface). Hence the implementation
+// AESSIVCMAC implements a deterministic encryption with additional
+// data (i.e. the DeterministicAEAD interface). Hence the implementation
 // below is restricted to one AD component.
 //
 // Security:
@@ -44,7 +44,7 @@ import (
 // Since 192-bit AES keys are not supported by tink for voodoo reasons
 // and RFC 5297 only supports same size encryption and MAC keys this
 // implies that keys must be 64 bytes (2*256 bits) long.
-type AesSivCmac struct {
+type AESSIVCMAC struct {
 	K1     []byte
 	K2     []byte
 	CmacK1 []byte
@@ -52,15 +52,15 @@ type AesSivCmac struct {
 	Cipher cipher.Block
 }
 
-// AesSivCmacKeySize is the key size in bytes.
-const AesSivCmacKeySize = 64
+// AESSIVCMACKeySize is the key size in bytes.
+const AESSIVCMACKeySize = 64
 
-// Assert that AesSivCmac implements the DeterministicAead interface.
-var _ tink.DeterministicAead = (*AesSivCmac)(nil)
+// Assert that AESSIVCMAC implements the DeterministicAEAD interface.
+var _ tink.DeterministicAEAD = (*AESSIVCMAC)(nil)
 
-// NewAesSivCmac returns an AesSivCmac instance.
-func NewAesSivCmac(key []byte) (*AesSivCmac, error) {
-	if len(key) != AesSivCmacKeySize {
+// NewAESSIVCMAC returns an AESSIVCMAC instance.
+func NewAESSIVCMAC(key []byte) (*AESSIVCMAC, error) {
+	if len(key) != AESSIVCMACKeySize {
 		return nil, fmt.Errorf("aes_siv_cmac: invalid key size %d", len(key))
 	}
 
@@ -80,7 +80,7 @@ func NewAesSivCmac(key []byte) (*AesSivCmac, error) {
 	cmacK2 := make([]byte, aes.BlockSize)
 	copy(cmacK2, block)
 
-	return &AesSivCmac{
+	return &AESSIVCMAC{
 		K1:     k1,
 		K2:     k2,
 		CmacK1: cmacK1,
@@ -106,7 +106,7 @@ func multiplyByX(block []byte) {
 
 // EncryptDeterministically deterministically encrypts plaintext with additionalData as
 // additional authenticated data.
-func (asc *AesSivCmac) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
+func (asc *AESSIVCMAC) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
 	siv := make([]byte, aes.BlockSize)
 	asc.s2v(pt, aad, siv)
 
@@ -121,7 +121,7 @@ func (asc *AesSivCmac) EncryptDeterministically(pt, aad []byte) ([]byte, error) 
 
 // DecryptDeterministically deterministically decrypts ciphertext with additionalData as
 // additional authenticated data.
-func (asc *AesSivCmac) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
+func (asc *AESSIVCMAC) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
 	if len(ct) < aes.BlockSize {
 		return nil, errors.New("aes_siv_cmac: ciphertext is too short")
 	}
@@ -144,7 +144,7 @@ func (asc *AesSivCmac) DecryptDeterministically(ct, aad []byte) ([]byte, error) 
 }
 
 // ctrCrypt encrypts (or decrypts) the bytes in in using an SIV and writes the result to out.
-func (asc *AesSivCmac) ctrCrypt(siv, in, out []byte) error {
+func (asc *AESSIVCMAC) ctrCrypt(siv, in, out []byte) error {
 	// siv might be used outside of ctrCrypt(), so making a copy of it.
 	iv := make([]byte, aes.BlockSize)
 	copy(iv, siv)
@@ -162,7 +162,7 @@ func (asc *AesSivCmac) ctrCrypt(siv, in, out []byte) error {
 }
 
 // s2v is a Pseudo-Random Function (PRF) construction: https://tools.ietf.org/html/rfc5297.
-func (asc *AesSivCmac) s2v(msg, aad, siv []byte) {
+func (asc *AESSIVCMAC) s2v(msg, aad, siv []byte) {
 	block := make([]byte, aes.BlockSize)
 	asc.cmac(block, block)
 	multiplyByX(block)
@@ -185,7 +185,7 @@ func (asc *AesSivCmac) s2v(msg, aad, siv []byte) {
 
 // cmacLong computes CMAC(XorEnd(data, last)), where XorEnd xors the bytes in last to the last bytes in data.
 // The size of the data must be at least 16 bytes.
-func (asc *AesSivCmac) cmacLong(data, last, mac []byte) {
+func (asc *AESSIVCMAC) cmacLong(data, last, mac []byte) {
 	block := make([]byte, aes.BlockSize)
 	copy(block, data[:aes.BlockSize])
 
@@ -216,7 +216,7 @@ func (asc *AesSivCmac) cmacLong(data, last, mac []byte) {
 }
 
 // cmac computes a CMAC of some data.
-func (asc *AesSivCmac) cmac(data, mac []byte) {
+func (asc *AESSIVCMAC) cmac(data, mac []byte) {
 	numBs := int(math.Ceil(float64(len(data)) / aes.BlockSize))
 	if numBs == 0 {
 		numBs = 1
