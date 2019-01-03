@@ -69,7 +69,7 @@ echo "using go: $(which go)"
 go version
 
 run_linux_tests() {
-  time bazel fetch ...
+  time bazel fetch --logging=6 --build_event_publish_all_actions --announce_rc ...
 
   # Build all targets, except objc.
   time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
