@@ -56,9 +56,9 @@ http_archive(
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "e514c2e613dc47c062ea8df480efeec368ffbef98af0437ac00cdaadcb0d80d2",
-    strip_prefix = "protobuf-3.6.0",
-    urls = ["https://github.com/google/protobuf/archive/v3.6.0.zip"],
+    sha256 = "d6618d117698132dadf0f830b762315807dc424ba36ab9183f1f436008a2fdb6",
+    strip_prefix = "protobuf-3.6.1.2",
+    urls = ["https://github.com/google/protobuf/archive/v3.6.1.2.zip"],
 )
 
 # java_lite_proto_library rules implicitly depend on
