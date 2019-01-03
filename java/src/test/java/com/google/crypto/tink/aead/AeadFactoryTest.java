@@ -64,7 +64,7 @@ public class AeadFactoryTest {
                     42,
                     KeyStatusType.ENABLED,
                     OutputPrefixType.TINK)));
-    TestUtil.runBasicAeadFactoryTests(keysetHandle);
+    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 
   @Test
@@ -102,7 +102,7 @@ public class AeadFactoryTest {
 
     KeysetHandle keysetHandle =
         TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy, tink));
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
@@ -116,7 +116,7 @@ public class AeadFactoryTest {
     // encrypt with a non-primary RAW key and decrypt with the keyset
     KeysetHandle keysetHandle2 =
         TestUtil.createKeysetHandle(TestUtil.createKeyset(raw, legacy, tink));
-    Aead aead2 = AeadFactory.getPrimitive(keysetHandle2);
+    Aead aead2 = keysetHandle2.getPrimitive(Aead.class);
     ciphertext = aead2.encrypt(plaintext, associatedData);
     assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
 
@@ -130,7 +130,7 @@ public class AeadFactoryTest {
             KeyStatusType.ENABLED,
             OutputPrefixType.TINK);
     keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(random));
-    aead2 = AeadFactory.getPrimitive(keysetHandle2);
+    aead2 = keysetHandle2.getPrimitive(Aead.class);
     ciphertext = aead2.encrypt(plaintext, associatedData);
     try {
       aead.decrypt(ciphertext, associatedData);
@@ -167,7 +167,7 @@ public class AeadFactoryTest {
             OutputPrefixType.LEGACY);
     KeysetHandle keysetHandle =
         TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy));
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
@@ -190,7 +190,7 @@ public class AeadFactoryTest {
             KeyStatusType.ENABLED,
             OutputPrefixType.RAW);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(primary));
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
     byte[] plaintext = Random.randBytes(1);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
@@ -218,7 +218,7 @@ public class AeadFactoryTest {
 
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
     try {
-      AeadFactory.getPrimitive(keysetHandle);
+      keysetHandle.getPrimitive(Aead.class);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "Primitive type com.google.crypto.tink.DeterministicAead");
@@ -227,7 +227,7 @@ public class AeadFactoryTest {
     // invalid as the primary key.
     keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
     try {
-      AeadFactory.getPrimitive(keysetHandle);
+      keysetHandle.getPrimitive(Aead.class);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "Primitive type com.google.crypto.tink.DeterministicAead");

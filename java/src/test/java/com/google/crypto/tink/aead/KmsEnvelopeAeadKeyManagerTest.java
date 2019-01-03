@@ -53,7 +53,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
         AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(
             TestUtil.RESTRICTED_CRYPTO_KEY_URI, dekTemplate));
-    TestUtil.runBasicAeadFactoryTests(keysetHandle);
+    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 
   @Test
@@ -63,7 +63,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
         AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(
             TestUtil.RESTRICTED_CRYPTO_KEY_URI, dekTemplate));
 
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
     byte[] plaintext = Random.randBytes(20);
     byte[] aad = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, aad);

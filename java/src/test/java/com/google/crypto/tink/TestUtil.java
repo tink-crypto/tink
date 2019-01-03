@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
@@ -484,18 +483,8 @@ public class TestUtil {
         .build();
   }
 
-  /**
-   * Runs basic tests against an Aead primitive. The given keysetHandle should be an Aead key type.
-   */
-  public static void runBasicAeadFactoryTests(KeysetHandle keysetHandle) throws Exception {
-    runBasicAeadFactoryTests(keysetHandle, /* keyManager*/ null);
-  }
-  /**
-   * Runs basic tests against an Aead primitive. The given keysetHandle should be an Aead key type.
-   */
-  public static void runBasicAeadFactoryTests(
-      KeysetHandle keysetHandle, KeyManager<Aead> keyManager) throws Exception {
-    Aead aead = AeadFactory.getPrimitive(keysetHandle, keyManager);
+  /** Runs basic tests against an Aead primitive. */
+  public static void runBasicAeadTests(Aead aead) throws Exception {
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
