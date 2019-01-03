@@ -66,9 +66,9 @@ http_archive(
 # runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_javalite",
-    sha256 = "38458deb90db61c054b708e141544c32863ab14a8747710ba3ee290d9b6dab92",
-    strip_prefix = "protobuf-javalite",
-    urls = ["https://github.com/google/protobuf/archive/javalite.zip"],
+    sha256 = "79d102c61e2a479a0b7e5fc167bcfaa4832a0c6aad4a75fa7da0480564931bcc",
+    strip_prefix = "protobuf-384989534b2246d413dbcd750744faab2607b516",
+    urls = ["https://github.com/google/protobuf/archive/384989534b2246d413dbcd750744faab2607b516.zip"],
 )
 
 #-----------------------------------------------------------------------------
