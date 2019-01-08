@@ -36,7 +36,7 @@ namespace tink {
 // * HybridConfig::Register()
 // * TinkConfig::Register()
 class ABSL_DEPRECATED(
-    "Call getPrimitive<Aead>() on the keyset_handle after registering the "
+    "Call GetPrimitive<Aead>() on the keyset_handle after registering the "
     "AeadWrapper instead.") AeadFactory {
  public:
   // Returns an Aead-primitive that uses key material from the keyset
