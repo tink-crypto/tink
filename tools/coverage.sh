@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ###############################################################################
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,18 +24,18 @@
 set -eu
 
 genhtml=$(command -v genhtml)
-if [ -z "${genhtml}" ]; then
+if [[ -z "${genhtml}" ]]; then
     echo "Install 'genhtml' (contained in the 'lcov' package)"
     exit 1
 fi
 
 destdir="$1"
-if [ -z "${destdir}" ]; then
+if [[ -z "${destdir}" ]]; then
     destdir=$(mktemp -d /tmp/gerritcov.XXXXXX)
 fi
 
 targets="$2"
-if [ -z "${targets}" ]; then
+if [[ -z "${targets}" ]]; then
     targets="apps/... java/..."
 fi
 
@@ -53,7 +53,7 @@ rm -rf "${destdir}" || true
 mkdir -p "${destdir}"
 
 for ROOT in java apps/paymentmethodtoken; do
-  rsync -a "$ROOT/src/main/java/" "$ROOT/src/test/java/" "${destdir}/"
+  rsync -a "${ROOT}/src/main/java/" "${ROOT}/src/test/java/" "${destdir}/"
 done
 
 base=$(bazel info bazel-testlogs)
