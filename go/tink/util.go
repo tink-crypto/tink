@@ -111,8 +111,8 @@ func ValidateKey(key *tinkpb.Keyset_Key) error {
 	if key == nil {
 		return fmt.Errorf("ValidateKey() called with nil")
 	}
-	if key.KeyId <= 0 {
-		return fmt.Errorf("key has non-positive key id: %d", key.KeyId)
+	if key.KeyId == 0 {
+		return fmt.Errorf("key has zero key id: %d", key.KeyId)
 	}
 	if key.KeyData == nil {
 		return fmt.Errorf("key %d has no key data", key.KeyId)
