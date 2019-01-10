@@ -20,6 +20,8 @@
 
 #import <XCTest/XCTest.h>
 
+#include "tink/aead/xchacha20_poly1305_key_manager.h"
+
 #import "objc/TINKKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/util/TINKProtoHelpers.h"
@@ -170,6 +172,31 @@
   XCTAssertNil(error);
   XCTAssertNotNil(keyFormat);
   XCTAssertEqual(keyFormat.keySize, 32);
+}
+
+- (void)testXChaCha20Poly1305KeyTemplates {
+  static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
+
+  NSError *error = nil;
+  TINKAeadKeyTemplate *tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKXChaCha20Poly1305
+                                                                        error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(tpl);
+
+  error = nil;
+  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyTemplate);
+
+  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
+  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
+  error = nil;
+
+  // Check that the template works with the key manager.
+  crypto::tink::XChaCha20Poly1305KeyManager key_manager;
+  XCTAssertTrue(key_manager.get_key_type() == tpl.ccKeyTemplate->type_url());
+  auto new_key_result = key_manager.get_key_factory().NewKey(tpl.ccKeyTemplate->value());
+  XCTAssertTrue(new_key_result.ok());
 }
 
 @end
