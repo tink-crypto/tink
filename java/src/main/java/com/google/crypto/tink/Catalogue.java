@@ -39,4 +39,7 @@ public interface Catalogue<P> {
    */
   public KeyManager<P> getKeyManager(String typeUrl, String primitiveName, int minVersion)
       throws GeneralSecurityException;
+
+  /** Returns a new primitive wrapper for this primitive. */
+  public PrimitiveWrapper<P> getPrimitiveWrapper() throws GeneralSecurityException;
 }

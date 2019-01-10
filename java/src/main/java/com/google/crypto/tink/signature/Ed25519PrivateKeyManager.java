@@ -38,7 +38,7 @@ class Ed25519PrivateKeyManager
     extends KeyManagerBase<PublicKeySign, Ed25519PrivateKey, Empty>
     implements PrivateKeyManager<PublicKeySign> {
   public Ed25519PrivateKeyManager() {
-    super(Ed25519PrivateKey.class, Empty.class, TYPE_URL);
+    super(PublicKeySign.class, Ed25519PrivateKey.class, Empty.class, TYPE_URL);
   }
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
@@ -48,7 +48,6 @@ class Ed25519PrivateKeyManager
   @Override
   public PublicKeySign getPrimitiveFromKey(Ed25519PrivateKey keyProto)
       throws GeneralSecurityException {
-    validate(keyProto);
     return new Ed25519Sign(keyProto.getKeyValue().toByteArray());
   }
 
@@ -103,10 +102,14 @@ class Ed25519PrivateKeyManager
     return VERSION;
   }
 
-  private void validate(Ed25519PrivateKey keyProto) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(Ed25519PrivateKey keyProto) throws GeneralSecurityException {
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != Ed25519Sign.SECRET_KEY_LEN) {
       throw new GeneralSecurityException("invalid Ed25519 private key: incorrect key length");
     }
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) {}
 }

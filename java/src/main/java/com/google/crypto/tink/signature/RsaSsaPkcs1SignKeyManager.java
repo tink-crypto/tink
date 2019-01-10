@@ -51,7 +51,7 @@ class RsaSsaPkcs1SignKeyManager
     extends KeyManagerBase<PublicKeySign, RsaSsaPkcs1PrivateKey, RsaSsaPkcs1KeyFormat>
     implements PrivateKeyManager<PublicKeySign> {
   public RsaSsaPkcs1SignKeyManager() {
-    super(RsaSsaPkcs1PrivateKey.class, RsaSsaPkcs1KeyFormat.class, TYPE_URL);
+    super(PublicKeySign.class, RsaSsaPkcs1PrivateKey.class, RsaSsaPkcs1KeyFormat.class, TYPE_URL);
   }
 
   public static final String TYPE_URL =
@@ -181,12 +181,14 @@ class RsaSsaPkcs1SignKeyManager
     return VERSION;
   }
 
-  private void validateKeyFormat(RsaSsaPkcs1KeyFormat keyFormat) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(RsaSsaPkcs1KeyFormat keyFormat) throws GeneralSecurityException {
     SigUtil.validateRsaSsaPkcs1Params(keyFormat.getParams());
     Validators.validateRsaModulusSize(keyFormat.getModulusSizeInBits());
   }
 
-  private void validateKey(RsaSsaPkcs1PrivateKey privKey) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(RsaSsaPkcs1PrivateKey privKey) throws GeneralSecurityException {
     Validators.validateVersion(privKey.getVersion(), VERSION);
     Validators.validateRsaModulusSize(
         (new BigInteger(1, privKey.getPublicKey().getN().toByteArray())).bitLength());

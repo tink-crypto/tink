@@ -1,3 +1,11 @@
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_go//go:def.bzl", "nogo")
+
+nogo(
+    name = "tink_nogo",
+    vet = True,
+    visibility = ["//visibility:public"],
+)

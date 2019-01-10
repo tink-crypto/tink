@@ -17,6 +17,7 @@
 #ifndef TINK_MAC_MAC_FACTORY_H_
 #define TINK_MAC_MAC_FACTORY_H_
 
+#include "absl/base/macros.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
@@ -27,21 +28,18 @@ namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// MacFactory allows for obtaining a Mac primitive from a KeysetHandle.
+// This class is deprecated. Call keyset_handle->GetPrimitive<Mac>() instead.
 //
-// MacFactory gets primitives from the Registry, which can be initialized
-// via a convenience method from MacConfig-class. Here is an example
-// how one can obtain and use a Mac primitive:
-//
-//   auto status = MacConfig::Register();
-//   if (!status.ok()) { /* fail with error */ }
-//   KeysetHandle keyset_handle = ...;
-//   std::unique_ptr<Mac> mac =
-//       std::move(MacFactory::GetPrimitive(keyset_handle).ValueOrDie());
-//   std::string data = ...;
-//   std::string mac_value = mac.ComputeMac(data).ValueOrDie();
-//
-class MacFactory {
+// Note that in order to for this change to be safe, the AeadSetWrapper has to
+// be registered in your binary before this call. This happens automatically if
+// you call one of
+// * MacConfig::Register()
+// * AeadConfig::Register()
+// * HybridConfig::Register()
+// * TinkConfig::Register()
+class ABSL_DEPRECATED(
+    "Call getPrimitive<Mac>() on the keyset_handle after registering the "
+    "MacWrapper instead.") MacFactory {
  public:
   // Returns a Mac-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.

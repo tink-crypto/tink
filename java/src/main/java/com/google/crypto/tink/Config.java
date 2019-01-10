@@ -79,11 +79,11 @@ public final class Config {
    *     {@link com.google.crypto.tink.KeyManager} or {@link com.google.crypto.tink.Catalogue} that
    *     can handle the entry. In both cases the error message should show how to resolve it.
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public static void registerKeyType(KeyTypeEntry entry) throws GeneralSecurityException {
     validate(entry);
-    Catalogue catalogue = Registry.getCatalogue(entry.getCatalogueName());
-    KeyManager keyManager =
+    Catalogue<?> catalogue = Registry.getCatalogue(entry.getCatalogueName());
+    Registry.registerPrimitiveWrapper(catalogue.getPrimitiveWrapper());
+    KeyManager<?> keyManager =
         catalogue.getKeyManager(
             entry.getTypeUrl(), entry.getPrimitiveName(), entry.getKeyManagerVersion());
     Registry.registerKeyManager(keyManager, entry.getNewKeyAllowed());

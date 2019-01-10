@@ -35,7 +35,7 @@ import java.security.GeneralSecurityException;
  */
 class AesCtrKeyManager extends KeyManagerBase<IndCpaCipher, AesCtrKey, AesCtrKeyFormat> {
   public AesCtrKeyManager() {
-    super(AesCtrKey.class, AesCtrKeyFormat.class, TYPE_URL);
+    super(IndCpaCipher.class, AesCtrKey.class, AesCtrKeyFormat.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;
@@ -53,14 +53,12 @@ class AesCtrKeyManager extends KeyManagerBase<IndCpaCipher, AesCtrKey, AesCtrKey
 
   @Override
   public IndCpaCipher getPrimitiveFromKey(AesCtrKey keyProto) throws GeneralSecurityException {
-    validate(keyProto);
     return new AesCtrJceCipher(
         keyProto.getKeyValue().toByteArray(), keyProto.getParams().getIvSize());
   }
 
   @Override
   public AesCtrKey newKeyFromFormat(AesCtrKeyFormat format) throws GeneralSecurityException {
-    validate(format);
     return AesCtrKey.newBuilder()
         .setParams(format.getParams())
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
@@ -90,13 +88,15 @@ class AesCtrKeyManager extends KeyManagerBase<IndCpaCipher, AesCtrKey, AesCtrKey
     return AesCtrKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(AesCtrKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(AesCtrKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     Validators.validateAesKeySize(key.getKeyValue().size());
     validate(key.getParams());
   }
 
-  private void validate(AesCtrKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesCtrKeyFormat format) throws GeneralSecurityException {
     Validators.validateAesKeySize(format.getKeySize());
     validate(format.getParams());
   }

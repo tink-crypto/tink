@@ -1,12 +1,5 @@
 """Build definitions for javac related operations in tink."""
 
-XLINT_OPTS = [
-    "-Werror",
-    "-Xlint:all",
-    "-Xlint:-serial",
-    "-Xlint:-classfile",
-]
-
 # errorprone checks primarily related to coding style, enabled to
 # improve uniformity.
 EP_STYLE_CHECKS = [
@@ -106,6 +99,6 @@ SOURCE_7_TARGET_7 = [
     "-target 1.7",
 ]
 
-JAVACOPTS = XLINT_OPTS + EP_OPTS
+JAVACOPTS = EP_OPTS
 
-JAVACOPTS_OSS = XLINT_OPTS + EP_OPTS + SOURCE_7_TARGET_7
+JAVACOPTS_OSS = EP_OPTS + SOURCE_7_TARGET_7

@@ -56,14 +56,22 @@ public class CliUtil {
   }
 
   /**
-   * Reads the specified file and returns the contents as a string.
+   * Reads the specified file and returns the contents as a byte array.
    * In case of errors throws an exception.
    */
   public static byte[] read(String filename) throws GeneralSecurityException, IOException {
-    System.out.println("Reading the input...");
+    System.out.println("Reading file " + filename);
     InputStream inputStream = new FileInputStream(Paths.get(filename).toFile());
+    return read(inputStream);
+  }
+
+  /**
+   * Reads the specified InputStream and returns the contents as a byte array.
+   * In case of errors throws an exception.
+   */
+  public static byte[] read(InputStream inputStream) throws GeneralSecurityException, IOException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    byte[] buffer = new byte[1024];
+    byte[] buffer = new byte[512];
     int length;
     while ((length = inputStream.read(buffer)) != -1) {
       result.write(buffer, 0, length);
@@ -77,7 +85,7 @@ public class CliUtil {
    * In case of errors throws an exception.
    */
   public static void write(byte[] output, String filename) throws IOException {
-    System.out.println("Writing the output...");
+    System.out.println("Writing to file " + filename);
     OutputStream outputStream = new FileOutputStream(Paths.get(filename).toFile());
     outputStream.write(output);
     outputStream.close();

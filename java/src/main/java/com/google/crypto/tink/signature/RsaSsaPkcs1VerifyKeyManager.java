@@ -39,7 +39,7 @@ import java.security.spec.RSAPublicKeySpec;
 class RsaSsaPkcs1VerifyKeyManager
     extends KeyManagerBase<PublicKeyVerify, RsaSsaPkcs1PublicKey, Empty> {
   public RsaSsaPkcs1VerifyKeyManager() {
-    super(RsaSsaPkcs1PublicKey.class, Empty.class, TYPE_URL);
+    super(PublicKeyVerify.class, RsaSsaPkcs1PublicKey.class, Empty.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;
@@ -87,9 +87,13 @@ class RsaSsaPkcs1VerifyKeyManager
     return Empty.parseFrom(byteString);
   }
 
-  private void validateKey(RsaSsaPkcs1PublicKey pubKey) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(RsaSsaPkcs1PublicKey pubKey) throws GeneralSecurityException {
     Validators.validateVersion(pubKey.getVersion(), VERSION);
     Validators.validateRsaModulusSize((new BigInteger(1, pubKey.getN().toByteArray())).bitLength());
     SigUtil.validateRsaSsaPkcs1Params(pubKey.getParams());
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) {}
 }

@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeySign;
 import java.security.GeneralSecurityException;
 
@@ -64,5 +65,10 @@ class PublicKeySignCatalogue implements Catalogue<PublicKeySign> {
         throw new GeneralSecurityException(
             String.format("No support for primitive 'PublicKeySign' with key type '%s'.", typeUrl));
     }
+  }
+
+  @Override
+  public PrimitiveWrapper<PublicKeySign> getPrimitiveWrapper() {
+    return new PublicKeySignWrapper();
   }
 }

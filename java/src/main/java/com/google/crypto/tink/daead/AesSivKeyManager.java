@@ -36,7 +36,7 @@ import java.security.InvalidKeyException;
  */
 class AesSivKeyManager extends KeyManagerBase<DeterministicAead, AesSivKey, AesSivKeyFormat> {
   public AesSivKeyManager() {
-    super(AesSivKey.class, AesSivKeyFormat.class, TYPE_URL);
+    super(DeterministicAead.class, AesSivKey.class, AesSivKeyFormat.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;
@@ -46,13 +46,11 @@ class AesSivKeyManager extends KeyManagerBase<DeterministicAead, AesSivKey, AesS
   @Override
   protected DeterministicAead getPrimitiveFromKey(AesSivKey keyProto)
       throws GeneralSecurityException {
-    validate(keyProto);
     return new AesSiv(keyProto.getKeyValue().toByteArray());
   }
 
   @Override
   public AesSivKey newKeyFromFormat(AesSivKeyFormat format) throws GeneralSecurityException {
-    validate(format);
     return AesSivKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
         .setVersion(VERSION)
@@ -81,7 +79,8 @@ class AesSivKeyManager extends KeyManagerBase<DeterministicAead, AesSivKey, AesS
     return AesSivKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(AesSivKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(AesSivKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() != 64) {
       throw new InvalidKeyException(
@@ -89,7 +88,8 @@ class AesSivKeyManager extends KeyManagerBase<DeterministicAead, AesSivKey, AesS
     }
   }
 
-  private void validate(AesSivKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesSivKeyFormat format) throws GeneralSecurityException {
     if (format.getKeySize() != 64) {
       throw new InvalidAlgorithmParameterException(
           "invalid key size: " + format.getKeySize() + ". Valid keys must have 64 bytes.");

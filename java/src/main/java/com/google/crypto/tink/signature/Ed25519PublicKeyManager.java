@@ -33,7 +33,7 @@ import java.security.GeneralSecurityException;
  */
 class Ed25519PublicKeyManager extends KeyManagerBase<PublicKeyVerify, Ed25519PublicKey, Empty> {
   public Ed25519PublicKeyManager() {
-    super(Ed25519PublicKey.class, Empty.class, TYPE_URL);
+    super(PublicKeyVerify.class, Ed25519PublicKey.class, Empty.class, TYPE_URL);
   }
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
 
@@ -42,7 +42,6 @@ class Ed25519PublicKeyManager extends KeyManagerBase<PublicKeyVerify, Ed25519Pub
   @Override
   public PublicKeyVerify getPrimitiveFromKey(Ed25519PublicKey keyProto)
       throws GeneralSecurityException {
-    validate(keyProto);
     return new Ed25519Verify(keyProto.getKeyValue().toByteArray());
   }
 
@@ -73,10 +72,14 @@ class Ed25519PublicKeyManager extends KeyManagerBase<PublicKeyVerify, Ed25519Pub
     return Empty.parseFrom(byteString);
   }
 
-  private void validate(Ed25519PublicKey keyProto) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(Ed25519PublicKey keyProto) throws GeneralSecurityException {
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != Ed25519Verify.PUBLIC_KEY_LEN) {
       throw new GeneralSecurityException("invalid Ed25519 public key: incorrect key length");
     }
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

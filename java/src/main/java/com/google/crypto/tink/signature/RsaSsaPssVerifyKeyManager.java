@@ -39,7 +39,7 @@ import java.security.spec.RSAPublicKeySpec;
  */
 class RsaSsaPssVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, RsaSsaPssPublicKey, Empty> {
   public RsaSsaPssVerifyKeyManager() {
-    super(RsaSsaPssPublicKey.class, Empty.class, TYPE_URL);
+    super(PublicKeyVerify.class, RsaSsaPssPublicKey.class, Empty.class, TYPE_URL);
   }
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey";
@@ -49,7 +49,6 @@ class RsaSsaPssVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, RsaSsaPs
   @Override
   public PublicKeyVerify getPrimitiveFromKey(RsaSsaPssPublicKey keyProto)
       throws GeneralSecurityException {
-    validateKey(keyProto);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
     BigInteger modulus = new BigInteger(1, keyProto.getN().toByteArray());
     BigInteger exponent = new BigInteger(1, keyProto.getE().toByteArray());
@@ -90,9 +89,13 @@ class RsaSsaPssVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, RsaSsaPs
     return Empty.parseFrom(byteString);
   }
 
-  private void validateKey(RsaSsaPssPublicKey pubKey) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(RsaSsaPssPublicKey pubKey) throws GeneralSecurityException {
     Validators.validateVersion(pubKey.getVersion(), VERSION);
     Validators.validateRsaModulusSize(new BigInteger(1, pubKey.getN().toByteArray()).bitLength());
     SigUtil.validateRsaSsaPssParams(pubKey.getParams());
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

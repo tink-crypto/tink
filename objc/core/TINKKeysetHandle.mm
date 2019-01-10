@@ -58,6 +58,27 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
   _ccKeysetHandle.reset();
 }
 
+- (instancetype)initWithNoSecretKeyset:(NSData *)keyset error:(NSError **)error {
+  if (keyset == nil) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "keyset must be non-nil."));
+    }
+    return nil;
+  }
+
+  auto st = crypto::tink::KeysetHandle::ReadNoSecret(std::string(
+      reinterpret_cast<const char *>(keyset.bytes), static_cast<size_t>(keyset.length)));
+  if (!st.ok()) {
+    if (error) {
+      *error = TINKStatusToError(st.status());
+      return nil;
+    }
+  }
+
+  return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+}
+
 - (instancetype)initWithKeysetReader:(TINKKeysetReader *)reader
                               andKey:(id<TINKAead>)aeadKey
                                error:(NSError **)error {

@@ -38,7 +38,11 @@ import java.security.GeneralSecurityException;
 class AesCtrHmacStreamingKeyManager
     extends KeyManagerBase<StreamingAead, AesCtrHmacStreamingKey, AesCtrHmacStreamingKeyFormat> {
   public AesCtrHmacStreamingKeyManager() {
-    super(AesCtrHmacStreamingKey.class, AesCtrHmacStreamingKeyFormat.class, TYPE_URL);
+    super(
+        StreamingAead.class,
+        AesCtrHmacStreamingKey.class,
+        AesCtrHmacStreamingKeyFormat.class,
+        TYPE_URL);
   }
 
   private static final int VERSION = 0;
@@ -53,7 +57,6 @@ class AesCtrHmacStreamingKeyManager
   @Override
   public StreamingAead getPrimitiveFromKey(AesCtrHmacStreamingKey keyProto)
       throws GeneralSecurityException {
-    validate(keyProto);
     return new AesCtrHmacStreaming(
         keyProto.getKeyValue().toByteArray(),
         StreamingAeadUtil.toHmacAlgo(
@@ -73,7 +76,6 @@ class AesCtrHmacStreamingKeyManager
   @Override
   public AesCtrHmacStreamingKey newKeyFromFormat(AesCtrHmacStreamingKeyFormat format)
       throws GeneralSecurityException {
-    validate(format);
     return AesCtrHmacStreamingKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
         .setParams(format.getParams())
@@ -103,7 +105,8 @@ class AesCtrHmacStreamingKeyManager
     return AesCtrHmacStreamingKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(AesCtrHmacStreamingKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(AesCtrHmacStreamingKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() < 16) {
       throw new GeneralSecurityException("key_value must have at least 16 bytes");
@@ -115,7 +118,9 @@ class AesCtrHmacStreamingKeyManager
     validate(key.getParams());
   }
 
-  private void validate(AesCtrHmacStreamingKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesCtrHmacStreamingKeyFormat format)
+      throws GeneralSecurityException {
     if (format.getKeySize() < 16) {
       throw new GeneralSecurityException("key_size must be at least 16 bytes");
     }

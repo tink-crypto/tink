@@ -316,6 +316,27 @@ public class AesCtrHmacStreamingTest {
   }
 
   @Test
+  public void testSkipWithStream() throws Exception {
+    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    int keySize = 16;
+    int tagSize = 12;
+    int segmentSize = 256;
+    int offset = 8;
+    int plaintextSize = 1 << 16;
+    AesCtrHmacStreaming ags =
+        new AesCtrHmacStreaming(
+            ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, offset);
+    // Smallest possible chunk size
+    StreamingTestUtil.testSkipWithStream(ags, offset, plaintextSize, 1);
+    // Chunk size < segmentSize
+    StreamingTestUtil.testSkipWithStream(ags, offset, plaintextSize, 37);
+    // Chunk size > segmentSize
+    StreamingTestUtil.testSkipWithStream(ags, offset, plaintextSize, 384);
+    // Chunk size > 3*segmentSize
+    StreamingTestUtil.testSkipWithStream(ags, offset, plaintextSize, 800);
+  }
+
+  @Test
   public void testModifiedCiphertextWithSeekableByteChannel() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
@@ -369,6 +390,8 @@ public class AesCtrHmacStreamingTest {
   /** Encrypt some plaintext to a file, then decrypt from the file */
   @Test
   public void testFileEncryption() throws Exception {
-    StreamingTestUtil.testFileEncryption(createAesCtrHmacStreaming(), tmpFolder.newFile());
+    int plaintextSize = 1 << 20;
+    StreamingTestUtil.testFileEncryption(
+        createAesCtrHmacStreaming(), tmpFolder.newFile(), plaintextSize);
   }
 }

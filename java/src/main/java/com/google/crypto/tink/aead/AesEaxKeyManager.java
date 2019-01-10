@@ -34,7 +34,7 @@ import java.security.GeneralSecurityException;
  */
 class AesEaxKeyManager extends KeyManagerBase<Aead, AesEaxKey, AesEaxKeyFormat> {
   public AesEaxKeyManager() {
-    super(AesEaxKey.class, AesEaxKeyFormat.class, TYPE_URL);
+    super(Aead.class, AesEaxKey.class, AesEaxKeyFormat.class, TYPE_URL);
   }
 
   private static final int VERSION = 0;
@@ -43,13 +43,11 @@ class AesEaxKeyManager extends KeyManagerBase<Aead, AesEaxKey, AesEaxKeyFormat> 
 
   @Override
   public Aead getPrimitiveFromKey(AesEaxKey keyProto) throws GeneralSecurityException {
-    validate(keyProto);
     return new AesEaxJce(keyProto.getKeyValue().toByteArray(), keyProto.getParams().getIvSize());
   }
 
   @Override
   public AesEaxKey newKeyFromFormat(AesEaxKeyFormat format) throws GeneralSecurityException {
-    validate(format);
     return AesEaxKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
         .setParams(format.getParams())
@@ -79,7 +77,8 @@ class AesEaxKeyManager extends KeyManagerBase<Aead, AesEaxKey, AesEaxKeyFormat> 
     return AesEaxKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(AesEaxKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(AesEaxKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     Validators.validateAesKeySize(key.getKeyValue().size());
     if (key.getParams().getIvSize() != 12 && key.getParams().getIvSize() != 16) {
@@ -87,7 +86,8 @@ class AesEaxKeyManager extends KeyManagerBase<Aead, AesEaxKey, AesEaxKeyFormat> 
     }
   }
 
-  private void validate(AesEaxKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesEaxKeyFormat format) throws GeneralSecurityException {
     Validators.validateAesKeySize(format.getKeySize());
     if (format.getParams().getIvSize() != 12 && format.getParams().getIvSize() != 16) {
       throw new GeneralSecurityException("invalid IV size; acceptable values have 12 or 16 bytes");

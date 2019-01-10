@@ -36,7 +36,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
   public HmacKeyManager() {
-    super(HmacKey.class, HmacKeyFormat.class, TYPE_URL);
+    super(Mac.class, HmacKey.class, HmacKeyFormat.class, TYPE_URL);
   }
   /** Type url that this manager does support. */
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";
@@ -52,7 +52,6 @@ class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
   /** @param serializedKey serialized {@code HmacKey} proto */
   @Override
   public Mac getPrimitiveFromKey(HmacKey keyProto) throws GeneralSecurityException {
-    validate(keyProto);
     HashType hash = keyProto.getParams().getHash();
     byte[] keyValue = keyProto.getKeyValue().toByteArray();
     SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
@@ -75,7 +74,6 @@ class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
    */
   @Override
   public HmacKey newKeyFromFormat(HmacKeyFormat format) throws GeneralSecurityException {
-    validate(format);
     return HmacKey.newBuilder()
         .setVersion(VERSION)
         .setParams(format.getParams())
@@ -105,7 +103,8 @@ class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
     return HmacKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(HmacKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(HmacKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("key too short");
@@ -113,7 +112,8 @@ class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
     validate(key.getParams());
   }
 
-  private void validate(HmacKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(HmacKeyFormat format) throws GeneralSecurityException {
     if (format.getKeySize() < MIN_KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("key too short");
     }

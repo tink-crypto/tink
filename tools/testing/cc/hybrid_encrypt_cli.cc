@@ -56,7 +56,8 @@ int main(int argc, char** argv) {
       CliUtil::ReadKeyset(keyset_filename);
 
   // Get the primitive.
-  auto primitive_result = HybridEncryptFactory::GetPrimitive(*keyset_handle);
+  auto primitive_result =
+      keyset_handle->GetPrimitive<crypto::tink::HybridEncrypt>();
   if (!primitive_result.ok()) {
     std::clog << "Getting HybridEncrypt-primitive from the factory failed: "
               << primitive_result.status().error_message() << std::endl;

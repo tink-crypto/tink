@@ -20,16 +20,16 @@ cc_library(
 )
 
 cc_library(
-    name = "hybrid_decrypt_set_wrapper",
-    srcs = ["hybrid_decrypt_set_wrapper.cc"],
-    hdrs = ["hybrid_decrypt_set_wrapper.h"],
+    name = "hybrid_decrypt_wrapper",
+    srcs = ["hybrid_decrypt_wrapper.cc"],
+    hdrs = ["hybrid_decrypt_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:hybrid_decrypt",
         "//cc:primitive_set",
+        "//cc:primitive_wrapper",
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -39,16 +39,16 @@ cc_library(
 )
 
 cc_library(
-    name = "hybrid_encrypt_set_wrapper",
-    srcs = ["hybrid_encrypt_set_wrapper.cc"],
-    hdrs = ["hybrid_encrypt_set_wrapper.h"],
+    name = "hybrid_encrypt_wrapper",
+    srcs = ["hybrid_encrypt_wrapper.cc"],
+    hdrs = ["hybrid_encrypt_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:hybrid_encrypt",
         "//cc:primitive_set",
+        "//cc:primitive_wrapper",
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -80,7 +80,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":hybrid_decrypt_set_wrapper",
+        ":hybrid_decrypt_wrapper",
         "//cc:hybrid_decrypt",
         "//cc:key_manager",
         "//cc:keyset_handle",
@@ -88,6 +88,7 @@ cc_library(
         "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
@@ -114,7 +115,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":hybrid_encrypt_set_wrapper",
+        ":hybrid_encrypt_wrapper",
         "//cc:hybrid_encrypt",
         "//cc:key_manager",
         "//cc:keyset_handle",
@@ -122,6 +123,7 @@ cc_library(
         "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
@@ -270,8 +272,12 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":hybrid_config",
+        ":hybrid_key_templates",
         "//cc:catalogue",
         "//cc:config",
+        "//cc:hybrid_decrypt",
+        "//cc:hybrid_encrypt",
+        "//cc:keyset_handle",
         "//cc:registry",
         "//cc/util:status",
         "@com_google_googletest//:gtest_main",
@@ -279,12 +285,12 @@ cc_test(
 )
 
 cc_test(
-    name = "hybrid_decrypt_set_wrapper_test",
+    name = "hybrid_decrypt_wrapper_test",
     size = "small",
-    srcs = ["hybrid_decrypt_set_wrapper_test.cc"],
+    srcs = ["hybrid_decrypt_wrapper_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":hybrid_decrypt_set_wrapper",
+        ":hybrid_decrypt_wrapper",
         "//cc:hybrid_decrypt",
         "//cc:primitive_set",
         "//cc/util:status",
@@ -295,12 +301,12 @@ cc_test(
 )
 
 cc_test(
-    name = "hybrid_encrypt_set_wrapper_test",
+    name = "hybrid_encrypt_wrapper_test",
     size = "small",
-    srcs = ["hybrid_encrypt_set_wrapper_test.cc"],
+    srcs = ["hybrid_encrypt_wrapper_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":hybrid_encrypt_set_wrapper",
+        ":hybrid_encrypt_wrapper",
         "//cc:hybrid_encrypt",
         "//cc:primitive_set",
         "//cc/util:status",

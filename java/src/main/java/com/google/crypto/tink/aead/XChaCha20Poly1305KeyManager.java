@@ -34,7 +34,7 @@ import java.security.GeneralSecurityException;
  */
 class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305Key, Empty> {
   public XChaCha20Poly1305KeyManager() {
-    super(XChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
+    super(Aead.class, XChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
   }
 
   public static final String TYPE_URL =
@@ -46,18 +46,7 @@ class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305
 
   @Override
   public Aead getPrimitiveFromKey(XChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
-    validate(keyProto);
     return new XChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
   }
 
   @Override
@@ -89,10 +78,14 @@ class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305
     return Empty.parseFrom(byteString);
   }
 
-  private void validate(XChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(XChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("invalid XChaCha20Poly1305Key: incorrect key length");
     }
   }
+
+  @Override
+  protected void validateKeyFormat(Empty empty) throws GeneralSecurityException {}
 }

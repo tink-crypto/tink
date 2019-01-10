@@ -77,6 +77,23 @@ public class AesGcmHkdfStreamingKeyManagerTest {
   }
 
   @Test
+  public void testSkip() throws Exception {
+    AesGcmHkdfStreamingKey key =
+        AesGcmHkdfStreamingKey.newBuilder()
+            .setVersion(0)
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(20)))
+            .setParams(keyParams)
+            .build();
+    StreamingAead streamingAead = keyManager.getPrimitive(key);
+    int offset = 0;
+    int plaintextSize = 1 << 16;
+    // Runs the test with different sizes for the chunks to skip.
+    StreamingTestUtil.testSkipWithStream(streamingAead, offset, plaintextSize, 1);
+    StreamingTestUtil.testSkipWithStream(streamingAead, offset, plaintextSize, 64);
+    StreamingTestUtil.testSkipWithStream(streamingAead, offset, plaintextSize, 300);
+  }
+
+  @Test
   public void testNewKeyMultipleTimes() throws Exception {
     AesGcmHkdfStreamingKeyFormat keyFormat =
         AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(16).build();

@@ -45,7 +45,7 @@ class BinaryKeysetReader : public KeysetReader {
   ReadEncrypted() override;
 
  private:
-  BinaryKeysetReader(absl::string_view serialized_keyset)
+  explicit BinaryKeysetReader(absl::string_view serialized_keyset)
       : serialized_keyset_(serialized_keyset) {}
 
   std::string serialized_keyset_;

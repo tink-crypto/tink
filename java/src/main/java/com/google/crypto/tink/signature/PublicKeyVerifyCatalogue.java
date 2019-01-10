@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeyVerify;
 import java.security.GeneralSecurityException;
 
@@ -65,5 +66,10 @@ class PublicKeyVerifyCatalogue implements Catalogue<PublicKeyVerify> {
             String.format(
                 "No support for primitive 'PublicKeyVerify' with key type '%s'.", typeUrl));
     }
+  }
+
+  @Override
+  public PrimitiveWrapper<PublicKeyVerify> getPrimitiveWrapper() {
+    return new PublicKeyVerifyWrapper();
   }
 }

@@ -40,7 +40,7 @@ public final class KeyManagerBaseTest {
   /** Keymanager for testing. Only produces dummy aeads, and wants the key size to be exactly 16. */
   static class TestKeyManager extends KeyManagerBase<Aead, AesGcmKey, AesGcmKeyFormat> {
     public TestKeyManager() {
-      super(AesGcmKey.class, AesGcmKeyFormat.class, TYPE_URL);
+      super(Aead.class, AesGcmKey.class, AesGcmKeyFormat.class, TYPE_URL);
     }
 
     private static final int VERSION = 0;
@@ -49,13 +49,11 @@ public final class KeyManagerBaseTest {
 
     @Override
     protected Aead getPrimitiveFromKey(AesGcmKey key) throws GeneralSecurityException {
-      validate(key);
       return new DummyAead();
     }
 
     @Override
     protected AesGcmKey newKeyFromFormat(AesGcmKeyFormat format) throws GeneralSecurityException {
-      validate(format);
       return AesGcmKey.newBuilder()
           .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
           .setVersion(VERSION)
@@ -89,12 +87,14 @@ public final class KeyManagerBaseTest {
       }
     }
 
-    private void validate(AesGcmKey key) throws GeneralSecurityException {
+    @Override
+    protected void validateKey(AesGcmKey key) throws GeneralSecurityException {
       Validators.validateVersion(key.getVersion(), VERSION);
       throwIfNot16(key.getKeyValue().size());
     }
 
-    private void validate(AesGcmKeyFormat format) throws GeneralSecurityException {
+    @Override
+    protected void validateKeyFormat(AesGcmKeyFormat format) throws GeneralSecurityException {
       throwIfNot16(format.getKeySize());
     }
   }
@@ -236,5 +236,11 @@ public final class KeyManagerBaseTest {
                 .newKeyData(AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString())
                 .getKeyMaterialType())
         .isEqualTo(KeyMaterialType.SYMMETRIC);
+  }
+
+  @Test
+  public void getPrimitiveClass() throws Exception {
+    TestKeyManager keyManager = new TestKeyManager();
+    assertThat(keyManager.getPrimitiveClass()).isEqualTo(Aead.class);
   }
 }

@@ -50,6 +50,16 @@ NS_ASSUME_NONNULL_BEGIN
                                         error:(NSError **)error;
 
 /**
+ * Creates a TINKKeysetHandle from a serialized keyset which contains no secret key material.
+ * This can be used to load public keysets or envelope encryption keysets.
+ *
+ * @param keyset  A serialized keyset.
+ * @param error   If non-nil it will be populated with a descriptive error message.
+ * @return        A TINKKeysetHandle, or nil in case of error.
+ */
+- (nullable instancetype)initWithNoSecretKeyset:(NSData *)keyset error:(NSError **)error;
+
+/**
  * Returns a new TINKKeysetHandle that contains a single fresh key generated according to
  * @c keyTemplate. @c keyTemplate can be obtained by using one of the subclasses such as
  * TINKAeadKeyTemplate, TINKHybridKeyTemplate etc.

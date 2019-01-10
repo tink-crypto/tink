@@ -53,7 +53,7 @@ public final class KmsEnvelopeAead implements Aead {
     // Wrap it with remote.
     byte[] encryptedDek = remote.encrypt(dek, EMPTY_AAD);
     // Use DEK to encrypt plaintext.
-    Aead aead = Registry.getPrimitive(dekTemplate.getTypeUrl(), dek);
+    Aead aead = Registry.getPrimitive(dekTemplate.getTypeUrl(), dek, Aead.class);
     byte[] payload = aead.encrypt(plaintext, associatedData);
     // Build ciphertext protobuf and return result.
     return buildCiphertext(encryptedDek, payload);
@@ -75,7 +75,7 @@ public final class KmsEnvelopeAead implements Aead {
       // Use remote to decrypt encryptedDek.
       byte[] dek = remote.decrypt(encryptedDek, EMPTY_AAD);
       // Use DEK to decrypt payload.
-      Aead aead = Registry.getPrimitive(dekTemplate.getTypeUrl(), dek);
+      Aead aead = Registry.getPrimitive(dekTemplate.getTypeUrl(), dek, Aead.class);
       return aead.decrypt(payload, associatedData);
     } catch (IndexOutOfBoundsException
              | BufferUnderflowException

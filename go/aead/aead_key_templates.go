@@ -16,7 +16,11 @@ package aead
 
 import (
 	"github.com/golang/protobuf/proto"
+	ctrpb "github.com/google/tink/proto/aes_ctr_go_proto"
+	ctrhmacpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -35,6 +39,28 @@ func AES256GCMKeyTemplate() *tinkpb.KeyTemplate {
 	return createAESGCMKeyTemplate(32)
 }
 
+// AES128CTRHMACSHA256KeyTemplate is a KeyTemplate of AESCTRHMACAEADKey with the following
+// parameters:
+//  - AES key size: 16 bytes
+//  - AES CTR IV size: 16 bytes
+//  - HMAC key size: 32 bytes
+//  - HMAC tag size: 16 bytes
+//  - HMAC hash function: SHA256
+func AES128CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
+	return createAESCTRHMACAEADKeyTemplate(16, 16, 32, 16, commonpb.HashType_SHA256)
+}
+
+// AES256CTRHMACSHA256KeyTemplate is a KeyTemplate of AESCTRHMACAEADKey with the following
+// parameters:
+//  - AES key size: 32 bytes
+//  - AES CTR IV size: 16 bytes
+//  - HMAC key size: 32 bytes
+//  - HMAC tag size: 32 bytes
+//  - HMAC hash function: SHA256
+func AES256CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
+	return createAESCTRHMACAEADKeyTemplate(32, 16, 32, 32, commonpb.HashType_SHA256)
+}
+
 // createAESGCMKeyTemplate creates a new AES-GCM key template with the given key
 // size in bytes.
 func createAESGCMKeyTemplate(keySize uint32) *tinkpb.KeyTemplate {
@@ -45,5 +71,24 @@ func createAESGCMKeyTemplate(keySize uint32) *tinkpb.KeyTemplate {
 	return &tinkpb.KeyTemplate{
 		TypeUrl: AESGCMTypeURL,
 		Value:   serializedFormat,
+	}
+}
+
+func createAESCTRHMACAEADKeyTemplate(aesKeySize, ivSize, hmacKeySize, tagSize uint32, hash commonpb.HashType) *tinkpb.KeyTemplate {
+	format := &ctrhmacpb.AesCtrHmacAeadKeyFormat{
+		AesCtrKeyFormat: &ctrpb.AesCtrKeyFormat{
+			Params:  &ctrpb.AesCtrParams{IvSize: ivSize},
+			KeySize: aesKeySize,
+		},
+		HmacKeyFormat: &hmacpb.HmacKeyFormat{
+			Params:  &hmacpb.HmacParams{Hash: hash, TagSize: tagSize},
+			KeySize: hmacKeySize,
+		},
+	}
+	serializedFormat, _ := proto.Marshal(format)
+	return &tinkpb.KeyTemplate{
+		Value:            serializedFormat,
+		TypeUrl:          AESCTRHMACAEADTypeURL,
+		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
 	}
 }

@@ -43,7 +43,7 @@ class BinaryKeysetWriter : public KeysetWriter {
   Write(const google::crypto::tink::EncryptedKeyset& encrypted_keyset) override;
 
  private:
-  BinaryKeysetWriter(std::unique_ptr<std::ostream> destination_stream)
+  explicit BinaryKeysetWriter(std::unique_ptr<std::ostream> destination_stream)
       : destination_stream_(std::move(destination_stream)) {}
 
   std::unique_ptr<std::ostream> destination_stream_;

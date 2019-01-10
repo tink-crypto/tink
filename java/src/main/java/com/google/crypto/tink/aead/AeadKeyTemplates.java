@@ -40,7 +40,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * <pre>{@code
  * Config.register(AeadConfig.TINK_1_1_0);
  * KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
- * Aead aead = AeadFactory.getPrimitive(handle);
+ * Aead aead = handle.getPrimitive(Aead.class);
  * }</pre>
  *
  * @since 1.0.0

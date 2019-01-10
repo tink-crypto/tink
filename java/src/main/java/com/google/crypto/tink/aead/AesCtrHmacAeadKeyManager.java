@@ -40,7 +40,7 @@ import java.security.GeneralSecurityException;
 class AesCtrHmacAeadKeyManager
     extends KeyManagerBase<Aead, AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {
   public AesCtrHmacAeadKeyManager() throws GeneralSecurityException {
-    super(AesCtrHmacAeadKey.class, AesCtrHmacAeadKeyFormat.class, TYPE_URL);
+    super(Aead.class, AesCtrHmacAeadKey.class, AesCtrHmacAeadKeyFormat.class, TYPE_URL);
     Registry.registerKeyManager(new AesCtrKeyManager());
   }
 
@@ -50,10 +50,10 @@ class AesCtrHmacAeadKeyManager
 
   @Override
   public Aead getPrimitiveFromKey(AesCtrHmacAeadKey keyProto) throws GeneralSecurityException {
-    validate(keyProto);
     return new EncryptThenAuthenticate(
-        (IndCpaCipher) Registry.getPrimitive(AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
-        (Mac) Registry.getPrimitive(MacConfig.HMAC_TYPE_URL, keyProto.getHmacKey()),
+        Registry.getPrimitive(
+            AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey(), IndCpaCipher.class),
+        Registry.getPrimitive(MacConfig.HMAC_TYPE_URL, keyProto.getHmacKey(), Mac.class),
         keyProto.getHmacKey().getParams().getTagSize());
   }
 
@@ -92,11 +92,13 @@ class AesCtrHmacAeadKeyManager
     return AesCtrHmacAeadKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(AesCtrHmacAeadKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesCtrHmacAeadKeyFormat format) throws GeneralSecurityException {
     Validators.validateAesKeySize(format.getAesCtrKeyFormat().getKeySize());
   }
 
-  private void validate(AesCtrHmacAeadKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(AesCtrHmacAeadKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
   }
 }

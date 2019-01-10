@@ -81,6 +81,14 @@ public interface KeyManager<P> {
   /** @return the version number of this KeyManager. */
   int getVersion();
 
+  /**
+   * Returns the primitive class object of the P. Should be implemented as {@code return P.class;}
+   * when implementing a key manager for primitive {$code P}.
+   *
+   * @return {@code P.class}
+   */
+  Class<P> getPrimitiveClass();
+
   // APIs for Key Management
 
   /**

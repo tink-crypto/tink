@@ -17,8 +17,10 @@
 #include "tink/aead/aead_config.h"
 
 #include "tink/aead.h"
+#include "tink/aead/aead_key_templates.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
+#include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "gtest/gtest.h"
@@ -128,6 +130,33 @@ TEST_F(AeadConfigTest, testRegister) {
   status = AeadConfig::Register();
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
+}
+
+// Tests that the AeadWrapper has been properly registered and we can wrap
+// primitives.
+TEST_F(AeadConfigTest, WrappersRegistered) {
+  ASSERT_TRUE(AeadConfig::Register().ok());
+  auto keyset_handle_result =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes256Eax());
+  ASSERT_TRUE(keyset_handle_result.ok());
+
+  auto primitive_set_result =
+      keyset_handle_result.ValueOrDie()->GetPrimitives<Aead>(
+          nullptr);
+  ASSERT_TRUE(primitive_set_result.ok());
+
+  auto primitive_result =
+      Registry::Wrap(std::move(primitive_set_result.ValueOrDie()));
+  ASSERT_TRUE(primitive_result.ok());
+
+  auto encryption_result =
+      primitive_result.ValueOrDie()->Encrypt("encrypted text", "");
+  ASSERT_TRUE(encryption_result.ok());
+
+  auto decryption_result = primitive_result.ValueOrDie()->Decrypt(
+      encryption_result.ValueOrDie(), "");
+  ASSERT_TRUE(decryption_result.ok());
+  EXPECT_EQ(decryption_result.ValueOrDie(), "encrypted text");
 }
 
 }  // namespace

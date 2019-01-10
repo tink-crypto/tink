@@ -18,7 +18,6 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.signature.PublicKeySignFactory;
 
 /**
  * A command-line utility for testing PublicKeySign-primitives.
@@ -50,7 +49,7 @@ public class PublicKeySignCli {
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    PublicKeySign pkSign = PublicKeySignFactory.getPrimitive(keysetHandle);
+    PublicKeySign pkSign = keysetHandle.getPrimitive(PublicKeySign.class);
 
     // Read the message.
     byte[] message = CliUtil.read(messageFilename);

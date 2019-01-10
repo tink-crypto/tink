@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -90,6 +91,48 @@ public final class KeysetHandle {
     EncryptedKeyset encryptedKeyset = reader.readEncrypted();
     assertEnoughEncryptedKeyMaterial(encryptedKeyset);
     return new KeysetHandle(decrypt(encryptedKeyset, masterKey));
+  }
+
+  /**
+   * Tries to create a {@link KeysetHandle} from a keyset, obtained via {@code reader}, which
+   * contains no secret key material.
+   *
+   * <p>This can be used to load public keysets or envelope encryption keysets. Users that need to
+   * load cleartext keysets can use {@link CleartextKeysetHandle}.
+   *
+   * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
+   * @throws GeneralSecurityException
+   */
+  public static final KeysetHandle readNoSecret(KeysetReader reader)
+      throws GeneralSecurityException, IOException {
+    try {
+      Keyset keyset = reader.read();
+      assertNoSecretKeyMaterial(keyset);
+      return KeysetHandle.fromKeyset(keyset);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset");
+    }
+  }
+
+  /**
+   * Tries to create a {@link KeysetHandle} from a serialized keyset which contains no secret key
+   * material.
+   *
+   * <p>This can be used to load public keysets or envelope encryption keysets. Users that need to
+   * load cleartext keysets can use {@link CleartextKeysetHandle}.
+   *
+   * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
+   * @throws GeneralSecurityException
+   */
+  public static final KeysetHandle readNoSecret(final byte[] serialized)
+      throws GeneralSecurityException {
+    try {
+      Keyset keyset = Keyset.parseFrom(serialized);
+      assertNoSecretKeyMaterial(keyset);
+      return KeysetHandle.fromKeyset(keyset);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset");
+    }
   }
 
   /** Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream}. */
@@ -168,6 +211,7 @@ public final class KeysetHandle {
     return publicKeyData;
   }
 
+  @SuppressWarnings("deprecation")
   private static void validate(KeyData keyData) throws GeneralSecurityException {
     // This will throw GeneralSecurityException if the keyData is invalid.
     Registry.getPrimitive(keyData);
@@ -180,6 +224,21 @@ public final class KeysetHandle {
   @Override
   public String toString() {
     return getKeysetInfo().toString();
+  }
+
+  /**
+   * Validates that {@code keyset} doesn't contain any secret key material.
+   *
+   * @throws GeneralSecurityException if {@code keyset} contains secret key material.
+   */
+  private static void assertNoSecretKeyMaterial(Keyset keyset) throws GeneralSecurityException {
+    for (Keyset.Key key : keyset.getKeyList()) {
+      if (key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL
+          || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.SYMMETRIC
+          || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
+        throw new GeneralSecurityException("keyset contains secret key material");
+      }
+    }
   }
 
   /**
@@ -203,5 +262,38 @@ public final class KeysetHandle {
     if (keyset == null || keyset.getEncryptedKeyset().size() == 0) {
       throw new GeneralSecurityException("empty keyset");
     }
+  }
+
+  /**
+   * Returns a primitive from this keyset, using the global registry to create resources creating
+   * the primitive.
+   *
+   * <p>This does not yet work for all primitives, since the set-wrapper for the primitive needs to
+   * be registered. TODO(tholenst): Make this work for all primitives we have, then remove the alpha
+   * annotation.
+   */
+  @Alpha
+  public <P> P getPrimitive(Class<P> classObject) throws GeneralSecurityException {
+    PrimitiveSet<P> primitiveSet = Registry.getPrimitives(this, classObject);
+    return Registry.wrap(primitiveSet);
+  }
+
+  /**
+   * Returns a primitive from this keyset, using the given {@code customKeyManager} and the global
+   * registry to get resources creating the primitive. The given keyManager will take precedence
+   * when creating primitives over the globally registered keyManagers.
+   *
+   * <p>This does not yet work for all primitives, since the set-wrapper for the primitive needs to
+   * be registered. TODO(tholenst): Make this work for all primitives we have, then remove the alpha
+   * annotation.
+   */
+  @Alpha
+  public <P> P getPrimitive(KeyManager<P> customKeyManager, Class<P> classObject)
+      throws GeneralSecurityException {
+    if (customKeyManager == null) {
+      throw new IllegalArgumentException("customKeyManager must be non-null.");
+    }
+    PrimitiveSet<P> primitiveSet = Registry.getPrimitives(this, customKeyManager, classObject);
+    return Registry.wrap(primitiveSet);
   }
 }
