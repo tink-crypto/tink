@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <algorithm>
 
+#include "absl/memory/memory.h"
 #include "tink/input_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -28,18 +29,38 @@ namespace crypto {
 namespace tink {
 namespace util {
 
-FileInputStream::FileInputStream(int file_descriptor, int buffer_size) {
+namespace {
+
+// Attempts to close file descriptor fd, while ignoring EINTR.
+// (code borrowed from ZeroCopy-streams)
+int close_ignoring_eintr(int fd) {
+  int result;
+  do {
+    result = close(fd);
+  } while (result < 0 && errno == EINTR);
+  return result;
+}
+
+
+// Attempts to read 'count' bytes of data data from file descriptor fd
+// to 'buf' while ignoring EINTR.
+int read_ignoring_eintr(int fd, void *buf, size_t count) {
+  int result;
+  do {
+    result = read(fd, buf, count);
+  } while (result < 0 && errno == EINTR);
+  return result;
+}
+
+}  // anonymous namespace
+
+FileInputStream::FileInputStream(int file_descriptor, int buffer_size) :
+    buffer_size_(buffer_size > 0 ? buffer_size : 128 * 1024) {  // 128 KB
   fd_ = file_descriptor;
-  if (buffer_size > 0) {
-    buffer_size_ = buffer_size;
-  } else {
-    // On linux systems, 128kB is a good buffer size and used e.g. by cp.
-    buffer_size_ = 128 * 1024;
-  }
   count_in_buffer_ = 0;
   count_backedup_ = 0;
   position_ = 0;
-  buffer_.reset(new uint8_t[buffer_size_]);
+  buffer_ = absl::make_unique<uint8_t[]>(buffer_size_);
   buffer_offset_ = 0;
   status_ = Status::OK;
 }
@@ -55,7 +76,7 @@ crypto::tink::util::StatusOr<int> FileInputStream::Next(const void** data) {
     return count_in_buffer_;
   }
   // Read new bytes to buffer_.
-  int read_result = read(fd_, buffer_.get(), buffer_size_);
+  int read_result = read_ignoring_eintr(fd_, buffer_.get(), buffer_size_);
   if (read_result <= 0) {  // EOF or an I/O error.
     if (read_result == 0) {
       status_ = Status(util::error::OUT_OF_RANGE, "EOF");
@@ -81,7 +102,7 @@ void FileInputStream::BackUp(int count) {
 }
 
 FileInputStream::~FileInputStream() {
-  close(fd_);
+  close_ignoring_eintr(fd_);
 }
 
 int64_t FileInputStream::Position() const {

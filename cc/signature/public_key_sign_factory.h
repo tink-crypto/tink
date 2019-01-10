@@ -17,48 +17,39 @@
 #ifndef TINK_SIGNATURE_PUBLIC_KEY_SIGN_FACTORY_H_
 #define TINK_SIGNATURE_PUBLIC_KEY_SIGN_FACTORY_H_
 
-#include "tink/public_key_sign.h"
+#include "absl/base/macros.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
+#include "tink/public_key_sign.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// PublicKeySignFactory allows for obtaining an PublicKeySign primitive
-// from a KeysetHandle.
+// This class is deprecated. Call keyset_handle->GetPrimitive<PublicKeySign>()
+// instead.
 //
-// PublicKeySignFactory gets primitives from the Registry, which can
-// be initialized via a convenience method from SignatureConfig-class.
-// Here is an example how one can obtain and use a PublicKeySign primitive:
-//
-//   auto status = SignatureConfig::Register();
-//   if (!status.ok()) { /* fail with error */ }
-//   KeysetHandle keyset_handle = ...;
-//   std::unique_ptr<PublicKeySign> public_key_sign = std::move(
-//           PublicKeySignFactory::GetPrimitive(keyset_handle).ValueOrDie());
-//   std::string data = ...;
-//   auto sign_result = public_key_sign.Sign(data);
-//   if (!sign_result.ok()) {
-//     // Signing failed.
-//     // ...
-//   }
-//   std::string signature = sign_result.ValueOrDie();
-//
-class PublicKeySignFactory {
+// Note that in order to for this change to be safe, the AeadSetWrapper has to
+// be registered in your binary before this call. This happens automatically if
+// you call one of
+// * SignatureConfig::Register()
+// * TinkConfig::Register()
+class ABSL_DEPRECATED(
+    "Call getPrimitive<PublicKeySign>() on the keyset_handle after registering "
+    "the PublicKeySignWrapper instead.") PublicKeySignFactory {
  public:
   // Returns a PublicKeySign-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
   static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>>
-      GetPrimitive(const KeysetHandle& keyset_handle);
+  GetPrimitive(const KeysetHandle& keyset_handle);
 
   // Returns a PublicKeySign-primitive that uses key material from the keyset
   // specified via 'keyset_handle' and is instantiated by the given
   // 'custom_key_manager' (instead of the key manager from the Registry).
   static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>>
-      GetPrimitive(const KeysetHandle& keyset_handle,
-                   const KeyManager<PublicKeySign>* custom_key_manager);
+  GetPrimitive(const KeysetHandle& keyset_handle,
+               const KeyManager<PublicKeySign>* custom_key_manager);
 
  private:
   PublicKeySignFactory() {}

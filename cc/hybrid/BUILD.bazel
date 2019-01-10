@@ -88,6 +88,7 @@ cc_library(
         "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
@@ -122,6 +123,7 @@ cc_library(
         "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 

@@ -38,6 +38,11 @@ class KeysetHandle {
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Read(
       std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead);
 
+  // Creates a KeysetHandle from a keyset which contains no secret key material.
+  // This can be used to load public keysets or envelope encryption keysets.
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+  ReadNoSecret(const std::string& serialized_keyset);
+
   // Returns a new KeysetHandle that contains a single fresh key generated
   // according to |key_template|.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
@@ -92,9 +97,9 @@ class KeysetHandle {
   friend class KeysetUtil;
 
   // Creates a handle that contains the given keyset.
-  KeysetHandle(google::crypto::tink::Keyset keyset);
+  explicit KeysetHandle(google::crypto::tink::Keyset keyset);
   // Creates a handle that contains the given keyset.
-  KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
+  explicit KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
 
   // Helper function which generates a key from a template, then adds it
   // to the keyset. TODO(tholenst): Change this to a proper member operating

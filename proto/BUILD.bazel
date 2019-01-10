@@ -321,7 +321,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "ed25519_go_proto",
-    importpath = "github.com/google/tink/proto/ed25519_proto",
+    importpath = "github.com/google/tink/proto/ed25519_go_proto",
     proto = ":ed25519_proto",
 )
 
@@ -398,7 +398,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_ctr_go_proto",
-    importpath = "github.com/google/tink/proto/aes_ctr_proto",
+    importpath = "github.com/google/tink/proto/aes_ctr_go_proto",
     proto = ":aes_ctr_proto",
 )
 
@@ -439,7 +439,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_ctr_hmac_aead_go_proto",
-    importpath = "github.com/google/tink/proto/aes_ctr_hmac_aead_proto",
+    importpath = "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto",
     proto = ":aes_ctr_hmac_aead_proto",
     deps = [
         ":aes_ctr_go_proto",

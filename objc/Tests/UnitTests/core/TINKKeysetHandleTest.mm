@@ -39,6 +39,12 @@
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddTinkKey;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+
 // Variables used to hold the serialized keyset data.
 static NSData *gBadSerializedKeyset;
 static NSData *gGoodSerializedKeyset;
@@ -404,6 +410,101 @@ static TINKPBKeyset *gKeyset;
   XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Key material is not of type KeyData::ASYMMETRIC_PRIVATE"]);
+}
+
+- (void)testReadNoSecret {
+  auto keyset = absl::make_unique<Keyset>();
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
+             keyset.get());
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED, KeyData::REMOTE, keyset.get());
+  keyset->set_primary_key_id(42);
+  NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
+  NSError *error = nil;
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithNoSecretKeyset:serializedKeyset
+                                                                        error:&error];
+
+  XCTAssertNil(error);
+  XCTAssertNotNil(handle);
+  XCTAssertTrue(crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle).SerializeAsString() ==
+                keyset->SerializeAsString());
+}
+
+- (void)testReadNoSecretFailForTypeUnknown {
+  auto keyset = absl::make_unique<Keyset>();
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::UNKNOWN_KEYMATERIAL,
+             keyset.get());
+  keyset->set_primary_key_id(42);
+  NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
+  NSError *error = nil;
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithNoSecretKeyset:serializedKeyset
+                                                                        error:&error];
+
+  XCTAssertNil(handle);
+  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"Cannot create KeysetHandle with secret key material"]);
+}
+
+- (void)testReadNoSecretFailForTypeSymmetric {
+  auto keyset = absl::make_unique<Keyset>();
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, keyset.get());
+  keyset->set_primary_key_id(42);
+  NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
+  NSError *error = nil;
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithNoSecretKeyset:serializedKeyset
+                                                                        error:&error];
+
+  XCTAssertNil(handle);
+  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"Cannot create KeysetHandle with secret key material"]);
+}
+
+- (void)testReadNoSecretFailForTypeAssymmetricPrivate {
+  auto keyset = absl::make_unique<Keyset>();
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
+             keyset.get());
+  keyset->set_primary_key_id(42);
+  NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
+  NSError *error = nil;
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithNoSecretKeyset:serializedKeyset
+                                                                        error:&error];
+
+  XCTAssertNil(handle);
+  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"Cannot create KeysetHandle with secret key material"]);
+}
+
+- (void)testReadNoSecretFailForHidden {
+  auto keyset = absl::make_unique<Keyset>();
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
+             keyset.get());
+  for (int i = 0; i < 10; ++i) {
+    AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PUBLIC, keyset.get());
+  }
+  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
+            keyset.get());
+  for (int i = 0; i < 10; ++i) {
+    AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key, KeyStatusType::ENABLED,
+              KeyData::ASYMMETRIC_PUBLIC, keyset.get());
+  }
+  keyset->set_primary_key_id(42);
+  NSData *serializedKeyset = TINKStringToNSData(keyset->SerializeAsString());
+  NSError *error = nil;
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithNoSecretKeyset:serializedKeyset
+                                                                        error:&error];
+
+  XCTAssertNil(handle);
+  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
 
 @end

@@ -44,7 +44,6 @@ class KmsAeadKeyManager extends KeyManagerBase<Aead, KmsAeadKey, KmsAeadKeyForma
 
   @Override
   public Aead getPrimitiveFromKey(KmsAeadKey keyProto) throws GeneralSecurityException {
-    validate(keyProto);
     String keyUri = keyProto.getParams().getKeyUri();
     KmsClient kmsClient = KmsClients.get(keyUri);
     return kmsClient.getAead(keyUri);
@@ -77,7 +76,11 @@ class KmsAeadKeyManager extends KeyManagerBase<Aead, KmsAeadKey, KmsAeadKeyForma
     return KmsAeadKeyFormat.parseFrom(byteString);
   }
 
-  private static void validate(KmsAeadKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(KmsAeadKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
   }
+
+  @Override
+  protected void validateKeyFormat(KmsAeadKeyFormat format) {}
 }

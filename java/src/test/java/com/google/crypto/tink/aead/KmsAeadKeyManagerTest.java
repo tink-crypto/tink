@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.aead;
 
+import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
@@ -41,6 +42,6 @@ public class KmsAeadKeyManagerTest {
     KeysetHandle keysetHandle =
         KeysetHandle.generateNew(
             AeadKeyTemplates.createKmsAeadKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
-    TestUtil.runBasicAeadFactoryTests(keysetHandle);
+    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 }

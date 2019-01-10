@@ -41,7 +41,7 @@ class EciesAeadHkdfPublicKeyManager
   public EciesAeadHkdfPublicKeyManager() {
     super(HybridEncrypt.class, EciesAeadHkdfPublicKey.class, Empty.class, TYPE_URL);
   }
-  
+
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =
@@ -50,7 +50,6 @@ class EciesAeadHkdfPublicKeyManager
   @Override
   protected HybridEncrypt getPrimitiveFromKey(EciesAeadHkdfPublicKey recipientKeyProto)
       throws GeneralSecurityException {
-    validate(recipientKeyProto);
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
     ECPublicKey recipientPublicKey =
@@ -69,8 +68,7 @@ class EciesAeadHkdfPublicKeyManager
   }
 
   @Override
-  public EciesAeadHkdfPublicKey newKeyFromFormat(Empty format)
-      throws GeneralSecurityException {
+  public EciesAeadHkdfPublicKey newKeyFromFormat(Empty format) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented.");
   }
 
@@ -91,14 +89,17 @@ class EciesAeadHkdfPublicKeyManager
   }
 
   @Override
-  protected Empty parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
+  protected Empty parseKeyFormatProto(ByteString byteString) throws InvalidProtocolBufferException {
     return Empty.parseFrom(byteString);
   }
 
-  private void validate(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
     // TODO(b/74251423): add more checks.
     Validators.validateVersion(key.getVersion(), VERSION);
     HybridUtil.validate(key.getParams());
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

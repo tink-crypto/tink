@@ -45,7 +45,7 @@ class EcdsaSignBoringSsl : public PublicKeySign {
   virtual ~EcdsaSignBoringSsl() {}
 
  private:
-  EcdsaSignBoringSsl(EC_KEY* key, const EVP_MD* hash,
+  EcdsaSignBoringSsl(bssl::UniquePtr<EC_KEY> key, const EVP_MD* hash,
                      EcdsaSignatureEncoding encoding);
 
   bssl::UniquePtr<EC_KEY> key_;

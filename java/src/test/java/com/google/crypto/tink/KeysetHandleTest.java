@@ -222,4 +222,83 @@ public class KeysetHandleTest {
       assertExceptionContains(e, "customKeyManager");
     }
   }
+
+  @Test
+  public void readNoSecretShouldWork() throws Exception {
+    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+    Keyset keyset = privateHandle.getPublicKeysetHandle().getKeyset();
+    Keyset keyset2 = KeysetHandle.readNoSecret(keyset.toByteArray()).getKeyset();
+    Keyset keyset3 =
+        KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray())).getKeyset();
+
+    assertEquals(keyset, keyset2);
+    assertEquals(keyset, keyset3);
+  }
+
+  @Test
+  public void readNoSecretFailForTypeSymmetric() throws Exception {
+    String keyValue = "01234567890123456";
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    try {
+      KeysetHandle unused = KeysetHandle.readNoSecret(keyset.toByteArray());
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+
+    try {
+      KeysetHandle unused =
+          KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray()));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+  }
+
+  @Test
+  public void readNoSecretForTypeAssymmetricPrivate() throws Exception {
+    Keyset keyset = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256).getKeyset();
+
+    try {
+      KeysetHandle unused = KeysetHandle.readNoSecret(keyset.toByteArray());
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+
+    try {
+      KeysetHandle unused =
+          KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray()));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+  }
+
+  @Test
+  public void readNoSecretFailWithEmptyKeyset() throws Exception {
+    try {
+      KeysetHandle unused = KeysetHandle.readNoSecret(new byte[0]);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "empty keyset");
+    }
+  }
+
+  @Test
+  public void readNoSecretFailWithInvalidKeyset() throws Exception {
+    byte[] proto = new byte[] {0x00, 0x01, 0x02};
+    try {
+      KeysetHandle unused = KeysetHandle.readNoSecret(proto);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid");
+    }
+  }
 }

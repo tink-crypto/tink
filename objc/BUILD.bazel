@@ -25,7 +25,6 @@ PUBLIC_APIS = [
     "TINKJSONKeysetReader.h",
     "TINKKeyTemplate.h",
     "TINKKeysetHandle.h",
-    "TINKKeysetHandle+NoSecret.h",
     "TINKKeysetReader.h",
     "TINKMac.h",
     "TINKMacConfig.h",
@@ -63,7 +62,6 @@ PUBLIC_API_DEPS = [
     ":mac_config",
     ":mac_factory",
     ":mac_key_template",
-    ":no_secret_keyset_handle",
     ":public_key_sign",
     ":public_key_sign_factory",
     ":public_key_verify",
@@ -234,20 +232,6 @@ objc_library(
     ],
     deps = [
         "//cc:keyset_reader",
-    ],
-)
-
-objc_library(
-    name = "no_secret_keyset_handle",
-    srcs = ["core/TINKKeysetHandle+NoSecret.mm"],
-    hdrs = [
-        "TINKKeysetHandle+NoSecret.h",
-    ],
-    deps = [
-        ":keyset_handle",
-        ":keyset_reader",
-        "//cc:no_secret_keyset_handle",
-        "//objc/util:errors",
     ],
 )
 

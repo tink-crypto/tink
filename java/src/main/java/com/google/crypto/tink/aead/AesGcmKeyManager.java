@@ -44,13 +44,11 @@ class AesGcmKeyManager extends KeyManagerBase<Aead, AesGcmKey, AesGcmKeyFormat> 
   /** @param key {@code AesGcmKey} proto */
   @Override
   protected Aead getPrimitiveFromKey(AesGcmKey key) throws GeneralSecurityException {
-    validate(key);
     return new AesGcmJce(key.getKeyValue().toByteArray());
   }
 
   @Override
   protected AesGcmKey newKeyFromFormat(AesGcmKeyFormat format) throws GeneralSecurityException {
-    validate(format);
     return AesGcmKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
         .setVersion(VERSION)
@@ -79,12 +77,14 @@ class AesGcmKeyManager extends KeyManagerBase<Aead, AesGcmKey, AesGcmKeyFormat> 
     return AesGcmKeyFormat.parseFrom(byteString);
   }
 
-  private void validate(AesGcmKey key) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(AesGcmKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     Validators.validateAesKeySize(key.getKeyValue().size());
   }
 
-  private void validate(AesGcmKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesGcmKeyFormat format) throws GeneralSecurityException {
     Validators.validateAesKeySize(format.getKeySize());
   }
 }

@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_IND_CPA_CIPHER_H_
-#define TINK_IND_CPA_CIPHER_H_
+#ifndef TINK_SUBTLE_IND_CPA_CIPHER_H_
+#define TINK_SUBTLE_IND_CPA_CIPHER_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"
@@ -47,4 +47,4 @@ class IndCpaCipher {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_IND_CPA_CIPHER_H_
+#endif  // TINK_SUBTLE_IND_CPA_CIPHER_H_

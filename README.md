@@ -1,8 +1,17 @@
 # Tink
+*A multi-language, cross-platform library that provides cryptographic APIs that are secure, easy to use correctly, and hard(er) to misuse.*
 
 **`Ubuntu`**                                                                                   | **`macOS`**
 ---------------------------------------------------------------------------------------------- | -----------
 [![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png)](#) | [![Kokoro macOS](https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png)](#)
+
+## Index
+1. [Introduction](#introduction)
+2. [Getting Started](#getting-started)
+3. [Current Status](#current-status)
+4. [Learn More](#learn-more)
+5. [Contact and Mailing List](#contact-and-mailing-list)
+6. [Maintainers](#maintainers)
 
 ## Introduction
 
@@ -80,11 +89,11 @@ AEAD primitive in Java:
 
 ## Current Status
 
-*   [Java and Android](docs/JAVA-HOWTO.md),
-    [C++](docs/CPP-HOWTO.md) and [Obj-C](docs/OBJC-HOWTO.md)
-    are field tested and ready for production. The latest version is
-    [1.2.0](https://github.com/google/tink/releases/tag/v1.2.0),
-    released on 2018-08-09.
+*   [Java and Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md) and
+    [Obj-C](docs/OBJC-HOWTO.md) are field tested and ready for production. The
+    latest version is
+    [1.2.1](https://github.com/google/tink/releases/tag/v1.2.1), released on
+    2018-11-15.
 
 *   Tink for Go and JavaScript are in active development.
 

@@ -49,7 +49,6 @@ class ChaCha20Poly1305KeyManager
 
   @Override
   public Aead getPrimitiveFromKey(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
-    validate(keyProto);
     return new ChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
   }
 
@@ -82,10 +81,14 @@ class ChaCha20Poly1305KeyManager
     return Empty.parseFrom(byteString);
   }
 
-  private void validate(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("invalid ChaCha20Poly1305Key: incorrect key length");
     }
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

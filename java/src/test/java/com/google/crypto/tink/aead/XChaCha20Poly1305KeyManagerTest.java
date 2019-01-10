@@ -44,13 +44,13 @@ public class XChaCha20Poly1305KeyManagerTest {
   @Test
   public void testBasic() throws Exception {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.XCHACHA20_POLY1305);
-    TestUtil.runBasicAeadFactoryTests(keysetHandle);
+    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 
   @Test
   public void testCiphertextSize() throws Exception {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.XCHACHA20_POLY1305);
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
     byte[] associatedData = "associatedData".getBytes("UTF-8");
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);

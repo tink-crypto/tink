@@ -11,7 +11,7 @@ To add a dependency using Maven:
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>apps-webpush</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
 </dependency>
 ```
 
@@ -19,7 +19,7 @@ To add a dependency using Gradle:
 
 ```
 dependencies {
-  compile 'com.google.crypto.tink:apps-webpush:1.2.0'
+  compile 'com.google.crypto.tink:apps-webpush:1.2.1'
 }
 ```
 

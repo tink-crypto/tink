@@ -289,7 +289,7 @@ def _get_external_root(ctx):
     # This set size must be 0 or 1. (all source files must exist in this
     # workspace or the same external workspace).
     roots = depset(external_roots)
-    n = len(roots)
+    n = len(roots.to_list())
     if n:
         if n > 1:
             fail(
@@ -316,7 +316,7 @@ def _compile(ctx, unit):
     transitive_units = depset()
     for u in unit.data.transitive_units:
         transitive_units = transitive_units | u.inputs
-    inputs = list(unit.inputs | transitive_units) + [unit.compiler]
+    inputs = depset(transitive = [unit.inputs, transitive_units]).to_list() + [unit.compiler]
     outputs = list(unit.outputs)
 
     cmds = [" ".join(protoc_cmd)]

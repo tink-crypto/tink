@@ -56,7 +56,6 @@ class EcdsaSignKeyManager
   @Override
   public PublicKeySign getPrimitiveFromKey(EcdsaPrivateKey keyProto)
       throws GeneralSecurityException {
-    validateKey(keyProto);
     ECPrivateKey privateKey =
         EllipticCurves.getEcPrivateKey(
             SigUtil.toCurveType(keyProto.getPublicKey().getParams().getCurve()),
@@ -71,7 +70,6 @@ class EcdsaSignKeyManager
   public EcdsaPrivateKey newKeyFromFormat(EcdsaKeyFormat format)
       throws GeneralSecurityException {
     EcdsaParams ecdsaParams = format.getParams();
-    SigUtil.validateEcdsaParams(ecdsaParams);
     KeyPair keyPair = EllipticCurves.generateKeyPair(SigUtil.toCurveType(ecdsaParams.getCurve()));
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
@@ -130,8 +128,14 @@ class EcdsaSignKeyManager
     return VERSION;
   }
 
-  private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
+  @Override
+  protected void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
     Validators.validateVersion(privKey.getVersion(), VERSION);
     SigUtil.validateEcdsaParams(privKey.getPublicKey().getParams());
+  }
+
+  @Override
+  protected void validateKeyFormat(EcdsaKeyFormat format) throws GeneralSecurityException {
+    SigUtil.validateEcdsaParams(format.getParams());
   }
 }

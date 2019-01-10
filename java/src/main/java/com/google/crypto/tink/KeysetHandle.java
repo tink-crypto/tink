@@ -93,6 +93,48 @@ public final class KeysetHandle {
     return new KeysetHandle(decrypt(encryptedKeyset, masterKey));
   }
 
+  /**
+   * Tries to create a {@link KeysetHandle} from a keyset, obtained via {@code reader}, which
+   * contains no secret key material.
+   *
+   * <p>This can be used to load public keysets or envelope encryption keysets. Users that need to
+   * load cleartext keysets can use {@link CleartextKeysetHandle}.
+   *
+   * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
+   * @throws GeneralSecurityException
+   */
+  public static final KeysetHandle readNoSecret(KeysetReader reader)
+      throws GeneralSecurityException, IOException {
+    try {
+      Keyset keyset = reader.read();
+      assertNoSecretKeyMaterial(keyset);
+      return KeysetHandle.fromKeyset(keyset);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset");
+    }
+  }
+
+  /**
+   * Tries to create a {@link KeysetHandle} from a serialized keyset which contains no secret key
+   * material.
+   *
+   * <p>This can be used to load public keysets or envelope encryption keysets. Users that need to
+   * load cleartext keysets can use {@link CleartextKeysetHandle}.
+   *
+   * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
+   * @throws GeneralSecurityException
+   */
+  public static final KeysetHandle readNoSecret(final byte[] serialized)
+      throws GeneralSecurityException {
+    try {
+      Keyset keyset = Keyset.parseFrom(serialized);
+      assertNoSecretKeyMaterial(keyset);
+      return KeysetHandle.fromKeyset(keyset);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset");
+    }
+  }
+
   /** Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream}. */
   public void write(KeysetWriter keysetWriter, Aead masterKey)
       throws GeneralSecurityException, IOException {
@@ -182,6 +224,21 @@ public final class KeysetHandle {
   @Override
   public String toString() {
     return getKeysetInfo().toString();
+  }
+
+  /**
+   * Validates that {@code keyset} doesn't contain any secret key material.
+   *
+   * @throws GeneralSecurityException if {@code keyset} contains secret key material.
+   */
+  private static void assertNoSecretKeyMaterial(Keyset keyset) throws GeneralSecurityException {
+    for (Keyset.Key key : keyset.getKeyList()) {
+      if (key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL
+          || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.SYMMETRIC
+          || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
+        throw new GeneralSecurityException("keyset contains secret key material");
+      }
+    }
   }
 
   /**
