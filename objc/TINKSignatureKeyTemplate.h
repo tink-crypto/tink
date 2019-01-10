@@ -74,6 +74,46 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
    *   - OutputPrefixType: TINK
    */
   TINKEcdsaP521Ieee = 6,
+
+  /**
+   * RsaSsaPkcs1PrivateKey with the following parameters:
+   *   - Modulus size in bits: 3072.
+   *   - Hash function: SHA256.
+   *   - Public Exponent: 65537 (aka F4).
+   *   - OutputPrefixType: TINK
+   */
+  TINKRsaSsaPkcs13072Sha256F4 = 7,
+
+  /**
+   * RsaSsaPkcs1PrivateKey with the following parameters:
+   *   - Modulus size in bits: 4096.
+   *   - Hash function: SHA512.
+   *   - Public Exponent: 65537 (aka F4).
+   *   - OutputPrefixType: TINK
+   */
+  TINKRsaSsaPkcs14096Sha512F4 = 8,
+
+  /**
+   * RsaSsaPssPrivateKey with the following parameters:
+   *   - Modulus size in bits: 3072.
+   *   - Signature hash: SHA256.
+   *   - MGF1 hash: SHA256.
+   *   - Salt length: 32 (i.e., SHA256's output length).
+   *   - Public Exponent: 65537 (aka F4).
+   *   - OutputPrefixType: TINK
+   */
+  TINKRsaSsaPss3072Sha256Sha256F4 = 9,
+
+  /**
+   * RsaSsaPssPrivateKey with the following parameters:
+   *   - Modulus size in bits: 4096.
+   *   - Signature hash: SHA512.
+   *   - MGF1 hash: SHA512.
+   *   - Salt length: 64 (i.e., SHA512's output length).
+   *   - Public Exponent: 65537 (aka F4).
+   *   - OutputPrefixType: TINK
+   */
+  TINKRsaSsaPss4096Sha512Sha512F4 = 10,
 };
 
 NS_ASSUME_NONNULL_BEGIN

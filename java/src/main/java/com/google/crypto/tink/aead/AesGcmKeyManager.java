@@ -17,102 +17,42 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
  * This key manager generates new {@code AesGcmKey} keys and produces new instances of {@code
  * AesGcmJce}.
  */
-class AesGcmKeyManager implements KeyManager<Aead> {
+class AesGcmKeyManager extends KeyManagerBase<Aead, AesGcmKey, AesGcmKeyFormat> {
+  public AesGcmKeyManager() {
+    super(Aead.class, AesGcmKey.class, AesGcmKeyFormat.class, TYPE_URL);
+  }
+
   private static final int VERSION = 0;
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesGcmKey";
 
-  /** @param serializedKey serialized {@code AesGcmKey} proto */
-  @Override
-  public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      AesGcmKey keyProto = AesGcmKey.parseFrom(serializedKey);
-      return getPrimitive(keyProto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected AesGcmKey proto");
-    }
-  }
-
   /** @param key {@code AesGcmKey} proto */
   @Override
-  public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof AesGcmKey)) {
-      throw new GeneralSecurityException("expected AesGcmKey proto");
-    }
-    AesGcmKey keyProto = (AesGcmKey) key;
-    validate(keyProto);
-    return new AesGcmJce(keyProto.getKeyValue().toByteArray());
+  protected Aead getPrimitiveFromKey(AesGcmKey key) throws GeneralSecurityException {
+    return new AesGcmJce(key.getKeyValue().toByteArray());
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code AesGcmKeyFormat} proto
-   * @return new {@code AesGcmKey} proto
-   */
   @Override
-  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    try {
-      AesGcmKeyFormat format = AesGcmKeyFormat.parseFrom(serializedKeyFormat);
-      return newKey(format);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesGcmKeyFormat proto", e);
-    }
-  }
-
-  /**
-   * @param keyFormat {@code AesGcmKeyFormat} proto
-   * @return new {@code AesGcmKey} proto
-   */
-  @Override
-  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-    if (!(keyFormat instanceof AesGcmKeyFormat)) {
-      throw new GeneralSecurityException("expected AesGcmKeyFormat proto");
-    }
-    AesGcmKeyFormat format = (AesGcmKeyFormat) keyFormat;
-    validate(format);
+  protected AesGcmKey newKeyFromFormat(AesGcmKeyFormat format) throws GeneralSecurityException {
     return AesGcmKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
         .setVersion(VERSION)
         .build();
-  }
-
-  /**
-   * @param serializedKeyFormat serialized {@code AesGcmKeyFormat} proto
-   * @return {@code KeyData} proto with a new {@code AesGcmKey} proto
-   */
-  @Override
-  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    AesGcmKey key = (AesGcmKey) newKey(serializedKeyFormat);
-    return KeyData.newBuilder()
-        .setTypeUrl(TYPE_URL)
-        .setValue(key.toByteString())
-        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
-        .build();
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(TYPE_URL);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
   }
 
   @Override
@@ -120,12 +60,31 @@ class AesGcmKeyManager implements KeyManager<Aead> {
     return VERSION;
   }
 
-  private void validate(AesGcmKey key) throws GeneralSecurityException {
+  @Override
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.SYMMETRIC;
+  }
+
+  @Override
+  protected AesGcmKey parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesGcmKey.parseFrom(byteString);
+  }
+
+  @Override
+  protected AesGcmKeyFormat parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesGcmKeyFormat.parseFrom(byteString);
+  }
+
+  @Override
+  protected void validateKey(AesGcmKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     Validators.validateAesKeySize(key.getKeyValue().size());
   }
 
-  private void validate(AesGcmKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesGcmKeyFormat format) throws GeneralSecurityException {
     Validators.validateAesKeySize(format.getKeySize());
   }
 }

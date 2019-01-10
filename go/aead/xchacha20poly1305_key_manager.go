@@ -38,20 +38,20 @@ const (
 var errInvalidXChaCha20Poly1305Key = fmt.Errorf("xchacha20poly1305_key_manager: invalid key")
 var errInvalidXChaCha20Poly1305KeyFormat = fmt.Errorf("xchacha20poly1305_key_manager: invalid key format")
 
-// XChaCha20Poly1305KeyManager is an implementation of KeyManager interface.
+// xChaCha20Poly1305KeyManager is an implementation of KeyManager interface.
 // It generates new XChaCha20Poly1305Key keys and produces new instances of XChaCha20Poly1305 subtle.
-type XChaCha20Poly1305KeyManager struct{}
+type xChaCha20Poly1305KeyManager struct{}
 
-// Assert that XChaCha20Poly1305KeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*XChaCha20Poly1305KeyManager)(nil)
+// Assert that xChaCha20Poly1305KeyManager implements the KeyManager interface.
+var _ tink.KeyManager = (*xChaCha20Poly1305KeyManager)(nil)
 
-// NewXChaCha20Poly1305KeyManager creates a new XChaCha20Poly1305KeyManager.
-func NewXChaCha20Poly1305KeyManager() *XChaCha20Poly1305KeyManager {
-	return new(XChaCha20Poly1305KeyManager)
+// newXChaCha20Poly1305KeyManager creates a new xChaCha20Poly1305KeyManager.
+func newXChaCha20Poly1305KeyManager() *xChaCha20Poly1305KeyManager {
+	return new(xChaCha20Poly1305KeyManager)
 }
 
 // Primitive creates an XChaCha20Poly1305 subtle for the given serialized XChaCha20Poly1305Key proto.
-func (km *XChaCha20Poly1305KeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *xChaCha20Poly1305KeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidXChaCha20Poly1305Key
 	}
@@ -71,14 +71,14 @@ func (km *XChaCha20Poly1305KeyManager) Primitive(serializedKey []byte) (interfac
 
 // NewKey creates a new key, ignoring the specification in the given serialized key format
 // because the key size and other params are fixed.
-func (km *XChaCha20Poly1305KeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+func (km *xChaCha20Poly1305KeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	return km.newXChaCha20Poly1305Key(), nil
 }
 
 // NewKeyData creates a new KeyData, ignoring the specification in the given serialized key format
 // because the key size and other params are fixed.
 // It should be used solely by the key management API.
-func (km *XChaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (km *xChaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	key := km.newXChaCha20Poly1305Key()
 	serializedKey, err := proto.Marshal(key)
 	if err != nil {
@@ -92,16 +92,16 @@ func (km *XChaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (km *XChaCha20Poly1305KeyManager) DoesSupport(typeURL string) bool {
+func (km *xChaCha20Poly1305KeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == XChaCha20Poly1305TypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
-func (km *XChaCha20Poly1305KeyManager) TypeURL() string {
+func (km *xChaCha20Poly1305KeyManager) TypeURL() string {
 	return XChaCha20Poly1305TypeURL
 }
 
-func (km *XChaCha20Poly1305KeyManager) newXChaCha20Poly1305Key() *xcppb.XChaCha20Poly1305Key {
+func (km *xChaCha20Poly1305KeyManager) newXChaCha20Poly1305Key() *xcppb.XChaCha20Poly1305Key {
 	keyValue := random.GetRandomBytes(chacha20poly1305.KeySize)
 	return &xcppb.XChaCha20Poly1305Key{
 		Version:  XChaCha20Poly1305KeyVersion,
@@ -110,7 +110,7 @@ func (km *XChaCha20Poly1305KeyManager) newXChaCha20Poly1305Key() *xcppb.XChaCha2
 }
 
 // validateKey validates the given XChaCha20Poly1305Key.
-func (km *XChaCha20Poly1305KeyManager) validateKey(key *xcppb.XChaCha20Poly1305Key) error {
+func (km *xChaCha20Poly1305KeyManager) validateKey(key *xcppb.XChaCha20Poly1305Key) error {
 	err := tink.ValidateVersion(key.Version, XChaCha20Poly1305KeyVersion)
 	if err != nil {
 		return fmt.Errorf("xchacha20poly1305_key_manager: %s", err)

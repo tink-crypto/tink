@@ -16,21 +16,23 @@
 
 package com.google.crypto.tink.subtle;
 
+
 import java.security.InvalidKeyException;
 
 /**
- * ChaCha20-Poly1305, as described in <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC
- * 7539, section 2.8</a>.
+ * ChaCha20Poly1305 AEAD construction, as described in <a
+ * href="https://tools.ietf.org/html/rfc8439#section-2.8">RFC 8439, section 2.8</a>.
  *
  * @since 1.1.0
  */
-public final class ChaCha20Poly1305 extends SnufflePoly1305 {
+public final class ChaCha20Poly1305 extends ChaCha20Poly1305Base {
   public ChaCha20Poly1305(final byte[] key) throws InvalidKeyException {
     super(key);
   }
 
   @Override
-  Snuffle createSnuffleInstance(final byte[] key, int initialCounter) throws InvalidKeyException {
+  ChaCha20Base newChaCha20Instance(final byte[] key, int initialCounter)
+      throws InvalidKeyException {
     return new ChaCha20(key, initialCounter);
   }
 }

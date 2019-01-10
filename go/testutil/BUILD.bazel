@@ -15,9 +15,11 @@ go_library(
         "//proto:aes_gcm_go_proto",
         "//proto:common_go_proto",
         "//proto:ecdsa_go_proto",
+        "//proto:ed25519_go_proto",
         "//proto:hmac_go_proto",
         "//proto:tink_go_proto",
         "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_x_crypto//ed25519:go_default_library",
     ],
 )
 

@@ -15,23 +15,14 @@
 package insecure_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/insecure"
-	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
-
-func setUp() {
-	if err := mac.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register MAC key types: %s", err))
-
-	}
-}
 
 func TestFromKeyset(t *testing.T) {
 	keyData := tink.CreateKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
@@ -59,8 +50,6 @@ func TestFromKeysetWithInvalidInput(t *testing.T) {
 }
 
 func TestKeysetHandleFromSerializedProto(t *testing.T) {
-	setUp()
-
 	// Create a keyset that contains a single HmacKey.
 	manager := testutil.NewHMACKeysetManager()
 	handle, err := manager.KeysetHandle()
@@ -90,8 +79,6 @@ func TestKeysetHandleFromSerializedProto(t *testing.T) {
 }
 
 func TestKeysetHandleFromSerializedProtoWithInvalidInput(t *testing.T) {
-	setUp()
-
 	manager := testutil.NewHMACKeysetManager()
 	handle, err := manager.KeysetHandle()
 	if handle == nil || err != nil {

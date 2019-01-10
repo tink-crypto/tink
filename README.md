@@ -74,7 +74,6 @@ AEAD primitive in Java:
 ```java
     import com.google.crypto.tink.Aead;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.aead.AeadFactory;
     import com.google.crypto.tink.aead.AeadKeyTemplates;
 
     // 1. Generate the key material.
@@ -82,7 +81,7 @@ AEAD primitive in Java:
         AeadKeyTemplates.AES128_GCM);
 
     // 2. Get the primitive.
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
 
     // 3. Use the primitive.
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
@@ -90,11 +89,11 @@ AEAD primitive in Java:
 
 ## Current Status
 
-*   [Java and Android](docs/JAVA-HOWTO.md),
-    [C++](docs/CPP-HOWTO.md) and [Obj-C](docs/OBJC-HOWTO.md)
-    are field tested and ready for production. The latest version is
-    [1.2.0](https://github.com/google/tink/releases/tag/v1.2.0),
-    released on 2018-08-09.
+*   [Java and Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md) and
+    [Obj-C](docs/OBJC-HOWTO.md) are field tested and ready for production. The
+    latest version is
+    [1.2.1](https://github.com/google/tink/releases/tag/v1.2.1), released on
+    2018-11-15.
 
 *   Tink for Go and JavaScript are in active development.
 

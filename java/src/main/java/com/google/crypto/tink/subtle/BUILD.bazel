@@ -42,18 +42,21 @@ java_library(
         "AesEaxJce.java",
         "AesGcmJce.java",
         "ChaCha20.java",
+        "ChaCha20Base.java",
         "ChaCha20Poly1305.java",
+        "ChaCha20Poly1305Base.java",
         "EncryptThenAuthenticate.java",
         "IndCpaCipher.java",
         "Poly1305.java",
-        "Snuffle.java",
-        "SnufflePoly1305.java",
+        "XChaCha20.java",
+        "XChaCha20Poly1305.java",
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":mac",
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
     ],
 )
 
@@ -149,6 +152,20 @@ java_library(
         "StreamingAeadEncryptingChannel.java",
         "StreamingAeadEncryptingStream.java",
         "StreamingAeadSeekableDecryptingChannel.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":subtle",
+        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "@com_google_code_findbugs_jsr305",
+    ],
+)
+
+# KeyWrap subtle
+java_library(
+    name = "keywrap",
+    srcs = [
+        "Kwp.java",
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [

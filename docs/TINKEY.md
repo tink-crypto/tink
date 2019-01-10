@@ -157,8 +157,8 @@ tinkey convert-keyset --in encrypted-keyset.cfg --out cleartext-keyset.cfg \
     using default credentials
 
 ```shell
-tinkey convert-keyset --out encrypted-keyset.cfg --in cleartext-keyset.cfg \
---master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
+tinkey convert-keyset --in cleartext-keyset.cfg --out encrypted-keyset.cfg \
+--new-master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 ```
 
 -   Add a new key to an encrypted keyset, using default credentials

@@ -58,6 +58,12 @@ public final class CleartextKeysetHandle {
   }
 
   /**
+   * @return the keyset underlying this {@code keysetHandle}.
+   */
+  public static Keyset getKeyset(KeysetHandle keysetHandle) {
+    return keysetHandle.getKeyset();
+  }
+  /**
    * Serializes and writes the {@link Keyset} managed by {@code handle} to {@code keysetWriter}.
    *
    * @throws IOException

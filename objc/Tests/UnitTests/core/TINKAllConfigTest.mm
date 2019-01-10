@@ -39,7 +39,7 @@
   XCTAssertNil(error);
   google::crypto::tink::RegistryConfig config = allConfig.ccConfig;
 
-  XCTAssertTrue(config.entry_size() == 9);
+  XCTAssertTrue(config.entry_size() == 10);
 
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
   XCTAssertTrue("TinkMac" == config.entry(0).catalogue_name());
@@ -107,6 +107,13 @@
   XCTAssertTrue(ecdsa_verify_key_type == config.entry(8).type_url());
   XCTAssertTrue(config.entry(8).new_key_allowed());
   XCTAssertTrue(0 == config.entry(8).key_manager_version());
+
+  std::string aes_siv_key_type = "type.googleapis.com/google.crypto.tink.AesSivKey";
+  XCTAssertTrue("TinkDeterministicAead" == config.entry(9).catalogue_name());
+  XCTAssertTrue("DeterministicAead" == config.entry(9).primitive_name());
+  XCTAssertTrue(aes_siv_key_type == config.entry(9).type_url());
+  XCTAssertTrue(config.entry(9).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(9).key_manager_version());
 }
 
 - (void)testConfigRegistration {

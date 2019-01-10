@@ -15,7 +15,6 @@
 package tink_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/google/tink/go/mac"
@@ -24,15 +23,7 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func setUpKeysetHandleTest() {
-	if err := mac.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register MAC key types: %v", err))
-	}
-}
-
 func TestNewKeysetHandle(t *testing.T) {
-	setUpKeysetHandleTest()
-
 	kt := mac.HMACSHA256Tag128KeyTemplate()
 	kh, err := tink.NewKeysetHandle(kt)
 	if err != nil {
@@ -55,8 +46,6 @@ func TestNewKeysetHandle(t *testing.T) {
 }
 
 func TestNewKeysetHandleWithInvalidInput(t *testing.T) {
-	setUpKeysetHandleTest()
-
 	// template unregistered TypeUrl
 	template := mac.HMACSHA256Tag128KeyTemplate()
 	template.TypeUrl = "some unknown TypeUrl"

@@ -21,19 +21,16 @@ import (
 	"github.com/google/tink/go/signature"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
+	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
-func TestNewECDSAVerifierKeyManager(t *testing.T) {
-	var km *signature.ECDSAVerifierKeyManager = signature.NewECDSAVerifierKeyManager()
-	if km == nil {
-		t.Errorf("NewECDSAVerifierKeyManager returns nil")
-	}
-}
-
 func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km := signature.NewECDSAVerifierKeyManager()
+	km, err := tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
+	}
 	for i := 0; i < len(testParams); i++ {
 		serializedKey, _ := proto.Marshal(testutil.NewECDSAPublicKey(testParams[i].hashType, testParams[i].curve))
 		tmp, err := km.Primitive(serializedKey)
@@ -46,7 +43,10 @@ func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 
 func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	testParams := genInvalidECDSAParams()
-	km := signature.NewECDSAVerifierKeyManager()
+	km, err := tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
+	}
 	for i := 0; i < len(testParams); i++ {
 		serializedKey, _ := proto.Marshal(testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
 		if _, err := km.Primitive(serializedKey); err == nil {

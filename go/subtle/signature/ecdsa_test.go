@@ -32,10 +32,10 @@ type paramsTest struct {
 
 var _ = fmt.Println
 
-func TestEncodeDecode(t *testing.T) {
+func TestECDSAEncodeDecode(t *testing.T) {
 	nTest := 1000
 	for i := 0; i < nTest; i++ {
-		sig := newRandomSignature()
+		sig := newECDSARandomSignature()
 		encoding := "DER"
 		encoded, err := sig.EncodeECDSASignature(encoding)
 		if err != nil {
@@ -53,7 +53,7 @@ func TestEncodeDecode(t *testing.T) {
 		if len(encoded) != int(encoded[1])+2 {
 			t.Errorf("incorrect length, expected %d, got %d", len(encoded), encoded[1]+2)
 		}
-		decodedSig, err := DecodeECDSASignerature(encoded, encoding)
+		decodedSig, err := DecodeECDSASignature(encoded, encoding)
 		if err != nil {
 			t.Errorf("unexpected error during decoding: %s", err)
 		}
@@ -63,46 +63,46 @@ func TestEncodeDecode(t *testing.T) {
 	}
 }
 
-func TestEncodeWithInvalidInput(t *testing.T) {
-	sig := newRandomSignature()
+func TestECDSAEncodeWithInvalidInput(t *testing.T) {
+	sig := newECDSARandomSignature()
 	_, err := sig.EncodeECDSASignature("UNKNOWN_ENCODING")
 	if err == nil {
 		t.Errorf("expect an error when encoding is invalid")
 	}
 }
 
-func TestDecodeWithInvalidInput(t *testing.T) {
-	var sig *ECDSASignerature
+func TestECDSADecodeWithInvalidInput(t *testing.T) {
+	var sig *ECDSASignature
 	var encoded []byte
 	encoding := "DER"
 
 	// modified first byte
-	sig = newRandomSignature()
+	sig = newECDSARandomSignature()
 	encoded, _ = sig.EncodeECDSASignature(encoding)
 	encoded[0] = 0x31
-	if _, err := DecodeECDSASignerature(encoded, encoding); err == nil {
+	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when first byte is not 0x30")
 	}
 	// modified tag
-	sig = newRandomSignature()
+	sig = newECDSARandomSignature()
 	encoded, _ = sig.EncodeECDSASignature(encoding)
 	encoded[2] = encoded[2] + 1
-	if _, err := DecodeECDSASignerature(encoded, encoding); err == nil {
+	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when tag is modified")
 	}
 	// modified length
-	sig = newRandomSignature()
+	sig = newECDSARandomSignature()
 	encoded, _ = sig.EncodeECDSASignature(encoding)
 	encoded[1] = encoded[1] + 1
-	if _, err := DecodeECDSASignerature(encoded, encoding); err == nil {
+	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when length is modified")
 	}
 	// append unused 0s
-	sig = newRandomSignature()
+	sig = newECDSARandomSignature()
 	encoded, _ = sig.EncodeECDSASignature(encoding)
 	tmp := make([]byte, len(encoded)+4)
 	copy(tmp, encoded)
-	if _, err := DecodeECDSASignerature(tmp, encoding); err == nil {
+	if _, err := DecodeECDSASignature(tmp, encoding); err == nil {
 		t.Errorf("expect an error when unused 0s are appended to signature")
 	}
 	// a struct with three numbers
@@ -112,19 +112,19 @@ func TestDecodeWithInvalidInput(t *testing.T) {
 		Z: new(big.Int).SetBytes(random.GetRandomBytes(32)),
 	}
 	encoded, _ = asn1.Marshal(randomStruct)
-	if _, err := DecodeECDSASignerature(encoded, encoding); err == nil {
-		t.Errorf("expect an error when input is not an ECDSASignerature")
+	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
+		t.Errorf("expect an error when input is not an ECDSASignature")
 	}
 }
 
-func TestValidateParams(t *testing.T) {
-	params := genValidParams()
+func TestECDSAValidateParams(t *testing.T) {
+	params := genECDSAValidParams()
 	for i := 0; i < len(params); i++ {
 		if err := ValidateECDSAParams(params[i].hash, params[i].curve, params[i].encoding); err != nil {
 			t.Errorf("unexpected error for valid params: %s, i = %d", err, i)
 		}
 	}
-	params = genInvalidParams()
+	params = genECDSAInvalidParams()
 	for i := 0; i < len(params); i++ {
 		if err := ValidateECDSAParams(params[i].hash, params[i].curve, params[i].encoding); err == nil {
 			t.Errorf("expect an error when params are invalid, i = %d", i)
@@ -132,7 +132,7 @@ func TestValidateParams(t *testing.T) {
 	}
 }
 
-func genInvalidParams() []paramsTest {
+func genECDSAInvalidParams() []paramsTest {
 	return []paramsTest{
 		// invalid encoding
 		paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "UNKNOWN_ENCODING"},
@@ -147,7 +147,7 @@ func genInvalidParams() []paramsTest {
 	}
 }
 
-func genValidParams() []paramsTest {
+func genECDSAValidParams() []paramsTest {
 	return []paramsTest{
 		paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "DER"},
 		paramsTest{hash: "SHA512", curve: "NIST_P384", encoding: "DER"},
@@ -155,8 +155,8 @@ func genValidParams() []paramsTest {
 	}
 }
 
-func newRandomSignature() *ECDSASignerature {
+func newECDSARandomSignature() *ECDSASignature {
 	r := new(big.Int).SetBytes(random.GetRandomBytes(32))
 	s := new(big.Int).SetBytes(random.GetRandomBytes(32))
-	return NewECDSASignerature(r, s)
+	return NewECDSASignature(r, s)
 }

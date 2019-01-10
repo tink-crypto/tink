@@ -65,6 +65,15 @@ cc_binary(
 )
 
 cc_binary(
+    name = "deterministic_aead_cli_cc",
+    srcs = ["deterministic_aead_cli.cc"],
+    deps = [
+        ":cli_util",
+        "//cc",
+    ],
+)
+
+cc_binary(
     name = "mac_cli_cc",
     srcs = ["mac_cli.cc"],
     deps = [

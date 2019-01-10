@@ -40,7 +40,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * <pre>{@code
  * Config.register(AeadConfig.TINK_1_1_0);
  * KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
- * Aead aead = AeadFactory.getPrimitive(handle);
+ * Aead aead = handle.getPrimitive(Aead.class);
  * }</pre>
  *
  * @since 1.0.0
@@ -135,6 +135,18 @@ public final class AeadKeyTemplates {
   public static final KeyTemplate CHACHA20_POLY1305 =
       KeyTemplate.newBuilder()
           .setTypeUrl(ChaCha20Poly1305KeyManager.TYPE_URL)
+          .setOutputPrefixType(OutputPrefixType.TINK)
+          .build();
+
+  /**
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.XChaCha20Poly1305Key}.
+   *
+   * @since 1.3.0
+   */
+  public static final KeyTemplate XCHACHA20_POLY1305 =
+      KeyTemplate.newBuilder()
+          .setTypeUrl(XChaCha20Poly1305KeyManager.TYPE_URL)
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 

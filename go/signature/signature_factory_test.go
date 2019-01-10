@@ -15,7 +15,6 @@
 package signature_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
@@ -29,10 +28,6 @@ import (
 )
 
 func TestSignerVerifyFactory(t *testing.T) {
-	if err := signature.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register signature key types: %s", err))
-	}
-
 	tinkPriv, tinkPub := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
 		tinkpb.OutputPrefixType_TINK,

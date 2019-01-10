@@ -23,21 +23,18 @@ import (
 	"golang.org/x/crypto/chacha20poly1305"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/tink"
 
 	subteaead "github.com/google/tink/go/subtle/aead"
 	cppb "github.com/google/tink/proto/chacha20_poly1305_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestNewChaCha20Poly1305KeyManager(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
-	if km == nil {
-		t.Errorf("NewChaCha20Poly1305KeyManager() returns nil")
-	}
-}
-
 func TestChaCha20Poly1305GetPrimitive(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
+	km, err := tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
+	}
 	m, _ := km.NewKey(nil)
 	key, _ := m.(*cppb.ChaCha20Poly1305Key)
 	serializedKey, _ := proto.Marshal(key)
@@ -51,7 +48,10 @@ func TestChaCha20Poly1305GetPrimitive(t *testing.T) {
 }
 
 func TestChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
+	km, err := tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
+	}
 	invalidKeys := genInvalidChaCha20Poly1305Keys()
 	for _, key := range invalidKeys {
 		serializedKey, _ := proto.Marshal(key)
@@ -62,7 +62,10 @@ func TestChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
 }
 
 func TestChaCha20Poly1305NewKey(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
+	km, err := tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
+	}
 	m, err := km.NewKey(nil)
 	if err != nil {
 		t.Errorf("km.NewKey(nil) = _, %v; want _, nil", err)
@@ -74,7 +77,10 @@ func TestChaCha20Poly1305NewKey(t *testing.T) {
 }
 
 func TestChaCha20Poly1305NewKeyData(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
+	km, err := tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
+	}
 	kd, err := km.NewKeyData(nil)
 	if err != nil {
 		t.Errorf("km.NewKeyData(nil) = _, %v; want _, nil", err)
@@ -95,7 +101,10 @@ func TestChaCha20Poly1305NewKeyData(t *testing.T) {
 }
 
 func TestChaCha20Poly1305DoesSupport(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
+	km, err := tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
+	}
 	if !km.DoesSupport(aead.ChaCha20Poly1305TypeURL) {
 		t.Errorf("ChaCha20Poly1305KeyManager must support %s", aead.ChaCha20Poly1305TypeURL)
 	}
@@ -105,7 +114,10 @@ func TestChaCha20Poly1305DoesSupport(t *testing.T) {
 }
 
 func TestChaCha20Poly1305TypeURL(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
+	km, err := tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
+	}
 	if kt := km.TypeURL(); kt != aead.ChaCha20Poly1305TypeURL {
 		t.Errorf("km.TypeURL() = %s; want %s", kt, aead.ChaCha20Poly1305TypeURL)
 	}

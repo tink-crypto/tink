@@ -127,9 +127,14 @@ public final class PrimitiveSet<P> {
       new ConcurrentHashMap<java.lang.String, List<Entry<P>>>();
 
   private Entry<P> primary;
+  private final Class<P> primitiveClass;
 
-  protected static <P> PrimitiveSet<P> newPrimitiveSet() {
-    return new PrimitiveSet<P>();
+  private PrimitiveSet(Class<P> primitiveClass) {
+    this.primitiveClass = primitiveClass;
+  }
+
+  public static <P> PrimitiveSet<P> newPrimitiveSet(Class<P> primitiveClass) {
+    return new PrimitiveSet<P>(primitiveClass);
   }
 
   /** @return the entries with primitives identified by the ciphertext prefix of {@code key}. */
@@ -138,7 +143,7 @@ public final class PrimitiveSet<P> {
   }
 
   /** Sets given Entry {@code primary} as the primary one. */
-  protected void setPrimary(final Entry<P> primary) {
+  public void setPrimary(final Entry<P> primary) {
     this.primary = primary;
   }
 
@@ -147,7 +152,7 @@ public final class PrimitiveSet<P> {
    *
    * @return the added entry
    */
-  protected Entry<P> addPrimitive(final P primitive, Keyset.Key key)
+  public Entry<P> addPrimitive(final P primitive, Keyset.Key key)
       throws GeneralSecurityException {
     Entry<P> entry =
         new Entry<P>(
@@ -167,5 +172,9 @@ public final class PrimitiveSet<P> {
       primitives.put(identifier, Collections.unmodifiableList(newList));
     }
     return entry;
+  }
+
+  public Class<P> getPrimitiveClass() {
+    return primitiveClass;
   }
 }

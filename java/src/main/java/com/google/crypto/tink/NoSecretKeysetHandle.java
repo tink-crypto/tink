@@ -26,7 +26,9 @@ import java.security.GeneralSecurityException;
  * Static methods for reading cleartext keysets that don't contain any secret key material.
  *
  * @since 1.0.0
+ * @deprecated use {@link KeysetHandle#readNoSecret} instead
  */
+@Deprecated
 public final class NoSecretKeysetHandle {
   /**
    * @return a new keyset handle from {@code serialized} which is a serialized {@link Keyset}.

@@ -143,4 +143,162 @@ public class KeysetHandleTest {
       assertExceptionContains(e, "empty keyset");
     }
   }
+
+  @Test
+  public void testGetPrimitive_basic() throws Exception {
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                Registry.newKeyData(AeadKeyTemplates.AES128_GCM),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    byte[] message = Random.randBytes(20);
+    byte[] aad = Random.randBytes(20);
+    Aead aead = handle.getPrimitive(Aead.class);
+    assertArrayEquals(aead.decrypt(aead.encrypt(message, aad), aad), message);
+  }
+
+  // Tests that getPrimitive does correct wrapping and not just return the primary. For this, we
+  // simply add a raw, non-primary key and encrypt directly with it.
+  @Test
+  public void testGetPrimitive_wrappingDoneCorrectly() throws Exception {
+    KeyData rawKeyData = Registry.newKeyData(AeadKeyTemplates.AES128_GCM);
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                Registry.newKeyData(AeadKeyTemplates.AES128_GCM),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK),
+            TestUtil.createKey(
+                rawKeyData,
+                43,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.RAW));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    byte[] message = Random.randBytes(20);
+    byte[] aad = Random.randBytes(20);
+    Aead aeadToEncrypt = Registry.getPrimitive(rawKeyData, Aead.class);
+    Aead aead = handle.getPrimitive(Aead.class);
+    assertArrayEquals(aead.decrypt(aeadToEncrypt.encrypt(message, aad), aad), message);
+  }
+
+  @Test
+  public void testGetPrimitive_customKeyManager() throws Exception {
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                Registry.newKeyData(AeadKeyTemplates.AES128_GCM),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    // The TestKeyManager accepts AES128_GCM keys, but creates a DummyAead which always fails.
+    Aead aead = handle.getPrimitive(new KeyManagerBaseTest.TestKeyManager(), Aead.class);
+    try {
+      aead.encrypt(new byte[0], new byte[0]);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "dummy");
+    }
+  }
+
+  @Test
+  public void testGetPrimitive_nullKeyManager_throwsInvalidArgument() throws Exception {
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                Registry.newKeyData(AeadKeyTemplates.AES128_GCM),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    try {
+      handle.getPrimitive(null, Aead.class);
+      fail("Expected GeneralSecurityException");
+    } catch (IllegalArgumentException e) {
+      assertExceptionContains(e, "customKeyManager");
+    }
+  }
+
+  @Test
+  public void readNoSecretShouldWork() throws Exception {
+    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+    Keyset keyset = privateHandle.getPublicKeysetHandle().getKeyset();
+    Keyset keyset2 = KeysetHandle.readNoSecret(keyset.toByteArray()).getKeyset();
+    Keyset keyset3 =
+        KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray())).getKeyset();
+
+    assertEquals(keyset, keyset2);
+    assertEquals(keyset, keyset3);
+  }
+
+  @Test
+  public void readNoSecretFailForTypeSymmetric() throws Exception {
+    String keyValue = "01234567890123456";
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    try {
+      KeysetHandle unused = KeysetHandle.readNoSecret(keyset.toByteArray());
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+
+    try {
+      KeysetHandle unused =
+          KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray()));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+  }
+
+  @Test
+  public void readNoSecretForTypeAssymmetricPrivate() throws Exception {
+    Keyset keyset = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256).getKeyset();
+
+    try {
+      KeysetHandle unused = KeysetHandle.readNoSecret(keyset.toByteArray());
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+
+    try {
+      KeysetHandle unused =
+          KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray()));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+  }
+
+  @Test
+  public void readNoSecretFailWithEmptyKeyset() throws Exception {
+    try {
+      KeysetHandle unused = KeysetHandle.readNoSecret(new byte[0]);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "empty keyset");
+    }
+  }
+
+  @Test
+  public void readNoSecretFailWithInvalidKeyset() throws Exception {
+    byte[] proto = new byte[] {0x00, 0x01, 0x02};
+    try {
+      KeysetHandle unused = KeysetHandle.readNoSecret(proto);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid");
+    }
+  }
 }

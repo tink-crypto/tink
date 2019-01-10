@@ -19,11 +19,9 @@
 
 #include "tink/aead.h"
 #include "tink/keyset_handle.h"
-#include "tink/aead/aead_factory.h"
 #include "tink/util/status.h"
 #include "tools/testing/cc/cli_util.h"
 
-using crypto::tink::AeadFactory;
 using crypto::tink::KeysetHandle;
 
 // A command-line utility for testing AEAD-primitives.
@@ -66,7 +64,7 @@ int main(int argc, char** argv) {
       CliUtil::ReadKeyset(keyset_filename);
 
   // Get the primitive.
-  auto primitive_result = AeadFactory::GetPrimitive(*keyset_handle);
+  auto primitive_result = keyset_handle->GetPrimitive<crypto::tink::Aead>();
   if (!primitive_result.ok()) {
     std::clog << "Getting AEAD-primitive from the factory failed: "
               << primitive_result.status().error_message() << std::endl;

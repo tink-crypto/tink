@@ -21,7 +21,7 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.AWSKMSClient;
+import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
@@ -109,13 +109,10 @@ public final class AwsKmsClient implements KmsClient {
   }
 
   /** Loads AWS credentials from a provider. */
-  // new AWSKMSClient(provider) is deprecated, but some clients have not upgraded their AWS
-  // libraries.
-  @SuppressWarnings("deprecation")
   private KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
       throws GeneralSecurityException {
     try {
-      this.client = new AWSKMSClient(provider);
+      this.client = AWSKMSClientBuilder.standard().withCredentials(provider).build();
       return this;
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("cannot load credentials from provider", e);

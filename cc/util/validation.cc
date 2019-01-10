@@ -26,6 +26,15 @@ namespace tink {
 
 // TODO(przydatek): add more validation checks
 
+util::Status ValidateAesKeySize(uint32_t key_size) {
+  if (key_size != 16 && key_size != 32) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "AES key has %d bytes; supported sizes: 16 or 32 bytes.",
+                     key_size);
+  }
+  return util::Status::OK;
+}
+
 util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset) {
   if (keyset.key_size() < 1) {
     return ToStatusF(util::error::INVALID_ARGUMENT,

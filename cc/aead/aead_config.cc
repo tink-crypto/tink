@@ -17,6 +17,7 @@
 #include "tink/aead/aead_config.h"
 
 #include "absl/memory/memory.h"
+#include "tink/aead/aead_wrapper.h"
 #include "tink/config.h"
 #include "tink/registry.h"
 #include "tink/aead/aead_catalogue.h"

@@ -118,4 +118,4 @@ class AesSivBoringSsl : public DeterministicAead {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_SUBTLE_AES_CTR_BORINGSSL_H_
+#endif  // TINK_SUBTLE_AES_SIV_BORINGSSL_H_

@@ -15,7 +15,6 @@
 package tink_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
@@ -32,49 +31,17 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func setupRegistryTests() {
-	if err := mac.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register MAC key types: %v", err))
-	}
-
-	if err := aead.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register AEAD key types: %v", err))
-	}
-}
-
-func TestRegistryBasic(t *testing.T) {
-	// try to put a HMACKeyManager
-	hmacManager := mac.NewHMACKeyManager()
-	typeURL := mac.HMACTypeURL
-	tink.RegisterKeyManager(hmacManager)
-	tmp, existed := tink.GetKeyManager(typeURL)
-	if existed != nil {
-		t.Errorf("a HMACKeyManager should be found")
-	}
-	var _ = tmp.(*mac.HMACKeyManager)
-	// Get type url that doesn't exist
-	if _, existed := tink.GetKeyManager("some url"); existed == nil {
-		t.Errorf("unknown typeURL shouldn't exist in the map")
-	}
-}
-
 func TestRegisterKeyManager(t *testing.T) {
-	var km tink.KeyManager
-	var err error
-	// register mac and aead types.
-	setupRegistryTests()
 	// get HMACKeyManager
-	km, err = tink.GetKeyManager(mac.HMACTypeURL)
+	_, err := tink.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *mac.HMACKeyManager = km.(*mac.HMACKeyManager)
 	// get AESGCMKeyManager
-	km, err = tink.GetKeyManager(aead.AESGCMTypeURL)
+	_, err = tink.GetKeyManager(aead.AESGCMTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *aead.AESGCMKeyManager = km.(*aead.AESGCMKeyManager)
 	// some random typeurl
 	if _, err = tink.GetKeyManager("some url"); err == nil {
 		t.Errorf("expect an error when a type url doesn't exist in the registry")
@@ -82,24 +49,26 @@ func TestRegisterKeyManager(t *testing.T) {
 }
 
 func TestRegisterKeyManagerWithCollision(t *testing.T) {
-	// register mac and aead types.
-	setupRegistryTests()
 	// dummyKeyManager's typeURL is equal to that of AESGCM
 	var dummyKeyManager tink.KeyManager = new(testutil.DummyAEADKeyManager)
-	// this should not overwrite the existing manager.
+	// This should fail because overwriting is disallowed.
 	err := tink.RegisterKeyManager(dummyKeyManager)
-	if err != nil {
-		t.Errorf("AES_GCM_TYPE_URL shouldn't be registered again")
+	if err == nil {
+		t.Errorf("%s shouldn't be registered again", aead.AESGCMTypeURL)
 	}
+
 	km, err := tink.GetKeyManager(aead.AESGCMTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *aead.AESGCMKeyManager = km.(*aead.AESGCMKeyManager)
+	// This should fail because overwriting is disallowed, even with the same key manager.
+	err = tink.RegisterKeyManager(km)
+	if err == nil {
+		t.Errorf("%s shouldn't be registered again", aead.AESGCMTypeURL)
+	}
 }
 
 func TestNewKeyData(t *testing.T) {
-	setupRegistryTests()
 	// new Keydata from a Hmac KeyTemplate
 	keyData, err := tink.NewKeyData(mac.HMACSHA256Tag128KeyTemplate())
 	if err != nil {
@@ -124,7 +93,6 @@ func TestNewKeyData(t *testing.T) {
 }
 
 func TestNewKey(t *testing.T) {
-	setupRegistryTests()
 	// aead template
 	aesGcmTemplate := aead.AES128GCMKeyTemplate()
 	key, err := tink.NewKey(aesGcmTemplate)
@@ -151,7 +119,6 @@ func TestNewKey(t *testing.T) {
 }
 
 func TestPrimitiveFromKeyData(t *testing.T) {
-	setupRegistryTests()
 	// hmac keydata
 	keyData := testutil.NewHMACKeyData(commonpb.HashType_SHA256, 16)
 	p, err := tink.PrimitiveFromKeyData(keyData)
@@ -176,7 +143,6 @@ func TestPrimitiveFromKeyData(t *testing.T) {
 }
 
 func TestPrimitive(t *testing.T) {
-	setupRegistryTests()
 	// hmac key
 	key := testutil.NewHMACKey(commonpb.HashType_SHA256, 16)
 	serializedKey, _ := proto.Marshal(key)
@@ -206,7 +172,6 @@ func TestPrimitive(t *testing.T) {
 }
 
 func TestPrimitives(t *testing.T) {
-	setupRegistryTests()
 	// valid input
 	template1 := aead.AES128GCMKeyTemplate()
 	template2 := aead.AES256GCMKeyTemplate()

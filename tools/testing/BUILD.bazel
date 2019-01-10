@@ -44,6 +44,34 @@ java_binary(
 )
 
 java_binary(
+    name = "deterministic_aead_cli_java",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/DeterministicAeadCli.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    main_class = "com.google.crypto.tink.testing.DeterministicAeadCli",
+    deps = [
+        ":cli_util",
+        "//java:testonly",
+    ],
+)
+
+java_binary(
+    name = "streaming_aead_cli_java",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/StreamingAeadCli.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    main_class = "com.google.crypto.tink.testing.StreamingAeadCli",
+    deps = [
+        ":cli_util",
+        "//java:testonly",
+    ],
+)
+
+java_binary(
     name = "mac_cli_java",
     testonly = 1,
     srcs = [

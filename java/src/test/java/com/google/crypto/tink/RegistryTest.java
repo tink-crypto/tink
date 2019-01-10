@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil.DummyAead;
@@ -34,6 +35,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.MacJce;
@@ -41,7 +43,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -95,11 +97,16 @@ public class RegistryTest {
     public int getVersion() {
       return 0;
     }
+
+    @Override
+    public Class<Aead> getPrimitiveClass() {
+      return Aead.class;
+    }
   }
 
-  @BeforeClass
-  public static void setUp() throws GeneralSecurityException {
-    Config.register(TinkConfig.TINK_1_0_0);
+  @Before
+  public void setUp() throws GeneralSecurityException {
+    TinkConfig.register();
   }
 
   private void testGetKeyManager_shouldWork(String typeUrl, String className) throws Exception {
@@ -107,15 +114,27 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetKeyManager_shouldWork() throws Exception {
+  public void testGetKeyManager_legacy_shouldWork() throws Exception {
     testGetKeyManager_shouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, "AesCtrHmacAeadKeyManager");
     testGetKeyManager_shouldWork(AeadConfig.AES_EAX_TYPE_URL, "AesEaxKeyManager");
     testGetKeyManager_shouldWork(MacConfig.HMAC_TYPE_URL, "HmacKeyManager");
   }
 
   @Test
-  public void testGetKeyManager_wrongType_shouldThrowException() throws Exception {
-    // TODO(thaidn): make this assignment throw some exception.
+  public void testGetKeyManager_shouldWorkAesEax() throws Exception {
+    assertThat(
+            Registry.getKeyManager(AeadConfig.AES_EAX_TYPE_URL, Aead.class).getClass().toString())
+        .contains("AesEaxKeyManager");
+  }
+
+  @Test
+  public void testGetKeyManager_shouldWorkHmac() throws Exception {
+    assertThat(Registry.getKeyManager(MacConfig.HMAC_TYPE_URL, Mac.class).getClass().toString())
+        .contains("HmacKeyManager");
+  }
+
+  @Test
+  public void testGetKeyManager_legacy_wrongType_shouldThrowException() throws Exception {
     KeyManager<Aead> wrongType = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     HmacKey hmacKey = (HmacKey) Registry.newKey(template);
@@ -129,7 +148,19 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetKeyManager_badTypeUrl_shouldThrowException() throws Exception {
+  public void testGetKeyManager_wrongType_shouldThrowException() throws Exception {
+    try {
+      Registry.getKeyManager(MacConfig.HMAC_TYPE_URL, Aead.class);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "Primitive type com.google.crypto.tink.Mac");
+      assertExceptionContains(
+          e, "does not match requested primitive type com.google.crypto.tink.Aead");
+    }
+  }
+
+  @Test
+  public void testGetKeyManager_legacy_badTypeUrl_shouldThrowException() throws Exception {
     String badTypeUrl = "bad type URL";
 
     try {
@@ -139,6 +170,25 @@ public class RegistryTest {
       assertExceptionContains(e, "No key manager found");
       assertExceptionContains(e, badTypeUrl);
     }
+  }
+
+  @Test
+  public void testGetKeyManager_badTypeUrl_shouldThrowException() throws Exception {
+    String badTypeUrl = "bad type URL";
+
+    try {
+      Registry.getKeyManager(badTypeUrl, Aead.class);
+      fail("Expected GeneralSecurityException.");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "No key manager found");
+      assertExceptionContains(e, badTypeUrl);
+    }
+  }
+
+  @Test
+  public void testGetUntypedKeyManager_shouldWorkHmac() throws Exception {
+    assertThat(Registry.getUntypedKeyManager(MacConfig.HMAC_TYPE_URL).getClass().toString())
+        .contains("HmacKeyManager");
   }
 
   @Test
@@ -155,26 +205,14 @@ public class RegistryTest {
   public void testRegisterKeyManager_MoreRestrictedNewKeyAllowed_shouldWork() throws Exception {
     String typeUrl = "someTypeUrl";
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl));
-
-    try {
-      Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
-    } catch (GeneralSecurityException e) {
-      throw new AssertionError(
-          "repeated registrations of the same key manager should work", e);
-    }
+    Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
   }
 
   @Test
   public void testRegisterKeyManager_SameNewKeyAllowed_shouldWork() throws Exception {
     String typeUrl = "someOtherTypeUrl";
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl));
-
-    try {
-      Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true);
-    } catch (GeneralSecurityException e) {
-      throw new AssertionError(
-          "repeated registrations of the same key manager should work", e);
-    }
+    Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true);
   }
 
   @Test
@@ -224,12 +262,11 @@ public class RegistryTest {
     String differentTypeUrl = "differentTypeUrl";
     try {
       Registry.registerKeyManager(differentTypeUrl, new CustomAeadKeyManager(typeUrl));
+      fail("Should throw an exception.");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e,
           "Manager does not support key type " + differentTypeUrl);
-      return;
     }
-    fail("Should throw an exception.");
   }
 
   @Test
@@ -276,7 +313,29 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitive_AesGcm_shouldWork() throws Exception {
+  public void testGetPublicKeyData_shouldWork() throws Exception {
+    KeyData privateKeyData = Registry.newKeyData(SignatureKeyTemplates.ECDSA_P256);
+    KeyData publicKeyData = Registry.getPublicKeyData(privateKeyData.getTypeUrl(),
+        privateKeyData.getValue());
+    PublicKeyVerify verifier = Registry.<PublicKeyVerify>getPrimitive(publicKeyData);
+    PublicKeySign signer = Registry.<PublicKeySign>getPrimitive(privateKeyData);
+    byte[] message = "Nice test message".getBytes(UTF_8);
+    verifier.verify(signer.sign(message), message);
+  }
+
+  @Test
+  public void testGetPublicKeyData_shouldThrow() throws Exception {
+    KeyData keyData = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    try {
+      Registry.getPublicKeyData(keyData.getTypeUrl(), keyData.getValue());
+      fail("Expected GeneralSecurityException.");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("not a PrivateKeyManager");
+    }
+  }
+
+  @Test
+  public void testGetPrimitive_legacy_AesGcm_shouldWork() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES128_EAX;
     AesEaxKey aesEaxKey = (AesEaxKey) Registry.newKey(template);
     KeyData aesEaxKeyData = Registry.newKeyData(template);
@@ -289,7 +348,20 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitive_Hmac_shouldWork() throws Exception {
+  public void testGetPrimitive_AesGcm_shouldWork() throws Exception {
+    KeyTemplate template = AeadKeyTemplates.AES128_EAX;
+    AesEaxKey aesEaxKey = (AesEaxKey) Registry.newKey(template);
+    KeyData aesEaxKeyData = Registry.newKeyData(template);
+    Aead aead = Registry.getPrimitive(aesEaxKeyData, Aead.class);
+
+    assertThat(aesEaxKey.getKeyValue().size()).isEqualTo(16);
+    assertThat(aesEaxKeyData.getTypeUrl()).isEqualTo(AeadConfig.AES_EAX_TYPE_URL);
+    // This might break when we add native implementations.
+    assertThat(aead.getClass()).isEqualTo(AesEaxJce.class);
+  }
+
+  @Test
+  public void testGetPrimitive_legacy_Hmac_shouldWork() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     HmacKey hmacKey = (HmacKey) Registry.newKey(template);
     KeyData hmacKeyData = Registry.newKeyData(template);
@@ -304,7 +376,22 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitives_shouldWork() throws Exception {
+  public void testGetPrimitive_Hmac_shouldWork() throws Exception {
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    HmacKey hmacKey = (HmacKey) Registry.newKey(template);
+    KeyData hmacKeyData = Registry.newKeyData(template);
+    Mac mac = Registry.getPrimitive(hmacKeyData, Mac.class);
+
+    assertThat(hmacKey.getKeyValue().size()).isEqualTo(32);
+    assertThat(hmacKey.getParams().getTagSize()).isEqualTo(16);
+    assertThat(hmacKey.getParams().getHash()).isEqualTo(HashType.SHA256);
+    assertThat(hmacKeyData.getTypeUrl()).isEqualTo(MacConfig.HMAC_TYPE_URL);
+    // This might break when we add native implementations.
+    assertThat(mac.getClass()).isEqualTo(MacJce.class);
+  }
+
+  @Test
+  public void testGetPrimitives_legacy_shouldWork() throws Exception {
     // Create a keyset, and get a PrimitiveSet.
     KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
     KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
@@ -343,6 +430,45 @@ public class RegistryTest {
   }
 
   @Test
+  public void testGetPrimitives_shouldWork() throws Exception {
+    // Create a keyset, and get a PrimitiveSet.
+    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
+    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
+    KeyData key1 = Registry.newKeyData(template1);
+    KeyData key2 = Registry.newKeyData(template1);
+    KeyData key3 = Registry.newKeyData(template2);
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key2)
+                        .setKeyId(2)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key3)
+                        .setKeyId(3)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(2)
+                .build());
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, Aead.class);
+
+    assertThat(aeadSet.getPrimary().getPrimitive().getClass()).isEqualTo(AesEaxJce.class);
+  }
+
+  @Test
   public void testGetPrimitives_WithSomeNonEnabledKeys_shouldWork() throws Exception {
     // Try a keyset with some keys non-ENABLED.
     KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
@@ -376,14 +502,14 @@ public class RegistryTest {
                         .build())
                 .setPrimaryKeyId(3)
                 .build());
-    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle);
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, Aead.class);
 
     assertThat(aeadSet.getPrimary().getPrimitive().getClass())
         .isEqualTo(EncryptThenAuthenticate.class);
   }
 
   @Test
-  public void testGetPrimitives_CustomManager_shouldWork() throws Exception {
+  public void testGetPrimitives_legacy_CustomManager_shouldWork() throws Exception {
     // Create a keyset.
     KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
     KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
@@ -417,6 +543,47 @@ public class RegistryTest {
     List<PrimitiveSet.Entry<Aead>> aead2List =
         aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
 
+    assertThat(aead1List).hasSize(1);
+    assertThat(aead1List.get(0).getPrimitive().getClass()).isEqualTo(DummyAead.class);
+    assertThat(aead2List).hasSize(1);
+    assertThat(aead2List.get(0).getPrimitive().getClass()).isEqualTo(EncryptThenAuthenticate.class);
+  }
+
+  @Test
+  public void testGetPrimitives_CustomManager_shouldWork() throws Exception {
+    // Create a keyset.
+    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
+    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
+    KeyData key1 = Registry.newKeyData(template1);
+    KeyData key2 = Registry.newKeyData(template2);
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key2)
+                        .setKeyId(2)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(2)
+                .build());
+
+    // Get a PrimitiveSet using a custom key manager for key1.
+    KeyManager<Aead> customManager = new CustomAeadKeyManager(AeadConfig.AES_EAX_TYPE_URL);
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager, Aead.class);
+    List<PrimitiveSet.Entry<Aead>> aead1List =
+        aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(0));
+    List<PrimitiveSet.Entry<Aead>> aead2List =
+        aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
+
     assertThat(aead1List.size()).isEqualTo(1);
     assertThat(aead1List.get(0).getPrimitive().getClass()).isEqualTo(DummyAead.class);
     assertThat(aead2List.size()).isEqualTo(1);
@@ -427,7 +594,7 @@ public class RegistryTest {
   public void testGetPrimitives_EmptyKeyset_shouldThrowException() throws Exception {
     // Empty keyset.
     try {
-      Registry.getPrimitives(KeysetHandle.fromKeyset(Keyset.newBuilder().build()));
+      Registry.getPrimitives(KeysetHandle.fromKeyset(Keyset.getDefaultInstance()), Aead.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");
@@ -452,7 +619,7 @@ public class RegistryTest {
 
     // No primary key.
     try {
-      Registry.getPrimitives(keysetHandle);
+      Registry.getPrimitives(keysetHandle, Aead.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset doesn't contain a valid primary key");
@@ -478,7 +645,7 @@ public class RegistryTest {
                 .build());
 
     try {
-      Registry.getPrimitives(keysetHandle);
+      Registry.getPrimitives(keysetHandle, Mac.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset doesn't contain a valid primary key");
@@ -511,33 +678,87 @@ public class RegistryTest {
                 .build());
 
     try {
-      Registry.getPrimitives(keysetHandle);
+      Registry.getPrimitives(keysetHandle, Aead.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset contains multiple primary keys");
     }
   }
 
-  private static class Catalogue1 implements Catalogue {
+  @Test
+  public void testGetPrimitives_KeysetWithKeyForWrongPrimitive_shouldThrowException()
+      throws Exception {
+    // Try a keyset with some keys non-ENABLED.
+    KeyData key1 = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeyData key2 = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    KeyData key3 = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key2)
+                        .setKeyId(2)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key3)
+                        .setKeyId(3)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(3)
+                .build());
+    try {
+      Registry.getPrimitives(keysetHandle, Aead.class);
+      fail("Non Aead keys. Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "Primitive type com.google.crypto.tink.Mac");
+      assertExceptionContains(e, "not match requested primitive type com.google.crypto.tink.Aead");
+    }
+  }
+
+  private static class Catalogue1 implements Catalogue<Aead> {
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+    public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+      return null;
+    }
+
+    @Override
+    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
       return null;
     }
   }
 
-  private static class Catalogue2 implements Catalogue {
+  private static class Catalogue2 implements Catalogue<Aead> {
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+    public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+      return null;
+    }
+
+    @Override
+    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
       return null;
     }
   }
 
-  private static class Catalogue3 implements Catalogue {
+  private static class Catalogue3 implements Catalogue<Aead> {
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+    public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
+      return null;
+    }
+
+    @Override
+    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
       return null;
     }
   }
@@ -606,4 +827,55 @@ public class RegistryTest {
     assertThat(count).isEqualTo(2);
   }
   // TODO(przydatek): Add more tests for creation of PrimitiveSets.
+
+  @Test
+  public void testWrap_wrapperRegistered() throws Exception {
+    KeyData key = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(1)
+                .build());
+
+    // Get a PrimitiveSet using a custom key manager for key1.
+    KeyManager<Aead> customManager = new CustomAeadKeyManager(AeadConfig.AES_EAX_TYPE_URL);
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager, Aead.class);
+    Registry.wrap(aeadSet);
+  }
+
+  @Test
+  public void testWrap_noWrapperRegistered_throws() throws Exception {
+    KeyData key = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    Registry.reset();
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(1)
+                .build());
+
+    // Get a PrimitiveSet using a custom key manager for key1.
+    KeyManager<Aead> customManager = new CustomAeadKeyManager(AeadConfig.AES_EAX_TYPE_URL);
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager, Aead.class);
+    try {
+      Registry.wrap(aeadSet);
+      fail("Expected GeneralSecurityException.");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "No wrapper found");
+      assertExceptionContains(e, "Aead");
+    }
+  }
 }

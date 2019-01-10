@@ -32,8 +32,6 @@ import java.security.GeneralSecurityException;
  * AeadConfig.register();
  * }</pre>
  *
- * <p>For more information on how to obtain and use instances of Aead, see {@link AeadFactory}.
- *
  * @since 1.0.0
  */
 public final class AeadConfig {
@@ -43,6 +41,7 @@ public final class AeadConfig {
   public static final String KMS_AEAD_TYPE_URL = KmsAeadKeyManager.TYPE_URL;
   public static final String KMS_ENVELOPE_AEAD_TYPE_URL = KmsEnvelopeAeadKeyManager.TYPE_URL;
   public static final String CHACHA20_POLY1305_TYPE_URL = ChaCha20Poly1305KeyManager.TYPE_URL;
+  public static final String XCHACHA20_POLY1305_TYPE_URL = XChaCha20Poly1305KeyManager.TYPE_URL;
 
   private static final String CATALOGUE_NAME = "TinkAead";
   private static final String PRIMITIVE_NAME = "Aead";
@@ -97,6 +96,9 @@ public final class AeadConfig {
           .addEntry(
               Config.getTinkKeyTypeEntry(
                   CATALOGUE_NAME, PRIMITIVE_NAME, "KmsEnvelopeAeadKey", 0, true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  CATALOGUE_NAME, PRIMITIVE_NAME, "XChaCha20Poly1305Key", 0, true))
           .setConfigName("TINK_AEAD")
           .build();
 

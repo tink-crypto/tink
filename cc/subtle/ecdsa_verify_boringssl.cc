@@ -83,15 +83,6 @@ crypto::tink::util::StatusOr<std::string> IeeeToDer(absl::string_view ieee,
 util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
     const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
     EcdsaSignatureEncoding encoding) {
-  // Check hash.
-  auto hash_status = SubtleUtilBoringSSL::ValidateSignatureHash(hash_type);
-  if (!hash_status.ok()) {
-    return hash_status;
-  }
-  auto hash_result = SubtleUtilBoringSSL::EvpHash(hash_type);
-  if (!hash_result.ok()) return hash_result.status();
-  const EVP_MD* hash = hash_result.ValueOrDie();
-
   // Check curve.
   auto group_result(SubtleUtilBoringSSL::GetEcGroup(ec_key.curve));
   if (!group_result.ok()) return group_result.status();
@@ -109,8 +100,23 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
                         absl::StrCat("Invalid public key: ",
                                      SubtleUtilBoringSSL::GetErrors()));
   }
+  return New(std::move(key), hash_type, encoding);
+}
+
+// static
+util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
+    bssl::UniquePtr<EC_KEY> ec_key, HashType hash_type,
+    EcdsaSignatureEncoding encoding) {
+  // Check hash.
+  auto hash_status = SubtleUtilBoringSSL::ValidateSignatureHash(hash_type);
+  if (!hash_status.ok()) {
+    return hash_status;
+  }
+  auto hash_result = SubtleUtilBoringSSL::EvpHash(hash_type);
+  if (!hash_result.ok()) return hash_result.status();
+  const EVP_MD* hash = hash_result.ValueOrDie();
   std::unique_ptr<EcdsaVerifyBoringSsl> verify(
-      new EcdsaVerifyBoringSsl(key.release(), hash, encoding));
+      new EcdsaVerifyBoringSsl(ec_key.release(), hash, encoding));
   return std::move(verify);
 }
 
@@ -147,7 +153,8 @@ util::Status EcdsaVerifyBoringSsl::Verify(
                         reinterpret_cast<const uint8_t*>(derSig.data()),
                         derSig.size(), key_.get())) {
     // signature is invalid
-    return util::Status(util::error::UNKNOWN, "Signature is not valid.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Signature is not valid.");
   }
   // signature is valid
   return util::Status::OK;

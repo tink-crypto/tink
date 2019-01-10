@@ -20,7 +20,7 @@
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
-#include "tink/hybrid/hybrid_encrypt_set_wrapper.h"
+#include "tink/hybrid/hybrid_encrypt_wrapper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -31,20 +31,25 @@ namespace tink {
 // static
 util::StatusOr<std::unique_ptr<HybridEncrypt>>
 HybridEncryptFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
-  return GetPrimitive(keyset_handle, nullptr);
+  util::Status status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<HybridEncryptWrapper>());
+  if (!status.ok()) {
+    return status;
+  }
+  return keyset_handle.GetPrimitive<HybridEncrypt>();
 }
 
 // static
 util::StatusOr<std::unique_ptr<HybridEncrypt>>
-HybridEncryptFactory::GetPrimitive(const KeysetHandle& keyset_handle,
+HybridEncryptFactory::GetPrimitive(
+    const KeysetHandle& keyset_handle,
     const KeyManager<HybridEncrypt>* custom_key_manager) {
-  auto primitives_result = Registry::GetPrimitives<HybridEncrypt>(
-      keyset_handle, custom_key_manager);
-  if (primitives_result.ok()) {
-    return HybridEncryptSetWrapper::NewHybridEncrypt(
-        std::move(primitives_result.ValueOrDie()));
+  util::Status status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<HybridEncryptWrapper>());
+  if (!status.ok()) {
+    return status;
   }
-  return primitives_result.status();
+  return keyset_handle.GetPrimitive<HybridEncrypt>(custom_key_manager);
 }
 
 }  // namespace tink

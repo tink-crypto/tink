@@ -16,41 +16,50 @@
 package signature
 
 import (
+	"errors"
 	"fmt"
 	"math/big"
 )
 
-var errUnsupportedEncoding = fmt.Errorf("ecdsa: unsupported encoding")
+var errUnsupportedEncoding = errors.New("ecdsa: unsupported encoding")
 
-// ECDSASignerature is a struct holding r and s values of an ECDSA signature.
-type ECDSASignerature struct {
+// ECDSASignature is a struct holding r and s values of an ECDSA signature.
+type ECDSASignature struct {
 	R, S *big.Int
 }
 
-// NewECDSASignerature creates a new ecdsaSignature object.
-func NewECDSASignerature(r, s *big.Int) *ECDSASignerature {
-	return &ECDSASignerature{R: r, S: s}
+// NewECDSASignature creates a new ecdsaSignature object.
+func NewECDSASignature(r, s *big.Int) *ECDSASignature {
+	return &ECDSASignature{R: r, S: s}
 }
 
 // EncodeECDSASignature converts the signature to the given encoding format.
 // Only DER encoding is supported now.
-func (sig *ECDSASignerature) EncodeECDSASignature(encoding string) ([]byte, error) {
+func (sig *ECDSASignature) EncodeECDSASignature(encoding string) ([]byte, error) {
 	switch encoding {
 	case "DER":
-		return asn1encode(sig)
+		enc, err := asn1encode(sig)
+		if err != nil {
+			return nil, fmt.Errorf("ecdsa: can't convert ECDSA signature to %s encoding: %v", encoding, err)
+		}
+		return enc, nil
 	default:
 		return nil, errUnsupportedEncoding
 	}
 }
 
-// DecodeECDSASignerature creates a new ECDSA signature using the given byte slice.
+// DecodeECDSASignature creates a new ECDSA signature using the given byte slice.
 // The function assumes that the byte slice is the concatenation of the BigEndian
 // representation of two big integer r and s.
-func DecodeECDSASignerature(encodedBytes []byte,
-	encoding string) (*ECDSASignerature, error) {
+func DecodeECDSASignature(encodedBytes []byte,
+	encoding string) (*ECDSASignature, error) {
 	switch encoding {
 	case "DER":
-		return asn1decode(encodedBytes)
+		sig, err := asn1decode(encodedBytes)
+		if err != nil {
+			return nil, fmt.Errorf("ecdsa: %s", err)
+		}
+		return sig, nil
 	default:
 		return nil, errUnsupportedEncoding
 	}
@@ -69,11 +78,11 @@ func ValidateECDSAParams(hashAlg string, curve string, encoding string) error {
 	switch curve {
 	case "NIST_P256":
 		if hashAlg != "SHA256" {
-			return fmt.Errorf("invalid hash type, expect SHA-256")
+			return errors.New("invalid hash type, expect SHA-256")
 		}
 	case "NIST_P384", "NIST_P521":
 		if hashAlg != "SHA512" {
-			return fmt.Errorf("invalid hash type, expect SHA-512")
+			return errors.New("invalid hash type, expect SHA-512")
 		}
 	default:
 		return fmt.Errorf("unsupported curve: %s", curve)

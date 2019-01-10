@@ -17,18 +17,18 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.Empty;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
@@ -36,31 +36,20 @@ import java.security.interfaces.ECPublicKey;
  * This key manager produces new instances of {@code EciesAeadHkdfHybridEncrypt}. It doesn't support
  * key generation.
  */
-class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
+class EciesAeadHkdfPublicKeyManager
+    extends KeyManagerBase<HybridEncrypt, EciesAeadHkdfPublicKey, Empty> {
+  public EciesAeadHkdfPublicKeyManager() {
+    super(HybridEncrypt.class, EciesAeadHkdfPublicKey.class, Empty.class, TYPE_URL);
+  }
+
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
 
-  /** @param serializedKey serialized {@code EciesAeadHkdfPublicKey} proto */
   @Override
-  public HybridEncrypt getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      EciesAeadHkdfPublicKey recipientKeyProto = EciesAeadHkdfPublicKey.parseFrom(serializedKey);
-      return getPrimitive(recipientKeyProto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized EciesAeadHkdfPublicKey proto", e);
-    }
-  }
-
-  /** @param recipientKey {@code EciesAeadHkdfPublicKey} proto */
-  @Override
-  public HybridEncrypt getPrimitive(MessageLite recipientKey) throws GeneralSecurityException {
-    if (!(recipientKey instanceof EciesAeadHkdfPublicKey)) {
-      throw new GeneralSecurityException("expected EciesAeadHkdfPublicKey proto");
-    }
-    EciesAeadHkdfPublicKey recipientKeyProto = (EciesAeadHkdfPublicKey) recipientKey;
-    validate(recipientKeyProto);
+  protected HybridEncrypt getPrimitiveFromKey(EciesAeadHkdfPublicKey recipientKeyProto)
+      throws GeneralSecurityException {
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
     ECPublicKey recipientPublicKey =
@@ -78,41 +67,9 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
         demHelper);
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code EciesAeadHkdfKeyFormat} proto
-   * @return new {@code EciesAeadHkdfPublicKey} proto
-   */
   @Override
-  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
+  public EciesAeadHkdfPublicKey newKeyFromFormat(Empty format) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented.");
-  }
-
-  /**
-   * @param keyFormat {@code EciesAeadHkdfKeyFormat} proto
-   * @return new {@code EciesAeadHkdfPublicKey} proto
-   */
-  @Override
-  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented.");
-  }
-
-  /**
-   * @param serializedKeyFormat serialized {@code EciesAeadHkdfKeyFormat} proto
-   * @return {@code KeyData} with a new {@code EciesAeadHkdfPrivateKey} proto
-   */
-  @Override
-  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented.");
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
   }
 
   @Override
@@ -120,9 +77,29 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
     return VERSION;
   }
 
-  private void validate(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
+  @Override
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.ASYMMETRIC_PUBLIC;
+  }
+
+  @Override
+  protected EciesAeadHkdfPublicKey parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return EciesAeadHkdfPublicKey.parseFrom(byteString);
+  }
+
+  @Override
+  protected Empty parseKeyFormatProto(ByteString byteString) throws InvalidProtocolBufferException {
+    return Empty.parseFrom(byteString);
+  }
+
+  @Override
+  protected void validateKey(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
     // TODO(b/74251423): add more checks.
     Validators.validateVersion(key.getVersion(), VERSION);
     HybridUtil.validate(key.getParams());
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

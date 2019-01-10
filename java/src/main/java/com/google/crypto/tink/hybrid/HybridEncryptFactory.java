@@ -20,37 +20,32 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
-import java.util.Collection;
-import java.util.logging.Logger;
 
 /**
- * Static methods for obtaining {@link HybridEncrypt} instances.
+ * Deprecated class to create {@code HybridEncrypt} primitives. Instead of using this class, make
+ * sure that the {@code HybridEncryptWrapper} is registered in your binary, then call {@code
+ * keysetHandle.GetPrimitive(HybridEncrypt.class)} instead. The required registration happens
+ * automatically if you called one of the following in your binary:
  *
- * <h3>Usage</h3>
+ * <ul>
+ *   <li>{@code HybridConfig.register()}
+ *   <li>{@code TinkConfig.register()}
+ * </ul>
  *
- * <pre>{@code
- * KeysetHandle keysetHandle = ...;
- * HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandle);
- * byte[] plaintext = ...;
- * byte[] contextInfo = ...;
- * byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
- * }</pre>
- *
- * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
- * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix associated
- * with the primary key.
- *
+ * @deprecated Use {@code keysetHandle.GetPrimitive(HybridEncrypt.class)} after registering the
+ *     {@code HybridEncryptWrapper} instead.
  * @since 1.0.0
  */
+@Deprecated
 public final class HybridEncryptFactory {
-  private static final Logger logger = Logger.getLogger(HybridEncryptFactory.class.getName());
-
   /**
    * @return a HybridEncrypt primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(HybridEncrypt.class)} after registering the
+   *     {@code HybridEncryptWrapper} instead.
    */
+  @Deprecated
   public static HybridEncrypt getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitive(keysetHandle, /* keyManager= */ null);
@@ -59,32 +54,16 @@ public final class HybridEncryptFactory {
   /**
    * @return a HybridEncrypt primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
+   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, HybridEncrypt.class)} after
+   *     registering the {@code HybridEncryptWrapper} instead.
    */
+  @Deprecated
   public static HybridEncrypt getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<HybridEncrypt> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<HybridEncrypt> primitives = Registry.getPrimitives(keysetHandle, keyManager);
-    validate(primitives);
-    return new HybridEncrypt() {
-      @Override
-      public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
-          throws GeneralSecurityException {
-        return Bytes.concat(
-            primitives.getPrimary().getIdentifier(),
-            primitives.getPrimary().getPrimitive().encrypt(plaintext, contextInfo));
-      }
-    };
-  }
-
-  // Check that all primitives in <code>pset</code> are HybridEncrypt instances.
-  private static void validate(final PrimitiveSet<HybridEncrypt> pset)
-      throws GeneralSecurityException {
-    for (Collection<PrimitiveSet.Entry<HybridEncrypt>> entries : pset.getAll()) {
-      for (PrimitiveSet.Entry<HybridEncrypt> entry : entries) {
-        if (!(entry.getPrimitive() instanceof HybridEncrypt)) {
-          throw new GeneralSecurityException("invalid HybridEncrypt key material");
-        }
-      }
-    }
+    Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
+    final PrimitiveSet<HybridEncrypt> primitives =
+        Registry.getPrimitives(keysetHandle, keyManager, HybridEncrypt.class);
+    return Registry.wrap(primitives);
   }
 }

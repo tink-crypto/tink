@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CC_SIGNATURE_RSA_SIGN_BORINGSSL_H_
-#define TINK_CC_SIGNATURE_RSA_SIGN_BORINGSSL_H_
+#ifndef TINK_SUBTLE_RSA_SSA_PSS_SIGN_BORINGSSL_H_
+#define TINK_SUBTLE_RSA_SSA_PSS_SIGN_BORINGSSL_H_
 
 #include <memory>
 
@@ -63,4 +63,4 @@ class RsaSsaPssSignBoringSsl : public PublicKeySign {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CC_SIGNATURE_RSA_SIGN_BORINGSSL_H_
+#endif  // TINK_SUBTLE_RSA_SSA_PSS_SIGN_BORINGSSL_H_

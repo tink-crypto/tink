@@ -34,7 +34,6 @@ namespace subtle {
 // ECDSA signing using Boring SSL, generating signatures in DER-encoding.
 class EcdsaSignBoringSsl : public PublicKeySign {
  public:
- public:
   static crypto::tink::util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> New(
       const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
       EcdsaSignatureEncoding encoding);
@@ -46,7 +45,7 @@ class EcdsaSignBoringSsl : public PublicKeySign {
   virtual ~EcdsaSignBoringSsl() {}
 
  private:
-  EcdsaSignBoringSsl(EC_KEY* key, const EVP_MD* hash,
+  EcdsaSignBoringSsl(bssl::UniquePtr<EC_KEY> key, const EVP_MD* hash,
                      EcdsaSignatureEncoding encoding);
 
   bssl::UniquePtr<EC_KEY> key_;

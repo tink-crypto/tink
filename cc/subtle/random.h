@@ -34,4 +34,4 @@ class Random {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_SUBTLE_HMAC_RANDOM_H_
+#endif  // TINK_SUBTLE_RANDOM_H_

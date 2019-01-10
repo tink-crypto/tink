@@ -19,6 +19,7 @@
 #include "tink/aead.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
+#include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/mac.h"
@@ -71,9 +72,11 @@ TEST_F(TinkConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
   std::string hmac_key_type =
       "type.googleapis.com/google.crypto.tink.HmacKey";
+  std::string aes_siv_key_type =
+      "type.googleapis.com/google.crypto.tink.AesSivKey";
   auto& config = TinkConfig::Latest();
 
-  EXPECT_EQ(9, TinkConfig::Latest().entry_size());
+  EXPECT_EQ(10, TinkConfig::Latest().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
@@ -129,6 +132,12 @@ TEST_F(TinkConfigTest, testBasic) {
   EXPECT_EQ(true, config.entry(8).new_key_allowed());
   EXPECT_EQ(0, config.entry(8).key_manager_version());
 
+  EXPECT_EQ("TinkDeterministicAead", config.entry(9).catalogue_name());
+  EXPECT_EQ("DeterministicAead", config.entry(9).primitive_name());
+  EXPECT_EQ(aes_siv_key_type, config.entry(9).type_url());
+  EXPECT_EQ(true, config.entry(9).new_key_allowed());
+  EXPECT_EQ(0, config.entry(9).key_manager_version());
+
   // No key manager before registration.
   {
     auto manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);
@@ -161,6 +170,12 @@ TEST_F(TinkConfigTest, testBasic) {
   {
     auto manager_result =
         Registry::get_key_manager<PublicKeyVerify>(public_key_verify_key_type);
+    EXPECT_FALSE(manager_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  }
+  {
+    auto manager_result =
+        Registry::get_key_manager<DeterministicAead>(aes_siv_key_type);
     EXPECT_FALSE(manager_result.ok());
     EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
   }
@@ -205,6 +220,12 @@ TEST_F(TinkConfigTest, testBasic) {
     EXPECT_TRUE(manager_result.ok()) << manager_result.status();
     EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(
         public_key_verify_key_type));
+  }
+  {
+    auto manager_result =
+        Registry::get_key_manager<DeterministicAead>(aes_siv_key_type);
+    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(aes_siv_key_type));
   }
 }
 

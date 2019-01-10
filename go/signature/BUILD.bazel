@@ -9,10 +9,12 @@ go_library(
     srcs = [
         "ecdsa_signer_key_manager.go",
         "ecdsa_verifier_key_manager.go",
+        "ed25519_signer_key_manager.go",
+        "ed25519_verifier_key_manager.go",
+        "init.go",
         "proto_util.go",
         "signer_factory.go",
         "verifier_factory.go",
-        "signature_config.go",
         "signature_key_templates.go",
     ],
     importpath = "github.com/google/tink/go/signature",
@@ -23,8 +25,10 @@ go_library(
         "//go/tink:go_default_library",
         "//proto:common_go_proto",
         "//proto:ecdsa_go_proto",
+        "//proto:ed25519_go_proto",
         "//proto:tink_go_proto",
         "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_x_crypto//ed25519:go_default_library",
     ],
 )
 
@@ -33,7 +37,9 @@ go_test(
     srcs = [
         "ecdsa_signer_key_manager_test.go",
         "ecdsa_verifier_key_manager_test.go",
-        "signature_config_test.go",
+        "ed25519_signer_key_manager_test.go",
+        "ed25519_verifier_key_manager_test.go",
+        "init_test.go",
         "signature_factory_test.go",
         "signature_key_templates_test.go",
     ],
@@ -46,7 +52,9 @@ go_test(
         "//go/tink:go_default_library",
         "//proto:common_go_proto",
         "//proto:ecdsa_go_proto",
+        "//proto:ed25519_go_proto",
         "//proto:tink_go_proto",
         "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_x_crypto//ed25519:go_default_library",
     ],
 )

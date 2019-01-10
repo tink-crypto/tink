@@ -38,6 +38,10 @@ class EcdsaVerifyBoringSsl : public PublicKeyVerify {
   New(const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
       EcdsaSignatureEncoding encoding);
 
+  static crypto::tink::util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>>
+  New(bssl::UniquePtr<EC_KEY> ec_key, HashType hash_type,
+      EcdsaSignatureEncoding encoding);
+
   // Verifies that 'signature' is a digital signature for 'data'.
   crypto::tink::util::Status Verify(
       absl::string_view signature,

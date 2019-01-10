@@ -9,6 +9,9 @@ go_library(
     srcs = [
         "aead.go",
         "crypto_format.go",
+        "deterministic_aead.go",
+        "hybrid_decrypt.go",
+        "hybrid_encrypt.go",
         "init.go",
         "key_manager.go",
         "keyset_handle.go",

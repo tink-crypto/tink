@@ -21,10 +21,12 @@ full_protos = [
     "//proto:chacha20_poly1305_java_proto",
     "//proto:common_java_proto",
     "//proto:config_java_proto",
+    "//proto:empty_java_proto",
     "//proto:hmac_java_proto",
     "//proto:kms_aead_java_proto",
     "//proto:kms_envelope_java_proto",
     "//proto:tink_java_proto",
+    "//proto:xchacha20_poly1305_java_proto",
 ]
 
 lite_protos = [
@@ -35,10 +37,12 @@ lite_protos = [
     "//proto:chacha20_poly1305_java_proto_lite",
     "//proto:common_java_proto_lite",
     "//proto:config_java_proto_lite",
+    "//proto:empty_java_proto_lite",
     "//proto:hmac_java_proto_lite",
     "//proto:kms_aead_java_proto_lite",
     "//proto:kms_envelope_java_proto_lite",
     "//proto:tink_java_proto_lite",
+    "//proto:xchacha20_poly1305_java_proto_lite",
 ]
 
 java_library(

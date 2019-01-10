@@ -19,6 +19,7 @@ package com.google.crypto.tink.daead;
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrimitiveWrapper;
 import java.security.GeneralSecurityException;
 
 /** A catalogue of {@link DeterministicAead} key managers. */
@@ -59,5 +60,10 @@ class DeterministicAeadCatalogue implements Catalogue<DeterministicAead> {
             String.format(
                 "No support for primitive 'DeterministicAead' with key type '%s'.", typeUrl));
     }
+  }
+
+  @Override
+  public PrimitiveWrapper<DeterministicAead> getPrimitiveWrapper() {
+    return new DeterministicAeadWrapper();
   }
 }

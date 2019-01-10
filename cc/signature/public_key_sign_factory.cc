@@ -16,11 +16,11 @@
 
 #include "tink/signature/public_key_sign_factory.h"
 
-#include "tink/public_key_sign.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
+#include "tink/public_key_sign.h"
 #include "tink/registry.h"
-#include "tink/signature/public_key_sign_set_wrapper.h"
+#include "tink/signature/public_key_sign_wrapper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -30,20 +30,25 @@ namespace tink {
 // static
 util::StatusOr<std::unique_ptr<PublicKeySign>>
 PublicKeySignFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
-  return GetPrimitive(keyset_handle, nullptr);
+  util::Status status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<PublicKeySignWrapper>());
+  if (!status.ok()) {
+    return status;
+  }
+  return keyset_handle.GetPrimitive<PublicKeySign>();
 }
 
 // static
 util::StatusOr<std::unique_ptr<PublicKeySign>>
-PublicKeySignFactory::GetPrimitive(const KeysetHandle& keyset_handle,
+PublicKeySignFactory::GetPrimitive(
+    const KeysetHandle& keyset_handle,
     const KeyManager<PublicKeySign>* custom_key_manager) {
-  auto primitives_result = Registry::GetPrimitives<PublicKeySign>(
-      keyset_handle, custom_key_manager);
-  if (primitives_result.ok()) {
-    return PublicKeySignSetWrapper::NewPublicKeySign(
-        std::move(primitives_result.ValueOrDie()));
+  util::Status status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<PublicKeySignWrapper>());
+  if (!status.ok()) {
+    return status;
   }
-  return primitives_result.status();
+  return keyset_handle.GetPrimitive<PublicKeySign>(custom_key_manager);
 }
 
 }  // namespace tink

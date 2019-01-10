@@ -15,12 +15,17 @@
 package aead_test
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/tink"
+	ctrhmacpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -30,10 +35,17 @@ func TestAESGCMKeyTemplates(t *testing.T) {
 	if err := checkAESGCMKeyTemplate(template, uint32(16)); err != nil {
 		t.Errorf("invalid AES-128 GCM key template: %s", err)
 	}
+	if err := testEncryptDecrypt(template, aead.AESGCMTypeURL); err != nil {
+		t.Errorf("%v", err)
+	}
+
 	// AES-GCM 256 bit
 	template = aead.AES256GCMKeyTemplate()
 	if err := checkAESGCMKeyTemplate(template, uint32(32)); err != nil {
 		t.Errorf("invalid AES-256 GCM key template: %s", err)
+	}
+	if err := testEncryptDecrypt(template, aead.AESGCMTypeURL); err != nil {
+		t.Errorf("%v", err)
 	}
 }
 
@@ -49,5 +61,92 @@ func checkAESGCMKeyTemplate(template *tinkpb.KeyTemplate, keySize uint32) error 
 	if keyFormat.KeySize != keySize {
 		return fmt.Errorf("incorrect key size, expect %d, got %d", keySize, keyFormat.KeySize)
 	}
+	return nil
+}
+
+func TestAESCTRHMACAEADKeyTemplates(t *testing.T) {
+	// AES-CTR 128 bit with HMAC SHA-256
+	template := aead.AES128CTRHMACSHA256KeyTemplate()
+	if err := checkAESCTRHMACAEADKeyTemplate(template, 16, 16, 16); err != nil {
+		t.Errorf("invalid AES-128 CTR HMAC SHA256 key template: %s", err)
+	}
+
+	if err := testEncryptDecrypt(template, aead.AESCTRHMACAEADTypeURL); err != nil {
+		t.Errorf("%v", err)
+	}
+
+	// AES-CTR 256 bit with HMAC SHA-256
+	template = aead.AES256CTRHMACSHA256KeyTemplate()
+	if err := checkAESCTRHMACAEADKeyTemplate(template, 32, 16, 32); err != nil {
+		t.Errorf("invalid AES-256 CTR HMAC SHA256 key template: %s", err)
+	}
+	if err := testEncryptDecrypt(template, aead.AESCTRHMACAEADTypeURL); err != nil {
+		t.Errorf("%v", err)
+	}
+}
+
+func checkAESCTRHMACAEADKeyTemplate(template *tinkpb.KeyTemplate, keySize, ivSize, tagSize uint32) error {
+	if template.TypeUrl != aead.AESCTRHMACAEADTypeURL {
+		return fmt.Errorf("incorrect type url")
+	}
+	keyFormat := new(ctrhmacpb.AesCtrHmacAeadKeyFormat)
+	err := proto.Unmarshal(template.Value, keyFormat)
+	if err != nil {
+		return fmt.Errorf("cannot deserialize key format: %s", err)
+	}
+	if keyFormat.AesCtrKeyFormat.KeySize != keySize {
+		return fmt.Errorf("incorrect key size, expect %d, got %d", keySize, keyFormat.AesCtrKeyFormat.KeySize)
+	}
+	if keyFormat.AesCtrKeyFormat.Params.IvSize != ivSize {
+		return fmt.Errorf("incorrect IV size, expect %d, got %d", ivSize, keyFormat.AesCtrKeyFormat.Params.IvSize)
+	}
+	if keyFormat.HmacKeyFormat.KeySize != 32 {
+		return fmt.Errorf("incorrect HMAC key size, expect 32, got %d", keyFormat.HmacKeyFormat.KeySize)
+	}
+	if keyFormat.HmacKeyFormat.Params.TagSize != tagSize {
+		return fmt.Errorf("incorrect HMAC tag size, expect %d, got %d", tagSize, keyFormat.HmacKeyFormat.Params.TagSize)
+	}
+	if keyFormat.HmacKeyFormat.Params.Hash != commonpb.HashType_SHA256 {
+		return fmt.Errorf("incorrect HMAC hash, expect %q, got %q", commonpb.HashType_SHA256, keyFormat.HmacKeyFormat.Params.Hash)
+	}
+	return nil
+}
+
+func testEncryptDecrypt(template *tinkpb.KeyTemplate, typeURL string) error {
+	key, err := tink.NewKey(template)
+	if err != nil {
+		return fmt.Errorf("failed to get key from template, error: %v", err)
+	}
+
+	sk, err := proto.Marshal(key)
+	if err != nil {
+		return fmt.Errorf("failed to serialize key, error: %v", err)
+	}
+
+	p, err := tink.Primitive(typeURL, sk)
+	if err != nil {
+		return fmt.Errorf("failed to get primitive from serialized key, error: %v", err)
+	}
+
+	primitive, ok := p.(tink.AEAD)
+	if !ok {
+		return errors.New("failed to convert AEAD primitive")
+	}
+
+	plaintext := []byte("some data to encrypt")
+	aad := []byte("extra data to authenticate")
+	ciphertext, err := primitive.Encrypt(plaintext, aad)
+	if err != nil {
+		return fmt.Errorf("encryption failed, error: %v", err)
+	}
+	decrypted, err := primitive.Decrypt(ciphertext, aad)
+	if err != nil {
+		return fmt.Errorf("decryption failed, error: %v", err)
+	}
+
+	if bytes.Compare(plaintext, decrypted) != 0 {
+		return fmt.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, plaintext)
+	}
+
 	return nil
 }

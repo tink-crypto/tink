@@ -15,28 +15,14 @@
 package tink_test
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func setUpKeysetManagerTest() {
-	if err := mac.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register MAC key types: %v", err))
-	}
-
-	if err := aead.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register AEAD key types: %v", err))
-	}
-}
-
 func TestKeysetManagerBasic(t *testing.T) {
-	setUpKeysetManagerTest()
-
 	// Create a keyset that contains a single HmacKey.
 	ksm := tink.NewKeysetManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()

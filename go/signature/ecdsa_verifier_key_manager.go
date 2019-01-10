@@ -36,20 +36,20 @@ const (
 var errInvalidECDSAVerifierKey = fmt.Errorf("ecdsa_verifier_key_manager: invalid key")
 var errECDSAVerifierNotImplemented = fmt.Errorf("ecdsa_verifier_key_manager: not implemented")
 
-// ECDSAVerifierKeyManager is an implementation of KeyManager interface.
+// ecdsaVerifierKeyManager is an implementation of KeyManager interface.
 // It doesn't support key generation.
-type ECDSAVerifierKeyManager struct{}
+type ecdsaVerifierKeyManager struct{}
 
-// Assert that ECDSAVerifierKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*ECDSAVerifierKeyManager)(nil)
+// Assert that ecdsaVerifierKeyManager implements the KeyManager interface.
+var _ tink.KeyManager = (*ecdsaVerifierKeyManager)(nil)
 
-// NewECDSAVerifierKeyManager creates a new ECDSAVerifierKeyManager.
-func NewECDSAVerifierKeyManager() *ECDSAVerifierKeyManager {
-	return new(ECDSAVerifierKeyManager)
+// newECDSAVerifierKeyManager creates a new ecdsaVerifierKeyManager.
+func newECDSAVerifierKeyManager() *ecdsaVerifierKeyManager {
+	return new(ecdsaVerifierKeyManager)
 }
 
 // Primitive creates an ECDSAVerifier subtle for the given serialized ECDSAPublicKey proto.
-func (km *ECDSAVerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *ecdsaVerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidECDSAVerifierKey
 	}
@@ -69,28 +69,28 @@ func (km *ECDSAVerifierKeyManager) Primitive(serializedKey []byte) (interface{},
 }
 
 // NewKey is not implemented.
-func (km *ECDSAVerifierKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+func (km *ecdsaVerifierKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	return nil, errECDSAVerifierNotImplemented
 }
 
 // NewKeyData creates a new KeyData according to specification in  the given
 // serialized ECDSAKeyFormat. It should be used solely by the key management API.
-func (km *ECDSAVerifierKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (km *ecdsaVerifierKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	return nil, errECDSAVerifierNotImplemented
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (km *ECDSAVerifierKeyManager) DoesSupport(typeURL string) bool {
+func (km *ecdsaVerifierKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == ECDSAVerifierTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
-func (km *ECDSAVerifierKeyManager) TypeURL() string {
+func (km *ecdsaVerifierKeyManager) TypeURL() string {
 	return ECDSAVerifierTypeURL
 }
 
 // validateKey validates the given ECDSAPublicKey.
-func (km *ECDSAVerifierKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
+func (km *ecdsaVerifierKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
 	if err := tink.ValidateVersion(key.Version, ECDSAVerifierKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_verifier_key_manager: %s", err)
 	}

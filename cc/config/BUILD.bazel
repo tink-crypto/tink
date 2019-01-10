@@ -9,6 +9,7 @@ cc_library(
     deps = [
         "//cc:config",
         "//cc:key_manager",
+        "//cc/daead:deterministic_aead_config",
         "//cc/hybrid:hybrid_config",
         "//cc/signature:signature_config",
         "//cc/util:status",
@@ -30,6 +31,7 @@ cc_test(
         "//cc:aead",
         "//cc:catalogue",
         "//cc:config",
+        "//cc:deterministic_aead",
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
         "//cc:mac",

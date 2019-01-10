@@ -90,7 +90,8 @@ util::Status RsaSsaPkcs1VerifyBoringSsl::Verify(absl::string_view signature,
                  /*sig_len=*/signature.length(),
                  /*rsa=*/rsa_.get())) {
     // Signature is invalid.
-    return util::Status(util::error::UNKNOWN, "Signature is not valid.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Signature is not valid.");
   }
 
   return util::Status::OK;

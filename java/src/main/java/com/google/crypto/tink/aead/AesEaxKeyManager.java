@@ -17,74 +17,37 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
  * This key manager generates new {@code AesEaxKey} keys and produces new instances of {@code
  * AesEaxJce}.
  */
-class AesEaxKeyManager implements KeyManager<Aead> {
+class AesEaxKeyManager extends KeyManagerBase<Aead, AesEaxKey, AesEaxKeyFormat> {
+  public AesEaxKeyManager() {
+    super(Aead.class, AesEaxKey.class, AesEaxKeyFormat.class, TYPE_URL);
+  }
+
   private static final int VERSION = 0;
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesEaxKey";
 
-  /** @param serializedKey serialized {@code AesEaxKey} proto */
   @Override
-  public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      AesEaxKey keyProto = AesEaxKey.parseFrom(serializedKey);
-      return getPrimitive(keyProto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesEaxKey proto", e);
-    }
-  }
-
-  /** @param key {@code AesEaxKey} proto */
-  @Override
-  public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof AesEaxKey)) {
-      throw new GeneralSecurityException("expected AesEaxKey proto");
-    }
-    AesEaxKey keyProto = (AesEaxKey) key;
-    validate(keyProto);
+  public Aead getPrimitiveFromKey(AesEaxKey keyProto) throws GeneralSecurityException {
     return new AesEaxJce(keyProto.getKeyValue().toByteArray(), keyProto.getParams().getIvSize());
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code AesEaxKeyFormat} proto
-   * @return new {@code AesEaxKey} proto
-   */
   @Override
-  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    try {
-      AesEaxKeyFormat format = AesEaxKeyFormat.parseFrom(serializedKeyFormat);
-      return newKey(format);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesEaxKeyFormat proto", e);
-    }
-  }
-
-  /**
-   * @param keyFormat {@code AesEaxKeyFormat} proto
-   * @return new {@code AesEaxKey} proto
-   */
-  @Override
-  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-    if (!(keyFormat instanceof AesEaxKeyFormat)) {
-      throw new GeneralSecurityException("expected AesEaxKeyFormat proto");
-    }
-    AesEaxKeyFormat format = (AesEaxKeyFormat) keyFormat;
-    validate(format);
+  public AesEaxKey newKeyFromFormat(AesEaxKeyFormat format) throws GeneralSecurityException {
     return AesEaxKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
         .setParams(format.getParams())
@@ -92,37 +55,30 @@ class AesEaxKeyManager implements KeyManager<Aead> {
         .build();
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code AesEaxKeyFormat} proto
-   * @return {@code KeyData} proto with a new {@code AesEaxKey} proto
-   */
-  @Override
-  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    AesEaxKey key = (AesEaxKey) newKey(serializedKeyFormat);
-    return KeyData.newBuilder()
-        .setTypeUrl(TYPE_URL)
-        .setValue(key.toByteString())
-        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
-        .build();
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(TYPE_URL);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
-  }
-
   @Override
   public int getVersion() {
     return VERSION;
   }
 
+  @Override
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.SYMMETRIC;
+  }
 
-  private void validate(AesEaxKey key) throws GeneralSecurityException {
+  @Override
+  protected AesEaxKey parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesEaxKey.parseFrom(byteString);
+  }
+
+  @Override
+  protected AesEaxKeyFormat parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesEaxKeyFormat.parseFrom(byteString);
+  }
+
+  @Override
+  protected void validateKey(AesEaxKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     Validators.validateAesKeySize(key.getKeyValue().size());
     if (key.getParams().getIvSize() != 12 && key.getParams().getIvSize() != 16) {
@@ -130,7 +86,8 @@ class AesEaxKeyManager implements KeyManager<Aead> {
     }
   }
 
-  private void validate(AesEaxKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesEaxKeyFormat format) throws GeneralSecurityException {
     Validators.validateAesKeySize(format.getKeySize());
     if (format.getParams().getIvSize() != 12 && format.getParams().getIvSize() != 16) {
       throw new GeneralSecurityException("invalid IV size; acceptable values have 12 or 16 bytes");

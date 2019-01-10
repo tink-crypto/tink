@@ -24,21 +24,18 @@ import (
 	subteAEAD "github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
+	"github.com/google/tink/go/tink"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 var keySizes = []uint32{16, 24, 32}
 
-func TestNewAESGCMKeyManager(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
-	if keyManager == nil {
-		t.Errorf("NewAESGCMKeyManager() returns nil")
-	}
-}
-
 func TestAESGCMGetPrimitiveBasic(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	for _, keySize := range keySizes {
 		key := testutil.NewAESGCMKey(uint32(keySize))
 		serializedKey, _ := proto.Marshal(key)
@@ -53,7 +50,10 @@ func TestAESGCMGetPrimitiveBasic(t *testing.T) {
 }
 
 func TestAESGCMGetPrimitiveWithInvalidInput(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	// invalid AESGCMKey
 	testKeys := genInvalidAESGCMKeys()
 	for i := 0; i < len(testKeys); i++ {
@@ -73,17 +73,20 @@ func TestAESGCMGetPrimitiveWithInvalidInput(t *testing.T) {
 }
 
 func TestAESGCMNewKeyMultipleTimes(t *testing.T) {
-	km := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	format := aead.NewAESGCMKeyFormat(32)
 	serializedFormat, _ := proto.Marshal(format)
 	keys := make(map[string]bool)
 	nTest := 26
 	for i := 0; i < nTest; i++ {
-		key, _ := km.NewKey(serializedFormat)
+		key, _ := keyManager.NewKey(serializedFormat)
 		serializedKey, _ := proto.Marshal(key)
 		keys[string(serializedKey)] = true
 
-		keyData, _ := km.NewKeyData(serializedFormat)
+		keyData, _ := keyManager.NewKeyData(serializedFormat)
 		serializedKey = keyData.Value
 		keys[string(serializedKey)] = true
 	}
@@ -93,7 +96,10 @@ func TestAESGCMNewKeyMultipleTimes(t *testing.T) {
 }
 
 func TestAESGCMNewKeyBasic(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	for _, keySize := range keySizes {
 		format := aead.NewAESGCMKeyFormat(uint32(keySize))
 		serializedFormat, _ := proto.Marshal(format)
@@ -109,7 +115,10 @@ func TestAESGCMNewKeyBasic(t *testing.T) {
 }
 
 func TestAESGCMNewKeyWithInvalidInput(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	// bad format
 	badFormats := genInvalidAESGCMKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
@@ -129,7 +138,10 @@ func TestAESGCMNewKeyWithInvalidInput(t *testing.T) {
 }
 
 func TestAESGCMNewKeyDataBasic(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	for _, keySize := range keySizes {
 		format := aead.NewAESGCMKeyFormat(uint32(keySize))
 		serializedFormat, _ := proto.Marshal(format)
@@ -154,7 +166,10 @@ func TestAESGCMNewKeyDataBasic(t *testing.T) {
 }
 
 func TestAESGCMNewKeyDataWithInvalidInput(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	badFormats := genInvalidAESGCMKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
 		serializedFormat, _ := proto.Marshal(badFormats[i])
@@ -173,7 +188,10 @@ func TestAESGCMNewKeyDataWithInvalidInput(t *testing.T) {
 }
 
 func TestAESGCMDoesSupport(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	if !keyManager.DoesSupport(aead.AESGCMTypeURL) {
 		t.Errorf("AESGCMKeyManager must support %s", aead.AESGCMTypeURL)
 	}
@@ -183,7 +201,10 @@ func TestAESGCMDoesSupport(t *testing.T) {
 }
 
 func TestAESGCMTypeURL(t *testing.T) {
-	keyManager := aead.NewAESGCMKeyManager()
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
+	}
 	if keyManager.TypeURL() != aead.AESGCMTypeURL {
 		t.Errorf("incorrect key type")
 	}

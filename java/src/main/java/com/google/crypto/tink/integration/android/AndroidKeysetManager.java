@@ -48,7 +48,7 @@ import javax.annotation.concurrent.GuardedBy;
  *    .withKeyTemplate(SignatureKeyTemplates.ECDSA_P256)
  *    .withMasterKeyUri(masterKeyUri)
  *    .build();
- * PublicKeySign signer = PublicKeySignFactory.getPrimitive(manager.getKeysetHandle());
+ * PublicKeySign signer = manager.getKeysetHandle().getPrimitive(PublicKeySign.class);
  * }</pre>
  *
  * <p>This will read a keyset stored in the {@code my_keyset_name} preference of the {@code

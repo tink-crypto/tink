@@ -16,7 +16,6 @@ cc_binary(
     deps = [
         "//cc",
         "//cc:cleartext_keyset_handle",
-        "//cc/aead:aead_factory",
         "//cc/config:tink_config",
         "//cc/util:status",
     ],

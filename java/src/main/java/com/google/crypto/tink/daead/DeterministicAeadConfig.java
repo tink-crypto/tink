@@ -92,5 +92,6 @@ public final class DeterministicAeadConfig {
   public static void register() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new DeterministicAeadCatalogue());
     Config.register(LATEST);
+    Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
   }
 }

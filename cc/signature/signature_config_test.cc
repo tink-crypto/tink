@@ -18,9 +18,11 @@
 
 #include "tink/catalogue.h"
 #include "tink/config.h"
+#include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
+#include "tink/signature/signature_key_templates.h"
 #include "tink/util/status.h"
 #include "gtest/gtest.h"
 
@@ -116,6 +118,46 @@ TEST_F(SignatureConfigTest, testRegister) {
   status = SignatureConfig::Register();
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
+}
+
+// Tests that the PublicKeySign and PublicKeyVerify wrappers have been properly
+// registered and we can wrap primitives.
+TEST_F(SignatureConfigTest, WrappersRegistered) {
+  ASSERT_TRUE(SignatureConfig::Register().ok());
+  auto private_keyset_handle_result =
+      KeysetHandle::GenerateNew(SignatureKeyTemplates::EcdsaP256());
+  ASSERT_TRUE(private_keyset_handle_result.ok());
+
+  auto public_keyset_handle_result =
+      private_keyset_handle_result.ValueOrDie()->GetPublicKeysetHandle();
+  ASSERT_TRUE(public_keyset_handle_result.ok());
+
+  auto private_primitive_set_result =
+      private_keyset_handle_result.ValueOrDie()->GetPrimitives<PublicKeySign>(
+          nullptr);
+  ASSERT_TRUE(private_primitive_set_result.ok());
+
+  auto public_primitive_set_result =
+      public_keyset_handle_result.ValueOrDie()->GetPrimitives<PublicKeyVerify>(
+          nullptr);
+  ASSERT_TRUE(public_primitive_set_result.ok());
+
+  auto private_primitive_result =
+      Registry::Wrap(std::move(private_primitive_set_result.ValueOrDie()));
+  ASSERT_TRUE(private_primitive_result.ok());
+
+  auto public_primitive_result =
+      Registry::Wrap(std::move(public_primitive_set_result.ValueOrDie()));
+  ASSERT_TRUE(public_primitive_result.ok());
+
+  auto signature_result =
+      private_primitive_result.ValueOrDie()->Sign("signed text");
+  ASSERT_TRUE(signature_result.ok());
+
+  EXPECT_TRUE(public_primitive_result.ValueOrDie()->Verify(
+      signature_result.ValueOrDie(), "signed text").ok());
+  EXPECT_FALSE(public_primitive_result.ValueOrDie()->Verify(
+      signature_result.ValueOrDie(), "faked text").ok());
 }
 
 }  // namespace

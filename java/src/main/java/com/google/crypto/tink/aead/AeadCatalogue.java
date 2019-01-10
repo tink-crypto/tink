@@ -19,6 +19,7 @@ package com.google.crypto.tink.aead;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrimitiveWrapper;
 import java.security.GeneralSecurityException;
 
 /** A catalogue of {@link Aead} key managers. */
@@ -63,9 +64,16 @@ class AeadCatalogue implements Catalogue<Aead> {
         return new KmsAeadKeyManager();
       case KmsEnvelopeAeadKeyManager.TYPE_URL:
         return new KmsEnvelopeAeadKeyManager();
+      case XChaCha20Poly1305KeyManager.TYPE_URL:
+        return new XChaCha20Poly1305KeyManager();
       default:
         throw new GeneralSecurityException(
             String.format("No support for primitive 'Aead' with key type '%s'.", typeUrl));
     }
+  }
+
+  @Override
+  public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
+    return new AeadWrapper();
   }
 }

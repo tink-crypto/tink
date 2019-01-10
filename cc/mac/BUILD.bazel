@@ -3,16 +3,16 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
-    name = "mac_set_wrapper",
-    srcs = ["mac_set_wrapper.cc"],
-    hdrs = ["mac_set_wrapper.h"],
+    name = "mac_wrapper",
+    srcs = ["mac_wrapper.cc"],
+    hdrs = ["mac_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:mac",
         "//cc:primitive_set",
+        "//cc:primitive_wrapper",
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -55,7 +55,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":mac_set_wrapper",
+        ":mac_wrapper",
         "//cc:key_manager",
         "//cc:keyset_handle",
         "//cc:mac",
@@ -63,6 +63,7 @@ cc_library(
         "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
@@ -106,12 +107,12 @@ cc_library(
 # tests
 
 cc_test(
-    name = "mac_set_wrapper_test",
+    name = "mac_wrapper_test",
     size = "small",
-    srcs = ["mac_set_wrapper_test.cc"],
+    srcs = ["mac_wrapper_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":mac_set_wrapper",
+        ":mac_wrapper",
         "//cc:crypto_format",
         "//cc:mac",
         "//cc:primitive_set",
@@ -145,8 +146,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":mac_config",
+        ":mac_key_templates",
         "//cc:catalogue",
         "//cc:config",
+        "//cc:keyset_handle",
         "//cc:mac",
         "//cc:registry",
         "//cc/util:status",
@@ -162,7 +165,7 @@ cc_test(
     deps = [
         ":mac_config",
         ":mac_factory",
-        ":mac_set_wrapper",
+        ":mac_wrapper",
         "//cc:config",
         "//cc:crypto_format",
         "//cc:keyset_handle",

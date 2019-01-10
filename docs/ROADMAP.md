@@ -47,56 +47,58 @@ prepare the Obj-C release).
 
 ### 1.3.0
 
-Tentative release date: December 2018.
+Tentative release date: February 2019.
+
+Tentative new features:
 
 *   Java
 
-    *   P1. Authenticated Public Key Encryption.
-    *   P1. Initial support for strict JOSE.
-    *   P2. JNI for better performance.
+    *   P0. Integration with Cloud KMS/AWS KMS: streaming envelope encryption
+    *   P1. AEAD: XCHACHA20-POLY1305
+    *   P1. Signature: RSA-SSA-PKCS1, RSA-PSS
+    *   P2. Streaming hybrid encryption
 
-*   C++
+*   C++/Obj-C
 
-    *   P0. Feature parity with [Java
-        1.1.0](https://github.com/google/tink/releases/tag/v1.1.0).
-
-*   Objective-C
-
-    *   P0. Feature parity with [Java
-        1.1.0](https://github.com/google/tink/releases/tag/v1.1.0).
-
-*   C#
-
-    *   P0. Initial release, feature parity with [Java
-        1.0.0](https://github.com/google/tink/releases/tag/v1.1.0).
-    *   P1. Integration with Azure Key Vault.
+    *   P0. Integration with Cloud KMS/AWS KMS: key storage and (streaming)
+        envelope encryption
+    *   P0. Streaming AEAD: AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
+    *   P0. Deterministic AEAD: AES-SIV
+    *   P0. Digital signature: ED25519
+    *   P1. AEAD: XCHACHA20-POLY1305
+    *   P1. Signature: RSA-SSA-PKCS1, RSA-PSS
+    *   P2. Nonce reuse resistant AEAD: AES-GCM-SIV
 
 *   Go
 
-    *   P1. Initial release, feature parity with [Java
-        1.0.0](https://github.com/google/tink/releases/tag/v1.0.0).
-    *   P2. Integration with Google Cloud KMS and AWS KMS.
-
-*   Javascript/NodeJS
-
-    *   P1. Initial release, feature parity with [Java
-        1.0.0](https://github.com/google/tink/releases/tag/v1.0.0).
+    *   P0. AEAD: AES-GCM, AES-CTR-HMAC-AEAD
+    *   P0. MAC: HMAC-SHA2
+    *   P0. Signature: ECDSA with NIST curves
+    *   P0. Hybrid encryption: ECIES with NIST curves and AEAD
+    *   P1. AEAD: XCHACHA20-POLY1305
+    *   P1. Integration with Cloud KMS/AWS KMS: key storage and envelope
+        encryption
+    *   P2. Signature: ED25519
+    *   P2. Deterministic AEAD: AES-SIV
 
 ### 1.4.0
 
-Tentative release date: June 2019.
+Tentative release date: August 2019.
 
-*   Java
+Tentative new features:
 
-    *   P0. Stable strict JOSE APIs.
-    *   P1. More streaming APIs: StreamingMac and StreamingAead with append and
-        random write.
-    *   P1. Benchmarking.
+*   Go/Java/C++/Obj-C
 
-*   C++/Objective-C/Go/C#/Javascript/NodeJS
+    *   P0. Benchmarking
+    *   P0. Full integration with Cloud KMS/AWS KMS: key storage, (streaming)
+        envelope encryption, hybrid encryption and digital signature
+    *   P0. Initial support for Cloud HSM/AWS HSM
+    *   P1. Feature parity across platforms.
 
-    *   P0. Feature parity with Java 1.4.0.
+*   JavaScript
 
-*   C++
+    *   P0. Initial release that supports modern browsers
 
-    *   P1. Windows support.
+*   Python
+
+    *   P0. Initial CLIF-based release that can replace Keyczar.

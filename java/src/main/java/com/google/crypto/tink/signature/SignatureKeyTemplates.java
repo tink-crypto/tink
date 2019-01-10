@@ -25,6 +25,8 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
+import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
+import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.protobuf.ByteString;
 import java.math.BigInteger;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -161,18 +163,19 @@ public final class SignatureKeyTemplates {
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
+
   /**
    * A {@link KeyTemplate} that generates new instances of {@link
    * com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey} with the following parameters:
    *
    * <ul>
    *   <li>Hash function: SHA256.
-   *   <li>Modulus size: 2048 bit.
+   *   <li>Modulus size: 3072 bit.
    *   <li>Public exponent: 65537 (aka F4).
    * </ul>
    */
-  public static final KeyTemplate RSA_SSA_PKCS1_2048_SHA256_F4 =
-      createRsaSsaPkcs1KeyTemplate(HashType.SHA256, 2048, RSAKeyGenParameterSpec.F4);
+  public static final KeyTemplate RSA_SSA_PKCS1_3072_SHA256_F4 =
+      createRsaSsaPkcs1KeyTemplate(HashType.SHA256, 3072, RSAKeyGenParameterSpec.F4);
 
   /**
    * A {@link KeyTemplate} that generates new instances of {@link
@@ -180,12 +183,12 @@ public final class SignatureKeyTemplates {
    *
    * <ul>
    *   <li>Hash function: SHA512.
-   *   <li>Modulus size: 3072 bit.
+   *   <li>Modulus size: 4096 bit.
    *   <li>Public exponent: 65537 (aka F4).
    * </ul>
    */
-  public static final KeyTemplate RSA_SSA_PKCS1_3072_SHA512_F4 =
-      createRsaSsaPkcs1KeyTemplate(HashType.SHA512, 3072, RSAKeyGenParameterSpec.F4);
+  public static final KeyTemplate RSA_SSA_PKCS1_4096_SHA512_F4 =
+      createRsaSsaPkcs1KeyTemplate(HashType.SHA512, 4096, RSAKeyGenParameterSpec.F4);
 
   /**
    * @return a {@link KeyTemplate} containing a {@link RsaSsaPkcs1KeyFormat} with some specified
@@ -203,6 +206,67 @@ public final class SignatureKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(RsaSsaPkcs1SignKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
+        .build();
+  }
+
+  /**
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.RsaSsaPssPrivateKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Signature hash: SHA256.
+   *   <li>MGF1 hash: SHA256.
+   *   <li>Salt length: 32 (i.e., SHA256's output length).
+   *   <li>Modulus size: 3072 bit.
+   *   <li>Public exponent: 65537 (aka F4).
+   * </ul>
+   */
+  public static final KeyTemplate RSA_SSA_PSS_3072_SHA256_SHA256_32_F4 =
+      createRsaSsaPssKeyTemplate(
+          HashType.SHA256, HashType.SHA256, 32, 3072, RSAKeyGenParameterSpec.F4);
+
+  /**
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.RsaSsaPssPrivateKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Signature hash: SHA512.
+   *   <li>MGF1 hash: SHA512.
+   *   <li>Salt length: 64 (i.e., SHA512's output length).
+   *   <li>Modulus size: 4096 bit.
+   *   <li>Public exponent: 65537 (aka F4).
+   * </ul>
+   */
+  public static final KeyTemplate RSA_SSA_PSS_4096_SHA512_SHA512_64_F4 =
+      createRsaSsaPssKeyTemplate(
+          HashType.SHA512, HashType.SHA512, 64, 4096, RSAKeyGenParameterSpec.F4);
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link RsaSsaPssKeyFormat} with some specified
+   *     parameters.
+   */
+  public static KeyTemplate createRsaSsaPssKeyTemplate(
+      HashType sigHash,
+      HashType mgf1Hash,
+      int saltLength,
+      int modulusSize,
+      BigInteger publicExponent) {
+    RsaSsaPssParams params =
+        RsaSsaPssParams.newBuilder()
+            .setSigHash(sigHash)
+            .setMgf1Hash(mgf1Hash)
+            .setSaltLength(saltLength)
+            .build();
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.newBuilder()
+            .setParams(params)
+            .setModulusSizeInBits(modulusSize)
+            .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
+            .build();
+    return KeyTemplate.newBuilder()
+        .setValue(format.toByteString())
+        .setTypeUrl(RsaSsaPssSignKeyManager.TYPE_URL)
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
