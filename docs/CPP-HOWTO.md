@@ -95,10 +95,10 @@ To install Tink from the source code, the following prerequisites must be instal
     ```sh
     cd tink
     TARGET_DIR="/usr/local"
-    bazel build -c opt cc:libtink.so
-    bazel build cc:tink_headers cc:tink_deps_headers
     mkdir -p $TARGET_DIR/lib $TARGET_DIR/include
+    bazel build -c opt cc:libtink.so
     sudo cp bazel-bin/cc/libtink.so $TARGET_DIR/lib/
+    bazel build cc:tink_headers cc:tink_deps_headers
     sudo tar xfv bazel-genfiles/cc/tink_headers.tar -C $TARGET_DIR/include/
     sudo tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C $TARGET_DIR/include/
     ```
