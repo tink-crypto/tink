@@ -32,7 +32,7 @@ func NewVerifier(handle *tink.KeysetHandle) (tink.Verifier, error) {
 func NewVerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Verifier, error) {
 	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
-		return nil, fmt.Errorf("public_key_verify_factory: cannot obtain primitive set: %s", err)
+		return nil, fmt.Errorf("verifier_factory: cannot obtain primitive set: %s", err)
 	}
 	var ret = newVerifierSet(ps)
 	return ret, nil
@@ -53,7 +53,7 @@ func newVerifierSet(ps *tink.PrimitiveSet) *verifierSet {
 	return ret
 }
 
-var errInvalidSignature = errors.New("public_key_verify_factory: invalid signature")
+var errInvalidSignature = errors.New("verifier_factory: invalid signature")
 
 // Verify checks whether the given signature is a valid signature of the given data.
 func (v *verifierSet) Verify(signature, data []byte) error {

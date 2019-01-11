@@ -18,6 +18,7 @@ package com.google.crypto.tink.streamingaead;
 
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.StreamingAead;
 import java.security.GeneralSecurityException;
 
@@ -60,5 +61,10 @@ class StreamingAeadCatalogue implements Catalogue<StreamingAead> {
         throw new GeneralSecurityException(
             String.format("No support for primitive 'StreamingAead' with key type '%s'.", typeUrl));
     }
+  }
+
+  @Override
+  public PrimitiveWrapper<StreamingAead> getPrimitiveWrapper() {
+    return new StreamingAeadWrapper();
   }
 }

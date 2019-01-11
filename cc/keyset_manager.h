@@ -30,7 +30,7 @@ namespace tink {
 class KeysetHandle;
 
 // KeysetManager provides convenience methods for creation of Keysets, and for
-// rotating, disabling, enabling, or destroing keys.
+// rotating, disabling, enabling, or destroying keys.
 // An instance of this class takes care of a single Keyset, that can be
 // accessed via GetKeysetHandle()-method.
 class KeysetManager {
@@ -107,9 +107,6 @@ class KeysetManager {
 
   mutable absl::Mutex keyset_mutex_;
   google::crypto::tink::Keyset keyset_ GUARDED_BY(keyset_mutex_);
-
-  // Generates a new key_id avoiding collisions in the managed keyset.
-  uint32_t GenerateNewKeyId() SHARED_LOCKS_REQUIRED(keyset_mutex_);
 };
 
 }  // namespace tink

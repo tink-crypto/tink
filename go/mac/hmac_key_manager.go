@@ -15,6 +15,7 @@
 package mac
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
@@ -33,8 +34,8 @@ const (
 	HMACKeyVersion = uint32(0)
 )
 
-var errInvalidHMACKey = fmt.Errorf("hmac_key_manager: invalid key")
-var errInvalidHMACKeyFormat = fmt.Errorf("hmac_key_manager: invalid key format")
+var errInvalidHMACKey = errors.New("hmac_key_manager: invalid key")
+var errInvalidHMACKeyFormat = errors.New("hmac_key_manager: invalid key format")
 
 // hmacKeyManager generates new HMAC keys and produces new instances of HMAC.
 type hmacKeyManager struct{}
@@ -117,7 +118,7 @@ func (km *hmacKeyManager) TypeURL() string {
 func (km *hmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
 	err := tink.ValidateVersion(key.Version, HMACKeyVersion)
 	if err != nil {
-		return fmt.Errorf("hmac_key_manager: %s", err)
+		return fmt.Errorf("hmac_key_manager: invalid version: %s", err)
 	}
 	keySize := uint32(len(key.KeyValue))
 	hash := tink.GetHashName(key.Params.Hash)

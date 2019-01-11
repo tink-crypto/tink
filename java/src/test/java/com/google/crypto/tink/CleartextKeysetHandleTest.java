@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.mac.MacFactory;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
@@ -47,14 +46,10 @@ public class CleartextKeysetHandleTest {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle = KeysetHandle.generateNew(template);
-    Keyset keyset = handle.getKeyset();
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     handle = CleartextKeysetHandle.parseFrom(keyset.toByteArray());
     assertEquals(keyset, handle.getKeyset());
-    try {
-      Mac unused = MacFactory.getPrimitive(handle);
-    } catch (GeneralSecurityException e) {
-      fail("instantiation should succeed: " + e.toString());
-    }
+    handle.getPrimitive(Mac.class);
   }
 
   @Test
@@ -74,11 +69,7 @@ public class CleartextKeysetHandleTest {
     Keyset.Key key2 = keyset2.getKey(0);
     assertEquals(keyset2.getPrimaryKeyId(), key2.getKeyId());
     assertEquals(template.getTypeUrl(), key2.getKeyData().getTypeUrl());
-    try {
-      Mac unused = MacFactory.getPrimitive(handle2);
-    } catch (GeneralSecurityException e) {
-      fail("instantiation should succeed: " + e.toString());
-    }
+    Mac unused = handle2.getPrimitive(Mac.class);
   }
 
   @Test

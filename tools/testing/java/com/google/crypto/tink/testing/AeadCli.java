@@ -18,7 +18,6 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.aead.AeadFactory;
 
 /**
  * A command-line utility for testing Aead-primitives.
@@ -60,7 +59,7 @@ public class AeadCli {
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
 
     // Read the input.
     byte[] input = CliUtil.read(inputFilename);

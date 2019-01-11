@@ -125,9 +125,9 @@ class KeyManagerBase : public KeyManager<Primitive> {
   }
 
   static std::string& static_key_type() {
-    static std::string key_type =
-        absl::StrCat(kTypeGoogleapisCom, KeyProto().GetTypeName());
-    return key_type;
+    static std::string* key_type =
+        new std::string(absl::StrCat(kTypeGoogleapisCom, KeyProto().GetTypeName()));
+    return *key_type;
   }
 
  protected:

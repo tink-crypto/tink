@@ -95,10 +95,10 @@ To install Tink from the source code, the following prerequisites must be instal
     ```sh
     cd tink
     TARGET_DIR="/usr/local"
-    bazel build -c opt cc:libtink.so
-    bazel build cc:tink_headers cc:tink_deps_headers
     mkdir -p $TARGET_DIR/lib $TARGET_DIR/include
+    bazel build -c opt cc:libtink.so
     sudo cp bazel-bin/cc/libtink.so $TARGET_DIR/lib/
+    bazel build cc:tink_headers cc:tink_deps_headers
     sudo tar xfv bazel-genfiles/cc/tink_headers.tar -C $TARGET_DIR/include/
     sudo tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C $TARGET_DIR/include/
     ```
@@ -283,9 +283,8 @@ currently available or planned (the latter are listed in brackets).
 | Digital Signatures | ECDSA over NIST curves, (Ed25519)             |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                      |
 
-Tink user accesses implementations of a primitive via a factory that corresponds
-to the primitive: AEAD via `AeadFactory`, MAC via `MacFactory`, etc. where each
-factory offers corresponding `getPrimitive(...)` methods.
+The user obtains a primitive by calling the function `getPrimitive<>` of the
+`KeysetHandle`.
 
 ### Symmetric Key Encryption
 
@@ -297,20 +296,19 @@ to encrypt or decrypt data:
 ```cpp
     #include "tink/aead.h"
     #include "tink/keyset_handle.h"
-    #include "tink/aead/aead_factory.h"
 
 
     // 1. Get a handle to the key material.
     KeysetHandle keyset_handle = ...;
 
     // 2. Get the primitive.
-    auto aead_result= AeadFactory.GetPrimitive(keyset_handle);
+    auto aead_result= keyset_handle.GetPrimitive<Aead>();
     if (!aead_result.ok()) return aead_result.status();
     auto aead = std::move(aead_result.ValueOrDie());
 
     // 3. Use the primitive.
     auto ciphertext_result = aead.Encrypt(plaintext, aad);
-    if (!ciphertext_result.ok()) return ciphertext.status();
+    if (!ciphertext_result.ok()) return ciphertext_result.status();
     auto ciphertext = std::move(ciphertext_result.ValueOrDie());
 ```
 
@@ -322,19 +320,18 @@ symmetric key encryption](PRIMITIVES.md#hybrid-encryption):
 ```cpp
     #include "tink/hybrid_decrypt.h"
     #include "tink/keyset_handle.h"
-    #include "tink/hybrid/hybrid_decrypt_factory.h"
 
 
     // 1. Get a handle to the key material.
     KeysetHandle keyset_handle = ...;
 
     // 2. Get the primitive.
-    auto hybrid_decrypt_result= HybridDecryptFactory.GetPrimitive(keyset_handle);
+    auto hybrid_decrypt_result = keyset_handle.GetPrimitive<HybridDecrypt>();
     if (!hybrid_decrypt_result.ok()) return hybrid_decrypt_result.status();
     auto hybrid_decrypt = std::move(hybrid_decrypt_result.ValueOrDie());
 
     // 3. Use the primitive.
     auto plaintext_result = hybrid_decrypt.Decrypt(ciphertext, context_info);
-    if (!plaintext_result.ok()) return plaintext.status();
+    if (!plaintext_result.ok()) return plaintext_result.status();
     auto plaintext = std::move(plaintext_result.ValueOrDie());
 ```

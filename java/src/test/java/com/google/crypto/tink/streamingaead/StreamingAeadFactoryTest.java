@@ -163,7 +163,8 @@ public class StreamingAeadFactoryTest {
       StreamingAeadFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "invalid StreamingAead key material");
+      assertExceptionContains(
+          e, "not match requested primitive type com.google.crypto.tink.StreamingAead");
     }
 
     // invalid as the primary key.
@@ -172,7 +173,8 @@ public class StreamingAeadFactoryTest {
       StreamingAeadFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "invalid StreamingAead key material");
+      assertExceptionContains(
+          e, "not match requested primitive type com.google.crypto.tink.StreamingAead");
     }
   }
 }

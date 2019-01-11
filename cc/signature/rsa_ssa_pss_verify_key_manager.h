@@ -60,7 +60,6 @@ class RsaSsaPssVerifyKeyManager
   friend class RsaSsaPssPrivateKeyFactory;
   friend class RsaSsaPssSignKeyManager;
 
-  std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
 
   static crypto::tink::util::Status Validate(

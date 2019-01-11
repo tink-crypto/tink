@@ -37,17 +37,6 @@ using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-namespace {
-
-uint32_t NewKeyId() {
-  std::random_device rd;
-  std::minstd_rand0 gen(rd());
-  std::uniform_int_distribution<uint32_t> dist;
-  return dist(gen);
-}
-
-}  // namespace
-
 // static
 StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
     const KeyTemplate& key_template) {
@@ -66,20 +55,6 @@ StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
   return std::move(manager);
 }
 
-uint32_t KeysetManager::GenerateNewKeyId() {
-  while (true) {
-    uint32_t key_id = NewKeyId();
-    bool already_exists = false;
-    for (auto& key : keyset_.key()) {
-      if (key.key_id() == key_id) {
-        already_exists = true;
-        break;
-      }
-    }
-    if (!already_exists) return key_id;
-  }
-}
-
 std::unique_ptr<KeysetHandle> KeysetManager::GetKeysetHandle() {
   absl::MutexLock lock(&keyset_mutex_);
   std::unique_ptr<Keyset> keyset_copy(new Keyset(keyset_));
@@ -95,19 +70,7 @@ StatusOr<uint32_t> KeysetManager::Add(const KeyTemplate& key_template) {
 crypto::tink::util::StatusOr<uint32_t> KeysetManager::Add(
     const google::crypto::tink::KeyTemplate& key_template, bool as_primary) {
   absl::MutexLock lock(&keyset_mutex_);
-  auto key_data_result = Registry::NewKeyData(key_template);
-  if (!key_data_result.ok()) return key_data_result.status();
-  auto key_data = std::move(key_data_result.ValueOrDie());
-  Keyset::Key* key = keyset_.add_key();
-  uint32_t key_id = GenerateNewKeyId();
-  *(key->mutable_key_data()) = *key_data;
-  key->set_status(KeyStatusType::ENABLED);
-  key->set_key_id(key_id);
-  key->set_output_prefix_type(key_template.output_prefix_type());
-  if (as_primary) {
-    keyset_.set_primary_key_id(key_id);
-  }
-  return key_id;
+  return KeysetHandle::AddToKeyset(key_template, as_primary, &keyset_);
 }
 
 StatusOr<uint32_t> KeysetManager::Rotate(const KeyTemplate& key_template) {

@@ -27,16 +27,16 @@ cc_library(
 )
 
 cc_library(
-    name = "deterministic_aead_set_wrapper",
-    srcs = ["deterministic_aead_set_wrapper.cc"],
-    hdrs = ["deterministic_aead_set_wrapper.h"],
+    name = "deterministic_aead_wrapper",
+    srcs = ["deterministic_aead_wrapper.cc"],
+    hdrs = ["deterministic_aead_wrapper.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
         "//cc:deterministic_aead",
         "//cc:primitive_set",
+        "//cc:primitive_wrapper",
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -84,7 +84,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":deterministic_aead_set_wrapper",
+        ":deterministic_aead_wrapper",
         "//cc:deterministic_aead",
         "//cc:key_manager",
         "//cc:keyset_handle",
@@ -92,6 +92,7 @@ cc_library(
         "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
@@ -129,12 +130,12 @@ cc_test(
 )
 
 cc_test(
-    name = "deterministic_aead_set_wrapper_test",
+    name = "deterministic_aead_wrapper_test",
     size = "small",
-    srcs = ["deterministic_aead_set_wrapper_test.cc"],
+    srcs = ["deterministic_aead_wrapper_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":deterministic_aead_set_wrapper",
+        ":deterministic_aead_wrapper",
         "//cc:deterministic_aead",
         "//cc:primitive_set",
         "//cc/util:status",
@@ -168,9 +169,11 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":deterministic_aead_config",
+        ":deterministic_aead_key_templates",
         "//cc:catalogue",
         "//cc:config",
         "//cc:deterministic_aead",
+        "//cc:keyset_handle",
         "//cc:registry",
         "//cc/util:status",
         "@com_google_absl//absl/memory",

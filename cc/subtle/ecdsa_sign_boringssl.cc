@@ -109,13 +109,14 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
 
   // Sign.
   std::unique_ptr<EcdsaSignBoringSsl> sign(
-      new EcdsaSignBoringSsl(key.release(), hash, encoding));
+      new EcdsaSignBoringSsl(std::move(key), hash, encoding));
   return std::move(sign);
 }
 
-EcdsaSignBoringSsl::EcdsaSignBoringSsl(EC_KEY* key, const EVP_MD* hash,
+EcdsaSignBoringSsl::EcdsaSignBoringSsl(bssl::UniquePtr<EC_KEY> key,
+                                       const EVP_MD* hash,
                                        EcdsaSignatureEncoding encoding)
-    : key_(key), hash_(hash), encoding_(encoding) {}
+    : key_(std::move(key)), hash_(hash), encoding_(encoding) {}
 
 util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
     absl::string_view data) const {

@@ -91,7 +91,7 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
           .mergeFrom(aesGcmKey)
           .setKeyValue(ByteString.copyFrom(symmetricKeyValue, 0, symmetricKeySize))
           .build();
-      return Registry.getPrimitive(demKeyTypeUrl, aeadKey);
+      return Registry.getPrimitive(demKeyTypeUrl, aeadKey, Aead.class);
     } else if (demKeyTypeUrl.equals(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)) {
       byte[] aesCtrKeyValue = Arrays.copyOfRange(symmetricKeyValue, 0, aesCtrKeySize);
       byte[] hmacKeyValue = Arrays.copyOfRange(symmetricKeyValue, aesCtrKeySize, symmetricKeySize);
@@ -111,7 +111,7 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
               .setAesCtrKey(aesCtrKey)
               .setHmacKey(hmacKey)
               .build();
-      return Registry.getPrimitive(demKeyTypeUrl, aeadKey);
+      return Registry.getPrimitive(demKeyTypeUrl, aeadKey, Aead.class);
     } else {
       throw new GeneralSecurityException("unknown DEM key type");
     }

@@ -19,6 +19,7 @@ package com.google.crypto.tink.mac;
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.PrimitiveWrapper;
 import java.security.GeneralSecurityException;
 
 /** A catalogue of {@link Mac} key managers. */
@@ -57,5 +58,10 @@ class MacCatalogue implements Catalogue<Mac> {
         throw new GeneralSecurityException(
             String.format("No support for primitive 'Mac' with key type '%s'.", typeUrl));
     }
+  }
+
+  @Override
+  public PrimitiveWrapper<Mac> getPrimitiveWrapper() {
+    return new MacWrapper();
   }
 }

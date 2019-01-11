@@ -45,9 +45,9 @@ class JsonKeysetReader : public KeysetReader {
   ReadEncrypted() override;
 
  private:
-  JsonKeysetReader(std::unique_ptr<std::istream> keyset_stream)
+  explicit JsonKeysetReader(std::unique_ptr<std::istream> keyset_stream)
       : serialized_keyset_(""), keyset_stream_(std::move(keyset_stream)) {}
-  JsonKeysetReader(absl::string_view serialized_keyset)
+  explicit JsonKeysetReader(absl::string_view serialized_keyset)
       : serialized_keyset_(serialized_keyset), keyset_stream_(nullptr) {}
 
   std::string serialized_keyset_;

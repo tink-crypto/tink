@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
@@ -60,6 +59,8 @@ import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.proto.RsaSsaPssParams;
+import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
@@ -382,6 +383,28 @@ public class TestUtil {
   }
 
   /**
+   * Returns a {@code RsaSsaPssPublicKey} constructed from {@code modulus}, {@code exponent}, {@code
+   * sigHash}, {@code mgf1Hash} and {@code saltLength}.
+   */
+  public static RsaSsaPssPublicKey createRsaSsaPssPubKey(
+      byte[] modulus, byte[] exponent, HashType sigHash, HashType mgf1Hash, int saltLength)
+      throws Exception {
+    final int version = 0;
+    RsaSsaPssParams params =
+        RsaSsaPssParams.newBuilder()
+            .setSigHash(sigHash)
+            .setMgf1Hash(mgf1Hash)
+            .setSaltLength(saltLength)
+            .build();
+
+    return RsaSsaPssPublicKey.newBuilder()
+        .setVersion(version)
+        .setParams(params)
+        .setN(ByteString.copyFrom(modulus))
+        .setE(ByteString.copyFrom(exponent))
+        .build();
+  }
+  /**
    * @return a freshly generated {@code EciesAeadHkdfPrivateKey} constructed with specified
    *     parameters.
    */
@@ -460,18 +483,8 @@ public class TestUtil {
         .build();
   }
 
-  /**
-   * Runs basic tests against an Aead primitive. The given keysetHandle should be an Aead key type.
-   */
-  public static void runBasicAeadFactoryTests(KeysetHandle keysetHandle) throws Exception {
-    runBasicAeadFactoryTests(keysetHandle, /* keyManager*/ null);
-  }
-  /**
-   * Runs basic tests against an Aead primitive. The given keysetHandle should be an Aead key type.
-   */
-  public static void runBasicAeadFactoryTests(
-      KeysetHandle keysetHandle, KeyManager<Aead> keyManager) throws Exception {
-    Aead aead = AeadFactory.getPrimitive(keysetHandle, keyManager);
+  /** Runs basic tests against an Aead primitive. */
+  public static void runBasicAeadTests(Aead aead) throws Exception {
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
@@ -514,6 +527,14 @@ public class TestUtil {
       // If Application isn't loaded, it might as well not be Android.
       return false;
     }
+  }
+
+  /**
+   * Best-effort checks that this is running under tsan. Returns false in doubt and externally to
+   * google.
+   */
+  public static boolean isTsan() {
+    return false;
   }
 
   /** Returns whether we should skip a test with some AES key size. */

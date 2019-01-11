@@ -16,25 +16,28 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.crypto.tink.subtle.IndCpaCipher;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
  * This key manager generates new {@code AesCtrKey} keys and produces new instances of {@code
  * AesCtrJceCipher}.
  */
-class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
+class AesCtrKeyManager extends KeyManagerBase<IndCpaCipher, AesCtrKey, AesCtrKeyFormat> {
+  public AesCtrKeyManager() {
+    super(IndCpaCipher.class, AesCtrKey.class, AesCtrKeyFormat.class, TYPE_URL);
+  }
+
   private static final int VERSION = 0;
 
   static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesCtrKey";
@@ -48,54 +51,14 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   // 2^-33 (i.e., less than one in eight billion).
   private static final int MIN_IV_SIZE_IN_BYTES = 12;
 
-  /** @param serializedKey serialized {@code AesCtrKey} proto */
   @Override
-  public AesCtrJceCipher getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      AesCtrKey keyProto = AesCtrKey.parseFrom(serializedKey);
-      return getPrimitive(keyProto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesCtrKey proto", e);
-    }
-  }
-
-  /** @param key {@code AesCtrKey} proto */
-  @Override
-  public AesCtrJceCipher getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof AesCtrKey)) {
-      throw new GeneralSecurityException("expected AesCtrKey proto");
-    }
-    AesCtrKey keyProto = (AesCtrKey) key;
-    validate(keyProto);
+  public IndCpaCipher getPrimitiveFromKey(AesCtrKey keyProto) throws GeneralSecurityException {
     return new AesCtrJceCipher(
         keyProto.getKeyValue().toByteArray(), keyProto.getParams().getIvSize());
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code AesCtrKeyFormat} proto
-   * @return new {@code AesCtrKey} proto
-   */
   @Override
-  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    try {
-      AesCtrKeyFormat format = AesCtrKeyFormat.parseFrom(serializedKeyFormat);
-      return newKey(format);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesCtrKeyFormat proto", e);
-    }
-  }
-
-  /**
-   * @param keyFormat {@code AesCtrKeyFormat} proto
-   * @return new {@code AesCtrKey} proto
-   */
-  @Override
-  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-    if (!(keyFormat instanceof AesCtrKeyFormat)) {
-      throw new GeneralSecurityException("expected AesCtrKeyFormat proto");
-    }
-    AesCtrKeyFormat format = (AesCtrKeyFormat) keyFormat;
-    validate(format);
+  public AesCtrKey newKeyFromFormat(AesCtrKeyFormat format) throws GeneralSecurityException {
     return AesCtrKey.newBuilder()
         .setParams(format.getParams())
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
@@ -103,42 +66,37 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
         .build();
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code AesCtrKeyFormat} proto
-   * @return {@code KeyData} proto with a new {@code AesCtrKey} proto
-   */
-  @Override
-  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    AesCtrKey key = (AesCtrKey) newKey(serializedKeyFormat);
-    return KeyData.newBuilder()
-        .setTypeUrl(TYPE_URL)
-        .setValue(key.toByteString())
-        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
-        .build();
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(TYPE_URL);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
-  }
-
   @Override
   public int getVersion() {
     return VERSION;
   }
 
-  private void validate(AesCtrKey key) throws GeneralSecurityException {
+  @Override
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.SYMMETRIC;
+  }
+
+  @Override
+  protected AesCtrKey parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesCtrKey.parseFrom(byteString);
+  }
+
+  @Override
+  protected AesCtrKeyFormat parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesCtrKeyFormat.parseFrom(byteString);
+  }
+
+  @Override
+  protected void validateKey(AesCtrKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     Validators.validateAesKeySize(key.getKeyValue().size());
     validate(key.getParams());
   }
 
-  private void validate(AesCtrKeyFormat format) throws GeneralSecurityException {
+  @Override
+  protected void validateKeyFormat(AesCtrKeyFormat format) throws GeneralSecurityException {
     Validators.validateAesKeySize(format.getKeySize());
     validate(format.getParams());
   }

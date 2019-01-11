@@ -1,5 +1,7 @@
 workspace(name="tink")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+
 #-----------------------------------------------------------------------------
 # wycheproof, for JSON test vectors
 #-----------------------------------------------------------------------------
@@ -15,9 +17,9 @@ http_archive(
 #-----------------------------------------------------------------------------
 http_archive(
     name = "com_google_absl",
-    strip_prefix = "abseil-cpp-c075ad321696fa5072e097f0a51e4fe76a6fe13e",
-    url = "https://github.com/abseil/abseil-cpp/archive/c075ad321696fa5072e097f0a51e4fe76a6fe13e.zip",
-    sha256 = "f95a2cccde80dd7d57c7bb433069e25544c4da9c1f01768d8bb721d2aaa7782a",
+    strip_prefix = "abseil-cpp-c476da141ca9cffc2137baf85872f0cae9ffa9ad",
+    url = "https://github.com/abseil/abseil-cpp/archive/c476da141ca9cffc2137baf85872f0cae9ffa9ad.zip",
+    sha256 = "84b4277a9b56f9a192952beca535313497826c6ff2e38b2cac7351a3ed2ae780",
 )
 
 http_archive(
@@ -35,44 +37,44 @@ http_archive(
     sha256 = "9431adb18d26a304d864c2b05f6e5a165e73108fc89a110f5b27d65d7e51680b",
 )
 
-new_http_archive(
+http_archive(
     name = "rapidjson",
     urls = [
         "https://github.com/Tencent/rapidjson/archive/v1.1.0.tar.gz",
     ],
     sha256 = "bf7ced29704a1e696fbccf2a2b4ea068e7774fa37f6d7dd4039d0787f8bed98e",
     strip_prefix = "rapidjson-1.1.0",
-    build_file = "third_party/rapidjson.BUILD.bazel",
+    build_file = "//:third_party/rapidjson.BUILD.bazel",
 )
 
-new_http_archive(
+http_archive(
     name = "aws_cpp_sdk",
     # Must be in sync with defines in third_party/aws_sdk_cpp.BUILD.bazel.
     urls = [
         "https://github.com/aws/aws-sdk-cpp/archive/1.4.80.tar.gz",
     ],
     strip_prefix = "aws-sdk-cpp-1.4.80/",
-    build_file = "third_party/aws_sdk_cpp.BUILD.bazel",
+    build_file = "//:third_party/aws_sdk_cpp.BUILD.bazel",
 )
 
-new_http_archive(
+http_archive(
     name = "curl",
     urls = [
         "https://mirror.bazel.build/curl.haxx.se/download/curl-7.49.1.tar.gz",
     ],
     sha256 = "ff3e80c1ca6a068428726cd7dd19037a47cc538ce58ef61c59587191039b2ca6",
     strip_prefix = "curl-7.49.1",
-    build_file = "third_party/curl.BUILD.bazel",
+    build_file = "//:third_party/curl.BUILD.bazel",
 )
 
-new_http_archive(
+http_archive(
     name = "zlib_archive",
     urls = [
         "https://mirror.bazel.build/zlib.net/zlib-1.2.11.tar.gz",
     ],
     sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
     strip_prefix = "zlib-1.2.11",
-    build_file = "third_party/zlib.BUILD.bazel",
+    build_file = "//:third_party/zlib.BUILD.bazel",
 )
 
 #-----------------------------------------------------------------------------
@@ -84,9 +86,9 @@ new_http_archive(
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
-    strip_prefix = "protobuf-3.6.0",
-    urls = ["https://github.com/google/protobuf/archive/v3.6.0.zip"],
-    sha256 = "e514c2e613dc47c062ea8df480efeec368ffbef98af0437ac00cdaadcb0d80d2",
+    strip_prefix = "protobuf-3.6.1.2",
+    urls = ["https://github.com/google/protobuf/archive/v3.6.1.2.zip"],
+    sha256 = "d6618d117698132dadf0f830b762315807dc424ba36ab9183f1f436008a2fdb6",
 )
 
 # java_lite_proto_library rules implicitly depend on
@@ -94,9 +96,9 @@ http_archive(
 # runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_javalite",
-    strip_prefix = "protobuf-javalite",
-    urls = ["https://github.com/google/protobuf/archive/javalite.zip"],
-    sha256 = "38458deb90db61c054b708e141544c32863ab14a8747710ba3ee290d9b6dab92",
+    strip_prefix = "protobuf-384989534b2246d413dbcd750744faab2607b516",
+    urls = ["https://github.com/google/protobuf/archive/384989534b2246d413dbcd750744faab2607b516.zip"],
+    sha256 = "79d102c61e2a479a0b7e5fc167bcfaa4832a0c6aad4a75fa7da0480564931bcc",
 )
 
 #-----------------------------------------------------------------------------
@@ -570,7 +572,9 @@ http_archive(
 http_file(
     name = "xctestrunner",
     executable = 1,
-    url = "https://github.com/google/xctestrunner/releases/download/0.2.1/ios_test_runner.par",
+    urls = [
+        "https://github.com/google/xctestrunner/releases/download/0.2.1/ios_test_runner.par"
+    ],
     sha256 = "5bfbd45c5ac89305e8bf3296999d490611b88d4d828b2a39ef6037027411aa94",
 )
 
@@ -579,8 +583,8 @@ http_file(
 #-----------------------------------------------------------------------------
 http_archive(
     name = "io_bazel_rules_go",
-    urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.15.3/rules_go-0.15.3.tar.gz"],
-    sha256 = "97cf62bdef33519412167fd1e4b0810a318a7c234f5f8dc4f53e2da86241c492",
+    url = "https://github.com/bazelbuild/rules_go/releases/download/0.16.2/rules_go-0.16.2.tar.gz",
+    sha256 = "f87fa87475ea107b3c69196f39c82b7bbf58fe27c62a338684c20ca17d1d8613",
 )
 http_archive(
     name = "bazel_gazelle",
@@ -590,7 +594,7 @@ http_archive(
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
 go_rules_dependencies()
-go_register_toolchains()
+go_register_toolchains(nogo="@//go:tink_nogo")
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 gazelle_dependencies()

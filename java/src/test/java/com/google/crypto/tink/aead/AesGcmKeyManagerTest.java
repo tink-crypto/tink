@@ -317,7 +317,7 @@ public class AesGcmKeyManagerTest {
                     42,
                     KeyStatusType.ENABLED,
                     OutputPrefixType.RAW)));
-    return AeadFactory.getPrimitive(keysetHandle);
+    return keysetHandle.getPrimitive(Aead.class);
   }
 
   @Test
@@ -331,7 +331,7 @@ public class AesGcmKeyManagerTest {
                     42,
                     KeyStatusType.ENABLED,
                     OutputPrefixType.TINK)));
-    TestUtil.runBasicAeadFactoryTests(keysetHandle);
+    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 
   @Test
@@ -345,7 +345,7 @@ public class AesGcmKeyManagerTest {
                     42,
                     KeyStatusType.ENABLED,
                     OutputPrefixType.TINK)));
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
     byte[] associatedData = "associatedData".getBytes("UTF-8");
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);

@@ -78,6 +78,14 @@ typedef NS_ENUM(NSInteger, TINKAeadKeyTemplates) {
    *   OutputPrefixType: TINK
    */
   TINKAes256Eax = 6,
+
+  /**
+   * XChaCha20Poly1305Key with the following parameters:
+   *    XChacha20 key size: 32 bytes
+   *    IV size: 24 bytes
+   *    OutputPrefixType: TINK
+   */
+  TINKXChaCha20Poly1305 = 7,
 };
 
 NS_ASSUME_NONNULL_BEGIN

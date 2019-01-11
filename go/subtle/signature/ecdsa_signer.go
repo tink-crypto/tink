@@ -17,6 +17,7 @@ package signature
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"hash"
 	"math/big"
@@ -54,11 +55,11 @@ func NewECDSASignerFromPrivateKey(hashAlg string,
 	encoding string,
 	privateKey *ecdsa.PrivateKey) (*ECDSASigner, error) {
 	if privateKey.Curve == nil {
-		return nil, fmt.Errorf("ecdsa_sign: invalid curve")
+		return nil, errors.New("ecdsa_signer: privateKey.Curve can't be nil")
 	}
 	curve := subtle.ConvertCurveName(privateKey.Curve.Params().Name)
 	if err := ValidateECDSAParams(hashAlg, curve, encoding); err != nil {
-		return nil, fmt.Errorf("ecdsa_sign: %s", err)
+		return nil, fmt.Errorf("ecdsa_signer: %s", err)
 	}
 	hashFunc := subtle.GetHashFunc(hashAlg)
 	return &ECDSASigner{
@@ -76,13 +77,13 @@ func (e *ECDSASigner) Sign(data []byte) ([]byte, error) {
 	}
 	r, s, err := ecdsa.Sign(rand.Reader, e.privateKey, hashed)
 	if err != nil {
-		return nil, fmt.Errorf("ecdsa_sign: signing failed: %s", err)
+		return nil, fmt.Errorf("ecdsa_signer: signing failed: %s", err)
 	}
 	// format the signature
 	sig := NewECDSASignature(r, s)
 	ret, err := sig.EncodeECDSASignature(e.encoding)
 	if err != nil {
-		return nil, fmt.Errorf("ecdsa_sign: signing failed: %s", err)
+		return nil, fmt.Errorf("ecdsa_signer: signing failed: %s", err)
 	}
 	return ret, nil
 }

@@ -18,7 +18,6 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import java.security.GeneralSecurityException;
 
 /**
@@ -54,7 +53,7 @@ public class PublicKeyVerifyCli {
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    PublicKeyVerify pkVerify = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
+    PublicKeyVerify pkVerify = keysetHandle.getPrimitive(PublicKeyVerify.class);
 
     // Read the signature.
     byte[] signature = CliUtil.read(signatureFilename);

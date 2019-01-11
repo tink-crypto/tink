@@ -95,7 +95,8 @@ util::Status RsaSsaPssVerifyBoringSsl::Verify(absl::string_view signature,
                salt_length_, reinterpret_cast<const uint8_t*>(signature.data()),
                signature.length())) {
     // Signature is invalid.
-    return util::Status(util::error::UNKNOWN, "Signature is not valid.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Signature is not valid.");
   }
   return util::Status::OK;
 }

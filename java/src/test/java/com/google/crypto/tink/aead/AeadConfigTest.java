@@ -196,7 +196,7 @@ public class AeadConfigTest {
   @Test
   public void testConfigContents_LATEST() throws Exception {
     RegistryConfig config = AeadConfig.LATEST;
-    assertEquals(7, config.getEntryCount());
+    assertEquals(8, config.getEntryCount());
     assertEquals("TINK_AEAD", config.getConfigName());
 
     TestUtil.verifyConfigEntry(
@@ -246,6 +246,13 @@ public class AeadConfigTest {
         "TinkAead",
         "Aead",
         "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(7),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
         true,
         0);
   }

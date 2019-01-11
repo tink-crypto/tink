@@ -17,22 +17,27 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.Empty;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.ChaCha20Poly1305;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
  * This instance of {@code KeyManager} generates new {@code ChaCha20Poly1305} keys and produces new
  * instances of {@code ChaCha20Poly1305}.
  */
-class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
+class ChaCha20Poly1305KeyManager
+    extends KeyManagerBase<Aead, ChaCha20Poly1305Key, Empty> {
+  public ChaCha20Poly1305KeyManager() {
+    super(Aead.class, ChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
+  }
+
   /** Type url that this manager supports */
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key";
@@ -43,53 +48,16 @@ class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
 
   @Override
-  public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
-    try {
-      ChaCha20Poly1305Key keyProto = ChaCha20Poly1305Key.parseFrom(serialized);
-      return getPrimitive(keyProto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid ChaCha20Poly1305 key", e);
-    }
-  }
-
-  @Override
-  public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof ChaCha20Poly1305Key)) {
-      throw new GeneralSecurityException("expected ChaCha20Poly1305Key proto");
-    }
-    ChaCha20Poly1305Key keyProto = (ChaCha20Poly1305Key) key;
-    validate(keyProto);
+  public Aead getPrimitiveFromKey(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
     return new ChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
   }
 
   @Override
-  public MessageLite newKey(ByteString unused) throws GeneralSecurityException {
-    return newKey();
-  }
-
-  @Override
-  public MessageLite newKey(MessageLite unused) throws GeneralSecurityException {
-    return newKey();
-  }
-
-  @Override
-  public KeyData newKeyData(ByteString unused) throws GeneralSecurityException {
-    ChaCha20Poly1305Key key = newKey();
-    return KeyData.newBuilder()
-        .setTypeUrl(TYPE_URL)
-        .setValue(key.toByteString())
-        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
+  protected ChaCha20Poly1305Key newKeyFromFormat(Empty unused) throws GeneralSecurityException {
+    return ChaCha20Poly1305Key.newBuilder()
+        .setVersion(VERSION)
+        .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
         .build();
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
   }
 
   @Override
@@ -97,17 +65,30 @@ class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
     return VERSION;
   }
 
-  private ChaCha20Poly1305Key newKey() throws GeneralSecurityException {
-    return ChaCha20Poly1305Key.newBuilder()
-        .setVersion(VERSION)
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
-        .build();
+  @Override
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.SYMMETRIC;
   }
 
-  private void validate(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
+  @Override
+  protected ChaCha20Poly1305Key parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return ChaCha20Poly1305Key.parseFrom(byteString);
+  }
+
+  @Override
+  protected Empty parseKeyFormatProto(ByteString byteString) throws InvalidProtocolBufferException {
+    return Empty.parseFrom(byteString);
+  }
+
+  @Override
+  protected void validateKey(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("invalid ChaCha20Poly1305Key: incorrect key length");
     }
   }
+
+  @Override
+  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

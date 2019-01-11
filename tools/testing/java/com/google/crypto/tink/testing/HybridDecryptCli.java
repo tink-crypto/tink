@@ -18,7 +18,6 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 
 /**
  * A command-line utility for testing HybridDecrypt-primitives.
@@ -53,7 +52,7 @@ public class HybridDecryptCli {
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandle);
+    HybridDecrypt hybridDecrypt = keysetHandle.getPrimitive(HybridDecrypt.class);
 
     // Read the ciphertext.
     byte[] ciphertext = CliUtil.read(ciphertextFilename);

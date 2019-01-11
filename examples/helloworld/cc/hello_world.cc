@@ -32,7 +32,6 @@
 #include "tink/json_keyset_reader.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
-#include "tink/aead/aead_factory.h"
 #include "tink/config/tink_config.h"
 
 namespace {
@@ -143,8 +142,7 @@ int main(int argc, char** argv) {
   auto keyset_handle = ReadKeyset(keyset_filename);
 
   // Get the primitive.
-  auto primitive_result =
-      crypto::tink::AeadFactory::GetPrimitive(*keyset_handle);
+  auto primitive_result = keyset_handle->GetPrimitive<crypto::tink::Aead>();
   if (!primitive_result.ok()) {
     std::clog << "Getting AEAD-primitive from the factory failed: "
               << primitive_result.status().error_message() << std::endl;

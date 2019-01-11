@@ -182,7 +182,7 @@ public class MacFactoryTest {
       MacFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "invalid MAC key material");
+      assertExceptionContains(e, "not match requested primitive type com.google.crypto.tink.Mac");
     }
 
     // invalid as the primary key.
@@ -191,7 +191,7 @@ public class MacFactoryTest {
       MacFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "invalid MAC key material");
+      assertExceptionContains(e, "not match requested primitive type com.google.crypto.tink.Mac");
     }
   }
 }

@@ -216,7 +216,8 @@ public class DeterministicAeadFactoryTest {
       DeterministicAeadFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "invalid Deterministic AEAD key material");
+      assertExceptionContains(
+          e, "not match requested primitive type com.google.crypto.tink.DeterministicAead");
     }
 
     // invalid as the primary key.
@@ -225,7 +226,8 @@ public class DeterministicAeadFactoryTest {
       DeterministicAeadFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "invalid Deterministic AEAD key material");
+      assertExceptionContains(
+          e, "not match requested primitive type com.google.crypto.tink.DeterministicAead");
     }
   }
 }

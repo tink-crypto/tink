@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -48,27 +49,44 @@ public class RsaSsaPkcs1SignKeyManagerTest {
 
   final byte[] msg = Random.randBytes(20);
 
+  private void checkKey(RsaSsaPkcs1PrivateKey privateKey) throws Exception {
+    BigInteger p = new BigInteger(1, privateKey.getP().toByteArray());
+    BigInteger q = new BigInteger(1, privateKey.getQ().toByteArray());
+    BigInteger n = new BigInteger(1, privateKey.getPublicKey().getN().toByteArray());
+    BigInteger d = new BigInteger(1, privateKey.getD().toByteArray());
+    BigInteger dp = new BigInteger(1, privateKey.getDp().toByteArray());
+    BigInteger dq = new BigInteger(1, privateKey.getDq().toByteArray());
+    BigInteger crt = new BigInteger(1, privateKey.getCrt().toByteArray());
+    assertEquals(n, p.multiply(q));
+    assertEquals(dp, d.mod(p.subtract(BigInteger.ONE)));
+    assertEquals(dq, d.mod(q.subtract(BigInteger.ONE)));
+    assertEquals(crt, q.modInverse(p));
+  }
+
   private void testNewKeyWithVerifier(KeyTemplate keyTemplate) throws Exception {
     // Call newKey multiple times and make sure that it generates different keys.
-    int numTests = 9;
+    int numTests = 3;
     RsaSsaPkcs1PrivateKey[] privKeys = new RsaSsaPkcs1PrivateKey[numTests];
     RsaSsaPkcs1SignKeyManager signManager = new RsaSsaPkcs1SignKeyManager();
     Set<String> keys = new TreeSet<String>();
-    for (int j = 0; j < numTests / 3; j++) {
-      privKeys[3 * j] =
-          (RsaSsaPkcs1PrivateKey)
-              signManager.newKey(RsaSsaPkcs1KeyFormat.parseFrom(keyTemplate.getValue()));
-      keys.add(TestUtil.hexEncode(privKeys[3 * j].toByteArray()));
 
-      privKeys[3 * j + 1] = (RsaSsaPkcs1PrivateKey) signManager.newKey(keyTemplate.getValue());
-      keys.add(TestUtil.hexEncode(privKeys[3 * j + 1].toByteArray()));
+    privKeys[0] =
+        (RsaSsaPkcs1PrivateKey)
+            signManager.newKey(RsaSsaPkcs1KeyFormat.parseFrom(keyTemplate.getValue()));
+    keys.add(TestUtil.hexEncode(privKeys[0].toByteArray()));
 
-      privKeys[3 * j + 2] =
-          RsaSsaPkcs1PrivateKey.parseFrom(
-              signManager.newKeyData(keyTemplate.getValue()).getValue());
-      keys.add(TestUtil.hexEncode(privKeys[3 * j + 2].toByteArray()));
-    }
+    privKeys[1] = (RsaSsaPkcs1PrivateKey) signManager.newKey(keyTemplate.getValue());
+    keys.add(TestUtil.hexEncode(privKeys[1].toByteArray()));
+
+    privKeys[2] =
+        RsaSsaPkcs1PrivateKey.parseFrom(signManager.newKeyData(keyTemplate.getValue()).getValue());
+    keys.add(TestUtil.hexEncode(privKeys[2].toByteArray()));
     assertEquals(numTests, keys.size());
+
+    // Check key.
+    for (int i = 0; i < numTests; i++) {
+      checkKey(privKeys[i]);
+    }
 
     // Test whether signer works correctly with the corresponding verifier.
     RsaSsaPkcs1VerifyKeyManager verifyManager = new RsaSsaPkcs1VerifyKeyManager();
@@ -97,8 +115,12 @@ public class RsaSsaPkcs1SignKeyManagerTest {
 
   @Test
   public void testNewKeyWithVerifier() throws Exception {
-    testNewKeyWithVerifier(SignatureKeyTemplates.RSA_SSA_PKCS1_2048_SHA256_F4);
-    testNewKeyWithVerifier(SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA512_F4);
+    if (TestUtil.isTsan()) {
+      // This test times out when running under thread sanitizer, so we just skip.
+      return;
+    }
+    testNewKeyWithVerifier(SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA256_F4);
+    testNewKeyWithVerifier(SignatureKeyTemplates.RSA_SSA_PKCS1_4096_SHA512_F4);
   }
 
   @Test
@@ -127,8 +149,12 @@ public class RsaSsaPkcs1SignKeyManagerTest {
   /** Tests that a public key is extracted properly from a private key. */
   @Test
   public void testGetPublicKeyData() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test takes over a minute in successful tsan runs and sometimes times out.
+      return;
+    }
     KeysetHandle privateHandle =
-        KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA512_F4);
+        KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA256_F4);
     KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
     RsaSsaPkcs1SignKeyManager privateManager = new RsaSsaPkcs1SignKeyManager();
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());

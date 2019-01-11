@@ -57,14 +57,19 @@ func ECDSAP521KeyTemplate() *tinkpb.KeyTemplate {
 
 // createECDSAKeyTemplate creates a KeyTemplate containing a EcdasKeyFormat
 // with the given parameters.
-func createECDSAKeyTemplate(hashType commonpb.HashType,
-	curve commonpb.EllipticCurveType,
-	encoding ecdsapb.EcdsaSignatureEncoding) *tinkpb.KeyTemplate {
+func createECDSAKeyTemplate(hashType commonpb.HashType, curve commonpb.EllipticCurveType, encoding ecdsapb.EcdsaSignatureEncoding) *tinkpb.KeyTemplate {
 	params := NewECDSAParams(hashType, curve, encoding)
 	format := NewECDSAKeyFormat(params)
 	serializedFormat, _ := proto.Marshal(format)
 	return &tinkpb.KeyTemplate{
 		TypeUrl: ECDSASignerTypeURL,
 		Value:   serializedFormat,
+	}
+}
+
+// ED25519KeyTemplate creates a KeyTemplate with the ED25519 configuration.
+func ED25519KeyTemplate() *tinkpb.KeyTemplate {
+	return &tinkpb.KeyTemplate{
+		TypeUrl: ED25519SignerTypeURL,
 	}
 }

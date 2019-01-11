@@ -18,6 +18,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <cstdlib>
 
 #include "absl/memory/memory.h"
 #include "tink/keyset_handle.h"
@@ -86,21 +87,47 @@ std::string HexEncode(absl::string_view bytes) {
   return res;
 }
 
-void AddKey(
-    const std::string& key_type,
+#if defined(PLATFORM_GOOGLE)
+std::string TmpDir() { return FLAGS_test_tmpdir; }
+#else
+std::string TmpDir() {
+  // 'bazel test' sets TEST_TMPDIR
+  const char* env = getenv("TEST_TMPDIR");
+  if (env && env[0] != '\0') {
+    return env;
+  }
+  env = getenv("TMPDIR");
+  if (env && env[0] != '\0') {
+    return env;
+  }
+  return "/tmp";
+}
+#endif
+
+void AddKeyData(
+    const google::crypto::tink::KeyData& key_data,
     uint32_t key_id,
-    const portable_proto::MessageLite& new_key,
     google::crypto::tink::OutputPrefixType output_prefix,
     google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset) {
   Keyset::Key* key = keyset->add_key();
   key->set_output_prefix_type(output_prefix);
   key->set_key_id(key_id);
   key->set_status(key_status);
-  key->mutable_key_data()->set_type_url(key_type);
-  key->mutable_key_data()->set_key_material_type(material_type);
-  key->mutable_key_data()->set_value(new_key.SerializeAsString());
+  *key->mutable_key_data() = key_data;
+}
+
+void AddKey(const std::string& key_type, uint32_t key_id,
+            const portable_proto::MessageLite& new_key,
+            google::crypto::tink::OutputPrefixType output_prefix,
+            google::crypto::tink::KeyStatusType key_status,
+            google::crypto::tink::KeyData::KeyMaterialType material_type,
+            google::crypto::tink::Keyset* keyset) {
+  google::crypto::tink::KeyData key_data;
+  key_data.set_type_url(key_type);
+  key_data.set_key_material_type(material_type);
+  key_data.set_value(new_key.SerializeAsString());
+  AddKeyData(key_data, key_id, output_prefix, key_status, keyset);
 }
 
 void AddTinkKey(

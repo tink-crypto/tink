@@ -74,6 +74,66 @@ cc_library(
 )
 
 cc_library(
+    name = "file_input_stream",
+    srcs = ["file_input_stream.cc"],
+    hdrs = ["file_input_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":errors",
+        ":status",
+        ":statusor",
+        "//cc:input_stream",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "file_output_stream",
+    srcs = ["file_output_stream.cc"],
+    hdrs = ["file_output_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":errors",
+        ":status",
+        ":statusor",
+        "//cc:output_stream",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "istream_input_stream",
+    srcs = ["istream_input_stream.cc"],
+    hdrs = ["istream_input_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":errors",
+        ":status",
+        ":statusor",
+        "//cc:input_stream",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "ostream_output_stream",
+    srcs = ["ostream_output_stream.cc"],
+    hdrs = ["ostream_output_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":errors",
+        ":status",
+        ":statusor",
+        "//cc:output_stream",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
     name = "test_util",
     testonly = 1,
     srcs = ["test_util.cc"],
@@ -145,6 +205,19 @@ cc_library(
 # tests
 
 cc_test(
+    name = "errors_test",
+    size = "small",
+    srcs = ["errors_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":errors",
+        ":status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "enums_test",
     size = "small",
     srcs = ["enums_test.cc"],
@@ -159,14 +232,65 @@ cc_test(
 )
 
 cc_test(
-    name = "errors_test",
-    size = "small",
-    srcs = ["errors_test.cc"],
+    name = "file_input_stream_test",
+    size = "medium",
+    srcs = ["file_input_stream_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     linkopts = ["-lpthread"],
     deps = [
-        ":errors",
-        ":status",
+        ":file_input_stream",
+        ":test_util",
+        "//cc/subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "file_output_stream_test",
+    size = "medium",
+    srcs = ["file_output_stream_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":file_output_stream",
+        ":test_util",
+        "//cc/subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "istream_input_stream_test",
+    size = "medium",
+    srcs = ["istream_input_stream_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":istream_input_stream",
+        ":test_util",
+        "//cc/subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ostream_output_stream_test",
+    size = "medium",
+    srcs = ["ostream_output_stream_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":ostream_output_stream",
+        ":test_util",
+        "//cc/subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

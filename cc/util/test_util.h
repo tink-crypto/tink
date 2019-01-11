@@ -59,6 +59,19 @@ std::string HexDecodeOrDie(absl::string_view hex);
 // Converts a std::string of bytes into a hexadecimal std::string.
 std::string HexEncode(absl::string_view bytes);
 
+// Returns a temporary directory suitable for temporary testing files.
+std::string TmpDir();
+
+// Adds the given 'keyData' with specified status, key_id, and
+// output_prefix_type to the keyset.
+void AddKeyData(
+    const google::crypto::tink::KeyData& key_data,
+    uint32_t key_id,
+    google::crypto::tink::OutputPrefixType output_prefix,
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::Keyset* keyset);
+
+
 // Adds the given 'key' with specified parameters and output_prefix_type=TINK
 // to the specified 'keyset'.
 void AddTinkKey(
@@ -124,7 +137,7 @@ google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(
 // as a parameter of the constructor.
 class DummyAead : public Aead {
  public:
-  DummyAead(absl::string_view aead_name) : aead_name_(aead_name) {}
+  explicit DummyAead(absl::string_view aead_name) : aead_name_(aead_name) {}
 
   // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
   // with the name of this DummyAead.
@@ -159,7 +172,8 @@ class DummyAead : public Aead {
 // The implementation is the same as DummyAead.
 class DummyDeterministicAead : public DeterministicAead {
  public:
-  DummyDeterministicAead(absl::string_view daead_name) : aead_(daead_name) {}
+  explicit DummyDeterministicAead(absl::string_view daead_name)
+      : aead_(daead_name) {}
 
   crypto::tink::util::StatusOr<std::string> EncryptDeterministically(
       absl::string_view plaintext,
@@ -182,8 +196,8 @@ class DummyDeterministicAead : public DeterministicAead {
 // as a parameter of the constructor.
 class DummyHybridEncrypt : public HybridEncrypt {
  public:
-  DummyHybridEncrypt(absl::string_view hybrid_name)
-      : dummy_aead_(absl::StrCat("DummyHybrid:", hybrid_name))  {}
+  explicit DummyHybridEncrypt(absl::string_view hybrid_name)
+      : dummy_aead_(absl::StrCat("DummyHybrid:", hybrid_name)) {}
 
   // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
   // with the name of this DummyHybridEncrypt.
@@ -202,8 +216,8 @@ class DummyHybridEncrypt : public HybridEncrypt {
 // as a parameter of the constructor.
 class DummyHybridDecrypt : public HybridDecrypt {
  public:
-  DummyHybridDecrypt(absl::string_view hybrid_name)
-      : dummy_aead_(absl::StrCat("DummyHybrid:", hybrid_name))  {}
+  explicit DummyHybridDecrypt(absl::string_view hybrid_name)
+      : dummy_aead_(absl::StrCat("DummyHybrid:", hybrid_name)) {}
 
   // Decrypts a dummy ciphertext, which should be a concatenation
   // of a plaintext with the name of this DummyHybridDecrypt.
@@ -222,7 +236,7 @@ class DummyHybridDecrypt : public HybridDecrypt {
 // as a parameter of the constructor.
 class DummyPublicKeySign : public PublicKeySign {
  public:
-  DummyPublicKeySign(absl::string_view signature_name)
+  explicit DummyPublicKeySign(absl::string_view signature_name)
       : dummy_aead_(absl::StrCat("DummySign:", signature_name)) {}
 
   // Computes a dummy signature, which is a concatenation of 'data'
@@ -241,7 +255,7 @@ class DummyPublicKeySign : public PublicKeySign {
 // as a parameter of the constructor.
 class DummyPublicKeyVerify : public PublicKeyVerify {
  public:
-  DummyPublicKeyVerify(absl::string_view signature_name)
+  explicit DummyPublicKeyVerify(absl::string_view signature_name)
       : dummy_aead_(absl::StrCat("DummySign:", signature_name)) {}
 
   // Verifies a dummy signature, should be a concatenation of the name
@@ -260,7 +274,7 @@ class DummyPublicKeyVerify : public PublicKeyVerify {
 // as a parameter of the constructor.
 class DummyMac : public Mac {
  public:
-  DummyMac(const std::string& mac_name)
+  explicit DummyMac(const std::string& mac_name)
       : dummy_aead_(absl::StrCat("DummyMac:", mac_name)) {}
 
   // Computes a dummy MAC, which is concatenation of provided 'data'

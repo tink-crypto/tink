@@ -25,7 +25,7 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-var errInvalidSignature = errors.New("ecdsa_verify: invalid signature")
+var errInvalidECDSASignature = errors.New("ecdsa_verifier: invalid signature")
 
 // ECDSAVerifier is an implementation of Verifier for ECDSA.
 // At the moment, the implementation only accepts signatures with strict DER encoding.
@@ -51,11 +51,11 @@ func NewECDSAVerifier(hashAlg string, curve string, encoding string, x []byte, y
 // NewECDSAVerifierFromPublicKey creates a new instance of ECDSAVerifier.
 func NewECDSAVerifierFromPublicKey(hashAlg string, encoding string, publicKey *ecdsa.PublicKey) (*ECDSAVerifier, error) {
 	if publicKey.Curve == nil {
-		return nil, fmt.Errorf("ecdsa_verify: invalid curve")
+		return nil, errors.New("ecdsa_verifier: invalid curve")
 	}
 	curve := subtle.ConvertCurveName(publicKey.Curve.Params().Name)
 	if err := ValidateECDSAParams(hashAlg, curve, encoding); err != nil {
-		return nil, fmt.Errorf("ecdsa_verify: %s", err)
+		return nil, fmt.Errorf("ecdsa_verifier: %s", err)
 	}
 	hashFunc := subtle.GetHashFunc(hashAlg)
 	return &ECDSAVerifier{
@@ -70,7 +70,7 @@ func NewECDSAVerifierFromPublicKey(hashAlg string, encoding string, publicKey *e
 func (e *ECDSAVerifier) Verify(signatureBytes, data []byte) error {
 	signature, err := DecodeECDSASignature(signatureBytes, e.encoding)
 	if err != nil {
-		return errInvalidSignature
+		return fmt.Errorf("ecdsa_verifier: %s", err)
 	}
 	hashed, err := subtle.ComputeHash(e.hashFunc, data)
 	if err != nil {
@@ -78,7 +78,7 @@ func (e *ECDSAVerifier) Verify(signatureBytes, data []byte) error {
 	}
 	valid := ecdsa.Verify(e.publicKey, hashed, signature.R, signature.S)
 	if !valid {
-		return errInvalidSignature
+		return errInvalidECDSASignature
 	}
 	return nil
 }

@@ -20,7 +20,7 @@
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
-#include "tink/aead/aead_set_wrapper.h"
+#include "tink/aead/aead_wrapper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -31,21 +31,25 @@ namespace tink {
 // static
 util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
     const KeysetHandle& keyset_handle) {
-  return GetPrimitive(keyset_handle, nullptr);
+  util::Status status =
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
+  if (!status.ok()) {
+    return status;
+  }
+  return keyset_handle.GetPrimitive<Aead>();
 }
 
 // static
 util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
     const KeysetHandle& keyset_handle,
     const KeyManager<Aead>* custom_key_manager) {
-  auto primitives_result = Registry::GetPrimitives<Aead>(
-      keyset_handle, custom_key_manager);
-  if (primitives_result.ok()) {
-    return AeadSetWrapper::NewAead(std::move(primitives_result.ValueOrDie()));
+  util::Status status =
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
+  if (!status.ok()) {
+    return status;
   }
-  return primitives_result.status();
+  return keyset_handle.GetPrimitive<Aead>(custom_key_manager);
 }
-
 
 }  // namespace tink
 }  // namespace crypto

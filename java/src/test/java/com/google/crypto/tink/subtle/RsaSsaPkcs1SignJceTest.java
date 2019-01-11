@@ -75,6 +75,10 @@ public class RsaSsaPkcs1SignJceTest {
 
   @Test
   public void testSignWithTheSameMessage() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out when running under thread sanitizer, so we just skip.
+      return;
+    }
     int keySize = 4096;
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
     keyGen.initialize(keySize);

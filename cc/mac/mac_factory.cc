@@ -18,7 +18,7 @@
 
 #include "tink/mac.h"
 #include "tink/registry.h"
-#include "tink/mac/mac_set_wrapper.h"
+#include "tink/mac/mac_wrapper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -36,12 +36,16 @@ util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
 util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
     const KeysetHandle& keyset_handle,
     const KeyManager<Mac>* custom_key_manager) {
-  auto primitives_result = Registry::GetPrimitives<Mac>(
-      keyset_handle, custom_key_manager);
-  if (primitives_result.ok()) {
-    return MacSetWrapper::NewMac(std::move(primitives_result.ValueOrDie()));
+  util::Status status =
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<MacWrapper>());
+  if (!status.ok()) {
+    return status;
   }
-  return primitives_result.status();
+  auto primitives_result = keyset_handle.GetPrimitives<Mac>(custom_key_manager);
+  if (!primitives_result.ok()) {
+    return primitives_result.status();
+  }
+  return Registry::Wrap<Mac>(std::move(primitives_result.ValueOrDie()));
 }
 
 }  // namespace tink

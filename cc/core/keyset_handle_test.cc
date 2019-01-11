@@ -17,17 +17,20 @@
 #include "tink/keyset_handle.h"
 
 #include "gtest/gtest.h"
+#include "tink/aead/aead_key_templates.h"
+#include "tink/aead/aead_wrapper.h"
+#include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead_key_templates.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/config/tink_config.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
-#include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/config/tink_config.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/util/keyset_util.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
@@ -35,11 +38,13 @@ namespace crypto {
 namespace tink {
 
 using crypto::tink::KeysetUtil;
+using crypto::tink::test::AddKeyData;
 using crypto::tink::test::AddLegacyKey;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
-
+using crypto::tink::test::IsOk;
+using crypto::tink::test::StatusIs;
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
@@ -376,12 +381,213 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
   }
 }
 
+TEST_F(KeysetHandleTest, GetPrimitives) {
+  Keyset keyset;
+  KeyData key_data_0 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes128Gcm()).ValueOrDie();
+  AddKeyData(key_data_0, /*key_id=*/0,
+             google::crypto::tink::OutputPrefixType::TINK,
+             KeyStatusType::ENABLED, &keyset);
+  KeyData key_data_1 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).ValueOrDie();
+  AddKeyData(key_data_1, /*key_id=*/1,
+             google::crypto::tink::OutputPrefixType::TINK,
+             KeyStatusType::ENABLED, &keyset);
+  KeyData key_data_2 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).ValueOrDie();
+  AddKeyData(key_data_2, /*key_id=*/2,
+             google::crypto::tink::OutputPrefixType::RAW,
+             KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(1);
+  std::unique_ptr<KeysetHandle> keyset_handle =
+      KeysetUtil::GetKeysetHandle(keyset);
+
+  // Check that encryption with the primary can be decrypted with key_data_1.
+  auto result = keyset_handle->GetPrimitives<Aead>(nullptr);
+  ASSERT_TRUE(result.ok()) << result.status();
+  auto aead_set = std::move(result.ValueOrDie());
+
+  std::string plaintext = "plaintext";
+  std::string aad = "aad";
+  std::string encryption = aead_set->get_primary()
+                          ->get_primitive()
+                          .Encrypt(plaintext, aad)
+                          .ValueOrDie();
+  EXPECT_EQ(Registry::GetPrimitive<Aead>(key_data_1)
+                .ValueOrDie()
+                ->Decrypt(encryption, aad)
+                .ValueOrDie(),
+            plaintext);
+
+  // Check that the primitive corresponding to key_data_0 is in the keyset.
+  auto& tink =
+      *(aead_set
+            ->get_primitives(
+                CryptoFormat::get_output_prefix(keyset.key(0)).ValueOrDie())
+            .ValueOrDie());
+  ASSERT_EQ(1, tink.size());
+  encryption = tink[0]->get_primitive().Encrypt(plaintext, aad).ValueOrDie();
+  EXPECT_EQ(Registry::GetPrimitive<Aead>(key_data_0)
+                .ValueOrDie()
+                ->Decrypt(encryption, aad)
+                .ValueOrDie(),
+            plaintext);
+}
+
+
+TEST_F(KeysetHandleTest, GetPrimitive) {
+  Keyset keyset;
+  KeyData key_data_0 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes128Gcm()).ValueOrDie();
+  AddKeyData(key_data_0, /*key_id=*/0,
+             google::crypto::tink::OutputPrefixType::TINK,
+             KeyStatusType::ENABLED, &keyset);
+  KeyData key_data_1 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).ValueOrDie();
+  AddKeyData(key_data_1, /*key_id=*/1,
+             google::crypto::tink::OutputPrefixType::TINK,
+             KeyStatusType::ENABLED, &keyset);
+  KeyData key_data_2 =
+      *Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).ValueOrDie();
+  AddKeyData(key_data_2, /*key_id=*/2,
+             google::crypto::tink::OutputPrefixType::RAW,
+             KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(1);
+  std::unique_ptr<KeysetHandle> keyset_handle =
+      KeysetUtil::GetKeysetHandle(keyset);
+
+  // Check that encryption with the primary can be decrypted with key_data_1.
+  auto aead_result = keyset_handle->GetPrimitive<Aead>();
+  ASSERT_TRUE(aead_result.ok()) << aead_result.status();
+  std::unique_ptr<Aead> aead = std::move(aead_result.ValueOrDie());
+
+  std::string plaintext = "plaintext";
+  std::string aad = "aad";
+  std::string encryption = aead->Encrypt(plaintext, aad).ValueOrDie();
+  EXPECT_EQ(aead->Decrypt(encryption, aad).ValueOrDie(), plaintext);
+
+  std::unique_ptr<Aead> raw_aead =
+      Registry::GetPrimitive<Aead>(key_data_2).ValueOrDie();
+  EXPECT_FALSE(raw_aead->Decrypt(encryption, aad).ok());
+
+  std::string raw_encryption = raw_aead->Encrypt(plaintext, aad).ValueOrDie();
+  EXPECT_EQ(aead->Decrypt(raw_encryption, aad).ValueOrDie(), plaintext);
+}
+
+// Tests that GetPrimitive(nullptr) fails with a non-ok status.
+TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
+  Keyset keyset;
+  AddKeyData(*Registry::NewKeyData(AeadKeyTemplates::Aes128Gcm()).ValueOrDie(),
+             /*key_id=*/0, google::crypto::tink::OutputPrefixType::TINK,
+             KeyStatusType::ENABLED, &keyset);
+  keyset.set_primary_key_id(0);
+  std::unique_ptr<KeysetHandle> keyset_handle =
+      KeysetUtil::GetKeysetHandle(keyset);
+  ASSERT_THAT(keyset_handle->GetPrimitive<Aead>(nullptr).status(),
+              test::StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+// Test creating with custom key manager. For this, we reset the registry before
+// asking for the primitive.
+TEST_F(KeysetHandleTest, GetPrimitiveCustomKeyManager) {
+  auto handle_result = KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
+  ASSERT_TRUE(handle_result.ok()) << handle_result.status();
+  std::unique_ptr<KeysetHandle> handle = std::move(handle_result.ValueOrDie());
+  Registry::Reset();
+  ASSERT_TRUE(
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>())
+          .ok());
+  // Without custom key manager it now fails.
+  ASSERT_FALSE(handle->GetPrimitive<Aead>().ok());
+  AesGcmKeyManager key_manager;
+  // With custom key manager it works ok.
+  ASSERT_TRUE(handle->GetPrimitive<Aead>(&key_manager).ok());
+}
+
 // Compile time check: ensures that the KeysetHandle can be copied.
 TEST_F(KeysetHandleTest, Copiable) {
   auto handle_result = KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Eax());
   ASSERT_TRUE(handle_result.ok()) << handle_result.status();
   std::unique_ptr<KeysetHandle> handle = std::move(handle_result.ValueOrDie());
   KeysetHandle handle_copy = *handle;
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecret) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::REMOTE, &keyset);
+  keyset.set_primary_key_id(42);
+  auto handle_result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  ASSERT_THAT(handle_result.status(), IsOk());
+  std::unique_ptr<KeysetHandle>& keyset_handle = handle_result.ValueOrDie();
+
+  const Keyset& result = CleartextKeysetHandle::GetKeyset(*keyset_handle);
+  // We check that result equals keyset. For lack of a better method we do this
+  // by hand.
+  EXPECT_EQ(result.primary_key_id(), keyset.primary_key_id());
+  ASSERT_EQ(result.key_size(), keyset.key_size());
+  ASSERT_EQ(result.key(0).key_id(), keyset.key(0).key_id());
+  ASSERT_EQ(result.key(1).key_id(), keyset.key(1).key_id());
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeUnknown) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::UNKNOWN_KEYMATERIAL, &keyset);
+  keyset.set_primary_key_id(42);
+  auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeSymmetric) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+  auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeAssymmetricPrivate) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  keyset.set_primary_key_id(42);
+  auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForHidden) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
+            KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key,
+              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+
+  keyset.set_primary_key_id(42);
+  auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
+  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+}
+
+TEST_F(KeysetHandleTest, ReadNoSecretFailForInvalidString) {
+  auto result = KeysetHandle::ReadNoSecret("bad serialized keyset");
+  EXPECT_FALSE(result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
 }
 
 }  // namespace

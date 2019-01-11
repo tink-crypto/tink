@@ -22,6 +22,10 @@ import (
 )
 
 func init() {
+	if err := tink.RegisterKeyManager(newAESCTRHMACAEADKeyManager()); err != nil {
+		panic(fmt.Sprintf("aead.init() failed: %v", err))
+	}
+
 	if err := tink.RegisterKeyManager(newAESGCMKeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}

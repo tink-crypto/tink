@@ -21,7 +21,6 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.mac.MacFactory;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Random;
@@ -76,8 +75,8 @@ public class JsonKeysetReaderTest {
   }
 
   private void assertKeysetHandle(KeysetHandle handle1, KeysetHandle handle2) throws Exception {
-    Mac mac1 = MacFactory.getPrimitive(handle1);
-    Mac mac2 = MacFactory.getPrimitive(handle2);
+    Mac mac1 = handle1.getPrimitive(Mac.class);
+    Mac mac2 = handle2.getPrimitive(Mac.class);
     byte[] message = Random.randBytes(20);
 
     assertThat(handle2.getKeyset()).isEqualTo(handle1.getKeyset());

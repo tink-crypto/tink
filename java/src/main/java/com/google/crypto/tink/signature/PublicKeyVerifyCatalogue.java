@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeyVerify;
 import java.security.GeneralSecurityException;
 
@@ -58,10 +59,17 @@ class PublicKeyVerifyCatalogue implements Catalogue<PublicKeyVerify> {
         return new Ed25519PublicKeyManager();
       case RsaSsaPkcs1VerifyKeyManager.TYPE_URL:
         return new RsaSsaPkcs1VerifyKeyManager();
+      case RsaSsaPssVerifyKeyManager.TYPE_URL:
+        return new RsaSsaPssVerifyKeyManager();
       default:
         throw new GeneralSecurityException(
             String.format(
                 "No support for primitive 'PublicKeyVerify' with key type '%s'.", typeUrl));
     }
+  }
+
+  @Override
+  public PrimitiveWrapper<PublicKeyVerify> getPrimitiveWrapper() {
+    return new PublicKeyVerifyWrapper();
   }
 }
