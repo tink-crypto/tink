@@ -72,7 +72,10 @@ func (e *ECDSAVerifier) Verify(signatureBytes, data []byte) error {
 	if err != nil {
 		return fmt.Errorf("ecdsa_verifier: %s", err)
 	}
-	hashed := subtle.ComputeHash(e.hashFunc, data)
+	hashed, err := subtle.ComputeHash(e.hashFunc, data)
+	if err != nil {
+		return err
+	}
 	valid := ecdsa.Verify(e.publicKey, hashed, signature.R, signature.S)
 	if !valid {
 		return errInvalidECDSASignature

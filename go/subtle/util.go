@@ -21,9 +21,12 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"errors"
 	"hash"
 	"math/big"
 )
+
+var errNilHashFunc = errors.New("nil hash function")
 
 // ConvertHashName converts different forms of a hash name to the
 // hash name that tink recognizes.
@@ -85,11 +88,18 @@ func GetCurve(curve string) elliptic.Curve {
 }
 
 // ComputeHash calculates a hash of the given data using the given hash function.
-func ComputeHash(hashFunc func() hash.Hash, data []byte) []byte {
+func ComputeHash(hashFunc func() hash.Hash, data []byte) ([]byte, error) {
+	if hashFunc == nil {
+		return nil, errNilHashFunc
+	}
 	h := hashFunc()
-	h.Write(data)
-	ret := h.Sum(nil)
-	return ret
+
+	_, err := h.Write(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return h.Sum(nil), nil
 }
 
 // NewBigIntFromHex returns a big integer from a hex string.
