@@ -2,7 +2,7 @@
 
 [Tink](https://github.com/google/tink) performs cryptographic tasks via
 so-called _primitives_, which provide an abstract representation of the provided
-functionality.  Currently Tink supports the following cryptograhic operations
+functionality.  Currently Tink supports the following cryptographic operations
 via the corresponding primitives:
 
 - authenticated encryption with associated data (primitive: AEAD)
