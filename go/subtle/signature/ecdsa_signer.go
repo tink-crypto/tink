@@ -71,7 +71,10 @@ func NewECDSASignerFromPrivateKey(hashAlg string,
 
 // Sign computes a signature for the given data.
 func (e *ECDSASigner) Sign(data []byte) ([]byte, error) {
-	hashed := subtle.ComputeHash(e.hashFunc, data)
+	hashed, err := subtle.ComputeHash(e.hashFunc, data)
+	if err != nil {
+		return nil, err
+	}
 	r, s, err := ecdsa.Sign(rand.Reader, e.privateKey, hashed)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_signer: signing failed: %s", err)

@@ -18,10 +18,10 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"golang.org/x/crypto/chacha20poly1305"
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
+	"golang.org/x/crypto/chacha20poly1305"
 
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 	xcppb "github.com/google/tink/proto/xchacha20_poly1305_go_proto"
@@ -36,7 +36,6 @@ const (
 
 // Common errors.
 var errInvalidXChaCha20Poly1305Key = fmt.Errorf("xchacha20poly1305_key_manager: invalid key")
-var errInvalidXChaCha20Poly1305KeyFormat = fmt.Errorf("xchacha20poly1305_key_manager: invalid key format")
 
 // xChaCha20Poly1305KeyManager is an implementation of KeyManager interface.
 // It generates new XChaCha20Poly1305Key keys and produces new instances of XChaCha20Poly1305 subtle.

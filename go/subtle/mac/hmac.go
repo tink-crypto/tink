@@ -95,7 +95,9 @@ func (h *HMAC) ComputeMAC(data []byte) ([]byte, error) {
 		return nil, errHMACInvalidInput
 	}
 	mac := hmac.New(h.HashFunc, h.Key)
-	mac.Write(data)
+	if _, err := mac.Write(data); err != nil {
+		return nil, err
+	}
 	tag := mac.Sum(nil)
 	return tag[:h.TagSize], nil
 }
