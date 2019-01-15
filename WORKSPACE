@@ -32,9 +32,9 @@ http_archive(
 # GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
 http_archive(
     name = "com_google_googletest",
-    strip_prefix = "googletest-61330388862cf011fa956f7f59082b9923e6be0e",
-    url = "https://github.com/google/googletest/archive/61330388862cf011fa956f7f59082b9923e6be0e.zip",
-    sha256 = "9431adb18d26a304d864c2b05f6e5a165e73108fc89a110f5b27d65d7e51680b",
+    strip_prefix = "googletest-eb9225ce361affe561592e0912320b9db84985d0",
+    url = "https://github.com/google/googletest/archive/eb9225ce361affe561592e0912320b9db84985d0.zip",
+    sha256 = "a7db7d1295ce46b93f3d1a90dbbc55a48409c00d19684fcd87823037add88118",
 )
 
 http_archive(
