@@ -29,9 +29,7 @@ namespace crypto {
 namespace tink {
 
 using google::crypto::tink::AesEaxKey;
-using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::XChaCha20Poly1305Key;
 
 namespace {

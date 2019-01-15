@@ -37,7 +37,6 @@ using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::XChaCha20Poly1305Key;
-using portable_proto::MessageLite;
 
 const int kKeySizeInBytes = 32;
 

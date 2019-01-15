@@ -46,8 +46,6 @@ using google::crypto::tink::AesCtrHmacAeadKey;
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
-using portable_proto::MessageLite;
 
 class AesCtrHmacAeadKeyFactory
     : public KeyFactoryBase<AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {

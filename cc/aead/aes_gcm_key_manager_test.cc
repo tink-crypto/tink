@@ -33,7 +33,6 @@ using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
 
 namespace {
 
