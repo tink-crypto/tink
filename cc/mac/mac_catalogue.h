@@ -39,4 +39,4 @@ class MacCatalogue : public Catalogue<Mac> {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_MAC_MAC_CONFIG_H_
+#endif  // TINK_MAC_MAC_CATALOGUE_H_
