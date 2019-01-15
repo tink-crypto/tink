@@ -435,7 +435,7 @@ TEST(ComputeHashTest, AcceptsNullStringView) {
 using ComputeHashSamplesTest = ::testing::TestWithParam<
     std::tuple<HashType, absl::string_view, absl::string_view>>;
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NistSampleCases, ComputeHashSamplesTest,
     ::testing::Values(
         std::make_tuple(
