@@ -935,9 +935,8 @@ public final class EllipticCurves {
     checkPointOnCurve(publicPoint, myPrivateKey.getParams().getCurve());
     // Explicitly reconstruct the peer public key using private key's spec.
     ECParameterSpec privSpec = myPrivateKey.getParams();
-    EllipticCurve privCurve = privSpec.getCurve();
     ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(publicPoint, privSpec);
-    KeyFactory kf = KeyFactory.getInstance("EC");
+    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     PublicKey publicKey = kf.generatePublic(publicKeySpec);
     KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");
     ka.init(myPrivateKey);
