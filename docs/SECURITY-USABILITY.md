@@ -1,5 +1,11 @@
 # Tink's Security and Usability Design Goals
 
+The work on Tink is guided by the design goals discussed below.  To get a quick
+overview of Tink design you can also take a look at
+[slides](Tink-a_cryptographic_library--RealWorldCrypto2019.pdf) from [a talk
+about Tink](https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665) presented at
+[Real World Crypto 2019](https://rwc.iacr.org/2019/).
+
 *   **Security** Tink is built on top of existing libraries such as BoringSSL
     and Java Cryptography Architecture, but includes countermeasures to many
     weaknesses in these libraries, which were discovered by Project Wycheproof,

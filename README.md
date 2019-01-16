@@ -30,6 +30,12 @@ implementation and code reviews, and extensive testing. At Google, Tink is
 already being used to secure data of many products such as AdMob, Google Pay,
 Google Assistant, Firebase, the Android Search App, etc.
 
+To get a quick overview of Tink design please take a look at
+[slides](docs/Tink-a_cryptographic_library--RealWorldCrypto2019.pdf) from [a
+talk about Tink](https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665) presented
+at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
+
+
 ## Getting started
 
 **TIP** The easiest way to get started with Tink is to install

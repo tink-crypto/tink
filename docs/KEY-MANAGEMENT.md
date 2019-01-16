@@ -2,7 +2,11 @@
 
 In addition to cryptographic operations Tink provides support for key management
 features like key versioning, key rotation, and storing keysets or encrypting
-with master keys in remote key management systems (KMS).
+with master keys in remote key management systems (KMS).  To get a quick
+overview of Tink design, incl. key management features, you can also take a look
+at [slides](Tink-a_cryptographic_library--RealWorldCrypto2019.pdf) from [a talk
+about Tink](https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665) presented at
+[Real World Crypto 2019](https://rwc.iacr.org/2019/).
 
 [Tinkey](TINKEY.md) is a command-line tool that allows managing Tink's key
 material. Tink also provides a rich key management API (e.g., see
