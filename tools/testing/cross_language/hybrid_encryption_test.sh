@@ -13,7 +13,7 @@
 
 #!/bin/bash
 
-ROOT_DIR="$TEST_SRCDIR/__main__"
+ROOT_DIR="$TEST_SRCDIR/tink"
 CC_ENCRYPT_CLI="$ROOT_DIR/tools/testing/cc/hybrid_encrypt_cli_cc"
 CC_DECRYPT_CLI="$ROOT_DIR/tools/testing/cc/hybrid_decrypt_cli_cc"
 JAVA_ENCRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_encrypt_cli_java"

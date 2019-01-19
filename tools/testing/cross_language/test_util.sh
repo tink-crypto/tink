@@ -13,7 +13,7 @@
 
 #!/bin/bash
 
-ROOT_DIR="$TEST_SRCDIR/__main__"
+ROOT_DIR="$TEST_SRCDIR/tink"
 TINKEY_CLI="$ROOT_DIR/tools/tinkey/tinkey"
 
 #############################################################################
