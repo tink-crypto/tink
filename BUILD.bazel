@@ -9,13 +9,7 @@ licenses(["notice"])  # Apache 2.0
 
 exports_files(["LICENSE"])
 
-# All go packages use github.com/google/tink prefix
-load("@io_bazel_rules_go//go:def.bzl", "gazelle")
+load("@bazel_gazelle//:def.bzl", "gazelle")
 
-# bazel rule definition
-gazelle(
-    name = "gazelle",
-    command = "update",
-    prefix = "github.com/google/tink",
-)
-
+# gazelle:prefix github.com/google/go
+gazelle(name = "gazelle")
