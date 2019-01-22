@@ -45,8 +45,12 @@ func KeysetHandleFromSerializedProto(serialized []byte) (*tink.KeysetHandle, err
 }
 
 // KeysetHandle creates a new instance of KeysetHandle using the given keyset.
-func KeysetHandle(ks *tinkpb.Keyset) (*tink.KeysetHandle, error) {
-	if ks == nil || len(ks.Key) == 0 {
+func KeysetHandle(r tink.KeysetReader) (*tink.KeysetHandle, error) {
+	if r == nil {
+		return nil, errInvalidKeyset
+	}
+	ks, err := r.Read()
+	if err != nil || ks == nil || len(ks.Key) == 0 {
 		return nil, errInvalidKeyset
 	}
 	return keysetHandle(ks), nil

@@ -29,7 +29,7 @@ func TestFromKeyset(t *testing.T) {
 	key := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
 	keyset := tink.CreateKeyset(1, []*tinkpb.Keyset_Key{key})
 	keysetInfo, _ := tink.GetKeysetInfo(keyset)
-	h, err := insecure.KeysetHandle(keyset)
+	h, err := insecure.KeysetHandle(tink.MemKeysetReader{keyset})
 	if err != nil {
 		t.Errorf("unexpected error when creating new KeysetHandle")
 	}
@@ -69,7 +69,7 @@ func TestKeysetHandleFromSerializedProto(t *testing.T) {
 		t.Errorf("parsed keyset doesn't match the original")
 	}
 	// create handle from keyset
-	parsedHandle, err = insecure.KeysetHandle(handle.Keyset())
+	parsedHandle, err = insecure.KeysetHandle(tink.MemKeysetReader{handle.Keyset()})
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
