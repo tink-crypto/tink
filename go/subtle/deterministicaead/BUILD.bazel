@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = [
-        "aes_siv_cmac.go",
+        "aes_siv.go",
     ],
     importpath = "github.com/google/tink/go/subtle/deterministicaead",
     visibility = ["//visibility:public"],
@@ -15,7 +15,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "aes_siv_cmac_test.go",
+        "aes_siv_test.go",
     ],
     data = [
         "@wycheproof//testvectors:all",  # keep

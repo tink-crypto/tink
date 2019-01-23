@@ -47,7 +47,7 @@ type testCase struct {
 	Result string
 }
 
-func TestAESSIVCMAC_EncryptDecrypt(t *testing.T) {
+func TestAESSIV_EncryptDecrypt(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
@@ -55,9 +55,9 @@ func TestAESSIVCMAC_EncryptDecrypt(t *testing.T) {
 	msg := []byte("Some data to encrypt.")
 	aad := []byte("Additional data")
 
-	a, err := deterministicaead.NewAESSIVCMAC(key)
+	a, err := deterministicaead.NewAESSIV(key)
 	if err != nil {
-		t.Errorf("NewAESSIVCMAC(key) = _, %v, want _, nil", err)
+		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
 
 	ct, err := a.EncryptDeterministically(msg, aad)
@@ -72,16 +72,16 @@ func TestAESSIVCMAC_EncryptDecrypt(t *testing.T) {
 	}
 }
 
-func TestAESSIVCMAC_EmptyPlaintext(t *testing.T) {
+func TestAESSIV_EmptyPlaintext(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
 	key, _ := hex.DecodeString(keyStr)
 	aad := []byte("Additional data")
 
-	a, err := deterministicaead.NewAESSIVCMAC(key)
+	a, err := deterministicaead.NewAESSIV(key)
 	if err != nil {
-		t.Errorf("NewAESSIVCMAC(key) = _, %v, want _, nil", err)
+		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
 
 	ct, err := a.EncryptDeterministically(nil, aad)
@@ -105,15 +105,15 @@ func TestAESSIVCMAC_EmptyPlaintext(t *testing.T) {
 	}
 }
 
-func TestAESSIVCMAC_EmptyAdditionalData(t *testing.T) {
+func TestAESSIV_EmptyAdditionalData(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
 	key, _ := hex.DecodeString(keyStr)
 
-	a, err := deterministicaead.NewAESSIVCMAC(key)
+	a, err := deterministicaead.NewAESSIV(key)
 	if err != nil {
-		t.Errorf("NewAESSIVCMAC(key) = _, %v, want _, nil", err)
+		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
 
 	ct, err := a.EncryptDeterministically(nil, nil)
@@ -134,7 +134,7 @@ func TestAESSIVCMAC_EmptyAdditionalData(t *testing.T) {
 	}
 }
 
-func TestAESSIVCMAC_KeySizes(t *testing.T) {
+func TestAESSIV_KeySizes(t *testing.T) {
 	keyStr :=
 		"198371900187498172316311acf81d238ff7619873a61983d619c87b63a1987f" +
 			"987131819803719b847126381cd763871638aa71638176328761287361231321" +
@@ -144,26 +144,26 @@ func TestAESSIVCMAC_KeySizes(t *testing.T) {
 	key, _ := hex.DecodeString(keyStr)
 
 	for i := 0; i < len(key); i++ {
-		_, err := deterministicaead.NewAESSIVCMAC(key[:i])
-		if i == deterministicaead.AESSIVCMACKeySize && err != nil {
+		_, err := deterministicaead.NewAESSIV(key[:i])
+		if i == deterministicaead.AESSIVKeySize && err != nil {
 			t.Errorf("Rejected valid key size: %v, %v", i, err)
 		}
-		if i != deterministicaead.AESSIVCMACKeySize && err == nil {
+		if i != deterministicaead.AESSIVKeySize && err == nil {
 			t.Errorf("Allowed invalid key size: %v", i)
 		}
 	}
 }
 
-func TestAESSIVCMAC_MessageSizes(t *testing.T) {
+func TestAESSIV_MessageSizes(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
 	key, _ := hex.DecodeString(keyStr)
 	aad := []byte("Additional data")
 
-	a, err := deterministicaead.NewAESSIVCMAC(key)
+	a, err := deterministicaead.NewAESSIV(key)
 	if err != nil {
-		t.Errorf("NewAESSIVCMAC(key) = _, %v, want _, nil", err)
+		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
 
 	for i := uint32(0); i < 1024; i++ {
@@ -193,16 +193,16 @@ func TestAESSIVCMAC_MessageSizes(t *testing.T) {
 	}
 }
 
-func TestAESSIVCMAC_AdditionalDataSizes(t *testing.T) {
+func TestAESSIV_AdditionalDataSizes(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
 	key, _ := hex.DecodeString(keyStr)
 	msg := []byte("Some data to encrypt.")
 
-	a, err := deterministicaead.NewAESSIVCMAC(key)
+	a, err := deterministicaead.NewAESSIV(key)
 	if err != nil {
-		t.Errorf("NewAESSIVCMAC(key) = _, %v, want _, nil", err)
+		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
 
 	for i := uint32(0); i < 1024; i++ {
@@ -219,16 +219,16 @@ func TestAESSIVCMAC_AdditionalDataSizes(t *testing.T) {
 	}
 }
 
-func TestAESSIVCMAC_CiphertextModifications(t *testing.T) {
+func TestAESSIV_CiphertextModifications(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
 	key, _ := hex.DecodeString(keyStr)
 	aad := []byte("Additional data")
 
-	a, err := deterministicaead.NewAESSIVCMAC(key)
+	a, err := deterministicaead.NewAESSIV(key)
 	if err != nil {
-		t.Errorf("NewAESSIVCMAC(key) = _, %v, want _, nil", err)
+		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
 
 	for i := uint32(0); i < 50; i++ {
@@ -249,7 +249,7 @@ func TestAESSIVCMAC_CiphertextModifications(t *testing.T) {
 	}
 }
 
-func TestAESSIVCMAC_WycheproofVectors(t *testing.T) {
+func TestAESSIV_WycheproofVectors(t *testing.T) {
 	f, err := os.Open("../../../../wycheproof/testvectors/aes_siv_cmac_test.json")
 	if err != nil {
 		t.Fatalf("Cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath.", err)
@@ -261,7 +261,7 @@ func TestAESSIVCMAC_WycheproofVectors(t *testing.T) {
 	}
 
 	for _, g := range data.TestGroups {
-		if g.KeySize/8 != deterministicaead.AESSIVCMACKeySize {
+		if g.KeySize/8 != deterministicaead.AESSIVKeySize {
 			continue
 		}
 
@@ -283,9 +283,9 @@ func TestAESSIVCMAC_WycheproofVectors(t *testing.T) {
 				t.Errorf("#%d, cannot decode ct: %s", tc.TcID, err)
 			}
 
-			a, err := deterministicaead.NewAESSIVCMAC(key)
+			a, err := deterministicaead.NewAESSIV(key)
 			if err != nil {
-				t.Errorf("NewAESSIVCMAC(key) = _, %v, want _, nil", err)
+				t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 				continue
 			}
 
