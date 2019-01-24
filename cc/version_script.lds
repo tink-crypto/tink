@@ -1,4 +1,4 @@
-VERS_1.2.1 {
+VERS_1.2.2 {
   global:
     *tink*;
     *absl*;

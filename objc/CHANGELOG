@@ -1,3 +1,8 @@
+Version 1.2.2
+==================================
+Staticly linking BoringSSL in the CocoaPod build to prevent namespace clashes
+when Tink is used alongside pods that depend on OpenSSL.
+
 Version 1.2.1
 ==================================
 No changes to the Obj-C implementation.
