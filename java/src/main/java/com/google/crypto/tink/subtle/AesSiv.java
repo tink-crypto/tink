@@ -29,8 +29,9 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * AES-SIV, as described in <a href="https://tools.ietf.org/html/rfc5297">RFC 5297</a>.
  *
- * <p>To meet the security requirements of {@link DeterministicAead}, this cipher can only be used
- * with 256-bit keys.
+ * <p>Each AES-SIV key consists of two sub keys. To meet the security requirements of {@link
+ * DeterministicAead}, each sub key must be 256 bits. The total size of ASE-SIV keys is then 512
+ * bits.
  *
  * @since 1.1.0
  */
