@@ -112,7 +112,7 @@ func validateAEADFactoryCipher(encryptCipher tink.AEAD,
 	if string(ct[:prefixSize]) != expectedPrefix {
 		return fmt.Errorf("incorrect prefix with regular plaintext")
 	}
-	if prefixSize+len(pt)+subtleAEAD.AESGCMIvSize+subtleAEAD.AESGCMTagSize != len(ct) {
+	if prefixSize+len(pt)+subtleAEAD.AESGCMIVSize+subtleAEAD.AESGCMTagSize != len(ct) {
 		return fmt.Errorf("lengths of plaintext and ciphertext don't match with regular plaintext")
 	}
 
@@ -130,7 +130,7 @@ func validateAEADFactoryCipher(encryptCipher tink.AEAD,
 	if string(ct[:prefixSize]) != expectedPrefix {
 		return fmt.Errorf("incorrect prefix with short plaintext")
 	}
-	if prefixSize+len(pt)+subtleAEAD.AESGCMIvSize+subtleAEAD.AESGCMTagSize != len(ct) {
+	if prefixSize+len(pt)+subtleAEAD.AESGCMIVSize+subtleAEAD.AESGCMTagSize != len(ct) {
 		return fmt.Errorf("lengths of plaintext and ciphertext don't match with short plaintext")
 	}
 	return nil

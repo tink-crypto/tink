@@ -25,7 +25,7 @@ import (
 	"github.com/google/tink/go/subtle/random"
 )
 
-var keySizes = []int{16, 24, 32}
+var keySizes = []int{16, 32}
 
 // Since the tag size depends on the Seal() function of crypto library,
 // this test checks that the tag size is always 128 bit.
@@ -36,7 +36,7 @@ func TestAESGCMTagLength(t *testing.T) {
 		ad := random.GetRandomBytes(32)
 		pt := random.GetRandomBytes(32)
 		ct, _ := a.Encrypt(pt, ad)
-		actualTagSize := len(ct) - aead.AESGCMIvSize - len(pt)
+		actualTagSize := len(ct) - aead.AESGCMIVSize - len(pt)
 		if actualTagSize != aead.AESGCMTagSize {
 			t.Errorf("tag size is not 128 bit, it is %d bit", actualTagSize*8)
 		}
@@ -198,7 +198,7 @@ func TestVectors(t *testing.T) {
 		if err := aead.ValidateAESKeySize(g.KeySize / 8); err != nil {
 			continue
 		}
-		if g.IvSize != aead.AESGCMIvSize*8 {
+		if g.IvSize != aead.AESGCMIVSize*8 {
 			continue
 		}
 		for _, tc := range g.Tests {

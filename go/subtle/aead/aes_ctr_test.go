@@ -50,8 +50,8 @@ func TestNewAESCTR(t *testing.T) {
 			}
 		default:
 			// Invalid key sizes.
-			if !strings.Contains(err.Error(), "aes_ctr: invalid key size:") {
-				t.Errorf("want: error invalid key size, got: %v", err)
+			if !strings.Contains(err.Error(), "aes_ctr: invalid AES key size; want 16 or 32") {
+				t.Errorf("wrong error message; want a string starting with \"aes_ctr: invalid AES key size; want 16 or 32\", got %v", err)
 			}
 		}
 	}

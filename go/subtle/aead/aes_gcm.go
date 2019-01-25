@@ -12,7 +12,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package aead provides subtle implementations of the AEAD primitive.
 package aead
 
 import (
@@ -25,8 +24,8 @@ import (
 )
 
 const (
-	// AESGCMIvSize is the only IV size that this implementation supports.
-	AESGCMIvSize = 12
+	// AESGCMIVSize is the only IV size that this implementation supports.
+	AESGCMIVSize = 12
 	// AESGCMTagSize is the only tag size that this implementation supports.
 	AESGCMTagSize = 16
 )
@@ -40,24 +39,14 @@ type AESGCM struct {
 var _ tink.AEAD = (*AESGCM)(nil)
 
 // NewAESGCM returns an AESGCM instance.
-// The key argument should be the AES key, either 16, 24, or 32 bytes to select
-// AES-128, AES-192, or AES-256.
+// The key argument should be the AES key, either 16 or 32 bytes to select
+// AES-128 or AES-256.
 func NewAESGCM(key []byte) (*AESGCM, error) {
 	keySize := uint32(len(key))
 	if err := ValidateAESKeySize(keySize); err != nil {
 		return nil, fmt.Errorf("aes_gcm: %s", err)
 	}
 	return &AESGCM{Key: key}, nil
-}
-
-// ValidateAESKeySize checks if the given key size is a valid AES key size.
-func ValidateAESKeySize(sizeInBytes uint32) error {
-	switch sizeInBytes {
-	case 16, 24, 32:
-		return nil
-	default:
-		return fmt.Errorf("invalid AES key size %d", sizeInBytes)
-	}
 }
 
 // Encrypt encrypts pt with aad as additional authenticated data.
@@ -86,15 +75,15 @@ func (a *AESGCM) Encrypt(pt, aad []byte) ([]byte, error) {
 
 // Decrypt decrypts ct with aad as the additionalauthenticated data.
 func (a *AESGCM) Decrypt(ct, aad []byte) ([]byte, error) {
-	if len(ct) < AESGCMIvSize+AESGCMTagSize {
+	if len(ct) < AESGCMIVSize+AESGCMTagSize {
 		return nil, fmt.Errorf("aes_gcm: ciphertext too short")
 	}
 	cipher, err := a.newCipher(a.Key)
 	if err != nil {
 		return nil, err
 	}
-	iv := ct[:AESGCMIvSize]
-	pt, err := cipher.Open(nil, iv, ct[AESGCMIvSize:], aad)
+	iv := ct[:AESGCMIVSize]
+	pt, err := cipher.Open(nil, iv, ct[AESGCMIVSize:], aad)
 	if err != nil {
 		return nil, fmt.Errorf("aes_gcm: %s", err)
 	}
@@ -103,7 +92,7 @@ func (a *AESGCM) Decrypt(ct, aad []byte) ([]byte, error) {
 
 // newIV creates a new IV for encryption.
 func (a *AESGCM) newIV() []byte {
-	return random.GetRandomBytes(AESGCMIvSize)
+	return random.GetRandomBytes(AESGCMIVSize)
 }
 
 var errCipher = fmt.Errorf("aes_gcm: initializing cipher failed")
