@@ -117,8 +117,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 implements <a href="../../../../../com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink">DeterministicAead</a></pre>
 <div class="block">AES-SIV, as described in <a href="https://tools.ietf.org/html/rfc5297">RFC 5297</a>.
 
- <p>To meet the security requirements of <a href="../../../../../com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink"><code>DeterministicAead</code></a>, this cipher can only be used
- with 256-bit keys.</div>
+ <p>Each AES-SIV key consists of two sub keys. To meet the security requirements of <a href="../../../../../com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink"><code>DeterministicAead</code></a>, each sub key must be 256 bits. The total size of ASE-SIV keys is then 512
+ bits.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.1.0</dd>
