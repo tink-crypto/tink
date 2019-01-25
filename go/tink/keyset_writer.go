@@ -16,12 +16,11 @@ package tink
 
 import tinkpb "github.com/google/tink/proto/tink_go_proto"
 
-// KeysetReader knows how to read a Keyset or an EncryptedKeyset from some source.
-// In order to turn a KeysetReader into a KeysetHandle for use, callers must use
-// insecure.KeysetHandle or by TODO(#143): tink.KeysetHandle (with encryption).
-type KeysetReader interface {
-	// Read returns a (cleartext) Keyset object from the underlying source.
-	Read() (*tinkpb.Keyset, error)
-	// ReadEncrypted returns an EncryptedKeyset object from the underlying source.
-	ReadEncrypted() (*tinkpb.EncryptedKeyset, error)
+// KeysetWriter knows how to write a Keyset or an EncryptedKeyset to some source.
+type KeysetWriter interface {
+	// Write keyset to some storage system.
+	Write(Keyset *tinkpb.Keyset) error
+
+	// Write EncryptedKeyset to some storage system.
+	WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error
 }

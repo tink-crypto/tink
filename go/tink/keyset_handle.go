@@ -17,6 +17,8 @@ package tink
 import (
 	"fmt"
 
+	"github.com/golang/protobuf/proto"
+
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -41,6 +43,19 @@ func NewKeysetHandle(kt *tinkpb.KeyTemplate) (*KeysetHandle, error) {
 		return nil, fmt.Errorf("keyset_handle: cannot get keyset handle: %s", err)
 	}
 	return handle, nil
+}
+
+// NewKeysetHandleFromReader tries to create a KeysetHandle from an encrypted keyset obtained via reader.
+func NewKeysetHandleFromReader(reader KeysetReader, masterKey AEAD) (*KeysetHandle, error) {
+	encryptedKeyset, err := reader.ReadEncrypted()
+	if err != nil {
+		return nil, err
+	}
+	ks, err := decrypt(encryptedKeyset, masterKey)
+	if err != nil {
+		return nil, err
+	}
+	return &KeysetHandle{ks}, nil
 }
 
 // KeysetHandleWithNoSecret creates a new instance of KeysetHandle using the given keyset which does
@@ -106,6 +121,15 @@ func (h *KeysetHandle) String() string {
 	return info.String()
 }
 
+// Write encrypts and writes an encrypted keyset.
+func (h *KeysetHandle) Write(writer KeysetWriter, masterKey AEAD) error {
+	encrypted, err := encrypt(h.Keyset(), masterKey)
+	if err != nil {
+		return err
+	}
+	return writer.WriteEncrypted(encrypted)
+}
+
 func publicKeyData(privKeyData *tinkpb.KeyData) (*tinkpb.KeyData, error) {
 	if privKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PRIVATE {
 		return nil, fmt.Errorf("keyset_handle: keyset contains a non-private key")
@@ -124,4 +148,37 @@ func publicKeyData(privKeyData *tinkpb.KeyData) (*tinkpb.KeyData, error) {
 func validateKeyData(keyData *tinkpb.KeyData) error {
 	_, err := PrimitiveFromKeyData(keyData)
 	return err
+}
+
+func decrypt(encryptedKeyset *tinkpb.EncryptedKeyset, masterKey AEAD) (*tinkpb.Keyset, error) {
+	decrypted, err := masterKey.Decrypt(encryptedKeyset.EncryptedKeyset, []byte{})
+	if err != nil {
+		return nil, fmt.Errorf("decryption failed: %s", err)
+	}
+	keyset := new(tinkpb.Keyset)
+	if err := proto.Unmarshal(decrypted, keyset); err != nil {
+		return nil, fmt.Errorf("invalid encrypted keyset")
+	}
+	return keyset, nil
+}
+
+func encrypt(keyset *tinkpb.Keyset, masterKey AEAD) (*tinkpb.EncryptedKeyset, error) {
+	serializedKeyset, err := proto.Marshal(keyset)
+	if err != nil {
+		return nil, fmt.Errorf("invalid keyset")
+	}
+	encrypted, err := masterKey.Encrypt(serializedKeyset, []byte{})
+	if err != nil {
+		return nil, fmt.Errorf("encrypted failed: %s", err)
+	}
+	// get keyset info
+	info, err := GetKeysetInfo(keyset)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get keyset info: %s", err)
+	}
+	encryptedKeyset := &tinkpb.EncryptedKeyset{
+		EncryptedKeyset: encrypted,
+		KeysetInfo:      info,
+	}
+	return encryptedKeyset, nil
 }
