@@ -1,0 +1,20 @@
+PODS:
+  - rapidjson (1.1.0)
+  - Tink (1.2.2):
+    - rapidjson (~> 1.1.0)
+
+DEPENDENCIES:
+  - Tink
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - rapidjson
+    - Tink
+
+SPEC CHECKSUMS:
+  rapidjson: 926ddeea70d7a0987b6d746cd9fa51f165467cd3
+  Tink: 6e98a53fca9104a396fecd043130eb37324f18c6
+
+PODFILE CHECKSUM: 63ae5e0d366597a54e5f483920c628e80572945a
+
+COCOAPODS: 1.6.0.rc.1

@@ -1,0 +1,1 @@
+../../../../rapidjson/include/rapidjson/msinttypes/inttypes.h
