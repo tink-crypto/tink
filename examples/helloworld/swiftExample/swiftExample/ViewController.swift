@@ -34,7 +34,7 @@ class ViewController: UIViewController {
             // handle error.
         }
         //2. Get a handle to the key material.
-        let tpl = try! TINKAeadKeyTemplate(keyTemplate: .TINKAes128Gcm)
+        let tpl = try! TINKAeadKeyTemplate(keyTemplate: .TINKAes256Gcm)
         let keysetHandle = try! TINKKeysetHandle(keyTemplate: tpl)
 
         //3. Get the primitive.
