@@ -81,14 +81,14 @@ inline __m128i Increment(__m128i x) {
 inline __m128i Add(__m128i x, uint64 y) {
   // Convert to a vector of two uint64.
   uint64 vec[2];
-  _mm_storeu_si128((__m128i*) vec, x);
+  _mm_storeu_si128(reinterpret_cast<__m128i*>(vec), x);
   // Perform the addition on the vector.
   vec[0] += y;
   if (y > vec[0]) {
     vec[1]++;
   }
   // Convert back to xmm.
-  return _mm_loadu_si128((__m128i*) vec);
+  return _mm_loadu_si128(reinterpret_cast<__m128i*>(vec));
 }
 
 // Decrement x by 1.
@@ -137,7 +137,7 @@ __m128i LoadPartialBlock(const uint8_t* block, size_t block_size) {
   uint8_t tmp[16];
   memset(tmp, 0, 16);
   memmove(tmp, block, block_size);
-  return _mm_loadu_si128((__m128i*) tmp);
+  return _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp));
 }
 
 // Store the block_size least significant bytes from value in
@@ -145,7 +145,7 @@ __m128i LoadPartialBlock(const uint8_t* block, size_t block_size) {
 // critical.
 void StorePartialBlock(uint8_t* block, size_t block_size, __m128i value) {
   uint8_t tmp[16];
-  _mm_storeu_si128((__m128i*) tmp, value);
+  _mm_storeu_si128(reinterpret_cast<__m128i*>(tmp), value);
   memmove(block, tmp, block_size);
 }
 
@@ -320,11 +320,11 @@ __m128i AesEaxAesni::Pad(const uint8_t* data, int len) const {
   memset(tmp, 0, BLOCK_SIZE);
   memmove(tmp, data, len);
   if (len == BLOCK_SIZE) {
-    __m128i block = _mm_loadu_si128((__m128i*) tmp);
+    __m128i block = _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp));
     return _mm_xor_si128(block, B_);
   } else {
     tmp[len] = 0x80;
-    __m128i block = _mm_loadu_si128((__m128i*) tmp);
+    __m128i block = _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp));
     return _mm_xor_si128(block, P_);
   }
 }
@@ -383,11 +383,11 @@ bool AesEaxAesni::RawEncrypt(
     // Get the key stream for one message block and compute
     // the MAC for the previous ciphertext block or header.
     Encrypt2Blocks(mac, ctr_big_endian, &mac, &key_stream);
-    __m128i pt = _mm_loadu_si128((const __m128i*) plaintext);
+    __m128i pt = _mm_loadu_si128(reinterpret_cast<const __m128i*>(plaintext));
     __m128i ct = _mm_xor_si128(pt, key_stream);
     mac = _mm_xor_si128(mac, ct);
     ctr = Increment(ctr);
-    _mm_storeu_si128((__m128i*) out, ct);
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(out), ct);
     plaintext += BLOCK_SIZE;
     out += BLOCK_SIZE;
     idx += BLOCK_SIZE;
@@ -436,8 +436,8 @@ bool AesEaxAesni::RawDecrypt(
   }
 
   // Get the tag from the ciphertext.
-  const __m128i tag =
-      _mm_loadu_si128((const __m128i*) &ciphertext[plaintext_size]);
+  const __m128i tag = _mm_loadu_si128(
+      reinterpret_cast<const __m128i*>(&ciphertext[plaintext_size]));
 
   // A CBC-MAC is reversible. This allows to pipeline the MAC verification
   // by recomputing the MAC for the first half of the ciphertext and

@@ -38,9 +38,9 @@ type AESCTR struct {
 // AES-128 or AES-256.
 // ivSize specifies the size of the IV in bytes.
 func NewAESCTR(key []byte, ivSize int) (*AESCTR, error) {
-	keySize := len(key)
-	if keySize != 16 && keySize != 32 {
-		return nil, fmt.Errorf("aes_ctr: invalid key size: %d", keySize)
+	keySize := uint32(len(key))
+	if err := ValidateAESKeySize(keySize); err != nil {
+		return nil, fmt.Errorf("aes_ctr: %s", err)
 	}
 	if ivSize < AESCTRMinIVSize || ivSize > aes.BlockSize {
 		return nil, fmt.Errorf("aes_ctr: invalid IV size: %d", ivSize)

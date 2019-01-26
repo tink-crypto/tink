@@ -29,7 +29,7 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-var keySizes = []uint32{16, 24, 32}
+var keySizes = []uint32{16, 32}
 
 func TestAESGCMGetPrimitiveBasic(t *testing.T) {
 	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
