@@ -36,6 +36,7 @@ class ViewController: UIViewController {
         //2. Get a handle to the key material.
         let tpl = try! TINKAeadKeyTemplate(keyTemplate: .TINKAes256Gcm)
         let keysetHandle = try! TINKKeysetHandle(keyTemplate: tpl)
+        
 
         //3. Get the primitive.
         let aead: TINKAead? = try? TINKAeadFactory.primitive(with: keysetHandle)
@@ -48,7 +49,7 @@ class ViewController: UIViewController {
         print("targetText:\(String(describing: ciphertext?.base64EncodedString()))")
         
         // 5. decrypt
-        let originText: Data? = try! aead?.decrypt(ciphertext!, withAdditionalData: addedText)
+        let originText: Data? = try! aead?.decrypt(ciphertext!, withAdditionalData: "world".data(using: .utf8))
         
         print("targetText:\(String(describing: String(data: originText!, encoding: .utf8)))")
     }
