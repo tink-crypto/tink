@@ -158,7 +158,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_siv_go_proto",
-    importpath = "github.com/google/tink/proto/aes_siv_proto",
+    importpath = "github.com/google/tink/proto/aes_siv_go_proto",
     proto = ":aes_siv_proto",
 )
 
