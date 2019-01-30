@@ -15,11 +15,15 @@
 package tink_test
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/testkeysethandle"
 	"github.com/google/tink/go/tink"
+
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -71,5 +75,30 @@ func TestFromKeyset(t *testing.T) {
 	// test String()
 	if h.String() != keysetInfo.String() {
 		t.Errorf("String() returns incorrect value")
+	}
+}
+
+func TestNewKeysetHandleFromReader(t *testing.T) {
+	masterKey, err := aead.NewAESGCM([]byte(strings.Repeat("A", 32)))
+	if err != nil {
+		t.Errorf("aead.NewAESGCM(): %v", err)
+	}
+
+	// Create a keyset
+	keyData := tink.CreateKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := tink.CreateKeyset(1, []*tinkpb.Keyset_Key{key})
+	h, _ := testkeysethandle.KeysetHandle(keyset)
+
+	memKeyset := &tink.MemKeyset{}
+	if err := h.Write(memKeyset, masterKey); err != nil {
+		t.Fatalf("handle.Write(): %v", err)
+	}
+	h2, err := tink.NewKeysetHandleFromReader(memKeyset, masterKey)
+	if err != nil {
+		t.Fatalf("NewKeysetHandleFromReader(): %v", err)
+	}
+	if !proto.Equal(h.Keyset(), h2.Keyset()) {
+		t.Fatalf("Decrypt failed: got %v, want %v", h2, h)
 	}
 }

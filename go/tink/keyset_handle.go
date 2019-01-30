@@ -151,13 +151,16 @@ func validateKeyData(keyData *tinkpb.KeyData) error {
 }
 
 func decrypt(encryptedKeyset *tinkpb.EncryptedKeyset, masterKey AEAD) (*tinkpb.Keyset, error) {
+	if encryptedKeyset == nil || masterKey == nil {
+		return nil, fmt.Errorf("keyset_handle: invalid encrypted keyset")
+	}
 	decrypted, err := masterKey.Decrypt(encryptedKeyset.EncryptedKeyset, []byte{})
 	if err != nil {
-		return nil, fmt.Errorf("decryption failed: %s", err)
+		return nil, fmt.Errorf("keyset_handle: decryption failed: %s", err)
 	}
 	keyset := new(tinkpb.Keyset)
 	if err := proto.Unmarshal(decrypted, keyset); err != nil {
-		return nil, fmt.Errorf("invalid encrypted keyset")
+		return nil, errInvalidKeyset
 	}
 	return keyset, nil
 }
@@ -165,16 +168,16 @@ func decrypt(encryptedKeyset *tinkpb.EncryptedKeyset, masterKey AEAD) (*tinkpb.K
 func encrypt(keyset *tinkpb.Keyset, masterKey AEAD) (*tinkpb.EncryptedKeyset, error) {
 	serializedKeyset, err := proto.Marshal(keyset)
 	if err != nil {
-		return nil, fmt.Errorf("invalid keyset")
+		return nil, errInvalidKeyset
 	}
 	encrypted, err := masterKey.Encrypt(serializedKeyset, []byte{})
 	if err != nil {
-		return nil, fmt.Errorf("encrypted failed: %s", err)
+		return nil, fmt.Errorf("keyset_handle: encrypted failed: %s", err)
 	}
 	// get keyset info
 	info, err := GetKeysetInfo(keyset)
 	if err != nil {
-		return nil, fmt.Errorf("cannot get keyset info: %s", err)
+		return nil, fmt.Errorf("keyset_handle: cannot get keyset info: %s", err)
 	}
 	encryptedKeyset := &tinkpb.EncryptedKeyset{
 		EncryptedKeyset: encrypted,
