@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package deterministicaead_test
+package daead_test
 
 import (
 	"bytes"
@@ -20,17 +20,17 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/deterministicaead"
+	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 
-	subtedeterministicaead "github.com/google/tink/go/subtle/deterministicaead"
+	subtedaead "github.com/google/tink/go/subtle/daead"
 	aspb "github.com/google/tink/proto/aes_siv_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestAESSIVPrimitive(t *testing.T) {
-	km, err := tink.GetKeyManager(deterministicaead.AESSIVTypeURL)
+	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Fatalf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -50,7 +50,7 @@ func TestAESSIVPrimitive(t *testing.T) {
 }
 
 func TestAESSIVPrimitiveWithInvalidKeys(t *testing.T) {
-	km, err := tink.GetKeyManager(deterministicaead.AESSIVTypeURL)
+	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -64,7 +64,7 @@ func TestAESSIVPrimitiveWithInvalidKeys(t *testing.T) {
 }
 
 func TestAESSIVNewKey(t *testing.T) {
-	km, err := tink.GetKeyManager(deterministicaead.AESSIVTypeURL)
+	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -79,7 +79,7 @@ func TestAESSIVNewKey(t *testing.T) {
 }
 
 func TestAESSIVNewKeyData(t *testing.T) {
-	km, err := tink.GetKeyManager(deterministicaead.AESSIVTypeURL)
+	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -87,8 +87,8 @@ func TestAESSIVNewKeyData(t *testing.T) {
 	if err != nil {
 		t.Errorf("km.NewKeyData(nil) = _, %v; want _, nil", err)
 	}
-	if kd.TypeUrl != deterministicaead.AESSIVTypeURL {
-		t.Errorf("TypeUrl: %v != %v", kd.TypeUrl, deterministicaead.AESSIVTypeURL)
+	if kd.TypeUrl != daead.AESSIVTypeURL {
+		t.Errorf("TypeUrl: %v != %v", kd.TypeUrl, daead.AESSIVTypeURL)
 	}
 	if kd.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
 		t.Errorf("KeyMaterialType: %v != SYMMETRIC", kd.KeyMaterialType)
@@ -103,30 +103,30 @@ func TestAESSIVNewKeyData(t *testing.T) {
 }
 
 func TestAESSIVDoesSupport(t *testing.T) {
-	km, err := tink.GetKeyManager(deterministicaead.AESSIVTypeURL)
+	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
-	if !km.DoesSupport(deterministicaead.AESSIVTypeURL) {
-		t.Errorf("AESSIVKeyManager must support %s", deterministicaead.AESSIVTypeURL)
+	if !km.DoesSupport(daead.AESSIVTypeURL) {
+		t.Errorf("AESSIVKeyManager must support %s", daead.AESSIVTypeURL)
 	}
 	if km.DoesSupport("some bad type") {
-		t.Errorf("AESSIVKeyManager must only support %s", deterministicaead.AESSIVTypeURL)
+		t.Errorf("AESSIVKeyManager must only support %s", daead.AESSIVTypeURL)
 	}
 }
 
 func TestAESSIVTypeURL(t *testing.T) {
-	km, err := tink.GetKeyManager(deterministicaead.AESSIVTypeURL)
+	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
-	if kt := km.TypeURL(); kt != deterministicaead.AESSIVTypeURL {
-		t.Errorf("km.TypeURL() = %s; want %s", kt, deterministicaead.AESSIVTypeURL)
+	if kt := km.TypeURL(); kt != daead.AESSIVTypeURL {
+		t.Errorf("km.TypeURL() = %s; want %s", kt, daead.AESSIVTypeURL)
 	}
 }
 
 func validateAESSIVPrimitive(p interface{}, key *aspb.AesSivKey) error {
-	cipher := p.(*subtedeterministicaead.AESSIV)
+	cipher := p.(*subtedaead.AESSIV)
 	// try to encrypt and decrypt
 	pt := random.GetRandomBytes(32)
 	aad := random.GetRandomBytes(32)
@@ -145,15 +145,15 @@ func validateAESSIVPrimitive(p interface{}, key *aspb.AesSivKey) error {
 }
 
 func validateAESSIVKey(key *aspb.AesSivKey) error {
-	if key.Version != deterministicaead.AESSIVKeyVersion {
-		return fmt.Errorf("incorrect key version: keyVersion != %d", deterministicaead.AESSIVKeyVersion)
+	if key.Version != daead.AESSIVKeyVersion {
+		return fmt.Errorf("incorrect key version: keyVersion != %d", daead.AESSIVKeyVersion)
 	}
-	if uint32(len(key.KeyValue)) != subtedeterministicaead.AESSIVKeySize {
-		return fmt.Errorf("incorrect key size: keySize != %d", subtedeterministicaead.AESSIVKeySize)
+	if uint32(len(key.KeyValue)) != subtedaead.AESSIVKeySize {
+		return fmt.Errorf("incorrect key size: keySize != %d", subtedaead.AESSIVKeySize)
 	}
 
 	// Try to encrypt and decrypt.
-	p, err := subtedeterministicaead.NewAESSIV(key.KeyValue)
+	p, err := subtedaead.NewAESSIV(key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("invalid key: %v", key.KeyValue)
 	}
@@ -164,25 +164,25 @@ func genInvalidAESSIVKeys() []*aspb.AesSivKey {
 	return []*aspb.AesSivKey{
 		// Bad key size.
 		&aspb.AesSivKey{
-			Version:  deterministicaead.AESSIVKeyVersion,
+			Version:  daead.AESSIVKeyVersion,
 			KeyValue: random.GetRandomBytes(16),
 		},
 		&aspb.AesSivKey{
-			Version:  deterministicaead.AESSIVKeyVersion,
+			Version:  daead.AESSIVKeyVersion,
 			KeyValue: random.GetRandomBytes(32),
 		},
 		&aspb.AesSivKey{
-			Version:  deterministicaead.AESSIVKeyVersion,
+			Version:  daead.AESSIVKeyVersion,
 			KeyValue: random.GetRandomBytes(63),
 		},
 		&aspb.AesSivKey{
-			Version:  deterministicaead.AESSIVKeyVersion,
+			Version:  daead.AESSIVKeyVersion,
 			KeyValue: random.GetRandomBytes(65),
 		},
 		// Bad version.
 		&aspb.AesSivKey{
-			Version:  deterministicaead.AESSIVKeyVersion + 1,
-			KeyValue: random.GetRandomBytes(subtedeterministicaead.AESSIVKeySize),
+			Version:  daead.AESSIVKeyVersion + 1,
+			KeyValue: random.GetRandomBytes(subtedaead.AESSIVKeySize),
 		},
 	}
 }

@@ -5,7 +5,7 @@ go_library(
     srcs = [
         "aes_siv.go",
     ],
-    importpath = "github.com/google/tink/go/subtle/deterministicaead",
+    importpath = "github.com/google/tink/go/subtle/daead",
     visibility = ["//visibility:public"],
     deps = [
         "//go/tink:go_default_library",

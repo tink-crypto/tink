@@ -12,19 +12,17 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package deterministicaead_test
+// Package daead provides implementations of the DeterministicAEAD primitive.
+package daead
 
 import (
-	"testing"
+	"fmt"
 
-	"github.com/google/tink/go/deterministicaead"
 	"github.com/google/tink/go/tink"
 )
 
-func TestDeterministicAEADInit(t *testing.T) {
-	// Check for AES-SIV key manager.
-	_, err := tink.GetKeyManager(deterministicaead.AESSIVTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
+func init() {
+	if err := tink.RegisterKeyManager(newAESSIVKeyManager()); err != nil {
+		panic(fmt.Sprintf("daead.init() failed: %v", err))
 	}
 }

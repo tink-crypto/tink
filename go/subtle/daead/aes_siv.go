@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package deterministicaead provides subtle implementations of the DeterministicAEAD primitive.
-package deterministicaead
+// Package daead provides subtle implementations of the DeterministicAEAD primitive.
+package daead
 
 import (
 	"crypto/aes"

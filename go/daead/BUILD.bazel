@@ -10,10 +10,10 @@ go_library(
         "aes_siv_key_manager.go",
         "init.go",
     ],
-    importpath = "github.com/google/tink/go/deterministicaead",
+    importpath = "github.com/google/tink/go/daead",
     visibility = ["//visibility:public"],
     deps = [
-        "//go/subtle/deterministicaead:go_default_library",
+        "//go/subtle/daead:go_default_library",
         "//go/subtle/random:go_default_library",
         "//go/tink:go_default_library",
         "//proto:aes_siv_go_proto",
@@ -30,7 +30,7 @@ go_test(
     ],
     embed = [":go_default_library"],
     deps = [
-        "//go/subtle/deterministicaead:go_default_library",
+        "//go/subtle/daead:go_default_library",
         "//go/subtle/random:go_default_library",
         "//go/tink:go_default_library",
         "//proto:aes_siv_go_proto",

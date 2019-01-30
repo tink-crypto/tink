@@ -12,13 +12,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package deterministicaead
+package daead
 
 import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/subtle/deterministicaead"
+	"github.com/google/tink/go/subtle/daead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 
@@ -58,7 +58,7 @@ func (km *aesSIVKeyManager) Primitive(serializedKey []byte) (interface{}, error)
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	ret, err := deterministicaead.NewAESSIV(key.KeyValue)
+	ret, err := daead.NewAESSIV(key.KeyValue)
 	if err != nil {
 		return nil, fmt.Errorf("aes_siv_key_manager: cannot create new primitive: %s", err)
 	}
@@ -104,15 +104,15 @@ func (km *aesSIVKeyManager) validateKey(key *aspb.AesSivKey) error {
 		return fmt.Errorf("aes_siv_key_manager: %s", err)
 	}
 	keySize := uint32(len(key.KeyValue))
-	if keySize != deterministicaead.AESSIVKeySize {
-		return fmt.Errorf("aes_siv_key_manager: keySize != %d", deterministicaead.AESSIVKeySize)
+	if keySize != daead.AESSIVKeySize {
+		return fmt.Errorf("aes_siv_key_manager: keySize != %d", daead.AESSIVKeySize)
 	}
 	return nil
 }
 
 // newAesSivKey creates a new AesSivKey.
 func (km *aesSIVKeyManager) newAesSivKey() *aspb.AesSivKey {
-	keyValue := random.GetRandomBytes(deterministicaead.AESSIVKeySize)
+	keyValue := random.GetRandomBytes(daead.AESSIVKeySize)
 	return &aspb.AesSivKey{
 		Version:  AESSIVKeyVersion,
 		KeyValue: keyValue,
