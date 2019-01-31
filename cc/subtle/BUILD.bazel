@@ -428,6 +428,40 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "stream_segment_encrypter",
+    hdrs = ["stream_segment_encrypter.h"],
+    deps = [
+        "//cc/util:status",
+    ],
+)
+
+cc_library(
+    name = "streaming_aead_encrypting_stream",
+    srcs = ["streaming_aead_encrypting_stream.cc"],
+    hdrs = ["streaming_aead_encrypting_stream.h"],
+    deps = [
+        ":stream_segment_encrypter",
+        "//cc:output_stream",
+        "//cc/util:statusor",
+    ],
+)
+
+cc_library(
+    name = "nonce_based_streaming_aead",
+    srcs = ["nonce_based_streaming_aead.cc"],
+    hdrs = ["nonce_based_streaming_aead.h"],
+    deps = [
+        ":stream_segment_encrypter",
+        ":streaming_aead_encrypting_stream",
+        "//cc:input_stream",
+        "//cc:output_stream",
+        "//cc:streaming_aead",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 cc_test(
