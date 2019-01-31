@@ -431,6 +431,8 @@ cc_library(
 cc_library(
     name = "stream_segment_encrypter",
     hdrs = ["stream_segment_encrypter.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//cc/util:status",
     ],
@@ -440,6 +442,8 @@ cc_library(
     name = "streaming_aead_encrypting_stream",
     srcs = ["streaming_aead_encrypting_stream.cc"],
     hdrs = ["streaming_aead_encrypting_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":stream_segment_encrypter",
         "//cc:output_stream",
@@ -451,6 +455,8 @@ cc_library(
     name = "nonce_based_streaming_aead",
     srcs = ["nonce_based_streaming_aead.cc"],
     hdrs = ["nonce_based_streaming_aead.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":stream_segment_encrypter",
         ":streaming_aead_encrypting_stream",
