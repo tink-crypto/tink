@@ -23,13 +23,16 @@ import (
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/ed25519"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
 
+	subtedaead "github.com/google/tink/go/subtle/daead"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	aspb "github.com/google/tink/proto/aes_siv_go_proto"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
@@ -103,6 +106,18 @@ func (h *DummyMAC) VerifyMAC(mac []byte, data []byte) error {
 // NewTestAESGCMKeyset creates a new Keyset containing an AESGCMKey.
 func NewTestAESGCMKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
 	keyData := NewAESGCMKeyData(16)
+	return NewTestKeyset(keyData, primaryOutputPrefixType)
+}
+
+// NewTestAESSIVKeyset creates a new Keyset containing an AesSivKey.
+func NewTestAESSIVKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
+	keyValue := random.GetRandomBytes(subtedaead.AESSIVKeySize)
+	key := &aspb.AesSivKey{
+		Version:  daead.AESSIVKeyVersion,
+		KeyValue: keyValue,
+	}
+	serializedKey, _ := proto.Marshal(key)
+	keyData := tink.CreateKeyData(daead.AESSIVTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
 	return NewTestKeyset(keyData, primaryOutputPrefixType)
 }
 
