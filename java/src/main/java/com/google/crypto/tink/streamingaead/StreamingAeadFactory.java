@@ -24,32 +24,21 @@ import com.google.crypto.tink.StreamingAead;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods for obtaining {@link StreamingAead} instances.
+ * Deprecated class to create {@code StreamingAead} primitives. Instead of using this class, make
+ * sure that the {@code StreamingAeadWrapper} is registered in your binary, then call {@code
+ * keysetHandle.GetPrimitive(StreamingAead.class)}. The required registration happens automatically
+ * if you called one of the following in your binary:
  *
- * <h3>Usage</h3>
+ * <ul>
+ *   <li>{@code StreamingAeadConfig.register()}
+ *   <li>{@code TinkConfig.register()}
+ * </ul>
  *
- * <pre>{@code
- * KeysetHandle keysetHandle = ...;
- * StreamingAead streamingAead = StreamingAeadFactory.getPrimitive(keysetHandle);
- * java.nio.channels.FileChannel ciphertextDestination =
- *     new FileOutputStream(ciphertextFile).getChannel();
- * byte[] aad = ...
- * WritableByteChannel encryptingChannel = s.newEncryptingChannel(ciphertextDestination, aad);
- *
- * while ( ... ) {
- *   int r = encryptingChannel.write(buffer);
- *   ...
- * }
- * encryptingChannel.close();
- * }</pre>
- *
- * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
- * it uses the primary key in the keyset. To decrypt, the primitive tries the enabled keys from the
- * keyset to select the right key for decryption. All keys in a keyset of StreamingAead have type
- * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
- *
+ * @deprecated Use {@code keysetHandle.GetPrimitive(StreamingAead.class)} after registering the
+ *     {@code StreamingAeadWrapper} instead.
  * @since 1.1.0
  */
+@Deprecated
 public final class StreamingAeadFactory {
   /**
    * @return a StreamingAead primitive from a {@code keysetHandle}.
