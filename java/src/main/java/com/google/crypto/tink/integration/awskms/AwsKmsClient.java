@@ -109,7 +109,7 @@ public final class AwsKmsClient implements KmsClient {
   }
 
   /** Loads AWS credentials from a provider. */
-  private KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
+  public KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
       throws GeneralSecurityException {
     try {
       this.client = AWSKMSClientBuilder.standard().withCredentials(provider).build();
