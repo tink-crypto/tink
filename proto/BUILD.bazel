@@ -869,6 +869,7 @@ tink_objc_proto_library(
         ":aes_eax_objc_pb",
         ":aes_gcm_hkdf_streaming_objc_pb",
         ":aes_gcm_objc_pb",
+        ":aes_siv_objc_pb",
         ":chacha20_poly1305_objc_pb",
         ":common_objc_pb",
         ":config_objc_pb",

@@ -16,6 +16,10 @@ PUBLIC_APIS = [
     "TINKAllConfig.h",
     "TINKBinaryKeysetReader.h",
     "TINKConfig.h",
+    "TINKDeterministicAead.h",
+    "TINKDeterministicAeadConfig.h",
+    "TINKDeterministicAeadFactory.h",
+    "TINKDeterministicAeadKeyTemplate.h",
     "TINKHybridConfig.h",
     "TINKHybridDecrypt.h",
     "TINKHybridDecryptFactory.h",
@@ -48,6 +52,10 @@ PUBLIC_API_DEPS = [
     ":all_config",
     ":binary_keyset_reader",
     ":config",
+    ":deterministic_aead",
+    ":deterministic_aead_config",
+    ":deterministic_aead_factory",
+    ":deterministic_aead_key_template",
     ":hybrid_config",
     ":hybrid_decrypt",
     ":hybrid_decrypt_factory",
@@ -320,6 +328,70 @@ objc_library(
         ":key_template",
         ":tink_cc_pb",
         "//cc/aead:aead_key_templates",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+############################
+#    Deterministic Aead    #
+############################
+
+objc_library(
+    name = "deterministic_aead",
+    hdrs = ["TINKDeterministicAead.h"],
+)
+
+objc_library(
+    name = "deterministic_aead_internal",
+    srcs = ["daead/TINKDeterministicAeadInternal.mm"],
+    hdrs = ["daead/TINKDeterministicAeadInternal.h"],
+    deps = [
+        ":deterministic_aead",
+        ":keyset_handle",
+        "//cc:deterministic_aead",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+objc_library(
+    name = "deterministic_aead_config",
+    srcs = ["daead/TINKDeterministicAeadConfig.mm"],
+    hdrs = ["TINKDeterministicAeadConfig.h"],
+    deps = [
+        ":registry_config",
+        "//cc/daead:deterministic_aead_config",
+        "//cc/util:errors",
+        "//objc/util:errors",
+        "//objc/util:strings",
+    ],
+)
+
+objc_library(
+    name = "deterministic_aead_factory",
+    srcs = ["daead/TINKDeterministicAeadFactory.mm"],
+    hdrs = ["TINKDeterministicAeadFactory.h"],
+    deps = [
+        ":deterministic_aead",
+        ":deterministic_aead_internal",
+        ":keyset_handle",
+        "//cc:keyset_handle",
+        "//cc/daead:deterministic_aead_factory",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
+    name = "deterministic_aead_key_template",
+    srcs = ["daead/TINKDeterministicAeadKeyTemplate.mm"],
+    hdrs = ["TINKDeterministicAeadKeyTemplate.h"],
+    deps = [
+        ":key_template",
+        ":tink_cc_pb",
+        "//cc/daead:deterministic_aead_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
     ],
