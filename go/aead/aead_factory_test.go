@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/insecure"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
@@ -42,7 +43,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("aead.New failed: %s", err)
 	}
-	expectedPrefix, _ := tink.OutputPrefix(primaryKey)
+	expectedPrefix, _ := format.OutputPrefix(primaryKey)
 	if err := validateAEADFactoryCipher(a, a, expectedPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
@@ -58,14 +59,14 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("aead.New failed: %s", err)
 	}
-	if err := validateAEADFactoryCipher(a2, a, tink.RawPrefix); err != nil {
+	if err := validateAEADFactoryCipher(a2, a, format.RawPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
 
 	// encrypt with a random key not in the keyset, decrypt with the keyset should fail
 	keyset2 = testutil.NewTestAESGCMKeyset(tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
-	expectedPrefix, _ = tink.OutputPrefix(primaryKey)
+	expectedPrefix, _ = format.OutputPrefix(primaryKey)
 	keysetHandle2, _ = insecure.KeysetHandle(&tink.MemKeyset{Keyset: keyset2})
 	a2, err = aead.New(keysetHandle2)
 	if err != nil {
@@ -88,7 +89,7 @@ func TestFactoryRawKeyAsPrimary(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot get primitive from keyset handle: %s", err)
 	}
-	if err := validateAEADFactoryCipher(a, a, tink.RawPrefix); err != nil {
+	if err := validateAEADFactoryCipher(a, a, format.RawPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
 }

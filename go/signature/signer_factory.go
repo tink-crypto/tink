@@ -17,6 +17,7 @@ package signature
 import (
 	"fmt"
 
+	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -59,7 +60,7 @@ func (s *signerSet) Sign(data []byte) ([]byte, error) {
 	var signedData []byte
 	if primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		signedData = append(signedData, data...)
-		signedData = append(signedData, tink.LegacyStartByte)
+		signedData = append(signedData, format.LegacyStartByte)
 	} else {
 		signedData = data
 	}

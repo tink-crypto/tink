@@ -1,0 +1,24 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+
+licenses(["notice"])  # Apache 2.0 # keep
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["format.go"],
+    importpath = "github.com/google/tink/go/format",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:tink_go_proto",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["format_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//proto:tink_go_proto",
+    ],
+)

@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -57,19 +58,20 @@ var errInvalidSignature = errors.New("verifier_factory: invalid signature")
 
 // Verify checks whether the given signature is a valid signature of the given data.
 func (v *verifierSet) Verify(signature, data []byte) error {
-	if len(signature) < tink.NonRawPrefixSize {
+	prefixSize := format.NonRawPrefixSize
+	if len(signature) < prefixSize {
 		return errInvalidSignature
 	}
 	// try non-raw keys
-	prefix := signature[:tink.NonRawPrefixSize]
-	signatureNoPrefix := signature[tink.NonRawPrefixSize:]
+	prefix := signature[:prefixSize]
+	signatureNoPrefix := signature[prefixSize:]
 	entries, err := v.ps.EntriesForPrefix(string(prefix))
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
 			var signedData []byte
 			if entries[i].PrefixType == tinkpb.OutputPrefixType_LEGACY {
 				signedData = append(signedData, data...)
-				signedData = append(signedData, tink.LegacyStartByte)
+				signedData = append(signedData, format.LegacyStartByte)
 			} else {
 				signedData = data
 			}

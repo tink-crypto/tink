@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/insecure"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
@@ -41,7 +42,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("daead.New failed: %s", err)
 	}
-	expectedPrefix, _ := tink.OutputPrefix(primaryKey)
+	expectedPrefix, _ := format.OutputPrefix(primaryKey)
 	if err := validateDAEADFactoryCipher(d, d, expectedPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
@@ -58,7 +59,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 		if err != nil {
 			t.Errorf("daead.New failed: %s", err)
 		}
-		if err := validateDAEADFactoryCipher(d2, d, tink.RawPrefix); err != nil {
+		if err := validateDAEADFactoryCipher(d2, d, format.RawPrefix); err != nil {
 			t.Errorf("invalid cipher: %s", err)
 		}
 	}
@@ -75,7 +76,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 		if err != nil {
 			t.Errorf("daead.New failed: %s", err)
 		}
-		expectedPrefix, _ = tink.OutputPrefix(newPK)
+		expectedPrefix, _ = format.OutputPrefix(newPK)
 		err = validateDAEADFactoryCipher(d2, d, expectedPrefix)
 		if err == nil || !strings.Contains(err.Error(), "decryption failed") {
 			t.Errorf("expect decryption to fail with random key: %s", err)
@@ -94,7 +95,7 @@ func TestFactoryRawKeyAsPrimary(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot get primitive from keyset handle: %s", err)
 	}
-	if err := validateDAEADFactoryCipher(d, d, tink.RawPrefix); err != nil {
+	if err := validateDAEADFactoryCipher(d, d, format.RawPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
 }

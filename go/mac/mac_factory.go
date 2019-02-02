@@ -17,6 +17,7 @@ package mac
 import (
 	"fmt"
 
+	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/tink"
 )
 
@@ -72,7 +73,7 @@ var errInvalidMAC = fmt.Errorf("mac_factory: invalid mac")
 func (m *primitiveSet) VerifyMAC(mac, data []byte) error {
 	// This also rejects raw MAC with size of 4 bytes or fewer. Those MACs are
 	// clearly insecure, thus should be discouraged.
-	prefixSize := tink.NonRawPrefixSize
+	prefixSize := format.NonRawPrefixSize
 	if len(mac) <= prefixSize {
 		return errInvalidMAC
 	}

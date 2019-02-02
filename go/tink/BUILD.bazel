@@ -8,7 +8,6 @@ go_library(
     name = "go_default_library",
     srcs = [
         "aead.go",
-        "crypto_format.go",
         "deterministic_aead.go",
         "hybrid_decrypt.go",
         "hybrid_encrypt.go",
@@ -30,6 +29,7 @@ go_library(
     importpath = "github.com/google/tink/go/tink",
     visibility = ["//visibility:public"],
     deps = [
+        "//go/format:go_default_library",
         "//go/internal:go_default_library",
         "//go/subtle/random:go_default_library",
         "//proto:common_go_proto",
@@ -41,7 +41,6 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "crypto_format_test.go",
         "keyset_handle_test.go",
         "keyset_manager_test.go",
         "primitive_set_test.go",
@@ -51,6 +50,7 @@ go_test(
     embed = [":go_default_library"],
     deps = [
         "//go/aead:go_default_library",
+        "//go/format:go_default_library",
         "//go/internal:go_default_library",
         "//go/mac:go_default_library",
         "//go/subtle/aead:go_default_library",

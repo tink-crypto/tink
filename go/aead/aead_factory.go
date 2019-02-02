@@ -17,6 +17,7 @@ package aead
 import (
 	"fmt"
 
+	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/tink"
 )
 
@@ -70,7 +71,7 @@ func (a *primitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
 // ciphertext is authenticated.
 func (a *primitiveSet) Decrypt(ct, ad []byte) ([]byte, error) {
 	// try non-raw keys
-	prefixSize := tink.NonRawPrefixSize
+	prefixSize := format.NonRawPrefixSize
 	if len(ct) > prefixSize {
 		prefix := ct[:prefixSize]
 		ctNoPrefix := ct[prefixSize:]

@@ -17,6 +17,7 @@ package tink
 import (
 	"fmt"
 
+	"github.com/google/tink/go/format"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -70,7 +71,7 @@ func NewPrimitiveSet() *PrimitiveSet {
 
 // RawEntries returns all primitives in the set that have RAW prefix.
 func (ps *PrimitiveSet) RawEntries() ([]*Entry, error) {
-	return ps.EntriesForPrefix(RawPrefix)
+	return ps.EntriesForPrefix(format.RawPrefix)
 }
 
 // EntriesForPrefix returns all primitives in the set that have the given prefix.
@@ -87,7 +88,7 @@ func (ps *PrimitiveSet) Add(p interface{}, key *tinkpb.Keyset_Key) (*Entry, erro
 	if key == nil || p == nil {
 		return nil, fmt.Errorf("primitive_set: key and primitive must not be nil")
 	}
-	prefix, err := OutputPrefix(key)
+	prefix, err := format.OutputPrefix(key)
 	if err != nil {
 		return nil, fmt.Errorf("primitive_set: %s", err)
 	}

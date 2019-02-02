@@ -17,6 +17,7 @@ package daead
 import (
 	"fmt"
 
+	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/tink"
 )
 
@@ -66,7 +67,7 @@ func (d *primitiveSet) EncryptDeterministically(pt, aad []byte) ([]byte, error) 
 // ciphertext is authenticated.
 func (d *primitiveSet) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
 	// try non-raw keys
-	prefixSize := tink.NonRawPrefixSize
+	prefixSize := format.NonRawPrefixSize
 	if len(ct) > prefixSize {
 		prefix := ct[:prefixSize]
 		ctNoPrefix := ct[prefixSize:]
