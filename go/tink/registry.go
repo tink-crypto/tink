@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/primitiveset"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -102,7 +103,7 @@ func Primitive(typeURL string, sk []byte) (interface{}, error) {
 //
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
-func Primitives(kh *KeysetHandle) (*PrimitiveSet, error) {
+func Primitives(kh *KeysetHandle) (*primitiveset.PrimitiveSet, error) {
 	return PrimitivesWithKeyManager(kh, nil)
 }
 
@@ -118,7 +119,7 @@ func Primitives(kh *KeysetHandle) (*PrimitiveSet, error) {
 //
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
-func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*PrimitiveSet, error) {
+func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*primitiveset.PrimitiveSet, error) {
 	if kh == nil {
 		return nil, fmt.Errorf("registry: invalid keyset handle")
 	}
@@ -126,7 +127,7 @@ func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*PrimitiveSet, e
 	if err := ValidateKeyset(keyset); err != nil {
 		return nil, fmt.Errorf("registry: invalid keyset: %s", err)
 	}
-	primitiveSet := NewPrimitiveSet()
+	primitiveSet := primitiveset.New()
 	for _, key := range keyset.Key {
 		if key.Status != tinkpb.KeyStatusType_ENABLED {
 			continue

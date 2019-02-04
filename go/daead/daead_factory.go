@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/primitiveset"
 	"github.com/google/tink/go/tink"
 )
 
@@ -40,7 +41,7 @@ func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Determin
 // primitiveSet is an DeterministicAEAD implementation that uses the underlying primitive set
 // for deterministic encryption and decryption.
 type primitiveSet struct {
-	ps *tink.PrimitiveSet
+	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that primitiveSet implements the DeterministicAEAD interface.

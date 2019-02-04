@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink_test
+package primitiveset_test
 
 import (
 	"fmt"
@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/primitiveset"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -44,7 +44,7 @@ func createKeyset() []*tinkpb.Keyset_Key {
 
 func TestPrimitiveSetBasic(t *testing.T) {
 	var err error
-	ps := tink.NewPrimitiveSet()
+	ps := primitiveset.New()
 	if ps.Primary != nil || ps.Entries == nil {
 		t.Errorf("expect primary to be nil and primitives is initialized")
 	}
@@ -52,7 +52,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 	keys := createKeyset()
 	// add all test primitives
 	macs := make([]testutil.DummyMAC, len(keys))
-	entries := make([]*tink.Entry, len(macs))
+	entries := make([]*primitiveset.Entry, len(macs))
 	for i := 0; i < len(macs); i++ {
 		macs[i] = testutil.DummyMAC{Name: fmt.Sprintf("Mac#%d", i)}
 		entries[i], err = ps.Add(macs[i], keys[i])
@@ -114,7 +114,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 }
 
 func TestAddWithInvalidInput(t *testing.T) {
-	ps := tink.NewPrimitiveSet()
+	ps := primitiveset.New()
 	// nil input
 	key := testutil.NewDummyKey(0, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK)
 	if _, err := ps.Add(nil, key); err == nil {
@@ -130,7 +130,7 @@ func TestAddWithInvalidInput(t *testing.T) {
 	}
 }
 
-func validateEntryList(entries []*tink.Entry,
+func validateEntryList(entries []*primitiveset.Entry,
 	macs []testutil.DummyMAC,
 	statuses []tinkpb.KeyStatusType,
 	prefixTypes []tinkpb.OutputPrefixType) bool {
@@ -146,7 +146,7 @@ func validateEntryList(entries []*tink.Entry,
 }
 
 // Compares an entry with the testutil.DummyMAC that was used to create the entry
-func validateEntry(entry *tink.Entry,
+func validateEntry(entry *primitiveset.Entry,
 	testMac testutil.DummyMAC,
 	status tinkpb.KeyStatusType,
 	outputPrefixType tinkpb.OutputPrefixType) bool {

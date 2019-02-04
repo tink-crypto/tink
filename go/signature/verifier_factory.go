@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/primitiveset"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -42,13 +43,13 @@ func NewVerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.
 // verifierSet is an Signer implementation that uses the
 // underlying primitive set for signing.
 type verifierSet struct {
-	ps *tink.PrimitiveSet
+	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that verifierSet implements the Verifier interface.
 var _ tink.Verifier = (*verifierSet)(nil)
 
-func newVerifierSet(ps *tink.PrimitiveSet) *verifierSet {
+func newVerifierSet(ps *primitiveset.PrimitiveSet) *verifierSet {
 	ret := new(verifierSet)
 	ret.ps = ps
 	return ret

@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/primitiveset"
 	"github.com/google/tink/go/tink"
 )
 
@@ -39,13 +40,13 @@ func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.MAC, err
 // primitiveSet is a MAC implementation that uses the underlying primitive set to compute and
 // verify MACs.
 type primitiveSet struct {
-	ps *tink.PrimitiveSet
+	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that primitiveSet implements the Mac interface.
 var _ tink.MAC = (*primitiveSet)(nil)
 
-func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
+func newPrimitiveSet(ps *primitiveset.PrimitiveSet) *primitiveSet {
 	ret := new(primitiveSet)
 	ret.ps = ps
 	return ret

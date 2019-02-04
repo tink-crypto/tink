@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/primitiveset"
 	"github.com/google/tink/go/tink"
 )
 
@@ -39,13 +40,13 @@ func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.AEAD, er
 // primitiveSet is an AEAD implementation that uses the underlying primitive set for encryption
 // and decryption.
 type primitiveSet struct {
-	ps *tink.PrimitiveSet
+	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that primitiveSet implements the AEAD interface.
 var _ tink.AEAD = (*primitiveSet)(nil)
 
-func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
+func newPrimitiveSet(ps *primitiveset.PrimitiveSet) *primitiveSet {
 	ret := new(primitiveSet)
 	ret.ps = ps
 	return ret

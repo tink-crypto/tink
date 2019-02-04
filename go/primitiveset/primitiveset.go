@@ -12,7 +12,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+// Package primitiveset is a container for a set of primitives (i.e. implementations of cryptographic
+// primitives offered by Tink). It provides also additional properties for the primitives
+// it holds. In particular, one of the primitives in the set can be distinguished as
+// "the primary" one.
+package primitiveset
 
 import (
 	"fmt"
@@ -39,11 +43,6 @@ func newEntry(p interface{}, prefix string, prefixType tinkpb.OutputPrefixType, 
 	}
 }
 
-// PrimitiveSet is a container for a set of primitives (i.e. implementations of cryptographic
-// primitives offered by Tink). It provides also additional properties for the primitives
-// it holds. In particular, one of the primitives in the set can be distinguished as
-// "the primary" one.
-
 // PrimitiveSet is used for supporting key rotation: primitives in a set correspond to keys in a
 // keyset. Users will usually work with primitive instances, which essentially wrap primitive
 // sets. For example an instance of an AEAD-primitive for a given keyset holds a set of
@@ -61,8 +60,8 @@ type PrimitiveSet struct {
 	Entries map[string][]*Entry
 }
 
-// NewPrimitiveSet returns an empty instance of PrimitiveSet.
-func NewPrimitiveSet() *PrimitiveSet {
+// New returns an empty instance of PrimitiveSet.
+func New() *PrimitiveSet {
 	return &PrimitiveSet{
 		Primary: nil,
 		Entries: make(map[string][]*Entry),

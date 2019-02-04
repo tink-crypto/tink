@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/primitiveset"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -40,13 +41,13 @@ func NewSignerWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Si
 
 // signerSet is an Signer implementation that uses the underlying primitive set for signing.
 type signerSet struct {
-	ps *tink.PrimitiveSet
+	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that signerSet implements the Signer interface.
 var _ tink.Signer = (*signerSet)(nil)
 
-func newSignerSet(ps *tink.PrimitiveSet) *signerSet {
+func newSignerSet(ps *primitiveset.PrimitiveSet) *signerSet {
 	ret := new(signerSet)
 	ret.ps = ps
 	return ret
