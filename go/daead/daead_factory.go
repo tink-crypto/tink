@@ -23,11 +23,11 @@ import (
 
 // New returns a DeterministicAEAD primitive from the given keyset handle.
 func New(handle *tink.KeysetHandle) (tink.DeterministicAEAD, error) {
-	return newWithKeyManager(handle, nil /*keyManager*/)
+	return NewWithKeyManager(handle, nil /*keyManager*/)
 }
 
-// newWithKeyManager returns a DeterministicAEAD primitive from the given keyset handle and custom key manager.
-func newWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.DeterministicAEAD, error) {
+// NewWithKeyManager returns a DeterministicAEAD primitive from the given keyset handle and custom key manager.
+func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.DeterministicAEAD, error) {
 	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("daead_factory: cannot obtain primitive set: %s", err)
