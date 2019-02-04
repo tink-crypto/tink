@@ -286,18 +286,33 @@ func NewAESGCMKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
 	}
 }
 
+// NewHMACParams returns a new HMACParams.
+func NewHMACParams(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacParams {
+	return &hmacpb.HmacParams{
+		Hash:    hashType,
+		TagSize: tagSize,
+	}
+}
+
 // NewHMACKey creates a new HMACKey with the specified parameters.
 func NewHMACKey(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacKey {
-	params := mac.NewHMACParams(hashType, tagSize)
+	params := NewHMACParams(hashType, tagSize)
 	keyValue := random.GetRandomBytes(20)
-	return mac.NewHMACKey(params, mac.HMACKeyVersion, keyValue)
+	return &hmacpb.HmacKey{
+		Version:  mac.HMACKeyVersion,
+		Params:   params,
+		KeyValue: keyValue,
+	}
 }
 
 // NewHMACKeyFormat creates a new HMACKeyFormat with the specified parameters.
 func NewHMACKeyFormat(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacKeyFormat {
-	params := mac.NewHMACParams(hashType, tagSize)
+	params := NewHMACParams(hashType, tagSize)
 	keySize := uint32(20)
-	return mac.NewHMACKeyFormat(params, keySize)
+	return &hmacpb.HmacKeyFormat{
+		Params:  params,
+		KeySize: keySize,
+	}
 }
 
 // NewHMACKeysetManager returns a new KeysetManager that contains a HMACKey.

@@ -11,7 +11,6 @@ go_library(
         "init.go",
         "mac_factory.go",
         "mac_key_templates.go",
-        "proto_util.go",
     ],
     importpath = "github.com/google/tink/go/mac",
     visibility = ["//visibility:public"],

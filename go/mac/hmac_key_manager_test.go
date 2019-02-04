@@ -214,7 +214,7 @@ func genInvalidHMACKeys() []proto.Message {
 	shortKey.KeyValue = []byte{1, 1}
 	return []proto.Message{
 		// not a HMACKey
-		mac.NewHMACParams(commonpb.HashType_SHA256, 32),
+		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
 		// bad version
 		badVersionKey,
 		// tag size too big
@@ -235,7 +235,7 @@ func genInvalidHMACKeyFormats() []proto.Message {
 	shortKeyFormat.KeySize = 1
 	return []proto.Message{
 		// not a HMACKeyFormat
-		mac.NewHMACParams(commonpb.HashType_SHA256, 32),
+		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
 		// tag size too big
 		testutil.NewHMACKeyFormat(commonpb.HashType_SHA1, 21),
 		testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 33),

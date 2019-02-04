@@ -81,7 +81,11 @@ func (km *hmacKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, err
 		return nil, fmt.Errorf("hmac_key_manager: invalid key format: %s", err)
 	}
 	keyValue := random.GetRandomBytes(keyFormat.KeySize)
-	return NewHMACKey(keyFormat.Params, HMACKeyVersion, keyValue), nil
+	return &hmacpb.HmacKey{
+		Version:  HMACKeyVersion,
+		Params:   keyFormat.Params,
+		KeyValue: keyValue,
+	}, nil
 }
 
 // NewKeyData generates a new KeyData according to specification in the given
