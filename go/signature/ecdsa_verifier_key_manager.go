@@ -60,7 +60,7 @@ func (km *ecdsaVerifierKeyManager) Primitive(serializedKey []byte) (interface{},
 	if err := km.validateKey(key); err != nil {
 		return nil, fmt.Errorf("ecdsa_verifier_key_manager: %s", err)
 	}
-	hash, curve, encoding := GetECDSAParamNames(key.Params)
+	hash, curve, encoding := getECDSAParamNames(key.Params)
 	ret, err := subtleSignature.NewECDSAVerifier(hash, curve, encoding, key.X, key.Y)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_verifier_key_manager: invalid key: %s", err)
@@ -94,6 +94,6 @@ func (km *ecdsaVerifierKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) erro
 	if err := tink.ValidateVersion(key.Version, ECDSAVerifierKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_verifier_key_manager: %s", err)
 	}
-	hash, curve, encoding := GetECDSAParamNames(key.Params)
+	hash, curve, encoding := getECDSAParamNames(key.Params)
 	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
 }

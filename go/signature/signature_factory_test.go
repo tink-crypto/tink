@@ -90,7 +90,7 @@ func newECDSAKeysetKeypair(hashType commonpb.HashType,
 	curve commonpb.EllipticCurveType,
 	outputPrefixType tinkpb.OutputPrefixType,
 	keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
-	key := testutil.NewECDSAPrivateKey(hashType, curve)
+	key := testutil.NewRandomECDSAPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
 	keyData := tink.CreateKeyData(signature.ECDSASignerTypeURL,
 		serializedKey,

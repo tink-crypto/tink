@@ -79,9 +79,16 @@ func (km *ed25519SignerKeyManager) NewKey(serializedKey []byte) (proto.Message, 
 		return nil, fmt.Errorf("ed25519_signer_key_manager: cannot generate ED25519 key: %s", err)
 	}
 
-	pub := NewED25519PublicKey(ED25519SignerKeyVersion, &public)
-	priv := NewED25519PrivateKey(ED25519SignerKeyVersion, pub, &private)
-	return priv, nil
+	publicProto := &ed25519pb.Ed25519PublicKey{
+		Version:  ED25519SignerKeyVersion,
+		KeyValue: public,
+	}
+	privateProto := &ed25519pb.Ed25519PrivateKey{
+		Version:   ED25519SignerKeyVersion,
+		PublicKey: publicProto,
+		KeyValue:  private.Seed(),
+	}
+	return privateProto, nil
 }
 
 // NewKeyData creates a new KeyData according to specification in  the given

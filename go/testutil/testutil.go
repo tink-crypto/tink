@@ -150,22 +150,57 @@ func NewDummyKey(keyID int, status tinkpb.KeyStatusType, outputPrefixType tinkpb
 	}
 }
 
-// NewECDSAPrivateKey creates an ECDSAPrivateKey with a randomly generated key material.
-func NewECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPrivateKey {
-	curveName := commonpb.EllipticCurveType_name[int32(curve)]
-	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
-	params := signature.NewECDSAParams(hashType,
-		curve,
-		ecdsapb.EcdsaSignatureEncoding_DER)
-	publicKey := signature.NewECDSAPublicKey(signature.ECDSAVerifierKeyVersion,
-		params, priv.X.Bytes(), priv.Y.Bytes())
-	return signature.NewECDSAPrivateKey(signature.ECDSASignerKeyVersion,
-		publicKey, priv.D.Bytes())
+// NewECDSAParams creates a ECDSAParams with the specified parameters.
+func NewECDSAParams(hashType commonpb.HashType,
+	curve commonpb.EllipticCurveType,
+	encoding ecdsapb.EcdsaSignatureEncoding) *ecdsapb.EcdsaParams {
+	return &ecdsapb.EcdsaParams{
+		HashType: hashType,
+		Curve:    curve,
+		Encoding: encoding,
+	}
 }
 
-// NewECDSAPrivateKeyData creates a KeyData containing an ECDSAPrivateKey with a randomly generated key material.
-func NewECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *tinkpb.KeyData {
-	key := NewECDSAPrivateKey(hashType, curve)
+// NewECDSAKeyFormat creates a ECDSAKeyFormat with the specified parameters.
+func NewECDSAKeyFormat(params *ecdsapb.EcdsaParams) *ecdsapb.EcdsaKeyFormat {
+	return &ecdsapb.EcdsaKeyFormat{Params: params}
+}
+
+// NewECDSAPrivateKey creates a ECDSAPrivateKey with the specified paramaters.
+func NewECDSAPrivateKey(version uint32,
+	publicKey *ecdsapb.EcdsaPublicKey,
+	keyValue []byte) *ecdsapb.EcdsaPrivateKey {
+	return &ecdsapb.EcdsaPrivateKey{
+		Version:   version,
+		PublicKey: publicKey,
+		KeyValue:  keyValue,
+	}
+}
+
+// NewECDSAPublicKey creates a ECDSAPublicKey with the specified paramaters.
+func NewECDSAPublicKey(version uint32,
+	params *ecdsapb.EcdsaParams,
+	x []byte, y []byte) *ecdsapb.EcdsaPublicKey {
+	return &ecdsapb.EcdsaPublicKey{
+		Version: version,
+		Params:  params,
+		X:       x,
+		Y:       y,
+	}
+}
+
+// NewRandomECDSAPrivateKey creates an ECDSAPrivateKey with a randomly generated key material.
+func NewRandomECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPrivateKey {
+	curveName := commonpb.EllipticCurveType_name[int32(curve)]
+	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
+	params := NewECDSAParams(hashType, curve, ecdsapb.EcdsaSignatureEncoding_DER)
+	publicKey := NewECDSAPublicKey(signature.ECDSAVerifierKeyVersion, params, priv.X.Bytes(), priv.Y.Bytes())
+	return NewECDSAPrivateKey(signature.ECDSASignerKeyVersion, publicKey, priv.D.Bytes())
+}
+
+// NewRandomECDSAPrivateKeyData creates a KeyData containing an ECDSAPrivateKey with a randomly generated key material.
+func NewRandomECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *tinkpb.KeyData {
+	key := NewRandomECDSAPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
 	return &tinkpb.KeyData{
 		TypeUrl:         signature.ECDSASignerTypeURL,
@@ -174,17 +209,32 @@ func NewECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticC
 	}
 }
 
-// NewECDSAPublicKey creates an ECDSAPublicKey with the specified parameters.
-func NewECDSAPublicKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPublicKey {
-	return NewECDSAPrivateKey(hashType, curve).PublicKey
+// NewRandomECDSAPublicKey creates an ECDSAPublicKe with a randomly generated key material.
+func NewRandomECDSAPublicKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPublicKey {
+	return NewRandomECDSAPrivateKey(hashType, curve).PublicKey
+}
+
+// GetECDSAParamNames returns the string representations of each parameter in
+// the given ECDSAParams.
+func GetECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
+	hashName := tink.GetHashName(params.HashType)
+	curveName := tink.GetCurveName(params.Curve)
+	encodingName := ecdsapb.EcdsaSignatureEncoding_name[int32(params.Encoding)]
+	return hashName, curveName, encodingName
 }
 
 // NewED25519PrivateKey creates an ED25519PrivateKey with a randomly generated key material.
 func NewED25519PrivateKey() *ed25519pb.Ed25519PrivateKey {
 	public, private, _ := ed25519.GenerateKey(rand.Reader)
-	pub := signature.NewED25519PublicKey(signature.ED25519SignerKeyVersion, &public)
-	return signature.NewED25519PrivateKey(signature.ED25519SignerKeyVersion,
-		pub, &private)
+	publicProto := &ed25519pb.Ed25519PublicKey{
+		Version:  signature.ED25519SignerKeyVersion,
+		KeyValue: public,
+	}
+	return &ed25519pb.Ed25519PrivateKey{
+		Version:   signature.ED25519SignerKeyVersion,
+		PublicKey: publicProto,
+		KeyValue:  private.Seed(),
+	}
 }
 
 // NewED25519PrivateKeyData creates a KeyData containing an ED25519PrivateKey with a randomly generated key material.
@@ -198,7 +248,7 @@ func NewED25519PrivateKeyData() *tinkpb.KeyData {
 	}
 }
 
-// NewED25519PublicKey creates an ED25519PublicKey with the specified parameters.
+// NewED25519PublicKey creates an ED25519PublicKey with a randomly generated key material.
 func NewED25519PublicKey() *ed25519pb.Ed25519PublicKey {
 	return NewED25519PrivateKey().PublicKey
 }

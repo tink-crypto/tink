@@ -64,7 +64,7 @@ func (km *ecdsaSignerKeyManager) Primitive(serializedKey []byte) (interface{}, e
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	hash, curve, encoding := GetECDSAParamNames(key.PublicKey.Params)
+	hash, curve, encoding := getECDSAParamNames(key.PublicKey.Params)
 	ret, err := subtleSignature.NewECDSASigner(hash, curve, encoding, key.KeyValue)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_signer_key_manager: %s", err)
@@ -93,8 +93,8 @@ func (km *ecdsaSignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Messa
 	}
 
 	keyValue := tmpKey.D.Bytes()
-	pub := NewECDSAPublicKey(ECDSASignerKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
-	priv := NewECDSAPrivateKey(ECDSASignerKeyVersion, pub, keyValue)
+	pub := newECDSAPublicKey(ECDSASignerKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
+	priv := newECDSAPrivateKey(ECDSASignerKeyVersion, pub, keyValue)
 	return priv, nil
 }
 
@@ -148,12 +148,12 @@ func (km *ecdsaSignerKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error
 	if err := tink.ValidateVersion(key.Version, ECDSASignerKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_signer_key_manager: invalid key: %s", err)
 	}
-	hash, curve, encoding := GetECDSAParamNames(key.PublicKey.Params)
+	hash, curve, encoding := getECDSAParamNames(key.PublicKey.Params)
 	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
 }
 
 // validateKeyFormat validates the given ECDSAKeyFormat.
 func (km *ecdsaSignerKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
-	hash, curve, encoding := GetECDSAParamNames(format.Params)
+	hash, curve, encoding := getECDSAParamNames(format.Params)
 	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
 }
