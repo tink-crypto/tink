@@ -13,7 +13,6 @@ go_library(
         "aes_gcm_key_manager.go",
         "chacha20poly1305_key_manager.go",
         "init.go",
-        "proto_util.go",
         "xchacha20poly1305_key_manager.go",
     ],
     importpath = "github.com/google/tink/go/aead",

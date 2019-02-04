@@ -37,7 +37,7 @@ func TestAESGCMGetPrimitiveBasic(t *testing.T) {
 		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
 	}
 	for _, keySize := range keySizes {
-		key := testutil.NewAESGCMKey(uint32(keySize))
+		key := testutil.NewAESGCMKey(aead.AESGCMKeyVersion, uint32(keySize))
 		serializedKey, _ := proto.Marshal(key)
 		p, err := keyManager.Primitive(serializedKey)
 		if err != nil {
@@ -77,7 +77,7 @@ func TestAESGCMNewKeyMultipleTimes(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
 	}
-	format := aead.NewAESGCMKeyFormat(32)
+	format := testutil.NewAESGCMKeyFormat(32)
 	serializedFormat, _ := proto.Marshal(format)
 	keys := make(map[string]bool)
 	nTest := 26
@@ -101,7 +101,7 @@ func TestAESGCMNewKeyBasic(t *testing.T) {
 		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
 	}
 	for _, keySize := range keySizes {
-		format := aead.NewAESGCMKeyFormat(uint32(keySize))
+		format := testutil.NewAESGCMKeyFormat(uint32(keySize))
 		serializedFormat, _ := proto.Marshal(format)
 		m, err := keyManager.NewKey(serializedFormat)
 		if err != nil {
@@ -143,7 +143,7 @@ func TestAESGCMNewKeyDataBasic(t *testing.T) {
 		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
 	}
 	for _, keySize := range keySizes {
-		format := aead.NewAESGCMKeyFormat(uint32(keySize))
+		format := testutil.NewAESGCMKeyFormat(uint32(keySize))
 		serializedFormat, _ := proto.Marshal(format)
 		keyData, err := keyManager.NewKeyData(serializedFormat)
 		if err != nil {
@@ -213,24 +213,24 @@ func TestAESGCMTypeURL(t *testing.T) {
 func genInvalidAESGCMKeys() []proto.Message {
 	return []proto.Message{
 		// not a AESGCMKey
-		aead.NewAESGCMKeyFormat(32),
+		testutil.NewAESGCMKeyFormat(32),
 		// bad key size
-		aead.NewAESGCMKey(aead.AESGCMKeyVersion, random.GetRandomBytes(17)),
-		aead.NewAESGCMKey(aead.AESGCMKeyVersion, random.GetRandomBytes(25)),
-		aead.NewAESGCMKey(aead.AESGCMKeyVersion, random.GetRandomBytes(33)),
+		testutil.NewAESGCMKey(aead.AESGCMKeyVersion, 17),
+		testutil.NewAESGCMKey(aead.AESGCMKeyVersion, 25),
+		testutil.NewAESGCMKey(aead.AESGCMKeyVersion, 33),
 		// bad version
-		aead.NewAESGCMKey(aead.AESGCMKeyVersion+1, random.GetRandomBytes(16)),
+		testutil.NewAESGCMKey(aead.AESGCMKeyVersion+1, 16),
 	}
 }
 
 func genInvalidAESGCMKeyFormats() []proto.Message {
 	return []proto.Message{
 		// not AESGCMKeyFormat
-		aead.NewAESGCMKey(aead.AESGCMKeyVersion, random.GetRandomBytes(16)),
+		testutil.NewAESGCMKey(aead.AESGCMKeyVersion, 16),
 		// invalid key size
-		aead.NewAESGCMKeyFormat(uint32(15)),
-		aead.NewAESGCMKeyFormat(uint32(23)),
-		aead.NewAESGCMKeyFormat(uint32(31)),
+		testutil.NewAESGCMKeyFormat(uint32(15)),
+		testutil.NewAESGCMKeyFormat(uint32(23)),
+		testutil.NewAESGCMKeyFormat(uint32(31)),
 	}
 }
 

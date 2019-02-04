@@ -254,27 +254,36 @@ func NewED25519PublicKey() *ed25519pb.Ed25519PublicKey {
 }
 
 // NewAESGCMKey creates a randomly generated AESGCMKey.
-func NewAESGCMKey(keySize uint32) *gcmpb.AesGcmKey {
+func NewAESGCMKey(keyVersion uint32, keySize uint32) *gcmpb.AesGcmKey {
 	keyValue := random.GetRandomBytes(keySize)
-	return aead.NewAESGCMKey(aead.AESGCMKeyVersion, keyValue)
+	return &gcmpb.AesGcmKey{
+		Version:  keyVersion,
+		KeyValue: keyValue,
+	}
 }
 
 // NewAESGCMKeyData creates a KeyData containing a randomly generated AESGCMKey.
 func NewAESGCMKeyData(keySize uint32) *tinkpb.KeyData {
-	keyValue := random.GetRandomBytes(keySize)
-	key := aead.NewAESGCMKey(aead.AESGCMKeyVersion, keyValue)
+	key := NewAESGCMKey(aead.AESGCMKeyVersion, keySize)
 	serializedKey, _ := proto.Marshal(key)
 	return tink.CreateKeyData(aead.AESGCMTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
 }
 
 // NewSerializedAESGCMKey creates a AESGCMKey with randomly generated key material.
 func NewSerializedAESGCMKey(keySize uint32) []byte {
-	key := NewAESGCMKey(keySize)
+	key := NewAESGCMKey(aead.AESGCMKeyVersion, keySize)
 	serializedKey, err := proto.Marshal(key)
 	if err != nil {
 		panic(fmt.Sprintf("cannot marshal AESGCMKey: %s", err))
 	}
 	return serializedKey
+}
+
+// NewAESGCMKeyFormat returns a new AESGCMKeyFormat.
+func NewAESGCMKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
+	return &gcmpb.AesGcmKeyFormat{
+		KeySize: keySize,
+	}
 }
 
 // NewHMACKey creates a new HMACKey with the specified parameters.
