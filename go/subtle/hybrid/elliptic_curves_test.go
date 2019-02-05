@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -601,12 +602,13 @@ func TestVectors(t *testing.T) {
 				default:
 					errPub = errors.New("invalid schema")
 				}
-				if errPub != nil && test.Result == "invalid" {
+				if errPub != nil && test.Result != "valid" {
 					t.Logf("test case %s failing as expected for invalid result : %v", tcID, err)
 					continue
 
 				}
-				if pubKey == nil {
+
+				if reflect.DeepEqual(&ECPublicKey{}, pubKey) {
 					t.Logf("error decoding public key in test case %s: %v", tcID, err)
 					// Some test vectors have incorrect public key encoding which
 					// leads to runtime errors. For more details please see the
