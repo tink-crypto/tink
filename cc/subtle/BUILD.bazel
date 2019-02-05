@@ -104,6 +104,40 @@ cc_library(
 )
 
 cc_library(
+    name = "ed25519_sign_boringssl",
+    srcs = ["ed25519_sign_boringssl.cc"],
+    hdrs = ["ed25519_sign_boringssl.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":subtle_util_boringssl",
+        "//cc:public_key_sign",
+        "//cc/util:errors",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+    ],
+)
+
+cc_library(
+    name = "ed25519_verify_boringssl",
+    srcs = ["ed25519_verify_boringssl.cc"],
+    hdrs = ["ed25519_verify_boringssl.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":subtle_util_boringssl",
+        "//cc:public_key_verify",
+        "//cc/util:errors",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+    ],
+)
+
+cc_library(
     name = "hkdf",
     srcs = ["hkdf.cc"],
     hdrs = ["hkdf.h"],
@@ -687,6 +721,51 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@rapidjson",
+    ],
+)
+
+cc_test(
+    name = "ed25519_sign_boringssl_test",
+    size = "small",
+    srcs = ["ed25519_sign_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":ed25519_sign_boringssl",
+        ":ed25519_verify_boringssl",
+        ":random",
+        ":subtle_util_boringssl",
+        "//cc:public_key_sign",
+        "//cc:public_key_verify",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ed25519_verify_boringssl_test",
+    size = "small",
+    srcs = ["ed25519_verify_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    deps = [
+        ":ed25519_sign_boringssl",
+        ":ed25519_verify_boringssl",
+        ":subtle_util_boringssl",
+        ":wycheproof_util",
+        "//cc:public_key_sign",
+        "//cc:public_key_verify",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
