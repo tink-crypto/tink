@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hybrid_test
+package hybrid
 
 import (
 	"encoding/hex"
@@ -20,7 +20,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/tink/go/subtle/hybrid"
 	"github.com/google/tink/go/subtle/random"
 )
 
@@ -118,7 +117,7 @@ func TestHKDFBasic(t *testing.T) {
 		s, _ := hex.DecodeString(test.salt)
 		i, _ := hex.DecodeString(test.info)
 
-		result, err := hybrid.ComputeHKDF(test.hashAlg, k, s, i, test.tagSize)
+		result, err := computeHKDF(test.hashAlg, k, s, i, test.tagSize)
 		r := hex.EncodeToString(result)
 		fmt.Printf("Test no: %d\n", ti)
 		fmt.Printf("Length of tag :%d\n", test.tagSize)
@@ -136,25 +135,25 @@ func TestHKDFBasic(t *testing.T) {
 
 func TestNewHMACWithInvalidInput(t *testing.T) {
 	// invalid hash algorithm
-	_, err := hybrid.ComputeHKDF("SHA224", random.GetRandomBytes(16), nil, nil, 32)
+	_, err := computeHKDF("SHA224", random.GetRandomBytes(16), nil, nil, 32)
 	if err == nil || !strings.Contains(err.Error(), "invalid hash algorithm") {
 		t.Errorf("expect an error when hash algorithm is invalid")
 	}
 	// tag too short
-	_, err = hybrid.ComputeHKDF("SHA256", random.GetRandomBytes(16), nil, nil, 9)
+	_, err = computeHKDF("SHA256", random.GetRandomBytes(16), nil, nil, 9)
 	if err == nil || !strings.Contains(err.Error(), "tag size too small") {
 		t.Errorf("expect an error when tag size is too small")
 	}
 	// tag too big
-	_, err = hybrid.ComputeHKDF("SHA1", random.GetRandomBytes(16), nil, nil, 5101)
+	_, err = computeHKDF("SHA1", random.GetRandomBytes(16), nil, nil, 5101)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}
-	_, err = hybrid.ComputeHKDF("SHA256", random.GetRandomBytes(16), nil, nil, 8162)
+	_, err = computeHKDF("SHA256", random.GetRandomBytes(16), nil, nil, 8162)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}
-	_, err = hybrid.ComputeHKDF("SHA512", random.GetRandomBytes(16), nil, nil, 16323)
+	_, err = computeHKDF("SHA512", random.GetRandomBytes(16), nil, nil, 16323)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}

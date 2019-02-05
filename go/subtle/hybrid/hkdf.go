@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package hybrid provides subtle implementations of the HKDF primitive.
+// Package hybrid provides subtle implementations of the HKDF and EC primitives.
 package hybrid
 
 import (
@@ -54,8 +54,8 @@ func validateHKDFParams(hash string, keySize uint32, tagSize uint32) error {
 	return nil
 }
 
-// ComputeHKDF extracts a pseudorandom key.
-func ComputeHKDF(hashAlg string, key []byte, salt []byte, info []byte, tagSize uint32) ([]byte, error) {
+// computeHKDF extracts a pseudorandom key.
+func computeHKDF(hashAlg string, key []byte, salt []byte, info []byte, tagSize uint32) ([]byte, error) {
 	keySize := uint32(len(key))
 	if err := validateHKDFParams(hashAlg, keySize, tagSize); err != nil {
 		return nil, fmt.Errorf("hkdf: %s", err)
