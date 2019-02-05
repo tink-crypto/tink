@@ -240,3 +240,14 @@ func TestPrimitives(t *testing.T) {
 		t.Errorf("expect an error when there are multiple primary keys")
 	}
 }
+
+func TestRegisterKmsClient(t *testing.T) {
+	kms := &testutil.DummyKMSClient{}
+	tink.RegisterKMSClient(kms)
+
+	_, err := tink.GetKMSClient("dummy")
+	if err != nil {
+		t.Errorf("error fetching dummy kms client: %s", err)
+	}
+
+}

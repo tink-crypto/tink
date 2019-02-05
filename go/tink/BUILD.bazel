@@ -17,6 +17,7 @@ go_library(
         "keyset_manager.go",
         "keyset_reader.go",
         "keyset_writer.go",
+        "kms_client.go",
         "mac.go",
         "mem_keyset.go",
         "private_key_manager.go",
@@ -60,3 +61,4 @@ go_test(
         "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )
+

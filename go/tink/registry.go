@@ -27,6 +27,8 @@ import (
 var (
 	keyManagersMu sync.RWMutex
 	keyManagers   = make(map[string]KeyManager) // typeURL -> KeyManager
+	kmsClientsMu  sync.RWMutex
+	kmsClients    = []KMSClient{}
 )
 
 // RegisterKeyManager registers the given key manager.
@@ -152,4 +154,23 @@ func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*primitiveset.Pr
 		}
 	}
 	return primitiveSet, nil
+}
+
+// RegisterKMSClient is used to register a new KMS client
+func RegisterKMSClient(k KMSClient) {
+	kmsClientsMu.Lock()
+	defer kmsClientsMu.Unlock()
+	kmsClients = append(kmsClients, k)
+}
+
+// GetKMSClient fetches a KMSClient by a given URI.
+func GetKMSClient(keyURI string) (KMSClient, error) {
+	kmsClientsMu.RLock()
+	defer kmsClientsMu.RUnlock()
+	for _, k := range kmsClients {
+		if k.Supported(keyURI) {
+			return k, nil
+		}
+	}
+	return nil, fmt.Errorf("KMS client supporting %s not found", keyURI)
 }

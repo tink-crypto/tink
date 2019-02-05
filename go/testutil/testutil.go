@@ -103,6 +103,35 @@ func (h *DummyMAC) VerifyMAC(mac []byte, data []byte) error {
 	return nil
 }
 
+// DummyKMSClient is a dummy implementation of a KMS Client.
+type DummyKMSClient struct{}
+
+var _ tink.KMSClient = (*DummyKMSClient)(nil)
+
+// Supported true if this client does support keyURI
+func (d *DummyKMSClient) Supported(keyURI string) bool {
+	if keyURI == "dummy" {
+		return true
+	}
+	return false
+}
+
+// LoadCredentials loads the credentials in credentialPath. If credentialPath is null, loads the
+// default credentials.
+func (d *DummyKMSClient) LoadCredentials(credentialPath string) (interface{}, error) {
+	return d, nil
+}
+
+// LoadDefaultCredentials loads with the default credentials.
+func (d *DummyKMSClient) LoadDefaultCredentials() (interface{}, error) {
+	return d, nil
+}
+
+// GetAead gets an Aead backend by keyURI.
+func (d *DummyKMSClient) GetAead(keyURI string) (tink.AEAD, error) {
+	return &DummyAEAD{}, nil
+}
+
 // NewTestAESGCMKeyset creates a new Keyset containing an AESGCMKey.
 func NewTestAESGCMKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
 	keyData := NewAESGCMKeyData(16)
