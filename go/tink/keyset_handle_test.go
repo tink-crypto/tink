@@ -22,6 +22,7 @@ import (
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/testkeysethandle"
+	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -63,18 +64,13 @@ func TestNewKeysetHandleWithInvalidInput(t *testing.T) {
 }
 
 func TestFromKeyset(t *testing.T) {
-	keyData := tink.CreateKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
-	key := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := tink.CreateKeyset(1, []*tinkpb.Keyset_Key{key})
-	keysetInfo, _ := tink.GetKeysetInfo(keyset)
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
 	h, _ := testkeysethandle.KeysetHandle(keyset)
 	// test Keyset
 	if h.Keyset() != keyset {
 		t.Errorf("Keyset is incorrect")
-	}
-	// test String()
-	if h.String() != keysetInfo.String() {
-		t.Errorf("String() returns incorrect value")
 	}
 }
 
@@ -85,9 +81,9 @@ func TestNewKeysetHandleFromReader(t *testing.T) {
 	}
 
 	// Create a keyset
-	keyData := tink.CreateKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
-	key := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := tink.CreateKeyset(1, []*tinkpb.Keyset_Key{key})
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
 	h, _ := testkeysethandle.KeysetHandle(keyset)
 
 	memKeyset := &tink.MemKeyset{}

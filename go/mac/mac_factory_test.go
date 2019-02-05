@@ -58,7 +58,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if rawKey.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a raw key")
 	}
-	keyset2 := tink.CreateKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
+	keyset2 := testutil.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
 	keysetHandle2, err := testkeysethandle.KeysetHandle(keyset2)
 	if err != nil {
 		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)

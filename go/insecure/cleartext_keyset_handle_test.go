@@ -26,10 +26,9 @@ import (
 )
 
 func TestFromKeyset(t *testing.T) {
-	keyData := tink.CreateKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
-	key := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := tink.CreateKeyset(1, []*tinkpb.Keyset_Key{key})
-	keysetInfo, _ := tink.GetKeysetInfo(keyset)
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
 	h, err := insecure.KeysetHandle(&tink.MemKeyset{Keyset: keyset})
 	if err != nil {
 		t.Errorf("unexpected error when creating new KeysetHandle")
@@ -37,10 +36,6 @@ func TestFromKeyset(t *testing.T) {
 	// test Keyset
 	if h.Keyset() != keyset {
 		t.Errorf("Keyset is incorrect")
-	}
-	// test String()
-	if h.String() != keysetInfo.String() {
-		t.Errorf("String() returns incorrect value")
 	}
 }
 

@@ -19,6 +19,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//go/format:go_default_library",
+        "//go/keyset:go_default_library",
         "//go/primitiveset:go_default_library",
         "//go/subtle/aead:go_default_library",
         "//go/subtle/mac:go_default_library",

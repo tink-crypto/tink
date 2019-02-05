@@ -117,7 +117,7 @@ func NewTestAESSIVKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkp
 		KeyValue: keyValue,
 	}
 	serializedKey, _ := proto.Marshal(key)
-	keyData := tink.CreateKeyData(daead.AESSIVTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
+	keyData := NewKeyData(daead.AESSIVTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
 	return NewTestKeyset(keyData, primaryOutputPrefixType)
 }
 
@@ -131,13 +131,13 @@ func NewTestHMACKeyset(tagSize uint32,
 // NewTestKeyset creates a new test Keyset.
 func NewTestKeyset(keyData *tinkpb.KeyData,
 	primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
-	primaryKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
-	rawKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 43, tinkpb.OutputPrefixType_RAW)
-	legacyKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 44, tinkpb.OutputPrefixType_LEGACY)
-	tinkKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 45, tinkpb.OutputPrefixType_TINK)
-	crunchyKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 46, tinkpb.OutputPrefixType_CRUNCHY)
+	primaryKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
+	rawKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 43, tinkpb.OutputPrefixType_RAW)
+	legacyKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 44, tinkpb.OutputPrefixType_LEGACY)
+	tinkKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 45, tinkpb.OutputPrefixType_TINK)
+	crunchyKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 46, tinkpb.OutputPrefixType_CRUNCHY)
 	keys := []*tinkpb.Keyset_Key{primaryKey, rawKey, legacyKey, tinkKey, crunchyKey}
-	return tink.CreateKeyset(primaryKey.KeyId, keys)
+	return NewKeyset(primaryKey.KeyId, keys)
 }
 
 // NewDummyKey returns a dummy key that doesn't contain actual key material.
@@ -217,8 +217,8 @@ func NewRandomECDSAPublicKey(hashType commonpb.HashType, curve commonpb.Elliptic
 // GetECDSAParamNames returns the string representations of each parameter in
 // the given ECDSAParams.
 func GetECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
-	hashName := tink.GetHashName(params.HashType)
-	curveName := tink.GetCurveName(params.Curve)
+	hashName := commonpb.HashType_name[int32(params.HashType)]
+	curveName := commonpb.EllipticCurveType_name[int32(params.Curve)]
 	encodingName := ecdsapb.EcdsaSignatureEncoding_name[int32(params.Encoding)]
 	return hashName, curveName, encodingName
 }
@@ -266,7 +266,7 @@ func NewAESGCMKey(keyVersion uint32, keySize uint32) *gcmpb.AesGcmKey {
 func NewAESGCMKeyData(keySize uint32) *tinkpb.KeyData {
 	key := NewAESGCMKey(aead.AESGCMKeyVersion, keySize)
 	serializedKey, _ := proto.Marshal(key)
-	return tink.CreateKeyData(aead.AESGCMTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
+	return NewKeyData(aead.AESGCMTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
 }
 
 // NewSerializedAESGCMKey creates a AESGCMKey with randomly generated key material.
@@ -334,5 +334,46 @@ func NewHMACKeyData(hashType commonpb.HashType, tagSize uint32) *tinkpb.KeyData 
 		TypeUrl:         mac.HMACTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+	}
+}
+
+// NewKeyData creates a new KeyData with the specified parameters.
+func NewKeyData(typeURL string,
+	value []byte,
+	materialType tinkpb.KeyData_KeyMaterialType) *tinkpb.KeyData {
+	return &tinkpb.KeyData{
+		TypeUrl:         typeURL,
+		Value:           value,
+		KeyMaterialType: materialType,
+	}
+}
+
+// NewKey creates a new Key with the specified parameters.
+func NewKey(keyData *tinkpb.KeyData,
+	status tinkpb.KeyStatusType,
+	keyID uint32,
+	prefixType tinkpb.OutputPrefixType) *tinkpb.Keyset_Key {
+	return &tinkpb.Keyset_Key{
+		KeyData:          keyData,
+		Status:           status,
+		KeyId:            keyID,
+		OutputPrefixType: prefixType,
+	}
+}
+
+// NewKeyset creates a new Keyset with the specified parameters.
+func NewKeyset(primaryKeyID uint32,
+	keys []*tinkpb.Keyset_Key) *tinkpb.Keyset {
+	return &tinkpb.Keyset{
+		PrimaryKeyId: primaryKeyID,
+		Key:          keys,
+	}
+}
+
+// NewEncryptedKeyset creates a new EncryptedKeyset with a specified parameters.
+func NewEncryptedKeyset(encryptedKeySet []byte, info *tinkpb.KeysetInfo) *tinkpb.EncryptedKeyset {
+	return &tinkpb.EncryptedKeyset{
+		EncryptedKeyset: encryptedKeySet,
+		KeysetInfo:      info,
 	}
 }

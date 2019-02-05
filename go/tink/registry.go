@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/primitiveset"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -123,12 +124,12 @@ func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*primitiveset.Pr
 	if kh == nil {
 		return nil, fmt.Errorf("registry: invalid keyset handle")
 	}
-	keyset := kh.Keyset()
-	if err := ValidateKeyset(keyset); err != nil {
+	ks := kh.Keyset()
+	if err := keyset.Validate(ks); err != nil {
 		return nil, fmt.Errorf("registry: invalid keyset: %s", err)
 	}
 	primitiveSet := primitiveset.New()
-	for _, key := range keyset.Key {
+	for _, key := range ks.Key {
 		if key.Status != tinkpb.KeyStatusType_ENABLED {
 			continue
 		}
@@ -146,7 +147,7 @@ func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*primitiveset.Pr
 		if err != nil {
 			return nil, fmt.Errorf("registry: cannot add primitive: %s", err)
 		}
-		if key.KeyId == keyset.PrimaryKeyId {
+		if key.KeyId == ks.PrimaryKeyId {
 			primitiveSet.Primary = entry
 		}
 	}

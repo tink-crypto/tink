@@ -15,15 +15,15 @@
 package signature
 
 import (
-	"github.com/google/tink/go/tink"
+	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 )
 
 // getECDSAParamNames returns the string representations of each parameter in
 // the given ECDSAParams.
 func getECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
-	hashName := tink.GetHashName(params.HashType)
-	curveName := tink.GetCurveName(params.Curve)
+	hashName := commonpb.HashType_name[int32(params.HashType)]
+	curveName := commonpb.EllipticCurveType_name[int32(params.Curve)]
 	encodingName := ecdsapb.EcdsaSignatureEncoding_name[int32(params.Encoding)]
 	return hashName, curveName, encodingName
 }

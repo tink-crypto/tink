@@ -24,6 +24,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/keyset"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -138,7 +139,7 @@ func (km *ed25519SignerKeyManager) TypeURL() string {
 
 // validateKey validates the given ED25519PrivateKey.
 func (km *ed25519SignerKeyManager) validateKey(key *ed25519pb.Ed25519PrivateKey) error {
-	if err := tink.ValidateVersion(key.Version, ED25519SignerKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, ED25519SignerKeyVersion); err != nil {
 		return fmt.Errorf("ed25519_signer_key_manager: invalid key: %s", err)
 	}
 	if len(key.KeyValue) != ed25519.SeedSize {

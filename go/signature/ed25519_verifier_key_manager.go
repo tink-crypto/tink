@@ -21,6 +21,7 @@ import (
 	"golang.org/x/crypto/ed25519"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/keyset"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -91,7 +92,7 @@ func (km *ed25519VerifierKeyManager) TypeURL() string {
 
 // validateKey validates the given ED25519PublicKey.
 func (km *ed25519VerifierKeyManager) validateKey(key *ed25519pb.Ed25519PublicKey) error {
-	if err := tink.ValidateVersion(key.Version, ED25519VerifierKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, ED25519VerifierKeyVersion); err != nil {
 		return fmt.Errorf("ed25519_verifier_key_manager: %s", err)
 	}
 	if len(key.KeyValue) != ed25519.PublicKeySize {

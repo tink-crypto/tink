@@ -21,6 +21,7 @@ import (
 	"github.com/google/tink/go/subtle/daead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/keyset"
 
 	aspb "github.com/google/tink/proto/aes_siv_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -99,7 +100,7 @@ func (km *aesSIVKeyManager) TypeURL() string {
 
 // validateKey validates the given AesSivKey.
 func (km *aesSIVKeyManager) validateKey(key *aspb.AesSivKey) error {
-	err := tink.ValidateVersion(key.Version, AESSIVKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, AESSIVKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_siv_key_manager: %s", err)
 	}

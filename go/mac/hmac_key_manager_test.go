@@ -272,7 +272,7 @@ func validateHMACKey(format *hmacpb.HmacKeyFormat, key *hmacpb.HmacKey) error {
 		key.Params.Hash != format.Params.Hash {
 		return fmt.Errorf("key format and generated key do not match")
 	}
-	p, err := subtleMac.NewHMAC(tink.GetHashName(key.Params.Hash), key.KeyValue, key.Params.TagSize)
+	p, err := subtleMac.NewHMAC(commonpb.HashType_name[int32(key.Params.Hash)], key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return fmt.Errorf("cannot create primitive from key: %s", err)
 	}
@@ -285,7 +285,7 @@ func validateHMACPrimitive(p interface{}, key *hmacpb.HmacKey) error {
 	if !bytes.Equal(hmacPrimitive.Key, key.KeyValue) ||
 		hmacPrimitive.TagSize != key.Params.TagSize ||
 		reflect.ValueOf(hmacPrimitive.HashFunc).Pointer() !=
-			reflect.ValueOf(subtle.GetHashFunc(tink.GetHashName(key.Params.Hash))).Pointer() {
+			reflect.ValueOf(subtle.GetHashFunc(commonpb.HashType_name[int32(key.Params.Hash)])).Pointer() {
 		return fmt.Errorf("primitive and key do not matched")
 	}
 	data := random.GetRandomBytes(20)

@@ -22,6 +22,8 @@ import (
 	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/keyset"
+	commonpb "github.com/google/tink/proto/common_go_proto"
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -60,7 +62,7 @@ func (km *hmacKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	hash := tink.GetHashName(key.Params.Hash)
+	hash := commonpb.HashType_name[int32(key.Params.Hash)]
 	hmac, err := mac.NewHMAC(hash, key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return nil, err
@@ -120,12 +122,12 @@ func (km *hmacKeyManager) TypeURL() string {
 // validateKey validates the given HMACKey. It only validates the version of the
 // key because other parameters will be validated in primitive construction.
 func (km *hmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
-	err := tink.ValidateVersion(key.Version, HMACKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, HMACKeyVersion)
 	if err != nil {
 		return fmt.Errorf("hmac_key_manager: invalid version: %s", err)
 	}
 	keySize := uint32(len(key.KeyValue))
-	hash := tink.GetHashName(key.Params.Hash)
+	hash := commonpb.HashType_name[int32(key.Params.Hash)]
 	return mac.ValidateHMACParams(hash, keySize, key.Params.TagSize)
 }
 
@@ -134,6 +136,6 @@ func (km *hmacKeyManager) validateKeyFormat(format *hmacpb.HmacKeyFormat) error 
 	if format.Params == nil {
 		return fmt.Errorf("null HMAC params")
 	}
-	hash := tink.GetHashName(format.Params.Hash)
+	hash := commonpb.HashType_name[int32(format.Params.Hash)]
 	return mac.ValidateHMACParams(hash, format.KeySize, format.Params.TagSize)
 }

@@ -22,7 +22,6 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testkeysethandle"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -45,10 +44,10 @@ func TestSignerVerifyFactory(t *testing.T) {
 		tinkpb.OutputPrefixType_CRUNCHY,
 		4)
 	privKeys := []*tinkpb.Keyset_Key{tinkPriv, legacyPriv, rawPriv, crunchyPriv}
-	privKeyset := tink.CreateKeyset(privKeys[0].KeyId, privKeys)
+	privKeyset := testutil.NewKeyset(privKeys[0].KeyId, privKeys)
 	privKeysetHandle, _ := testkeysethandle.KeysetHandle(privKeyset)
 	pubKeys := []*tinkpb.Keyset_Key{tinkPub, legacyPub, rawPub, crunchyPub}
-	pubKeyset := tink.CreateKeyset(pubKeys[0].KeyId, pubKeys)
+	pubKeyset := testutil.NewKeyset(pubKeys[0].KeyId, pubKeys)
 	pubKeysetHandle, _ := testkeysethandle.KeysetHandle(pubKeyset)
 
 	// sign some random data
@@ -75,7 +74,7 @@ func TestSignerVerifyFactory(t *testing.T) {
 		tinkpb.OutputPrefixType_TINK,
 		1)
 	pubKeys = []*tinkpb.Keyset_Key{randomPub}
-	pubKeyset = tink.CreateKeyset(pubKeys[0].KeyId, pubKeys)
+	pubKeyset = testutil.NewKeyset(pubKeys[0].KeyId, pubKeys)
 	pubKeysetHandle, _ = testkeysethandle.KeysetHandle(pubKeyset)
 	verifier, err = signature.NewVerifier(pubKeysetHandle)
 	if err != nil {
@@ -92,15 +91,15 @@ func newECDSAKeysetKeypair(hashType commonpb.HashType,
 	keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
 	key := testutil.NewRandomECDSAPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
-	keyData := tink.CreateKeyData(signature.ECDSASignerTypeURL,
+	keyData := testutil.NewKeyData(signature.ECDSASignerTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PRIVATE)
-	privKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
+	privKey := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 
 	serializedKey, _ = proto.Marshal(key.PublicKey)
-	keyData = tink.CreateKeyData(signature.ECDSAVerifierTypeURL,
+	keyData = testutil.NewKeyData(signature.ECDSAVerifierTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PUBLIC)
-	pubKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
+	pubKey := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 	return privKey, pubKey
 }

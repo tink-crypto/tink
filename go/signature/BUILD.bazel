@@ -21,6 +21,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//go/format:go_default_library",
+        "//go/keyset:go_default_library",
         "//go/primitiveset:go_default_library",
         "//go/subtle:go_default_library",
         "//go/subtle/signature:go_default_library",

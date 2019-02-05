@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["util.go"],
+    importpath = "github.com/google/tink/go/keyset",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:tink_go_proto",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["util_test.go"],
+    deps = [
+        "//go/testutil:go_default_library",
+        "//go/keyset:go_default_library",
+        "//proto:tink_go_proto",
+    ],
+)

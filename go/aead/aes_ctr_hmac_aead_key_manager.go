@@ -23,6 +23,7 @@ import (
 	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/keyset"
 	ctrpb "github.com/google/tink/proto/aes_ctr_go_proto"
 	aeadpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
 	commonpb "github.com/google/tink/proto/common_go_proto"
@@ -146,7 +147,7 @@ func (km *aesCTRHMACAEADKeyManager) TypeURL() string {
 
 // validateKey validates the given AesCtrHmacAeadKey proto.
 func (km *aesCTRHMACAEADKeyManager) validateKey(key *aeadpb.AesCtrHmacAeadKey) error {
-	err := tink.ValidateVersion(key.Version, AESCTRHMACAEADKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, AESCTRHMACAEADKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
 	}

@@ -177,9 +177,9 @@ func TestPrimitives(t *testing.T) {
 	template2 := aead.AES256GCMKeyTemplate()
 	keyData1, _ := tink.NewKeyData(template1)
 	keyData2, _ := tink.NewKeyData(template2)
-	keyset := tink.CreateKeyset(2, []*tinkpb.Keyset_Key{
-		tink.CreateKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
-		tink.CreateKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
+	keyset := testutil.NewKeyset(2, []*tinkpb.Keyset_Key{
+		testutil.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+		testutil.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ := testkeysethandle.KeysetHandle(keyset)
 	ps, err := tink.Primitives(handle)
@@ -202,38 +202,38 @@ func TestPrimitives(t *testing.T) {
 		t.Errorf("expect an error when keysethandle is nil")
 	}
 	// keyset is empty
-	keyset = tink.CreateKeyset(1, []*tinkpb.Keyset_Key{})
+	keyset = testutil.NewKeyset(1, []*tinkpb.Keyset_Key{})
 	handle, _ = testkeysethandle.KeysetHandle(keyset)
 	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when keyset is empty")
 	}
-	keyset = tink.CreateKeyset(1, nil)
+	keyset = testutil.NewKeyset(1, nil)
 	handle, _ = testkeysethandle.KeysetHandle(keyset)
 	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when keyset is empty")
 	}
 	// no primary key
-	keyset = tink.CreateKeyset(3, []*tinkpb.Keyset_Key{
-		tink.CreateKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
-		tink.CreateKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
+	keyset = testutil.NewKeyset(3, []*tinkpb.Keyset_Key{
+		testutil.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+		testutil.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = testkeysethandle.KeysetHandle(keyset)
 	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when there is no primary key")
 	}
 	// there is primary key but it is disabled
-	keyset = tink.CreateKeyset(1, []*tinkpb.Keyset_Key{
-		tink.CreateKey(keyData1, tinkpb.KeyStatusType_DISABLED, 1, tinkpb.OutputPrefixType_TINK),
-		tink.CreateKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
+	keyset = testutil.NewKeyset(1, []*tinkpb.Keyset_Key{
+		testutil.NewKey(keyData1, tinkpb.KeyStatusType_DISABLED, 1, tinkpb.OutputPrefixType_TINK),
+		testutil.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = testkeysethandle.KeysetHandle(keyset)
 	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when primary key is disabled")
 	}
 	// multiple primary keys
-	keyset = tink.CreateKeyset(1, []*tinkpb.Keyset_Key{
-		tink.CreateKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
-		tink.CreateKey(keyData2, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+	keyset = testutil.NewKeyset(1, []*tinkpb.Keyset_Key{
+		testutil.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+		testutil.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = testkeysethandle.KeysetHandle(keyset)
 	if _, err := tink.Primitives(handle); err == nil {

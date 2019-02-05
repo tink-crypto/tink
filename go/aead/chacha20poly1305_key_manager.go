@@ -22,6 +22,7 @@ import (
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/keyset"
 
 	cppb "github.com/google/tink/proto/chacha20_poly1305_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -111,7 +112,7 @@ func (km *chaCha20Poly1305KeyManager) newChaCha20Poly1305Key() *cppb.ChaCha20Pol
 
 // validateKey validates the given ChaCha20Poly1305Key.
 func (km *chaCha20Poly1305KeyManager) validateKey(key *cppb.ChaCha20Poly1305Key) error {
-	err := tink.ValidateVersion(key.Version, ChaCha20Poly1305KeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, ChaCha20Poly1305KeyVersion)
 	if err != nil {
 		return fmt.Errorf("chacha20poly1305_key_manager: %s", err)
 	}

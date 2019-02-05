@@ -21,6 +21,7 @@ import (
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/keyset"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -118,7 +119,7 @@ func (km *aesGCMKeyManager) TypeURL() string {
 
 // validateKey validates the given AESGCMKey.
 func (km *aesGCMKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
-	err := tink.ValidateVersion(key.Version, AESGCMKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, AESGCMKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
 	}

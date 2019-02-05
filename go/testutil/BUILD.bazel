@@ -8,6 +8,7 @@ go_library(
     deps = [
         "//go/aead:go_default_library",
         "//go/daead:go_default_library",
+        "//go/keyset:go_default_library",
         "//go/mac:go_default_library",
         "//go/signature:go_default_library",
         "//go/subtle:go_default_library",
