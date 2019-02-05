@@ -37,4 +37,7 @@ func init() {
 	if err := tink.RegisterKeyManager(newXChaCha20Poly1305KeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
+	if err := tink.RegisterKeyManager(newKMSEnvelopeAEADKeyManager()); err != nil {
+		panic(fmt.Sprintf("aead.init() failed: %v", err))
+	}
 }

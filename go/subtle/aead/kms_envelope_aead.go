@@ -67,7 +67,7 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 		return nil, errors.New("failed to convert AEAD primitive")
 	}
 
-	payload, err := primitive.Encrypt(encryptedDEK, aad)
+	payload, err := primitive.Encrypt(pt, aad)
 	if err != nil {
 		return nil, err
 	}
@@ -77,9 +77,14 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 
 // Decrypt implements the tink.AEAD interface for decryption.
 func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
-
 	b := bytes.NewBuffer(ct)
-	ed, err := binary.ReadVarint(b)
+	bLen := b.Len()
+	l := make([]byte, lenDEK)
+	_, err := b.Read(l)
+	ed, err := binary.ReadVarint(bytes.NewReader(l))
+	if err != nil {
+		return nil, errors.New("invalid ciphertext")
+	}
 	if ed <= 0 || ed > int64(len(ct)-lenDEK) {
 		return nil, errors.New("invalid ciphertext")
 	}
@@ -88,7 +93,7 @@ func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
 	if err != nil || int64(n) != ed {
 		return nil, errors.New("invalid ciphertext")
 	}
-	pl := b.Len() - lenDEK - int(ed)
+	pl := bLen - lenDEK - int(ed)
 	payload := make([]byte, pl)
 	n, err = b.Read(payload)
 	if err != nil || n != pl {
@@ -110,11 +115,17 @@ func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
 	return primitive.Decrypt(payload, aad)
 }
 
+// buildCipherText builds the cipher text by appending the length DEK, encrypted DEK
+// and the encrypted payload.
 func buildCipherText(encryptedDEK, payload []byte) ([]byte, error) {
-	t := []byte{}
-	_ = binary.PutVarint(t, int64(len(encryptedDEK)))
-	b := bytes.NewBuffer(t)
-	_, err := b.Write(encryptedDEK)
+	buf := make([]byte, lenDEK)
+	var b bytes.Buffer
+	_ = binary.PutVarint(buf, int64(len(encryptedDEK)))
+	_, err := b.Write(buf)
+	if err != nil {
+		return nil, err
+	}
+	_, err = b.Write(encryptedDEK)
 	if err != nil {
 		return nil, err
 	}
