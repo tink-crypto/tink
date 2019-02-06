@@ -493,7 +493,7 @@ proto_compile = rule(
             mandatory = False,
         ),
         "protos": attr.label_list(
-            allow_files = FileType([".proto"]),
+            allow_files = [".proto"],
         ),
         "deps": attr.label_list(
             providers = ["proto_compile_result"],
