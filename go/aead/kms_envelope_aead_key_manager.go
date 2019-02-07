@@ -20,7 +20,6 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/tink"
 	kmsepb "github.com/google/tink/proto/kms_envelope_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -68,7 +67,7 @@ func (km *kmsEnvelopeAEADKeyManager) Primitive(serializedKey []byte) (interface{
 		return nil, errors.New("kms_envelope_aead_key_manager: invalid aead backend")
 	}
 
-	return aead.NewKMSEnvelopeAEAD(*key.Params.DekTemplate, backend), nil
+	return NewKMSEnvelopeAEAD(*key.Params.DekTemplate, backend), nil
 }
 
 // NewKey creates a new key according to specification the given serialized KMSEnvelopeAEADKeyFormat.

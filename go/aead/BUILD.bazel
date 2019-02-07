@@ -13,6 +13,7 @@ go_library(
         "aes_gcm_key_manager.go",
         "chacha20poly1305_key_manager.go",
         "init.go",
+        "kms_envelope_aead.go",
         "kms_envelope_aead_key_manager.go",
         "xchacha20poly1305_key_manager.go",
     ],
