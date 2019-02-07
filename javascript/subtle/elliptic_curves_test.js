@@ -407,23 +407,36 @@ testSuite({
  */
 const runWycheproofTest = async function(test) {
   try {
-    const publicKey =
-        await EllipticCurves.importPublicKey('ECDH', test['public']);
     const privateKey =
         await EllipticCurves.importPrivateKey('ECDH', test['private']);
-    const sharedSecret =
-        await EllipticCurves.computeEcdhSharedSecret(privateKey, publicKey);
-    if (test['result'] === 'invalid') {
-      return 'Fail on test ' + test['tcId'] + ': No exception thrown.\n';
-    }
-    const sharedSecretHex = Bytes.toHex(sharedSecret);
-    if (sharedSecretHex !== test['shared']) {
-      return 'Fail on test ' + test['tcId'] + ': unexpected result was \"' +
-          sharedSecretHex + '\".\n';
+    try {
+      const publicKey =
+          await EllipticCurves.importPublicKey('ECDH', test['public']);
+      const sharedSecret =
+          await EllipticCurves.computeEcdhSharedSecret(privateKey, publicKey);
+      if (test['result'] === 'invalid') {
+        return 'Fail on test ' + test['tcId'] + ': No exception thrown.\n';
+      }
+      const sharedSecretHex = Bytes.toHex(sharedSecret);
+      if (sharedSecretHex !== test['shared']) {
+        return 'Fail on test ' + test['tcId'] + ': unexpected result was \"' +
+            sharedSecretHex + '\".\n';
+      }
+    } catch (e) {
+      if (test['result'] === 'valid') {
+        return 'Fail on test ' + test['tcId'] + ': unexpected exception \"' +
+            e.toString() + '\".\n';
+      }
     }
   } catch (e) {
     if (test['result'] === 'valid') {
-      return 'Fail on test ' + test['tcId'] + ': unexpected exception \"' +
+      if (test['private']['crv'] == "P-256K") {
+        // P-256K doesn't have to be supported. Hence failing to import the
+        // key is OK.
+        return '';
+      }
+      return 'Fail on test ' + test['tcId'] +
+          ': unexpected exception trying to import private key \"' +
           e.toString() + '\".\n';
     }
   }
