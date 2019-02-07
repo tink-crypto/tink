@@ -3,6 +3,9 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = [
+        "ecies_aead_hkdf_dem_helper.go",
+        "ecies_aead_hkdf_hybrid_decrypt.go",
+        "ecies_aead_hkdf_hybrid_encrypt.go",
         "ecies_hkdf_recipient_kem.go",
         "ecies_hkdf_sender_kem.go",
         "elliptic_curves.go",
@@ -30,5 +33,6 @@ go_test(
         "@org_golang_x_crypto//hkdf:go_default_library",
     ],
 )
+
 
 
