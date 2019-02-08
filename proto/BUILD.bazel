@@ -765,7 +765,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "ecies_aead_hkdf_go_proto",
-    importpath = "github.com/google/tink/proto/ecies_aead_hkdf_proto",
+    importpath = "github.com/google/tink/proto/ecies_aead_hkdf_go_proto",
     proto = ":ecies_aead_hkdf_proto",
     deps = [
         ":common_go_proto",
