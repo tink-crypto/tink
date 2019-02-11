@@ -21,31 +21,19 @@ package insecure
 import (
 	"errors"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/internal"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-var keysetHandle = internal.KeysetHandle.(func(*tinkpb.Keyset) *tink.KeysetHandle)
+var (
+	keysetHandle     = internal.KeysetHandle.(func(*tinkpb.Keyset) *tink.KeysetHandle)
+	errInvalidKeyset = errors.New("KeysetHandle: invalid keyset")
+	errInvalidWriter = errors.New("KeysetWriter: invalid writer")
+)
 
-var errInvalidKeyset = errors.New("keyset_handle: invalid keyset")
-
-// KeysetHandleFromSerializedProto creates a new instance of KeysetHandle from the given
-// serialized keyset proto.
-func KeysetHandleFromSerializedProto(serialized []byte) (*tink.KeysetHandle, error) {
-	if len(serialized) == 0 {
-		return nil, errInvalidKeyset
-	}
-	ks := new(tinkpb.Keyset)
-	if err := proto.Unmarshal(serialized, ks); err != nil {
-		return nil, errInvalidKeyset
-	}
-	return keysetHandle(ks), nil
-}
-
-// KeysetHandle creates a new instance of KeysetHandle using the given keyset.
-func KeysetHandle(r tink.KeysetReader) (*tink.KeysetHandle, error) {
+// NewKeysetHandleFromReader creates a KeysetHandle from an unencrypted keyset obtained via r.
+func NewKeysetHandleFromReader(r tink.KeysetReader) (*tink.KeysetHandle, error) {
 	if r == nil {
 		return nil, errInvalidKeyset
 	}
@@ -54,4 +42,17 @@ func KeysetHandle(r tink.KeysetReader) (*tink.KeysetHandle, error) {
 		return nil, errInvalidKeyset
 	}
 	return keysetHandle(ks), nil
+}
+
+// WriteUnencryptedKeysetHandle exports the keyset from h to the given writer w without encrypting it.
+// Storing secret key material in an unencrypted fashion is dangerous. If feasible, you should use
+// func KeysetHandle.Write() instead.
+func WriteUnencryptedKeysetHandle(h *tink.KeysetHandle, w tink.KeysetWriter) error {
+	if h == nil {
+		return errInvalidKeyset
+	}
+	if w == nil {
+		return errInvalidWriter
+	}
+	return w.Write(h.Keyset())
 }

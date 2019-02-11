@@ -8,6 +8,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "aead.go",
+        "binary_keyset_io.go",
         "deterministic_aead.go",
         "hybrid_decrypt.go",
         "hybrid_encrypt.go",
@@ -41,6 +42,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
+        "binary_keyset_io_test.go",
         "keyset_handle_test.go",
         "keyset_manager_test.go",
         "registry_test.go",

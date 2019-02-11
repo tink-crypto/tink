@@ -12,7 +12,6 @@ go_library(
         "//go/internal:go_default_library",
         "//go/tink:go_default_library",
         "//proto:tink_go_proto",
-        "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )
 

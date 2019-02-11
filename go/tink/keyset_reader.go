@@ -22,6 +22,7 @@ import tinkpb "github.com/google/tink/proto/tink_go_proto"
 type KeysetReader interface {
 	// Read returns a (cleartext) Keyset object from the underlying source.
 	Read() (*tinkpb.Keyset, error)
+
 	// ReadEncrypted returns an EncryptedKeyset object from the underlying source.
 	ReadEncrypted() (*tinkpb.EncryptedKeyset, error)
 }

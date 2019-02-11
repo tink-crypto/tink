@@ -59,6 +59,36 @@ func NewKeysetHandleFromReader(reader KeysetReader, masterKey AEAD) (*KeysetHand
 	return &KeysetHandle{ks}, nil
 }
 
+// NewKeysetHandleFromReaderWithNoSecrets tries to create a KeysetHandle from a keyset obtained via reader.
+func NewKeysetHandleFromReaderWithNoSecrets(reader KeysetReader) (*KeysetHandle, error) {
+	ks, err := reader.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	h := &KeysetHandle{ks}
+	if h.hasSecrets() {
+		// If you need to do this, you have to use func insecure.NewKeysetHandleFromReader() instead.
+		return nil, errors.New("importing unencrypted secret key material is forbidden")
+	}
+	return &KeysetHandle{ks}, nil
+}
+
+// hasSecrets checks if the keyset handle contains any key material considered secret.
+// Both symmetric keys and the private key of an assymmetric crypto system are considered secret keys.
+// Also returns true when encountering any errors.
+func (h KeysetHandle) hasSecrets() bool {
+	for _, k := range h.ks.Key {
+		if k == nil || k.KeyData == nil {
+			continue
+		}
+		if k.KeyData.KeyMaterialType == tinkpb.KeyData_ASYMMETRIC_PRIVATE || k.KeyData.KeyMaterialType == tinkpb.KeyData_SYMMETRIC {
+			return true
+		}
+	}
+	return false
+}
+
 // KeysetHandleWithNoSecret creates a new instance of KeysetHandle using the given keyset which does
 // not contain any secret key material.
 func KeysetHandleWithNoSecret(ks *tinkpb.Keyset) (*KeysetHandle, error) {
@@ -67,7 +97,7 @@ func KeysetHandleWithNoSecret(ks *tinkpb.Keyset) (*KeysetHandle, error) {
 			return nil, errInvalidKeyset
 		}
 		if ks.Key[i].KeyData.KeyMaterialType == tinkpb.KeyData_ASYMMETRIC_PRIVATE || ks.Key[i].KeyData.KeyMaterialType == tinkpb.KeyData_SYMMETRIC {
-			return nil, fmt.Errorf("keyset_handle: keyset contains a secret key material")
+			return nil, fmt.Errorf("keyset_handle: keyset contains secret key material")
 		}
 		if err := validateKeyData(ks.Key[i].KeyData); err != nil {
 			return nil, fmt.Errorf("keyset_handle: %s", err)
@@ -123,12 +153,22 @@ func (h *KeysetHandle) String() string {
 }
 
 // Write encrypts and writes an encrypted keyset.
-func (h *KeysetHandle) Write(writer KeysetWriter, masterKey AEAD) error {
-	encrypted, err := encrypt(h.Keyset(), masterKey)
+func (h *KeysetHandle) Write(w KeysetWriter, masterKey AEAD) error {
+	encrypted, err := encrypt(h.ks, masterKey)
 	if err != nil {
 		return err
 	}
-	return writer.WriteEncrypted(encrypted)
+	return w.WriteEncrypted(encrypted)
+}
+
+// WriteWithNoSecrets exports the keyset in h to the given KeysetWriter w returning an error if the keyset
+// contains secret key material.
+func (h *KeysetHandle) WriteWithNoSecrets(w KeysetWriter) error {
+	if h.hasSecrets() {
+		return errors.New("exporting unencrypted secret key material is forbidden")
+	}
+
+	return w.Write(h.ks)
 }
 
 func publicKeyData(privKeyData *tinkpb.KeyData) (*tinkpb.KeyData, error) {

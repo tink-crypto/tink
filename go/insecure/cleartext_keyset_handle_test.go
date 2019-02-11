@@ -25,76 +25,47 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestFromKeyset(t *testing.T) {
-	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
-	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
-	h, err := insecure.KeysetHandle(&tink.MemKeyset{Keyset: keyset})
-	if err != nil {
-		t.Errorf("unexpected error when creating new KeysetHandle")
+func TestInvalidInput(t *testing.T) {
+	if _, err := insecure.NewKeysetHandleFromReader(nil); err == nil {
+		t.Error("NewKeysetHandleFromReader should not accept nil as keyset")
 	}
-	// test Keyset
-	if h.Keyset() != keyset {
-		t.Errorf("Keyset is incorrect")
+	if err := insecure.WriteUnencryptedKeysetHandle(nil, &tink.MemKeyset{}); err == nil {
+		t.Error("WriteUnencryptedKeysetHandle should not accept nil as keyset")
+	}
+	if err := insecure.WriteUnencryptedKeysetHandle(&tink.KeysetHandle{}, nil); err == nil {
+		t.Error("WriteUnencryptedKeysetHandle should not accept nil as writer")
 	}
 }
 
-func TestFromKeysetWithInvalidInput(t *testing.T) {
-	if _, err := insecure.KeysetHandle(nil); err == nil {
-		t.Errorf("FromKeyset should not accept nil as Keyset")
-	}
-}
-
-func TestKeysetHandleFromSerializedProto(t *testing.T) {
+func TestKeysetHandleFromReader(t *testing.T) {
 	// Create a keyset that contains a single HmacKey.
 	manager := testutil.NewHMACKeysetManager()
 	handle, err := manager.KeysetHandle()
 	if handle == nil || err != nil {
-		t.Errorf("cannot get keyset handle: %s", err)
+		t.Fatalf("cannot get keyset handle: %v", err)
 	}
-	serializedKeyset, err := proto.Marshal(handle.Keyset())
+	parsedHandle, err := insecure.NewKeysetHandleFromReader(&tink.MemKeyset{Keyset: handle.Keyset()})
 	if err != nil {
-		t.Errorf("cannot serialize keyset: %s", err)
+		t.Fatalf("unexpected error reading keyset: %v", err)
 	}
-	// create handle from serialized keyset
-	parsedHandle, err := insecure.KeysetHandleFromSerializedProto(serializedKeyset)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	if handle.Keyset().String() != parsedHandle.Keyset().String() {
-		t.Errorf("parsed keyset doesn't match the original")
-	}
-	// create handle from keyset
-	parsedHandle, err = insecure.KeysetHandle(&tink.MemKeyset{Keyset: handle.Keyset()})
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	if handle.Keyset().String() != parsedHandle.Keyset().String() {
-		t.Errorf("parsed keyset doesn't match the original")
+	if !proto.Equal(handle.Keyset(), parsedHandle.Keyset()) {
+		t.Errorf("parsed keyset (%s) doesn't match original keyset (%s)", parsedHandle.Keyset(), handle.Keyset())
 	}
 }
 
-func TestKeysetHandleFromSerializedProtoWithInvalidInput(t *testing.T) {
-	manager := testutil.NewHMACKeysetManager()
-	handle, err := manager.KeysetHandle()
-	if handle == nil || err != nil {
-		t.Errorf("cannot get keyset handle: %s", err)
-	}
-	serializedKeyset, err := proto.Marshal(handle.Keyset())
+func TestWriteUnencryptedKeysetHandle(t *testing.T) {
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	h, err := insecure.NewKeysetHandleFromReader(&tink.MemKeyset{Keyset: keyset})
 	if err != nil {
-		t.Errorf("cannot serialize keyset: %s", err)
+		t.Fatalf("unexpected error creating new KeysetHandle: %v", err)
 	}
-	serializedKeyset[0] = 0
-	_, err = insecure.KeysetHandleFromSerializedProto(serializedKeyset)
-	if err == nil {
-		t.Errorf("expect an error when input is an invalid serialized keyset")
+	exported := &tink.MemKeyset{}
+	if err := insecure.WriteUnencryptedKeysetHandle(h, exported); err != nil {
+		t.Fatalf("unexpected error writing keyset: %v", err)
 	}
-	_, err = insecure.KeysetHandleFromSerializedProto([]byte{})
-	if err == nil {
-		t.Errorf("expect an error when input is an empty slice")
-	}
-	_, err = insecure.KeysetHandleFromSerializedProto(nil)
-	if err == nil {
-		t.Errorf("expect an error when input is nil")
+	if !proto.Equal(exported.Keyset, keyset) {
+		t.Errorf("exported keyset (%s) doesn't match original keyset (%s)", exported.Keyset, keyset)
 	}
 }
