@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink_test
+package keyset_test
 
 import (
 	"bytes"
@@ -20,19 +20,19 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestBinaryIOUnencrypted(t *testing.T) {
 	buf := new(bytes.Buffer)
-	w := tink.NewBinaryKeysetWriter(buf)
-	r := tink.NewBinaryKeysetReader(buf)
+	w := keyset.NewBinaryWriter(buf)
+	r := keyset.NewBinaryReader(buf)
 
 	manager := testutil.NewHMACKeysetManager()
-	h, err := manager.KeysetHandle()
+	h, err := manager.Handle()
 	if h == nil || err != nil {
 		t.Fatalf("cannot get keyset handle: %v", err)
 	}
@@ -53,8 +53,8 @@ func TestBinaryIOUnencrypted(t *testing.T) {
 
 func TestBinaryIOEncrypted(t *testing.T) {
 	buf := new(bytes.Buffer)
-	w := tink.NewBinaryKeysetWriter(buf)
-	r := tink.NewBinaryKeysetReader(buf)
+	w := keyset.NewBinaryWriter(buf)
+	r := keyset.NewBinaryReader(buf)
 
 	kse1 := &tinkpb.EncryptedKeyset{EncryptedKeyset: []byte(strings.Repeat("A", 32))}
 

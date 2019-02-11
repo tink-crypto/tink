@@ -18,16 +18,16 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
 func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
 	}
@@ -43,7 +43,7 @@ func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 
 func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	testParams := genInvalidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
 	}

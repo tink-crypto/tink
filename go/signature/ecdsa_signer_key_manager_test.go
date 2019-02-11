@@ -20,11 +20,11 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -37,7 +37,7 @@ type ecdsaParams struct {
 
 func TestECDSASignerGetPrimitiveBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
@@ -54,7 +54,7 @@ func TestECDSASignerGetPrimitiveBasic(t *testing.T) {
 func TestECDSASignGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid params
 	testParams := genInvalidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
@@ -83,7 +83,7 @@ func TestECDSASignGetPrimitiveWithInvalidInput(t *testing.T) {
 
 func TestECDSASignNewKeyBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
@@ -103,7 +103,7 @@ func TestECDSASignNewKeyBasic(t *testing.T) {
 }
 
 func TestECDSASignNewKeyWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
@@ -137,7 +137,7 @@ func TestECDSASignNewKeyWithInvalidInput(t *testing.T) {
 }
 
 func TestECDSASignNewKeyMultipleTimes(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
@@ -165,7 +165,7 @@ func TestECDSASignNewKeyMultipleTimes(t *testing.T) {
 }
 
 func TestECDSASignNewKeyDataBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
@@ -198,7 +198,7 @@ func TestECDSASignNewKeyDataBasic(t *testing.T) {
 }
 
 func TestECDSASignNewKeyDataWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
@@ -221,11 +221,11 @@ func TestECDSASignNewKeyDataWithInvalidInput(t *testing.T) {
 
 func TestPublicKeyDataBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
-	pkm, ok := km.(tink.PrivateKeyManager)
+	pkm, ok := km.(registry.PrivateKeyManager)
 	if !ok {
 		t.Errorf("cannot obtain private key manager")
 	}
@@ -251,11 +251,11 @@ func TestPublicKeyDataBasic(t *testing.T) {
 }
 
 func TestPublicKeyDataWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
-	pkm, ok := km.(tink.PrivateKeyManager)
+	pkm, ok := km.(registry.PrivateKeyManager)
 	if !ok {
 		t.Errorf("cannot obtain private key manager")
 	}

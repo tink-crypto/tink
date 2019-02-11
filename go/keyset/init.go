@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package tink defines interfaces for the crypto primitives that Tink supports.
-package tink
+// Package keyset provides methods to read, write and validate keysets.
+package keyset
 
 import (
 	"github.com/google/tink/go/internal"
@@ -22,8 +22,8 @@ import (
 
 // keysetHandle is used by package insecure and package testkeysethandle (via package internal)
 // to create KeysetHandle from cleartext key material.
-func keysetHandle(ks *tinkpb.Keyset) *KeysetHandle {
-	return &KeysetHandle{ks}
+func keysetHandle(ks *tinkpb.Keyset) *Handle {
+	return &Handle{ks}
 }
 
 func init() {

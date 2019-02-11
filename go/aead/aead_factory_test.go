@@ -22,8 +22,8 @@ import (
 
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/format"
-	"github.com/google/tink/go/insecure"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 
@@ -38,7 +38,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if primaryKey.OutputPrefixType == tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a non-raw key")
 	}
-	keysetHandle, _ := insecure.NewKeysetHandleFromReader(&tink.MemKeyset{Keyset: keyset})
+	keysetHandle, _ := testkeyset.NewHandle(keyset)
 	a, err := aead.New(keysetHandle)
 	if err != nil {
 		t.Errorf("aead.New failed: %s", err)
@@ -54,7 +54,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 		t.Errorf("expect a raw key")
 	}
 	keyset2 := testutil.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
-	keysetHandle2, _ := insecure.NewKeysetHandleFromReader(&tink.MemKeyset{Keyset: keyset2})
+	keysetHandle2, _ := testkeyset.NewHandle(keyset2)
 	a2, err := aead.New(keysetHandle2)
 	if err != nil {
 		t.Errorf("aead.New failed: %s", err)
@@ -67,7 +67,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	keyset2 = testutil.NewTestAESGCMKeyset(tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
 	expectedPrefix, _ = format.OutputPrefix(primaryKey)
-	keysetHandle2, _ = insecure.NewKeysetHandleFromReader(&tink.MemKeyset{Keyset: keyset2})
+	keysetHandle2, _ = testkeyset.NewHandle(keyset2)
 	a2, err = aead.New(keysetHandle2)
 	if err != nil {
 		t.Errorf("aead.New failed: %s", err)
@@ -83,7 +83,7 @@ func TestFactoryRawKeyAsPrimary(t *testing.T) {
 	if keyset.Key[0].OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("primary key is not a raw key")
 	}
-	keysetHandle, _ := insecure.NewKeysetHandleFromReader(&tink.MemKeyset{Keyset: keyset})
+	keysetHandle, _ := testkeyset.NewHandle(keyset)
 
 	a, err := aead.New(keysetHandle)
 	if err != nil {

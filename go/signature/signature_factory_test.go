@@ -20,7 +20,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/testkeysethandle"
+	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -45,10 +45,10 @@ func TestSignerVerifyFactory(t *testing.T) {
 		4)
 	privKeys := []*tinkpb.Keyset_Key{tinkPriv, legacyPriv, rawPriv, crunchyPriv}
 	privKeyset := testutil.NewKeyset(privKeys[0].KeyId, privKeys)
-	privKeysetHandle, _ := testkeysethandle.KeysetHandle(privKeyset)
+	privKeysetHandle, _ := testkeyset.NewHandle(privKeyset)
 	pubKeys := []*tinkpb.Keyset_Key{tinkPub, legacyPub, rawPub, crunchyPub}
 	pubKeyset := testutil.NewKeyset(pubKeys[0].KeyId, pubKeys)
-	pubKeysetHandle, _ := testkeysethandle.KeysetHandle(pubKeyset)
+	pubKeysetHandle, _ := testkeyset.NewHandle(pubKeyset)
 
 	// sign some random data
 	signer, err := signature.NewSigner(privKeysetHandle)
@@ -75,7 +75,7 @@ func TestSignerVerifyFactory(t *testing.T) {
 		1)
 	pubKeys = []*tinkpb.Keyset_Key{randomPub}
 	pubKeyset = testutil.NewKeyset(pubKeys[0].KeyId, pubKeys)
-	pubKeysetHandle, _ = testkeysethandle.KeysetHandle(pubKeyset)
+	pubKeysetHandle, _ = testkeyset.NewHandle(pubKeyset)
 	verifier, err = signature.NewVerifier(pubKeysetHandle)
 	if err != nil {
 		t.Errorf("getting verify primitive failed: %s", err)

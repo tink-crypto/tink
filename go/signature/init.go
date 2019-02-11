@@ -18,23 +18,23 @@ package signature
 import (
 	"fmt"
 
-	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/registry"
 )
 
 func init() {
 	// ECDSA
-	if err := tink.RegisterKeyManager(newECDSASignerKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newECDSASignerKeyManager()); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
-	if err := tink.RegisterKeyManager(newECDSAVerifierKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newECDSAVerifierKeyManager()); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
 
 	// ED25519
-	if err := tink.RegisterKeyManager(newED25519SignerKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newED25519SignerKeyManager()); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
-	if err := tink.RegisterKeyManager(newED25519VerifierKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newED25519VerifierKeyManager()); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
 }

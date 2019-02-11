@@ -24,7 +24,9 @@ import (
 	"golang.org/x/crypto/ed25519"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
@@ -44,7 +46,7 @@ import (
 // It returns DummyAEAD when GetPrimitive() functions are called.
 type DummyAEADKeyManager struct{}
 
-var _ tink.KeyManager = (*DummyAEADKeyManager)(nil)
+var _ registry.KeyManager = (*DummyAEADKeyManager)(nil)
 
 // Primitive constructs a primitive instance for the key given in
 // serializedKey, which must be a serialized key protocol buffer handled by this manager.
@@ -106,7 +108,7 @@ func (h *DummyMAC) VerifyMAC(mac []byte, data []byte) error {
 // DummyKMSClient is a dummy implementation of a KMS Client.
 type DummyKMSClient struct{}
 
-var _ tink.KMSClient = (*DummyKMSClient)(nil)
+var _ registry.KMSClient = (*DummyKMSClient)(nil)
 
 // Supported true if this client does support keyURI
 func (d *DummyKMSClient) Supported(keyURI string) bool {
@@ -345,8 +347,8 @@ func NewHMACKeyFormat(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacKe
 }
 
 // NewHMACKeysetManager returns a new KeysetManager that contains a HMACKey.
-func NewHMACKeysetManager() *tink.KeysetManager {
-	ksm := tink.NewKeysetManager()
+func NewHMACKeysetManager() *keyset.Manager {
+	ksm := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
 	err := ksm.Rotate(kt)
 	if err != nil {

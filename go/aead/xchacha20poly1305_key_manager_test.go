@@ -22,8 +22,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/chacha20poly1305"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
 
 	subteaead "github.com/google/tink/go/subtle/aead"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -31,7 +31,7 @@ import (
 )
 
 func TestXChaCha20Poly1305GetPrimitive(t *testing.T) {
-	km, err := tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain XChaCha20Poly1305 key manager: %s", err)
 	}
@@ -48,7 +48,7 @@ func TestXChaCha20Poly1305GetPrimitive(t *testing.T) {
 }
 
 func TestXChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
-	km, err := tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain XChaCha20Poly1305 key manager: %s", err)
 	}
@@ -62,7 +62,7 @@ func TestXChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
 }
 
 func TestXChaCha20Poly1305NewKey(t *testing.T) {
-	km, err := tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain XChaCha20Poly1305 key manager: %s", err)
 	}
@@ -77,7 +77,7 @@ func TestXChaCha20Poly1305NewKey(t *testing.T) {
 }
 
 func TestXChaCha20Poly1305NewKeyData(t *testing.T) {
-	km, err := tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain XChaCha20Poly1305 key manager: %s", err)
 	}
@@ -101,7 +101,7 @@ func TestXChaCha20Poly1305NewKeyData(t *testing.T) {
 }
 
 func TestXChaCha20Poly1305DoesSupport(t *testing.T) {
-	km, err := tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain XChaCha20Poly1305 key manager: %s", err)
 	}
@@ -114,7 +114,7 @@ func TestXChaCha20Poly1305DoesSupport(t *testing.T) {
 }
 
 func TestXChaCha20Poly1305TypeURL(t *testing.T) {
-	km, err := tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain XChaCha20Poly1305 key manager: %s", err)
 	}

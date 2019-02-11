@@ -19,10 +19,10 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/keyset"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -43,7 +43,7 @@ var errInvalidHMACKeyFormat = errors.New("hmac_key_manager: invalid key format")
 type hmacKeyManager struct{}
 
 // Assert that hmacKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*hmacKeyManager)(nil)
+var _ registry.KeyManager = (*hmacKeyManager)(nil)
 
 // newHMACKeyManager returns a new hmacKeyManager.
 func newHMACKeyManager() *hmacKeyManager {

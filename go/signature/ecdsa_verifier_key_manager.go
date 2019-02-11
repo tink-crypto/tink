@@ -18,9 +18,9 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
-	"github.com/google/tink/go/tink"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
+	subtleSignature "github.com/google/tink/go/subtle/signature"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -42,7 +42,7 @@ var errECDSAVerifierNotImplemented = fmt.Errorf("ecdsa_verifier_key_manager: not
 type ecdsaVerifierKeyManager struct{}
 
 // Assert that ecdsaVerifierKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*ecdsaVerifierKeyManager)(nil)
+var _ registry.KeyManager = (*ecdsaVerifierKeyManager)(nil)
 
 // newECDSAVerifierKeyManager creates a new ecdsaVerifierKeyManager.
 func newECDSAVerifierKeyManager() *ecdsaVerifierKeyManager {

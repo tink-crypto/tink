@@ -20,6 +20,7 @@ import (
 	"errors"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -46,7 +47,7 @@ func NewKMSEnvelopeAEAD(kt tinkpb.KeyTemplate, remote tink.AEAD) *KMSEnvelopeAEA
 
 // Encrypt implements the tink.AEAD interface for encryption.
 func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
-	dekM, err := tink.NewKey(a.dekTemplate)
+	dekM, err := registry.NewKey(a.dekTemplate)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +59,7 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	p, err := tink.Primitive(a.dekTemplate.TypeUrl, dek)
+	p, err := registry.Primitive(a.dekTemplate.TypeUrl, dek)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +105,7 @@ func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
 	if err != nil {
 		return nil, errors.New("decryption failed")
 	}
-	p, err := tink.Primitive(a.dekTemplate.TypeUrl, dek)
+	p, err := registry.Primitive(a.dekTemplate.TypeUrl, dek)
 	if err != nil {
 		return nil, errors.New("decryption failed")
 	}

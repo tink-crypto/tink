@@ -18,10 +18,10 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/keyset"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -43,7 +43,7 @@ var errInvalidAESGCMKeyFormat = fmt.Errorf("aes_gcm_key_manager: invalid key for
 type aesGCMKeyManager struct{}
 
 // Assert that aesGCMKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*aesGCMKeyManager)(nil)
+var _ registry.KeyManager = (*aesGCMKeyManager)(nil)
 
 // newAESGCMKeyManager creates a new aesGcmKeyManager.
 func newAESGCMKeyManager() *aesGCMKeyManager {

@@ -18,11 +18,11 @@ package mac
 import (
 	"fmt"
 
-	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/registry"
 )
 
 func init() {
-	if err := tink.RegisterKeyManager(newHMACKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newHMACKeyManager()); err != nil {
 		panic(fmt.Sprintf("mac.init() failed: %v", err))
 	}
 }

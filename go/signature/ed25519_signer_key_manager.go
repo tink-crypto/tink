@@ -22,9 +22,9 @@ import (
 	"golang.org/x/crypto/ed25519"
 
 	"github.com/golang/protobuf/proto"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
-	"github.com/google/tink/go/tink"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
+	subtleSignature "github.com/google/tink/go/subtle/signature"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -45,7 +45,7 @@ var errInvalidED25519SignKeyFormat = errors.New("ed25519_signer_key_manager: inv
 type ed25519SignerKeyManager struct{}
 
 // Assert that ed25519SignerKeyManager implements the PrivateKeyManager interface.
-var _ tink.PrivateKeyManager = (*ed25519SignerKeyManager)(nil)
+var _ registry.PrivateKeyManager = (*ed25519SignerKeyManager)(nil)
 
 // newED25519SignerKeyManager creates a new ed25519SignerKeyManager.
 func newED25519SignerKeyManager() *ed25519SignerKeyManager {

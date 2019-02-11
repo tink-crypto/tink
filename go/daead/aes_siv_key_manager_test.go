@@ -21,8 +21,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
 
 	subtedaead "github.com/google/tink/go/subtle/daead"
 	aspb "github.com/google/tink/proto/aes_siv_go_proto"
@@ -30,7 +30,7 @@ import (
 )
 
 func TestAESSIVPrimitive(t *testing.T) {
-	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Fatalf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -50,7 +50,7 @@ func TestAESSIVPrimitive(t *testing.T) {
 }
 
 func TestAESSIVPrimitiveWithInvalidKeys(t *testing.T) {
-	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -64,7 +64,7 @@ func TestAESSIVPrimitiveWithInvalidKeys(t *testing.T) {
 }
 
 func TestAESSIVNewKey(t *testing.T) {
-	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -79,7 +79,7 @@ func TestAESSIVNewKey(t *testing.T) {
 }
 
 func TestAESSIVNewKeyData(t *testing.T) {
-	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -103,7 +103,7 @@ func TestAESSIVNewKeyData(t *testing.T) {
 }
 
 func TestAESSIVDoesSupport(t *testing.T) {
-	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -116,7 +116,7 @@ func TestAESSIVDoesSupport(t *testing.T) {
 }
 
 func TestAESSIVTypeURL(t *testing.T) {
-	km, err := tink.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}

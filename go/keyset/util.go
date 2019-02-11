@@ -12,7 +12,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package keyset provides methods to read, write and validate keys and keysets.
 package keyset
 
 import (

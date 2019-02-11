@@ -24,6 +24,8 @@ import (
 	"google3/base/go/google"
 	"google3/base/go/runfiles"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
@@ -50,7 +52,7 @@ func setupKMS(t *testing.T) {
 	if err != nil {
 		t.Errorf("error loading credentials : %v", err)
 	}
-	tink.RegisterKMSClient(g)
+	registry.RegisterKMSClient(g)
 }
 
 func basicAeadTest(t *testing.T, a tink.AEAD) error {
@@ -75,7 +77,7 @@ func basicAeadTest(t *testing.T, a tink.AEAD) error {
 func TestBasicAead(t *testing.T) {
 	setupKMS(t)
 	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	kh, err := tink.NewKeysetHandle(aead.KMSEnvelopeAeadKeyTemplate(keyURI, dek))
+	kh, err := keyset.NewHandle(aead.KMSEnvelopeAeadKeyTemplate(keyURI, dek))
 	if err != nil {
 		t.Errorf("error getting a new keyset handle: %v", err)
 	}

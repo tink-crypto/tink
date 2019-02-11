@@ -17,19 +17,19 @@ package signature_test
 import (
 	"testing"
 
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
-	"github.com/google/tink/go/tink"
 )
 
 func TestSignatureInit(t *testing.T) {
 	// check for ECDSASignerKeyManager
-	_, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	_, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 
 	// check for ECDSAVerifierKeyManager
-	_, err = tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	_, err = registry.GetKeyManager(signature.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

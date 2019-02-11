@@ -26,6 +26,7 @@ import (
 	"google3/third_party/golang/google_api/cloudkms/v1/cloudkms"
 	"google3/third_party/golang/oauth2/google/google"
 	"google3/third_party/golang/oauth2/oauth2"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 )
 
@@ -43,12 +44,12 @@ type GCPClient struct {
 	kms    *cloudkms.Service
 }
 
-var _ tink.KMSClient = (*GCPClient)(nil)
+var _ registry.KMSClient = (*GCPClient)(nil)
 
 // NewGCPClient returns a new client to GCP KMS. It does not have an established session.
 func NewGCPClient(URI string) (*GCPClient, error) {
 	if !strings.HasPrefix(strings.ToLower(URI), gcpPrefix) {
-		return nil, errors.New(fmt.Sprintf("key URI must start with %s", gcpPrefix))
+		return nil, fmt.Errorf("key URI must start with %s", gcpPrefix)
 	}
 
 	return &GCPClient{
@@ -108,7 +109,7 @@ func (g *GCPClient) LoadDefaultCredentials() (interface{}, error) {
 // GetAead  gets an Aead backend by keyURI.
 func (g *GCPClient) GetAead(keyURI string) (tink.AEAD, error) {
 	if len(g.keyURI) > 0 && strings.Compare(strings.ToLower(g.keyURI), strings.ToLower(keyURI)) != 0 {
-		return nil, errors.New(fmt.Sprintf("this client is bound to %s, cannot load keys bound to %s", g.keyURI, keyURI))
+		return nil, fmt.Errorf("this client is bound to %s, cannot load keys bound to %s", g.keyURI, keyURI)
 	}
 	uri, err := validateTrimKMSPrefix(g.keyURI, gcpPrefix)
 	if err != nil {
@@ -126,7 +127,7 @@ func validateKMSPrefix(keyURI, prefix string) bool {
 
 func validateTrimKMSPrefix(keyURI, prefix string) (string, error) {
 	if !validateKMSPrefix(keyURI, prefix) {
-		return "", errors.New(fmt.Sprintf("key URI must start with %s", prefix))
+		return "", fmt.Errorf("key URI must start with %s", prefix)
 	}
 	return strings.TrimPrefix(keyURI, prefix), nil
 }

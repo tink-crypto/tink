@@ -12,39 +12,39 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package insecure_test
+package insecureinsecurecleartextkeyset_test
 
 import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/insecure"
+	"github.com/google/tink/go/insecurecleartextkeyset"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestInvalidInput(t *testing.T) {
-	if _, err := insecure.NewKeysetHandleFromReader(nil); err == nil {
-		t.Error("NewKeysetHandleFromReader should not accept nil as keyset")
+	if _, err := insecurecleartextkeyset.Read(nil); err == nil {
+		t.Error("insecurecleartextkeyset.Read should not accept nil as keyset")
 	}
-	if err := insecure.WriteUnencryptedKeysetHandle(nil, &tink.MemKeyset{}); err == nil {
-		t.Error("WriteUnencryptedKeysetHandle should not accept nil as keyset")
+	if err := insecurecleartextkeyset.Write(nil, &keyset.MemReaderWriter{}); err == nil {
+		t.Error("insecurecleartextkeyset.Write should not accept nil as keyset")
 	}
-	if err := insecure.WriteUnencryptedKeysetHandle(&tink.KeysetHandle{}, nil); err == nil {
-		t.Error("WriteUnencryptedKeysetHandle should not accept nil as writer")
+	if err := insecurecleartextkeyset.Write(&keyset.Handle{}, nil); err == nil {
+		t.Error("insecurecleartextkeyset.Write should not accept nil as writer")
 	}
 }
 
-func TestKeysetHandleFromReader(t *testing.T) {
+func TestHandleFromReader(t *testing.T) {
 	// Create a keyset that contains a single HmacKey.
 	manager := testutil.NewHMACKeysetManager()
-	handle, err := manager.KeysetHandle()
+	handle, err := manager.Handle()
 	if handle == nil || err != nil {
 		t.Fatalf("cannot get keyset handle: %v", err)
 	}
-	parsedHandle, err := insecure.NewKeysetHandleFromReader(&tink.MemKeyset{Keyset: handle.Keyset()})
+	parsedHandle, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: handle.Keyset()})
 	if err != nil {
 		t.Fatalf("unexpected error reading keyset: %v", err)
 	}
@@ -53,19 +53,19 @@ func TestKeysetHandleFromReader(t *testing.T) {
 	}
 }
 
-func TestWriteUnencryptedKeysetHandle(t *testing.T) {
+func TestWrite(t *testing.T) {
 	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
 	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
-	h, err := insecure.NewKeysetHandleFromReader(&tink.MemKeyset{Keyset: keyset})
+	ks := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	h, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: ks})
 	if err != nil {
 		t.Fatalf("unexpected error creating new KeysetHandle: %v", err)
 	}
-	exported := &tink.MemKeyset{}
-	if err := insecure.WriteUnencryptedKeysetHandle(h, exported); err != nil {
+	exported := &keyset.MemReaderWriter{}
+	if err := insecurecleartextkeyset.Write(h, exported); err != nil {
 		t.Fatalf("unexpected error writing keyset: %v", err)
 	}
-	if !proto.Equal(exported.Keyset, keyset) {
-		t.Errorf("exported keyset (%s) doesn't match original keyset (%s)", exported.Keyset, keyset)
+	if !proto.Equal(exported.Keyset, ks) {
+		t.Errorf("exported keyset (%s) doesn't match original keyset (%s)", exported.Keyset, ks)
 	}
 }

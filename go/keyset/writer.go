@@ -12,21 +12,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+package keyset
 
-// KMSClient knows how to produce primitives backed by keys stored in remote
-// KMS services.
-type KMSClient interface {
-	// Supported true if this client does support keyURI
-	Supported(keyURI string) bool
+import tinkpb "github.com/google/tink/proto/tink_go_proto"
 
-	// LoadCredentials loads the credentials in credentialPath. If credentialPath is null, loads the
-	// default credentials.
-	LoadCredentials(credentialPath string) (interface{}, error)
+// Writer knows how to write a Keyset or an EncryptedKeyset to some source.
+type Writer interface {
+	// Write keyset to some storage system.
+	Write(Keyset *tinkpb.Keyset) error
 
-	// LoadDefaultCredentials loads with the default credentials.
-	LoadDefaultCredentials() (interface{}, error)
-
-	// GetAEAD  gets an Aead backend by keyURI.
-	GetAead(keyURI string) (AEAD, error)
+	// Write EncryptedKeyset to some storage system.
+	WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error
 }

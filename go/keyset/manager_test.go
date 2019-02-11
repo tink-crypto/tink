@@ -12,69 +12,69 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink_test
+package keyset_test
 
 import (
 	"testing"
 
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestKeysetManagerBasic(t *testing.T) {
 	// Create a keyset that contains a single HmacKey.
-	ksm := tink.NewKeysetManager()
+	ksm := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
 	err := ksm.Rotate(kt)
 	if err != nil {
 		t.Errorf("cannot rotate when key template is available: %s", err)
 	}
-	handle, err := ksm.KeysetHandle()
+	h, err := ksm.Handle()
 	if err != nil {
 		t.Errorf("cannot get keyset handle: %s", err)
 	}
-	keyset := handle.Keyset()
-	if len(keyset.Key) != 1 {
+	ks := h.Keyset()
+	if len(ks.Key) != 1 {
 		t.Errorf("expect the number of keys in the keyset is 1")
 	}
-	if keyset.Key[0].KeyId != keyset.PrimaryKeyId ||
-		keyset.Key[0].KeyData.TypeUrl != mac.HMACTypeURL ||
-		keyset.Key[0].Status != tinkpb.KeyStatusType_ENABLED ||
-		keyset.Key[0].OutputPrefixType != tinkpb.OutputPrefixType_TINK {
-		t.Errorf("incorrect key information: %s", keyset.Key[0])
+	if ks.Key[0].KeyId != ks.PrimaryKeyId ||
+		ks.Key[0].KeyData.TypeUrl != mac.HMACTypeURL ||
+		ks.Key[0].Status != tinkpb.KeyStatusType_ENABLED ||
+		ks.Key[0].OutputPrefixType != tinkpb.OutputPrefixType_TINK {
+		t.Errorf("incorrect key information: %s", ks.Key[0])
 	}
 }
 
 func TestExistingKeyset(t *testing.T) {
 	// Create a keyset that contains a single HmacKey.
-	ksm1 := tink.NewKeysetManager()
+	ksm1 := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
 	err := ksm1.Rotate(kt)
 	if err != nil {
 		t.Errorf("cannot rotate when key template is available: %s", err)
 	}
 
-	handle1, err := ksm1.KeysetHandle()
+	h1, err := ksm1.Handle()
 	if err != nil {
 		t.Errorf("cannot get keyset handle: %s", err)
 	}
-	keyset1 := handle1.Keyset()
+	ks1 := h1.Keyset()
 
-	ksm2 := tink.FromKeysetHandle(handle1)
+	ksm2 := keyset.NewManagerFromHandle(h1)
 	ksm2.Rotate(kt)
-	handle2, err := ksm2.KeysetHandle()
+	h2, err := ksm2.Handle()
 	if err != nil {
 		t.Errorf("cannot get keyset handle: %s", err)
 	}
-	keyset2 := handle2.Keyset()
-	if len(keyset2.Key) != 2 {
-		t.Errorf("expect the number of keys to be 2, got %d", len(keyset2.Key))
+	ks2 := h2.Keyset()
+	if len(ks2.Key) != 2 {
+		t.Errorf("expect the number of keys to be 2, got %d", len(ks2.Key))
 	}
-	if keyset1.Key[0].String() != keyset2.Key[0].String() {
+	if ks1.Key[0].String() != ks2.Key[0].String() {
 		t.Errorf("expect the first key in two keysets to be the same")
 	}
-	if keyset2.Key[1].KeyId != keyset2.PrimaryKeyId {
+	if ks2.Key[1].KeyId != ks2.PrimaryKeyId {
 		t.Errorf("expect the second key to be primary")
 	}
 }

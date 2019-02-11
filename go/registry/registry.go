@@ -12,15 +12,27 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+// Package registry is essentially a big container (map) that for each supported key type holds
+// a corresponding KeyManager object, which "understands" the key type (i.e. the KeyManager
+// can instantiate the primitive corresponding to given key, or can generate new keys
+// of the supported key type).
+//
+// Registry is initialized at startup, and is later used to instantiate primitives for given keys
+// or keysets. Keeping KeyManagers for all primitives in a single Registry (rather than having a
+// separate KeyManager per primitive) enables modular construction of compound primitives from
+// "simple" ones, e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
+//
+// Note that regular users will usually not work directly with Registry, but rather
+// via primitive factories, which in the background query the Registry for specific
+// KeyManagers. Registry is public though, to enable configurations with custom
+// primitives and KeyManagers.
+package registry
 
 import (
 	"fmt"
 	"sync"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/primitiveset"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -38,7 +50,7 @@ func RegisterKeyManager(km KeyManager) error {
 	defer keyManagersMu.Unlock()
 	typeURL := km.TypeURL()
 	if _, existed := keyManagers[typeURL]; existed {
-		return fmt.Errorf("tink.RegisterKeyManager: type %s already registered", typeURL)
+		return fmt.Errorf("registry.RegisterKeyManager: type %s already registered", typeURL)
 	}
 	keyManagers[typeURL] = km
 	return nil
@@ -50,7 +62,7 @@ func GetKeyManager(typeURL string) (KeyManager, error) {
 	defer keyManagersMu.RUnlock()
 	km, existed := keyManagers[typeURL]
 	if !existed {
-		return nil, fmt.Errorf("tink.GetKeyManager: unsupported key type: %s", typeURL)
+		return nil, fmt.Errorf("registry.GetKeyManager: unsupported key type: %s", typeURL)
 	}
 	return km, nil
 }
@@ -58,7 +70,7 @@ func GetKeyManager(typeURL string) (KeyManager, error) {
 // NewKeyData generates a new KeyData for the given key template.
 func NewKeyData(kt *tinkpb.KeyTemplate) (*tinkpb.KeyData, error) {
 	if kt == nil {
-		return nil, fmt.Errorf("registry: invalid key template")
+		return nil, fmt.Errorf("registry.NewKeyData: invalid key template")
 	}
 	km, err := GetKeyManager(kt.TypeUrl)
 	if err != nil {
@@ -70,7 +82,7 @@ func NewKeyData(kt *tinkpb.KeyTemplate) (*tinkpb.KeyData, error) {
 // NewKey generates a new key for the given key template.
 func NewKey(kt *tinkpb.KeyTemplate) (proto.Message, error) {
 	if kt == nil {
-		return nil, fmt.Errorf("registry: invalid key template")
+		return nil, fmt.Errorf("registry.NewKey: invalid key template")
 	}
 	km, err := GetKeyManager(kt.TypeUrl)
 	if err != nil {
@@ -82,7 +94,7 @@ func NewKey(kt *tinkpb.KeyTemplate) (proto.Message, error) {
 // PrimitiveFromKeyData creates a new primitive for the key given in the given KeyData.
 func PrimitiveFromKeyData(kd *tinkpb.KeyData) (interface{}, error) {
 	if kd == nil {
-		return nil, fmt.Errorf("registry: invalid key data")
+		return nil, fmt.Errorf("registry.PrimitiveFromKeyData: invalid key data")
 	}
 	return Primitive(kd.TypeUrl, kd.Value)
 }
@@ -91,69 +103,13 @@ func PrimitiveFromKeyData(kd *tinkpb.KeyData) (interface{}, error) {
 // identified by the given typeURL.
 func Primitive(typeURL string, sk []byte) (interface{}, error) {
 	if len(sk) == 0 {
-		return nil, fmt.Errorf("registry: invalid serialized key")
+		return nil, fmt.Errorf("registry.Primitive: invalid serialized key")
 	}
 	km, err := GetKeyManager(typeURL)
 	if err != nil {
 		return nil, err
 	}
 	return km.Primitive(sk)
-}
-
-// Primitives creates a set of primitives corresponding to the keys with
-// status=ENABLED in the keyset of the given keyset handle, assuming all the
-// corresponding key managers are present (keys with status!=ENABLED are skipped).
-//
-// The returned set is usually later "wrapped" into a class that implements
-// the corresponding Primitive-interface.
-func Primitives(kh *KeysetHandle) (*primitiveset.PrimitiveSet, error) {
-	return PrimitivesWithKeyManager(kh, nil)
-}
-
-// PrimitivesWithKeyManager creates a set of primitives corresponding to
-// the keys with status=ENABLED in the keyset of the given keysetHandle, using
-// the given key manager (instead of registered key managers) for keys supported
-// by it.  Keys not supported by the key manager are handled by matching registered
-// key managers (if present), and keys with status!=ENABLED are skipped.
-//
-// This enables custom treatment of keys, for example providing extra context
-// (e.g. credentials for accessing keys managed by a KMS), or gathering custom
-// monitoring/profiling information.
-//
-// The returned set is usually later "wrapped" into a class that implements
-// the corresponding Primitive-interface.
-func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*primitiveset.PrimitiveSet, error) {
-	if kh == nil {
-		return nil, fmt.Errorf("registry: invalid keyset handle")
-	}
-	ks := kh.Keyset()
-	if err := keyset.Validate(ks); err != nil {
-		return nil, fmt.Errorf("registry: invalid keyset: %s", err)
-	}
-	primitiveSet := primitiveset.New()
-	for _, key := range ks.Key {
-		if key.Status != tinkpb.KeyStatusType_ENABLED {
-			continue
-		}
-		var primitive interface{}
-		var err error
-		if km != nil && km.DoesSupport(key.KeyData.TypeUrl) {
-			primitive, err = km.Primitive(key.KeyData.Value)
-		} else {
-			primitive, err = PrimitiveFromKeyData(key.KeyData)
-		}
-		if err != nil {
-			return nil, fmt.Errorf("registry: cannot get primitive from key: %s", err)
-		}
-		entry, err := primitiveSet.Add(primitive, key)
-		if err != nil {
-			return nil, fmt.Errorf("registry: cannot add primitive: %s", err)
-		}
-		if key.KeyId == ks.PrimaryKeyId {
-			primitiveSet.Primary = entry
-		}
-	}
-	return primitiveSet, nil
 }
 
 // RegisterKMSClient is used to register a new KMS client

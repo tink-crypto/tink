@@ -22,18 +22,18 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/registry"
 	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestGetPrimitiveBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("HMAC key manager not found: %s", err)
 	}
@@ -51,7 +51,7 @@ func TestGetPrimitiveBasic(t *testing.T) {
 }
 
 func TestGetPrimitiveWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -73,7 +73,7 @@ func TestGetPrimitiveWithInvalidInput(t *testing.T) {
 }
 
 func TestNewKeyMultipleTimes(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -95,7 +95,7 @@ func TestNewKeyMultipleTimes(t *testing.T) {
 }
 
 func TestNewKeyBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -113,7 +113,7 @@ func TestNewKeyBasic(t *testing.T) {
 }
 
 func TestNewKeyWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -138,7 +138,7 @@ func TestNewKeyWithInvalidInput(t *testing.T) {
 }
 
 func TestNewKeyDataBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -166,7 +166,7 @@ func TestNewKeyDataBasic(t *testing.T) {
 }
 
 func TestNewKeyDataWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("HMAC key manager not found: %s", err)
 	}
@@ -185,7 +185,7 @@ func TestNewKeyDataWithInvalidInput(t *testing.T) {
 }
 
 func TestDoesSupport(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("HMAC key manager not found: %s", err)
 	}
@@ -198,7 +198,7 @@ func TestDoesSupport(t *testing.T) {
 }
 
 func TestTypeURL(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("HMAC key manager not found: %s", err)
 	}

@@ -20,7 +20,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/registry"
 	kmsepb "github.com/google/tink/proto/kms_envelope_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -38,7 +38,7 @@ const (
 type kmsEnvelopeAEADKeyManager struct{}
 
 // Assert that kmsEnvelopeAEADKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*kmsEnvelopeAEADKeyManager)(nil)
+var _ registry.KeyManager = (*kmsEnvelopeAEADKeyManager)(nil)
 
 // newKMSEnvelopeAEADKeyManager creates a new aesGcmKeyManager.
 func newKMSEnvelopeAEADKeyManager() *kmsEnvelopeAEADKeyManager {
@@ -58,7 +58,7 @@ func (km *kmsEnvelopeAEADKeyManager) Primitive(serializedKey []byte) (interface{
 		return nil, err
 	}
 	uri := key.Params.KekUri
-	kmsClient, err := tink.GetKMSClient(uri)
+	kmsClient, err := registry.GetKMSClient(uri)
 	if err != nil {
 		return nil, err
 	}

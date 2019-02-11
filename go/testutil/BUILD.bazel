@@ -10,6 +10,7 @@ go_library(
         "//go/daead:go_default_library",
         "//go/keyset:go_default_library",
         "//go/mac:go_default_library",
+        "//go/registry:go_default_library",
         "//go/signature:go_default_library",
         "//go/subtle:go_default_library",
         "//go/subtle/daead:go_default_library",

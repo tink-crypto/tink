@@ -7,11 +7,11 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     testonly = 1,
-    srcs = ["testkeysethandle.go"],
-    importpath = "github.com/google/tink/go/testkeysethandle",
+    srcs = ["testkeyset.go"],
+    importpath = "github.com/google/tink/go/testkeyset",
     deps = [
         "//go/internal:go_default_library",
-        "//go/tink:go_default_library",
+        "//go/keyset:go_default_library",
         "//proto:tink_go_proto",
         "@com_github_golang_protobuf//proto:go_default_library",
     ],

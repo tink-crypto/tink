@@ -18,11 +18,11 @@ package daead
 import (
 	"fmt"
 
-	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/registry"
 )
 
 func init() {
-	if err := tink.RegisterKeyManager(newAESSIVKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newAESSIVKeyManager()); err != nil {
 		panic(fmt.Sprintf("daead.init() failed: %v", err))
 	}
 }

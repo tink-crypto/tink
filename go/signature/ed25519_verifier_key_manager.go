@@ -19,9 +19,9 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/ed25519"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
-	"github.com/google/tink/go/tink"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
+	subtleSignature "github.com/google/tink/go/subtle/signature"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -43,7 +43,7 @@ var errED25519VerifierNotImplemented = fmt.Errorf("ed25519_verifier_key_manager:
 type ed25519VerifierKeyManager struct{}
 
 // Assert that ed25519VerifierKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*ed25519VerifierKeyManager)(nil)
+var _ registry.KeyManager = (*ed25519VerifierKeyManager)(nil)
 
 // newED25519VerifierKeyManager creates a new ed25519VerifierKeyManager.
 func newED25519VerifierKeyManager() *ed25519VerifierKeyManager {

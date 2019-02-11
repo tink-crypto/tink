@@ -18,18 +18,20 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/primitiveset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 )
 
 // New creates a MAC primitive from the given keyset handle.
-func New(kh *tink.KeysetHandle) (tink.MAC, error) {
-	return NewWithKeyManager(kh, nil /*keyManager*/)
+func New(h *keyset.Handle) (tink.MAC, error) {
+	return NewWithKeyManager(h, nil /*keyManager*/)
 }
 
 // NewWithKeyManager creates a MAC primitive from the given keyset handle and a custom key manager.
-func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.MAC, error) {
-	ps, err := tink.PrimitivesWithKeyManager(kh, km)
+func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.MAC, error) {
+	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
 		return nil, fmt.Errorf("mac_factory: cannot obtain primitive set: %s", err)
 	}

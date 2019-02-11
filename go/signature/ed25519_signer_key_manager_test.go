@@ -19,17 +19,17 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -41,7 +41,7 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 	}
 	var s *subtleSig.ED25519Signer = tmp.(*subtleSig.ED25519Signer)
 
-	kmPub, err := tink.GetKeyManager(signature.ED25519VerifierTypeURL)
+	kmPub, err := registry.GetKeyManager(signature.ED25519VerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -67,7 +67,7 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 
 func TestED25519SignGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid params
-	km, err := tink.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -89,7 +89,7 @@ func TestED25519SignGetPrimitiveWithInvalidInput(t *testing.T) {
 }
 
 func TestED25519SignNewKeyBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -105,11 +105,11 @@ func TestED25519SignNewKeyBasic(t *testing.T) {
 }
 
 func TestED25519PublicKeyDataBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
-	pkm, ok := km.(tink.PrivateKeyManager)
+	pkm, ok := km.(registry.PrivateKeyManager)
 	if !ok {
 		t.Errorf("cannot obtain private key manager")
 	}
@@ -134,11 +134,11 @@ func TestED25519PublicKeyDataBasic(t *testing.T) {
 }
 
 func TestED25519PublicKeyDataWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
-	pkm, ok := km.(tink.PrivateKeyManager)
+	pkm, ok := km.(registry.PrivateKeyManager)
 	if !ok {
 		t.Errorf("cannot obtain private key manager")
 	}

@@ -12,42 +12,43 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+package keyset
 
 import (
 	"fmt"
 
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/random"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// KeysetManager manages a Keyset-proto, with convenience methods that rotate, disable, enable or destroy keys.
+// Manager manages a Keyset-proto, with convenience methods that rotate, disable, enable or destroy keys.
 // Note: It is not thread-safe.
-type KeysetManager struct {
+type Manager struct {
 	ks *tinkpb.Keyset
 }
 
-// NewKeysetManager creates a new instance with an empty Keyset.
-func NewKeysetManager() *KeysetManager {
-	ret := new(KeysetManager)
+// NewManager creates a new instance with an empty Keyset.
+func NewManager() *Manager {
+	ret := new(Manager)
 	ret.ks = new(tinkpb.Keyset)
 	return ret
 }
 
-// FromKeysetHandle creates a new instance from the given KeysetHandle.
-func FromKeysetHandle(kh *KeysetHandle) *KeysetManager {
-	ret := new(KeysetManager)
+// NewManagerFromHandle creates a new instance from the given Handle.
+func NewManagerFromHandle(kh *Handle) *Manager {
+	ret := new(Manager)
 	ret.ks = kh.ks
 	return ret
 }
 
 // Rotate generates a fresh key using the given key template and
 // sets the new key as the primary key.
-func (km *KeysetManager) Rotate(kt *tinkpb.KeyTemplate) error {
+func (km *Manager) Rotate(kt *tinkpb.KeyTemplate) error {
 	if kt == nil {
 		return fmt.Errorf("keyset_manager: cannot rotate, need key template")
 	}
-	keyData, err := NewKeyData(kt)
+	keyData, err := registry.NewKeyData(kt)
 	if err != nil {
 		return fmt.Errorf("keyset_manager: cannot create KeyData: %s", err)
 	}
@@ -68,13 +69,13 @@ func (km *KeysetManager) Rotate(kt *tinkpb.KeyTemplate) error {
 	return nil
 }
 
-// KeysetHandle creates a new KeysetHandle for the managed keyset.
-func (km *KeysetManager) KeysetHandle() (*KeysetHandle, error) {
-	return &KeysetHandle{km.ks}, nil
+// Handle creates a new Handle for the managed keyset.
+func (km *Manager) Handle() (*Handle, error) {
+	return &Handle{km.ks}, nil
 }
 
 // newKeyID generates a key id that has not been used by any key in the keyset.
-func (km *KeysetManager) newKeyID() uint32 {
+func (km *Manager) newKeyID() uint32 {
 	for {
 		ret := random.GetRandomUint32()
 		ok := true

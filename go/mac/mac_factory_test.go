@@ -21,7 +21,7 @@ import (
 
 	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/testkeysethandle"
+	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 
@@ -35,9 +35,9 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_TINK {
 		t.Errorf("expect a tink key")
 	}
-	keysetHandle, err := testkeysethandle.KeysetHandle(keyset)
+	keysetHandle, err := testkeyset.NewHandle(keyset)
 	if err != nil {
-		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
 	}
 
 	p, err := mac.New(keysetHandle)
@@ -59,9 +59,9 @@ func TestFactoryMultipleKeys(t *testing.T) {
 		t.Errorf("expect a raw key")
 	}
 	keyset2 := testutil.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
-	keysetHandle2, err := testkeysethandle.KeysetHandle(keyset2)
+	keysetHandle2, err := testkeyset.NewHandle(keyset2)
 	if err != nil {
-		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
 	}
 
 	p2, err := mac.New(keysetHandle2)
@@ -76,9 +76,9 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	keyset2 = testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
 	expectedPrefix, _ = format.OutputPrefix(primaryKey)
-	keysetHandle2, err = testkeysethandle.KeysetHandle(keyset2)
+	keysetHandle2, err = testkeyset.NewHandle(keyset2)
 	if err != nil {
-		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
 	}
 
 	p2, err = mac.New(keysetHandle2)
@@ -98,9 +98,9 @@ func TestFactoryRawKey(t *testing.T) {
 	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a raw key")
 	}
-	keysetHandle, err := testkeysethandle.KeysetHandle(keyset)
+	keysetHandle, err := testkeyset.NewHandle(keyset)
 	if err != nil {
-		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
 	}
 	p, err := mac.New(keysetHandle)
 	if err != nil {

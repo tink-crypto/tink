@@ -18,26 +18,26 @@ package aead
 import (
 	"fmt"
 
-	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/registry"
 )
 
 func init() {
-	if err := tink.RegisterKeyManager(newAESCTRHMACAEADKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newAESCTRHMACAEADKeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 
-	if err := tink.RegisterKeyManager(newAESGCMKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newAESGCMKeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 
-	if err := tink.RegisterKeyManager(newChaCha20Poly1305KeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newChaCha20Poly1305KeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 
-	if err := tink.RegisterKeyManager(newXChaCha20Poly1305KeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newXChaCha20Poly1305KeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
-	if err := tink.RegisterKeyManager(newKMSEnvelopeAEADKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(newKMSEnvelopeAEADKeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 }

@@ -12,30 +12,37 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package insecure provides functions that create KeysetHandle from cleartext key material.
-//
-// This package contains dangerous functions, and is separate from the rest of Tink so that its
-// usage can be restricted and audited.
-package insecure
+// Package testkeyset provides functions that create keyset.Handle from cleartext key material in tests.
+package testkeyset
 
 import (
 	"errors"
 
 	"github.com/google/tink/go/internal"
-	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/keyset"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 var (
-	keysetHandle     = internal.KeysetHandle.(func(*tinkpb.Keyset) *tink.KeysetHandle)
-	errInvalidKeyset = errors.New("KeysetHandle: invalid keyset")
-	errInvalidWriter = errors.New("KeysetWriter: invalid writer")
+	keysetHandle     = internal.KeysetHandle.(func(*tinkpb.Keyset) *keyset.Handle)
+	errInvalidKeyset = errors.New("cleartextkeyset: invalid keyset")
+	errInvalidHandle = errors.New("cleartextkeyset: invalid handle")
+	errInvalidReader = errors.New("cleartextkeyset: invalid reader")
+	errInvalidWriter = errors.New("cleartextkeyset: invalid writer")
 )
 
-// NewKeysetHandleFromReader creates a KeysetHandle from an unencrypted keyset obtained via r.
-func NewKeysetHandleFromReader(r tink.KeysetReader) (*tink.KeysetHandle, error) {
-	if r == nil {
+// NewHandle creates a new instance of NewHandle using the given keyset.
+func NewHandle(ks *tinkpb.Keyset) (*keyset.Handle, error) {
+	if ks == nil || len(ks.Key) == 0 {
 		return nil, errInvalidKeyset
+	}
+	return keysetHandle(ks), nil
+}
+
+// Read creates a keyset.Handle from a cleartext keyset obtained via r.
+func Read(r keyset.Reader) (*keyset.Handle, error) {
+	if r == nil {
+		return nil, errInvalidReader
 	}
 	ks, err := r.Read()
 	if err != nil || ks == nil || len(ks.Key) == 0 {
@@ -44,12 +51,12 @@ func NewKeysetHandleFromReader(r tink.KeysetReader) (*tink.KeysetHandle, error) 
 	return keysetHandle(ks), nil
 }
 
-// WriteUnencryptedKeysetHandle exports the keyset from h to the given writer w without encrypting it.
+// Write exports the keyset from h to the given writer w without encrypting it.
 // Storing secret key material in an unencrypted fashion is dangerous. If feasible, you should use
-// func KeysetHandle.Write() instead.
-func WriteUnencryptedKeysetHandle(h *tink.KeysetHandle, w tink.KeysetWriter) error {
+// func keyset.Handle.Write() instead.
+func Write(h *keyset.Handle, w keyset.Writer) error {
 	if h == nil {
-		return errInvalidKeyset
+		return errInvalidHandle
 	}
 	if w == nil {
 		return errInvalidWriter

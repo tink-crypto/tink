@@ -12,39 +12,38 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+package keyset
 
 import tinkpb "github.com/google/tink/proto/tink_go_proto"
 
-// MemKeyset implements KeysetReader and KeysetWriter for
-// *tinkpb.Keyset and *tinkpb.EncryptedKeyset
-type MemKeyset struct {
+// MemReaderWriter implements keyset.Reader and keyset.Writer for *tinkpb.Keyset and *tinkpb.EncryptedKeyset.
+type MemReaderWriter struct {
 	Keyset          *tinkpb.Keyset
 	EncryptedKeyset *tinkpb.EncryptedKeyset
 }
 
-// MemKeyset implements KeysetReader
-var _ KeysetReader = &MemKeyset{}
-var _ KeysetWriter = &MemKeyset{}
+// MemReaderWriter implements Reader and Writer.
+var _ Reader = &MemReaderWriter{}
+var _ Writer = &MemReaderWriter{}
 
 // Read returns *tinkpb.Keyset from memory.
-func (m *MemKeyset) Read() (*tinkpb.Keyset, error) {
+func (m *MemReaderWriter) Read() (*tinkpb.Keyset, error) {
 	return m.Keyset, nil
 }
 
 // ReadEncrypted returns *tinkpb.EncryptedKeyset from memory.
-func (m *MemKeyset) ReadEncrypted() (*tinkpb.EncryptedKeyset, error) {
+func (m *MemReaderWriter) ReadEncrypted() (*tinkpb.EncryptedKeyset, error) {
 	return m.EncryptedKeyset, nil
 }
 
 // Write keyset to memory.
-func (m *MemKeyset) Write(keyset *tinkpb.Keyset) error {
+func (m *MemReaderWriter) Write(keyset *tinkpb.Keyset) error {
 	m.Keyset = keyset
 	return nil
 }
 
 // WriteEncrypted keyset to memory.
-func (m *MemKeyset) WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error {
+func (m *MemReaderWriter) WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error {
 	m.EncryptedKeyset = keyset
 	return nil
 }

@@ -18,10 +18,10 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/daead"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/keyset"
 
 	aspb "github.com/google/tink/proto/aes_siv_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -39,7 +39,7 @@ const (
 type aesSIVKeyManager struct{}
 
 // Assert that aesSIVKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*aesSIVKeyManager)(nil)
+var _ registry.KeyManager = (*aesSIVKeyManager)(nil)
 
 // newAESSIVKeyManager creates a new aesSIVKeyManager.
 func newAESSIVKeyManager() *aesSIVKeyManager {

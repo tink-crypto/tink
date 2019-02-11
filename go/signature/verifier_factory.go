@@ -19,20 +19,21 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/primitiveset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // NewVerifier returns a Verifier primitive from the given keyset handle.
-func NewVerifier(handle *tink.KeysetHandle) (tink.Verifier, error) {
-	return NewVerifierWithKeyManager(handle, nil /*keyManager*/)
+func NewVerifier(h *keyset.Handle) (tink.Verifier, error) {
+	return NewVerifierWithKeyManager(h, nil /*keyManager*/)
 }
 
-// NewVerifierWithKeyManager returns a Verifier primitive from the given keyset handle and
-// custom key manager.
-func NewVerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Verifier, error) {
-	ps, err := tink.PrimitivesWithKeyManager(kh, km)
+// NewVerifierWithKeyManager returns a Verifier primitive from the given keyset handle and custom key manager.
+func NewVerifierWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Verifier, error) {
+	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
 		return nil, fmt.Errorf("verifier_factory: cannot obtain primitive set: %s", err)
 	}

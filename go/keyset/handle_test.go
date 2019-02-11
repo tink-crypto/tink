@@ -12,25 +12,25 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink_test
+package keyset_test
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/subtle/aead"
-	"github.com/google/tink/go/testkeysethandle"
+	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestNewKeysetHandle(t *testing.T) {
+func TestNewHandle(t *testing.T) {
 	kt := mac.HMACSHA256Tag128KeyTemplate()
-	kh, err := tink.NewKeysetHandle(kt)
+	kh, err := keyset.NewHandle(kt)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
@@ -50,31 +50,20 @@ func TestNewKeysetHandle(t *testing.T) {
 	}
 }
 
-func TestNewKeysetHandleWithInvalidInput(t *testing.T) {
+func TestNewHandleWithInvalidInput(t *testing.T) {
 	// template unregistered TypeUrl
 	template := mac.HMACSHA256Tag128KeyTemplate()
 	template.TypeUrl = "some unknown TypeUrl"
-	if _, err := tink.NewKeysetHandle(template); err == nil {
+	if _, err := keyset.NewHandle(template); err == nil {
 		t.Errorf("expect an error when TypeUrl is not registered")
 	}
 	// nil
-	if _, err := tink.NewKeysetHandle(nil); err == nil {
+	if _, err := keyset.NewHandle(nil); err == nil {
 		t.Errorf("expect an error when template is nil")
 	}
 }
 
-func TestFromKeyset(t *testing.T) {
-	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
-	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
-	h, _ := testkeysethandle.KeysetHandle(keyset)
-	// test Keyset
-	if h.Keyset() != keyset {
-		t.Errorf("Keyset is incorrect")
-	}
-}
-
-func TestNewKeysetHandleFromReader(t *testing.T) {
+func TestRead(t *testing.T) {
 	masterKey, err := aead.NewAESGCM([]byte(strings.Repeat("A", 32)))
 	if err != nil {
 		t.Errorf("aead.NewAESGCM(): %v", err)
@@ -83,36 +72,36 @@ func TestNewKeysetHandleFromReader(t *testing.T) {
 	// Create a keyset
 	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
 	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
-	h, _ := testkeysethandle.KeysetHandle(keyset)
+	ks := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	h, _ := testkeyset.NewHandle(ks)
 
-	memKeyset := &tink.MemKeyset{}
+	memKeyset := &keyset.MemReaderWriter{}
 	if err := h.Write(memKeyset, masterKey); err != nil {
 		t.Fatalf("handle.Write(): %v", err)
 	}
-	h2, err := tink.NewKeysetHandleFromReader(memKeyset, masterKey)
+	h2, err := keyset.Read(memKeyset, masterKey)
 	if err != nil {
-		t.Fatalf("NewKeysetHandleFromReader(): %v", err)
+		t.Fatalf("keyset.Read(): %v", err)
 	}
 	if !proto.Equal(h.Keyset(), h2.Keyset()) {
 		t.Fatalf("Decrypt failed: got %v, want %v", h2, h)
 	}
 }
 
-func TestNewKeysetHandleFromReaderWithNoSecrets(t *testing.T) {
+func TestReadWithNoSecrets(t *testing.T) {
 	// Create a keyset containing public key material
 	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_ASYMMETRIC_PUBLIC)
 	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
-	h, _ := testkeysethandle.KeysetHandle(keyset)
+	ks := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	h, _ := testkeyset.NewHandle(ks)
 
-	memKeyset := &tink.MemKeyset{}
+	memKeyset := &keyset.MemReaderWriter{}
 	if err := h.WriteWithNoSecrets(memKeyset); err != nil {
 		t.Fatalf("handle.WriteWithNoSecrets(): %v", err)
 	}
-	h2, err := tink.NewKeysetHandleFromReaderWithNoSecrets(memKeyset)
+	h2, err := keyset.ReadWithNoSecrets(memKeyset)
 	if err != nil {
-		t.Fatalf("NewKeysetHandleFromReaderWithNoSecrets(): %v", err)
+		t.Fatalf("keyset.ReadWithNoSecrets(): %v", err)
 	}
 	if !proto.Equal(h.Keyset(), h2.Keyset()) {
 		t.Fatalf("Decrypt failed: got %v, want %v", h2, h)
@@ -123,14 +112,14 @@ func TestWithNoSecretsFunctionsFailWhenHandlingSecretKeyMaterial(t *testing.T) {
 	// Create a keyset containing secret key material (symmetric)
 	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
 	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
-	h, _ := testkeysethandle.KeysetHandle(keyset)
+	ks := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	h, _ := testkeyset.NewHandle(ks)
 
-	if err := h.WriteWithNoSecrets(&tink.MemKeyset{}); err == nil {
+	if err := h.WriteWithNoSecrets(&keyset.MemReaderWriter{}); err == nil {
 		t.Error("handle.WriteWithNoSecrets() should fail when exporting secret key material")
 	}
 
-	if _, err := tink.NewKeysetHandleFromReaderWithNoSecrets(&tink.MemKeyset{Keyset: h.Keyset()}); err == nil {
-		t.Error("NewKeysetHandleFromReaderWithNoSecrets should fail when importing secret key material")
+	if _, err := keyset.ReadWithNoSecrets(&keyset.MemReaderWriter{Keyset: h.Keyset()}); err == nil {
+		t.Error("keyset.ReadWithNoSecrets should fail when importing secret key material")
 	}
 }

@@ -12,10 +12,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package internal provides a coordination point for package tink, package insecure,
-// and package testkeysethandle.
+// Package internal provides a coordination point for package keyset, package insecurecleartextkeyset, and package testkeyset.
 // internal must only be imported by these three packages.
 package internal
 
-// KeysetHandle is the raw constructor for a tink.KeysetHandle.
+// KeysetHandle is the raw constructor for a keyset.Handle.
 var KeysetHandle interface{}

@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+package keyset
 
 import (
 	"io"
@@ -23,18 +23,18 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// BinaryKeysetReader deserializes a keyset from binary proto format.
-type BinaryKeysetReader struct {
+// BinaryReader deserializes a keyset from binary proto format.
+type BinaryReader struct {
 	r io.Reader
 }
 
-// NewBinaryKeysetReader returns new BinaryKeysetReader that will read from r.
-func NewBinaryKeysetReader(r io.Reader) *BinaryKeysetReader {
-	return &BinaryKeysetReader{r: r}
+// NewBinaryReader returns new BinaryReader that will read from r.
+func NewBinaryReader(r io.Reader) *BinaryReader {
+	return &BinaryReader{r: r}
 }
 
 // Read parses a (cleartext) keyset from the underlying io.Reader.
-func (bkr *BinaryKeysetReader) Read() (*tinkpb.Keyset, error) {
+func (bkr *BinaryReader) Read() (*tinkpb.Keyset, error) {
 	keyset := &tinkpb.Keyset{}
 
 	if err := read(bkr.r, keyset); err != nil {
@@ -44,7 +44,7 @@ func (bkr *BinaryKeysetReader) Read() (*tinkpb.Keyset, error) {
 }
 
 // ReadEncrypted parses an EncryptedKeyset from the underlying io.Reader.
-func (bkr *BinaryKeysetReader) ReadEncrypted() (*tinkpb.EncryptedKeyset, error) {
+func (bkr *BinaryReader) ReadEncrypted() (*tinkpb.EncryptedKeyset, error) {
 	keyset := &tinkpb.EncryptedKeyset{}
 
 	if err := read(bkr.r, keyset); err != nil {
@@ -62,23 +62,23 @@ func read(r io.Reader, msg proto.Message) error {
 	return proto.Unmarshal(data, msg)
 }
 
-// BinaryKeysetWriter serializes a keyset into binary proto format.
-type BinaryKeysetWriter struct {
+// BinaryWriter serializes a keyset into binary proto format.
+type BinaryWriter struct {
 	w io.Writer
 }
 
-// NewBinaryKeysetWriter returns a new BinaryKeysetWriter that will write to w.
-func NewBinaryKeysetWriter(w io.Writer) *BinaryKeysetWriter {
-	return &BinaryKeysetWriter{w: w}
+// NewBinaryWriter returns a new BinaryWriter that will write to w.
+func NewBinaryWriter(w io.Writer) *BinaryWriter {
+	return &BinaryWriter{w: w}
 }
 
 // Write writes the keyset to the underlying io.Writer.
-func (bkw *BinaryKeysetWriter) Write(keyset *tinkpb.Keyset) error {
+func (bkw *BinaryWriter) Write(keyset *tinkpb.Keyset) error {
 	return write(bkw.w, keyset)
 }
 
 // WriteEncrypted writes the encrypted keyset to the underlying io.Writer.
-func (bkw *BinaryKeysetWriter) WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error {
+func (bkw *BinaryWriter) WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error {
 	return write(bkw.w, keyset)
 }
 

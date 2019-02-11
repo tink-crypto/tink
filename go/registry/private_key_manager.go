@@ -12,15 +12,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+package registry
 
-import tinkpb "github.com/google/tink/proto/tink_go_proto"
+import (
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
+)
 
-// KeysetWriter knows how to write a Keyset or an EncryptedKeyset to some source.
-type KeysetWriter interface {
-	// Write keyset to some storage system.
-	Write(Keyset *tinkpb.Keyset) error
+// PrivateKeyManager is a special type of KeyManager that understands private key types.
+type PrivateKeyManager interface {
+	KeyManager
 
-	// Write EncryptedKeyset to some storage system.
-	WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error
+	// PublicKeyData extracts the public key data from the private key.
+	PublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error)
 }

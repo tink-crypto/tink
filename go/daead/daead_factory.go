@@ -18,18 +18,20 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/primitiveset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 )
 
 // New returns a DeterministicAEAD primitive from the given keyset handle.
-func New(handle *tink.KeysetHandle) (tink.DeterministicAEAD, error) {
-	return NewWithKeyManager(handle, nil /*keyManager*/)
+func New(h *keyset.Handle) (tink.DeterministicAEAD, error) {
+	return NewWithKeyManager(h, nil /*keyManager*/)
 }
 
 // NewWithKeyManager returns a DeterministicAEAD primitive from the given keyset handle and custom key manager.
-func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.DeterministicAEAD, error) {
-	ps, err := tink.PrimitivesWithKeyManager(kh, km)
+func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.DeterministicAEAD, error) {
+	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
 		return nil, fmt.Errorf("daead_factory: cannot obtain primitive set: %s", err)
 	}
