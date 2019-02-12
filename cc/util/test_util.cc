@@ -21,9 +21,9 @@
 #include <cstdlib>
 
 #include "absl/memory/memory.h"
-#include "tink/keyset_handle.h"
-#include "tink/cleartext_keyset_handle.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/cleartext_keyset_handle.h"
+#include "tink/keyset_handle.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
@@ -34,18 +34,19 @@
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
+#include "proto/ed25519.pb.h"
 #include "proto/tink.pb.h"
 
+using crypto::tink::util::Enums;
+using crypto::tink::util::Status;
+using crypto::tink::util::error::Code;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
+using google::crypto::tink::Ed25519PrivateKey;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::OutputPrefixType;
-using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::error::Code;
-
 
 namespace crypto {
 namespace tink {
@@ -230,6 +231,19 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
   params->set_curve(curve_type);
   params->set_encoding(encoding);
   return ecdsa_key;
+}
+
+Ed25519PrivateKey GetEd25519TestPrivateKey() {
+  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEd25519Key();
+  Ed25519PrivateKey ed25519_key;
+  ed25519_key.set_version(0);
+  ed25519_key.set_key_value(test_key->private_key);
+
+  auto public_key = ed25519_key.mutable_public_key();
+  public_key->set_version(0);
+  public_key->set_key_value(test_key->public_key);
+
+  return ed25519_key;
 }
 
 }  // namespace test
