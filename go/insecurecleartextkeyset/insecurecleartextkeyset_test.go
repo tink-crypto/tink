@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package insecureinsecurecleartextkeyset_test
+package insecurecleartextkeyset_test
 
 import (
 	"testing"
