@@ -264,12 +264,9 @@ bool WycheproofTest(const rapidjson::Value& root) {
 }
 
 TEST(SubtleUtilBoringSSLTest, ComputeEcdhSharedSecretWithWycheproofTest) {
-// Keep synchronized with google3/third_party/tink/copybara/cc.bara.sky
-#ifndef __ASYLO__  // see cl/177230851 discussion
-  ASSERT_TRUE(
-      WycheproofTest(*WycheproofUtil ::ReadTestVectors("ecdh_test.json")));
-#endif  // __ASYLO__
-  // end of block in sync with google3/third_party/tink/copybara/cc.bara.sky
+// placeholder_disabled_subtle_test, please ignore
+  ASSERT_TRUE(WycheproofTest(
+      *WycheproofUtil ::ReadTestVectors("ecdh_test.json")));
   ASSERT_TRUE(WycheproofTest(
       *WycheproofUtil ::ReadTestVectors("ecdh_secp256r1_test.json")));
   ASSERT_TRUE(WycheproofTest(
