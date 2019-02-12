@@ -290,7 +290,7 @@ primitive to encrypt or decrypt data:
         AeadKeyTemplates.AES128_GCM);
 
     // 2. Get the primitive.
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead aead = AeadFactory.getPrimitive(keysetHandle)
 
     // 3. Use the primitive to encrypt a plaintext,
     byte[] ciphertext = aead.encrypt(plaintext, aad);
