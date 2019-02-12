@@ -63,9 +63,9 @@ func AES256CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 }
 
 // KMSEnvelopeAeadKeyTemplate is a KeyTemplate for a given KEK in remote KMS
-func KMSEnvelopeAeadKeyTemplate(kURI string, dekT *tinkpb.KeyTemplate) *tinkpb.KeyTemplate {
+func KMSEnvelopeAeadKeyTemplate(uri string, dekT *tinkpb.KeyTemplate) *tinkpb.KeyTemplate {
 	f := &kmsenvpb.KmsEnvelopeAeadKeyFormat{
-		KekUri:      kURI,
+		KekUri:      uri,
 		DekTemplate: dekT,
 	}
 	serializedFormat, _ := proto.Marshal(f)

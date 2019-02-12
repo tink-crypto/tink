@@ -35,8 +35,7 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.MAC, erro
 	if err != nil {
 		return nil, fmt.Errorf("mac_factory: cannot obtain primitive set: %s", err)
 	}
-	var mac tink.MAC = newPrimitiveSet(ps)
-	return mac, nil
+	return newPrimitiveSet(ps), nil
 }
 
 // primitiveSet is a MAC implementation that uses the underlying primitive set to compute and
@@ -58,7 +57,7 @@ func newPrimitiveSet(ps *primitiveset.PrimitiveSet) *primitiveSet {
 // and returns the concatenation of the primary's identifier and the calculated mac.
 func (m *primitiveSet) ComputeMAC(data []byte) ([]byte, error) {
 	primary := m.ps.Primary
-	var primitive tink.MAC = (primary.Primitive).(tink.MAC)
+	var primitive = (primary.Primitive).(tink.MAC)
 	mac, err := primitive.ComputeMAC(data)
 	if err != nil {
 		return nil, err
@@ -86,7 +85,7 @@ func (m *primitiveSet) VerifyMAC(mac, data []byte) error {
 	entries, err := m.ps.EntriesForPrefix(string(prefix))
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p tink.MAC = (entries[i].Primitive).(tink.MAC)
+			var p = (entries[i].Primitive).(tink.MAC)
 			if err = p.VerifyMAC(macNoPrefix, data); err == nil {
 				return nil
 			}
@@ -96,7 +95,7 @@ func (m *primitiveSet) VerifyMAC(mac, data []byte) error {
 	entries, err = m.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p tink.MAC = (entries[i].Primitive).(tink.MAC)
+			var p = (entries[i].Primitive).(tink.MAC)
 			if err = p.VerifyMAC(mac, data); err == nil {
 				return nil
 			}

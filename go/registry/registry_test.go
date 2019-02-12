@@ -48,7 +48,7 @@ func TestRegisterKeyManager(t *testing.T) {
 
 func TestRegisterKeyManagerWithCollision(t *testing.T) {
 	// dummyKeyManager's typeURL is equal to that of AESGCM
-	var dummyKeyManager registry.KeyManager = new(testutil.DummyAEADKeyManager)
+	var dummyKeyManager = new(testutil.DummyAEADKeyManager)
 	// This should fail because overwriting is disallowed.
 	err := registry.RegisterKeyManager(dummyKeyManager)
 	if err == nil {
@@ -97,7 +97,7 @@ func TestNewKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var aesGcmKey *gcmpb.AesGcmKey = key.(*gcmpb.AesGcmKey)
+	var aesGcmKey = key.(*gcmpb.AesGcmKey)
 	aesGcmFormat := new(gcmpb.AesGcmKeyFormat)
 	if err := proto.Unmarshal(aesGcmTemplate.Value, aesGcmFormat); err != nil {
 		t.Errorf("unexpected error: %s", err)

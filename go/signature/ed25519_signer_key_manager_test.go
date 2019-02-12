@@ -39,7 +39,7 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	var s *subtleSig.ED25519Signer = tmp.(*subtleSig.ED25519Signer)
+	var s = tmp.(*subtleSig.ED25519Signer)
 
 	kmPub, err := registry.GetKeyManager(signature.ED25519VerifierTypeURL)
 	if err != nil {
@@ -51,7 +51,7 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	var v *subtleSig.ED25519Verifier = tmp.(*subtleSig.ED25519Verifier)
+	var v = tmp.(*subtleSig.ED25519Verifier)
 
 	data := random.GetRandomBytes(1281)
 	signature, err := s.Sign(data)

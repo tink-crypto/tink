@@ -35,8 +35,7 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.AEAD, err
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret tink.AEAD = newPrimitiveSet(ps)
-	return ret, nil
+	return newPrimitiveSet(ps), nil
 }
 
 // primitiveSet is an AEAD implementation that uses the underlying primitive set for encryption
@@ -58,7 +57,7 @@ func newPrimitiveSet(ps *primitiveset.PrimitiveSet) *primitiveSet {
 // It returns the concatenation of the primary's identifier and the ciphertext.
 func (a *primitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
 	primary := a.ps.Primary
-	var p tink.AEAD = (primary.Primitive).(tink.AEAD)
+	var p = (primary.Primitive).(tink.AEAD)
 	ct, err := p.Encrypt(pt, ad)
 	if err != nil {
 		return nil, err

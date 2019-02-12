@@ -36,8 +36,7 @@ func NewSignerWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Sig
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret tink.Signer = newSignerSet(ps)
-	return ret, nil
+	return newSignerSet(ps), nil
 }
 
 // signerSet is an Signer implementation that uses the underlying primitive set for signing.
@@ -58,7 +57,7 @@ func newSignerSet(ps *primitiveset.PrimitiveSet) *signerSet {
 // primary primitive.
 func (s *signerSet) Sign(data []byte) ([]byte, error) {
 	primary := s.ps.Primary
-	var signer tink.Signer = (primary.Primitive).(tink.Signer)
+	var signer = (primary.Primitive).(tink.Signer)
 	var signedData []byte
 	if primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		signedData = append(signedData, data...)
