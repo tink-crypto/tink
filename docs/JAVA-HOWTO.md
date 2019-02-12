@@ -290,7 +290,7 @@ primitive to encrypt or decrypt data:
         AeadKeyTemplates.AES128_GCM);
 
     // 2. Get the primitive.
-    Aead aead = AeadFactory.getPrimitive(keysetHandle)
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
 
     // 3. Use the primitive to encrypt a plaintext,
     byte[] ciphertext = aead.encrypt(plaintext, aad);
@@ -398,7 +398,7 @@ Authentication Code)](PRIMITIVES.md#message-authentication-code):
         MacKeyTemplates.HMAC_SHA256_128BITTAG);
 
     // 2. Get the primitive.
-    Mac mac = keysetHandle.getPrimitive(Mac.class);
+    Mac mac = AeadFactory.getPrimitive(keysetHandle);
 
     // 3. Use the primitive to compute a tag,
     byte[] tag = mac.computeMac(data);
@@ -425,7 +425,7 @@ signature](PRIMITIVES.md#digital-signatures):
         SignatureKeyTemplates.ECDSA_P256);
 
     // 2. Get the primitive.
-    PublicKeySign signer = privateKeysetHandle.getPrimitive(PublicKeySign.class);
+    PublicKeySign signer = AeadFactory.getPrimitive(privateKeysetHandle);
 
     // 3. Use the primitive to sign.
     byte[] signature = signer.sign(data);
@@ -437,7 +437,7 @@ signature](PRIMITIVES.md#digital-signatures):
         privateKeysetHandle.getPublicKeysetHandle();
 
     // 2. Get the primitive.
-    PublicKeyVerify verifier = publicKeysetHandle.getPrimitive(PublicKeyVerify.class);
+    PublicKeyVerify verifier = AeadFactory.getPrimitive(publicKeysetHandle);
 
     // 4. Use the primitive to verify.
     verifier.verify(signature, data);
@@ -467,7 +467,7 @@ use the following:
 
     // 2. Get the primitive.
     HybridEncrypt hybridEncrypt =
-        publicKeysetHandle.getPrimitive(HybridEncrypt.class);
+        AeadFactory.getPrimitive(publicKeysetHandle);
 
     // 3. Use the primitive.
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
@@ -475,8 +475,7 @@ use the following:
     // DECRYPTING
 
     // 2. Get the primitive.
-    HybridDecrypt hybridDecrypt = privateKeysetHandle.getPrimitive(
-        HybridDecrypt.class);
+    HybridDecrypt hybridDecrypt = AeadFactory.getPrimitive(privateKeysetHandle);
 
     // 3. Use the primitive.
     byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
@@ -519,7 +518,7 @@ using the credentials in `credentials.json` as follows:
         .withCredentials("credentials.json"));
 
     // 3. Get the primitive.
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
 
     // 4. Use the primitive.
     byte[] ciphertext = aead.encrypt(plaintext, aad);
