@@ -9,11 +9,11 @@ go_library(
     srcs = [
         "binary_io.go",
         "handle.go",
-        "init.go",
+        "keyset.go",
         "manager.go",
         "mem_io.go",
         "reader.go",
-        "util.go",
+        "validation.go",
         "writer.go",
     ],
     importpath = "github.com/google/tink/go/keyset",
@@ -34,7 +34,7 @@ go_test(
         "binary_io_test.go",
         "handle_test.go",
         "manager_test.go",
-        "util_test.go",
+        "validation_test.go",
     ],
     deps = [
         "//go/keyset:go_default_library",

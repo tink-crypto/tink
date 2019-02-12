@@ -8,7 +8,8 @@ go_library(
     name = "go_default_library",
     srcs = [
         "aes_siv_key_manager.go",
-        "init.go",
+        "daead.go",
+        "daead_factory.go",
     ],
     importpath = "github.com/google/tink/go/daead",
     visibility = ["//visibility:public"],
@@ -30,7 +31,8 @@ go_test(
     name = "go_default_test",
     srcs = [
         "aes_siv_key_manager_test.go",
-        "init_test.go",
+        "daead_factory_test.go",
+        "daead_test.go",
     ],
     embed = [":go_default_library"],
     deps = [

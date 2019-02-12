@@ -8,7 +8,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "hmac_key_manager.go",
-        "init.go",
+        "mac.go",
         "mac_factory.go",
         "mac_key_templates.go",
     ],
@@ -33,9 +33,9 @@ go_test(
     name = "go_default_test",
     srcs = [
         "hmac_key_manager_test.go",
-        "init_test.go",
         "mac_factory_test.go",
         "mac_key_templates_test.go",
+        "mac_test.go",
     ],
     embed = [":go_default_library"],
     deps = [

@@ -17,8 +17,8 @@ package keyset_test
 import (
 	"testing"
 
-	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -37,7 +37,7 @@ func TestValidate(t *testing.T) {
 		t.Errorf("expect an error when keyset is nil")
 	}
 	// empty keyset
-	emptyKeys := make([]*tinkpb.Keyset_Key, 0)
+	var emptyKeys []*tinkpb.Keyset_Key
 	if err = keyset.Validate(testutil.NewKeyset(1, emptyKeys)); err == nil {
 		t.Errorf("expect an error when keyset is empty")
 	}
