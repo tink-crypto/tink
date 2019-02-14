@@ -419,15 +419,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>getPrimitive</h4>
-<pre>@Alpha
-public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;classObject)
-                          throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;classObject)
+                   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Returns a primitive from this keyset, using the global registry to create resources creating
- the primitive.
-
- <p>This does not yet work for all primitives, since the set-wrapper for the primitive needs to
- be registered. TODO(tholenst): Make this work for all primitives we have, then remove the alpha
- annotation.</div>
+ the primitive.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
@@ -446,11 +441,7 @@ public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="../../../../com/google/c
                           throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Returns a primitive from this keyset, using the given <code>customKeyManager</code> and the global
  registry to get resources creating the primitive. The given keyManager will take precedence
- when creating primitives over the globally registered keyManagers.
-
- <p>This does not yet work for all primitives, since the set-wrapper for the primitive needs to
- be registered. TODO(tholenst): Make this work for all primitives we have, then remove the alpha
- annotation.</div>
+ when creating primitives over the globally registered keyManagers.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
