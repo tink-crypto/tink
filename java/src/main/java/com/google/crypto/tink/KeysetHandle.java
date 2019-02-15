@@ -267,12 +267,7 @@ public final class KeysetHandle {
   /**
    * Returns a primitive from this keyset, using the global registry to create resources creating
    * the primitive.
-   *
-   * <p>This does not yet work for all primitives, since the set-wrapper for the primitive needs to
-   * be registered. TODO(tholenst): Make this work for all primitives we have, then remove the alpha
-   * annotation.
    */
-  @Alpha
   public <P> P getPrimitive(Class<P> classObject) throws GeneralSecurityException {
     PrimitiveSet<P> primitiveSet = Registry.getPrimitives(this, classObject);
     return Registry.wrap(primitiveSet);
@@ -282,10 +277,6 @@ public final class KeysetHandle {
    * Returns a primitive from this keyset, using the given {@code customKeyManager} and the global
    * registry to get resources creating the primitive. The given keyManager will take precedence
    * when creating primitives over the globally registered keyManagers.
-   *
-   * <p>This does not yet work for all primitives, since the set-wrapper for the primitive needs to
-   * be registered. TODO(tholenst): Make this work for all primitives we have, then remove the alpha
-   * annotation.
    */
   @Alpha
   public <P> P getPrimitive(KeyManager<P> customKeyManager, Class<P> classObject)

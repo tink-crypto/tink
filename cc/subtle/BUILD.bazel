@@ -482,6 +482,7 @@ cc_library(
         ":stream_segment_encrypter",
         "//cc:output_stream",
         "//cc/util:statusor",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -928,6 +929,26 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "streaming_aead_encrypting_stream_test",
+    size = "medium",
+    srcs = ["streaming_aead_encrypting_stream_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":random",
+        ":stream_segment_encrypter",
+        ":streaming_aead_encrypting_stream",
+        "//cc:output_stream",
+        "//cc/util:ostream_output_stream",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],

@@ -44,27 +44,25 @@ namespace subtle {
 // Values returned by StreamSegmentEncrypter's methods effectively define
 // the layout of the resulting ciphertext stream:
 //
-//   | other | header | 1st segment |
-//   | ...   2nd ciphertext segment |
-//   | ...   3rd ciphertext segment |
-//   | ...   ...                    |
-//   | ...   last segment |
+//   | other | header | 1st ciphertext segment |
+//   | ......    2nd ciphertext segment  ..... |
+//   | ......    3rd ciphertext segment  ..... |
+//   | ......    ...                     ..... |
+//   | ......    last ciphertext segment |
 //
 // where the following holds:
 //  * each line above, except for the last one,
 //    contains get_ciphertext_segment_size() bytes
 //  * each segment, except for the 1st and the last one,
 //    encrypts get_plaintext_segment_size() bytes of plaintext
-//  * 'header' is  get_header_length() bytes long
-//  * 'other' is (get_ciphertext_offset() - get_header_length()) bytes long,
+//  * if the ciphertext stream encrypts at least one byte of plaintext,
+//    then the last segment encrypts at least one byte of plaintext
+//  * 'other' is (get_ciphertext_offset() - get_header().size()) bytes long,
 //    and represents potential other bytes already written to the stream;
 //    the purpose of ciphertext offset is to allow alignment of ciphertext
 //    segments with segments of the underlying storage or transmission stream.
 class StreamSegmentEncrypter {
  public:
-  // Returns the header of the ciphertext stream.
-  virtual const std::vector<uint8_t>& get_header() const;
-
   // Encrypts 'plaintext' as a segment, and writes the resulting ciphertext
   // to 'ciphertext_buffer', adjusting its size as needed.
   // 'plaintext' and 'ciphertext_buffer' must refer to distinct and
@@ -77,21 +75,21 @@ class StreamSegmentEncrypter {
       bool is_last_segment,
       std::vector<uint8_t>* ciphertext_buffer) = 0;
 
+  // Returns the header of the ciphertext stream.
+  virtual const std::vector<uint8_t>& get_header() const = 0;
+
   // Returns the segment number that will be used for encryption
   // of the next segment.
   virtual int64_t get_segment_number() const = 0;
 
-  // Returns the length (in bytes) of a plaintext segment.
+  // Returns the size (in bytes) of a plaintext segment.
   virtual int get_plaintext_segment_size() const = 0;
 
-  // Returns the length (in bytes) of a ciphertext segment.
+  // Returns the size (in bytes) of a ciphertext segment.
   virtual int get_ciphertext_segment_size() const = 0;
 
-  // Returns the length (in bytes) of the header of an encrypted stream.
-  virtual int get_header_length() const = 0;
-
   // Returns the offset (in bytes) of the ciphertext within an encrypted stream.
-  // The offset is not smaller than the length of the header.
+  // The offset is not smaller than the size of the header.
   virtual int get_ciphertext_offset() const = 0;
 
   virtual ~StreamSegmentEncrypter() {}

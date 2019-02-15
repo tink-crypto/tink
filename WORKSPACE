@@ -3,6 +3,19 @@ workspace(name="tink")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 #-----------------------------------------------------------------------------
+# Google PKI certs for connecting to GCP KMS
+#-----------------------------------------------------------------------------
+
+http_file(
+    name = "google_root_pem",
+    executable = 0,
+    urls = [
+        "https://pki.goog/roots.pem"
+    ],
+    sha256 = "24be41e33ba82bd7ac872f0ba0a9e6da219929a7c79b81ff23c229b40dca7234",
+)
+
+#-----------------------------------------------------------------------------
 # wycheproof, for JSON test vectors
 #-----------------------------------------------------------------------------
 http_archive(
@@ -609,4 +622,22 @@ go_repository(
     name = "org_golang_x_sys",
     commit = "d0be0721c37eeb5299f245a996a483160fc36940",
     importpath = "golang.org/x/sys",
+)
+
+go_repository(
+    name = "org_golang_google_api",
+    commit = "3097bf831ede4a24e08a3316254e29ca726383e3",
+    importpath = "google.golang.org/api",
+)
+
+go_repository(
+    name = "org_golang_x_oauth2",
+    commit = "ef147856a6ddbb60760db74283d2424e98c87bff",
+    importpath = "golang.org/x/oauth2",
+)
+
+go_repository(
+    name = "com_google_cloud_go",
+    commit = "777200caa7fb8936aed0f12b1fd79af64cc83ec9",
+    importpath = "cloud.google.com/go",
 )
