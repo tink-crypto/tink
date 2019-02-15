@@ -324,6 +324,9 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":ecdsa_sign_key_manager",
+        ":ed25519_sign_key_manager",
+        ":rsa_ssa_pkcs1_sign_key_manager",
+        ":rsa_ssa_pss_sign_key_manager",
         "//cc:catalogue",
         "//cc:key_manager",
         "//cc:public_key_sign",
@@ -340,6 +343,9 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":ecdsa_verify_key_manager",
+        ":ed25519_verify_key_manager",
+        ":rsa_ssa_pkcs1_verify_key_manager",
+        ":rsa_ssa_pss_verify_key_manager",
         "//cc:catalogue",
         "//cc:key_manager",
         "//cc:public_key_verify",
@@ -680,6 +686,7 @@ cc_test(
         "//cc:public_key_verify",
         "//cc:registry",
         "//cc/util:status",
+        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )

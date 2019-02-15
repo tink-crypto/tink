@@ -18,8 +18,11 @@
 
 #include "absl/strings/ascii.h"
 #include "tink/catalogue.h"
-#include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/key_manager.h"
+#include "tink/signature/ecdsa_sign_key_manager.h"
+#include "tink/signature/ed25519_sign_key_manager.h"
+#include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
+#include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -34,9 +37,22 @@ CreateKeyManager(const std::string& type_url) {
     std::unique_ptr<KeyManager<PublicKeySign>> manager(
         new EcdsaSignKeyManager());
     return std::move(manager);
+  } else if (type_url == Ed25519SignKeyManager::static_key_type()) {
+    std::unique_ptr<KeyManager<PublicKeySign>> manager(
+        new Ed25519SignKeyManager());
+    return std::move(manager);
+  } else if (type_url == RsaSsaPkcs1SignKeyManager::static_key_type()) {
+    std::unique_ptr<KeyManager<PublicKeySign>> manager(
+        new RsaSsaPkcs1SignKeyManager());
+    return std::move(manager);
+  } else if (type_url == RsaSsaPssSignKeyManager::static_key_type()) {
+    std::unique_ptr<KeyManager<PublicKeySign>> manager(
+        new RsaSsaPssSignKeyManager());
+    return std::move(manager);
+  } else {
+    return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+                     "No key manager for type_url '%s'.", type_url.c_str());
   }
-  return ToStatusF(crypto::tink::util::error::NOT_FOUND,
-                   "No key manager for type_url '%s'.", type_url.c_str());
 }
 
 }  // anonymous namespace

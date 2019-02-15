@@ -16,6 +16,8 @@
 
 #include "tink/signature/signature_config.h"
 
+#include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/keyset_handle.h"
@@ -24,7 +26,6 @@
 #include "tink/registry.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/util/status.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -35,8 +36,7 @@ class DummySignCatalogue : public Catalogue<PublicKeySign> {
   DummySignCatalogue() {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<PublicKeySign>>>
-  GetKeyManager(const std::string& type_url,
-                const std::string& primitive_name,
+  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
                 uint32_t min_version) const override {
     return util::Status::UNKNOWN;
   }
@@ -44,50 +44,88 @@ class DummySignCatalogue : public Catalogue<PublicKeySign> {
 
 class SignatureConfigTest : public ::testing::Test {
  protected:
-  void SetUp() override {
-    Registry::Reset();
-  }
+  void SetUp() override { Registry::Reset(); }
 };
 
 TEST_F(SignatureConfigTest, testBasic) {
-  std::string sign_key_type =
-      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-  std::string verify_key_type =
-      "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
+  std::vector<std::string> sign_key_types;
+  sign_key_types.push_back(
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
+  sign_key_types.push_back(
+      "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey");
+  sign_key_types.push_back(
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey");
+  sign_key_types.push_back(
+      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey");
+
+  std::vector<std::string> verify_key_types;
+  verify_key_types.push_back(
+      "type.googleapis.com/google.crypto.tink.EcdsaPublicKey");
+  verify_key_types.push_back(
+      "type.googleapis.com/google.crypto.tink.Ed25519PublicKey");
+  verify_key_types.push_back(
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey");
+  verify_key_types.push_back(
+      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey");
+
+  const size_t total_key_types =
+      sign_key_types.size() + verify_key_types.size();
+
   auto& config = SignatureConfig::Latest();
 
-  EXPECT_EQ(2, SignatureConfig::Latest().entry_size());
+  EXPECT_EQ(total_key_types, SignatureConfig::Latest().entry_size());
+  EXPECT_EQ(sign_key_types.size(), verify_key_types.size());
 
-  EXPECT_EQ("TinkPublicKeySign", config.entry(0).catalogue_name());
-  EXPECT_EQ("PublicKeySign", config.entry(0).primitive_name());
-  EXPECT_EQ(sign_key_type, config.entry(0).type_url());
-  EXPECT_EQ(true, config.entry(0).new_key_allowed());
-  EXPECT_EQ(0, config.entry(0).key_manager_version());
+  for (int i = 0; i < SignatureConfig::Latest().entry_size(); i += 2) {
+    std::string sign_key_type = sign_key_types[i / 2];
+    EXPECT_EQ("TinkPublicKeySign", config.entry(i).catalogue_name());
+    EXPECT_EQ("PublicKeySign", config.entry(i).primitive_name());
+    EXPECT_EQ(sign_key_type, config.entry(i).type_url());
+    EXPECT_EQ(true, config.entry(i).new_key_allowed());
+    EXPECT_EQ(0, config.entry(i).key_manager_version());
 
-  EXPECT_EQ("TinkPublicKeyVerify", config.entry(1).catalogue_name());
-  EXPECT_EQ("PublicKeyVerify", config.entry(1).primitive_name());
-  EXPECT_EQ(verify_key_type, config.entry(1).type_url());
-  EXPECT_EQ(true, config.entry(1).new_key_allowed());
-  EXPECT_EQ(0, config.entry(1).key_manager_version());
+    std::string verify_key_type = verify_key_types[i / 2];
+    EXPECT_EQ("TinkPublicKeyVerify", config.entry(i + 1).catalogue_name());
+    EXPECT_EQ("PublicKeyVerify", config.entry(i + 1).primitive_name());
+    EXPECT_EQ(verify_key_type, config.entry(i + 1).type_url());
+    EXPECT_EQ(true, config.entry(i + 1).new_key_allowed());
+    EXPECT_EQ(0, config.entry(i + 1).key_manager_version());
+  }
 
   // No key manager before registration.
-  auto sign_manager_result =
-      Registry::get_key_manager<PublicKeySign>(sign_key_type);
-  EXPECT_FALSE(sign_manager_result.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, sign_manager_result.status().error_code());
+  for (const auto& sign_key_type : sign_key_types) {
+    auto sign_manager_result =
+        Registry::get_key_manager<PublicKeySign>(sign_key_type);
+    EXPECT_FALSE(sign_manager_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND,
+              sign_manager_result.status().error_code());
+  }
+  for (const auto& verify_key_type : verify_key_types) {
+    auto verify_manager_result =
+        Registry::get_key_manager<PublicKeyVerify>(verify_key_type);
+    EXPECT_FALSE(verify_manager_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND,
+              verify_manager_result.status().error_code());
+  }
 
   // Registration of standard key types works.
   auto status = SignatureConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
 
-  sign_manager_result = Registry::get_key_manager<PublicKeySign>(sign_key_type);
-  EXPECT_TRUE(sign_manager_result.ok()) << sign_manager_result.status();
-  EXPECT_TRUE(sign_manager_result.ValueOrDie()->DoesSupport(sign_key_type));
+  for (const auto& sign_key_type : sign_key_types) {
+    auto sign_manager_result =
+        Registry::get_key_manager<PublicKeySign>(sign_key_type);
+    EXPECT_TRUE(sign_manager_result.ok()) << sign_manager_result.status();
+    EXPECT_TRUE(sign_manager_result.ValueOrDie()->DoesSupport(sign_key_type));
+  }
 
-  auto verify_manager_result =
-      Registry::get_key_manager<PublicKeyVerify>(verify_key_type);
-  EXPECT_TRUE(verify_manager_result.ok()) << verify_manager_result.status();
-  EXPECT_TRUE(verify_manager_result.ValueOrDie()->DoesSupport(verify_key_type));
+  for (const auto& verify_key_type : verify_key_types) {
+    auto verify_manager_result =
+        Registry::get_key_manager<PublicKeyVerify>(verify_key_type);
+    EXPECT_TRUE(verify_manager_result.ok()) << verify_manager_result.status();
+    EXPECT_TRUE(
+        verify_manager_result.ValueOrDie()->DoesSupport(verify_key_type));
+  }
 }
 
 TEST_F(SignatureConfigTest, testRegister) {
@@ -113,7 +151,7 @@ TEST_F(SignatureConfigTest, testRegister) {
   // Reset the registry, and try overriding a catalogue with a different one.
   Registry::Reset();
   status = Registry::AddCatalogue("TinkPublicKeySign",
-                                  new DummySignCatalogue());
+                                  absl::make_unique<DummySignCatalogue>());
   EXPECT_TRUE(status.ok()) << status;
   status = SignatureConfig::Register();
   EXPECT_FALSE(status.ok());
@@ -154,10 +192,12 @@ TEST_F(SignatureConfigTest, WrappersRegistered) {
       private_primitive_result.ValueOrDie()->Sign("signed text");
   ASSERT_TRUE(signature_result.ok());
 
-  EXPECT_TRUE(public_primitive_result.ValueOrDie()->Verify(
-      signature_result.ValueOrDie(), "signed text").ok());
-  EXPECT_FALSE(public_primitive_result.ValueOrDie()->Verify(
-      signature_result.ValueOrDie(), "faked text").ok());
+  EXPECT_TRUE(public_primitive_result.ValueOrDie()
+                  ->Verify(signature_result.ValueOrDie(), "signed text")
+                  .ok());
+  EXPECT_FALSE(public_primitive_result.ValueOrDie()
+                   ->Verify(signature_result.ValueOrDie(), "faked text")
+                   .ok());
 }
 
 }  // namespace

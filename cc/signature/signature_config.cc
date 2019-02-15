@@ -32,14 +32,45 @@ namespace {
 google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   google::crypto::tink::RegistryConfig* config =
       new google::crypto::tink::RegistryConfig();
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      SignatureConfig::kPublicKeySignCatalogueName,
-      SignatureConfig::kPublicKeySignPrimitiveName,
-      "EcdsaPrivateKey", 0, true));
+  // ECDSA
+  config->add_entry()->MergeFrom(
+      *Config::GetTinkKeyTypeEntry(SignatureConfig::kPublicKeySignCatalogueName,
+                                   SignatureConfig::kPublicKeySignPrimitiveName,
+                                   "EcdsaPrivateKey", 0, true));
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       SignatureConfig::kPublicKeyVerifyCatalogueName,
-      SignatureConfig::kPublicKeyVerifyPrimitiveName,
-      "EcdsaPublicKey", 0, true));
+      SignatureConfig::kPublicKeyVerifyPrimitiveName, "EcdsaPublicKey", 0,
+      true));
+
+  // ED25519
+  config->add_entry()->MergeFrom(
+      *Config::GetTinkKeyTypeEntry(SignatureConfig::kPublicKeySignCatalogueName,
+                                   SignatureConfig::kPublicKeySignPrimitiveName,
+                                   "Ed25519PrivateKey", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      SignatureConfig::kPublicKeyVerifyCatalogueName,
+      SignatureConfig::kPublicKeyVerifyPrimitiveName, "Ed25519PublicKey", 0,
+      true));
+
+  // RSA SSA PSS
+  config->add_entry()->MergeFrom(
+      *Config::GetTinkKeyTypeEntry(SignatureConfig::kPublicKeySignCatalogueName,
+                                   SignatureConfig::kPublicKeySignPrimitiveName,
+                                   "RsaSsaPssPrivateKey", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      SignatureConfig::kPublicKeyVerifyCatalogueName,
+      SignatureConfig::kPublicKeyVerifyPrimitiveName, "RsaSsaPssPublicKey", 0,
+      true));
+
+  // RSA SSA PKCS1
+  config->add_entry()->MergeFrom(
+      *Config::GetTinkKeyTypeEntry(SignatureConfig::kPublicKeySignCatalogueName,
+                                   SignatureConfig::kPublicKeySignPrimitiveName,
+                                   "RsaSsaPkcs1PrivateKey", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      SignatureConfig::kPublicKeyVerifyCatalogueName,
+      SignatureConfig::kPublicKeyVerifyPrimitiveName, "RsaSsaPkcs1PublicKey", 0,
+      true));
   config->set_config_name("TINK_SIGNATURE");
   return config;
 }

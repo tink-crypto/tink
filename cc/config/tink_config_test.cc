@@ -16,6 +16,7 @@
 
 #include "tink/config/tink_config.h"
 
+#include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
@@ -27,7 +28,6 @@
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -38,144 +38,166 @@ class DummyHybridDecryptCatalogue : public Catalogue<HybridDecrypt> {
   DummyHybridDecryptCatalogue() {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridDecrypt>>>
-  GetKeyManager(const std::string& type_url,
-                const std::string& primitive_name,
+  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
                 uint32_t min_version) const override {
     return util::Status::UNKNOWN;
   }
 };
 
-
 class TinkConfigTest : public ::testing::Test {
  protected:
-  void SetUp() override {
-    Registry::Reset();
-  }
+  void SetUp() override { Registry::Reset(); }
 };
 
+typedef struct KeyTypeEntry {
+  std::string catalogue_name;
+  std::string primitive_name;
+  std::string type_url;
+  bool new_key_allowed;
+  int key_manager_version;
+} KeyTypeEntry;
+
 TEST_F(TinkConfigTest, testBasic) {
-  std::string public_key_sign_key_type =
-      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-  std::string public_key_verify_key_type =
-      "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
-  std::string hybrid_decrypt_key_type =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-  std::string hybrid_encrypt_key_type =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
-  std::string aes_ctr_hmac_aead_key_type =
-      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-  std::string aes_eax_key_type =
-      "type.googleapis.com/google.crypto.tink.AesEaxKey";
-  std::string aes_gcm_key_type =
-      "type.googleapis.com/google.crypto.tink.AesGcmKey";
-  std::string xchacha20_poly1305_key_type =
-      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
-  std::string hmac_key_type =
-      "type.googleapis.com/google.crypto.tink.HmacKey";
-  std::string aes_siv_key_type =
-      "type.googleapis.com/google.crypto.tink.AesSivKey";
+  std::vector<KeyTypeEntry> all_key_type_entries;
+
+  std::vector<KeyTypeEntry> mac_key_type_entries;
+  mac_key_type_entries.push_back(
+      {"TinkMac", "Mac", "type.googleapis.com/google.crypto.tink.HmacKey", true,
+       0});
+  all_key_type_entries.insert(std::end(all_key_type_entries),
+                              std::begin(mac_key_type_entries),
+                              std::end(mac_key_type_entries));
+
+  std::vector<KeyTypeEntry> aead_key_type_entries;
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey", true, 0});
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesGcmKey",
+       true, 0});
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesEaxKey",
+       true, 0});
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key", true, 0});
+  all_key_type_entries.insert(std::end(all_key_type_entries),
+                              std::begin(aead_key_type_entries),
+                              std::end(aead_key_type_entries));
+
+  std::vector<KeyTypeEntry> hybrid_key_type_entries;
+  hybrid_key_type_entries.push_back(
+      {"TinkHybridDecrypt", "HybridDecrypt",
+       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey", true,
+       0});
+  hybrid_key_type_entries.push_back(
+      {"TinkHybridEncrypt", "HybridEncrypt",
+       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey", true,
+       0});
+  all_key_type_entries.insert(std::end(all_key_type_entries),
+                              std::begin(hybrid_key_type_entries),
+                              std::end(hybrid_key_type_entries));
+
+  std::vector<KeyTypeEntry> signature_key_type_entries;
+  signature_key_type_entries.push_back(
+      {"TinkPublicKeySign", "PublicKeySign",
+       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey", true, 0});
+  signature_key_type_entries.push_back(
+      {"TinkPublicKeyVerify", "PublicKeyVerify",
+       "type.googleapis.com/google.crypto.tink.EcdsaPublicKey", true, 0});
+  signature_key_type_entries.push_back(
+      {"TinkPublicKeySign", "PublicKeySign",
+       "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey", true, 0});
+  signature_key_type_entries.push_back(
+      {"TinkPublicKeyVerify", "PublicKeyVerify",
+       "type.googleapis.com/google.crypto.tink.Ed25519PublicKey", true, 0});
+  signature_key_type_entries.push_back(
+      {"TinkPublicKeySign", "PublicKeySign",
+       "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey", true, 0});
+  signature_key_type_entries.push_back(
+      {"TinkPublicKeyVerify", "PublicKeyVerify",
+       "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey", true, 0});
+  signature_key_type_entries.push_back(
+      {"TinkPublicKeySign", "PublicKeySign",
+       "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey", true,
+       0});
+  signature_key_type_entries.push_back(
+      {"TinkPublicKeyVerify", "PublicKeyVerify",
+       "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey", true, 0});
+  all_key_type_entries.insert(std::end(all_key_type_entries),
+                              std::begin(signature_key_type_entries),
+                              std::end(signature_key_type_entries));
+
+  std::vector<KeyTypeEntry> daead_key_type_entries;
+  daead_key_type_entries.push_back(
+      {"TinkDeterministicAead", "DeterministicAead",
+       "type.googleapis.com/google.crypto.tink.AesSivKey", true, 0});
+  all_key_type_entries.insert(std::end(all_key_type_entries),
+                              std::begin(daead_key_type_entries),
+                              std::end(daead_key_type_entries));
+
   auto& config = TinkConfig::Latest();
 
-  EXPECT_EQ(10, TinkConfig::Latest().entry_size());
+  EXPECT_EQ(all_key_type_entries.size(), TinkConfig::Latest().entry_size());
 
-  EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
-  EXPECT_EQ("Mac", config.entry(0).primitive_name());
-  EXPECT_EQ(hmac_key_type, config.entry(0).type_url());
-  EXPECT_EQ(true, config.entry(0).new_key_allowed());
-  EXPECT_EQ(0, config.entry(0).key_manager_version());
-
-  EXPECT_EQ("TinkAead", config.entry(1).catalogue_name());
-  EXPECT_EQ("Aead", config.entry(1).primitive_name());
-  EXPECT_EQ(aes_ctr_hmac_aead_key_type, config.entry(1).type_url());
-  EXPECT_EQ(true, config.entry(1).new_key_allowed());
-  EXPECT_EQ(0, config.entry(1).key_manager_version());
-
-  EXPECT_EQ("TinkAead", config.entry(2).catalogue_name());
-  EXPECT_EQ("Aead", config.entry(2).primitive_name());
-  EXPECT_EQ(aes_gcm_key_type, config.entry(2).type_url());
-  EXPECT_EQ(true, config.entry(2).new_key_allowed());
-  EXPECT_EQ(0, config.entry(2).key_manager_version());
-
-  EXPECT_EQ("TinkAead", config.entry(3).catalogue_name());
-  EXPECT_EQ("Aead", config.entry(3).primitive_name());
-  EXPECT_EQ(aes_eax_key_type, config.entry(3).type_url());
-  EXPECT_EQ(true, config.entry(3).new_key_allowed());
-  EXPECT_EQ(0, config.entry(3).key_manager_version());
-
-  EXPECT_EQ("TinkAead", config.entry(4).catalogue_name());
-  EXPECT_EQ("Aead", config.entry(4).primitive_name());
-  EXPECT_EQ(xchacha20_poly1305_key_type, config.entry(4).type_url());
-  EXPECT_EQ(true, config.entry(4).new_key_allowed());
-  EXPECT_EQ(0, config.entry(4).key_manager_version());
-
-  EXPECT_EQ("TinkHybridDecrypt", config.entry(5).catalogue_name());
-  EXPECT_EQ("HybridDecrypt", config.entry(5).primitive_name());
-  EXPECT_EQ(hybrid_decrypt_key_type, config.entry(5).type_url());
-  EXPECT_EQ(true, config.entry(5).new_key_allowed());
-  EXPECT_EQ(0, config.entry(5).key_manager_version());
-
-  EXPECT_EQ("TinkHybridEncrypt", config.entry(6).catalogue_name());
-  EXPECT_EQ("HybridEncrypt", config.entry(6).primitive_name());
-  EXPECT_EQ(hybrid_encrypt_key_type, config.entry(6).type_url());
-  EXPECT_EQ(true, config.entry(6).new_key_allowed());
-  EXPECT_EQ(0, config.entry(6).key_manager_version());
-
-  EXPECT_EQ("TinkPublicKeySign", config.entry(7).catalogue_name());
-  EXPECT_EQ("PublicKeySign", config.entry(7).primitive_name());
-  EXPECT_EQ(public_key_sign_key_type, config.entry(7).type_url());
-  EXPECT_EQ(true, config.entry(7).new_key_allowed());
-  EXPECT_EQ(0, config.entry(7).key_manager_version());
-
-  EXPECT_EQ("TinkPublicKeyVerify", config.entry(8).catalogue_name());
-  EXPECT_EQ("PublicKeyVerify", config.entry(8).primitive_name());
-  EXPECT_EQ(public_key_verify_key_type, config.entry(8).type_url());
-  EXPECT_EQ(true, config.entry(8).new_key_allowed());
-  EXPECT_EQ(0, config.entry(8).key_manager_version());
-
-  EXPECT_EQ("TinkDeterministicAead", config.entry(9).catalogue_name());
-  EXPECT_EQ("DeterministicAead", config.entry(9).primitive_name());
-  EXPECT_EQ(aes_siv_key_type, config.entry(9).type_url());
-  EXPECT_EQ(true, config.entry(9).new_key_allowed());
-  EXPECT_EQ(0, config.entry(9).key_manager_version());
+  int i = 0;
+  for (const auto& key_type_entry : all_key_type_entries) {
+    EXPECT_EQ(key_type_entry.catalogue_name, config.entry(i).catalogue_name());
+    EXPECT_EQ(key_type_entry.primitive_name, config.entry(i).primitive_name());
+    EXPECT_EQ(key_type_entry.type_url, config.entry(i).type_url());
+    EXPECT_EQ(key_type_entry.new_key_allowed,
+              config.entry(i).new_key_allowed());
+    EXPECT_EQ(key_type_entry.key_manager_version,
+              config.entry(i).key_manager_version());
+    i++;
+  }
 
   // No key manager before registration.
-  {
-    auto manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);
-    EXPECT_FALSE(manager_result.ok());
-    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
-  }
-  {
-    auto manager_result = Registry::get_key_manager<Mac>(hmac_key_type);
-    EXPECT_FALSE(manager_result.ok());
-    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
-  }
-  {
+  for (const auto& key_type_entry : aead_key_type_entries) {
     auto manager_result =
-        Registry::get_key_manager<HybridEncrypt>(hybrid_encrypt_key_type);
+        Registry::get_key_manager<Aead>(key_type_entry.type_url);
     EXPECT_FALSE(manager_result.ok());
     EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
   }
-  {
+  for (const auto& key_type_entry : mac_key_type_entries) {
     auto manager_result =
-        Registry::get_key_manager<HybridDecrypt>(hybrid_decrypt_key_type);
+        Registry::get_key_manager<Mac>(key_type_entry.type_url);
     EXPECT_FALSE(manager_result.ok());
     EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
   }
-  {
-    auto manager_result =
-        Registry::get_key_manager<PublicKeySign>(public_key_sign_key_type);
-    EXPECT_FALSE(manager_result.ok());
-    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  for (const auto& key_type_entry : hybrid_key_type_entries) {
+    if (key_type_entry.catalogue_name == "TinkHybridEncrypt") {
+      // HybridEncrypt
+      auto manager_result =
+          Registry::get_key_manager<HybridEncrypt>(key_type_entry.type_url);
+      EXPECT_FALSE(manager_result.ok());
+      EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+    } else {
+      // HybridDecrypt
+      auto manager_result =
+          Registry::get_key_manager<HybridDecrypt>(key_type_entry.type_url);
+      EXPECT_FALSE(manager_result.ok());
+      EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+    }
   }
-  {
-    auto manager_result =
-        Registry::get_key_manager<PublicKeyVerify>(public_key_verify_key_type);
-    EXPECT_FALSE(manager_result.ok());
-    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  for (const auto& key_type_entry : signature_key_type_entries) {
+    if (key_type_entry.catalogue_name == "TinkPublicKeySign") {
+      // PublicKeySign
+      auto manager_result =
+          Registry::get_key_manager<PublicKeySign>(key_type_entry.type_url);
+      EXPECT_FALSE(manager_result.ok());
+      EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+    } else {
+      // PublicKeyVerify
+      auto manager_result =
+          Registry::get_key_manager<PublicKeyVerify>(key_type_entry.type_url);
+      EXPECT_FALSE(manager_result.ok());
+      EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+    }
   }
-  {
+  for (const auto& key_type_entry : daead_key_type_entries) {
     auto manager_result =
-        Registry::get_key_manager<DeterministicAead>(aes_siv_key_type);
+        Registry::get_key_manager<DeterministicAead>(key_type_entry.type_url);
     EXPECT_FALSE(manager_result.ok());
     EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
   }
@@ -183,51 +205,62 @@ TEST_F(TinkConfigTest, testBasic) {
   // Registration of standard key types works.
   auto status = TinkConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
-  {
-    auto manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);
-    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(aes_gcm_key_type));
-  }
-  {
-    auto manager_result = Registry::get_key_manager<Mac>(hmac_key_type);
-    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(hmac_key_type));
-  }
-  {
+  for (const auto& key_type_entry : aead_key_type_entries) {
     auto manager_result =
-        Registry::get_key_manager<HybridEncrypt>(hybrid_encrypt_key_type);
+        Registry::get_key_manager<Aead>(key_type_entry.type_url);
     EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(
-        hybrid_encrypt_key_type));
+    EXPECT_TRUE(
+        manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
   }
-  {
+
+  for (const auto& key_type_entry : mac_key_type_entries) {
     auto manager_result =
-        Registry::get_key_manager<HybridDecrypt>(hybrid_decrypt_key_type);
+        Registry::get_key_manager<Mac>(key_type_entry.type_url);
     EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(
-        hybrid_decrypt_key_type));
+    EXPECT_TRUE(
+        manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
   }
-  {
+
+  for (const auto& key_type_entry : hybrid_key_type_entries) {
+    if (key_type_entry.catalogue_name == "TinkHybridEncrypt") {
+      auto manager_result =
+          Registry::get_key_manager<HybridEncrypt>(key_type_entry.type_url);
+      EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+      EXPECT_TRUE(
+          manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
+    } else {
+      auto manager_result =
+          Registry::get_key_manager<HybridDecrypt>(key_type_entry.type_url);
+      EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+      EXPECT_TRUE(
+          manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
+    }
+  }
+
+  for (const auto& key_type_entry : signature_key_type_entries) {
+    if (key_type_entry.catalogue_name == "TinkPublicKeySign") {
+      auto manager_result =
+          Registry::get_key_manager<PublicKeySign>(key_type_entry.type_url);
+      EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+      EXPECT_TRUE(
+          manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
+    } else {
+      auto manager_result =
+          Registry::get_key_manager<PublicKeyVerify>(key_type_entry.type_url);
+      EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+      EXPECT_TRUE(
+          manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
+    }
+  }
+
+  for (const auto& key_type_entry : daead_key_type_entries) {
     auto manager_result =
-        Registry::get_key_manager<PublicKeySign>(public_key_sign_key_type);
+        Registry::get_key_manager<DeterministicAead>(key_type_entry.type_url);
     EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(
-        public_key_sign_key_type));
+    EXPECT_TRUE(
+        manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
   }
-  {
-    auto manager_result =
-        Registry::get_key_manager<PublicKeyVerify>(public_key_verify_key_type);
-    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(
-        public_key_verify_key_type));
-  }
-  {
-    auto manager_result =
-        Registry::get_key_manager<DeterministicAead>(aes_siv_key_type);
-    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(aes_siv_key_type));
-  }
-}
+}  // namespace
 
 TEST_F(TinkConfigTest, testRegister) {
   std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";

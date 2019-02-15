@@ -18,8 +18,11 @@
 
 #include "absl/strings/ascii.h"
 #include "tink/catalogue.h"
-#include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/key_manager.h"
+#include "tink/signature/ecdsa_verify_key_manager.h"
+#include "tink/signature/ed25519_verify_key_manager.h"
+#include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
+#include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -34,17 +37,30 @@ CreateKeyManager(const std::string& type_url) {
     std::unique_ptr<KeyManager<PublicKeyVerify>> manager(
         new EcdsaVerifyKeyManager());
     return std::move(manager);
+  } else if (type_url == Ed25519VerifyKeyManager::static_key_type()) {
+    std::unique_ptr<KeyManager<PublicKeyVerify>> manager(
+        new Ed25519VerifyKeyManager());
+    return std::move(manager);
+  } else if (type_url == RsaSsaPkcs1VerifyKeyManager::static_key_type()) {
+    std::unique_ptr<KeyManager<PublicKeyVerify>> manager(
+        new RsaSsaPkcs1VerifyKeyManager());
+    return std::move(manager);
+  } else if (type_url == RsaSsaPssVerifyKeyManager::static_key_type()) {
+    std::unique_ptr<KeyManager<PublicKeyVerify>> manager(
+        new RsaSsaPssVerifyKeyManager());
+    return std::move(manager);
+  } else {
+    return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+                     "No key manager for type_url '%s'.", type_url.c_str());
   }
-  return ToStatusF(crypto::tink::util::error::NOT_FOUND,
-                   "No key manager for type_url '%s'.", type_url.c_str());
 }
 
 }  // anonymous namespace
 
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<PublicKeyVerify>>>
 PublicKeyVerifyCatalogue::GetKeyManager(const std::string& type_url,
-                                      const std::string& primitive_name,
-                                      uint32_t min_version) const {
+                                        const std::string& primitive_name,
+                                        uint32_t min_version) const {
   if (!(absl::AsciiStrToLower(primitive_name) == "publickeyverify")) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "This catalogue does not support primitive %s.",

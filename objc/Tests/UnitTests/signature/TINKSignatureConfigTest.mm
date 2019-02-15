@@ -33,17 +33,16 @@
 @implementation TINKSignatureConfigTest
 
 - (void)testConfigContents {
-  std::string sign_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-  std::string verify_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
-
   NSError *error = nil;
   TINKSignatureConfig *signatureConfig = [[TINKSignatureConfig alloc] initWithError:&error];
   XCTAssertNotNil(signatureConfig);
   XCTAssertNil(error);
 
   google::crypto::tink::RegistryConfig config = signatureConfig.ccConfig;
-  XCTAssertEqual(config.entry_size(), 2);
+  XCTAssertEqual(config.entry_size(), 8);
 
+  std::string sign_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  std::string verify_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
   XCTAssertTrue("TinkPublicKeySign" == config.entry(0).catalogue_name());
   XCTAssertTrue("PublicKeySign" == config.entry(0).primitive_name());
   XCTAssertTrue(sign_key_type == config.entry(0).type_url());
@@ -55,6 +54,48 @@
   XCTAssertTrue(verify_key_type == config.entry(1).type_url());
   XCTAssertTrue(config.entry(1).new_key_allowed());
   XCTAssertEqual(config.entry(1).key_manager_version(), 0);
+
+  sign_key_type = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
+  verify_key_type = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
+  XCTAssertTrue("TinkPublicKeySign" == config.entry(2).catalogue_name());
+  XCTAssertTrue("PublicKeySign" == config.entry(2).primitive_name());
+  XCTAssertTrue(sign_key_type == config.entry(2).type_url());
+  XCTAssertTrue(config.entry(2).new_key_allowed());
+  XCTAssertEqual(config.entry(2).key_manager_version(), 0);
+
+  XCTAssertTrue("TinkPublicKeyVerify" == config.entry(3).catalogue_name());
+  XCTAssertTrue("PublicKeyVerify" == config.entry(3).primitive_name());
+  XCTAssertTrue(verify_key_type == config.entry(3).type_url());
+  XCTAssertTrue(config.entry(3).new_key_allowed());
+  XCTAssertEqual(config.entry(3).key_manager_version(), 0);
+
+  sign_key_type = "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey";
+  verify_key_type = "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey";
+  XCTAssertTrue("TinkPublicKeySign" == config.entry(4).catalogue_name());
+  XCTAssertTrue("PublicKeySign" == config.entry(4).primitive_name());
+  XCTAssertTrue(sign_key_type == config.entry(4).type_url());
+  XCTAssertTrue(config.entry(4).new_key_allowed());
+  XCTAssertEqual(config.entry(4).key_manager_version(), 0);
+
+  XCTAssertTrue("TinkPublicKeyVerify" == config.entry(5).catalogue_name());
+  XCTAssertTrue("PublicKeyVerify" == config.entry(5).primitive_name());
+  XCTAssertTrue(verify_key_type == config.entry(5).type_url());
+  XCTAssertTrue(config.entry(5).new_key_allowed());
+  XCTAssertEqual(config.entry(5).key_manager_version(), 0);
+
+  sign_key_type = "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey";
+  verify_key_type = "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey";
+  XCTAssertTrue("TinkPublicKeySign" == config.entry(6).catalogue_name());
+  XCTAssertTrue("PublicKeySign" == config.entry(6).primitive_name());
+  XCTAssertTrue(sign_key_type == config.entry(6).type_url());
+  XCTAssertTrue(config.entry(6).new_key_allowed());
+  XCTAssertEqual(config.entry(6).key_manager_version(), 0);
+
+  XCTAssertTrue("TinkPublicKeyVerify" == config.entry(7).catalogue_name());
+  XCTAssertTrue("PublicKeyVerify" == config.entry(7).primitive_name());
+  XCTAssertTrue(verify_key_type == config.entry(7).type_url());
+  XCTAssertTrue(config.entry(7).new_key_allowed());
+  XCTAssertEqual(config.entry(7).key_manager_version(), 0);
 
   // Registration of standard key types works.
   error = nil;
