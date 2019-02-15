@@ -52,10 +52,23 @@ class StreamingAeadEncryptingStream : public OutputStream {
  private:
   StreamingAeadEncryptingStream() {}
   std::unique_ptr<StreamSegmentEncrypter> segment_encrypter_;
-  std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination_;
-  std::vector<uint8_t> plaintext_buffer_;
-  std::vector<uint8_t> ciphertext_buffer_;
+  std::unique_ptr<crypto::tink::OutputStream> ct_destination_;
+  std::vector<uint8_t> pt_buffer_;  // plaintext buffer
+  std::vector<uint8_t> ct_buffer_;  // ciphertext buffer
+  std::vector<uint8_t> pt_to_encrypt_;  // plaintext to be encrypted
   int64_t position_;  // number of plaintext bytes written to this stream
+  crypto::tink::util::Status status_;  // status of the stream
+
+  // Counters that describe the state of the data in pt_buffer_.
+  int count_backedup_;    // # bytes in pt_buffer_ that were backed up
+  int pt_buffer_offset_;  // offset at which *data starts in pt_buffer_
+
+  // Flag that indicates user obtained a buffer to write data of
+  // the first segment.
+  // If true, Next() was not called yet, which implies that neither
+  // header has been written to ct_destination_, nor the user had
+  // a chance to write any data to this stream.
+  bool is_first_segment_;
 };
 
 }  // namespace subtle
