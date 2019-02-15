@@ -56,11 +56,10 @@ TEST_F(EnumsTest, testEllipticCurveType) {
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_type = (int)pb::EllipticCurveType_MIN;
-       int_type <= (int)pb::EllipticCurveType_MAX;
-       int_type++) {
+  for (int int_type = static_cast<int>(pb::EllipticCurveType_MIN);
+       int_type <= static_cast<int>(pb::EllipticCurveType_MAX); int_type++) {
     if (pb::EllipticCurveType_IsValid(int_type)) {
-      pb::EllipticCurveType type = (pb::EllipticCurveType)int_type;
+      pb::EllipticCurveType type = static_cast<pb::EllipticCurveType>(int_type);
       EXPECT_EQ(type,
                 Enums::SubtleToProto(Enums::ProtoToSubtle(type)));
       count++;
@@ -94,11 +93,10 @@ TEST_F(EnumsTest, testHashType) {
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_type = (int)pb::HashType_MIN;
-       int_type <= (int)pb::HashType_MAX;
-       int_type++) {
+  for (int int_type = static_cast<int>(pb::HashType_MIN);
+       int_type <= static_cast<int>(pb::HashType_MAX); int_type++) {
     if (pb::HashType_IsValid(int_type)) {
-      pb::HashType type = (pb::HashType)int_type;
+      pb::HashType type = static_cast<pb::HashType>(int_type);
       EXPECT_EQ(type,
                 Enums::SubtleToProto(Enums::ProtoToSubtle(type)));
       count++;
@@ -134,11 +132,10 @@ TEST_F(EnumsTest, testEcPointFormat) {
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_format = (int)pb::EcPointFormat_MIN;
-       int_format <= (int)pb::EcPointFormat_MAX;
-       int_format++) {
+  for (int int_format = static_cast<int>(pb::EcPointFormat_MIN);
+       int_format <= static_cast<int>(pb::EcPointFormat_MAX); int_format++) {
     if (pb::EcPointFormat_IsValid(int_format)) {
-      pb::EcPointFormat format = (pb::EcPointFormat)int_format;
+      pb::EcPointFormat format = static_cast<pb::EcPointFormat>(int_format);
       EXPECT_EQ(format,
                 Enums::SubtleToProto(Enums::ProtoToSubtle(format)));
       count++;
@@ -163,11 +160,12 @@ TEST_F(EnumsTest, testEcdsaSignatureEncoding) {
             Enums::ProtoToSubtle(pb::EcdsaSignatureEncoding::DER));
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_encoding = (int)pb::EcdsaSignatureEncoding_MIN;
-       int_encoding <= (int)pb::EcdsaSignatureEncoding_MAX; int_encoding++) {
+  for (int int_encoding = static_cast<int>(pb::EcdsaSignatureEncoding_MIN);
+       int_encoding <= static_cast<int>(pb::EcdsaSignatureEncoding_MAX);
+       int_encoding++) {
     if (pb::EcdsaSignatureEncoding_IsValid(int_encoding)) {
       pb::EcdsaSignatureEncoding encoding =
-          (pb::EcdsaSignatureEncoding)int_encoding;
+          static_cast<pb::EcdsaSignatureEncoding>(int_encoding);
       EXPECT_EQ(encoding, Enums::SubtleToProto(Enums::ProtoToSubtle(encoding)));
       count++;
     }
@@ -197,11 +195,10 @@ TEST_F(EnumsTest, testKeyStatusName) {
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_status = (int)pb::KeyStatusType_MIN;
-       int_status <= (int)pb::KeyStatusType_MAX;
-       int_status++) {
+  for (int int_status = static_cast<int>(pb::KeyStatusType_MIN);
+       int_status <= static_cast<int>(pb::KeyStatusType_MAX); int_status++) {
     if (pb::KeyStatusType_IsValid(int_status)) {
-      pb::KeyStatusType status = (pb::KeyStatusType)int_status;
+      pb::KeyStatusType status = static_cast<pb::KeyStatusType>(int_status);
       EXPECT_EQ(status,
                 Enums::KeyStatus(Enums::KeyStatusName(status)));
       count++;
@@ -227,11 +224,10 @@ TEST_F(EnumsTest, testHashName) {
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_hash = (int)pb::HashType_MIN;
-       int_hash <= (int)pb::HashType_MAX;
-       int_hash++) {
+  for (int int_hash = static_cast<int>(pb::HashType_MIN);
+       int_hash <= static_cast<int>(pb::HashType_MAX); int_hash++) {
     if (pb::HashType_IsValid(int_hash)) {
-      pb::HashType hash = (pb::HashType)int_hash;
+      pb::HashType hash = static_cast<pb::HashType>(int_hash);
       EXPECT_EQ(hash, Enums::Hash(Enums::HashName(hash)));
       count++;
     }
@@ -268,12 +264,12 @@ TEST_F(EnumsTest, testKeyMaterialName) {
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_type = (int)pb::KeyData::KeyMaterialType_MIN;
-       int_type <= (int)pb::KeyData::KeyMaterialType_MAX;
+  for (int int_type = static_cast<int>(pb::KeyData::KeyMaterialType_MIN);
+       int_type <= static_cast<int>(pb::KeyData::KeyMaterialType_MAX);
        int_type++) {
     if (pb::KeyData::KeyMaterialType_IsValid(int_type)) {
       pb::KeyData::KeyMaterialType type =
-          (pb::KeyData::KeyMaterialType)int_type;
+          static_cast<pb::KeyData::KeyMaterialType>(int_type);
       EXPECT_EQ(type,
                 Enums::KeyMaterial(Enums::KeyMaterialName(type)));
       count++;
@@ -308,11 +304,10 @@ TEST_F(EnumsTest, testOutputPrefixName) {
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_type = (int)pb::OutputPrefixType_MIN;
-       int_type <= (int)pb::OutputPrefixType_MAX;
-       int_type++) {
+  for (int int_type = static_cast<int>(pb::OutputPrefixType_MIN);
+       int_type <= static_cast<int>(pb::OutputPrefixType_MAX); int_type++) {
     if (pb::OutputPrefixType_IsValid(int_type)) {
-      pb::OutputPrefixType type = (pb::OutputPrefixType)int_type;
+      pb::OutputPrefixType type = static_cast<pb::OutputPrefixType>(int_type);
       EXPECT_EQ(type, Enums::OutputPrefix(Enums::OutputPrefixName(type)));
       count++;
     }

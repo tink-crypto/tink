@@ -192,7 +192,7 @@ keysets with master keys stored in a remote [key management
 systems](KEY-MANAGEMENT.md).
 
 For example, you can encrypt the key material with a Google Cloud KMS key at
-`gcp-kms:/projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`
+`gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`
 as follows:
 
 ```java

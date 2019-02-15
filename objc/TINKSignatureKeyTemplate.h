@@ -114,6 +114,11 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
    *   - OutputPrefixType: TINK
    */
   TINKRsaSsaPss4096Sha512Sha512F4 = 10,
+
+  /**
+   * Ed25519PrivateKey.
+   */
+  TINKEd25519 = 11,
 };
 
 NS_ASSUME_NONNULL_BEGIN

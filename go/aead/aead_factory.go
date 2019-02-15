@@ -17,34 +17,37 @@ package aead
 import (
 	"fmt"
 
+	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/primitiveset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 )
 
 // New returns a AEAD primitive from the given keyset handle.
-func New(handle *tink.KeysetHandle) (tink.AEAD, error) {
-	return NewWithKeyManager(handle, nil /*keyManager*/)
+func New(h *keyset.Handle) (tink.AEAD, error) {
+	return NewWithKeyManager(h, nil /*keyManager*/)
 }
 
 // NewWithKeyManager returns a AEAD primitive from the given keyset handle and custom key manager.
-func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.AEAD, error) {
-	ps, err := tink.PrimitivesWithKeyManager(kh, km)
+func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.AEAD, error) {
+	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret tink.AEAD = newPrimitiveSet(ps)
-	return ret, nil
+	return newPrimitiveSet(ps), nil
 }
 
 // primitiveSet is an AEAD implementation that uses the underlying primitive set for encryption
 // and decryption.
 type primitiveSet struct {
-	ps *tink.PrimitiveSet
+	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that primitiveSet implements the AEAD interface.
 var _ tink.AEAD = (*primitiveSet)(nil)
 
-func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
+func newPrimitiveSet(ps *primitiveset.PrimitiveSet) *primitiveSet {
 	ret := new(primitiveSet)
 	ret.ps = ps
 	return ret
@@ -54,7 +57,7 @@ func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
 // It returns the concatenation of the primary's identifier and the ciphertext.
 func (a *primitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
 	primary := a.ps.Primary
-	var p tink.AEAD = (primary.Primitive).(tink.AEAD)
+	var p = (primary.Primitive).(tink.AEAD)
 	ct, err := p.Encrypt(pt, ad)
 	if err != nil {
 		return nil, err
@@ -70,7 +73,7 @@ func (a *primitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
 // ciphertext is authenticated.
 func (a *primitiveSet) Decrypt(ct, ad []byte) ([]byte, error) {
 	// try non-raw keys
-	prefixSize := tink.NonRawPrefixSize
+	prefixSize := format.NonRawPrefixSize
 	if len(ct) > prefixSize {
 		prefix := ct[:prefixSize]
 		ctNoPrefix := ct[prefixSize:]

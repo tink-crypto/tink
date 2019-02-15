@@ -67,7 +67,7 @@ public class AesSivKeyManagerTest {
   public void testCiphertextSize() throws Exception {
     for (KeyTemplate template : keyTemplates) {
       KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
-      DeterministicAead daead = DeterministicAeadFactory.getPrimitive(keysetHandle);
+      DeterministicAead daead = keysetHandle.getPrimitive(DeterministicAead.class);
       byte[] plaintext = "plaintext".getBytes("UTF-8");
       byte[] associatedData = "associatedData".getBytes("UTF-8");
       byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);

@@ -22,8 +22,9 @@ import (
 	"golang.org/x/crypto/ed25519"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
-	"github.com/google/tink/go/tink"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -44,7 +45,7 @@ var errInvalidED25519SignKeyFormat = errors.New("ed25519_signer_key_manager: inv
 type ed25519SignerKeyManager struct{}
 
 // Assert that ed25519SignerKeyManager implements the PrivateKeyManager interface.
-var _ tink.PrivateKeyManager = (*ed25519SignerKeyManager)(nil)
+var _ registry.PrivateKeyManager = (*ed25519SignerKeyManager)(nil)
 
 // newED25519SignerKeyManager creates a new ed25519SignerKeyManager.
 func newED25519SignerKeyManager() *ed25519SignerKeyManager {
@@ -79,9 +80,16 @@ func (km *ed25519SignerKeyManager) NewKey(serializedKey []byte) (proto.Message, 
 		return nil, fmt.Errorf("ed25519_signer_key_manager: cannot generate ED25519 key: %s", err)
 	}
 
-	pub := NewED25519PublicKey(ED25519SignerKeyVersion, &public)
-	priv := NewED25519PrivateKey(ED25519SignerKeyVersion, pub, &private)
-	return priv, nil
+	publicProto := &ed25519pb.Ed25519PublicKey{
+		Version:  ED25519SignerKeyVersion,
+		KeyValue: public,
+	}
+	privateProto := &ed25519pb.Ed25519PrivateKey{
+		Version:   ED25519SignerKeyVersion,
+		PublicKey: publicProto,
+		KeyValue:  private.Seed(),
+	}
+	return privateProto, nil
 }
 
 // NewKeyData creates a new KeyData according to specification in  the given
@@ -131,7 +139,7 @@ func (km *ed25519SignerKeyManager) TypeURL() string {
 
 // validateKey validates the given ED25519PrivateKey.
 func (km *ed25519SignerKeyManager) validateKey(key *ed25519pb.Ed25519PrivateKey) error {
-	if err := tink.ValidateVersion(key.Version, ED25519SignerKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, ED25519SignerKeyVersion); err != nil {
 		return fmt.Errorf("ed25519_signer_key_manager: invalid key: %s", err)
 	}
 	if len(key.KeyValue) != ed25519.SeedSize {

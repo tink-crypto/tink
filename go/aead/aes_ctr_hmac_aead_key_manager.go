@@ -19,10 +19,11 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
 	ctrpb "github.com/google/tink/proto/aes_ctr_go_proto"
 	aeadpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
 	commonpb "github.com/google/tink/proto/common_go_proto"
@@ -50,7 +51,7 @@ var errInvalidAESCTRHMACAEADKeyFormat = fmt.Errorf("aes_ctr_hmac_aead_key_manage
 type aesCTRHMACAEADKeyManager struct{}
 
 // Assert that aesCTRHMACAEADKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*aesCTRHMACAEADKeyManager)(nil)
+var _ registry.KeyManager = (*aesCTRHMACAEADKeyManager)(nil)
 
 // newAESCTRHMACAEADKeyManager creates a new aesCTRHMACAEADKeyManager.
 func newAESCTRHMACAEADKeyManager() *aesCTRHMACAEADKeyManager {
@@ -146,7 +147,7 @@ func (km *aesCTRHMACAEADKeyManager) TypeURL() string {
 
 // validateKey validates the given AesCtrHmacAeadKey proto.
 func (km *aesCTRHMACAEADKeyManager) validateKey(key *aeadpb.AesCtrHmacAeadKey) error {
-	err := tink.ValidateVersion(key.Version, AESCTRHMACAEADKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, AESCTRHMACAEADKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
 	}

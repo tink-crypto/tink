@@ -22,6 +22,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 	ctrhmacpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
@@ -113,7 +114,7 @@ func checkAESCTRHMACAEADKeyTemplate(template *tinkpb.KeyTemplate, keySize, ivSiz
 }
 
 func testEncryptDecrypt(template *tinkpb.KeyTemplate, typeURL string) error {
-	key, err := tink.NewKey(template)
+	key, err := registry.NewKey(template)
 	if err != nil {
 		return fmt.Errorf("failed to get key from template, error: %v", err)
 	}
@@ -123,7 +124,7 @@ func testEncryptDecrypt(template *tinkpb.KeyTemplate, typeURL string) error {
 		return fmt.Errorf("failed to serialize key, error: %v", err)
 	}
 
-	p, err := tink.Primitive(typeURL, sk)
+	p, err := registry.Primitive(typeURL, sk)
 	if err != nil {
 		return fmt.Errorf("failed to get primitive from serialized key, error: %v", err)
 	}

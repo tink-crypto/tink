@@ -18,6 +18,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
 #include "openssl/bn.h"
+#include "openssl/curve25519.h"
 #include "openssl/ec.h"
 #include "openssl/err.h"
 #include "openssl/rsa.h"
@@ -144,6 +145,26 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
   }
   ec_key.priv = priv_key_str.ValueOrDie();
   return ec_key;
+}
+
+// static
+std::unique_ptr<SubtleUtilBoringSSL::Ed25519Key>
+SubtleUtilBoringSSL::GetNewEd25519Key() {
+  // Generate a new key pair.
+  uint8_t out_public_key[ED25519_PUBLIC_KEY_LEN];
+  uint8_t out_private_key[ED25519_PRIVATE_KEY_LEN];
+
+  ED25519_keypair(out_public_key, out_private_key);
+
+  std::unique_ptr<Ed25519Key> key(new Ed25519Key);
+  key->public_key = std::string(reinterpret_cast<const char *>(out_public_key),
+                           ED25519_PUBLIC_KEY_LEN);
+  std::string tmp = std::string(reinterpret_cast<const char *>(out_private_key),
+                      ED25519_PRIVATE_KEY_LEN);
+  // ED25519_keypair appends the public key at the end of the private key. Keep
+  // the first 32 bytes that contain the private key and discard the public key.
+  key->private_key = tmp.substr(0, 32);
+  return key;
 }
 
 // static

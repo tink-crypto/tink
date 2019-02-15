@@ -40,6 +40,11 @@ class SubtleUtilBoringSSL {
     std::string priv;  // big integer in bigendian represnetation
   };
 
+  struct Ed25519Key {
+    std::string public_key;
+    std::string private_key;
+  };
+
   struct RsaPublicKey {
     // Modulus.
     // Unsigned big integer in bigendian representation.
@@ -121,6 +126,9 @@ class SubtleUtilBoringSSL {
   // Returns a new EC key for the specified curve.
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
       EllipticCurveType curve_type);
+
+  // Returns a new ED25519 key.
+  static std::unique_ptr<Ed25519Key> GetNewEd25519Key();
 
   // Returns BoringSSL's EC_POINT constructed from curve type, point format and
   // encoded public key's point. The uncompressed point is encoded as

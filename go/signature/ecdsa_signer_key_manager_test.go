@@ -20,11 +20,11 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -37,12 +37,12 @@ type ecdsaParams struct {
 
 func TestECDSASignerGetPrimitiveBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewRandomECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
 		tmp, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
@@ -54,18 +54,18 @@ func TestECDSASignerGetPrimitiveBasic(t *testing.T) {
 func TestECDSASignGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid params
 	testParams := genInvalidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewRandomECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// invalid version
-	key := testutil.NewECDSAPrivateKey(commonpb.HashType_SHA256,
+	key := testutil.NewRandomECDSAPrivateKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
 	key.Version = signature.ECDSASignerKeyVersion + 1
 	serializedKey, _ := proto.Marshal(key)
@@ -83,14 +83,14 @@ func TestECDSASignGetPrimitiveWithInvalidInput(t *testing.T) {
 
 func TestECDSASignNewKeyBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
+		params := testutil.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		serializedFormat, _ := proto.Marshal(signature.NewECDSAKeyFormat(params))
+		serializedFormat, _ := proto.Marshal(testutil.NewECDSAKeyFormat(params))
 		tmp, err := km.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
@@ -103,16 +103,16 @@ func TestECDSASignNewKeyBasic(t *testing.T) {
 }
 
 func TestECDSASignNewKeyWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
 	// invalid hash and curve type
 	testParams := genInvalidECDSAParams()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
+		params := testutil.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		serializedFormat, _ := proto.Marshal(signature.NewECDSAKeyFormat(params))
+		serializedFormat, _ := proto.Marshal(testutil.NewECDSAKeyFormat(params))
 		if _, err := km.NewKey(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -120,9 +120,9 @@ func TestECDSASignNewKeyWithInvalidInput(t *testing.T) {
 	// invalid encoding
 	testParams = genValidECDSAParams()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
+		params := testutil.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_UNKNOWN_ENCODING)
-		serializedFormat, _ := proto.Marshal(signature.NewECDSAKeyFormat(params))
+		serializedFormat, _ := proto.Marshal(testutil.NewECDSAKeyFormat(params))
 		if _, err := km.NewKey(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -137,7 +137,7 @@ func TestECDSASignNewKeyWithInvalidInput(t *testing.T) {
 }
 
 func TestECDSASignNewKeyMultipleTimes(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
@@ -145,9 +145,9 @@ func TestECDSASignNewKeyMultipleTimes(t *testing.T) {
 	nTest := 27
 	for i := 0; i < len(testParams); i++ {
 		keys := make(map[string]bool)
-		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
+		params := testutil.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := signature.NewECDSAKeyFormat(params)
+		format := testutil.NewECDSAKeyFormat(params)
 		serializedFormat, _ := proto.Marshal(format)
 		for j := 0; j < nTest; j++ {
 			key, _ := km.NewKey(serializedFormat)
@@ -165,15 +165,15 @@ func TestECDSASignNewKeyMultipleTimes(t *testing.T) {
 }
 
 func TestECDSASignNewKeyDataBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
 	testParams := genValidECDSAParams()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
+		params := testutil.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		serializedFormat, _ := proto.Marshal(signature.NewECDSAKeyFormat(params))
+		serializedFormat, _ := proto.Marshal(testutil.NewECDSAKeyFormat(params))
 
 		keyData, err := km.NewKeyData(serializedFormat)
 		if err != nil {
@@ -198,15 +198,15 @@ func TestECDSASignNewKeyDataBasic(t *testing.T) {
 }
 
 func TestECDSASignNewKeyDataWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
 	testParams := genInvalidECDSAParams()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
+		params := testutil.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := signature.NewECDSAKeyFormat(params)
+		format := testutil.NewECDSAKeyFormat(params)
 		serializedFormat, _ := proto.Marshal(format)
 
 		if _, err := km.NewKeyData(serializedFormat); err == nil {
@@ -221,16 +221,16 @@ func TestECDSASignNewKeyDataWithInvalidInput(t *testing.T) {
 
 func TestPublicKeyDataBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
-	pkm, ok := km.(tink.PrivateKeyManager)
+	pkm, ok := km.(registry.PrivateKeyManager)
 	if !ok {
 		t.Errorf("cannot obtain private key manager")
 	}
 	for i := 0; i < len(testParams); i++ {
-		key := testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve)
+		key := testutil.NewRandomECDSAPrivateKey(testParams[i].hashType, testParams[i].curve)
 		serializedKey, _ := proto.Marshal(key)
 
 		pubKeyData, err := pkm.PublicKeyData(serializedKey)
@@ -251,16 +251,16 @@ func TestPublicKeyDataBasic(t *testing.T) {
 }
 
 func TestPublicKeyDataWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSASigner key manager: %s", err)
 	}
-	pkm, ok := km.(tink.PrivateKeyManager)
+	pkm, ok := km.(registry.PrivateKeyManager)
 	if !ok {
 		t.Errorf("cannot obtain private key manager")
 	}
 	// modified key
-	key := testutil.NewECDSAPrivateKey(commonpb.HashType_SHA256,
+	key := testutil.NewRandomECDSAPrivateKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
 	serializedKey, _ := proto.Marshal(key)
 	serializedKey[0] = 0
@@ -315,7 +315,7 @@ func validateECDSAPrivateKey(key *ecdsapb.EcdsaPrivateKey, params *ecdsapb.Ecdsa
 		}
 	}
 	// try to sign and verify with the key
-	hash, curve, encoding := signature.GetECDSAParamNames(publicKey.Params)
+	hash, curve, encoding := testutil.GetECDSAParamNames(publicKey.Params)
 	signer, err := subtleSig.NewECDSASigner(hash, curve, encoding, key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("unexpected error when creating ECDSASign: %s", err)

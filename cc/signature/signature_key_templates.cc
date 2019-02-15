@@ -24,6 +24,7 @@
 #include "tink/util/constants.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
+#include "proto/ed25519.pb.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
 #include "proto/rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"
@@ -35,6 +36,7 @@ namespace {
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
+using google::crypto::tink::Ed25519PrivateKey;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
@@ -189,6 +191,15 @@ const KeyTemplate& SignatureKeyTemplates::RsaSsaPss4096Sha512Sha512F4() {
       NewRsaSsaPssKeyTemplate(HashType::SHA512, HashType::SHA512, 64, 4096,
                               RSA_F4)
           .release();
+  return *key_template;
+}
+
+// static
+const google::crypto::tink::KeyTemplate& SignatureKeyTemplates::Ed25519() {
+  static KeyTemplate* key_template = new KeyTemplate();
+  key_template->set_type_url(
+      absl::StrCat(kTypeGoogleapisCom, Ed25519PrivateKey().GetTypeName()));
+  key_template->set_output_prefix_type(OutputPrefixType::TINK);
   return *key_template;
 }
 

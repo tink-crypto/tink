@@ -22,18 +22,18 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/registry"
 	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestGetPrimitiveBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("HMAC key manager not found: %s", err)
 	}
@@ -51,7 +51,7 @@ func TestGetPrimitiveBasic(t *testing.T) {
 }
 
 func TestGetPrimitiveWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -73,7 +73,7 @@ func TestGetPrimitiveWithInvalidInput(t *testing.T) {
 }
 
 func TestNewKeyMultipleTimes(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -95,7 +95,7 @@ func TestNewKeyMultipleTimes(t *testing.T) {
 }
 
 func TestNewKeyBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -113,7 +113,7 @@ func TestNewKeyBasic(t *testing.T) {
 }
 
 func TestNewKeyWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -138,7 +138,7 @@ func TestNewKeyWithInvalidInput(t *testing.T) {
 }
 
 func TestNewKeyDataBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
@@ -166,7 +166,7 @@ func TestNewKeyDataBasic(t *testing.T) {
 }
 
 func TestNewKeyDataWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("HMAC key manager not found: %s", err)
 	}
@@ -185,7 +185,7 @@ func TestNewKeyDataWithInvalidInput(t *testing.T) {
 }
 
 func TestDoesSupport(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("HMAC key manager not found: %s", err)
 	}
@@ -198,7 +198,7 @@ func TestDoesSupport(t *testing.T) {
 }
 
 func TestTypeURL(t *testing.T) {
-	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	km, err := registry.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("HMAC key manager not found: %s", err)
 	}
@@ -214,7 +214,7 @@ func genInvalidHMACKeys() []proto.Message {
 	shortKey.KeyValue = []byte{1, 1}
 	return []proto.Message{
 		// not a HMACKey
-		mac.NewHMACParams(commonpb.HashType_SHA256, 32),
+		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
 		// bad version
 		badVersionKey,
 		// tag size too big
@@ -235,7 +235,7 @@ func genInvalidHMACKeyFormats() []proto.Message {
 	shortKeyFormat.KeySize = 1
 	return []proto.Message{
 		// not a HMACKeyFormat
-		mac.NewHMACParams(commonpb.HashType_SHA256, 32),
+		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
 		// tag size too big
 		testutil.NewHMACKeyFormat(commonpb.HashType_SHA1, 21),
 		testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 33),
@@ -272,7 +272,7 @@ func validateHMACKey(format *hmacpb.HmacKeyFormat, key *hmacpb.HmacKey) error {
 		key.Params.Hash != format.Params.Hash {
 		return fmt.Errorf("key format and generated key do not match")
 	}
-	p, err := subtleMac.NewHMAC(tink.GetHashName(key.Params.Hash), key.KeyValue, key.Params.TagSize)
+	p, err := subtleMac.NewHMAC(commonpb.HashType_name[int32(key.Params.Hash)], key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return fmt.Errorf("cannot create primitive from key: %s", err)
 	}
@@ -285,7 +285,7 @@ func validateHMACPrimitive(p interface{}, key *hmacpb.HmacKey) error {
 	if !bytes.Equal(hmacPrimitive.Key, key.KeyValue) ||
 		hmacPrimitive.TagSize != key.Params.TagSize ||
 		reflect.ValueOf(hmacPrimitive.HashFunc).Pointer() !=
-			reflect.ValueOf(subtle.GetHashFunc(tink.GetHashName(key.Params.Hash))).Pointer() {
+			reflect.ValueOf(subtle.GetHashFunc(commonpb.HashType_name[int32(key.Params.Hash)])).Pointer() {
 		return fmt.Errorf("primitive and key do not matched")
 	}
 	data := random.GetRandomBytes(20)

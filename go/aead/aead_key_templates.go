@@ -21,6 +21,7 @@ import (
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
+	kmsenvpb "github.com/google/tink/proto/kms_envelope_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -59,6 +60,20 @@ func AES128CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 //  - HMAC hash function: SHA256
 func AES256CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 	return createAESCTRHMACAEADKeyTemplate(32, 16, 32, 32, commonpb.HashType_SHA256)
+}
+
+// KMSEnvelopeAeadKeyTemplate is a KeyTemplate for a given KEK in remote KMS
+func KMSEnvelopeAeadKeyTemplate(uri string, dekT *tinkpb.KeyTemplate) *tinkpb.KeyTemplate {
+	f := &kmsenvpb.KmsEnvelopeAeadKeyFormat{
+		KekUri:      uri,
+		DekTemplate: dekT,
+	}
+	serializedFormat, _ := proto.Marshal(f)
+	return &tinkpb.KeyTemplate{
+		Value:            serializedFormat,
+		TypeUrl:          KMSEnvelopeAEADTypeURL,
+		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+	}
 }
 
 // createAESGCMKeyTemplate creates a new AES-GCM key template with the given key

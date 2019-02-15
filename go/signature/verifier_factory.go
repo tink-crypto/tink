@@ -18,19 +18,22 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/primitiveset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // NewVerifier returns a Verifier primitive from the given keyset handle.
-func NewVerifier(handle *tink.KeysetHandle) (tink.Verifier, error) {
-	return NewVerifierWithKeyManager(handle, nil /*keyManager*/)
+func NewVerifier(h *keyset.Handle) (tink.Verifier, error) {
+	return NewVerifierWithKeyManager(h, nil /*keyManager*/)
 }
 
-// NewVerifierWithKeyManager returns a Verifier primitive from the given keyset handle and
-// custom key manager.
-func NewVerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Verifier, error) {
-	ps, err := tink.PrimitivesWithKeyManager(kh, km)
+// NewVerifierWithKeyManager returns a Verifier primitive from the given keyset handle and custom key manager.
+func NewVerifierWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Verifier, error) {
+	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
 		return nil, fmt.Errorf("verifier_factory: cannot obtain primitive set: %s", err)
 	}
@@ -41,13 +44,13 @@ func NewVerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.
 // verifierSet is an Signer implementation that uses the
 // underlying primitive set for signing.
 type verifierSet struct {
-	ps *tink.PrimitiveSet
+	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that verifierSet implements the Verifier interface.
 var _ tink.Verifier = (*verifierSet)(nil)
 
-func newVerifierSet(ps *tink.PrimitiveSet) *verifierSet {
+func newVerifierSet(ps *primitiveset.PrimitiveSet) *verifierSet {
 	ret := new(verifierSet)
 	ret.ps = ps
 	return ret
@@ -57,19 +60,20 @@ var errInvalidSignature = errors.New("verifier_factory: invalid signature")
 
 // Verify checks whether the given signature is a valid signature of the given data.
 func (v *verifierSet) Verify(signature, data []byte) error {
-	if len(signature) < tink.NonRawPrefixSize {
+	prefixSize := format.NonRawPrefixSize
+	if len(signature) < prefixSize {
 		return errInvalidSignature
 	}
 	// try non-raw keys
-	prefix := signature[:tink.NonRawPrefixSize]
-	signatureNoPrefix := signature[tink.NonRawPrefixSize:]
+	prefix := signature[:prefixSize]
+	signatureNoPrefix := signature[prefixSize:]
 	entries, err := v.ps.EntriesForPrefix(string(prefix))
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
 			var signedData []byte
 			if entries[i].PrefixType == tinkpb.OutputPrefixType_LEGACY {
 				signedData = append(signedData, data...)
-				signedData = append(signedData, tink.LegacyStartByte)
+				signedData = append(signedData, format.LegacyStartByte)
 			} else {
 				signedData = data
 			}

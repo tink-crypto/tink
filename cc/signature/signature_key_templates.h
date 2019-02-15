@@ -118,6 +118,9 @@ class SignatureKeyTemplates {
   //   - Public Exponent: 65537 (aka F4).
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& RsaSsaPss4096Sha512Sha512F4();
+
+  // Returns a KeyTemplate that generates new instances of Ed25519PrivateKey.
+  static const google::crypto::tink::KeyTemplate& Ed25519();
 };
 
 }  // namespace tink

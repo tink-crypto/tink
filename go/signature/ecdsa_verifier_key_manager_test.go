@@ -18,21 +18,21 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
 func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
 	}
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewECDSAPublicKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewRandomECDSAPublicKey(testParams[i].hashType, testParams[i].curve))
 		tmp, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
@@ -43,18 +43,18 @@ func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 
 func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	testParams := genInvalidECDSAParams()
-	km, err := tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	km, err := registry.GetKeyManager(signature.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
 	}
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewRandomECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// invalid version
-	key := testutil.NewECDSAPublicKey(commonpb.HashType_SHA256,
+	key := testutil.NewRandomECDSAPublicKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
 	key.Version = signature.ECDSAVerifierKeyVersion + 1
 	serializedKey, _ := proto.Marshal(key)

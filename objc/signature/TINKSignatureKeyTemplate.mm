@@ -72,6 +72,10 @@
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
           &crypto::tink::SignatureKeyTemplates::RsaSsaPss4096Sha512Sha512F4());
       break;
+    case TINKEd25519:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::SignatureKeyTemplates::Ed25519());
+      break;
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(

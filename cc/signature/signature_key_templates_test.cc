@@ -20,11 +20,13 @@
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
+#include "tink/signature/ed25519_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
+#include "proto/empty.pb.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
 #include "proto/rsa_ssa_pss.pb.h"
 
@@ -37,6 +39,7 @@ namespace {
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::Empty;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
@@ -314,6 +317,24 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss4096Sha512Sha512F4) {
   RsaSsaPssSignKeyManager key_manager;
   EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
   auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+  EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+}
+
+TEST(SignatureKeyTemplatesTest, KeyTemplatesWithEd25519) {
+  std::string type_url = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
+  const KeyTemplate& key_template = SignatureKeyTemplates::Ed25519();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 = SignatureKeyTemplates::Ed25519();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the key manager works with the template.
+  Ed25519SignKeyManager key_manager;
+  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  Empty empty;
+  auto new_key_result = key_manager.get_key_factory().NewKey(empty);
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 

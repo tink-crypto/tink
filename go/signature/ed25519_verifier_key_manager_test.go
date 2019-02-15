@@ -18,14 +18,14 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 )
 
 func TestED25519VerifyGetPrimitiveBasic(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ED25519VerifierTypeURL)
+	km, err := registry.GetKeyManager(signature.ED25519VerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Verifier key manager: %s", err)
 	}
@@ -38,7 +38,7 @@ func TestED25519VerifyGetPrimitiveBasic(t *testing.T) {
 }
 
 func TestED25519VerifyGetPrimitiveWithInvalidInput(t *testing.T) {
-	km, err := tink.GetKeyManager(signature.ED25519VerifierTypeURL)
+	km, err := registry.GetKeyManager(signature.ED25519VerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Verifier key manager: %s", err)
 	}

@@ -17,35 +17,37 @@ package signature
 import (
 	"fmt"
 
+	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/primitiveset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // NewSigner returns a Signer primitive from the given keyset handle.
-func NewSigner(kh *tink.KeysetHandle) (tink.Signer, error) {
-	return NewSignerWithKeyManager(kh, nil /*keyManager*/)
+func NewSigner(h *keyset.Handle) (tink.Signer, error) {
+	return NewSignerWithKeyManager(h, nil /*keyManager*/)
 }
 
-// NewSignerWithKeyManager returns a Signer primitive from the given keyset handle and custom
-// key manager.
-func NewSignerWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Signer, error) {
-	ps, err := tink.PrimitivesWithKeyManager(kh, km)
+// NewSignerWithKeyManager returns a Signer primitive from the given keyset handle and custom key manager.
+func NewSignerWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Signer, error) {
+	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret tink.Signer = newSignerSet(ps)
-	return ret, nil
+	return newSignerSet(ps), nil
 }
 
 // signerSet is an Signer implementation that uses the underlying primitive set for signing.
 type signerSet struct {
-	ps *tink.PrimitiveSet
+	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that signerSet implements the Signer interface.
 var _ tink.Signer = (*signerSet)(nil)
 
-func newSignerSet(ps *tink.PrimitiveSet) *signerSet {
+func newSignerSet(ps *primitiveset.PrimitiveSet) *signerSet {
 	ret := new(signerSet)
 	ret.ps = ps
 	return ret
@@ -55,11 +57,11 @@ func newSignerSet(ps *tink.PrimitiveSet) *signerSet {
 // primary primitive.
 func (s *signerSet) Sign(data []byte) ([]byte, error) {
 	primary := s.ps.Primary
-	var signer tink.Signer = (primary.Primitive).(tink.Signer)
+	var signer = (primary.Primitive).(tink.Signer)
 	var signedData []byte
 	if primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		signedData = append(signedData, data...)
-		signedData = append(signedData, tink.LegacyStartByte)
+		signedData = append(signedData, format.LegacyStartByte)
 	} else {
 		signedData = data
 	}

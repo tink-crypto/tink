@@ -19,8 +19,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/tink/go/format"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/testkeysethandle"
+	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 
@@ -34,18 +35,18 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_TINK {
 		t.Errorf("expect a tink key")
 	}
-	keysetHandle, err := testkeysethandle.KeysetHandle(keyset)
+	keysetHandle, err := testkeyset.NewHandle(keyset)
 	if err != nil {
-		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
 	}
 
 	p, err := mac.New(keysetHandle)
 	if err != nil {
 		t.Errorf("mac.New failed: %s", err)
 	}
-	expectedPrefix, err := tink.OutputPrefix(primaryKey)
+	expectedPrefix, err := format.OutputPrefix(primaryKey)
 	if err != nil {
-		t.Errorf("tink.OutputPrefix failed: %s", err)
+		t.Errorf("format.OutputPrefix failed: %s", err)
 	}
 
 	if err := verifyMacPrimitive(p, p, expectedPrefix, tagSize); err != nil {
@@ -57,27 +58,27 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if rawKey.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a raw key")
 	}
-	keyset2 := tink.CreateKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
-	keysetHandle2, err := testkeysethandle.KeysetHandle(keyset2)
+	keyset2 := testutil.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
+	keysetHandle2, err := testkeyset.NewHandle(keyset2)
 	if err != nil {
-		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
 	}
 
 	p2, err := mac.New(keysetHandle2)
 	if err != nil {
 		t.Errorf("mac.New failed: %s", err)
 	}
-	if err := verifyMacPrimitive(p2, p, tink.RawPrefix, tagSize); err != nil {
+	if err := verifyMacPrimitive(p2, p, format.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
 
 	// mac with a random key not in the keyset, verify with the keyset should fail
 	keyset2 = testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
-	expectedPrefix, _ = tink.OutputPrefix(primaryKey)
-	keysetHandle2, err = testkeysethandle.KeysetHandle(keyset2)
+	expectedPrefix, _ = format.OutputPrefix(primaryKey)
+	keysetHandle2, err = testkeyset.NewHandle(keyset2)
 	if err != nil {
-		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
 	}
 
 	p2, err = mac.New(keysetHandle2)
@@ -97,15 +98,15 @@ func TestFactoryRawKey(t *testing.T) {
 	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a raw key")
 	}
-	keysetHandle, err := testkeysethandle.KeysetHandle(keyset)
+	keysetHandle, err := testkeyset.NewHandle(keyset)
 	if err != nil {
-		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
 	}
 	p, err := mac.New(keysetHandle)
 	if err != nil {
 		t.Errorf("mac.New failed: %s", err)
 	}
-	if err := verifyMacPrimitive(p, p, tink.RawPrefix, tagSize); err != nil {
+	if err := verifyMacPrimitive(p, p, format.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
 }

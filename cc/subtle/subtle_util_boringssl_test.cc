@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
+#include "openssl/curve25519.h"
 #include "openssl/digest.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
@@ -391,6 +392,39 @@ TEST(CreatesNewRsaKeyPairTest, GeneratesDifferentKeysEveryTime) {
     ASSERT_NE(left.dq, right.dq);
     ASSERT_NE(left.crt, right.crt);
   }
+}
+
+TEST(CreatesNewEd25519KeyPairTest, BoringSSLPrivateKeySuffix) {
+  // Generate a new key pair.
+  uint8_t out_public_key[ED25519_PUBLIC_KEY_LEN];
+  uint8_t out_private_key[ED25519_PRIVATE_KEY_LEN];
+
+  ED25519_keypair(out_public_key, out_private_key);
+  std::string pk = std::string(reinterpret_cast<const char*>(out_public_key),
+                     ED25519_PUBLIC_KEY_LEN);
+  std::string sk = std::string(reinterpret_cast<const char*>(out_private_key),
+                     ED25519_PRIVATE_KEY_LEN);
+  ASSERT_EQ(pk.length(), 32);
+  ASSERT_EQ(sk.length(), 64);
+  // BoringSSL's ED25519_keypair returns a private key with the last 32-bytes
+  // equal to the public key. If this changes you must update
+  // SubtleUtilBoringSSL::GetNewEd25519Key().
+  ASSERT_EQ(sk.substr(32, std::string::npos), pk);
+}
+
+TEST(CreatesNewEd25519KeyPairTest, KeyIsWellFormed) {
+  auto keypair = SubtleUtilBoringSSL::GetNewEd25519Key();
+  ASSERT_EQ(keypair->public_key.length(), 32);
+  ASSERT_EQ(keypair->private_key.length(), 32);
+  ASSERT_TRUE(keypair->public_key != keypair->private_key);
+}
+
+TEST(CreatesNewEd25519KeyPairTest, GeneratesDifferentKeysEveryTime) {
+  auto keypair1 = SubtleUtilBoringSSL::GetNewEd25519Key();
+  auto keypair2 = SubtleUtilBoringSSL::GetNewEd25519Key();
+  ASSERT_NE(keypair1->public_key, keypair2->public_key);
+  ASSERT_NE(keypair1->private_key, keypair2->private_key);
+  ASSERT_NE(keypair1->public_key, keypair1->private_key);
 }
 
 TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {

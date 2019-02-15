@@ -23,13 +23,18 @@ import (
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/ed25519"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
 
+	subtedaead "github.com/google/tink/go/subtle/daead"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	aspb "github.com/google/tink/proto/aes_siv_go_proto"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
@@ -41,7 +46,7 @@ import (
 // It returns DummyAEAD when GetPrimitive() functions are called.
 type DummyAEADKeyManager struct{}
 
-var _ tink.KeyManager = (*DummyAEADKeyManager)(nil)
+var _ registry.KeyManager = (*DummyAEADKeyManager)(nil)
 
 // Primitive constructs a primitive instance for the key given in
 // serializedKey, which must be a serialized key protocol buffer handled by this manager.
@@ -100,9 +105,50 @@ func (h *DummyMAC) VerifyMAC(mac []byte, data []byte) error {
 	return nil
 }
 
+// DummyKMSClient is a dummy implementation of a KMS Client.
+type DummyKMSClient struct{}
+
+var _ registry.KMSClient = (*DummyKMSClient)(nil)
+
+// Supported true if this client does support keyURI
+func (d *DummyKMSClient) Supported(keyURI string) bool {
+	if keyURI == "dummy" {
+		return true
+	}
+	return false
+}
+
+// LoadCredentials loads the credentials in credentialPath. If credentialPath is null, loads the
+// default credentials.
+func (d *DummyKMSClient) LoadCredentials(credentialPath string) (interface{}, error) {
+	return d, nil
+}
+
+// LoadDefaultCredentials loads with the default credentials.
+func (d *DummyKMSClient) LoadDefaultCredentials() (interface{}, error) {
+	return d, nil
+}
+
+// GetAead gets an Aead backend by keyURI.
+func (d *DummyKMSClient) GetAead(keyURI string) (tink.AEAD, error) {
+	return &DummyAEAD{}, nil
+}
+
 // NewTestAESGCMKeyset creates a new Keyset containing an AESGCMKey.
 func NewTestAESGCMKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
 	keyData := NewAESGCMKeyData(16)
+	return NewTestKeyset(keyData, primaryOutputPrefixType)
+}
+
+// NewTestAESSIVKeyset creates a new Keyset containing an AesSivKey.
+func NewTestAESSIVKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
+	keyValue := random.GetRandomBytes(subtedaead.AESSIVKeySize)
+	key := &aspb.AesSivKey{
+		Version:  daead.AESSIVKeyVersion,
+		KeyValue: keyValue,
+	}
+	serializedKey, _ := proto.Marshal(key)
+	keyData := NewKeyData(daead.AESSIVTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
 	return NewTestKeyset(keyData, primaryOutputPrefixType)
 }
 
@@ -116,13 +162,13 @@ func NewTestHMACKeyset(tagSize uint32,
 // NewTestKeyset creates a new test Keyset.
 func NewTestKeyset(keyData *tinkpb.KeyData,
 	primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
-	primaryKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
-	rawKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 43, tinkpb.OutputPrefixType_RAW)
-	legacyKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 44, tinkpb.OutputPrefixType_LEGACY)
-	tinkKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 45, tinkpb.OutputPrefixType_TINK)
-	crunchyKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 46, tinkpb.OutputPrefixType_CRUNCHY)
+	primaryKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
+	rawKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 43, tinkpb.OutputPrefixType_RAW)
+	legacyKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 44, tinkpb.OutputPrefixType_LEGACY)
+	tinkKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 45, tinkpb.OutputPrefixType_TINK)
+	crunchyKey := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 46, tinkpb.OutputPrefixType_CRUNCHY)
 	keys := []*tinkpb.Keyset_Key{primaryKey, rawKey, legacyKey, tinkKey, crunchyKey}
-	return tink.CreateKeyset(primaryKey.KeyId, keys)
+	return NewKeyset(primaryKey.KeyId, keys)
 }
 
 // NewDummyKey returns a dummy key that doesn't contain actual key material.
@@ -135,22 +181,57 @@ func NewDummyKey(keyID int, status tinkpb.KeyStatusType, outputPrefixType tinkpb
 	}
 }
 
-// NewECDSAPrivateKey creates an ECDSAPrivateKey with a randomly generated key material.
-func NewECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPrivateKey {
-	curveName := commonpb.EllipticCurveType_name[int32(curve)]
-	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
-	params := signature.NewECDSAParams(hashType,
-		curve,
-		ecdsapb.EcdsaSignatureEncoding_DER)
-	publicKey := signature.NewECDSAPublicKey(signature.ECDSAVerifierKeyVersion,
-		params, priv.X.Bytes(), priv.Y.Bytes())
-	return signature.NewECDSAPrivateKey(signature.ECDSASignerKeyVersion,
-		publicKey, priv.D.Bytes())
+// NewECDSAParams creates a ECDSAParams with the specified parameters.
+func NewECDSAParams(hashType commonpb.HashType,
+	curve commonpb.EllipticCurveType,
+	encoding ecdsapb.EcdsaSignatureEncoding) *ecdsapb.EcdsaParams {
+	return &ecdsapb.EcdsaParams{
+		HashType: hashType,
+		Curve:    curve,
+		Encoding: encoding,
+	}
 }
 
-// NewECDSAPrivateKeyData creates a KeyData containing an ECDSAPrivateKey with a randomly generated key material.
-func NewECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *tinkpb.KeyData {
-	key := NewECDSAPrivateKey(hashType, curve)
+// NewECDSAKeyFormat creates a ECDSAKeyFormat with the specified parameters.
+func NewECDSAKeyFormat(params *ecdsapb.EcdsaParams) *ecdsapb.EcdsaKeyFormat {
+	return &ecdsapb.EcdsaKeyFormat{Params: params}
+}
+
+// NewECDSAPrivateKey creates a ECDSAPrivateKey with the specified paramaters.
+func NewECDSAPrivateKey(version uint32,
+	publicKey *ecdsapb.EcdsaPublicKey,
+	keyValue []byte) *ecdsapb.EcdsaPrivateKey {
+	return &ecdsapb.EcdsaPrivateKey{
+		Version:   version,
+		PublicKey: publicKey,
+		KeyValue:  keyValue,
+	}
+}
+
+// NewECDSAPublicKey creates a ECDSAPublicKey with the specified paramaters.
+func NewECDSAPublicKey(version uint32,
+	params *ecdsapb.EcdsaParams,
+	x []byte, y []byte) *ecdsapb.EcdsaPublicKey {
+	return &ecdsapb.EcdsaPublicKey{
+		Version: version,
+		Params:  params,
+		X:       x,
+		Y:       y,
+	}
+}
+
+// NewRandomECDSAPrivateKey creates an ECDSAPrivateKey with a randomly generated key material.
+func NewRandomECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPrivateKey {
+	curveName := commonpb.EllipticCurveType_name[int32(curve)]
+	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
+	params := NewECDSAParams(hashType, curve, ecdsapb.EcdsaSignatureEncoding_DER)
+	publicKey := NewECDSAPublicKey(signature.ECDSAVerifierKeyVersion, params, priv.X.Bytes(), priv.Y.Bytes())
+	return NewECDSAPrivateKey(signature.ECDSASignerKeyVersion, publicKey, priv.D.Bytes())
+}
+
+// NewRandomECDSAPrivateKeyData creates a KeyData containing an ECDSAPrivateKey with a randomly generated key material.
+func NewRandomECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *tinkpb.KeyData {
+	key := NewRandomECDSAPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
 	return &tinkpb.KeyData{
 		TypeUrl:         signature.ECDSASignerTypeURL,
@@ -159,17 +240,32 @@ func NewECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticC
 	}
 }
 
-// NewECDSAPublicKey creates an ECDSAPublicKey with the specified parameters.
-func NewECDSAPublicKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPublicKey {
-	return NewECDSAPrivateKey(hashType, curve).PublicKey
+// NewRandomECDSAPublicKey creates an ECDSAPublicKe with a randomly generated key material.
+func NewRandomECDSAPublicKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPublicKey {
+	return NewRandomECDSAPrivateKey(hashType, curve).PublicKey
+}
+
+// GetECDSAParamNames returns the string representations of each parameter in
+// the given ECDSAParams.
+func GetECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
+	hashName := commonpb.HashType_name[int32(params.HashType)]
+	curveName := commonpb.EllipticCurveType_name[int32(params.Curve)]
+	encodingName := ecdsapb.EcdsaSignatureEncoding_name[int32(params.Encoding)]
+	return hashName, curveName, encodingName
 }
 
 // NewED25519PrivateKey creates an ED25519PrivateKey with a randomly generated key material.
 func NewED25519PrivateKey() *ed25519pb.Ed25519PrivateKey {
 	public, private, _ := ed25519.GenerateKey(rand.Reader)
-	pub := signature.NewED25519PublicKey(signature.ED25519SignerKeyVersion, &public)
-	return signature.NewED25519PrivateKey(signature.ED25519SignerKeyVersion,
-		pub, &private)
+	publicProto := &ed25519pb.Ed25519PublicKey{
+		Version:  signature.ED25519SignerKeyVersion,
+		KeyValue: public,
+	}
+	return &ed25519pb.Ed25519PrivateKey{
+		Version:   signature.ED25519SignerKeyVersion,
+		PublicKey: publicProto,
+		KeyValue:  private.Seed(),
+	}
 }
 
 // NewED25519PrivateKeyData creates a KeyData containing an ED25519PrivateKey with a randomly generated key material.
@@ -183,28 +279,30 @@ func NewED25519PrivateKeyData() *tinkpb.KeyData {
 	}
 }
 
-// NewED25519PublicKey creates an ED25519PublicKey with the specified parameters.
+// NewED25519PublicKey creates an ED25519PublicKey with a randomly generated key material.
 func NewED25519PublicKey() *ed25519pb.Ed25519PublicKey {
 	return NewED25519PrivateKey().PublicKey
 }
 
 // NewAESGCMKey creates a randomly generated AESGCMKey.
-func NewAESGCMKey(keySize uint32) *gcmpb.AesGcmKey {
+func NewAESGCMKey(keyVersion uint32, keySize uint32) *gcmpb.AesGcmKey {
 	keyValue := random.GetRandomBytes(keySize)
-	return aead.NewAESGCMKey(aead.AESGCMKeyVersion, keyValue)
+	return &gcmpb.AesGcmKey{
+		Version:  keyVersion,
+		KeyValue: keyValue,
+	}
 }
 
 // NewAESGCMKeyData creates a KeyData containing a randomly generated AESGCMKey.
 func NewAESGCMKeyData(keySize uint32) *tinkpb.KeyData {
-	keyValue := random.GetRandomBytes(keySize)
-	key := aead.NewAESGCMKey(aead.AESGCMKeyVersion, keyValue)
+	key := NewAESGCMKey(aead.AESGCMKeyVersion, keySize)
 	serializedKey, _ := proto.Marshal(key)
-	return tink.CreateKeyData(aead.AESGCMTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
+	return NewKeyData(aead.AESGCMTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
 }
 
 // NewSerializedAESGCMKey creates a AESGCMKey with randomly generated key material.
 func NewSerializedAESGCMKey(keySize uint32) []byte {
-	key := NewAESGCMKey(keySize)
+	key := NewAESGCMKey(aead.AESGCMKeyVersion, keySize)
 	serializedKey, err := proto.Marshal(key)
 	if err != nil {
 		panic(fmt.Sprintf("cannot marshal AESGCMKey: %s", err))
@@ -212,23 +310,45 @@ func NewSerializedAESGCMKey(keySize uint32) []byte {
 	return serializedKey
 }
 
+// NewAESGCMKeyFormat returns a new AESGCMKeyFormat.
+func NewAESGCMKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
+	return &gcmpb.AesGcmKeyFormat{
+		KeySize: keySize,
+	}
+}
+
+// NewHMACParams returns a new HMACParams.
+func NewHMACParams(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacParams {
+	return &hmacpb.HmacParams{
+		Hash:    hashType,
+		TagSize: tagSize,
+	}
+}
+
 // NewHMACKey creates a new HMACKey with the specified parameters.
 func NewHMACKey(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacKey {
-	params := mac.NewHMACParams(hashType, tagSize)
+	params := NewHMACParams(hashType, tagSize)
 	keyValue := random.GetRandomBytes(20)
-	return mac.NewHMACKey(params, mac.HMACKeyVersion, keyValue)
+	return &hmacpb.HmacKey{
+		Version:  mac.HMACKeyVersion,
+		Params:   params,
+		KeyValue: keyValue,
+	}
 }
 
 // NewHMACKeyFormat creates a new HMACKeyFormat with the specified parameters.
 func NewHMACKeyFormat(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacKeyFormat {
-	params := mac.NewHMACParams(hashType, tagSize)
+	params := NewHMACParams(hashType, tagSize)
 	keySize := uint32(20)
-	return mac.NewHMACKeyFormat(params, keySize)
+	return &hmacpb.HmacKeyFormat{
+		Params:  params,
+		KeySize: keySize,
+	}
 }
 
 // NewHMACKeysetManager returns a new KeysetManager that contains a HMACKey.
-func NewHMACKeysetManager() *tink.KeysetManager {
-	ksm := tink.NewKeysetManager()
+func NewHMACKeysetManager() *keyset.Manager {
+	ksm := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
 	err := ksm.Rotate(kt)
 	if err != nil {
@@ -245,5 +365,46 @@ func NewHMACKeyData(hashType commonpb.HashType, tagSize uint32) *tinkpb.KeyData 
 		TypeUrl:         mac.HMACTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+	}
+}
+
+// NewKeyData creates a new KeyData with the specified parameters.
+func NewKeyData(typeURL string,
+	value []byte,
+	materialType tinkpb.KeyData_KeyMaterialType) *tinkpb.KeyData {
+	return &tinkpb.KeyData{
+		TypeUrl:         typeURL,
+		Value:           value,
+		KeyMaterialType: materialType,
+	}
+}
+
+// NewKey creates a new Key with the specified parameters.
+func NewKey(keyData *tinkpb.KeyData,
+	status tinkpb.KeyStatusType,
+	keyID uint32,
+	prefixType tinkpb.OutputPrefixType) *tinkpb.Keyset_Key {
+	return &tinkpb.Keyset_Key{
+		KeyData:          keyData,
+		Status:           status,
+		KeyId:            keyID,
+		OutputPrefixType: prefixType,
+	}
+}
+
+// NewKeyset creates a new Keyset with the specified parameters.
+func NewKeyset(primaryKeyID uint32,
+	keys []*tinkpb.Keyset_Key) *tinkpb.Keyset {
+	return &tinkpb.Keyset{
+		PrimaryKeyId: primaryKeyID,
+		Key:          keys,
+	}
+}
+
+// NewEncryptedKeyset creates a new EncryptedKeyset with a specified parameters.
+func NewEncryptedKeyset(encryptedKeySet []byte, info *tinkpb.KeysetInfo) *tinkpb.EncryptedKeyset {
+	return &tinkpb.EncryptedKeyset{
+		EncryptedKeyset: encryptedKeySet,
+		KeysetInfo:      info,
 	}
 }

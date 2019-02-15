@@ -37,6 +37,7 @@
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
+#include "proto/ed25519.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -131,6 +132,9 @@ google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::HashType hash_type,
     google::crypto::tink::EcdsaSignatureEncoding encoding);
+
+// Generates a fresh test key for ED25519.
+google::crypto::tink::Ed25519PrivateKey GetEd25519TestPrivateKey();
 
 // A dummy implementation of Aead-interface.
 // An instance of DummyAead can be identified by a name specified

@@ -21,9 +21,11 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/subtle"
-	"github.com/google/tink/go/tink"
+	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -45,7 +47,7 @@ var errInvalidECDSASignKeyFormat = errors.New("ecdsa_signer_key_manager: invalid
 type ecdsaSignerKeyManager struct{}
 
 // Assert that ecdsaSignerKeyManager implements the PrivateKeyManager interface.
-var _ tink.PrivateKeyManager = (*ecdsaSignerKeyManager)(nil)
+var _ registry.PrivateKeyManager = (*ecdsaSignerKeyManager)(nil)
 
 // newECDSASignerKeyManager creates a new ecdsaSignerKeyManager.
 func newECDSASignerKeyManager() *ecdsaSignerKeyManager {
@@ -64,7 +66,7 @@ func (km *ecdsaSignerKeyManager) Primitive(serializedKey []byte) (interface{}, e
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	hash, curve, encoding := GetECDSAParamNames(key.PublicKey.Params)
+	hash, curve, encoding := getECDSAParamNames(key.PublicKey.Params)
 	ret, err := subtleSignature.NewECDSASigner(hash, curve, encoding, key.KeyValue)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_signer_key_manager: %s", err)
@@ -86,15 +88,15 @@ func (km *ecdsaSignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Messa
 	}
 	// generate key
 	params := keyFormat.Params
-	curve := tink.GetCurveName(params.Curve)
+	curve := commonpb.EllipticCurveType_name[int32(params.Curve)]
 	tmpKey, err := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_signer_key_manager: cannot generate ECDSA key: %s", err)
 	}
 
 	keyValue := tmpKey.D.Bytes()
-	pub := NewECDSAPublicKey(ECDSASignerKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
-	priv := NewECDSAPrivateKey(ECDSASignerKeyVersion, pub, keyValue)
+	pub := newECDSAPublicKey(ECDSASignerKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
+	priv := newECDSAPrivateKey(ECDSASignerKeyVersion, pub, keyValue)
 	return priv, nil
 }
 
@@ -145,15 +147,15 @@ func (km *ecdsaSignerKeyManager) TypeURL() string {
 
 // validateKey validates the given ECDSAPrivateKey.
 func (km *ecdsaSignerKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
-	if err := tink.ValidateVersion(key.Version, ECDSASignerKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, ECDSASignerKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_signer_key_manager: invalid key: %s", err)
 	}
-	hash, curve, encoding := GetECDSAParamNames(key.PublicKey.Params)
+	hash, curve, encoding := getECDSAParamNames(key.PublicKey.Params)
 	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
 }
 
 // validateKeyFormat validates the given ECDSAKeyFormat.
 func (km *ecdsaSignerKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
-	hash, curve, encoding := GetECDSAParamNames(format.Params)
+	hash, curve, encoding := getECDSAParamNames(format.Params)
 	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
 }

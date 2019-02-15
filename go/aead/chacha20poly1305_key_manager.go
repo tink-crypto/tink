@@ -19,9 +19,10 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/chacha20poly1305"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
 
 	cppb "github.com/google/tink/proto/chacha20_poly1305_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -43,7 +44,7 @@ var errInvalidChaCha20Poly1305KeyFormat = fmt.Errorf("chacha20poly1305_key_manag
 type chaCha20Poly1305KeyManager struct{}
 
 // Assert that chaCha20Poly1305KeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*chaCha20Poly1305KeyManager)(nil)
+var _ registry.KeyManager = (*chaCha20Poly1305KeyManager)(nil)
 
 // newChaCha20Poly1305KeyManager creates a new chaCha20Poly1305KeyManager.
 func newChaCha20Poly1305KeyManager() *chaCha20Poly1305KeyManager {
@@ -111,7 +112,7 @@ func (km *chaCha20Poly1305KeyManager) newChaCha20Poly1305Key() *cppb.ChaCha20Pol
 
 // validateKey validates the given ChaCha20Poly1305Key.
 func (km *chaCha20Poly1305KeyManager) validateKey(key *cppb.ChaCha20Poly1305Key) error {
-	err := tink.ValidateVersion(key.Version, ChaCha20Poly1305KeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, ChaCha20Poly1305KeyVersion)
 	if err != nil {
 		return fmt.Errorf("chacha20poly1305_key_manager: %s", err)
 	}
