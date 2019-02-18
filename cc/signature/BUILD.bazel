@@ -10,7 +10,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         "//cc:crypto_format",
-        "//cc:primitive_set",c
+        "//cc:primitive_set",
         "//cc:primitive_wrapper",
         "//cc:public_key_verify",
         "//cc/subtle:subtle_util_boringssl",
