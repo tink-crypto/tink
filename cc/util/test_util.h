@@ -26,10 +26,13 @@
 #include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
+#include "tink/input_stream.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
+#include "tink/output_stream.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/streaming_aead.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -193,6 +196,61 @@ class DummyDeterministicAead : public DeterministicAead {
 
  private:
   DummyAead aead_;
+};
+
+// A dummy implementation of StreamingAead-interface.
+// An instance of DummyStreamingAead can be identified by a name specified
+// as a parameter of the constructor.
+class DummyStreamingAead : public StreamingAead {
+ public:
+  explicit DummyStreamingAead(absl::string_view streaming_aead_name)
+      : streaming_aead_name_(streaming_aead_name) {}
+
+  // Writes to 'ciphertext_destination' the name of this instance
+  // followed by 'associated_data', and returns 'ciphertext_destination'
+  // as the encrypting stream.
+  crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
+  NewEncryptingStream(
+      std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination,
+      absl::string_view associated_data) override {
+    auto header = absl::StrCat(streaming_aead_name_, associated_data);
+    void* buffer;
+    auto next_result = ciphertext_destination->Next(&buffer);
+    if (!next_result.status().ok()) return next_result.status();
+    if (next_result.ValueOrDie() < header.size()) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INTERNAL, "Buffer too small");
+    }
+    memcpy(buffer, header.data(), header.size());
+    ciphertext_destination->BackUp(next_result.ValueOrDie() - header.size());
+    return std::move(ciphertext_destination);
+  }
+
+  // Reads a prefix from 'ciphertext_source' and verifies that it starts
+  // with the name of this instance, followed by 'associated_data'.
+  // Returns 'ciphertext_source' as the decrypting stream.
+  crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
+  NewDecryptingStream(
+      std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
+      absl::string_view associated_data) override {
+    auto header = absl::StrCat(streaming_aead_name_, associated_data);
+    const void* buffer;
+    auto next_result = ciphertext_source->Next(&buffer);
+    if (!next_result.status().ok()) return next_result.status();
+    if (next_result.ValueOrDie() < header.size()) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INTERNAL, "Buffer too small");
+    }
+    if (!memcmp(buffer, header.data(), header.size())) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "Corrupted header");
+    }
+    ciphertext_source->BackUp(next_result.ValueOrDie() - header.size());
+    return std::move(ciphertext_source);
+  }
+
+ private:
+  std::string streaming_aead_name_;
 };
 
 // A dummy implementation of HybridEncrypt-interface.
