@@ -49,7 +49,7 @@ class KeysetHandle {
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template);
 
   // Encrypts the underlying keyset with the provided |master_key_aead|
-  // and writes the resulting EncrytpedKeyset to the given |writer|,
+  // and writes the resulting EncryptedKeyset to the given |writer|,
   // which must be non-null.
   crypto::tink::util::Status Write(KeysetWriter* writer,
       const Aead& master_key_aead);
@@ -75,17 +75,6 @@ class KeysetHandle {
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const KeyManager<P>* custom_manager) const;
 
-  // Creates a set of primitives corresponding to the keys with
-  // (status == ENABLED) in the keyset given in 'keyset_handle',
-  // assuming all the corresponding key managers are present (keys
-  // with (status != ENABLED) are skipped).
-  //
-  // The returned set is usually later "wrapped" into a class that
-  // implements the corresponding Primitive-interface.
-  template <class P>
-  crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
-      GetPrimitives(const KeyManager<P>* custom_manager) const;
-
  private:
   // The classes below need access to get_keyset();
   friend class CleartextKeysetHandle;
@@ -110,6 +99,17 @@ class KeysetHandle {
 
   // Returns keyset held by this handle.
   const google::crypto::tink::Keyset& get_keyset() const;
+
+  // Creates a set of primitives corresponding to the keys with
+  // (status == ENABLED) in the keyset given in 'keyset_handle',
+  // assuming all the corresponding key managers are present (keys
+  // with (status != ENABLED) are skipped).
+  //
+  // The returned set is usually later "wrapped" into a class that
+  // implements the corresponding Primitive-interface.
+  template <class P>
+  crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
+      GetPrimitives(const KeyManager<P>* custom_manager) const;
 
   google::crypto::tink::Keyset keyset_;
 };

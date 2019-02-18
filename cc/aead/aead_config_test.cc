@@ -16,6 +16,7 @@
 
 #include "tink/aead/aead_config.h"
 
+#include "gmock/gmock.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/catalogue.h"
@@ -24,11 +25,15 @@
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "gtest/gtest.h"
+#include "tink/util/test_util.h"
 
 
 namespace crypto {
 namespace tink {
 namespace {
+
+using ::crypto::tink::test::DummyAead;
+using ::testing::Eq;
 
 class DummyAeadCatalogue : public Catalogue<Aead> {
  public:
@@ -136,27 +141,30 @@ TEST_F(AeadConfigTest, testRegister) {
 // primitives.
 TEST_F(AeadConfigTest, WrappersRegistered) {
   ASSERT_TRUE(AeadConfig::Register().ok());
-  auto keyset_handle_result =
-      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes256Eax());
-  ASSERT_TRUE(keyset_handle_result.ok());
 
-  auto primitive_set_result =
-      keyset_handle_result.ValueOrDie()->GetPrimitives<Aead>(
-          nullptr);
-  ASSERT_TRUE(primitive_set_result.ok());
+  google::crypto::tink::Keyset::Key key;
+  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key.set_key_id(1234);
+  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
+  auto primitive_set = absl::make_unique<PrimitiveSet<Aead>>();
+  primitive_set->set_primary(
+      primitive_set->AddPrimitive(absl::make_unique<DummyAead>("dummy"), key)
+          .ValueOrDie());
 
-  auto primitive_result =
-      Registry::Wrap(std::move(primitive_set_result.ValueOrDie()));
-  ASSERT_TRUE(primitive_result.ok());
+  auto primitive_result = Registry::Wrap(std::move(primitive_set));
 
-  auto encryption_result =
-      primitive_result.ValueOrDie()->Encrypt("encrypted text", "");
+  ASSERT_TRUE(primitive_result.ok()) << primitive_result.status();
+  auto encryption_result = primitive_result.ValueOrDie()->Encrypt("secret", "");
   ASSERT_TRUE(encryption_result.ok());
 
-  auto decryption_result = primitive_result.ValueOrDie()->Decrypt(
-      encryption_result.ValueOrDie(), "");
-  ASSERT_TRUE(decryption_result.ok());
-  EXPECT_EQ(decryption_result.ValueOrDie(), "encrypted text");
+  auto decryption_result =
+      DummyAead("dummy").Decrypt(encryption_result.ValueOrDie(), "");
+  ASSERT_TRUE(decryption_result.status().ok());
+  EXPECT_THAT(decryption_result.ValueOrDie(), Eq("secret"));
+
+  decryption_result =
+      DummyAead("dummy").Decrypt(encryption_result.ValueOrDie(), "wrog");
+  EXPECT_FALSE(decryption_result.status().ok());
 }
 
 }  // namespace

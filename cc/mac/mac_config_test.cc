@@ -24,10 +24,13 @@
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "gtest/gtest.h"
+#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace {
+
+using ::crypto::tink::test::DummyMac;
 
 class DummyMacCatalogue : public Catalogue<Mac> {
  public:
@@ -106,27 +109,28 @@ TEST_F(MacConfigTest, testRegister) {
 // primitives.
 TEST_F(MacConfigTest, WrappersRegistered) {
   ASSERT_TRUE(MacConfig::Register().ok());
-  auto keyset_handle_result =
-      KeysetHandle::GenerateNew(MacKeyTemplates::HmacSha256HalfSizeTag());
-  ASSERT_TRUE(keyset_handle_result.ok());
 
-  auto primitive_set_result =
-      keyset_handle_result.ValueOrDie()->GetPrimitives<Mac>(
-          nullptr);
-  ASSERT_TRUE(primitive_set_result.ok());
+  google::crypto::tink::Keyset::Key key;
+  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key.set_key_id(1234);
+  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
+  auto primitive_set = absl::make_unique<PrimitiveSet<Mac>>();
+  primitive_set->set_primary(
+      primitive_set->AddPrimitive(absl::make_unique<DummyMac>("dummy"), key)
+          .ValueOrDie());
 
-  auto primitive_result =
-      Registry::Wrap(std::move(primitive_set_result.ValueOrDie()));
-  ASSERT_TRUE(primitive_result.ok());
+  auto primitive_result = Registry::Wrap(std::move(primitive_set));
 
+  ASSERT_TRUE(primitive_result.ok()) << primitive_result.status();
   auto mac_result =
       primitive_result.ValueOrDie()->ComputeMac("verified text");
   ASSERT_TRUE(mac_result.ok());
 
-  EXPECT_TRUE(primitive_result.ValueOrDie()->VerifyMac(
-      mac_result.ValueOrDie(), "verified text").ok());
-  EXPECT_FALSE(primitive_result.ValueOrDie()->VerifyMac(
-      mac_result.ValueOrDie(), "faked text").ok());
+  EXPECT_TRUE(DummyMac("dummy")
+                  .VerifyMac(mac_result.ValueOrDie(), "verified text")
+                  .ok());
+  EXPECT_FALSE(
+      DummyMac("dummy").VerifyMac(mac_result.ValueOrDie(), "faked text").ok());
 }
 
 }  // namespace

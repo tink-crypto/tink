@@ -16,6 +16,8 @@
 
 #include "tink/hybrid/hybrid_config.h"
 
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/hybrid/hybrid_key_templates.h"
@@ -24,12 +26,14 @@
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
-#include "gtest/gtest.h"
-
+#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace {
+
+using ::crypto::tink::test::DummyHybridEncrypt;
+using ::crypto::tink::test::DummyHybridDecrypt;
 
 class DummyHybridDecryptCatalogue : public Catalogue<HybridDecrypt> {
  public:
@@ -171,44 +175,62 @@ TEST_F(HybridConfigTest, testRegister) {
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
 }
 
-// Tests that the HybridEncrypt and HybridDecrypt wrappers have been properly
-// registered and we can wrap primitives.
-TEST_F(HybridConfigTest, WrappersRegistered) {
+// Tests that the HybridEncryptWrapper has been properly registered and we
+// can wrap primitives.
+TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
   ASSERT_TRUE(HybridConfig::Register().ok());
-  auto private_keyset_handle_result = KeysetHandle::GenerateNew(
-      HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm());
-  ASSERT_TRUE(private_keyset_handle_result.ok());
 
-  auto public_keyset_handle_result =
-      private_keyset_handle_result.ValueOrDie()->GetPublicKeysetHandle();
-  ASSERT_TRUE(public_keyset_handle_result.ok());
+  google::crypto::tink::Keyset::Key key;
+  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key.set_key_id(1234);
+  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  auto primitive_set = absl::make_unique<PrimitiveSet<HybridEncrypt>>();
+  primitive_set->set_primary(
+      primitive_set
+          ->AddPrimitive(absl::make_unique<DummyHybridEncrypt>("dummy"), key)
+          .ValueOrDie());
 
-  auto private_primitive_set_result =
-      private_keyset_handle_result.ValueOrDie()->GetPrimitives<HybridDecrypt>(
-          nullptr);
-  ASSERT_TRUE(private_primitive_set_result.ok());
+  auto wrapped = Registry::Wrap(std::move(primitive_set));
 
-  auto public_primitive_set_result =
-      public_keyset_handle_result.ValueOrDie()->GetPrimitives<HybridEncrypt>(
-          nullptr);
-  ASSERT_TRUE(public_primitive_set_result.ok());
-
-  auto private_primitive_result =
-      Registry::Wrap(std::move(private_primitive_set_result.ValueOrDie()));
-  ASSERT_TRUE(private_primitive_result.ok());
-
-  auto public_primitive_result =
-      Registry::Wrap(std::move(public_primitive_set_result.ValueOrDie()));
-  ASSERT_TRUE(public_primitive_result.ok());
-
-  auto encryption_result =
-      public_primitive_result.ValueOrDie()->Encrypt("encrypted text", "");
+  ASSERT_TRUE(wrapped.ok()) << wrapped.status();
+  auto encryption_result = wrapped.ValueOrDie()->Encrypt("secret", "");
   ASSERT_TRUE(encryption_result.ok());
 
-  auto decryption_result = private_primitive_result.ValueOrDie()->Decrypt(
-      encryption_result.ValueOrDie(), "");
-  ASSERT_TRUE(decryption_result.ok());
-  EXPECT_EQ(decryption_result.ValueOrDie(), "encrypted text");
+  std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
+  EXPECT_EQ(
+      encryption_result.ValueOrDie(),
+      absl::StrCat(
+          prefix,
+          DummyHybridEncrypt("dummy").Encrypt("secret", "").ValueOrDie()));
+}
+
+// Tests that the HybridDecryptWrapper has been properly registered and we
+// can wrap primitives.
+TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
+  ASSERT_TRUE(HybridConfig::Register().ok());
+
+  google::crypto::tink::Keyset::Key key;
+  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key.set_key_id(1234);
+  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  auto primitive_set = absl::make_unique<PrimitiveSet<HybridDecrypt>>();
+  primitive_set->set_primary(
+      primitive_set
+          ->AddPrimitive(absl::make_unique<DummyHybridDecrypt>("dummy"), key)
+          .ValueOrDie());
+
+  auto wrapped = Registry::Wrap(std::move(primitive_set));
+
+  ASSERT_TRUE(wrapped.ok()) << wrapped.status();
+
+  std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
+  std::string encryption =
+      DummyHybridEncrypt("dummy").Encrypt("secret", "").ValueOrDie();
+
+  ASSERT_EQ(wrapped.ValueOrDie()
+                ->Decrypt(absl::StrCat(prefix, encryption), "")
+                .ValueOrDie(),
+            "secret");
 }
 
 }  // namespace

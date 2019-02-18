@@ -16,6 +16,7 @@
 
 #include "tink/daead/deterministic_aead_config.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
@@ -24,10 +25,14 @@
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
+#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace {
+
+using ::crypto::tink::test::DummyDeterministicAead;
+using ::testing::Eq;
 
 class DummyDaeadCatalogue : public Catalogue<DeterministicAead> {
  public:
@@ -106,29 +111,34 @@ TEST_F(DeterministicAeadConfigTest, testRegister) {
 // can wrap primitives.
 TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
   ASSERT_TRUE(DeterministicAeadConfig::Register().ok());
-  auto keyset_handle_result =
-      KeysetHandle::GenerateNew(DeterministicAeadKeyTemplates::Aes256Siv());
-  ASSERT_TRUE(keyset_handle_result.ok());
 
-  auto primitive_set_result =
-      keyset_handle_result.ValueOrDie()->GetPrimitives<DeterministicAead>(
-          nullptr);
-  ASSERT_TRUE(primitive_set_result.ok());
+  google::crypto::tink::Keyset::Key key;
+  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key.set_key_id(1234);
+  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
+  auto primitive_set = absl::make_unique<PrimitiveSet<DeterministicAead>>();
+  primitive_set->set_primary(
+      primitive_set
+          ->AddPrimitive(absl::make_unique<DummyDeterministicAead>("dummy"),
+                         key)
+          .ValueOrDie());
 
-  auto primitive_result =
-      Registry::Wrap(std::move(primitive_set_result.ValueOrDie()));
-  ASSERT_TRUE(primitive_result.ok());
+  auto registry_wrapped = Registry::Wrap(std::move(primitive_set));
 
+  ASSERT_TRUE(registry_wrapped.ok()) << registry_wrapped.status();
   auto encryption_result =
-      primitive_result.ValueOrDie()->EncryptDeterministically("encrypted text",
-                                                              "");
+      registry_wrapped.ValueOrDie()->EncryptDeterministically("secret", "");
   ASSERT_TRUE(encryption_result.ok());
 
   auto decryption_result =
-      primitive_result.ValueOrDie()->DecryptDeterministically(
+      DummyDeterministicAead("dummy").DecryptDeterministically(
           encryption_result.ValueOrDie(), "");
-  ASSERT_TRUE(decryption_result.ok());
-  EXPECT_EQ(decryption_result.ValueOrDie(), "encrypted text");
+  ASSERT_TRUE(decryption_result.status().ok());
+  EXPECT_THAT(decryption_result.ValueOrDie(), Eq("secret"));
+
+  decryption_result = DummyDeterministicAead("dummy").DecryptDeterministically(
+      encryption_result.ValueOrDie(), "wrog");
+  EXPECT_FALSE(decryption_result.status().ok());
 }
 
 }  // namespace

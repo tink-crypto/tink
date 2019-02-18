@@ -176,6 +176,8 @@ cc_test(
         "//cc:keyset_handle",
         "//cc:registry",
         "//cc/util:status",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],

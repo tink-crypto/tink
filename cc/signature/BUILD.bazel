@@ -10,7 +10,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         "//cc:crypto_format",
-        "//cc:primitive_set",
+        "//cc:primitive_set",c
         "//cc:primitive_wrapper",
         "//cc:public_key_verify",
         "//cc/subtle:subtle_util_boringssl",
@@ -686,6 +686,8 @@ cc_test(
         "//cc:public_key_verify",
         "//cc:registry",
         "//cc/util:status",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],

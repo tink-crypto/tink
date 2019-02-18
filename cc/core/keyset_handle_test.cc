@@ -381,60 +381,6 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
   }
 }
 
-TEST_F(KeysetHandleTest, GetPrimitives) {
-  Keyset keyset;
-  KeyData key_data_0 =
-      *Registry::NewKeyData(AeadKeyTemplates::Aes128Gcm()).ValueOrDie();
-  AddKeyData(key_data_0, /*key_id=*/0,
-             google::crypto::tink::OutputPrefixType::TINK,
-             KeyStatusType::ENABLED, &keyset);
-  KeyData key_data_1 =
-      *Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).ValueOrDie();
-  AddKeyData(key_data_1, /*key_id=*/1,
-             google::crypto::tink::OutputPrefixType::TINK,
-             KeyStatusType::ENABLED, &keyset);
-  KeyData key_data_2 =
-      *Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).ValueOrDie();
-  AddKeyData(key_data_2, /*key_id=*/2,
-             google::crypto::tink::OutputPrefixType::RAW,
-             KeyStatusType::ENABLED, &keyset);
-  keyset.set_primary_key_id(1);
-  std::unique_ptr<KeysetHandle> keyset_handle =
-      KeysetUtil::GetKeysetHandle(keyset);
-
-  // Check that encryption with the primary can be decrypted with key_data_1.
-  auto result = keyset_handle->GetPrimitives<Aead>(nullptr);
-  ASSERT_TRUE(result.ok()) << result.status();
-  auto aead_set = std::move(result.ValueOrDie());
-
-  std::string plaintext = "plaintext";
-  std::string aad = "aad";
-  std::string encryption = aead_set->get_primary()
-                          ->get_primitive()
-                          .Encrypt(plaintext, aad)
-                          .ValueOrDie();
-  EXPECT_EQ(Registry::GetPrimitive<Aead>(key_data_1)
-                .ValueOrDie()
-                ->Decrypt(encryption, aad)
-                .ValueOrDie(),
-            plaintext);
-
-  // Check that the primitive corresponding to key_data_0 is in the keyset.
-  auto& tink =
-      *(aead_set
-            ->get_primitives(
-                CryptoFormat::get_output_prefix(keyset.key(0)).ValueOrDie())
-            .ValueOrDie());
-  ASSERT_EQ(1, tink.size());
-  encryption = tink[0]->get_primitive().Encrypt(plaintext, aad).ValueOrDie();
-  EXPECT_EQ(Registry::GetPrimitive<Aead>(key_data_0)
-                .ValueOrDie()
-                ->Decrypt(encryption, aad)
-                .ValueOrDie(),
-            plaintext);
-}
-
-
 TEST_F(KeysetHandleTest, GetPrimitive) {
   Keyset keyset;
   KeyData key_data_0 =

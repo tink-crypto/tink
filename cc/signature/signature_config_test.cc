@@ -16,8 +16,8 @@
 
 #include "tink/signature/signature_config.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "absl/memory/memory.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/keyset_handle.h"
@@ -26,10 +26,15 @@
 #include "tink/registry.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/util/status.h"
+#include "tink/util/test_util.h"
+#include "absl/memory/memory.h"
 
 namespace crypto {
 namespace tink {
 namespace {
+
+using ::crypto::tink::test::DummyPublicKeySign;
+using ::crypto::tink::test::DummyPublicKeyVerify;
 
 class DummySignCatalogue : public Catalogue<PublicKeySign> {
  public:
@@ -158,46 +163,58 @@ TEST_F(SignatureConfigTest, testRegister) {
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
 }
 
-// Tests that the PublicKeySign and PublicKeyVerify wrappers have been properly
-// registered and we can wrap primitives.
-TEST_F(SignatureConfigTest, WrappersRegistered) {
+// Tests that the PublicKeySignWrapper has been properly registered and we
+// can wrap primitives.
+TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
   ASSERT_TRUE(SignatureConfig::Register().ok());
-  auto private_keyset_handle_result =
-      KeysetHandle::GenerateNew(SignatureKeyTemplates::EcdsaP256());
-  ASSERT_TRUE(private_keyset_handle_result.ok());
 
-  auto public_keyset_handle_result =
-      private_keyset_handle_result.ValueOrDie()->GetPublicKeysetHandle();
-  ASSERT_TRUE(public_keyset_handle_result.ok());
+  google::crypto::tink::Keyset::Key key;
+  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key.set_key_id(1234);
+  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeySign>>();
+  primitive_set->set_primary(
+      primitive_set
+          ->AddPrimitive(absl::make_unique<DummyPublicKeySign>("dummy"), key)
+          .ValueOrDie());
 
-  auto private_primitive_set_result =
-      private_keyset_handle_result.ValueOrDie()->GetPrimitives<PublicKeySign>(
-          nullptr);
-  ASSERT_TRUE(private_primitive_set_result.ok());
+  auto wrapped = Registry::Wrap(std::move(primitive_set));
 
-  auto public_primitive_set_result =
-      public_keyset_handle_result.ValueOrDie()->GetPrimitives<PublicKeyVerify>(
-          nullptr);
-  ASSERT_TRUE(public_primitive_set_result.ok());
-
-  auto private_primitive_result =
-      Registry::Wrap(std::move(private_primitive_set_result.ValueOrDie()));
-  ASSERT_TRUE(private_primitive_result.ok());
-
-  auto public_primitive_result =
-      Registry::Wrap(std::move(public_primitive_set_result.ValueOrDie()));
-  ASSERT_TRUE(public_primitive_result.ok());
-
-  auto signature_result =
-      private_primitive_result.ValueOrDie()->Sign("signed text");
+  ASSERT_TRUE(wrapped.ok()) << wrapped.status();
+  auto signature_result = wrapped.ValueOrDie()->Sign("message");
   ASSERT_TRUE(signature_result.ok());
 
-  EXPECT_TRUE(public_primitive_result.ValueOrDie()
-                  ->Verify(signature_result.ValueOrDie(), "signed text")
+  std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
+  EXPECT_EQ(
+      signature_result.ValueOrDie(),
+      absl::StrCat(prefix,
+                   DummyPublicKeySign("dummy").Sign("message").ValueOrDie()));
+}
+
+
+// Tests that the PublicKeyVerifyWrapper has been properly registered and we
+// can wrap primitives.
+TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
+  ASSERT_TRUE(SignatureConfig::Register().ok());
+
+  google::crypto::tink::Keyset::Key key;
+  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key.set_key_id(1234);
+  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeyVerify>>();
+  primitive_set->set_primary(
+      primitive_set
+          ->AddPrimitive(absl::make_unique<DummyPublicKeyVerify>("dummy"), key)
+          .ValueOrDie());
+  std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
+  std::string signature = DummyPublicKeySign("dummy").Sign("message").ValueOrDie();
+
+  auto wrapped = Registry::Wrap(std::move(primitive_set));
+
+  ASSERT_TRUE(wrapped.ok()) << wrapped.status();
+  ASSERT_TRUE(wrapped.ValueOrDie()
+                  ->Verify(absl::StrCat(prefix, signature), "message")
                   .ok());
-  EXPECT_FALSE(public_primitive_result.ValueOrDie()
-                   ->Verify(signature_result.ValueOrDie(), "faked text")
-                   .ok());
 }
 
 }  // namespace
