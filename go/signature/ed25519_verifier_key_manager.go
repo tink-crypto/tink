@@ -27,11 +27,8 @@ import (
 )
 
 const (
-	// ED25519VerifierKeyVersion is the maximum version of keys that this manager supports.
-	ED25519VerifierKeyVersion = 0
-
-	// ED25519VerifierTypeURL is the only type URL that this manager supports.
-	ED25519VerifierTypeURL = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey"
+	ed25519VerifierKeyVersion = 0
+	ed25519VerifierTypeURL    = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey"
 )
 
 // common errors
@@ -82,17 +79,17 @@ func (km *ed25519VerifierKeyManager) NewKeyData(serializedKeyFormat []byte) (*ti
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *ed25519VerifierKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == ED25519VerifierTypeURL
+	return typeURL == ed25519VerifierTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *ed25519VerifierKeyManager) TypeURL() string {
-	return ED25519VerifierTypeURL
+	return ed25519VerifierTypeURL
 }
 
 // validateKey validates the given ED25519PublicKey.
 func (km *ed25519VerifierKeyManager) validateKey(key *ed25519pb.Ed25519PublicKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, ED25519VerifierKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, ed25519VerifierKeyVersion); err != nil {
 		return fmt.Errorf("ed25519_verifier_key_manager: %s", err)
 	}
 	if len(key.KeyValue) != ed25519.PublicKeySize {

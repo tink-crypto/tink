@@ -106,8 +106,8 @@ func (g *GCPClient) LoadDefaultCredentials() (interface{}, error) {
 	return g, nil
 }
 
-// GetAead  gets an Aead backend by keyURI.
-func (g *GCPClient) GetAead(keyURI string) (tink.AEAD, error) {
+// GetAEAD gets an AEAD backend by keyURI.
+func (g *GCPClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 	if len(g.keyURI) > 0 && strings.Compare(strings.ToLower(g.keyURI), strings.ToLower(keyURI)) != 0 {
 		return nil, fmt.Errorf("this client is bound to %s, cannot load keys bound to %s", g.keyURI, keyURI)
 	}
@@ -115,7 +115,7 @@ func (g *GCPClient) GetAead(keyURI string) (tink.AEAD, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewGCPAead(uri, g.kms), nil
+	return NewGCPAEAD(uri, g.kms), nil
 }
 
 func validateKMSPrefix(keyURI, prefix string) bool {

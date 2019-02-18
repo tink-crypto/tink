@@ -32,14 +32,10 @@ import (
 )
 
 const (
-	// AESCTRHMACAEADKeyVersion is the maxmimal version of keys that this key manager supports.
-	AESCTRHMACAEADKeyVersion = 0
-
-	// AESCTRHMACAEADTypeURL is the url that this key manager supports.
-	AESCTRHMACAEADTypeURL = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey"
-
-	minHMACKeySizeInBytes = 16
-	minTagSizeInBytes     = 10
+	aesCTRHMACAEADKeyVersion = 0
+	aesCTRHMACAEADTypeURL    = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey"
+	minHMACKeySizeInBytes    = 16
+	minTagSizeInBytes        = 10
 )
 
 // common errors
@@ -102,14 +98,14 @@ func (km *aesCTRHMACAEADKeyManager) NewKey(serializedKeyFormat []byte) (proto.Me
 		return nil, fmt.Errorf("aes_ctr_hmac_aead_key_manager: invalid key format: %v", err)
 	}
 	return &aeadpb.AesCtrHmacAeadKey{
-		Version: AESCTRHMACAEADKeyVersion,
+		Version: aesCTRHMACAEADKeyVersion,
 		AesCtrKey: &ctrpb.AesCtrKey{
-			Version:  AESCTRHMACAEADKeyVersion,
+			Version:  aesCTRHMACAEADKeyVersion,
 			KeyValue: random.GetRandomBytes(keyFormat.AesCtrKeyFormat.KeySize),
 			Params:   keyFormat.AesCtrKeyFormat.Params,
 		},
 		HmacKey: &hmacpb.HmacKey{
-			Version:  AESCTRHMACAEADKeyVersion,
+			Version:  aesCTRHMACAEADKeyVersion,
 			KeyValue: random.GetRandomBytes(keyFormat.HmacKeyFormat.KeySize),
 			Params:   keyFormat.HmacKeyFormat.Params,
 		},
@@ -137,17 +133,17 @@ func (km *aesCTRHMACAEADKeyManager) NewKeyData(serializedKeyFormat []byte) (*tin
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *aesCTRHMACAEADKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == AESCTRHMACAEADTypeURL
+	return typeURL == aesCTRHMACAEADTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *aesCTRHMACAEADKeyManager) TypeURL() string {
-	return AESCTRHMACAEADTypeURL
+	return aesCTRHMACAEADTypeURL
 }
 
 // validateKey validates the given AesCtrHmacAeadKey proto.
 func (km *aesCTRHMACAEADKeyManager) validateKey(key *aeadpb.AesCtrHmacAeadKey) error {
-	err := keyset.ValidateKeyVersion(key.Version, AESCTRHMACAEADKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, aesCTRHMACAEADKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
 	}

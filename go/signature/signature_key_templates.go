@@ -21,11 +21,10 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// This file contains pre-generated KeyTemplate for Signer and Verifier.
-// One can use these templates to generate new Keyset, using utility functions
-// in either cleartext_keyset_handle or encrypted_keyset_handle.
+// This file contains pre-generated KeyTemplates for Signer and Verifier.
+// One can use these templates to generate new Keysets.
 
-// ECDSAP256KeyTemplate is a KeyTemplate of ECDSAPrivateKey with the following parameters:
+// ECDSAP256KeyTemplate is a KeyTemplate that generates a new ECDSA private key with the following parameters:
 //   - Hash function: SHA256
 //   - Curve: NIST P-256
 //   - Signature encoding: DER
@@ -35,7 +34,7 @@ func ECDSAP256KeyTemplate() *tinkpb.KeyTemplate {
 		ecdsapb.EcdsaSignatureEncoding_DER)
 }
 
-// ECDSAP384KeyTemplate is a KeyTemplate of ECDSAPrivateKey with the following parameters:
+// ECDSAP384KeyTemplate is a KeyTemplate that generates a new ECDSA private key with the following parameters:
 //   - Hash function: SHA512
 //   - Curve: NIST P-384
 //   - Signature encoding: DER
@@ -45,7 +44,7 @@ func ECDSAP384KeyTemplate() *tinkpb.KeyTemplate {
 		ecdsapb.EcdsaSignatureEncoding_DER)
 }
 
-// ECDSAP521KeyTemplate is a KeyTemplate of ECDSAPrivateKey with the following parameters:
+// ECDSAP521KeyTemplate is a KeyTemplate that generates a new ECDSA private key with the following parameters:
 //   - Hash function: SHA512
 //   - Curve: NIST P-521
 //   - Signature encoding: DER
@@ -66,14 +65,14 @@ func createECDSAKeyTemplate(hashType commonpb.HashType, curve commonpb.EllipticC
 	format := &ecdsapb.EcdsaKeyFormat{Params: params}
 	serializedFormat, _ := proto.Marshal(format)
 	return &tinkpb.KeyTemplate{
-		TypeUrl: ECDSASignerTypeURL,
+		TypeUrl: ecdsaSignerTypeURL,
 		Value:   serializedFormat,
 	}
 }
 
-// ED25519KeyTemplate creates a KeyTemplate with the ED25519 configuration.
+// ED25519KeyTemplate is a KeyTemplate that generates a new ED25519 private key.
 func ED25519KeyTemplate() *tinkpb.KeyTemplate {
 	return &tinkpb.KeyTemplate{
-		TypeUrl: ED25519SignerTypeURL,
+		TypeUrl: ed25519SignerTypeURL,
 	}
 }

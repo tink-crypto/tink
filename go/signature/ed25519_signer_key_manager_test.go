@@ -20,16 +20,15 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/registry"
-	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
-	subtleSig "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
-	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -39,9 +38,9 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	var s = tmp.(*subtleSig.ED25519Signer)
+	var s = tmp.(*signature.ED25519Signer)
 
-	kmPub, err := registry.GetKeyManager(signature.ED25519VerifierTypeURL)
+	kmPub, err := registry.GetKeyManager(testutil.ED25519VerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -51,7 +50,7 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	var v = tmp.(*subtleSig.ED25519Verifier)
+	var v = tmp.(*signature.ED25519Verifier)
 
 	data := random.GetRandomBytes(1281)
 	signature, err := s.Sign(data)
@@ -67,14 +66,14 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 
 func TestED25519SignGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid params
-	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
 
 	// invalid version
 	key := testutil.NewED25519PrivateKey()
-	key.Version = signature.ED25519SignerKeyVersion + 1
+	key.Version = testutil.ED25519SignerKeyVersion + 1
 	serializedKey, _ := proto.Marshal(key)
 	if _, err := km.Primitive(serializedKey); err == nil {
 		t.Errorf("expect an error when version is invalid")
@@ -89,7 +88,7 @@ func TestED25519SignGetPrimitiveWithInvalidInput(t *testing.T) {
 }
 
 func TestED25519SignNewKeyBasic(t *testing.T) {
-	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -105,7 +104,7 @@ func TestED25519SignNewKeyBasic(t *testing.T) {
 }
 
 func TestED25519PublicKeyDataBasic(t *testing.T) {
-	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -121,7 +120,7 @@ func TestED25519PublicKeyDataBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	if pubKeyData.TypeUrl != signature.ED25519VerifierTypeURL {
+	if pubKeyData.TypeUrl != testutil.ED25519VerifierTypeURL {
 		t.Errorf("incorrect type url: %s", pubKeyData.TypeUrl)
 	}
 	if pubKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PUBLIC {
@@ -134,7 +133,7 @@ func TestED25519PublicKeyDataBasic(t *testing.T) {
 }
 
 func TestED25519PublicKeyDataWithInvalidInput(t *testing.T) {
-	km, err := registry.GetKeyManager(signature.ED25519SignerTypeURL)
+	km, err := registry.GetKeyManager(testutil.ED25519SignerTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
@@ -160,22 +159,22 @@ func TestED25519PublicKeyDataWithInvalidInput(t *testing.T) {
 }
 
 func validateED25519PrivateKey(key *ed25519pb.Ed25519PrivateKey) error {
-	if key.Version != signature.ED25519SignerKeyVersion {
+	if key.Version != testutil.ED25519SignerKeyVersion {
 		return fmt.Errorf("incorrect private key's version: expect %d, got %d",
-			signature.ED25519SignerKeyVersion, key.Version)
+			testutil.ED25519SignerKeyVersion, key.Version)
 	}
 	publicKey := key.PublicKey
-	if publicKey.Version != signature.ED25519SignerKeyVersion {
+	if publicKey.Version != testutil.ED25519SignerKeyVersion {
 		return fmt.Errorf("incorrect public key's version: expect %d, got %d",
-			signature.ED25519SignerKeyVersion, key.Version)
+			testutil.ED25519SignerKeyVersion, key.Version)
 	}
 
-	signer, err := subtleSig.NewED25519Signer(key.KeyValue)
+	signer, err := signature.NewED25519Signer(key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("unexpected error when creating ED25519Sign: %s", err)
 	}
 
-	verifier, err := subtleSig.NewED25519Verifier(publicKey.KeyValue)
+	verifier, err := signature.NewED25519Verifier(publicKey.KeyValue)
 	if err != nil {
 		return fmt.Errorf("unexpected error when creating ED25519Verify: %s", err)
 	}

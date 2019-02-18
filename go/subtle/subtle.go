@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package subtle provides utility functions.
+// Package subtle provides common methods needed in subtle implementations.
 package subtle
 
 import (

@@ -24,12 +24,12 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// New returns a AEAD primitive from the given keyset handle.
+// New returns an AEAD primitive from the given keyset handle.
 func New(h *keyset.Handle) (tink.AEAD, error) {
 	return NewWithKeyManager(h, nil /*keyManager*/)
 }
 
-// NewWithKeyManager returns a AEAD primitive from the given keyset handle and custom key manager.
+// NewWithKeyManager returns an AEAD primitive from the given keyset handle and custom key manager.
 func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.AEAD, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {

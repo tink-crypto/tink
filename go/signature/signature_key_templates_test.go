@@ -20,6 +20,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
+	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -61,8 +62,8 @@ func checkECDSAKeyTemplate(template *tinkpb.KeyTemplate,
 	hashType commonpb.HashType,
 	curve commonpb.EllipticCurveType,
 	encoding ecdsapb.EcdsaSignatureEncoding) error {
-	if template.TypeUrl != signature.ECDSASignerTypeURL {
-		return fmt.Errorf("incorrect typeurl: expect %s, got %s", signature.ECDSASignerTypeURL, template.TypeUrl)
+	if template.TypeUrl != testutil.ECDSASignerTypeURL {
+		return fmt.Errorf("incorrect typeurl: expect %s, got %s", testutil.ECDSASignerTypeURL, template.TypeUrl)
 	}
 	format := new(ecdsapb.EcdsaKeyFormat)
 	if err := proto.Unmarshal(template.Value, format); err != nil {

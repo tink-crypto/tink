@@ -26,11 +26,8 @@ import (
 )
 
 const (
-	// ECDSAVerifierKeyVersion is the maximum version of keys that this manager supports.
-	ECDSAVerifierKeyVersion = 0
-
-	// ECDSAVerifierTypeURL is the only type URL that this manager supports.
-	ECDSAVerifierTypeURL = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey"
+	ecdsaVerifierKeyVersion = 0
+	ecdsaVerifierTypeURL    = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey"
 )
 
 // common errors
@@ -82,17 +79,17 @@ func (km *ecdsaVerifierKeyManager) NewKeyData(serializedKeyFormat []byte) (*tink
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *ecdsaVerifierKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == ECDSAVerifierTypeURL
+	return typeURL == ecdsaVerifierTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *ecdsaVerifierKeyManager) TypeURL() string {
-	return ECDSAVerifierTypeURL
+	return ecdsaVerifierTypeURL
 }
 
 // validateKey validates the given ECDSAPublicKey.
 func (km *ecdsaVerifierKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, ECDSAVerifierKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, ecdsaVerifierKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_verifier_key_manager: %s", err)
 	}
 	hash, curve, encoding := getECDSAParamNames(key.Params)

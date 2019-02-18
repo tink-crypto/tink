@@ -31,12 +31,12 @@ import (
 
 func TestRegisterKeyManager(t *testing.T) {
 	// get HMACKeyManager
-	_, err := registry.GetKeyManager(mac.HMACTypeURL)
+	_, err := registry.GetKeyManager(testutil.HMACTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 	// get AESGCMKeyManager
-	_, err = registry.GetKeyManager(aead.AESGCMTypeURL)
+	_, err = registry.GetKeyManager(testutil.AESGCMTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
@@ -52,17 +52,17 @@ func TestRegisterKeyManagerWithCollision(t *testing.T) {
 	// This should fail because overwriting is disallowed.
 	err := registry.RegisterKeyManager(dummyKeyManager)
 	if err == nil {
-		t.Errorf("%s shouldn't be registered again", aead.AESGCMTypeURL)
+		t.Errorf("%s shouldn't be registered again", testutil.AESGCMTypeURL)
 	}
 
-	km, err := registry.GetKeyManager(aead.AESGCMTypeURL)
+	km, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 	// This should fail because overwriting is disallowed, even with the same key manager.
 	err = registry.RegisterKeyManager(km)
 	if err == nil {
-		t.Errorf("%s shouldn't be registered again", aead.AESGCMTypeURL)
+		t.Errorf("%s shouldn't be registered again", testutil.AESGCMTypeURL)
 	}
 }
 
@@ -72,7 +72,7 @@ func TestNewKeyData(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	if keyData.TypeUrl != mac.HMACTypeURL {
+	if keyData.TypeUrl != testutil.HMACTypeURL {
 		t.Errorf("invalid key data")
 	}
 	key := new(hmacpb.HmacKey)
@@ -130,7 +130,7 @@ func TestPrimitiveFromKeyData(t *testing.T) {
 		t.Errorf("expect an error when typeURL has not been registered")
 	}
 	// unmatched url
-	keyData.TypeUrl = aead.AESGCMTypeURL
+	keyData.TypeUrl = testutil.AESGCMTypeURL
 	if _, err := registry.PrimitiveFromKeyData(keyData); err == nil {
 		t.Errorf("expect an error when typeURL doesn't match key")
 	}
@@ -144,7 +144,7 @@ func TestPrimitive(t *testing.T) {
 	// hmac key
 	key := testutil.NewHMACKey(commonpb.HashType_SHA256, 16)
 	serializedKey, _ := proto.Marshal(key)
-	p, err := registry.Primitive(mac.HMACTypeURL, serializedKey)
+	p, err := registry.Primitive(testutil.HMACTypeURL, serializedKey)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
@@ -154,17 +154,17 @@ func TestPrimitive(t *testing.T) {
 		t.Errorf("expect an error when typeURL has not been registered")
 	}
 	// unmatched url
-	if _, err := registry.Primitive(aead.AESGCMTypeURL, serializedKey); err == nil {
+	if _, err := registry.Primitive(testutil.AESGCMTypeURL, serializedKey); err == nil {
 		t.Errorf("expect an error when typeURL doesn't match key")
 	}
 	// void key
-	if _, err := registry.Primitive(aead.AESGCMTypeURL, nil); err == nil {
+	if _, err := registry.Primitive(testutil.AESGCMTypeURL, nil); err == nil {
 		t.Errorf("expect an error when key is nil")
 	}
-	if _, err := registry.Primitive(aead.AESGCMTypeURL, []byte{}); err == nil {
+	if _, err := registry.Primitive(testutil.AESGCMTypeURL, []byte{}); err == nil {
 		t.Errorf("expect an error when key is nil")
 	}
-	if _, err := registry.Primitive(aead.AESGCMTypeURL, []byte{0}); err == nil {
+	if _, err := registry.Primitive(testutil.AESGCMTypeURL, []byte{0}); err == nil {
 		t.Errorf("expect an error when key is nil")
 	}
 }

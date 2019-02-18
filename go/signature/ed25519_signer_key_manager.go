@@ -30,10 +30,8 @@ import (
 )
 
 const (
-	// ED25519SignerKeyVersion is the maximum version of keys that this manager supports.
-	ED25519SignerKeyVersion = 0
-	// ED25519SignerTypeURL is the only type URL that this manager supports.
-	ED25519SignerTypeURL = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey"
+	ed25519SignerKeyVersion = 0
+	ed25519SignerTypeURL    = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey"
 )
 
 // common errors
@@ -81,11 +79,11 @@ func (km *ed25519SignerKeyManager) NewKey(serializedKey []byte) (proto.Message, 
 	}
 
 	publicProto := &ed25519pb.Ed25519PublicKey{
-		Version:  ED25519SignerKeyVersion,
+		Version:  ed25519SignerKeyVersion,
 		KeyValue: public,
 	}
 	privateProto := &ed25519pb.Ed25519PrivateKey{
-		Version:   ED25519SignerKeyVersion,
+		Version:   ed25519SignerKeyVersion,
 		PublicKey: publicProto,
 		KeyValue:  private.Seed(),
 	}
@@ -104,7 +102,7 @@ func (km *ed25519SignerKeyManager) NewKeyData(serializedKeyFormat []byte) (*tink
 		return nil, errInvalidED25519SignKeyFormat
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         ED25519SignerTypeURL,
+		TypeUrl:         ed25519SignerTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
 	}, nil
@@ -121,7 +119,7 @@ func (km *ed25519SignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*tin
 		return nil, errInvalidED25519SignKey
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         ED25519VerifierTypeURL,
+		TypeUrl:         ed25519VerifierTypeURL,
 		Value:           serializedPubKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
 	}, nil
@@ -129,17 +127,17 @@ func (km *ed25519SignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*tin
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *ed25519SignerKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == ED25519SignerTypeURL
+	return typeURL == ed25519SignerTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *ed25519SignerKeyManager) TypeURL() string {
-	return ED25519SignerTypeURL
+	return ed25519SignerTypeURL
 }
 
 // validateKey validates the given ED25519PrivateKey.
 func (km *ed25519SignerKeyManager) validateKey(key *ed25519pb.Ed25519PrivateKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, ED25519SignerKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, ed25519SignerKeyVersion); err != nil {
 		return fmt.Errorf("ed25519_signer_key_manager: invalid key: %s", err)
 	}
 	if len(key.KeyValue) != ed25519.SeedSize {

@@ -62,7 +62,7 @@ func setupKMS(t *testing.T) {
 	registry.RegisterKMSClient(g)
 }
 
-func basicAeadTest(t *testing.T, a tink.AEAD) error {
+func basicAEADTest(t *testing.T, a tink.AEAD) error {
 	t.Helper()
 	for i := 0; i < 100; i++ {
 		pt := random.GetRandomBytes(20)
@@ -84,7 +84,7 @@ func basicAeadTest(t *testing.T, a tink.AEAD) error {
 func TestBasicAead(t *testing.T) {
 	setupKMS(t)
 	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	kh, err := keyset.NewHandle(aead.KMSEnvelopeAeadKeyTemplate(keyURI, dek))
+	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
 	if err != nil {
 		t.Errorf("error getting a new keyset handle: %v", err)
 	}
@@ -92,7 +92,7 @@ func TestBasicAead(t *testing.T) {
 	if err != nil {
 		t.Errorf("error getting the primitive: %v", err)
 	}
-	if err := basicAeadTest(t, a); err != nil {
+	if err := basicAEADTest(t, a); err != nil {
 		t.Errorf("error in basic aead tests: %v", err)
 	}
 }

@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package testkeyset provides functions that create keyset.Handle from cleartext key material in tests.
+// Package testkeyset provides for test code methods to read or write cleartext keyset material.
 package testkeyset
 
 import (

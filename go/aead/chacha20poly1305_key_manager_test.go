@@ -21,9 +21,9 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/chacha20poly1305"
-	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testutil"
 
 	subteaead "github.com/google/tink/go/subtle/aead"
 	cppb "github.com/google/tink/proto/chacha20_poly1305_go_proto"
@@ -31,7 +31,7 @@ import (
 )
 
 func TestChaCha20Poly1305GetPrimitive(t *testing.T) {
-	km, err := registry.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
 	}
@@ -48,7 +48,7 @@ func TestChaCha20Poly1305GetPrimitive(t *testing.T) {
 }
 
 func TestChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
-	km, err := registry.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
 	}
@@ -62,7 +62,7 @@ func TestChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
 }
 
 func TestChaCha20Poly1305NewKey(t *testing.T) {
-	km, err := registry.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
 	}
@@ -77,7 +77,7 @@ func TestChaCha20Poly1305NewKey(t *testing.T) {
 }
 
 func TestChaCha20Poly1305NewKeyData(t *testing.T) {
-	km, err := registry.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
 	}
@@ -85,8 +85,8 @@ func TestChaCha20Poly1305NewKeyData(t *testing.T) {
 	if err != nil {
 		t.Errorf("km.NewKeyData(nil) = _, %v; want _, nil", err)
 	}
-	if kd.TypeUrl != aead.ChaCha20Poly1305TypeURL {
-		t.Errorf("TypeUrl: %v != %v", kd.TypeUrl, aead.ChaCha20Poly1305TypeURL)
+	if kd.TypeUrl != testutil.ChaCha20Poly1305TypeURL {
+		t.Errorf("TypeUrl: %v != %v", kd.TypeUrl, testutil.ChaCha20Poly1305TypeURL)
 	}
 	if kd.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
 		t.Errorf("KeyMaterialType: %v != SYMMETRIC", kd.KeyMaterialType)
@@ -101,25 +101,25 @@ func TestChaCha20Poly1305NewKeyData(t *testing.T) {
 }
 
 func TestChaCha20Poly1305DoesSupport(t *testing.T) {
-	km, err := registry.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
 	}
-	if !km.DoesSupport(aead.ChaCha20Poly1305TypeURL) {
-		t.Errorf("ChaCha20Poly1305KeyManager must support %s", aead.ChaCha20Poly1305TypeURL)
+	if !km.DoesSupport(testutil.ChaCha20Poly1305TypeURL) {
+		t.Errorf("ChaCha20Poly1305KeyManager must support %s", testutil.ChaCha20Poly1305TypeURL)
 	}
 	if km.DoesSupport("some bad type") {
-		t.Errorf("ChaCha20Poly1305KeyManager must only support %s", aead.ChaCha20Poly1305TypeURL)
+		t.Errorf("ChaCha20Poly1305KeyManager must only support %s", testutil.ChaCha20Poly1305TypeURL)
 	}
 }
 
 func TestChaCha20Poly1305TypeURL(t *testing.T) {
-	km, err := registry.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	km, err := registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
 	}
-	if kt := km.TypeURL(); kt != aead.ChaCha20Poly1305TypeURL {
-		t.Errorf("km.TypeURL() = %s; want %s", kt, aead.ChaCha20Poly1305TypeURL)
+	if kt := km.TypeURL(); kt != testutil.ChaCha20Poly1305TypeURL {
+		t.Errorf("km.TypeURL() = %s; want %s", kt, testutil.ChaCha20Poly1305TypeURL)
 	}
 }
 
@@ -127,20 +127,20 @@ func genInvalidChaCha20Poly1305Keys() []*cppb.ChaCha20Poly1305Key {
 	return []*cppb.ChaCha20Poly1305Key{
 		// Bad key size.
 		&cppb.ChaCha20Poly1305Key{
-			Version:  aead.ChaCha20Poly1305KeyVersion,
+			Version:  testutil.ChaCha20Poly1305KeyVersion,
 			KeyValue: random.GetRandomBytes(17),
 		},
 		&cppb.ChaCha20Poly1305Key{
-			Version:  aead.ChaCha20Poly1305KeyVersion,
+			Version:  testutil.ChaCha20Poly1305KeyVersion,
 			KeyValue: random.GetRandomBytes(25),
 		},
 		&cppb.ChaCha20Poly1305Key{
-			Version:  aead.ChaCha20Poly1305KeyVersion,
+			Version:  testutil.ChaCha20Poly1305KeyVersion,
 			KeyValue: random.GetRandomBytes(33),
 		},
 		// Bad version.
 		&cppb.ChaCha20Poly1305Key{
-			Version:  aead.ChaCha20Poly1305KeyVersion + 1,
+			Version:  testutil.ChaCha20Poly1305KeyVersion + 1,
 			KeyValue: random.GetRandomBytes(chacha20poly1305.KeySize),
 		},
 	}
@@ -170,8 +170,8 @@ func validateChaCha20Poly1305Primitive(p interface{}, key *cppb.ChaCha20Poly1305
 }
 
 func validateChaCha20Poly1305Key(key *cppb.ChaCha20Poly1305Key) error {
-	if key.Version != aead.ChaCha20Poly1305KeyVersion {
-		return fmt.Errorf("incorrect key version: keyVersion != %d", aead.ChaCha20Poly1305KeyVersion)
+	if key.Version != testutil.ChaCha20Poly1305KeyVersion {
+		return fmt.Errorf("incorrect key version: keyVersion != %d", testutil.ChaCha20Poly1305KeyVersion)
 	}
 	if uint32(len(key.KeyValue)) != chacha20poly1305.KeySize {
 		return fmt.Errorf("incorrect key size: keySize != %d", chacha20poly1305.KeySize)

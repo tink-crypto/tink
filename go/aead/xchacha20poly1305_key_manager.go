@@ -29,10 +29,8 @@ import (
 )
 
 const (
-	// XChaCha20Poly1305KeyVersion is the maxmimal version of keys that this key manager supports.
-	XChaCha20Poly1305KeyVersion = 0
-	// XChaCha20Poly1305TypeURL is the url that this key manager supports.
-	XChaCha20Poly1305TypeURL = "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key"
+	xChaCha20Poly1305KeyVersion = 0
+	xChaCha20Poly1305TypeURL    = "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key"
 )
 
 // Common errors.
@@ -85,7 +83,7 @@ func (km *xChaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*
 		return nil, err
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         XChaCha20Poly1305TypeURL,
+		TypeUrl:         xChaCha20Poly1305TypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 	}, nil
@@ -93,25 +91,25 @@ func (km *xChaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *xChaCha20Poly1305KeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == XChaCha20Poly1305TypeURL
+	return typeURL == xChaCha20Poly1305TypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *xChaCha20Poly1305KeyManager) TypeURL() string {
-	return XChaCha20Poly1305TypeURL
+	return xChaCha20Poly1305TypeURL
 }
 
 func (km *xChaCha20Poly1305KeyManager) newXChaCha20Poly1305Key() *xcppb.XChaCha20Poly1305Key {
 	keyValue := random.GetRandomBytes(chacha20poly1305.KeySize)
 	return &xcppb.XChaCha20Poly1305Key{
-		Version:  XChaCha20Poly1305KeyVersion,
+		Version:  xChaCha20Poly1305KeyVersion,
 		KeyValue: keyValue,
 	}
 }
 
 // validateKey validates the given XChaCha20Poly1305Key.
 func (km *xChaCha20Poly1305KeyManager) validateKey(key *xcppb.XChaCha20Poly1305Key) error {
-	err := keyset.ValidateKeyVersion(key.Version, XChaCha20Poly1305KeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, xChaCha20Poly1305KeyVersion)
 	if err != nil {
 		return fmt.Errorf("xchacha20poly1305_key_manager: %s", err)
 	}

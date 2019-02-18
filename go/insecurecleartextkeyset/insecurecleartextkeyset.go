@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package insecurecleartextkeyset provides functions that create keyset.Handle from cleartext key material.
+// Package insecurecleartextkeyset provides methods to read or write cleartext keyset material.
 //
 // This package contains dangerous functions, and is separate from the rest of Tink so that its
 // usage can be restricted and audited.

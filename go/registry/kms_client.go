@@ -16,8 +16,7 @@ package registry
 
 import "github.com/google/tink/go/tink"
 
-// KMSClient knows how to produce primitives backed by keys stored in remote
-// KMS services.
+// KMSClient knows how to produce primitives backed by keys stored in remote KMS services.
 type KMSClient interface {
 	// Supported true if this client does support keyURI
 	Supported(keyURI string) bool
@@ -29,6 +28,6 @@ type KMSClient interface {
 	// LoadDefaultCredentials loads with the default credentials.
 	LoadDefaultCredentials() (interface{}, error)
 
-	// GetAEAD  gets an Aead backend by keyURI.
-	GetAead(keyURI string) (tink.AEAD, error)
+	// GetAEAD  gets an AEAD backend by keyURI.
+	GetAEAD(keyURI string) (tink.AEAD, error)
 }

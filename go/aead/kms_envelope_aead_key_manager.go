@@ -26,11 +26,8 @@ import (
 )
 
 const (
-	// KMSEnvelopeAEADKeyVersion is the maxmimal version of keys that this key manager supports.
-	KMSEnvelopeAEADKeyVersion = 0
-
-	// KMSEnvelopeAEADTypeURL is the url that this key manager supports.
-	KMSEnvelopeAEADTypeURL = "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey"
+	kmsEnvelopeAEADKeyVersion = 0
+	kmsEnvelopeAEADTypeURL    = "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey"
 )
 
 // kmsEnvelopeAEADKeyManager is an implementation of KeyManager interface.
@@ -62,7 +59,7 @@ func (km *kmsEnvelopeAEADKeyManager) Primitive(serializedKey []byte) (interface{
 	if err != nil {
 		return nil, err
 	}
-	backend, err := kmsClient.GetAead(uri)
+	backend, err := kmsClient.GetAEAD(uri)
 	if err != nil {
 		return nil, errors.New("kms_envelope_aead_key_manager: invalid aead backend")
 	}
@@ -80,7 +77,7 @@ func (km *kmsEnvelopeAEADKeyManager) NewKey(serializedKeyFormat []byte) (proto.M
 		return nil, errors.New("kms_envelope_aead_key_manager: invalid key format")
 	}
 	return &kmsepb.KmsEnvelopeAeadKey{
-		Version: KMSEnvelopeAEADKeyVersion,
+		Version: kmsEnvelopeAEADKeyVersion,
 		Params:  keyFormat,
 	}, nil
 }
@@ -98,7 +95,7 @@ func (km *kmsEnvelopeAEADKeyManager) NewKeyData(serializedKeyFormat []byte) (*ti
 		return nil, err
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         KMSEnvelopeAEADTypeURL,
+		TypeUrl:         kmsEnvelopeAEADTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_REMOTE,
 	}, nil
@@ -106,17 +103,17 @@ func (km *kmsEnvelopeAEADKeyManager) NewKeyData(serializedKeyFormat []byte) (*ti
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *kmsEnvelopeAEADKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == KMSEnvelopeAEADTypeURL
+	return typeURL == kmsEnvelopeAEADTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *kmsEnvelopeAEADKeyManager) TypeURL() string {
-	return KMSEnvelopeAEADTypeURL
+	return kmsEnvelopeAEADTypeURL
 }
 
 // validateKey validates the given KmsEnvelopeAeadKey.
 func (km *kmsEnvelopeAEADKeyManager) validateKey(key *kmsepb.KmsEnvelopeAeadKey) error {
-	err := keyset.ValidateKeyVersion(key.Version, KMSEnvelopeAEADKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, kmsEnvelopeAEADKeyVersion)
 	if err != nil {
 		return fmt.Errorf("kms_envelope_aead_key_manager: %s", err)
 	}

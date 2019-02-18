@@ -20,6 +20,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/testutil"
 	ctrhmacpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -31,7 +32,7 @@ func TestNewKeyMultipleTimes(t *testing.T) {
 		t.Fatalf("cannot unmarshal AES128CTRHMACSHA256 key template")
 	}
 
-	keyManager, err := registry.GetKeyManager(aead.AESCTRHMACAEADTypeURL)
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACAEADTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AES-CTR-HMAC-AEAD key manager: %s", err)
 	}
@@ -65,10 +66,10 @@ func TestNewKeyMultipleTimes(t *testing.T) {
 func TestNewKeyWithCorruptedFormat(t *testing.T) {
 	keyTemplate := new(tinkpb.KeyTemplate)
 
-	keyTemplate.TypeUrl = aead.AESCTRHMACAEADTypeURL
+	keyTemplate.TypeUrl = testutil.AESCTRHMACAEADTypeURL
 	keyTemplate.Value = make([]byte, 128)
 
-	keyManager, err := registry.GetKeyManager(aead.AESCTRHMACAEADTypeURL)
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACAEADTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AES-CTR-HMAC-AEAD key manager: %s", err)
 	}

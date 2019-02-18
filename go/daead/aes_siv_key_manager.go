@@ -28,10 +28,8 @@ import (
 )
 
 const (
-	// AESSIVKeyVersion is the maxmimal version of keys that this key manager supports.
-	AESSIVKeyVersion = 0
-	// AESSIVTypeURL is the url that this key manager supports.
-	AESSIVTypeURL = "type.googleapis.com/google.crypto.tink.AesSivKey"
+	aesSIVKeyVersion = 0
+	aesSIVTypeURL    = "type.googleapis.com/google.crypto.tink.AesSivKey"
 )
 
 // aesSIVKeyManager is an implementation of KeyManager interface.
@@ -82,7 +80,7 @@ func (km *aesSIVKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyD
 		return nil, err
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         AESSIVTypeURL,
+		TypeUrl:         aesSIVTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 	}, nil
@@ -90,17 +88,17 @@ func (km *aesSIVKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyD
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *aesSIVKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == AESSIVTypeURL
+	return typeURL == aesSIVTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *aesSIVKeyManager) TypeURL() string {
-	return AESSIVTypeURL
+	return aesSIVTypeURL
 }
 
 // validateKey validates the given AesSivKey.
 func (km *aesSIVKeyManager) validateKey(key *aspb.AesSivKey) error {
-	err := keyset.ValidateKeyVersion(key.Version, AESSIVKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, aesSIVKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_siv_key_manager: %s", err)
 	}
@@ -115,7 +113,7 @@ func (km *aesSIVKeyManager) validateKey(key *aspb.AesSivKey) error {
 func (km *aesSIVKeyManager) newAesSivKey() *aspb.AesSivKey {
 	keyValue := random.GetRandomBytes(daead.AESSIVKeySize)
 	return &aspb.AesSivKey{
-		Version:  AESSIVKeyVersion,
+		Version:  aesSIVKeyVersion,
 		KeyValue: keyValue,
 	}
 }

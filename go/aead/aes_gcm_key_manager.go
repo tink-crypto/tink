@@ -27,11 +27,8 @@ import (
 )
 
 const (
-	// AESGCMKeyVersion is the maxmimal version of keys that this key manager supports.
-	AESGCMKeyVersion = 0
-
-	// AESGCMTypeURL is the url that this key manager supports.
-	AESGCMTypeURL = "type.googleapis.com/google.crypto.tink.AesGcmKey"
+	aesGCMKeyVersion = 0
+	aesGCMTypeURL    = "type.googleapis.com/google.crypto.tink.AesGcmKey"
 )
 
 // common errors
@@ -83,7 +80,7 @@ func (km *aesGCMKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, e
 	}
 	keyValue := random.GetRandomBytes(keyFormat.KeySize)
 	return &gcmpb.AesGcmKey{
-		Version:  AESGCMKeyVersion,
+		Version:  aesGCMKeyVersion,
 		KeyValue: keyValue,
 	}, nil
 }
@@ -101,7 +98,7 @@ func (km *aesGCMKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyD
 		return nil, err
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         AESGCMTypeURL,
+		TypeUrl:         aesGCMTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 	}, nil
@@ -109,17 +106,17 @@ func (km *aesGCMKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyD
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *aesGCMKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == AESGCMTypeURL
+	return typeURL == aesGCMTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *aesGCMKeyManager) TypeURL() string {
-	return AESGCMTypeURL
+	return aesGCMTypeURL
 }
 
 // validateKey validates the given AESGCMKey.
 func (km *aesGCMKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
-	err := keyset.ValidateKeyVersion(key.Version, AESGCMKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, aesGCMKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
 	}

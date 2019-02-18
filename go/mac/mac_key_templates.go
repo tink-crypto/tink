@@ -23,8 +23,7 @@ import (
 
 // This file contains pre-generated KeyTemplate for MAC.
 
-// HMACSHA256Tag128KeyTemplate is a KeyTemplate for HMACKey with the following
-// parameters:
+// HMACSHA256Tag128KeyTemplate is a KeyTemplate that generates a HMAC key with the following parameters:
 //   - Key size: 32 bytes
 //   - Tag size: 16 bytes
 //   - Hash function: SHA256
@@ -32,8 +31,7 @@ func HMACSHA256Tag128KeyTemplate() *tinkpb.KeyTemplate {
 	return createHMACKeyTemplate(32, 16, commonpb.HashType_SHA256)
 }
 
-// HMACSHA256Tag256KeyTemplate is a KeyTemplate for HMACKey with the following
-// parameters:
+// HMACSHA256Tag256KeyTemplate is a KeyTemplate that generates a HMAC key with the following parameters:
 //   - Key size: 32 bytes
 //   - Tag size: 32 bytes
 //   - Hash function: SHA256
@@ -55,7 +53,7 @@ func createHMACKeyTemplate(keySize uint32,
 	}
 	serializedFormat, _ := proto.Marshal(&format)
 	return &tinkpb.KeyTemplate{
-		TypeUrl: HMACTypeURL,
+		TypeUrl: hmacTypeURL,
 		Value:   serializedFormat,
 	}
 }

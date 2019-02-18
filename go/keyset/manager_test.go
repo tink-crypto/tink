@@ -19,6 +19,7 @@ import (
 
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -39,7 +40,7 @@ func TestKeysetManagerBasic(t *testing.T) {
 		t.Errorf("expect the number of keys in the keyset is 1")
 	}
 	if ks.Key[0].KeyId != ks.PrimaryKeyId ||
-		ks.Key[0].KeyData.TypeUrl != mac.HMACTypeURL ||
+		ks.Key[0].KeyData.TypeUrl != testutil.HMACTypeURL ||
 		ks.Key[0].Status != tinkpb.KeyStatusType_ENABLED ||
 		ks.Key[0].OutputPrefixType != tinkpb.OutputPrefixType_TINK {
 		t.Errorf("incorrect key information: %s", ks.Key[0])

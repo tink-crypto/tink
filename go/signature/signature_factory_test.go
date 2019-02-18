@@ -91,13 +91,13 @@ func newECDSAKeysetKeypair(hashType commonpb.HashType,
 	keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
 	key := testutil.NewRandomECDSAPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
-	keyData := testutil.NewKeyData(signature.ECDSASignerTypeURL,
+	keyData := testutil.NewKeyData(testutil.ECDSASignerTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PRIVATE)
 	privKey := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 
 	serializedKey, _ = proto.Marshal(key.PublicKey)
-	keyData = testutil.NewKeyData(signature.ECDSAVerifierTypeURL,
+	keyData = testutil.NewKeyData(testutil.ECDSAVerifierTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PUBLIC)
 	pubKey := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)

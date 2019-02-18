@@ -17,25 +17,25 @@ package aead_test
 import (
 	"testing"
 
-	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/testutil"
 )
 
 func TestAeadInit(t *testing.T) {
 	// Check for AES-GCM key manager.
-	_, err := registry.GetKeyManager(aead.AESGCMTypeURL)
+	_, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 
 	// Check for ChaCha20Poly1305 key manager.
-	_, err = registry.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	_, err = registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 
 	// Check for XChaCha20Poly1305 key manager.
-	_, err = registry.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	_, err = registry.GetKeyManager(testutil.XChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

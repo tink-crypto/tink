@@ -19,13 +19,12 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/registry"
-	"github.com/google/tink/go/signature"
-	subtleSig "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
 )
 
 func TestED25519VerifyGetPrimitiveBasic(t *testing.T) {
-	km, err := registry.GetKeyManager(signature.ED25519VerifierTypeURL)
+	km, err := registry.GetKeyManager(testutil.ED25519VerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Verifier key manager: %s", err)
 	}
@@ -34,18 +33,18 @@ func TestED25519VerifyGetPrimitiveBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	var _ *subtleSig.ED25519Verifier = tmp.(*subtleSig.ED25519Verifier)
+	var _ *signature.ED25519Verifier = tmp.(*signature.ED25519Verifier)
 }
 
 func TestED25519VerifyGetPrimitiveWithInvalidInput(t *testing.T) {
-	km, err := registry.GetKeyManager(signature.ED25519VerifierTypeURL)
+	km, err := registry.GetKeyManager(testutil.ED25519VerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Verifier key manager: %s", err)
 	}
 
 	// invalid version
 	key := testutil.NewED25519PublicKey()
-	key.Version = signature.ED25519VerifierKeyVersion + 1
+	key.Version = testutil.ED25519VerifierKeyVersion + 1
 	serializedKey, _ := proto.Marshal(key)
 	if _, err := km.Primitive(serializedKey); err == nil {
 		t.Errorf("expect an error when version is invalid")

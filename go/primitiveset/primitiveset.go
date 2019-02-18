@@ -12,10 +12,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package primitiveset is a container for a set of primitives (i.e. implementations of cryptographic
-// primitives offered by Tink). It provides also additional properties for the primitives
-// it holds. In particular, one of the primitives in the set can be distinguished as
-// "the primary" one.
+// Package primitiveset is a container for a set of primitives (i.e., implementations of cryptographic primitives offered by Tink).
+//
+// It provides also additional properties for the primitives it holds. In particular, one of the primitives in the set can be distinguished as "the primary" one.
 package primitiveset
 
 import (

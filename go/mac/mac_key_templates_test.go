@@ -20,6 +20,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -40,7 +41,7 @@ func checkTemplate(template *tinkpb.KeyTemplate,
 	keySize uint32,
 	tagSize uint32,
 	hashType commonpb.HashType) error {
-	if template.TypeUrl != mac.HMACTypeURL {
+	if template.TypeUrl != testutil.HMACTypeURL {
 		return fmt.Errorf("TypeUrl is incorrect")
 	}
 	format := new(hmacpb.HmacKeyFormat)

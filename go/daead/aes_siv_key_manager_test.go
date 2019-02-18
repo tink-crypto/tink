@@ -20,9 +20,9 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/registry"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testutil"
 
 	subtedaead "github.com/google/tink/go/subtle/daead"
 	aspb "github.com/google/tink/proto/aes_siv_go_proto"
@@ -30,7 +30,7 @@ import (
 )
 
 func TestAESSIVPrimitive(t *testing.T) {
-	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
 		t.Fatalf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -50,7 +50,7 @@ func TestAESSIVPrimitive(t *testing.T) {
 }
 
 func TestAESSIVPrimitiveWithInvalidKeys(t *testing.T) {
-	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -64,7 +64,7 @@ func TestAESSIVPrimitiveWithInvalidKeys(t *testing.T) {
 }
 
 func TestAESSIVNewKey(t *testing.T) {
-	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -79,7 +79,7 @@ func TestAESSIVNewKey(t *testing.T) {
 }
 
 func TestAESSIVNewKeyData(t *testing.T) {
-	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
@@ -87,8 +87,8 @@ func TestAESSIVNewKeyData(t *testing.T) {
 	if err != nil {
 		t.Errorf("km.NewKeyData(nil) = _, %v; want _, nil", err)
 	}
-	if kd.TypeUrl != daead.AESSIVTypeURL {
-		t.Errorf("TypeUrl: %v != %v", kd.TypeUrl, daead.AESSIVTypeURL)
+	if kd.TypeUrl != testutil.AESSIVTypeURL {
+		t.Errorf("TypeUrl: %v != %v", kd.TypeUrl, testutil.AESSIVTypeURL)
 	}
 	if kd.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
 		t.Errorf("KeyMaterialType: %v != SYMMETRIC", kd.KeyMaterialType)
@@ -103,25 +103,25 @@ func TestAESSIVNewKeyData(t *testing.T) {
 }
 
 func TestAESSIVDoesSupport(t *testing.T) {
-	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
-	if !km.DoesSupport(daead.AESSIVTypeURL) {
-		t.Errorf("AESSIVKeyManager must support %s", daead.AESSIVTypeURL)
+	if !km.DoesSupport(testutil.AESSIVTypeURL) {
+		t.Errorf("AESSIVKeyManager must support %s", testutil.AESSIVTypeURL)
 	}
 	if km.DoesSupport("some bad type") {
-		t.Errorf("AESSIVKeyManager must only support %s", daead.AESSIVTypeURL)
+		t.Errorf("AESSIVKeyManager must only support %s", testutil.AESSIVTypeURL)
 	}
 }
 
 func TestAESSIVTypeURL(t *testing.T) {
-	km, err := registry.GetKeyManager(daead.AESSIVTypeURL)
+	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AESSIV key manager: %s", err)
 	}
-	if kt := km.TypeURL(); kt != daead.AESSIVTypeURL {
-		t.Errorf("km.TypeURL() = %s; want %s", kt, daead.AESSIVTypeURL)
+	if kt := km.TypeURL(); kt != testutil.AESSIVTypeURL {
+		t.Errorf("km.TypeURL() = %s; want %s", kt, testutil.AESSIVTypeURL)
 	}
 }
 
@@ -145,8 +145,8 @@ func validateAESSIVPrimitive(p interface{}, key *aspb.AesSivKey) error {
 }
 
 func validateAESSIVKey(key *aspb.AesSivKey) error {
-	if key.Version != daead.AESSIVKeyVersion {
-		return fmt.Errorf("incorrect key version: keyVersion != %d", daead.AESSIVKeyVersion)
+	if key.Version != testutil.AESSIVKeyVersion {
+		return fmt.Errorf("incorrect key version: keyVersion != %d", testutil.AESSIVKeyVersion)
 	}
 	if uint32(len(key.KeyValue)) != subtedaead.AESSIVKeySize {
 		return fmt.Errorf("incorrect key size: keySize != %d", subtedaead.AESSIVKeySize)
@@ -164,24 +164,24 @@ func genInvalidAESSIVKeys() []*aspb.AesSivKey {
 	return []*aspb.AesSivKey{
 		// Bad key size.
 		&aspb.AesSivKey{
-			Version:  daead.AESSIVKeyVersion,
+			Version:  testutil.AESSIVKeyVersion,
 			KeyValue: random.GetRandomBytes(16),
 		},
 		&aspb.AesSivKey{
-			Version:  daead.AESSIVKeyVersion,
+			Version:  testutil.AESSIVKeyVersion,
 			KeyValue: random.GetRandomBytes(32),
 		},
 		&aspb.AesSivKey{
-			Version:  daead.AESSIVKeyVersion,
+			Version:  testutil.AESSIVKeyVersion,
 			KeyValue: random.GetRandomBytes(63),
 		},
 		&aspb.AesSivKey{
-			Version:  daead.AESSIVKeyVersion,
+			Version:  testutil.AESSIVKeyVersion,
 			KeyValue: random.GetRandomBytes(65),
 		},
 		// Bad version.
 		&aspb.AesSivKey{
-			Version:  daead.AESSIVKeyVersion + 1,
+			Version:  testutil.AESSIVKeyVersion + 1,
 			KeyValue: random.GetRandomBytes(subtedaead.AESSIVKeySize),
 		},
 	}

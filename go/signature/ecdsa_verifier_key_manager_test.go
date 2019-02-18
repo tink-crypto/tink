@@ -19,15 +19,14 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/registry"
-	"github.com/google/tink/go/signature"
-	subtleSig "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
 func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 	testParams := genValidECDSAParams()
-	km, err := registry.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	km, err := registry.GetKeyManager(testutil.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
 	}
@@ -37,13 +36,13 @@ func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		var _ *subtleSig.ECDSAVerifier = tmp.(*subtleSig.ECDSAVerifier)
+		var _ *signature.ECDSAVerifier = tmp.(*signature.ECDSAVerifier)
 	}
 }
 
 func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	testParams := genInvalidECDSAParams()
-	km, err := registry.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	km, err := registry.GetKeyManager(testutil.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
 	}
@@ -56,7 +55,7 @@ func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid version
 	key := testutil.NewRandomECDSAPublicKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
-	key.Version = signature.ECDSAVerifierKeyVersion + 1
+	key.Version = testutil.ECDSAVerifierKeyVersion + 1
 	serializedKey, _ := proto.Marshal(key)
 	if _, err := km.Primitive(serializedKey); err == nil {
 		t.Errorf("expect an error when version is invalid")

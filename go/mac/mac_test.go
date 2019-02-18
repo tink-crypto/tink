@@ -17,12 +17,12 @@ package mac_test
 import (
 	"testing"
 
-	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/testutil"
 )
 
 func TestMacInit(t *testing.T) {
-	_, err := registry.GetKeyManager(mac.HMACTypeURL)
+	_, err := registry.GetKeyManager(testutil.HMACTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

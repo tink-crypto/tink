@@ -29,10 +29,8 @@ import (
 )
 
 const (
-	// ChaCha20Poly1305KeyVersion is the maxmimal version of keys that this key manager supports.
-	ChaCha20Poly1305KeyVersion = 0
-	// ChaCha20Poly1305TypeURL is the url that this key manager supports.
-	ChaCha20Poly1305TypeURL = "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key"
+	chaCha20Poly1305KeyVersion = 0
+	chaCha20Poly1305TypeURL    = "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key"
 )
 
 // Common errors.
@@ -86,7 +84,7 @@ func (km *chaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*t
 		return nil, err
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         ChaCha20Poly1305TypeURL,
+		TypeUrl:         chaCha20Poly1305TypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 	}, nil
@@ -94,25 +92,25 @@ func (km *chaCha20Poly1305KeyManager) NewKeyData(serializedKeyFormat []byte) (*t
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *chaCha20Poly1305KeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == ChaCha20Poly1305TypeURL
+	return typeURL == chaCha20Poly1305TypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *chaCha20Poly1305KeyManager) TypeURL() string {
-	return ChaCha20Poly1305TypeURL
+	return chaCha20Poly1305TypeURL
 }
 
 func (km *chaCha20Poly1305KeyManager) newChaCha20Poly1305Key() *cppb.ChaCha20Poly1305Key {
 	keyValue := random.GetRandomBytes(chacha20poly1305.KeySize)
 	return &cppb.ChaCha20Poly1305Key{
-		Version:  ChaCha20Poly1305KeyVersion,
+		Version:  chaCha20Poly1305KeyVersion,
 		KeyValue: keyValue,
 	}
 }
 
 // validateKey validates the given ChaCha20Poly1305Key.
 func (km *chaCha20Poly1305KeyManager) validateKey(key *cppb.ChaCha20Poly1305Key) error {
-	err := keyset.ValidateKeyVersion(key.Version, ChaCha20Poly1305KeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, chaCha20Poly1305KeyVersion)
 	if err != nil {
 		return fmt.Errorf("chacha20poly1305_key_manager: %s", err)
 	}

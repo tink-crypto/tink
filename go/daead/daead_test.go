@@ -17,13 +17,13 @@ package daead_test
 import (
 	"testing"
 
-	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/testutil"
 )
 
 func TestDeterministicAEADInit(t *testing.T) {
 	// Check for AES-SIV key manager.
-	_, err := registry.GetKeyManager(daead.AESSIVTypeURL)
+	_, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

@@ -31,11 +31,8 @@ import (
 )
 
 const (
-	// ECDSASignerKeyVersion is the maximum version of keys that this manager supports.
-	ECDSASignerKeyVersion = 0
-
-	// ECDSASignerTypeURL is the only type URL that this manager supports.
-	ECDSASignerTypeURL = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey"
+	ecdsaSignerKeyVersion = 0
+	ecdsaSignerTypeURL    = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey"
 )
 
 // common errors
@@ -95,8 +92,8 @@ func (km *ecdsaSignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Messa
 	}
 
 	keyValue := tmpKey.D.Bytes()
-	pub := newECDSAPublicKey(ECDSASignerKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
-	priv := newECDSAPrivateKey(ECDSASignerKeyVersion, pub, keyValue)
+	pub := newECDSAPublicKey(ecdsaSignerKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
+	priv := newECDSAPrivateKey(ecdsaSignerKeyVersion, pub, keyValue)
 	return priv, nil
 }
 
@@ -112,7 +109,7 @@ func (km *ecdsaSignerKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb
 		return nil, errInvalidECDSASignKeyFormat
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         ECDSASignerTypeURL,
+		TypeUrl:         ecdsaSignerTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
 	}, nil
@@ -129,7 +126,7 @@ func (km *ecdsaSignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkp
 		return nil, errInvalidECDSASignKey
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         ECDSAVerifierTypeURL,
+		TypeUrl:         ecdsaVerifierTypeURL,
 		Value:           serializedPubKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
 	}, nil
@@ -137,17 +134,17 @@ func (km *ecdsaSignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkp
 
 // DoesSupport indicates if this key manager supports the given key type.
 func (km *ecdsaSignerKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == ECDSASignerTypeURL
+	return typeURL == ecdsaSignerTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
 func (km *ecdsaSignerKeyManager) TypeURL() string {
-	return ECDSASignerTypeURL
+	return ecdsaSignerTypeURL
 }
 
 // validateKey validates the given ECDSAPrivateKey.
 func (km *ecdsaSignerKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, ECDSASignerKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, ecdsaSignerKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_signer_key_manager: invalid key: %s", err)
 	}
 	hash, curve, encoding := getECDSAParamNames(key.PublicKey.Params)

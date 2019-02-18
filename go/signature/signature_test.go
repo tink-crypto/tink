@@ -18,18 +18,18 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/registry"
-	"github.com/google/tink/go/signature"
+	"github.com/google/tink/go/testutil"
 )
 
 func TestSignatureInit(t *testing.T) {
 	// check for ECDSASignerKeyManager
-	_, err := registry.GetKeyManager(signature.ECDSASignerTypeURL)
+	_, err := registry.GetKeyManager(testutil.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 
 	// check for ECDSAVerifierKeyManager
-	_, err = registry.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	_, err = registry.GetKeyManager(testutil.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

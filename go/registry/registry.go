@@ -12,10 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package registry is essentially a big container (map) that for each supported key type holds
-// a corresponding KeyManager object, which "understands" the key type (i.e. the KeyManager
-// can instantiate the primitive corresponding to given key, or can generate new keys
-// of the supported key type).
+// Package registry is a container that for each supported key type holds a corresponding KeyManager
+// object, which can generate new keys or instantiate the primitive corresponding to given key.
 //
 // Registry is initialized at startup, and is later used to instantiate primitives for given keys
 // or keysets. Keeping KeyManagers for all primitives in a single Registry (rather than having a

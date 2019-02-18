@@ -29,11 +29,8 @@ import (
 )
 
 const (
-	// HMACTypeURL is the only type URL that this manager supports.
-	HMACTypeURL = "type.googleapis.com/google.crypto.tink.HmacKey"
-
-	// HMACKeyVersion is the maxmimal version of keys that this key manager supports.
-	HMACKeyVersion = uint32(0)
+	hmacKeyVersion = 0
+	hmacTypeURL    = "type.googleapis.com/google.crypto.tink.HmacKey"
 )
 
 var errInvalidHMACKey = errors.New("hmac_key_manager: invalid key")
@@ -84,7 +81,7 @@ func (km *hmacKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, err
 	}
 	keyValue := random.GetRandomBytes(keyFormat.KeySize)
 	return &hmacpb.HmacKey{
-		Version:  HMACKeyVersion,
+		Version:  hmacKeyVersion,
 		Params:   keyFormat.Params,
 		KeyValue: keyValue,
 	}, nil
@@ -103,7 +100,7 @@ func (km *hmacKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyDat
 	}
 
 	return &tinkpb.KeyData{
-		TypeUrl:         HMACTypeURL,
+		TypeUrl:         hmacTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 	}, nil
@@ -111,18 +108,18 @@ func (km *hmacKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyDat
 
 // DoesSupport checks whether this KeyManager supports the given key type.
 func (km *hmacKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == HMACTypeURL
+	return typeURL == hmacTypeURL
 }
 
 // TypeURL returns the type URL of keys managed by this KeyManager.
 func (km *hmacKeyManager) TypeURL() string {
-	return HMACTypeURL
+	return hmacTypeURL
 }
 
 // validateKey validates the given HMACKey. It only validates the version of the
 // key because other parameters will be validated in primitive construction.
 func (km *hmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
-	err := keyset.ValidateKeyVersion(key.Version, HMACKeyVersion)
+	err := keyset.ValidateKeyVersion(key.Version, hmacKeyVersion)
 	if err != nil {
 		return fmt.Errorf("hmac_key_manager: invalid version: %s", err)
 	}

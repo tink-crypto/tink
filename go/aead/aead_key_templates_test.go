@@ -23,6 +23,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	ctrhmacpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
@@ -36,7 +37,7 @@ func TestAESGCMKeyTemplates(t *testing.T) {
 	if err := checkAESGCMKeyTemplate(template, uint32(16)); err != nil {
 		t.Errorf("invalid AES-128 GCM key template: %s", err)
 	}
-	if err := testEncryptDecrypt(template, aead.AESGCMTypeURL); err != nil {
+	if err := testEncryptDecrypt(template, testutil.AESGCMTypeURL); err != nil {
 		t.Errorf("%v", err)
 	}
 
@@ -45,13 +46,13 @@ func TestAESGCMKeyTemplates(t *testing.T) {
 	if err := checkAESGCMKeyTemplate(template, uint32(32)); err != nil {
 		t.Errorf("invalid AES-256 GCM key template: %s", err)
 	}
-	if err := testEncryptDecrypt(template, aead.AESGCMTypeURL); err != nil {
+	if err := testEncryptDecrypt(template, testutil.AESGCMTypeURL); err != nil {
 		t.Errorf("%v", err)
 	}
 }
 
 func checkAESGCMKeyTemplate(template *tinkpb.KeyTemplate, keySize uint32) error {
-	if template.TypeUrl != aead.AESGCMTypeURL {
+	if template.TypeUrl != testutil.AESGCMTypeURL {
 		return fmt.Errorf("incorrect type url")
 	}
 	keyFormat := new(gcmpb.AesGcmKeyFormat)
@@ -72,7 +73,7 @@ func TestAESCTRHMACAEADKeyTemplates(t *testing.T) {
 		t.Errorf("invalid AES-128 CTR HMAC SHA256 key template: %s", err)
 	}
 
-	if err := testEncryptDecrypt(template, aead.AESCTRHMACAEADTypeURL); err != nil {
+	if err := testEncryptDecrypt(template, testutil.AESCTRHMACAEADTypeURL); err != nil {
 		t.Errorf("%v", err)
 	}
 
@@ -81,13 +82,13 @@ func TestAESCTRHMACAEADKeyTemplates(t *testing.T) {
 	if err := checkAESCTRHMACAEADKeyTemplate(template, 32, 16, 32); err != nil {
 		t.Errorf("invalid AES-256 CTR HMAC SHA256 key template: %s", err)
 	}
-	if err := testEncryptDecrypt(template, aead.AESCTRHMACAEADTypeURL); err != nil {
+	if err := testEncryptDecrypt(template, testutil.AESCTRHMACAEADTypeURL); err != nil {
 		t.Errorf("%v", err)
 	}
 }
 
 func checkAESCTRHMACAEADKeyTemplate(template *tinkpb.KeyTemplate, keySize, ivSize, tagSize uint32) error {
-	if template.TypeUrl != aead.AESCTRHMACAEADTypeURL {
+	if template.TypeUrl != testutil.AESCTRHMACAEADTypeURL {
 		return fmt.Errorf("incorrect type url")
 	}
 	keyFormat := new(ctrhmacpb.AesCtrHmacAeadKeyFormat)

@@ -25,23 +25,22 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// This file contains pre-generated KeyTemplate for AEAD keys. One can use these templates
-// to generate new Keyset.
+// This file contains pre-generated KeyTemplates for AEAD keys. One can use these templates
+// to generate new Keysets.
 
-// AES128GCMKeyTemplate is a KeyTemplate of AESGCMKey with the following parameters:
+// AES128GCMKeyTemplate is a KeyTemplate that generates an AES-GCM key with the following parameters:
 //   - Key size: 16 bytes
 func AES128GCMKeyTemplate() *tinkpb.KeyTemplate {
 	return createAESGCMKeyTemplate(16)
 }
 
-// AES256GCMKeyTemplate is a KeyTemplate of AESGCMKey with the following parameters:
+// AES256GCMKeyTemplate is a KeyTemplate that generates an AES-GCM key with the following parameters:
 //   - Key size: 32 bytes
 func AES256GCMKeyTemplate() *tinkpb.KeyTemplate {
 	return createAESGCMKeyTemplate(32)
 }
 
-// AES128CTRHMACSHA256KeyTemplate is a KeyTemplate of AESCTRHMACAEADKey with the following
-// parameters:
+// AES128CTRHMACSHA256KeyTemplate is a KeyTemplate that generates an AES-CTR-HMAC-AEAD key with the following parameters:
 //  - AES key size: 16 bytes
 //  - AES CTR IV size: 16 bytes
 //  - HMAC key size: 32 bytes
@@ -51,8 +50,7 @@ func AES128CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 	return createAESCTRHMACAEADKeyTemplate(16, 16, 32, 16, commonpb.HashType_SHA256)
 }
 
-// AES256CTRHMACSHA256KeyTemplate is a KeyTemplate of AESCTRHMACAEADKey with the following
-// parameters:
+// AES256CTRHMACSHA256KeyTemplate is a KeyTemplate that generates an AES-CTR-HMAC-AEAD key with the following parameters:
 //  - AES key size: 32 bytes
 //  - AES CTR IV size: 16 bytes
 //  - HMAC key size: 32 bytes
@@ -62,8 +60,8 @@ func AES256CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 	return createAESCTRHMACAEADKeyTemplate(32, 16, 32, 32, commonpb.HashType_SHA256)
 }
 
-// KMSEnvelopeAeadKeyTemplate is a KeyTemplate for a given KEK in remote KMS
-func KMSEnvelopeAeadKeyTemplate(uri string, dekT *tinkpb.KeyTemplate) *tinkpb.KeyTemplate {
+// KMSEnvelopeAEADKeyTemplate is a KeyTemplate that generates a KMSEnvelopeAEAD key for a given KEK in remote KMS
+func KMSEnvelopeAEADKeyTemplate(uri string, dekT *tinkpb.KeyTemplate) *tinkpb.KeyTemplate {
 	f := &kmsenvpb.KmsEnvelopeAeadKeyFormat{
 		KekUri:      uri,
 		DekTemplate: dekT,
@@ -71,7 +69,7 @@ func KMSEnvelopeAeadKeyTemplate(uri string, dekT *tinkpb.KeyTemplate) *tinkpb.Ke
 	serializedFormat, _ := proto.Marshal(f)
 	return &tinkpb.KeyTemplate{
 		Value:            serializedFormat,
-		TypeUrl:          KMSEnvelopeAEADTypeURL,
+		TypeUrl:          kmsEnvelopeAEADTypeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
 	}
 }
@@ -84,7 +82,7 @@ func createAESGCMKeyTemplate(keySize uint32) *tinkpb.KeyTemplate {
 	}
 	serializedFormat, _ := proto.Marshal(format)
 	return &tinkpb.KeyTemplate{
-		TypeUrl: AESGCMTypeURL,
+		TypeUrl: aesGCMTypeURL,
 		Value:   serializedFormat,
 	}
 }
@@ -103,7 +101,7 @@ func createAESCTRHMACAEADKeyTemplate(aesKeySize, ivSize, hmacKeySize, tagSize ui
 	serializedFormat, _ := proto.Marshal(format)
 	return &tinkpb.KeyTemplate{
 		Value:            serializedFormat,
-		TypeUrl:          AESCTRHMACAEADTypeURL,
+		TypeUrl:          aesCTRHMACAEADTypeURL,
 		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
 	}
 }
