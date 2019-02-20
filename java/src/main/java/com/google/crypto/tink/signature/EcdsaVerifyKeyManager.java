@@ -40,7 +40,7 @@ class EcdsaVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, EcdsaPublicK
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
   /** Current version of this key manager. Keys with greater version are not supported. */
-  private static final int VERSION = 0;
+  protected static final int VERSION = 0;
 
   @Override
   public PublicKeyVerify getPrimitiveFromKey(EcdsaPublicKey keyProto)

@@ -43,8 +43,7 @@ class RsaSsaPssVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, RsaSsaPs
   }
 
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey";
-
-  private static final int VERSION = 0;
+  protected static final int VERSION = 0;
 
   @Override
   public PublicKeyVerify getPrimitiveFromKey(RsaSsaPssPublicKey keyProto)

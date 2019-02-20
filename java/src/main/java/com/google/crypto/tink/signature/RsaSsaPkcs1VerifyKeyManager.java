@@ -42,7 +42,7 @@ class RsaSsaPkcs1VerifyKeyManager
     super(PublicKeyVerify.class, RsaSsaPkcs1PublicKey.class, Empty.class, TYPE_URL);
   }
 
-  private static final int VERSION = 0;
+  protected static final int VERSION = 0;
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey";
 
