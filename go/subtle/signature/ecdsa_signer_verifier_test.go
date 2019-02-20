@@ -19,7 +19,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"os"
 	"testing"
 
@@ -94,7 +93,7 @@ type testKey struct {
 
 type testcase struct {
 	Comment string
-	Message string
+	Msg     string
 	Result  string
 	Sig     string
 	TcID    uint32
@@ -130,7 +129,7 @@ func TestVectors(t *testing.T) {
 			continue
 		}
 		for _, tc := range g.Tests {
-			message, err := hex.DecodeString(tc.Message)
+			message, err := hex.DecodeString(tc.Msg)
 			if err != nil {
 				t.Errorf("cannot decode message in test case %d: %s", tc.TcID, err)
 			}
@@ -141,7 +140,7 @@ func TestVectors(t *testing.T) {
 			err = verifier.Verify(sig, message)
 			if (tc.Result == "valid" && err != nil) ||
 				(tc.Result == "invalid" && err == nil) {
-				fmt.Println("failed in test case ", tc.TcID, err)
+				t.Errorf("failed in test case %d with error %q ", tc.TcID, err)
 			}
 		}
 	}
