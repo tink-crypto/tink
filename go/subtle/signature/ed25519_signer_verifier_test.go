@@ -19,7 +19,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"os"
 	"testing"
 
@@ -165,11 +164,12 @@ type testGroupED25519 struct {
 
 type testKeyED25519 struct {
 	Sk string
+	Pk string
 }
 
 type testcaseED25519 struct {
 	Comment string
-	Message string
+	Msg     string
 	Result  string
 	Sig     string
 	TcID    uint32
@@ -179,28 +179,32 @@ func TestVectorsED25519(t *testing.T) {
 	// signing tests are same between ecdsa and ed25519
 	f, err := os.Open("../../../../wycheproof/testvectors/eddsa_test.json")
 	if err != nil {
-		t.Errorf("cannot open file: %s", err)
+		t.Fatalf("cannot open file: %s", err)
 	}
 	parser := json.NewDecoder(f)
 	content := new(testDataED25519)
 	if err := parser.Decode(content); err != nil {
-		t.Errorf("cannot decode content of file: %s", err)
+		t.Fatalf("cannot decode content of file: %s", err)
 	}
 	for _, g := range content.TestGroups {
 		pvtKey, err := hex.DecodeString(g.Key.Sk)
+		pubKey, err := hex.DecodeString(g.Key.Pk)
 		if err != nil {
-			t.Errorf("cannot decode private key: %s", err)
+			t.Fatalf("cannot decode private key: %s", err)
 		}
 
 		private := ed25519.PrivateKey(pvtKey)
-		public := private.Public()
-
-		verifier, err := subtleSignature.NewED25519Verifier(public.(ed25519.PublicKey))
+		public := ed25519.PrivateKey(pubKey)
+		signer, err := subtleSignature.NewED25519Signer(private)
+		if err != nil {
+			continue
+		}
+		verifier, err := subtleSignature.NewED25519Verifier(public)
 		if err != nil {
 			continue
 		}
 		for _, tc := range g.Tests {
-			message, err := hex.DecodeString(tc.Message)
+			message, err := hex.DecodeString(tc.Msg)
 			if err != nil {
 				t.Errorf("cannot decode message in test case %d: %s", tc.TcID, err)
 			}
@@ -208,10 +212,19 @@ func TestVectorsED25519(t *testing.T) {
 			if err != nil {
 				t.Errorf("cannot decode signature in test case %d: %s", tc.TcID, err)
 			}
+			got, err := signer.Sign(message)
+			if tc.Result == "valid" && err != nil {
+				t.Errorf("sign failed in test case %d: valid signature is rejected with error %s", tc.TcID, err)
+			}
+			if tc.Result == "invalid" && err == nil && bytes.Equal(sig, got) {
+				t.Errorf("sign failed in test case %d: invalid signature is accepted", tc.TcID)
+			}
 			err = verifier.Verify(sig, message)
-			if (tc.Result == "valid" && err != nil) ||
-				(tc.Result == "invalid" && err == nil) {
-				fmt.Println("failed in test case ", tc.TcID, err)
+			if tc.Result == "valid" && err != nil {
+				t.Errorf("verify failed in test case %d: valid signature is rejected with error %s", tc.TcID, err)
+			}
+			if tc.Result == "invalid" && err == nil {
+				t.Errorf("verify failed in test case %d: invalid signature is accepted", tc.TcID)
 			}
 		}
 	}
