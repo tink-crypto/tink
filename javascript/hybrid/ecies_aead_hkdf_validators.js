@@ -42,7 +42,7 @@ const validateKemParams = function(kemParams) {
 
   const hashType = kemParams.getHkdfHashType();
   if (hashType !== PbHashType.SHA1 && hashType !== PbHashType.SHA256 &&
-      hashType !== PbHashType.SHA512) {
+      hashType !== PbHashType.SHA384 && hashType !== PbHashType.SHA512) {
     throw new SecurityException('Invalid KEM params - unknown hash type.');
   }
 };
