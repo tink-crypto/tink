@@ -26,6 +26,7 @@ java_library(
         "Enums.java",
         "Hex.java",
         "ImmutableByteArray.java",
+        "PemKeyType.java",
         "Random.java",
         "SubtleUtil.java",
         "Validators.java",

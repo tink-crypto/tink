@@ -142,7 +142,7 @@ public class ValidatorsTest {
       Validators.validateSignatureHash(HashType.SHA1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e, "SHA1 is not safe");
+      TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
     }
   }
 

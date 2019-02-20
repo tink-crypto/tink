@@ -65,6 +65,8 @@ public class SubtleUtil {
         return "SHA-1";
       case SHA256:
         return "SHA-256";
+      case SHA384:
+        return "SHA-384";
       case SHA512:
         return "SHA-512";
     }

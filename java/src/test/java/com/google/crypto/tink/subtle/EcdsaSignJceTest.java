@@ -75,7 +75,7 @@ public class EcdsaSignJceTest {
       fail("Unsafe hash, should have thrown exception.");
     } catch (GeneralSecurityException e) {
       // Expected.
-      TestUtil.assertExceptionContains(e, "SHA1 is not safe");
+      TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
     }
   }
 

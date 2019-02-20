@@ -80,12 +80,13 @@ public final class Validators {
   public static void validateSignatureHash(HashType hash) throws GeneralSecurityException {
     switch (hash) {
       case SHA256: // fall through
+      case SHA384: // fall through
       case SHA512:
         return;
-      case SHA1:
-        throw new GeneralSecurityException("SHA1 is not safe for signature");
+      default:
+        break;
     }
-    throw new GeneralSecurityException("Unsupported hash " + hash);
+    throw new GeneralSecurityException("Unsupported hash: " + hash.name());
   }
 
   /**

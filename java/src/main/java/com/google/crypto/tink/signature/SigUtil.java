@@ -24,7 +24,6 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums;
-import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
 
 final class SigUtil {
@@ -50,14 +49,17 @@ final class SigUtil {
     switch (curve) {
       case NIST_P256:
         // Using SHA512 for curve P256 is fine. However, only the 256 leftmost bits of the hash is
-        // used in signature computation. Therefore, we don't allow it here to prevent security's
+        // used in signature computation. Therefore, we don't allow it here to prevent security
         // illusion.
         if (hash != HashType.SHA256) {
           throw new GeneralSecurityException(INVALID_PARAMS);
         }
         break;
       case NIST_P384:
-        /* fall through */
+        if (hash != HashType.SHA384 && hash != HashType.SHA512) {
+          throw new GeneralSecurityException(INVALID_PARAMS);
+        }
+        break;
       case NIST_P521:
         if (hash != HashType.SHA512) {
           throw new GeneralSecurityException(INVALID_PARAMS);
@@ -77,7 +79,7 @@ final class SigUtil {
    */
   public static void validateRsaSsaPkcs1Params(RsaSsaPkcs1Params params)
       throws GeneralSecurityException {
-    Validators.validateSignatureHash(toHashType(params.getHashType()));
+    toHashType(params.getHashType());
   }
 
   /**
@@ -102,7 +104,7 @@ final class SigUtil {
    */
   public static void validateRsaSsaPssParams(RsaSsaPssParams params)
       throws GeneralSecurityException {
-    Validators.validateSignatureHash(toHashType(params.getSigHash()));
+    toHashType(params.getSigHash());
     if (params.getSigHash() != params.getMgf1Hash()) {
       throw new GeneralSecurityException("MGF1 hash is different from signature hash");
     }
@@ -111,15 +113,16 @@ final class SigUtil {
   /** Converts protobuf enum {@code HashType} to raw Java enum {@code Enums.HashType}. */
   public static Enums.HashType toHashType(HashType hash) throws GeneralSecurityException {
     switch (hash) {
-      case SHA1:
-        return Enums.HashType.SHA1;
       case SHA256:
         return Enums.HashType.SHA256;
+      case SHA384:
+        return Enums.HashType.SHA384;
       case SHA512:
         return Enums.HashType.SHA512;
       default:
-        throw new GeneralSecurityException("unknown hash type: " + hash);
+        break;
     }
+    throw new GeneralSecurityException("unsupported hash type: " + hash.name());
   }
 
   /** Converts protobuf enum {@code EllipticCurveType} to raw Java enum {code CurveType}. */

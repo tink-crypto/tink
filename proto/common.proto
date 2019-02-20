@@ -43,6 +43,7 @@ enum EcPointFormat {
 enum HashType {
   UNKNOWN_HASH = 0;
   SHA1 = 1; // Using SHA1 for digital signature is deprecated but HMAC-SHA1 is fine.
+  SHA384 = 2;
   SHA256 = 3;
   SHA512 = 4;
 };

@@ -132,10 +132,10 @@ public final class EllipticCurves {
       throw new GeneralSecurityException("point is at infinity");
     }
     // Check 0 <= x < p and 0 <= y < p.
-    if (x.signum() == -1 || x.compareTo(p) != -1) {
+    if (x.signum() == -1 || x.compareTo(p) >= 0) {
       throw new GeneralSecurityException("x is out of range");
     }
-    if (y.signum() == -1 || y.compareTo(p) != -1) {
+    if (y.signum() == -1 || y.compareTo(p) >= 0) {
       throw new GeneralSecurityException("y is out of range");
     }
     // Check y^2 == x^3 + a x + b (mod p)
@@ -216,7 +216,7 @@ public final class EllipticCurves {
    * @param curve must be a prime order elliptic curve
    * @return the size of an element in bits
    */
-  private static int fieldSizeInBits(EllipticCurve curve) throws GeneralSecurityException {
+  static int fieldSizeInBits(EllipticCurve curve) throws GeneralSecurityException {
     return getModulus(curve).subtract(BigInteger.ONE).bitLength();
   }
 
@@ -717,7 +717,7 @@ public final class EllipticCurves {
             throw new GeneralSecurityException("invalid format");
           }
           BigInteger x = new BigInteger(1, Arrays.copyOfRange(encoded, 1, encoded.length));
-          if (x.signum() == -1 || x.compareTo(p) != -1) {
+          if (x.signum() == -1 || x.compareTo(p) >= 0) {
             throw new GeneralSecurityException("x is out of range");
           }
           BigInteger y = getY(x, lsb, curve);
@@ -911,7 +911,7 @@ public final class EllipticCurves {
       throws GeneralSecurityException {
     EllipticCurve privateKeyCurve = privateKey.getParams().getCurve();
     BigInteger x = new BigInteger(1, secret);
-    if (x.signum() == -1 || x.compareTo(getModulus(privateKeyCurve)) != -1) {
+    if (x.signum() == -1 || x.compareTo(getModulus(privateKeyCurve)) >= 0) {
       throw new GeneralSecurityException("shared secret is out of range");
     }
     // This will throw if x is not a valid coordinate.

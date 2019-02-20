@@ -73,6 +73,8 @@ TEST_F(EnumsTest, testHashType) {
             Enums::SubtleToProto(subtle::HashType::SHA1));
   EXPECT_EQ(pb::HashType::SHA256,
             Enums::SubtleToProto(subtle::HashType::SHA256));
+  EXPECT_EQ(pb::HashType::SHA384,
+            Enums::SubtleToProto(subtle::HashType::SHA384));
   EXPECT_EQ(pb::HashType::SHA512,
             Enums::SubtleToProto(subtle::HashType::SHA512));
   EXPECT_EQ(pb::HashType::UNKNOWN_HASH,
@@ -84,6 +86,8 @@ TEST_F(EnumsTest, testHashType) {
             Enums::ProtoToSubtle(pb::HashType::SHA1));
   EXPECT_EQ(subtle::HashType::SHA256,
             Enums::ProtoToSubtle(pb::HashType::SHA256));
+  EXPECT_EQ(subtle::HashType::SHA384,
+            Enums::ProtoToSubtle(pb::HashType::SHA384));
   EXPECT_EQ(subtle::HashType::SHA512,
             Enums::ProtoToSubtle(pb::HashType::SHA512));
   EXPECT_EQ(subtle::HashType::UNKNOWN_HASH,
@@ -102,7 +106,7 @@ TEST_F(EnumsTest, testHashType) {
       count++;
     }
   }
-  EXPECT_EQ(4, count);
+  EXPECT_EQ(5, count);
 }
 
 TEST_F(EnumsTest, testEcPointFormat) {
@@ -218,6 +222,7 @@ TEST_F(EnumsTest, testHashName) {
 
   EXPECT_EQ(pb::HashType::SHA1, Enums::Hash("SHA1"));
   EXPECT_EQ(pb::HashType::SHA256, Enums::Hash("SHA256"));
+  EXPECT_EQ(pb::HashType::SHA384, Enums::Hash("SHA384"));
   EXPECT_EQ(pb::HashType::SHA512, Enums::Hash("SHA512"));
   EXPECT_EQ(pb::HashType::UNKNOWN_HASH, Enums::Hash("Other string"));
   EXPECT_EQ(pb::HashType::UNKNOWN_HASH, Enums::Hash("UNKNOWN_HASH"));
@@ -232,7 +237,7 @@ TEST_F(EnumsTest, testHashName) {
       count++;
     }
   }
-  EXPECT_EQ(4, count);
+  EXPECT_EQ(5, count);
 }
 
 TEST_F(EnumsTest, testKeyMaterialName) {

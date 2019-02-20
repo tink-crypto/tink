@@ -88,6 +88,8 @@ pb::HashType Enums::SubtleToProto(subtle::HashType type) {
     return pb::HashType::SHA1;
   case subtle::HashType::SHA256:
     return pb::HashType::SHA256;
+  case subtle::HashType::SHA384:
+    return pb::HashType::SHA384;
   case subtle::HashType::SHA512:
     return pb::HashType::SHA512;
   default:
@@ -102,6 +104,8 @@ subtle::HashType Enums::ProtoToSubtle(pb::HashType type) {
     return subtle::HashType::SHA1;
   case pb::HashType::SHA256:
     return subtle::HashType::SHA256;
+  case pb::HashType::SHA384:
+    return subtle::HashType::SHA384;
   case pb::HashType::SHA512:
     return subtle::HashType::SHA512;
   default:
@@ -156,6 +160,8 @@ const char* Enums::HashName(pb::HashType hash_type) {
       return "SHA1";
     case pb::HashType::SHA256:
       return "SHA256";
+    case pb::HashType::SHA384:
+      return "SHA384";
     case pb::HashType::SHA512:
       return "SHA512";
     default:
@@ -208,6 +214,7 @@ pb::KeyStatusType Enums::KeyStatus(absl::string_view name) {
 pb::HashType Enums::Hash(absl::string_view name) {
   if (name == "SHA1") return pb::HashType::SHA1;
   if (name == "SHA256") return pb::HashType::SHA256;
+  if (name == "SHA384") return pb::HashType::SHA384;
   if (name == "SHA512") return pb::HashType::SHA512;
   return pb::HashType::UNKNOWN_HASH;
 }

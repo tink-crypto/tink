@@ -31,8 +31,8 @@ import org.junit.runners.JUnit4;
 public final class SigUtilTest {
   @Test
   public void testToHashType() throws Exception {
-    assertEquals(Enums.HashType.SHA1, SigUtil.toHashType(HashType.SHA1));
     assertEquals(Enums.HashType.SHA256, SigUtil.toHashType(HashType.SHA256));
+    assertEquals(Enums.HashType.SHA384, SigUtil.toHashType(HashType.SHA384));
     assertEquals(Enums.HashType.SHA512, SigUtil.toHashType(HashType.SHA512));
     try {
       SigUtil.toHashType(HashType.UNKNOWN_HASH);
