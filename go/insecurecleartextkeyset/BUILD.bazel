@@ -9,7 +9,7 @@ go_library(
     srcs = ["insecurecleartextkeyset.go"],
     importpath = "github.com/google/tink/go/insecurecleartextkeyset",
     deps = [
-        "//go/core/internal:go_default_library",
+        "//go/internal:go_default_library",
         "//go/keyset:go_default_library",
         "//proto:tink_go_proto",
     ],

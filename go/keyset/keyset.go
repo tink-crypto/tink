@@ -16,7 +16,7 @@
 package keyset
 
 import (
-	"github.com/google/tink/go/core/internal"
+	"github.com/google/tink/go/internal"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 

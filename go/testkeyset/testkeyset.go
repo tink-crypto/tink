@@ -18,7 +18,7 @@ package testkeyset
 import (
 	"errors"
 
-	"github.com/google/tink/go/core/internal"
+	"github.com/google/tink/go/internal"
 	"github.com/google/tink/go/keyset"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )

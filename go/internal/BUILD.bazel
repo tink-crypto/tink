@@ -7,7 +7,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["internal.go"],
-    importpath = "github.com/google/tink/go/core/internal",
+    importpath = "github.com/google/tink/go/internal",
     visibility = [
         "//go/insecurecleartextkeyset:__pkg__",
         "//go/keyset:__pkg__",
