@@ -18,7 +18,7 @@ package daead
 import (
 	"fmt"
 
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 )
 
 func init() {

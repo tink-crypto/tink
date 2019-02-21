@@ -19,7 +19,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"

@@ -20,7 +20,7 @@ import (
 	"errors"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )

@@ -22,7 +22,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	ctrhmacpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"

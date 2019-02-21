@@ -20,7 +20,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/chacha20poly1305"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 

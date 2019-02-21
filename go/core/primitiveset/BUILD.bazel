@@ -7,10 +7,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["primitiveset.go"],
-    importpath = "github.com/google/tink/go/primitiveset",
+    importpath = "github.com/google/tink/go/core/primitiveset",
     visibility = ["//visibility:public"],
     deps = [
-        "//go/format:go_default_library",
+        "//go/core/cryptofmt:go_default_library",
         "//proto:tink_go_proto",
     ],
 )
@@ -20,7 +20,7 @@ go_test(
     srcs = ["primitiveset_test.go"],
     embed = [":go_default_library"],
     deps = [
-        "//go/format:go_default_library",
+        "//go/core/cryptofmt:go_default_library",
         "//go/testutil:go_default_library",
         "//proto:tink_go_proto",
     ],

@@ -17,10 +17,10 @@ package daead
 import (
 	"fmt"
 
-	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/primitiveset"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/primitiveset"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 )
 
@@ -70,7 +70,7 @@ func (d *primitiveSet) EncryptDeterministically(pt, aad []byte) ([]byte, error) 
 // ciphertext is authenticated.
 func (d *primitiveSet) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
 	// try non-raw keys
-	prefixSize := format.NonRawPrefixSize
+	prefixSize := cryptofmt.NonRawPrefixSize
 	if len(ct) > prefixSize {
 		prefix := ct[:prefixSize]
 		ctNoPrefix := ct[prefixSize:]

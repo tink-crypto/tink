@@ -20,7 +20,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	kmsepb "github.com/google/tink/proto/kms_envelope_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )

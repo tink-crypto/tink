@@ -20,7 +20,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	commonpb "github.com/google/tink/proto/common_go_proto"

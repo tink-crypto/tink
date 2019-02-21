@@ -26,7 +26,7 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 )
 

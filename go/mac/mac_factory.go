@@ -17,10 +17,10 @@ package mac
 import (
 	"fmt"
 
-	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/primitiveset"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/primitiveset"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 )
 
@@ -75,7 +75,7 @@ var errInvalidMAC = fmt.Errorf("mac_factory: invalid mac")
 func (m *primitiveSet) VerifyMAC(mac, data []byte) error {
 	// This also rejects raw MAC with size of 4 bytes or fewer. Those MACs are
 	// clearly insecure, thus should be discouraged.
-	prefixSize := format.NonRawPrefixSize
+	prefixSize := cryptofmt.NonRawPrefixSize
 	if len(mac) <= prefixSize {
 		return errInvalidMAC
 	}

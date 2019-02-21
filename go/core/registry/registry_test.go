@@ -20,7 +20,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"

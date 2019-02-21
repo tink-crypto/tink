@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"

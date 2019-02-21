@@ -25,7 +25,7 @@ import (
 	// TEST_SRCDIR to read the roots.pem
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )

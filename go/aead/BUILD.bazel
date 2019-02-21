@@ -20,10 +20,10 @@ go_library(
     importpath = "github.com/google/tink/go/aead",
     visibility = ["//visibility:public"],
     deps = [
-        "//go/format:go_default_library",
+        "//go/core/cryptofmt:go_default_library",
+        "//go/core/primitiveset:go_default_library",
+        "//go/core/registry:go_default_library",
         "//go/keyset:go_default_library",
-        "//go/primitiveset:go_default_library",
-        "//go/registry:go_default_library",
         "//go/subtle/aead:go_default_library",
         "//go/subtle/mac:go_default_library",
         "//go/subtle/random:go_default_library",
@@ -45,9 +45,9 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "aead_test.go",
         "aead_factory_test.go",
         "aead_key_templates_test.go",
+        "aead_test.go",
         "aes_ctr_hmac_aead_key_manager_test.go",
         "aes_gcm_key_manager_test.go",
         "chacha20poly1305_key_manager_test.go",
@@ -55,9 +55,9 @@ go_test(
     ],
     embed = [":go_default_library"],
     deps = [
-        "//go/format:go_default_library",
+        "//go/core/cryptofmt:go_default_library",
+        "//go/core/registry:go_default_library",
         "//go/keyset:go_default_library",
-        "//go/registry:go_default_library",
         "//go/subtle/aead:go_default_library",
         "//go/subtle/random:go_default_library",
         "//go/testkeyset:go_default_library",

@@ -10,7 +10,7 @@ go_library(
     srcs = ["testkeyset.go"],
     importpath = "github.com/google/tink/go/testkeyset",
     deps = [
-        "//go/internal:go_default_library",
+        "//go/core/internal:go_default_library",
         "//go/keyset:go_default_library",
         "//proto:tink_go_proto",
         "@com_github_golang_protobuf//proto:go_default_library",

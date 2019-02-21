@@ -12,12 +12,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package format_test
+package cryptofmt_test
 
 import (
 	"testing"
 
-	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/core/cryptofmt"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -45,32 +45,32 @@ func TestOutputPrefix(t *testing.T) {
 		key.KeyId = test.keyID
 		// legacy type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_LEGACY
-		prefix, err := format.OutputPrefix(key)
-		if err != nil || !validatePrefix(prefix, format.LegacyStartByte, test.result) {
+		prefix, err := cryptofmt.OutputPrefix(key)
+		if err != nil || !validatePrefix(prefix, cryptofmt.LegacyStartByte, test.result) {
 			t.Errorf("incorrect legacy prefix in test %d", i)
 		}
 		// crunchy type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_CRUNCHY
-		prefix, err = format.OutputPrefix(key)
-		if err != nil || !validatePrefix(prefix, format.LegacyStartByte, test.result) {
+		prefix, err = cryptofmt.OutputPrefix(key)
+		if err != nil || !validatePrefix(prefix, cryptofmt.LegacyStartByte, test.result) {
 			t.Errorf("incorrect legacy prefix in test %d", i)
 		}
 		// tink type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_TINK
-		prefix, err = format.OutputPrefix(key)
-		if err != nil || !validatePrefix(prefix, format.TinkStartByte, test.result) {
+		prefix, err = cryptofmt.OutputPrefix(key)
+		if err != nil || !validatePrefix(prefix, cryptofmt.TinkStartByte, test.result) {
 			t.Errorf("incorrect tink prefix in test %d", i)
 		}
 		// raw type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_RAW
-		prefix, err = format.OutputPrefix(key)
-		if err != nil || prefix != format.RawPrefix {
+		prefix, err = cryptofmt.OutputPrefix(key)
+		if err != nil || prefix != cryptofmt.RawPrefix {
 			t.Errorf("incorrect raw prefix in test %d", i)
 		}
 	}
 	// unknown prefix type
 	key.OutputPrefixType = tinkpb.OutputPrefixType_UNKNOWN_PREFIX
-	if _, err := format.OutputPrefix(key); err == nil {
+	if _, err := cryptofmt.OutputPrefix(key); err == nil {
 		t.Errorf("expect an error when prefix type is unknown")
 	}
 }

@@ -19,7 +19,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
@@ -44,9 +44,9 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("mac.New failed: %s", err)
 	}
-	expectedPrefix, err := format.OutputPrefix(primaryKey)
+	expectedPrefix, err := cryptofmt.OutputPrefix(primaryKey)
 	if err != nil {
-		t.Errorf("format.OutputPrefix failed: %s", err)
+		t.Errorf("cryptofmt.OutputPrefix failed: %s", err)
 	}
 
 	if err := verifyMacPrimitive(p, p, expectedPrefix, tagSize); err != nil {
@@ -68,14 +68,14 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("mac.New failed: %s", err)
 	}
-	if err := verifyMacPrimitive(p2, p, format.RawPrefix, tagSize); err != nil {
+	if err := verifyMacPrimitive(p2, p, cryptofmt.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
 
 	// mac with a random key not in the keyset, verify with the keyset should fail
 	keyset2 = testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
-	expectedPrefix, _ = format.OutputPrefix(primaryKey)
+	expectedPrefix, _ = cryptofmt.OutputPrefix(primaryKey)
 	keysetHandle2, err = testkeyset.NewHandle(keyset2)
 	if err != nil {
 		t.Errorf("testkeyset.NewHandle failed: %s", err)
@@ -106,7 +106,7 @@ func TestFactoryRawKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("mac.New failed: %s", err)
 	}
-	if err := verifyMacPrimitive(p, p, format.RawPrefix, tagSize); err != nil {
+	if err := verifyMacPrimitive(p, p, cryptofmt.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
 }

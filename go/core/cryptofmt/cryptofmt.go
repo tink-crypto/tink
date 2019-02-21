@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package format contains constants and convenience methods that deal with ciphertext and signature format.
-package format
+// Package cryptofmt provides constants and convenience methods that define the format of ciphertexts and signatures.
+package cryptofmt
 
 import (
 	"encoding/binary"

@@ -19,8 +19,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/google/tink/go/format"
-	"github.com/google/tink/go/primitiveset"
+	"github.com/google/tink/go/core/cryptofmt"
+	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -79,7 +79,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 	tinkMacs := []testutil.DummyMAC{macs[0], macs[5]}
 	tinkStatuses := []tinkpb.KeyStatusType{keys[0].Status, keys[5].Status}
 	tinkPrefixTypes := []tinkpb.OutputPrefixType{keys[0].OutputPrefixType, keys[5].OutputPrefixType}
-	prefix, _ := format.OutputPrefix(keys[0])
+	prefix, _ := cryptofmt.OutputPrefix(keys[0])
 	tinkEntries, err := ps.EntriesForPrefix(prefix)
 	if err != nil {
 		t.Errorf("unexpected error when getting primitives: %s", err)
@@ -91,7 +91,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 	tinkMacs = []testutil.DummyMAC{macs[2]}
 	tinkStatuses = []tinkpb.KeyStatusType{keys[2].Status}
 	tinkPrefixTypes = []tinkpb.OutputPrefixType{keys[2].OutputPrefixType}
-	prefix, _ = format.OutputPrefix(keys[2])
+	prefix, _ = cryptofmt.OutputPrefix(keys[2])
 	tinkEntries, err = ps.EntriesForPrefix(prefix)
 	if err != nil {
 		t.Errorf("unexpected error when getting tink primitives: %s", err)
@@ -103,7 +103,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 	legacyMacs := []testutil.DummyMAC{macs[1]}
 	legacyStatuses := []tinkpb.KeyStatusType{keys[1].Status}
 	legacyPrefixTypes := []tinkpb.OutputPrefixType{keys[1].OutputPrefixType}
-	legacyPrefix, _ := format.OutputPrefix(keys[1])
+	legacyPrefix, _ := cryptofmt.OutputPrefix(keys[1])
 	legacyEntries, err := ps.EntriesForPrefix(legacyPrefix)
 	if err != nil {
 		t.Errorf("unexpected error when getting legacy primitives: %s", err)

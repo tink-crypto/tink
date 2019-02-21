@@ -24,7 +24,7 @@ import (
 	"golang.org/x/crypto/ed25519"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"

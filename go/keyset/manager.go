@@ -17,7 +17,7 @@ package keyset
 import (
 	"fmt"
 
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )

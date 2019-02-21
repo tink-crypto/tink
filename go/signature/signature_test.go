@@ -17,7 +17,7 @@ package signature_test
 import (
 	"testing"
 
-	"github.com/google/tink/go/registry"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/testutil"
 )
 

@@ -12,7 +12,7 @@ go_library(
         "private_key_manager.go",
         "registry.go",
     ],
-    importpath = "github.com/google/tink/go/registry",
+    importpath = "github.com/google/tink/go/core/registry",
     deps = [
         "//go/tink:go_default_library",
         "//proto:tink_go_proto",
@@ -26,8 +26,8 @@ go_test(
     srcs = ["registry_test.go"],
     deps = [
         "//go/aead:go_default_library",
+        "//go/core/registry:go_default_library",
         "//go/mac:go_default_library",
-        "//go/registry:go_default_library",
         "//go/subtle/mac:go_default_library",
         "//go/testutil:go_default_library",
         "//proto:aes_gcm_go_proto",

@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package primitiveset is a container for a set of primitives (i.e., implementations of cryptographic primitives offered by Tink).
+// Package primitiveset provides a container for a set of cryptographic primitives.
 //
 // It provides also additional properties for the primitives it holds. In particular, one of the primitives in the set can be distinguished as "the primary" one.
 package primitiveset
@@ -20,7 +20,7 @@ package primitiveset
 import (
 	"fmt"
 
-	"github.com/google/tink/go/format"
+	"github.com/google/tink/go/core/cryptofmt"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
@@ -69,7 +69,7 @@ func New() *PrimitiveSet {
 
 // RawEntries returns all primitives in the set that have RAW prefix.
 func (ps *PrimitiveSet) RawEntries() ([]*Entry, error) {
-	return ps.EntriesForPrefix(format.RawPrefix)
+	return ps.EntriesForPrefix(cryptofmt.RawPrefix)
 }
 
 // EntriesForPrefix returns all primitives in the set that have the given prefix.
@@ -86,7 +86,7 @@ func (ps *PrimitiveSet) Add(p interface{}, key *tinkpb.Keyset_Key) (*Entry, erro
 	if key == nil || p == nil {
 		return nil, fmt.Errorf("primitive_set: key and primitive must not be nil")
 	}
-	prefix, err := format.OutputPrefix(key)
+	prefix, err := cryptofmt.OutputPrefix(key)
 	if err != nil {
 		return nil, fmt.Errorf("primitive_set: %s", err)
 	}
