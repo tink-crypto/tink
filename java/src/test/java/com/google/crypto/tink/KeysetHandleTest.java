@@ -236,7 +236,7 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void readNoSecretFailForTypeSymmetric() throws Exception {
+  public void readNoSecretFailWithTypeSymmetric() throws Exception {
     String keyValue = "01234567890123456";
     Keyset keyset =
         TestUtil.createKeyset(
@@ -262,7 +262,7 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void readNoSecretForTypeAssymmetricPrivate() throws Exception {
+  public void readNoSecretFailWithTypeAsymmetricPrivate() throws Exception {
     Keyset keyset = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256).getKeyset();
 
     try {
@@ -299,6 +299,51 @@ public class KeysetHandleTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "invalid");
+    }
+  }
+
+  @Test
+  public void writeNoSecretShouldWork() throws Exception {
+    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+    KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
+    Keyset keyset = publicHandle.getKeyset();
+    publicHandle.writeNoSecret(writer);
+    ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+    KeysetReader reader = BinaryKeysetReader.withInputStream(inputStream);
+    Keyset keyset2 = KeysetHandle.readNoSecret(reader).getKeyset();
+    assertEquals(keyset, keyset2);
+  }
+
+  @Test
+  public void writeNoSecretFailWithTypeSymmetric() throws Exception {
+    String keyValue = "01234567890123456";
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    try {
+      handle.writeNoSecret(null /* writer */);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
+    }
+  }
+
+  @Test
+  public void writeNoSecretFailWithTypeAsymmetricPrivate() throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+
+    try {
+      handle.writeNoSecret(null /* writer */);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains secret key material");
     }
   }
 }

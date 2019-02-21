@@ -143,6 +143,20 @@ public final class KeysetHandle {
     return;
   }
 
+  /**
+   * Tries to write to {@code writer} this keyset which must not contain any secret key material.
+   *
+   * <p>This can be used to persist public keysets or envelope encryption keysets. Users that need
+   * to persist cleartext keysets can use {@link CleartextKeysetHandle}.
+   *
+   * @throws GeneralSecurityException if the keyset contains any secret key material
+   */
+  public void writeNoSecret(KeysetWriter writer) throws GeneralSecurityException, IOException {
+    assertNoSecretKeyMaterial(keyset);
+    writer.write(keyset);
+    return;
+  }
+
   /** Encrypts the keyset with the {@link Aead} master key. */
   private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey)
       throws GeneralSecurityException {
