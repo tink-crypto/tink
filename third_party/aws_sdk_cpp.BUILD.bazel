@@ -29,7 +29,7 @@ cc_library(
         "aws-cpp-sdk-core/source/utils/crypto/factory/**/*.cpp",
         "aws-cpp-sdk-kms/include/**/*.h",
         "aws-cpp-sdk-kms/source/**/*.cpp",
-        ]),
+    ]),
     hdrs = [
         "aws-cpp-sdk-core/include/aws/core/SDKConfig.h",
     ],

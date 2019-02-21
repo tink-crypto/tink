@@ -39,13 +39,13 @@ sh_test(
     srcs = [
         "non_bazel_build_test.sh",
     ],
-    tags = [
-        "local",   # This tests needs g++.
-    ],
     data = [
         ":hello_world_files",
         "//cc:libtink.so",
-        "//cc:tink_headers",
         "//cc:tink_deps_headers",
+        "//cc:tink_headers",
+    ],
+    tags = [
+        "local",  # This tests needs g++.
     ],
 )

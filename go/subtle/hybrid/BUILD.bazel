@@ -9,8 +9,8 @@ go_library(
         "ecies_hkdf_recipient_kem.go",
         "ecies_hkdf_sender_kem.go",
         "elliptic_curves.go",
-        "hkdf.go"
-        ],
+        "hkdf.go",
+    ],
     importpath = "github.com/google/tink/go/subtle/hybrid",
     visibility = ["//visibility:public"],
     deps = [
@@ -23,16 +23,13 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-            "elliptic_curves_test.go",
-            "hkdf_test.go"
-            ],
-    data = ["@wycheproof//testvectors:all",],
-    embed = [":go_default_library",],
+        "elliptic_curves_test.go",
+        "hkdf_test.go",
+    ],
+    data = ["@wycheproof//testvectors:all"],
+    embed = [":go_default_library"],
     deps = [
         "//go/subtle/random:go_default_library",
         "@org_golang_x_crypto//hkdf:go_default_library",
     ],
 )
-
-
-

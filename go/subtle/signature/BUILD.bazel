@@ -23,8 +23,8 @@ go_test(
     name = "go_default_test",
     srcs = [
         "ecdsa_signer_verifier_test.go",
-        "ed25519_signer_verifier_test.go",
         "ecdsa_test.go",
+        "ed25519_signer_verifier_test.go",
     ],
     data = [
         "@wycheproof//testvectors:all",  # keep

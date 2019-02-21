@@ -6,6 +6,8 @@ cc_library(
     name = "tink_config",
     srcs = ["tink_config.cc"],
     hdrs = ["tink_config.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//cc:config",
         "//cc:key_manager",
@@ -15,8 +17,6 @@ cc_library(
         "//cc/util:status",
         "//proto:config_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 # tests
