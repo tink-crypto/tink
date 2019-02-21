@@ -188,4 +188,27 @@ public final class PemKeyTypeTest {
     assertThat(rsa.getModulus()).isNotNull();
     assertThat(rsa.getPublicExponent()).isNotNull();
   }
+
+  @Test
+  public void readKey_withEd25519_shouldFail() throws Exception {
+    String pem =
+        "-----BEGIN PUBLIC KEY-----\n"
+            + "MCowBQYDK2VwAyEAfU0Of2FTpptiQrUiq77mhf2kQg+INLEIw72uNp71Sfo=\n"
+            + "-----END PUBLIC KEY-----\n";
+    BufferedReader reader = new BufferedReader(new StringReader(pem));
+    Key key = PemKeyType.ECDSA_P256_SHA256.readKey(reader);
+    assertThat(key).isNull();
+  }
+
+  @Test
+  public void readKey_withSecp256k1_shouldFail() throws Exception {
+    String pem =
+        "-----BEGIN PUBLIC KEY-----\n"
+            + "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEuDj/ROW8F3vyEYnQdmCC/J2EMiaIf8l2\n"
+            + "A3EQC37iCm/wyddb+6ezGmvKGXRJbutW3jVwcZVdg8Sxutqgshgy6Q==\n"
+            + "-----END PUBLIC KEY-----";
+    BufferedReader reader = new BufferedReader(new StringReader(pem));
+    Key key = PemKeyType.ECDSA_P256_SHA256.readKey(reader);
+    assertThat(key).isNull();
+  }
 }

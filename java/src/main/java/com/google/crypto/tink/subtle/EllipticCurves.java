@@ -164,6 +164,21 @@ public final class EllipticCurves {
     checkPointOnCurve(key.getW(), key.getParams().getCurve());
   }
 
+  /** Returns whether {@code spec} is a {@link ECParameterSpec} of one of the NIST curves. */
+  public static boolean isNistEcParameterSpec(ECParameterSpec spec) {
+    return isSameEcParameterSpec(spec, getNistP256Params())
+        || isSameEcParameterSpec(spec, getNistP384Params())
+        || isSameEcParameterSpec(spec, getNistP521Params());
+  }
+
+  /** Returns whether {@code one} is the same {@link ECParameterSpec} as {@code two}. */
+  public static boolean isSameEcParameterSpec(ECParameterSpec one, ECParameterSpec two) {
+    return one.getCurve().equals(two.getCurve())
+        && one.getGenerator().equals(two.getGenerator())
+        && one.getOrder().equals(two.getOrder())
+        && one.getCofactor() == two.getCofactor();
+  }
+
   /**
    * Checks that the public key's params is the same as the private key's params, and the public key
    * is a valid point on the private key's curve.
@@ -182,10 +197,7 @@ public final class EllipticCurves {
     try {
       ECParameterSpec publicKeySpec = publicKey.getParams();
       ECParameterSpec privateKeySpec = privateKey.getParams();
-      if (!publicKeySpec.getCurve().equals(privateKeySpec.getCurve())
-          || !publicKeySpec.getGenerator().equals(privateKeySpec.getGenerator())
-          || !publicKeySpec.getOrder().equals(privateKeySpec.getOrder())
-          || publicKeySpec.getCofactor() != privateKeySpec.getCofactor()) {
+      if (!isSameEcParameterSpec(publicKeySpec, privateKeySpec)) {
         throw new GeneralSecurityException("invalid public key spec");
       }
     } catch (IllegalArgumentException | NullPointerException ex) {

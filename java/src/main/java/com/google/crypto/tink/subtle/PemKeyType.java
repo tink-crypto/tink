@@ -24,6 +24,7 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
+import java.security.spec.ECParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -139,7 +140,12 @@ public enum PemKeyType {
       }
     } else {
       ECKey ecKey = (ECKey) key;
-      int foundKeySizeInBits = EllipticCurves.fieldSizeInBits(ecKey.getParams().getCurve());
+      ECParameterSpec ecParams = ecKey.getParams();
+      if (!EllipticCurves.isNistEcParameterSpec(ecParams)) {
+        throw new GeneralSecurityException("unsupport EC spec: " + ecParams.toString());
+      }
+
+      int foundKeySizeInBits = EllipticCurves.fieldSizeInBits(ecParams.getCurve());
       if (foundKeySizeInBits != this.keySizeInBits) {
         throw new GeneralSecurityException(
             String.format(
