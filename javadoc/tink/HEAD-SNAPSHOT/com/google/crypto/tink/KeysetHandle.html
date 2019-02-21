@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9,"i3":10,"i4":10,"i5":10,"i6":10,"i7":9,"i8":9,"i9":9,"i10":10,"i11":10};
+var methods = {"i0":9,"i1":9,"i2":9,"i3":10,"i4":10,"i5":10,"i6":10,"i7":9,"i8":9,"i9":9,"i10":10,"i11":10,"i12":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -213,6 +213,12 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code>.</div>
 </td>
 </tr>
+<tr id="i12" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#writeNoSecret-com.google.crypto.tink.KeysetWriter-">writeNoSecret</a></span>(<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;writer)</code>
+<div class="block">Tries to write to <code>writer</code> this keyset which must not contain any secret key material.</div>
+</td>
+</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -348,6 +354,26 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="writeNoSecret-com.google.crypto.tink.KeysetWriter-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>writeNoSecret</h4>
+<pre>public&nbsp;void&nbsp;writeNoSecret(<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;writer)
+                   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                          <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block">Tries to write to <code>writer</code> this keyset which must not contain any secret key material.
+
+ <p>This can be used to persist public keysets or envelope encryption keysets. Users that need
+ to persist cleartext keysets can use <a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink"><code>CleartextKeysetHandle</code></a>.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the keyset contains any secret key material</dd>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
