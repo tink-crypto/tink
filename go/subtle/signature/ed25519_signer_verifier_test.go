@@ -214,10 +214,16 @@ func TestVectorsED25519(t *testing.T) {
 			}
 			got, err := signer.Sign(message)
 			if tc.Result == "valid" && err != nil {
-				t.Errorf("sign failed in test case %d: valid signature is rejected with error %s", tc.TcID, err)
+				t.Errorf("sign failed in test case %d: with error %s", tc.TcID, err)
+			}
+			if tc.Result == "valid" && err == nil && !bytes.Equal(sig, got) {
+				// Ed25519 is deterministic.
+				// Getting an alternative signature may leak the private key.
+				// This is especially the case if an attacker can also learn the valid signature.
+				t.Errorf("sign failed in test case %d: invalid signature generated %s", tc.TcID, hex.EncodeToString(got))
 			}
 			if tc.Result == "invalid" && err == nil && bytes.Equal(sig, got) {
-				t.Errorf("sign failed in test case %d: invalid signature is accepted", tc.TcID)
+				t.Errorf("sign failed in test case %d: invalid signature generated", tc.TcID)
 			}
 			err = verifier.Verify(sig, message)
 			if tc.Result == "valid" && err != nil {
