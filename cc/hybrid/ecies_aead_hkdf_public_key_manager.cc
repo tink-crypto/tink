@@ -32,17 +32,14 @@
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::EciesAeadHkdfPublicKey;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfParams;
+using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
-using portable_proto::MessageLite;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
 
 constexpr uint32_t EciesAeadHkdfPublicKeyManager::kVersion;
 

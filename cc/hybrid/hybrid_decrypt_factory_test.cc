@@ -34,7 +34,6 @@
 using crypto::tink::KeysetUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
-using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
@@ -42,8 +41,6 @@ using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::KeyTemplate;
-
 
 namespace crypto {
 namespace tink {

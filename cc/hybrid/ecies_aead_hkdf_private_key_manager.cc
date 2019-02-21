@@ -35,16 +35,12 @@
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::EciesAeadHkdfPrivateKey;
-using google::crypto::tink::EciesAeadHkdfKeyFormat;
-using google::crypto::tink::EciesAeadHkdfParams;
-using google::crypto::tink::EciesAeadDemParams;
-using google::crypto::tink::EciesHkdfKemParams;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
-using portable_proto::MessageLite;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
+using google::crypto::tink::EciesAeadHkdfKeyFormat;
+using google::crypto::tink::EciesAeadHkdfPrivateKey;
+using google::crypto::tink::EciesHkdfKemParams;
+using google::crypto::tink::KeyData;
 
 class EciesAeadHkdfPrivateKeyFactory
     : public PrivateKeyFactory,

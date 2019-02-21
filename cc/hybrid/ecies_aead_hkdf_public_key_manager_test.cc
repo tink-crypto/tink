@@ -38,7 +38,6 @@ using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
 
 namespace {
 
