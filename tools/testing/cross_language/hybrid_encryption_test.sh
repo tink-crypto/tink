@@ -20,47 +20,60 @@ JAVA_ENCRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_encrypt_cli_java"
 JAVA_DECRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_decrypt_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
-KEY_TEMPLATES=(ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256 ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
 
 source $TEST_UTIL || exit 1
-
 
 #############################################################################
 ### Helpers for hybrid-tests.
 
-# Basic tests of HybridEncrypt and HybridDecrypt.
+# Basic tests of HybridEncrypt and HybridDecrypt implementations.
 hybrid_basic_test() {
-  local test_name="$1-hybrid-basic-test"
-  local encrypt_cli="$2"
-  local decrypt_cli="$3"
-  local key_templates=$4
+  local test_name="hybrid-basic-test"
+  local encrypt_clis=$1
+  local decrypt_clis=$2
+  local key_templates=$3
 
   echo "############ starting test $test_name for the following templates:"
   echo $key_templates
   for key_template in ${key_templates[*]}
   do
-    local test_instance="${test_name}_${key_template}"
-    generate_asymmetric_keys $test_instance $key_template
-    generate_plaintext $test_instance
+    echo "## TEST for key template $key_template"
+    for encrypt_cli in ${encrypt_clis[*]}
+    do
+      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      echo "## ENCRYPTING using $encrypt_cli_name"
+      local test_instance="${test_name}_${key_template}"
+      generate_asymmetric_keys "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
+          $key_template
+      generate_plaintext $test_instance
 
-    local encrypted_file="$TEST_TMPDIR/${test_instance}_encrypted.bin"
-    local decrypted_file="$TEST_TMPDIR/${test_instance}_decrypted.bin"
-    local context_info_file="$TEST_TMPDIR/${test_instance}_context_info.bin"
-    echo "some context info for $test_instance" > $context_info_file
-    $encrypt_cli $pub_key_file $plaintext_file $context_info_file \
-        $encrypted_file || exit 1
-    assert_files_different $plaintext_file $encrypted_file
-    $decrypt_cli $priv_key_file $encrypted_file $context_info_file \
-        $decrypted_file || exit 1
-    assert_files_equal $plaintext_file $decrypted_file
+      local encrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_encrypted.bin"
+      local context_info_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_context_info.bin"
+      echo "some context info for $test_instance using $encrypt_cli_name" \
+          "for encryption" > $context_info_file
+
+      $encrypt_cli $pub_key_file $plaintext_file $context_info_file \
+          $encrypted_file || exit 1
+      assert_files_different $plaintext_file $encrypted_file
+      for decrypt_cli in ${decrypt_clis[*]}
+      do
+        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
+        echo "## DECRYPTING using $decrypt_cli_name"
+        $decrypt_cli $priv_key_file $encrypted_file $context_info_file \
+            $decrypted_file || exit 1
+        assert_files_equal $plaintext_file $decrypted_file
+      done
+    done
   done
 }
 
+
 #############################################################################
 ##### Run the actual tests.
-hybrid_basic_test "CC-CC"     $CC_ENCRYPT_CLI   $CC_DECRYPT_CLI   "${KEY_TEMPLATES[*]}"
-hybrid_basic_test "CC-JAVA"   $CC_ENCRYPT_CLI   $JAVA_DECRYPT_CLI "${KEY_TEMPLATES[*]}"
-hybrid_basic_test "JAVA-CC"   $JAVA_ENCRYPT_CLI $CC_DECRYPT_CLI   "${KEY_TEMPLATES[*]}"
-hybrid_basic_test "JAVA-JAVA" $JAVA_ENCRYPT_CLI $JAVA_DECRYPT_CLI "${KEY_TEMPLATES[*]}"
 
-
+KEY_TEMPLATES=(ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256 ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+ENCRYPT_CLIS=($CC_ENCRYPT_CLI $JAVA_ENCRYPT_CLI)
+DECRYPT_CLIS=($CC_DECRYPT_CLI $JAVA_DECRYPT_CLI)
+hybrid_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" \
+    "${KEY_TEMPLATES[*]}"

@@ -18,8 +18,6 @@ CC_MAC_CLI="$ROOT_DIR/tools/testing/cc/mac_cli_cc"
 JAVA_MAC_CLI="$ROOT_DIR/tools/testing/mac_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
-KEY_TEMPLATES=(HMAC_SHA256_128BITTAG HMAC_SHA256_256BITTAG)
-
 source $TEST_UTIL || exit 1
 
 #############################################################################
@@ -27,50 +25,53 @@ source $TEST_UTIL || exit 1
 
 # Basic tests of MAC-implementations.
 mac_basic_test() {
-  local test_name="$1-mac-basic-test-$5"
-  local compute_mac_cli="$2"
-  local verify_mac_cli="$3"
-  local key_templates=$4
-  local output_prefix="$5"
+  local test_name="mac-basic-test"
+  local compute_mac_clis=$1
+  local verify_mac_clis=$2
+  local key_templates=$3
 
   echo "############ starting test $test_name for the following templates:"
   echo $key_templates
-  for key_template in ${key_templates[*]}
-  do
-    local test_instance="${test_name}_${key_template}"
-    generate_symmetric_key $test_instance $key_template
-    generate_plaintext $test_instance
+    for key_template in ${key_templates[*]}
+    do
+      echo "## TEST for key template $key_template"
+      echo $compute_mac_clis
+      for compute_mac_cli in ${compute_mac_clis[*]}
+      do
+        local compute_mac_cli_name=`get_file_name $compute_mac_cli`
+        echo "## COMPUTING MAC using $compute_mac_cli_name"
+        local test_instance="${test_name}_${key_template}"
 
-    local mac_file="$TEST_TMPDIR/${test_instance}_mac.bin"
-    local result_file="$TEST_TMPDIR/${test_instance}_result.txt"
-    $compute_mac_cli $symmetric_key_file "compute" $plaintext_file\
-        $mac_file || exit 1
-    assert_files_different $plaintext_file $mac_file
-    $verify_mac_cli $symmetric_key_file "verify" $plaintext_file\
-        $mac_file $result_file || exit 1
-    assert_file_equals "valid" $result_file
-  done
+        generate_symmetric_key "${test_instance}_MAC_${compute_mac_cli_name}" $key_template
+        generate_plaintext $test_instance
+
+        local mac_file="$TEST_TMPDIR/${test_instance}_MAC_${compute_mac_cli_name}_mac.bin"
+
+        $compute_mac_cli $symmetric_key_file "compute" $plaintext_file\
+            $mac_file || exit 1
+        assert_files_different $plaintext_file $mac_file
+
+        for verify_mac_cli in ${verify_mac_clis[*]}
+        do
+          local verify_mac_cli_name=`get_file_name $verify_mac_cli`
+          local result_file="$TEST_TMPDIR/${test_instance}_MAC_${compute_mac_cli_name}_VERIFY_${verify_mac_cli_name}_verification.txt"
+
+          echo "## VERIFYING using $verify_mac_cli_name"
+
+          $verify_mac_cli $symmetric_key_file "verify" $plaintext_file\
+              $mac_file $result_file || exit 1
+          assert_file_equals "valid" $result_file
+
+        done
+      done
+    done
 }
 
 #############################################################################
 ##### Run the actual tests.
 
-### Tests with OutputPrefixType=="TINK"
-mac_basic_test "CC-CC"     $CC_MAC_CLI   $CC_MAC_CLI   \
-  "${KEY_TEMPLATES[*]}" "TINK"
-mac_basic_test "CC-JAVA"   $CC_MAC_CLI   $JAVA_MAC_CLI \
-  "${KEY_TEMPLATES[*]}" "TINK"
-mac_basic_test "JAVA-CC"   $JAVA_MAC_CLI $CC_MAC_CLI   \
-  "${KEY_TEMPLATES[*]}" "TINK"
-mac_basic_test "JAVA-JAVA" $JAVA_MAC_CLI $JAVA_MAC_CLI \
-  "${KEY_TEMPLATES[*]}" "TINK"
-
-### Tests with OutputPrefixType=="LEGACY"
-mac_basic_test "CC-CC"     $CC_MAC_CLI   $CC_MAC_CLI   \
-  "${KEY_TEMPLATES[*]}" "LEGACY"
-mac_basic_test "CC-JAVA"   $CC_MAC_CLI   $JAVA_MAC_CLI \
-  "${KEY_TEMPLATES[*]}" "LEGACY"
-mac_basic_test "JAVA-CC"   $JAVA_MAC_CLI $CC_MAC_CLI   \
-  "${KEY_TEMPLATES[*]}" "LEGACY"
-mac_basic_test "JAVA-JAVA" $JAVA_MAC_CLI $JAVA_MAC_CLI \
-  "${KEY_TEMPLATES[*]}" "LEGACY"
+KEY_TEMPLATES=(HMAC_SHA256_128BITTAG HMAC_SHA256_256BITTAG)
+MAC_CLIS=($CC_MAC_CLI $JAVA_MAC_CLI)
+VERIFY_CLIS=($CC_MAC_CLI $JAVA_MAC_CLI)
+mac_basic_test "${MAC_CLIS[*]}" "${VERIFY_CLIS[*]}" \
+    "${KEY_TEMPLATES[*]}"
