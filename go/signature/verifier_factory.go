@@ -72,8 +72,7 @@ func (v *verifierSet) Verify(signature, data []byte) error {
 		for i := 0; i < len(entries); i++ {
 			var signedData []byte
 			if entries[i].PrefixType == tinkpb.OutputPrefixType_LEGACY {
-				signedData = append(signedData, data...)
-				signedData = append(signedData, cryptofmt.LegacyStartByte)
+				signedData = append(data, cryptofmt.LegacyStartByte)
 			} else {
 				signedData = data
 			}
