@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":41,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9};
+var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":41,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9,"i28":9,"i29":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -324,16 +324,29 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i21" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#isValidDerEncoding-byte:A-">isValidDerEncoding</a></span>(byte[]&nbsp;sig)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#isNistEcParameterSpec-java.security.spec.ECParameterSpec-">isNistEcParameterSpec</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;spec)</code>
+<div class="block">Returns whether <code>spec</code> is a <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec"><code>ECParameterSpec</code></a> of one of the NIST curves.</div>
+</td>
 </tr>
 <tr id="i22" class="altColor">
+<td class="colFirst"><code>static boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#isSameEcParameterSpec-java.security.spec.ECParameterSpec-java.security.spec.ECParameterSpec-">isSameEcParameterSpec</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;one,
+                     <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;two)</code>
+<div class="block">Returns whether <code>one</code> is the same <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec"><code>ECParameterSpec</code></a> as <code>two</code>.</div>
+</td>
+</tr>
+<tr id="i23" class="rowColor">
+<td class="colFirst"><code>static boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#isValidDerEncoding-byte:A-">isValidDerEncoding</a></span>(byte[]&nbsp;sig)</code>&nbsp;</td>
+</tr>
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>protected static <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#modSqrt-java.math.BigInteger-java.math.BigInteger-">modSqrt</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;x,
        <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;p)</code>
 <div class="block">Computes a square root modulo an odd prime.</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECPoint.html?is-external=true" title="class or interface in java.security.spec">ECPoint</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#pointDecode-java.security.spec.EllipticCurve-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-byte:A-">pointDecode</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve,
            <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;format,
@@ -341,7 +354,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Decodes an encoded point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECPoint.html?is-external=true" title="class or interface in java.security.spec">ECPoint</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#pointDecode-com.google.crypto.tink.subtle.EllipticCurves.CurveType-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-byte:A-">pointDecode</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curveType,
            <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;format,
@@ -349,7 +362,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Decodes an encoded point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#pointEncode-java.security.spec.EllipticCurve-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-java.security.spec.ECPoint-">pointEncode</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve,
            <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;format,
@@ -357,7 +370,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Encodes a point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#pointEncode-com.google.crypto.tink.subtle.EllipticCurves.CurveType-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-java.security.spec.ECPoint-">pointEncode</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curveType,
            <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;format,
@@ -365,7 +378,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Encodes a point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i29" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#validatePublicKey-java.security.interfaces.ECPublicKey-java.security.interfaces.ECPrivateKey-">validatePublicKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;publicKey,
                  <a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;privateKey)</code>
@@ -437,6 +450,27 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>getNistP521Params</h4>
 <pre>public static&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;getNistP521Params()</pre>
+</li>
+</ul>
+<a name="isNistEcParameterSpec-java.security.spec.ECParameterSpec-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isNistEcParameterSpec</h4>
+<pre>public static&nbsp;boolean&nbsp;isNistEcParameterSpec(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;spec)</pre>
+<div class="block">Returns whether <code>spec</code> is a <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec"><code>ECParameterSpec</code></a> of one of the NIST curves.</div>
+</li>
+</ul>
+<a name="isSameEcParameterSpec-java.security.spec.ECParameterSpec-java.security.spec.ECParameterSpec-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isSameEcParameterSpec</h4>
+<pre>public static&nbsp;boolean&nbsp;isSameEcParameterSpec(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;one,
+                                            <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;two)</pre>
+<div class="block">Returns whether <code>one</code> is the same <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec"><code>ECParameterSpec</code></a> as <code>two</code>.</div>
 </li>
 </ul>
 <a name="validatePublicKey-java.security.interfaces.ECPublicKey-java.security.interfaces.ECPrivateKey-">
