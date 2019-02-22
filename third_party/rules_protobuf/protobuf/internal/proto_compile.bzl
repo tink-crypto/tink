@@ -20,10 +20,10 @@ def _emit_params_file_action(ctx, path, mnemonic, cmds):
     """
     filename = "%s.%sFile.params" % (path, mnemonic)
     f = ctx.new_file(ctx.configuration.bin_dir, filename)
-    ctx.file_action(
+    ctx.actions.write(
         output = f,
         content = "\n".join(["set -e"] + cmds),
-        executable = True,
+        is_executable = True,
     )
     return f
 
@@ -100,7 +100,7 @@ def _build_output_jar(run, builder):
     ctx = run.ctx
     execdir = run.data.execdir
     name = run.lang.name
-    protojar = ctx.new_file("%s_%s.jar" % (run.data.label.name, name))
+    protojar = ctx.actions.declare_file("%s_%s.jar" % (run.data.label.name, name))
     builder["outputs"] += [protojar]
     builder[name + "_jar"] = protojar
     builder[name + "_outdir"] = _get_offset_path(execdir, protojar.path)
@@ -110,7 +110,7 @@ def _build_output_library(run, builder):
     ctx = run.ctx
     execdir = run.data.execdir
     name = run.lang.name
-    jslib = ctx.new_file(run.data.label.name + run.lang.pb_file_extensions[0])
+    jslib = ctx.actions.declare_file(run.data.label.name + run.lang.pb_file_extensions[0])
     builder["jslib"] = [jslib]
     builder["outputs"] += [jslib]
 
@@ -124,7 +124,7 @@ def _build_output_srcjar(run, builder):
     name = run.lang.name
     protojar = builder[name + "_jar"]
     srcjar_name = "%s_%s.srcjar" % (run.data.label.name, name)
-    srcjar = ctx.new_file("%s_%s.srcjar" % (run.data.label.name, name))
+    srcjar = ctx.actions.declare_file("%s_%s.srcjar" % (run.data.label.name, name))
     run.ctx.action(
         mnemonic = "CpJarToSrcJar",
         inputs = [protojar],
@@ -159,7 +159,7 @@ def _build_output_files(run, builder):
         for ext in exts:
             path = _get_relative_dirname(ctx.label.package, file)
             path.append(base + ext)
-            pbfile = ctx.new_file("/".join(path))
+            pbfile = ctx.actions.declare_file("/".join(path))
             builder["outputs"] += [pbfile]
 
 def _build_output_libdir(run, builder):
@@ -363,7 +363,7 @@ cd $(bazel info execution_root)%s && \
         for i in range(len(outputs)):
             print(" > output%s: %s" % (i, outputs[i]))
 
-    ctx.action(
+    ctx.actions.run_shell(
         mnemonic = "ProtoCompile",
         command = " && ".join(cmds),
         inputs = inputs,
