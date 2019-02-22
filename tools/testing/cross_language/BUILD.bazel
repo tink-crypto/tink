@@ -46,6 +46,7 @@ sh_test(
         ":test_lib",
         "//tools/testing:aead_cli_java",
         "//tools/testing/cc:aead_cli_cc",
+        "//tools/testing/go:aead_cli_go",
         "//tools/tinkey",
     ],
 )
@@ -87,6 +88,7 @@ sh_test(
         ":test_lib",
         "//tools/testing:mac_cli_java",
         "//tools/testing/cc:mac_cli_cc",
+        "//tools/testing/go:mac_cli_go",
         "//tools/tinkey",
     ],
 )
@@ -109,7 +111,7 @@ sh_test(
 
 sh_test(
     name = "signature_test",
-    size = "medium",
+    size = "large",
     timeout = "moderate",
     srcs = [
         "signature_test.sh",
@@ -120,6 +122,8 @@ sh_test(
         "//tools/testing:public_key_verify_cli_java",
         "//tools/testing/cc:public_key_sign_cli_cc",
         "//tools/testing/cc:public_key_verify_cli_cc",
+        "//tools/testing/go:public_key_sign_cli_go",
+        "//tools/testing/go:public_key_verify_cli_go",
         "//tools/tinkey",
     ],
 )

@@ -1,0 +1,53 @@
+package(default_visibility = ["//tools/testing:__subpackages__"])
+
+licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+
+go_binary(
+    name = "aead_cli_go",
+    testonly = 1,  # keep
+    srcs = ["aead_cli.go"],
+    out = "aead_cli_go",
+    deps = [
+        "//go/aead:go_default_library",
+        "//go/keyset:go_default_library",
+        "//go/testkeyset:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "mac_cli_go",
+    testonly = 1,  # keep
+    srcs = ["mac_cli.go"],
+    out = "mac_cli_go",
+    deps = [
+        "//go/keyset:go_default_library",
+        "//go/mac:go_default_library",
+        "//go/testkeyset:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "public_key_sign_cli_go",
+    testonly = 1,  # keep
+    srcs = ["public_key_sign_cli.go"],
+    out = "public_key_sign_cli_go",
+    deps = [
+        "//go/keyset:go_default_library",
+        "//go/signature:go_default_library",
+        "//go/testkeyset:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "public_key_verify_cli_go",
+    testonly = 1,  # keep
+    srcs = ["public_key_verify_cli.go"],
+    out = "public_key_verify_cli_go",
+    deps = [
+        "//go/keyset:go_default_library",
+        "//go/signature:go_default_library",
+        "//go/testkeyset:go_default_library",
+    ],
+)

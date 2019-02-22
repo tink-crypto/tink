@@ -15,6 +15,7 @@
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 CC_AEAD_CLI="$ROOT_DIR/tools/testing/cc/aead_cli_cc"
+GO_AEAD_CLI="$ROOT_DIR/tools/testing/go/aead_cli_go"
 JAVA_AEAD_CLI="$ROOT_DIR/tools/testing/aead_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
@@ -69,8 +70,8 @@ aead_basic_test() {
 #############################################################################
 ##### Run the actual tests.
 KEY_TEMPLATES=(AES128_GCM AES256_GCM AES128_CTR_HMAC_SHA256 AES256_CTR_HMAC_SHA256)
-ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI)
-DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI)
+ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI)
+DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI)
 aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
 KEY_TEMPLATES=(AES128_EAX AES256_EAX)

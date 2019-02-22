@@ -18,6 +18,8 @@ CC_SIGN_CLI="$ROOT_DIR/tools/testing/cc/public_key_sign_cli_cc"
 CC_VERIFY_CLI="$ROOT_DIR/tools/testing/cc/public_key_verify_cli_cc"
 JAVA_SIGN_CLI="$ROOT_DIR/tools/testing/public_key_sign_cli_java"
 JAVA_VERIFY_CLI="$ROOT_DIR/tools/testing/public_key_verify_cli_java"
+GO_SIGN_CLI="$ROOT_DIR/tools/testing/go/public_key_sign_cli_go"
+GO_VERIFY_CLI="$ROOT_DIR/tools/testing/go/public_key_verify_cli_go"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
 KEY_TEMPLATES=(ECDSA_P256 ECDSA_P384 ECDSA_P521)
@@ -74,7 +76,16 @@ signature_basic_test() {
 #############################################################################
 ##### Run the actual tests.
 
-KEY_TEMPLATES=(ECDSA_P256 ECDSA_P384 ECDSA_P521 ECDSA_P256_IEEE_P1363 ECDSA_P384_IEEE_P1363 ECDSA_P521_IEEE_P1363 ED25519 RSA_SSA_PKCS1_3072_SHA256_F4 RSA_SSA_PKCS1_4096_SHA512_F4 RSA_SSA_PSS_3072_SHA256_SHA256_32_F4 RSA_SSA_PSS_4096_SHA512_SHA512_64_F4)
+# Common tests for Java, C++ and Go
+KEY_TEMPLATES=(ECDSA_P256 ECDSA_P384 ECDSA_P521 ED25519)
+OUTPUT_PREFIXES=(TINK LEGACY)
+SIGN_CLIS=($CC_SIGN_CLI $JAVA_SIGN_CLI $GO_SIGN_CLI)
+VERIFY_CLIS=($CC_VERIFY_CLI $JAVA_VERIFY_CLI $GO_VERIFY_CLI)
+signature_basic_test "${SIGN_CLIS[*]}" "${VERIFY_CLIS[*]}" \
+    "${KEY_TEMPLATES[*]}" "${OUTPUT_PREFIXES[*]}"
+
+# These tests work only in Java and C++
+KEY_TEMPLATES=(ECDSA_P256_IEEE_P1363 ECDSA_P384_IEEE_P1363 ECDSA_P521_IEEE_P1363 RSA_SSA_PKCS1_3072_SHA256_F4 RSA_SSA_PKCS1_4096_SHA512_F4 RSA_SSA_PSS_3072_SHA256_SHA256_32_F4 RSA_SSA_PSS_4096_SHA512_SHA512_64_F4)
 OUTPUT_PREFIXES=(TINK LEGACY)
 SIGN_CLIS=($CC_SIGN_CLI $JAVA_SIGN_CLI)
 VERIFY_CLIS=($CC_VERIFY_CLI $JAVA_VERIFY_CLI)

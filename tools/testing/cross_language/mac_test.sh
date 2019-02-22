@@ -15,6 +15,7 @@
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 CC_MAC_CLI="$ROOT_DIR/tools/testing/cc/mac_cli_cc"
+GO_MAC_CLI="$ROOT_DIR/tools/testing/go/mac_cli_go"
 JAVA_MAC_CLI="$ROOT_DIR/tools/testing/mac_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
@@ -71,7 +72,7 @@ mac_basic_test() {
 ##### Run the actual tests.
 
 KEY_TEMPLATES=(HMAC_SHA256_128BITTAG HMAC_SHA256_256BITTAG)
-MAC_CLIS=($CC_MAC_CLI $JAVA_MAC_CLI)
-VERIFY_CLIS=($CC_MAC_CLI $JAVA_MAC_CLI)
+MAC_CLIS=($CC_MAC_CLI $JAVA_MAC_CLI $GO_MAC_CLI)
+VERIFY_CLIS=($CC_MAC_CLI $JAVA_MAC_CLI $GO_MAC_CLI)
 mac_basic_test "${MAC_CLIS[*]}" "${VERIFY_CLIS[*]}" \
     "${KEY_TEMPLATES[*]}"
