@@ -116,6 +116,17 @@ AEAD primitive in Java:
 *   [Feature Roadmap](docs/ROADMAP.md)
 *   [Java Hacking Guide](docs/JAVA-HACKING.md)
 
+## Community-driven ports
+
+Out of the box Tink supports a wide range of languages, but it still doesn't
+support every language. Fortunately, some users like Tink so much that they've
+ported it to their favorite languages! Below you can find notable ports.
+
+**WARNING** While we usually review these ports, until further notice, we do not
+maintain them and have no plan to support them in the foreseeable future.
+
+*   [C# (with JNI)](https://github.com/google-pay/tink-jni-examples)
+
 ## Contact and mailing list
 
 If you want to contribute, please read [CONTRIBUTING](docs/CONTRIBUTING.md)
