@@ -60,6 +60,24 @@ func AES256CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 	return createAESCTRHMACAEADKeyTemplate(32, 16, 32, 32, commonpb.HashType_SHA256)
 }
 
+// ChaCha20Poly1305KeyTemplate is a KeyTemplate that generates a CHACHA20_POLY1305 key.
+func ChaCha20Poly1305KeyTemplate() *tinkpb.KeyTemplate {
+	return &tinkpb.KeyTemplate{
+		// Don't set value because KeyFormat is not required.
+		TypeUrl:          chaCha20Poly1305TypeURL,
+		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+	}
+}
+
+// XChaCha20Poly1305KeyTemplate is a KeyTemplate that generates a XCHACHA20_POLY1305 key.
+func XChaCha20Poly1305KeyTemplate() *tinkpb.KeyTemplate {
+	return &tinkpb.KeyTemplate{
+		// Don't set value because KeyFormat is not required.
+		TypeUrl:          xChaCha20Poly1305TypeURL,
+		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+	}
+}
+
 // KMSEnvelopeAEADKeyTemplate is a KeyTemplate that generates a KMSEnvelopeAEAD key for a given KEK in remote KMS
 func KMSEnvelopeAEADKeyTemplate(uri string, dekT *tinkpb.KeyTemplate) *tinkpb.KeyTemplate {
 	f := &kmsenvpb.KmsEnvelopeAeadKeyFormat{

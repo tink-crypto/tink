@@ -114,6 +114,26 @@ func checkAESCTRHMACAEADKeyTemplate(template *tinkpb.KeyTemplate, keySize, ivSiz
 	return nil
 }
 
+func TestChaCha20Poly1305KeyTemplate(t *testing.T) {
+	template := aead.ChaCha20Poly1305KeyTemplate()
+	if template.TypeUrl != testutil.ChaCha20Poly1305TypeURL {
+		t.Errorf("incorrect type url: %v, expected %v", template.TypeUrl, testutil.ChaCha20Poly1305TypeURL)
+	}
+	if err := testEncryptDecrypt(template, testutil.ChaCha20Poly1305TypeURL); err != nil {
+		t.Errorf("%v", err)
+	}
+}
+
+func TestXChaCha20Poly1305KeyTemplate(t *testing.T) {
+	template := aead.XChaCha20Poly1305KeyTemplate()
+	if template.TypeUrl != testutil.XChaCha20Poly1305TypeURL {
+		t.Errorf("incorrect type url: %v, expected %v", template.TypeUrl, testutil.XChaCha20Poly1305TypeURL)
+	}
+	if err := testEncryptDecrypt(template, testutil.XChaCha20Poly1305TypeURL); err != nil {
+		t.Errorf("%v", err)
+	}
+}
+
 func testEncryptDecrypt(template *tinkpb.KeyTemplate, typeURL string) error {
 	key, err := registry.NewKey(template)
 	if err != nil {
