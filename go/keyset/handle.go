@@ -52,6 +52,9 @@ func NewHandle(kt *tinkpb.KeyTemplate) (*Handle, error) {
 // NewHandleWithNoSecrets creates a new instance of KeysetHandle using the given keyset which does
 // not contain any secret key material.
 func NewHandleWithNoSecrets(ks *tinkpb.Keyset) (*Handle, error) {
+  if ks == nil {
+    return nil, errors.New("keyset.Handle: nil keyset")
+  }
 	h := &Handle{ks}
 	if h.hasSecrets() {
 		// If you need to do this, you have to use func insecurecleartextkeyset.Read() instead.
