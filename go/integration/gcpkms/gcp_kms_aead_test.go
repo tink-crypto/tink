@@ -35,19 +35,19 @@ const (
 )
 
 var (
-	// LINT.IfChange
+	// lint placeholder header, please ignore
 	credFile = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/credential.json"
-	// LINT.ThenChange(//depot/google3/third_party/tink/copybara/go.bara.sky)
+	// lint placeholder footer, please ignore
 )
 
-// LINT.IfChange
+// lint placeholder header, please ignore
 func init() {
 	certPath := os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "roots.pem"
 	flag.Set("cacerts", certPath)
 	os.Setenv("SSL_CERT_FILE", certPath)
 }
 
-// LINT.ThenChange(//depot/google3/third_party/tink/copybara/go.bara.sky)
+// lint placeholder footer, please ignore
 
 func setupKMS(t *testing.T) {
 	t.Helper()
