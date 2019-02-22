@@ -10,6 +10,7 @@ go_library(
         "aes_siv_key_manager.go",
         "daead.go",
         "daead_factory.go",
+        "daead_key_templates.go",
     ],
     importpath = "github.com/google/tink/go/daead",
     visibility = ["//visibility:public"],
@@ -32,6 +33,7 @@ go_test(
     srcs = [
         "aes_siv_key_manager_test.go",
         "daead_factory_test.go",
+        "daead_key_templates_test.go",
         "daead_test.go",
     ],
     embed = [":go_default_library"],
