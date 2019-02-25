@@ -27,23 +27,25 @@
 namespace crypto {
 namespace tink {
 
-// Registry for KeyMangers.
+// Registry for KeyMangers and PrimitiveWrappers.
 //
-// It is essentially a big container (map) that for each supported key
-// type holds a corresponding KeyManager object, which "understands"
-// the key type (i.e. the KeyManager can instantiate the primitive
-// corresponding to given key, or can generate new keys of the
-// supported key type).  Registry is initialized at startup, and is
-// later used to instantiate primitives for given keys or keysets.
-// Keeping KeyManagers for all primitives in a single Registry (rather
-// than having a separate KeyManager per primitive) enables modular
-// construction of compound primitives from "simple" ones, e.g.,
+// It is essentially a big container (map) that for each supported key type
+// holds a corresponding KeyManager object, which "understands" the key type
+// (i.e. the KeyManager can instantiate the primitive corresponding to given
+// key, or can generate new keys of the supported key type).  It holds also
+// a so-called PrimitiveWrapper for each supported primitive, so that it can
+// wrap a set of primitives (corresponding to a keyset) into a single primitive.
+//
+// Registry is initialized at startup, and is later used to instantiate
+// primitives for given keys or keysets.  Keeping KeyManagers for all primitives
+// in a single Registry (rather than having a separate KeyManager per primitive)
+// enables modular construction of compound primitives from "simple" ones, e.g.,
 // AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
 //
-// Note that regular users will usually not work directly with
-// Registry, but rather via primitive factories, which in the
-// background query the Registry for specific KeyManagers.  Registry
-// is public though, to enable configurations with custom primitives
+// Note that regular users will usually not work directly with Registry, but
+// rather via KeysetHandle::GetPrimitive()-methods, which in the background
+// query the Registry for specific KeyManagers and PrimitiveWrappers.
+// Registry is public though, to enable configurations with custom primitives
 // and KeyManagers.
 class Registry {
  public:
