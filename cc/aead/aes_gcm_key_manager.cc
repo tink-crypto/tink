@@ -63,8 +63,6 @@ class AesGcmKeyFactory : public KeyFactoryBase<AesGcmKey, AesGcmKeyFormat> {
 
 constexpr uint32_t AesGcmKeyManager::kVersion;
 
-const int kMinKeySizeInBytes = 16;
-
 AesGcmKeyManager::AesGcmKeyManager()
     : key_factory_(absl::make_unique<AesGcmKeyFactory>()) {}
 
