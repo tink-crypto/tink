@@ -562,7 +562,7 @@ func TestVectors(t *testing.T) {
 		}
 
 		for _, g := range data.TestGroups {
-			curve, err := getCurve(g.Curve)
+			curve, err := GetCurve(g.Curve)
 			if err != nil {
 				t.Logf("unsupported curve: %s", g.Curve)
 				continue

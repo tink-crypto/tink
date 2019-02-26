@@ -42,6 +42,18 @@ const (
 	// XChaCha20Poly1305TypeURL is the type URL of XChaCha20Poly1305 keys.
 	XChaCha20Poly1305TypeURL = "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key"
 
+	// EciesAeadHkdfPrivateKeyKeyVersion is the maxmimal version of keys that this key manager supports.
+	EciesAeadHkdfPrivateKeyKeyVersion = 0
+
+	// EciesAeadHkdfPrivateKeyTypeURL is the url that this key manager supports.
+	EciesAeadHkdfPrivateKeyTypeURL = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
+
+	// EciesAeadHkdfPublicKeyKeyVersion is the maxmimal version of keys that this key manager supports.
+	EciesAeadHkdfPublicKeyKeyVersion = 0
+
+	// EciesAeadHkdfPublicKeyTypeURL is the url that this key manager supports.
+	EciesAeadHkdfPublicKeyTypeURL = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey"
+
 	// DeterministicAEAD
 
 	// AESSIVKeyVersion is the maxmimal version of AES-SIV keys that Tink supports.

@@ -263,16 +263,16 @@ func GenerateECDHKeyPair(c elliptic.Curve) (*ECPrivateKey, error) {
 
 }
 
-// getCurve returns the elliptic.Curve for a given standard curve name.
-func getCurve(c string) (elliptic.Curve, error) {
+// GetCurve returns the elliptic.Curve for a given standard curve name.
+func GetCurve(c string) (elliptic.Curve, error) {
 	switch c {
 	case "secp224r1", "NIST_P224", "P-224":
 		return elliptic.P224(), nil
-	case "secp256r1", "NIST_P256", "P-256":
+	case "secp256r1", "NIST_P256", "P-256", "EllipticCurveType_NIST_P256":
 		return elliptic.P256(), nil
-	case "secp384r1", "NIST_P384", "P-384":
+	case "secp384r1", "NIST_P384", "P-384", "EllipticCurveType_NIST_P384":
 		return elliptic.P384(), nil
-	case "secp521r1", "NIST_521", "P-521":
+	case "secp521r1", "NIST_P521", "P-521", "EllipticCurveType_NIST_P521":
 		return elliptic.P521(), nil
 	default:
 		return nil, errors.New("unsupported curve")

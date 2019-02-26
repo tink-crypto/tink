@@ -405,3 +405,29 @@ func NewEncryptedKeyset(encryptedKeySet []byte, info *tinkpb.KeysetInfo) *tinkpb
 		KeysetInfo:      info,
 	}
 }
+
+// GenerateMutations generates different byte mutations for a given byte array.
+func GenerateMutations(src []byte) (all [][]byte) {
+	n := make([]byte, len(src))
+
+	// Flip bits
+	for i := 0; i < len(src); i++ {
+		for j := 0; j < 8; j++ {
+			copy(n, src)
+			n[i] = n[i] ^ (1 << uint8(j))
+			all = append(all, n)
+		}
+	}
+
+	//truncate bytes
+	for i := 0; i < len(src); i++ {
+		copy(n, src[i:])
+		all = append(all, n)
+	}
+
+	//append extra byte
+	m := make([]byte, len(src)+1)
+	copy(m, src)
+	all = append(all, m)
+	return
+}

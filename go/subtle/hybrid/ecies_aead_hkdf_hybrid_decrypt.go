@@ -27,14 +27,14 @@ type EciesAeadHkdfHybridDecrypt struct {
 	hkdfSalt     []byte
 	hkdfHMACAlgo string
 	pointFormat  string
-	demHelper    EciesAeadHkdfDemHelper
+	demHelper    EciesAEADHKDFDEMHelper
 }
 
 var _ tink.HybridDecrypt = (*EciesAeadHkdfHybridDecrypt)(nil)
 
 // NewEciesAeadHkdfHybridDecrypt returns ECIES decryption construct with HKDF-KEM (key encapsulation mechanism)
 // and AEAD-DEM (data encapsulation mechanism).
-func NewEciesAeadHkdfHybridDecrypt(pvt *ECPrivateKey, hkdfSalt []byte, hkdfHMACAlgo string, ptFormat string, demHelper EciesAeadHkdfDemHelper) (*EciesAeadHkdfHybridDecrypt, error) {
+func NewEciesAeadHkdfHybridDecrypt(pvt *ECPrivateKey, hkdfSalt []byte, hkdfHMACAlgo string, ptFormat string, demHelper EciesAEADHKDFDEMHelper) (*EciesAeadHkdfHybridDecrypt, error) {
 	return &EciesAeadHkdfHybridDecrypt{
 		privateKey:   pvt,
 		hkdfSalt:     hkdfSalt,
@@ -47,7 +47,6 @@ func NewEciesAeadHkdfHybridDecrypt(pvt *ECPrivateKey, hkdfSalt []byte, hkdfHMACA
 // Decrypt is used to decrypt using ECIES with a HKDF-KEM and AEAD-DEM mechanisms.
 func (e *EciesAeadHkdfHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
 	curve := e.privateKey.PublicKey.Curve
-
 	headerSize, err := encodingSizeInBytes(curve, e.pointFormat)
 	if err != nil {
 		return nil, err
@@ -55,17 +54,20 @@ func (e *EciesAeadHkdfHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]
 	if len(ciphertext) < headerSize {
 		return nil, errors.New("ciphertext too short")
 	}
-	kemBytes := ciphertext[:headerSize]
+	var kemBytes = make([]byte, headerSize)
+	var ct = make([]byte, len(ciphertext)-headerSize)
+	copy(kemBytes, ciphertext[:headerSize])
+	copy(ct, ciphertext[headerSize:])
 	rKem := &ECIESHKDFRecipientKem{
 		recipientPrivateKey: e.privateKey,
 	}
-	symmetricKey, err := rKem.decapsulate(kemBytes, e.hkdfHMACAlgo, e.hkdfSalt, contextInfo, e.demHelper.getSymmetricKeySize(), e.pointFormat)
+	symmetricKey, err := rKem.decapsulate(kemBytes, e.hkdfHMACAlgo, e.hkdfSalt, contextInfo, e.demHelper.GetSymmetricKeySize(), e.pointFormat)
 	if err != nil {
 		return nil, err
 	}
-	aead, err := e.demHelper.getAead(symmetricKey)
+	aead, err := e.demHelper.GetAEAD(symmetricKey)
 	if err != nil {
 		return nil, err
 	}
-	return aead.Decrypt(ciphertext[headerSize:], []byte{})
+	return aead.Decrypt(ct, []byte{})
 }

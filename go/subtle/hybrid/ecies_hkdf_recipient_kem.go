@@ -22,12 +22,11 @@ type ECIESHKDFRecipientKem struct {
 
 // decapsulate uses the KEM to generate a new HKDF-based key.
 func (s *ECIESHKDFRecipientKem) decapsulate(kem []byte, hashAlg string, salt []byte, info []byte, keySize uint32, pointFormat string) ([]byte, error) {
-	ephemeralPvt, err := GenerateECDHKeyPair(s.recipientPrivateKey.PublicKey.Curve)
+	pubPoint, err := pointDecode(s.recipientPrivateKey.PublicKey.Curve, pointFormat, kem)
 	if err != nil {
 		return nil, err
 	}
-
-	secret, err := ComputeSharedSecret(&ephemeralPvt.PublicKey.Point, s.recipientPrivateKey)
+	secret, err := ComputeSharedSecret(pubPoint, s.recipientPrivateKey)
 	if err != nil {
 		return nil, err
 	}

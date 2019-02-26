@@ -16,8 +16,12 @@ package hybrid
 
 import "github.com/google/tink/go/tink"
 
-// EciesAeadHkdfDemHelper a helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF.
-type EciesAeadHkdfDemHelper interface {
-	getSymmetricKeySize() uint32
-	getAead(symmetricKeyValue []byte) (tink.AEAD, error)
+// EciesAEADHKDFDEMHelper a helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF.
+type EciesAEADHKDFDEMHelper interface {
+
+	// GetSymmetricKeySize gives the size of the DEM-key in bytes
+	GetSymmetricKeySize() uint32
+
+	// GetAEAD returns the newly created AEAD primitive.
+	GetAEAD(symmetricKeyValue []byte) (tink.AEAD, error)
 }

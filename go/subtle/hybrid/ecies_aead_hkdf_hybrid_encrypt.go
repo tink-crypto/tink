@@ -27,15 +27,15 @@ type EciesAeadHkdfHybridEncrypt struct {
 	hkdfSalt     []byte
 	hkdfHMACAlgo string
 	pointFormat  string
-	demHelper    EciesAeadHkdfDemHelper
+	demHelper    EciesAEADHKDFDEMHelper
 }
 
 var _ tink.HybridEncrypt = (*EciesAeadHkdfHybridEncrypt)(nil)
 
 // NewEciesAeadHkdfHybridEncrypt returns ECIES encryption construct with HKDF-KEM (key encapsulation mechanism)
 // and AEAD-DEM (data encapsulation mechanism).
-func NewEciesAeadHkdfHybridEncrypt(pub *ECPublicKey, hkdfSalt []byte, hkdfHMACAlgo string, ptFormat string, demHelper EciesAeadHkdfDemHelper) (*EciesAeadHkdfHybridEncrypt, error) {
-	c, err := getCurve(pub.Curve.Params().Name)
+func NewEciesAeadHkdfHybridEncrypt(pub *ECPublicKey, hkdfSalt []byte, hkdfHMACAlgo string, ptFormat string, demHelper EciesAEADHKDFDEMHelper) (*EciesAeadHkdfHybridEncrypt, error) {
+	c, err := GetCurve(pub.Curve.Params().Name)
 	if err != nil {
 		return nil, err
 	}
@@ -57,11 +57,11 @@ func (e *EciesAeadHkdfHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]b
 	sKem := &ECIESHKDFSenderKem{
 		recipientPublicKey: e.publicKey,
 	}
-	kemKey, err := sKem.encapsulate(e.hkdfHMACAlgo, e.hkdfSalt, contextInfo, e.demHelper.getSymmetricKeySize(), e.pointFormat)
+	kemKey, err := sKem.encapsulate(e.hkdfHMACAlgo, e.hkdfSalt, contextInfo, e.demHelper.GetSymmetricKeySize(), e.pointFormat)
 	if err != nil {
 		return nil, err
 	}
-	aead, err := e.demHelper.getAead(kemKey.SymmetricKey)
+	aead, err := e.demHelper.GetAEAD(kemKey.SymmetricKey)
 	if err != nil {
 		return nil, err
 	}
