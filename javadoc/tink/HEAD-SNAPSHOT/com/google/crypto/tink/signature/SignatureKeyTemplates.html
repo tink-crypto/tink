@@ -119,7 +119,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  <pre><code>
  Config.register(SignatureConfig.TINK_1_1_0);
  KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
- PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
+ PublicKeySign signer = handle.getPrimitive(PublicKeySign.class);
+ PublicKeyVerify verifier = handle.getPublicKeyset().getPrimitive(PublicKeyVerify.class);
  </code></pre></div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
