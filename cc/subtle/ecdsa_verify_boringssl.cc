@@ -69,13 +69,14 @@ crypto::tink::util::StatusOr<std::string> IeeeToDer(absl::string_view ieee,
   status_or_r.ValueOrDie().release();
   status_or_s.ValueOrDie().release();
   uint8_t* der = nullptr;
-  bssl::UniquePtr<uint8_t> unique(der);
   size_t der_len;
   if (!ECDSA_SIG_to_bytes(&der, &der_len, ecdsa.get())) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ECDSA_SIG_to_bytes error");
   }
-  return std::string(reinterpret_cast<char*>(der), der_len);
+  std::string result = std::string(reinterpret_cast<char*>(der), der_len);
+  OPENSSL_free(der);
+  return result;
 }
 }  // namespace
 
