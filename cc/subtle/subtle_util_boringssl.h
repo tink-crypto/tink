@@ -136,7 +136,7 @@ class SubtleUtilBoringSSL {
   // The compressed point is encoded as 1-byte || x where x is
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
-  static crypto::tink::util::StatusOr<EC_POINT *> EcPointDecode(
+  static util::StatusOr<bssl::UniquePtr<EC_POINT>> EcPointDecode(
       EllipticCurveType curve, EcPointFormat format, absl::string_view encoded);
 
   // Returns the encoded public key based on curve type, point format and

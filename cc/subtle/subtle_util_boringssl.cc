@@ -219,7 +219,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
 }
 
 // static
-util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
+util::StatusOr<bssl::UniquePtr<EC_POINT>> SubtleUtilBoringSSL::EcPointDecode(
     EllipticCurveType curve, EcPointFormat format, absl::string_view encoded) {
   auto status_or_ec_group = GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
@@ -303,7 +303,7 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
   if (1 != EC_POINT_is_on_curve(group.get(), point.get(), nullptr)) {
     return util::Status(util::error::INTERNAL, "Point is not on curve");
   }
-  return point.release();
+  return {std::move(point)};
 }
 
 // static

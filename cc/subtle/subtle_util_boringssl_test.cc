@@ -127,13 +127,13 @@ TEST(SubtleUtilBoringSSLTest, EcPointDecode) {
         test.curve, test.format, encoded_str);
     EXPECT_TRUE(status_or_ec_point.ok());
     EXPECT_EQ(0, EC_POINT_cmp(status_or_group.ValueOrDie(), point.get(),
-                              status_or_ec_point.ValueOrDie(), nullptr));
+                              status_or_ec_point.ValueOrDie().get(), nullptr));
     // Modify the 1st byte.
     encoded_str = std::string("0") + encoded_str.substr(1);
-    status_or_ec_point = SubtleUtilBoringSSL::EcPointDecode(
+    auto status_or_ec_point2 = SubtleUtilBoringSSL::EcPointDecode(
         test.curve, test.format, encoded_str);
-    EXPECT_FALSE(status_or_ec_point.ok());
-    EXPECT_LE(0, status_or_ec_point.status().error_message().find(
+    EXPECT_FALSE(status_or_ec_point2.ok());
+    EXPECT_LE(0, status_or_ec_point2.status().error_message().find(
                      "point should start with"));
   }
 }
@@ -236,7 +236,8 @@ bool WycheproofTest(const rapidjson::Value& root) {
         }
         continue;
       }
-      bssl::UniquePtr<EC_POINT> pub_key(status_or_ec_point.ValueOrDie());
+      bssl::UniquePtr<EC_POINT> pub_key =
+          std::move(status_or_ec_point.ValueOrDie());
       bssl::UniquePtr<BIGNUM> priv_key(
           BN_bin2bn(reinterpret_cast<const unsigned char*>(priv_bytes.data()),
                     priv_bytes.size(), nullptr));

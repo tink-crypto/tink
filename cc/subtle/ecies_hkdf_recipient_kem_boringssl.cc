@@ -61,7 +61,8 @@ util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
                      "Invalid KEM bytes: %s",
                      status_or_ec_point.status().error_message().c_str());
   }
-  bssl::UniquePtr<EC_POINT> pub_key(status_or_ec_point.ValueOrDie());
+  bssl::UniquePtr<EC_POINT> pub_key =
+      std::move(status_or_ec_point.ValueOrDie());
   bssl::UniquePtr<BIGNUM> priv_key(
       BN_bin2bn(reinterpret_cast<const unsigned char*>(priv_key_value_.data()),
                 priv_key_value_.size(), nullptr));
