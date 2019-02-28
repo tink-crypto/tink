@@ -32,7 +32,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * <pre>{@code
  * Config.register(Mac.TINK_1_0_0);
  * KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
- * Mac mac = MacFactory.getPrimitive(handle);
+ * Mac mac = handle.getPrimitive(Mac.class);
  * }</pre>
  *
  * @since 1.0.0
