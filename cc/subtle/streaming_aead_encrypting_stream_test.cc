@@ -89,6 +89,28 @@ class DummyStreamSegmentEncrypter : public StreamSegmentEncrypter {
     generated_output_size_ = header_size;
   }
 
+  // Generates an expected ciphertext for the given 'plaintext'.
+  std::string GenerateCiphertext(absl::string_view plaintext) {
+    std::string ct(header_.begin(), header_.end());
+    int64_t seg_no = 0;
+    int pos = 0;
+    do {
+      int seg_len = pt_segment_size_;
+      if (pos == 0) {  // The first segment.
+        seg_len -= ct_offset_;
+      }
+      if (seg_len > plaintext.size() - pos) {  // The last segment.
+        seg_len = plaintext.size() - pos;
+      }
+      ct.append(plaintext.substr(pos, seg_len).data(), seg_len);
+      pos += seg_len;
+      ct.append(reinterpret_cast<const char*>(&seg_no), sizeof(seg_no));
+      ct.append(1, pos < plaintext.size() ? kNotLastSegment : kLastSegment);
+      seg_no++;
+    } while (pos < plaintext.size());
+    return ct;
+  }
+
   util::Status EncryptSegment(
       const std::vector<uint8_t>& plaintext,
       bool is_last_segment,
@@ -212,8 +234,9 @@ TEST_F(StreamingAeadEncryptingStreamTest, WritingStreams) {
           EXPECT_EQ(enc_stream->Position(), pt.size());
           EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
                     refs.ct_buf->str().size());
-          EXPECT_EQ(std::string(header_size, 'h'),
-                    refs.ct_buf->str().substr(0, header_size));
+          auto exp_ciphertext = refs.seg_enc->GenerateCiphertext(pt);
+          EXPECT_EQ(exp_ciphertext.size(), refs.ct_buf->str().size());
+          EXPECT_EQ(exp_ciphertext, refs.ct_buf->str());
 
           // Try closing the stream again.
           status = enc_stream->Close();
@@ -314,6 +337,53 @@ TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintext) {
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
   EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+}
+
+TEST_F(StreamingAeadEncryptingStreamTest, NextAfterBackup) {
+  int pt_segment_size = 512;
+  int part1_size = 123;
+  int part2_size = 74;
+  int header_size = 64;
+  void* buffer;
+
+  // Get an encrypting stream.
+  ValidationRefs refs;
+  auto enc_stream = GetEncryptingStream(
+      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+
+  // Get the first block.
+  auto next_result = enc_stream->Next(&buffer);
+  int buffer_size = pt_segment_size - header_size;
+  EXPECT_TRUE(next_result.ok()) << next_result.status();
+  EXPECT_EQ(buffer_size, next_result.ValueOrDie());
+  EXPECT_EQ(buffer_size, enc_stream->Position());
+
+  // Backup so that only part1_size bytes are written.
+  enc_stream->BackUp(buffer_size - part1_size);
+  EXPECT_EQ(part1_size, enc_stream->Position());
+
+  // Get backed up space.
+  void* backedup_buffer;
+  next_result = enc_stream->Next(&backedup_buffer);
+  EXPECT_TRUE(next_result.ok()) << next_result.status();
+  EXPECT_EQ(buffer_size - part1_size, next_result.ValueOrDie());
+  EXPECT_EQ(reinterpret_cast<uint8_t*>(buffer) + part1_size,
+            reinterpret_cast<uint8_t*>(backedup_buffer));
+
+  // Backup so again that (part1_size + part2_size) bytes are written.
+  enc_stream->BackUp(buffer_size - (part1_size + part2_size));
+  EXPECT_EQ(part1_size + part2_size, enc_stream->Position());
+
+  // Get backed up space again.
+  next_result = enc_stream->Next(&backedup_buffer);
+  EXPECT_TRUE(next_result.ok()) << next_result.status();
+  EXPECT_EQ(buffer_size - (part1_size + part2_size), next_result.ValueOrDie());
+  EXPECT_EQ(reinterpret_cast<uint8_t*>(buffer) + part1_size + part2_size,
+            reinterpret_cast<uint8_t*>(backedup_buffer));
+
+  // Close the stream.
+  auto close_status = enc_stream->Close();
+  EXPECT_TRUE(close_status.ok()) << close_status;
 }
 
 TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintextWithBackup) {

@@ -113,7 +113,7 @@ StatusOr<int> StreamingAeadEncryptingStream::Next(void** data) {
   // If some space was backed up, return it first.
   if (count_backedup_ > 0) {
     position_ += count_backedup_;
-    pt_buffer_offset_ = pt_buffer_.size() - pt_buffer_offset_ - count_backedup_;
+    pt_buffer_offset_ = pt_buffer_.size() - count_backedup_;
     int backedup = count_backedup_;
     count_backedup_ = 0;
     *data = pt_buffer_.data() + pt_buffer_offset_;
