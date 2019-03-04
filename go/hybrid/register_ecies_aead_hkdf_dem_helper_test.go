@@ -43,7 +43,7 @@ var (
 
 func TestCipherKeySize(t *testing.T) {
 	for c, l := range keyTemplates {
-		rDem, err := newRegisterEciesAeadHkdfDemHelper(c)
+		rDem, err := newRegisterECIESAEADHKDFDemHelper(c)
 		if err != nil {
 			t.Fatalf("error generating a DEM helper :%s", err)
 		}
@@ -55,7 +55,7 @@ func TestCipherKeySize(t *testing.T) {
 
 func TestUnsupportedKeyTemplates(t *testing.T) {
 	for _, l := range uTemplates {
-		_, err := newRegisterEciesAeadHkdfDemHelper(l)
+		_, err := newRegisterECIESAEADHKDFDemHelper(l)
 		if err == nil {
 			t.Fatalf("unsupported key template %s should have generated error", l)
 		}
@@ -66,7 +66,7 @@ func TestAead(t *testing.T) {
 	for c, _ := range keyTemplates {
 		pt := random.GetRandomBytes(20)
 		ad := random.GetRandomBytes(20)
-		rDem, err := newRegisterEciesAeadHkdfDemHelper(c)
+		rDem, err := newRegisterECIESAEADHKDFDemHelper(c)
 		if err != nil {
 			t.Fatalf("error generating a DEM helper :%s", err)
 		}

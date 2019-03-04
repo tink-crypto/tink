@@ -37,15 +37,15 @@ func basicMultipleEncrypts(t *testing.T, c string, k *tinkpb.KeyTemplate) {
 	salt := []byte("some salt")
 	pt := random.GetRandomBytes(20)
 	context := []byte("context info")
-	rDem, err := newRegisterEciesAeadHkdfDemHelper(k)
+	rDem, err := newRegisterECIESAEADHKDFDemHelper(k)
 	if err != nil {
 		t.Fatalf("error generating a DEM helper :%s", err)
 	}
-	e, err := subtle.NewEciesAeadHkdfHybridEncrypt(&pvt.PublicKey, salt, "SHA256", "UNCOMPRESSED", rDem)
+	e, err := subtle.NewECIESAEADHKDFHybridEncrypt(&pvt.PublicKey, salt, "SHA256", "UNCOMPRESSED", rDem)
 	if err != nil {
 		t.Fatalf("error generating an encryption construct :%s", err)
 	}
-	d, err := subtle.NewEciesAeadHkdfHybridDecrypt(pvt, salt, "SHA256", "UNCOMPRESSED", rDem)
+	d, err := subtle.NewECIESAEADHKDFHybridDecrypt(pvt, salt, "SHA256", "UNCOMPRESSED", rDem)
 	if err != nil {
 		t.Fatalf("error generating an decryption construct :%s", err)
 	}

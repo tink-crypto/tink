@@ -28,64 +28,64 @@ import (
 )
 
 const (
-	eciesAeadHkdfPrivateKeyKeyVersion = 0
-	eciesAeadHkdfPrivateKeyTypeURL    = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
+	eciesAEADHKDFPrivateKeyKeyVersion = 0
+	eciesAEADHKDFPrivateKeyTypeURL    = "type.googleapis.com/google.crypto.tink.ECIESAEADHKDFPrivateKey"
 )
 
 // common errors
-var errInvalidEciesAeadHkdfPrivateKeyKey = fmt.Errorf("ecies_aead_hkdf_private_key_manager: invalid key")
-var errInvalidEciesAeadHkdfPrivateKeyKeyFormat = fmt.Errorf("ecies_aead_hkdf_private_key_manager: invalid key format")
+var errInvalidECIESAEADHKDFPrivateKeyKey = fmt.Errorf("ecies_aead_hkdf_private_key_manager: invalid key")
+var errInvalidECIESAEADHKDFPrivateKeyKeyFormat = fmt.Errorf("ecies_aead_hkdf_private_key_manager: invalid key format")
 
-// eciesAeadHkdfPrivateKeyKeyManager is an implementation of KeyManager interface.
-// It generates new EciesAeadHkdfPrivateKeyKey keys and produces new instances of EciesAeadHkdfPrivateKey subtle.
-type eciesAeadHkdfPrivateKeyKeyManager struct{}
+// eciesAEADHKDFPrivateKeyKeyManager is an implementation of KeyManager interface.
+// It generates new ECIESAEADHKDFPrivateKeyKey keys and produces new instances of ECIESAEADHKDFPrivateKey subtle.
+type eciesAEADHKDFPrivateKeyKeyManager struct{}
 
-// Assert that eciesAeadHkdfPrivateKeyKeyManager implements the KeyManager interface.
-var _ registry.KeyManager = (*eciesAeadHkdfPrivateKeyKeyManager)(nil)
+// Assert that eciesAEADHKDFPrivateKeyKeyManager implements the KeyManager interface.
+var _ registry.KeyManager = (*eciesAEADHKDFPrivateKeyKeyManager)(nil)
 
-// newEciesAeadHkdfPrivateKeyKeyManager creates a new aesGcmKeyManager.
-func newEciesAeadHkdfPrivateKeyKeyManager() *eciesAeadHkdfPrivateKeyKeyManager {
-	return new(eciesAeadHkdfPrivateKeyKeyManager)
+// newECIESAEADHKDFPrivateKeyKeyManager creates a new aesGcmKeyManager.
+func newECIESAEADHKDFPrivateKeyKeyManager() *eciesAEADHKDFPrivateKeyKeyManager {
+	return new(eciesAEADHKDFPrivateKeyKeyManager)
 }
 
-// Primitive creates an EciesAeadHkdfPrivateKey subtle for the given serialized EciesAeadHkdfPrivateKey proto.
-func (km *eciesAeadHkdfPrivateKeyKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+// Primitive creates an ECIESAEADHKDFPrivateKey subtle for the given serialized ECIESAEADHKDFPrivateKey proto.
+func (km *eciesAEADHKDFPrivateKeyKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
-		return nil, errInvalidEciesAeadHkdfPrivateKeyKey
+		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
 	}
 	key := new(eahpb.EciesAeadHkdfPrivateKey)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
-		return nil, errInvalidEciesAeadHkdfPrivateKeyKey
+		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
 	}
 	if err := km.validateKey(key); err != nil {
-		return nil, errInvalidEciesAeadHkdfPrivateKeyKey
+		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
 	}
 	curve, err := subtle.GetCurve(key.PublicKey.Params.KemParams.CurveType.String())
 	if err != nil {
 		return nil, err
 	}
 	pvt := subtle.GetECPrivateKey(curve, key.KeyValue)
-	rDem, err := newRegisterEciesAeadHkdfDemHelper(key.PublicKey.Params.DemParams.AeadDem)
+	rDem, err := newRegisterECIESAEADHKDFDemHelper(key.PublicKey.Params.DemParams.AeadDem)
 	if err != nil {
 		return nil, err
 	}
 	salt := key.PublicKey.Params.KemParams.HkdfSalt
 	hash := key.PublicKey.Params.KemParams.HkdfHashType.String()
 	ptFormat := key.PublicKey.Params.EcPointFormat.String()
-	return subtle.NewEciesAeadHkdfHybridDecrypt(pvt, salt, hash, ptFormat, rDem)
+	return subtle.NewECIESAEADHKDFHybridDecrypt(pvt, salt, hash, ptFormat, rDem)
 }
 
-// NewKey creates a new key according to specification the given serialized EciesAeadHkdfPrivateKeyKeyFormat.
-func (km *eciesAeadHkdfPrivateKeyKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+// NewKey creates a new key according to specification the given serialized ECIESAEADHKDFPrivateKeyKeyFormat.
+func (km *eciesAEADHKDFPrivateKeyKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
-		return nil, errInvalidEciesAeadHkdfPrivateKeyKeyFormat
+		return nil, errInvalidECIESAEADHKDFPrivateKeyKeyFormat
 	}
 	keyFormat := new(eahpb.EciesAeadHkdfKeyFormat)
 	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
-		return nil, errInvalidEciesAeadHkdfPrivateKeyKeyFormat
+		return nil, errInvalidECIESAEADHKDFPrivateKeyKeyFormat
 	}
 	if err := km.validateKeyFormat(keyFormat); err != nil {
-		return nil, errInvalidEciesAeadHkdfPrivateKeyKeyFormat
+		return nil, errInvalidECIESAEADHKDFPrivateKeyKeyFormat
 	}
 	curve, err := subtle.GetCurve(keyFormat.Params.KemParams.CurveType.String())
 	pvt, err := subtle.GenerateECDHKeyPair(curve)
@@ -94,10 +94,10 @@ func (km *eciesAeadHkdfPrivateKeyKeyManager) NewKey(serializedKeyFormat []byte) 
 	}
 
 	return &eahpb.EciesAeadHkdfPrivateKey{
-		Version:  eciesAeadHkdfPrivateKeyKeyVersion,
+		Version:  eciesAEADHKDFPrivateKeyKeyVersion,
 		KeyValue: pvt.D.Bytes(),
 		PublicKey: &eahpb.EciesAeadHkdfPublicKey{
-			Version: eciesAeadHkdfPrivateKeyKeyVersion,
+			Version: eciesAEADHKDFPrivateKeyKeyVersion,
 			Params:  keyFormat.Params,
 			X:       pvt.PublicKey.Point.X.Bytes(),
 			Y:       pvt.PublicKey.Point.Y.Bytes(),
@@ -106,9 +106,9 @@ func (km *eciesAeadHkdfPrivateKeyKeyManager) NewKey(serializedKeyFormat []byte) 
 }
 
 // NewKeyData creates a new KeyData according to specification in the given serialized
-// EciesAeadHkdfPrivateKeyKeyFormat.
+// ECIESAEADHKDFPrivateKeyKeyFormat.
 // It should be used solely by the key management API.
-func (km *eciesAeadHkdfPrivateKeyKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (km *eciesAEADHKDFPrivateKeyKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	key, err := km.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
@@ -118,36 +118,36 @@ func (km *eciesAeadHkdfPrivateKeyKeyManager) NewKeyData(serializedKeyFormat []by
 		return nil, err
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         eciesAeadHkdfPrivateKeyTypeURL,
+		TypeUrl:         eciesAEADHKDFPrivateKeyTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
 	}, nil
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (km *eciesAeadHkdfPrivateKeyKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == eciesAeadHkdfPrivateKeyTypeURL
+func (km *eciesAEADHKDFPrivateKeyKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == eciesAEADHKDFPrivateKeyTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
-func (km *eciesAeadHkdfPrivateKeyKeyManager) TypeURL() string {
-	return eciesAeadHkdfPrivateKeyTypeURL
+func (km *eciesAEADHKDFPrivateKeyKeyManager) TypeURL() string {
+	return eciesAEADHKDFPrivateKeyTypeURL
 }
 
 // validateKey validates the given ECDSAPrivateKey.
-func (km *eciesAeadHkdfPrivateKeyKeyManager) validateKey(key *eahpb.EciesAeadHkdfPrivateKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, eciesAeadHkdfPrivateKeyKeyVersion); err != nil {
+func (km *eciesAEADHKDFPrivateKeyKeyManager) validateKey(key *eahpb.EciesAeadHkdfPrivateKey) error {
+	if err := keyset.ValidateKeyVersion(key.Version, eciesAEADHKDFPrivateKeyKeyVersion); err != nil {
 		return fmt.Errorf("ecies_aead_hkdf_private_key_manager: invalid key: %s", err)
 	}
-	return checkEciesAeadHkdfParams(key.PublicKey.Params)
+	return checkECIESAEADHKDFParams(key.PublicKey.Params)
 }
 
 // validateKeyFormat validates the given ECDSAKeyFormat.
-func (km *eciesAeadHkdfPrivateKeyKeyManager) validateKeyFormat(format *eahpb.EciesAeadHkdfKeyFormat) error {
-	return checkEciesAeadHkdfParams(format.Params)
+func (km *eciesAEADHKDFPrivateKeyKeyManager) validateKeyFormat(format *eahpb.EciesAeadHkdfKeyFormat) error {
+	return checkECIESAEADHKDFParams(format.Params)
 }
 
-func checkEciesAeadHkdfParams(params *eahpb.EciesAeadHkdfParams) error {
+func checkECIESAEADHKDFParams(params *eahpb.EciesAeadHkdfParams) error {
 	_, err := subtle.GetCurve(params.KemParams.CurveType.String())
 	if err != nil {
 		return err

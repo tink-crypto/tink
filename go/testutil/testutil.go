@@ -22,9 +22,10 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/ed25519"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/core/registry"
+	subtlehybrid "github.com/google/tink/go/subtle/hybrid"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
@@ -34,6 +35,7 @@ import (
 	aspb "github.com/google/tink/proto/aes_siv_go_proto"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
+	eciespb "github.com/google/tink/proto/ecies_aead_hkdf_go_proto"
 	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -430,4 +432,48 @@ func GenerateMutations(src []byte) (all [][]byte) {
 	copy(m, src)
 	all = append(all, m)
 	return
+}
+
+// eciesAEADHKDFPublicKey returns a EciesAeadHkdfPublicKey with specified parameters.
+func eciesAEADHKDFPublicKey(c commonpb.EllipticCurveType, ht commonpb.HashType, ptfmt commonpb.EcPointFormat, dekT *tinkpb.KeyTemplate, x, y, salt []byte) *eciespb.EciesAeadHkdfPublicKey {
+	return &eciespb.EciesAeadHkdfPublicKey{
+		Version: 0,
+		Params: &eciespb.EciesAeadHkdfParams{
+			KemParams: &eciespb.EciesHkdfKemParams{
+				CurveType:    c,
+				HkdfHashType: ht,
+				HkdfSalt:     salt,
+			},
+			DemParams: &eciespb.EciesAeadDemParams{
+				AeadDem: dekT,
+			},
+			EcPointFormat: ptfmt,
+		},
+		X: x,
+		Y: y,
+	}
+}
+
+// eciesAEADHKDFPrivateKey returns a EciesAeadHkdfPrivateKey with specified parameters
+func eciesAEADHKDFPrivateKey(p *eciespb.EciesAeadHkdfPublicKey, d []byte) *eciespb.EciesAeadHkdfPrivateKey {
+	return &eciespb.EciesAeadHkdfPrivateKey{
+		Version:   0,
+		PublicKey: p,
+		KeyValue:  d,
+	}
+}
+
+// GenerateECIESAEADHKDFPrivateKey generates a new EC key pair and returns the private key proto.
+func GenerateECIESAEADHKDFPrivateKey(c commonpb.EllipticCurveType, ht commonpb.HashType, ptfmt commonpb.EcPointFormat, dekT *tinkpb.KeyTemplate, salt []byte) (*eciespb.EciesAeadHkdfPrivateKey, error) {
+	curve, err := subtlehybrid.GetCurve(c.String())
+	if err != nil {
+		return nil, err
+	}
+	pvt, err := subtlehybrid.GenerateECDHKeyPair(curve)
+	if err != nil {
+		return nil, err
+	}
+	pubKey := eciesAEADHKDFPublicKey(c, ht, ptfmt, dekT, pvt.PublicKey.Point.X.Bytes(), pvt.PublicKey.Point.Y.Bytes(), salt)
+	//fmt.Println(proto.MarshalTextString(pubKey))
+	return eciesAEADHKDFPrivateKey(pubKey, pvt.D.Bytes()), nil
 }

@@ -41,15 +41,15 @@ func modifyDecrypt(t *testing.T, c string, k *tinkpb.KeyTemplate) {
 	salt := random.GetRandomBytes(8)
 	pt := random.GetRandomBytes(4)
 	context := random.GetRandomBytes(4)
-	rDem, err := newRegisterEciesAeadHkdfDemHelper(k)
+	rDem, err := newRegisterECIESAEADHKDFDemHelper(k)
 	if err != nil {
 		t.Fatalf("error generating a DEM helper :%s", err)
 	}
-	e, err := subtle.NewEciesAeadHkdfHybridEncrypt(&pvt.PublicKey, salt, "SHA256", "UNCOMPRESSED", rDem)
+	e, err := subtle.NewECIESAEADHKDFHybridEncrypt(&pvt.PublicKey, salt, "SHA256", "UNCOMPRESSED", rDem)
 	if err != nil {
 		t.Fatalf("error generating an encryption construct :%s", err)
 	}
-	d, err := subtle.NewEciesAeadHkdfHybridDecrypt(pvt, salt, "SHA256", "UNCOMPRESSED", rDem)
+	d, err := subtle.NewECIESAEADHKDFHybridDecrypt(pvt, salt, "SHA256", "UNCOMPRESSED", rDem)
 	if err != nil {
 		t.Fatalf("error generating an decryption construct :%s", err)
 	}
@@ -81,7 +81,7 @@ func modifyDecrypt(t *testing.T, c string, k *tinkpb.KeyTemplate) {
 		for j := 0; j < 8; j++ {
 			copy(mSalt, salt)
 			mSalt[i] ^= (1 << uint8(j))
-			d, err = subtle.NewEciesAeadHkdfHybridDecrypt(pvt, mSalt, "SHA256", "UNCOMPRESSED", rDem)
+			d, err = subtle.NewECIESAEADHKDFHybridDecrypt(pvt, mSalt, "SHA256", "UNCOMPRESSED", rDem)
 			if _, err := d.Decrypt(ct, context); err == nil {
 				t.Fatalf("invalid salt should throw exception")
 			}

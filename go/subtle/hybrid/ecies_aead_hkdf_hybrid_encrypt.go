@@ -20,9 +20,9 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// EciesAeadHkdfHybridEncrypt is an instance of ECIES encryption with HKDF-KEM (key encapsulation mechanism)
+// ECIESAEADHKDFHybridEncrypt is an instance of ECIES encryption with HKDF-KEM (key encapsulation mechanism)
 // and AEAD-DEM (data encapsulation mechanism).
-type EciesAeadHkdfHybridEncrypt struct {
+type ECIESAEADHKDFHybridEncrypt struct {
 	publicKey    *ECPublicKey
 	hkdfSalt     []byte
 	hkdfHMACAlgo string
@@ -30,16 +30,16 @@ type EciesAeadHkdfHybridEncrypt struct {
 	demHelper    EciesAEADHKDFDEMHelper
 }
 
-var _ tink.HybridEncrypt = (*EciesAeadHkdfHybridEncrypt)(nil)
+var _ tink.HybridEncrypt = (*ECIESAEADHKDFHybridEncrypt)(nil)
 
-// NewEciesAeadHkdfHybridEncrypt returns ECIES encryption construct with HKDF-KEM (key encapsulation mechanism)
+// NewECIESAEADHKDFHybridEncrypt returns ECIES encryption construct with HKDF-KEM (key encapsulation mechanism)
 // and AEAD-DEM (data encapsulation mechanism).
-func NewEciesAeadHkdfHybridEncrypt(pub *ECPublicKey, hkdfSalt []byte, hkdfHMACAlgo string, ptFormat string, demHelper EciesAEADHKDFDEMHelper) (*EciesAeadHkdfHybridEncrypt, error) {
+func NewECIESAEADHKDFHybridEncrypt(pub *ECPublicKey, hkdfSalt []byte, hkdfHMACAlgo string, ptFormat string, demHelper EciesAEADHKDFDEMHelper) (*ECIESAEADHKDFHybridEncrypt, error) {
 	c, err := GetCurve(pub.Curve.Params().Name)
 	if err != nil {
 		return nil, err
 	}
-	return &EciesAeadHkdfHybridEncrypt{
+	return &ECIESAEADHKDFHybridEncrypt{
 		publicKey: &ECPublicKey{
 			Curve: c,
 			Point: pub.Point,
@@ -52,7 +52,7 @@ func NewEciesAeadHkdfHybridEncrypt(pub *ECPublicKey, hkdfSalt []byte, hkdfHMACAl
 }
 
 // Encrypt is used to encrypt using ECIES with a HKDF-KEM and AEAD-DEM mechanisms.
-func (e *EciesAeadHkdfHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
+func (e *ECIESAEADHKDFHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	var b bytes.Buffer
 	sKem := &ECIESHKDFSenderKem{
 		recipientPublicKey: e.publicKey,

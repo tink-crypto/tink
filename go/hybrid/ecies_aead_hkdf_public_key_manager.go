@@ -29,38 +29,38 @@ import (
 )
 
 const (
-	eciesAeadHkdfPublicKeyKeyVersion = 0
+	eciesAEADHKDFPublicKeyKeyVersion = 0
 
-	eciesAeadHkdfPublicKeyTypeURL = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey"
+	eciesAEADHKDFPublicKeyTypeURL = "type.googleapis.com/google.crypto.tink.ECIESAEADHKDFPublicKey"
 )
 
 // common errors
-var errInvalidEciesAeadHkdfPublicKeyKey = fmt.Errorf("ecies_aead_hkdf_public_key_manager: invalid key")
-var errInvalidEciesAeadHkdfPublicKeyKeyFormat = fmt.Errorf("ecies_aead_hkdf_public_key_manager: invalid key format")
+var errInvalidECIESAEADHKDFPublicKeyKey = fmt.Errorf("ecies_aead_hkdf_public_key_manager: invalid key")
+var errInvalidECIESAEADHKDFPublicKeyKeyFormat = fmt.Errorf("ecies_aead_hkdf_public_key_manager: invalid key format")
 
-// eciesAeadHkdfPublicKeyKeyManager is an implementation of KeyManager interface.
-// It generates new EciesAeadHkdfPublicKeyKey keys and produces new instances of EciesAeadHkdfPublicKey subtle.
-type eciesAeadHkdfPublicKeyKeyManager struct{}
+// eciesAEADHKDFPublicKeyKeyManager is an implementation of KeyManager interface.
+// It generates new ECIESAEADHKDFPublicKeyKey keys and produces new instances of ECIESAEADHKDFPublicKey subtle.
+type eciesAEADHKDFPublicKeyKeyManager struct{}
 
-// Assert that eciesAeadHkdfPublicKeyKeyManager implements the KeyManager interface.
-var _ registry.KeyManager = (*eciesAeadHkdfPublicKeyKeyManager)(nil)
+// Assert that eciesAEADHKDFPublicKeyKeyManager implements the KeyManager interface.
+var _ registry.KeyManager = (*eciesAEADHKDFPublicKeyKeyManager)(nil)
 
-// newEciesAeadHkdfPublicKeyKeyManager creates a new aesGcmKeyManager.
-func newEciesAeadHkdfPublicKeyKeyManager() *eciesAeadHkdfPublicKeyKeyManager {
-	return new(eciesAeadHkdfPublicKeyKeyManager)
+// newECIESAEADHKDFPublicKeyKeyManager creates a new aesGcmKeyManager.
+func newECIESAEADHKDFPublicKeyKeyManager() *eciesAEADHKDFPublicKeyKeyManager {
+	return new(eciesAEADHKDFPublicKeyKeyManager)
 }
 
-// Primitive creates an EciesAeadHkdfPublicKey subtle for the given serialized EciesAeadHkdfPublicKey proto.
-func (km *eciesAeadHkdfPublicKeyKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+// Primitive creates an ECIESAEADHKDFPublicKey subtle for the given serialized ECIESAEADHKDFPublicKey proto.
+func (km *eciesAEADHKDFPublicKeyKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
-		return nil, errInvalidEciesAeadHkdfPublicKeyKey
+		return nil, errInvalidECIESAEADHKDFPublicKeyKey
 	}
 	key := new(eahpb.EciesAeadHkdfPublicKey)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
-		return nil, errInvalidEciesAeadHkdfPublicKeyKey
+		return nil, errInvalidECIESAEADHKDFPublicKeyKey
 	}
 	if err := km.validateKey(key); err != nil {
-		return nil, errInvalidEciesAeadHkdfPublicKeyKey
+		return nil, errInvalidECIESAEADHKDFPublicKeyKey
 	}
 	curve, err := subtle.GetCurve(key.Params.KemParams.CurveType.String())
 	if err != nil {
@@ -73,7 +73,7 @@ func (km *eciesAeadHkdfPublicKeyKeyManager) Primitive(serializedKey []byte) (int
 			Y: new(big.Int).SetBytes(key.Y),
 		},
 	}
-	rDem, err := newRegisterEciesAeadHkdfDemHelper(key.Params.DemParams.AeadDem)
+	rDem, err := newRegisterECIESAEADHKDFDemHelper(key.Params.DemParams.AeadDem)
 	if err != nil {
 		return nil, err
 	}
@@ -81,33 +81,33 @@ func (km *eciesAeadHkdfPublicKeyKeyManager) Primitive(serializedKey []byte) (int
 	hash := key.Params.KemParams.HkdfHashType.String()
 	ptFormat := key.Params.EcPointFormat.String()
 
-	return subtle.NewEciesAeadHkdfHybridEncrypt(&pub, salt, hash, ptFormat, rDem)
+	return subtle.NewECIESAEADHKDFHybridEncrypt(&pub, salt, hash, ptFormat, rDem)
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (km *eciesAeadHkdfPublicKeyKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == eciesAeadHkdfPublicKeyTypeURL
+func (km *eciesAEADHKDFPublicKeyKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == eciesAEADHKDFPublicKeyTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
-func (km *eciesAeadHkdfPublicKeyKeyManager) TypeURL() string {
-	return eciesAeadHkdfPublicKeyTypeURL
+func (km *eciesAEADHKDFPublicKeyKeyManager) TypeURL() string {
+	return eciesAEADHKDFPublicKeyTypeURL
 }
 
 // validateKey validates the given ECDSAPrivateKey.
-func (km *eciesAeadHkdfPublicKeyKeyManager) validateKey(key *eahpb.EciesAeadHkdfPublicKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, eciesAeadHkdfPublicKeyKeyVersion); err != nil {
+func (km *eciesAEADHKDFPublicKeyKeyManager) validateKey(key *eahpb.EciesAeadHkdfPublicKey) error {
+	if err := keyset.ValidateKeyVersion(key.Version, eciesAEADHKDFPublicKeyKeyVersion); err != nil {
 		return fmt.Errorf("ecies_aead_hkdf_public_key_manager: invalid key: %s", err)
 	}
-	return checkEciesAeadHkdfParams(key.Params)
+	return checkECIESAEADHKDFParams(key.Params)
 }
 
 // NewKey is not implemented for public key manager.
-func (km *eciesAeadHkdfPublicKeyKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+func (km *eciesAEADHKDFPublicKeyKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	return nil, errors.New("public key manager does not implement NewKey")
 }
 
 // NewKeyData is not implemented for public key manager.
-func (km *eciesAeadHkdfPublicKeyKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (km *eciesAEADHKDFPublicKeyKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	return nil, errors.New("public key manager does not implement NewKeyData")
 }

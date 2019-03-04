@@ -20,9 +20,9 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// EciesAeadHkdfHybridDecrypt is an instance of ECIES decryption with HKDF-KEM (key encapsulation mechanism)
+// ECIESAEADHKDFHybridDecrypt is an instance of ECIES decryption with HKDF-KEM (key encapsulation mechanism)
 // and AEAD-DEM (data encapsulation mechanism).
-type EciesAeadHkdfHybridDecrypt struct {
+type ECIESAEADHKDFHybridDecrypt struct {
 	privateKey   *ECPrivateKey
 	hkdfSalt     []byte
 	hkdfHMACAlgo string
@@ -30,12 +30,12 @@ type EciesAeadHkdfHybridDecrypt struct {
 	demHelper    EciesAEADHKDFDEMHelper
 }
 
-var _ tink.HybridDecrypt = (*EciesAeadHkdfHybridDecrypt)(nil)
+var _ tink.HybridDecrypt = (*ECIESAEADHKDFHybridDecrypt)(nil)
 
-// NewEciesAeadHkdfHybridDecrypt returns ECIES decryption construct with HKDF-KEM (key encapsulation mechanism)
+// NewECIESAEADHKDFHybridDecrypt returns ECIES decryption construct with HKDF-KEM (key encapsulation mechanism)
 // and AEAD-DEM (data encapsulation mechanism).
-func NewEciesAeadHkdfHybridDecrypt(pvt *ECPrivateKey, hkdfSalt []byte, hkdfHMACAlgo string, ptFormat string, demHelper EciesAEADHKDFDEMHelper) (*EciesAeadHkdfHybridDecrypt, error) {
-	return &EciesAeadHkdfHybridDecrypt{
+func NewECIESAEADHKDFHybridDecrypt(pvt *ECPrivateKey, hkdfSalt []byte, hkdfHMACAlgo string, ptFormat string, demHelper EciesAEADHKDFDEMHelper) (*ECIESAEADHKDFHybridDecrypt, error) {
+	return &ECIESAEADHKDFHybridDecrypt{
 		privateKey:   pvt,
 		hkdfSalt:     hkdfSalt,
 		hkdfHMACAlgo: hkdfHMACAlgo,
@@ -45,7 +45,7 @@ func NewEciesAeadHkdfHybridDecrypt(pvt *ECPrivateKey, hkdfSalt []byte, hkdfHMACA
 }
 
 // Decrypt is used to decrypt using ECIES with a HKDF-KEM and AEAD-DEM mechanisms.
-func (e *EciesAeadHkdfHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
+func (e *ECIESAEADHKDFHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
 	curve := e.privateKey.PublicKey.Curve
 	headerSize, err := encodingSizeInBytes(curve, e.pointFormat)
 	if err != nil {

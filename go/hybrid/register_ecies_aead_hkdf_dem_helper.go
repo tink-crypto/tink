@@ -33,18 +33,18 @@ const (
 	aesCTRHMACAEADTypeURL = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey"
 )
 
-// registerEciesAeadHkdfDemHelper registers a DEM helper.
-type registerEciesAeadHkdfDemHelper struct {
+// registerECIESAEADHKDFDemHelper registers a DEM helper.
+type registerECIESAEADHKDFDemHelper struct {
 	demKeyURL        string
 	keyData          []byte
 	symmetricKeySize uint32
 	aesCTRSize       uint32
 }
 
-var _ subtle.EciesAEADHKDFDEMHelper = (*registerEciesAeadHkdfDemHelper)(nil)
+var _ subtle.EciesAEADHKDFDEMHelper = (*registerECIESAEADHKDFDemHelper)(nil)
 
-// newRegisterEciesAeadHkdfDemHelper initializes and returns a RegisterEciesAeadHkdfDemHelper
-func newRegisterEciesAeadHkdfDemHelper(k *tinkpb.KeyTemplate) (*registerEciesAeadHkdfDemHelper, error) {
+// newRegisterECIESAEADHKDFDemHelper initializes and returns a RegisterECIESAEADHKDFDemHelper
+func newRegisterECIESAEADHKDFDemHelper(k *tinkpb.KeyTemplate) (*registerECIESAEADHKDFDemHelper, error) {
 	var len uint32
 	var a uint32
 	u := k.TypeUrl
@@ -72,7 +72,7 @@ func newRegisterEciesAeadHkdfDemHelper(k *tinkpb.KeyTemplate) (*registerEciesAea
 	} else {
 		return nil, fmt.Errorf("unsupported AEAD DEM key type: %s", u)
 	}
-	return &registerEciesAeadHkdfDemHelper{
+	return &registerECIESAEADHKDFDemHelper{
 		demKeyURL:        u,
 		keyData:          sk,
 		symmetricKeySize: len,
@@ -81,13 +81,13 @@ func newRegisterEciesAeadHkdfDemHelper(k *tinkpb.KeyTemplate) (*registerEciesAea
 }
 
 // GetSymmetricKeySize returns the symmetric key size
-func (r *registerEciesAeadHkdfDemHelper) GetSymmetricKeySize() uint32 {
+func (r *registerECIESAEADHKDFDemHelper) GetSymmetricKeySize() uint32 {
 	return r.symmetricKeySize
 
 }
 
 // GetAEAD returns the AEAD primitive from the DEM
-func (r *registerEciesAeadHkdfDemHelper) GetAEAD(symmetricKeyValue []byte) (tink.AEAD, error) {
+func (r *registerECIESAEADHKDFDemHelper) GetAEAD(symmetricKeyValue []byte) (tink.AEAD, error) {
 	var sk []byte
 	var pErr error
 	if uint32(len(symmetricKeyValue)) != r.GetSymmetricKeySize() {
