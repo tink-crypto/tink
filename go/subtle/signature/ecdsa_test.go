@@ -16,6 +16,7 @@ package signature_test
 
 import (
 	"encoding/asn1"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"testing"
@@ -32,12 +33,12 @@ type paramsTest struct {
 
 var _ = fmt.Println
 
-func TestECDSAEncodeDecode(t *testing.T) {
+func TestECDSAEncodeDecodeDER(t *testing.T) {
 	nTest := 1000
 	for i := 0; i < nTest; i++ {
 		sig := newECDSARandomSignature()
 		encoding := "DER"
-		encoded, err := sig.EncodeECDSASignature(encoding)
+		encoded, err := sig.EncodeECDSASignature(encoding, "P-256")
 		if err != nil {
 			t.Errorf("unexpected error during encoding: %s", err)
 		}
@@ -63,9 +64,47 @@ func TestECDSAEncodeDecode(t *testing.T) {
 	}
 }
 
+func TestECDSAEncodeDecodeIEEEP1363(t *testing.T) {
+	nTest := 1000
+	for i := 0; i < nTest; i++ {
+		sig := newECDSARandomSignature()
+		encoding := "IEEE_P1363"
+		encoded, err := sig.EncodeECDSASignature(encoding, "P-256")
+		if err != nil {
+			t.Errorf("unexpected error during encoding: %s", err)
+		}
+		if len(encoded) != 64 {
+			t.Errorf("incorrect length, expected %d, got %d", 64, len(encoded))
+		}
+		if len(sig.R.Bytes()) < 32 {
+			expectedZeros := 32 - len(sig.R.Bytes())
+			for i := 0; i < expectedZeros; i++ {
+				if encoded[i] != 0 {
+					t.Errorf("expect byte %d to be 0, got %d. encoded data = %s", i, encoded[i], hex.Dump(encoded))
+				}
+			}
+		}
+		if len(sig.S.Bytes()) < 32 {
+			expectedZeros := 32 - len(sig.S.Bytes())
+			for i := 32; i < (32 + expectedZeros); i++ {
+				if encoded[i] != 0 {
+					t.Errorf("expect byte %d to be 0, got %d. encoded data = %s", i, encoded[i], hex.Dump(encoded))
+				}
+			}
+		}
+		decodedSig, err := DecodeECDSASignature(encoded, encoding)
+		if err != nil {
+			t.Errorf("unexpected error during decoding: %s", err)
+		}
+		if decodedSig.R.Cmp(sig.R) != 0 || decodedSig.S.Cmp(sig.S) != 0 {
+			t.Errorf("decoded signature doesn't match original value")
+		}
+	}
+}
+
 func TestECDSAEncodeWithInvalidInput(t *testing.T) {
 	sig := newECDSARandomSignature()
-	_, err := sig.EncodeECDSASignature("UNKNOWN_ENCODING")
+	_, err := sig.EncodeECDSASignature("UNKNOWN_ENCODING", "P-256")
 	if err == nil {
 		t.Errorf("expect an error when encoding is invalid")
 	}
@@ -78,28 +117,28 @@ func TestECDSADecodeWithInvalidInput(t *testing.T) {
 
 	// modified first byte
 	sig = newECDSARandomSignature()
-	encoded, _ = sig.EncodeECDSASignature(encoding)
+	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
 	encoded[0] = 0x31
 	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when first byte is not 0x30")
 	}
 	// modified tag
 	sig = newECDSARandomSignature()
-	encoded, _ = sig.EncodeECDSASignature(encoding)
+	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
 	encoded[2] = encoded[2] + 1
 	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when tag is modified")
 	}
 	// modified length
 	sig = newECDSARandomSignature()
-	encoded, _ = sig.EncodeECDSASignature(encoding)
+	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
 	encoded[1] = encoded[1] + 1
 	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when length is modified")
 	}
 	// append unused 0s
 	sig = newECDSARandomSignature()
-	encoded, _ = sig.EncodeECDSASignature(encoding)
+	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
 	tmp := make([]byte, len(encoded)+4)
 	copy(tmp, encoded)
 	if _, err := DecodeECDSASignature(tmp, encoding); err == nil {
@@ -133,25 +172,34 @@ func TestECDSAValidateParams(t *testing.T) {
 }
 
 func genECDSAInvalidParams() []paramsTest {
-	return []paramsTest{
+	encodings := []string{"DER", "IEEE_P1363"}
+	testCases := []paramsTest{
 		// invalid encoding
 		paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "UNKNOWN_ENCODING"},
-		// invalid curve
-		paramsTest{hash: "SHA256", curve: "UNKNOWN_CURVE", encoding: "DER"},
-		// invalid hash: P256 and SHA-512
-		paramsTest{hash: "SHA512", curve: "NIST_P256", encoding: "DER"},
-		// invalid hash: P521 and SHA-256
-		paramsTest{hash: "SHA256", curve: "NIST_P521", encoding: "DER"},
-		// invalid hash: P384 and SHA-256
-		paramsTest{hash: "SHA256", curve: "NIST_P384", encoding: "DER"},
 	}
+	for _, encoding := range encodings {
+		// invalid curve
+		testCases = append(testCases, paramsTest{hash: "SHA256", curve: "UNKNOWN_CURVE", encoding: encoding})
+		// invalid hash: P256 and SHA-512
+		testCases = append(testCases, paramsTest{hash: "SHA512", curve: "NIST_P256", encoding: encoding})
+		// invalid hash: P521 and SHA-256
+		testCases = append(testCases, paramsTest{hash: "SHA256", curve: "NIST_P521", encoding: encoding})
+		// invalid hash: P384 and SHA-256
+		testCases = append(testCases, paramsTest{hash: "SHA256", curve: "NIST_P384", encoding: encoding})
+	}
+	return testCases
 }
 
 func genECDSAValidParams() []paramsTest {
 	return []paramsTest{
 		paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "DER"},
+		paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "IEEE_P1363"},
+		paramsTest{hash: "SHA384", curve: "NIST_P384", encoding: "DER"},
+		paramsTest{hash: "SHA384", curve: "NIST_P384", encoding: "IEEE_P1363"},
 		paramsTest{hash: "SHA512", curve: "NIST_P384", encoding: "DER"},
+		paramsTest{hash: "SHA512", curve: "NIST_P384", encoding: "IEEE_P1363"},
 		paramsTest{hash: "SHA512", curve: "NIST_P521", encoding: "DER"},
+		paramsTest{hash: "SHA512", curve: "NIST_P521", encoding: "IEEE_P1363"},
 	}
 }
 

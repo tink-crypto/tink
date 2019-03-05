@@ -81,7 +81,7 @@ func (e *ECDSASigner) Sign(data []byte) ([]byte, error) {
 	}
 	// format the signature
 	sig := NewECDSASignature(r, s)
-	ret, err := sig.EncodeECDSASignature(e.encoding)
+	ret, err := sig.EncodeECDSASignature(e.encoding, e.privateKey.PublicKey.Curve.Params().Name)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_signer: signing failed: %s", err)
 	}

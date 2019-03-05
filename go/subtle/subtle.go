@@ -34,6 +34,8 @@ func ConvertHashName(name string) string {
 	switch name {
 	case "SHA-256":
 		return "SHA256"
+	case "SHA-384":
+		return "SHA384"
 	case "SHA-512":
 		return "SHA512"
 	case "SHA-1":
@@ -65,6 +67,8 @@ func GetHashFunc(hash string) func() hash.Hash {
 		return sha1.New
 	case "SHA256":
 		return sha256.New
+	case "SHA384":
+		return sha512.New384
 	case "SHA512":
 		return sha512.New
 	default:

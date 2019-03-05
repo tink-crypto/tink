@@ -35,34 +35,41 @@ func NewECDSASignature(r, s *big.Int) *ECDSASignature {
 
 // EncodeECDSASignature converts the signature to the given encoding format.
 // Only DER encoding is supported now.
-func (sig *ECDSASignature) EncodeECDSASignature(encoding string) ([]byte, error) {
+func (sig *ECDSASignature) EncodeECDSASignature(encoding, curveName string) ([]byte, error) {
+	var enc []byte
+	var err error
 	switch encoding {
+	case "IEEE_P1363":
+		enc, err = ieeeP1363Encode(sig, curveName)
 	case "DER":
-		enc, err := asn1encode(sig)
-		if err != nil {
-			return nil, fmt.Errorf("ecdsa: can't convert ECDSA signature to %s encoding: %v", encoding, err)
-		}
-		return enc, nil
+		enc, err = asn1encode(sig)
 	default:
-		return nil, errUnsupportedEncoding
+		err = errUnsupportedEncoding
 	}
+	if err != nil {
+		return nil, fmt.Errorf("ecdsa: can't convert ECDSA signature to %s encoding: %v", encoding, err)
+	}
+	return enc, nil
 }
 
 // DecodeECDSASignature creates a new ECDSA signature using the given byte slice.
 // The function assumes that the byte slice is the concatenation of the BigEndian
 // representation of two big integer r and s.
-func DecodeECDSASignature(encodedBytes []byte,
-	encoding string) (*ECDSASignature, error) {
+func DecodeECDSASignature(encodedBytes []byte, encoding string) (*ECDSASignature, error) {
+	var sig *ECDSASignature
+	var err error
 	switch encoding {
+	case "IEEE_P1363":
+		sig, err = ieeeP1363Decode(encodedBytes)
 	case "DER":
-		sig, err := asn1decode(encodedBytes)
-		if err != nil {
-			return nil, fmt.Errorf("ecdsa: %s", err)
-		}
-		return sig, nil
+		sig, err = asn1decode(encodedBytes)
 	default:
-		return nil, errUnsupportedEncoding
+		err = errUnsupportedEncoding
 	}
+	if err != nil {
+		return nil, fmt.Errorf("ecdsa: %s", err)
+	}
+	return sig, nil
 }
 
 // ValidateECDSAParams validates ECDSA parameters.
@@ -71,7 +78,7 @@ func DecodeECDSASignature(encodedBytes []byte,
 func ValidateECDSAParams(hashAlg string, curve string, encoding string) error {
 	switch encoding {
 	case "DER":
-		break
+	case "IEEE_P1363":
 	default:
 		return errUnsupportedEncoding
 	}
@@ -80,7 +87,11 @@ func ValidateECDSAParams(hashAlg string, curve string, encoding string) error {
 		if hashAlg != "SHA256" {
 			return errors.New("invalid hash type, expect SHA-256")
 		}
-	case "NIST_P384", "NIST_P521":
+	case "NIST_P384":
+		if hashAlg != "SHA384" && hashAlg != "SHA512" {
+			return errors.New("invalid hash type, expect SHA-384 or SHA-512")
+		}
+	case "NIST_P521":
 		if hashAlg != "SHA512" {
 			return errors.New("invalid hash type, expect SHA-512")
 		}
