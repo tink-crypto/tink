@@ -67,11 +67,11 @@ class PrimitiveSet {
 
     const std::string& get_identifier() const { return identifier_; }
 
-    const google::crypto::tink::KeyStatusType get_status() const {
+    google::crypto::tink::KeyStatusType get_status() const {
       return status_;
     }
 
-    const google::crypto::tink::OutputPrefixType get_output_prefix_type()
+    google::crypto::tink::OutputPrefixType get_output_prefix_type()
         const {
       return output_prefix_type_;
     }
