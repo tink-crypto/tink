@@ -1,0 +1,40 @@
+package(
+    default_visibility = ["//tools/build_defs:internal_pkg"],
+)
+
+licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure_js_test")
+
+closure_js_library(
+    name = "aead",
+    srcs = [
+        "aes_ctr.js",
+    ],
+    deps = [
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/library/crypt:aes",
+        "@io_bazel_rules_closure//closure/library/crypt:ctr",
+    ],
+)
+
+closure_js_library(
+    name = "mac",
+    srcs = [
+        "hmac.js",
+    ],
+    deps = [
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/library/array",
+        "@io_bazel_rules_closure//closure/library/crypt:hmac",
+        "@io_bazel_rules_closure//closure/library/crypt:sha1",
+        "@io_bazel_rules_closure//closure/library/crypt:sha256",
+        "@io_bazel_rules_closure//closure/library/crypt:sha512",
+    ],
+)

@@ -1,8 +1,187 @@
 package(
-    default_hdrs_check = "strict",
-    default_visibility = [
-        "//tools/build_defs:internal_pkg",
-    ],
+    default_visibility = ["//tools/build_defs:internal_pkg"],
 )
 
 licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure_js_test")
+
+closure_js_library(
+    name = "primitives",
+    srcs = [
+        "aead.js",
+        "hybrid_decrypt.js",
+        "hybrid_encrypt.js",
+        "mac.js",
+        "public_key_sign.js",
+        "public_key_verify.js",
+    ],
+    deps = [
+        "//javascript/exception",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "binary_reader",
+    srcs = [
+        "binary_keyset_reader.js",
+    ],
+    deps = [
+        ":readers_writers",
+        "//javascript/exception",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "readers_writers",
+    srcs = [
+        "keyset_reader.js",
+        "keyset_writer.js",
+    ],
+    deps = [
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "keyset_handle",
+    srcs = [
+        "keyset_handle.js",
+    ],
+    deps = [
+        ":key_manager",
+        ":primitive_set",
+        ":primitives",
+        ":readers_writers",
+        ":registry",
+        ":util",
+        "//javascript/exception",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "cleartext_keyset_handle",
+    srcs = [
+        "cleartext_keyset_handle.js",
+    ],
+    deps = [
+        ":keyset_handle",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "primitive_set",
+    srcs = [
+        "primitive_set.js",
+    ],
+    deps = [
+        ":crypto_format",
+        "//javascript/exception",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "key_manager",
+    srcs = [
+        "key_manager.js",
+    ],
+    deps = [
+        "//javascript/exception",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/protobuf:jspb",
+    ],
+)
+
+closure_js_library(
+    name = "primitive_wrapper",
+    srcs = [
+        "primitive_wrapper.js",
+    ],
+    deps = [
+        ":primitive_set",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "catalogue",
+    srcs = [
+        "catalogue.js",
+    ],
+    deps = [
+        ":key_manager",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "registry",
+    srcs = [
+        "registry.js",
+    ],
+    deps = [
+        ":catalogue",
+        ":key_manager",
+        ":primitive_set",
+        ":primitive_wrapper",
+        ":util",
+        "//javascript/exception",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/protobuf:jspb",
+    ],
+)
+
+closure_js_library(
+    name = "crypto_format",
+    srcs = [
+        "crypto_format.js",
+    ],
+    deps = [
+        "//javascript/exception",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "util",
+    srcs = [
+        "util.js",
+    ],
+    deps = [
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//proto:common_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "config",
+    srcs = [
+        "config.js",
+    ],
+    deps = [
+        ":catalogue",
+        ":key_manager",
+        ":registry",
+        "//javascript/exception",
+        "//proto:config_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+# test

@@ -1,0 +1,148 @@
+package(
+    default_visibility = [
+        "//tools/build_defs:internal_pkg",
+    ],
+)
+
+licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
+
+closure_js_library(
+    name = "aead",
+    exports = [
+        ":aead_catalogue",
+        ":aead_config",
+        ":aead_key_templates",
+        ":aead_wrapper",
+        ":aes_ctr_hmac_aead_key_manager",
+        ":aes_gcm_key_manager",
+    ],
+)
+
+closure_js_library(
+    name = "aes_ctr_hmac_aead_key_manager",
+    srcs = [
+        "aes_ctr_hmac_aead_key_manager.js",
+    ],
+    deps = [
+        "//javascript:key_manager",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//javascript/subtle:aead",
+        "//proto:aes_ctr_closure_proto",
+        "//proto:aes_ctr_hmac_aead_closure_proto",
+        "//proto:common_closure_proto",
+        "//proto:hmac_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "aes_gcm_key_manager",
+    srcs = [
+        "aes_gcm_key_manager.js",
+    ],
+    deps = [
+        "//javascript:key_manager",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//javascript/subtle:aead",
+        "//proto:aes_gcm_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/protobuf:jspb",
+    ],
+)
+
+closure_js_library(
+    name = "aead_key_templates",
+    srcs = [
+        "aead_key_templates.js",
+    ],
+    deps = [
+        ":aead_config",
+        "//proto:aes_ctr_closure_proto",
+        "//proto:aes_ctr_hmac_aead_closure_proto",
+        "//proto:aes_gcm_closure_proto",
+        "//proto:common_closure_proto",
+        "//proto:hmac_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "aead_catalogue",
+    srcs = [
+        "aead_catalogue.js",
+    ],
+    deps = [
+        ":aes_ctr_hmac_aead_key_manager",
+        ":aes_gcm_key_manager",
+        "//javascript:catalogue",
+        "//javascript:key_manager",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "aead_config",
+    srcs = [
+        "aead_config.js",
+    ],
+    deps = [
+        ":aead_catalogue",
+        ":aead_wrapper",
+        ":aes_ctr_hmac_aead_key_manager",
+        ":aes_gcm_key_manager",
+        "//javascript:config",
+        "//javascript:registry",
+        "//proto:config_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "aead_wrapper",
+    srcs = [
+        "aead_wrapper.js",
+    ],
+    deps = [
+        "//javascript:crypto_format",
+        "//javascript:primitive_set",
+        "//javascript:primitive_wrapper",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+# test
+
+closure_js_library(
+    name = "test_lib",
+    testonly = 1,
+    srcs = glob([
+        "*_test.js",
+    ]),
+    deps = [
+        "//proto:aes_ctr_closure_proto",
+        "//proto:aes_ctr_hmac_aead_closure_proto",
+        "//proto:aes_gcm_closure_proto",
+        "//proto:common_closure_proto",
+        "//proto:hmac_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/library/testing:asserts",
+        "@io_bazel_rules_closure//closure/library/testing:jsunit",
+        "@io_bazel_rules_closure//closure/library/testing:testsuite",
+        "@io_bazel_rules_closure//closure/library/useragent",
+    ],
+)
