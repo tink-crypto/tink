@@ -36,7 +36,7 @@
                                              error:(NSError **)error {
   crypto::tink::KeysetHandle *handle = [keysetHandle ccKeysetHandle];
 
-  auto st = crypto::tink::PublicKeySignFactory::GetPrimitive(*handle);
+  auto st = handle->GetPrimitive<crypto::tink::PublicKeySign>();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());

@@ -35,7 +35,7 @@
 + (id<TINKAead>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle error:(NSError **)error {
   crypto::tink::KeysetHandle *handle = [keysetHandle ccKeysetHandle];
 
-  auto st = crypto::tink::AeadFactory::GetPrimitive(*handle);
+  auto st = handle->GetPrimitive<crypto::tink::Aead>();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());

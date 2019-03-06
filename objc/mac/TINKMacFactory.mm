@@ -35,7 +35,7 @@
 + (id<TINKMac>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle error:(NSError **)error {
   crypto::tink::KeysetHandle *handle = [keysetHandle ccKeysetHandle];
 
-  auto st = crypto::tink::MacFactory::GetPrimitive(*handle);
+  auto st = handle->GetPrimitive<crypto::tink::Mac>();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());
