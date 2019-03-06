@@ -1,0 +1,136 @@
+package(
+    default_visibility = ["//tools/build_defs:internal_pkg"],
+)
+
+licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
+
+closure_js_library(
+    name = "subtle",
+    srcs = [
+        "bytes.js",
+        "ecies_aead_hkdf_dem_helper.js",
+        "elliptic_curves.js",
+        "environment.js",
+        "ind_cpa_cipher.js",
+        "random.js",
+        "validators.js",
+    ],
+    deps = [
+        "//javascript:primitives",
+        "//javascript/exception",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "aead",
+    srcs = [
+        "aes_ctr.js",
+        "aes_gcm.js",
+        "encrypt_then_authenticate.js",
+    ],
+    deps = [
+        ":mac",
+        ":subtle",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//javascript/subtle/purejs:aead",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "mac",
+    srcs = [
+        "hmac.js",
+    ],
+    deps = [
+        ":subtle",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//javascript/subtle/purejs:mac",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "hkdf",
+    srcs = [
+        "hkdf.js",
+    ],
+    deps = [
+        ":mac",
+        ":subtle",
+        "//javascript/exception",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "hybrid",
+    srcs = [
+        "ecies_aead_hkdf_hybrid_decrypt.js",
+        "ecies_aead_hkdf_hybrid_encrypt.js",
+        "ecies_hkdf_kem_recipient.js",
+        "ecies_hkdf_kem_sender.js",
+    ],
+    deps = [
+        ":hkdf",
+        ":subtle",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "signature",
+    srcs = [
+        "ecdsa_sign.js",
+        "ecdsa_verify.js",
+    ],
+    deps = [
+        ":subtle",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+# test
+
+closure_js_library(
+    name = "test_lib",
+    testonly = 1,
+    srcs = glob([
+        "*_test.js",
+    ]) + [
+        ":wycheproof_ecdh_testvectors",
+        ":wycheproof_ecdsa_testvectors",
+    ],
+    deps = [
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/library/testing:asserts",
+        "@io_bazel_rules_closure//closure/library/testing:jsunit",
+        "@io_bazel_rules_closure//closure/library/testing:testsuite",
+        "@io_bazel_rules_closure//closure/library/useragent",
+    ],
+)
+
+genrule(
+    name = "wycheproof_ecdh_testvectors",
+    testonly = 1,
+    srcs = ["@wycheproof//testvectors:ecdh_webcrypto"],
+    outs = [":wycheproof_ecdh_testvectors.js"],
+    cmd = 'cat - $< <<<"goog.module(\'tink.subtle.wycheproofEcdhTestVectors\'); exports =" >$@',
+)
+
+genrule(
+    name = "wycheproof_ecdsa_testvectors",
+    testonly = 1,
+    srcs = ["@wycheproof//testvectors:ecdsa_webcrypto"],
+    outs = [":wycheproof_ecdsa_testvectors.js"],
+    cmd = 'cat - $< <<<"goog.module(\'tink.subtle.wycheproofEcdsaTestVectors\'); exports =" >$@',
+)

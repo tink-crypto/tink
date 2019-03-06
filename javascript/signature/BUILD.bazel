@@ -1,0 +1,142 @@
+package(
+    default_visibility = [
+        "//tools/build_defs:internal_pkg",
+    ],
+)
+
+licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
+
+closure_js_library(
+    name = "signature",
+    exports = [
+        ":catalogues",
+        ":config",
+        ":ecdsa_key_managers",
+        ":key_templates",
+        ":utils",
+        ":wrappers",
+    ],
+)
+
+closure_js_library(
+    name = "utils",
+    srcs = [
+        "ecdsa_util.js",
+    ],
+    deps = [
+        "//javascript:util",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//proto:common_closure_proto",
+        "//proto:ecdsa_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "ecdsa_key_managers",
+    srcs = [
+        "ecdsa_private_key_manager.js",
+        "ecdsa_public_key_manager.js",
+    ],
+    deps = [
+        ":utils",
+        "//javascript:key_manager",
+        "//javascript:primitives",
+        "//javascript:util",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//javascript/subtle:signature",
+        "//proto:ecdsa_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/protobuf:jspb",
+    ],
+)
+
+closure_js_library(
+    name = "wrappers",
+    srcs = [
+        "public_key_sign_wrapper.js",
+        "public_key_verify_wrapper.js",
+    ],
+    deps = [
+        "//javascript:crypto_format",
+        "//javascript:primitive_set",
+        "//javascript:primitive_wrapper",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "catalogues",
+    srcs = [
+        "public_key_sign_catalogue.js",
+        "public_key_verify_catalogue.js",
+    ],
+    deps = [
+        ":ecdsa_key_managers",
+        "//javascript:catalogue",
+        "//javascript:key_manager",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "config",
+    srcs = [
+        "signature_config.js",
+    ],
+    deps = [
+        ":catalogues",
+        ":ecdsa_key_managers",
+        ":wrappers",
+        "//javascript:config",
+        "//javascript:registry",
+        "//javascript/aead:aead_config",
+        "//proto:config_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "key_templates",
+    srcs = [
+        "signature_key_templates.js",
+    ],
+    deps = [
+        ":config",
+        "//proto:common_closure_proto",
+        "//proto:ecdsa_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+# test
+
+closure_js_library(
+    name = "test_lib",
+    testonly = 1,
+    srcs = glob([
+        "*_test.js",
+    ]),
+    deps = [
+        "//proto:common_closure_proto",
+        "//proto:ecdsa_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/library/testing:asserts",
+        "@io_bazel_rules_closure//closure/library/testing:jsunit",
+        "@io_bazel_rules_closure//closure/library/testing:testsuite",
+        "@io_bazel_rules_closure//closure/library/useragent",
+    ],
+)

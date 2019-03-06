@@ -1,0 +1,166 @@
+package(
+    default_visibility = [
+        "//tools/build_defs:internal_pkg",
+    ],
+)
+
+licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
+
+closure_js_library(
+    name = "hybrid",
+    exports = [
+        ":ecies_aead_hkdf_key_managers",
+        ":hybrid_catalogues",
+        ":hybrid_config",
+        ":hybrid_key_templates",
+        ":hybrid_wrappers",
+        ":registry_ecies_aead_hkdf_dem_helper",
+        ":util_and_validators",
+    ],
+)
+
+closure_js_library(
+    name = "util_and_validators",
+    srcs = [
+        "ecies_aead_hkdf_util.js",
+        "ecies_aead_hkdf_validators.js",
+    ],
+    deps = [
+        "//javascript:util",
+        "//javascript/aead:aead_config",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//proto:common_closure_proto",
+        "//proto:ecies_aead_hkdf_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "registry_ecies_aead_hkdf_dem_helper",
+    srcs = [
+        "registry_ecies_aead_hkdf_dem_helper.js",
+    ],
+    deps = [
+        "//javascript:primitives",
+        "//javascript:registry",
+        "//javascript/aead:aead_config",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//proto:aes_ctr_hmac_aead_closure_proto",
+        "//proto:aes_gcm_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "ecies_aead_hkdf_key_managers",
+    srcs = [
+        "ecies_aead_hkdf_private_key_manager.js",
+        "ecies_aead_hkdf_public_key_manager.js",
+    ],
+    deps = [
+        ":registry_ecies_aead_hkdf_dem_helper",
+        ":util_and_validators",
+        "//javascript:key_manager",
+        "//javascript:primitives",
+        "//javascript:util",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//javascript/subtle:hybrid",
+        "//proto:ecies_aead_hkdf_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/protobuf:jspb",
+    ],
+)
+
+closure_js_library(
+    name = "hybrid_catalogues",
+    srcs = [
+        "hybrid_decrypt_catalogue.js",
+        "hybrid_encrypt_catalogue.js",
+    ],
+    deps = [
+        ":ecies_aead_hkdf_key_managers",
+        "//javascript:catalogue",
+        "//javascript:key_manager",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "hybrid_config",
+    srcs = [
+        "hybrid_config.js",
+    ],
+    deps = [
+        ":ecies_aead_hkdf_key_managers",
+        ":hybrid_catalogues",
+        ":hybrid_wrappers",
+        "//javascript:config",
+        "//javascript:registry",
+        "//javascript/aead:aead_config",
+        "//proto:config_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "hybrid_key_templates",
+    srcs = [
+        "hybrid_key_templates.js",
+    ],
+    deps = [
+        ":hybrid_config",
+        "//javascript/aead:aead_key_templates",
+        "//proto:common_closure_proto",
+        "//proto:ecies_aead_hkdf_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "hybrid_wrappers",
+    srcs = [
+        "hybrid_decrypt_wrapper.js",
+        "hybrid_encrypt_wrapper.js",
+    ],
+    deps = [
+        "//javascript:crypto_format",
+        "//javascript:primitive_set",
+        "//javascript:primitive_wrapper",
+        "//javascript:primitives",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+# test
+
+closure_js_library(
+    name = "test_lib",
+    testonly = 1,
+    srcs = glob([
+        "*_test.js",
+    ]),
+    deps = [
+        "//proto:aes_ctr_closure_proto",
+        "//proto:common_closure_proto",
+        "//proto:ecies_aead_hkdf_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/library/testing:asserts",
+        "@io_bazel_rules_closure//closure/library/testing:jsunit",
+        "@io_bazel_rules_closure//closure/library/testing:testsuite",
+        "@io_bazel_rules_closure//closure/library/useragent",
+    ],
+)

@@ -4,6 +4,7 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_proto_library")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("//third_party/rules_protobuf/objc:rules.bzl", "objc_proto_compile")
 load("//tools:objc.bzl", "tink_objc_proto_library")
@@ -30,6 +31,11 @@ java_proto_library(
 
 java_lite_proto_library(
     name = "common_java_proto_lite",
+    deps = [":common_proto"],
+)
+
+closure_proto_library(
+    name = "common_closure_proto",
     deps = [":common_proto"],
 )
 
@@ -70,6 +76,11 @@ java_proto_library(
 
 java_lite_proto_library(
     name = "tink_java_proto_lite",
+    deps = [":tink_proto"],
+)
+
+closure_proto_library(
+    name = "tink_closure_proto",
     deps = [":tink_proto"],
 )
 
@@ -116,6 +127,11 @@ java_proto_library(
 
 java_lite_proto_library(
     name = "config_java_proto_lite",
+    deps = [":config_proto"],
+)
+
+closure_proto_library(
+    name = "config_closure_proto",
     deps = [":config_proto"],
 )
 
@@ -280,6 +296,11 @@ java_lite_proto_library(
     deps = [":ecdsa_proto"],
 )
 
+closure_proto_library(
+    name = "ecdsa_closure_proto",
+    deps = [":ecdsa_proto"],
+)
+
 go_proto_library(
     name = "ecdsa_go_proto",
     importpath = "github.com/google/tink/proto/ecdsa_go_proto",
@@ -357,6 +378,11 @@ java_lite_proto_library(
     deps = [":hmac_proto"],
 )
 
+closure_proto_library(
+    name = "hmac_closure_proto",
+    deps = [":hmac_proto"],
+)
+
 go_proto_library(
     name = "hmac_go_proto",
     importpath = "github.com/google/tink/proto/hmac_go_proto",
@@ -393,6 +419,11 @@ java_proto_library(
 
 java_lite_proto_library(
     name = "aes_ctr_java_proto_lite",
+    deps = [":aes_ctr_proto"],
+)
+
+closure_proto_library(
+    name = "aes_ctr_closure_proto",
     deps = [":aes_ctr_proto"],
 )
 
@@ -434,6 +465,11 @@ java_proto_library(
 
 java_lite_proto_library(
     name = "aes_ctr_hmac_aead_java_proto_lite",
+    deps = [":aes_ctr_hmac_aead_proto"],
+)
+
+closure_proto_library(
+    name = "aes_ctr_hmac_aead_closure_proto",
     deps = [":aes_ctr_hmac_aead_proto"],
 )
 
@@ -479,6 +515,11 @@ java_proto_library(
 
 java_lite_proto_library(
     name = "aes_gcm_java_proto_lite",
+    deps = [":aes_gcm_proto"],
+)
+
+closure_proto_library(
+    name = "aes_gcm_closure_proto",
     deps = [":aes_gcm_proto"],
 )
 
@@ -763,6 +804,11 @@ java_lite_proto_library(
     deps = [":ecies_aead_hkdf_proto"],
 )
 
+closure_proto_library(
+    name = "ecies_aead_hkdf_closure_proto",
+    deps = [":ecies_aead_hkdf_proto"],
+)
+
 go_proto_library(
     name = "ecies_aead_hkdf_go_proto",
     importpath = "github.com/google/tink/proto/ecies_aead_hkdf_go_proto",
@@ -842,6 +888,11 @@ java_proto_library(
 
 java_lite_proto_library(
     name = "empty_java_proto_lite",
+    deps = [":empty_proto"],
+)
+
+closure_proto_library(
+    name = "empty_closure_proto",
     deps = [":empty_proto"],
 )
 

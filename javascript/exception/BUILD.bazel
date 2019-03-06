@@ -1,0 +1,18 @@
+package(
+    default_visibility = ["//tools/build_defs:internal_pkg"],
+)
+
+licenses(["notice"])  # Apache 2.0
+
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
+
+closure_js_library(
+    name = "exception",
+    srcs = glob([
+        "*.js",
+    ]),
+    deps = [
+        "@io_bazel_rules_closure//closure/library",
+        "@io_bazel_rules_closure//closure/library/debug:error",
+    ],
+)
