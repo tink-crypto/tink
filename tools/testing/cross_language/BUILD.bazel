@@ -105,6 +105,8 @@ sh_test(
         "//tools/testing:hybrid_encrypt_cli_java",
         "//tools/testing/cc:hybrid_decrypt_cli_cc",
         "//tools/testing/cc:hybrid_encrypt_cli_cc",
+        "//tools/testing/go:hybrid_encrypt_cli_go",
+        "//tools/testing/go:hybrid_decrypt_cli_go",
         "//tools/tinkey",
     ],
 )

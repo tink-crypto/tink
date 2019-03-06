@@ -51,3 +51,27 @@ go_binary(
         "//go/testkeyset:go_default_library",
     ],
 )
+
+go_binary(
+    name = "hybrid_encrypt_cli_go",
+    testonly = 1,  # keep
+    srcs = ["hybrid_encrypt_cli.go"],
+    out = "hybrid_encrypt_cli_go",
+    deps = [
+        "//go/keyset:go_default_library",
+        "//go/hybrid:go_default_library",
+        "//go/testkeyset:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "hybrid_decrypt_cli_go",
+    testonly = 1,  # keep
+    srcs = ["hybrid_decrypt_cli.go"],
+    out = "hybrid_decrypt_cli_go",
+    deps = [
+        "//go/keyset:go_default_library",
+        "//go/hybrid:go_default_library",
+        "//go/testkeyset:go_default_library",
+    ],
+)

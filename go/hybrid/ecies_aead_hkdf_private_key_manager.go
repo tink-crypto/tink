@@ -29,7 +29,7 @@ import (
 
 const (
 	eciesAEADHKDFPrivateKeyKeyVersion = 0
-	eciesAEADHKDFPrivateKeyTypeURL    = "type.googleapis.com/google.crypto.tink.ECIESAEADHKDFPrivateKey"
+	eciesAEADHKDFPrivateKeyTypeURL    = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
 )
 
 // common errors

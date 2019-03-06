@@ -19,7 +19,8 @@ CC_DECRYPT_CLI="$ROOT_DIR/tools/testing/cc/hybrid_decrypt_cli_cc"
 JAVA_ENCRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_encrypt_cli_java"
 JAVA_DECRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_decrypt_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
-
+GO_ENCRYPT_CLI="$ROOT_DIR/tools/testing/go/hybrid_encrypt_cli_go"
+GO_DECRYPT_CLI="$ROOT_DIR/tools/testing/go/hybrid_decrypt_cli_go"
 
 source $TEST_UTIL || exit 1
 
@@ -73,7 +74,7 @@ hybrid_basic_test() {
 ##### Run the actual tests.
 
 KEY_TEMPLATES=(ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256 ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
-ENCRYPT_CLIS=($CC_ENCRYPT_CLI $JAVA_ENCRYPT_CLI)
-DECRYPT_CLIS=($CC_DECRYPT_CLI $JAVA_DECRYPT_CLI)
+ENCRYPT_CLIS=($CC_ENCRYPT_CLI $JAVA_ENCRYPT_CLI $GO_ENCRYPT_CLI)
+DECRYPT_CLIS=($CC_DECRYPT_CLI $JAVA_DECRYPT_CLI $GO_DECRYPT_CLI)
 hybrid_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" \
     "${KEY_TEMPLATES[*]}"
