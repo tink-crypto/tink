@@ -12,7 +12,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package hybrid provides subtle implementations of the HKDF and EC primitives.
 package hybrid
 
 import (

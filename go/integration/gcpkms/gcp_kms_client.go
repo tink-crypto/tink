@@ -14,6 +14,52 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package gcpkms provides integration with the GCP Cloud KMS.
+// Tink APIs work with GCP and AWS KMS.
+// GCP Example below:
+//
+// package main
+//
+// import (
+//     "github.com/google/tink/go/aead"
+//     "github.com/google/tink/go/core/registry"
+//     "github.com/google/tink/go/integration/gcpkms"
+//     "github.com/google/tink/go/keyset"
+// )
+//
+// const (
+//     keyURI = "gcp-kms://......"
+// )
+//
+// func main() {
+//     gcpclient := gcpkms.NewGCPClient(keyURI)
+//     _, err := gcpclient.LoadCredentials("/mysecurestorage/credentials.json")
+//     if err != nil {
+//         //handle error
+//     }
+//     registry.RegisterKMSClient(gcpclient)
+//
+//     dek := aead.AES128CTRHMACSHA256KeyTemplate()
+//     kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
+//     if err != nil {
+//         // handle error
+//     }
+//     a, err := aead.New(kh)
+//     if err != nil {
+//         // handle error
+//     }
+//
+//     ct, err = a.Encrypt([]byte("secret message"), []byte("associated data"))
+//     if err != nil {
+//         // handle error
+//     }
+//
+//     pt, err = a.Decrypt(ct, []byte("associated data"))
+//     if err != nil {
+//         // handle error
+//     }
+// }
+
 package gcpkms
 
 import (
