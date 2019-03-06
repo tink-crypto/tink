@@ -17,6 +17,7 @@
 #ifndef TINK_UTIL_TEST_UTIL_H_
 #define TINK_UTIL_TEST_UTIL_H_
 
+#include <limits>
 #include <string>
 
 #include "absl/strings/match.h"
@@ -221,8 +222,13 @@ class DummyStreamingAead : public StreamingAead {
       return crypto::tink::util::Status(
           crypto::tink::util::error::INTERNAL, "Buffer too small");
     }
+    if (header.size() > std::numeric_limits<int>::max()) {
+      return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+                                        "Input too large");
+    }
+    const int header_size = static_cast<int>(header.size());
     memcpy(buffer, header.data(), header.size());
-    ciphertext_destination->BackUp(next_result.ValueOrDie() - header.size());
+    ciphertext_destination->BackUp(next_result.ValueOrDie() - header_size);
     return std::move(ciphertext_destination);
   }
 
@@ -241,11 +247,16 @@ class DummyStreamingAead : public StreamingAead {
       return crypto::tink::util::Status(
           crypto::tink::util::error::INTERNAL, "Buffer too small");
     }
+    if (header.size() > std::numeric_limits<int>::max()) {
+      return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+                                        "Input too large");
+    }
+    const int header_size = static_cast<int>(header.size());
     if (!memcmp(buffer, header.data(), header.size())) {
       return crypto::tink::util::Status(
           crypto::tink::util::error::INVALID_ARGUMENT, "Corrupted header");
     }
-    ciphertext_source->BackUp(next_result.ValueOrDie() - header.size());
+    ciphertext_source->BackUp(next_result.ValueOrDie() - header_size);
     return std::move(ciphertext_source);
   }
 
