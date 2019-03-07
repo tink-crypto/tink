@@ -349,18 +349,18 @@ func main() {
     // Write encrypts the keyset handle with the master key and
     // writes to the io.Writer implementation(memKeyset)
     // We recommend you encrypt the keyset handle before persisting.
-    if err := h.Write(memKeyset, masterKey); err != nil {
+    if err := kh.Write(memKeyset, masterKey); err != nil {
         // handle error
     }
 
     // Read reads the encrypted keyset handle back from the io.Reader implementation
     // and decrypts it using the master key.
-    h2, err := keyset.Read(memKeyset, masterKey)
+    kh2, err := keyset.Read(memKeyset, masterKey)
     if err != nil {
         // handle error
     }
 
-    if !proto.Equal(h.Keyset(), h2.Keyset()) {
+    if !proto.Equal(kh.Keyset(), kh2.Keyset()) {
         // handle error
     }
 }
