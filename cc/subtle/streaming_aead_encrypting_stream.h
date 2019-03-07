@@ -28,15 +28,13 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-class NonceBasedStreamingAead;
-
 class StreamingAeadEncryptingStream : public OutputStream {
  public:
   // A factory that produces encrypting streams.
   // The returned stream is a wrapper around 'ciphertext_destination',
-  // such that any bytes written via the wrapper are streaming AEAD-encrypted
-  // via 'nonce_based_streaming_aead' using 'associated_data' as
-  // associated authenticated data.
+  // such that any bytes written via the wrapper are AEAD-encrypted
+  // by 'segment_encrypter' using 'associated_data' as associated
+  // authenticated data.
   static
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
       New(std::unique_ptr<StreamSegmentEncrypter> segment_encrypter,
@@ -63,8 +61,8 @@ class StreamingAeadEncryptingStream : public OutputStream {
   int count_backedup_;    // # bytes in pt_buffer_ that were backed up
   int pt_buffer_offset_;  // offset at which *data starts in pt_buffer_
 
-  // Flag that indicates user obtained a buffer to write data of
-  // the first segment.
+  // Flag that indicates whether the user has obtained a buffer to write
+  // the data of the first segment.
   // If true, Next() was not called yet, which implies that neither
   // header has been written to ct_destination_, nor the user had
   // a chance to write any data to this stream.

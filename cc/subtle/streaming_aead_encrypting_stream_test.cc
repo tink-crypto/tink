@@ -26,17 +26,20 @@
 #include "tink/output_stream.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/test_util.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
-using crypto::tink::OutputStream;
-using crypto::tink::util::OstreamOutputStream;
-using crypto::tink::util::Status;
-
 namespace crypto {
 namespace tink {
 namespace subtle {
+
+using crypto::tink::OutputStream;
+using crypto::tink::subtle::test::DummyStreamSegmentEncrypter;
+using crypto::tink::util::OstreamOutputStream;
+using crypto::tink::util::Status;
+
 namespace {
 
 // Writes 'contents' the specified 'output_stream', and closes the stream.
@@ -63,108 +66,6 @@ Status WriteToStream(OutputStream* output_stream,
   }
   return output_stream->Close();
 }
-
-// Size of the per-segment tag added upon encryption.
-const int kSegmentTagSize = sizeof(int64_t) + 1;
-
-// Bytes for marking whether a given segment is the last one.
-const char kLastSegment = 'l';
-const char kNotLastSegment = 'n';
-
-
-// A dummy encrypter that "encrypts" by just appending to the plaintext
-// the current segment number and a marker byte indicating whether
-// the segment is last one.
-class DummyStreamSegmentEncrypter : public StreamSegmentEncrypter {
- public:
-  DummyStreamSegmentEncrypter(int pt_segment_size,
-                              int header_size,
-                              int ct_offset) :
-      pt_segment_size_(pt_segment_size),
-      ct_offset_(ct_offset),
-      segment_number_(0) {
-    // Fill the header with 'header_size' copies of letter 'h'
-    header_.resize(0);
-    header_.resize(header_size, static_cast<uint8_t>('h'));
-    generated_output_size_ = header_size;
-  }
-
-  // Generates an expected ciphertext for the given 'plaintext'.
-  std::string GenerateCiphertext(absl::string_view plaintext) {
-    std::string ct(header_.begin(), header_.end());
-    int64_t seg_no = 0;
-    int pos = 0;
-    do {
-      int seg_len = pt_segment_size_;
-      if (pos == 0) {  // The first segment.
-        seg_len -= ct_offset_;
-      }
-      if (seg_len > plaintext.size() - pos) {  // The last segment.
-        seg_len = plaintext.size() - pos;
-      }
-      ct.append(plaintext.substr(pos, seg_len).data(), seg_len);
-      pos += seg_len;
-      ct.append(reinterpret_cast<const char*>(&seg_no), sizeof(seg_no));
-      ct.append(1, pos < plaintext.size() ? kNotLastSegment : kLastSegment);
-      seg_no++;
-    } while (pos < plaintext.size());
-    return ct;
-  }
-
-  util::Status EncryptSegment(
-      const std::vector<uint8_t>& plaintext,
-      bool is_last_segment,
-      std::vector<uint8_t>* ciphertext_buffer) override {
-    ciphertext_buffer->resize(plaintext.size() + kSegmentTagSize);
-    memcpy(ciphertext_buffer->data(), plaintext.data(), plaintext.size());
-    memcpy(ciphertext_buffer->data() + plaintext.size(),
-           &segment_number_, sizeof(segment_number_));
-    // The last byte of the a ciphertext segment.
-    ciphertext_buffer->back() =
-        is_last_segment ? kLastSegment : kNotLastSegment;
-    generated_output_size_ += ciphertext_buffer->size();
-    IncSegmentNumber();
-    return Status::OK;
-  }
-
-  const std::vector<uint8_t>& get_header() const override {
-    return header_;
-  }
-
-  int64_t get_segment_number() const override {
-    return segment_number_;
-  }
-
-  int get_plaintext_segment_size() const override {
-    return pt_segment_size_;
-  }
-
-  int get_ciphertext_segment_size() const override {
-    return pt_segment_size_ + kSegmentTagSize;
-  }
-
-  int get_ciphertext_offset() const override {
-    return ct_offset_;
-  }
-
-  ~DummyStreamSegmentEncrypter() override {}
-
-  int get_generated_output_size() {
-    return generated_output_size_;
-  }
-
- protected:
-  void IncSegmentNumber() override {
-    segment_number_++;
-  }
-
- private:
-  std::vector<uint8_t> header_;
-  int pt_segment_size_;
-  int ct_offset_;
-  int64_t segment_number_;
-  int64_t generated_output_size_;
-};   // class DummyStreamSegmentEncrypter
 
 // References to objects used for test validation.
 // The objects pointed to are not owned by this structure.
@@ -262,10 +163,12 @@ TEST_F(StreamingAeadEncryptingStreamTest, EmptyPlaintext) {
   EXPECT_TRUE(close_status.ok()) << close_status;
   EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
             refs.ct_buf->str().size());
-  // Ciphertext contains only the header and an "empty" first block.
-  EXPECT_EQ(header_size + kSegmentTagSize, refs.ct_buf->str().size());
+  // Ciphertext contains only the header and an "empty" first segment.
+  EXPECT_EQ(header_size + DummyStreamSegmentEncrypter::kSegmentTagSize,
+            refs.ct_buf->str().size());
   // The last segment is marked as such.
-  EXPECT_EQ(kLastSegment, refs.ct_buf->str().back());
+  EXPECT_EQ(DummyStreamSegmentEncrypter::kLastSegment,
+            refs.ct_buf->str().back());
 
   // Try closing the stream again.
   close_status = enc_stream->Close();
@@ -283,24 +186,26 @@ TEST_F(StreamingAeadEncryptingStreamTest, EmptyPlaintextWithBackup) {
   auto enc_stream = GetEncryptingStream(
       pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
 
-  // Get the first block.
+  // Get the first segment.
   auto next_result = enc_stream->Next(&buffer);
   int buffer_size = pt_segment_size - header_size;
   EXPECT_TRUE(next_result.ok()) << next_result.status();
   EXPECT_EQ(buffer_size, next_result.ValueOrDie());
   EXPECT_EQ(buffer_size, enc_stream->Position());
 
-  // Backup the entire block, and close the stream.
+  // Backup the entire segment, and close the stream.
   enc_stream->BackUp(buffer_size);
   EXPECT_EQ(0, enc_stream->Position());
   auto close_status = enc_stream->Close();
   EXPECT_TRUE(close_status.ok()) << close_status;
   EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
             refs.ct_buf->str().size());
-  // Ciphertext contains only the header and an "empty" first block.
-  EXPECT_EQ(header_size + kSegmentTagSize, refs.ct_buf->str().size());
+  // Ciphertext contains only the header and an "empty" first segment.
+  EXPECT_EQ(header_size + DummyStreamSegmentEncrypter::kSegmentTagSize,
+            refs.ct_buf->str().size());
   // The last segment is marked as such.
-  EXPECT_EQ(kLastSegment, refs.ct_buf->str().back());
+  EXPECT_EQ(DummyStreamSegmentEncrypter::kLastSegment,
+            refs.ct_buf->str().back());
 
   // Try closing the stream again.
   close_status = enc_stream->Close();
@@ -328,10 +233,12 @@ TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintext) {
   EXPECT_TRUE(close_status.ok()) << close_status;
   EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
             refs.ct_buf->str().size());
-  // Ciphertext contains only header and a full first block.
-  EXPECT_EQ(pt_segment_size + kSegmentTagSize, refs.ct_buf->str().size());
+  // Ciphertext contains only header and a full first segment.
+  EXPECT_EQ(pt_segment_size + DummyStreamSegmentEncrypter::kSegmentTagSize,
+            refs.ct_buf->str().size());
   // The last segment is marked as such.
-  EXPECT_EQ(kLastSegment, refs.ct_buf->str().back());
+  EXPECT_EQ(DummyStreamSegmentEncrypter::kLastSegment,
+            refs.ct_buf->str().back());
 
   // Try closing the stream again.
   close_status = enc_stream->Close();
@@ -351,7 +258,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, NextAfterBackup) {
   auto enc_stream = GetEncryptingStream(
       pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
 
-  // Get the first block.
+  // Get the first segment.
   auto next_result = enc_stream->Next(&buffer);
   int buffer_size = pt_segment_size - header_size;
   EXPECT_TRUE(next_result.ok()) << next_result.status();
@@ -397,7 +304,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintextWithBackup) {
   auto enc_stream = GetEncryptingStream(
       pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
 
-  // Get the first block.
+  // Get the first segment.
   auto next_result = enc_stream->Next(&buffer);
   int buffer_size = pt_segment_size - header_size;
   EXPECT_TRUE(next_result.ok()) << next_result.status();
@@ -411,10 +318,13 @@ TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintextWithBackup) {
   EXPECT_TRUE(close_status.ok()) << close_status;
   EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
             refs.ct_buf->str().size());
-  // Ciphertext contains only the header and partial first block.
-  EXPECT_EQ(header_size + pt_size + kSegmentTagSize, refs.ct_buf->str().size());
+  // Ciphertext contains only the header and partial first segment.
+  EXPECT_EQ(
+      header_size + pt_size + DummyStreamSegmentEncrypter::kSegmentTagSize,
+      refs.ct_buf->str().size());
   // The last segment is marked as such.
-  EXPECT_EQ(kLastSegment, refs.ct_buf->str().back());
+  EXPECT_EQ(DummyStreamSegmentEncrypter::kLastSegment,
+            refs.ct_buf->str().back());
 
   // Try closing the stream again.
   close_status = enc_stream->Close();
@@ -454,14 +364,17 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintext) {
   EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
             refs.ct_buf->str().size());
   // Ciphertext contains seg_count full segments.
-  int ct_segment_size = pt_segment_size + kSegmentTagSize;
+  int ct_segment_size =
+      pt_segment_size + DummyStreamSegmentEncrypter::kSegmentTagSize;
   EXPECT_EQ(refs.seg_enc->get_ciphertext_segment_size(), ct_segment_size);
   EXPECT_EQ(ct_segment_size * seg_count, refs.ct_buf->str().size());
   // The last segment is marked as such.
-  EXPECT_EQ(kLastSegment, refs.ct_buf->str().back());
+  EXPECT_EQ(DummyStreamSegmentEncrypter::kLastSegment,
+            refs.ct_buf->str().back());
   // The previous segments are marked as not-last ones.
   for (int i = 1; i < seg_count - 1; i++) {
-    EXPECT_EQ(kNotLastSegment, refs.ct_buf->str()[(ct_segment_size * i)-1]);
+    EXPECT_EQ(DummyStreamSegmentEncrypter::kNotLastSegment,
+              refs.ct_buf->str()[(ct_segment_size * i)-1]);
   }
 
   // Try closing the stream again.
@@ -505,15 +418,18 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintextWithBackup) {
   EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
             refs.ct_buf->str().size());
   // Ciphertext contains seg_count full segments, minus the size of the backup.
-  int ct_segment_size = pt_segment_size + kSegmentTagSize;
+  int ct_segment_size =
+      pt_segment_size + DummyStreamSegmentEncrypter::kSegmentTagSize;
   EXPECT_EQ(refs.seg_enc->get_ciphertext_segment_size(), ct_segment_size);
   EXPECT_EQ(ct_segment_size * seg_count - backup_size,
             refs.ct_buf->str().size());
   // The last segment is marked as such.
-  EXPECT_EQ(kLastSegment, refs.ct_buf->str().back());
+  EXPECT_EQ(DummyStreamSegmentEncrypter::kLastSegment,
+            refs.ct_buf->str().back());
   // The previous segments are marked as not-last ones.
   for (int i = 1; i < seg_count - 1; i++) {
-    EXPECT_EQ(kNotLastSegment, refs.ct_buf->str()[(ct_segment_size * i)-1]);
+    EXPECT_EQ(DummyStreamSegmentEncrypter::kNotLastSegment,
+              refs.ct_buf->str()[(ct_segment_size * i)-1]);
   }
 
   // Try closing the stream again.
@@ -556,14 +472,17 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintextWithFullBackup) {
   EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
             refs.ct_buf->str().size());
   // Ciphertext contains (seg_count - 1) full segments.
-  int ct_segment_size = pt_segment_size + kSegmentTagSize;
+  int ct_segment_size =
+      pt_segment_size + DummyStreamSegmentEncrypter::kSegmentTagSize;
   EXPECT_EQ(refs.seg_enc->get_ciphertext_segment_size(), ct_segment_size);
   EXPECT_EQ(ct_segment_size * (seg_count - 1), refs.ct_buf->str().size());
   // The last segment is marked as such.
-  EXPECT_EQ(kLastSegment, refs.ct_buf->str().back());
+  EXPECT_EQ(DummyStreamSegmentEncrypter::kLastSegment,
+            refs.ct_buf->str().back());
   // The previous segments are marked as not-last ones.
   for (int i = 1; i < seg_count - 1; i++) {
-    EXPECT_EQ(kNotLastSegment, refs.ct_buf->str()[(ct_segment_size * i)-1]);
+    EXPECT_EQ(DummyStreamSegmentEncrypter::kNotLastSegment,
+              refs.ct_buf->str()[(ct_segment_size * i)-1]);
   }
 
   // Try closing the stream again.
@@ -599,7 +518,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, BackupAndPosition) {
   }
   EXPECT_LT(total_backup_size, next_result.ValueOrDie());
 
-  // Call Next(), it should succeed (backuped bytes of 1st block).
+  // Call Next(), it should succeed (backuped bytes of 1st segment).
   next_result = enc_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
   EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
@@ -615,13 +534,13 @@ TEST_F(StreamingAeadEncryptingStreamTest, BackupAndPosition) {
   }
   EXPECT_LT(total_backup_size, next_result.ValueOrDie());
 
-  // Call Next(), it should succeed  (backuped bytes of 1st block).
+  // Call Next(), it should succeed  (backuped bytes of 1st segment).
   next_result = enc_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
   EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
   EXPECT_EQ(buffer_size, enc_stream->Position());
 
-  // Call Next() again, it should return a full block (2nd block).
+  // Call Next() again, it should return a full segment (2nd segment).
   auto prev_position = enc_stream->Position();
   buffer_size = pt_segment_size;
   next_result = enc_stream->Next(&buffer);
@@ -644,14 +563,14 @@ TEST_F(StreamingAeadEncryptingStreamTest, BackupAndPosition) {
   EXPECT_EQ(total_backup_size, buffer_size);
   EXPECT_EQ(prev_position, enc_stream->Position());
 
-  // Call Next() again, it should return a full block (2nd block);
+  // Call Next() again, it should return a full segment (2nd segment);
   next_result = enc_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();
   EXPECT_EQ(buffer_size, next_result.ValueOrDie());
   EXPECT_EQ(prev_position + buffer_size, enc_stream->Position());
   EXPECT_EQ(2 * pt_segment_size - header_size, enc_stream->Position());
 
-  // Backup the entire block, and close the stream.
+  // Backup the entire segment, and close the stream.
   enc_stream->BackUp(buffer_size);
   EXPECT_EQ(pt_segment_size - header_size, enc_stream->Position());
   auto close_status = enc_stream->Close();
@@ -659,8 +578,9 @@ TEST_F(StreamingAeadEncryptingStreamTest, BackupAndPosition) {
   EXPECT_EQ(refs.seg_enc->get_generated_output_size(),
             refs.ct_buf->str().size());
   // Ciphertext contains 1st segment (with header), and no traces
-  // of the "empty" (backed-up) block.
-  EXPECT_EQ((pt_segment_size + kSegmentTagSize), refs.ct_buf->str().size());
+  // of the "empty" (backed-up) segment.
+  EXPECT_EQ((pt_segment_size + DummyStreamSegmentEncrypter::kSegmentTagSize),
+            refs.ct_buf->str().size());
 
   // Try closing the stream again.
   close_status = enc_stream->Close();

@@ -35,7 +35,7 @@ namespace subtle {
 namespace {
 
 
-// Writes 'contents' the specified 'output_stream', which must be non-null.
+// Writes 'contents' to the specified 'output_stream', which must be non-null.
 // In case of errors returns the first non-OK status of
 // output_stream->Next()-operation.
 
@@ -92,6 +92,7 @@ StatusOr<std::unique_ptr<OutputStream>> StreamingAeadEncryptingStream::New(
   enc_stream->is_first_segment_ = true;
   enc_stream->count_backedup_ = first_segment_size;
   enc_stream->pt_buffer_offset_ = 0;
+  enc_stream->status_ = Status::OK;
   return {std::move(enc_stream)};
 }
 
