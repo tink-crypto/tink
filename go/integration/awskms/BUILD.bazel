@@ -1,0 +1,44 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])  # Apache 2.0 # keep
+
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "aws_kms_aead.go",
+        "aws_kms_client.go",
+    ],
+    importpath = "github.com/google/tink/go/integration/awskms",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_aws_sdk_go//aws:go_default_library",
+        "@com_github_aws_sdk_go//service/kms:go_default_library",
+        "@com_github_aws_sdk_go//aws/credentials:go_default_library",
+        "@com_github_aws_sdk_go//aws/session:go_default_library",
+        "//go/aead:go_default_library",
+        "//go/tink:go_default_library",
+        "//go/core/registry:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["aws_kms_aead_test.go"],
+    data = [
+        "@google_root_pem//file", #keep
+        "//testdata:credentials",
+    ],
+    embed = [":go_default_library",],
+    deps = [
+        "//go/aead:go_default_library",
+        "//go/subtle/random:go_default_library",
+        "//go/subtle/aead:go_default_library",
+        "//go/tink:go_default_library",
+        "//go/keyset:go_default_library",
+        "//go/core/registry:go_default_library",
+    ],
+)

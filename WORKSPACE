@@ -651,6 +651,13 @@ go_repository(
     importpath = "cloud.google.com/go",
 )
 
+go_repository(
+    name = "com_github_aws_sdk_go",
+    commit = "182cda27d0921b14139ff6d352c09e0cb20e4578",
+    importpath = "github.com/aws/aws-sdk-go",
+)
+
+
 #-----------------------------------------------------------------------------
 # Javascript
 #-----------------------------------------------------------------------------
@@ -668,3 +675,4 @@ http_archive(
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
 
 closure_repositories()
+
