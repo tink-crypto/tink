@@ -18,8 +18,8 @@ import (
 	"bytes"
 	"errors"
 	"os"
-	"os/user"
-	"strings"
+	// ignore-placeholder1
+	// ignore-placeholder2
 	"testing"
 
 	"flag"
@@ -28,7 +28,7 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
-	subtleaead "github.com/google/tink/go/subtle/aead"
+	// ignore-placeholder3
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
@@ -40,17 +40,15 @@ const (
 
 var (
 	// lint placeholder header, please ignore
-	credFile = "testdata/credentials_aws.csv"
+	credFile = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/credentials_aws.csv"
 	// lint placeholder footer, please ignore
 )
 
 // lint placeholder header, please ignore
 func init() {
-	google.RegisterInit(func() {
-		certPath := runfiles.Path("google3/security/cacerts/for_connecting_to_google/roots.pem")
-		flag.Set("cacerts", certPath)
-		os.Setenv("SSL_CERT_FILE", certPath)
-	})
+	certPath := os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "roots.pem"
+	flag.Set("cacerts", certPath)
+	os.Setenv("SSL_CERT_FILE", certPath)
 }
 
 // lint placeholder footer, please ignore
@@ -89,7 +87,7 @@ func basicAEADTest(t *testing.T, a tink.AEAD) error {
 }
 func TestBasicAead(t *testing.T) {
 	setupKMS(t)
-	mockAead()
+	// ignore-placeholder4
 	dek := aead.AES128CTRHMACSHA256KeyTemplate()
 	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
 	if err != nil {
@@ -104,10 +102,4 @@ func TestBasicAead(t *testing.T) {
 	}
 }
 
-func mockAead() {
-	if u, err := user.Current(); err == nil && strings.HasPrefix(u.Username, "forge-") {
-		awsaead = func(h *keyset.Handle) (tink.AEAD, error) {
-			return subtleaead.NewAESGCM(random.GetRandomBytes(32))
-		}
-	}
-}
+// ignore-placeholder5

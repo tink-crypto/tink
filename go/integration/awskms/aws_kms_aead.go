@@ -22,8 +22,8 @@ import (
 	"errors"
 	"strings"
 
-	"google3/third_party/golang/aws/aws/aws"
-	"google3/third_party/golang/aws/service/kms/kms"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/kms"
 
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/tink"

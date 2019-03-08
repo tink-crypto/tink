@@ -24,10 +24,10 @@ import (
 	"regexp"
 	"strings"
 
-	"google3/third_party/golang/aws/aws/aws"
-	"google3/third_party/golang/aws/aws/credentials/credentials"
-	"google3/third_party/golang/aws/aws/session/session"
-	"google3/third_party/golang/aws/service/kms/kms"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 )

@@ -34,7 +34,6 @@ func NewECDSASignature(r, s *big.Int) *ECDSASignature {
 }
 
 // EncodeECDSASignature converts the signature to the given encoding format.
-// Only DER encoding is supported now.
 func (sig *ECDSASignature) EncodeECDSASignature(encoding, curveName string) ([]byte, error) {
 	var enc []byte
 	var err error
