@@ -28,6 +28,7 @@ android_library(
         ":srcs",
     ],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
     deps = [
         ":protos",
         "//java/src/main/java/com/google/crypto/tink:android",

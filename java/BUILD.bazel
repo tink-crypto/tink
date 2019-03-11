@@ -184,7 +184,7 @@ android_library(
 )
 
 java_library(
-    name = "test_util",
+    name = "testutil",
     testonly = 1,
     srcs = glob([
         "src/test/**/TestUtil.java",

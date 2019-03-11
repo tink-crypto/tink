@@ -17,6 +17,7 @@ java_library(
     name = "config",
     srcs = [":srcs"],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
     deps = [
         "//java/src/main/java/com/google/crypto/tink/daead",
         "//java/src/main/java/com/google/crypto/tink/hybrid",
@@ -30,6 +31,7 @@ java_library(
     name = "android",
     srcs = [":srcs"],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
     deps = [
         "//java/src/main/java/com/google/crypto/tink/daead:android",
         "//java/src/main/java/com/google/crypto/tink/hybrid:android",

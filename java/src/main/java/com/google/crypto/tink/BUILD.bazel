@@ -34,6 +34,7 @@ java_library(
         "StreamingAead.java",
     ],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
 )
 
 # restricted APIs
@@ -74,6 +75,7 @@ java_library(
     name = "tink",
     srcs = [":srcs"],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
     deps = full_protos + [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
@@ -99,6 +101,7 @@ java_library(
     name = "android",
     srcs = [":android_srcs"],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
     deps = lite_protos + [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
