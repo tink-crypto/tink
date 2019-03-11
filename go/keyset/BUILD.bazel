@@ -17,9 +17,6 @@ go_library(
         "writer.go",
     ],
     importpath = "github.com/google/tink/go/keyset",
-    visibility = [
-        "//visibility:public",
-    ],
     deps = [
         "//go/core/primitiveset:go_default_library",
         "//go/core/registry:go_default_library",

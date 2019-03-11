@@ -6,6 +6,7 @@ go_library(
     name = "go_default_library",
     srcs = ["random.go"],
     importpath = "github.com/google/tink/go/subtle/random",
+    visibility = ["//visibility:public"],
 )
 
 go_test(

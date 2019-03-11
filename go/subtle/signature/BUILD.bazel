@@ -13,6 +13,7 @@ go_library(
         "encoding.go",
     ],
     importpath = "github.com/google/tink/go/subtle/signature",
+    visibility = ["//visibility:public"],
     deps = [
         "//go/subtle:go_default_library",
         "//go/tink:go_default_library",
