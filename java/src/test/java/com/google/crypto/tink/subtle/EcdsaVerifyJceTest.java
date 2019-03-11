@@ -51,8 +51,6 @@ public class EcdsaVerifyJceTest {
         "../wycheproof/testvectors/ecdsa_secp384r1_sha512_test.json", EcdsaEncoding.DER);
     testWycheproofVectors(
         "../wycheproof/testvectors/ecdsa_secp521r1_sha512_test.json", EcdsaEncoding.DER);
-    testWycheproofVectors(
-        "../wycheproof/testvectors/ecdsa_webcrypto_test.json", EcdsaEncoding.IEEE_P1363);
   }
 
   private static void testWycheproofVectors(String fileName, EcdsaEncoding encoding)
