@@ -1,3 +1,5 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
@@ -7,7 +9,6 @@ go_library(
         "testutil.go",
     ],
     importpath = "github.com/google/tink/go/testutil",
-    visibility = ["//visibility:public"],
     deps = [
         "//go/aead:go_default_library",
         "//go/core/registry:go_default_library",
