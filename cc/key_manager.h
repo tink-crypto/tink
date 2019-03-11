@@ -14,11 +14,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include <vector>
-
 #ifndef TINK_KEY_MANAGER_H_
 #define TINK_KEY_MANAGER_H_
+
+#include <algorithm>
+#include <vector>
 
 #include "absl/strings/string_view.h"
 #include "tink/util/errors.h"
