@@ -6,7 +6,6 @@ go_library(
         "aes_siv.go",
     ],
     importpath = "github.com/google/tink/go/subtle/daead",
-    visibility = ["//visibility:public"],
     deps = [
         "//go/tink:go_default_library",
     ],
