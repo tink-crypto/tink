@@ -26,9 +26,9 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestECIESP256HKDFHMACSHA256AES128GCMKeyTemplate(t *testing.T) {
+func TestECIESHKDFAES128GCMKeyTemplate(t *testing.T) {
 	kformat := new(eciespb.EciesAeadHkdfKeyFormat)
-	kt := ECIESP256HKDFHMACSHA256AES128GCMKeyTemplate()
+	kt := ECIESHKDFAES128GCMKeyTemplate()
 	if kt.TypeUrl != eciesAEADHKDFPrivateKeyTypeURL {
 		t.Error("type url mismatch")
 	}
@@ -55,9 +55,9 @@ func TestECIESP256HKDFHMACSHA256AES128GCMKeyTemplate(t *testing.T) {
 	}
 }
 
-func TestECIESP256HKDFHMACSHA256AES128CTRHMACSHA256KeyTemplate(t *testing.T) {
+func TestECIESHKDFAES128CTRHMACSHA256KeyTemplate(t *testing.T) {
 	kformat := new(eciespb.EciesAeadHkdfKeyFormat)
-	kt := ECIESP256HKDFHMACSHA256AES128CTRHMACSHA256KeyTemplate()
+	kt := ECIESHKDFAES128CTRHMACSHA256KeyTemplate()
 	if kt.TypeUrl != eciesAEADHKDFPrivateKeyTypeURL {
 		t.Error("type url mismatch")
 	}

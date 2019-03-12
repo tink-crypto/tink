@@ -32,7 +32,7 @@
 //
 // func main() {
 //
-//     kh , err := keyset.NewHandle(hybrid.ECIESP256HKDFHMACSHA256AES128CTRHMACSHA256KeyTemplate())
+//     kh , err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
 //     if err != nil {
 //         //handle error
 //     }

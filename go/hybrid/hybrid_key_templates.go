@@ -25,16 +25,16 @@ import (
 // This file contains pre-generated KeyTemplates for HybridEncrypt keys. One can use these templates
 // to generate new Keysets.
 
-// ECIESP256HKDFHMACSHA256AES128GCMKeyTemplate is a KeyTemplate that generates an ECDH P-256 and decapsulation key AES128-GCM key with the following parameters:
+// ECIESHKDFAES128GCMKeyTemplate is a KeyTemplate that generates an ECDH P-256 and decapsulation key AES128-GCM key with the following parameters:
 //  - KEM: ECDH over NIST P-256
 //  - DEM: AES128-GCM
 //  - KDF: HKDF-HMAC-SHA256 with an empty salt
-func ECIESP256HKDFHMACSHA256AES128GCMKeyTemplate() *tinkpb.KeyTemplate {
+func ECIESHKDFAES128GCMKeyTemplate() *tinkpb.KeyTemplate {
 	empty := []byte{}
 	return createECIESAEADHKDFKeyTemplate(commonpb.EllipticCurveType_NIST_P256, commonpb.HashType_SHA256, commonpb.EcPointFormat_UNCOMPRESSED, aead.AES128GCMKeyTemplate(), empty)
 }
 
-// ECIESP256HKDFHMACSHA256AES128CTRHMACSHA256KeyTemplate is a KeyTemplate that generates an ECDH P-256 and decapsulation key AES128-CTR-HMAC-SHA256 with the following parameters:
+// ECIESHKDFAES128CTRHMACSHA256KeyTemplate is a KeyTemplate that generates an ECDH P-256 and decapsulation key AES128-CTR-HMAC-SHA256 with the following parameters:
 //  - KEM: ECDH over NIST P-256
 //  - DEM: AES128-CTR-HMAC-SHA256 with the following parameters
 //      - AES key size: 16 bytes
@@ -42,7 +42,7 @@ func ECIESP256HKDFHMACSHA256AES128GCMKeyTemplate() *tinkpb.KeyTemplate {
 //      - HMAC key size: 32 bytes
 //      - HMAC tag size: 16 bytes
 //  - KDF: HKDF-HMAC-SHA256 with an empty salt
-func ECIESP256HKDFHMACSHA256AES128CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
+func ECIESHKDFAES128CTRHMACSHA256KeyTemplate() *tinkpb.KeyTemplate {
 	empty := []byte{}
 	return createECIESAEADHKDFKeyTemplate(commonpb.EllipticCurveType_NIST_P256, commonpb.HashType_SHA256, commonpb.EcPointFormat_UNCOMPRESSED, aead.AES128CTRHMACSHA256KeyTemplate(), empty)
 }
