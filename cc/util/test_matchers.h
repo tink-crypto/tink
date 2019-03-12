@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CC_UTIL_TEST_MATCHERS_H_
-#define TINK_CC_UTIL_TEST_MATCHERS_H_
+#ifndef TINK_UTIL_TEST_MATCHERS_H_
+#define TINK_UTIL_TEST_MATCHERS_H_
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -49,4 +49,4 @@ MATCHER_P(StatusIs, code,
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CC_UTIL_TEST_MATCHERS_H_
+#endif  // TINK_UTIL_TEST_MATCHERS_H_

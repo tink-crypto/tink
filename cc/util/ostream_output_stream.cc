@@ -16,6 +16,7 @@
 
 #include "tink/util/ostream_output_stream.h"
 
+#include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <memory>
