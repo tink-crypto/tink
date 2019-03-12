@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  * succeed, we try the raw primitives. If any succeeds, we return the ciphertext, otherwise we
  * simply throw a GeneralSecurityException.
  */
-public class AeadWrapper implements PrimitiveWrapper<Aead> {
+class AeadWrapper implements PrimitiveWrapper<Aead> {
   private static final Logger logger = Logger.getLogger(AeadWrapper.class.getName());
 
   private static class WrappedAead implements Aead {

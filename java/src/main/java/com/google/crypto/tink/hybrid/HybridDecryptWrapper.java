@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  * the keys associated with the prefix do not work, the primitive tries all keys with {@link
  * com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
-public final class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
+class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
   private static final Logger logger = Logger.getLogger(HybridDecryptWrapper.class.getName());
 
   private static class WrappedHybridDecrypt implements HybridDecrypt {

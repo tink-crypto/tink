@@ -31,7 +31,7 @@ import java.security.GeneralSecurityException;
  * uses the primary key in the keyset, and prepends to the signature a certain prefix associated
  * with the primary key.
  */
-public final class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
+class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
   private static class WrappedPublicKeySign implements PublicKeySign {
     private final PrimitiveSet<PublicKeySign> primitives;
 
