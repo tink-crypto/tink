@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
@@ -65,7 +66,7 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 	}
 	primitive, ok := p.(tink.AEAD)
 	if !ok {
-		return nil, errors.New("failed to convert AEAD primitive")
+		return nil, errors.New("kms_envelope_aead: failed to convert AEAD primitive")
 	}
 
 	payload, err := primitive.Encrypt(pt, aad)
@@ -84,34 +85,34 @@ func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
 	_, err := b.Read(l)
 	ed, err := binary.ReadVarint(bytes.NewReader(l))
 	if err != nil {
-		return nil, errors.New("invalid ciphertext")
+		return nil, errors.New("kms_envelope_aead: invalid ciphertext")
 	}
 	if ed <= 0 || ed > int64(len(ct)-lenDEK) {
-		return nil, errors.New("invalid ciphertext")
+		return nil, errors.New("kms_envelope_aead: invalid ciphertext")
 	}
 	encryptedDEK := make([]byte, ed)
 	n, err := b.Read(encryptedDEK)
 	if err != nil || int64(n) != ed {
-		return nil, errors.New("invalid ciphertext")
+		return nil, errors.New("kms_envelope_aead: invalid ciphertext")
 	}
 	pl := bLen - lenDEK - int(ed)
 	payload := make([]byte, pl)
 	n, err = b.Read(payload)
 	if err != nil || n != pl {
-		return nil, errors.New("invalid ciphertext")
+		return nil, errors.New("kms_envelope_aead: invalid ciphertext")
 	}
 
 	dek, err := a.remote.Decrypt(encryptedDEK, []byte{0})
 	if err != nil {
-		return nil, errors.New("decryption failed")
+		return nil, err
 	}
 	p, err := registry.Primitive(a.dekTemplate.TypeUrl, dek)
 	if err != nil {
-		return nil, errors.New("decryption failed")
+		return nil, fmt.Errorf("kms_envelope_aead: %s", err)
 	}
 	primitive, ok := p.(tink.AEAD)
 	if !ok {
-		return nil, errors.New("failed to convert AEAD primitive")
+		return nil, errors.New("kms_envelope_aead: failed to convert AEAD primitive")
 	}
 	return primitive.Decrypt(payload, aad)
 }
