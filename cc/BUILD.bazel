@@ -440,7 +440,7 @@ template_rule(
     src = "version.h.templ",
     out = "version.h",
     substitutions = {
-        "TINK_VERSION_LABEL": "%s" % TINK_VERSION_LABEL,
+        "@TINK_VERSION_LABEL@": "%s" % TINK_VERSION_LABEL,
     },
 )
 
