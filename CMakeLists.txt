@@ -4,9 +4,6 @@ project(Tink CXX)
 # Deviate from the naming convention for consistency with tink_version.bzl.
 include(tink_version.cmake)
 
-set(TINK_CXX_STANDARD 11)
-set(TINK_ENABLE_TESTS true)
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(TinkWorkspace)
