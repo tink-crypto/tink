@@ -112,6 +112,8 @@ tink_cc_library(
   PUBLIC
 )
 
+add_library(tink ALIAS tink_core_cc)
+
 tink_cc_library(
   NAME input_stream
   SRCS input_stream.h
