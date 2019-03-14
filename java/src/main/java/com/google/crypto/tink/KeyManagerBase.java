@@ -63,14 +63,15 @@ public abstract class KeyManagerBase<
   private final Class<KeyFormatProto> keyFormatProtoClass;
   private final String typeUrl;
 
-  @SuppressWarnings("unchecked")
   private static <Casted> Casted castOrSecurityException(
       Object objectToCast, String exceptionText, Class<Casted> classObject)
       throws GeneralSecurityException {
     if (!classObject.isInstance(objectToCast)) {
       throw new GeneralSecurityException(exceptionText);
     }
-    return (Casted) objectToCast;
+    @SuppressWarnings("unchecked") // We just checked it manually.
+    Casted castedObject = (Casted) objectToCast;
+    return castedObject;
   }
 
   @Override

@@ -71,14 +71,12 @@ import java.util.logging.Logger;
 public final class Registry {
   private static final Logger logger = Logger.getLogger(Registry.class.getName());
 
-  @SuppressWarnings("rawtypes")
   private static final ConcurrentMap<String, KeyManager> keyManagerMap =
       new ConcurrentHashMap<String, KeyManager>(); // typeUrl -> KeyManager mapping
 
   private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
       new ConcurrentHashMap<String, Boolean>(); // typeUrl -> newKeyAllowed mapping
 
-  @SuppressWarnings("rawtypes")
   private static final ConcurrentMap<String, Catalogue> catalogueMap =
       new ConcurrentHashMap<String, Catalogue>(); //  name -> catalogue mapping
 
@@ -205,7 +203,6 @@ public final class Registry {
    *     of the class of {@code manager}, or the registration tries to re-enable the generation
    *     of new keys.
    */
-  @SuppressWarnings("unchecked")
   public static synchronized <P> void registerKeyManager(
       final KeyManager<P> manager, boolean newKeyAllowed) throws GeneralSecurityException {
     if (manager == null) {
@@ -283,7 +280,6 @@ public final class Registry {
    *     class of {@code manager}, or the registration tries to re-enable the generation of new
    *     keys.
    */
-  @SuppressWarnings("unchecked")
   public static synchronized <P> void registerPrimitiveWrapper(final PrimitiveWrapper<P> wrapper)
       throws GeneralSecurityException {
     if (wrapper == null) {
