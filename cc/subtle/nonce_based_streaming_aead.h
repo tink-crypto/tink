@@ -51,8 +51,8 @@ class NonceBasedStreamingAead : public StreamingAead {
   // Methods to be implemented by a subclass of this class.
 
   // Returns a new StreamSegmentEncrypter that uses `associated_data` for AEAD.
-  virtual std::unique_ptr<StreamSegmentEncrypter> NewSegmentEncrypter(
-      absl::string_view associated_data) const = 0;
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
+  NewSegmentEncrypter(absl::string_view associated_data) const = 0;
 };
 
 }  // namespace subtle

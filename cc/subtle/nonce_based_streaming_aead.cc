@@ -32,8 +32,11 @@ crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
     NonceBasedStreamingAead::NewEncryptingStream(
         std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination,
         absl::string_view associated_data) {
+  auto segment_encrypter_result = NewSegmentEncrypter(associated_data);
+  if (!segment_encrypter_result.ok()) return segment_encrypter_result.status();
   return StreamingAeadEncryptingStream::New(
-      NewSegmentEncrypter(associated_data), std::move(ciphertext_destination));
+      std::move(segment_encrypter_result.ValueOrDie()),
+      std::move(ciphertext_destination));
 }
 
 crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>

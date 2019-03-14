@@ -299,6 +299,48 @@ cc_library(
 )
 
 cc_library(
+    name = "aes_gcm_hkdf_stream_segment_encrypter",
+    srcs = ["aes_gcm_hkdf_stream_segment_encrypter.cc"],
+    hdrs = ["aes_gcm_hkdf_stream_segment_encrypter.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":random",
+        ":stream_segment_encrypter",
+        ":subtle_util_boringssl",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "aes_gcm_hkdf_streaming",
+    srcs = ["aes_gcm_hkdf_streaming.cc"],
+    hdrs = ["aes_gcm_hkdf_streaming.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":aes_gcm_hkdf_stream_segment_encrypter",
+        ":common_enums",
+        ":hkdf",
+        ":nonce_based_streaming_aead",
+        ":random",
+        ":stream_segment_encrypter",
+        ":subtle_util_boringssl",
+        "//cc:input_stream",
+        "//cc:output_stream",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "aes_eax_boringssl",
     srcs = ["aes_eax_boringssl.cc"],
     hdrs = ["aes_eax_boringssl.h"],
@@ -645,6 +687,40 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@rapidjson",
+    ],
+)
+
+cc_test(
+    name = "aes_gcm_hkdf_stream_segment_encrypter_test",
+    size = "small",
+    srcs = ["aes_gcm_hkdf_stream_segment_encrypter_test.cc"],
+    deps = [
+        ":aes_gcm_hkdf_stream_segment_encrypter",
+        ":random",
+        ":stream_segment_encrypter",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_gcm_hkdf_streaming_test",
+    size = "small",
+    srcs = ["aes_gcm_hkdf_streaming_test.cc"],
+    deps = [
+        ":aes_gcm_hkdf_streaming",
+        ":common_enums",
+        ":random",
+        "//cc:output_stream",
+        "//cc/util:ostream_output_stream",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
