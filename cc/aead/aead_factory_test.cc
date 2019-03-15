@@ -21,13 +21,13 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/keyset_util.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::KeysetUtil;
+using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::AesGcmKeyFormat;
@@ -46,7 +46,7 @@ class AeadFactoryTest : public ::testing::Test {
 TEST_F(AeadFactoryTest, testBasic) {
   Keyset keyset;
   auto aead_result =
-      AeadFactory::GetPrimitive(*KeysetUtil::GetKeysetHandle(keyset));
+      AeadFactory::GetPrimitive(*TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(aead_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, aead_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
@@ -86,7 +86,7 @@ TEST_F(AeadFactoryTest, testPrimitive) {
 
   // Create a KeysetHandle and use it with the factory.
   auto aead_result =
-      AeadFactory::GetPrimitive(*KeysetUtil::GetKeysetHandle(keyset));
+      AeadFactory::GetPrimitive(*TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(aead_result.ok()) << aead_result.status();
   auto aead = std::move(aead_result.ValueOrDie());
 

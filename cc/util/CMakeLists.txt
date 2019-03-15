@@ -155,10 +155,10 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME keyset_util
+  NAME test_keyset_handle
   SRCS
-    keyset_util.cc
-    keyset_util.h
+    test_keyset_handle.cc
+    test_keyset_handle.h
   DEPS
     tink::core::keyset_handle
     tink::proto::tink

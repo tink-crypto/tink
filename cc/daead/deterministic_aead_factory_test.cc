@@ -21,13 +21,13 @@
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/deterministic_aead.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/keyset_util.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_siv.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::KeysetUtil;
+using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::AesSivKeyFormat;
@@ -45,7 +45,7 @@ class DeterministicAeadFactoryTest : public ::testing::Test {};
 TEST_F(DeterministicAeadFactoryTest, testBasic) {
   Keyset keyset;
   auto daead_result = DeterministicAeadFactory::GetPrimitive(
-      *KeysetUtil::GetKeysetHandle(keyset));
+      *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(daead_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, daead_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
@@ -85,7 +85,7 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
 
   // Create a KeysetHandle and use it with the factory.
   auto daead_result = DeterministicAeadFactory::GetPrimitive(
-      *KeysetUtil::GetKeysetHandle(keyset));
+      *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(daead_result.ok()) << daead_result.status();
   auto daead = std::move(daead_result.ValueOrDie());
 

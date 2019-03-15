@@ -24,13 +24,13 @@
 #include "tink/registry.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/signature_config.h"
-#include "tink/util/keyset_util.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::KeysetUtil;
+using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
@@ -62,7 +62,7 @@ EcdsaPublicKey GetNewEcdsaPublicKey() {
 TEST_F(PublicKeyVerifyFactoryTest, testBasic) {
   Keyset keyset;
   auto public_key_verify_result = PublicKeyVerifyFactory::GetPrimitive(
-      *KeysetUtil::GetKeysetHandle(keyset));
+      *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(public_key_verify_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
       public_key_verify_result.status().error_code());
@@ -92,7 +92,7 @@ TEST_F(PublicKeyVerifyFactoryTest, testPrimitive) {
 
   // Create a KeysetHandle and use it with the factory.
   auto public_key_verify_result = PublicKeyVerifyFactory::GetPrimitive(
-      *KeysetUtil::GetKeysetHandle(keyset));
+      *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(public_key_verify_result.ok())
       << public_key_verify_result.status();
   auto public_key_verify = std::move(public_key_verify_result.ValueOrDie());

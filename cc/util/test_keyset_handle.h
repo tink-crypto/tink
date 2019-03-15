@@ -14,30 +14,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/util/keyset_util.h"
+#ifndef TINK_UTIL_KEYSET_UTIL_H_
+#define TINK_UTIL_KEYSET_UTIL_H_
 
-#include "absl/memory/memory.h"
 #include "tink/keyset_handle.h"
 #include "proto/tink.pb.h"
-
-using google::crypto::tink::Keyset;
 
 namespace crypto {
 namespace tink {
 
-// static
-std::unique_ptr<KeysetHandle> KeysetUtil::GetKeysetHandle(
-    const Keyset& keyset) {
-  auto unique_keyset = absl::make_unique<Keyset>(keyset);
-  std::unique_ptr<KeysetHandle> handle =
-      absl::WrapUnique(new KeysetHandle(std::move(unique_keyset)));
-  return handle;
-}
+// The helpers below are "packed" in a class to allow for an easier
+// addition of them as a "friend class".
+class TestKeysetHandle {
+ public:
+  // Creates a KeysetHandle object for the given 'keyset'.
+  static std::unique_ptr<KeysetHandle> GetKeysetHandle(
+      const google::crypto::tink::Keyset& keyset);
 
-// static
-const Keyset& KeysetUtil::GetKeyset(const KeysetHandle& keyset_handle) {
-  return keyset_handle.get_keyset();
-}
+  // Returns a Keyset-proto from the given 'keyset_handle'.
+  static const google::crypto::tink::Keyset& GetKeyset(
+      const KeysetHandle& keyset_handle);
+};
 
 }  // namespace tink
 }  // namespace crypto
+
+#endif  // TINK_UTIL_KEYSET_UTIL_H_

@@ -32,7 +32,7 @@
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/deterministic_aead.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/keyset_util.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_siv.pb.h"
@@ -40,7 +40,7 @@
 
 using crypto::tink::AesSivKeyManager;
 using crypto::tink::KeyFactory;
-using crypto::tink::KeysetUtil;
+using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::AesSivKeyFormat;
@@ -56,7 +56,7 @@ using google::crypto::tink::KeyStatusType;
 - (void)testEmptyKeyset {
   Keyset keyset;
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -100,7 +100,7 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertNil(error);
 
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   id<TINKDeterministicAead> aead = [TINKDeterministicAeadFactory primitiveWithKeysetHandle:handle

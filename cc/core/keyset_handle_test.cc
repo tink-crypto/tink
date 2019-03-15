@@ -28,8 +28,8 @@
 #include "tink/json_keyset_writer.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
-#include "tink/util/keyset_util.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
@@ -37,7 +37,7 @@
 namespace crypto {
 namespace tink {
 
-using crypto::tink::KeysetUtil;
+using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddKeyData;
 using crypto::tink::test::AddLegacyKey;
 using crypto::tink::test::AddRawKey;
@@ -83,7 +83,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
     EXPECT_TRUE(result.ok()) << result.status();
     auto handle = std::move(result.ValueOrDie());
     EXPECT_EQ(keyset.SerializeAsString(),
-              KeysetUtil::GetKeyset(*handle).SerializeAsString());
+              TestKeysetHandle::GetKeyset(*handle).SerializeAsString());
   }
 
   {  // AEAD does not match the ciphertext
@@ -162,7 +162,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
     EXPECT_TRUE(result.ok()) << result.status();
     auto handle = std::move(result.ValueOrDie());
     EXPECT_EQ(keyset.SerializeAsString(),
-              KeysetUtil::GetKeyset(*handle).SerializeAsString());
+              TestKeysetHandle::GetKeyset(*handle).SerializeAsString());
   }
 
   {  // AEAD does not match the ciphertext
@@ -286,9 +286,9 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
     auto handle = std::move(handle_result.ValueOrDie());
     auto public_handle_result = handle->GetPublicKeysetHandle();
     ASSERT_TRUE(public_handle_result.ok()) << public_handle_result.status();
-    auto keyset = KeysetUtil::GetKeyset(*handle);
-    auto public_keyset = KeysetUtil::GetKeyset(
-        *(public_handle_result.ValueOrDie()));
+    auto keyset = TestKeysetHandle::GetKeyset(*handle);
+    auto public_keyset =
+        TestKeysetHandle::GetKeyset(*(public_handle_result.ValueOrDie()));
     EXPECT_EQ(keyset.primary_key_id(), public_keyset.primary_key_id());
     EXPECT_EQ(keyset.key_size(), public_keyset.key_size());
     CompareKeyMetadata(keyset.key(0), public_keyset.key(0));
@@ -323,11 +323,11 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
               KeyData::ASYMMETRIC_PRIVATE,
               &keyset);
     keyset.set_primary_key_id(42);
-    auto handle = KeysetUtil::GetKeysetHandle(keyset);
+    auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
     auto public_handle_result = handle->GetPublicKeysetHandle();
     ASSERT_TRUE(public_handle_result.ok()) << public_handle_result.status();
-    auto public_keyset = KeysetUtil::GetKeyset(
-        *(public_handle_result.ValueOrDie()));
+    auto public_keyset =
+        TestKeysetHandle::GetKeyset(*(public_handle_result.ValueOrDie()));
     EXPECT_EQ(keyset.primary_key_id(), public_keyset.primary_key_id());
     EXPECT_EQ(keyset.key_size(), public_keyset.key_size());
     for (int i = 0; i < key_count; i++) {
@@ -373,7 +373,7 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
         KeyData::ASYMMETRIC_PRIVATE,  // Intentionally wrong setting.
         &keyset);
     keyset.set_primary_key_id(42);
-    auto handle = KeysetUtil::GetKeysetHandle(keyset);
+    auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
     auto public_handle_result = handle->GetPublicKeysetHandle();
     ASSERT_FALSE(public_handle_result.ok());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "PrivateKeyFactory",
@@ -400,7 +400,7 @@ TEST_F(KeysetHandleTest, GetPrimitive) {
              KeyStatusType::ENABLED, &keyset);
   keyset.set_primary_key_id(1);
   std::unique_ptr<KeysetHandle> keyset_handle =
-      KeysetUtil::GetKeysetHandle(keyset);
+      TestKeysetHandle::GetKeysetHandle(keyset);
 
   // Check that encryption with the primary can be decrypted with key_data_1.
   auto aead_result = keyset_handle->GetPrimitive<Aead>();
@@ -428,7 +428,7 @@ TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
              KeyStatusType::ENABLED, &keyset);
   keyset.set_primary_key_id(0);
   std::unique_ptr<KeysetHandle> keyset_handle =
-      KeysetUtil::GetKeysetHandle(keyset);
+      TestKeysetHandle::GetKeysetHandle(keyset);
   ASSERT_THAT(keyset_handle->GetPrimitive<Aead>(nullptr).status(),
               test::StatusIs(util::error::INVALID_ARGUMENT));
 }

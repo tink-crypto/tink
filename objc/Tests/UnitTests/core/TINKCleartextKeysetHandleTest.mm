@@ -25,7 +25,7 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
 
-#include "tink/util/keyset_util.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
@@ -58,8 +58,9 @@
       [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
 
   XCTAssertNotNil(handle);
-  XCTAssertTrue(crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle).SerializeAsString() ==
-                keyset.SerializeAsString());
+  XCTAssertTrue(
+      crypto::tink::TestKeysetHandle::GetKeyset(*handle.ccKeysetHandle).SerializeAsString() ==
+      keyset.SerializeAsString());
 
   // Trying to use the same reader again must fail.
   error = nil;

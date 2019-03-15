@@ -184,9 +184,10 @@ cc_library(
 )
 
 cc_library(
-    name = "keyset_util",
-    srcs = ["keyset_util.cc"],
-    hdrs = ["keyset_util.h"],
+    name = "test_keyset_handle",
+    testonly = 1,
+    srcs = ["test_keyset_handle.cc"],
+    hdrs = ["test_keyset_handle.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [

@@ -22,14 +22,14 @@
 #include "tink/mac.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/mac/mac_config.h"
-#include "tink/util/keyset_util.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/common.pb.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::KeysetUtil;
+using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::HashType;
@@ -49,7 +49,7 @@ class MacFactoryTest : public ::testing::Test {
 TEST_F(MacFactoryTest, testBasic) {
   Keyset keyset;
   auto mac_result =
-      MacFactory::GetPrimitive(*KeysetUtil::GetKeysetHandle(keyset));
+      MacFactory::GetPrimitive(*TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(mac_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, mac_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
@@ -91,7 +91,7 @@ TEST_F(MacFactoryTest, testPrimitive) {
 
   // Create a KeysetHandle and use it with the factory.
   auto mac_result =
-      MacFactory::GetPrimitive(*KeysetUtil::GetKeysetHandle(keyset));
+      MacFactory::GetPrimitive(*TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(mac_result.ok()) << mac_result.status();
   auto mac = std::move(mac_result.ValueOrDie());
 

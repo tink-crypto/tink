@@ -25,13 +25,13 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/keyset_util.h"
 #include "tink/util/status.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::KeysetUtil;
+using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
@@ -57,8 +57,8 @@ EciesAeadHkdfPrivateKey GetNewEciesPrivateKey() {
 
 TEST_F(HybridDecryptFactoryTest, testBasic) {
   Keyset keyset;
-  auto hybrid_decrypt_result =
-      HybridDecryptFactory::GetPrimitive(*KeysetUtil::GetKeysetHandle(keyset));
+  auto hybrid_decrypt_result = HybridDecryptFactory::GetPrimitive(
+      *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(hybrid_decrypt_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
       hybrid_decrypt_result.status().error_code());
@@ -100,8 +100,8 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
       ecies_key_manager->GetPrimitive(ecies_key_2.public_key()).ValueOrDie());
 
   // Create a KeysetHandle and use it with the factory.
-  auto hybrid_decrypt_result =
-      HybridDecryptFactory::GetPrimitive(*KeysetUtil::GetKeysetHandle(keyset));
+  auto hybrid_decrypt_result = HybridDecryptFactory::GetPrimitive(
+      *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(hybrid_decrypt_result.ok()) << hybrid_decrypt_result.status();
   auto hybrid_decrypt = std::move(hybrid_decrypt_result.ValueOrDie());
 

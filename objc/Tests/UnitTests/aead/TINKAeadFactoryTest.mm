@@ -33,14 +33,14 @@
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
-#include "tink/util/keyset_util.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
 using crypto::tink::AesGcmKeyManager;
 using crypto::tink::KeyFactory;
-using crypto::tink::KeysetUtil;
+using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::AesGcmKeyFormat;
@@ -56,7 +56,7 @@ using google::crypto::tink::KeyStatusType;
 - (void)testEmptyKeyset {
   Keyset keyset;
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -98,7 +98,7 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertNil(error);
 
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];

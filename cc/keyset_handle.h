@@ -78,12 +78,11 @@ class KeysetHandle {
  private:
   // The classes below need access to get_keyset();
   friend class CleartextKeysetHandle;
-  friend class NoSecretKeysetHandle;
   friend class KeysetManager;
   friend class RegistryImpl;
 
-  // KeysetUtil::GetKeyset() provides access to get_keyset().
-  friend class KeysetUtil;
+  // TestKeysetHandle::GetKeyset() provides access to get_keyset().
+  friend class TestKeysetHandle;
 
   // Creates a handle that contains the given keyset.
   explicit KeysetHandle(google::crypto::tink::Keyset keyset);

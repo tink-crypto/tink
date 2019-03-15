@@ -31,10 +31,10 @@
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/keyset_manager.h"
 #include "tink/registry.h"
-#include "tink/util/keyset_util.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
@@ -45,7 +45,6 @@ namespace crypto {
 namespace tink {
 namespace {
 
-using crypto::tink::KeysetUtil;
 using crypto::tink::test::AddLegacyKey;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
@@ -623,12 +622,15 @@ TEST_F(RegistryTest, UsualWrappingTest) {
   keyset.add_key();
   keyset.mutable_key(0)->set_output_prefix_type(OutputPrefixType::TINK);
   keyset.mutable_key(0)->set_key_id(1234543);
+  keyset.mutable_key(0)->set_status(KeyStatusType::ENABLED);
   keyset.add_key();
   keyset.mutable_key(1)->set_output_prefix_type(OutputPrefixType::LEGACY);
   keyset.mutable_key(1)->set_key_id(726329);
+  keyset.mutable_key(1)->set_status(KeyStatusType::ENABLED);
   keyset.add_key();
   keyset.mutable_key(2)->set_output_prefix_type(OutputPrefixType::TINK);
   keyset.mutable_key(2)->set_key_id(7213743);
+  keyset.mutable_key(2)->set_status(KeyStatusType::ENABLED);
 
   auto primitive_set = absl::make_unique<PrimitiveSet<Aead>>();
   ASSERT_TRUE(

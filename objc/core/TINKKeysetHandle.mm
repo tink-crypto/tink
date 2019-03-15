@@ -36,7 +36,6 @@
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/keyset_util.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
@@ -154,7 +153,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
         break;
       default:
         std::ostringstream oss;
-        oss << "An error occured while trying to retrieve the keyset from the keychain.";
+        oss << "An error occurred while trying to retrieve the keyset from the keychain.";
         oss << " Error code: " << status;
         errorMessage = oss.str();
         errorCode = crypto::tink::util::error::UNKNOWN;
@@ -209,7 +208,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
   if (status != errSecSuccess && status != errSecItemNotFound) {
     if (error) {
       std::ostringstream oss;
-      oss << "An error occured while trying to delete the keyset from the keychain.";
+      oss << "An error occurred while trying to delete the keyset from the keychain.";
       oss << " Keychain error code: " << status;
       std::string errorMessage = oss.str();
       *error = TINKStatusToError(
@@ -232,7 +231,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     return NO;
   }
 
-  auto keyset = crypto::tink::KeysetUtil::GetKeyset(*self.ccKeysetHandle);
+  auto keyset = crypto::tink::CleartextKeysetHandle::GetKeyset(*self.ccKeysetHandle);
 
   std::string serializedKeyset;
   if (!keyset.SerializeToString(&serializedKeyset)) {
@@ -277,7 +276,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     default:
       if (error) {
         std::ostringstream oss;
-        oss << "An error occured while trying to store the keyset in the keychain.";
+        oss << "An error occurred while trying to store the keyset in the keychain.";
         oss << " Error code: " << status;
         std::string errorMessage = oss.str();
         *error = TINKStatusToError(

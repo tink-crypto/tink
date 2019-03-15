@@ -35,7 +35,7 @@
 
 #include "tink/binary_keyset_reader.h"
 #include "tink/util/status.h"
-#include "tink/util/keyset_util.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
@@ -144,7 +144,7 @@ static TINKPBKeyset *gKeyset;
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:nil];
   XCTAssertNotNil(handle);
   std::string output;
-  crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle).SerializeToString(&output);
+  crypto::tink::TestKeysetHandle::GetKeyset(*handle.ccKeysetHandle).SerializeToString(&output);
 
   XCTAssertTrue(
       [gKeyset.data isEqualToData:[NSData dataWithBytes:output.data() length:output.size()]]);
@@ -261,7 +261,7 @@ static TINKPBKeyset *gKeyset;
   XCTAssertNil(error);
 
   // Verify the contents of the keyset.
-  auto ccKeyset = crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle);
+  auto ccKeyset = crypto::tink::TestKeysetHandle::GetKeyset(*handle.ccKeysetHandle);
   std::string serializedCCKeyset;
   XCTAssertTrue(ccKeyset.SerializeToString(&serializedCCKeyset));
   XCTAssertTrue(
@@ -327,11 +327,11 @@ static TINKPBKeyset *gKeyset;
   XCTAssertNil(error);
 
   // Compare the two keysets, verify that they are identical.
-  auto keyset1 = crypto::tink::KeysetUtil::GetKeyset(*handle1.ccKeysetHandle);
+  auto keyset1 = crypto::tink::TestKeysetHandle::GetKeyset(*handle1.ccKeysetHandle);
   std::string serializedKeyset1;
   XCTAssertTrue(keyset1.SerializeToString(&serializedKeyset1));
 
-  auto keyset2 = crypto::tink::KeysetUtil::GetKeyset(*handle2.ccKeysetHandle);
+  auto keyset2 = crypto::tink::TestKeysetHandle::GetKeyset(*handle2.ccKeysetHandle);
   std::string serializedKeyset2;
   XCTAssertTrue(keyset2.SerializeToString(&serializedKeyset2));
 
@@ -381,8 +381,8 @@ static TINKPBKeyset *gKeyset;
   XCTAssertNotNil(publicHandle);
   XCTAssertNil(error);
 
-  auto keyset = crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle);
-  auto public_keyset = crypto::tink::KeysetUtil::GetKeyset(*publicHandle.ccKeysetHandle);
+  auto keyset = crypto::tink::TestKeysetHandle::GetKeyset(*handle.ccKeysetHandle);
+  auto public_keyset = crypto::tink::TestKeysetHandle::GetKeyset(*publicHandle.ccKeysetHandle);
   XCTAssertEqual(keyset.primary_key_id(), public_keyset.primary_key_id());
   XCTAssertEqual(keyset.key_size(), public_keyset.key_size());
   XCTAssertEqual(keyset.key(0).status(), public_keyset.key(0).status());
@@ -426,8 +426,9 @@ static TINKPBKeyset *gKeyset;
 
   XCTAssertNil(error);
   XCTAssertNotNil(handle);
-  XCTAssertTrue(crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle).SerializeAsString() ==
-                keyset->SerializeAsString());
+  XCTAssertTrue(
+      crypto::tink::TestKeysetHandle::GetKeyset(*handle.ccKeysetHandle).SerializeAsString() ==
+      keyset->SerializeAsString());
 }
 
 - (void)testReadNoSecretFailForTypeUnknown {
