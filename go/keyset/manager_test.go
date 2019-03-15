@@ -18,6 +18,8 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/testkeyset"
+
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -35,7 +37,7 @@ func TestKeysetManagerBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot get keyset handle: %s", err)
 	}
-	ks := h.Keyset()
+	ks := testkeyset.KeysetMaterial(h)
 	if len(ks.Key) != 1 {
 		t.Errorf("expect the number of keys in the keyset is 1")
 	}
@@ -60,7 +62,7 @@ func TestExistingKeyset(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot get keyset handle: %s", err)
 	}
-	ks1 := h1.Keyset()
+	ks1 := testkeyset.KeysetMaterial(h1)
 
 	ksm2 := keyset.NewManagerFromHandle(h1)
 	ksm2.Rotate(kt)
@@ -68,7 +70,8 @@ func TestExistingKeyset(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot get keyset handle: %s", err)
 	}
-	ks2 := h2.Keyset()
+	ks2 := testkeyset.KeysetMaterial(h2)
+
 	if len(ks2.Key) != 2 {
 		t.Errorf("expect the number of keys to be 2, got %d", len(ks2.Key))
 	}

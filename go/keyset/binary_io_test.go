@@ -21,6 +21,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -37,7 +38,8 @@ func TestBinaryIOUnencrypted(t *testing.T) {
 		t.Fatalf("cannot get keyset handle: %v", err)
 	}
 
-	if err := w.Write(h.Keyset()); err != nil {
+	ks1 := testkeyset.KeysetMaterial(h)
+	if err := w.Write(ks1); err != nil {
 		t.Fatalf("cannot write keyset: %v", err)
 	}
 
@@ -46,8 +48,8 @@ func TestBinaryIOUnencrypted(t *testing.T) {
 		t.Fatalf("cannot read keyset: %v", err)
 	}
 
-	if !proto.Equal(h.Keyset(), ks2) {
-		t.Errorf("written keyset (%s) doesn't match read keyset (%s)", h.Keyset(), ks2)
+	if !proto.Equal(ks1, ks2) {
+		t.Errorf("written keyset (%s) doesn't match read keyset (%s)", ks1, ks2)
 	}
 }
 

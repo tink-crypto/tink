@@ -52,9 +52,9 @@ func NewHandle(kt *tinkpb.KeyTemplate) (*Handle, error) {
 // NewHandleWithNoSecrets creates a new instance of KeysetHandle using the given keyset which does
 // not contain any secret key material.
 func NewHandleWithNoSecrets(ks *tinkpb.Keyset) (*Handle, error) {
-  if ks == nil {
-    return nil, errors.New("keyset.Handle: nil keyset")
-  }
+	if ks == nil {
+		return nil, errors.New("keyset.Handle: nil keyset")
+	}
 	h := &Handle{ks}
 	if h.hasSecrets() {
 		// If you need to do this, you have to use func insecurecleartextkeyset.Read() instead.
@@ -113,11 +113,6 @@ func (h *Handle) Public() (*Handle, error) {
 	return &Handle{ks}, nil
 }
 
-// Keyset returns the Keyset managed by this handle.
-func (h *Handle) Keyset() *tinkpb.Keyset {
-	return h.ks
-}
-
 // String returns a string representation of the managed keyset.
 // The result does not contain any sensitive key material.
 func (h *Handle) String() string {
@@ -130,7 +125,7 @@ func (h *Handle) String() string {
 
 // Write encrypts and writes the enclosing keyset.
 func (h *Handle) Write(writer Writer, masterKey tink.AEAD) error {
-	encrypted, err := encrypt(h.Keyset(), masterKey)
+	encrypted, err := encrypt(h.ks, masterKey)
 	if err != nil {
 		return err
 	}
@@ -170,12 +165,11 @@ func (h *Handle) Primitives() (*primitiveset.PrimitiveSet, error) {
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
 func (h *Handle) PrimitivesWithKeyManager(km registry.KeyManager) (*primitiveset.PrimitiveSet, error) {
-	ks := h.Keyset()
-	if err := Validate(ks); err != nil {
+	if err := Validate(h.ks); err != nil {
 		return nil, fmt.Errorf("registry.PrimitivesWithKeyManager: invalid keyset: %s", err)
 	}
 	primitiveSet := primitiveset.New()
-	for _, key := range ks.Key {
+	for _, key := range h.ks.Key {
 		if key.Status != tinkpb.KeyStatusType_ENABLED {
 			continue
 		}
@@ -193,7 +187,7 @@ func (h *Handle) PrimitivesWithKeyManager(km registry.KeyManager) (*primitiveset
 		if err != nil {
 			return nil, fmt.Errorf("registry.PrimitivesWithKeyManager: cannot add primitive: %s", err)
 		}
-		if key.KeyId == ks.PrimaryKeyId {
+		if key.KeyId == h.ks.PrimaryKeyId {
 			primitiveSet.Primary = entry
 		}
 	}

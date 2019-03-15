@@ -34,13 +34,13 @@ func TestNewHandle(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	keyset := kh.Keyset()
-	if len(keyset.Key) != 1 {
-		t.Errorf("incorrect number of keys in the keyset: %d", len(keyset.Key))
+	ks := testkeyset.KeysetMaterial(kh)
+	if len(ks.Key) != 1 {
+		t.Errorf("incorrect number of keys in the keyset: %d", len(ks.Key))
 	}
-	key := keyset.Key[0]
-	if keyset.PrimaryKeyId != key.KeyId {
-		t.Errorf("incorrect primary key id, expect %d, got %d", key.KeyId, keyset.PrimaryKeyId)
+	key := ks.Key[0]
+	if ks.PrimaryKeyId != key.KeyId {
+		t.Errorf("incorrect primary key id, expect %d, got %d", key.KeyId, ks.PrimaryKeyId)
 	}
 	if key.KeyData.TypeUrl != kt.TypeUrl {
 		t.Errorf("incorrect type url, expect %s, got %s", kt.TypeUrl, key.KeyData.TypeUrl)
@@ -83,7 +83,7 @@ func TestRead(t *testing.T) {
 	if err != nil {
 		t.Fatalf("keyset.Read(): %v", err)
 	}
-	if !proto.Equal(h.Keyset(), h2.Keyset()) {
+	if !proto.Equal(testkeyset.KeysetMaterial(h), testkeyset.KeysetMaterial(h2)) {
 		t.Fatalf("Decrypt failed: got %v, want %v", h2, h)
 	}
 }
@@ -103,7 +103,7 @@ func TestReadWithNoSecrets(t *testing.T) {
 	if err != nil {
 		t.Fatalf("keyset.ReadWithNoSecrets(): %v", err)
 	}
-	if !proto.Equal(h.Keyset(), h2.Keyset()) {
+	if !proto.Equal(testkeyset.KeysetMaterial(h), testkeyset.KeysetMaterial(h2)) {
 		t.Fatalf("Decrypt failed: got %v, want %v", h2, h)
 	}
 }
@@ -119,7 +119,7 @@ func TestWithNoSecretsFunctionsFailWhenHandlingSecretKeyMaterial(t *testing.T) {
 		t.Error("handle.WriteWithNoSecrets() should fail when exporting secret key material")
 	}
 
-	if _, err := keyset.ReadWithNoSecrets(&keyset.MemReaderWriter{Keyset: h.Keyset()}); err == nil {
+	if _, err := keyset.ReadWithNoSecrets(&keyset.MemReaderWriter{Keyset: testkeyset.KeysetMaterial(h)}); err == nil {
 		t.Error("keyset.ReadWithNoSecrets should fail when importing secret key material")
 	}
 }

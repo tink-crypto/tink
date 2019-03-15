@@ -44,12 +44,14 @@ func TestHandleFromReader(t *testing.T) {
 	if handle == nil || err != nil {
 		t.Fatalf("cannot get keyset handle: %v", err)
 	}
-	parsedHandle, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: handle.Keyset()})
+	ks := insecurecleartextkeyset.KeysetMaterial(handle)
+	parsedHandle, err := insecurecleartextkeyset.Read(&keyset.MemReaderWriter{Keyset: ks})
 	if err != nil {
 		t.Fatalf("unexpected error reading keyset: %v", err)
 	}
-	if !proto.Equal(handle.Keyset(), parsedHandle.Keyset()) {
-		t.Errorf("parsed keyset (%s) doesn't match original keyset (%s)", parsedHandle.Keyset(), handle.Keyset())
+	parsedKs := insecurecleartextkeyset.KeysetMaterial(parsedHandle)
+	if !proto.Equal(ks, parsedKs) {
+		t.Errorf("parsed keyset (%s) doesn't match original keyset (%s)", parsedKs, ks)
 	}
 }
 

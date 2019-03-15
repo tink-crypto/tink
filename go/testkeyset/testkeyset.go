@@ -24,7 +24,11 @@ import (
 )
 
 var (
-	keysetHandle     = internal.KeysetHandle.(func(*tinkpb.Keyset) *keyset.Handle)
+	// KeysetHandle creates a keyset.Handle from cleartext key material.
+	KeysetHandle = internal.KeysetHandle.(func(*tinkpb.Keyset) *keyset.Handle)
+	// KeysetMaterial returns the key material contained in a keyset.Handle.
+	KeysetMaterial = internal.KeysetMaterial.(func(*keyset.Handle) *tinkpb.Keyset)
+
 	errInvalidKeyset = errors.New("cleartextkeyset: invalid keyset")
 	errInvalidHandle = errors.New("cleartextkeyset: invalid handle")
 	errInvalidReader = errors.New("cleartextkeyset: invalid reader")
@@ -36,7 +40,7 @@ func NewHandle(ks *tinkpb.Keyset) (*keyset.Handle, error) {
 	if ks == nil || len(ks.Key) == 0 {
 		return nil, errInvalidKeyset
 	}
-	return keysetHandle(ks), nil
+	return KeysetHandle(ks), nil
 }
 
 // Read creates a keyset.Handle from a cleartext keyset obtained via r.
@@ -48,7 +52,7 @@ func Read(r keyset.Reader) (*keyset.Handle, error) {
 	if err != nil || ks == nil || len(ks.Key) == 0 {
 		return nil, errInvalidKeyset
 	}
-	return keysetHandle(ks), nil
+	return KeysetHandle(ks), nil
 }
 
 // Write exports the keyset from h to the given writer w without encrypting it.
@@ -61,5 +65,5 @@ func Write(h *keyset.Handle, w keyset.Writer) error {
 	if w == nil {
 		return errInvalidWriter
 	}
-	return w.Write(h.Keyset())
+	return w.Write(KeysetMaterial(h))
 }

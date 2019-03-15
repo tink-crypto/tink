@@ -16,5 +16,8 @@
 // internal must only be imported by these three packages.
 package internal
 
-// KeysetHandle is the raw constructor for a keyset.Handle.
+// KeysetHandle is a raw constructor of keyset.Handle.
 var KeysetHandle interface{}
+
+// KeysetMaterial returns the key material contained in a keyset.Handle.
+var KeysetMaterial interface{}
