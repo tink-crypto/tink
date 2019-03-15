@@ -299,6 +299,27 @@ cc_library(
 )
 
 cc_library(
+    name = "aes_gcm_hkdf_stream_segment_decrypter",
+    srcs = ["aes_gcm_hkdf_stream_segment_decrypter.cc"],
+    hdrs = ["aes_gcm_hkdf_stream_segment_decrypter.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":aes_gcm_hkdf_stream_segment_encrypter",
+        ":common_enums",
+        ":hkdf",
+        ":random",
+        ":stream_segment_decrypter",
+        ":subtle_util_boringssl",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "aes_gcm_hkdf_stream_segment_encrypter",
     srcs = ["aes_gcm_hkdf_stream_segment_encrypter.cc"],
     hdrs = ["aes_gcm_hkdf_stream_segment_encrypter.h"],
@@ -323,11 +344,13 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
+        ":aes_gcm_hkdf_stream_segment_decrypter",
         ":aes_gcm_hkdf_stream_segment_encrypter",
         ":common_enums",
         ":hkdf",
         ":nonce_based_streaming_aead",
         ":random",
+        ":stream_segment_decrypter",
         ":stream_segment_encrypter",
         ":subtle_util_boringssl",
         "//cc:input_stream",
@@ -561,7 +584,9 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
+        ":stream_segment_decrypter",
         ":stream_segment_encrypter",
+        ":streaming_aead_decrypting_stream",
         ":streaming_aead_encrypting_stream",
         "//cc:input_stream",
         "//cc:output_stream",
@@ -691,6 +716,27 @@ cc_test(
 )
 
 cc_test(
+    name = "aes_gcm_hkdf_stream_segment_decrypter_test",
+    size = "small",
+    srcs = ["aes_gcm_hkdf_stream_segment_decrypter_test.cc"],
+    deps = [
+        ":aes_gcm_hkdf_stream_segment_decrypter",
+        ":aes_gcm_hkdf_stream_segment_encrypter",
+        ":common_enums",
+        ":hkdf",
+        ":random",
+        ":stream_segment_decrypter",
+        ":stream_segment_encrypter",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "aes_gcm_hkdf_stream_segment_encrypter_test",
     size = "small",
     srcs = ["aes_gcm_hkdf_stream_segment_encrypter_test.cc"],
@@ -701,6 +747,7 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -714,7 +761,9 @@ cc_test(
         ":aes_gcm_hkdf_streaming",
         ":common_enums",
         ":random",
+        ":test_util",
         "//cc:output_stream",
+        "//cc/util:istream_input_stream",
         "//cc/util:ostream_output_stream",
         "//cc/util:status",
         "//cc/util:statusor",

@@ -47,19 +47,9 @@ void BigEndianStore32(uint8_t dst[8], uint32_t val) {
 
 }  // namespace
 
-// The size of the IVs for GCM.
-static const int kNonceSizeInBytes = 12;
-
-// The nonce has the format nonce_prefix || ctr || last_block, where:
-//  - nonce_prefix is a constant of kNoncePrefixSizeInBytes bytes
-//    for the whole file
-//  - ctr is a 32 bit counter
-//  - last_block is a byte equal to 1 for the last block of the file
-//    and 0 otherwise.
-static const int kNoncePrefixSizeInBytes = 7;
-
-// The size of the tags of each ciphertext segment.
-static const int kTagSizeInBytes = 16;
+const int AesGcmHkdfStreamSegmentEncrypter::kNonceSizeInBytes;
+const int AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
+const int AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes;
 
 static const EVP_AEAD* GetAeadForKeySize(uint32_t size_in_bytes) {
   switch (size_in_bytes) {
@@ -85,16 +75,18 @@ util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "first_segment_offset must be non-negative");
   }
-  int header_size = 1 + params.salt.size() + kNoncePrefixSizeInBytes;
+  int header_size = 1 + params.salt.size() +
+                    AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
   if (params.ciphertext_segment_size <
-      params.first_segment_offset + header_size + kTagSizeInBytes) {
+      params.first_segment_offset + header_size +
+      AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext_segment_size too small");
   }
   return util::OkStatus();
 }
 
-util::Status AesGcmHkdfStreamSegmentEncrypter::Init(
+util::Status AesGcmHkdfStreamSegmentEncrypter::InitCtx(
     absl::string_view key_value) {
   const EVP_AEAD* aead = GetAeadForKeySize(key_value.size());
   if (aead == nullptr) {
@@ -121,7 +113,7 @@ util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
 
   std::unique_ptr<AesGcmHkdfStreamSegmentEncrypter>
       encrypter(new AesGcmHkdfStreamSegmentEncrypter());
-  status = encrypter->Init(params.key_value);
+  status = encrypter->InitCtx(params.key_value);
   if (!status.ok()) return status;
   uint8_t header_size =
       static_cast<uint8_t>(1 + params.salt.size() + kNoncePrefixSizeInBytes);

@@ -20,7 +20,9 @@
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
 #include "tink/streaming_aead.h"
+#include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/stream_segment_encrypter.h"
+#include "tink/subtle/streaming_aead_decrypting_stream.h"
 #include "tink/subtle/streaming_aead_encrypting_stream.h"
 #include "tink/util/statusor.h"
 
@@ -43,7 +45,11 @@ crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
     NonceBasedStreamingAead::NewDecryptingStream(
         std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
         absl::string_view associated_data) {
-  return util::Status(util::error::UNIMPLEMENTED, "Not implemented yet");
+  auto segment_decrypter_result = NewSegmentDecrypter(associated_data);
+  if (!segment_decrypter_result.ok()) return segment_decrypter_result.status();
+  return StreamingAeadDecryptingStream::New(
+      std::move(segment_decrypter_result.ValueOrDie()),
+      std::move(ciphertext_source));
 }
 
 }  // namespace subtle

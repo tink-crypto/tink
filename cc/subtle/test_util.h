@@ -38,6 +38,20 @@ namespace test {
 // Various utilities for testing.
 ///////////////////////////////////////////////////////////////////////////////
 
+// Writes 'contents' the specified 'output_stream', and closes the stream.
+// Returns the status of output_stream->Close()-operation, or a non-OK status
+// of a prior output_stream->Next()-operation, if any.
+util::Status WriteToStream(OutputStream* output_stream,
+                           absl::string_view contents);
+
+// Reads all bytes from the specified 'input_stream', and puts
+// them into 'output', where both 'input_stream' and 'output must be non-null.
+// Returns a non-OK status only if reading fails for some reason.
+// If the end of stream is reached ('input_stream' returns OUT_OF_RANGE),
+// then this function returns OK.
+util::Status ReadFromStream(InputStream* input_stream,
+                            std::string* output);
+
 // A dummy encrypter that "encrypts" by just appending to the plaintext
 // the current segment number and a marker byte indicating whether
 // the segment is last one.

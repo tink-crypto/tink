@@ -14,14 +14,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_ENCRYPTER_H_
-#define TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_ENCRYPTER_H_
+#ifndef TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_DECRYPTER_H_
+#define TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_DECRYPTER_H_
 
 #include <vector>
 
 #include "absl/strings/string_view.h"
 #include "openssl/aead.h"
-#include "tink/subtle/stream_segment_encrypter.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -29,7 +30,7 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// StreamSegmentEncrypter for streaming encryption using AES-GCM with HKDF as
+// StreamSegmentDecrypter for streaming decryption using AES-GCM with HKDF as
 // key derivation function.
 //
 // Each ciphertext uses a new AES-GCM key that is derived from the key
@@ -54,69 +55,65 @@ namespace subtle {
 // In principle header_size is redundant information, since the length of the
 // header can be determined from the key size.
 
-class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
+class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
  public:
-  // The size of the IVs for GCM.
-  static const int kNonceSizeInBytes = 12;
-
-  // The nonce has the format nonce_prefix || ctr || last_block, where:
-  //  - nonce_prefix is a constant of kNoncePrefixSizeInBytes bytes
-  //    for the whole file
-  //  - ctr is a 32 bit counter
-  //  - last_block is a byte equal to 1 for the last block of the file
-  //    and 0 otherwise.
-  static const int kNoncePrefixSizeInBytes = 7;
-
-  // The size of the tags of each ciphertext segment.
-  static const int kTagSizeInBytes = 16;
-
+  // All sizes are in bytes.
   struct Params {
-    std::string key_value;
-    std::string salt;
+    std::string ikm;
+    HashType hkdf_hash;
+    int derived_key_size;
     int first_segment_offset;
     int ciphertext_segment_size;
+    std::string associated_data;
   };
 
   // A factory.
-  static util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
+  static util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>
       New(const Params& params);
 
-  // Overridden methods of StreamSegmentEncrypter.
-  util::Status EncryptSegment(
-      const std::vector<uint8_t>& plaintext,
-      bool is_last_segment,
-      std::vector<uint8_t>* ciphertext_buffer) override;
+  // Overridden methods of StreamSegmentDecrypter.
+  util::Status Init(const std::vector<uint8_t>& header) override;
 
-  const std::vector<uint8_t>& get_header() const override {
-    return header_;
+  util::Status DecryptSegment(
+      const std::vector<uint8_t>& ciphertext,
+      int64_t segment_number,
+      bool is_last_segment,
+      std::vector<uint8_t>* plaintext_buffer) override;
+
+  int get_header_size() const override {
+    return header_size_;
   }
-  int64_t get_segment_number() const override {
-    return segment_number_;
-  }
+
   int get_plaintext_segment_size() const override;
+
   int get_ciphertext_segment_size() const override {
     return ciphertext_segment_size_;
   }
   int get_ciphertext_offset() const override {
     return ciphertext_offset_;
   }
-  ~AesGcmHkdfStreamSegmentEncrypter() override {}
-
- protected:
-  void IncSegmentNumber() override {
-    segment_number_++;
-  }
-
- private:
-  AesGcmHkdfStreamSegmentEncrypter() : segment_number_(0) {}
+  ~AesGcmHkdfStreamSegmentDecrypter() override {}
   util::Status InitCtx(absl::string_view key_value);
 
-  std::vector<uint8_t> header_;
-  std::string nonce_prefix_;
-  int64_t segment_number_;
+
+ private:
+  AesGcmHkdfStreamSegmentDecrypter() {}
+
+  // Parameters set upon decrypter creation.
+  // All sizes are in bytes.
+  std::string ikm_;
+  HashType hkdf_hash_;
+  int header_size_;
   int ciphertext_segment_size_;
   int ciphertext_offset_;
+  int derived_key_size_;
+  std::string associated_data_;
+  bool is_initialized_;
 
+  // Parameters set when initializing with data from stream header.
+  std::vector<uint8_t> salt_;
+  std::vector<uint8_t> nonce_prefix_;
+  std::string key_value_;
   bssl::ScopedEVP_AEAD_CTX ctx_;
 };
 
@@ -124,4 +121,4 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_ENCRYPTER_H_
+#endif  // TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_DECRYPTER_H_

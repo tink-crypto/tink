@@ -24,6 +24,8 @@
 #include "tink/output_stream.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/nonce_based_streaming_aead.h"
+#include "tink/subtle/stream_segment_decrypter.h"
+#include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -35,7 +37,7 @@ class AesGcmHkdfStreaming : public NonceBasedStreamingAead {
   static crypto::tink::util::StatusOr<std::unique_ptr<AesGcmHkdfStreaming>>
   New(absl::string_view ikm,
       HashType hkdf_hash,
-      int derived_key_size_in_bytes,
+      int derived_key_size,
       int ciphertext_segment_size,
       int first_segment_offset);
 
@@ -45,11 +47,14 @@ class AesGcmHkdfStreaming : public NonceBasedStreamingAead {
   crypto::tink::util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
   NewSegmentEncrypter(absl::string_view associated_data) const override;
 
+  crypto::tink::util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>
+  NewSegmentDecrypter(absl::string_view associated_data) const override;
+
  private:
   AesGcmHkdfStreaming() {}
   std::string ikm_;
   HashType hkdf_hash_;
-  int derived_key_size_in_bytes_;
+  int derived_key_size_;
   int ciphertext_segment_size_;
   int first_segment_offset_;
 };

@@ -265,6 +265,25 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME aes_gcm_hkdf_stream_segment_decrypter
+  SRCS
+    aes_gcm_hkdf_stream_segment_decrypter.cc
+    aes_gcm_hkdf_stream_segment_decrypter.h
+  DEPS
+    tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
+    tink::subtle::common_enums
+    tink::subtle::hkdf
+    tink::subtle::random
+    tink::subtle::stream_segment_decrypter
+    tink::subtle::subtle_util_boringssl
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+    crypto
+    absl::strings
+)
+
+tink_cc_library(
   NAME aes_gcm_hkdf_stream_segment_encrypter
   SRCS
     aes_gcm_hkdf_stream_segment_encrypter.cc
@@ -286,11 +305,13 @@ tink_cc_library(
     aes_gcm_hkdf_streaming.cc
     aes_gcm_hkdf_streaming.h
   DEPS
+    tink::subtle::aes_gcm_hkdf_stream_segment_decrypter
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::nonce_based_streaming_aead
     tink::subtle::random
+    tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util_boringssl
     tink::core::input_stream
@@ -487,7 +508,9 @@ tink_cc_library(
     nonce_based_streaming_aead.cc
     nonce_based_streaming_aead.h
   DEPS
+    tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
+    tink::subtle::streaming_aead_decrypting_stream
     tink::subtle::streaming_aead_encrypting_stream
     tink::core::input_stream
     tink::core::output_stream
@@ -587,6 +610,24 @@ tink_cc_test(
 )
 
 tink_cc_test(
+  NAME aes_gcm_hkdf_stream_segment_decrypter_test
+  SRCS aes_gcm_hkdf_stream_segment_decrypter_test.cc
+  DEPS
+    tink::subtle::aes_gcm_hkdf_stream_segment_decrypter
+    tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
+    tink::subtle::common_enums
+    tink::subtle::hkdf
+    tink::subtle::random
+    tink::subtle::stream_segment_decrypter
+    tink::subtle::stream_segment_encrypter
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    absl::memory
+    absl::strings
+)
+
+tink_cc_test(
   NAME aes_gcm_hkdf_stream_segment_encrypter_test
   SRCS aes_gcm_hkdf_stream_segment_encrypter_test.cc
   DEPS
@@ -596,6 +637,7 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
+    absl::memory
     absl::strings
 )
 
@@ -606,8 +648,10 @@ tink_cc_test(
     tink::subtle::aes_gcm_hkdf_streaming
     tink::subtle::common_enums
     tink::subtle::random
+    tink::subtle::test_util
     tink::core::output_stream
     tink::util::ostream_output_stream
+    tink::util::istream_input_stream
     tink::util::status
     tink::util::statusor
     tink::util::test_util

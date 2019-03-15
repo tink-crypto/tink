@@ -42,34 +42,6 @@ namespace tink {
 namespace subtle {
 namespace {
 
-
-// Reads all bytes from the specified 'input_stream', and puts
-// them into 'output', where both 'input_stream' and 'output must be non-null.
-// Returns a non-OK status only if reading fails for some reason.
-// If the end of stream is reached ('input_stream' returns OUT_OF_RANGE),
-// then this function returns OK.
-Status ReadFromStream(InputStream* input_stream,
-                      std::string* output) {
-  if (input_stream == nullptr || output == nullptr) {
-    return Status(util::error::INTERNAL, "Illegal read from a stream");
-  }
-  const void* buffer;
-  output->clear();
-  while (true) {
-    auto next_result = input_stream->Next(&buffer);
-    if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
-      // End of stream.
-      return Status::OK;
-    }
-    if (!next_result.ok()) return next_result.status();
-    auto read_bytes = next_result.ValueOrDie();
-    if (read_bytes > 0) {
-      output->append(std::string(reinterpret_cast<const char*>(buffer), read_bytes));
-    }
-  }
-  return Status::OK;
-}
-
 // References to objects used for test validation.
 // The objects pointed to are not owned by this structure.
 struct ValidationRefs {
@@ -138,7 +110,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, WritingStreams) {
 
           // Read the entire plaintext to the stream.
           std::string decrypted;
-          auto status = ReadFromStream(dec_stream.get(), &decrypted);
+          auto status = test::ReadFromStream(dec_stream.get(), &decrypted);
           EXPECT_TRUE(status.ok()) << status;
           EXPECT_EQ(dec_stream->Position(), pt.size());
           EXPECT_EQ(pt, decrypted);
@@ -201,7 +173,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, TruncatedLastSegment) {
 
   // First buffer returned by Next();
   std::string decrypted;
-  auto status = ReadFromStream(dec_stream.get(), &decrypted);
+  auto status = test::ReadFromStream(dec_stream.get(), &decrypted);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(status.error_code(), util::error::INVALID_ARGUMENT);
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "unexpected last-segment marker",
@@ -330,7 +302,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, NextAfterBackUp) {
 
   // Read the stream to the end.
   std::string decrypted_rest;
-  auto status = ReadFromStream(dec_stream.get(), &decrypted_rest);
+  auto status = test::ReadFromStream(dec_stream.get(), &decrypted_rest);
   EXPECT_TRUE(status.ok()) << status;
   EXPECT_EQ(pt_size, dec_stream->Position());
   EXPECT_EQ(pt, (decrypted_first_segment + decrypted_rest));
@@ -426,7 +398,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, BackupAndPosition) {
   dec_stream->BackUp(buffer_size);
   EXPECT_EQ(prev_position, dec_stream->Position());
   std::string decrypted_rest;
-  auto status = ReadFromStream(dec_stream.get(), &decrypted_rest);
+  auto status = test::ReadFromStream(dec_stream.get(), &decrypted_rest);
   EXPECT_TRUE(status.ok()) << status;
   EXPECT_EQ(pt_size, dec_stream->Position());
   EXPECT_EQ(pt, decrypted_first_segment + decrypted_rest);

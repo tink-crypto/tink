@@ -42,31 +42,6 @@ using crypto::tink::util::Status;
 
 namespace {
 
-// Writes 'contents' the specified 'output_stream', and closes the stream.
-// Returns the status of output_stream->Close()-operation, or a non-OK status
-// of a prior output_stream->Next()-operation, if any.
-Status WriteToStream(OutputStream* output_stream,
-                     absl::string_view contents) {
-  void* buffer;
-  int pos = 0;
-  int remaining = contents.length();
-  int available_space;
-  int available_bytes;
-  while (remaining > 0) {
-    auto next_result = output_stream->Next(&buffer);
-    if (!next_result.ok()) return next_result.status();
-    available_space = next_result.ValueOrDie();
-    available_bytes = std::min(available_space, remaining);
-    memcpy(buffer, contents.data() + pos, available_bytes);
-    remaining -= available_bytes;
-    pos += available_bytes;
-  }
-  if (available_space > available_bytes) {
-    output_stream->BackUp(available_space - available_bytes);
-  }
-  return output_stream->Close();
-}
-
 // References to objects used for test validation.
 // The objects pointed to are not owned by this structure.
 struct ValidationRefs {
@@ -130,7 +105,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, WritingStreams) {
 
           // Write plaintext to the stream, and close the stream.
           std::string pt = Random::GetRandomBytes(pt_size);
-          auto status = WriteToStream(enc_stream.get(), pt);
+          auto status = test::WriteToStream(enc_stream.get(), pt);
           EXPECT_TRUE(status.ok()) << status;
           EXPECT_EQ(enc_stream->Position(), pt.size());
           EXPECT_EQ(refs.seg_enc->get_generated_output_size(),

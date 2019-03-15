@@ -24,6 +24,8 @@
 #include "tink/output_stream.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/test_util.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -67,27 +69,43 @@ TEST(AesGcmHkdfStreamingTest, testBasic) {
             EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-null",
                                 failed_result.status().error_message());
 
-            // Prepare ciphertext destination stream.
-            auto ct_stream = absl::make_unique<std::stringstream>();
-            // A reference to the ciphertext buffer, for later validation.
-            auto ct_buf = ct_stream->rdbuf();
-            std::unique_ptr<OutputStream> ct_destination(
-                absl::make_unique<util::OstreamOutputStream>(
-                    std::move(ct_stream)));
+            for (int pt_size : {0, 16, 100, 1000, 10000}) {
+              SCOPED_TRACE(absl::StrCat(" pt_size = ", pt_size));
 
-            // Use AesGcmHkdfStreaming to encrypt some data.
-            auto enc_stream_result = streaming_aead->NewEncryptingStream(
-                std::move(ct_destination), associated_data);
-            EXPECT_TRUE(enc_stream_result.ok()) << enc_stream_result.status();
-            auto enc_stream = std::move(enc_stream_result.ValueOrDie());
-            void* data;
-            auto next_result = enc_stream->Next(&data);
-            EXPECT_TRUE(next_result.ok()) << next_result.status();
-            EXPECT_GT(next_result.ValueOrDie(), 0);
-            auto status = enc_stream->Close();
-            EXPECT_TRUE(status.ok()) << status;
-            EXPECT_EQ(ct_segment_size - first_segment_offset,
-                      ct_buf->str().size());
+              // Prepare ciphertext destination stream.
+              auto ct_stream = absl::make_unique<std::stringstream>();
+              // A reference to the ciphertext buffer, for later validation.
+              auto ct_buf = ct_stream->rdbuf();
+              std::unique_ptr<OutputStream> ct_destination(
+                  absl::make_unique<util::OstreamOutputStream>(
+                      std::move(ct_stream)));
+
+              // Use AesGcmHkdfStreaming to encrypt some data.
+              auto enc_stream_result = streaming_aead->NewEncryptingStream(
+                  std::move(ct_destination), associated_data);
+              EXPECT_TRUE(enc_stream_result.ok()) << enc_stream_result.status();
+              auto enc_stream = std::move(enc_stream_result.ValueOrDie());
+              std::string pt = Random::GetRandomBytes(pt_size);
+              auto status = test::WriteToStream(enc_stream.get(), pt);
+              EXPECT_TRUE(status.ok()) << status;
+              EXPECT_EQ(pt_size, enc_stream->Position());
+              std::string ct = ct_buf->str();
+              EXPECT_NE(ct, pt);
+
+              // Use AesGcmHkdfStreaming to decrypt the resulting ciphertext.
+              auto ct_bytes = absl::make_unique<std::stringstream>(std::string(ct));
+              std::unique_ptr<InputStream> ct_source(
+                  absl::make_unique<util::IstreamInputStream>(
+                      std::move(ct_bytes)));
+              auto dec_stream_result = streaming_aead->NewDecryptingStream(
+                  std::move(ct_source), associated_data);
+              EXPECT_TRUE(dec_stream_result.ok()) << dec_stream_result.status();
+              auto dec_stream = std::move(dec_stream_result.ValueOrDie());
+              std::string decrypted;
+              status = test::ReadFromStream(dec_stream.get(), &decrypted);
+              EXPECT_TRUE(status.ok()) << status;
+              EXPECT_EQ(pt, decrypted);
+            }
           }
         }
       }

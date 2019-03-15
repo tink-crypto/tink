@@ -21,6 +21,7 @@
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
 #include "tink/streaming_aead.h"
+#include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/statusor.h"
 
@@ -53,6 +54,10 @@ class NonceBasedStreamingAead : public StreamingAead {
   // Returns a new StreamSegmentEncrypter that uses `associated_data` for AEAD.
   virtual crypto::tink::util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
   NewSegmentEncrypter(absl::string_view associated_data) const = 0;
+
+  // Returns a new StreamSegmentEncrypter that uses `associated_data` for AEAD.
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>
+  NewSegmentDecrypter(absl::string_view associated_data) const = 0;
 };
 
 }  // namespace subtle
