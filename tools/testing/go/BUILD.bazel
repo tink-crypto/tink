@@ -75,3 +75,15 @@ go_binary(
         "//go/testkeyset:go_default_library",
     ],
 )
+
+go_binary(
+    name = "deterministic_aead_cli_go",
+    testonly = 1,  # keep
+    srcs = ["deterministic_aead_cli.go"],
+    out = "deterministic_aead_cli_go",
+    deps = [
+        "//go/daead:go_default_library",
+        "//go/keyset:go_default_library",
+        "//go/testkeyset:go_default_library",
+    ],
+)

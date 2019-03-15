@@ -16,6 +16,7 @@
 ROOT_DIR="$TEST_SRCDIR/tink"
 CC_DAEAD_CLI="$ROOT_DIR/tools/testing/cc/deterministic_aead_cli_cc"
 JAVA_DAEAD_CLI="$ROOT_DIR/tools/testing/deterministic_aead_cli_java"
+GO_DAEAD_CLI="$ROOT_DIR/tools/testing/go/deterministic_aead_cli_go"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
 KEY_TEMPLATES=(AES256_SIV)
@@ -63,4 +64,15 @@ deterministic_aead_basic_test "JAVA-CC"\
     $JAVA_DAEAD_CLI $CC_DAEAD_CLI   "${KEY_TEMPLATES[*]}"
 deterministic_aead_basic_test "JAVA-JAVA"\
     $JAVA_DAEAD_CLI $JAVA_DAEAD_CLI "${KEY_TEMPLATES[*]}"
+deterministic_aead_basic_test "GO-GO"\
+    $GO_DAEAD_CLI $GO_DAEAD_CLI "${KEY_TEMPLATES[*]}"
+deterministic_aead_basic_test "GO-JAVA"\
+    $GO_DAEAD_CLI $JAVA_DAEAD_CLI "${KEY_TEMPLATES[*]}"
+deterministic_aead_basic_test "JAVA-GO"\
+    $JAVA_DAEAD_CLI $GO_DAEAD_CLI "${KEY_TEMPLATES[*]}"
+deterministic_aead_basic_test "CC-GO"\
+    $CC_DAEAD_CLI $GO_DAEAD_CLI "${KEY_TEMPLATES[*]}"
+deterministic_aead_basic_test "GO-CC"\
+    $GO_DAEAD_CLI $CC_DAEAD_CLI "${KEY_TEMPLATES[*]}"
+
 

@@ -61,6 +61,7 @@ sh_test(
         ":test_lib",
         "//tools/testing:deterministic_aead_cli_java",
         "//tools/testing/cc:deterministic_aead_cli_cc",
+        "//tools/testing/go:deterministic_aead_cli_go",
         "//tools/tinkey",
     ],
 )
