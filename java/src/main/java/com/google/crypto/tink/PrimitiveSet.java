@@ -58,7 +58,7 @@ public final class PrimitiveSet<P> {
     // The actual primitive.
     private final P primitive;
     // Identifies the primitive within the set.
-    // It is the ciphertext prefix of the correponding key.
+    // It is the ciphertext prefix of the corresponding key.
     private final byte[] identifier;
     // The status of the key represented by the primitive.
     private final KeyStatusType status;
@@ -154,6 +154,9 @@ public final class PrimitiveSet<P> {
    */
   public Entry<P> addPrimitive(final P primitive, Keyset.Key key)
       throws GeneralSecurityException {
+    if (key.getStatus() != KeyStatusType.ENABLED) {
+      throw new GeneralSecurityException("only ENABLED key is allowed");
+    }
     Entry<P> entry =
         new Entry<P>(
             primitive,

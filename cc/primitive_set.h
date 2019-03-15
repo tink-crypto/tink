@@ -91,6 +91,10 @@ class PrimitiveSet {
   // Adds 'primitive' to this set for the specified 'key'.
   crypto::tink::util::StatusOr<Entry<P>*> AddPrimitive(
       std::unique_ptr<P> primitive, google::crypto::tink::Keyset::Key key) {
+    if (key.status() != google::crypto::tink::KeyStatusType::ENABLED) {
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+                       "The key must be ENABLED.");
+    }
     auto identifier_result = CryptoFormat::get_output_prefix(key);
     if (!identifier_result.ok()) return identifier_result.status();
     if (primitive == nullptr) {

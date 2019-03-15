@@ -24,8 +24,9 @@
 
 using crypto::tink::test::DummyPublicKeySign;
 using crypto::tink::test::DummyPublicKeyVerify;
-using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyStatusType;
+using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -67,16 +68,19 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
     key = keyset.add_key();
     key->set_output_prefix_type(OutputPrefixType::TINK);
     key->set_key_id(key_id_0);
+    key->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_1 = 726329;
     key = keyset.add_key();
     key->set_output_prefix_type(OutputPrefixType::LEGACY);
     key->set_key_id(key_id_1);
+    key->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_2 = 7213743;
     key = keyset.add_key();
     key->set_output_prefix_type(OutputPrefixType::RAW);
     key->set_key_id(key_id_2);
+    key->set_status(KeyStatusType::ENABLED);
 
     std::string signature_name_0 = "signature_0";
     std::string signature_name_1 = "signature_1";
@@ -124,6 +128,7 @@ TEST_F(PublicKeySignSetWrapperTest, testLegacySignatures) {
     uint32_t key_id = 1234543;
     key.set_output_prefix_type(OutputPrefixType::LEGACY);
     key.set_key_id(key_id);
+    key.set_status(KeyStatusType::ENABLED);
     std::string signature_name = "SomeLegacySignatures";
 
     std::unique_ptr<PrimitiveSet<PublicKeySign>> pk_sign_set(

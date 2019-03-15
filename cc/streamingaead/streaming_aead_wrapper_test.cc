@@ -28,6 +28,7 @@
 
 using crypto::tink::test::DummyStreamingAead;
 using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
@@ -60,16 +61,19 @@ TEST(StreamingAeadSetWrapperTest, Basic) {
   key = keyset.add_key();
   key->set_output_prefix_type(OutputPrefixType::TINK);
   key->set_key_id(key_id_0);
+  key->set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_1 = 726329;
   key = keyset.add_key();
   key->set_output_prefix_type(OutputPrefixType::LEGACY);
   key->set_key_id(key_id_1);
+  key->set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_2 = 7213743;
   key = keyset.add_key();
   key->set_output_prefix_type(OutputPrefixType::TINK);
   key->set_key_id(key_id_2);
+  key->set_status(KeyStatusType::ENABLED);
 
   std::string saead_name_0 = "streaming_aead0";
   std::string saead_name_1 = "streaming_aead1";

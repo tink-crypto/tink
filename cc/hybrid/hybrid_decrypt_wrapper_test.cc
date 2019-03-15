@@ -23,9 +23,9 @@
 
 using crypto::tink::test::DummyHybridDecrypt;
 using crypto::tink::test::DummyHybridEncrypt;
-using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
-
+using google::crypto::tink::KeyStatusType;
+using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -70,16 +70,19 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     key = keyset.add_key();
     key->set_output_prefix_type(OutputPrefixType::RAW);
     key->set_key_id(key_id_0);
+    key->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_1 = 726329;
     key = keyset.add_key();
     key->set_output_prefix_type(OutputPrefixType::LEGACY);
     key->set_key_id(key_id_1);
+    key->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_2 = 7213743;
     key = keyset.add_key();
     key->set_output_prefix_type(OutputPrefixType::TINK);
     key->set_key_id(key_id_2);
+    key->set_status(KeyStatusType::ENABLED);
 
     std::string hybrid_name_0 = "hybrid_0";
     std::string hybrid_name_1 = "hybrid_1";

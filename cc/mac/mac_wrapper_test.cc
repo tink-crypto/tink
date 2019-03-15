@@ -23,8 +23,9 @@
 #include "gtest/gtest.h"
 
 using crypto::tink::test::DummyMac;
-using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyStatusType;
+using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -55,16 +56,19 @@ TEST(MacWrapperTest, Basic) {
   key = keyset.add_key();
   key->set_output_prefix_type(OutputPrefixType::TINK);
   key->set_key_id(key_id_0);
+  key->set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_1 = 726329;
   key = keyset.add_key();
   key->set_output_prefix_type(OutputPrefixType::LEGACY);
   key->set_key_id(key_id_1);
+  key->set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_2 = 7213743;
   key = keyset.add_key();
   key->set_output_prefix_type(OutputPrefixType::TINK);
   key->set_key_id(key_id_2);
+  key->set_status(KeyStatusType::ENABLED);
 
   std::string mac_name_0 = "mac0";
   std::string mac_name_1 = "mac1";
@@ -109,6 +113,7 @@ TEST(MacWrapperTest, testLegacyAuthentication) {
   uint32_t key_id = 1234543;
   key.set_output_prefix_type(OutputPrefixType::LEGACY);
   key.set_key_id(key_id);
+  key.set_status(KeyStatusType::ENABLED);
   std::string mac_name = "SomeLegacyMac";
 
   std::unique_ptr<PrimitiveSet<Mac>> mac_set(new PrimitiveSet<Mac>());

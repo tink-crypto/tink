@@ -145,13 +145,13 @@ TEST_F(PrimitiveSetTest, Basic) {
   Keyset::Key key_5;
   key_5.set_output_prefix_type(OutputPrefixType::RAW);
   key_5.set_key_id(key_id_5);
-  key_5.set_status(KeyStatusType::DISABLED);
+  key_5.set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_6 = key_id_1;    // same id as key_1
   Keyset::Key key_6;
   key_6.set_output_prefix_type(OutputPrefixType::TINK);
   key_6.set_key_id(key_id_6);
-  key_6.set_status(KeyStatusType::DISABLED);
+  key_6.set_status(KeyStatusType::ENABLED);
 
   PrimitiveSet<Mac> primitive_set;
   EXPECT_TRUE(primitive_set.get_primary() == nullptr);
@@ -207,7 +207,7 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(OutputPrefixType::RAW, primitives[0]->get_output_prefix_type());
     EXPECT_EQ(DummyMac(mac_name_5).ComputeMac(data).ValueOrDie(),
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
-    EXPECT_EQ(KeyStatusType::DISABLED, primitives[1]->get_status());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives[1]->get_status());
     EXPECT_EQ(OutputPrefixType::RAW, primitives[1]->get_output_prefix_type());
   }
 
@@ -221,7 +221,7 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
     EXPECT_EQ(DummyMac(mac_name_6).ComputeMac(data).ValueOrDie(),
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
-    EXPECT_EQ(KeyStatusType::DISABLED, primitives[1]->get_status());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives[1]->get_status());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[1]->get_output_prefix_type());
   }
 
@@ -343,6 +343,22 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
   }
 }
 
+TEST_F(PrimitiveSetTest, DisabledKey) {
+  std::string mac_name_1 = "MAC#1";
+  std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
+
+  uint32_t key_id_1 = 1234543;
+  Keyset::Key key_1;
+  key_1.set_output_prefix_type(OutputPrefixType::TINK);
+  key_1.set_key_id(key_id_1);
+  key_1.set_status(KeyStatusType::DISABLED);
+
+  PrimitiveSet<Mac> primitive_set;
+  // Add all the primitives.
+  auto add_primitive_result =
+      primitive_set.AddPrimitive(std::move(mac_1), key_1);
+  EXPECT_FALSE(add_primitive_result.ok());
+}
 
 }  // namespace
 }  // namespace tink

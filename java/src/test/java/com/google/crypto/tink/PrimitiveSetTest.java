@@ -84,7 +84,7 @@ public class PrimitiveSetTest {
     Key key3 =
         Key.newBuilder()
             .setKeyId(3)
-            .setStatus(KeyStatusType.DISABLED)
+            .setStatus(KeyStatusType.ENABLED)
             .setOutputPrefixType(OutputPrefixType.LEGACY)
             .build();
     pset.addPrimitive(new DummyMac1(), key3);
@@ -117,7 +117,7 @@ public class PrimitiveSetTest {
     assertEquals(
         DummyMac1.class.getSimpleName(),
         new String(entry.getPrimitive().computeMac(null), "UTF-8"));
-    assertEquals(KeyStatusType.DISABLED, entry.getStatus());
+    assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertEquals(CryptoFormat.LEGACY_START_BYTE, entry.getIdentifier()[0]);
     assertArrayEquals(CryptoFormat.getOutputPrefix(key3), entry.getIdentifier());
 
@@ -234,7 +234,7 @@ public class PrimitiveSetTest {
   }
 
   @Test
-  public void testAddInvalidKey() throws Exception {
+  public void testAddPrimive_withUnknownPrefixType_shouldFail() throws Exception {
     PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 = Key.newBuilder().setKeyId(1).setStatus(KeyStatusType.ENABLED).build();
     try {
@@ -242,6 +242,23 @@ public class PrimitiveSetTest {
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "unknown output prefix type");
+    }
+  }
+
+  @Test
+  public void testAddPrimive_WithDisabledKey_shouldFail() throws Exception {
+    PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
+    Key key1 =
+        Key.newBuilder()
+            .setKeyId(1)
+            .setStatus(KeyStatusType.DISABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+    try {
+      pset.addPrimitive(new DummyMac1(), key1);
+      fail("Expected GeneralSecurityException.");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "only ENABLED key is allowed");
     }
   }
 }
