@@ -37,8 +37,8 @@ func createKeyset() []*tinkpb.Keyset_Key {
 		testutil.NewDummyKey(keyID1, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_LEGACY),
 		testutil.NewDummyKey(keyID2, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
 		testutil.NewDummyKey(keyID3, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_RAW),
-		testutil.NewDummyKey(keyID4, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_RAW),
-		testutil.NewDummyKey(keyID5, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_TINK),
+		testutil.NewDummyKey(keyID4, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_RAW),
+		testutil.NewDummyKey(keyID5, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
 	}
 }
 
@@ -128,6 +128,12 @@ func TestAddWithInvalidInput(t *testing.T) {
 	if _, err := ps.Add(*new(testutil.DummyMAC), invalidKey); err == nil {
 		t.Errorf("expect an error when key is invalid")
 	}
+	// disabled key
+	disabledKey := testutil.NewDummyKey(0, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_UNKNOWN_PREFIX)
+	if _, err := ps.Add(*new(testutil.DummyMAC), disabledKey); err == nil {
+		t.Errorf("expect an error when key is disabled")
+	}
+
 }
 
 func validateEntryList(entries []*primitiveset.Entry,

@@ -86,6 +86,9 @@ func (ps *PrimitiveSet) Add(p interface{}, key *tinkpb.Keyset_Key) (*Entry, erro
 	if key == nil || p == nil {
 		return nil, fmt.Errorf("primitive_set: key and primitive must not be nil")
 	}
+	if key.Status != tinkpb.KeyStatusType_ENABLED {
+		return nil, fmt.Errorf("The key must be ENABLED")
+	}
 	prefix, err := cryptofmt.OutputPrefix(key)
 	if err != nil {
 		return nil, fmt.Errorf("primitive_set: %s", err)
