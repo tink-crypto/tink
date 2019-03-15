@@ -114,6 +114,7 @@ cc_library(
     hdrs = ["input_stream.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
@@ -125,6 +126,7 @@ cc_library(
     hdrs = ["output_stream.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
@@ -136,6 +138,7 @@ cc_library(
     hdrs = ["aead.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
@@ -147,6 +150,7 @@ cc_library(
     hdrs = ["deterministic_aead.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
@@ -158,6 +162,7 @@ cc_library(
     hdrs = ["streaming_aead.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":input_stream",
         ":output_stream",
@@ -171,6 +176,7 @@ cc_library(
     hdrs = ["hybrid_decrypt.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
@@ -182,6 +188,7 @@ cc_library(
     hdrs = ["hybrid_encrypt.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
@@ -193,6 +200,7 @@ cc_library(
     hdrs = ["mac.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
@@ -205,6 +213,7 @@ cc_library(
     hdrs = ["public_key_sign.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
@@ -216,6 +225,7 @@ cc_library(
     hdrs = ["public_key_verify.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:status",
         "@com_google_absl//absl/strings",
@@ -227,6 +237,7 @@ cc_library(
     hdrs = ["keyset_reader.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
@@ -238,6 +249,7 @@ cc_library(
     hdrs = ["keyset_writer.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:status",
         "//proto:tink_cc_proto",
@@ -250,6 +262,7 @@ cc_library(
     hdrs = ["binary_keyset_reader.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
         "//cc/util:errors",
@@ -267,6 +280,7 @@ cc_library(
     hdrs = ["binary_keyset_writer.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_writer",
         "//cc/util:errors",
@@ -284,6 +298,7 @@ cc_library(
     hdrs = ["json_keyset_reader.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
         "//cc/util:enums",
@@ -303,6 +318,7 @@ cc_library(
     hdrs = ["json_keyset_writer.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_writer",
         "//cc/util:enums",
@@ -458,6 +474,7 @@ cc_library(
     hdrs = ["keyset_handle.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":aead",
         ":key_manager",

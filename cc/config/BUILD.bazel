@@ -8,6 +8,7 @@ cc_library(
     hdrs = ["tink_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc:config",
         "//cc:key_manager",

@@ -26,6 +26,7 @@ cc_library(
     hdrs = ["mac_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":mac_catalogue",
         "//cc:config",
@@ -73,6 +74,7 @@ cc_library(
     hdrs = ["mac_key_templates.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",

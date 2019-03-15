@@ -8,6 +8,7 @@ cc_library(
     hdrs = ["hybrid_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":hybrid_decrypt_catalogue",
         ":hybrid_encrypt_catalogue",
@@ -133,6 +134,7 @@ cc_library(
     hdrs = ["hybrid_key_templates.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/aead:aead_key_templates",
         "//proto:common_cc_proto",

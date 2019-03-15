@@ -84,6 +84,7 @@ cc_library(
     hdrs = ["signature_key_templates.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:constants",
@@ -360,6 +361,7 @@ cc_library(
     hdrs = ["signature_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":public_key_sign_catalogue",
         ":public_key_verify_catalogue",

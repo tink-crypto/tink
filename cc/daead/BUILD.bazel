@@ -67,6 +67,7 @@ cc_library(
     hdrs = ["deterministic_aead_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":deterministic_aead_catalogue",
         "//cc:config",
@@ -102,6 +103,7 @@ cc_library(
     hdrs = ["deterministic_aead_key_templates.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//proto:aes_siv_cc_proto",
         "//proto:common_cc_proto",
