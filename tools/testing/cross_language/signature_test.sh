@@ -22,8 +22,6 @@ GO_SIGN_CLI="$ROOT_DIR/tools/testing/go/public_key_sign_cli_go"
 GO_VERIFY_CLI="$ROOT_DIR/tools/testing/go/public_key_verify_cli_go"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
-KEY_TEMPLATES=(ECDSA_P256 ECDSA_P384 ECDSA_P521)
-
 source $TEST_UTIL || exit 1
 
 
