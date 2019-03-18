@@ -47,12 +47,10 @@ var _ subtle.EciesAEADHKDFDEMHelper = (*registerECIESAEADHKDFDemHelper)(nil)
 func newRegisterECIESAEADHKDFDemHelper(k *tinkpb.KeyTemplate) (*registerECIESAEADHKDFDemHelper, error) {
 	var len uint32
 	var a uint32
+	var skf []byte
+	var err error
 	u := k.TypeUrl
-	key, err := registry.NewKey(k)
-	sk, err := proto.Marshal(key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to serialize key, error: %v", err)
-	}
+
 	if strings.Compare(u, aesGCMTypeURL) == 0 {
 		gcmKeyFormat := new(gcmpb.AesGcmKeyFormat)
 		if err := proto.Unmarshal(k.Value, gcmKeyFormat); err != nil {
@@ -60,18 +58,41 @@ func newRegisterECIESAEADHKDFDemHelper(k *tinkpb.KeyTemplate) (*registerECIESAEA
 		}
 		len = gcmKeyFormat.KeySize
 		a = 0
-
+		skf, err = proto.Marshal(gcmKeyFormat)
+		if err != nil {
+			return nil, fmt.Errorf("failed to serialize key format, error :%v", err)
+		}
 	} else if strings.Compare(u, aesCTRHMACAEADTypeURL) == 0 {
 		aeadKeyFormat := new(ctrhmacpb.AesCtrHmacAeadKeyFormat)
 		if err := proto.Unmarshal(k.Value, aeadKeyFormat); err != nil {
 			return nil, err
 		}
+		if aeadKeyFormat.AesCtrKeyFormat == nil || aeadKeyFormat.HmacKeyFormat == nil {
+			return nil, fmt.Errorf("failed to deserialize key format")
+		}
 		a = aeadKeyFormat.AesCtrKeyFormat.KeySize
 		len = a + aeadKeyFormat.HmacKeyFormat.KeySize
-
+		skf, err = proto.Marshal(aeadKeyFormat)
+		if err != nil {
+			return nil, fmt.Errorf("failed to serialize key format, error :%v", err)
+		}
 	} else {
 		return nil, fmt.Errorf("unsupported AEAD DEM key type: %s", u)
 	}
+	km, err := registry.GetKeyManager(k.TypeUrl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch KeyManager, error: %v", err)
+	}
+
+	key, err := km.NewKey(skf)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch key, error: %v", err)
+	}
+	sk, err := proto.Marshal(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize key, error: %v", err)
+	}
+
 	return &registerECIESAEADHKDFDemHelper{
 		demKeyURL:        u,
 		keyData:          sk,

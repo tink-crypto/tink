@@ -38,6 +38,7 @@ var (
 		mac.HMACSHA256Tag256KeyTemplate(),
 		&tinkpb.KeyTemplate{TypeUrl: "some url", Value: []byte{0}},
 		&tinkpb.KeyTemplate{TypeUrl: aesCTRHMACAEADTypeURL},
+		&tinkpb.KeyTemplate{TypeUrl: aesGCMTypeURL},
 	}
 )
 
