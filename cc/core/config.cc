@@ -31,6 +31,8 @@
 #include "tink/public_key_verify.h"
 #include "tink/signature/public_key_sign_wrapper.h"
 #include "tink/signature/public_key_verify_wrapper.h"
+#include "tink/streaming_aead.h"
+#include "tink/streamingaead/streaming_aead_wrapper.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -96,6 +98,8 @@ util::Status Config::Register(
       status = Register<PublicKeySign>(entry);
     } else if (primitive_name == "publickeyverify") {
       status = Register<PublicKeyVerify>(entry);
+    } else if (primitive_name == "streamingaead") {
+      status = Register<StreamingAead>(entry);
     } else {
       status = ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                          "A non-standard primitive '%s' '%s', "
@@ -133,6 +137,9 @@ util::Status Config::RegisterWrapper(
   } else if (lowercase_primitive_name == "publickeyverify") {
     return Registry::RegisterPrimitiveWrapper(
         absl::make_unique<PublicKeyVerifyWrapper>());
+  } else if (lowercase_primitive_name == "streamingaead") {
+    return Registry::RegisterPrimitiveWrapper(
+        absl::make_unique<StreamingAeadWrapper>());
   } else {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
