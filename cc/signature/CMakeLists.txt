@@ -13,7 +13,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -47,7 +47,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -76,12 +76,12 @@ tink_cc_library(
   DEPS
     tink::subtle::subtle_util_boringssl
     tink::util::constants
-    tink::proto::common
-    tink::proto::ecdsa
-    tink::proto::ed25519
-    tink::proto::rsa_ssa_pkcs1
-    tink::proto::rsa_ssa_pss
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
+    tink::proto::ed25519_cc_proto
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
     crypto
     absl::memory
     absl::strings
@@ -105,9 +105,9 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::ecdsa
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
 )
@@ -129,9 +129,9 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::ecdsa
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -152,9 +152,9 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::ed25519
-    tink::proto::empty
-    tink::proto::tink
+    tink::proto::ed25519_cc_proto
+    tink::proto::empty_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
 )
@@ -175,7 +175,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::ed25519
+    tink::proto::ed25519_cc_proto
     absl::strings
 )
 
@@ -209,9 +209,9 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::rsa_ssa_pkcs1
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
 )
@@ -233,9 +233,9 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::rsa_ssa_pkcs1
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -257,9 +257,9 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::rsa_ssa_pss
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
 )
@@ -281,9 +281,9 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::rsa_ssa_pss
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -332,7 +332,7 @@ tink_cc_library(
     tink::core::config
     tink::core::registry
     tink::util::status
-    tink::proto::config
+    tink::proto::config_cc_proto
     absl::memory
 )
 
@@ -348,7 +348,7 @@ tink_cc_test(
     tink::core::public_key_verify
     tink::util::status
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -365,8 +365,8 @@ tink_cc_test(
     tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
-    tink::proto::ecdsa
-    tink::proto::tink
+    tink::proto::ecdsa_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -380,7 +380,7 @@ tink_cc_test(
     tink::core::public_key_verify
     tink::util::status
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -397,8 +397,8 @@ tink_cc_test(
     tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
-    tink::proto::ecdsa
-    tink::proto::tink
+    tink::proto::ecdsa_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -413,10 +413,10 @@ tink_cc_test(
     tink::core::registry
     tink::util::status
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::ecdsa
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -431,11 +431,11 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::ed25519
-    tink::proto::empty
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ed25519_cc_proto
+    tink::proto::empty_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -449,10 +449,10 @@ tink_cc_test(
     tink::core::registry
     tink::util::status
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::rsa_ssa_pkcs1
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -467,10 +467,10 @@ tink_cc_test(
     tink::core::registry
     tink::util::status
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::rsa_ssa_pss
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -488,10 +488,10 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::util::status
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::ecdsa
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -509,11 +509,11 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::ed25519
-    tink::proto::empty
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ed25519_cc_proto
+    tink::proto::empty_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -531,10 +531,10 @@ tink_cc_test(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::rsa_ssa_pkcs1
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::tink_cc_proto
     crypto
 )
 
@@ -553,10 +553,10 @@ tink_cc_test(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::rsa_ssa_pss
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
     crypto
 )
 
@@ -608,12 +608,12 @@ tink_cc_test(
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::signature_key_templates
     tink::subtle::subtle_util_boringssl
-    tink::proto::common
-    tink::proto::ecdsa
-    tink::proto::ed25519
-    tink::proto::empty
-    tink::proto::rsa_ssa_pkcs1
-    tink::proto::rsa_ssa_pss
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
+    tink::proto::ed25519_cc_proto
+    tink::proto::empty_cc_proto
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
     crypto
 )

@@ -14,7 +14,7 @@ tink_cc_library(
     tink::core::primitive_wrapper
     tink::core::registry
     tink::core::streaming_aead
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     tink::util::status
     tink::util::statusor
 )
@@ -93,7 +93,7 @@ tink_cc_test(
     tink::core::output_stream
     tink::core::primitive_set
     tink::core::streaming_aead
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     tink::streamingaead::streaming_aead_wrapper
     tink::util::istream_input_stream
     tink::util::ostream_output_stream

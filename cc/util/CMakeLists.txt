@@ -25,9 +25,9 @@ tink_cc_library(
     enums.h
   DEPS
     tink::subtle::common_enums
-    tink::proto::common
-    tink::proto::ecdsa
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -56,7 +56,7 @@ tink_cc_library(
   DEPS
     tink::util::errors
     tink::util::status
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -135,12 +135,12 @@ tink_cc_library(
     tink::core::streaming_aead
     tink::aead::aes_gcm_key_manager
     tink::subtle::subtle_util_boringssl
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::ecdsa
-    tink::proto::ecies_aead_hkdf
-    tink::proto::ed25519
-    tink::proto::tink
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::ed25519_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
 )
@@ -161,7 +161,7 @@ tink_cc_library(
     test_keyset_handle.h
   DEPS
     tink::core::keyset_handle
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::memory
 )
 
@@ -189,7 +189,7 @@ tink_cc_test(
   DEPS
     tink::util::enums
     tink::subtle::common_enums
-    tink::proto::common
+    tink::proto::common_cc_proto
 )
 
 tink_cc_test(

@@ -12,7 +12,7 @@ tink_cc_library(
     tink::hybrid::hybrid_config
     tink::signature::signature_config
     tink::util::status
-    tink::proto::config
+    tink::proto::config_cc_proto
 )
 
 # tests

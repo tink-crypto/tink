@@ -204,7 +204,7 @@ tink_cc_library(
   SRCS keyset_reader.h
   DEPS
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -212,7 +212,7 @@ tink_cc_library(
   SRCS keyset_writer.h
   DEPS
     tink::util::status
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -224,7 +224,7 @@ tink_cc_library(
     tink::core::keyset_reader
     tink::util::errors
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
     protobuf::libprotobuf-lite
@@ -241,7 +241,7 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -256,7 +256,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
     rapidjson
@@ -274,7 +274,7 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::strings
     rapidjson
 )
@@ -315,7 +315,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    tink::proto::config
+    tink::proto::config_cc_proto
     absl::strings
 )
 
@@ -327,7 +327,7 @@ tink_cc_library(
   DEPS
     tink::util::errors
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -337,7 +337,7 @@ tink_cc_library(
     tink::core::crypto_format
     tink::util::errors
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::memory
     absl::synchronization
 )
@@ -375,7 +375,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::base
     absl::strings
     absl::synchronization
@@ -403,7 +403,7 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::registry
     tink::util::errors
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::memory
 )
 
@@ -417,7 +417,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -430,7 +430,7 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
 )
@@ -443,7 +443,7 @@ tink_cc_library(
     tink::util::constants
     tink::util::errors
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::base
     absl::memory
     absl::strings
@@ -463,7 +463,7 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::base
     absl::memory
     absl::synchronization
@@ -502,10 +502,10 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
-    tink::proto::aes_ctr_hmac_aead
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
 )
 
@@ -523,7 +523,7 @@ tink_cc_test(
   DEPS
     tink::core::binary_keyset_reader
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -532,7 +532,7 @@ tink_cc_test(
   DEPS
     tink::core::binary_keyset_writer
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -542,9 +542,9 @@ tink_cc_test(
     tink::core::json_keyset_reader
     tink::util::protobuf_helper
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::aes_gcm
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -556,9 +556,9 @@ tink_cc_test(
     tink::core::json_keyset_writer
     tink::util::protobuf_helper
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::aes_gcm
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
     absl::strings
     rapidjson
 )
@@ -569,7 +569,7 @@ tink_cc_test(
   DEPS
     tink::core::config
     tink::core::mac
-    tink::proto::config
+    tink::proto::config_cc_proto
 )
 
 tink_cc_test(
@@ -577,7 +577,7 @@ tink_cc_test(
   SRCS core/crypto_format_test.cc
   DEPS
     tink::core::crypto_format
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -601,7 +601,7 @@ tink_cc_test(
     tink::util::protobuf_helper
     tink::util::test_matchers
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -611,7 +611,7 @@ tink_cc_test(
     tink::core::key_manager
     tink::util::status
     tink::util::test_matchers
-    tink::proto::empty
+    tink::proto::empty_cc_proto
     gmock
 )
 
@@ -626,8 +626,8 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::util::test_keyset_handle
     tink::util::test_util
-    tink::proto::aes_gcm
-    tink::proto::tink
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -640,7 +640,7 @@ tink_cc_test(
     tink::core::keyset_reader
     tink::util::test_keyset_handle
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -652,5 +652,5 @@ tink_cc_test(
     tink::core::primitive_set
     tink::util::protobuf_helper
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )

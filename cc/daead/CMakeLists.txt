@@ -16,9 +16,9 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::aes_siv
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_siv_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
     absl::base
 )
 
@@ -35,7 +35,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -63,7 +63,7 @@ tink_cc_library(
     tink::core::config
     tink::mac::mac_config
     tink::util::status
-    tink::proto::config
+    tink::proto::config_cc_proto
     absl::memory
 )
 
@@ -90,9 +90,9 @@ tink_cc_library(
     deterministic_aead_key_templates.cc
     deterministic_aead_key_templates.h
   DEPS
-    tink::proto::aes_siv
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_siv_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 # tests
@@ -105,10 +105,10 @@ tink_cc_test(
     tink::core::aead
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_eax
-    tink::proto::aes_siv
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_siv_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -120,7 +120,7 @@ tink_cc_test(
     tink::core::primitive_set
     tink::util::status
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::memory
 )
 
@@ -166,8 +166,8 @@ tink_cc_test(
     tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
-    tink::proto::aes_siv
-    tink::proto::tink
+    tink::proto::aes_siv_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -176,7 +176,7 @@ tink_cc_test(
   DEPS
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_key_templates
-    tink::proto::aes_siv
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_siv_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )

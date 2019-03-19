@@ -11,7 +11,7 @@ tink_cc_library(
     tink::core::config
     tink::aead::aead_config
     tink::util::status
-    tink::proto::config
+    tink::proto::config_cc_proto
     absl::memory
 )
 
@@ -28,7 +28,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -45,7 +45,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -118,9 +118,9 @@ tink_cc_library(
     hybrid_key_templates.h
   DEPS
     tink::aead::aead_key_templates
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -136,10 +136,10 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_ctr_hmac_aead
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
 )
 
@@ -156,9 +156,9 @@ tink_cc_library(
     tink::util::enums
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -176,9 +176,9 @@ tink_cc_library(
     tink::util::enums
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -199,8 +199,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
 )
@@ -219,9 +219,9 @@ tink_cc_library(
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 # tests
@@ -252,7 +252,7 @@ tink_cc_test(
     tink::core::primitive_set
     tink::util::status
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -264,7 +264,7 @@ tink_cc_test(
     tink::core::primitive_set
     tink::util::status
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -292,8 +292,8 @@ tink_cc_test(
     tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
     absl::memory
 )
 
@@ -320,8 +320,8 @@ tink_cc_test(
     tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -332,9 +332,9 @@ tink_cc_test(
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
     tink::aead::aead_key_templates
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -351,8 +351,8 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
     absl::memory
 )
 
@@ -370,8 +370,8 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
     absl::memory
 )
 
@@ -389,10 +389,10 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -406,8 +406,8 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::ecies_aead_hkdf
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
 )

@@ -14,7 +14,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -45,7 +45,7 @@ tink_cc_library(
     tink::core::config
     tink::mac::mac_config
     tink::util::status
-    tink::proto::config
+    tink::proto::config_cc_proto
     absl::memory
 )
 
@@ -72,12 +72,12 @@ tink_cc_library(
     aead_key_templates.cc
     aead_key_templates.h
   DEPS
-    tink::proto::aes_ctr_hmac_aead
-    tink::proto::aes_eax
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::tink
-    tink::proto::xchacha20_poly1305
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
+    tink::proto::xchacha20_poly1305_cc_proto
 )
 
 tink_cc_library(
@@ -96,9 +96,9 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
     absl::base
 )
 
@@ -118,9 +118,9 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
     absl::base
 )
 
@@ -145,9 +145,9 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::aes_ctr_hmac_aead
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
     absl::base
 )
 
@@ -167,9 +167,9 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::empty
-    tink::proto::tink
-    tink::proto::xchacha20_poly1305
+    tink::proto::empty_cc_proto
+    tink::proto::tink_cc_proto
+    tink::proto::xchacha20_poly1305_cc_proto
     absl::strings
 )
 
@@ -184,7 +184,7 @@ tink_cc_test(
     tink::core::primitive_set
     tink::util::status
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -228,8 +228,8 @@ tink_cc_test(
     tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
-    tink::proto::aes_gcm
-    tink::proto::tink
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -241,12 +241,12 @@ tink_cc_test(
     tink::aead::aes_eax_key_manager
     tink::aead::aes_gcm_key_manager
     tink::aead::xchacha20_poly1305_key_manager
-    tink::proto::aes_ctr_hmac_aead
-    tink::proto::aes_eax
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::tink
-    tink::proto::xchacha20_poly1305
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
+    tink::proto::xchacha20_poly1305_cc_proto
 )
 
 tink_cc_test(
@@ -257,10 +257,10 @@ tink_cc_test(
     tink::core::aead
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_eax
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -271,10 +271,10 @@ tink_cc_test(
     tink::core::aead
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_eax
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -286,10 +286,10 @@ tink_cc_test(
     tink::mac::mac_config
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_ctr_hmac_aead
-    tink::proto::aes_gcm
-    tink::proto::common
-    tink::proto::tink
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -300,8 +300,8 @@ tink_cc_test(
     tink::core::aead
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_eax
-    tink::proto::common
-    tink::proto::tink
-    tink::proto::xchacha20_poly1305
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
+    tink::proto::xchacha20_poly1305_cc_proto
 )

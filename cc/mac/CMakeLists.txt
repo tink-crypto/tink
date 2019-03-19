@@ -13,7 +13,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -25,7 +25,7 @@ tink_cc_library(
     tink::mac::mac_catalogue
     tink::core::config
     tink::util::status
-    tink::proto::config
+    tink::proto::config_cc_proto
     absl::memory
 )
 
@@ -63,9 +63,9 @@ tink_cc_library(
     mac_key_templates.cc
     mac_key_templates.h
   DEPS
-    tink::proto::common
-    tink::proto::hmac
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -85,9 +85,9 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::common
-    tink::proto::hmac
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 # tests
@@ -102,7 +102,7 @@ tink_cc_test(
     tink::core::primitive_set
     tink::util::status
     tink::util::test_util
-    tink::proto::tink
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -148,9 +148,9 @@ tink_cc_test(
     tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
-    tink::proto::common
-    tink::proto::hmac
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -159,9 +159,9 @@ tink_cc_test(
   DEPS
     tink::mac::hmac_key_manager
     tink::mac::mac_key_templates
-    tink::proto::common
-    tink::proto::hmac
-    tink::proto::tink
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -172,9 +172,9 @@ tink_cc_test(
     tink::core::mac
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_ctr
-    tink::proto::aes_ctr_hmac_aead
-    tink::proto::common
-    tink::proto::hmac
-    tink::proto::tink
+    tink::proto::aes_ctr_cc_proto
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
 )
