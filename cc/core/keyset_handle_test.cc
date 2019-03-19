@@ -536,6 +536,104 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForInvalidString) {
   EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
 }
 
+TEST_F(KeysetHandleTest, WriteNoSecret) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::REMOTE, &keyset);
+  keyset.set_primary_key_id(42);
+
+  auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
+
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer =
+      test::DummyKeysetWriter::New(std::move(destination_stream)).ValueOrDie();
+  auto result = handle->WriteNoSecret(writer.get());
+  EXPECT_TRUE(result.ok());
+}
+
+TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeUnknown) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::UNKNOWN_KEYMATERIAL, &keyset);
+  keyset.set_primary_key_id(42);
+
+  auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
+
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer =
+      test::DummyKeysetWriter::New(std::move(destination_stream)).ValueOrDie();
+  auto result = handle->WriteNoSecret(writer.get());
+  EXPECT_FALSE(result.ok());
+}
+
+TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeSymmetric) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+
+  auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
+
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer =
+      test::DummyKeysetWriter::New(std::move(destination_stream)).ValueOrDie();
+  auto result = handle->WriteNoSecret(writer.get());
+  EXPECT_FALSE(result.ok());
+}
+
+TEST_F(KeysetHandleTest, WriteNoSecretFailForTypeAssymmetricPrivate) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  keyset.set_primary_key_id(42);
+
+  auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
+
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer =
+      test::DummyKeysetWriter::New(std::move(destination_stream)).ValueOrDie();
+  auto result = handle->WriteNoSecret(writer.get());
+  EXPECT_FALSE(result.ok());
+}
+
+TEST_F(KeysetHandleTest, WriteNoSecretFailForHidden) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
+            KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key,
+              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+
+  keyset.set_primary_key_id(42);
+
+  auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
+
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer =
+      test::DummyKeysetWriter::New(std::move(destination_stream)).ValueOrDie();
+  auto result = handle->WriteNoSecret(writer.get());
+  EXPECT_FALSE(result.ok());
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

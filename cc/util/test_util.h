@@ -54,8 +54,7 @@ namespace test {
 // Converts a hexadecimal std::string into a std::string of bytes.
 // Returns a status if the size of the input is odd or if the input contains
 // characters that are not hexadecimal.
-crypto::tink::util::StatusOr<std::string> HexDecode(
-    absl::string_view hex);
+crypto::tink::util::StatusOr<std::string> HexDecode(absl::string_view hex);
 
 // Converts a hexadecimal std::string into a std::string of bytes.
 // Dies if the input is not a valid hexadecimal std::string.
@@ -69,60 +68,47 @@ std::string TmpDir();
 
 // Adds the given 'keyData' with specified status, key_id, and
 // output_prefix_type to the keyset.
-void AddKeyData(
-    const google::crypto::tink::KeyData& key_data,
-    uint32_t key_id,
-    google::crypto::tink::OutputPrefixType output_prefix,
-    google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::Keyset* keyset);
-
+void AddKeyData(const google::crypto::tink::KeyData& key_data, uint32_t key_id,
+                google::crypto::tink::OutputPrefixType output_prefix,
+                google::crypto::tink::KeyStatusType key_status,
+                google::crypto::tink::Keyset* keyset);
 
 // Adds the given 'key' with specified parameters and output_prefix_type=TINK
 // to the specified 'keyset'.
-void AddTinkKey(
-    const std::string& key_type,
-    uint32_t key_id,
-    const portable_proto::MessageLite& key,
-    google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::crypto::tink::Keyset* keyset);
+void AddTinkKey(const std::string& key_type, uint32_t key_id,
+                const portable_proto::MessageLite& key,
+                google::crypto::tink::KeyStatusType key_status,
+                google::crypto::tink::KeyData::KeyMaterialType material_type,
+                google::crypto::tink::Keyset* keyset);
 
 // Adds the given 'key' with specified parameters and output_prefix_type=LEGACY
 // to the specified 'keyset'.
-void AddLegacyKey(
-    const std::string& key_type,
-    uint32_t key_id,
-    const portable_proto::MessageLite& key,
-    google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::crypto::tink::Keyset* keyset);
+void AddLegacyKey(const std::string& key_type, uint32_t key_id,
+                  const portable_proto::MessageLite& key,
+                  google::crypto::tink::KeyStatusType key_status,
+                  google::crypto::tink::KeyData::KeyMaterialType material_type,
+                  google::crypto::tink::Keyset* keyset);
 
 // Adds the given 'key' with specified parameters and output_prefix_type=RAW
 // to the specified 'keyset'.
-void AddRawKey(
-    const std::string& key_type,
-    uint32_t key_id,
-    const portable_proto::MessageLite& key,
-    google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::crypto::tink::Keyset* keyset);
-
+void AddRawKey(const std::string& key_type, uint32_t key_id,
+               const portable_proto::MessageLite& key,
+               google::crypto::tink::KeyStatusType key_status,
+               google::crypto::tink::KeyData::KeyMaterialType material_type,
+               google::crypto::tink::Keyset* keyset);
 
 // Generates a fresh test key for ECIES-AEAD-HKDF for the given curve,
 // using AesGcm with the specified key size as AEAD, and HKDF with 'hash_type'.
 google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
-    subtle::EllipticCurveType curve_type,
-    subtle::EcPointFormat ec_point_format,
-    subtle::HashType hash_type,
-    uint32_t aes_gcm_key_size);
+    subtle::EllipticCurveType curve_type, subtle::EcPointFormat ec_point_format,
+    subtle::HashType hash_type, uint32_t aes_gcm_key_size);
 
 // Generates a fresh test key for ECIES-AEAD-HKDF for the given curve,
 // using AesGcm with the specified key size as AEAD, and HKDF with 'hash_type'.
 google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::EcPointFormat ec_point_format,
-    google::crypto::tink::HashType hash_type,
-    uint32_t aes_gcm_key_size);
+    google::crypto::tink::HashType hash_type, uint32_t aes_gcm_key_size);
 
 // Generates a fresh test key for EC DSA for the given 'curve_type', 'hash_type'
 // and 'encoding'.
@@ -219,8 +205,8 @@ class DummyStreamingAead : public StreamingAead {
     auto next_result = ciphertext_destination->Next(&buffer);
     if (!next_result.status().ok()) return next_result.status();
     if (next_result.ValueOrDie() < header.size()) {
-      return crypto::tink::util::Status(
-          crypto::tink::util::error::INTERNAL, "Buffer too small");
+      return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+                                        "Buffer too small");
     }
     if (header.size() > std::numeric_limits<int>::max()) {
       return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
@@ -244,8 +230,8 @@ class DummyStreamingAead : public StreamingAead {
     auto next_result = ciphertext_source->Next(&buffer);
     if (!next_result.status().ok()) return next_result.status();
     if (next_result.ValueOrDie() < header.size()) {
-      return crypto::tink::util::Status(
-          crypto::tink::util::error::INTERNAL, "Buffer too small");
+      return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+                                        "Buffer too small");
     }
     if (header.size() > std::numeric_limits<int>::max()) {
       return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
@@ -333,8 +319,8 @@ class DummyPublicKeyVerify : public PublicKeyVerify {
 
   // Verifies a dummy signature, should be a concatenation of the name
   // of this DummyPublicKeyVerify with the provided 'data'.
-  crypto::tink::util::Status Verify(
-      absl::string_view signature, absl::string_view data) const override {
+  crypto::tink::util::Status Verify(absl::string_view signature,
+                                    absl::string_view data) const override {
     return dummy_aead_.Decrypt(signature, data).status();
   }
 
@@ -357,15 +343,41 @@ class DummyMac : public Mac {
     return dummy_aead_.Encrypt("", data);
   }
 
-  crypto::tink::util::Status VerifyMac(
-      absl::string_view mac,
-      absl::string_view data) const override {
+  crypto::tink::util::Status VerifyMac(absl::string_view mac,
+                                       absl::string_view data) const override {
     return dummy_aead_.Decrypt(mac, data).status();
   }
+
  private:
   DummyAead dummy_aead_;
 };
 
+// A dummy implementation of KeysetWriter-interface.
+class DummyKeysetWriter : public KeysetWriter {
+ public:
+  static crypto::tink::util::StatusOr<std::unique_ptr<DummyKeysetWriter>> New(
+      std::unique_ptr<std::ostream> destination_stream) {
+    std::unique_ptr<DummyKeysetWriter> writer(
+        new DummyKeysetWriter(std::move(destination_stream)));
+    return std::move(writer);
+  }
+
+  crypto::tink::util::Status Write(
+      const google::crypto::tink::Keyset& keyset) override {
+    return crypto::tink::util::Status::OK;
+  }
+
+  crypto::tink::util::Status Write(
+      const google::crypto::tink::EncryptedKeyset& encrypted_keyset) override {
+    return crypto::tink::util::Status::OK;
+  }
+
+ private:
+  explicit DummyKeysetWriter(std::unique_ptr<std::ostream> destination_stream)
+      : destination_stream_(std::move(destination_stream)) {}
+
+  std::unique_ptr<std::ostream> destination_stream_;
+};
 
 }  // namespace test
 }  // namespace tink

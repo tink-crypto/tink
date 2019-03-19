@@ -146,6 +146,18 @@ util::Status KeysetHandle::Write(KeysetWriter* writer,
   return writer->Write(*(encrypt_result.ValueOrDie().get()));
 }
 
+util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) {
+  if (writer == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Writer must be non-null");
+  }
+
+  util::Status validation = ValidateNoSecret(get_keyset());
+  if (!validation.ok()) return validation;
+
+  return writer->Write(get_keyset());
+}
+
 // static
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
     const KeyTemplate& key_template) {

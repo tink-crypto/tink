@@ -69,6 +69,31 @@ TEST_F(CleartextKeysetHandleTest, testRead) {
   }
 }
 
+TEST_F(CleartextKeysetHandleTest, testWrite) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+
+  auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
+
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer =
+      test::DummyKeysetWriter::New(std::move(destination_stream)).ValueOrDie();
+
+  // Write a valid keyset.
+  EXPECT_EQ(CleartextKeysetHandle::Write(writer.get(), *(handle.get())),
+            util::Status::OK);
+
+  // Null writer.
+  EXPECT_NE(CleartextKeysetHandle::Write(nullptr, *(handle.get())),
+            util::Status::OK);
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
