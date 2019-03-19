@@ -41,6 +41,10 @@ public final class MacJce implements Mac {
       throw new InvalidAlgorithmParameterException(
           "tag size too small, need at least " + MIN_TAG_SIZE_IN_BYTES + " bytes");
     }
+    if (key.getEncoded().length < MIN_KEY_SIZE_IN_BYTES) {
+      throw new InvalidAlgorithmParameterException(
+          "key size too small, need at least " + MIN_KEY_SIZE_IN_BYTES + " bytes");
+    }
     switch (algorithm) {
       case "HMACSHA1":
         if (digestSize > 20) {

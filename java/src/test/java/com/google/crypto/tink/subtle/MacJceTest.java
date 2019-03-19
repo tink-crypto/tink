@@ -185,6 +185,16 @@ public class MacJceTest {
   }
 
   @Test
+  public void testThrowExceptionIfKeySizeIsTooSmall() throws Exception {
+    try {
+      new MacJce("HMACSHA1", new SecretKeySpec(Random.randBytes(15), "HMAC"), 16);
+      fail("Expected InvalidAlgorithmParameterException");
+    } catch (InvalidAlgorithmParameterException ex) {
+      // expected.
+    }
+  }
+
+  @Test
   public void testThrowExceptionIfTagSizeIsTooSmall() throws Exception {
     testThrowExceptionIfTagSizeIsTooSmall("HMACSHA1");
     testThrowExceptionIfTagSizeIsTooSmall("HMACSHA256");
