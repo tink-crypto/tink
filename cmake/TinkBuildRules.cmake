@@ -51,6 +51,8 @@ endif()
 
 list(APPEND TINK_INCLUDE_DIRS "${TINK_GENFILE_DIR}")
 
+set(TINK_IDE_FOLDER "Tink")
+
 # Declare the beginning of a new Tink library namespace.
 #
 # As a rule of thumb, every CMakeLists.txt should be a different module, named
@@ -121,6 +123,13 @@ function(tink_cc_library)
     target_link_libraries(${_target_name} PUBLIC ${tink_cc_library_DEPS})
     set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD ${TINK_CXX_STANDARD})
     set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD_REQUIRED true)
+    if (tink_cc_library_PUBLIC)
+      set_property(TARGET ${_target_name}
+                   PROPERTY FOLDER "${TINK_IDE_FOLDER}")
+    else()
+      set_property(TARGET ${_target_name}
+                   PROPERTY FOLDER "${TINK_IDE_FOLDER}/Internal")
+    endif()
   else()
     add_library(${_target_name} INTERFACE)
     target_include_directories(${_target_name} INTERFACE ${TINK_INCLUDE_DIRS})
@@ -167,6 +176,9 @@ function(tink_cc_test)
     gtest_main
     ${tink_cc_test_DEPS}
   )
+
+  set_property(TARGET ${_target_name}
+               PROPERTY FOLDER "${TINK_IDE_FOLDER}/Tests")
 
   if (${CMAKE_VERSION} VERSION_LESS 3.10)
     gtest_add_tests(TARGET ${_target_name})
