@@ -6,6 +6,8 @@ include(tink_version.cmake)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+option(TINK_BUILD_TESTS "Build Tink tests" OFF)
+
 include(TinkWorkspace)
 include(TinkBuildRules)
 include(TinkUtil)

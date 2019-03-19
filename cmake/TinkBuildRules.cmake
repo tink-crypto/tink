@@ -25,7 +25,7 @@
 #   TINK_GENFILE_DIR generated content root, such pb.{cc,h} files.
 #   TINK_INCLUDE_DIRS list of global include paths.
 #   TINK_CXX_STANDARD C++ standard to enforce, 11 for now.
-#   TINK_ENABLE_TESTS flag, set to false to disable tests (default true).
+#   TINK_BUILD_TESTS flag, set to false to disable tests (default false).
 #
 # Sensible defaults are provided for all variables, except TINK_MODULE, which is
 # defined by calls to tink_module(). Please don't alter it directly.
@@ -33,11 +33,7 @@
 include(CMakeParseArguments)
 include(GoogleTest)
 
-if (NOT DEFINED TINK_ENABLE_TESTS)
-  set(TINK_ENABLE_TESTS true)
-endif()
-
-if (TINK_ENABLE_TESTS)
+if (TINK_BUILD_TESTS)
   enable_testing()
 endif()
 
@@ -158,7 +154,7 @@ function(tink_cc_test)
     "SRCS;DEPS;DATA"
   )
 
-  if (NOT TINK_ENABLE_TESTS)
+  if (NOT TINK_BUILD_TESTS)
     return()
   endif()
 
