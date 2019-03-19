@@ -54,14 +54,6 @@ function(http_archive)
   set(http_archive_SOURCE_DIR "${http_archive_PREFIX}/src")
   set(http_archive_BINARY_DIR "${http_archive_PREFIX}/build")
 
-  if (http_archive_DATA_ONLY)
-    set(http_archive_EXTRA_OPTIONS CONFIGURE_COMMAND "\"\"")
-  endif()
-
-  # Join the extra argument list into a space-delimited string.
-  string(REPLACE ";" " "
-         http_archive_EXTRA_OPTIONS "${http_archive_EXTRA_OPTIONS}")
-
   configure_file(
     cmake/HttpArchiveDownloader.cmake.in
     "${http_archive_PREFIX}/CMakeLists.txt")

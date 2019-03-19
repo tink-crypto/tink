@@ -289,7 +289,7 @@ tink_cc_test(
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::core::keyset_handle
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
     tink::proto::ecies_aead_hkdf
@@ -317,7 +317,7 @@ tink_cc_test(
     tink::core::config
     tink::core::hybrid_encrypt
     tink::core::keyset_handle
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
     tink::proto::ecies_aead_hkdf

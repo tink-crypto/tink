@@ -10,7 +10,7 @@ add_subdirectory(../../.. "${CMAKE_CURRENT_BINARY_DIR}/tink")
 add_executable(hello_world hello_world.cc)
 
 target_link_libraries(hello_world
-  tink
+  tink::static
   tink::core::cleartext_keyset_handle
   tink::config::tink_config
   tink::util::status

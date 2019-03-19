@@ -34,7 +34,7 @@
 include(HttpArchive)
 include(TinkUtil)
 
-set(gtest_force_shared_crt true CACHE BOOL "" FORCE)
+set(gtest_force_shared_crt ON CACHE BOOL "Tink dependency override" FORCE)
 
 http_archive(
   NAME com_google_googletest
@@ -69,9 +69,9 @@ http_archive(
 # BoringSSL targets do not carry include directory info, this fixes it.
 target_include_directories(crypto PUBLIC "${boringssl_SOURCE_DIR}/src/include")
 
-set(RAPIDJSON_BUILD_DOC false)
-set(RAPIDJSON_BUILD_EXAMPLES false)
-set(RAPIDJSON_BUILD_TESTS false)
+set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "Tink dependency override" FORCE)
+set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
+set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Tink dependency override" FORCE)
 
 http_archive(
   NAME rapidjson
@@ -83,12 +83,12 @@ http_archive(
 add_library(rapidjson INTERFACE)
 target_include_directories(rapidjson INTERFACE "${rapidjson_SOURCE_DIR}")
 
-set(protobuf_BUILD_TESTS false CACHE BOOL "")
+set(protobuf_BUILD_TESTS OFF CACHE BOOL "Tink dependency override" FORCE)
+set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
 
 http_archive(
   NAME com_google_protobuf
   URL https://github.com/google/protobuf/archive/v3.7.0.zip
   SHA256 b50be32ea806bdb948c22595ba0742c75dc2f8799865def414cf27ea5706f2b7
   CMAKE_SUBDIR cmake
-  CMAKE_ARGS -Dprotobuf_BUILD_TESTS=OFF
 )

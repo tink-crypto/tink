@@ -12,6 +12,8 @@ tink_module(core)
 
 # public libraries
 
+set(TINK_VERSION_H "${TINK_GENFILE_DIR}/tink/version.h")
+
 set(TINK_PUBLIC_APIS
   aead.h
   aead_config.h
@@ -51,7 +53,7 @@ set(TINK_PUBLIC_APIS
   signature_config.h
   signature_key_templates.h
   tink_config.h
-  version.h
+  "${TINK_VERSION_H}"
 )
 
 set(TINK_PUBLIC_API_DEPS
@@ -112,7 +114,7 @@ tink_cc_library(
   PUBLIC
 )
 
-add_library(tink ALIAS tink_core_cc)
+add_library(tink::static ALIAS tink_core_cc)
 
 tink_cc_library(
   NAME input_stream
@@ -377,7 +379,6 @@ tink_cc_library(
     absl::synchronization
 )
 
-set(TINK_VERSION_H "${TINK_GENFILE_DIR}/tink/version.h")
 configure_file(version.h.templ "${TINK_VERSION_H}")
 
 tink_cc_library(
@@ -494,7 +495,7 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
@@ -587,14 +588,14 @@ tink_cc_test(
     tink::core::json_keyset_reader
     tink::core::json_keyset_writer
     tink::core::keyset_handle
-    tink
+    tink::static
     tink::aead::aead_key_templates
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
     tink::config::tink_config
     tink::signature::ecdsa_sign_key_manager
     tink::signature::signature_key_templates
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::protobuf_helper
     tink::util::test_matchers
     tink::util::test_util
@@ -621,7 +622,7 @@ tink_cc_test(
     tink::core::keyset_manager
     tink::aead::aead_config
     tink::aead::aes_gcm_key_manager
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::test_util
     tink::proto::aes_gcm
     tink::proto::tink
@@ -635,7 +636,7 @@ tink_cc_test(
     tink::core::cleartext_keyset_handle
     tink::core::keyset_handle
     tink::core::keyset_reader
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::test_util
     tink::proto::tink
 )

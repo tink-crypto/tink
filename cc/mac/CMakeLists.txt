@@ -145,7 +145,7 @@ tink_cc_test(
     tink::core::keyset_handle
     tink::core::mac
     tink::mac::hmac_key_manager
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
     tink::proto::common

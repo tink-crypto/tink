@@ -225,7 +225,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::crypto_format
     tink::core::keyset_handle
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
     tink::proto::aes_gcm

@@ -26,6 +26,7 @@ ExternalProject_Add(${http_archive_NAME}
   BINARY_DIR "${http_archive_BINARY_DIR}"
   SOURCE_SUBDIR "${http_archive_CMAKE_SUBDIR}"
   CMAKE_ARGS ${http_archive_CMAKE_ARGS}
+  CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   TEST_COMMAND ""
   INSTALL_COMMAND ""

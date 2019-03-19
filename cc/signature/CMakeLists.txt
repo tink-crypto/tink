@@ -362,7 +362,7 @@ tink_cc_test(
     tink::core::keyset_handle
     tink::core::public_key_verify
     tink::core::registry
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
     tink::proto::ecdsa
@@ -394,7 +394,7 @@ tink_cc_test(
     tink::core::keyset_handle
     tink::core::public_key_sign
     tink::core::registry
-    tink::util::keyset_util
+    tink::util::test_keyset_handle
     tink::util::status
     tink::util::test_util
     tink::proto::ecdsa
