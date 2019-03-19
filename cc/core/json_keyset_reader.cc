@@ -259,9 +259,9 @@ tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
   rapidjson::Document json_doc(rapidjson::kObjectType);
   if (json_doc.Parse(serialized_keyset->c_str()).HasParseError()) {
     return ToStatusF(tinkutil::error::INVALID_ARGUMENT,
-        "Invalid JSON Keyset: Error (offset %u): %s",
-        (unsigned)json_doc.GetErrorOffset(),
-        rapidjson::GetParseError_En(json_doc.GetParseError()));
+                     "Invalid JSON Keyset: Error (offset %u): %s",
+                     static_cast<unsigned>(json_doc.GetErrorOffset()),
+                     rapidjson::GetParseError_En(json_doc.GetParseError()));
   }
   return KeysetFromJson(json_doc);
 }
@@ -280,9 +280,9 @@ JsonKeysetReader::ReadEncrypted() {
   rapidjson::Document json_doc;
   if (json_doc.Parse(serialized_keyset->c_str()).HasParseError()) {
     return ToStatusF(tinkutil::error::INVALID_ARGUMENT,
-        "Invalid JSON EncryptedKeyset: Error (offset %u): %s",
-        (unsigned)json_doc.GetErrorOffset(),
-        rapidjson::GetParseError_En(json_doc.GetParseError()));
+                     "Invalid JSON EncryptedKeyset: Error (offset %u): %s",
+                     static_cast<unsigned>(json_doc.GetErrorOffset()),
+                     rapidjson::GetParseError_En(json_doc.GetParseError()));
   }
   return EncryptedKeysetFromJson(json_doc);
 }

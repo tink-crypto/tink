@@ -38,7 +38,6 @@ namespace subtle {
 using crypto::tink::OutputStream;
 using crypto::tink::subtle::test::DummyStreamSegmentEncrypter;
 using crypto::tink::util::OstreamOutputStream;
-using crypto::tink::util::Status;
 
 namespace {
 

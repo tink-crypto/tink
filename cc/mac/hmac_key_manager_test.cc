@@ -34,7 +34,6 @@ using google::crypto::tink::HashType;
 using google::crypto::tink::HmacKey;
 using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
 
 namespace {
 

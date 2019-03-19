@@ -36,10 +36,8 @@ namespace tink {
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-using google::crypto::tink::KeyData;
 using google::crypto::tink::RsaSsaPkcs1Params;
 using google::crypto::tink::RsaSsaPkcs1PublicKey;
-using portable_proto::MessageLite;
 
 constexpr uint32_t RsaSsaPkcs1VerifyKeyManager::kVersion;
 

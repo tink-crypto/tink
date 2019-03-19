@@ -178,8 +178,8 @@ TEST_F(RsaSsaPssVerifyKeyManagerTest, testKeyMessageErrors) {
     key.mutable_params()->set_sig_hash(pb::HashType::SHA256);
     key.mutable_params()->set_salt_length(32);
     key.set_version(0);
-    key.set_n(std::string("\x23"));
-    key.set_e(std::string("\x3"));
+    key.set_n("\x23");
+    key.set_e("\x3");
     auto result = key_manager.GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());

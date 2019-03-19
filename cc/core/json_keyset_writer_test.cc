@@ -192,7 +192,7 @@ TEST_F(JsonKeysetWriterTest, testWriteEncryptedKeyset) {
   EXPECT_FALSE(
       json_encrypted_keyset.Parse(buffer.str().c_str()).HasParseError())
       << "Parsing error at position "
-      << (unsigned)json_encrypted_keyset.GetErrorOffset()
+      << static_cast<unsigned>(json_encrypted_keyset.GetErrorOffset())
       << " of JSON string\n"
       << buffer.str() << "\n"
       << rapidjson::GetParseError_En(json_encrypted_keyset.GetParseError());

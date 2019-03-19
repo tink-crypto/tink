@@ -52,7 +52,6 @@ using crypto::tink::test::DummyAead;
 using crypto::tink::util::Status;
 using google::crypto::tink::AesCtrHmacAeadKey;
 using google::crypto::tink::AesGcmKey;
-using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;

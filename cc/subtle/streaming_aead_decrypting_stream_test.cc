@@ -35,7 +35,6 @@ using crypto::tink::InputStream;
 using crypto::tink::subtle::test::DummyStreamSegmentDecrypter;
 using crypto::tink::subtle::test::DummyStreamSegmentEncrypter;
 using crypto::tink::util::IstreamInputStream;
-using crypto::tink::util::Status;
 
 namespace crypto {
 namespace tink {

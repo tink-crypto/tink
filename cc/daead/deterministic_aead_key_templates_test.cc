@@ -23,7 +23,6 @@
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::AesSivKeyFormat;
-using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 

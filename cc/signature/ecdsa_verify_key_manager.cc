@@ -42,8 +42,6 @@ using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
-using google::crypto::tink::KeyData;
-using portable_proto::MessageLite;
 
 constexpr uint32_t EcdsaVerifyKeyManager::kVersion;
 

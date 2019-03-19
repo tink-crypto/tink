@@ -36,14 +36,13 @@
 namespace crypto {
 namespace tink {
 
+using crypto::tink::util::Enums;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::KeyData;
-using portable_proto::MessageLite;
-using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
 
 class EcdsaPrivateKeyFactory
     : public PrivateKeyFactory,

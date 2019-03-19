@@ -36,16 +36,14 @@
 namespace crypto {
 namespace tink {
 
+using crypto::tink::util::Enums;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 using google::crypto::tink::HashType;
 using google::crypto::tink::HmacKey;
 using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::HmacParams;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
-using portable_proto::MessageLite;
-using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
 
 class HmacKeyFactory : public KeyFactoryBase<HmacKey, HmacKeyFormat> {
  public:
