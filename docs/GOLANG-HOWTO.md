@@ -8,7 +8,7 @@ accomplishing some common cryptographic tasks using [Tink](https://github.com/go
 To install Tink locally run
 
 ```sh
-go get github.com/google/tink/go
+go get github.com/google/tink/go/...
 ```
 
 to run all the tests locally
