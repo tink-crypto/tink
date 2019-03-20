@@ -215,6 +215,7 @@ cc_test(
         "//cc/subtle:test_util",
         "//cc/util:istream_input_stream",
         "//cc/util:status",
+        "//cc/util:test_matchers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",

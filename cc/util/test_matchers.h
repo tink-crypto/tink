@@ -25,8 +25,8 @@ namespace crypto {
 namespace tink {
 namespace test {
 
-// Matches a util::Status value. This is better than
-// EXPECT_TRUE(status.ok())
+// Matches a util::StatusOk() value.
+// This is better than EXPECT_TRUE(status.ok())
 // because the error message is a part of the failure messsage.
 MATCHER(IsOk, "is a Status with an OK value") {
   if (arg.ok()) {
@@ -36,6 +36,7 @@ MATCHER(IsOk, "is a Status with an OK value") {
   return false;
 }
 
+// Matches a Status with the specified 'code' as error_code().
 MATCHER_P(StatusIs, code,
           "is a Status with a " + util::ErrorCodeString(code) + " code") {
   if (arg.CanonicalCode() == code) {
@@ -43,6 +44,13 @@ MATCHER_P(StatusIs, code,
   }
   *result_listener << ::testing::PrintToString(arg);
   return false;
+}
+
+// Matches a Status whose error_code() equals 'code', and whose
+// error_message() matches 'message_macher'.
+MATCHER_P2(StatusIs, code, message_matcher, "") {
+  return (arg.CanonicalCode() == code) &&
+      testing::Matches(message_matcher)(arg.error_message());
 }
 
 }  // namespace test

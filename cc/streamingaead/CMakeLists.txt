@@ -187,5 +187,6 @@ tink_cc_test(
     tink::subtle::test_util
     tink::util::istream_input_stream
     tink::util::status
+    tink::util::test_matchers
 )
 

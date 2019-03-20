@@ -28,16 +28,17 @@
 #include "tink/subtle/test_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 
 namespace crypto {
 namespace tink {
 namespace streamingaead {
 namespace {
 
+using crypto::tink::test::IsOk;
+using crypto::tink::test::StatusIs;
 using subtle::test::ReadFromStream;
 using testing::HasSubstr;
-using testing::status::IsOk;
-using testing::status::StatusIs;
 
 
 static int kBufferSize = 4096;
