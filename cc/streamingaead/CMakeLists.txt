@@ -83,6 +83,20 @@ tink_cc_library(
     tink::util::validation
 )
 
+tink_cc_library(
+  NAME buffered_input_stream
+  SRCS
+    buffered_input_stream.cc
+    buffered_input_stream.h
+  DEPS
+    absl::memory
+    tink::core::input_stream
+    tink::core::registry
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -159,3 +173,19 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
 )
+
+tink_cc_test(
+  NAME buffered_input_stream_test
+  SRCS buffered_input_stream_test.cc
+  DEPS
+    absl::memory
+    absl::strings
+    gmock
+    tink::core::input_stream
+    tink::streamingaead::buffered_input_stream
+    tink::subtle::random
+    tink::subtle::test_util
+    tink::util::istream_input_stream
+    tink::util::status
+)
+
