@@ -19,7 +19,6 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
@@ -93,8 +92,7 @@ class OstreamOutputStreamTest : public ::testing::Test {
 };
 
 TEST_F(OstreamOutputStreamTest, WritingStreams) {
-  std::vector<int> stream_sizes = {0, 10, 100, 1000, 10000, 100000, 1000000};
-  for (auto stream_size : stream_sizes) {
+  for (size_t stream_size : {0, 10, 100, 1000, 10000, 100000, 1000000}) {
     std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
     std::string filename = absl::StrCat(stream_size, "_writing_test.bin");
     auto output = GetTestOstream(filename);
@@ -109,10 +107,9 @@ TEST_F(OstreamOutputStreamTest, WritingStreams) {
 }
 
 TEST_F(OstreamOutputStreamTest, CustomBufferSizes) {
-  std::vector<int> buffer_sizes = {1, 10, 100, 1000, 10000, 100000, 1000000};
   int stream_size = 1024 * 1024;
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
-  for (auto buffer_size : buffer_sizes) {
+  for (int buffer_size : {1, 10, 100, 1000, 10000, 100000, 1000000}) {
     std::string filename = absl::StrCat(buffer_size, "_buffer_size_test.bin");
     auto output = GetTestOstream(filename);
     auto output_stream = absl::make_unique<util::OstreamOutputStream>(
@@ -149,11 +146,10 @@ TEST_F(OstreamOutputStreamTest, BackupAndPosition) {
   std::memcpy(buffer, stream_contents.data(), buffer_size);
 
   // BackUp several times, but in total fewer bytes than returned by Next().
-  std::vector<int> backup_sizes = {0, 1, 5, 0, 10, 100, -42, 400, 20, -100};
   int total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (int backup_size : {0, 1, 5, 0, 10, 100, -42, 400, 20, -100}) {
     output_stream->BackUp(backup_size);
-    total_backup_size += std::max(0, backup_size);
+    total_backup_size += std::max(backup_size, 0);
     EXPECT_EQ(buffer_size - total_backup_size, output_stream->Position());
   }
   EXPECT_LT(total_backup_size, next_result.ValueOrDie());
@@ -163,9 +159,8 @@ TEST_F(OstreamOutputStreamTest, BackupAndPosition) {
   EXPECT_TRUE(next_result.ok()) << next_result.status();
 
   // BackUp() some bytes, again fewer than returned by Next().
-  backup_sizes = {0, 72, -94, 37, 82};
   total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (int backup_size : {0, 72, -94, 37, 82}) {
     output_stream->BackUp(backup_size);
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, output_stream->Position());
@@ -185,12 +180,12 @@ TEST_F(OstreamOutputStreamTest, BackupAndPosition) {
   std::memcpy(buffer, stream_contents.data() + buffer_size, buffer_size);
 
   // BackUp a few times, with total over the returned buffer_size.
-  backup_sizes = {0, 72, -100, buffer_size / 2, 200, -25, buffer_size / 2, 42};
   total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (int backup_size :
+           {0, 72, -100, buffer_size / 2, 200, -25, buffer_size / 2, 42}) {
     output_stream->BackUp(backup_size);
     total_backup_size = std::min(buffer_size,
-                                 total_backup_size + std::max(0, backup_size));
+                                 total_backup_size + std::max(backup_size, 0));
     EXPECT_EQ(prev_position + buffer_size - total_backup_size,
               output_stream->Position());
   }

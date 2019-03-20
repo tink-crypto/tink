@@ -20,7 +20,6 @@
 #include <fstream>
 #include <iostream>
 #include <istream>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
@@ -73,8 +72,7 @@ class IstreamInputStreamTest : public ::testing::Test {
 };
 
 TEST_F(IstreamInputStreamTest, testReadingStreams) {
-  std::vector<int> stream_sizes = {0, 10, 100, 1000, 10000, 100000, 1000000};
-  for (auto stream_size : stream_sizes) {
+  for (int stream_size : {0, 10, 100, 1000, 10000, 100000, 1000000}) {
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
     auto input = GetTestIstream(filename, stream_size, &file_contents);
@@ -90,9 +88,8 @@ TEST_F(IstreamInputStreamTest, testReadingStreams) {
 }
 
 TEST_F(IstreamInputStreamTest, testCustomBufferSizes) {
-  std::vector<int> buffer_sizes = {1, 10, 100, 1000, 10000};
   int stream_size = 100000;
-  for (auto buffer_size : buffer_sizes) {
+  for (int buffer_size : {1, 10, 100, 1000, 10000}) {
     std::string file_contents;
     std::string filename = absl::StrCat(buffer_size, "_buffer_size_test.bin");
     auto input = GetTestIstream(filename, stream_size, &file_contents);
@@ -129,9 +126,8 @@ TEST_F(IstreamInputStreamTest, testBackupAndPosition) {
             std::string(static_cast<const char*>(buffer), buffer_size));
 
   // BackUp several times, but in total fewer bytes than returned by Next().
-  std::vector<int> backup_sizes = {0, 1, 5, 0, 10, 100, -42, 400, 20, -100};
   int total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (auto backup_size : {0, 1, 5, 0, 10, 100, -42, 400, 20, -100}) {
     input_stream->BackUp(backup_size);
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, input_stream->Position());
@@ -146,9 +142,8 @@ TEST_F(IstreamInputStreamTest, testBackupAndPosition) {
       std::string(static_cast<const char*>(buffer), total_backup_size));
 
   // BackUp() some bytes, again fewer than returned by Next().
-  backup_sizes = {0, 72, -94, 37, 82};
   total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (int backup_size : {0, 72, -94, 37, 82}) {
     input_stream->BackUp(backup_size);
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, input_stream->Position());
@@ -173,9 +168,9 @@ TEST_F(IstreamInputStreamTest, testBackupAndPosition) {
       std::string(static_cast<const char*>(buffer), buffer_size));
 
   // BackUp a few times, with total over the returned buffer_size.
-  backup_sizes = {0, 72, -100, buffer_size/2, 200, -25, buffer_size, 42};
   total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (int backup_size :
+           {0, 72, -100, buffer_size/2, 200, -25, buffer_size, 42}) {
     input_stream->BackUp(backup_size);
     total_backup_size = std::min(buffer_size,
                                  total_backup_size + std::max(0, backup_size));
