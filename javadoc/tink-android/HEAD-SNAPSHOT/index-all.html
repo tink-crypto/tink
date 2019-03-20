@@ -199,6 +199,12 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AeadKeyTemplates--">AeadKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">AeadWrapper</span></a> - Class in <a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a></dt>
+<dd>
+<div class="block">AeadWrapper is the implementation of SetWrapper for the Aead primitive.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadWrapper.html#AeadWrapper--">AeadWrapper()</a></span> - Constructor for class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead">AeadWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_CTR_HMAC_SHA256">AES128_CTR_HMAC_SHA256</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
 <div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
@@ -1705,6 +1711,12 @@
 <div class="block">Pre-generated <code>KeyTemplate</code> for <code>DeterministicAead</code> keys.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html#DeterministicAeadKeyTemplates--">DeterministicAeadKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html" title="class in com.google.crypto.tink.daead">DeterministicAeadKeyTemplates</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html" title="class in com.google.crypto.tink.daead"><span class="typeNameLink">DeterministicAeadWrapper</span></a> - Class in <a href="com/google/crypto/tink/daead/package-summary.html">com.google.crypto.tink.daead</a></dt>
+<dd>
+<div class="block">The implementation of <code>PrimitiveWrapper&lt;DeterministicAead&gt;</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html#DeterministicAeadWrapper--">DeterministicAeadWrapper()</a></span> - Constructor for class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html" title="class in com.google.crypto.tink.daead">DeterministicAeadWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html#disable-int-">disable(int)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></dt>
 <dd>
@@ -4807,11 +4819,21 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead">AeadWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html" title="class in com.google.crypto.tink.daead">DeterministicAeadWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>
 <div class="block">Returns the primitive class object of the P.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacWrapper.html" title="class in com.google.crypto.tink.mac">MacWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>&nbsp;</dd>
@@ -4819,6 +4841,12 @@
 <dd>
 <div class="block">Returns the primitive class object of the primitive managed.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeySignWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeyVerifyWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeyVerifyWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeyVerifyWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitiveFromKey-KeyProto-">getPrimitiveFromKey(KeyProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
 <dd>
 <div class="block">Creates a primitive from a given key.</div>
@@ -6427,6 +6455,12 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridDecryptWrapper</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
+<dd>
+<div class="block">The implementation of <code>PrimitiveWrapper&lt;HybridDecrypt&gt;</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#HybridDecryptWrapper--">HybridDecryptWrapper()</a></span> - Constructor for class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/HybridEncrypt.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">HybridEncrypt</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">Interface for hybrid encryption.</div>
@@ -6452,6 +6486,12 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridEncryptWrapper</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
+<dd>
+<div class="block">The implementation of <code>PrimitiveWrapper&lt;HybridEncrypt&gt;</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html#HybridEncryptWrapper--">HybridEncryptWrapper()</a></span> - Constructor for class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
 <dd>
 <div class="block">Pre-generated <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <code>HybridDecrypt</code> and <code>HybridEncrypt</code> primitives.</div>
@@ -6947,6 +6987,12 @@
 <div class="block">Pre-generated <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><code>Mac</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#MacKeyTemplates--">MacKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/mac/MacWrapper.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacWrapper</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
+<dd>
+<div class="block">MacWrapper is the implementation of PrimitiveWrapper for the Mac primitive.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacWrapper.html#MacWrapper--">MacWrapper()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacWrapper.html" title="class in com.google.crypto.tink.mac">MacWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EciesAeadDemParams.Builder.html#mergeAeadDem-com.google.crypto.tink.proto.KeyTemplate-">mergeAeadDem(KeyTemplate)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EciesAeadDemParams.Builder.html" title="class in com.google.crypto.tink.proto">EciesAeadDemParams.Builder</a></dt>
 <dd>
@@ -8939,6 +8985,12 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeySignWrapper</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
+<dd>
+<div class="block">The implementation of <code>PrimitiveWrapper&lt;PublicKeySign&gt;</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html#PublicKeySignWrapper--">PublicKeySignWrapper()</a></span> - Constructor for class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeySignWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PublicKeyVerify</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">Interface for public key signing.</div>
@@ -8964,6 +9016,12 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><a href="com/google/crypto/tink/signature/PublicKeyVerifyWrapper.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeyVerifyWrapper</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
+<dd>
+<div class="block">The implementation of <code>PrimitiveWrapper&lt;DeterministicAead&gt;</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeyVerifyWrapper.html#PublicKeyVerifyWrapper--">PublicKeyVerifyWrapper()</a></span> - Constructor for class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeyVerifyWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeyVerifyWrapper</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <a name="I:Q">
 <!--   -->
@@ -10559,6 +10617,12 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#StreamingAeadKeyTemplates--">StreamingAeadKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html" title="class in com.google.crypto.tink.streamingaead"><span class="typeNameLink">StreamingAeadWrapper</span></a> - Class in <a href="com/google/crypto/tink/streamingaead/package-summary.html">com.google.crypto.tink.streamingaead</a></dt>
+<dd>
+<div class="block">StreamingAeadWrapper is the implementation of PrimitiveWrapper for the StreamingAead primitive.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html#StreamingAeadWrapper--">StreamingAeadWrapper()</a></span> - Constructor for class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html" title="interface in com.google.crypto.tink.subtle"><span class="typeNameLink">StreamSegmentDecrypter</span></a> - Interface in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">StreamSegmentDecrypter is a helper class that decrypts individual segments of a stream.</div>
@@ -11135,10 +11199,20 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withUrlSafeBase64--">withUrlSafeBase64()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;Aead&gt;)</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead">AeadWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;DeterministicAead&gt;)</a></span> - Method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html" title="class in com.google.crypto.tink.daead">DeterministicAeadWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;HybridDecrypt&gt;)</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;HybridEncrypt&gt;)</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyWrap.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></dt>
 <dd>
 <div class="block">Wraps some key material <code>data</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;Mac&gt;)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacWrapper.html" title="class in com.google.crypto.tink.mac">MacWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;P&gt;)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a></dt>
 <dd>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.</div>
@@ -11148,6 +11222,12 @@ the order they are declared.</div>
 <div class="block">Looks up the globally registered PrimitiveWrapper for this primitive and wraps the given
  PrimitiveSet with it.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;PublicKeySign&gt;)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeySignWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeyVerifyWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;PublicKeyVerify&gt;)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeyVerifyWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeyVerifyWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;StreamingAead&gt;)</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
 <dd>
 <div class="block">Wraps some key material <code>data</code>.</div>
