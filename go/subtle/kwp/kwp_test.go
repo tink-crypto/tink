@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/google/tink/go/subtle/kwp"
@@ -107,7 +108,7 @@ type KwpSuite struct {
 }
 
 func TestWycheproofCases(t *testing.T) {
-	suiteBytes, err := testutil.ReadWycheproofTests("kwp_test.json")
+	suiteBytes, err := ioutil.ReadFile("../../../../wycheproof/testvectors/kwp_test.json")
 	if err != nil {
 		t.Fatal(err)
 	}

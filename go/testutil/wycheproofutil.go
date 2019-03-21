@@ -14,11 +14,6 @@
 
 package testutil
 
-import (
-	"fmt"
-	"io/ioutil"
-)
-
 // WycheproofSuite represents the common elements of the top level
 // object in a Wycheproof json file. Implementations should embed
 // WycheproofSuite in a struct that strongly types the testGroups
@@ -47,10 +42,4 @@ type WycheproofCase struct {
 	Comment string   `json:"comment"`
 	Result  string   `json:"result"`
 	Flags   []string `json:"flags"`
-}
-
-// ReadWycheproofTests loads the named document (for example, "aes_gcm_test.json")
-// from the Wycheproof test vectors directory.
-func ReadWycheproofTests(filename string) ([]byte, error) {
-	return ioutil.ReadFile(fmt.Sprintf("../../../wycheproof/testvectors/%s", filename))
 }
