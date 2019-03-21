@@ -34,7 +34,7 @@ KeyTemplate* NewAesGcmHkdfStreamingKeyTemplate(int ikm_size_in_bytes) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey");
-  key_template->set_output_prefix_type(OutputPrefixType::TINK);
+  key_template->set_output_prefix_type(OutputPrefixType::RAW);
   AesGcmHkdfStreamingKeyFormat key_format;
   key_format.set_key_size(ikm_size_in_bytes);
   auto params = key_format.mutable_params();

@@ -41,7 +41,7 @@ TEST(StreamingAeadKeyTemplatesTest, testAesGcmHkdfStreamingKeyTemplates) {
     const KeyTemplate& key_template =
         StreamingAeadKeyTemplates::Aes128GcmHkdf4KB();
     EXPECT_EQ(type_url, key_template.type_url());
-    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+    EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
     AesGcmHkdfStreamingKeyFormat key_format;
     EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
     EXPECT_EQ(16, key_format.key_size());
@@ -67,7 +67,7 @@ TEST(StreamingAeadKeyTemplatesTest, testAesGcmHkdfStreamingKeyTemplates) {
     const KeyTemplate& key_template =
         StreamingAeadKeyTemplates::Aes256GcmHkdf4KB();
     EXPECT_EQ(type_url, key_template.type_url());
-    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+    EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
     AesGcmHkdfStreamingKeyFormat key_format;
     EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
     EXPECT_EQ(32, key_format.key_size());

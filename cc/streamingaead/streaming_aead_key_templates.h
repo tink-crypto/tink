@@ -41,7 +41,7 @@ class StreamingAeadKeyTemplates {
   //   - HKDF algorithm: HMAC-SHA256
   //   - size of derived AES-GCM keys: 16 bytes
   //   - ciphertext segment size: 4096 bytes
-  //   - OutputPrefixType: TINK
+  //   - OutputPrefixType: RAW
   static const google::crypto::tink::KeyTemplate& Aes128GcmHkdf4KB();
 
   // Returns a KeyTemplate that generates new instances of
@@ -50,7 +50,7 @@ class StreamingAeadKeyTemplates {
   //   - HKDF algorithm: HMAC-SHA256
   //   - size of derived AES-GCM keys: 32 bytes
   //   - ciphertext segment size: 4096 bytes
-  //   - OutputPrefixType: TINK
+  //   - OutputPrefixType: RAW
   static const google::crypto::tink::KeyTemplate& Aes256GcmHkdf4KB();
 };
 
