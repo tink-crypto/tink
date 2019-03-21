@@ -79,12 +79,7 @@ final class SeekableByteChannelDecrypter implements SeekableByteChannel {
         throw new IOException("No matching key found for the ciphertext in the stream.");
       }
       attemptedMatching = true;
-      List<PrimitiveSet.Entry<StreamingAead>> entries;
-      try {
-        entries = primitives.getRawPrimitives();
-      } catch (GeneralSecurityException e) {
-        throw new IOException("Keyset failure: ", e);
-      }
+      List<PrimitiveSet.Entry<StreamingAead>> entries = primitives.getRawPrimitives();
       for (PrimitiveSet.Entry<StreamingAead> entry : entries) {
         try {
           SeekableByteChannel attemptedChannel =
