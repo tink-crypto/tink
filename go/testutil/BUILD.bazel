@@ -7,6 +7,7 @@ go_library(
     srcs = [
         "constant.go",
         "testutil.go",
+        "wycheproofutil.go",
     ],
     importpath = "github.com/google/tink/go/testutil",
     deps = [
@@ -36,7 +37,13 @@ go_library(
 
 go_test(
     name = "go_default_test",
-    srcs = ["testutil_test.go"],
+    srcs = [
+        "testutil_test.go",
+        "wycheproofutil_test.go",
+    ],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
     deps = [
         "//go/testutil:go_default_library",
         "//go/tink:go_default_library",
