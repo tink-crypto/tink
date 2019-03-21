@@ -53,7 +53,9 @@ public final class Validators {
   public static void validateAesKeySize(int sizeInBytes) throws InvalidAlgorithmParameterException {
     if (sizeInBytes != 16 && sizeInBytes != 32) {
       throw new InvalidAlgorithmParameterException(
-          "invalid key size; only 128-bit and 256-bit AES keys are supported");
+          String.format(
+              "invalid key size %d; only 128-bit and 256-bit AES keys are supported",
+              sizeInBytes * 8));
     }
   }
 
