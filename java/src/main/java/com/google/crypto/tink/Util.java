@@ -80,14 +80,13 @@ class Util {
     int primaryKeyId = keyset.getPrimaryKeyId();
     boolean hasPrimaryKey = false;
     boolean containsOnlyPublicKeyMaterial = true;
-    int nonDestroyedKeys = 0;
+    int numEnabledKeys = 0;
     for (Keyset.Key key : keyset.getKeyList()) {
-      if (key.getStatus() == KeyStatusType.DESTROYED) {
+      if (key.getStatus() != KeyStatusType.ENABLED) {
         continue;
       }
-      ++nonDestroyedKeys;
       validateKey(key);
-      if (key.getStatus() == KeyStatusType.ENABLED && key.getKeyId() == primaryKeyId) {
+      if (key.getKeyId() == primaryKeyId) {
         if (hasPrimaryKey) {
           throw new GeneralSecurityException("keyset contains multiple primary keys");
         }
@@ -96,11 +95,12 @@ class Util {
       if (key.getKeyData().getKeyMaterialType() != KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC) {
         containsOnlyPublicKeyMaterial = false;
       }
-      // TODO(thaidn): use TypeLiteral to ensure that all keys are of the same primitive.
+      numEnabledKeys++;
     }
-    if (nonDestroyedKeys == 0) {
-      throw new GeneralSecurityException("empty keyset");
+    if (numEnabledKeys == 0) {
+      throw new GeneralSecurityException("keyset must contain at least one ENABLED key");
     }
+    // Checks that a keyset contains a primary key, except when it contains only public keys.
     if (!hasPrimaryKey && !containsOnlyPublicKeyMaterial) {
       throw new GeneralSecurityException("keyset doesn't contain a valid primary key");
     }

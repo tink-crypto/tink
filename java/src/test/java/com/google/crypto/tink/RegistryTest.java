@@ -641,6 +641,13 @@ public class RegistryTest {
                         .setStatus(KeyStatusType.DISABLED)
                         .setOutputPrefixType(OutputPrefixType.TINK)
                         .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(2)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
                 .setPrimaryKeyId(1)
                 .build());
 
@@ -678,7 +685,7 @@ public class RegistryTest {
                 .build());
 
     try {
-      Registry.getPrimitives(keysetHandle, Aead.class);
+      Registry.getPrimitives(keysetHandle, Mac.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset contains multiple primary keys");
@@ -688,8 +695,8 @@ public class RegistryTest {
   @Test
   public void testGetPrimitives_KeysetWithKeyForWrongPrimitive_shouldThrowException()
       throws Exception {
-    // Try a keyset with some keys non-ENABLED.
     KeyData key1 = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    // This MAC key should cause an exception.
     KeyData key2 = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     KeyData key3 = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
     KeysetHandle keysetHandle =

@@ -21,8 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
@@ -38,7 +36,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class UtilTest {
   @Test
-  public void testValidateKeyset() throws Exception {
+  public void testValidateKeyset_shouldWork() throws Exception {
     String keyValue = "01234567890123456";
     Keyset keyset =
         TestUtil.createKeyset(
@@ -52,15 +50,21 @@ public class UtilTest {
     } catch (GeneralSecurityException e) {
       fail("Valid keyset; should not throw Exception: " + e);
     }
+  }
 
-    // Empty keyset.
+  @Test
+  public void testValidateKeyset_emptyKeyset_shouldFail() throws Exception {
     try {
       Util.validateKeyset(Keyset.newBuilder().build());
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "empty keyset");
+      assertExceptionContains(e, "keyset must contain at least one ENABLED key");
     }
+  }
 
+  @Test
+  public void testValidateKeyset_multiplePrimaryKeys_shouldFail() throws Exception {
+    String keyValue = "01234567890123456";
     // Multiple primary keys.
     Keyset invalidKeyset =
         TestUtil.createKeyset(
@@ -80,14 +84,23 @@ public class UtilTest {
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset contains multiple primary keys");
     }
+  }
 
+  @Test
+  public void testValidateKeyset_primaryKeyIsDisabled_shouldFail() throws Exception {
+    String keyValue = "01234567890123456";
     // Primary key is disabled.
-    invalidKeyset =
+    Keyset invalidKeyset =
         TestUtil.createKeyset(
             TestUtil.createKey(
                 TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
                 42,
                 KeyStatusType.DISABLED,
+                OutputPrefixType.TINK),
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                43,
+                KeyStatusType.ENABLED,
                 OutputPrefixType.TINK));
     try {
       Util.validateKeyset(invalidKeyset);
@@ -95,9 +108,37 @@ public class UtilTest {
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset doesn't contain a valid primary key");
     }
+  }
 
+  @Test
+  public void testValidateKeyset_noEnabledKey_shouldFail() throws Exception {
+    String keyValue = "01234567890123456";
+    // No ENABLED key.
+    Keyset invalidKeyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.DISABLED,
+                OutputPrefixType.TINK),
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.DESTROYED,
+                OutputPrefixType.TINK));
+    try {
+      Util.validateKeyset(invalidKeyset);
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset must contain at least one ENABLED key");
+    }
+  }
+
+  @Test
+  public void testValidateKeyset_noPrimaryKey_shouldFail() throws Exception {
+    String keyValue = "01234567890123456";
     // No primary key.
-    invalidKeyset =
+    Keyset invalidKeyset =
         Keyset.newBuilder()
             .addKey(
                 Keyset.Key.newBuilder()
@@ -113,7 +154,11 @@ public class UtilTest {
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset doesn't contain a valid primary key");
     }
+  }
 
+  @Test
+  public void testValidateKeyset_noPrimaryKey_keysetContainsOnlyPublicKeys_shouldWork()
+      throws Exception {
     // No primary key, but contains only public key material.
     Keyset validKeyset =
         Keyset.newBuilder()
@@ -137,13 +182,25 @@ public class UtilTest {
   }
 
   @Test
-  public void testValidateKeyset_withDestroyedKey() throws Exception {
-    TinkConfig.register();
-    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    keysetManager.addNewKey(AeadKeyTemplates.AES128_GCM, true);
-    int secondaryKey = keysetManager.addNewKey(AeadKeyTemplates.AES128_GCM, false);
-    keysetManager.destroy(secondaryKey);
-    Util.validateKeyset(CleartextKeysetHandle.getKeyset(keysetManager.getKeysetHandle()));
+  public void testValidateKeyset_withDestroyedKey_shouldWork() throws Exception {
+    String keyValue = "01234567890123456";
+    Keyset validKeyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK),
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.DESTROYED,
+                OutputPrefixType.TINK));
+    try {
+      Util.validateKeyset(validKeyset);
+    } catch (GeneralSecurityException e) {
+      fail("Valid keyset, should not fail: " + e);
+    }
   }
 
   /** Tests that getKeysetInfo doesn't contain key material. */
