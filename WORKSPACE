@@ -616,10 +616,8 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_to
 go_rules_dependencies()
 go_register_toolchains(nogo="@//go:tink_nogo")
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 gazelle_dependencies()
-
-load("@bazel_gazelle//:deps.bzl", "go_repository")
 
 go_repository(
     name = "org_golang_x_crypto",
