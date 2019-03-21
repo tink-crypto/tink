@@ -67,12 +67,9 @@ class PrimitiveSet {
 
     const std::string& get_identifier() const { return identifier_; }
 
-    google::crypto::tink::KeyStatusType get_status() const {
-      return status_;
-    }
+    google::crypto::tink::KeyStatusType get_status() const { return status_; }
 
-    google::crypto::tink::OutputPrefixType get_output_prefix_type()
-        const {
+    google::crypto::tink::OutputPrefixType get_output_prefix_type() const {
       return output_prefix_type_;
     }
 
@@ -104,9 +101,8 @@ class PrimitiveSet {
     std::string identifier = identifier_result.ValueOrDie();
     absl::MutexLock lock(&primitives_mutex_);
     primitives_[identifier].push_back(
-        absl::make_unique<Entry<P>>(std::move(primitive),
-                                    identifier, key.status(),
-                                    key.output_prefix_type()));
+        absl::make_unique<Entry<P>>(std::move(primitive), identifier,
+                                    key.status(), key.output_prefix_type()));
     return primitives_[identifier].back().get();
   }
 
@@ -129,8 +125,26 @@ class PrimitiveSet {
     return get_primitives(CryptoFormat::kRawPrefix);
   }
 
-  // Sets the given 'primary' as as the primary primitive of this set.
-  void set_primary(Entry<P>* primary) { primary_ = primary; }
+  // Sets the given 'primary' as the primary primitive of this set.
+  crypto::tink::util::Status set_primary(Entry<P>* primary) {
+    if (!primary) {
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+                       "The primary primitive must be non-null.");
+    }
+    if (primary->get_status() != google::crypto::tink::KeyStatusType::ENABLED) {
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+                       "Primary has to be enabled.");
+    }
+    auto entries_result = get_primitives(primary->get_identifier());
+    if (!entries_result.ok()) {
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+                       "Primary cannot be set to an entry which is "
+                       "not held by this primitive set.");
+    }
+
+    primary_ = primary;
+    return crypto::tink::util::Status::OK;
+  }
 
   // Returns the entry with the primary primitive.
   const Entry<P>* get_primary() const { return primary_; }

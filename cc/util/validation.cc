@@ -20,11 +20,12 @@
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
+using google::crypto::tink::KeyData;
+using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyStatusType;
 
 namespace crypto {
 namespace tink {
-
-// TODO(przydatek): add more validation checks
 
 util::Status ValidateAesKeySize(uint32_t key_size) {
   if (key_size != 16 && key_size != 32) {
@@ -35,11 +36,78 @@ util::Status ValidateAesKeySize(uint32_t key_size) {
   return util::Status::OK;
 }
 
-util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset) {
+util::Status ValidateKey(const Keyset::Key& key) {
+  if (!key.has_key_data()) {
+    return ToStatusF(util::error::INVALID_ARGUMENT, "key %d, has no key data",
+                     key.key_id());
+  }
+
+  if (key.output_prefix_type() ==
+      google::crypto::tink::OutputPrefixType::UNKNOWN_PREFIX) {
+    return ToStatusF(util::error::INVALID_ARGUMENT, "key %d has unknown prefix",
+                     key.key_id());
+  }
+
+  if (key.status() == google::crypto::tink::KeyStatusType::UNKNOWN_STATUS) {
+    return ToStatusF(util::error::INVALID_ARGUMENT, "key %d has unknown status",
+                     key.key_id());
+  }
+  return util::Status::OK;
+}
+
+util::Status ValidateKeyset(const Keyset& keyset) {
   if (keyset.key_size() < 1) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "A valid keyset must contain at least one key.");
   }
+
+  int primary_key_id = keyset.primary_key_id();
+  bool has_primary_key = false;
+  bool contains_only_public_key_material = true;
+  int enabled_keys = 0;
+
+  for (int i = 0; i < keyset.key_size(); i++) {
+    const Keyset::Key& key = keyset.key(i);
+
+
+    if (key.status() != KeyStatusType::ENABLED) {
+      continue;
+    }
+    enabled_keys += 1;
+
+    auto validation_result = ValidateKey(key);
+    if (!validation_result.ok()) {
+      return validation_result;
+    }
+
+    if (key.status() == KeyStatusType::ENABLED &&
+        key.key_id() == primary_key_id) {
+      if (has_primary_key) {
+        return ToStatusF(util::error::INVALID_ARGUMENT,
+                         "keyset contains multiple primary keys");
+      }
+      has_primary_key = true;
+    }
+
+    if (key.key_data().key_material_type() !=
+        KeyData::KeyMaterialType::KeyData_KeyMaterialType_ASYMMETRIC_PUBLIC) {
+      contains_only_public_key_material = false;
+    }
+  }
+
+  if (enabled_keys == 0) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "keyset must contain at least one ENABLED key");
+  }
+
+  // A public key can be used for verification without being set as the primary
+  // key. Therefore, it is okay to have a keyset that contains public but
+  // doesn't have a primary key set.
+  if (!has_primary_key && !contains_only_public_key_material) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "keyset doesn't contain a valid primary key");
+  }
+
   return util::Status::OK;
 }
 
@@ -52,7 +120,6 @@ util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected) {
   }
   return util::Status::OK;
 }
-
 
 }  // namespace tink
 }  // namespace crypto

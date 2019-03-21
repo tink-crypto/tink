@@ -52,7 +52,7 @@ class KeysetHandle {
   // and writes the resulting EncryptedKeyset to the given |writer|,
   // which must be non-null.
   crypto::tink::util::Status Write(KeysetWriter* writer,
-      const Aead& master_key_aead);
+                                   const Aead& master_key_aead);
 
   // Writes the underlying keyset to |writer| only if the keyset does not
   // contain any secret key material.
@@ -114,8 +114,8 @@ class KeysetHandle {
   // The returned set is usually later "wrapped" into a class that
   // implements the corresponding Primitive-interface.
   template <class P>
-  crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
-      GetPrimitives(const KeyManager<P>* custom_manager) const;
+  crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
+      const KeyManager<P>* custom_manager) const;
 
   google::crypto::tink::Keyset keyset_;
 };
@@ -145,7 +145,9 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
       auto entry_result = primitives->AddPrimitive(std::move(primitive), key);
       if (!entry_result.ok()) return entry_result.status();
       if (key.key_id() == get_keyset().primary_key_id()) {
-        primitives->set_primary(entry_result.ValueOrDie());
+        auto primary_result =
+            primitives->set_primary(entry_result.ValueOrDie());
+        if (!primary_result.ok()) return primary_result;
       }
     }
   }
@@ -175,7 +177,6 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
   }
   return Registry::Wrap<P>(std::move(primitives_result.ValueOrDie()));
 }
-
 
 }  // namespace tink
 }  // namespace crypto

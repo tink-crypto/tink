@@ -27,6 +27,9 @@ namespace tink {
 
 crypto::tink::util::Status ValidateAesKeySize(uint32_t key_size);
 
+crypto::tink::util::Status ValidateKey(
+    const google::crypto::tink::Keyset::Key& key);
+
 crypto::tink::util::Status ValidateKeyset(
     const google::crypto::tink::Keyset& keyset);
 
