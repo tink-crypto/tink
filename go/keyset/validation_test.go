@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -71,6 +72,29 @@ func TestValidate(t *testing.T) {
 		if err == nil {
 			t.Errorf("expect an error when validate invalid key %d", i)
 		}
+	}
+	//no primary keys
+	keys = []*tinkpb.Keyset_Key{
+		testutil.NewDummyKey(1, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_TINK),
+		testutil.NewDummyKey(1, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_LEGACY),
+	}
+	if err = keyset.Validate(testutil.NewKeyset(1, keys)); err == nil {
+		t.Errorf("expect an error when there are no primary keys")
+	}
+	// public key only
+	keys = []*tinkpb.Keyset_Key{
+		testutil.NewKey(testutil.NewKeyData(testutil.EciesAeadHkdfPublicKeyTypeURL, random.GetRandomBytes(10), tinkpb.KeyData_ASYMMETRIC_PUBLIC), tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+	}
+	if err = keyset.Validate(testutil.NewKeyset(1, keys)); err != nil {
+		t.Errorf("valid test failed when using public key only: %v", err)
+	}
+	// private key
+	keys = []*tinkpb.Keyset_Key{
+		testutil.NewKey(testutil.NewKeyData(testutil.EciesAeadHkdfPublicKeyTypeURL, random.GetRandomBytes(10), tinkpb.KeyData_ASYMMETRIC_PUBLIC), tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+		testutil.NewKey(testutil.NewKeyData(testutil.EciesAeadHkdfPrivateKeyTypeURL, random.GetRandomBytes(10), tinkpb.KeyData_ASYMMETRIC_PRIVATE), tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+	}
+	if err = keyset.Validate(testutil.NewKeyset(1, keys)); err == nil {
+		t.Errorf("expect an error when there are keydata other than public")
 	}
 }
 
