@@ -189,7 +189,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>protected <a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#getPrimitive-com.google.crypto.tink.proto.Keyset.Key-">getPrimitive</a></span>(<a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html#getPrimitive-com.google.crypto.tink.proto.Keyset.Key-">getPrimitive</a></span>(<a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)</code>
+<div class="block">Returns the entries with primitives identified by the ciphertext prefix of <code>key</code>.</div>
+</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;</code></td>
@@ -250,13 +252,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>getRawPrimitives</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&nbsp;getRawPrimitives()
-                                             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&nbsp;getRawPrimitives()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>all primitives using RAW prefix.</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -266,11 +265,23 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>getPrimitive</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&nbsp;getPrimitive(byte[]&nbsp;identifier)
-                                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&nbsp;getPrimitive(byte[]&nbsp;identifier)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the entries with primitive identifed by <code>identifier</code>.</dd>
+</dl>
+</li>
+</ul>
+<a name="getPrimitive-com.google.crypto.tink.proto.Keyset.Key-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPrimitive</h4>
+<pre>protected&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)
+                                            throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Returns the entries with primitives identified by the ciphertext prefix of <code>key</code>.</div>
+<dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
@@ -282,13 +293,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>getAll</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&gt;&nbsp;getAll()
-                                               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&gt;&nbsp;getAll()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>all primitives</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -299,22 +307,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>newPrimitiveSet</h4>
 <pre>public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;&nbsp;newPrimitiveSet(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</pre>
-</li>
-</ul>
-<a name="getPrimitive-com.google.crypto.tink.proto.Keyset.Key-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getPrimitive</h4>
-<pre>protected&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="type parameter in PrimitiveSet">P</a>&gt;&gt;&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/proto/Keyset.Key.html" title="class in com.google.crypto.tink.proto">Keyset.Key</a>&nbsp;key)
-                                            throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>the entries with primitives identified by the ciphertext prefix of <code>key</code>.</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-</dl>
 </li>
 </ul>
 <a name="setPrimary-com.google.crypto.tink.PrimitiveSet.Entry-">
