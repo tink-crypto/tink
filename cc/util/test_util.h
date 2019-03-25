@@ -185,66 +185,155 @@ class DummyDeterministicAead : public DeterministicAead {
   DummyAead aead_;
 };
 
-// A dummy implementation of StreamingAead-interface.
-// An instance of DummyStreamingAead can be identified by a name specified
-// as a parameter of the constructor.
+// A dummy implementation of StreamingAead-interface.  An instance of
+// DummyStreamingAead can be identified by a name specified as a parameter of
+// the constructor.  This name concatenated with 'associated_data' for a
+// specific stream yields a header of an encrypted stream produced/consumed
+// by DummyStreamingAead.
 class DummyStreamingAead : public StreamingAead {
  public:
   explicit DummyStreamingAead(absl::string_view streaming_aead_name)
       : streaming_aead_name_(streaming_aead_name) {}
 
-  // Writes to 'ciphertext_destination' the name of this instance
-  // followed by 'associated_data', and returns 'ciphertext_destination'
-  // as the encrypting stream.
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
   NewEncryptingStream(
       std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination,
       absl::string_view associated_data) override {
-    auto header = absl::StrCat(streaming_aead_name_, associated_data);
-    void* buffer;
-    auto next_result = ciphertext_destination->Next(&buffer);
-    if (!next_result.status().ok()) return next_result.status();
-    if (next_result.ValueOrDie() < header.size()) {
-      return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
-                                        "Buffer too small");
-    }
-    if (header.size() > std::numeric_limits<int>::max()) {
-      return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
-                                        "Input too large");
-    }
-    const int header_size = static_cast<int>(header.size());
-    memcpy(buffer, header.data(), header.size());
-    ciphertext_destination->BackUp(next_result.ValueOrDie() - header_size);
-    return std::move(ciphertext_destination);
+    return {absl::make_unique<DummyEncryptingStream>(
+        std::move(ciphertext_destination),
+        absl::StrCat(streaming_aead_name_, associated_data))};
   }
 
-  // Reads a prefix from 'ciphertext_source' and verifies that it starts
-  // with the name of this instance, followed by 'associated_data'.
-  // Returns 'ciphertext_source' as the decrypting stream.
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
   NewDecryptingStream(
       std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
       absl::string_view associated_data) override {
-    auto header = absl::StrCat(streaming_aead_name_, associated_data);
-    const void* buffer;
-    auto next_result = ciphertext_source->Next(&buffer);
-    if (!next_result.status().ok()) return next_result.status();
-    if (next_result.ValueOrDie() < header.size()) {
-      return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
-                                        "Buffer too small");
-    }
-    if (header.size() > std::numeric_limits<int>::max()) {
-      return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
-                                        "Input too large");
-    }
-    const int header_size = static_cast<int>(header.size());
-    if (!memcmp(buffer, header.data(), header.size())) {
-      return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Corrupted header");
-    }
-    ciphertext_source->BackUp(next_result.ValueOrDie() - header_size);
-    return std::move(ciphertext_source);
+    return {absl::make_unique<DummyDecryptingStream>(
+        std::move(ciphertext_source),
+        absl::StrCat(streaming_aead_name_, associated_data))};
   }
+
+  // Upon first call to Next() writes to 'ct_dest' the specifed 'header',
+  // and subsequently forwards all methods calls to the corresponding
+  // methods of 'cd_dest'.
+  class DummyEncryptingStream : public crypto::tink::OutputStream {
+   public:
+    DummyEncryptingStream(std::unique_ptr<crypto::tink::OutputStream> ct_dest,
+                          absl::string_view header)
+        : ct_dest_(std::move(ct_dest)), header_(header),
+          after_init_(false), status_(util::OkStatus()) {}
+
+    crypto::tink::util::StatusOr<int> Next(void** data) override {
+      if (!after_init_) {  // Try to initialize.
+        after_init_ = true;
+        auto next_result = ct_dest_->Next(data);
+        if (!next_result.ok()) {
+          status_ = next_result.status();
+          return status_;
+        }
+        if (next_result.ValueOrDie() < header_.size()) {
+          status_ = util::Status(util::error::INTERNAL, "Buffer too small");
+        } else {
+          memcpy(*data, header_.data(), static_cast<int>(header_.size()));
+          ct_dest_->BackUp(next_result.ValueOrDie() - header_.size());
+        }
+      }
+      if (!status_.ok()) return status_;
+      return ct_dest_->Next(data);
+    }
+
+    void BackUp(int count) override {
+      if (after_init_ && status_.ok()) {
+        ct_dest_->BackUp(count);
+      }
+    }
+
+    int64_t Position() const override {
+      if (after_init_ && status_.ok()) {
+        return ct_dest_->Position() - header_.size();
+      } else {
+        return 0;
+      }
+    }
+    util::Status Close() override {
+      if (!after_init_) {  // Call Next() to write the header to ct_dest_.
+        void *buf;
+        auto next_result = Next(&buf);
+        if (next_result.ok()) {
+          BackUp(next_result.ValueOrDie());
+        } else {
+          status_ = next_result.status();
+          return status_;
+        }
+      }
+      return ct_dest_->Close();
+    }
+
+   private:
+    std::unique_ptr<crypto::tink::OutputStream> ct_dest_;
+    std::string header_;
+    bool after_init_;
+    util::Status status_;
+  };  // class DummyEncryptingStream
+
+  // Upon first call to Next() tries to read from 'ct_source' a header
+  // that is expected to be equal to 'expected_header'.  If this
+  // header matching succeeds, all subsequent method calls are forwarded
+  // to the corresponding methods of 'cd_source'.
+  class DummyDecryptingStream : public crypto::tink::InputStream {
+   public:
+    DummyDecryptingStream(std::unique_ptr<crypto::tink::InputStream> ct_source,
+                          absl::string_view expected_header)
+        : ct_source_(std::move(ct_source)), exp_header_(expected_header),
+          after_init_(false), status_(util::OkStatus()) {}
+
+    crypto::tink::util::StatusOr<int> Next(const void** data) override {
+      if (!after_init_) {  // Try to initialize.
+        after_init_ = true;
+        auto next_result = ct_source_->Next(data);
+        if (!next_result.ok()) {
+          status_ = next_result.status();
+          if (status_.error_code() == util::error::OUT_OF_RANGE) {
+            status_ = util::Status(
+                util::error::INVALID_ARGUMENT, "Could not read header");
+          }
+          return status_;
+        }
+        if (next_result.ValueOrDie() < exp_header_.size()) {
+          status_ = util::Status(util::error::INTERNAL, "Buffer too small");
+        } else if (memcmp((*data), exp_header_.data(),
+                          static_cast<int>(exp_header_.size()))) {
+          status_ = util::Status(
+              util::error::INVALID_ARGUMENT, "Corrupted header");
+        }
+        if (status_.ok()) {
+          ct_source_->BackUp(next_result.ValueOrDie() - exp_header_.size());
+        }
+      }
+      if (!status_.ok()) return status_;
+      return ct_source_->Next(data);
+    }
+
+    void BackUp(int count) override {
+      if (after_init_ && status_.ok()) {
+        ct_source_->BackUp(count);
+      }
+    }
+
+    int64_t Position() const override {
+      if (after_init_ && status_.ok()) {
+        return ct_source_->Position() - exp_header_.size();
+      } else {
+        return 0;
+      }
+    }
+
+   private:
+    std::unique_ptr<crypto::tink::InputStream> ct_source_;
+    std::string exp_header_;
+    bool after_init_;
+    util::Status status_;
+  };  // class DummyDecryptingStream
 
  private:
   std::string streaming_aead_name_;

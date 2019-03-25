@@ -21,6 +21,7 @@
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
 #include "tink/primitive_set.h"
+#include "tink/streamingaead/decrypting_input_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -38,8 +39,14 @@ Status Validate(PrimitiveSet<StreamingAead>* primitives) {
   }
   if (primitives->get_primary() == nullptr) {
     return Status(util::error::INVALID_ARGUMENT,
-                        "primitive set has no primary");
+                  "primitive set has no primary");
   }
+  auto raw_primitives_result = primitives->get_raw_primitives();
+  if (!raw_primitives_result.ok()) {
+    return Status(util::error::INVALID_ARGUMENT,
+                  "primitive set has no raw primitives");
+  }
+  // TODO(b/129044084)
   return Status::OK;
 }
 
@@ -62,7 +69,12 @@ class StreamingAeadSetWrapper: public StreamingAead {
   ~StreamingAeadSetWrapper() override {}
 
  private:
-  std::unique_ptr<PrimitiveSet<StreamingAead>> primitives_;
+  // We use a shared_ptr here to ensure that primitves_ stays alive
+  // as long as it might be needed by some decrypting stream returned
+  // by NewDecryptingStream.  This can happen after this wrapper
+  // is destroyed, as we refer to primitives_ only when the user attempts
+  // to read some data from the decrypting stream.
+  std::shared_ptr<PrimitiveSet<StreamingAead>> primitives_;
 };  // class StreamingAeadSetWrapper
 
 StatusOr<std::unique_ptr<OutputStream>>
@@ -77,7 +89,8 @@ StatusOr<std::unique_ptr<InputStream>>
 StreamingAeadSetWrapper::NewDecryptingStream(
     std::unique_ptr<InputStream> ciphertext_source,
     absl::string_view associated_data) {
-  return Status(util::error::UNIMPLEMENTED, "Not implemented yet");
+  return {streamingaead::DecryptingInputStream::New(
+      primitives_, std::move(ciphertext_source), associated_data)};
 }
 
 }  // anonymous namespace
