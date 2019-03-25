@@ -76,6 +76,9 @@ TEST_F(TinkConfigTest, testBasic) {
       {"TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesGcmKey",
        true, 0});
   aead_key_type_entries.push_back(
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.AesGcmSivKey", true, 0});
+  aead_key_type_entries.push_back(
       {"TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesEaxKey",
        true, 0});
   aead_key_type_entries.push_back(

@@ -19,6 +19,7 @@
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
+#include "proto/aes_gcm_siv.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
@@ -26,6 +27,7 @@
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::AesGcmKeyFormat;
+using google::crypto::tink::AesGcmSivKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
@@ -58,10 +60,22 @@ KeyTemplate* NewAesGcmKeyTemplate(int key_size_in_bytes) {
   return key_template;
 }
 
-KeyTemplate* NewAesCtrHmacAeadKeyTemplate(
-    int aes_key_size_in_bytes, int iv_size_in_bytes,
-    int hmac_key_size_in_bytes, int tag_size_in_bytes,
-    HashType hash_type) {
+KeyTemplate* NewAesGcmSivKeyTemplate(int key_size_in_bytes) {
+  KeyTemplate* key_template = new KeyTemplate;
+  key_template->set_type_url(
+      "type.googleapis.com/google.crypto.tink.AesGcmSivKey");
+  key_template->set_output_prefix_type(OutputPrefixType::TINK);
+  AesGcmSivKeyFormat key_format;
+  key_format.set_key_size(key_size_in_bytes);
+  key_format.SerializeToString(key_template->mutable_value());
+  return key_template;
+}
+
+KeyTemplate* NewAesCtrHmacAeadKeyTemplate(int aes_key_size_in_bytes,
+                                          int iv_size_in_bytes,
+                                          int hmac_key_size_in_bytes,
+                                          int tag_size_in_bytes,
+                                          HashType hash_type) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey");
@@ -119,13 +133,26 @@ const KeyTemplate& AeadKeyTemplates::Aes256Gcm() {
 }
 
 // static
+const KeyTemplate& AeadKeyTemplates::Aes128GcmSiv() {
+  static const KeyTemplate* key_template =
+      NewAesGcmSivKeyTemplate(/* key_size_in_bytes= */ 16);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& AeadKeyTemplates::Aes256GcmSiv() {
+  static const KeyTemplate* key_template =
+      NewAesGcmSivKeyTemplate(/* key_size_in_bytes= */ 32);
+  return *key_template;
+}
+
+// static
 const KeyTemplate& AeadKeyTemplates::Aes128CtrHmacSha256() {
   static const KeyTemplate* key_template = NewAesCtrHmacAeadKeyTemplate(
       /* aes_key_size_in_bytes= */ 16,
       /* iv_size_in_bytes= */ 16,
       /* hmac_key_size_in_bytes= */ 32,
-      /* tag_size_in_bytes= */ 16,
-      HashType::SHA256);
+      /* tag_size_in_bytes= */ 16, HashType::SHA256);
   return *key_template;
 }
 
@@ -135,8 +162,7 @@ const KeyTemplate& AeadKeyTemplates::Aes256CtrHmacSha256() {
       /* aes_key_size_in_bytes= */ 32,
       /* iv_size_in_bytes= */ 16,
       /* hmac_key_size_in_bytes= */ 32,
-      /* tag_size_in_bytes= */ 32,
-      HashType::SHA256);
+      /* tag_size_in_bytes= */ 32, HashType::SHA256);
   return *key_template;
 }
 

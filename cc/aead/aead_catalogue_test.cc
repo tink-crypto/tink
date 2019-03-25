@@ -16,23 +16,23 @@
 
 #include "tink/aead/aead_catalogue.h"
 
-#include "tink/catalogue.h"
+#include "gtest/gtest.h"
 #include "tink/aead/aead_config.h"
+#include "tink/catalogue.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
 namespace {
 
-class AeadCatalogueTest : public ::testing::Test {
-};
+class AeadCatalogueTest : public ::testing::Test {};
 
 TEST_F(AeadCatalogueTest, testBasic) {
   std::string key_types[] = {
       "type.googleapis.com/google.crypto.tink.AesEaxKey",
       "type.googleapis.com/google.crypto.tink.AesGcmKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
       "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key"};
 

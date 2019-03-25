@@ -16,8 +16,8 @@
 
 #include "tink/hybrid/hybrid_config.h"
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/hybrid/hybrid_key_templates.h"
@@ -32,27 +32,23 @@ namespace crypto {
 namespace tink {
 namespace {
 
-using ::crypto::tink::test::DummyHybridEncrypt;
 using ::crypto::tink::test::DummyHybridDecrypt;
+using ::crypto::tink::test::DummyHybridEncrypt;
 
 class DummyHybridDecryptCatalogue : public Catalogue<HybridDecrypt> {
  public:
   DummyHybridDecryptCatalogue() {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridDecrypt>>>
-  GetKeyManager(const std::string& type_url,
-                const std::string& primitive_name,
+  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
                 uint32_t min_version) const override {
     return util::Status::UNKNOWN;
   }
 };
 
-
 class HybridConfigTest : public ::testing::Test {
  protected:
-  void SetUp() override {
-    Registry::Reset();
-  }
+  void SetUp() override { Registry::Reset(); }
 };
 
 TEST_F(HybridConfigTest, testBasic) {
@@ -62,17 +58,16 @@ TEST_F(HybridConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
   std::string aes_ctr_hmac_aead_key_type =
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-  std::string aes_eax_key_type =
-      "type.googleapis.com/google.crypto.tink.AesEaxKey";
-  std::string aes_gcm_key_type =
-      "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  std::string aes_eax_key_type = "type.googleapis.com/google.crypto.tink.AesEaxKey";
+  std::string aes_gcm_key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  std::string aes_gcm_siv_key_type =
+      "type.googleapis.com/google.crypto.tink.AesGcmSivKey";
   std::string xchacha20_poly1305_key_type =
       "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
-  std::string hmac_key_type =
-      "type.googleapis.com/google.crypto.tink.HmacKey";
+  std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
   auto& config = HybridConfig::Latest();
 
-  EXPECT_EQ(7, HybridConfig::Latest().entry_size());
+  EXPECT_EQ(8, HybridConfig::Latest().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
@@ -94,27 +89,33 @@ TEST_F(HybridConfigTest, testBasic) {
 
   EXPECT_EQ("TinkAead", config.entry(3).catalogue_name());
   EXPECT_EQ("Aead", config.entry(3).primitive_name());
-  EXPECT_EQ(aes_eax_key_type, config.entry(3).type_url());
+  EXPECT_EQ(aes_gcm_siv_key_type, config.entry(3).type_url());
   EXPECT_EQ(true, config.entry(3).new_key_allowed());
   EXPECT_EQ(0, config.entry(3).key_manager_version());
 
   EXPECT_EQ("TinkAead", config.entry(4).catalogue_name());
   EXPECT_EQ("Aead", config.entry(4).primitive_name());
-  EXPECT_EQ(xchacha20_poly1305_key_type, config.entry(4).type_url());
+  EXPECT_EQ(aes_eax_key_type, config.entry(4).type_url());
   EXPECT_EQ(true, config.entry(4).new_key_allowed());
   EXPECT_EQ(0, config.entry(4).key_manager_version());
 
-  EXPECT_EQ("TinkHybridDecrypt", config.entry(5).catalogue_name());
-  EXPECT_EQ("HybridDecrypt", config.entry(5).primitive_name());
-  EXPECT_EQ(decrypt_key_type, config.entry(5).type_url());
+  EXPECT_EQ("TinkAead", config.entry(5).catalogue_name());
+  EXPECT_EQ("Aead", config.entry(5).primitive_name());
+  EXPECT_EQ(xchacha20_poly1305_key_type, config.entry(5).type_url());
   EXPECT_EQ(true, config.entry(5).new_key_allowed());
   EXPECT_EQ(0, config.entry(5).key_manager_version());
 
-  EXPECT_EQ("TinkHybridEncrypt", config.entry(6).catalogue_name());
-  EXPECT_EQ("HybridEncrypt", config.entry(6).primitive_name());
-  EXPECT_EQ(encrypt_key_type, config.entry(6).type_url());
+  EXPECT_EQ("TinkHybridDecrypt", config.entry(6).catalogue_name());
+  EXPECT_EQ("HybridDecrypt", config.entry(6).primitive_name());
+  EXPECT_EQ(decrypt_key_type, config.entry(6).type_url());
   EXPECT_EQ(true, config.entry(6).new_key_allowed());
   EXPECT_EQ(0, config.entry(6).key_manager_version());
+
+  EXPECT_EQ("TinkHybridEncrypt", config.entry(7).catalogue_name());
+  EXPECT_EQ("HybridEncrypt", config.entry(7).primitive_name());
+  EXPECT_EQ(encrypt_key_type, config.entry(7).type_url());
+  EXPECT_EQ(true, config.entry(7).new_key_allowed());
+  EXPECT_EQ(0, config.entry(7).key_manager_version());
 
   // No key manager before registration.
   auto decrypt_manager_result =
@@ -135,13 +136,13 @@ TEST_F(HybridConfigTest, testBasic) {
   decrypt_manager_result =
       Registry::get_key_manager<HybridDecrypt>(decrypt_key_type);
   EXPECT_TRUE(decrypt_manager_result.ok()) << decrypt_manager_result.status();
-  EXPECT_TRUE(decrypt_manager_result.ValueOrDie()
-              ->DoesSupport(decrypt_key_type));
+  EXPECT_TRUE(
+      decrypt_manager_result.ValueOrDie()->DoesSupport(decrypt_key_type));
   encrypt_manager_result =
       Registry::get_key_manager<HybridEncrypt>(encrypt_key_type);
   EXPECT_TRUE(encrypt_manager_result.ok()) << encrypt_manager_result.status();
-  EXPECT_TRUE(encrypt_manager_result.ValueOrDie()
-              ->DoesSupport(encrypt_key_type));
+  EXPECT_TRUE(
+      encrypt_manager_result.ValueOrDie()->DoesSupport(encrypt_key_type));
 }
 
 TEST_F(HybridConfigTest, testRegister) {
