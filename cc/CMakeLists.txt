@@ -33,6 +33,7 @@ set(TINK_PUBLIC_APIS
   hybrid_encrypt.h
   hybrid_encrypt_factory.h
   hybrid_key_templates.h
+  input_stream.h
   json_keyset_reader.h
   json_keyset_writer.h
   key_manager.h
@@ -45,6 +46,7 @@ set(TINK_PUBLIC_APIS
   mac_config.h
   mac_factory.h
   mac_key_templates.h
+  output_stream.h
   public_key_sign.h
   public_key_sign_factory.h
   public_key_verify.h
@@ -52,6 +54,9 @@ set(TINK_PUBLIC_APIS
   registry.h
   signature_config.h
   signature_key_templates.h
+  streaming_aead.h
+  streaming_aead_config.h
+  streaming_aead_key_templates.h
   tink_config.h
   "${TINK_VERSION_H}"
 )
@@ -63,20 +68,23 @@ set(TINK_PUBLIC_API_DEPS
   tink::core::deterministic_aead
   tink::core::hybrid_decrypt
   tink::core::hybrid_encrypt
+  tink::core::input_stream
   tink::core::json_keyset_reader
   tink::core::json_keyset_writer
   tink::core::key_manager
   tink::core::keyset_handle
   tink::core::keyset_manager
-  tink::core::public_key_sign
-  tink::core::public_key_verify
   tink::core::keyset_reader
   tink::core::keyset_writer
   tink::core::kms_client
+  tink::core::output_stream
+  tink::core::public_key_sign
+  tink::core::public_key_verify
   tink::core::mac
   tink::core::primitive_set
   tink::core::registry
   tink::core::registry_impl
+  tink::core::streaming_aead
   tink::core::version
   tink::aead::aead_config
   tink::aead::aead_factory
@@ -96,6 +104,8 @@ set(TINK_PUBLIC_API_DEPS
   tink::signature::public_key_verify_factory
   tink::signature::signature_config
   tink::signature::signature_key_templates
+  tink::streamingaead::streaming_aead_config
+  tink::streamingaead::streaming_aead_key_templates
   tink::util::errors
   tink::util::protobuf_helper
   tink::util::status
