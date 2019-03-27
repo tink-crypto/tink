@@ -45,7 +45,7 @@ namespace subtle {
 //  - segment_0 is shorter, so that segment_0, the header and other information
 //    of size get_ciphertext_offset() align with get_ciphertext_segment_size().
 //
-// The of the header is
+// The format of the header is
 //   header_size || salt || nonce_prefix
 // where
 //  - header_size is 1 byte determining the size of the header
