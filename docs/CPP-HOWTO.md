@@ -279,6 +279,7 @@ currently available or planned (the latter are listed in brackets).
 | ------------------ | --------------------------------------------- |
 | AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX                |
 | Deterministic AEAD | AES-SIV                                       |
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING                        |
 | MAC                | HMAC-SHA2                                     |
 | Digital Signatures | ECDSA over NIST curves, (Ed25519)             |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                      |
