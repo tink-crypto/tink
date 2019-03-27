@@ -491,6 +491,46 @@ tink_cc_library(
     absl::strings
 )
 
+if (TINK_BUILD_SHARED_LIB)
+  add_library(tink SHARED
+    ${TINK_PUBLIC_APIS}
+    version_script.lds
+    exported_symbols.lds
+  )
+
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(tink
+      PRIVATE
+        -fuse-ld=gold  # GNU ld does not support ICF.
+        -Wl,--version-script="${CMAKE_CURRENT_SOURCE_DIR}/version_script.lds"
+        -Wl,--gc-sections
+        -Wl,--icf=all
+        -Wl,--strip-all
+    )
+  elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_link_libraries(tink
+      PRIVATE
+        -Wl,-install_name,@rpath/libtink.so
+        -Wl,-exported_symbols_list="${CMAKE_CURRENT_SOURCE_DIR}/exported_symbols.lds"
+        -Wl,-x
+        -Wl,-dead_strip
+    )
+  else()
+    message(FATAL_ERROR "libtink not yet supported on your platform")
+  endif()
+
+  target_include_directories(tink PUBLIC ${TINK_INCLUDE_DIRS})
+  target_link_libraries(tink
+    PRIVATE
+      -Wl,--whole-archive
+      ${TINK_PUBLIC_API_DEPS}
+      -Wl,--no-whole-archive
+  )
+  set_target_properties(tink PROPERTIES SOVERSION ${TINK_VERSION_LABEL})
+
+  install(TARGETS tink EXPORT Tink LIBRARY DESTINATION "lib")
+endif()
+
 # tests
 
 tink_cc_test(
