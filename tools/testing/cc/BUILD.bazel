@@ -74,6 +74,18 @@ cc_binary(
 )
 
 cc_binary(
+    name = "streaming_aead_cli_cc",
+    srcs = ["streaming_aead_cli.cc"],
+    deps = [
+        ":cli_util",
+        "//cc",
+        "//cc/util:istream_input_stream",
+        "//cc/util:ostream_output_stream",
+        "//cc/util:status",
+    ],
+)
+
+cc_binary(
     name = "mac_cli_cc",
     srcs = ["mac_cli.cc"],
     deps = [

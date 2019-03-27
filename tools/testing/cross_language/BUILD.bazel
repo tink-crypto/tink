@@ -75,6 +75,7 @@ sh_test(
     data = [
         ":test_lib",
         "//tools/testing:streaming_aead_cli_java",
+        "//tools/testing/cc:streaming_aead_cli_cc",
         "//tools/tinkey",
     ],
 )
