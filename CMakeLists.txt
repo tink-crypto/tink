@@ -50,32 +50,30 @@ list(APPEND TINK_INCLUDE_DIRS "${TINK_INCLUDE_ALIAS_DIR}")
 add_subdirectory(cc)
 add_subdirectory(proto)
 
-install(FILES README.md LICENSE DESTINATION "share/doc/tink")
-
-# The trailing slash in a directory name is used to strip it from the paths
-# being installed. Do not add or remove it just for style reasons.
-install(
-  DIRECTORY
-    "${CMAKE_CURRENT_SOURCE_DIR}/cc/"
-    "${TINK_GENFILE_DIR}/tink/"
-    "${TINK_GENFILE_DIR}/proto"
-  DESTINATION "include/tink"
-  FILES_MATCHING PATTERN "*.h"
-)
-
-# Bundle Abseil and BoringSSL headers with Tink.
-install(
-  DIRECTORY
-    "${com_google_absl_SOURCE_DIR}/absl"
-    "${com_google_protobuf_SOURCE_DIR}/src/google"
-  DESTINATION "include"
-  FILES_MATCHING
-    REGEX "\\.(h|inc)$"
-    PATTERN "testdata" EXCLUDE
-)
-
-# At the moment we only mark libtink for export, so we need to wrap this in a
-# if(). Otherwise we get error when TINK_BUILD_SHARED_LIB is OFF.
 if (TINK_BUILD_SHARED_LIB)
+  install(FILES README.md LICENSE DESTINATION "share/doc/tink")
+
+  # The trailing slash in a directory name is used to strip it from the paths
+  # being installed. Do not add or remove it just for style reasons.
+  install(
+    DIRECTORY
+      "${CMAKE_CURRENT_SOURCE_DIR}/cc/"
+      "${TINK_GENFILE_DIR}/tink/"
+      "${TINK_GENFILE_DIR}/proto"
+    DESTINATION "include/tink"
+    FILES_MATCHING PATTERN "*.h"
+  )
+
+  # Bundle Abseil and BoringSSL headers with Tink.
+  install(
+    DIRECTORY
+      "${com_google_absl_SOURCE_DIR}/absl"
+      "${com_google_protobuf_SOURCE_DIR}/src/google"
+    DESTINATION "include"
+    FILES_MATCHING
+      REGEX "\\.(h|inc)$"
+      PATTERN "testdata" EXCLUDE
+  )
+
   export(EXPORT Tink FILE TinkConfig.cmake)
 endif()
