@@ -34,7 +34,6 @@ namespace subtle {
 
 namespace {
 
-
 // Writes 'contents' to the specified 'output_stream', which must be non-null.
 // In case of errors returns the first non-OK status of
 // output_stream->Next()-operation.
@@ -44,8 +43,8 @@ util::Status WriteToStream(const std::vector<uint8_t>& contents,
   void* buffer;
   int pos = 0;
   int remaining = contents.size();
-  int available_space;
-  int available_bytes;
+  int available_space = 0;
+  int available_bytes = 0;
   while (remaining > 0) {
     auto next_result = output_stream->Next(&buffer);
     if (!next_result.ok()) return next_result.status();
@@ -103,8 +102,8 @@ StatusOr<int> StreamingAeadEncryptingStream::Next(void** data) {
   if (is_first_segment_) {
     is_first_segment_ = false;
     count_backedup_ = 0;
-    status_ = WriteToStream(segment_encrypter_->get_header(),
-                            ct_destination_.get());
+    status_ =
+        WriteToStream(segment_encrypter_->get_header(), ct_destination_.get());
     if (!status_.ok()) return status_;
     *data = pt_buffer_.data();
     position_ = pt_buffer_.size();
@@ -157,8 +156,8 @@ void StreamingAeadEncryptingStream::BackUp(int count) {
 Status StreamingAeadEncryptingStream::Close() {
   if (!status_.ok()) return status_;
   if (is_first_segment_) {  // Next() was never called.
-    status_ = WriteToStream(segment_encrypter_->get_header(),
-                            ct_destination_.get());
+    status_ =
+        WriteToStream(segment_encrypter_->get_header(), ct_destination_.get());
     if (!status_.ok()) return status_;
   }
 
@@ -173,7 +172,7 @@ Status StreamingAeadEncryptingStream::Close() {
   if (pt_last_segment != &pt_to_encrypt_ && (!pt_to_encrypt_.empty())) {
     // Before writing the last segment we must encrypt pt_to_encrypt_.
     status_ = segment_encrypter_->EncryptSegment(
-      pt_to_encrypt_, /* is_last_segment = */ false, &ct_buffer_);
+        pt_to_encrypt_, /* is_last_segment = */ false, &ct_buffer_);
     if (!status_.ok()) {
       ct_destination_->Close();
       return status_;
@@ -201,9 +200,7 @@ Status StreamingAeadEncryptingStream::Close() {
   return ct_destination_->Close();
 }
 
-int64_t StreamingAeadEncryptingStream::Position() const {
-  return position_;
-}
+int64_t StreamingAeadEncryptingStream::Position() const { return position_; }
 
 }  // namespace subtle
 }  // namespace tink
