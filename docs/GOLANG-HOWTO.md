@@ -124,7 +124,7 @@ func main() {
 ### Deterministic AEAD
 
 Unlike AEAD, implementations of this interface are not semantically secure, because
-encrypting the same plaintex always yields the same ciphertext.
+encrypting the same plaintext always yields the same ciphertext.
 
 ```go
 package main
@@ -304,7 +304,7 @@ func main() {
 To take advantage of key rotation and other key management features, a Tink user works usually not
 with single keys, but with keysets, which are just sets of keys with some additional parameters and metadata.
 
-Internally Tink stores keysets as Protocol Buffers, but you can work with keysets via a wrapper called keyset handle. You can generate a new keyset and obtain its handle using a KeyTemplate. KeysetHandle objects enforce certain restrictions that prevent accidental leakage of the sensistive key material.
+Internally Tink stores keysets as Protocol Buffers, but you can work with keysets via a wrapper called keyset handle. You can generate a new keyset and obtain its handle using a KeyTemplate. KeysetHandle objects enforce certain restrictions that prevent accidental leakage of the sensitive key material.
 
 
 ```go
