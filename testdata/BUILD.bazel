@@ -6,6 +6,11 @@ filegroup(
     name = "credentials",
     testonly = 1,
     srcs = [
+        "aws_credentials_cc.txt",
+        "aws_key_arn.txt",
+        "bad_aws_key_arn.txt",
+        "bad_aws_credentials_cc.txt",
+        "bad_credentials_aws.csv",
         "credential.json",
         "credentials_aws.csv",
         "README_AWS.txt",

@@ -15,14 +15,8 @@ cc_library(
         "//cc:json_keyset_writer",
         "//cc/config:tink_config",
         "//cc/util:status",
-    ],
-)
-
-filegroup(
-    name = "aws_kms_access_files",
-    srcs = glob(["*access_key.csv"]) + [
-        "aws_key_arn.txt",
-        "bad_aws_key_arn.txt",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -34,6 +28,7 @@ cc_binary(
         "//cc",
         "//cc/integration/awskms:aws_crypto",
         "//cc/integration/awskms:aws_kms_aead",
+        "//cc/integration/awskms:aws_kms_client",
         "@aws_cpp_sdk//:aws_sdk_core",
     ],
 )
@@ -137,8 +132,8 @@ sh_test(
         "aws_kms_aead_test.sh",
     ],
     data = [
-        ":aws_kms_access_files",
         ":aws_kms_aead_cli",
+        "//testdata:credentials",
         "//tools/testing/cross_language:test_lib",
     ],
 )
