@@ -2,6 +2,7 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
+
 cc_library(
     name = "streaming_aead_wrapper",
     srcs = ["streaming_aead_wrapper.cc"],
