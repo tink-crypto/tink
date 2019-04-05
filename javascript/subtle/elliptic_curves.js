@@ -449,7 +449,7 @@ const computeEcdhSharedSecret = async function(privateKey, publicKey) {
 /**
  * @param {string} algorithm
  * @param {string} curve
- * @return {!Promise<!webCrypto.CryptoKey>}
+ * @return {!Promise<!webCrypto.CryptoKeyPair>}
  */
 const generateKeyPair = async function(algorithm, curve) {
   if (algorithm != 'ECDH' && algorithm != 'ECDSA') {
@@ -462,7 +462,7 @@ const generateKeyPair = async function(algorithm, curve) {
       params, true /* extractable */,
       algorithm == 'ECDH' ? ['deriveKey', 'deriveBits'] :
                             ['sign', 'verify'] /* usage */);
-  return /** @type {!webCrypto.CryptoKey} */ (ephemeralKeyPair);
+  return /** @type {!webCrypto.CryptoKeyPair} */ (ephemeralKeyPair);
 };
 
 /**
