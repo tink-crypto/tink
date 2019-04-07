@@ -24,7 +24,7 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 /**
  * A catalogue of TINK Aead key managers.
  *
- * @implements {Catalogue<Aead>}
+ * @implements {Catalogue<!Aead>}
  * @final
  */
 class AeadCatalogue {

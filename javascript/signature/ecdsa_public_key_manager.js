@@ -130,7 +130,7 @@ class EcdsaPublicKeyManager {
     let /** !PbEcdsaPublicKey */ key;
     try {
       key = PbEcdsaPublicKey.deserializeBinary(keyData.getValue());
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Input cannot be parsed as ' + EcdsaPublicKeyManager.KEY_TYPE +
           ' key-proto.');

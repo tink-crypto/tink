@@ -30,7 +30,7 @@ testSuite({
     try {
       BinaryKeysetReader.withUint8Array(null);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.nullKeyset(), e.toString());
     }
   },
@@ -43,7 +43,7 @@ testSuite({
       try {
         reader.read();
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         assertEquals(ExceptionText.invalidSerialization(), e.toString());
       }
     }
@@ -89,7 +89,7 @@ testSuite({
     try {
       reader.readEncrypted();
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.notImplemented(), e.toString());
     }
   },

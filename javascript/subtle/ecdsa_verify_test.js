@@ -78,7 +78,7 @@ testSuite({
     try {
       await EcdsaVerify.newInstance(null, 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: public key has to be non-null', e.toString());
     }
   },
@@ -89,7 +89,7 @@ testSuite({
       await EcdsaVerify.newInstance(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-1');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-256 (because curve is P-256) but got SHA-1',
           e.toString());
@@ -100,7 +100,7 @@ testSuite({
       await EcdsaVerify.newInstance(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
@@ -111,7 +111,7 @@ testSuite({
       await EcdsaVerify.newInstance(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
@@ -125,7 +125,7 @@ testSuite({
       jwk.crv = 'blah';
       await EcdsaVerify.newInstance(jwk, 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: unsupported curve: blah', e.toString());
     }
   },
@@ -171,7 +171,7 @@ testSuite({
       try {
         Validators.validateEcdsaParams(
             testGroup['jwk']['crv'], testGroup['sha']);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         // Tink does not support this config.
         continue;
       }
@@ -211,7 +211,7 @@ const runWycheproofTest = async function(verifier, test) {
         return 'valid signature rejected on test ' + test['tcId'] + '\n';
       }
     }
-  } catch (e) {
+  } catch (/** @type {!Object} */e) {
     if (test['result'] === 'valid') {
       return 'valid signature rejected on test ' + test['tcId'] +
           ': unexpected exception \"' + e.toString() + '\".\n';

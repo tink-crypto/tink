@@ -31,7 +31,7 @@ class CryptoFormat {
    * Generates the prefix for the outputs handled by the given 'key'.
    * Throws an exception if the prefix type of 'key' is invalid.
    *
-   * @param {PbKeyset.Key} key
+   * @param {!PbKeyset.Key} key
    *
    * @return {!Uint8Array}
    */
@@ -63,7 +63,7 @@ class CryptoFormat {
    * @return {!Uint8Array}
    */
   static makeOutputPrefix_(keyId, keyTypeIdentifier) {
-    let /** Array */ res = [keyTypeIdentifier];
+    let /** !Array */ res = [keyTypeIdentifier];
     res = res.concat(CryptoFormat.numberAsBigEndian_(keyId));
     return new Uint8Array(res);
   }

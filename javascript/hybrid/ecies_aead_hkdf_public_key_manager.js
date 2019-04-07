@@ -138,10 +138,10 @@ class EciesAeadHkdfPublicKeyManager {
           'manager supports ' + EciesAeadHkdfPublicKeyManager.KEY_TYPE + '.');
     }
 
-    let /** PbEciesAeadHkdfPublicKey */ key;
+    let /** !PbEciesAeadHkdfPublicKey */ key;
     try {
       key = PbEciesAeadHkdfPublicKey.deserializeBinary(keyData.getValue());
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Input cannot be parsed as ' +
           EciesAeadHkdfPublicKeyManager.KEY_TYPE + ' key-proto.');

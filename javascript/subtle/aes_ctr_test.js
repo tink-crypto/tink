@@ -62,14 +62,14 @@ testSuite({
     try {
       await AesCtr.newInstance(123, 16);  // IV size too short
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await AesCtr.newInstance(Random.randBytes(16), 11);  // IV size too short
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: invalid IV length, must be at least 12 and at most 16',
           e.toString());
@@ -77,7 +77,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), 17);  // IV size too long
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: invalid IV length, must be at least 12 and at most 16',
           e.toString());
@@ -86,7 +86,7 @@ testSuite({
       await AesCtr.newInstance(
           Random.randBytes(24), 12);  // 192-bit keys not supported
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: unsupported AES key size: 24', e.toString());
     }
   },
@@ -95,7 +95,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), NaN);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: invalid IV length, must be an integer', e.toString());
     }
@@ -103,7 +103,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), undefined);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: invalid IV length, must be an integer', e.toString());
     }
@@ -111,7 +111,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: invalid IV length, must be an integer', e.toString());
     }
@@ -119,7 +119,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), 0);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: invalid IV length, must be at least 12 and at most 16',
           e.toString());
@@ -130,7 +130,7 @@ testSuite({
     try {
       await AesCtr.newInstance('blah', 12);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -139,28 +139,28 @@ testSuite({
     try {
       await cipher.encrypt('blah');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.encrypt(123);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.decrypt('blah');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.decrypt(123);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }

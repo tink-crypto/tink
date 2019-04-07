@@ -34,7 +34,7 @@ testSuite({
     try {
       new HybridDecryptWrapper().wrap(null);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
     }
   },
@@ -50,7 +50,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('Should throw an exception');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
     }
   },
@@ -146,7 +146,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
     }
     const decryptedCiphertext =
@@ -175,7 +175,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
     }
   },
@@ -188,7 +188,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(null);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.nullCiphertext(), e.toString());
     }
   },

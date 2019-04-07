@@ -30,7 +30,7 @@ testSuite({
     try {
       new PublicKeySignWrapper().wrap(null);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Primitive set has to be non-null.', e.toString());
     }
@@ -41,7 +41,7 @@ testSuite({
     try {
       new PublicKeySignWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: Primary has to be non-null.', e.toString());
     }
   },
@@ -59,7 +59,7 @@ testSuite({
     try {
       await publicKeySign.sign(null);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }

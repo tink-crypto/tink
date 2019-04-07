@@ -42,7 +42,7 @@ testSuite({
     try {
       manager.getKeyFactory().newKey(keyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.invalidKeyFormat(), e.toString());
     }
   },
@@ -54,7 +54,7 @@ testSuite({
     try {
       manager.getKeyFactory().newKey(keyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
     }
   },
@@ -73,7 +73,7 @@ testSuite({
       try {
         manager.getKeyFactory().newKey(keyFormat);
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         assertEquals(ExceptionText.unsupportedKeySize(keySize), e.toString());
       }
     }
@@ -132,7 +132,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
     }
@@ -145,7 +145,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
     }
   },
@@ -160,7 +160,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
     }
   },
@@ -178,7 +178,7 @@ testSuite({
       try {
         await manager.getPrimitive(PRIMITIVE, key);
         fail('An exception should be thrown');
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         assertEquals(ExceptionText.unsupportedKeySize(keySize), e.toString());
       }
     }
@@ -192,7 +192,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
     }
   },
@@ -204,7 +204,7 @@ testSuite({
     try {
       await manager.getPrimitive(Mac, keyData);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
     }
   },
@@ -216,7 +216,7 @@ testSuite({
     const key = createTestKey();
 
     // Get the primitive from key manager.
-    const /** Aead */ primitive = await manager.getPrimitive(PRIMITIVE, key);
+    const /** !Aead */ primitive = await manager.getPrimitive(PRIMITIVE, key);
 
     // Test the returned primitive.
     const plaintext = Random.randBytes(8);
@@ -232,7 +232,7 @@ testSuite({
     const keyData = createTestKeyData();
 
     // Get primitive.
-    const /** Aead */ primitive =
+    const /** !Aead */ primitive =
         await manager.getPrimitive(PRIMITIVE, keyData);
 
     // Test the returned primitive.

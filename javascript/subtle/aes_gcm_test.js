@@ -88,7 +88,7 @@ testSuite({
     try {
       await AesGcm.newInstance('blah');
       fail('expected AesGcm.newInstance to fail');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -97,28 +97,28 @@ testSuite({
     try {
       await aead.encrypt('blah');
       fail('expected aead.encrypt to fail');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.encrypt(Random.randBytes(20), 'blah');
       fail('expected aead.encrypt to fail');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt('blah');
       fail('expected aead.decrypt to fail');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt(Random.randBytes(32), 'blah');
       fail('expected aead.decrypt to fail');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -136,7 +136,7 @@ testSuite({
         try {
           await aead.decrypt(c1, aad);
           fail('expected aead.decrypt to fail');
-        } catch (e) {
+        } catch (/** @type {!Object} */e) {
           assertCryptoError(e);
         }
       }
@@ -155,7 +155,7 @@ testSuite({
         try {
           await aead.decrypt(ciphertext, aad1);
           fail('expected aead.decrypt to fail');
-        } catch (e) {
+        } catch (/** @type {!Object} */e) {
           assertCryptoError(e);
         }
       }
@@ -172,7 +172,7 @@ testSuite({
       try {
         await aead.decrypt(c1, aad);
         fail('expected aead.decrypt to fail');
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         if (c1.length < 12 /* iv */ + 16 /* tag */) {
           assertEquals('CustomError: ciphertext too short', e.toString());
         } else {
@@ -685,7 +685,7 @@ testSuite({
       try {
         const plaintext = await aead.decrypt(ciphertext, aad);
         assertEquals(Bytes.toHex(plaintext), testVector['PT']);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         fail(e);
       }
     }

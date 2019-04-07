@@ -157,7 +157,7 @@ class EcdsaPrivateKeyFactory {
     let /** !PbEcdsaKeyFormat */ keyFormatProto;
     try {
       keyFormatProto = PbEcdsaKeyFormat.deserializeBinary(keyFormat);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Input cannot be parsed as ' + EcdsaPrivateKeyManager.KEY_TYPE +
           ' key format proto.');
@@ -269,7 +269,7 @@ class EcdsaPrivateKeyManager {
     let /** !PbEcdsaPrivateKey */ key;
     try {
       key = PbEcdsaPrivateKey.deserializeBinary(serializedPrivateKey);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Input cannot be parsed as ' + EcdsaPrivateKeyManager.KEY_TYPE +
           ' key-proto.');

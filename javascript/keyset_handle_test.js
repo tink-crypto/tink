@@ -57,7 +57,7 @@ testSuite({
   async testConstructorNullKeyset() {
     try {
       new KeysetHandle(null);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Keyset should be non null and must contain at least one key.',
           e.toString());
@@ -71,7 +71,7 @@ testSuite({
     keyset.setKeyList([]);
     try {
       new KeysetHandle(keyset);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Keyset should be non null and must contain at least one key.',
           e.toString());
@@ -101,7 +101,7 @@ testSuite({
   async testRead() {
     try {
       await KeysetHandle.read(null, null);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: KeysetHandle -- read: Not implemented yet.',
           e.toString());
@@ -140,7 +140,7 @@ testSuite({
 
     try {
       await keysetHandle.write(null, null);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: KeysetHandle -- write: Not implemented yet.',
           e.toString());
@@ -159,7 +159,7 @@ testSuite({
     try {
       await keysetHandle.getPrimitive(null);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: primitive type must be non-null', e.toString());
     }
@@ -250,7 +250,7 @@ testSuite({
     try {
       await aeadFromRegistry.decrypt(ciphertext);
       fail('An exception should be thrown here.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Decryption failed for the given ciphertext.',
           e.toString());
@@ -370,7 +370,7 @@ testSuite({
     try {
       await hybridDecryptFromRegistry.decrypt(ciphertext);
       fail('An exception should be thrown here.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Decryption failed for the given ciphertext.',
           e.toString());
@@ -408,7 +408,7 @@ testSuite({
     try {
       await keysetHandle.getPrimitive(Aead);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Requested primitive type which is not supported by ' +
               'this key manager.',
@@ -549,7 +549,7 @@ testSuite({
       try {
         KeysetHandle.readNoSecret(reader);
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         assertEquals(
             'CustomError: Keyset contains secret key material.', e.toString());
       }

@@ -27,17 +27,17 @@ const SecurityException = goog.require('tink.exception.SecurityException');
  */
 class WrappedAead {
   /**
-   * @param {!PrimitiveSet.PrimitiveSet} aeadSet
+   * @param {!PrimitiveSet.PrimitiveSet<!Aead>} aeadSet
    */
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   constructor(aeadSet) {
-    /** @private @const {!PrimitiveSet.PrimitiveSet} */
+    /** @private @const {!PrimitiveSet.PrimitiveSet<!Aead>} */
     this.aeadSet_ = aeadSet;
   }
 
   /**
-   * @param {!PrimitiveSet.PrimitiveSet} aeadSet
+   * @param {!PrimitiveSet.PrimitiveSet<!Aead>} aeadSet
    *
    * @return {!Aead}
    */
@@ -87,7 +87,7 @@ class WrappedAead {
       try {
         decryptedText = await this.tryDecryption_(
             entries, rawCiphertext, opt_associatedData);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
       }
 
       if (decryptedText) {
@@ -124,7 +124,7 @@ class WrappedAead {
       try {
         decryptionResult =
             await primitive.decrypt(ciphertext, opt_associatedData);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         continue;
       }
       return decryptionResult;
@@ -134,7 +134,7 @@ class WrappedAead {
 }
 
 /**
- * @implements {PrimitiveWrapper<Aead>}
+ * @implements {PrimitiveWrapper<!Aead>}
  */
 class AeadWrapper {
   // The constructor should be @private, but it is not supported by Closure

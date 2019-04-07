@@ -60,7 +60,7 @@ class WrappedPublicKeyVerify {
       let /** @type {boolean} */ isValid;
       try {
         isValid = await this.tryVerification_(primitives, rawSignature, data);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         // Ignored.
       }
 
@@ -95,7 +95,7 @@ class WrappedPublicKeyVerify {
       let /** @type {boolean} */ isValid;
       try {
         isValid = await primitive.verify(signature, data);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         continue;
       }
       if (isValid) {

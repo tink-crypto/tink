@@ -48,7 +48,7 @@ class BinaryKeysetReader {
     let /** !PbKeyset */ keyset;
     try {
       keyset = PbKeyset.deserializeBinary(this.serializedKeyset_);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Could not parse the given serialized proto as a keyset proto.');
     }

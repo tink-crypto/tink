@@ -74,7 +74,7 @@ testSuite({
           'blah' /* aesKey */, 12 /* ivSize */, 'SHA-256',
           Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -83,7 +83,7 @@ testSuite({
           Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
           'blah' /* hmacKey */, 10 /* tagSize */);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -94,28 +94,28 @@ testSuite({
     try {
       await aead.encrypt('blah');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.encrypt(Random.randBytes(20), 'blah');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt('blah');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt(Random.randBytes(32), 'blah');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -135,7 +135,7 @@ testSuite({
         try {
           await aead.decrypt(c1, aad);
           fail('Should throw an exception.');
-        } catch (e) {
+        } catch (/** @type {!Object} */e) {
           assertEquals('CustomError: invalid MAC', e.toString());
         }
       }
@@ -156,7 +156,7 @@ testSuite({
         try {
           await aead.decrypt(ciphertext, aad1);
           fail('Should throw an exception.');
-        } catch (e) {
+        } catch (/** @type {!Object} */e) {
           assertEquals('CustomError: invalid MAC', e.toString());
         }
       }
@@ -175,7 +175,7 @@ testSuite({
       try {
         await aead.decrypt(c1, aad);
         fail('Should throw an exception.');
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         if (c1.length < 32) {
           assertEquals('CustomError: ciphertext too short', e.toString());
         } else {
@@ -247,7 +247,7 @@ testSuite({
       const aad = Bytes.fromHex(testVector['aad']);
       try {
         await aead.decrypt(ciphertext, aad);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         fail(e);
       }
     }

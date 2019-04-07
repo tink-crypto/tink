@@ -107,7 +107,7 @@ testSuite({
     try {
       await EcdsaSign.newInstance(null, 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: private key has to be non-null', e.toString());
     }
   },
@@ -118,7 +118,7 @@ testSuite({
       await EcdsaSign.newInstance(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-1');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-256 (because curve is P-256) but ' +
               'got SHA-1',
@@ -130,7 +130,7 @@ testSuite({
       await EcdsaSign.newInstance(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
@@ -141,7 +141,7 @@ testSuite({
       await EcdsaSign.newInstance(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
@@ -155,7 +155,7 @@ testSuite({
       jwk.crv = 'blah';
       await EcdsaSign.newInstance(jwk, 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: unsupported curve: blah', e.toString());
     }
   },

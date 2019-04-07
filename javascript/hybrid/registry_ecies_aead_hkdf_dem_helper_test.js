@@ -43,7 +43,7 @@ testSuite({
     try {
       new RegistryEciesAeadHkdfDemHelper(template);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.unsupportedTypeUrl(template.getTypeUrl()),
           e.toString());
@@ -65,7 +65,7 @@ testSuite({
         try {
           new RegistryEciesAeadHkdfDemHelper(template);
           fail('An exception should be thrown.');
-        } catch (e) {
+        } catch (/** @type {!Object} */e) {
           assertEquals(
               ExceptionText.invalidKeyFormat(template.getTypeUrl()),
               e.toString());
@@ -124,7 +124,7 @@ testSuite({
     try {
       await helper.getAead(new Uint8Array(keyLength));
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.invalidKeyLength(expectedKeyLength, keyLength),
           e.toString());

@@ -39,16 +39,16 @@ const isEqual = function(ba1, ba2) {
  * @param {...!Uint8Array} var_args
  * @return {!Uint8Array}
  */
-const concat = function(var_args) {
+const concat = function(...var_args) {
   let length = 0;
-  for (let i = 0; i < arguments.length; i++) {
-    length += arguments[i].length;
+  for (let i = 0; i < var_args.length; i++) {
+    length += var_args[i].length;
   }
   let result = new Uint8Array(length);
   let curOffset = 0;
-  for (let i = 0; i < arguments.length; i++) {
-    result.set(arguments[i], curOffset);
-    curOffset += arguments[i].length;
+  for (let i = 0; i < var_args.length; i++) {
+    result.set(var_args[i], curOffset);
+    curOffset += var_args[i].length;
   }
   return result;
 };

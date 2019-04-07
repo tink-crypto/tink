@@ -31,7 +31,7 @@ testSuite({
     try {
       new HybridEncryptWrapper().wrap(null);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
     }
   },
@@ -41,7 +41,7 @@ testSuite({
     try {
       new HybridEncryptWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.primitiveSetWithoutPrimary(), e.toString());
     }
   },
@@ -59,7 +59,7 @@ testSuite({
     try {
       await hybridEncrypt.encrypt(null);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.nullPlaintext(), e.toString());
     }
   },

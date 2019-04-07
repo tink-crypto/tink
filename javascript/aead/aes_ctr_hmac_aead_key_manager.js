@@ -38,11 +38,11 @@ class AesCtrHmacAeadKeyFactory {
    * @override
    */
   newKey(keyFormat) {
-    let /** PbAesCtrHmacAeadKeyFormat */ keyFormatProto;
+    let /** !PbAesCtrHmacAeadKeyFormat */ keyFormatProto;
     if (keyFormat instanceof Uint8Array) {
       try {
         keyFormatProto = PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyFormat);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         throw new SecurityException(
             'Could not parse the given Uint8Array as a serialized proto of ' +
             AesCtrHmacAeadKeyManager.KEY_TYPE);
@@ -62,21 +62,21 @@ class AesCtrHmacAeadKeyFactory {
     }
 
     this.validateAesCtrKeyFormat(keyFormatProto.getAesCtrKeyFormat());
-    let /** PbAesCtrKey */ aesCtrKey = new PbAesCtrKey();
+    let /** !PbAesCtrKey */ aesCtrKey = new PbAesCtrKey();
     aesCtrKey.setVersion(AesCtrHmacAeadKeyFactory.VERSION_);
     aesCtrKey.setParams(keyFormatProto.getAesCtrKeyFormat().getParams());
     aesCtrKey.setKeyValue(
         Random.randBytes(keyFormatProto.getAesCtrKeyFormat().getKeySize()));
 
     this.validateHmacKeyFormat(keyFormatProto.getHmacKeyFormat());
-    let /** PbHmacKey */ hmacKey = new PbHmacKey();
+    let /** !PbHmacKey */ hmacKey = new PbHmacKey();
     hmacKey.setVersion(AesCtrHmacAeadKeyFactory.VERSION_);
     hmacKey.setParams(keyFormatProto.getHmacKeyFormat().getParams());
     hmacKey.setKeyValue(
         Random.randBytes(keyFormatProto.getHmacKeyFormat().getKeySize()));
 
 
-    let /** PbAesCtrHmacAeadKey */ aesCtrHmacAeadKey =
+    let /** !PbAesCtrHmacAeadKey */ aesCtrHmacAeadKey =
         new PbAesCtrHmacAeadKey();
     aesCtrHmacAeadKey.setAesCtrKey(aesCtrKey);
     aesCtrHmacAeadKey.setHmacKey(hmacKey);
@@ -181,7 +181,7 @@ AesCtrHmacAeadKeyFactory.MAX_TAG_SIZE_ = new Map(
     [[PbHashType.SHA1, 20], [PbHashType.SHA256, 32], [PbHashType.SHA512, 64]]);
 
 /**
- * @implements {KeyManager.KeyManager<Aead>}
+ * @implements {KeyManager.KeyManager<!Aead>}
  * @final
  */
 class AesCtrHmacAeadKeyManager {
@@ -202,7 +202,7 @@ class AesCtrHmacAeadKeyManager {
           'supported by this key manager.');
     }
 
-    let /** PbAesCtrHmacAeadKey */ deserializedKey;
+    let /** !PbAesCtrHmacAeadKey */ deserializedKey;
     if (key instanceof PbKeyData) {
       if (!this.doesSupport(key.getTypeUrl())) {
         throw new SecurityException('Key type ' + key.getTypeUrl() +
@@ -211,7 +211,7 @@ class AesCtrHmacAeadKeyManager {
       }
       try {
         deserializedKey = PbAesCtrHmacAeadKey.deserializeBinary(key.getValue());
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         throw new SecurityException(
             'Could not parse the key in key data as a serialized proto of ' +
             AesCtrHmacAeadKeyManager.KEY_TYPE);

@@ -61,7 +61,7 @@ class WrappedHybridDecrypt {
       try {
         decryptedText = await this.tryDecryption_(
             primitives, rawCiphertext, opt_contextInfo);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
       }
 
       if (decryptedText) {
@@ -96,7 +96,7 @@ class WrappedHybridDecrypt {
       let decryptionResult;
       try {
         decryptionResult = await primitive.decrypt(ciphertext, opt_contextInfo);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         continue;
       }
       return decryptionResult;

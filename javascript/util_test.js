@@ -39,7 +39,7 @@ testSuite({
 
     try {
       await Util.validateKey(key);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.InvalidKeyMissingKeyData(key.getKeyId()), e.toString());
       return;
@@ -53,7 +53,7 @@ testSuite({
 
     try {
       await Util.validateKey(key);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.InvalidKeyUnknownPrefix(key.getKeyId()), e.toString());
       return;
@@ -67,7 +67,7 @@ testSuite({
 
     try {
       await Util.validateKey(key);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()), e.toString());
       return;
@@ -89,7 +89,7 @@ testSuite({
 
     try {
       await Util.validateKeyset(keyset);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.InvalidKeysetMissingKeys(), e.toString());
       return;
     }
@@ -104,7 +104,7 @@ testSuite({
 
     try {
       await Util.validateKeyset(keyset);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.InvalidKeysetDisabledPrimary(), e.toString());
       return;
     }
@@ -121,7 +121,7 @@ testSuite({
 
     try {
       await Util.validateKeyset(keyset);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.InvalidKeysetMultiplePrimaries(), e.toString());
       return;
@@ -138,7 +138,7 @@ testSuite({
 
     try {
       await Util.validateKeyset(keyset);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()), e.toString());
       return;

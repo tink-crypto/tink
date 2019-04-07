@@ -115,7 +115,7 @@ class AesGcm {
       return new Uint8Array(await self.crypto.subtle.decrypt(
           alg, this.key_,
           new Uint8Array(ciphertext.subarray(IV_SIZE_IN_BYTES))));
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(e.toString());
     }
   }

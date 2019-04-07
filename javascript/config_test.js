@@ -65,7 +65,7 @@ testSuite({
     try {
       Config.register(entry);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.nonRegisteredCatalogue(catalogueName), e.toString());
     }
@@ -75,14 +75,14 @@ testSuite({
     try {
       Config.register();
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.undefinedEntry(), e.toString());
     }
 
     try {
       Config.register(null);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.undefinedEntry(), e.toString());
     }
   },
@@ -97,7 +97,7 @@ testSuite({
     try {
       Config.register(entry);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.primitiveNameMissing(), e.toString());
     }
   },
@@ -112,7 +112,7 @@ testSuite({
     try {
       Config.register(entry);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.catalogueNameMissing(), e.toString());
     }
   },
@@ -127,7 +127,7 @@ testSuite({
     try {
       Config.register(entry);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.typeUrlMissing(), e.toString());
     }
   },
@@ -185,7 +185,7 @@ testSuite({
     try {
       await Registry.newKeyData(template);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.newKeyForbidden(typeUrl), e.toString());
     }
   },

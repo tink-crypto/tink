@@ -36,7 +36,7 @@ testSuite({
 
     try {
       primitiveSet.addPrimitive(primitive, key);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownPrefixType(), e.toString());
       return;
     }
@@ -50,7 +50,7 @@ testSuite({
 
     try {
       primitiveSet.addPrimitive(primitive, key);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.addingNullPrimitive(), e.toString());
       return;
     }
@@ -63,7 +63,7 @@ testSuite({
 
     try {
       primitiveSet.addPrimitive(primitive, null);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.addingNullKey(), e.toString());
       return;
     }
@@ -206,7 +206,7 @@ testSuite({
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     try {
       primitiveSet.setPrimary(null);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.setPrimaryToNull(), e.toString());
       return;
     }
@@ -221,7 +221,7 @@ testSuite({
 
     try {
       primitiveSet.setPrimary(entry);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.setPrimaryToMissingEntry(), e.toString());
       return;
     }
@@ -237,7 +237,7 @@ testSuite({
 
     try {
       primitiveSet.setPrimary(primary);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.setPrimaryToDisabled(), e.toString());
       return;
     }

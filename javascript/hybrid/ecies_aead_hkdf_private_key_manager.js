@@ -161,7 +161,7 @@ class EciesAeadHkdfPrivateKeyFactory {
     let /** !PbEciesAeadHkdfKeyFormat */ keyFormatProto;
     try {
       keyFormatProto = PbEciesAeadHkdfKeyFormat.deserializeBinary(keyFormat);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Input cannot be parsed as ' +
           EciesAeadHkdfPrivateKeyManager.KEY_TYPE + ' key format proto.');
@@ -279,10 +279,10 @@ class EciesAeadHkdfPrivateKeyManager {
    * @return {!PbEciesAeadHkdfPrivateKey}
    */
   static deserializePrivateKey_(serializedPrivateKey) {
-    let /** PbEciesAeadHkdfPrivateKey */ key;
+    let /** !PbEciesAeadHkdfPrivateKey */ key;
     try {
       key = PbEciesAeadHkdfPrivateKey.deserializeBinary(serializedPrivateKey);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Input cannot be parsed as ' +
           EciesAeadHkdfPrivateKeyManager.KEY_TYPE + ' key-proto.');

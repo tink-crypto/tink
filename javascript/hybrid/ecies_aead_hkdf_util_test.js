@@ -113,7 +113,7 @@ testSuite({
     try {
       EciesAeadHkdfUtil.getJsonWebKeyFromProto(key.getPublicKey());
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Number needs more bytes to be represented.',
           e.toString());

@@ -32,7 +32,7 @@ testSuite({
     try {
       new PublicKeyVerifyWrapper().wrap(null);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Primitive set has to be non-null.', e.toString());
     }
@@ -46,7 +46,7 @@ testSuite({
     try {
       await publicKeyVerify.verify(null, Random.randBytes(10));
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -60,7 +60,7 @@ testSuite({
     try {
       await publicKeyVerify.verify(Random.randBytes(10), null);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }

@@ -57,7 +57,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingKemParams(), e.toString());
     }
   },
@@ -69,7 +69,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownHashType(), e.toString());
     }
   },
@@ -82,7 +82,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownCurveType(), e.toString());
     }
   },
@@ -94,7 +94,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingDemParams(), e.toString());
     }
   },
@@ -106,7 +106,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingAeadTemplate(), e.toString());
     }
   },
@@ -119,7 +119,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.unsupportedKeyTemplate(unsupportedTypeUrl),
           e.toString());
@@ -133,7 +133,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownPointFormat(), e.toString());
     }
   },
@@ -176,7 +176,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingFormatParams(), e.toString());
     }
   },
@@ -191,7 +191,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingDemParams(), e.toString());
     }
     invalidKeyFormat.getParams().setDemParams(createDemParams());
@@ -202,7 +202,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownHashType(), e.toString());
     }
   },
@@ -213,7 +213,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingKeyParams(), e.toString());
     }
   },
@@ -226,7 +226,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingXY(), e.toString());
     }
 
@@ -235,7 +235,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingXY(), e.toString());
     }
 
@@ -245,7 +245,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingXY(), e.toString());
     }
   },
@@ -259,7 +259,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingDemParams(), e.toString());
     }
     invalidPublicKey.getParams().setDemParams(createDemParams());
@@ -270,7 +270,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownHashType(), e.toString());
     }
   },
@@ -284,7 +284,7 @@ testSuite({
       EciesAeadHkdfValidators.validatePublicKey(
           invalidPublicKey, managerVersion);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.versionOutOfBounds(managerVersion), e.toString());
     }
@@ -296,7 +296,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingPublicKey(), e.toString());
     }
   },
@@ -307,7 +307,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingKeyParams(), e.toString());
     }
   },
@@ -318,7 +318,7 @@ testSuite({
     try {
       EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.missingPrivateKeyValue(), e.toString());
     }
   },
@@ -337,7 +337,7 @@ testSuite({
       EciesAeadHkdfValidators.validatePrivateKey(
           invalidPrivateKey, managerVersion, managerVersion);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.versionOutOfBounds(managerVersion), e.toString());
     }

@@ -111,7 +111,7 @@ class RegistryEciesAeadHkdfDemHelper {
     let /** @type{!PbAesGcmKeyFormat} */ keyFormat;
     try {
       keyFormat = PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue());
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Could not parse the given Uint8Array as a serialized proto of ' +
           AeadConfig.AES_GCM_TYPE_URL + '.');
@@ -136,7 +136,7 @@ class RegistryEciesAeadHkdfDemHelper {
     try {
       keyFormat =
           PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Could not parse the given Uint8Array ' +
           'as a serialized proto of ' + AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL +

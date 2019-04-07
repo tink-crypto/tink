@@ -82,7 +82,7 @@ class AesCtr {
             ['encrypt', 'decrypt']);
 
         return new AesCtr(cryptoKey, ivSize);
-      } catch (error) {
+      } catch (/** @type {!Object} */error) {
         // CTR might be unsupported in this browser. Fall back to Pure JS.
       }
     }

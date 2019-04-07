@@ -83,7 +83,7 @@ testSuite({
       await recipient.decapsulate(
           kemKeyToken['token'], NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: size must be an integer', e.toString());
     }
 
@@ -92,7 +92,7 @@ testSuite({
           kemKeyToken['token'], undefined, pointFormat, hkdfHash, hkdfInfo,
           hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: size must be an integer', e.toString());
     }
 
@@ -100,7 +100,7 @@ testSuite({
       await recipient.decapsulate(
           kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: size must be an integer', e.toString());
     }
   },
@@ -111,7 +111,7 @@ testSuite({
     try {
       await EciesHkdfKemRecipient.newInstance(null);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
     }
 
     // Test newInstance with public key instead private key.
@@ -120,14 +120,14 @@ testSuite({
     try {
       await EciesHkdfKemRecipient.newInstance(publicKey);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
     }
 
     // Test newInstance with CryptoKey instead of JSON key.
     try {
       await EciesHkdfKemRecipient.newInstance(keyPair.publicKey);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
     }
   },
 
@@ -154,7 +154,7 @@ testSuite({
         output = await recipient.decapsulate(
             Bytes.fromHex(testVector.token), testVector.outputLength,
             testVector.pointFormat, testVector.hashType, hkdfInfo, salt);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         // Everything works properly if exception was thrown.
         return;
       }
@@ -169,7 +169,7 @@ testSuite({
     try {
       new EciesHkdfKemRecipient(null);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Private key has to be non-null.', e.toString());
     }
@@ -179,7 +179,7 @@ testSuite({
     try {
       new EciesHkdfKemRecipient(keyPair.publicKey);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Expected crypto key of type: private.', e.toString());
     }
@@ -189,7 +189,7 @@ testSuite({
     try {
       new EciesHkdfKemRecipient(privateKey);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
     }
   },
 
@@ -252,7 +252,7 @@ testSuite({
           await recipient.decapsulate(
               token, keySizeInBytes, pointFormat, hashType, hkdfInfo, hkdfSalt);
           fail('Should throw an exception');
-        } catch (e) {
+        } catch (/** @type {!Object} */e) {
         }
       }
     }

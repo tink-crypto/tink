@@ -47,13 +47,13 @@ class EncryptThenAuthenticate {
    * @throws {InvalidArgumentsException}
    */
   constructor(cipher, ivSize, mac, tagSize) {
-    /** @const @private {IndCpaCipher} */
+    /** @const @private {!IndCpaCipher} */
     this.cipher_ = cipher;
 
     /** @const @private {number} */
     this.ivSize_ = ivSize;
 
-    /** @const @private {Mac} */
+    /** @const @private {!Mac} */
     this.mac_ = mac;
 
     /** @const @private {number} */

@@ -92,7 +92,7 @@ class AesGcmKeyFactory {
     let /** !PbAesGcmKeyFormat */ keyFormatProto;
     try {
       keyFormatProto = PbAesGcmKeyFormat.deserializeBinary(keyFormat);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Could not parse the input as a serialized proto of ' +
           AesGcmKeyManager.KEY_TYPE + ' key format.');
@@ -107,7 +107,7 @@ class AesGcmKeyFactory {
 }
 
 /**
- * @implements {KeyManager.KeyManager<Aead>}
+ * @implements {KeyManager.KeyManager<!Aead>}
  * @final
  */
 class AesGcmKeyManager {
@@ -201,10 +201,10 @@ class AesGcmKeyManager {
           AesGcmKeyManager.KEY_TYPE + '.');
     }
 
-    let /** PbAesGcmKey */ deserializedKey;
+    let /** !PbAesGcmKey */ deserializedKey;
     try {
       deserializedKey = PbAesGcmKey.deserializeBinary(keyData.getValue());
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       throw new SecurityException(
           'Could not parse the input as a ' +
           'serialized proto of ' + AesGcmKeyManager.KEY_TYPE + ' key.');

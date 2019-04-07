@@ -66,7 +66,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(null);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.nullKeyFormat(), e.toString());
     }
   },
@@ -78,7 +78,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidSerializedKeyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
     }
   },
@@ -90,7 +90,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(unsupportedKeyFormatProto);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unsupportedKeyFormat(), e.toString());
     }
   },
@@ -102,7 +102,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.invalidKeyFormatMissingParams(), e.toString());
     }
   },
@@ -117,7 +117,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownEncoding(), e.toString());
     }
     invalidFormat.getParams().setEncoding(PbEcdsaSignatureEncoding.DER);
@@ -127,7 +127,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownHash(), e.toString());
     }
     invalidFormat.getParams().setHashType(PbHashType.SHA256);
@@ -137,7 +137,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownCurve(), e.toString());
     }
 
@@ -146,7 +146,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
@@ -156,7 +156,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
@@ -188,7 +188,7 @@ testSuite({
         fail(
             'An exception should be thrown for the string: ' +
             serializedKeyFormats[i]);
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
         continue;
       }
@@ -222,7 +222,7 @@ testSuite({
       const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (
           manager.getKeyFactory());
       factory.getPublicKeyData(privateKey);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
     }
   },
@@ -258,7 +258,7 @@ testSuite({
     try {
       await manager.getPrimitive(PublicKeyVerify, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
     }
   },
@@ -273,7 +273,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
     }
@@ -286,7 +286,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
     }
   },
@@ -301,7 +301,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
     }
   },
@@ -317,7 +317,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownEncoding(), e.toString());
     }
     key.getPublicKey().getParams().setEncoding(PbEcdsaSignatureEncoding.DER);
@@ -327,7 +327,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownHash(), e.toString());
     }
     key.getPublicKey().getParams().setHashType(PbHashType.SHA256);
@@ -337,7 +337,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(ExceptionText.unknownCurve(), e.toString());
     }
 
@@ -346,7 +346,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
@@ -356,7 +356,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
@@ -377,7 +377,7 @@ testSuite({
       try {
         await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
-      } catch (e) {
+      } catch (/** @type {!Object} */e) {
         assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
       }
     }

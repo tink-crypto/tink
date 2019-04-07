@@ -58,7 +58,7 @@ testSuite({
       new EciesAeadHkdfHybridDecrypt(
           null, recipient, hkdfHash, pointFormat, demHelper);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Recipient private key has to be non-null.',
           e.toString());
@@ -68,7 +68,7 @@ testSuite({
       new EciesAeadHkdfHybridDecrypt(
           privateKey, null, hkdfHash, pointFormat, demHelper);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: KEM recipient has to be non-null.', e.toString());
     }
@@ -77,7 +77,7 @@ testSuite({
       new EciesAeadHkdfHybridDecrypt(
           privateKey, recipient, null, pointFormat, demHelper);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: HKDF hash algorithm has to be non-null.', e.toString());
     }
@@ -86,7 +86,7 @@ testSuite({
       new EciesAeadHkdfHybridDecrypt(
           privateKey, recipient, hkdfHash, null, demHelper);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Point format has to be non-null.', e.toString());
     }
@@ -95,7 +95,7 @@ testSuite({
       new EciesAeadHkdfHybridDecrypt(
           privateKey, recipient, hkdfHash, pointFormat, null);
       fail('Should throw an exception.');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: DEM helper has to be non-null.', e.toString());
     }
   },
@@ -122,7 +122,7 @@ testSuite({
     try {
       await EciesAeadHkdfHybridDecrypt.newInstance(
           null, hkdfHash, pointFormat, demHelper);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Recipient private key has to be non-null.',
           e.toString());
@@ -131,7 +131,7 @@ testSuite({
     try {
       await EciesAeadHkdfHybridDecrypt.newInstance(
           privateKey, null, pointFormat, demHelper);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: HKDF hash algorithm has to be non-null.', e.toString());
     }
@@ -139,7 +139,7 @@ testSuite({
     try {
       await EciesAeadHkdfHybridDecrypt.newInstance(
           privateKey, hkdfHash, null, demHelper);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals(
           'CustomError: Point format has to be non-null.', e.toString());
     }
@@ -147,7 +147,7 @@ testSuite({
     try {
       await EciesAeadHkdfHybridDecrypt.newInstance(
           privateKey, hkdfHash, pointFormat, null);
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: DEM helper has to be non-null.', e.toString());
     }
   },
@@ -176,7 +176,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(ciphertext.slice(0, curveEncodingSize - 1));
       fail('Should throw an exception');
-    } catch (e) {
+    } catch (/** @type {!Object} */e) {
       assertEquals('CustomError: Ciphertext is too short.', e.toString());
     }
   },
