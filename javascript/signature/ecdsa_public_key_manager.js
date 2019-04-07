@@ -47,7 +47,7 @@ class EcdsaPublicKeyFactory {
 
 
 /**
- * @implements {KeyManager.KeyManager<PublicKeyVerify>}
+ * @implements {KeyManager.KeyManager<!PublicKeyVerify>}
  * @final
  */
 class EcdsaPublicKeyManager {

@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.signature.PublicKeySignWrapperTest');
 goog.setTestOnly('tink.signature.PublicKeySignWrapperTest');
@@ -34,7 +34,7 @@ testSuite({
     try {
       new PublicKeySignWrapper().wrap(null);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: Primitive set has to be non-null.', e.toString());
     }
@@ -45,7 +45,7 @@ testSuite({
     try {
       new PublicKeySignWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: Primary has to be non-null.', e.toString());
     }
   },
@@ -63,7 +63,7 @@ testSuite({
     try {
       await publicKeySign.sign(null);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }

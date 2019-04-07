@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.subtle.EciesHkdfKemSenderTest');
 goog.setTestOnly('tink.subtle.EciesHkdfKemSenderTest');
@@ -65,20 +65,20 @@ testSuite({
     try {
       await sender.encapsulate(NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: size must be an integer', e.toString());
     }
     try {
       await sender.encapsulate(
           undefined, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: size must be an integer', e.toString());
     }
     try {
       await sender.encapsulate(0, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: size must be positive', e.toString());
     }
   },
@@ -88,7 +88,7 @@ testSuite({
     try {
       await EciesHkdfKemSender.newInstance(null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
     }
 
     // Test newInstance with public key instead private key.
@@ -97,14 +97,14 @@ testSuite({
     try {
       await EciesHkdfKemSender.newInstance(privateKey);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
     }
 
     // Test newInstance with CryptoKey instead of JSON key.
     try {
       await EciesHkdfKemSender.newInstance(keyPair.publicKey);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
     }
   },
 
@@ -129,7 +129,7 @@ testSuite({
             EllipticCurves.PointFormatType.UNCOMPRESSED,
             /* hkdfHash = */ 'SHA-256', hkdfInfo, salt);
         fail('Should throw an exception.');
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
       }
     }
   },
@@ -139,7 +139,7 @@ testSuite({
     try {
       new EciesHkdfKemSender(null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: Recipient public key has to be non-null.',
           e.toString());
@@ -150,7 +150,7 @@ testSuite({
     try {
       new EciesHkdfKemSender(keyPair.privateKey);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: Expected Crypto key of type: public.', e.toString());
     }
@@ -160,7 +160,7 @@ testSuite({
     try {
       new EciesHkdfKemSender(publicKey);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: Expected Crypto key of type: public.', e.toString());
     }

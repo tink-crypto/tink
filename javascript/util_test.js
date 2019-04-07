@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.UtilTest');
 goog.setTestOnly('tink.UtilTest');
@@ -43,7 +43,7 @@ testSuite({
 
     try {
       await Util.validateKey(key);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.InvalidKeyMissingKeyData(key.getKeyId()), e.toString());
       return;
@@ -57,7 +57,7 @@ testSuite({
 
     try {
       await Util.validateKey(key);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.InvalidKeyUnknownPrefix(key.getKeyId()), e.toString());
       return;
@@ -71,7 +71,7 @@ testSuite({
 
     try {
       await Util.validateKey(key);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()), e.toString());
       return;
@@ -93,7 +93,7 @@ testSuite({
 
     try {
       await Util.validateKeyset(keyset);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.InvalidKeysetMissingKeys(), e.toString());
       return;
     }
@@ -108,7 +108,7 @@ testSuite({
 
     try {
       await Util.validateKeyset(keyset);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.InvalidKeysetDisabledPrimary(), e.toString());
       return;
     }
@@ -125,7 +125,7 @@ testSuite({
 
     try {
       await Util.validateKeyset(keyset);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.InvalidKeysetMultiplePrimaries(), e.toString());
       return;
@@ -142,7 +142,7 @@ testSuite({
 
     try {
       await Util.validateKeyset(keyset);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()), e.toString());
       return;

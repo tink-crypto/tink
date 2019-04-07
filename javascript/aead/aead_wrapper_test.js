@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.aead.AeadWrapperTest');
 goog.setTestOnly('tink.aead.AeadWrapperTest');
@@ -35,7 +35,7 @@ testSuite({
   async testNewAeadNullPrimitiveSet() {
     try {
       new AeadWrapper().wrap(null);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
       return;
     }
@@ -46,7 +46,7 @@ testSuite({
     const primitiveSet = createPrimitiveSet(/* opt_withPrimary = */ false);
     try {
       new AeadWrapper().wrap(primitiveSet);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.primitiveSetWithoutPrimary(), e.toString());
       return;
     }
@@ -82,7 +82,7 @@ testSuite({
 
     try {
       await aead.decrypt(ciphertext);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
       return;
     }
@@ -168,7 +168,7 @@ testSuite({
     // used to neither encryption nor decryption.
     try {
       await aead.decrypt(ciphertext);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
       return;
     }
@@ -249,7 +249,7 @@ const createKey = function(keyId, outputPrefix, enabled) {
  *
  * @param {boolean=} opt_withPrimary
  *
- * @return {!PrimitiveSet.PrimitiveSet<!Aead>}
+ * @return {!PrimitiveSet.PrimitiveSet}
  */
 const createPrimitiveSet = function(opt_withPrimary = true) {
   const numberOfPrimitives = 5;

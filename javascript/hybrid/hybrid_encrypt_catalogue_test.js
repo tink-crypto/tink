@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.HybridEncryptCatalogueTest');
 goog.setTestOnly('tink.hybrid.HybridEncryptCatalogueTest');
@@ -36,7 +36,7 @@ testSuite({
           EciesAeadHkdfPublicKeyManager.KEY_TYPE, anotherPrimitiveName,
           /* minVersion = */ 0);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.wrongPrimitive(anotherPrimitiveName), e.toString());
     }
@@ -51,7 +51,7 @@ testSuite({
       catalogue.getKeyManager(
           manager.getKeyType(), SUPPORTED_PRIMITIVE_NAME, version);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.versionOutOfBounds(manager.getVersion()), e.toString());
     }
@@ -65,7 +65,7 @@ testSuite({
     try {
       catalogue.getKeyManager(keyType, SUPPORTED_PRIMITIVE_NAME, version);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unknownKeyType(keyType), e.toString());
     }
   },

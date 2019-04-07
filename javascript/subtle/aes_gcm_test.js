@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.subtle.AesGcmTest');
 goog.setTestOnly('tink.subtle.AesGcmTest');
@@ -29,7 +29,7 @@ const userAgent = goog.require('goog.userAgent');
 /**
  * Asserts that an exception is the result of a Web Crypto error.
  *
- * @param {!Object} exception A thrown exception.
+ * @param {*} exception A thrown exception.
  */
 function assertCryptoError(exception) {
   const message = exception.toString();
@@ -92,7 +92,7 @@ testSuite({
     try {
       await AesGcm.newInstance('blah');
       fail('expected AesGcm.newInstance to fail');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -101,28 +101,28 @@ testSuite({
     try {
       await aead.encrypt('blah');
       fail('expected aead.encrypt to fail');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.encrypt(Random.randBytes(20), 'blah');
       fail('expected aead.encrypt to fail');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt('blah');
       fail('expected aead.decrypt to fail');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt(Random.randBytes(32), 'blah');
       fail('expected aead.decrypt to fail');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -140,7 +140,7 @@ testSuite({
         try {
           await aead.decrypt(c1, aad);
           fail('expected aead.decrypt to fail');
-        } catch (/** @type {!Object} */e) {
+        } catch (e) {
           assertCryptoError(e);
         }
       }
@@ -159,7 +159,7 @@ testSuite({
         try {
           await aead.decrypt(ciphertext, aad1);
           fail('expected aead.decrypt to fail');
-        } catch (/** @type {!Object} */e) {
+        } catch (e) {
           assertCryptoError(e);
         }
       }
@@ -176,7 +176,7 @@ testSuite({
       try {
         await aead.decrypt(c1, aad);
         fail('expected aead.decrypt to fail');
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         if (c1.length < 12 /* iv */ + 16 /* tag */) {
           assertEquals('CustomError: ciphertext too short', e.toString());
         } else {
@@ -189,7 +189,7 @@ testSuite({
   async testWithNistTestVectors() {
     // Download from
     // https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/CAVP-TESTING-BLOCK-CIPHER-MODES.
-    const /** !Array<{Key: string, IV: string, PT: string, AAD: string, CT: string, Tag: string}> */ NIST_TEST_VECTORS =
+    const NIST_TEST_VECTORS =
         [
           {
             'Key':
@@ -689,7 +689,7 @@ testSuite({
       try {
         const plaintext = await aead.decrypt(ciphertext, aad);
         assertEquals(Bytes.toHex(plaintext), testVector['PT']);
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         fail(e);
       }
     }

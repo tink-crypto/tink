@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.BinaryKeysetReaderTest');
 goog.setTestOnly('tink.BinaryKeysetReaderTest');
@@ -34,7 +34,7 @@ testSuite({
     try {
       BinaryKeysetReader.withUint8Array(null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullKeyset(), e.toString());
     }
   },
@@ -47,7 +47,7 @@ testSuite({
       try {
         reader.read();
         fail('An exception should be thrown.');
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals(ExceptionText.invalidSerialization(), e.toString());
       }
     }
@@ -93,7 +93,7 @@ testSuite({
     try {
       reader.readEncrypted();
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.notImplemented(), e.toString());
     }
   },

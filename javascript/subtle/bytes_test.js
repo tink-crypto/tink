@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.subtle.BytesTest');
 goog.setTestOnly('tink.subtle.BytesTest');

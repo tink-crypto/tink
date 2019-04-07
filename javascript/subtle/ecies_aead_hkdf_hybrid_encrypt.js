@@ -116,7 +116,7 @@ class EciesAeadHkdfHybridEncrypt {
     const aead = await this.demHelper_.getAead(kemKey['key']);
 
     const ciphertextBody = await aead.encrypt(plaintext);
-    const header = kemKey['token'];
+    const /** !Uint8Array */ header = kemKey['token'];
 
     return Bytes.concat(header, ciphertextBody);
   }

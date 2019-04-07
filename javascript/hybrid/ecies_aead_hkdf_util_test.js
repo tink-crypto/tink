@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.EciesAeadHkdfUtilTest');
 goog.setTestOnly('tink.hybrid.EciesAeadHkdfUtilTest');
@@ -117,7 +117,7 @@ testSuite({
     try {
       EciesAeadHkdfUtil.getJsonWebKeyFromProto(key.getPublicKey());
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: Number needs more bytes to be represented.',
           e.toString());

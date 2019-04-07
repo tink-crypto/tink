@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.signature.EcdsaPublicKeyManagerTest');
 goog.setTestOnly('tink.signature.EcdsaPublicKeyManagerTest');
@@ -62,7 +62,7 @@ testSuite({
     try {
       manager.getKeyFactory().newKey();
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.notSupported(), e.toString());
     }
   },
@@ -73,7 +73,7 @@ testSuite({
     try {
       manager.getKeyFactory().newKeyData();
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.notSupported(), e.toString());
     }
   },
@@ -85,7 +85,7 @@ testSuite({
     try {
       await manager.getPrimitive(Mac, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
     }
   },
@@ -98,7 +98,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
     }
@@ -111,7 +111,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
     }
   },
@@ -125,7 +125,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
     }
   },
@@ -138,7 +138,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingParams(), e.toString());
     }
   },
@@ -152,7 +152,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unknownEncoding(), e.toString());
     }
     key.getParams().setEncoding(PbEcdsaSignatureEncoding.DER);
@@ -162,7 +162,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unknownHash(), e.toString());
     }
     key.getParams().setHashType(PbHashType.SHA256);
@@ -172,7 +172,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unknownCurve(), e.toString());
     }
 
@@ -181,7 +181,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
@@ -191,7 +191,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
@@ -207,7 +207,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingXY(), e.toString());
     }
 
@@ -216,7 +216,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingXY(), e.toString());
     }
   },
@@ -232,7 +232,7 @@ testSuite({
       try {
         await manager.getPrimitive(PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
       }
     }

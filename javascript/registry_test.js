@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.RegistryTest');
 goog.setTestOnly('tink.RegistryTest');
@@ -62,7 +62,7 @@ testSuite({
   testAddCatalogue_nullCatalogue() {
     try {
       Registry.addCatalogue('some catalogue', null);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullCatalogue(), e.toString());
       return;
     }
@@ -72,7 +72,7 @@ testSuite({
   testAddCatalogue_emptyName() {
     try {
       Registry.addCatalogue('', new DummyCatalogue1());
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingCatalogueName(), e.toString());
       return;
     }
@@ -83,7 +83,7 @@ testSuite({
     try {
       Registry.addCatalogue('some catalogue', new DummyCatalogue1());
       Registry.addCatalogue('some catalogue', new DummyCatalogue2());
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.overwrittingCatalogueAttempt(), e.toString());
       return;
     }
@@ -105,7 +105,7 @@ testSuite({
 
     try {
       Registry.getCatalogue(name);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.catalogueMissing(name), e.toString());
       return;
     }
@@ -133,7 +133,7 @@ testSuite({
     try {
       Registry.registerPrimitiveWrapper(null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: primitive wrapper cannot be null', e.toString());
     }
@@ -157,7 +157,7 @@ testSuite({
       Registry.registerPrimitiveWrapper(
           new DummyPrimitiveWrapper2(primitive, primitiveType));
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: primitive wrapper for type ' + primitiveType +
               ' has already been registered and cannot be overwritten',
@@ -191,7 +191,7 @@ testSuite({
     try {
       Registry.wrap(new PrimitiveSet.PrimitiveSet(primitiveType));
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: no primitive wrapper found for type ' + primitiveType,
           e.toString());
@@ -203,7 +203,7 @@ testSuite({
   testRegisterKeyManager_emptyManager() {
     try {
       Registry.registerKeyManager(null);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullKeyManager(), e.toString());
       return;
     }
@@ -216,7 +216,7 @@ testSuite({
     try {
       Registry.registerKeyManager(new DummyKeyManager1(keyType));
       Registry.registerKeyManager(new DummyKeyManager2(keyType));
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.keyManagerOverwrittingAttempt(keyType), e.toString());
       return;
@@ -240,7 +240,7 @@ testSuite({
     Registry.registerKeyManager(keyManager1, false);
     try {
       await Registry.newKeyData(keyTemplate);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.newKeyForbidden(keyType), e.toString());
       return;
     }
@@ -261,7 +261,7 @@ testSuite({
     try {
       Registry.registerKeyManager(keyManager1);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.prohibitedChangeToLessRestricted(
               keyManager1.getKeyType()),
@@ -269,7 +269,7 @@ testSuite({
     }
     try {
       await Registry.newKeyData(keyTemplate);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.newKeyForbidden(keyType), e.toString());
       return;
     }
@@ -306,7 +306,7 @@ testSuite({
 
     try {
       Registry.getKeyManager(keyType);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(keyType), e.toString());
       return;
@@ -325,7 +325,7 @@ testSuite({
     Registry.registerKeyManager(keyManager1);
     try {
       await Registry.newKeyData(keyTemplate);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(differentKeyType),
           e.toString());
@@ -342,7 +342,7 @@ testSuite({
     Registry.registerKeyManager(keyManager1, false);
     try {
       await Registry.newKeyData(keyTemplate);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.newKeyForbidden(keyManager1.getKeyType()),
           e.toString());
@@ -352,7 +352,7 @@ testSuite({
   },
 
   async testNewKeyData_newKeyAllowed() {
-    const /** !Array<string> */ keyTypes = [];
+    const /** Array<string> */ keyTypes = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
     }
@@ -371,7 +371,7 @@ testSuite({
   },
 
   async testNewKeyData_newKeyIsAllowedAutomatically() {
-    const /** !Array<string> */ keyTypes = [];
+    const /** Array<string> */ keyTypes = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
     }
@@ -424,7 +424,7 @@ testSuite({
     try {
       await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(notRegisteredKeyType),
           e.toString());
@@ -440,15 +440,15 @@ testSuite({
     try {
       await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.newKeyForbidden(keyManager.getKeyType()), e.toString());
     }
   },
 
   async testNewKey_shouldWork() {
-    const /** !Array<string> */ keyTypes = [];
-    const /** !Array<Uint8Array> */ newKeyMethodResult = [];
+    const /** Array<string> */ keyTypes = [];
+    const /** Array<Uint8Array> */ newKeyMethodResult = [];
     const keyTypesLength = 10;
 
     // Add some keys to Registry.
@@ -513,7 +513,7 @@ testSuite({
 
     try {
       await Registry.getPrimitive(null, keyData, anotherType);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.keyTypesAreNotMatching(keyDataType, anotherType),
           e.toString());
@@ -527,7 +527,7 @@ testSuite({
     try {
       await Registry.getPrimitive(null, new PbMessage);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.keyTypeNotDefined(), e.toString());
     }
   },
@@ -539,7 +539,7 @@ testSuite({
 
     try {
       await Registry.getPrimitive(null, keyData);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(keyDataType), e.toString());
       return;
@@ -579,7 +579,7 @@ testSuite({
 
     try {
       await Registry.getPrimitive(Mac, key, keyData.getTypeUrl());
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertTrue(
           e.toString().includes(ExceptionText.getPrimitiveBadPrimitive()));
       return;
@@ -598,7 +598,7 @@ testSuite({
       try {
         Registry.getPublicKeyData(notPrivateTypeUrl, new Uint8Array(8));
         fail('An exception should be thrown.');
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals(
             ExceptionText.notPrivateKeyFactory(notPrivateTypeUrl),
             e.toString());
@@ -611,7 +611,7 @@ testSuite({
       try {
         Registry.getPublicKeyData(typeUrl, new Uint8Array(10));
         fail('An exception should be thrown.');
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals(ExceptionText.couldNotParse(typeUrl), e.toString());
       }
     },
@@ -903,7 +903,7 @@ class DummyKeyFactory {
    * @override
    */
   newKeyData(serializedKeyFormat) {
-    let /** !PbKeyData */ keyData = new PbKeyData();
+    let /** PbKeyData */ keyData = new PbKeyData();
 
     keyData.setTypeUrl(this.KEY_TYPE_);
     keyData.setValue(this.NEW_KEY_METHOD_RESULT_);

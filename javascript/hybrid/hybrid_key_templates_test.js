@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.HybridKeyTemplatesTest');
 goog.setTestOnly('tink.hybrid.HybridKeyTemplatesTest');

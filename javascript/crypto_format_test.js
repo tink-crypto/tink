@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.CryptoFormatTest');
 goog.setTestOnly('tink.CryptoFormatTest');
@@ -43,7 +43,7 @@ testSuite({
 
     try {
       CryptoFormat.getOutputPrefix(key);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: Unsupported key prefix type.', e.toString());
       return;
     }
@@ -61,7 +61,7 @@ testSuite({
       key.setKeyId(invalidKeyIds[i]);
       try {
         CryptoFormat.getOutputPrefix(key);
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals('CustomError: Number has to be unsigned 32-bit integer.',
             e.toString());
         continue;

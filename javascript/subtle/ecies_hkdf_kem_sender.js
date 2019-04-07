@@ -60,17 +60,18 @@ class EciesHkdfKemSender {
    *     information (can be a zero-length array).
    * @param {!Uint8Array=} opt_hkdfSalt Salt value (a non-secret random
    *     value). If not provided, it is set to a string of hash length zeros.
-   * @return {!Promise.<!{key:!Uint8Array, token:!Uint8Array}>} The KEM key and
+   * @return {!Promise<{key:!Uint8Array, token:!Uint8Array}>} The KEM key and
    *     token.
+   * @suppress {reportUnknownTypes}
    */
   async encapsulate(
       keySizeInBytes, pointFormat, hkdfHash, hkdfInfo, opt_hkdfSalt) {
     const ephemeralKeyPair = await EllipticCurves.generateKeyPair(
         'ECDH', this.publicKey_.algorithm['namedCurve']);
     const sharedSecret = await EllipticCurves.computeEcdhSharedSecret(
-        /** @type {!Object} */ (ephemeralKeyPair).privateKey, this.publicKey_);
+        /** @type {?} */ (ephemeralKeyPair).privateKey, this.publicKey_);
     const jwk = await EllipticCurves.exportCryptoKey(
-        /** @type {!Object} */ (ephemeralKeyPair).publicKey);
+        /** @type {?} */ (ephemeralKeyPair).publicKey);
     const kemToken = EllipticCurves.pointEncode(jwk.crv, pointFormat, jwk);
     const hkdfIkm = Bytes.concat(kemToken, sharedSecret);
     const kemKey = await Hkdf.compute(

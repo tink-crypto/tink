@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.HybridDecryptWrapperTest');
 goog.setTestOnly('tink.hybrid.HybridDecryptWrapperTest');
@@ -38,7 +38,7 @@ testSuite({
     try {
       new HybridDecryptWrapper().wrap(null);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
     }
   },
@@ -54,7 +54,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('Should throw an exception');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
     }
   },
@@ -150,7 +150,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
     }
     const decryptedCiphertext =
@@ -179,7 +179,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(ciphertext);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
     }
   },
@@ -192,7 +192,7 @@ testSuite({
     try {
       await hybridDecrypt.decrypt(null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullCiphertext(), e.toString());
     }
   },

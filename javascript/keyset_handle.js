@@ -151,6 +151,7 @@ class KeysetHandle {
    * @param {?KeyManager.KeyManager<P>=} opt_customKeyManager
    *
    * @return {!Promise<!P>}
+   * @suppress {reportUnknownTypes}
    */
   async getPrimitive(primitiveType, opt_customKeyManager) {
     if (!primitiveType) {
@@ -175,6 +176,7 @@ class KeysetHandle {
    * @param {?KeyManager.KeyManager<P>=} opt_customKeyManager
    *
    * @return {!Promise.<!PrimitiveSet.PrimitiveSet<P>>}
+   * @suppress {reportUnknownTypes}
    */
   async getPrimitiveSet_(primitiveType, opt_customKeyManager) {
     const primitiveSet = new PrimitiveSet.PrimitiveSet(primitiveType);

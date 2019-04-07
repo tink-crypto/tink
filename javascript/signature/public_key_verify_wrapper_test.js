@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.signature.PublicKeyVerifyWrapperTest');
 goog.setTestOnly('tink.signature.PublicKeyVerifyWrapperTest');
@@ -36,7 +36,7 @@ testSuite({
     try {
       new PublicKeyVerifyWrapper().wrap(null);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: Primitive set has to be non-null.', e.toString());
     }
@@ -50,7 +50,7 @@ testSuite({
     try {
       await publicKeyVerify.verify(null, Random.randBytes(10));
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -64,7 +64,7 @@ testSuite({
     try {
       await publicKeyVerify.verify(Random.randBytes(10), null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }

@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.subtle.HmacTest');
 goog.setTestOnly('tink.subtle.HmacTest');
@@ -39,7 +39,7 @@ testSuite({
       await Hmac.newInstance(
           'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: blah is not supported', e.toString());
     }
 
@@ -47,7 +47,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-1', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: key too short, must be at least 16 bytes',
           e.toString());
@@ -57,7 +57,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-1', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: tag too short, must be at least 10 bytes',
           e.toString());
@@ -66,7 +66,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-1', Random.randBytes(16), 21);  // tag size too long
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: tag too long, must not be larger than 20 bytes',
           e.toString());
@@ -76,7 +76,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-256', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: key too short, must be at least 16 bytes',
           e.toString());
@@ -86,7 +86,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-256', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: tag too short, must be at least 10 bytes',
           e.toString());
@@ -96,7 +96,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-256', Random.randBytes(16), 33);  // tag size too long
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: tag too long, must not be larger than 32 bytes',
           e.toString());
@@ -106,7 +106,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-512', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: key too short, must be at least 16 bytes',
           e.toString());
@@ -116,7 +116,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-512', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: tag too short, must be at least 10 bytes',
           e.toString());
@@ -126,7 +126,7 @@ testSuite({
       await Hmac.newInstance(
           'SHA-512', Random.randBytes(16), 65);  // tag size too long
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: tag too long, must not be larger than 64 bytes',
           e.toString());
@@ -137,7 +137,7 @@ testSuite({
     try {
       await Hmac.newInstance('SHA-512', Random.randBytes(16), NaN);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid tag size, must be an integer', e.toString());
     }
@@ -145,7 +145,7 @@ testSuite({
     try {
       await Hmac.newInstance('SHA-512', Random.randBytes(16), undefined);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid tag size, must be an integer', e.toString());
     }
@@ -153,7 +153,7 @@ testSuite({
     try {
       await Hmac.newInstance('SHA-512', Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid tag size, must be an integer', e.toString());
     }
@@ -163,14 +163,14 @@ testSuite({
     try {
       await Hmac.newInstance('SHA-1', 'blah', 10);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await Hmac.newInstance('SHA-1', 123, 10);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -179,42 +179,42 @@ testSuite({
     try {
       await hmac.computeMac('blah');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await hmac.computeMac('123');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await hmac.verifyMac('blah', Random.randBytes(20));
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await hmac.verifyMac(123, Random.randBytes(20));
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await hmac.verifyMac(Random.randBytes(20), 'blah');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await hmac.verifyMac(Random.randBytes(20), 123);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -245,7 +245,7 @@ testSuite({
   async testWithTestVectors() {
     // Test data from
     // http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#testing.
-    const /** !Array<{algo: string, key: string, message: string, tag: string}> */NIST_TEST_VECTORS = [
+    const NIST_TEST_VECTORS = [
       {
         'algo': 'SHA-1',
         'key':

@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.RegistryEciesAeadHkdfDemHelperTest');
 goog.setTestOnly('tink.hybrid.RegistryEciesAeadHkdfDemHelperTest');
@@ -47,7 +47,7 @@ testSuite({
     try {
       new RegistryEciesAeadHkdfDemHelper(template);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.unsupportedTypeUrl(template.getTypeUrl()),
           e.toString());
@@ -69,7 +69,7 @@ testSuite({
         try {
           new RegistryEciesAeadHkdfDemHelper(template);
           fail('An exception should be thrown.');
-        } catch (/** @type {!Object} */e) {
+        } catch (e) {
           assertEquals(
               ExceptionText.invalidKeyFormat(template.getTypeUrl()),
               e.toString());
@@ -128,7 +128,7 @@ testSuite({
     try {
       await helper.getAead(new Uint8Array(keyLength));
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.invalidKeyLength(expectedKeyLength, keyLength),
           e.toString());

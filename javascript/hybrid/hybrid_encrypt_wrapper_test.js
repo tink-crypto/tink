@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.HybridEncryptWrapperTest');
 goog.setTestOnly('tink.hybrid.HybridEncryptWrapperTest');
@@ -35,7 +35,7 @@ testSuite({
     try {
       new HybridEncryptWrapper().wrap(null);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
     }
   },
@@ -45,7 +45,7 @@ testSuite({
     try {
       new HybridEncryptWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.primitiveSetWithoutPrimary(), e.toString());
     }
   },
@@ -63,7 +63,7 @@ testSuite({
     try {
       await hybridEncrypt.encrypt(null);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullPlaintext(), e.toString());
     }
   },

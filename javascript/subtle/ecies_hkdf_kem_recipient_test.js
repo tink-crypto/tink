@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.subtle.EciesHkdfKemRecipientTest');
 goog.setTestOnly('tink.subtle.EciesHkdfKemRecipientTest');
@@ -87,7 +87,7 @@ testSuite({
       await recipient.decapsulate(
           kemKeyToken['token'], NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: size must be an integer', e.toString());
     }
 
@@ -96,7 +96,7 @@ testSuite({
           kemKeyToken['token'], undefined, pointFormat, hkdfHash, hkdfInfo,
           hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: size must be an integer', e.toString());
     }
 
@@ -104,7 +104,7 @@ testSuite({
       await recipient.decapsulate(
           kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: size must be an integer', e.toString());
     }
   },
@@ -115,7 +115,7 @@ testSuite({
     try {
       await EciesHkdfKemRecipient.newInstance(null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
     }
 
     // Test newInstance with public key instead private key.
@@ -124,14 +124,14 @@ testSuite({
     try {
       await EciesHkdfKemRecipient.newInstance(publicKey);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
     }
 
     // Test newInstance with CryptoKey instead of JSON key.
     try {
       await EciesHkdfKemRecipient.newInstance(keyPair.publicKey);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
     }
   },
 
@@ -158,7 +158,7 @@ testSuite({
         output = await recipient.decapsulate(
             Bytes.fromHex(testVector.token), testVector.outputLength,
             testVector.pointFormat, testVector.hashType, hkdfInfo, salt);
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         // Everything works properly if exception was thrown.
         return;
       }
@@ -173,7 +173,7 @@ testSuite({
     try {
       new EciesHkdfKemRecipient(null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: Private key has to be non-null.', e.toString());
     }
@@ -183,7 +183,7 @@ testSuite({
     try {
       new EciesHkdfKemRecipient(keyPair.publicKey);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: Expected crypto key of type: private.', e.toString());
     }
@@ -193,7 +193,7 @@ testSuite({
     try {
       new EciesHkdfKemRecipient(privateKey);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
     }
   },
 
@@ -256,7 +256,7 @@ testSuite({
           await recipient.decapsulate(
               token, keySizeInBytes, pointFormat, hashType, hkdfInfo, hkdfSalt);
           fail('Should throw an exception');
-        } catch (/** @type {!Object} */e) {
+        } catch (e) {
         }
       }
     }
@@ -325,7 +325,8 @@ class TestVector {
 //
 // Token (i.e. sender public key) and privateKeyPoint values are in UNCOMPRESSED
 // EcPoint encoding (i.e. it has prefix '04' followed by x and y values).
-const /** !Array<!TestVector> */ TEST_VECTORS = [
+/** {!Array<!TestVector>} */
+const TEST_VECTORS = [
   new TestVector(
       EllipticCurves.CurveType.P256, 'SHA-256',
       EllipticCurves.PointFormatType.UNCOMPRESSED,

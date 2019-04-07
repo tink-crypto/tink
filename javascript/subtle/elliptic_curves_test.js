@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.subtle.EllipticCurvesTest');
 goog.setTestOnly('tink.subtle.EllipticCurvesTest');
@@ -297,7 +297,7 @@ testSuite({
     try {
       EllipticCurves.pointEncode(point['crv'], format, point);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: invalid format', e.toString());
     }
   },
@@ -314,7 +314,7 @@ testSuite({
       try {
         EllipticCurves.pointDecode(curveTypeString, format, point);
         fail('Should throw an exception.');
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals('CustomError: invalid point', e.toString());
       }
     }
@@ -328,7 +328,7 @@ testSuite({
     try {
       EllipticCurves.pointDecode(curve, format, point);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: invalid format', e.toString());
     }
   },
@@ -341,7 +341,7 @@ testSuite({
     try {
       EllipticCurves.pointDecode(curve, format, point);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertTrue(e.toString().includes('unknown curve'));
     }
   },
@@ -383,7 +383,7 @@ testSuite({
       try {
         EllipticCurves.ecdsaDer2Ieee(
             Bytes.fromHex(test), 1 /* ieeeLength, ignored */);
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals('CustomError: invalid DER signature', e.toString());
       }
     }
@@ -406,7 +406,7 @@ testSuite({
  * Runs the test with test vector given as an input and returns either empty
  * string or a text describing the failure.
  *
- * @param {{private: !webCrypto.JsonWebKey, public: !webCrypto.JsonWebKey, result: string, shared: string, tcId: string}} test - JSON object with test data
+ * @param {!Object} test - JSON object with test data
  * @return {!Promise<string>}
  */
 const runWycheproofTest = async function(test) {
@@ -426,13 +426,13 @@ const runWycheproofTest = async function(test) {
         return 'Fail on test ' + test['tcId'] + ': unexpected result was \"' +
             sharedSecretHex + '\".\n';
       }
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       if (test['result'] === 'valid') {
         return 'Fail on test ' + test['tcId'] + ': unexpected exception \"' +
             e.toString() + '\".\n';
       }
     }
-  } catch (/** @type {!Object} */e) {
+  } catch (e) {
     if (test['result'] === 'valid') {
       if (test['private']['crv'] == "P-256K") {
         // P-256K doesn't have to be supported. Hence failing to import the

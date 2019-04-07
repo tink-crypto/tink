@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.signature.SignatureKeyTemplatesTest');
 goog.setTestOnly('tink.signature.SignatureKeyTemplatesTest');

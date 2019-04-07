@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.HybridConfigTest');
 goog.setTestOnly('tink.hybrid.HybridConfigTest');

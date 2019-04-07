@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.subtle.AesCtrTest');
 goog.setTestOnly('tink.subtle.AesCtrTest');
@@ -66,14 +66,14 @@ testSuite({
     try {
       await AesCtr.newInstance(123, 16);  // IV size too short
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await AesCtr.newInstance(Random.randBytes(16), 11);  // IV size too short
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid IV length, must be at least 12 and at most 16',
           e.toString());
@@ -81,7 +81,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), 17);  // IV size too long
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid IV length, must be at least 12 and at most 16',
           e.toString());
@@ -90,7 +90,7 @@ testSuite({
       await AesCtr.newInstance(
           Random.randBytes(24), 12);  // 192-bit keys not supported
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals('CustomError: unsupported AES key size: 24', e.toString());
     }
   },
@@ -99,7 +99,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), NaN);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid IV length, must be an integer', e.toString());
     }
@@ -107,7 +107,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), undefined);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid IV length, must be an integer', e.toString());
     }
@@ -115,7 +115,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid IV length, must be an integer', e.toString());
     }
@@ -123,7 +123,7 @@ testSuite({
     try {
       await AesCtr.newInstance(Random.randBytes(16), 0);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: invalid IV length, must be at least 12 and at most 16',
           e.toString());
@@ -134,7 +134,7 @@ testSuite({
     try {
       await AesCtr.newInstance('blah', 12);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -143,28 +143,28 @@ testSuite({
     try {
       await cipher.encrypt('blah');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.encrypt(123);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.decrypt('blah');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.decrypt(123);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -172,7 +172,7 @@ testSuite({
 
   async testWithTestVectors() {
     // Test data from NIST SP 800-38A pp 55.
-    const /** !Array<{key: string, message: string, ciphertext: string, iv: string}> */ NIST_TEST_VECTORS = [
+    const NIST_TEST_VECTORS = [
       {
         'key': '2b7e151628aed2a6abf7158809cf4f3c',
         'message':

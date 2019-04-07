@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.EciesAeadHkdfPrivateKeyManagerTest');
 goog.setTestOnly('tink.hybrid.EciesAeadHkdfPrivateKeyManagerTest');
@@ -78,7 +78,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(null);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.nullKeyFormat(), e.toString());
     }
   },
@@ -90,7 +90,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidSerializedKeyFormat);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
     }
   },
@@ -102,7 +102,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(unsupportedKeyFormatProto);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedKeyFormat(), e.toString());
     }
   },
@@ -114,7 +114,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.invalidKeyFormatMissingParams(), e.toString());
     }
   },
@@ -128,7 +128,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unknownPointFormat(), e.toString());
     }
     invalidFormat.getParams().setEcPointFormat(PbPointFormat.UNCOMPRESSED);
@@ -138,7 +138,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingKemParams(), e.toString());
     }
     invalidFormat.getParams().setKemParams(createKemParams());
@@ -150,7 +150,7 @@ testSuite({
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.unsupportedKeyTemplate(templateTypeUrl), e.toString());
     }
@@ -181,7 +181,7 @@ testSuite({
         fail(
             'An exception should be thrown for the string: ' +
             serializedKeyFormats[i]);
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
         continue;
       }
@@ -216,7 +216,7 @@ testSuite({
       const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (
           manager.getKeyFactory());
       factory.getPublicKeyData(privateKey);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
     }
   },
@@ -252,7 +252,7 @@ testSuite({
     try {
       await manager.getPrimitive(HybridEncrypt, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
     }
   },
@@ -267,7 +267,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
     }
@@ -280,7 +280,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
     }
   },
@@ -295,7 +295,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
     }
   },
@@ -311,7 +311,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingKemParams(), e.toString());
     }
     key.getPublicKey().getParams().setKemParams(createKemParams());
@@ -323,7 +323,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.unsupportedKeyTemplate(templateTypeUrl), e.toString());
     }
@@ -343,7 +343,7 @@ testSuite({
       try {
         await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
       }
     }
@@ -357,10 +357,10 @@ testSuite({
     for (let keyFormat of keyFormats) {
       const key = await privateKeyManager.getKeyFactory().newKey(keyFormat);
 
-      const /** !HybridEncrypt */ hybridEncrypt =
+      const /** HybridEncrypt */ hybridEncrypt =
           await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, key.getPublicKey());
-      const /** !HybridDecrypt */ hybridDecrypt =
+      const /** HybridDecrypt */ hybridDecrypt =
           await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, key);
 
@@ -385,10 +385,10 @@ testSuite({
           privateKeyManager.getKeyFactory());
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
 
-      const /** !HybridEncrypt */ hybridEncrypt =
+      const /** HybridEncrypt */ hybridEncrypt =
           await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData);
-      const /** !HybridDecrypt */ hybridDecrypt =
+      const /** HybridDecrypt */ hybridDecrypt =
           await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
 

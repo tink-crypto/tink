@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.PrimitiveSetTest');
 goog.setTestOnly('tink.PrimitiveSetTest');
@@ -40,7 +40,7 @@ testSuite({
 
     try {
       primitiveSet.addPrimitive(primitive, key);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unknownPrefixType(), e.toString());
       return;
     }
@@ -54,7 +54,7 @@ testSuite({
 
     try {
       primitiveSet.addPrimitive(primitive, key);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.addingNullPrimitive(), e.toString());
       return;
     }
@@ -67,7 +67,7 @@ testSuite({
 
     try {
       primitiveSet.addPrimitive(primitive, null);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.addingNullKey(), e.toString());
       return;
     }
@@ -76,8 +76,7 @@ testSuite({
 
   testAddPrimitiveMultipleTimesShouldWork() {
     const key = createKey();
-    const /** !PrimitiveSet.PrimitiveSet<!Aead> */ primitiveSet =
-      new PrimitiveSet.PrimitiveSet(Aead);
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
     for (let i = 0; i < 4; i++) {
       let primitive;
@@ -211,7 +210,7 @@ testSuite({
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     try {
       primitiveSet.setPrimary(null);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.setPrimaryToNull(), e.toString());
       return;
     }
@@ -226,7 +225,7 @@ testSuite({
 
     try {
       primitiveSet.setPrimary(entry);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.setPrimaryToMissingEntry(), e.toString());
       return;
     }
@@ -242,7 +241,7 @@ testSuite({
 
     try {
       primitiveSet.setPrimary(primary);
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.setPrimaryToDisabled(), e.toString());
       return;
     }

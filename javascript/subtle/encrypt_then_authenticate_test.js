@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.subtle.EncryptThenAuthenticateTest');
 goog.setTestOnly('tink.subtle.EncryptThenAuthenticateTest');
@@ -78,7 +78,7 @@ testSuite({
           'blah' /* aesKey */, 12 /* ivSize */, 'SHA-256',
           Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -87,7 +87,7 @@ testSuite({
           Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
           'blah' /* hmacKey */, 10 /* tagSize */);
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -98,28 +98,28 @@ testSuite({
     try {
       await aead.encrypt('blah');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.encrypt(Random.randBytes(20), 'blah');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt('blah');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt(Random.randBytes(32), 'blah');
       fail('Should throw an exception.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
@@ -139,7 +139,7 @@ testSuite({
         try {
           await aead.decrypt(c1, aad);
           fail('Should throw an exception.');
-        } catch (/** @type {!Object} */e) {
+        } catch (e) {
           assertEquals('CustomError: invalid MAC', e.toString());
         }
       }
@@ -160,7 +160,7 @@ testSuite({
         try {
           await aead.decrypt(ciphertext, aad1);
           fail('Should throw an exception.');
-        } catch (/** @type {!Object} */e) {
+        } catch (e) {
           assertEquals('CustomError: invalid MAC', e.toString());
         }
       }
@@ -179,7 +179,7 @@ testSuite({
       try {
         await aead.decrypt(c1, aad);
         fail('Should throw an exception.');
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         if (c1.length < 32) {
           assertEquals('CustomError: ciphertext too short', e.toString());
         } else {
@@ -195,8 +195,7 @@ testSuite({
     // use CTR while RFC uses CBC mode, it's not possible to compare plaintexts.
     // However, the test is still valueable to make sure that we correcly
     // compute HMAC over ciphertext and aad.
-    const /** !Array<{macKey: string, encryptionKey: string, ciphertext: string,
-      aad: string, hashAlgoName: string, ivSize: number, tagSize: number}> */RFC_TEST_VECTORS = [
+    const RFC_TEST_VECTORS = [
       {
         'macKey': '000102030405060708090a0b0c0d0e0f',
         'encryptionKey': '101112131415161718191a1b1c1d1e1f',
@@ -252,7 +251,7 @@ testSuite({
       const aad = Bytes.fromHex(testVector['aad']);
       try {
         await aead.decrypt(ciphertext, aad);
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         fail(e);
       }
     }

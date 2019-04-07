@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes}
+ * @suppress {checkTypes, reportUnknownTypes}
  */
 goog.module('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
 goog.setTestOnly('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
@@ -71,7 +71,7 @@ testSuite({
     try {
       manager.getKeyFactory().newKey();
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.notSupported(), e.toString());
     }
   },
@@ -82,7 +82,7 @@ testSuite({
     try {
       manager.getKeyFactory().newKeyData();
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.notSupported(), e.toString());
     }
   },
@@ -94,20 +94,20 @@ testSuite({
     try {
       await manager.getPrimitive(Mac, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
     }
   },
 
   async testGetPrimitive_unsupportedKeyDataType() {
     const manager = new EciesAeadHkdfPublicKeyManager();
-    const /** !PbKeyData */ keyData = await createKeyData();
+    const /** PbKeyData */ keyData = await createKeyData();
     keyData.setTypeUrl('unsupported_key_type_url');
 
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(
           ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
     }
@@ -120,7 +120,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
     }
   },
@@ -134,7 +134,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
     }
   },
@@ -147,7 +147,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingParams(), e.toString());
     }
   },
@@ -161,7 +161,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unknownPointFormat(), e.toString());
     }
     key.getParams().setEcPointFormat(PbPointFormat.UNCOMPRESSED);
@@ -171,7 +171,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingKemParams(), e.toString());
     }
     key.getParams().setKemParams(createKemParams());
@@ -182,7 +182,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedKeyTemplate(typeUrl), e.toString());
     }
   },
@@ -195,7 +195,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingXY(), e.toString());
     }
     key.getParams().setEcPointFormat(PbPointFormat.UNCOMPRESSED);
@@ -205,7 +205,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.missingKemParams(), e.toString());
     }
     key.getParams().setKemParams(createKemParams());
@@ -216,7 +216,7 @@ testSuite({
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (/** @type {!Object} */e) {
+    } catch (e) {
       assertEquals(ExceptionText.unsupportedKeyTemplate(typeUrl), e.toString());
     }
   },
@@ -232,7 +232,7 @@ testSuite({
       try {
         await manager.getPrimitive(PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
-      } catch (/** @type {!Object} */e) {
+      } catch (e) {
         assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
       }
     }
@@ -244,7 +244,7 @@ testSuite({
     const keys = await createTestSetOfKeys();
 
     for (let key of keys) {
-      const /** !HybridEncrypt */ primitive =
+      const /** HybridEncrypt */ primitive =
           await manager.getPrimitive(PRIMITIVE, key);
 
       const plaintext = Random.randBytes(10);
@@ -259,7 +259,7 @@ testSuite({
     const keyDatas = await createTestSetOfKeyDatas();
 
     for (let key of keyDatas) {
-      const /** !HybridEncrypt */ primitive =
+      const /** HybridEncrypt */ primitive =
           await manager.getPrimitive(PRIMITIVE, key);
 
       const plaintext = Random.randBytes(10);
@@ -489,7 +489,7 @@ const createTestSetOfKeys = async function() {
       [AeadKeyTemplates.aes128CtrHmacSha256(), AeadKeyTemplates.aes256Gcm()];
   const pointFormats = [PbPointFormat.UNCOMPRESSED];
 
-  const /** !Array<!PbEciesAeadHkdfPublicKey> */ keys = [];
+  const /** Array<!PbEciesAeadHkdfPublicKey> */ keys = [];
   for (let curve of curveTypes) {
     for (let hkdfHash of hashTypes) {
       for (let keyTemplate of keyTemplates) {
@@ -510,7 +510,7 @@ const createTestSetOfKeys = async function() {
 const createTestSetOfKeyDatas = async function() {
   const keys = await createTestSetOfKeys();
 
-  const /** !Array<!PbKeyData> */ keyDatas = [];
+  const /** Array<!PbKeyData> */ keyDatas = [];
   for (let key of keys) {
     const keyData = await createKeyDataFromKey(key);
     keyDatas.push(keyData);

@@ -23,7 +23,7 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 /**
  * A catalogue of TINK key managers for digital signature verification.
  *
- * @implements {Catalogue<PublicKeyVerify>}
+ * @implements {Catalogue<!PublicKeyVerify>}
  * @final
  */
 class PublicKeyVerifyCatalogue {

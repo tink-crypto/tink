@@ -81,6 +81,7 @@ class RegistryEciesAeadHkdfDemHelper {
 
   /**
    * @override
+   * @suppress {reportUnknownTypes}
    */
   async getAead(symmetricKey) {
     if (symmetricKey.length != this.demKeySize_) {
