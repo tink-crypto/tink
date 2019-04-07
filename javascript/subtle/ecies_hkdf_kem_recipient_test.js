@@ -325,8 +325,7 @@ class TestVector {
 //
 // Token (i.e. sender public key) and privateKeyPoint values are in UNCOMPRESSED
 // EcPoint encoding (i.e. it has prefix '04' followed by x and y values).
-/** {!Array<!TestVector>} */
-const TEST_VECTORS = [
+const /** !Array<!TestVector> */ TEST_VECTORS = [
   new TestVector(
       EllipticCurves.CurveType.P256, 'SHA-256',
       EllipticCurves.PointFormatType.UNCOMPRESSED,

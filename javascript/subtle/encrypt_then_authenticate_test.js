@@ -195,7 +195,8 @@ testSuite({
     // use CTR while RFC uses CBC mode, it's not possible to compare plaintexts.
     // However, the test is still valueable to make sure that we correcly
     // compute HMAC over ciphertext and aad.
-    const RFC_TEST_VECTORS = [
+    const /** !Array<{macKey: string, encryptionKey: string, ciphertext: string,
+      aad: string, hashAlgoName: string, ivSize: number, tagSize: number}> */RFC_TEST_VECTORS = [
       {
         'macKey': '000102030405060708090a0b0c0d0e0f',
         'encryptionKey': '101112131415161718191a1b1c1d1e1f',

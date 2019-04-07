@@ -29,14 +29,14 @@ const Validators = goog.require('tink.subtle.Validators');
 class WrappedPublicKeyVerify {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
-  /** @param {!PrimitiveSet.PrimitiveSet} primitiveSet */
+  /** @param {!PrimitiveSet.PrimitiveSet<!PublicKeyVerify>} primitiveSet */
   constructor(primitiveSet) {
-    /** @private @const {!PrimitiveSet.PrimitiveSet} */
+    /** @private @const {!PrimitiveSet.PrimitiveSet<!PublicKeyVerify>} */
     this.primitiveSet_ = primitiveSet;
   }
 
   /**
-   * @param {!PrimitiveSet.PrimitiveSet} primitiveSet
+   * @param {!PrimitiveSet.PrimitiveSet<!PublicKeyVerify>} primitiveSet
    * @return {!PublicKeyVerify}
    */
   static newPublicKeyVerify(primitiveSet) {
@@ -77,7 +77,7 @@ class WrappedPublicKeyVerify {
    * Tries to verify the signature using each entry in primitives. It
    * returns false if no entry succeeds.
    *
-   * @param {!Array<!PrimitiveSet.Entry>} primitives
+   * @param {!Array<!PrimitiveSet.Entry<!PublicKeyVerify>>} primitives
    * @param {!Uint8Array} signature
    * @param {!Uint8Array} data
    *

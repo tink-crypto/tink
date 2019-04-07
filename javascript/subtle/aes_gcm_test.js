@@ -29,7 +29,7 @@ const userAgent = goog.require('goog.userAgent');
 /**
  * Asserts that an exception is the result of a Web Crypto error.
  *
- * @param {*} exception A thrown exception.
+ * @param {!Object} exception A thrown exception.
  */
 function assertCryptoError(exception) {
   const message = exception.toString();
@@ -189,7 +189,7 @@ testSuite({
   async testWithNistTestVectors() {
     // Download from
     // https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/CAVP-TESTING-BLOCK-CIPHER-MODES.
-    const NIST_TEST_VECTORS =
+    const /** !Array<{Key: string, IV: string, PT: string, AAD: string, CT: string, Tag: string}> */ NIST_TEST_VECTORS =
         [
           {
             'Key':

@@ -406,7 +406,7 @@ testSuite({
  * Runs the test with test vector given as an input and returns either empty
  * string or a text describing the failure.
  *
- * @param {!Object} test - JSON object with test data
+ * @param {{private: !webCrypto.JsonWebKey, public: !webCrypto.JsonWebKey, result: string, shared: string, tcId: string}} test - JSON object with test data
  * @return {!Promise<string>}
  */
 const runWycheproofTest = async function(test) {

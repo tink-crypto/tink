@@ -248,7 +248,7 @@ testSuite({
   },
 
   async testNewKeyBigTagSizeForHashType() {
-    const tagSizes = [
+    const /** !Array<{hashType: number, tagSize: number}> */tagSizes = [
       {'hashType': PbHashType.SHA1, 'tagSize': 22},
       {'hashType': PbHashType.SHA256, 'tagSize': 34},
       {'hashType': PbHashType.SHA512, 'tagSize': 66},

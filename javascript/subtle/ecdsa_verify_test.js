@@ -198,7 +198,7 @@ testSuite({
  * string or a text describing the failure.
  *
  * @param {!EcdsaVerify} verifier
- * @param {!Object} test - JSON object with test data
+ * @param {{sig: string, msg: string, tcId: string, result: string}} test - JSON object with test data
  * @return {!Promise<string>}
  */
 const runWycheproofTest = async function(verifier, test) {

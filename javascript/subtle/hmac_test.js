@@ -245,7 +245,7 @@ testSuite({
   async testWithTestVectors() {
     // Test data from
     // http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#testing.
-    const NIST_TEST_VECTORS = [
+    const /** !Array<{algo: string, key: string, message: string, tag: string}> */NIST_TEST_VECTORS = [
       {
         'algo': 'SHA-1',
         'key':

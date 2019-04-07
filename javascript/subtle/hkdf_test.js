@@ -16,10 +16,6 @@
  * @fileoverview
  * @suppress {checkTypes}
  */
-/**
- * @fileoverview
- * @suppress {checkTypes}
- */
 goog.module('tink.subtle.HkdfTest');
 goog.setTestOnly('tink.subtle.HkdfTest');
 
@@ -125,7 +121,8 @@ testSuite({
 
   async testWithTestVectors() {
     // Test cases are specified in Appendix A of RFC 5869.
-    const TEST_VECTORS = [
+    const /** !Array<{hash: string, output: string, outputSize: number,
+      ikm: string, salt: string, info: string}> */TEST_VECTORS = [
       {
         'hash': 'SHA-256',
         'output':

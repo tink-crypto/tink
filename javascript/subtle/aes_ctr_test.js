@@ -172,7 +172,7 @@ testSuite({
 
   async testWithTestVectors() {
     // Test data from NIST SP 800-38A pp 55.
-    const NIST_TEST_VECTORS = [
+    const /** !Array<{key: string, message: string, ciphertext: string, iv: string}> */ NIST_TEST_VECTORS = [
       {
         'key': '2b7e151628aed2a6abf7158809cf4f3c',
         'message':
