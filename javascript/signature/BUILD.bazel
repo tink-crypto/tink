@@ -6,7 +6,7 @@ package(
 
 licenses(["notice"])  # Apache 2.0
 
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure_js_test")
 
 closure_js_library(
     name = "signature",
@@ -22,6 +22,7 @@ closure_js_library(
 
 closure_js_library(
     name = "utils",
+    #lenient = True,
     srcs = [
         "ecdsa_util.js",
     ],
@@ -37,6 +38,7 @@ closure_js_library(
 
 closure_js_library(
     name = "ecdsa_key_managers",
+    #lenient = True,
     srcs = [
         "ecdsa_private_key_manager.js",
         "ecdsa_public_key_manager.js",
@@ -58,6 +60,7 @@ closure_js_library(
 
 closure_js_library(
     name = "wrappers",
+    #lenient = True,
     srcs = [
         "public_key_sign_wrapper.js",
         "public_key_verify_wrapper.js",
@@ -76,6 +79,7 @@ closure_js_library(
 
 closure_js_library(
     name = "catalogues",
+    #lenient = True,
     srcs = [
         "public_key_sign_catalogue.js",
         "public_key_verify_catalogue.js",
@@ -92,6 +96,7 @@ closure_js_library(
 
 closure_js_library(
     name = "config",
+    #lenient = True,
     srcs = [
         "signature_config.js",
     ],
@@ -109,6 +114,7 @@ closure_js_library(
 
 closure_js_library(
     name = "key_templates",
+    #lenient = True,
     srcs = [
         "signature_key_templates.js",
     ],
@@ -123,20 +129,38 @@ closure_js_library(
 
 # test
 
-closure_js_library(
+closure_js_test(
     name = "test_lib",
     testonly = 1,
+    #lenient = True,
     srcs = glob([
         "*_test.js",
     ]),
+    entry_points = {
+        "ecdsa_private_key_manager_test.js": ["tink.signature.EcdsaPrivateKeyManagerTest"],
+        "ecdsa_public_key_manager_test.js": ["tink.signature.EcdsaPublicKeyManagerTest"],
+        "public_key_sign_catalogue_test.js": ["tink.signature.PublicKeySignCatalogueTest"],
+        "public_key_sign_wrapper_test.js": ["tink.signature.PublicKeySignWrapperTest"],
+        "public_key_verify_catalogue_test.js": ["tink.signature.PublicKeyVerifyCatalogueTest"],
+        "public_key_verify_wrapper_test.js": ["tink.signature.PublicKeyVerifyWrapperTest"],
+        "signature_config_test.js": ["tink.signature.SignatureConfigTest"],
+        "signature_key_templates_test.js": ["tink.signature.SignatureKeyTemplatesTest"],
+    },
     deps = [
+        "//javascript/signature",
+        "//javascript/subtle",
+        "//javascript:crypto_format",
+        "//javascript:keyset_handle",
+        "//javascript:key_manager",
+        "//javascript:primitive_set",
+        "//javascript:primitives",
+        "//javascript:registry",
+        "//javascript:util",
         "//proto:common_closure_proto",
         "//proto:ecdsa_closure_proto",
         "//proto:tink_closure_proto",
         "@io_bazel_rules_closure//closure/library",
-        "@io_bazel_rules_closure//closure/library/testing:asserts",
-        "@io_bazel_rules_closure//closure/library/testing:jsunit",
-        "@io_bazel_rules_closure//closure/library/testing:testsuite",
+        "@io_bazel_rules_closure//closure/library:testing",
         "@io_bazel_rules_closure//closure/library/useragent",
     ],
 )

@@ -6,7 +6,7 @@ package(
 
 licenses(["notice"])  # Apache 2.0
 
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure_js_test")
 
 closure_js_library(
     name = "aead",
@@ -22,6 +22,7 @@ closure_js_library(
 
 closure_js_library(
     name = "aes_ctr_hmac_aead_key_manager",
+    #lenient = True,
     srcs = [
         "aes_ctr_hmac_aead_key_manager.js",
     ],
@@ -42,6 +43,7 @@ closure_js_library(
 
 closure_js_library(
     name = "aes_gcm_key_manager",
+    #lenient = True,
     srcs = [
         "aes_gcm_key_manager.js",
     ],
@@ -60,6 +62,7 @@ closure_js_library(
 
 closure_js_library(
     name = "aead_key_templates",
+    #lenient = True,
     srcs = [
         "aead_key_templates.js",
     ],
@@ -77,6 +80,7 @@ closure_js_library(
 
 closure_js_library(
     name = "aead_catalogue",
+    #lenient = True,
     srcs = [
         "aead_catalogue.js",
     ],
@@ -93,6 +97,7 @@ closure_js_library(
 
 closure_js_library(
     name = "aead_config",
+    #lenient = True,
     srcs = [
         "aead_config.js",
     ],
@@ -110,6 +115,7 @@ closure_js_library(
 
 closure_js_library(
     name = "aead_wrapper",
+    #lenient = True,
     srcs = [
         "aead_wrapper.js",
     ],
@@ -126,23 +132,37 @@ closure_js_library(
 
 # test
 
-closure_js_library(
+closure_js_test(
     name = "test_lib",
     testonly = 1,
+    #lenient = True,
     srcs = glob([
         "*_test.js",
     ]),
+    entry_points = {
+        "aead_catalogue_test.js": ["tink.aead.AeadCatalogueTest"],
+        "aead_config_test.js": ["tink.aead.AeadConfigTest"],
+        "aead_key_templates_test.js": ["tink.aead.AeadKeyTemplatesTest"],
+        "aead_wrapper_test.js": ["tink.aead.AeadWrapperTest"],
+        "aes_ctr_hmac_aead_key_manager_test.js": ["tink.aead.AesCtrHmacAeadKeyManagerTest"],
+        "aes_gcm_key_manager_test.js": ["tink.aead.AesGcmKeyManagerTest"],
+    },
     deps = [
+        "//javascript/aead",
+        "//javascript/exception",
+        "//javascript/subtle",
+        "//javascript:registry",
+        "//javascript:crypto_format",
+        "//javascript:keyset_handle",
+        "//javascript:primitives",
+        "//javascript:primitive_set",
         "//proto:aes_ctr_closure_proto",
         "//proto:aes_ctr_hmac_aead_closure_proto",
         "//proto:aes_gcm_closure_proto",
         "//proto:common_closure_proto",
         "//proto:hmac_closure_proto",
         "//proto:tink_closure_proto",
-        "@io_bazel_rules_closure//closure/library",
-        "@io_bazel_rules_closure//closure/library/testing:asserts",
-        "@io_bazel_rules_closure//closure/library/testing:jsunit",
-        "@io_bazel_rules_closure//closure/library/testing:testsuite",
+        "@io_bazel_rules_closure//closure/library:testing",
         "@io_bazel_rules_closure//closure/library/useragent",
     ],
 )

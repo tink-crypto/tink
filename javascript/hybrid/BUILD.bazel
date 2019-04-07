@@ -6,7 +6,7 @@ package(
 
 licenses(["notice"])  # Apache 2.0
 
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure_js_test")
 
 closure_js_library(
     name = "hybrid",
@@ -23,6 +23,7 @@ closure_js_library(
 
 closure_js_library(
     name = "util_and_validators",
+    #lenient = True,
     srcs = [
         "ecies_aead_hkdf_util.js",
         "ecies_aead_hkdf_validators.js",
@@ -40,6 +41,7 @@ closure_js_library(
 
 closure_js_library(
     name = "registry_ecies_aead_hkdf_dem_helper",
+    #lenient = True,
     srcs = [
         "registry_ecies_aead_hkdf_dem_helper.js",
     ],
@@ -58,6 +60,7 @@ closure_js_library(
 
 closure_js_library(
     name = "ecies_aead_hkdf_key_managers",
+    #lenient = True,
     srcs = [
         "ecies_aead_hkdf_private_key_manager.js",
         "ecies_aead_hkdf_public_key_manager.js",
@@ -80,6 +83,7 @@ closure_js_library(
 
 closure_js_library(
     name = "hybrid_catalogues",
+    #lenient = True,
     srcs = [
         "hybrid_decrypt_catalogue.js",
         "hybrid_encrypt_catalogue.js",
@@ -96,6 +100,7 @@ closure_js_library(
 
 closure_js_library(
     name = "hybrid_config",
+    #lenient = True,
     srcs = [
         "hybrid_config.js",
     ],
@@ -113,6 +118,7 @@ closure_js_library(
 
 closure_js_library(
     name = "hybrid_key_templates",
+    #lenient = True,
     srcs = [
         "hybrid_key_templates.js",
     ],
@@ -128,6 +134,7 @@ closure_js_library(
 
 closure_js_library(
     name = "hybrid_wrappers",
+    #lenient = True,
     srcs = [
         "hybrid_decrypt_wrapper.js",
         "hybrid_encrypt_wrapper.js",
@@ -146,21 +153,44 @@ closure_js_library(
 
 # test
 
-closure_js_library(
+closure_js_test(
     name = "test_lib",
     testonly = 1,
+    #lenient = True,
     srcs = glob([
         "*_test.js",
     ]),
+    entry_points = {
+        "ecies_aead_hkdf_private_key_manager_test.js": ["tink.hybrid.EciesAeadHkdfPrivateKeyManagerTest"],
+        "ecies_aead_hkdf_public_key_manager_test.js": ["tink.hybrid.EciesAeadHkdfPublicKeyManagerTest"],
+        "ecies_aead_hkdf_util_test.js": ["tink.hybrid.EciesAeadHkdfUtilTest"],
+        "ecies_aead_hkdf_validators_test.js": ["tink.hybrid.EciesAeadHkdfValidatorsTest"],
+        "hybrid_config_test.js": ["tink.hybrid.HybridConfigTest"],
+        "hybrid_decrypt_catalogue_test.js": ["tink.hybrid.HybridDecryptCatalogueTest"],
+        "hybrid_decrypt_wrapper_test.js": ["tink.hybrid.HybridDecryptWrapperTest"],
+        "hybrid_encrypt_catalogue_test.js": ["tink.hybrid.HybridEncryptCatalogueTest"],
+        "hybrid_encrypt_wrapper_test.js": ["tink.hybrid.HybridEncryptWrapperTest"],
+        "hybrid_key_templates_test.js": ["tink.hybrid.HybridKeyTemplatesTest"],
+        "registry_ecies_aead_hkdf_dem_helper_test.js": ["tink.hybrid.RegistryEciesAeadHkdfDemHelperTest"],
+    },
     deps = [
+        "//javascript/aead",
+        "//javascript/exception",
+        "//javascript/hybrid",
+        "//javascript/subtle",
+        "//javascript:crypto_format",
+        "//javascript:keyset_handle",
+        "//javascript:key_manager",
+        "//javascript:primitive_set",
+        "//javascript:primitives",
+        "//javascript:registry",
+        "//javascript:util",
         "//proto:aes_ctr_closure_proto",
         "//proto:common_closure_proto",
         "//proto:ecies_aead_hkdf_closure_proto",
         "//proto:tink_closure_proto",
         "@io_bazel_rules_closure//closure/library",
-        "@io_bazel_rules_closure//closure/library/testing:asserts",
-        "@io_bazel_rules_closure//closure/library/testing:jsunit",
-        "@io_bazel_rules_closure//closure/library/testing:testsuite",
+        "@io_bazel_rules_closure//closure/library:testing",
         "@io_bazel_rules_closure//closure/library/useragent",
     ],
 )

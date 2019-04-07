@@ -8,6 +8,7 @@ load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure
 
 closure_js_library(
     name = "primitives",
+    #lenient = True,
     srcs = [
         "aead.js",
         "hybrid_decrypt.js",
@@ -24,6 +25,7 @@ closure_js_library(
 
 closure_js_library(
     name = "binary_reader",
+    #lenient = True,
     srcs = [
         "binary_keyset_reader.js",
     ],
@@ -37,6 +39,7 @@ closure_js_library(
 
 closure_js_library(
     name = "readers_writers",
+    #lenient = True,
     srcs = [
         "keyset_reader.js",
         "keyset_writer.js",
@@ -49,6 +52,7 @@ closure_js_library(
 
 closure_js_library(
     name = "keyset_handle",
+    #lenient = True,
     srcs = [
         "keyset_handle.js",
     ],
@@ -67,6 +71,7 @@ closure_js_library(
 
 closure_js_library(
     name = "cleartext_keyset_handle",
+    #lenient = True,
     srcs = [
         "cleartext_keyset_handle.js",
     ],
@@ -79,6 +84,7 @@ closure_js_library(
 
 closure_js_library(
     name = "primitive_set",
+    #lenient = True,
     srcs = [
         "primitive_set.js",
     ],
@@ -92,6 +98,7 @@ closure_js_library(
 
 closure_js_library(
     name = "key_manager",
+    #lenient = True,
     srcs = [
         "key_manager.js",
     ],
@@ -105,6 +112,7 @@ closure_js_library(
 
 closure_js_library(
     name = "primitive_wrapper",
+    #lenient = True,
     srcs = [
         "primitive_wrapper.js",
     ],
@@ -116,6 +124,7 @@ closure_js_library(
 
 closure_js_library(
     name = "catalogue",
+    #lenient = True,
     srcs = [
         "catalogue.js",
     ],
@@ -127,6 +136,7 @@ closure_js_library(
 
 closure_js_library(
     name = "registry",
+    #lenient = True,
     srcs = [
         "registry.js",
     ],
@@ -145,6 +155,7 @@ closure_js_library(
 
 closure_js_library(
     name = "crypto_format",
+    #lenient = True,
     srcs = [
         "crypto_format.js",
     ],
@@ -157,6 +168,7 @@ closure_js_library(
 
 closure_js_library(
     name = "util",
+    #lenient = True,
     srcs = [
         "util.js",
     ],
@@ -171,6 +183,7 @@ closure_js_library(
 
 closure_js_library(
     name = "config",
+    #lenient = True,
     srcs = [
         "config.js",
     ],
@@ -185,3 +198,66 @@ closure_js_library(
 )
 
 # test
+closure_js_library(
+    name = "test_utils",
+    #lenient = True,
+    testonly = 1,
+    srcs = [
+        "test_utils.js",
+    ],
+    deps = [
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_test(
+    name = "test_lib",
+    testonly = 1,
+    #lenient = True,
+    srcs = glob([
+        "*_test.js",
+    ]),
+    entry_points = {
+        "binary_keyset_reader_test.js": ["tink.BinaryKeysetReaderTest"],
+        "cleartext_keyset_handle_test.js": ["tink.CleartextKeysetHandleTest"],
+        "config_test.js": ["tink.ConfigTest"],
+        "crypto_format_test.js": ["tink.CryptoFormatTest"],
+        "keyset_handle_test.js": ["tink.KeysetHandleTest"],
+        "primitive_set_test.js": ["tink.PrimitiveSetTest"],
+        "proto_test.js": ["tink.ProtoTest"],
+        "registry_test.js": ["tink.RegistryTest"],
+        "util_test.js": ["tink.UtilTest"],
+    },
+    deps = [
+        ":binary_reader",
+        ":catalogue",
+        ":cleartext_keyset_handle",
+        ":config",
+        ":crypto_format",
+        ":keyset_handle",
+        ":key_manager",
+        ":primitive_set",
+        ":primitive_wrapper",
+        ":primitives",
+        ":registry",
+        ":util",
+        ":test_utils",
+        "//javascript/aead",
+        "//javascript/hybrid",
+        "//javascript/subtle",
+        "//javascript/subtle:aead",
+        "//javascript/exception",
+        "//proto:aes_ctr_closure_proto",
+        "//proto:aes_ctr_hmac_aead_closure_proto",
+        "//proto:common_closure_proto",
+        "//proto:config_closure_proto",
+        "//proto:ecdsa_closure_proto",
+        "//proto:ecies_aead_hkdf_closure_proto",
+        "//proto:hmac_closure_proto",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library:testing",
+        "@io_bazel_rules_closure//closure/library/useragent",
+        "@io_bazel_rules_closure//closure/protobuf:jspb",
+    ],
+)

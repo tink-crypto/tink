@@ -218,6 +218,29 @@ load("@build_stack_rules_proto//cpp:deps.bzl", "cpp_grpc_library")
 cpp_grpc_library()
 
 #-----------------------------------------------------------------------------
+# Javascript
+#-----------------------------------------------------------------------------
+
+http_archive(
+    name = "io_bazel_rules_closure",
+    sha256 = "fecda06179906857ac79af6500124bf03fe1630fd1b3d4dcf6c65346b9c0725d",
+    strip_prefix = "rules_closure-03110588392d8c6c05b99c08a6f1c2121604ca27",
+    urls = [
+        "https://github.com/bazelbuild/rules_closure/archive/03110588392d8c6c05b99c08a6f1c2121604ca27.zip",
+    ],
+)
+
+#local_repository(
+#    name = "io_bazel_rules_closure",
+#    path = "/Users/michael/src/self/rules_closure",
+#)
+
+
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
+
+closure_repositories()
+
+#-----------------------------------------------------------------------------
 # java
 #-----------------------------------------------------------------------------
 
@@ -385,7 +408,7 @@ java_import_external(
 )
 
 java_import_external(
-    name = "com_google_auto_common",
+    name = "com_google_auto_common_08",
     licenses = ["notice"],  # Apache 2.0
     jar_sha256 = "97db1709f57b91b32edacb596ef4641872f227b7d99ad90e467f0d77f5ba134a",
     jar_urls = [
@@ -404,7 +427,7 @@ java_import_external(
         "https://repo1.maven.org/maven2/com/google/auto/service/auto-service/1.0-rc3/auto-service-1.0-rc3.jar",
     ],
     deps = [
-        "@com_google_auto_common",
+        "@com_google_auto_common_08",
         "@com_google_guava",
     ],
 )
@@ -767,23 +790,3 @@ go_repository(
     commit = "182cda27d0921b14139ff6d352c09e0cb20e4578",
     importpath = "github.com/aws/aws-sdk-go",
 )
-
-
-#-----------------------------------------------------------------------------
-# Javascript
-#-----------------------------------------------------------------------------
-
-http_archive(
-    name = "io_bazel_rules_closure",
-    sha256 = "6113983b357de085515c5356405e2391fda88edc3d8f214789b560a0e70d9968",
-    strip_prefix = "rules_closure-6794c2755113e967394eec53ed4ceb6c7eb4d065",
-    urls = [
-        "https://github.com/bazelbuild/rules_closure/archive/6794c2755113e967394eec53ed4ceb6c7eb4d065.zip",
-    ],
-)
-
-
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
-
-closure_repositories()
-

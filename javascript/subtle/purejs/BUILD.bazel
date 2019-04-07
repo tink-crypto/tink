@@ -11,6 +11,7 @@ closure_js_library(
     srcs = [
         "aes_ctr.js",
     ],
+    #lenient = True,
     deps = [
         "//javascript:primitives",
         "//javascript/exception",
@@ -26,6 +27,7 @@ closure_js_library(
     srcs = [
         "hmac.js",
     ],
+    #lenient = True,
     deps = [
         "//javascript:primitives",
         "//javascript/exception",
