@@ -669,10 +669,10 @@ const createKeysetAndInitializeRegistry = function(
     // they are quite rarely added into the Keyset.
     const key = createKey(i, outputPrefix, keyType, /* enabled = */ i % 7 < 6);
     keyset.addKey(key);
+  }
 
     keyset.setPrimaryKeyId(1);
     return keyset;
-  }
 };
 
 /**
