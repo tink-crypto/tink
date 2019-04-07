@@ -92,9 +92,9 @@ class EcdsaPrivateKeyFactory {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
 
     const jsonPublicKey =
-        await EllipticCurves.exportCryptoKey(/** @type {?} */ (keyPair).publicKey);
+        await EllipticCurves.exportCryptoKey((keyPair).publicKey);
     const jsonPrivateKey =
-        await EllipticCurves.exportCryptoKey(/** @type {?} */ (keyPair).privateKey);
+        await EllipticCurves.exportCryptoKey((keyPair).privateKey);
     return EcdsaPrivateKeyFactory.jsonToProtoKey_(
         jsonPrivateKey, jsonPublicKey, params);
   }
@@ -173,7 +173,7 @@ class EcdsaPrivateKeyFactory {
 
 
 /**
- * @implements {KeyManager.KeyManager<PublicKeySign>}
+ * @implements {KeyManager.KeyManager<!PublicKeySign>}
  * @final
  */
 class EcdsaPrivateKeyManager {

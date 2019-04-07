@@ -23,7 +23,7 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 /**
  * A catalogue of TINK key managers for hybrid decryption.
  *
- * @implements {Catalogue<HybridDecrypt>}
+ * @implements {Catalogue<!HybridDecrypt>}
  * @final
  */
 class HybridDecryptCatalogue {

@@ -50,7 +50,7 @@ class EciesAeadHkdfPublicKeyFactory {
 
 
 /**
- * @implements {KeyManager.KeyManager<HybridEncrypt>}
+ * @implements {KeyManager.KeyManager<!HybridEncrypt>}
  * @final
  */
 class EciesAeadHkdfPublicKeyManager {

@@ -28,14 +28,14 @@ const Validators = goog.require('tink.subtle.Validators');
 class WrappedPublicKeySign {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
-  /** @param {!PrimitiveSet.PrimitiveSet} primitiveSet */
+  /** @param {!PrimitiveSet.PrimitiveSet<!PublicKeySign>} primitiveSet */
   constructor(primitiveSet) {
-    /** @private @const {!PrimitiveSet.PrimitiveSet} */
+    /** @private @const {!PrimitiveSet.PrimitiveSet<!PublicKeySign>} */
     this.primitiveSet_ = primitiveSet;
   }
 
   /**
-   * @param {!PrimitiveSet.PrimitiveSet} primitiveSet
+   * @param {!PrimitiveSet.PrimitiveSet<!PublicKeySign>} primitiveSet
    * @return {!PublicKeySign}
    */
   static newPublicKeySign(primitiveSet) {
@@ -61,7 +61,7 @@ class WrappedPublicKeySign {
 }
 
 /**
- * @implements {PrimitiveWrapper<PublicKeySign>}
+ * @implements {PrimitiveWrapper<!PublicKeySign>}
  */
 class PublicKeySignWrapper {
   // The constructor should be @private, but it is not supported by Closure

@@ -220,7 +220,7 @@ testSuite({
     const key = createTestKey();
 
     // Get the primitive from key manager.
-    const /** Aead */ primitive = await manager.getPrimitive(PRIMITIVE, key);
+    const /** !Aead */ primitive = await manager.getPrimitive(PRIMITIVE, key);
 
     // Test the returned primitive.
     const plaintext = Random.randBytes(8);
@@ -236,7 +236,7 @@ testSuite({
     const keyData = createTestKeyData();
 
     // Get primitive.
-    const /** Aead */ primitive =
+    const /** !Aead */ primitive =
         await manager.getPrimitive(PRIMITIVE, keyData);
 
     // Test the returned primitive.

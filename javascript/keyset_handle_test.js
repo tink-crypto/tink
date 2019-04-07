@@ -14,7 +14,7 @@
 
 /**
  * @fileoverview
- * @suppress {checkTypes, reportUnknownTypes}
+ * @suppress {checkTypes, reportUnknownTypes, visibility}
  */
 goog.module('tink.KeysetHandleTest');
 goog.setTestOnly('tink.KeysetHandleTest');
@@ -671,8 +671,8 @@ const createKeysetAndInitializeRegistry = function(
     keyset.addKey(key);
   }
 
-    keyset.setPrimaryKeyId(1);
-    return keyset;
+  keyset.setPrimaryKeyId(1);
+  return keyset;
 };
 
 /**
@@ -799,11 +799,6 @@ class DummyKeyManager {
      * @private @const {!Object}
      */
     this.PRIMITIVE_ = primitive;
-
-    /**
-     * @private @const {!KeyManager.KeyFactory}
-     */
-    this.KEY_FACTORY_ = new DummyKeyFactory();
 
     /**
      * @private @const {!Object}

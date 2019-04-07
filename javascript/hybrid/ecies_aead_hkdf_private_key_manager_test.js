@@ -357,10 +357,10 @@ testSuite({
     for (let keyFormat of keyFormats) {
       const key = await privateKeyManager.getKeyFactory().newKey(keyFormat);
 
-      const /** HybridEncrypt */ hybridEncrypt =
+      const /** !HybridEncrypt */ hybridEncrypt =
           await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, key.getPublicKey());
-      const /** HybridDecrypt */ hybridDecrypt =
+      const /** !HybridDecrypt */ hybridDecrypt =
           await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, key);
 
@@ -385,10 +385,10 @@ testSuite({
           privateKeyManager.getKeyFactory());
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
 
-      const /** HybridEncrypt */ hybridEncrypt =
+      const /** !HybridEncrypt */ hybridEncrypt =
           await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData);
-      const /** HybridDecrypt */ hybridDecrypt =
+      const /** !HybridDecrypt */ hybridDecrypt =
           await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
 

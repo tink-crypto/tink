@@ -96,9 +96,9 @@ class EciesAeadHkdfPrivateKeyFactory {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
 
     const jsonPublicKey =
-        await EllipticCurves.exportCryptoKey(/** @type {?} */ (keyPair).publicKey);
+        await EllipticCurves.exportCryptoKey((keyPair).publicKey);
     const jsonPrivateKey =
-        await EllipticCurves.exportCryptoKey(/** @type {?} */ (keyPair).privateKey);
+        await EllipticCurves.exportCryptoKey((keyPair).privateKey);
     return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey_(
         jsonPrivateKey, jsonPublicKey, params);
   }
@@ -177,7 +177,7 @@ class EciesAeadHkdfPrivateKeyFactory {
 
 
 /**
- * @implements {KeyManager.KeyManager<HybridDecrypt>}
+ * @implements {KeyManager.KeyManager<!HybridDecrypt>}
  * @final
  */
 class EciesAeadHkdfPrivateKeyManager {

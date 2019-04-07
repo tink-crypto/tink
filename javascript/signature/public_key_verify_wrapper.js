@@ -107,7 +107,7 @@ class WrappedPublicKeyVerify {
 }
 
 /**
- * @implements {PrimitiveWrapper<PublicKeyVerify>}
+ * @implements {PrimitiveWrapper<!PublicKeyVerify>}
  */
 class PublicKeyVerifyWrapper {
   // The constructor should be @private, but it is not supported by Closure

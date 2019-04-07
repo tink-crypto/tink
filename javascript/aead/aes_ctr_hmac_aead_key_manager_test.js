@@ -171,7 +171,7 @@ testSuite({
   },
 
   async testNewKeyIvSizeOutOfRange() {
-    const /** Array<number> */ ivSizeOutOfRange = [10, 18];
+    const /** !Array<number> */ ivSizeOutOfRange = [10, 18];
     const manager = new AesCtrHmacAeadKeyManager();
 
     let keyFormat = createTestKeyFormat();
@@ -390,7 +390,7 @@ testSuite({
 
   async testGetPrimitiveUnsupportedKeyDataType() {
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbKeyData */ keyData = createTestKeyData();
+    let /** !PbKeyData */ keyData = createTestKeyData();
     keyData.setTypeUrl('bad type url');
 
     try {
@@ -423,7 +423,7 @@ testSuite({
   async testGetPrimitiveBadVersion() {
     const version = 1;
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    let /** !PbAesCtrHmacAeadKey */ key = createTestKey();
 
     key.getAesCtrKey().setVersion(version);
 
@@ -442,7 +442,7 @@ testSuite({
   async testGetPrimitiveShortAesCtrKey() {
     const keySize = 5;
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    let /** !PbAesCtrHmacAeadKey */ key = createTestKey();
 
     key.getAesCtrKey().setKeyValue(new Uint8Array(keySize));
 
@@ -457,9 +457,9 @@ testSuite({
   },
 
   async testGetPrimitiveAesCtrKeySmallIvSize() {
-    const /** Array<number> */ ivSizeOutOfRange = [9, 19];
+    const /** !Array<number> */ ivSizeOutOfRange = [9, 19];
     const manager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    let /** !PbAesCtrHmacAeadKey */ key = createTestKey();
 
     const ivSizeOutOfRangeLength = ivSizeOutOfRange.length;
     for (let i = 0; i < ivSizeOutOfRangeLength; i++) {
@@ -480,7 +480,7 @@ testSuite({
   async testGetPrimitiveShortHmacKey() {
     const keySize = 5;
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    let /** !PbAesCtrHmacAeadKey */ key = createTestKey();
 
     key.getHmacKey().setKeyValue(new Uint8Array(keySize));
 
@@ -498,7 +498,7 @@ testSuite({
 
   async testGetPrimitiveHmacKeyUnsupportedHashType() {
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    let /** !PbAesCtrHmacAeadKey */ key = createTestKey();
 
     key.getHmacKey().getParams().setHash(PbHashType.UNKNOWN_HASH);
 
@@ -514,7 +514,7 @@ testSuite({
   async testGetPrimitiveHmacKeySmallTagSize() {
     const SMALL_TAG_SIZE = 9;
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    let /** !PbAesCtrHmacAeadKey */ key = createTestKey();
 
     key.getHmacKey().getParams().setTagSize(SMALL_TAG_SIZE);
 
@@ -538,7 +538,7 @@ testSuite({
     ];
     const manager = new AesCtrHmacAeadKeyManager();
 
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    let /** !PbAesCtrHmacAeadKey */ key = createTestKey();
 
     const tagSizesLength = tagSizes.length;
     for (let i = 0; i < tagSizesLength; i++) {
@@ -564,7 +564,7 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
 
-    const /** Aead */ primitive = await aeadKeyManager.getPrimitive(Aead, key);
+    const /** !Aead */ primitive = await aeadKeyManager.getPrimitive(Aead, key);
     const ciphertext = await primitive.encrypt(plaintext, aad);
     const decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 
@@ -577,7 +577,7 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
 
-    const /** Aead */ primitive =
+    const /** !Aead */ primitive =
         await aeadKeyManager.getPrimitive(Aead, keyData);
     const ciphertext = await primitive.encrypt(plaintext, aad);
     const decryptedCiphertext = await primitive.decrypt(ciphertext, aad);

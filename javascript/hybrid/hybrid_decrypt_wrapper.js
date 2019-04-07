@@ -28,14 +28,14 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 class WrappedHybridDecrypt {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
-  /** @param {!PrimitiveSet.PrimitiveSet} hybridDecryptPrimitiveSet */
+  /** @param {!PrimitiveSet.PrimitiveSet<!HybridDecrypt>} hybridDecryptPrimitiveSet */
   constructor(hybridDecryptPrimitiveSet) {
-    /** @private @const {!PrimitiveSet.PrimitiveSet} */
+    /** @private @const {!PrimitiveSet.PrimitiveSet<!HybridDecrypt>} */
     this.primitiveSet_ = hybridDecryptPrimitiveSet;
   }
 
   /**
-   * @param {!PrimitiveSet.PrimitiveSet} hybridDecryptPrimitiveSet
+   * @param {!PrimitiveSet.PrimitiveSet<!HybridDecrypt>} hybridDecryptPrimitiveSet
    * @return {!HybridDecrypt}
    */
   static newHybridDecrypt(hybridDecryptPrimitiveSet) {
@@ -78,7 +78,7 @@ class WrappedHybridDecrypt {
    * returns the ciphertext decrypted by first primitive which succeed. It
    * throws an exception if no entry succeeds.
    *
-   * @param {!Array<!PrimitiveSet.Entry>} primitives
+   * @param {!Array<!PrimitiveSet.Entry<!HybridDecrypt>>} primitives
    * @param {!Uint8Array} ciphertext
    * @param {?Uint8Array=} opt_contextInfo
    *
@@ -106,7 +106,7 @@ class WrappedHybridDecrypt {
 }
 
 /**
- * @implements {PrimitiveWrapper<HybridDecrypt>}
+ * @implements {PrimitiveWrapper<!HybridDecrypt>}
  */
 class HybridDecryptWrapper {
   // The constructor should be @private, but it is not supported by Closure
