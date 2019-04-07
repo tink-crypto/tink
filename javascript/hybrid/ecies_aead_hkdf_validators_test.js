@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.hybrid.EciesAeadHkdfValidatorsTest');
 goog.setTestOnly('tink.hybrid.EciesAeadHkdfValidatorsTest');
 

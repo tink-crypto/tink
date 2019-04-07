@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.subtle.EciesHkdfKemRecipientTest');
 goog.setTestOnly('tink.subtle.EciesHkdfKemRecipientTest');
 

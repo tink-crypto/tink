@@ -33,6 +33,7 @@ class Entry {
    * @param {!Uint8Array} identifier
    * @param {!PbKeyStatusType} keyStatus
    * @param {!PbOutputPrefixType} outputPrefixType
+   * @suppress {reportUnknownTypes}
    */
   constructor(primitive, identifier, keyStatus, outputPrefixType) {
     /** @const @private {!P} */
@@ -47,6 +48,7 @@ class Entry {
 
   /**
    * @return {!P}
+   * @suppress {reportUnknownTypes}
    */
   getPrimitive() {
     return this.primitive_;
@@ -101,17 +103,17 @@ class PrimitiveSet {
    */
   constructor(primitiveType) {
     /**
-     * @private {!Object}
+     * @const @private {!Object}
      */
     this.primitiveType_ = primitiveType;
     /**
-     * @private {?Entry<P>}
+     * @private {?Entry<!P>}
      */
     this.primary_ = null;
     // Keys have to be stored as strings as two Uint8Arrays holding the same
     // digits are still different objects.
     /**
-     * @private {!Map<string, !Array<!Entry<P>>>}
+     * @const @private {!Map<string, !Array<!Entry<!P>>>}
      */
     this.identifierToPrimitivesMap_ = new Map();
   }
@@ -132,6 +134,7 @@ class PrimitiveSet {
    * @param {!PbKeyset.Key} key
    *
    * @return {!Entry<P>}
+   * @suppress {reportUnknownTypes}
    */
   addPrimitive(primitive, key) {
     if (!primitive) {

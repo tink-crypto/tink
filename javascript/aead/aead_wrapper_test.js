@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.aead.AeadWrapperTest');
 goog.setTestOnly('tink.aead.AeadWrapperTest');
 

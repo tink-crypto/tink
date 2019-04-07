@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.hybrid.HybridDecryptWrapperTest');
 goog.setTestOnly('tink.hybrid.HybridDecryptWrapperTest');
 

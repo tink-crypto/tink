@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.hybrid.HybridConfigTest');
 goog.setTestOnly('tink.hybrid.HybridConfigTest');
 

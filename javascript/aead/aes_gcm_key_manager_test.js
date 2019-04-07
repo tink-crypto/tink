@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.aead.AesGcmKeyManagerTest');
 goog.setTestOnly('tink.aead.AesGcmKeyManagerTest');
 
@@ -317,6 +321,9 @@ class ExceptionText {
         KEY_TYPE + ' key.';
   }
 
+  /**
+   * @return {string}
+   */
   static invalidSerializedKeyFormat() {
     return 'CustomError: Could not parse the input as a serialized proto of ' +
         KEY_TYPE + ' key format.';

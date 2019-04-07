@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.aead.AeadConfigTest');
 goog.setTestOnly('tink.aead.AeadConfigTest');
 

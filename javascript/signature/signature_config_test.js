@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.signature.SignatureConfigTest');
 goog.setTestOnly('tink.signature.SignatureConfigTest');
 

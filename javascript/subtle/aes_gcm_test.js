@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.subtle.AesGcmTest');
 goog.setTestOnly('tink.subtle.AesGcmTest');
 

@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.subtle.AesCtrTest');
 goog.setTestOnly('tink.subtle.AesCtrTest');
 

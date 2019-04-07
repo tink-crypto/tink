@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.subtle.BytesTest');
 goog.setTestOnly('tink.subtle.BytesTest');
 

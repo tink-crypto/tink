@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.hybrid.HybridDecryptCatalogueTest');
 goog.setTestOnly('tink.hybrid.HybridDecryptCatalogueTest');
 

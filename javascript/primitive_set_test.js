@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.PrimitiveSetTest');
 goog.setTestOnly('tink.PrimitiveSetTest');
 
@@ -72,7 +76,8 @@ testSuite({
 
   testAddPrimitiveMultipleTimesShouldWork() {
     const key = createKey();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
+    const /** !PrimitiveSet.PrimitiveSet<!Aead> */ primitiveSet =
+      new PrimitiveSet.PrimitiveSet(Aead);
 
     for (let i = 0; i < 4; i++) {
       let primitive;

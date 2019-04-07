@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.CryptoFormatTest');
 goog.setTestOnly('tink.CryptoFormatTest');
 

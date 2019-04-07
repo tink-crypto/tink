@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.signature.EcdsaPrivateKeyManagerTest');
 goog.setTestOnly('tink.signature.EcdsaPrivateKeyManagerTest');
 

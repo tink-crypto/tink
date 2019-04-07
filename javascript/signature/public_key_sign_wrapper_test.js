@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.signature.PublicKeySignWrapperTest');
 goog.setTestOnly('tink.signature.PublicKeySignWrapperTest');
 

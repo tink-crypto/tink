@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.subtle.EcdsaVerifyTest');
 goog.setTestOnly('tink.subtle.EcdsaVerifyTest');
 

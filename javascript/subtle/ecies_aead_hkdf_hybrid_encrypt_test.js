@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.subtle.EciesAeadHkdfHybridEncryptTest');
 goog.setTestOnly('tink.subtle.EciesAeadHkdfHybridEncryptTest');
 

@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.hybrid.RegistryEciesAeadHkdfDemHelperTest');
 goog.setTestOnly('tink.hybrid.RegistryEciesAeadHkdfDemHelperTest');
 

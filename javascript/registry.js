@@ -169,6 +169,7 @@ class Registry {
    * @param {?string=} opt_typeUrl -- key type
    *
    * @return {!Promise.<!P>}
+   * @suppress {reportUnknownTypes}
    */
   static async getPrimitive(primitiveType, key, opt_typeUrl) {
     if (key instanceof PbKeyData) {
@@ -229,6 +230,7 @@ class Registry {
    * @param {string} typeUrl
    * @param {!Uint8Array} serializedPrivateKey
    * @return {!PbKeyData}
+   * @suppress {reportUnknownTypes}
    */
   static getPublicKeyData(typeUrl, serializedPrivateKey) {
     const manager = Registry.getKeyManager(typeUrl);
@@ -316,8 +318,9 @@ class Registry {
    * @template P
    * @static
    *
-   * @param {!PrimitiveSet.PrimitiveSet<P>} primitiveSet
+   * @param {!PrimitiveSet.PrimitiveSet<!P>} primitiveSet
    * @return {!P}
+   * @suppress {reportUnknownTypes}
    */
   static wrap(primitiveSet) {
     if (!primitiveSet) {
@@ -334,24 +337,24 @@ class Registry {
 }
 // key managers maps
 /**
- * @static @private {!Map<string,!KeyManager.KeyManager>}
+ * @const @static @private {!Map<string,!KeyManager.KeyManager>}
  *
  */
 Registry.typeToManagerMap_ = new Map();
 /**
- * @static @private {!Map<string,boolean>}
+ * @const @static @private {!Map<string,boolean>}
  */
 Registry.typeToNewKeyAllowedMap_ = new Map();
 
 // catalogues maps
 /**
- * @static @private {!Map<string,!Catalogue>}
+ * @const @static @private {!Map<string,!Catalogue>}
  */
 Registry.nameToCatalogueMap_ = new Map();
 
 // primitive wrappers map
 /**
- * @static @private {!Map<!Object,!PrimitiveWrapper>}
+ * @const @static @private {!Map<!Object,!PrimitiveWrapper>}
  */
 Registry.primitiveTypeToWrapper_ = new Map();
 

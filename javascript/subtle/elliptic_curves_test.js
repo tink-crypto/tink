@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.subtle.EllipticCurvesTest');
 goog.setTestOnly('tink.subtle.EllipticCurvesTest');
 

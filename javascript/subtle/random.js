@@ -34,7 +34,9 @@ const randBytes = function(n) {
   }
   const result = new Uint8Array(n);
   if (n) {  // Edge can't handle an empty array
-    const crypto = goog.global['crypto'] || goog.global['msCrypto'];
+    const crypto = /** @type {?webCrypto.Crypto} */(
+      goog.global['crypto']) || /** @type {!webCrypto.Crypto} */(
+        goog.global['msCrypto']);
     crypto.getRandomValues(result);
   }
   return result;

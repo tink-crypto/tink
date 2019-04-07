@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.aead.AesCtrHmacAeadKeyManagerTest');
 goog.setTestOnly('tink.aead.AesCtrHmacAeadKeyManagerTest');
 

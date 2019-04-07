@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.BinaryKeysetReaderTest');
 goog.setTestOnly('tink.BinaryKeysetReaderTest');
 

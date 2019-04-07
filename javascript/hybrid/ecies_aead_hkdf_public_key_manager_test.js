@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
 goog.setTestOnly('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
 

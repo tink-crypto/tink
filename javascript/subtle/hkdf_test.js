@@ -12,6 +12,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.subtle.HkdfTest');
 goog.setTestOnly('tink.subtle.HkdfTest');
 

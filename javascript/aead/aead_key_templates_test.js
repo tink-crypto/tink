@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.aead.AeadKeyTemplatesTest');
 goog.setTestOnly('tink.aead.AeadKeyTemplatesTest');
 

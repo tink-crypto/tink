@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes}
+ */
 goog.module('tink.signature.PublicKeyVerifyCatalogueTest');
 goog.setTestOnly('tink.signature.PublicKeyVerifyCatalogueTest');
 

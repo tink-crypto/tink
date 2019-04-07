@@ -107,7 +107,7 @@ class WrappedAead {
    * throws an exception if no entry succeeds.
    *
    * @private
-   * @param {!Array<!PrimitiveSet.Entry>} entriesArray
+   * @param {!Array<!PrimitiveSet.Entry<!Aead>>} entriesArray
    * @param {!Uint8Array} ciphertext
    * @param {?Uint8Array=} opt_associatedData
    *
