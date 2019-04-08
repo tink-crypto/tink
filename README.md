@@ -126,6 +126,7 @@ ported it to their favorite languages! Below you can find notable ports.
 maintain them and have no plan to support them in the foreseeable future.
 
 *   [C# (with JNI)](https://github.com/google-pay/tink-jni-examples)
+*   [Clojure](https://github.com/perkss/tinklj)
 
 ## Contact and mailing list
 
