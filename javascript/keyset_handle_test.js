@@ -801,6 +801,12 @@ class DummyKeyManager {
     this.PRIMITIVE_ = primitive;
 
     /**
+     * @private @const {!KeyManager.KeyFactory}
+     * @suppress {unusedPrivateMembers}
+     */
+    this.KEY_FACTORY_ = new DummyKeyFactory();
+
+    /**
      * @private @const {!Object}
      */
     this.PRIMITIVE_TYPE_ = primitiveType;
