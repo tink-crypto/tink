@@ -223,18 +223,12 @@ cpp_grpc_library()
 
 http_archive(
     name = "io_bazel_rules_closure",
-    sha256 = "fecda06179906857ac79af6500124bf03fe1630fd1b3d4dcf6c65346b9c0725d",
-    strip_prefix = "rules_closure-03110588392d8c6c05b99c08a6f1c2121604ca27",
+    sha256 = "87e5734a31fc20844de11f16323ab8d85159ca62ec752a2d9d159a8f471632c4",
+    strip_prefix = "rules_closure-9b43421460db85773d121414a81ec7d5bec6b7ce",
     urls = [
-        "https://github.com/bazelbuild/rules_closure/archive/03110588392d8c6c05b99c08a6f1c2121604ca27.zip",
+        "https://github.com/bazelbuild/rules_closure/archive/9b43421460db85773d121414a81ec7d5bec6b7ce.zip",
     ],
 )
-
-#local_repository(
-#    name = "io_bazel_rules_closure",
-#    path = "/Users/michael/src/self/rules_closure",
-#)
-
 
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
 
