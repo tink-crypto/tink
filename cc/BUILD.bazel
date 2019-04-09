@@ -584,6 +584,23 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "kms_clients",
+    hdrs = ["kms_clients.h"],
+    srcs = ["core/kms_clients.cc"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":kms_client",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
 # Settings for building in various environments.
 config_setting(
     name = "linux_x86_64",
@@ -937,6 +954,24 @@ cc_test(
         "//cc/util:protobuf_helper",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "kms_clients_test",
+    size = "small",
+    srcs = ["core/kms_clients_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":kms_client",
+        ":kms_clients",
+        ":aead",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "//cc/util:test_matchers",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

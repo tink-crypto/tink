@@ -28,6 +28,7 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/input_stream.h"
+#include "tink/kms_client.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
 #include "tink/output_stream.h"
@@ -466,6 +467,32 @@ class DummyKeysetWriter : public KeysetWriter {
       : destination_stream_(std::move(destination_stream)) {}
 
   std::unique_ptr<std::ostream> destination_stream_;
+};
+
+// A dummy implementation of KmsClient-interface.
+class DummyKmsClient : public KmsClient {
+ public:
+  DummyKmsClient(absl::string_view uri_prefix, absl::string_view key_uri)
+      : uri_prefix_(uri_prefix), key_uri_(key_uri) {}
+
+  bool DoesSupport(absl::string_view key_uri) const override {
+    if (key_uri.empty()) return false;
+    if (key_uri_.empty()) return StartsWith(key_uri, uri_prefix_);
+    return key_uri == key_uri_;
+  }
+
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetAead(
+      absl::string_view key_uri) const override {
+    if (!DoesSupport(key_uri)) return crypto::tink::util::Status(
+            util::error::INVALID_ARGUMENT, "key_uri not supported");
+    return {absl::make_unique<DummyAead>(key_uri)};
+  }
+
+  ~DummyKmsClient() override {}
+
+ private:
+  std::string uri_prefix_;
+  std::string key_uri_;
 };
 
 }  // namespace test

@@ -197,6 +197,27 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME kms_aead_key_manager
+  SRCS
+    kms_aead_key_manager.cc
+    kms_aead_key_manager.h
+  DEPS
+    tink::core::aead
+    tink::core::key_manager
+    tink::core::key_manager_base
+    tink::core::kms_client
+    tink::core::kms_clients
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    tink::proto::kms_aead_cc_proto
+    tink::proto::tink_cc_proto
+    absl::strings
+)
+
 # tests
 
 tink_cc_test(
@@ -344,4 +365,22 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
+)
+
+tink_cc_test(
+  NAME kms_aead_key_manager_test
+  SRCS kms_aead_key_manager_test.cc
+  DEPS
+    tink::aead::kms_aead_key_manager
+    tink::core::aead
+    tink::core::kms_client
+    tink::core::kms_clients
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::aes_eax_cc_proto
+    tink::proto::kms_aead_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )

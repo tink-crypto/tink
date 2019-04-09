@@ -492,6 +492,21 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME kms_clients
+  SRCS
+    core/kms_clients.cc
+    kms_clients.h
+  DEPS
+    tink::core::kms_client
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+    absl::base
+    absl::strings
+    absl::synchronization
+)
+
 if (TINK_BUILD_SHARED_LIB)
   add_library(tink SHARED
     ${TINK_PUBLIC_APIS}
@@ -705,3 +720,19 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
+
+tink_cc_test(
+  NAME kms_clients_test
+  SRCS core/kms_clients_test.cc
+  DEPS
+    absl::strings
+    tink::core::aead
+    tink::core::kms_client
+    tink::core::kms_clients
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+)
+

@@ -151,6 +151,7 @@ cc_library(
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
         "//cc:input_stream",
+        "//cc:kms_client",
         "//cc:keyset_handle",
         "//cc:mac",
         "//cc:output_stream",
