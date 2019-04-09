@@ -507,6 +507,14 @@ tink_cc_library(
     absl::synchronization
 )
 
+tink_cc_library(
+  NAME template_util
+  SRCS
+    core/template_util.h
+  DEPS
+    absl::meta
+)
+
 if (TINK_BUILD_SHARED_LIB)
   add_library(tink SHARED
     ${TINK_PUBLIC_APIS}
@@ -734,5 +742,12 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+)
+
+tink_cc_test(
+  NAME template_utils_test
+  SRCS core/template_utils_test.cc
+  DEPS
+    tink::core::template_utils
 )
 

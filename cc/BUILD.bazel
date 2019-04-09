@@ -601,6 +601,14 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "core/template_util",
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    hdrs = ["core/template_util.h"],
+    deps = ["@com_google_absl//absl/meta:type_traits"],
+)
+
 # Settings for building in various environments.
 config_setting(
     name = "linux_x86_64",
@@ -972,6 +980,15 @@ cc_test(
         "//cc/util:test_util",
         "//cc/util:test_matchers",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/template_utils_test",
+    srcs = ["core/template_utils_test.cc"],
+    deps = [
+        ":core/template_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
