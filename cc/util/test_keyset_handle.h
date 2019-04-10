@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_UTIL_KEYSET_UTIL_H_
-#define TINK_UTIL_KEYSET_UTIL_H_
+#ifndef TINK_UTIL_TEST_KEYSET_HANDLE_H_
+#define TINK_UTIL_TEST_KEYSET_HANDLE_H_
 
 #include "tink/keyset_handle.h"
 #include "proto/tink.pb.h"
@@ -39,4 +39,4 @@ class TestKeysetHandle {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_UTIL_KEYSET_UTIL_H_
+#endif  // TINK_UTIL_TEST_KEYSET_HANDLE_H_
