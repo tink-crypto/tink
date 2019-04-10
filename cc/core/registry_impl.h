@@ -102,7 +102,7 @@ class RegistryImpl {
  private:
   // All information for a given type url.
   struct KeyTypeInfo {
-    KeyTypeInfo(std::unique_ptr<void, void (*)(void*)> key_manager,
+    KeyTypeInfo(std::shared_ptr<void> key_manager,
                 const char* type_id_name, bool new_key_allowed,
                 const KeyFactory& key_factory)
         : key_manager(std::move(key_manager)),
@@ -110,10 +110,9 @@ class RegistryImpl {
           new_key_allowed(new_key_allowed),
           key_factory(key_factory) {}
 
-    // A pointer to a KeyManager<P>. We cannot use a normal unique_ptr because
-    // we do not know P. Hence, we pass a custom deleter which knows how to
-    // delete the object.
-    const std::unique_ptr<void, void (*)(void*)> key_manager;
+    // A pointer to a KeyManager<P>. We use a shared_ptr because
+    // shared_ptr<void> is valid (as opposed to unique_ptr<void>).
+    const std::shared_ptr<void> key_manager;
     // TypeId of the primitive for which this key was inserted.
     const char* type_id_name;
     // Whether the key manager allows creating new keys.
@@ -124,11 +123,11 @@ class RegistryImpl {
 
   // All information for a given primitive label.
   struct LabelInfo {
-    LabelInfo(std::unique_ptr<void, void (*)(void*)> catalogue,
-              const char* type_id_name)
+    LabelInfo(std::shared_ptr<void> catalogue, const char* type_id_name)
         : catalogue(std::move(catalogue)), type_id_name(type_id_name) {}
-    // A pointer to the underlying Catalogue<P>.
-    const std::unique_ptr<void, void (*)(void*)> catalogue;
+    // A pointer to the underlying Catalogue<P>. We use a shared_ptr because
+    // shared_ptr<void> is valid (as opposed to unique_ptr<void>).
+    const std::shared_ptr<void> catalogue;
     // TypeId of the primitive for which this key was inserted.
     const char* type_id_name;
   };
@@ -145,28 +144,14 @@ class RegistryImpl {
   mutable absl::Mutex maps_mutex_;
   std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_
       GUARDED_BY(maps_mutex_);
-  std::unordered_map<std::string, std::unique_ptr<void, void (*)(void*)>>
-      primitive_to_wrapper_ GUARDED_BY(maps_mutex_);
+  // A map from the type_id to the corresponding wrapper. We use a shared_ptr
+  // because shared_ptr<void> is valid (as opposed to unique_ptr<void>).
+  std::unordered_map<std::string, std::shared_ptr<void>> primitive_to_wrapper_
+      GUARDED_BY(maps_mutex_);
 
   std::unordered_map<std::string, LabelInfo> name_to_catalogue_map_
       GUARDED_BY(maps_mutex_);
 };
-
-template <class P>
-void delete_manager(void* t) {
-  delete static_cast<KeyManager<P>*>(t);
-}
-
-template <class P>
-void delete_catalogue(void* t) {
-  delete static_cast<Catalogue<P>*>(t);
-}
-
-template <class Type>
-std::unique_ptr<void, void (*)(void*)> WrapAsVoidUnique(Type* ptr) {
-  return std::unique_ptr<void, void (*)(void*)>(
-      static_cast<void*>(ptr), [](void* t) { delete static_cast<Type*>(t); });
-}
 
 template <class P>
 crypto::tink::util::Status RegistryImpl::AddCatalogue(
@@ -176,7 +161,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'catalogue' must be non-null.");
   }
-  std::unique_ptr<void, void (*)(void*)> entry(catalogue, delete_catalogue<P>);
+  std::shared_ptr<void> entry(catalogue);
   absl::MutexLock lock(&maps_mutex_);
   auto curr_catalogue = name_to_catalogue_map_.find(catalogue_name);
   if (curr_catalogue != name_to_catalogue_map_.end()) {
@@ -223,7 +208,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'manager' must be non-null.");
   }
-  std::unique_ptr<void, void (*)(void*)> entry(manager, delete_manager<P>);
+  std::shared_ptr<void> entry(manager);
   std::string type_url = manager->get_key_type();
   if (!manager->DoesSupport(type_url)) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
@@ -264,7 +249,7 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'wrapper' must be non-null.");
   }
-  std::unique_ptr<void, void (*)(void*)> entry = WrapAsVoidUnique(wrapper);
+  std::shared_ptr<void> entry(wrapper);
 
   absl::MutexLock lock(&maps_mutex_);
   auto it = primitive_to_wrapper_.find(typeid(P).name());
