@@ -14,10 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "tink/registry.h"
 
 #include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
@@ -30,7 +32,6 @@
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/keyset_manager.h"
-#include "tink/registry.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -61,6 +62,7 @@ using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 using portable_proto::MessageLite;
+using ::testing::HasSubstr;
 
 class RegistryTest : public ::testing::Test {
  protected:
@@ -669,6 +671,33 @@ TEST_F(RegistryTest, UsualWrappingTest) {
             decrypt_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
                       decrypt_result.status().error_message());
+}
+
+// Tests that the error message in GetKeyManager contains the type_id.name() of
+// the primitive for which the key manager was actually registered.
+TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
+  EXPECT_TRUE(
+      Registry::RegisterKeyManager(absl::make_unique<AesGcmKeyManager>(), true)
+          .ok());
+  auto result =
+      Registry::get_key_manager<int>(AesGcmKeyManager().get_key_type());
+  EXPECT_FALSE(result.ok());
+  // Note: The C++ standard does not guarantee the next line.  If some toolchain
+  // update fails it, one can delete it.
+  EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
+}
+
+TEST_F(RegistryTest, GetCatalogueErrorMessage) {
+  std::string catalogue_name = "SomeCatalogue";
+
+  ASSERT_TRUE(Registry::AddCatalogue(catalogue_name,
+                                     absl::make_unique<TestAeadCatalogue>())
+                  .ok());
+  auto result = Registry::get_catalogue<int>(catalogue_name);
+  EXPECT_FALSE(result.ok());
+  // Note: The C++ standard does not guarantee the next line.  If some toolchain
+  // update fails it, one can delete it.
+  EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
 }
 
 }  // namespace

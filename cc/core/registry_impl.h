@@ -16,6 +16,7 @@
 #ifndef TINK_CORE_REGISTRY_IMPL_H_
 #define TINK_CORE_REGISTRY_IMPL_H_
 
+#include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
 
@@ -102,10 +103,11 @@ class RegistryImpl {
  private:
   // All information for a given type url.
   struct KeyTypeInfo {
-    KeyTypeInfo(std::shared_ptr<void> key_manager,
+    KeyTypeInfo(std::shared_ptr<void> key_manager, std::type_index type_index,
                 const char* type_id_name, bool new_key_allowed,
                 const KeyFactory& key_factory)
         : key_manager(std::move(key_manager)),
+          type_index(type_index),
           type_id_name(type_id_name),
           new_key_allowed(new_key_allowed),
           key_factory(key_factory) {}
@@ -113,8 +115,10 @@ class RegistryImpl {
     // A pointer to a KeyManager<P>. We use a shared_ptr because
     // shared_ptr<void> is valid (as opposed to unique_ptr<void>).
     const std::shared_ptr<void> key_manager;
+    // std::type_index of the primitive for which this key was inserted.
+    std::type_index type_index;
     // TypeId of the primitive for which this key was inserted.
-    const char* type_id_name;
+    const std::string type_id_name;
     // Whether the key manager allows creating new keys.
     bool new_key_allowed;
     // The factory which can produce keys of this type.
@@ -123,13 +127,18 @@ class RegistryImpl {
 
   // All information for a given primitive label.
   struct LabelInfo {
-    LabelInfo(std::shared_ptr<void> catalogue, const char* type_id_name)
-        : catalogue(std::move(catalogue)), type_id_name(type_id_name) {}
+    LabelInfo(std::shared_ptr<void> catalogue, std::type_index type_index,
+              const char* type_id_name)
+        : catalogue(std::move(catalogue)),
+          type_index(type_index),
+          type_id_name(type_id_name) {}
     // A pointer to the underlying Catalogue<P>. We use a shared_ptr because
     // shared_ptr<void> is valid (as opposed to unique_ptr<void>).
     const std::shared_ptr<void> catalogue;
-    // TypeId of the primitive for which this key was inserted.
-    const char* type_id_name;
+    // std::type_index of the primitive for which this key was inserted.
+    std::type_index type_index;
+    // TypeId name of the primitive for which this key was inserted.
+    const std::string type_id_name;
   };
 
   RegistryImpl() = default;
@@ -146,8 +155,8 @@ class RegistryImpl {
       GUARDED_BY(maps_mutex_);
   // A map from the type_id to the corresponding wrapper. We use a shared_ptr
   // because shared_ptr<void> is valid (as opposed to unique_ptr<void>).
-  std::unordered_map<std::string, std::shared_ptr<void>> primitive_to_wrapper_
-      GUARDED_BY(maps_mutex_);
+  std::unordered_map<std::type_index, std::shared_ptr<void>>
+      primitive_to_wrapper_ GUARDED_BY(maps_mutex_);
 
   std::unordered_map<std::string, LabelInfo> name_to_catalogue_map_
       GUARDED_BY(maps_mutex_);
@@ -167,7 +176,8 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
   if (curr_catalogue != name_to_catalogue_map_.end()) {
     auto existing =
         static_cast<Catalogue<P>*>(curr_catalogue->second.catalogue.get());
-    if (typeid(*existing).name() != typeid(*catalogue).name()) {
+    if (std::type_index(typeid(*existing)) !=
+        std::type_index(typeid(*catalogue))) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A catalogue named '%s' has been already added.",
                        catalogue_name.c_str());
@@ -175,7 +185,8 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
   } else {
     name_to_catalogue_map_.emplace(
         std::piecewise_construct, std::forward_as_tuple(catalogue_name),
-        std::forward_as_tuple(std::move(entry), typeid(P).name()));
+        std::forward_as_tuple(std::move(entry), std::type_index(typeid(P)),
+                              typeid(P).name()));
   }
   return crypto::tink::util::Status::OK;
 }
@@ -195,7 +206,7 @@ crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
                      "Wrong Primitive type for catalogue named '%s': "
                      "got '%s', expected '%s'",
                      catalogue_name.c_str(), typeid(P).name(),
-                     catalogue_entry->second.type_id_name);
+                     catalogue_entry->second.type_id_name.c_str());
   }
   return static_cast<Catalogue<P>*>(catalogue_entry->second.catalogue.get());
 }
@@ -219,7 +230,8 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
   auto it = type_url_to_info_.find(type_url);
   if (it != type_url_to_info_.end()) {
     auto existing = static_cast<KeyManager<P>*>(it->second.key_manager.get());
-    if (typeid(*existing).name() != typeid(*manager).name()) {
+    if (std::type_index(typeid(*existing)) !=
+        std::type_index(typeid(*manager))) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A manager for type '%s' has been already registered.",
                        type_url.c_str());
@@ -235,8 +247,9 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
   } else {
     type_url_to_info_.emplace(
         std::piecewise_construct, std::forward_as_tuple(type_url),
-        std::forward_as_tuple(std::move(entry), typeid(P).name(),
-                              new_key_allowed, manager->get_key_factory()));
+        std::forward_as_tuple(std::move(entry), std::type_index(typeid(P)),
+                              typeid(P).name(), new_key_allowed,
+                              manager->get_key_factory()));
   }
   return crypto::tink::util::Status::OK;
 }
@@ -252,10 +265,12 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
   std::shared_ptr<void> entry(wrapper);
 
   absl::MutexLock lock(&maps_mutex_);
-  auto it = primitive_to_wrapper_.find(typeid(P).name());
+  auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
   if (it != primitive_to_wrapper_.end()) {
-    if (typeid(*static_cast<PrimitiveWrapper<P>*>(it->second.get())).name() !=
-        typeid(*static_cast<PrimitiveWrapper<P>*>(entry.get())).name()) {
+    if (std::type_index(
+            typeid(*static_cast<PrimitiveWrapper<P>*>(it->second.get()))) !=
+        std::type_index(
+            typeid(*static_cast<PrimitiveWrapper<P>*>(entry.get())))) {
       return ToStatusF(
           crypto::tink::util::error::ALREADY_EXISTS,
           "A wrapper named for this primitive has already been added.");
@@ -263,7 +278,7 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
     return crypto::tink::util::Status::OK;
   }
   primitive_to_wrapper_.insert(
-      std::make_pair(typeid(P).name(), std::move(entry)));
+      std::make_pair(std::type_index(typeid(P)), std::move(entry)));
   return crypto::tink::util::Status::OK;
 }
 
@@ -277,12 +292,12 @@ RegistryImpl::get_key_manager(const std::string& type_url) const {
                      "No manager for type '%s' has been registered.",
                      type_url.c_str());
   }
-  if (it->second.type_id_name != typeid(P).name()) {
+  if (it->second.type_index != std::type_index(typeid(P))) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Wrong Primitive type for key type '%s': "
                      "got '%s', expected '%s'",
                      type_url.c_str(), typeid(P).name(),
-                     it->second.type_id_name);
+                     it->second.type_id_name.c_str());
   }
   return static_cast<KeyManager<P>*>(it->second.key_manager.get());
 }
@@ -311,7 +326,7 @@ template <class P>
 crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*>
 RegistryImpl::get_wrapper() const {
   absl::MutexLock lock(&maps_mutex_);
-  auto it = primitive_to_wrapper_.find(typeid(P).name());
+  auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
   if (it == primitive_to_wrapper_.end()) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
