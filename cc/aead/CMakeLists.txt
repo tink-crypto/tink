@@ -218,6 +218,22 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME kms_envelope_aead
+  SRCS
+    kms_envelope_aead.cc
+    kms_envelope_aead.h
+  DEPS
+    tink::core::aead
+    tink::core::registry
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+    absl::strings
+)
+
 # tests
 
 tink_cc_test(
@@ -382,5 +398,24 @@ tink_cc_test(
     tink::proto::aes_eax_cc_proto
     tink::proto::kms_aead_cc_proto
     tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME kms_envelope_aead_test
+  SRCS kms_envelope_aead_test.cc
+  DEPS
+    absl::memory
+    absl::strings
+    tink::aead::aead_config
+    tink::aead::aead_key_templates
+    tink::aead::kms_envelope_aead
+    tink::core::aead
+    tink::core::registry
+    tink::mac::mac_key_templates
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
     tink::proto::tink_cc_proto
 )

@@ -244,6 +244,24 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "kms_envelope_aead",
+    srcs = ["kms_envelope_aead.cc"],
+    hdrs = ["kms_envelope_aead.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:aead",
+        "//cc:registry",
+        "//cc/util:errors",
+        "//cc/util:protobuf_helper",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -451,6 +469,30 @@ cc_test(
         "//proto:kms_aead_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+
+)
+
+cc_test(
+    name = "kms_envelope_aead_test",
+    size = "small",
+    srcs = ["kms_envelope_aead_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aead_config",
+        ":aead_key_templates",
+        ":kms_envelope_aead",
+        "//cc:aead",
+        "//cc:registry",
+        "//cc/mac:mac_key_templates",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
