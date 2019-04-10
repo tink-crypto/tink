@@ -50,6 +50,22 @@ class MacKeyTemplates {
   //   - hash function: SHA256
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& HmacSha256();
+
+  // Returns a KeyTemplate that generates new instances of HmacKey
+  // with the following parameters:
+  //   - key size: 64 bytes
+  //   - tag size: 32 bytes
+  //   - hash function: SHA512
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& HmacSha512HalfSizeTag();
+
+  // Returns a KeyTemplate that generates new instances of HmacKey
+  // with the following parameters:
+  //   - key size: 64 bytes
+  //   - tag size: 64 bytes
+  //   - hash function: SHA512
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& HmacSha512();
 };
 
 }  // namespace tink

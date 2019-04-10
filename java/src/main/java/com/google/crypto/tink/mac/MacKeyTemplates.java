@@ -65,6 +65,32 @@ public final class MacKeyTemplates {
       createHmacKeyTemplate(32, 32, HashType.SHA256);
 
   /**
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.HmacKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Key size: 64 bytes
+   *   <li>Tag size: 32 bytes
+   *   <li>Hash function: SHA512
+   * </ul>
+   */
+  public static final KeyTemplate HMAC_SHA512_256BITTAG =
+      createHmacKeyTemplate(64, 32, HashType.SHA512);
+
+  /**
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.HmacKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Key size: 64 bytes
+   *   <li>Tag size: 64 bytes
+   *   <li>Hash function: SHA512
+   * </ul>
+   */
+  public static final KeyTemplate HMAC_SHA512_512BITTAG =
+      createHmacKeyTemplate(64, 64, HashType.SHA512);
+
+  /**
    * @return a {@link KeyTemplate} containing a {@link HmacKeyFormat} with some specified
    *     parameters.
    */

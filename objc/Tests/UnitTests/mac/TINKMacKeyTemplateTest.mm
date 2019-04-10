@@ -99,4 +99,54 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.HmacK
   XCTAssertEqual(keyFormat.params.hash_p, TINKPBHashType_Sha256);
 }
 
+- (void)testHmac256BittagSha512 {
+  // Get a HmacSha512HalfSizeTag key template.
+  NSError *error = nil;
+  TINKMacKeyTemplate *keyTemplate =
+      [[TINKMacKeyTemplate alloc] initWithKeyTemplate:TINKHmacSha512HalfSizeTag error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyTemplate);
+
+  TINKPBKeyTemplate *objcKeyTemplate = TINKKeyTemplateToObjc(keyTemplate.ccKeyTemplate, &error);
+  XCTAssertNil(error);
+  XCTAssertNotNil(objcKeyTemplate);
+
+  XCTAssertTrue([kTypeURL isEqualToString:objcKeyTemplate.typeURL]);
+  XCTAssertEqual(objcKeyTemplate.outputPrefixType, TINKPBOutputPrefixType_Tink);
+  error = nil;
+  TINKPBHmacKeyFormat *keyFormat = [TINKPBHmacKeyFormat parseFromData:objcKeyTemplate.value
+                                                                error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyFormat);
+
+  XCTAssertEqual(keyFormat.keySize, 64);
+  XCTAssertEqual(keyFormat.params.tagSize, 32);
+  XCTAssertEqual(keyFormat.params.hash_p, TINKPBHashType_Sha512);
+}
+
+- (void)testHmac512BittagSha512 {
+  // Get a HmacSha512 key template.
+  NSError *error = nil;
+  TINKMacKeyTemplate *keyTemplate = [[TINKMacKeyTemplate alloc] initWithKeyTemplate:TINKHmacSha512
+                                                                              error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyTemplate);
+
+  TINKPBKeyTemplate *objcKeyTemplate = TINKKeyTemplateToObjc(keyTemplate.ccKeyTemplate, &error);
+  XCTAssertNil(error);
+  XCTAssertNotNil(objcKeyTemplate);
+
+  XCTAssertTrue([kTypeURL isEqualToString:objcKeyTemplate.typeURL]);
+  XCTAssertEqual(objcKeyTemplate.outputPrefixType, TINKPBOutputPrefixType_Tink);
+  error = nil;
+  TINKPBHmacKeyFormat *keyFormat = [TINKPBHmacKeyFormat parseFromData:objcKeyTemplate.value
+                                                                error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyFormat);
+
+  XCTAssertEqual(keyFormat.keySize, 64);
+  XCTAssertEqual(keyFormat.params.tagSize, 64);
+  XCTAssertEqual(keyFormat.params.hash_p, TINKPBHashType_Sha512);
+}
+
 @end

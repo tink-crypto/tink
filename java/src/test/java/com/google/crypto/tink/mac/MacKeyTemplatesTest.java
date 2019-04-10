@@ -54,6 +54,30 @@ public class MacKeyTemplatesTest {
   }
 
   @Test
+  public void testHMAC_SHA512_256BITTAG() throws Exception {
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA512_256BITTAG;
+    assertEquals(HmacKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
+    HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
+
+    assertEquals(64, format.getKeySize());
+    assertEquals(32, format.getParams().getTagSize());
+    assertEquals(HashType.SHA512, format.getParams().getHash());
+  }
+
+  @Test
+  public void testHMAC_SHA512_512BITTAG() throws Exception {
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA512_512BITTAG;
+    assertEquals(HmacKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
+    HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
+
+    assertEquals(64, format.getKeySize());
+    assertEquals(64, format.getParams().getTagSize());
+    assertEquals(HashType.SHA512, format.getParams().getHash());
+  }
+
+  @Test
   public void testCreateHmacKeyTemplate() throws Exception {
     // Intentionally using "weird" or invalid values for parameters,
     // to test that the function correctly puts them in the resulting template.

@@ -71,7 +71,7 @@ mac_basic_test() {
 #############################################################################
 ##### Run the actual tests.
 
-KEY_TEMPLATES=(HMAC_SHA256_128BITTAG HMAC_SHA256_256BITTAG)
+KEY_TEMPLATES=(HMAC_SHA256_128BITTAG HMAC_SHA256_256BITTAG HMAC_SHA512_256BITTAG HMAC_SHA512_512BITTAG)
 MAC_CLIS=($CC_MAC_CLI $JAVA_MAC_CLI $GO_MAC_CLI)
 VERIFY_CLIS=($CC_MAC_CLI $JAVA_MAC_CLI $GO_MAC_CLI)
 mac_basic_test "${MAC_CLIS[*]}" "${VERIFY_CLIS[*]}" \

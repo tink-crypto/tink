@@ -38,6 +38,24 @@ typedef NS_ENUM(NSInteger, TINKMacKeyTemplates) {
    *   - OutputPrefixType: TINK
    */
   TINKHmacSha256 = 2,
+
+  /**
+   * HmacKey with the following parameters:
+   *   - key size: 64 bytes
+   *   - tag size: 32 bytes
+   *   - hash function: SHA512
+   *   - OutputPrefixType: TINK
+   */
+  TINKHmacSha512HalfSizeTag = 3,
+
+  /**
+   * HmacKey with the following parameters:
+   *   - key size: 64 bytes
+   *   - tag size: 64 bytes
+   *   - hash function: SHA512
+   *   - OutputPrefixType: TINK
+   */
+  TINKHmacSha512 = 4,
 };
 
 NS_ASSUME_NONNULL_BEGIN
