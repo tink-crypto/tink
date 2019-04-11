@@ -108,14 +108,14 @@ util::StatusOr<std::string> KmsEnvelopeAead::Encrypt(
 util::StatusOr<std::string> KmsEnvelopeAead::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data) const {
   // Parse the ciphertext.
-  auto enc_dek_size = BigEndianLoad32(
-      reinterpret_cast<const uint8_t*>(ciphertext.data()));
-  if (ciphertext.size() < kEncryptedDekPrefixSize ||
-      enc_dek_size > ciphertext.size() - kEncryptedDekPrefixSize) {
+  if (ciphertext.size() < kEncryptedDekPrefixSize) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext too short");
   }
-  if (enc_dek_size < 0) {
+  auto enc_dek_size = BigEndianLoad32(
+      reinterpret_cast<const uint8_t*>(ciphertext.data()));
+  if (enc_dek_size > ciphertext.size() - kEncryptedDekPrefixSize ||
+      enc_dek_size < 0) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "invalid ciphertext");
   }

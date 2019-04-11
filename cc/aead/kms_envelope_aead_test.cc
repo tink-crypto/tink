@@ -107,14 +107,14 @@ TEST(KmsEnvelopeAeadTest, DecryptionErrors) {
                                                 HasSubstr("too short")));
 
   // Short ciphertext.
-  decrypt_result = aead->Decrypt("short", aad);
+  decrypt_result = aead->Decrypt("sh", aad);
   EXPECT_THAT(decrypt_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
                                                 HasSubstr("too short")));
 
   // Truncated ciphertext.
   decrypt_result = aead->Decrypt(ct.substr(2), aad);
   EXPECT_THAT(decrypt_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
-                                                HasSubstr("too short")));
+                                                HasSubstr("invalid")));
 
   // Corrupted ciphertext.
   auto ct_copy = ct;
