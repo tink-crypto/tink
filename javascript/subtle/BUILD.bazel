@@ -22,10 +22,6 @@ closure_js_library(
         "//javascript/exception",
         "@io_bazel_rules_closure//closure/library",
     ],
-    visibility = [
-        "//communication/messages/web:__subpackages__",
-        "//third_party/tink/tools/build_defs:internal_pkg",
-    ],
 )
 
 closure_js_library(
@@ -100,10 +96,6 @@ closure_js_library(
         "//javascript:primitives",
         "//javascript/exception",
         "@io_bazel_rules_closure//closure/library",
-    ],
-    visibility = [
-        "//communication/messages/web:__subpackages__",
-        "//third_party/tink/tools/build_defs:internal_pkg",
     ],
 )
 
