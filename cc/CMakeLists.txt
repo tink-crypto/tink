@@ -515,6 +515,18 @@ tink_cc_library(
     absl::meta
 )
 
+tink_cc_library(
+  NAME internal_key_manager
+  SRCS
+    core/internal_key_manager.h
+  DEPS
+    absl::container
+    tink::core::internal_key_manager
+    tink::proto::tink_cc_proto
+    tink::util::status
+    tink::util::statusor
+)
+
 if (TINK_BUILD_SHARED_LIB)
   add_library(tink SHARED
     ${TINK_PUBLIC_APIS}
@@ -749,5 +761,19 @@ tink_cc_test(
   SRCS core/template_utils_test.cc
   DEPS
     tink::core::template_utils
+)
+
+tink_cc_test(
+  NAME internal_key_manager_test
+  SRCS core/internal_key_manager_test.cc
+  DEPS
+    tink::core::aead
+    tink::core::internal_key_manager
+    tink::proto::tink_cc_proto
+    tink::subtle::aes_gcm_boringssl
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::validation
 )
 

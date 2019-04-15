@@ -609,6 +609,20 @@ cc_library(
     deps = ["@com_google_absl//absl/meta:type_traits"],
 )
 
+cc_library(
+    name = "core/internal_key_manager",
+    hdrs = ["core/internal_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":core/template_util",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/container:flat_hash_map",
+    ],
+)
+
 # Settings for building in various environments.
 config_setting(
     name = "linux_x86_64",
@@ -972,13 +986,13 @@ cc_test(
     srcs = ["core/kms_clients_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":aead",
         ":kms_client",
         ":kms_clients",
-        ":aead",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//cc/util:test_util",
         "//cc/util:test_matchers",
+        "//cc/util:test_util",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -989,6 +1003,22 @@ cc_test(
     srcs = ["core/template_utils_test.cc"],
     deps = [
         ":core/template_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/internal_key_manager_test",
+    srcs = ["core/internal_key_manager_test.cc"],
+    deps = [
+        ":aead",
+        ":core/internal_key_manager",
+        "//cc/subtle",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:validation",
+        "//proto:aes_gcm_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
