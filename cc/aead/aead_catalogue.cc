@@ -16,11 +16,14 @@
 
 #include "tink/aead/aead_catalogue.h"
 
+#include "absl/memory/memory.h"
 #include "absl/strings/ascii.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
+#include "tink/aead/kms_aead_key_manager.h"
+#include "tink/aead/kms_envelope_aead_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/catalogue.h"
 #include "tink/key_manager.h"
@@ -35,21 +38,19 @@ namespace {
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
 CreateKeyManager(const std::string& type_url) {
   if (type_url == AesGcmKeyManager::static_key_type()) {
-    std::unique_ptr<KeyManager<Aead>> manager(new AesGcmKeyManager());
-    return std::move(manager);
+    return {absl::make_unique<AesGcmKeyManager>()};
   } else if (type_url == AesEaxKeyManager::static_key_type()) {
-    std::unique_ptr<KeyManager<Aead>> manager(new AesEaxKeyManager());
-    return std::move(manager);
+    return {absl::make_unique<AesEaxKeyManager>()};
   } else if (type_url == AesCtrHmacAeadKeyManager::static_key_type()) {
-    std::unique_ptr<KeyManager<Aead>> manager(new AesCtrHmacAeadKeyManager());
-    return std::move(manager);
+    return {absl::make_unique<AesCtrHmacAeadKeyManager>()};
   } else if (type_url == AesGcmSivKeyManager::static_key_type()) {
-    std::unique_ptr<KeyManager<Aead>> manager(new AesGcmSivKeyManager());
-    return std::move(manager);
+    return {absl::make_unique<AesGcmSivKeyManager>()};
   } else if (type_url == XChaCha20Poly1305KeyManager::static_key_type()) {
-    std::unique_ptr<KeyManager<Aead>> manager(
-        new XChaCha20Poly1305KeyManager());
-    return std::move(manager);
+    return {absl::make_unique<XChaCha20Poly1305KeyManager>()};
+  } else if (type_url == KmsAeadKeyManager::static_key_type()) {
+    return {absl::make_unique<KmsAeadKeyManager>()};
+  } else if (type_url == KmsEnvelopeAeadKeyManager::static_key_type()) {
+    return {absl::make_unique<KmsEnvelopeAeadKeyManager>()};
   }
   return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                    "No key manager for type_url '%s'.", type_url.c_str());

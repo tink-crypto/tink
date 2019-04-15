@@ -64,10 +64,14 @@ TEST_F(HybridConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.AesGcmSivKey";
   std::string xchacha20_poly1305_key_type =
       "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
+  std::string kms_aead_key_type =
+      "type.googleapis.com/google.crypto.tink.KmsAeadKey";
+  std::string kms_envelope_aead_key_type =
+      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
   auto& config = HybridConfig::Latest();
 
-  EXPECT_EQ(8, HybridConfig::Latest().entry_size());
+  EXPECT_EQ(10, HybridConfig::Latest().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
@@ -105,17 +109,29 @@ TEST_F(HybridConfigTest, testBasic) {
   EXPECT_EQ(true, config.entry(5).new_key_allowed());
   EXPECT_EQ(0, config.entry(5).key_manager_version());
 
-  EXPECT_EQ("TinkHybridDecrypt", config.entry(6).catalogue_name());
-  EXPECT_EQ("HybridDecrypt", config.entry(6).primitive_name());
-  EXPECT_EQ(decrypt_key_type, config.entry(6).type_url());
+  EXPECT_EQ("TinkAead", config.entry(6).catalogue_name());
+  EXPECT_EQ("Aead", config.entry(6).primitive_name());
+  EXPECT_EQ(kms_aead_key_type, config.entry(6).type_url());
   EXPECT_EQ(true, config.entry(6).new_key_allowed());
   EXPECT_EQ(0, config.entry(6).key_manager_version());
 
-  EXPECT_EQ("TinkHybridEncrypt", config.entry(7).catalogue_name());
-  EXPECT_EQ("HybridEncrypt", config.entry(7).primitive_name());
-  EXPECT_EQ(encrypt_key_type, config.entry(7).type_url());
+  EXPECT_EQ("TinkAead", config.entry(7).catalogue_name());
+  EXPECT_EQ("Aead", config.entry(7).primitive_name());
+  EXPECT_EQ(kms_envelope_aead_key_type, config.entry(7).type_url());
   EXPECT_EQ(true, config.entry(7).new_key_allowed());
   EXPECT_EQ(0, config.entry(7).key_manager_version());
+
+  EXPECT_EQ("TinkHybridDecrypt", config.entry(8).catalogue_name());
+  EXPECT_EQ("HybridDecrypt", config.entry(8).primitive_name());
+  EXPECT_EQ(decrypt_key_type, config.entry(8).type_url());
+  EXPECT_EQ(true, config.entry(8).new_key_allowed());
+  EXPECT_EQ(0, config.entry(8).key_manager_version());
+
+  EXPECT_EQ("TinkHybridEncrypt", config.entry(9).catalogue_name());
+  EXPECT_EQ("HybridEncrypt", config.entry(9).primitive_name());
+  EXPECT_EQ(encrypt_key_type, config.entry(9).type_url());
+  EXPECT_EQ(true, config.entry(9).new_key_allowed());
+  EXPECT_EQ(0, config.entry(9).key_manager_version());
 
   // No key manager before registration.
   auto decrypt_manager_result =

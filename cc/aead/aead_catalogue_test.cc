@@ -34,7 +34,9 @@ TEST_F(AeadCatalogueTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.AesGcmKey",
       "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
-      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key"};
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+      "type.googleapis.com/google.crypto.tink.KmsAeadKey",
+      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey"};
 
   AeadCatalogue catalogue;
   {

@@ -6,6 +6,7 @@ tink_cc_library(
     aead_wrapper.cc
     aead_wrapper.h
   DEPS
+    absl::strings
     tink::core::aead
     tink::core::crypto_format
     tink::core::primitive_set
@@ -15,7 +16,6 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
-    absl::strings
 )
 
 tink_cc_library(
@@ -24,10 +24,14 @@ tink_cc_library(
     aead_catalogue.cc
     aead_catalogue.h
   DEPS
+    absl::memory
+    absl::strings
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_eax_key_manager
     tink::aead::aes_gcm_key_manager
     tink::aead::aes_gcm_siv_key_manager
+    tink::aead::kms_aead_key_manager
+    tink::aead::kms_envelope_aead_key_manager
     tink::aead::xchacha20_poly1305_key_manager
     tink::core::aead
     tink::core::catalogue
@@ -234,6 +238,29 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME kms_envelope_aead_key_manager
+  SRCS
+    kms_envelope_aead_key_manager.cc
+    kms_envelope_aead_key_manager.h
+  DEPS
+    absl::memory
+    absl::strings
+    tink::core::aead
+    tink::core::key_manager
+    tink::core::key_manager_base
+    tink::core::kms_client
+    tink::core::kms_clients
+    tink::aead::kms_envelope_aead
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    tink::proto::kms_envelope_cc_proto
+    tink::proto::tink_cc_proto
+)
+
 # tests
 
 tink_cc_test(
@@ -417,5 +444,24 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME kms_envelope_aead_key_manager_test
+  SRCS kms_envelope_aead_key_manager_test.cc
+  DEPS
+    tink::aead::aead_config
+    tink::aead::kms_envelope_aead_key_manager
+    tink::core::aead
+    tink::core::kms_client
+    tink::core::kms_clients
+    tink::core::registry
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::aes_eax_cc_proto
+    tink::proto::kms_envelope_cc_proto
     tink::proto::tink_cc_proto
 )

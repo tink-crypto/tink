@@ -40,6 +40,9 @@
   std::string aes_eax_key_type = "type.googleapis.com/google.crypto.tink.AesEaxKey";
   std::string xchacha20_poly1305_key_type =
       "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
+  std::string kms_aead_key_type = "type.googleapis.com/google.crypto.tink.KmsAeadKey";
+  std::string kms_envelope_aead_key_type =
+      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
 
   NSError *error = nil;
@@ -48,7 +51,7 @@
   XCTAssertNil(error);
 
   google::crypto::tink::RegistryConfig config = aeadConfig.ccConfig;
-  XCTAssertTrue(config.entry_size() == 6);
+  XCTAssertTrue(config.entry_size() == 8);
 
   XCTAssertTrue("TinkMac" == config.entry(0).catalogue_name());
   XCTAssertTrue("Mac" == config.entry(0).primitive_name());
@@ -85,6 +88,18 @@
   XCTAssertTrue(xchacha20_poly1305_key_type == config.entry(5).type_url());
   XCTAssertTrue(config.entry(5).new_key_allowed());
   XCTAssertTrue(0 == config.entry(5).key_manager_version());
+
+  XCTAssertTrue("TinkAead" == config.entry(6).catalogue_name());
+  XCTAssertTrue("Aead" == config.entry(6).primitive_name());
+  XCTAssertTrue(kms_aead_key_type == config.entry(6).type_url());
+  XCTAssertTrue(config.entry(6).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(6).key_manager_version());
+
+  XCTAssertTrue("TinkAead" == config.entry(7).catalogue_name());
+  XCTAssertTrue("Aead" == config.entry(7).primitive_name());
+  XCTAssertTrue(kms_envelope_aead_key_type == config.entry(7).type_url());
+  XCTAssertTrue(config.entry(7).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(7).key_manager_version());
 
   // Registration of standard key types works.
   error = nil;

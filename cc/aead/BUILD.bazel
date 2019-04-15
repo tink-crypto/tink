@@ -33,11 +33,15 @@ cc_library(
         ":aes_eax_key_manager",
         ":aes_gcm_key_manager",
         ":aes_gcm_siv_key_manager",
+        ":kms_aead_key_manager",
+        ":kms_envelope_aead_key_manager",
         ":xchacha20_poly1305_key_manager",
         "//cc:aead",
         "//cc:catalogue",
         "//cc:key_manager",
         "//cc/util:status",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -262,6 +266,31 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "kms_envelope_aead_key_manager",
+    srcs = ["kms_envelope_aead_key_manager.cc"],
+    hdrs = ["kms_envelope_aead_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":kms_envelope_aead",
+        "//cc:aead",
+        "//cc:key_manager",
+        "//cc:key_manager_base",
+        "//cc:kms_client",
+        "//cc:kms_clients",
+        "//cc/util:errors",
+        "//cc/util:protobuf_helper",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:validation",
+        "//proto:kms_envelope_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -472,7 +501,6 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
-
 )
 
 cc_test(
@@ -496,5 +524,30 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
-
 )
+
+cc_test(
+    name = "kms_envelope_aead_key_manager_test",
+    size = "small",
+    srcs = ["kms_aead_key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aead_config",
+        ":aead_key_templates",
+        ":kms_envelope_aead_key_manager",
+        "//cc:aead",
+        "//cc:kms_client",
+        "//cc:kms_clients",
+        "//cc:registry",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "//proto:aes_eax_cc_proto",
+        "//proto:kms_envelope_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+

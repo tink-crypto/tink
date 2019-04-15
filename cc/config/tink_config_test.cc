@@ -85,6 +85,12 @@ TEST_F(TinkConfigTest, testBasic) {
   aead_key_type_entries.push_back(
       {"TinkAead", "Aead",
        "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key", true, 0});
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.KmsAeadKey", true, 0});
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey", true, 0});
   all_key_type_entries.insert(std::end(all_key_type_entries),
                               std::begin(aead_key_type_entries),
                               std::end(aead_key_type_entries));

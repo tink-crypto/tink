@@ -40,17 +40,24 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesCtrHmacAeadKey", 0, true));
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName, "AesGcmKey", 0,
-      true));
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "AesGcmKey", 0, true));
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName, "AesGcmSivKey", 0,
-      true));
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "AesGcmSivKey", 0, true));
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName, "AesEaxKey", 0,
-      true));
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "AesEaxKey", 0, true));
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "XChaCha20Poly1305Key", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "KmsAeadKey", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "KmsEnvelopeAeadKey", 0,
+      true));
   config->set_config_name("TINK_AEAD");
   return config;
 }
