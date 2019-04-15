@@ -24,7 +24,6 @@
 #include "absl/strings/str_cat.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/catalogue.h"
-#include "tink/core/registry_impl.h"
 #include "tink/key_manager.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
