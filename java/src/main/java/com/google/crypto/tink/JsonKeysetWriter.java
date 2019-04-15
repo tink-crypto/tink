@@ -105,16 +105,16 @@ public final class JsonKeysetWriter implements KeysetWriter {
   private JSONObject toJson(Key key) throws JSONException {
     return new JSONObject()
         .put("keyData", toJson(key.getKeyData()))
-        .put("status", key.getStatus().toString())
+        .put("status", key.getStatus().name())
         .put("keyId", key.getKeyId())
-        .put("outputPrefixType", key.getOutputPrefixType().toString());
+        .put("outputPrefixType", key.getOutputPrefixType().name());
   }
 
   private JSONObject toJson(KeyData keyData) throws JSONException {
     return new JSONObject()
         .put("typeUrl", keyData.getTypeUrl())
         .put("value", Base64.encode(keyData.getValue().toByteArray()))
-        .put("keyMaterialType", keyData.getKeyMaterialType().toString());
+        .put("keyMaterialType", keyData.getKeyMaterialType().name());
   }
 
   private JSONObject toJson(EncryptedKeyset keyset) throws JSONException {
@@ -137,8 +137,8 @@ public final class JsonKeysetWriter implements KeysetWriter {
   private JSONObject toJson(KeyInfo keyInfo) throws JSONException {
     return new JSONObject()
         .put("typeUrl", keyInfo.getTypeUrl())
-        .put("status", keyInfo.getStatus().toString())
+        .put("status", keyInfo.getStatus().name())
         .put("keyId", keyInfo.getKeyId())
-        .put("outputPrefixType", keyInfo.getOutputPrefixType().toString());
+        .put("outputPrefixType", keyInfo.getOutputPrefixType().name());
   }
 }
