@@ -27,7 +27,7 @@
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/validation.h"
-#include "proto/aes_gcm.proto.h"
+#include "proto/aes_gcm.pb.h"
 
 namespace crypto {
 namespace tink {

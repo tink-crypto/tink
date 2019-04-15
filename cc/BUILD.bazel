@@ -1018,7 +1018,7 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_matchers",
         "//cc/util:validation",
-        "//proto:aes_gcm_proto",
+        "//proto:aes_gcm_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

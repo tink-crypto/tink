@@ -769,6 +769,7 @@ tink_cc_test(
   DEPS
     tink::core::aead
     tink::core::internal_key_manager
+    tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_boringssl
     tink::util::status
