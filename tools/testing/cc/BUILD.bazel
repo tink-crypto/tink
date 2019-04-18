@@ -34,6 +34,17 @@ cc_binary(
 )
 
 cc_binary(
+    name = "gcp_kms_aead_cli",
+    srcs = ["gcp_kms_aead_cli.cc"],
+    deps = [
+        ":cli_util",
+        "//cc",
+        "//cc/integration/gcpkms:gcp_kms_client",
+        "//cc/integration/gcpkms:gcp_kms_aead",
+    ],
+)
+
+cc_binary(
     name = "keyset_reader_writer_cli",
     srcs = ["keyset_reader_writer_cli.cc"],
     deps = [
@@ -133,6 +144,19 @@ sh_test(
     ],
     data = [
         ":aws_kms_aead_cli",
+        "//testdata:credentials",
+        "//tools/testing/cross_language:test_lib",
+    ],
+)
+
+sh_test(
+    name = "gcp_kms_aead_test",
+    size = "medium",
+    srcs = [
+        "gcp_kms_aead_test.sh",
+    ],
+    data = [
+        ":gcp_kms_aead_cli",
         "//testdata:credentials",
         "//tools/testing/cross_language:test_lib",
     ],
