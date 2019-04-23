@@ -52,7 +52,7 @@ class AeadVariant {
   std::string s_;
 };
 
-class ExampleMultiKeyManager
+class ExampleInternalKeyManager
     : public InternalKeyManager<AesGcmKey, AesGcmKeyFormat> {
  public:
   class AeadFactory : public PrimitiveFactory<Aead> {
@@ -72,7 +72,7 @@ class ExampleMultiKeyManager
     }
   };
 
-  ExampleMultiKeyManager()
+  ExampleInternalKeyManager()
       : InternalKeyManager(absl::make_unique<AeadFactory>(),
                            absl::make_unique<AeadVariantFactory>()) {}
 
@@ -85,19 +85,19 @@ class ExampleMultiKeyManager
 
   const std::string& get_key_type() const override { return kKeyType; }
 
-  util::Status ValidateKey(const AesGcmKey& key) const override {
+  crypto::tink::util::Status ValidateKey(const AesGcmKey& key) const override {
     return util::OkStatus();
   }
 
-  util::Status ValidateKeyFormat(
+  crypto::tink::util::Status ValidateKeyFormat(
       const AesGcmKeyFormat& key_format) const override {
     return util::OkStatus();
   }
 
-  AesGcmKey CreateKey(const AesGcmKeyFormat& key_format) const override {
+  crypto::tink::util::StatusOr<AesGcmKey> CreateKey(
+      const AesGcmKeyFormat& key_format) const override {
     AesGcmKey result;
-    result.set_key_value(
-        subtle::Random::GetRandomBytes(key_format.key_size()));
+    result.set_key_value(subtle::Random::GetRandomBytes(key_format.key_size()));
     return result;
   }
 
@@ -109,9 +109,10 @@ class ExampleMultiKeyManager
 TEST(KeyManagerTest, CreateAead) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  AesGcmKey key = ExampleMultiKeyManager().CreateKey(key_format);
+  AesGcmKey key =
+      ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie();
   std::unique_ptr<Aead> aead =
-      ExampleMultiKeyManager().Create<Aead>(key).ValueOrDie();
+      ExampleInternalKeyManager().Create<Aead>(key).ValueOrDie();
 
   std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
   std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
@@ -121,20 +122,20 @@ TEST(KeyManagerTest, CreateAead) {
 TEST(KeyManagerTest, CreateAeadVariant) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  AesGcmKey key = ExampleMultiKeyManager().CreateKey(key_format);
+  AesGcmKey key =
+      ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie();
   std::unique_ptr<AeadVariant> aead_variant =
-      ExampleMultiKeyManager().Create<AeadVariant>(key).ValueOrDie();
+      ExampleInternalKeyManager().Create<AeadVariant>(key).ValueOrDie();
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
 }
 
 class NotRegistered {};
 TEST(KeyManagerTest, CreateFails) {
-  auto failing =
-      ExampleMultiKeyManager().Create<NotRegistered>(AesGcmKey());
+  auto failing = ExampleInternalKeyManager().Create<NotRegistered>(AesGcmKey());
   EXPECT_THAT(failing.status(), test::StatusIs(util::error::INVALID_ARGUMENT));
 }
 
-class ExampleMultiKeyManagerWithoutFactory
+class ExampleInternalKeyManagerWithoutFactory
     : public InternalKeyManager<AesGcmKey> {
  public:
   class AeadFactory : public PrimitiveFactory<Aead> {
@@ -154,7 +155,7 @@ class ExampleMultiKeyManagerWithoutFactory
     }
   };
 
-  ExampleMultiKeyManagerWithoutFactory()
+  ExampleInternalKeyManagerWithoutFactory()
       : InternalKeyManager(absl::make_unique<AeadFactory>(),
                            absl::make_unique<AeadVariantFactory>()) {}
 
@@ -181,9 +182,10 @@ class ExampleMultiKeyManagerWithoutFactory
 TEST(KeyManagerWithoutFactoryTest, CreateAead) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  AesGcmKey key = ExampleMultiKeyManager().CreateKey(key_format);
+  AesGcmKey key =
+      ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie();
   std::unique_ptr<Aead> aead =
-      ExampleMultiKeyManagerWithoutFactory().Create<Aead>(key).ValueOrDie();
+      ExampleInternalKeyManagerWithoutFactory().Create<Aead>(key).ValueOrDie();
 
   std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
   std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
@@ -193,15 +195,17 @@ TEST(KeyManagerWithoutFactoryTest, CreateAead) {
 TEST(KeyManagerWithoutFactoryTest, CreateAeadVariant) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  AesGcmKey key = ExampleMultiKeyManager().CreateKey(key_format);
+  AesGcmKey key =
+      ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie();
   std::unique_ptr<AeadVariant> aead_variant =
-      ExampleMultiKeyManager().Create<AeadVariant>(key).ValueOrDie();
+      ExampleInternalKeyManager().Create<AeadVariant>(key).ValueOrDie();
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
 }
 
 TEST(KeyManagerWithoutFactoryTest, CreateFails) {
   auto failing =
-      ExampleMultiKeyManagerWithoutFactory().Create<NotRegistered>(AesGcmKey());
+      ExampleInternalKeyManagerWithoutFactory().Create<NotRegistered>(
+          AesGcmKey());
   EXPECT_THAT(failing.status(), test::StatusIs(util::error::INVALID_ARGUMENT));
 }
 

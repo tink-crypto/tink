@@ -39,9 +39,10 @@ class InternalKeyFactory {
  public:
   virtual ~InternalKeyFactory() {}
 
-  virtual util::Status ValidateKeyFormat(
+  virtual crypto::tink::util::Status ValidateKeyFormat(
       const KeyFormatProto& key_format) const = 0;
-  virtual KeyProto CreateKey(const KeyFormatProto& key_format) const = 0;
+  virtual crypto::tink::util::StatusOr<KeyProto> CreateKey(
+      const KeyFormatProto& key_format) const = 0;
 };
 
 template <typename KeyProto>
@@ -100,14 +101,17 @@ class InternalKeyManager
   // and an invalid argument error otherwise.
   virtual util::Status ValidateKey(const KeyProto& key) const = 0;
 
-  // Creates a new primitive using one of the
+  // Creates a new primitive using one of the primitive factories passed in at
+  // construction time.
   template <typename Primitive>
   crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Create(
       const KeyProto& key) const {
     auto iter = primitive_factories_.find(std::type_index(typeid(Primitive)));
     if (iter == primitive_factories_.end()) {
-      return crypto::tink::util::Status(util::error::INVALID_ARGUMENT,
-                                        "No PrimitiveFactory given for  ");
+      return crypto::tink::util::Status(
+          util::error::INVALID_ARGUMENT,
+          absl::StrCat("No PrimitiveFactory was registered for type ",
+                       typeid(Primitive).name()));
     }
     return static_cast<PrimitiveFactory<Primitive>*>(iter->second.get())
         ->Create(key);
