@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_CORE_TEMPLATE_UTIL_H
-#define TINK_CORE_TEMPLATE_UTIL_H
+#ifndef TINK_CORE_TEMPLATE_UTIL_H_
+#define TINK_CORE_TEMPLATE_UTIL_H_
 
 #include <tuple>
 #include <type_traits>
@@ -68,4 +68,4 @@ class HasDuplicates<First, List...>
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CORE_TEMPLATE_UTIL_H
+#endif  // TINK_CORE_TEMPLATE_UTIL_H_
