@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":6,"i3":6,"i4":10,"i5":6,"i6":6,"i7":6};
+var methods = {"i0":10,"i1":6,"i2":10,"i3":6,"i4":10,"i5":6,"i6":6,"i7":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -194,22 +194,22 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>&lt;P&gt;&nbsp;P</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.html#createPrimitive-KeyProtoT-java.lang.Class-">createPrimitive</a></span>(<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&nbsp;key,
-               <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</code>
-<div class="block">Creates the requested primitive.</div>
-</td>
-</tr>
-<tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.html#getKeyProtoClass--">getKeyProtoClass</a></span>()</code>
 <div class="block">Returns the class corresponding to the key protobuffer.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>abstract <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.html#getKeyType--">getKeyType</a></span>()</code>
 <div class="block">Returns the type URL that identifies the key type of keys managed by this KeyManager.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>&lt;P&gt;&nbsp;P</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.html#getPrimitive-KeyProtoT-java.lang.Class-">getPrimitive</a></span>(<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&nbsp;key,
+            <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)</code>
+<div class="block">Creates the requested primitive.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
@@ -275,7 +275,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Constructs a new InternalKeyManager.
 
  <p>Takes an arbitrary number of <a href="../../../../com/google/crypto/tink/InternalKeyManager.PrimitiveFactory.html" title="class in com.google.crypto.tink"><code>InternalKeyManager.PrimitiveFactory</code></a> objects as input. These will be used
- and provided via <a href="../../../../com/google/crypto/tink/InternalKeyManager.html#createPrimitive-KeyProtoT-java.lang.Class-"><code>createPrimitive(KeyProtoT, java.lang.Class&lt;P&gt;)</code></a> to the user.</div>
+ and provided via <code>#createPrimitive</code> to the user.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if two of the passed in factories produce primitives of the
@@ -365,17 +365,17 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="createPrimitive-com.google.protobuf.MessageLite-java.lang.Class-">
+<a name="getPrimitive-com.google.protobuf.MessageLite-java.lang.Class-">
 <!--   -->
-</a><a name="createPrimitive-KeyProtoT-java.lang.Class-">
+</a><a name="getPrimitive-KeyProtoT-java.lang.Class-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>createPrimitive</h4>
-<pre>public final&nbsp;&lt;P&gt;&nbsp;P&nbsp;createPrimitive(<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&nbsp;key,
-                                   <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)
-                            throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<h4>getPrimitive</h4>
+<pre>public final&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&nbsp;key,
+                                <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;primitiveClass)
+                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Creates the requested primitive.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
