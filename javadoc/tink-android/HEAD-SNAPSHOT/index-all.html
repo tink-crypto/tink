@@ -1512,10 +1512,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RegistryConfig.html#CONFIG_NAME_FIELD_NUMBER">CONFIG_NAME_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RegistryConfig.html" title="class in com.google.crypto.tink.proto">RegistryConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/InternalKeyManager.PrimitiveFactory.html#create-KeyT-">create(KeyT)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/InternalKeyManager.PrimitiveFactory.html" title="class in com.google.crypto.tink">InternalKeyManager.PrimitiveFactory</a></dt>
-<dd>
-<div class="block">Creates a new instance of <code>PrimitiveT</code>.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#createAesCtrHmacAeadKeyTemplate-int-int-int-int-com.google.crypto.tink.proto.HashType-">createAesCtrHmacAeadKeyTemplate(int, int, int, int, HashType)</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#createAesCtrHmacStreamingKeyTemplate-int-com.google.crypto.tink.proto.HashType-int-com.google.crypto.tink.proto.HashType-int-int-">createAesCtrHmacStreamingKeyTemplate(int, HashType, int, HashType, int, int)</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
@@ -1540,10 +1536,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#createKmsEnvelopeAeadKeyTemplate-java.lang.String-com.google.crypto.tink.proto.KeyTemplate-">createKmsEnvelopeAeadKeyTemplate(String, KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/InternalKeyManager.html#createPrimitive-KeyProtoT-java.lang.Class-">createPrimitive(KeyProtoT, Class&lt;P&gt;)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/InternalKeyManager.html" title="class in com.google.crypto.tink">InternalKeyManager</a></dt>
-<dd>
-<div class="block">Creates the requested primitive.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPkcs1KeyTemplate-com.google.crypto.tink.proto.HashType-int-java.math.BigInteger-">createRsaSsaPkcs1KeyTemplate(HashType, int, BigInteger)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPssKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.HashType-int-int-java.math.BigInteger-">createRsaSsaPssKeyTemplate(HashType, HashType, int, int, BigInteger)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
@@ -4708,6 +4700,14 @@
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(keyManager, HybridEncrypt.class)</code> after
      registering the <code>HybridEncryptWrapper</code> instead.</span></div>
 </div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/InternalKeyManager.html#getPrimitive-KeyProtoT-java.lang.Class-">getPrimitive(KeyProtoT, Class&lt;P&gt;)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/InternalKeyManager.html" title="class in com.google.crypto.tink">InternalKeyManager</a></dt>
+<dd>
+<div class="block">Creates the requested primitive.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/InternalKeyManager.PrimitiveFactory.html#getPrimitive-KeyT-">getPrimitive(KeyT)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/InternalKeyManager.PrimitiveFactory.html" title="class in com.google.crypto.tink">InternalKeyManager.PrimitiveFactory</a></dt>
+<dd>
+<div class="block">Creates a new instance of <code>PrimitiveT</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#getPrimitive-com.google.protobuf.ByteString-">getPrimitive(ByteString)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>
