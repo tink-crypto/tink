@@ -1,24 +1,25 @@
-# HOW-TO Guide for Tink in Golang
+# Tink for Go HOW-TO
 
-The following subsections present instructions and/or Golang snippets for
-accomplishing some common cryptographic tasks using [Tink](https://github.com/google/tink).
+The following subsections present instructions and/or Go snippets for some
+common cryptographic tasks in [Tink](https://github.com/google/tink).
 
 ## Installing Tink
 
-To install Tink locally run
+To install Tink locally run:
 
 ```sh
 go get github.com/google/tink/go/...
 ```
 
-to run all the tests locally
+to run all the tests locally:
 
 ```sh
 cd $GOPATH/go/src/github.com/google/tink/go
 go test ./...
 ```
 
-Golang Tink API also supports [Bazel](https://www.bazel.build) builds. To run the tests using bazel
+Golang Tink API also supports [Bazel](https://www.bazel.build) builds. To run
+the tests using bazel:
 
 ```sh
 cd $GOPATH/go/src/github.com/google/tink/go
@@ -27,9 +28,10 @@ bazel build ... && bazel test ...
 
 ## GoDoc
 
-GoDocs for the Tink API can be found [here](https://godoc.org/github.com/google/tink).
+GoDocs for the Tink API can be found
+[here](https://godoc.org/github.com/google/tink).
 
-## Obtaining and Using Primitives
+## Obtaining and using primitives
 
 [_Primitives_](PRIMITIVES.md) represent cryptographic operations offered by
 Tink, hence they form the core of Tink API. A primitive is just an interface
@@ -51,7 +53,8 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 
 ### AEAD
 
-AEAD encryption assures the confidentiality and authenticity of the data. This primitive is CPA secure.
+AEAD encryption assures the confidentiality and authenticity of the data. This
+primitive is CPA secure.
 
 ```go
 package main
@@ -88,7 +91,9 @@ func main() {
 
 ### MAC
 
-MAC computes a tag for a given message that can be used to authenticate a message. MAC protects data integrity as well as provides for authenticity of the message.
+MAC computes a tag for a given message that can be used to authenticate a
+message. MAC protects data integrity as well as provides for authenticity of the
+message.
 
 ```go
 package main
@@ -123,8 +128,8 @@ func main() {
 
 ### Deterministic AEAD
 
-Unlike AEAD, implementations of this interface are not semantically secure, because
-encrypting the same plaintex always yields the same ciphertext.
+Unlike AEAD, implementations of this interface are not semantically secure,
+because encrypting the same plaintext always yields the same ciphertext.
 
 ```go
 package main
@@ -204,15 +209,22 @@ func main() {
 }
 ```
 
-### Hybrid Encryption and Decryption
+### Hybrid encryption and decryption
 
-The functionality of Hybrid Encryption is represented as a pair of primitives (interfaces):
-HybridEncrypt for encryption of data, and HybridDecrypt for decryption.
-Implementations of these interfaces are secure against adaptive chosen ciphertext attacks. In
-addition to plaintext the encryption takes an extra parameter contextInfo, which
-usually is public data implicit from the context, but should be bound to the resulting
-ciphertext, i.e. the ciphertext allows for checking the integrity of contextInfo (but
-there are no guarantees wrt. the secrecy or authenticity of contextInfo).
+The functionality of Hybrid Encryption is represented as a pair of primitives
+(interfaces):
+
+ * `HybridEncrypt` for encryption of data
+ * `HybridDecrypt` for decryption
+
+Implementations of these interfaces are secure against adaptive chosen
+ciphertext attacks.
+
+In addition to plaintext, the encryption takes an extra parameter, contextInfo.
+It usually is public data implicit from the context.  It is bound to the
+resulting ciphertext, which allows for checking the integrity of contextInfo
+(but there are no guarantees in regards to the secrecy or authenticity of
+contextInfo).
 
 ```go
 package main
@@ -249,7 +261,7 @@ func main() {
 ```
 
 
-### Envelope Encryption
+### Envelope encryption
 
 Tink APIs work with GCP and AWS KMS.
 
@@ -298,14 +310,18 @@ func main() {
 
 ```
 
-## Key Management
+## Key management
 
-### Generating New Key(set)s
-To take advantage of key rotation and other key management features, a Tink user works usually not
-with single keys, but with keysets, which are just sets of keys with some additional parameters and metadata.
+### Generating new key(set)s
 
-Internally Tink stores keysets as Protocol Buffers, but you can work with keysets via a wrapper called keyset handle. You can generate a new keyset and obtain its handle using a KeyTemplate. KeysetHandle objects enforce certain restrictions that prevent accidental leakage of the sensistive key material.
+To take advantage of key rotation and other key management features, a Tink user
+works usually not with single keys, but with keysets. Keysets are just sets of
+keys with some additional parameters and metadata.
 
+Internally Tink stores keysets as Protocol Buffers, but you can work with
+keysets via a wrapper called keyset handle. You can generate a new keyset and
+obtain its handle using a KeyTemplate. KeysetHandle objects enforce certain
+restrictions that prevent accidental leakage of the sensistive key material.
 
 ```go
 package main
@@ -350,16 +366,16 @@ Signature          | signature.ECDSAP521KeyTemplate()
 Hybrid             | hybrid.ECIESHKDFAES128GCMKeyTemplate()
 Hybrid             | hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate()
 
-To avoid accidental leakage of sensitive key material one should be careful
-mixing keyset generation and usage in code. To support the separation
-between these activities the Tink provides a command-line tool called
-[Tinkey](TINKEY.md), which can be used for common key management tasks.
+To avoid accidental leakage of sensitive key material, one should avoid mixing
+keyset generation and usage in code. To support the separation of these
+activities Tink provides a command-line tool, [Tinkey](TINKEY.md), which can be
+used for common key management tasks.
 
-### Storing and Loading existing Keysets
+### Storing and loading existing keysets
 
 After generating key material, you might want to persist it to a storage system.
-Tink supports persisting the keys after encryption to any io.Writer and io.Reader
-implementations.
+Tink supports persisting the keys after encryption to any io.Writer and
+io.Reader implementations.
 
 ```go
 package main
@@ -405,5 +421,3 @@ func main() {
     }
 }
 ```
-
-
