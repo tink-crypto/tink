@@ -60,33 +60,38 @@ primitive is CPA secure.
 package main
 
 import (
-    "fmt"
+        "fmt"
+        "log"
 
-    "github.com/google/tink/go/aead"
-    "github.com/google/tink/go/keyset"
+        "github.com/google/tink/go/aead"
+        "github.com/google/tink/go/keyset"
 )
 
 func main() {
 
-    kh, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
-    if err != nil {
-        // handle the error
-    }
+        kh, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    a := aead.New(kh)
+        a, err := aead.New(kh)
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    ct , err := a.Encrypt([]byte("this data needs to be encrypted"), []byte("associated data"))
-    if err != nil {
-        // handle error
-    }
+        ct, err := a.Encrypt([]byte("this data needs to be encrypted"), []byte("associated data"))
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    pt, err := a.Decrypt(ct, []byte("associated data"))
-    if err != nil {
-        //handle error
-    }
+        pt, err := a.Decrypt(ct, []byte("associated data"))
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        fmt.Printf("Cipher text: %s\nPlain text: %s\n", ct, pt)
 
 }
-
 ```
 
 ### MAC
@@ -99,29 +104,35 @@ message.
 package main
 
 import (
-    "fmt"
+        "fmt"
+        "log"
 
-    "github.com/google/tink/go/mac"
-    "github.com/google/tink/go/keyset"
+        "github.com/google/tink/go/keyset"
+        "github.com/google/tink/go/mac"
 )
 
 func main() {
 
-    kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
-    if err != nil {
-        // handle the error
-    }
+        kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    m := mac.New(kh)
+        m, err := mac.New(kh)
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    mac , err := m.ComputeMac([]byte("this data needs to be MACed"))
-    if err != nil {
-        // handle error
-    }
+        mac, err := m.ComputeMAC([]byte("this data needs to be MACed"))
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    if m.VerifyMAC(mac, []byte("this data needs to be MACed")); err != nil {
-        //handle error
-    }
+        if m.VerifyMAC(mac, []byte("this data needs to be MACed")); err != nil {
+                log.fatal("MAC verification failed")
+        }
+
+        fmt.Println("MAC verification succeeded.")
 
 }
 ```
@@ -135,38 +146,48 @@ because encrypting the same plaintext always yields the same ciphertext.
 package main
 
 import (
-    "fmt"
+        "bytes"
+        "fmt"
+        "log"
 
-    "github.com/google/tink/go/daead"
-    "github.com/google/tink/go/keyset"
+        "github.com/google/tink/go/daead"
+        "github.com/google/tink/go/keyset"
 )
 
 func main() {
 
-    kh, err := keyset.NewHandle(daead.AESSIVKeyTemplate())
-    if err != nil {
-        // handle the error
-    }
+        kh, err := keyset.NewHandle(daead.AESSIVKeyTemplate())
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    d := daead.New(kh)
+        d, err := daead.New(kh)
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    ct1 , err := d.EncryptDeterministically([]byte("this data needs to be encrypted"), []byte("additional data"))
-    if err != nil {
-        // handle error
-    }
+        ct1, err := d.EncryptDeterministically([]byte("this data needs to be encrypted"), []byte("additional data"))
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    pt , err := d.DecryptDeterministically(ct, []byte("additional data"))
-    if err != nil {
-        // handle error
-    }
+        ct2, err := d.EncryptDeterministically([]byte("this data needs to be encrypted"), []byte("additional data"))
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    ct2 , err := d.EncryptDeterministically([]byte("this data needs to be encrypted"), []byte("additional data"))
-    if err != nil {
-        // handle error
-    }
+        if !bytes.Equal(ct1, ct2) {
+                log.Fatal("cipher texts are not equal")
+        }
 
-    // ct1 will be equal to ct2
+        fmt.Print("Cipher texts are equal.\n")
 
+        pt, err := d.DecryptDeterministically(ct1, []byte("additional data"))
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        fmt.Printf("Plain text: %s\n", pt)
 
 }
 ```
@@ -179,32 +200,42 @@ To sign data using Tink you can use ECDSA or ED25519 key templates.
 package main
 
 import (
-    "fmt"
+        "fmt"
+        "log"
 
-    "github.com/google/tink/go/signature"
-    "github.com/google/tink/go/keyset"
+        "github.com/google/tink/go/keyset"
+        "github.com/google/tink/go/signature"
 )
 
 func main() {
 
-    kh, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate()) // other key templates can also be used
-    if err != nil {
-        // handle the error
-    }
+        khPriv, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate())
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    s := signature.NewSigner(kh)
+        s, err := signature.NewSigner(khPriv)
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    a , err := s.Sign([]byte("this data needs to be signed"))
-    if err != nil {
-        // handle error
-    }
+        a, err := s.Sign([]byte("this data needs to be signed"))
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    v := signature.NewVerifier(kh)
+        khPub, err := khPriv.Public()
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    if err := v.Verify(a, []byte("this data needs to be signed")); err != nil {
-        // handle error
-    }
+        v, err := signature.NewVerifier(khPub)
 
+        if err := v.Verify(a, []byte("this data needs to be signed")); err != nil {
+                log.Fatal("signature verification failed")
+        }
+
+        fmt.Println("Signature verification succeeded.")
 
 }
 ```
@@ -230,34 +261,45 @@ contextInfo).
 package main
 
 import (
-    "github.com/google/tink/go/hybrid"
-    "github.com/google/tink/go/core/registry"
-    "github.com/google/tink/go/keyset"
-)
+        "fmt"
+        "log"
 
+        "github.com/google/tink/go/hybrid"
+        "github.com/google/tink/go/keyset"
+)
 
 func main() {
 
-    kh , err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
-    if err != nil {
-        //handle error
-    }
-    h := hybrid.NewHybridEncrypt(kh)
+        khPriv, err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
+        if err != nil {
+                log.Fata(err)
+        }
 
-    ct, err = h.Encrypt([]byte("secret message"), []byte("context info"))
-    if err != nil {
-        // handle error
-    }
+        he, err := hybrid.NewHybridEncrypt(khPriv)
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    khd , err := keyset.NewHandle( .....); /// get a handle on the decryption key material
-    hd := hybrid.NewHybridDecrypt(khd)
+        ct, err := h.Encrypt([]byte("secret message"), []byte("context info"))
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    pt, err := hd.Decrypt(ct, []byte("context info"))
-    if err != nil {
-        // handle error
-    }
+        khPub, err := khPriv.PublicKey()
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        hd, err := hybrid.NewHybridDecrypt(khPub)
+
+        pt, err := hd.Decrypt(ct, []byte("context info"))
+        if err != nil {
+                log.Fata(err)
+        }
+
+        fmt.Printf("Cipher text: %s\nPlain text: %s\n", ct, pt)
+
 }
-
 ```
 
 
@@ -269,45 +311,54 @@ Tink APIs work with GCP and AWS KMS.
 package main
 
 import (
-    "github.com/google/tink/go/aead"
-    "github.com/google/tink/go/core/registry"
-    "github.com/google/tink/go/integration/gcpkms"
-    "github.com/google/tink/go/keyset"
+        "fmt"
+
+        "github.com/google/tink/go/aead"
+        "github.com/google/tink/go/core/registry"
+        "github.com/google/tink/go/integration/gcpkms"
+        "github.com/google/tink/go/keyset"
 )
 
 const (
-    keyURI = "gcp-kms://......"
+        keyURI          = "gcp-kms://......"
+        credentialsPath = "/mysecurestorage/credentials.json"
 )
 
 func main() {
-    gcpclient := gcpkms.NewGCPClient(keyURI)
-    _, err := gcpclient.LoadCredentials("/mysecurestorage/credentials.json")
-    if err != nil {
-        //handle error
-    }
-    registry.RegisterKMSClient(gcpclient)
 
-    dek := aead.AES128CTRHMACSHA256KeyTemplate()
-    kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
-    if err != nil {
-        // handle error
-    }
-    a, err := aead.New(kh)
-    if err != nil {
-        // handle error
-    }
+        gcpclient := gcpkms.NewGCPClient(keyURI)
 
-    ct, err = a.Encrypt([]byte("secret message"), []byte("associated data"))
-    if err != nil {
-        // handle error
-    }
+        _, err := gcpclient.LoadCredentials(credentialsPath)
+        if err != nil {
+                log.Fata(err)
+        }
 
-    pt, err = a.Decrypt(ct, []byte("associated data"))
-    if err != nil {
-        // handle error
-    }
+        registry.RegisterKMSClient(gcpclient)
+
+        dek := aead.AES128CTRHMACSHA256KeyTemplate()
+        kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
+        if err != nil {
+                log.Fata(err)
+        }
+
+        a, err := aead.New(kh)
+        if err != nil {
+                log.Fata(err)
+        }
+
+        ct, err = a.Encrypt([]byte("secret message"), []byte("associated data"))
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        pt, err = a.Decrypt(ct, []byte("associated data"))
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        fmt.Printf("Cipher text: %s\nPlain text: %s\n", ct, pt)
+
 }
-
 ```
 
 ## Key management
@@ -327,19 +378,23 @@ restrictions that prevent accidental leakage of the sensistive key material.
 package main
 
 import (
-    "fmt"
+        "fmt"
+        "log"
 
-    "github.com/google/tink/go/aead"
-    "github.com/google/tink/go/keyset"
+        "github.com/google/tink/go/aead"
+        "github.com/google/tink/go/keyset"
 )
 
 func main() {
 
-    kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate()) // other key templates can also be used
-    if err != nil {
-        // handle the error
-    }
-    fmt.Println(kh.String())
+        // Other key templates can also be used.
+        kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        fmt.Println(kh.String())
+
 }
 
 ```
@@ -381,43 +436,71 @@ io.Reader implementations.
 package main
 
 import (
-    "github.com/golang/protobuf/proto"
-    "github.com/google/tink/go/aead"
-    "github.com/google/tink/go/keyset"
+        "fmt"
+        "log"
+
+        "github.com/golang/protobuf/proto"
+        "github.com/google/tink/go/aead"
+        "github.com/google/tink/go/core/registry"
+        "github.com/google/tink/go/integration/gcpkms"
+        "github.com/google/tink/go/keyset"
+)
+
+const (
+        keyURI          = "gcp-kms://..."
+        credentialsPath = "/mysecurestorage/..."
 )
 
 func main() {
 
-    kh, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
-    if err != nil {
-        // handle error
-    }
+        // Generate a new key.
+        kh1, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    // Fetch the master key
-    masterKey = aead.NewKMSEnvelopeAead("..", "..") //key template, //remote aead
-    if err != nil {
-        // handle error
-    }
+        // Fetch the master key from a KMS.
+        gcpClient := gcpkms.NewGCPClient(keyURI)
 
-    // io.Reader and io.Writer implementation. This is simply writing to memory.
-    memKeyset := &keyset.MemReaderWriter{}
+        _, err := gpcClient.LoadCredentials(credentialsPath)
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    // Write encrypts the keyset handle with the master key and
-    // writes to the io.Writer implementation(memKeyset)
-    // We recommend you encrypt the keyset handle before persisting.
-    if err := kh.Write(memKeyset, masterKey); err != nil {
-        // handle error
-    }
+        registry.RegisterKMSClient(gcpClient)
 
-    // Read reads the encrypted keyset handle back from the io.Reader implementation
-    // and decrypts it using the master key.
-    kh2, err := keyset.Read(memKeyset, masterKey)
-    if err != nil {
-        // handle error
-    }
+        backend, err := gcpClient.GetAEAD(keyURI)
+        if err != nil {
+                log.Fatal(err)
+        }
 
-    if !proto.Equal(kh.Keyset(), kh2.Keyset()) {
-        // handle error
-    }
+        masterKey, err = aead.NewKMSEnvelopeAead(*aead.AES256GCMKeyTemplate(), backend)
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        // An io.Reader and io.Writer implementation which simply writes to memory.
+        memKeyset := &keyset.MemReaderWriter{}
+
+        // Write encrypts the keyset handle with the master key and writes to the
+        // io.Writer implementation (memKeyset).  We recommend you encrypt the keyset
+        // handle before persisting it.
+        if err := kh1.Write(memKeyset, masterKey); err != nil {
+                log.Fatal(err)
+        }
+
+        // Read reads the encrypted keyset handle back from the io.Reader implementation
+        // and decrypts it using the master key.
+        kh2, err := keyset.Read(memKeyset, masterKey)
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        if !proto.Equal(kh1.Keyset(), kh2.Keyset()) {
+                log.Fatal("key handlers are not equal")
+        }
+
+        fmt.Println("Key handlers are equal.")
+
 }
 ```
