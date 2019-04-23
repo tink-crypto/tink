@@ -317,8 +317,8 @@ TEST_F(TinkConfigTest, testRegister) {
 
   // Reset the registry, and try overriding a catalogue with a different one.
   Registry::Reset();
-  status = Registry::AddCatalogue("TinkHybridDecrypt",
-                                  new DummyHybridDecryptCatalogue());
+  status = Registry::AddCatalogue(
+      "TinkHybridDecrypt", absl::make_unique<DummyHybridDecryptCatalogue>());
   EXPECT_TRUE(status.ok()) << status;
   status = TinkConfig::Register();
   EXPECT_FALSE(status.ok());

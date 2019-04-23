@@ -151,7 +151,8 @@ TEST_F(AeadConfigTest, testRegister) {
 
   // Reset the registry, and try overriding a catalogue with a different one.
   Registry::Reset();
-  status = Registry::AddCatalogue("TinkAead", new DummyAeadCatalogue());
+  status = Registry::AddCatalogue("TinkAead",
+                                  absl::make_unique<DummyAeadCatalogue>());
   EXPECT_TRUE(status.ok()) << status;
   status = AeadConfig::Register();
   EXPECT_FALSE(status.ok());

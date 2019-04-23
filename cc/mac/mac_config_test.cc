@@ -98,7 +98,8 @@ TEST_F(MacConfigTest, testRegister) {
 
   // Reset the registry, and try overriding a catalogue with a different one.
   Registry::Reset();
-  status = Registry::AddCatalogue("TinkMac", new DummyMacCatalogue());
+  status =
+      Registry::AddCatalogue("TinkMac", absl::make_unique<DummyMacCatalogue>());
   EXPECT_TRUE(status.ok()) << status;
   status = MacConfig::Register();
   EXPECT_FALSE(status.ok());
