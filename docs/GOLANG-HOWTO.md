@@ -328,7 +328,8 @@ func main() {
 
 ```
 
-Key templates are available for MAC, digital signatures and AEAD encryption.
+Key templates are available for MAC, digital signatures, AEAD encryption, DAEAD
+encryption and hybrid encryption.
 
 Key Template Type  | Key Template
 ------------------ | ------------
@@ -336,11 +337,18 @@ AEAD               | aead.AES128CTRHMACSHA256KeyTemplate()
 AEAD               | aead.AES128GCMKeyTemplate()
 AEAD               | aead.AES256CTRHMACSHA256KeyTemplate()
 AEAD               | aead.AES256GCMKeyTemplate()
+AEAD               | aead.ChaCha20Poly1305KeyTemplate()
+AEAD               | aead.XChaCha20Poly1305KeyTemplate()
+DAEAD              | daead.AESSIVKeyTemplate()
 MAC                | mac.HMACSHA256Tag128KeyTemplate()
 MAC                | mac.HMACSHA256Tag256KeyTemplate()
+MAC                | mac.HMACSHA512Tag256KeyTemplate()
+MAC                | mac.HMACSHA512Tag512KeyTemplate()
 Signature          | signature.ECDSAP256KeyTemplate()
 Signature          | signature.ECDSAP384KeyTemplate()
 Signature          | signature.ECDSAP521KeyTemplate()
+Hybrid             | hybrid.ECIESHKDFAES128GCMKeyTemplate()
+Hybrid             | hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate()
 
 To avoid accidental leakage of sensitive key material one should be careful
 mixing keyset generation and usage in code. To support the separation
