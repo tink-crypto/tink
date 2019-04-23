@@ -61,36 +61,36 @@ public final class InternalKeyManagerTest {
   }
 
   @Test
-  public void createPrimitive_works() throws Exception {
+  public void getPrimitive_works() throws Exception {
     InternalKeyManager<AesGcmKey> keyManager =
         new TestInternalKeyManager(
             new TestInternalKeyManager.PrimitiveFactory<Primitive1, AesGcmKey>(Primitive1.class) {
               @Override
-              public Primitive1 create(AesGcmKey key) {
+              public Primitive1 getPrimitive(AesGcmKey key) {
                 return new Primitive1(key.getKeyValue());
               }
             },
             new TestInternalKeyManager.PrimitiveFactory<Primitive2, AesGcmKey>(Primitive2.class) {
               @Override
-              public Primitive2 create(AesGcmKey key) {
+              public Primitive2 getPrimitive(AesGcmKey key) {
                 return new Primitive2(key.getKeyValue().size());
               }
             });
     Primitive1 primitive1 =
-        keyManager.createPrimitive(
+        keyManager.getPrimitive(
             AesGcmKey.newBuilder().setKeyValue(TEST_BYTESTRING).build(), Primitive1.class);
     assertThat(primitive1.getKeyValue()).isEqualTo(TEST_BYTESTRING);
     Primitive2 primitive2 =
-        keyManager.createPrimitive(
+        keyManager.getPrimitive(
             AesGcmKey.newBuilder().setKeyValue(TEST_BYTESTRING).build(), Primitive2.class);
     assertThat(primitive2.getSize()).isEqualTo(TEST_BYTESTRING.size());
   }
 
   @Test
-  public void createPrimitive_throwsForUnknownPrimitives() throws Exception {
+  public void getPrimitive_throwsForUnknownPrimitives() throws Exception {
     InternalKeyManager<AesGcmKey> keyManager = new TestInternalKeyManager();
     try {
-      keyManager.createPrimitive(AesGcmKey.getDefaultInstance(), Primitive1.class);
+      keyManager.getPrimitive(AesGcmKey.getDefaultInstance(), Primitive1.class);
       fail();
     } catch (IllegalArgumentException e) {
       // expected
@@ -114,13 +114,13 @@ public final class InternalKeyManagerTest {
         new TestInternalKeyManager(
             new TestInternalKeyManager.PrimitiveFactory<Primitive1, AesGcmKey>(Primitive1.class) {
               @Override
-              public Primitive1 create(AesGcmKey key) {
+              public Primitive1 getPrimitive(AesGcmKey key) {
                 return new Primitive1(key.getKeyValue());
               }
             },
             new TestInternalKeyManager.PrimitiveFactory<Primitive1, AesGcmKey>(Primitive1.class) {
               @Override
-              public Primitive1 create(AesGcmKey key) {
+              public Primitive1 getPrimitive(AesGcmKey key) {
                 return new Primitive1(key.getKeyValue());
               }
             });

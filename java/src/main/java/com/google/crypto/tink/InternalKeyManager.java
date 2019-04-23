@@ -63,7 +63,7 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
     }
 
     /** Creates a new instance of {@code PrimitiveT}. */
-    public abstract PrimitiveT create(KeyT key) throws GeneralSecurityException;
+    public abstract PrimitiveT getPrimitive(KeyT key) throws GeneralSecurityException;
   }
 
   private final Class<KeyProtoT> clazz;
@@ -128,7 +128,7 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
    * @throws java.lang.IllegalArgumentException if the given {@code primitiveClass} is not
    *     supported.
    */
-  public final <P> P createPrimitive(KeyProtoT key, Class<P> primitiveClass)
+  public final <P> P getPrimitive(KeyProtoT key, Class<P> primitiveClass)
       throws GeneralSecurityException {
     @SuppressWarnings("unchecked") //  factories maps Class<P> to PrimitiveFactory<P, KeyProtoT>.
     PrimitiveFactory<P, KeyProtoT> factory =
@@ -137,7 +137,7 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
       throw new IllegalArgumentException(
           "Requested primitive class " + primitiveClass.getCanonicalName() + " not supported.");
     }
-    return factory.create(key);
+    return factory.getPrimitive(key);
   }
 
   /**

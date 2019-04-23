@@ -112,7 +112,7 @@ TEST(KeyManagerTest, CreateAead) {
   AesGcmKey key =
       ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie();
   std::unique_ptr<Aead> aead =
-      ExampleInternalKeyManager().Create<Aead>(key).ValueOrDie();
+      ExampleInternalKeyManager().GetPrimitive<Aead>(key).ValueOrDie();
 
   std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
   std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
@@ -125,13 +125,14 @@ TEST(KeyManagerTest, CreateAeadVariant) {
   AesGcmKey key =
       ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie();
   std::unique_ptr<AeadVariant> aead_variant =
-      ExampleInternalKeyManager().Create<AeadVariant>(key).ValueOrDie();
+      ExampleInternalKeyManager().GetPrimitive<AeadVariant>(key).ValueOrDie();
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
 }
 
 class NotRegistered {};
 TEST(KeyManagerTest, CreateFails) {
-  auto failing = ExampleInternalKeyManager().Create<NotRegistered>(AesGcmKey());
+  auto failing =
+      ExampleInternalKeyManager().GetPrimitive<NotRegistered>(AesGcmKey());
   EXPECT_THAT(failing.status(), test::StatusIs(util::error::INVALID_ARGUMENT));
 }
 
@@ -184,8 +185,9 @@ TEST(KeyManagerWithoutFactoryTest, CreateAead) {
   key_format.set_key_size(16);
   AesGcmKey key =
       ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie();
-  std::unique_ptr<Aead> aead =
-      ExampleInternalKeyManagerWithoutFactory().Create<Aead>(key).ValueOrDie();
+  std::unique_ptr<Aead> aead = ExampleInternalKeyManagerWithoutFactory()
+                                   .GetPrimitive<Aead>(key)
+                                   .ValueOrDie();
 
   std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
   std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
@@ -198,13 +200,13 @@ TEST(KeyManagerWithoutFactoryTest, CreateAeadVariant) {
   AesGcmKey key =
       ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie();
   std::unique_ptr<AeadVariant> aead_variant =
-      ExampleInternalKeyManager().Create<AeadVariant>(key).ValueOrDie();
+      ExampleInternalKeyManager().GetPrimitive<AeadVariant>(key).ValueOrDie();
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
 }
 
 TEST(KeyManagerWithoutFactoryTest, CreateFails) {
   auto failing =
-      ExampleInternalKeyManagerWithoutFactory().Create<NotRegistered>(
+      ExampleInternalKeyManagerWithoutFactory().GetPrimitive<NotRegistered>(
           AesGcmKey());
   EXPECT_THAT(failing.status(), test::StatusIs(util::error::INVALID_ARGUMENT));
 }

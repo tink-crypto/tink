@@ -104,7 +104,7 @@ class InternalKeyManager
   // Creates a new primitive using one of the primitive factories passed in at
   // construction time.
   template <typename Primitive>
-  crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Create(
+  crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> GetPrimitive(
       const KeyProto& key) const {
     auto iter = primitive_factories_.find(std::type_index(typeid(Primitive)));
     if (iter == primitive_factories_.end()) {
