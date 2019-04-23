@@ -21,13 +21,6 @@ type KMSClient interface {
 	// Supported true if this client does support keyURI
 	Supported(keyURI string) bool
 
-	// LoadCredentials loads the credentials in credentialPath. If credentialPath is null, loads the
-	// default credentials.
-	LoadCredentials(credentialPath string) (interface{}, error)
-
-	// LoadDefaultCredentials loads with the default credentials.
-	LoadDefaultCredentials() (interface{}, error)
-
 	// GetAEAD  gets an AEAD backend by keyURI.
 	GetAEAD(keyURI string) (tink.AEAD, error)
 }
