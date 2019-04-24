@@ -95,7 +95,7 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
   }
 
   /** Returns the class corresponding to the key protobuffer. */
-  public final Class<KeyProtoT> getKeyProtoClass() {
+  public final Class<KeyProtoT> getKeyClass() {
     return clazz;
   }
 
@@ -166,19 +166,19 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
      * @throws GeneralSecurityException if the passed {@code keyFormatProto} is not valid in any
      *     way.
      */
-    public abstract void validate(KeyFormatProtoT keyFormatProto) throws GeneralSecurityException;
+    public abstract void validateKeyFormat(KeyFormatProtoT keyFormatProto)
+        throws GeneralSecurityException;
 
     /**
      * Parses a serialized key proto.
      *
      * <p>Implement as {@code return KeyFormatProtoT.parseFrom(byteString);}.
      */
-    public abstract KeyFormatProtoT parse(ByteString byteString)
+    public abstract KeyFormatProtoT parseKeyFormat(ByteString byteString)
         throws InvalidProtocolBufferException;
 
     /** Creates a new key from a given format. */
-    public abstract KeyT newKeyFromFormat(KeyFormatProtoT keyFormat)
-        throws GeneralSecurityException;
+    public abstract KeyT createKey(KeyFormatProtoT keyFormat) throws GeneralSecurityException;
   }
 
   /**
