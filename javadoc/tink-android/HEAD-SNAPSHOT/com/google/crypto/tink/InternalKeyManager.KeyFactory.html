@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":6,"i2":6,"i3":6};
+var methods = {"i0":6,"i1":10,"i2":6,"i3":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -155,26 +155,26 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code>abstract <a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyT</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html#createKey-KeyFormatProtoT-">createKey</a></span>(<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat)</code>
+<div class="block">Creates a new key from a given format.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html#getKeyFormatClass--">getKeyFormatClass</a></span>()</code>
 <div class="block">Returns the class corresponding to the key format protobuffer.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
-<td class="colFirst"><code>abstract <a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyT</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html#newKeyFromFormat-KeyFormatProtoT-">newKeyFromFormat</a></span>(<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat)</code>
-<div class="block">Creates a new key from a given format.</div>
-</td>
-</tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>abstract <a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html#parse-com.google.protobuf.ByteString-">parse</a></span>(com.google.protobuf.ByteString&nbsp;byteString)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html#parseKeyFormat-com.google.protobuf.ByteString-">parseKeyFormat</a></span>(com.google.protobuf.ByteString&nbsp;byteString)</code>
 <div class="block">Parses a serialized key proto.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>abstract void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html#validate-KeyFormatProtoT-">validate</a></span>(<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormatProto)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html#validateKeyFormat-KeyFormatProtoT-">validateKeyFormat</a></span>(<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormatProto)</code>
 <div class="block">Checks if the given <code>keyFormatProto</code> is a valid key.</div>
 </td>
 </tr>
@@ -227,16 +227,16 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Returns the class corresponding to the key format protobuffer.</div>
 </li>
 </ul>
-<a name="validate-com.google.protobuf.MessageLite-">
+<a name="validateKeyFormat-com.google.protobuf.MessageLite-">
 <!--   -->
-</a><a name="validate-KeyFormatProtoT-">
+</a><a name="validateKeyFormat-KeyFormatProtoT-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>validate</h4>
-<pre>public abstract&nbsp;void&nbsp;validate(<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormatProto)
-                       throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<h4>validateKeyFormat</h4>
+<pre>public abstract&nbsp;void&nbsp;validateKeyFormat(<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormatProto)
+                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Checks if the given <code>keyFormatProto</code> is a valid key.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -245,14 +245,14 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="parse-com.google.protobuf.ByteString-">
+<a name="parseKeyFormat-com.google.protobuf.ByteString-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>parse</h4>
-<pre>public abstract&nbsp;<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;parse(com.google.protobuf.ByteString&nbsp;byteString)
-                               throws com.google.protobuf.InvalidProtocolBufferException</pre>
+<h4>parseKeyFormat</h4>
+<pre>public abstract&nbsp;<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;parseKeyFormat(com.google.protobuf.ByteString&nbsp;byteString)
+                                        throws com.google.protobuf.InvalidProtocolBufferException</pre>
 <div class="block">Parses a serialized key proto.
 
  <p>Implement as <code>return KeyFormatProtoT.parseFrom(byteString);</code>.</div>
@@ -262,16 +262,16 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="newKeyFromFormat-com.google.protobuf.MessageLite-">
+<a name="createKey-com.google.protobuf.MessageLite-">
 <!--   -->
-</a><a name="newKeyFromFormat-KeyFormatProtoT-">
+</a><a name="createKey-KeyFormatProtoT-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>newKeyFromFormat</h4>
-<pre>public abstract&nbsp;<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyT</a>&nbsp;newKeyFromFormat(<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat)
-                               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<h4>createKey</h4>
+<pre>public abstract&nbsp;<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyT</a>&nbsp;createKey(<a href="../../../../com/google/crypto/tink/InternalKeyManager.KeyFactory.html" title="type parameter in InternalKeyManager.KeyFactory">KeyFormatProtoT</a>&nbsp;keyFormat)
+                        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Creates a new key from a given format.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
