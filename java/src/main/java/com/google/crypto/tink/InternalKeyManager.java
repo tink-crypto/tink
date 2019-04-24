@@ -24,6 +24,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * An object which collects all the operations which one can do on for a single key type, identified
@@ -125,8 +126,10 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
   /**
    * Creates the requested primitive.
    *
-   * @throws java.lang.IllegalArgumentException if the given {@code primitiveClass} is not
-   *     supported.
+   * @throws java.lang.IllegalArgumentException if the given {@code primitiveClass} is not supported
+   *     (i.e., not returned by {@link #supportedPrimitives}.
+   * @throws GeneralSecurityException if the underlying factory throws a GeneralSecurityException
+   *     creating the primitive.
    */
   public final <P> P getPrimitive(KeyProtoT key, Class<P> primitiveClass)
       throws GeneralSecurityException {
@@ -138,6 +141,13 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
           "Requested primitive class " + primitiveClass.getCanonicalName() + " not supported.");
     }
     return factory.getPrimitive(key);
+  }
+
+  /**
+   * Returns a set containing the supported primitives.
+   */
+  public final Set<Class<?>> supportedPrimitives() {
+    return factories.keySet();
   }
 
   /**
