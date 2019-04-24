@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -47,6 +48,7 @@ import java.util.Set;
  * #keyFactory}. In this case it needs to return an object of type {@code KeyFactory<KeyFormatProto,
  * KeyProtoT>}, where one has to specify a proto for the key format as well.
  */
+@Alpha
 public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
   /** A PrimitiveFactory knows how to create primitives from a given key. */
   protected abstract static class PrimitiveFactory<PrimitiveT, KeyT> {
