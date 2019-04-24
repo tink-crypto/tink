@@ -40,11 +40,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initCleartextKeysetHandleWithKeysetReader:(TINKKeysetReader *)reader
                                                              error:(NSError **)error;
 
-/**
- * Returns the serialized Keyset-proto for this TINKKeysetHandle.
- */
-- (NSData *)serializedKeyset;
-
 @end
 
 NS_ASSUME_NONNULL_END

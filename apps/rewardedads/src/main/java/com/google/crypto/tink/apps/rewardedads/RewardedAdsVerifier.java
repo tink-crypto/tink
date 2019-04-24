@@ -205,12 +205,12 @@ public final class RewardedAdsVerifier {
      * {
      *   "keys": [
      *     {
-     *       keyId: 1916455855,
+     *       key_id: 1916455855,
      *       pem: "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEUaWMKcBHWdhUE+DncSIHhFCLLEln\nUs0LB9oanZ4K/FNICIM8ltS4nzc9yjmhgVQOlmSS6unqvN9t8sqajRTPcw==\n-----END PUBLIC KEY-----"
      *       base64: "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEUaWMKcBHWdhUE+DncSIHhFCLLElnUs0LB9oanZ4K/FNICIM8ltS4nzc9yjmhgVQOlmSS6unqvN9t8sqajRTPcw=="
      *     },
      *     {
-     *       keyId: 3901585526,
+     *       key_id: 3901585526,
      *       pem: "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEtxg2BsK/fllIeADtLspezS6YfHFWXZ8tiJncm8LDBa/NxEC84akdWbWDCUrMMGIV27/3/e7UuKSEonjGvaDUsw==\n-----END PUBLIC KEY-----"
      *       base64: "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEtxg2BsK/fllIeADtLspezS6YfHFWXZ8tiJncm8LDBa/NxEC84akdWbWDCUrMMGIV27/3/e7UuKSEonjGvaDUsw=="
      *     },

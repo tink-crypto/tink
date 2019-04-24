@@ -16,12 +16,14 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.annotations.Alpha;
 import java.security.InvalidKeyException;
 
 /**
  * XChaCha20Poly1305 AEAD construction, as described in
  * https://tools.ietf.org/html/draft-arciszewski-xchacha-01.
  */
+@Alpha
 public final class XChaCha20Poly1305 extends ChaCha20Poly1305Base {
   public XChaCha20Poly1305(final byte[] key) throws InvalidKeyException {
     super(key);

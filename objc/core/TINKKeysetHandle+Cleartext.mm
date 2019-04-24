@@ -24,7 +24,6 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/core/TINKKeysetReader_Internal.h"
 #import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
 
 @implementation TINKKeysetHandle (Cleartext)
 
@@ -51,11 +50,6 @@
   }
 
   return [[TINKKeysetHandle alloc] initWithCCKeysetHandle:std::move(st.ValueOrDie())];
-}
-
-- (NSData *)serializedKeyset {
-  auto keyset = crypto::tink::CleartextKeysetHandle::GetKeyset(*self.ccKeysetHandle);
-  return TINKStringToNSData(keyset.SerializeAsString());
 }
 
 @end

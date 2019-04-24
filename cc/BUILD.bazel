@@ -999,8 +999,8 @@ cc_test(
 )
 
 cc_test(
-    name = "core/template_util_test",
-    srcs = ["core/template_util_test.cc"],
+    name = "core/template_utils_test",
+    srcs = ["core/template_utils_test.cc"],
     deps = [
         ":core/template_util",
         "@com_google_googletest//:gtest_main",

@@ -3,27 +3,10 @@
 This app implements the verifier side of Server-Side Verification of Google
 AdMob Rewarded Ads.
 
-## Latest Release
-
-The most recent release is
-[1.2.2](https://github.com/google/tink/releases/tag/v1.2.2), released
-2019-01-24. API docs can be found
-[here](https://google.github.com/tink/javadoc/apps-rewardedads/1.2.2).
-
-The Maven group ID is `com.google.crypto.tink`, and the artifact ID is
-`apps-rewardedads`.
-
-To add a dependency using Maven:
-
-```xml
-<dependency>
-  <groupId>com.google.crypto.tink</groupId>
-  <artifactId>apps-rewardedads</artifactId>
-  <version>1.2.2</version>
-</dependency>
-```
-
 ## Snapshots
+
+This app has yet not been released, though you can still play with it using
+snapshot versions.
 
 Snapshots of this app built from the master branch are available through Maven
 using version `HEAD-SNAPSHOT`. API docs can be found

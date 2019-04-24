@@ -28,15 +28,14 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/input_stream.h"
-#include "tink/keyset_handle.h"
 #include "tink/kms_client.h"
+#include "tink/keyset_handle.h"
 #include "tink/mac.h"
 #include "tink/output_stream.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/streaming_aead.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/util/constants.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -127,18 +126,6 @@ google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(
 
 // Generates a fresh test key for ED25519.
 google::crypto::tink::Ed25519PrivateKey GetEd25519TestPrivateKey();
-
-// Embeds the given Proto into a KeyData proto.
-template <typename Proto>
-google::crypto::tink::KeyData AsKeyData(
-    const Proto& proto,
-    google::crypto::tink::KeyData::KeyMaterialType key_material_type) {
-  google::crypto::tink::KeyData result;
-  result.set_value(proto.SerializeAsString());
-  result.set_type_url(absl::StrCat(kTypeGoogleapisCom, proto.GetTypeName()));
-  result.set_key_material_type(key_material_type);
-  return result;
-}
 
 // A dummy implementation of Aead-interface.
 // An instance of DummyAead can be identified by a name specified

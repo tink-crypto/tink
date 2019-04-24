@@ -31,8 +31,8 @@ cc_library(
     name = "gcp_kms_client",
     srcs = ["gcp_kms_client.cc"],
     hdrs = ["gcp_kms_client.h"],
-    include_prefix = "tink",
     strip_include_prefix = "/cc",
+    include_prefix = "tink",
     deps = [
         ":gcp_kms_aead",
         "//cc:kms_client",
@@ -47,30 +47,29 @@ cc_library(
 
 # tests
 
-# TODO(b/119547792): Temporarily disabling until reliability concerns are addressed.
-#cc_test(
-#    name = "gcp_kms_aead_test",
-#    size = "medium",
-#    srcs = ["gcp_kms_aead_test.cc"],
-#    deps = [
-#        ":gcp_kms_aead",
-#        "//cc/util:errors",
-#        "//cc/util:status",
-#        "//cc/util:statusor",
-#        "@com_google_googletest//:gtest_main",
-#    ],
-#)
-#
-#cc_test(
-#    name = "gcp_kms_client_test",
-#    size = "medium",
-#    srcs = ["gcp_kms_client_test.cc"],
-#    data = ["//testdata:credentials"],
-#    deps = [
-#        ":gcp_kms_client",
-#        "//cc/util:errors",
-#        "//cc/util:status",
-#        "//cc/util:statusor",
-#        "@com_google_googletest//:gtest_main",
-#    ],
-#)
+cc_test(
+    name = "gcp_kms_aead_test",
+    size = "medium",
+    srcs = ["gcp_kms_aead_test.cc"],
+    deps = [
+        ":gcp_kms_aead",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "gcp_kms_client_test",
+    size = "medium",
+    srcs = ["gcp_kms_client_test.cc"],
+    data = ["//testdata:credentials"],
+    deps = [
+        ":gcp_kms_client",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

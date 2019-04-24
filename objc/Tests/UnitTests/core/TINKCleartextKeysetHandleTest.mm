@@ -87,32 +87,4 @@
   XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
 }
 
-- (void)testSerializeKeyset {
-  google::crypto::tink::Keyset keyset;
-  google::crypto::tink::Keyset::Key key;
-  crypto::tink::test::AddTinkKey("some key type", 42, key,
-                                 google::crypto::tink::KeyStatusType::ENABLED,
-                                 google::crypto::tink::KeyData::SYMMETRIC, &keyset);
-  crypto::tink::test::AddRawKey("some other key type", 711, key,
-                                google::crypto::tink::KeyStatusType::ENABLED,
-                                google::crypto::tink::KeyData::SYMMETRIC, &keyset);
-  keyset.set_primary_key_id(42);
-
-  NSData *serializedKeyset = TINKStringToNSData(keyset.SerializeAsString());
-
-  NSError *error = nil;
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:serializedKeyset error:&error];
-
-  XCTAssertNil(error);
-  XCTAssertNotNil(reader);
-
-  TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
-
-  XCTAssertNotNil(handle);
-  XCTAssertTrue([serializedKeyset isEqualToData:handle.serializedKeyset]);
-}
-
-
 @end

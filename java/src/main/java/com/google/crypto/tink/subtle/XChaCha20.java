@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.annotations.Alpha;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 
@@ -26,6 +27,7 @@ import java.util.Arrays;
  *
  * <p>This cipher is meant to be used to construct an AEAD with Poly1305.
  */
+@Alpha
 class XChaCha20 extends ChaCha20Base {
   /**
    * Constructs a new XChaCha20 cipher with the supplied {@code key}.
