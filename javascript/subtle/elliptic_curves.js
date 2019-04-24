@@ -110,7 +110,7 @@ const ecdsaDer2Ieee = function(der, ieeeLength) {
 const ecdsaIeee2Der = function(ieee) {
   if (ieee.length % 2 != 0 || ieee.length == 0 || ieee.length > 132) {
     throw new InvalidArgumentsException(
-        'Invalid IEEE P1363 signature encoding');
+        'Invalid IEEE P1363 signature encoding. Length: ' + ieee.length);
   }
   const r = toUnsignedBigNum(ieee.subarray(0, ieee.length / 2));
   const s = toUnsignedBigNum(ieee.subarray(ieee.length / 2, ieee.length));
