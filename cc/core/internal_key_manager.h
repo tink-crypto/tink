@@ -53,6 +53,10 @@ class InternalKeyFactory<KeyProto, void> {
 
 }  // namespace internal
 
+template <typename KeyProto, typename KeyFormatProto,
+          typename PrimitivesTuple>
+class InternalKeyManager;
+
 // An InternalKeyManager manages a single key proto. This includes
 //  * parsing and validating keys
 //  * parsing and validating key formats (in case generating keys is allowed).
@@ -62,8 +66,13 @@ class InternalKeyFactory<KeyProto, void> {
 // the key manager cannot produce keys and a protobuf otherwise.
 //
 // The constructor should take unique pointers to primitive factories.
-template <typename KeyProto, typename KeyFormatProto = void>
-class InternalKeyManager
+//
+// InternalKeyManager uses templates for KeyProto, KeyFormatProto and a list of
+// Primitives which have to be provided as a std::tuple.
+template <typename KeyProto, typename KeyFormatProto,
+          typename... Primitives>
+class InternalKeyManager<KeyProto, KeyFormatProto,
+                         std::tuple<Primitives...>>
     : public internal::InternalKeyFactory<KeyProto, KeyFormatProto> {
  public:
   // A PrimitiveFactory<Primitive> knows how to create instances of the
@@ -71,9 +80,6 @@ class InternalKeyManager
   template <typename Primitive>
   class PrimitiveFactory {
    public:
-    // Used for template deduction.
-    using UnderlyingPrimitive = Primitive;
-
     virtual ~PrimitiveFactory() {}
     virtual crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Create(
         const KeyProto& key) const = 0;
@@ -81,11 +87,14 @@ class InternalKeyManager
 
   // Creates a new InternalKeyManager. The parameter(s) primitives must be some
   // number of unique_ptr<PrimitiveFactory<P>> types.
-  template <typename... PrimitiveFactories>
   explicit InternalKeyManager(
-      std::unique_ptr<PrimitiveFactories>... primitives) {
-    AddAllPrimitives<typename PrimitiveFactories::UnderlyingPrimitive...>(
-        std::move(primitives)...);
+      std::unique_ptr<PrimitiveFactory<Primitives>>... primitives) {
+    static_assert(
+        !crypto::tink::internal::HasDuplicates<Primitives...>::value,
+        "List or primitives contains a duplicate, which is not allowed.");
+    // https://stackoverflow.com/questions/17339789/how-to-call-a-function-on-all-variadic-template-args
+    ABSL_ATTRIBUTE_UNUSED
+    int unused[] = {(AddPrimitive(std::move(primitives)), 0)...};
   }
 
   // Returns the type_url identifying the key type handled by this manager.
@@ -118,37 +127,11 @@ class InternalKeyManager
   }
 
  private:
-  // Actual helper function to put the primitive factories into the hash map
-  // primitive_factories_. Only enabled if the primitives in the given
-  // Primitives template parameters are distinct.
-  template <typename... Primitives>
-  typename std::enable_if<
-      !crypto::tink::internal::HasDuplicates<Primitives...>::value>::type
-  AddAllPrimitives(
-      std::unique_ptr<PrimitiveFactory<Primitives>>... primitives) {
-    // https://stackoverflow.com/questions/17339789/how-to-call-a-function-on-all-variadic-template-args
-    ABSL_ATTRIBUTE_UNUSED
-    int unused[] = {(AddPrimitive(std::move(primitives)), 0)...};
-  }
-
   // Helper function which adds a single primivie.
   template <typename Primitive>
   void AddPrimitive(std::unique_ptr<PrimitiveFactory<Primitive>> primitive) {
     primitive_factories_.emplace(std::type_index(typeid(Primitive)),
                                  std::move(primitive));
-  }
-
-  // Replacement helper function for AddAllPrimitives which always fails with
-  // an error message when compiling. Only enabled if at least one primitive
-  // appears at least twice.
-  template <typename... Primitives>
-  typename std::enable_if<
-      crypto::tink::internal::HasDuplicates<Primitives...>::value>::type
-  AddAllPrimitives(
-      std::unique_ptr<PrimitiveFactory<Primitives>>... primitives) {
-    static_assert(sizeof(KeyProto) < 0,
-                  "The list of arguments to InternalKeyManager contains two "
-                  "PrimitiveFactory objects for the same primitive.");
   }
 
   // We use a shared_ptr here because shared_ptr<void> is valid (as opposed to
