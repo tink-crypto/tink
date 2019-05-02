@@ -140,7 +140,9 @@ class EciesAeadHkdfPrivateKeyManager
 
   @Override
   protected void validateKey(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
-    // TODO(b/74249437): add more checks.
+    if (keyProto.getKeyValue().isEmpty()) {
+      throw new GeneralSecurityException("invalid ECIES private key");
+    }
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     HybridUtil.validate(keyProto.getPublicKey().getParams());
   }

@@ -35,6 +35,14 @@ func TestTemplates(t *testing.T) {
 	if err := checkTemplate(template, 32, 32, commonpb.HashType_SHA256); err != nil {
 		t.Errorf("incorrect HMACSHA256Tag256KeyTemplate: %s", err)
 	}
+	template = mac.HMACSHA512Tag256KeyTemplate()
+	if err := checkTemplate(template, 64, 32, commonpb.HashType_SHA512); err != nil {
+		t.Errorf("incorrect HMACSHA512Tag256KeyTemplate: %s", err)
+	}
+	template = mac.HMACSHA512Tag512KeyTemplate()
+	if err := checkTemplate(template, 64, 64, commonpb.HashType_SHA512); err != nil {
+		t.Errorf("incorrect HMACSHA512Tag512KeyTemplate: %s", err)
+	}
 }
 
 func checkTemplate(template *tinkpb.KeyTemplate,

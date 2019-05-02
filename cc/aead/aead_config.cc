@@ -17,14 +17,13 @@
 #include "tink/aead/aead_config.h"
 
 #include "absl/memory/memory.h"
+#include "tink/aead/aead_catalogue.h"
 #include "tink/aead/aead_wrapper.h"
 #include "tink/config.h"
-#include "tink/registry.h"
-#include "tink/aead/aead_catalogue.h"
 #include "tink/mac/mac_config.h"
+#include "tink/registry.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
-
 
 using google::crypto::tink::RegistryConfig;
 
@@ -45,10 +44,20 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
       "AesGcmKey", 0, true));
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "AesGcmSivKey", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesEaxKey", 0, true));
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "XChaCha20Poly1305Key", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "KmsAeadKey", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "KmsEnvelopeAeadKey", 0,
+      true));
   config->set_config_name("TINK_AEAD");
   return config;
 }

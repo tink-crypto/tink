@@ -26,6 +26,7 @@ PUBLIC_APIS = [
     "hybrid_encrypt.h",
     "hybrid_encrypt_factory.h",
     "hybrid_key_templates.h",
+    "input_stream.h",
     "json_keyset_reader.h",
     "json_keyset_writer.h",
     "key_manager.h",
@@ -38,6 +39,7 @@ PUBLIC_APIS = [
     "mac_config.h",
     "mac_factory.h",
     "mac_key_templates.h",
+    "output_stream.h",
     "public_key_sign.h",
     "public_key_sign_factory.h",
     "public_key_verify.h",
@@ -45,6 +47,9 @@ PUBLIC_APIS = [
     "registry.h",
     "signature_config.h",
     "signature_key_templates.h",
+    "streaming_aead.h",
+    "streaming_aead_config.h",
+    "streaming_aead_key_templates.h",
     "tink_config.h",
     "version.h",
 ]
@@ -58,16 +63,19 @@ PUBLIC_API_DEPS = [
     ":hybrid_encrypt",
     ":json_keyset_reader",
     ":json_keyset_writer",
+    ":input_stream",
     ":key_manager",
     ":keyset_handle",
     ":keyset_manager",
-    ":public_key_sign",
-    ":public_key_verify",
     ":keyset_reader",
     ":keyset_writer",
     ":kms_client",
     ":mac",
+    ":output_stream",
     ":primitive_set",
+    ":public_key_sign",
+    ":public_key_verify",
+    ":streaming_aead",
     ":registry",
     ":registry_impl",
     ":version",
@@ -89,6 +97,8 @@ PUBLIC_API_DEPS = [
     "//cc/signature:public_key_verify_factory",
     "//cc/signature:signature_config",
     "//cc/signature:signature_key_templates",
+    "//cc/streamingaead:streaming_aead_config",
+    "//cc/streamingaead:streaming_aead_key_templates",
     "//cc/util:errors",
     "//cc/util:protobuf_helper",
     "//cc/util:status",
@@ -574,6 +584,45 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "kms_clients",
+    hdrs = ["kms_clients.h"],
+    srcs = ["core/kms_clients.cc"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":kms_client",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+cc_library(
+    name = "core/template_util",
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    hdrs = ["core/template_util.h"],
+    deps = ["@com_google_absl//absl/meta:type_traits"],
+)
+
+cc_library(
+    name = "core/internal_key_manager",
+    hdrs = ["core/internal_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":core/template_util",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/container:flat_hash_map",
+    ],
+)
+
 # Settings for building in various environments.
 config_setting(
     name = "linux_x86_64",
@@ -927,6 +976,49 @@ cc_test(
         "//cc/util:protobuf_helper",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "kms_clients_test",
+    size = "small",
+    srcs = ["core/kms_clients_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aead",
+        ":kms_client",
+        ":kms_clients",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/template_utils_test",
+    srcs = ["core/template_utils_test.cc"],
+    deps = [
+        ":core/template_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/internal_key_manager_test",
+    srcs = ["core/internal_key_manager_test.cc"],
+    deps = [
+        ":aead",
+        ":core/internal_key_manager",
+        "//cc/subtle",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:validation",
+        "//proto:aes_gcm_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

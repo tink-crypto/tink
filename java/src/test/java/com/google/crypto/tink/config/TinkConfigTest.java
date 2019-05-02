@@ -90,37 +90,37 @@ public class TinkConfigTest {
     String signTypeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
     String streamingAeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
     try {
-      Registry.getKeyManager(macTypeUrl);
+      Registry.getUntypedKeyManager(macTypeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     try {
-      Registry.getKeyManager(aeadTypeUrl);
+      Registry.getUntypedKeyManager(aeadTypeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     try {
-      Registry.getKeyManager(daeadTypeUrl);
+      Registry.getUntypedKeyManager(daeadTypeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     try {
-      Registry.getKeyManager(hybridTypeUrl);
+      Registry.getUntypedKeyManager(hybridTypeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     try {
-      Registry.getKeyManager(signTypeUrl);
+      Registry.getUntypedKeyManager(signTypeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     try {
-      Registry.getKeyManager(streamingAeadTypeUrl);
+      Registry.getUntypedKeyManager(streamingAeadTypeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
@@ -140,12 +140,12 @@ public class TinkConfigTest {
 
     // After registration the key managers should be present.
     Config.register(TinkConfig.TINK_1_1_0);
-    Registry.getKeyManager(macTypeUrl);
-    Registry.getKeyManager(aeadTypeUrl);
-    Registry.getKeyManager(daeadTypeUrl);
-    Registry.getKeyManager(hybridTypeUrl);
-    Registry.getKeyManager(signTypeUrl);
-    Registry.getKeyManager(streamingAeadTypeUrl);
+    Registry.getUntypedKeyManager(macTypeUrl);
+    Registry.getUntypedKeyManager(aeadTypeUrl);
+    Registry.getUntypedKeyManager(daeadTypeUrl);
+    Registry.getUntypedKeyManager(hybridTypeUrl);
+    Registry.getUntypedKeyManager(signTypeUrl);
+    Registry.getUntypedKeyManager(streamingAeadTypeUrl);
   }
 
   @Test

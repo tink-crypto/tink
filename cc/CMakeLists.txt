@@ -33,6 +33,7 @@ set(TINK_PUBLIC_APIS
   hybrid_encrypt.h
   hybrid_encrypt_factory.h
   hybrid_key_templates.h
+  input_stream.h
   json_keyset_reader.h
   json_keyset_writer.h
   key_manager.h
@@ -45,6 +46,7 @@ set(TINK_PUBLIC_APIS
   mac_config.h
   mac_factory.h
   mac_key_templates.h
+  output_stream.h
   public_key_sign.h
   public_key_sign_factory.h
   public_key_verify.h
@@ -52,6 +54,9 @@ set(TINK_PUBLIC_APIS
   registry.h
   signature_config.h
   signature_key_templates.h
+  streaming_aead.h
+  streaming_aead_config.h
+  streaming_aead_key_templates.h
   tink_config.h
   "${TINK_VERSION_H}"
 )
@@ -60,23 +65,27 @@ set(TINK_PUBLIC_API_DEPS
   tink::core::aead
   tink::core::binary_keyset_reader
   tink::core::binary_keyset_writer
+  tink::core::cleartext_keyset_handle
   tink::core::deterministic_aead
   tink::core::hybrid_decrypt
   tink::core::hybrid_encrypt
+  tink::core::input_stream
   tink::core::json_keyset_reader
   tink::core::json_keyset_writer
   tink::core::key_manager
   tink::core::keyset_handle
   tink::core::keyset_manager
-  tink::core::public_key_sign
-  tink::core::public_key_verify
   tink::core::keyset_reader
   tink::core::keyset_writer
   tink::core::kms_client
+  tink::core::output_stream
+  tink::core::public_key_sign
+  tink::core::public_key_verify
   tink::core::mac
   tink::core::primitive_set
   tink::core::registry
   tink::core::registry_impl
+  tink::core::streaming_aead
   tink::core::version
   tink::aead::aead_config
   tink::aead::aead_factory
@@ -96,6 +105,8 @@ set(TINK_PUBLIC_API_DEPS
   tink::signature::public_key_verify_factory
   tink::signature::signature_config
   tink::signature::signature_key_templates
+  tink::streamingaead::streaming_aead_config
+  tink::streamingaead::streaming_aead_key_templates
   tink::util::errors
   tink::util::protobuf_helper
   tink::util::status
@@ -481,6 +492,81 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME kms_clients
+  SRCS
+    core/kms_clients.cc
+    kms_clients.h
+  DEPS
+    tink::core::kms_client
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+    absl::base
+    absl::strings
+    absl::synchronization
+)
+
+tink_cc_library(
+  NAME template_util
+  SRCS
+    core/template_util.h
+  DEPS
+    absl::meta
+)
+
+tink_cc_library(
+  NAME internal_key_manager
+  SRCS
+    core/internal_key_manager.h
+  DEPS
+    absl::container
+    tink::core::internal_key_manager
+    tink::proto::tink_cc_proto
+    tink::util::status
+    tink::util::statusor
+)
+
+if (TINK_BUILD_SHARED_LIB)
+  add_library(tink SHARED
+    ${TINK_PUBLIC_APIS}
+    version_script.lds
+    exported_symbols.lds
+  )
+
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(tink
+      PRIVATE
+        -fuse-ld=gold  # GNU ld does not support ICF.
+        -Wl,--version-script="${CMAKE_CURRENT_SOURCE_DIR}/version_script.lds"
+        -Wl,--gc-sections
+        -Wl,--icf=all
+        -Wl,--strip-all
+    )
+  elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_link_libraries(tink
+      PRIVATE
+        -Wl,-install_name,@rpath/libtink.so
+        -Wl,-exported_symbols_list="${CMAKE_CURRENT_SOURCE_DIR}/exported_symbols.lds"
+        -Wl,-x
+        -Wl,-dead_strip
+    )
+  else()
+    message(FATAL_ERROR "libtink not yet supported on your platform")
+  endif()
+
+  target_include_directories(tink PUBLIC ${TINK_INCLUDE_DIRS})
+  target_link_libraries(tink
+    PRIVATE
+      -Wl,--whole-archive
+      ${TINK_PUBLIC_API_DEPS}
+      -Wl,--no-whole-archive
+  )
+  set_target_properties(tink PROPERTIES SOVERSION ${TINK_VERSION_LABEL})
+
+  install(TARGETS tink EXPORT Tink LIBRARY DESTINATION "lib")
+endif()
+
 # tests
 
 tink_cc_test(
@@ -654,3 +740,41 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
+
+tink_cc_test(
+  NAME kms_clients_test
+  SRCS core/kms_clients_test.cc
+  DEPS
+    absl::strings
+    tink::core::aead
+    tink::core::kms_client
+    tink::core::kms_clients
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+)
+
+tink_cc_test(
+  NAME template_utils_test
+  SRCS core/template_utils_test.cc
+  DEPS
+    tink::core::template_utils
+)
+
+tink_cc_test(
+  NAME internal_key_manager_test
+  SRCS core/internal_key_manager_test.cc
+  DEPS
+    tink::core::aead
+    tink::core::internal_key_manager
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
+    tink::subtle::aes_gcm_boringssl
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::validation
+)
+

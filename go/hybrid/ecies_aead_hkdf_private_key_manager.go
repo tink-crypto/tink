@@ -36,12 +36,12 @@ const (
 var errInvalidECIESAEADHKDFPrivateKeyKey = fmt.Errorf("ecies_aead_hkdf_private_key_manager: invalid key")
 var errInvalidECIESAEADHKDFPrivateKeyKeyFormat = fmt.Errorf("ecies_aead_hkdf_private_key_manager: invalid key format")
 
-// eciesAEADHKDFPrivateKeyKeyManager is an implementation of KeyManager interface.
+// eciesAEADHKDFPrivateKeyKeyManager is an implementation of PrivateKeyManager interface.
 // It generates new ECIESAEADHKDFPrivateKeyKey keys and produces new instances of ECIESAEADHKDFPrivateKey subtle.
 type eciesAEADHKDFPrivateKeyKeyManager struct{}
 
-// Assert that eciesAEADHKDFPrivateKeyKeyManager implements the KeyManager interface.
-var _ registry.KeyManager = (*eciesAEADHKDFPrivateKeyKeyManager)(nil)
+// Assert that eciesAEADHKDFPrivateKeyKeyManager implements the PrivateKeyManager interface.
+var _ registry.PrivateKeyManager = (*eciesAEADHKDFPrivateKeyKeyManager)(nil)
 
 // newECIESAEADHKDFPrivateKeyKeyManager creates a new aesGcmKeyManager.
 func newECIESAEADHKDFPrivateKeyKeyManager() *eciesAEADHKDFPrivateKeyKeyManager {
@@ -121,6 +121,22 @@ func (km *eciesAEADHKDFPrivateKeyKeyManager) NewKeyData(serializedKeyFormat []by
 		TypeUrl:         eciesAEADHKDFPrivateKeyTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
+	}, nil
+}
+
+func (km *eciesAEADHKDFPrivateKeyKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
+	privKey := new(eahpb.EciesAeadHkdfPrivateKey)
+	if err := proto.Unmarshal(serializedPrivKey, privKey); err != nil {
+		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
+	}
+	serializedPubKey, err := proto.Marshal(privKey.PublicKey)
+	if err != nil {
+		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
+	}
+	return &tinkpb.KeyData{
+		TypeUrl:         eciesAEADHKDFPublicKeyTypeURL,
+		Value:           serializedPubKey,
+		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
 	}, nil
 }
 

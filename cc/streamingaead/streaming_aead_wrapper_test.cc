@@ -19,21 +19,66 @@
 #include <sstream>
 
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/primitive_set.h"
 #include "tink/streaming_aead.h"
+#include "tink/subtle/random.h"
+#include "tink/subtle/test_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-
-using crypto::tink::test::DummyStreamingAead;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
 namespace {
+
+using crypto::tink::test::IsOk;
+using crypto::tink::test::StatusIs;
+using crypto::tink::test::DummyStreamingAead;
+using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyStatusType;
+using google::crypto::tink::OutputPrefixType;
+using subtle::test::ReadFromStream;
+using subtle::test::WriteToStream;
+using testing::HasSubstr;
+
+// A container for specification of instances of DummyStreamingAead
+// to be created for testing.
+struct StreamingAeadSpec {
+  uint32_t key_id;
+  std::string saead_name;
+  OutputPrefixType output_prefix_type;
+};
+
+// Generates a PrimitiveSet<StreamingAead> with DummyStreamingAead
+// instances according to the specification in 'spec'.
+// The last entry in 'spec' will be the primary primitive in the returned set.
+std::unique_ptr<PrimitiveSet<StreamingAead>> GetTestStreamingAeadSet(
+    const std::vector<StreamingAeadSpec>& spec) {
+  Keyset::Key* key;
+  Keyset keyset;
+  auto saead_set = absl::make_unique<PrimitiveSet<StreamingAead>>();
+  int i = 0;
+  for (auto& s : spec) {
+    key = keyset.add_key();
+    key->set_output_prefix_type(s.output_prefix_type);
+    key->set_key_id(s.key_id);
+    key->set_status(KeyStatusType::ENABLED);
+    std::unique_ptr<StreamingAead> saead =
+        absl::make_unique<DummyStreamingAead>(s.saead_name);
+    auto entry_result = saead_set->AddPrimitive(std::move(saead), *key);
+    EXPECT_TRUE(entry_result.ok());
+    if (i + 1 == spec.size()) {
+      saead_set->set_primary(entry_result.ValueOrDie());
+    }
+    i++;
+  }
+  return saead_set;
+}
 
 TEST(StreamingAeadSetWrapperTest, WrapNullptr) {
   StreamingAeadWrapper wrapper;
@@ -53,83 +98,139 @@ TEST(StreamingAeadSetWrapperTest, WrapEmpty) {
                       result.status().error_message());
 }
 
-TEST(StreamingAeadSetWrapperTest, Basic) {
-  Keyset::Key* key;
-  Keyset keyset;
-
+TEST(StreamingAeadSetWrapperTest, BasicEncryptionAndDecryption) {
   uint32_t key_id_0 = 1234543;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::TINK);
-  key->set_key_id(key_id_0);
-  key->set_status(KeyStatusType::ENABLED);
-
   uint32_t key_id_1 = 726329;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::LEGACY);
-  key->set_key_id(key_id_1);
-  key->set_status(KeyStatusType::ENABLED);
-
   uint32_t key_id_2 = 7213743;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::TINK);
-  key->set_key_id(key_id_2);
-  key->set_status(KeyStatusType::ENABLED);
-
   std::string saead_name_0 = "streaming_aead0";
   std::string saead_name_1 = "streaming_aead1";
   std::string saead_name_2 = "streaming_aead2";
-  std::unique_ptr<PrimitiveSet<StreamingAead>> saead_set(
-      new PrimitiveSet<StreamingAead>());
 
-  std::unique_ptr<StreamingAead> saead =
-      absl::make_unique<DummyStreamingAead>(saead_name_0);
-  auto entry_result = saead_set->AddPrimitive(std::move(saead), keyset.key(0));
-  ASSERT_TRUE(entry_result.ok());
+  auto saead_set = GetTestStreamingAeadSet(
+      {{key_id_0, saead_name_0, OutputPrefixType::RAW},
+       {key_id_1, saead_name_1, OutputPrefixType::RAW},
+       {key_id_2, saead_name_2, OutputPrefixType::RAW}});
 
-  saead = absl::make_unique<DummyStreamingAead>(saead_name_1);
-  entry_result = saead_set->AddPrimitive(std::move(saead), keyset.key(1));
-  ASSERT_TRUE(entry_result.ok());
-
-  saead = absl::make_unique<DummyStreamingAead>(saead_name_2);
-  entry_result = saead_set->AddPrimitive(std::move(saead), keyset.key(2));
-  ASSERT_TRUE(entry_result.ok());
-  // The last key is the primary.
-  saead_set->set_primary(entry_result.ValueOrDie());
-
-  // Wrap aead_set and test the resulting StreamingAead.
+  // Wrap saead_set and test the resulting StreamingAead.
   StreamingAeadWrapper wrapper;
   auto wrap_result = wrapper.Wrap(std::move(saead_set));
   EXPECT_TRUE(wrap_result.ok()) << wrap_result.status();
-  saead = std::move(wrap_result.ValueOrDie());
-  std::string plaintext = "some_plaintext";
+  auto saead = std::move(wrap_result.ValueOrDie());
+  for (int pt_size : {0, 1, 10, 100, 10000}) {
+    std::string plaintext = subtle::Random::GetRandomBytes(pt_size);
+    for (std::string aad : {"some_aad", "", "some other aad"}) {
+      SCOPED_TRACE(absl::StrCat("pt_size = ", pt_size,
+                                ", aad = '", aad, "'"));
+
+      // Prepare ciphertext destination stream.
+      auto ct_stream = absl::make_unique<std::stringstream>();
+      // A reference to the ciphertext buffer, for later validation.
+      auto ct_buf = ct_stream->rdbuf();
+      std::unique_ptr<OutputStream> ct_destination(
+          absl::make_unique<util::OstreamOutputStream>(std::move(ct_stream)));
+      // Encrypt the plaintext.
+      auto enc_stream_result =
+          saead->NewEncryptingStream(std::move(ct_destination), aad);
+      EXPECT_THAT(enc_stream_result.status(), IsOk());
+      auto enc_stream = std::move(enc_stream_result.ValueOrDie());
+      auto status = WriteToStream(enc_stream.get(), plaintext);
+      EXPECT_THAT(status, IsOk());
+      EXPECT_EQ(absl::StrCat(saead_name_2, aad, plaintext), ct_buf->str());
+      // Prepare ciphertext source stream.
+      auto ct_source_stream =
+          absl::make_unique<std::stringstream>(ct_buf->str());
+      std::unique_ptr<InputStream> ct_source(
+          absl::make_unique<util::IstreamInputStream>(
+              std::move(ct_source_stream)));
+      // Decrypt the ciphertext.
+      auto dec_stream_result =
+          saead->NewDecryptingStream(std::move(ct_source), aad);
+      EXPECT_THAT(dec_stream_result.status(), IsOk());
+      std::string decrypted;
+      status = ReadFromStream(dec_stream_result.ValueOrDie().get(), &decrypted);
+      EXPECT_THAT(status, IsOk());
+      EXPECT_EQ(plaintext, decrypted);
+    }
+  }
+}
+
+
+TEST(StreamingAeadSetWrapperTest, DecryptionAfterWrapperIsDestroyed) {
+  uint32_t key_id_0 = 1234543;
+  uint32_t key_id_1 = 726329;
+  uint32_t key_id_2 = 7213743;
+  std::string saead_name_0 = "streaming_aead0";
+  std::string saead_name_1 = "streaming_aead1";
+  std::string saead_name_2 = "streaming_aead2";
+
+  auto saead_set = GetTestStreamingAeadSet(
+      {{key_id_0, saead_name_0, OutputPrefixType::RAW},
+       {key_id_1, saead_name_1, OutputPrefixType::RAW},
+       {key_id_2, saead_name_2, OutputPrefixType::RAW}});
+
+  int pt_size = 100;
+  std::string plaintext = subtle::Random::GetRandomBytes(pt_size);
   std::string aad = "some_aad";
+  std::unique_ptr<InputStream> dec_stream;
+  {
+    // Wrap saead_set and test the resulting StreamingAead.
+    StreamingAeadWrapper wrapper;
+    auto wrap_result = wrapper.Wrap(std::move(saead_set));
+    EXPECT_TRUE(wrap_result.ok()) << wrap_result.status();
+    auto saead = std::move(wrap_result.ValueOrDie());
 
-  // Prepare ciphertext destination stream.
-  auto ct_stream = absl::make_unique<std::stringstream>();
-  // A reference to the ciphertext buffer, for later validation.
-  auto ct_buf = ct_stream->rdbuf();
-  std::unique_ptr<OutputStream> ct_destination(
-      absl::make_unique<util::OstreamOutputStream>(std::move(ct_stream)));
+    // Prepare ciphertext destination stream.
+    auto ct_stream = absl::make_unique<std::stringstream>();
+    // A reference to the ciphertext buffer, for later validation.
+    auto ct_buf = ct_stream->rdbuf();
+    std::unique_ptr<OutputStream> ct_destination(
+        absl::make_unique<util::OstreamOutputStream>(std::move(ct_stream)));
+    // Encrypt the plaintext.
+    auto enc_stream_result =
+        saead->NewEncryptingStream(std::move(ct_destination), aad);
+    EXPECT_THAT(enc_stream_result.status(), IsOk());
+    auto enc_stream = std::move(enc_stream_result.ValueOrDie());
+    auto status = WriteToStream(enc_stream.get(), plaintext);
+    EXPECT_THAT(status, IsOk());
+    EXPECT_EQ(absl::StrCat(saead_name_2, aad, plaintext), ct_buf->str());
+    // Prepare ciphertext source stream.
+    auto ct_source_stream =
+        absl::make_unique<std::stringstream>(ct_buf->str());
+    std::unique_ptr<InputStream> ct_source(
+        absl::make_unique<util::IstreamInputStream>(
+            std::move(ct_source_stream)));
+    // Decrypt the ciphertext.
+    auto dec_stream_result =
+        saead->NewDecryptingStream(std::move(ct_source), aad);
+    EXPECT_THAT(dec_stream_result.status(), IsOk());
+    dec_stream = std::move(dec_stream_result.ValueOrDie());
+  }
+  // Now wrapper and saead are out of scope,
+  // but decrypting stream should still work.
+  std::string decrypted;
+  auto status = ReadFromStream(dec_stream.get(), &decrypted);
+  EXPECT_THAT(status, IsOk());
+  EXPECT_EQ(plaintext, decrypted);
+}
 
-  auto encrypt_result =
-      saead->NewEncryptingStream(std::move(ct_destination), aad);
-  EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-  auto encrypting_stream = std::move(encrypt_result.ValueOrDie());
-  auto status = encrypting_stream->Close();
-  EXPECT_TRUE(status.ok()) << status;
-  EXPECT_EQ(absl::StrCat(saead_name_2, aad), ct_buf->str());
+TEST(StreamingAeadSetWrapperTest, MissingRawPrimitives) {
+  uint32_t key_id_0 = 1234543;
+  uint32_t key_id_1 = 726329;
+  uint32_t key_id_2 = 7213743;
+  std::string saead_name_0 = "streaming_aead0";
+  std::string saead_name_1 = "streaming_aead1";
+  std::string saead_name_2 = "streaming_aead2";
 
-  // Prepare ciphertext source stream.
-  ct_stream = absl::make_unique<std::stringstream>();
-  // A reference to the ciphertext buffer, for later validation.
-  ct_buf = ct_stream->rdbuf();
-  std::unique_ptr<InputStream> ct_source(
-      absl::make_unique<util::IstreamInputStream>(std::move(ct_stream)));
-  auto decrypt_result = saead->NewDecryptingStream(std::move(ct_source), aad);
-  EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::UNIMPLEMENTED, decrypt_result.status().error_code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "Not implemented yet",
-                      decrypt_result.status().error_message());
+  auto saead_set = GetTestStreamingAeadSet(
+      {{key_id_0, saead_name_0, OutputPrefixType::TINK},
+       {key_id_1, saead_name_1, OutputPrefixType::LEGACY},
+       {key_id_2, saead_name_2, OutputPrefixType::TINK}});
+
+  // Wrap saead_set and test the resulting StreamingAead.
+  StreamingAeadWrapper wrapper;
+  auto wrap_result = wrapper.Wrap(std::move(saead_set));
+  EXPECT_THAT(wrap_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+                                             HasSubstr("no raw primitives")));
 }
 
 }  // namespace

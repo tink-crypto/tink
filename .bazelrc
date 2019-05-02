@@ -1,0 +1,3 @@
+# Fix for grpc build error on macOS.
+# See: https://github.com/bazelbuild/bazel/issues/4341
+build --copt -DGRPC_BAZEL_BUILD

@@ -32,7 +32,7 @@ endif()
 #   SHA256 hash of the file downloaded from URL.
 #
 # Optional parameters:
-#   CMAKE_SUBIDR subdirectory of the downloaded archive where the root
+#   CMAKE_SUBDIR subdirectory of the downloaded archive where the root
 #     CMakeLists.txt file for the project is located. Defaults to the root.
 #   CMAKE_ARGS any additional argument that should be passed to cmake when
 #     configuring the downloaded archive. Defaults to empty.

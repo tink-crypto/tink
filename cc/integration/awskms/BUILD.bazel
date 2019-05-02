@@ -36,6 +36,28 @@ cc_library(
     alwayslink = 1,
 )
 
+cc_library(
+    name = "aws_kms_client",
+    srcs = ["aws_kms_client.cc"],
+    hdrs = ["aws_kms_client.h"],
+    deps = [
+        ":aws_crypto",
+        ":aws_kms_aead",
+        "//cc:kms_client",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+    ],
+    alwayslink = 1,
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+# tests
+
 cc_test(
     name = "aws_kms_aead_test",
     size = "medium",
@@ -43,6 +65,22 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aws_kms_aead",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aws_kms_client_test",
+    size = "medium",
+    srcs = ["aws_kms_client_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    data = ["//testdata:credentials"],
+    deps = [
+        ":aws_kms_client",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",

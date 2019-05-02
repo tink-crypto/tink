@@ -66,8 +66,97 @@ http_archive(
     urls = [
         "https://github.com/aws/aws-sdk-cpp/archive/1.4.80.tar.gz",
     ],
-    strip_prefix = "aws-sdk-cpp-1.4.80/",
+    strip_prefix = "aws-sdk-cpp-1.4.80",
     build_file = "//:third_party/aws_sdk_cpp.BUILD.bazel",
+)
+
+
+# Needed by gRPC.
+http_archive(
+    name = "github_nanopb",
+    urls = [
+        "https://github.com/nanopb/nanopb/archive/f8ac463766281625ad710900479130c7fcb4d63b.tar.gz",
+    ],
+    sha256 = "8bbbb1e78d4ddb0a1919276924ab10d11b631df48b657d960e0c795a25515735",
+    strip_prefix = "nanopb-f8ac463766281625ad710900479130c7fcb4d63b",
+    build_file = "//:third_party/nanopb.BUILD.bazel",
+)
+
+# Needed by googleapis.
+http_archive(
+    name = "com_google_api_codegen",
+    urls = ["https://github.com/googleapis/gapic-generator/archive/96c3c5a4c8397d4bd29a6abce861547a271383e1.zip"],
+    strip_prefix = "gapic-generator-96c3c5a4c8397d4bd29a6abce861547a271383e1",
+)
+
+# Needed for Cloud KMS API via gRPC.
+http_archive(
+    name = "googleapis",
+    urls = [
+        "https://github.com/googleapis/googleapis/archive/43a324913190da118e1c3c1a89ef6cfc47c5caf3.zip",
+    ],
+    sha256 = "d1860c5e806c0cf04d6d0806ab6f43f27c9d9a47cd76429f49f8a37750effccf",
+    strip_prefix = "googleapis-43a324913190da118e1c3c1a89ef6cfc47c5caf3",
+)
+
+# Needed by gRPC.
+http_archive(
+    name = "com_github_cares_cares",
+    build_file = "@com_github_grpc_grpc//third_party:cares/cares.BUILD",
+    url = "https://github.com/c-ares/c-ares/archive/cares-1_15_0.zip",
+    sha256 = "ac95874559aade58b30308f11480359926637a993b8ac585e90fd1bf6c082bc5",
+    strip_prefix = "c-ares-cares-1_15_0",
+)
+
+# Actual gRPC.
+http_archive(
+    name = "com_github_grpc_grpc",
+    urls = [
+        "https://github.com/grpc/grpc/archive/v1.20.0.tar.gz"
+    ],
+    sha256 = "01c5e617d098a33672ddb640d0e50831fb7c613999435e5dcf115021abde6b9a",
+    strip_prefix = "grpc-1.20.0",
+)
+
+# Binds needed by gRPC.
+bind(
+  name = "libssl",
+  actual = "@boringssl//:ssl",
+)
+
+bind(
+    name = "zlib",
+    actual = "@zlib_archive//:zlib",
+)
+
+bind(
+    name = "nanopb",
+    actual = "@github_nanopb//:nanopb",
+)
+
+bind(
+    name = "protobuf",
+    actual = "@com_google_protobuf//:protobuf",
+)
+
+bind(
+    name = "protobuf_headers",
+    actual = "@com_google_protobuf//:protobuf_headers",
+)
+
+bind(
+    name = "protobuf_clib",
+    actual = "@com_google_protobuf//:protoc_lib",
+)
+
+bind(
+    name = "protocol_compiler",
+    actual = "@com_google_protobuf//:protoc",
+)
+
+bind(
+    name = "cares",
+    actual = "@com_github_cares_cares//:ares",
 )
 
 http_archive(
@@ -114,9 +203,33 @@ http_archive(
     sha256 = "79d102c61e2a479a0b7e5fc167bcfaa4832a0c6aad4a75fa7da0480564931bcc",
 )
 
+
+# Needed by gRPC, to build pb.h/pb.cc files from protos that contain services.
+http_archive(
+    name = "build_stack_rules_proto",
+    strip_prefix = "rules_proto-f5d6eea6a4528bef3c1d3a44d486b51a214d61c2",
+    urls = [
+        "https://github.com/stackb/rules_proto/archive/f5d6eea6a4528bef3c1d3a44d486b51a214d61c2.tar.gz",
+    ],
+    sha256 = "128c4486b1707db917411c6e448849dd76ea3b8ba704f9e0627d9b01f2ee45fe",
+)
+
+load("@build_stack_rules_proto//cpp:deps.bzl", "cpp_grpc_library")
+cpp_grpc_library()
+
 #-----------------------------------------------------------------------------
 # java
 #-----------------------------------------------------------------------------
+
+# Not used by Java Tink, but apparently needed for C++ gRPC library.
+http_archive(
+    name = "io_grpc_grpc_java",
+    strip_prefix = "grpc-java-1.20.0",
+    urls = [
+        "https://github.com/grpc/grpc-java/archive/v1.20.0.tar.gz",
+    ],
+    sha256 = "553d1bdbde3ff4035747c184486bae2f084c75c3c4cdf5ef31a6aa48bdccaf9b",
+)
 
 # android sdk
 android_sdk_repository(

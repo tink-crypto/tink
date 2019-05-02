@@ -15,14 +15,8 @@ cc_library(
         "//cc:json_keyset_writer",
         "//cc/config:tink_config",
         "//cc/util:status",
-    ],
-)
-
-filegroup(
-    name = "aws_kms_access_files",
-    srcs = glob(["*access_key.csv"]) + [
-        "aws_key_arn.txt",
-        "bad_aws_key_arn.txt",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -34,7 +28,19 @@ cc_binary(
         "//cc",
         "//cc/integration/awskms:aws_crypto",
         "//cc/integration/awskms:aws_kms_aead",
+        "//cc/integration/awskms:aws_kms_client",
         "@aws_cpp_sdk//:aws_sdk_core",
+    ],
+)
+
+cc_binary(
+    name = "gcp_kms_aead_cli",
+    srcs = ["gcp_kms_aead_cli.cc"],
+    deps = [
+        ":cli_util",
+        "//cc",
+        "//cc/integration/gcpkms:gcp_kms_aead",
+        "//cc/integration/gcpkms:gcp_kms_client",
     ],
 )
 
@@ -70,6 +76,18 @@ cc_binary(
     deps = [
         ":cli_util",
         "//cc",
+    ],
+)
+
+cc_binary(
+    name = "streaming_aead_cli_cc",
+    srcs = ["streaming_aead_cli.cc"],
+    deps = [
+        ":cli_util",
+        "//cc",
+        "//cc/util:istream_input_stream",
+        "//cc/util:ostream_output_stream",
+        "//cc/util:status",
     ],
 )
 
@@ -125,8 +143,22 @@ sh_test(
         "aws_kms_aead_test.sh",
     ],
     data = [
-        ":aws_kms_access_files",
         ":aws_kms_aead_cli",
+        "//testdata:credentials",
         "//tools/testing/cross_language:test_lib",
     ],
 )
+
+# TODO(b/119547792): Temporarily disabling until reliability concerns are addressed.
+#sh_test(
+#    name = "gcp_kms_aead_test",
+#    size = "medium",
+#    srcs = [
+#        "gcp_kms_aead_test.sh",
+#    ],
+#    data = [
+#        ":gcp_kms_aead_cli",
+#        "//testdata:credentials",
+#        "//tools/testing/cross_language:test_lib",
+#    ],
+#)

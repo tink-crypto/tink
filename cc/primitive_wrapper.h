@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_SET_WRAPPER_FACTORY_H_
-#define TINK_SET_WRAPPER_FACTORY_H_
+#ifndef TINK_PRIMITIVE_WRAPPER_H_
+#define TINK_PRIMITIVE_WRAPPER_H_
 
 #include <memory>
 
@@ -42,4 +42,4 @@ class PrimitiveWrapper {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_SET_WRAPPER_FACTORY_H_
+#endif  // TINK_PRIMITIVE_WRAPPER_H_

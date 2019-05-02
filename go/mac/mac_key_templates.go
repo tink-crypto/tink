@@ -39,6 +39,22 @@ func HMACSHA256Tag256KeyTemplate() *tinkpb.KeyTemplate {
 	return createHMACKeyTemplate(32, 32, commonpb.HashType_SHA256)
 }
 
+// HMACSHA512Tag256KeyTemplate is a KeyTemplate that generates a HMAC key with the following parameters:
+//   - Key size: 64 bytes
+//   - Tag size: 32 bytes
+//   - Hash function: SHA512
+func HMACSHA512Tag256KeyTemplate() *tinkpb.KeyTemplate {
+	return createHMACKeyTemplate(64, 32, commonpb.HashType_SHA512)
+}
+
+// HMACSHA512Tag512KeyTemplate is a KeyTemplate that generates a HMAC key with the following parameters:
+//   - Key size: 64 bytes
+//   - Tag size: 64 bytes
+//   - Hash function: SHA512
+func HMACSHA512Tag512KeyTemplate() *tinkpb.KeyTemplate {
+	return createHMACKeyTemplate(64, 64, commonpb.HashType_SHA512)
+}
+
 // createHMACKeyTemplate creates a new KeyTemplate for HMAC using the given parameters.
 func createHMACKeyTemplate(keySize uint32,
 	tagSize uint32,

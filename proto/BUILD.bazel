@@ -536,6 +536,48 @@ objc_proto_compile(
 )
 
 # -----------------------------------------------
+# aes_gcm_siv
+# -----------------------------------------------
+proto_library(
+    name = "aes_gcm_siv_proto",
+    srcs = [
+        "aes_gcm_siv.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "aes_gcm_siv_cc_proto",
+    deps = [":aes_gcm_siv_proto"],
+)
+
+java_proto_library(
+    name = "aes_gcm_siv_java_proto",
+    deps = [":aes_gcm_siv_proto"],
+)
+
+java_lite_proto_library(
+    name = "aes_gcm_siv_java_proto_lite",
+    deps = [":aes_gcm_siv_proto"],
+)
+
+closure_proto_library(
+    name = "aes_gcm_siv_closure_proto",
+    deps = [":aes_gcm_siv_proto"],
+)
+
+go_proto_library(
+    name = "aes_gcm_siv_go_proto",
+    importpath = "github.com/google/tink/proto/aes_gcm_siv_go_proto",
+    proto = ":aes_gcm_siv_proto",
+)
+
+objc_proto_compile(
+    name = "aes_gcm_siv_objc_pb",
+    protos = ["aes_gcm_siv.proto"],
+    tags = ["manual"],
+)
+
+# -----------------------------------------------
 # aes_ctr_hmac_streaming
 # -----------------------------------------------
 proto_library(

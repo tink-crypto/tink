@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_DAEAD_DAEAD_CONFIG_H_
-#define TINK_DAEAD_DAEAD_CONFIG_H_
+#ifndef TINK_DAEAD_DETERMINISTIC_AEAD_CONFIG_H_
+#define TINK_DAEAD_DETERMINISTIC_AEAD_CONFIG_H_
 
 #include "tink/config.h"
 #include "tink/util/status.h"
@@ -55,4 +55,4 @@ class DeterministicAeadConfig {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_DAEAD_DAEAD_CONFIG_H_
+#endif  // TINK_DAEAD_DETERMINISTIC_AEAD_CONFIG_H_

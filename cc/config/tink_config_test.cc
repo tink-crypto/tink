@@ -27,6 +27,7 @@
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
+#include "tink/streaming_aead.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -62,8 +63,8 @@ TEST_F(TinkConfigTest, testBasic) {
 
   std::vector<KeyTypeEntry> mac_key_type_entries;
   mac_key_type_entries.push_back(
-      {"TinkMac", "Mac", "type.googleapis.com/google.crypto.tink.HmacKey", true,
-       0});
+      {"TinkMac", "Mac",
+       "type.googleapis.com/google.crypto.tink.HmacKey", true, 0});
   all_key_type_entries.insert(std::end(all_key_type_entries),
                               std::begin(mac_key_type_entries),
                               std::end(mac_key_type_entries));
@@ -73,14 +74,23 @@ TEST_F(TinkConfigTest, testBasic) {
       {"TinkAead", "Aead",
        "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey", true, 0});
   aead_key_type_entries.push_back(
-      {"TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesGcmKey",
-       true, 0});
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.AesGcmKey", true, 0});
   aead_key_type_entries.push_back(
-      {"TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesEaxKey",
-       true, 0});
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.AesGcmSivKey", true, 0});
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.AesEaxKey", true, 0});
   aead_key_type_entries.push_back(
       {"TinkAead", "Aead",
        "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key", true, 0});
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.KmsAeadKey", true, 0});
+  aead_key_type_entries.push_back(
+      {"TinkAead", "Aead",
+       "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey", true, 0});
   all_key_type_entries.insert(std::end(all_key_type_entries),
                               std::begin(aead_key_type_entries),
                               std::end(aead_key_type_entries));
@@ -88,12 +98,12 @@ TEST_F(TinkConfigTest, testBasic) {
   std::vector<KeyTypeEntry> hybrid_key_type_entries;
   hybrid_key_type_entries.push_back(
       {"TinkHybridDecrypt", "HybridDecrypt",
-       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey", true,
-       0});
+       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+       true, 0});
   hybrid_key_type_entries.push_back(
       {"TinkHybridEncrypt", "HybridEncrypt",
-       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey", true,
-       0});
+       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+       true, 0});
   all_key_type_entries.insert(std::end(all_key_type_entries),
                               std::begin(hybrid_key_type_entries),
                               std::end(hybrid_key_type_entries));
@@ -135,6 +145,15 @@ TEST_F(TinkConfigTest, testBasic) {
   all_key_type_entries.insert(std::end(all_key_type_entries),
                               std::begin(daead_key_type_entries),
                               std::end(daead_key_type_entries));
+
+  std::vector<KeyTypeEntry> saead_key_type_entries;
+  saead_key_type_entries.push_back(
+      {"TinkStreamingAead", "StreamingAead",
+       "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
+       true, 0});
+  all_key_type_entries.insert(std::end(all_key_type_entries),
+                              std::begin(saead_key_type_entries),
+                              std::end(saead_key_type_entries));
 
   auto& config = TinkConfig::Latest();
 
@@ -201,6 +220,12 @@ TEST_F(TinkConfigTest, testBasic) {
     EXPECT_FALSE(manager_result.ok());
     EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
   }
+  for (const auto& key_type_entry : saead_key_type_entries) {
+    auto manager_result =
+        Registry::get_key_manager<StreamingAead>(key_type_entry.type_url);
+    EXPECT_FALSE(manager_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  }
 
   // Registration of standard key types works.
   auto status = TinkConfig::Register();
@@ -260,6 +285,14 @@ TEST_F(TinkConfigTest, testBasic) {
     EXPECT_TRUE(
         manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
   }
+
+  for (const auto& key_type_entry : saead_key_type_entries) {
+    auto manager_result =
+        Registry::get_key_manager<StreamingAead>(key_type_entry.type_url);
+    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+    EXPECT_TRUE(
+        manager_result.ValueOrDie()->DoesSupport(key_type_entry.type_url));
+  }
 }  // namespace
 
 TEST_F(TinkConfigTest, testRegister) {
@@ -284,8 +317,8 @@ TEST_F(TinkConfigTest, testRegister) {
 
   // Reset the registry, and try overriding a catalogue with a different one.
   Registry::Reset();
-  status = Registry::AddCatalogue("TinkHybridDecrypt",
-                                  new DummyHybridDecryptCatalogue());
+  status = Registry::AddCatalogue(
+      "TinkHybridDecrypt", absl::make_unique<DummyHybridDecryptCatalogue>());
   EXPECT_TRUE(status.ok()) << status;
   status = TinkConfig::Register();
   EXPECT_FALSE(status.ok());

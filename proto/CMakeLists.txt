@@ -69,6 +69,11 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME aes_gcm_siv_cc_proto
+  SRCS aes_gcm_siv.proto
+)
+
+tink_cc_proto(
   NAME aes_ctr_hmac_streaming_cc_proto
   SRCS aes_ctr_hmac_streaming.proto
   DEPS
