@@ -52,7 +52,7 @@ readonly DISABLE_SANDBOX_ARGS
 if ! [ -z "${KOKORO_ROOT}" ]; then
   rm -f ~/.bazelrc
   # Install the latest version of Bazel.
-  use_bazel.sh latest
+  use_bazel.sh 0.24.1
   if [[ "$PLATFORM" == 'darwin' ]]; then
     export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
     export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
