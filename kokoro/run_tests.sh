@@ -34,7 +34,7 @@ if [[ -z "${TMP}" ]]; then
   exit 4
 fi
 
-PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
+readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
 declare -a DISABLE_SANDBOX_ARGS
 DISABLE_SANDBOX_ARGS=(
@@ -48,14 +48,20 @@ DISABLE_SANDBOX_ARGS=(
 )
 readonly DISABLE_SANDBOX_ARGS
 
-# Workaround b/73748835#comment5 on Kokoro.
-if ! [ -z "${KOKORO_ROOT}" ]; then
+# Only in Kokoro environments.
+if [[ -n "${KOKORO_ROOT}" ]]; then
+  # TODO(b/73748835): Workaround on Kokoro.
   rm -f ~/.bazelrc
+
   # Install the latest version of Bazel.
   use_bazel.sh latest
-  if [[ "$PLATFORM" == 'darwin' ]]; then
+
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
     export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
     export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+
+    # TODO(b/120214184): Workaround for broken macos_external time sync.
+    sudo ntpdate -u time.apple.com
   fi
 fi
 
