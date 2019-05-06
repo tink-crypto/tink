@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_INTERNAL_KEY_MANAGER_H_
-#define TINK_INTERNAL_KEY_MANAGER_H_
+#ifndef TINK_CORE_INTERNAL_KEY_MANAGER_H_
+#define TINK_CORE_INTERNAL_KEY_MANAGER_H_
 
 #include <typeindex>
 
@@ -144,4 +144,4 @@ class InternalKeyManager<KeyProto, KeyFormatProto,
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_INTERNAL_KEY_MANAGER_H_
+#endif  // TINK_CORE_INTERNAL_KEY_MANAGER_H_
