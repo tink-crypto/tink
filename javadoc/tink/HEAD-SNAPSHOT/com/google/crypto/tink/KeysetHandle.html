@@ -461,10 +461,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getPrimitive</h4>
-<pre>@Alpha
-public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;customKeyManager,
-                                 <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;classObject)
-                          throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;customKeyManager,
+                          <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;classObject)
+                   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Returns a primitive from this keyset, using the given <code>customKeyManager</code> and the global
  registry to get resources creating the primitive. The given keyManager will take precedence
  when creating primitives over the globally registered keyManagers.</div>
