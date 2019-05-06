@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -292,7 +291,6 @@ public final class KeysetHandle {
    * registry to get resources creating the primitive. The given keyManager will take precedence
    * when creating primitives over the globally registered keyManagers.
    */
-  @Alpha
   public <P> P getPrimitive(KeyManager<P> customKeyManager, Class<P> classObject)
       throws GeneralSecurityException {
     if (customKeyManager == null) {
