@@ -141,6 +141,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
+        ":constants",
         ":enums",
         ":protobuf_helper",
         ":status",
@@ -151,8 +152,8 @@ cc_library(
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
         "//cc:input_stream",
-        "//cc:kms_client",
         "//cc:keyset_handle",
+        "//cc:kms_client",
         "//cc:mac",
         "//cc:output_stream",
         "//cc:public_key_sign",
@@ -297,6 +298,18 @@ cc_test(
         "//cc/subtle:random",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "test_util_test",
+    srcs = ["test_util_test.cc"],
+    deps = [
+        ":test_util",
+        "//cc/subtle:random",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
