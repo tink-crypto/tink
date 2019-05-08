@@ -117,6 +117,7 @@ tink_cc_library(
     test_util.cc
     test_util.h
   DEPS
+    tink::util::constants
     tink::util::enums
     tink::util::protobuf_helper
     tink::util::status
@@ -238,5 +239,17 @@ tink_cc_test(
     tink::util::test_util
     tink::subtle::random
     absl::memory
+    absl::strings
+)
+
+tink_cc_test(
+  NAME test_util_test
+  SRCS
+    test_util_test.cc
+  DEPS
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
+    tink::util::test_util
+    tink::subtle::random
     absl::strings
 )
