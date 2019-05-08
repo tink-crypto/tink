@@ -264,7 +264,7 @@ currently available or planned (the latter are listed in brackets).
 | Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                  |
 | Deterministic AEAD | AES-SIV                                                         |
 | MAC                | HMAC-SHA2                                                       |
-| Digital Signatures | ECDSA over NIST curves, ED25519                                 |
+| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS     |
 | Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)                      |
 
 Exact listings of primitives and their implementations available in a release _x.y.z_ of Tink
