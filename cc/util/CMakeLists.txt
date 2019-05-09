@@ -252,4 +252,5 @@ tink_cc_test(
     tink::util::test_util
     tink::subtle::random
     absl::strings
+    gmock
 )

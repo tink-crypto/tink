@@ -520,6 +520,7 @@ tink_cc_library(
   SRCS
     core/internal_key_manager.h
   DEPS
+    absl::hash
     absl::container
     tink::core::internal_key_manager
     tink::proto::tink_cc_proto
@@ -593,6 +594,7 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
+    gmock
 )
 
 tink_cc_test(
@@ -757,10 +759,10 @@ tink_cc_test(
 )
 
 tink_cc_test(
-  NAME template_utils_test
-  SRCS core/template_utils_test.cc
+  NAME template_util_test
+  SRCS core/template_util_test.cc
   DEPS
-    tink::core::template_utils
+    tink::core::template_util
 )
 
 tink_cc_test(

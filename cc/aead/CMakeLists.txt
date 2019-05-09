@@ -452,6 +452,7 @@ tink_cc_test(
   SRCS kms_envelope_aead_key_manager_test.cc
   DEPS
     tink::aead::aead_config
+    tink::aead::aead_key_templates
     tink::aead::kms_envelope_aead_key_manager
     tink::core::aead
     tink::core::kms_client
