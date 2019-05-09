@@ -9,10 +9,10 @@
 ## Index
 
 1. [Introduction](#introduction)
-2. [Getting Started](#getting-started)
-3. [Current Status](#current-status)
-4. [Learn More](#learn-more)
-5. [Contact and Mailing List](#contact-and-mailing-list)
+2. [Getting started](#getting-started)
+3. [Current status](#current-status)
+4. [Learn more](#learn-more)
+5. [Contact and mailing list](#contact-and-mailing-list)
 6. [Maintainers](#maintainers)
 
 ## Introduction
