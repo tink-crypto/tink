@@ -87,7 +87,6 @@ EP_SUGGESTED_CHECKS = [
     "-Xep:TypeParameterShadowing:ERROR",
     "-Xep:TypeParameterUnusedInFormals:ERROR",
     "-Xep:URLEqualsHashCode:ERROR",
-    "-Xep:UnsafeSdkVersionCheck:ERROR",
     "-Xep:UnsynchronizedOverridesSynchronized:ERROR",
     "-Xep:WaitNotInLoop:ERROR",
 ]
