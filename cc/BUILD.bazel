@@ -586,8 +586,8 @@ cc_library(
 
 cc_library(
     name = "kms_clients",
-    hdrs = ["kms_clients.h"],
     srcs = ["core/kms_clients.cc"],
+    hdrs = ["kms_clients.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
@@ -603,9 +603,9 @@ cc_library(
 
 cc_library(
     name = "core/template_util",
+    hdrs = ["core/template_util.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    hdrs = ["core/template_util.h"],
     deps = ["@com_google_absl//absl/meta:type_traits"],
 )
 
@@ -620,6 +620,20 @@ cc_library(
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
+    name = "core/key_manager_impl",
+    hdrs = ["core/key_manager_impl.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":core/internal_key_manager",
+        ":key_manager",
+        ":key_manager_base",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -1017,6 +1031,23 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_matchers",
+        "//cc/util:validation",
+        "//proto:aes_gcm_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/key_manager_impl_test",
+    srcs = ["core/key_manager_impl_test.cc"],
+    deps = [
+        ":aead",
+        ":core/key_manager_impl",
+        "//cc/subtle",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
         "//cc/util:validation",
         "//proto:aes_gcm_cc_proto",
         "@com_google_googletest//:gtest_main",
