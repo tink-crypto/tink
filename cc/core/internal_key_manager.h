@@ -45,6 +45,8 @@ class InternalKeyFactory {
       const KeyFormatProto& key_format) const = 0;
 };
 
+// Template specialization for when KeyFormatProto = void. The compiler will
+// pick the most specialized template when compiling.
 template <typename KeyProto>
 class InternalKeyFactory<KeyProto, void> {
  public:
@@ -53,6 +55,10 @@ class InternalKeyFactory<KeyProto, void> {
 
 }  // namespace internal
 
+// We declare a InternalKeyManager without giving an implementation. We then
+// provide a specialization only for the case where PrimitivesTuple is a
+// std::tuple of multiple primitives. This allows to ensure that such is always
+// the case.
 template <typename KeyProto, typename KeyFormatProto,
           typename PrimitivesTuple>
 class InternalKeyManager;
