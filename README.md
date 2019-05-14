@@ -109,6 +109,7 @@ AEAD primitive in Java:
 *   [Java HOW-TO](docs/JAVA-HOWTO.md)
 *   [C++ HOW-TO](docs/CPP-HOWTO.md)
 *   [Obj-C HOW-TO](docs/OBJC-HOWTO.md)
+*   [Go HOW-TO](docs/GOLANG-HOWTO.md)
 *   [Security and Usability Design Goals](docs/SECURITY-USABILITY.md)
 *   [Supported Crypto Primitives](docs/PRIMITIVES.md)
 *   [Key Management](docs/KEY-MANAGEMENT.md)
