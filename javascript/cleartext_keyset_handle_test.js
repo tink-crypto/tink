@@ -37,4 +37,21 @@ testSuite({
           CleartextKeysetHandle.fromJspbArray(keysetJspbArray);
         }).toString());
   },
+
+  testDeserializeFromJspb() {
+    const keyset1 = createKeyset();
+    const keysetHandle =
+        CleartextKeysetHandle.deserializeFromJspb(keyset1.serialize());
+    const keyset2 = keysetHandle.getKeyset();
+    assertEquals(keyset1.getPrimaryKeyId(), keyset2.getPrimaryKeyId());
+    assertObjectEquals(keyset2.getKeyList(), keyset2.getKeyList());
+  },
+
+  testSerializeToJspb() {
+    const keyset = createKeyset();
+    const keysetHandle = new KeysetHandle(keyset);
+
+    const keysetString = CleartextKeysetHandle.serializeToJspb(keysetHandle);
+    assertEquals(keysetString, keyset.serialize());
+  },
 });

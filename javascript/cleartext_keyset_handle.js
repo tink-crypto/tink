@@ -36,6 +36,32 @@ class CleartextKeysetHandle {
   static fromJspbArray(keysetJspbArray) {
     return new KeysetHandle(new PbKeyset(keysetJspbArray));
   }
+
+  /**
+   * Creates a KeysetHandle from a JSPB string representation of a keyset.
+   *
+   * Note that JSPB is currently not open source, so this method can't be
+   * either.
+   *
+   * @param {string} keysetJspbString
+   * @return {!KeysetHandle}
+   */
+  static deserializeFromJspb(keysetJspbString) {
+    return new KeysetHandle(PbKeyset.deserialize(keysetJspbString));
+  }
+
+  /**
+   * Serializes a KeysetHandle to string.
+   *
+   * Note that JSPB is currently not open source, so this method can't be
+   * either.
+   *
+   * @param {!KeysetHandle} keysetHandle
+   * @return {string}
+   */
+  static serializeToJspb(keysetHandle) {
+    return keysetHandle.getKeyset().serialize();
+  }
 }
 
 exports = CleartextKeysetHandle;
