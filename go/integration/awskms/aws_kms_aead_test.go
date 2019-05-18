@@ -85,6 +85,7 @@ func basicAEADTest(t *testing.T, a tink.AEAD) error {
 	}
 	return nil
 }
+
 func TestBasicAead(t *testing.T) {
 	setupKMS(t)
 	// ignore-placeholder4
@@ -99,6 +100,34 @@ func TestBasicAead(t *testing.T) {
 	}
 	if err := basicAEADTest(t, a); err != nil {
 		t.Errorf("error in basic aead tests: %v", err)
+	}
+}
+
+func TestBasicAeadWithoutAdditionalData(t *testing.T) {
+	setupKMS(t)
+	// ignore-placeholder4
+	dek := aead.AES128CTRHMACSHA256KeyTemplate()
+	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
+	if err != nil {
+		t.Fatalf("error getting a new keyset handle: %v", err)
+	}
+	a, err := awsaead(kh)
+	if err != nil {
+		t.Fatalf("error getting the primitive: %v", err)
+	}
+	for i := 0; i < 100; i++ {
+		pt := random.GetRandomBytes(20)
+		ct, err := a.Encrypt(pt, nil)
+		if err != nil {
+			t.Fatalf("error encrypting data: %v", err)
+		}
+		dt, err := a.Decrypt(ct, nil)
+		if err != nil {
+			t.Fatalf("erorr decrypting data: %v", err)
+		}
+		if !bytes.Equal(dt, pt) {
+			t.Fatalf("decrypt not inverse of encrypt")
+		}
 	}
 }
 
