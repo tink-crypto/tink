@@ -12,23 +12,26 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.KeysetWriter');
+goog.module('tink.BinaryKeysetWriter');
 
-const PbEncryptedKeyset = goog.require('proto.google.crypto.tink.EncryptedKeyset');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const KeysetWriter = goog.require('tink.KeysetWriter');
+const SecurityException = goog.require('tink.exception.SecurityException');
+
 
 /**
- * KeysetWriter knows how to write a keyset or an encrypted keyset to some
- * storage system.
+ * KeysetWriter knows how to write a keyset or an encrypted keyset.
  *
- * @record
+ * @implements {KeysetWriter}
+ * @final
  */
-class KeysetWriter {
-  /**
-   * @param {!PbKeyset|!PbEncryptedKeyset} keyset
-   * @return {!Uint8Array}
-   */
-  write(keyset) {}
+class BinaryKeysetWriter {
+  /** @override */
+  write(keyset) {
+    if (!keyset) {
+      throw new SecurityException('keyset has to be non-null.');
+    }
+    return keyset.serializeBinary();
+  }
 }
 
-exports = KeysetWriter;
+exports = BinaryKeysetWriter;
