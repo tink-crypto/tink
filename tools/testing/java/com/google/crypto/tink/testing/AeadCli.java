@@ -18,19 +18,24 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
+
+import com.google.crypto.tink.integration.awskms.AwsKmsClient;
 
 /**
- * A command-line utility for testing Aead-primitives.
- * It requires 5 arguments:
- *   keyset-file:  name of the file with the keyset to be used for encryption
- *   operation: the actual AEAD-operation, i.e. "encrypt" or "decrypt"
- *   input-file:  name of the file with input (plaintext for encryption, or
- *                or ciphertext for decryption)
- *   associated-data-file:  name of the file containing associated data
- *   output-file:  name of the file for the resulting output
+ * A command-line utility for testing Aead-primitives. It requires 5 arguments: keyset-file: name of
+ * the file with the keyset to be used for encryption operation: the actual AEAD-operation, i.e.
+ * "encrypt" or "decrypt" input-file: name of the file with input (plaintext for encryption, or or
+ * ciphertext for decryption) associated-data-file: name of the file containing associated data
+ * output-file: name of the file for the resulting output
  */
 public class AeadCli {
   public static void main(String[] args) throws Exception {
+
     if (args.length != 5) {
       System.out.println(
           "Usage: AeadCli keyset-file operation input-file associated-data-file output-file");
@@ -41,6 +46,15 @@ public class AeadCli {
     String inputFilename = args[2];
     String associatedDataFile = args[3];
     String outputFilename = args[4];
+
+    KmsClient gcpKmsClient = new GcpKmsClient().withCredentials(TestUtil.SERVICE_ACCOUNT_FILE);
+    KmsClients.add(gcpKmsClient);
+    AeadConfig.register();
+
+    KmsClient awsKmsClient = new AwsKmsClient(TestUtil.AWS_CRYPTO_URI).withCredentials(TestUtil.AWS_CREDS);
+    KmsClients.add(awsKmsClient);
+    AeadConfig.register();
+
     if (!(operation.equals("encrypt") || operation.equals("decrypt"))) {
       System.out.println(
           "Unknown operation '" + operation + "'.\nExpected 'encrypt' or 'decrypt'.");
@@ -56,7 +70,6 @@ public class AeadCli {
     // Read the keyset.
     System.out.println("Reading the keyset...");
     KeysetHandle keysetHandle = CliUtil.readKeyset(keysetFilename);
-
     // Get the primitive.
     System.out.println("Getting the primitive...");
     Aead aead = keysetHandle.getPrimitive(Aead.class);
@@ -73,7 +86,6 @@ public class AeadCli {
     } else { // operation.equals("decrypt")
       output = aead.decrypt(input, aad);
     }
-
     // Write the output to the output file.
     CliUtil.write(output, outputFilename);
 

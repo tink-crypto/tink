@@ -16,6 +16,7 @@ filegroup(
         "gcp_key_name.txt",
         "credential.json",
         "credentials_aws.csv",
+        "credentials_aws.cred",
         "README_AWS.txt",
 ],
 )

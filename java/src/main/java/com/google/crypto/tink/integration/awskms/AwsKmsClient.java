@@ -27,6 +27,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * An implementation of {@link KmsClient} for <a href="https://aws.amazon.com/kms/">AWS KMS</a>.
@@ -112,7 +113,10 @@ public final class AwsKmsClient implements KmsClient {
   public KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
       throws GeneralSecurityException {
     try {
-      this.client = AWSKMSClientBuilder.standard().withCredentials(provider).build();
+      String[] tokens = StringUtils.split(this.keyUri, ":");
+      this.client = AWSKMSClientBuilder.standard()
+                    .withCredentials(provider)
+                        .withRegion(Regions.fromName(tokens[3])).build();
       return this;
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("cannot load credentials from provider", e);
