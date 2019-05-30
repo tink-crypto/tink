@@ -117,7 +117,7 @@ public final class AwsKmsClient implements KmsClient {
       this.client =
           AWSKMSClientBuilder.standard()
               .withCredentials(provider)
-              .withRegion(Regions.fromName(tokens[3]))
+              .withRegion(Regions.fromName(tokens[4]))
               .build();
       return this;
     } catch (AmazonServiceException e) {
