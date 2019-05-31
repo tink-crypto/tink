@@ -741,25 +741,6 @@
 <dd>
 <div class="block"><code>ASYMMETRIC_PUBLIC = 3;</code></div>
 </dd>
-<dt><a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html" title="class in com.google.crypto.tink.integration.awskms"><span class="typeNameLink">AwsKmsAead</span></a> - Class in <a href="com/google/crypto/tink/integration/awskms/package-summary.html">com.google.crypto.tink.integration.awskms</a></dt>
-<dd>
-<div class="block">A <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> that forwards encryption/decryption requests to a key in <a
- href="https://aws.amazon.com/kms/">AWS KMS</a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html#AwsKmsAead-com.amazonaws.services.kms.AWSKMS-java.lang.String-">AwsKmsAead(AWSKMS, String)</a></span> - Constructor for class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsAead</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms"><span class="typeNameLink">AwsKmsClient</span></a> - Class in <a href="com/google/crypto/tink/integration/awskms/package-summary.html">com.google.crypto.tink.integration.awskms</a></dt>
-<dd>
-<div class="block">An implementation of <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> for <a href="https://aws.amazon.com/kms/">AWS KMS</a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#AwsKmsClient--">AwsKmsClient()</a></span> - Constructor for class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
-<dd>
-<div class="block">Constructs a generic AwsKmsClient that is not bound to any specific key.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#AwsKmsClient-java.lang.String-">AwsKmsClient(String)</a></span> - Constructor for class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
-<dd>
-<div class="block">Constructs a specific AwsKmsClient that is bound to a single key identified by <code>uri</code>.</div>
-</dd>
 </dl>
 <a name="I:B">
 <!--   -->
@@ -2268,10 +2249,6 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a> - package com.google.crypto.tink.hybrid</dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/integration/awskms/package-summary.html">com.google.crypto.tink.integration.awskms</a> - package com.google.crypto.tink.integration.awskms</dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/integration/gcpkms/package-summary.html">com.google.crypto.tink.integration.gcpkms</a> - package com.google.crypto.tink.integration.gcpkms</dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a> - package com.google.crypto.tink.mac</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a> - package com.google.crypto.tink.proto</dt>
@@ -2427,10 +2404,6 @@
 <dd>
 <div class="block">Decryption operation: decrypts <code>ciphertext</code> verifying the integrity of <code>contextInfo</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsAead</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsAead</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCtrJceCipher.html#decrypt-byte:A-">decrypt(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCtrJceCipher.html" title="class in com.google.crypto.tink.subtle">AesCtrJceCipher</a></dt>
 <dd>
 <div class="block">Decrypts the ciphertext with counter mode decryption.</div>
@@ -2540,10 +2513,6 @@
 <div class="block">
  Like UNCOMPRESSED but without the &#92;x04 prefix.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
@@ -2984,10 +2953,6 @@
 <div class="block">Encryption operation: encrypts <code>plaintext</code> binding <code>contextInfo</code> to the resulting
  ciphertext.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsAead</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsAead</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCtrJceCipher.html#encrypt-byte:A-">encrypt(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCtrJceCipher.html" title="class in com.google.crypto.tink.subtle">AesCtrJceCipher</a></dt>
 <dd>
 <div class="block">Encrypts the plaintext with counter mode encryption using randomly generated iv.</div>
@@ -3259,26 +3224,6 @@
 </a>
 <h2 class="title">G</h2>
 <dl>
-<dt><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html" title="class in com.google.crypto.tink.integration.gcpkms"><span class="typeNameLink">GcpKmsAead</span></a> - Class in <a href="com/google/crypto/tink/integration/gcpkms/package-summary.html">com.google.crypto.tink.integration.gcpkms</a></dt>
-<dd>
-<div class="block">A <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> that forwards encryption/decryption requests to a key in <a
- href="https://cloud.google.com/kms/">Google Cloud KMS</a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html#GcpKmsAead-com.google.api.services.cloudkms.v1.CloudKMS-java.lang.String-">GcpKmsAead(CloudKMS, String)</a></span> - Constructor for class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsAead</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms"><span class="typeNameLink">GcpKmsClient</span></a> - Class in <a href="com/google/crypto/tink/integration/gcpkms/package-summary.html">com.google.crypto.tink.integration.gcpkms</a></dt>
-<dd>
-<div class="block">An implementation of <code>KmsClient</code> for <a href="https://cloud.google.com/kms/">Google Cloud
- KMS</a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient--">GcpKmsClient()</a></span> - Constructor for class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
-<dd>
-<div class="block">Constructs a generic GcpKmsClient that is not bound to any specific key.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient-java.lang.String-">GcpKmsClient(String)</a></span> - Constructor for class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
-<dd>
-<div class="block">Constructs a specific GcpKmsClient that is bound to a single key identified by <code>uri</code>.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesHkdfRecipientKem.html#generateKey-byte:A-java.lang.String-byte:A-byte:A-int-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-">generateKey(byte[], String, byte[], byte[], int, EllipticCurves.PointFormatType)</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesHkdfRecipientKem.html" title="class in com.google.crypto.tink.subtle">EciesHkdfRecipientKem</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesHkdfSenderKem.html#generateKey-java.lang.String-byte:A-byte:A-int-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-">generateKey(String, byte[], byte[], int, EllipticCurves.PointFormatType)</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesHkdfSenderKem.html" title="class in com.google.crypto.tink.subtle">EciesHkdfSenderKem</a></dt>
@@ -3301,10 +3246,6 @@
 <dd>
 <div class="block">Returns the first <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> registered with <a href="com/google/crypto/tink/KmsClients.html#add-com.google.crypto.tink.KmsClient-"><code>KmsClients.add(com.google.crypto.tink.KmsClient)</code></a> that supports <code>keyUri</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#getAead-java.lang.String-">getAead(String)</a></span> - Method in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#getAead-java.lang.String-">getAead(String)</a></span> - Method in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClient.html#getAead-java.lang.String-">getAead(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></dt>
 <dd>
 <div class="block">Gets an <code>Aead</code> backed by <code>keyUri</code>.</div>
@@ -9112,7 +9053,7 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#init--">init()</a></span> - Static method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html" title="class in com.google.crypto.tink.daead">DeterministicAeadConfig</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>register()</code></a></span></div>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>DeterministicAeadConfig.register()</code></a></span></div>
 </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridConfig.html#init--">init()</a></span> - Static method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridConfig.html" title="class in com.google.crypto.tink.hybrid">HybridConfig</a></dt>
@@ -12885,14 +12826,6 @@
 <dd>
 <div class="block">Encodes a point on an elliptic curve.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#PREFIX">PREFIX</a></span> - Static variable in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
-<dd>
-<div class="block">The prefix of all keys stored in AWS KMS.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#PREFIX">PREFIX</a></span> - Static variable in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
-<dd>
-<div class="block">The prefix of all keys stored in Google Cloud KMS.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/Keyset.html#PRIMARY_KEY_ID_FIELD_NUMBER">PRIMARY_KEY_ID_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto">Keyset</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KeysetInfo.html#PRIMARY_KEY_ID_FIELD_NUMBER">PRIMARY_KEY_ID_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeysetInfo.html" title="class in com.google.crypto.tink.proto">KeysetInfo</a></dt>
@@ -15585,30 +15518,9 @@ the order they are declared.</div>
 <dd>
 <div class="block">Static method to create a JsonKeysetReader from a byte array.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#withCredentials-java.lang.String-">withCredentials(String)</a></span> - Method in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
-<dd>
-<div class="block">Loads AWS credentials from a properties file.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#withCredentials-java.lang.String-">withCredentials(String)</a></span> - Method in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
-<dd>
-<div class="block">Loads credentials from a service account JSON file <code>credentialPath</code>.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClient.html#withCredentials-java.lang.String-">withCredentials(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></dt>
 <dd>
 <div class="block">Loads the credentials in <code>credentialPath</code>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#withCredentialsProvider-com.amazonaws.auth.AWSCredentialsProvider-">withCredentialsProvider(AWSCredentialsProvider)</a></span> - Method in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
-<dd>
-<div class="block">Loads AWS credentials from a provider.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#withDefaultCredentials--">withDefaultCredentials()</a></span> - Method in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
-<dd>
-<div class="block">Loads default AWS credentials.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#withDefaultCredentials--">withDefaultCredentials()</a></span> - Method in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
-<dd>
-<div class="block">Loads <a href="https://developers.google.com/accounts/docs/application-default-credentials"
- default Google Cloud credentials</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClient.html#withDefaultCredentials--">withDefaultCredentials()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></dt>
 <dd>
