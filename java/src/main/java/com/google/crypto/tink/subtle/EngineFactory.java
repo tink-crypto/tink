@@ -155,23 +155,28 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
   }
 
   public T_ENGINE getInstance(String algorithm) throws GeneralSecurityException {
-    Exception cause = null;
-    for (Provider provider : this.policy) {
-      try {
-        return this.instanceBuilder.getInstance(algorithm, provider);
-      } catch (Exception e) {
-        if (cause == null) {
-          cause = e;
-        }
+    for (Provider p : this.policy) {
+      if (tryProvider(algorithm, p)) {
+        return this.instanceBuilder.getInstance(algorithm, p);
       }
     }
     if (letFallback) {
       return this.instanceBuilder.getInstance(algorithm, null);
     }
-    throw new GeneralSecurityException("No good Provider found.", cause);
+    throw new GeneralSecurityException("No good Provider found.");
   }
 
   private T_WRAPPER instanceBuilder;
   private List<Provider> policy;
   private boolean letFallback;
+
+  private boolean tryProvider(String algorithm, Provider provider) {
+    try {
+      this.instanceBuilder.getInstance(algorithm, provider);
+      return true;
+    } catch (Exception e) { // Don't care which one specifically.
+      e.printStackTrace();
+      return false;
+    }
+  }
 }
