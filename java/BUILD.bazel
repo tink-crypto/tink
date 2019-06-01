@@ -69,8 +69,6 @@ java_deps = [
     "//java/src/main/java/com/google/crypto/tink/config",
     "//java/src/main/java/com/google/crypto/tink/daead",
     "//java/src/main/java/com/google/crypto/tink/hybrid",
-    "//java/src/main/java/com/google/crypto/tink/integration/awskms",
-    "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
     "//java/src/main/java/com/google/crypto/tink/mac",
     "//java/src/main/java/com/google/crypto/tink/signature",
     "//java/src/main/java/com/google/crypto/tink/streamingaead",
@@ -103,6 +101,22 @@ java_library(
     name = "java",
     visibility = ["//visibility:public"],
     exports = java_deps,
+)
+
+java_library(
+    name = "awskms",
+    visibility = ["//visibility:public"],
+    exports = [
+        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
+    ],
+)
+
+java_library(
+    name = "gcpkms",
+    visibility = ["//visibility:public"],
+    exports = [
+        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
+    ],
 )
 
 # like :java, but for Android
@@ -144,13 +158,29 @@ java_library(
 load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
-    name = "maven",
+    name = "tink",
     doctitle = "Tink Cryptography API",
     deps = full_proto_deps + java_deps + cleartext_deps + subtle_deps,
 )
 
 gen_maven_jar_rules(
-    name = "maven-android",
+    name = "tink-awskms",
+    doctitle = "Tink Cryptography API with AWS KMS",
+    deps = [
+        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
+    ],
+)
+
+gen_maven_jar_rules(
+    name = "tink-gcpkms",
+    doctitle = "Tink Cryptography API with Google Cloud KMS",
+    deps = [
+        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
+    ],
+)
+
+gen_maven_jar_rules(
+    name = "tink-android",
     doctitle = "Tink Cryptography API for Android",
     deps = lite_proto_deps + android_deps + cleartext_android_deps + subtle_deps,
 )

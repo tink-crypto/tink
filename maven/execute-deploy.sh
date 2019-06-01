@@ -16,6 +16,9 @@
 # Fail on any error.
 set -e
 
+# Display commands to stderr.
+set -x
+
 readonly MVN_GOAL="$1"
 readonly VERSION="$2"
 shift 2
@@ -110,16 +113,30 @@ publish_javadoc_to_github_pages() {
 
 deploy_library \
   tink \
-  java/maven.jar \
-  java/maven-src.jar \
-  java/maven-javadoc.jar \
+  java/tink.jar \
+  java/tink-src.jar \
+  java/tink-javadoc.jar \
   $(dirname $0)/tink.pom.xml
 
 deploy_library \
+  tink-awskms \
+  java/tink-awskms.jar \
+  java/tink-awskms-src.jar \
+  java/tink-awskms-javadoc.jar \
+  $(dirname $0)/tink-awskms.pom.xml
+
+deploy_library \
+  tink-gcpkms \
+  java/tink-gcpkms.jar \
+  java/tink-gcpkms-src.jar \
+  java/tink-gcpkms-javadoc.jar \
+  $(dirname $0)/tink-gcpkms.pom.xml
+
+deploy_library \
   tink-android \
-  java/maven-android.jar \
-  java/maven-android-src.jar \
-  java/maven-android-javadoc.jar \
+  java/tink-android.jar \
+  java/tink-android-src.jar \
+  java/tink-android-javadoc.jar \
   $(dirname $0)/tink-android.pom.xml
 
 deploy_library \
