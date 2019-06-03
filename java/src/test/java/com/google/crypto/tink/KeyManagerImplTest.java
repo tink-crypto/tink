@@ -154,6 +154,18 @@ public final class KeyManagerImplTest {
   }
 
   @Test
+  public void getPrimitive_MessageLite_throwsIfVoid() throws Exception {
+    KeyManager<Void> keyManager = new KeyManagerImpl<>(new TestInternalKeyManager(), Void.class);
+    MessageLite key = keyManager.newKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
+    try {
+      keyManager.getPrimitive(key);
+      fail("expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("Void");
+    }
+  }
+
+  @Test
   public void getPrimitive_MessageLite_throwsWrongProto() throws Exception {
     KeyManager<Aead> keyManager = new KeyManagerImpl<>(new TestInternalKeyManager(), Aead.class);
     MessageLite notAKey = AesGcmKeyFormat.getDefaultInstance();
@@ -303,14 +315,7 @@ public final class KeyManagerImplTest {
   private static class TestInternalKeyManagerWithoutKeyFactory
       extends InternalKeyManager<AesGcmKey> {
     public TestInternalKeyManagerWithoutKeyFactory() {
-      super(
-          AesGcmKey.class,
-          new PrimitiveFactory<FakeAead, AesGcmKey>(FakeAead.class) {
-            @Override
-            public FakeAead getPrimitive(AesGcmKey key) {
-              return new FakeAead();
-            }
-          });
+      super(AesGcmKey.class);
     }
 
     @Override
@@ -339,8 +344,8 @@ public final class KeyManagerImplTest {
 
   @Test
   public void newKey_ByteString_throwsUnsupportedOperation() throws Exception {
-    KeyManager<FakeAead> keyManager =
-        new KeyManagerImpl<>(new TestInternalKeyManagerWithoutKeyFactory(), FakeAead.class);
+    KeyManager<Void> keyManager =
+        new KeyManagerImpl<>(new TestInternalKeyManagerWithoutKeyFactory(), Void.class);
     try {
       keyManager.newKey(ByteString.copyFromUtf8(""));
       fail("UnsupportedOperationException expected");
@@ -351,8 +356,8 @@ public final class KeyManagerImplTest {
 
   @Test
   public void newKey_byteString_throwsUnsupportedOperation() throws Exception {
-    KeyManager<FakeAead> keyManager =
-        new KeyManagerImpl<>(new TestInternalKeyManagerWithoutKeyFactory(), FakeAead.class);
+    KeyManager<Void> keyManager =
+        new KeyManagerImpl<>(new TestInternalKeyManagerWithoutKeyFactory(), Void.class);
     try {
       keyManager.newKey(ByteString.copyFromUtf8(""));
       fail("UnsupportedOperationException expected");
@@ -363,8 +368,8 @@ public final class KeyManagerImplTest {
 
   @Test
   public void newKey_messageList_throwsUnsupportedOperation() throws Exception {
-    KeyManager<FakeAead> keyManager =
-        new KeyManagerImpl<>(new TestInternalKeyManagerWithoutKeyFactory(), FakeAead.class);
+    KeyManager<Void> keyManager =
+        new KeyManagerImpl<>(new TestInternalKeyManagerWithoutKeyFactory(), Void.class);
     try {
       keyManager.newKey(AesGcmKey.getDefaultInstance());
       fail("UnsupportedOperationException expected");
@@ -375,8 +380,8 @@ public final class KeyManagerImplTest {
 
   @Test
   public void newKeyData_byteString_throwsUnsupportedOperation() throws Exception {
-    KeyManager<FakeAead> keyManager =
-        new KeyManagerImpl<>(new TestInternalKeyManagerWithoutKeyFactory(), FakeAead.class);
+    KeyManager<Void> keyManager =
+        new KeyManagerImpl<>(new TestInternalKeyManagerWithoutKeyFactory(), Void.class);
     try {
       keyManager.newKeyData(ByteString.copyFromUtf8(""));
       fail("UnsupportedOperationException expected");

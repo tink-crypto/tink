@@ -21,12 +21,18 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
-/** Implementation of the {@link KeyManager} interface based on an {@link InternalKeyManager}. */
+/**
+ * Implementation of the {@link KeyManager} interface based on an {@link InternalKeyManager}.
+ *
+ * <p>Choosing {@code PrimitiveT} equal to {@link java.lang.Void} is valid; in this case the
+ * functions {@link #getPrimitive} will throw if invoked.
+ */
 @Alpha
 class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyManager<PrimitiveT> {
   public KeyManagerImpl(
       InternalKeyManager<KeyProtoT> internalKeyManager, Class<PrimitiveT> primitiveClass) {
-    if (!internalKeyManager.supportedPrimitives().contains(primitiveClass)) {
+    if (!internalKeyManager.supportedPrimitives().contains(primitiveClass)
+        && !Void.class.equals(primitiveClass)) {
       throw new IllegalArgumentException(
           String.format(
               "Given internalKeyMananger %s does not support primitive class %s",
@@ -123,6 +129,9 @@ class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyMa
 
   private PrimitiveT validateKeyAndGetPrimitive(KeyProtoT keyProto)
       throws GeneralSecurityException {
+    if (Void.class.equals(primitiveClass)) {
+      throw new GeneralSecurityException("Cannot create a primitive for Void");
+    }
     internalKeyManager.validateKey(keyProto);
     return internalKeyManager.getPrimitive(keyProto, primitiveClass);
   }
