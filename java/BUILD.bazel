@@ -248,6 +248,8 @@ java_library(
         "@org_objenesis",
     ],
     deps = [
+        ":awskms",
+        ":gcpkms",
         ":testonly",
         "@com_amazonaws_aws_java_sdk_core",
         "@com_amazonaws_aws_java_sdk_kms",
