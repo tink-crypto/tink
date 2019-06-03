@@ -313,9 +313,7 @@ def _compile(ctx, unit):
     protoc_cmd = [protoc] + list(unit.args) + imports + srcs
     manifest = [f.short_path for f in unit.outputs]
 
-    transitive_units = depset()
-    for u in unit.data.transitive_units:
-        transitive_units = transitive_units | u.inputs
+    transitive_units = depset(transitive = [u.inputs for u in unit.data.transitive_units])
     inputs = depset(transitive = [unit.inputs, transitive_units]).to_list() + [unit.compiler]
     outputs = list(unit.outputs)
 
