@@ -372,7 +372,7 @@ keys with some additional parameters and metadata.
 Internally Tink stores keysets as Protocol Buffers, but you can work with
 keysets via a wrapper called keyset handle. You can generate a new keyset and
 obtain its handle using a KeyTemplate. KeysetHandle objects enforce certain
-restrictions that prevent accidental leakage of the sensistive key material.
+restrictions that prevent accidental leakage of the sensitive key material.
 
 ```go
 package main
