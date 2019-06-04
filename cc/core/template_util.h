@@ -33,19 +33,19 @@ namespace internal {
 
 // First declare the template which always takes two parameters.
 template <typename TestType, typename Tuple>
-class OccursInList;
+class OccursInTuple;
 
 // In the special case where the tuple is empty, the result is false.
 template <typename TestType>
-class OccursInList<TestType, std::tuple<>> : public std::false_type {};
+class OccursInTuple<TestType, std::tuple<>> : public std::false_type {};
 
 // If the list is not empty, the result is true if TestType equals the first in
 // the list, or  TestType occurs in the rest of the list.
 template <typename TestType, typename First, typename... List>
-class OccursInList<TestType, std::tuple<First, List...>>
+class OccursInTuple<TestType, std::tuple<First, List...>>
     : public absl::disjunction<
           std::is_same<TestType, First>,
-          OccursInList<TestType, typename std::tuple<List...>>> {};
+          OccursInTuple<TestType, typename std::tuple<List...>>> {};
 
 // The class HasDuplicates. Defines ::value as true in case the given list has
 // a duplicate, false otherwise.
@@ -61,7 +61,7 @@ class HasDuplicates<> : public std::false_type {};
 template <typename First, typename... List>
 class HasDuplicates<First, List...>
     : public absl::disjunction<
-          OccursInList<First, typename std::tuple<List...>>,
+          OccursInTuple<First, typename std::tuple<List...>>,
           HasDuplicates<List...>> {};
 
 }  // namespace internal
