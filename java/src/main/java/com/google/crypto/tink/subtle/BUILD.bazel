@@ -88,6 +88,7 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
+        "@com_google_errorprone_error_prone_annotations",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/annotations",
     ],

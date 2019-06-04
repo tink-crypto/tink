@@ -43,7 +43,7 @@ streaming_aead_basic_test() {
       local test_file_size_mb=5
       generate_symmetric_key "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
           $key_template
-      generate_long_plaintext $test_instance $test_file_size_mb
+      generate_long_plaintext $test_instance $test_file_size_mb 1048576
 
       local encrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_encrypted.bin"
       local associated_data_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_aad.bin"

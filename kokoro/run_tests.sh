@@ -53,8 +53,8 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   # TODO(b/73748835): Workaround on Kokoro.
   rm -f ~/.bazelrc
 
-  # Install the latest version of Bazel.
-  use_bazel.sh latest
+  # TODO(b/131821833) Use the latest version of Bazel.
+  use_bazel.sh 0.25.3
 
   if [[ "${PLATFORM}" == 'darwin' ]]; then
     export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"

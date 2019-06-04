@@ -68,7 +68,7 @@ tinkey rotate-keyset --key-template ED25519 --in private-keyset.cfg \
 -   List metadata of keys in a keyset:
 
 ```shell
-tinkey list-keys --in private-keyset.cfg
+tinkey list-keyset --in private-keyset.cfg
 ```
 
 -   Create a public keyset from a private keyset

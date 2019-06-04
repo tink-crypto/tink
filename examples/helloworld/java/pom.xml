@@ -44,6 +44,18 @@
       <artifactId>tink</artifactId>
       <version>HEAD-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.google.crypto.tink</groupId>
+      <artifactId>tink-awskms</artifactId>
+      <version>HEAD-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.crypto.tink</groupId>
+      <artifactId>tink-gcpkms</artifactId>
+      <version>HEAD-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -40,6 +40,11 @@ java_binary(
     deps = [
         ":cli_util",
         "//java:testonly",
+        "//java/src/main/java/com/google/crypto/tink",
+        "//java/src/main/java/com/google/crypto/tink/aead",
+        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
+        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
+        "//java:testutil",
     ],
 )
 

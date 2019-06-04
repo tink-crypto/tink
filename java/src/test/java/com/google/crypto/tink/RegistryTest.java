@@ -424,7 +424,7 @@ public class RegistryTest {
                         .build())
                 .setPrimaryKeyId(2)
                 .build());
-    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle);
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, Aead.class);
 
     assertThat(aeadSet.getPrimary().getPrimitive().getClass()).isEqualTo(AesEaxJce.class);
   }

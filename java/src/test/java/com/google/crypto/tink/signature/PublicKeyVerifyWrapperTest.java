@@ -113,7 +113,8 @@ public class PublicKeyVerifyWrapperTest {
               TestUtil.createKeyset(
                   keys[i], keys[(i + 1) % j], keys[(i + 2) % j], keys[(i + 3) % j]));
       PublicKeyVerify verifier =
-          new PublicKeyVerifyWrapper().wrap(Registry.getPrimitives(keysetHandle));
+          new PublicKeyVerifyWrapper()
+              .wrap(Registry.getPrimitives(keysetHandle, PublicKeyVerify.class));
       // Signature from any keys in the keyset should be valid.
       for (int k = 0; k < j; k++) {
         PublicKeySign signer =

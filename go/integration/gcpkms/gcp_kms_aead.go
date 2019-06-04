@@ -44,8 +44,8 @@ func NewGCPAEAD(keyURI string, kms *cloudkms.Service) *GCPAEAD {
 func (a *GCPAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 
 	req := &cloudkms.EncryptRequest{
-		Plaintext:                   base64.StdEncoding.EncodeToString(plaintext),
-		AdditionalAuthenticatedData: base64.StdEncoding.EncodeToString(additionalData),
+		Plaintext:                   base64.URLEncoding.EncodeToString(plaintext),
+		AdditionalAuthenticatedData: base64.URLEncoding.EncodeToString(additionalData),
 	}
 	resp, err := a.kms.Projects.Locations.KeyRings.CryptoKeys.Encrypt(a.keyURI, req).Do()
 	if err != nil {
@@ -59,8 +59,8 @@ func (a *GCPAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 func (a *GCPAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 
 	req := &cloudkms.DecryptRequest{
-		Ciphertext:                  base64.StdEncoding.EncodeToString(ciphertext),
-		AdditionalAuthenticatedData: base64.StdEncoding.EncodeToString(additionalData),
+		Ciphertext:                  base64.URLEncoding.EncodeToString(ciphertext),
+		AdditionalAuthenticatedData: base64.URLEncoding.EncodeToString(additionalData),
 	}
 	resp, err := a.kms.Projects.Locations.KeyRings.CryptoKeys.Decrypt(a.keyURI, req).Do()
 	if err != nil {

@@ -87,6 +87,32 @@ public final class InternalKeyManagerTest {
   }
 
   @Test
+  public void firstSupportedPrimitiveClass() throws Exception {
+    InternalKeyManager<AesGcmKey> keyManager =
+        new TestInternalKeyManager(
+            new TestInternalKeyManager.PrimitiveFactory<Primitive1, AesGcmKey>(Primitive1.class) {
+              @Override
+              public Primitive1 getPrimitive(AesGcmKey key) {
+                return new Primitive1(key.getKeyValue());
+              }
+            },
+            new TestInternalKeyManager.PrimitiveFactory<Primitive2, AesGcmKey>(Primitive2.class) {
+              @Override
+              public Primitive2 getPrimitive(AesGcmKey key) {
+                return new Primitive2(key.getKeyValue().size());
+              }
+            });
+    assertThat(keyManager.firstSupportedPrimitiveClass()).isEqualTo(Primitive1.class);
+  }
+
+  @Test
+  public void firstSupportedPrimitiveClass_returnsVoid() throws Exception {
+    InternalKeyManager<AesGcmKey> keyManager =
+        new TestInternalKeyManager();
+    assertThat(keyManager.firstSupportedPrimitiveClass()).isEqualTo(Void.class);
+  }
+
+  @Test
   public void supportedPrimitives_equalsGivenPrimitives() throws Exception {
     InternalKeyManager<AesGcmKey> keyManager =
         new TestInternalKeyManager(
@@ -107,10 +133,28 @@ public final class InternalKeyManagerTest {
   }
 
   @Test
+  public void supportedPrimitives_canBeEmpty() throws Exception {
+    InternalKeyManager<AesGcmKey> keyManager =
+        new TestInternalKeyManager();
+    assertThat(keyManager.supportedPrimitives()).isEmpty();
+  }
+
+  @Test
   public void getPrimitive_throwsForUnknownPrimitives() throws Exception {
     InternalKeyManager<AesGcmKey> keyManager = new TestInternalKeyManager();
     try {
       keyManager.getPrimitive(AesGcmKey.getDefaultInstance(), Primitive1.class);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void getPrimitive_throwsForVoid() throws Exception {
+    InternalKeyManager<AesGcmKey> keyManager = new TestInternalKeyManager();
+    try {
+      keyManager.getPrimitive(AesGcmKey.getDefaultInstance(), Void.class);
       fail();
     } catch (IllegalArgumentException e) {
       // expected

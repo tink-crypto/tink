@@ -14,8 +14,13 @@
 
 goog.module('tink.CleartextKeysetHandle');
 
+const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
+const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+
+/** @type {!BinaryKeysetWriter} */
+const binaryKeysetWriter = new BinaryKeysetWriter();
 
 /**
  * Static methods for reading or writing cleartext keysets.
@@ -35,6 +40,54 @@ class CleartextKeysetHandle {
    */
   static fromJspbArray(keysetJspbArray) {
     return new KeysetHandle(new PbKeyset(keysetJspbArray));
+  }
+
+  /**
+   * Creates a KeysetHandle from a JSPB string representation of a keyset.
+   *
+   * Note that JSPB is currently not open source, so this method can't be
+   * either.
+   *
+   * @param {string} keysetJspbString
+   * @return {!KeysetHandle}
+   */
+  static deserializeFromJspb(keysetJspbString) {
+    return new KeysetHandle(PbKeyset.deserialize(keysetJspbString));
+  }
+
+  /**
+   * Serializes a KeysetHandle to string.
+   *
+   * Note that JSPB is currently not open source, so this method can't be
+   * either.
+   *
+   * @param {!KeysetHandle} keysetHandle
+   * @return {string}
+   */
+  static serializeToJspb(keysetHandle) {
+    return keysetHandle.getKeyset().serialize();
+  }
+
+  /**
+   * Serializes a KeysetHandle to binary.
+   *
+   * @param {!KeysetHandle} keysetHandle
+   * @return {!Uint8Array}
+   */
+  static serializeToBinary(keysetHandle) {
+    return binaryKeysetWriter.write(keysetHandle.getKeyset());
+  }
+
+  /**
+   * Creates a KeysetHandle from a binary representation of a keyset.
+   *
+   * @param {!Uint8Array} keysetBinary
+   * @return {!KeysetHandle}
+   */
+  static deserializeFromBinary(keysetBinary) {
+    const reader = BinaryKeysetReader.withUint8Array(keysetBinary);
+    const keysetFromReader = reader.read();
+    return new KeysetHandle(keysetFromReader);
   }
 }
 

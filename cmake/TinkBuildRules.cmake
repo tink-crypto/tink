@@ -31,7 +31,15 @@
 # defined by calls to tink_module(). Please don't alter it directly.
 
 include(CMakeParseArguments)
-include(GoogleTest)
+
+# GoogleTest is available only since CMake version 3.9,
+# so we're using FindGTest for older versions.
+if (${CMAKE_VERSION} VERSION_LESS 3.9)
+  include(FindGTest)
+else()
+  include(GoogleTest)
+endif()
+
 
 if (TINK_BUILD_TESTS)
   enable_testing()
@@ -136,7 +144,7 @@ function(tink_cc_library)
     tink::${TINK_MODULE}::${tink_cc_library_NAME} ALIAS ${_target_name})
 endfunction(tink_cc_library)
 
-# Declare a Tink test using googletest, with a syntax similar to Blaze.
+# Declare a Tink test using googletest, with a syntax similar to Bazel.
 #
 # Parameters:
 #   NAME base name of the test.

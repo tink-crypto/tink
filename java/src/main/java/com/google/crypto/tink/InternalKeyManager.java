@@ -72,6 +72,7 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
   private final Class<KeyProtoT> clazz;
 
   private final Map<Class<?>, PrimitiveFactory<?, KeyProtoT>> factories;
+  private final Class<?> firstPrimitiveClass;
 
   /**
    * Constructs a new InternalKeyManager.
@@ -93,6 +94,11 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
                 + factory.getPrimitiveClass().getCanonicalName());
       }
       factoriesMap.put(factory.getPrimitiveClass(), factory);
+    }
+    if (factories.length > 0) {
+      this.firstPrimitiveClass = factories[0].getPrimitiveClass();
+    } else {
+      this.firstPrimitiveClass = Void.class;
     }
     this.factories = Collections.unmodifiableMap(factoriesMap);
   }
@@ -150,6 +156,14 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
    */
   public final Set<Class<?>> supportedPrimitives() {
     return factories.keySet();
+  }
+
+  /**
+   * Returns the first class object of the first supported primitive, or {@code Class<Void>} if the
+   * key manager supports no primitive at all.
+   */
+  final Class<?> firstSupportedPrimitiveClass() {
+    return firstPrimitiveClass;
   }
 
   /**

@@ -18,3 +18,13 @@ filegroup(
     name = "tink_version",
     srcs = ["tink_version.bzl"],
 )
+
+filegroup(
+    name = "cmake_source_files",
+    data = glob(["cmake/**"])
+       + [
+           "//cc",
+           "CMakeLists.txt",
+           "tink_version.cmake",
+       ],
+)
