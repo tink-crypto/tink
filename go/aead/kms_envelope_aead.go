@@ -56,7 +56,7 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	encryptedDEK, err := a.remote.Encrypt(dek, []byte{0})
+	encryptedDEK, err := a.remote.Encrypt(dek, []byte{})
 	if err != nil {
 		return nil, err
 	}
@@ -81,28 +81,26 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
 	b := bytes.NewBuffer(ct)
 	bLen := b.Len()
-	l := make([]byte, lenDEK)
-	_, err := b.Read(l)
-	ed, err := binary.ReadVarint(bytes.NewReader(l))
-	if err != nil {
+
+	ed := int(binary.BigEndian.Uint32(b.Next(lenDEK)))
+	if ed <= 0 || ed > len(ct)-lenDEK {
 		return nil, errors.New("kms_envelope_aead: invalid ciphertext")
 	}
-	if ed <= 0 || ed > int64(len(ct)-lenDEK) {
-		return nil, errors.New("kms_envelope_aead: invalid ciphertext")
-	}
+
 	encryptedDEK := make([]byte, ed)
 	n, err := b.Read(encryptedDEK)
-	if err != nil || int64(n) != ed {
+	if err != nil || n != ed {
 		return nil, errors.New("kms_envelope_aead: invalid ciphertext")
 	}
-	pl := bLen - lenDEK - int(ed)
+
+	pl := bLen - lenDEK - ed
 	payload := make([]byte, pl)
 	n, err = b.Read(payload)
 	if err != nil || n != pl {
 		return nil, errors.New("kms_envelope_aead: invalid ciphertext")
 	}
 
-	dek, err := a.remote.Decrypt(encryptedDEK, []byte{0})
+	dek, err := a.remote.Decrypt(encryptedDEK, []byte{})
 	if err != nil {
 		return nil, err
 	}
@@ -120,17 +118,21 @@ func (a *KMSEnvelopeAEAD) Decrypt(ct, aad []byte) ([]byte, error) {
 // buildCipherText builds the cipher text by appending the length DEK, encrypted DEK
 // and the encrypted payload.
 func buildCipherText(encryptedDEK, payload []byte) ([]byte, error) {
-	buf := make([]byte, lenDEK)
 	var b bytes.Buffer
-	_ = binary.PutVarint(buf, int64(len(encryptedDEK)))
-	_, err := b.Write(buf)
+
+	// Write the length of the encrypted DEK.
+	lenDEKbuf := make([]byte, lenDEK)
+	binary.BigEndian.PutUint32(lenDEKbuf, uint32(len(encryptedDEK)))
+	_, err := b.Write(lenDEKbuf)
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = b.Write(encryptedDEK)
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = b.Write(payload)
 	if err != nil {
 		return nil, err

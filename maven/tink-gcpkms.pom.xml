@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>Tink Cryptography API with Google Cloud KMS</name>
+  <description>This is a plugin that integrates Tink with Google Cloud KMS.</description>
+
+  <groupId>com.google.crypto.tink</groupId>
+  <artifactId>tink-gcpkms</artifactId>
+  <version>VERSION_PLACEHOLDER</version>
+  <packaging>jar</packaging>
+  <url>http://github.com/google/tink</url>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/google/tink/issues</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>tink-users</name>
+      <subscribe>tink-users+subscribe@googlegroups.com</subscribe>
+      <unsubscribe>tink-users+unsubscribe@googlegroups.com</unsubscribe>
+      <post>tink-users@googlegroups.com</post>
+      <archive>https://groups.google.com/group/tink-users</archive>
+    </mailingList>
+  </mailingLists>
+
+  <developers>
+    <developer>
+      <organization>Google Inc.</organization>
+      <organizationUrl>https://www.google.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:google/tink.git</connection>
+    <developerConnection>scm:git:git@github.com:google/tink.git</developerConnection>
+    <url>https://github.com/google/tink.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <properties>
+    <java.version>1.7</java.version>
+
+    <google-api-client.version>1.29.0</google-api-client.version>
+    <google-api-services-cloudkms.version>v1-rev88-1.25.0</google-api-services-cloudkms.version>
+    <google-auto-service.version>1.0-rc5</google-auto-service.version>
+    <google-guava.version>27.1-jre</google-guava.version>
+    <httpclient.version>4.5.8</httpclient.version>
+    <jackson.version>2.9.9</jackson.version>
+    <tink.version>VERSION_PLACEHOLDER</tink.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-cbor</artifactId>
+      <version>${jackson.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.api-client</groupId>
+      <artifactId>google-api-client</artifactId>
+      <version>${google-api-client.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava-jdk5</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-cloudkms</artifactId>
+      <version>${google-api-services-cloudkms.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.api-client</groupId>
+          <artifactId>google-api-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${google-guava.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auto.service</groupId>
+      <artifactId>auto-service</artifactId>
+      <version>${google-auto-service.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.crypto.tink</groupId>
+      <artifactId>tink</artifactId>
+      <version>${tink.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpclient.version}</version>
+    </dependency>
+  </dependencies>
+</project>

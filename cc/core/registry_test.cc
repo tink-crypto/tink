@@ -75,8 +75,7 @@ class RegistryTest : public ::testing::Test {
 
 class TestKeyFactory : public KeyFactory {
  public:
-  TestKeyFactory(const std::string& key_type) : key_type_(key_type) {
-  }
+  explicit TestKeyFactory(const std::string& key_type) : key_type_(key_type) {}
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
       const MessageLite& key_format) const override {
@@ -102,9 +101,8 @@ class TestKeyFactory : public KeyFactory {
 
 class TestAeadKeyManager : public KeyManager<Aead> {
  public:
-  TestAeadKeyManager(const std::string& key_type)
-      : key_type_(key_type), key_factory_(key_type) {
-  }
+  explicit TestAeadKeyManager(const std::string& key_type)
+      : key_type_(key_type), key_factory_(key_type) {}
 
   util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const KeyData& key) const override {
@@ -682,6 +680,8 @@ TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
   auto result =
       Registry::get_key_manager<int>(AesGcmKeyManager().get_key_type());
   EXPECT_FALSE(result.ok());
+  EXPECT_THAT(result.status().error_message(),
+              HasSubstr(AesGcmKeyManager().get_key_type()));
   // Note: The C++ standard does not guarantee the next line.  If some toolchain
   // update fails it, one can delete it.
   EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
@@ -695,6 +695,7 @@ TEST_F(RegistryTest, GetCatalogueErrorMessage) {
                   .ok());
   auto result = Registry::get_catalogue<int>(catalogue_name);
   EXPECT_FALSE(result.ok());
+  EXPECT_THAT(result.status().error_message(), HasSubstr(catalogue_name));
   // Note: The C++ standard does not guarantee the next line.  If some toolchain
   // update fails it, one can delete it.
   EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));

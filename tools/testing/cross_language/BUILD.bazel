@@ -47,7 +47,9 @@ sh_test(
         "//tools/testing:aead_cli_java",
         "//tools/testing/cc:aead_cli_cc",
         "//tools/testing/go:aead_cli_go",
+        "//tools/testing/go:generate_envelope_keyset",
         "//tools/tinkey",
+        "//testdata:credentials",
     ],
 )
 

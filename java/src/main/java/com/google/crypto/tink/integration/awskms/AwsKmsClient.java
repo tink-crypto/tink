@@ -20,6 +20,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.PropertiesFileCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.google.auto.service.AutoService;
@@ -112,7 +113,12 @@ public final class AwsKmsClient implements KmsClient {
   public KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
       throws GeneralSecurityException {
     try {
-      this.client = AWSKMSClientBuilder.standard().withCredentials(provider).build();
+      String[] tokens = this.keyUri.split(":");
+      this.client =
+          AWSKMSClientBuilder.standard()
+              .withCredentials(provider)
+              .withRegion(Regions.fromName(tokens[4]))
+              .build();
       return this;
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("cannot load credentials from provider", e);
@@ -123,8 +129,8 @@ public final class AwsKmsClient implements KmsClient {
   public Aead getAead(String uri) throws GeneralSecurityException {
     if (this.keyUri != null && !this.keyUri.equals(uri)) {
       throw new GeneralSecurityException(
-          String.format("this client is bound to %s, cannot load keys bound to %s",
-              this.keyUri, uri));
+          String.format(
+              "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
     }
     return new AwsKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
   }

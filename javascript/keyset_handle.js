@@ -24,6 +24,7 @@ const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Util = goog.require('tink.Util');
@@ -95,10 +96,49 @@ class KeysetHandle {
    * @return {!Promise<!KeysetHandle>}
    */
   static async generateNew(keyTemplate) {
-    // TODO implement
-    throw new SecurityException(
-        'KeysetHandle -- generateNew: Not implemented yet.');
+    // TODO(thaidn): move this to a key manager.
+    const keyset = await KeysetHandle.generateNewKeyset_(keyTemplate);
+    return new KeysetHandle(keyset);
   }
+
+  /**
+   * Generates a new Keyset that contains a single new key generated
+   * according to keyTemplate.
+   *
+   * @param {!PbKeyTemplate} keyTemplate
+   * @private
+   * @return {!Promise<!PbKeyset>}
+   */
+  static async generateNewKeyset_(keyTemplate) {
+    const key = new PbKeyset.Key();
+    key.setStatus(PbKeyStatusType.ENABLED);
+    key.setOutputPrefixType(keyTemplate.getOutputPrefixType());
+    const keyId = KeysetHandle.generateNewKeyId_();
+    key.setKeyId(keyId);
+    const keyData = await Registry.newKeyData(keyTemplate);
+    key.setKeyData(keyData);
+    const keyset = new PbKeyset();
+    keyset.addKey(key);
+    keyset.setPrimaryKeyId(keyId);
+    return keyset;
+  }
+
+  /**
+   * Generates a new random key ID.
+   *
+   * @private
+   * @return {number} The key ID.
+   */
+  static generateNewKeyId_() {
+    const bytes = Random.randBytes(4);
+    let value = 0;
+    for (let i = 0; i < bytes.length; i++) {
+      value += (bytes[i] & 0xFF) << (i * 8);
+    }
+    // Make sure the key ID is a positive integer smaller than 2^32.
+    return Math.abs(value) % 2 ** 32;
+  };
+
 
   /**
    * Returns a primitive that uses key material from this keyset handle. If

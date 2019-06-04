@@ -104,6 +104,13 @@ public class TestUtil {
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
   public static final String SERVICE_ACCOUNT_FILE = "testdata/credential.json";
 
+  // This AWS KMS CryptoKey is restricted to Google use only and {@code AWS_CREDS}.
+  public static final String AWS_CRYPTO_URI = "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f";
+
+  // This is a credential for the AWS service account with granted access to
+  // {@code AWS_CRYPTO_URI}.
+  public static final String AWS_CREDS = "testdata/credentials_aws.cred";
+
   /** A dummy Aead-implementation that just throws exception. */
   public static class DummyAead implements Aead {
     public DummyAead() {}

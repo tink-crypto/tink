@@ -18,7 +18,7 @@
 package awskms
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"strings"
 
@@ -50,11 +50,17 @@ func NewAWSAEAD(keyURI string, kms *kms.KMS) *AWSAEAD {
 
 // Encrypt AEAD encrypts the plaintext data and uses addtionaldata from authentication.
 func (a *AWSAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
-	ad := base64.StdEncoding.EncodeToString(additionalData)
+	ad := hex.EncodeToString(additionalData)
 	req := &kms.EncryptInput{
 		KeyId:             aws.String(a.keyURI),
 		Plaintext:         plaintext,
 		EncryptionContext: map[string]*string{"additionalData": &ad},
+	}
+	if ad == "" {
+		req = &kms.EncryptInput{
+			KeyId:     aws.String(a.keyURI),
+			Plaintext: plaintext,
+		}
 	}
 	resp, err := a.kms.Encrypt(req)
 	if err != nil {
@@ -66,10 +72,15 @@ func (a *AWSAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 
 // Decrypt AEAD decrypts the data and verified the additional data.
 func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
-	ad := base64.StdEncoding.EncodeToString(additionalData)
+	ad := hex.EncodeToString(additionalData)
 	req := &kms.DecryptInput{
 		CiphertextBlob:    ciphertext,
 		EncryptionContext: map[string]*string{"additionalData": &ad},
+	}
+	if ad == "" {
+		req = &kms.DecryptInput{
+			CiphertextBlob: ciphertext,
+		}
 	}
 	resp, err := a.kms.Decrypt(req)
 	if strings.Compare(*resp.KeyId, a.keyURI) != 0 {
