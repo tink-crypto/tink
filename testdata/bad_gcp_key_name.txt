@@ -1,0 +1,2 @@
+projects/non-existing-project/locations/global/keyRings/some-key-ring/cryptoKeys/aead-key
+

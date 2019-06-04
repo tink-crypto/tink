@@ -277,10 +277,11 @@ currently available or planned (the latter are listed in brackets).
 
 | Primitive          | Implementations                               |
 | ------------------ | --------------------------------------------- |
-| AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX                |
+| AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305 |
 | Deterministic AEAD | AES-SIV                                       |
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING                        |
 | MAC                | HMAC-SHA2                                     |
-| Digital Signatures | ECDSA over NIST curves, (Ed25519)             |
+| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                      |
 
 The user obtains a primitive by calling the function `getPrimitive<>` of the

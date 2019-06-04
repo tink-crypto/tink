@@ -80,6 +80,25 @@ HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256() {
   return *key_template;
 }
 
+// static
+const KeyTemplate&
+HybridKeyTemplates::EciesP256CompressedHkdfHmacSha256Aes128Gcm() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::NIST_P256, HashType::SHA256, EcPointFormat::COMPRESSED,
+      AeadKeyTemplates::Aes128Gcm(),
+      /* hkdf_salt= */ "");
+  return *key_template;
+}
+
+// static
+const KeyTemplate&
+HybridKeyTemplates::EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::NIST_P256, HashType::SHA256, EcPointFormat::COMPRESSED,
+      AeadKeyTemplates::Aes128CtrHmacSha256(),
+      /* hkdf_salt= */ "");
+  return *key_template;
+}
 
 }  // namespace tink
 }  // namespace crypto

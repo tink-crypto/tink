@@ -1,4 +1,5 @@
 # Tink
+
 *A multi-language, cross-platform library that provides cryptographic APIs that are secure, easy to use correctly, and hard(er) to misuse.*
 
 **`Ubuntu`**                                                                                   | **`macOS`**
@@ -6,11 +7,12 @@
 [![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png)](#) | [![Kokoro macOS](https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png)](#)
 
 ## Index
+
 1. [Introduction](#introduction)
-2. [Getting Started](#getting-started)
-3. [Current Status](#current-status)
-4. [Learn More](#learn-more)
-5. [Contact and Mailing List](#contact-and-mailing-list)
+2. [Getting started](#getting-started)
+3. [Current status](#current-status)
+4. [Learn more](#learn-more)
+5. [Contact and mailing list](#contact-and-mailing-list)
 6. [Maintainers](#maintainers)
 
 ## Introduction
@@ -34,7 +36,6 @@ To get a quick overview of Tink design please take a look at
 [slides](docs/Tink-a_cryptographic_library--RealWorldCrypto2019.pdf) from [a
 talk about Tink](https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665) presented
 at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
-
 
 ## Getting started
 
@@ -93,7 +94,7 @@ AEAD primitive in Java:
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
 ```
 
-## Current Status
+## Current status
 
 *   [Java and Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md) and
     [Obj-C](docs/OBJC-HOWTO.md) are field tested and ready for production. The
@@ -103,11 +104,12 @@ AEAD primitive in Java:
 
 *   Tink for Go and JavaScript are in active development.
 
-## Learn More
+## Learn more
 
 *   [Java HOW-TO](docs/JAVA-HOWTO.md)
 *   [C++ HOW-TO](docs/CPP-HOWTO.md)
 *   [Obj-C HOW-TO](docs/OBJC-HOWTO.md)
+*   [Go HOW-TO](docs/GOLANG-HOWTO.md)
 *   [Security and Usability Design Goals](docs/SECURITY-USABILITY.md)
 *   [Supported Crypto Primitives](docs/PRIMITIVES.md)
 *   [Key Management](docs/KEY-MANAGEMENT.md)
@@ -126,6 +128,7 @@ ported it to their favorite languages! Below you can find notable ports.
 maintain them and have no plan to support them in the foreseeable future.
 
 *   [C# (with JNI)](https://github.com/google-pay/tink-jni-examples)
+*   [Clojure](https://github.com/perkss/tinklj)
 
 ## Contact and mailing list
 

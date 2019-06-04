@@ -111,7 +111,8 @@ public class DeterministicAeadWrapperTest {
         TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy, tink));
 
     DeterministicAead daead =
-        new DeterministicAeadWrapper().wrap(Registry.getPrimitives(keysetHandle));
+        new DeterministicAeadWrapper()
+            .wrap(Registry.getPrimitives(keysetHandle, DeterministicAead.class));
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
@@ -124,7 +125,8 @@ public class DeterministicAeadWrapperTest {
     KeysetHandle keysetHandle2 =
         TestUtil.createKeysetHandle(TestUtil.createKeyset(raw, legacy, tink));
     DeterministicAead daead2 =
-        new DeterministicAeadWrapper().wrap(Registry.getPrimitives(keysetHandle2));
+        new DeterministicAeadWrapper()
+            .wrap(Registry.getPrimitives(keysetHandle2, DeterministicAead.class));
     ciphertext = daead2.encryptDeterministically(plaintext, associatedData);
     assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
 
@@ -136,7 +138,9 @@ public class DeterministicAeadWrapperTest {
             KeyStatusType.ENABLED,
             OutputPrefixType.TINK);
     keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(random));
-    daead2 = new DeterministicAeadWrapper().wrap(Registry.getPrimitives(keysetHandle2));
+    daead2 =
+        new DeterministicAeadWrapper()
+            .wrap(Registry.getPrimitives(keysetHandle2, DeterministicAead.class));
     ciphertext = daead2.encryptDeterministically(plaintext, associatedData);
     try {
       daead.decryptDeterministically(ciphertext, associatedData);
@@ -170,7 +174,8 @@ public class DeterministicAeadWrapperTest {
         TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy));
 
     DeterministicAead daead =
-        new DeterministicAeadWrapper().wrap(Registry.getPrimitives(keysetHandle));
+        new DeterministicAeadWrapper()
+            .wrap(Registry.getPrimitives(keysetHandle, DeterministicAead.class));
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
@@ -193,7 +198,8 @@ public class DeterministicAeadWrapperTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(primary));
 
     DeterministicAead daead =
-        new DeterministicAeadWrapper().wrap(Registry.getPrimitives(keysetHandle));
+        new DeterministicAeadWrapper()
+            .wrap(Registry.getPrimitives(keysetHandle, DeterministicAead.class));
     byte[] plaintext = Random.randBytes(1);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);

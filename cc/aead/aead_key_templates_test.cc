@@ -20,10 +20,12 @@
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/aead/aes_gcm_siv_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
+#include "proto/aes_gcm_siv.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
@@ -31,6 +33,7 @@
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::AesGcmKeyFormat;
+using google::crypto::tink::AesGcmSivKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
@@ -126,6 +129,52 @@ TEST(AeadKeyTemplatesTest, testAesGcmKeyTemplates) {
 
     // Check that the template works with the key manager.
     AesGcmKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result =
+        key_manager.get_key_factory().NewKey(key_template.value());
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+  }
+}
+
+TEST(AeadKeyTemplatesTest, testAesGcmSivKeyTemplates) {
+  std::string type_url = "type.googleapis.com/google.crypto.tink.AesGcmSivKey";
+
+  {  // Test Aes128GcmSiv().
+    // Check that returned template is correct.
+    const KeyTemplate& key_template = AeadKeyTemplates::Aes128GcmSiv();
+    EXPECT_EQ(type_url, key_template.type_url());
+    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+    AesGcmSivKeyFormat key_format;
+    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+    EXPECT_EQ(16, key_format.key_size());
+
+    // Check that reference to the same object is returned.
+    const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes128GcmSiv();
+    EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    AesGcmSivKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result =
+        key_manager.get_key_factory().NewKey(key_template.value());
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+  }
+
+  {  // Test Aes256GcmSiv().
+    // Check that returned template is correct.
+    const KeyTemplate& key_template = AeadKeyTemplates::Aes256GcmSiv();
+    EXPECT_EQ(type_url, key_template.type_url());
+    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+    AesGcmSivKeyFormat key_format;
+    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+    EXPECT_EQ(32, key_format.key_size());
+
+    // Check that reference to the same object is returned.
+    const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes256GcmSiv();
+    EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    AesGcmSivKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
     auto new_key_result =
         key_manager.get_key_factory().NewKey(key_template.value());

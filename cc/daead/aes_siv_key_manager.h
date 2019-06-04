@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_AEAD_AES_SIV_KEY_MANAGER_H_
-#define TINK_AEAD_AES_SIV_KEY_MANAGER_H_
+#ifndef TINK_DAEAD_AES_SIV_KEY_MANAGER_H_
+#define TINK_DAEAD_AES_SIV_KEY_MANAGER_H_
 
 #include <algorithm>
 #include <vector>
@@ -69,4 +69,4 @@ class AesSivKeyManager
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_AEAD_AES_SIV_KEY_MANAGER_H_
+#endif  // TINK_DAEAD_AES_SIV_KEY_MANAGER_H_

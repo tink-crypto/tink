@@ -17,30 +17,26 @@
 #include <vector>
 
 #include "absl/strings/ascii.h"
-#include "absl/strings/str_split.h"
 #include "aws/core/Aws.h"
-#include "aws/core/auth/AWSCredentialsProvider.h"
-#include "aws/core/client/ClientConfiguration.h"
 #include "aws/core/utils/crypto/Factories.h"
 #include "aws/core/utils/memory/AWSMemory.h"
 #include "aws/kms/KMSClient.h"
 #include "tink/aead.h"
 #include "tink/integration/awskms/aws_crypto.h"
 #include "tink/integration/awskms/aws_kms_aead.h"
+#include "tink/integration/awskms/aws_kms_client.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tools/testing/cc/cli_util.h"
 
 using crypto::tink::Aead;
 using crypto::tink::integration::awskms::AwsKmsAead;
-using crypto::tink::integration::awskms::AwsSha256Factory;
-using crypto::tink::integration::awskms::AwsSha256HmacFactory;
-using crypto::tink::integration::awskms::kAwsCryptoAllocationTag;
+using crypto::tink::integration::awskms::AwsKmsClient;
 
 // A command-line utility for testing AwsKmsAead.
 // It requires 6 arguments:
 //   key-arn-file:  Amazon Resource Name of AWS KMS key for encryption
-//   access-key-csv-file: credentials file containing AWS access key
+//   credentials-file: credentials file containing AWS access key
 //   operation: the actual AEAD-operation, i.e. "encrypt" or "decrypt"
 //   input-file:  name of the file with input (plaintext for encryption, or
 //                or ciphertext for decryption)
@@ -49,12 +45,12 @@ using crypto::tink::integration::awskms::kAwsCryptoAllocationTag;
 int main(int argc, char** argv) {
   if (argc != 7) {
     std::clog << "Usage: " << argv[0]
-              << " key-arn-file access-key-csv-file"
+              << " key-arn-file credentials-file"
               << " operation input-file associated-data output-file\n";
     exit(1);
   }
   std::string key_arn_filename(argv[1]);
-  std::string access_key_filename(argv[2]);
+  std::string credentials_filename(argv[2]);
   std::string operation(argv[3]);
   std::string input_filename(argv[4]);
   std::string associated_data(argv[5]);
@@ -65,53 +61,29 @@ int main(int argc, char** argv) {
     exit(1);
   }
   std::clog << "Using key_arn from file " << key_arn_filename
-            << " and AWS access key from file " << access_key_filename
+            << " and AWS credentials from file " << credentials_filename
             << " to AEAD-" << operation
             << " file "<< input_filename
             << " with associated data '" << associated_data << "'.\n"
             << "The resulting output will be written to file "
             << output_filename << std::endl;
 
-  // Init AWS API.
-  Aws::SDKOptions options;
-  options.cryptoOptions.sha256Factory_create_fn = []() {
-      return Aws::MakeShared<AwsSha256Factory>(kAwsCryptoAllocationTag);
-  };
-  options.cryptoOptions.sha256HMACFactory_create_fn = []() {
-      return Aws::MakeShared<AwsSha256HmacFactory>(kAwsCryptoAllocationTag);
-  };
-  Aws::InitAPI(options);
-
-  // Prepare AWS credentials and params.
-  // access-key-cvs-file contains two lines, where  the first line
-  // describes the actual comma-separated values present in the second line.
-  std::vector<std::string> access_key =
-      absl::StrSplit(CliUtil::Read(access_key_filename), '\n');
-  std::vector<std::string> access_key_values =
-      absl::StrSplit(access_key[1], ',');
-  std::string access_key_id = access_key_values[0];
-  absl::StripAsciiWhitespace(&access_key_id);
-  std::string secret_access_key = access_key_values[1];
-  absl::StripAsciiWhitespace(&secret_access_key);
-  Aws::Auth::AWSCredentials credentials(access_key_id.c_str(),
-                                        secret_access_key.c_str());
   std::string key_arn = CliUtil::Read(key_arn_filename);
   absl::StripAsciiWhitespace(&key_arn);
+  std::clog << "Will use key ARN " << key_arn << std::endl;
 
-  std::clog << "Will use key ARN " << key_arn << std::endl
-            << "with access key ID [" << access_key_id << "]" << std::endl;
-
-  // Create AWS KMSClient.
-  Aws::Client::ClientConfiguration configuration;
-  configuration.region = "us-east-1";
-  configuration.scheme = Aws::Http::Scheme::HTTPS;
-  configuration.connectTimeoutMs = 30000;
-  configuration.requestTimeoutMs = 60000;
-  auto aws_client = Aws::MakeShared<Aws::KMS::KMSClient>(
-      kAwsCryptoAllocationTag, credentials, configuration);
+  // Create AwsKmsClient.
+  auto client_result = AwsKmsClient::New("", credentials_filename);
+  if (!client_result.ok()) {
+    std::clog << "Aead creation failed: "
+              << client_result.status().error_message()
+              << "\n";
+    exit(1);
+  }
+  auto client = std::move(client_result.ValueOrDie());
 
   // Create Aead-primitive.
-  auto aead_result = AwsKmsAead::New(key_arn, aws_client);
+  auto aead_result = client->GetAead("aws-kms://" + key_arn);
   if (!aead_result.ok()) {
     std::clog << "Aead creation failed: "
               << aead_result.status().error_message()

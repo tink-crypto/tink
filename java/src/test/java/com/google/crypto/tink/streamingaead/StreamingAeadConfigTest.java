@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -57,7 +58,7 @@ public class StreamingAeadConfigTest {
     }
     String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
     try {
-      Registry.getKeyManager(typeUrl);
+      Registry.getUntypedKeyManager(typeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
@@ -70,7 +71,7 @@ public class StreamingAeadConfigTest {
     Registry.getCatalogue("TinkStreamingAead");
 
     // After registration the key manager should be present.
-    Registry.getKeyManager(typeUrl);
+    Registry.getKeyManager(typeUrl, StreamingAead.class);
 
     // Running init() manually again should succeed.
     StreamingAeadConfig.register();

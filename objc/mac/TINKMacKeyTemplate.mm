@@ -40,6 +40,14 @@
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
           &crypto::tink::MacKeyTemplates::HmacSha256());
       break;
+    case TINKHmacSha512HalfSizeTag:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::MacKeyTemplates::HmacSha512HalfSizeTag());
+      break;
+    case TINKHmacSha512:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::MacKeyTemplates::HmacSha512());
+      break;
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(

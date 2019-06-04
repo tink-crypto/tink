@@ -67,4 +67,4 @@ class EciesAeadHkdfPrivateKeyManager
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_HYBRID_ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_H_
+#endif  // TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_

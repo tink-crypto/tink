@@ -11,6 +11,7 @@ tink_cc_library(
     tink::daead::deterministic_aead_config
     tink::hybrid::hybrid_config
     tink::signature::signature_config
+    tink::streamingaead::streaming_aead_config
     tink::util::status
     tink::proto::config_cc_proto
 )
@@ -30,5 +31,6 @@ tink_cc_test(
     tink::core::hybrid_encrypt
     tink::core::mac
     tink::core::registry
+    tink::core::streaming_aead
     tink::util::status
 )

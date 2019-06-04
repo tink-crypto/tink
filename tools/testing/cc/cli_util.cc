@@ -28,7 +28,9 @@
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
 #include "tink/config.h"
+#include "tink/input_stream.h"
 #include "tink/keyset_handle.h"
+#include "tink/output_stream.h"
 #include "tink/config/tink_config.h"
 #include "tink/util/status.h"
 
@@ -36,12 +38,51 @@ using crypto::tink::BinaryKeysetReader;
 using crypto::tink::BinaryKeysetWriter;
 using crypto::tink::CleartextKeysetHandle;
 using crypto::tink::Config;
+using crypto::tink::InputStream;
 using crypto::tink::JsonKeysetReader;
 using crypto::tink::JsonKeysetWriter;
 using crypto::tink::KeysetHandle;
 using crypto::tink::KeysetReader;
 using crypto::tink::KeysetWriter;
+using crypto::tink::OutputStream;
 using crypto::tink::TinkConfig;
+
+namespace {
+
+// Writes 'contents' of the specified 'size' to 'output_stream'.
+// In case of errors writes a log message and aborts.
+void WriteToStream(OutputStream* output_stream,
+                   const void* contents,
+                   int size) {
+  if (output_stream == nullptr) {
+      std::clog << "'output_stream' must be non-null" << std::endl;
+      exit(1);
+  }
+  void* buffer;
+  int pos = 0;
+  int remaining = size;
+  int available_space;
+  int available_bytes;
+  while (remaining > 0) {
+    auto next_result = output_stream->Next(&buffer);
+    if (!next_result.ok()) {
+      std::clog << "Error writing to a stream: "
+                << next_result.status() << std::endl;
+      exit(1);
+    }
+    available_space = next_result.ValueOrDie();
+    available_bytes = std::min(available_space, remaining);
+    memcpy(buffer, reinterpret_cast<const char*>(contents) + pos,
+           available_bytes);
+    remaining -= available_bytes;
+    pos += available_bytes;
+  }
+  if (available_space > available_bytes) {
+    output_stream->BackUp(available_space - available_bytes);
+  }
+}
+
+}  // namespace
 
 // static
 std::unique_ptr<KeysetReader> CliUtil::GetBinaryKeysetReader(
@@ -154,4 +195,37 @@ void CliUtil::Write(const std::string& output,
   }
   output_stream << output;
   output_stream.close();
+}
+
+// static
+void CliUtil::CopyStream(InputStream* input_stream,
+                          OutputStream* output_stream) {
+  if (input_stream == nullptr || output_stream == nullptr) {
+      std::clog << "'input_stream' and 'output_stream' must be non-null"
+                << std::endl;
+      exit(1);
+  }
+  const void* in_buffer;
+  while (true) {
+    auto next_result = input_stream->Next(&in_buffer);
+    if (next_result.status().error_code() ==
+        crypto::tink::util::error::OUT_OF_RANGE) {
+      // End of stream.
+      auto status = output_stream->Close();
+      if (!status.ok()) {
+        std::clog << "Error closing the output stream: " << status << std::endl;
+        exit(1);
+      }
+      return;
+    }
+    if (!next_result.ok()) {
+      std::clog << "Error reading from a stream: "
+                << next_result.status() << std::endl;
+      exit(1);
+    }
+    auto read_bytes = next_result.ValueOrDie();
+    if (read_bytes > 0) {
+      WriteToStream(output_stream, in_buffer, read_bytes);
+    }
+  }
 }

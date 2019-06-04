@@ -111,9 +111,11 @@ public class HybridEncryptWrapperTest {
     KeysetHandle keysetHandlePriv =
         TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryPriv, rawPriv));
     HybridEncrypt hybridEncrypt =
-        new HybridEncryptWrapper().wrap(Registry.getPrimitives(keysetHandlePub));
+        new HybridEncryptWrapper()
+            .wrap(Registry.getPrimitives(keysetHandlePub, HybridEncrypt.class));
     HybridDecrypt hybridDecrypt =
-        new HybridDecryptWrapper().wrap(Registry.getPrimitives(keysetHandlePriv));
+        new HybridDecryptWrapper()
+            .wrap(Registry.getPrimitives(keysetHandlePriv, HybridDecrypt.class));
     byte[] plaintext = Random.randBytes(20);
     byte[] contextInfo = Random.randBytes(20);
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);

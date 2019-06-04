@@ -193,11 +193,40 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyCreation) {
     CheckNewKey(*ecies_key, key_format);
   }
 
+  {  // Via NewKey(format_proto).
+    EciesAeadHkdfKeyFormat key_format;
+    ASSERT_TRUE(key_format.ParseFromString(
+        HybridKeyTemplates::EciesP256CompressedHkdfHmacSha256Aes128Gcm()
+            .value()));
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    ASSERT_EQ(ecies_private_key_type, key_type_prefix + key->GetTypeName());
+    std::unique_ptr<EciesAeadHkdfPrivateKey> ecies_key(
+        reinterpret_cast<EciesAeadHkdfPrivateKey*>(key.release()));
+    CheckNewKey(*ecies_key, key_format);
+  }
+
   { // Via NewKey(serialized_format_proto).
     EciesAeadHkdfKeyFormat key_format;
     ASSERT_TRUE(key_format.ParseFromString(
         HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256()
         .value()));
+    auto result = key_factory.NewKey(key_format.SerializeAsString());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    ASSERT_EQ(ecies_private_key_type, key_type_prefix + key->GetTypeName());
+    std::unique_ptr<EciesAeadHkdfPrivateKey> ecies_key(
+        reinterpret_cast<EciesAeadHkdfPrivateKey*>(key.release()));
+    CheckNewKey(*ecies_key, key_format);
+  }
+
+  {  // Via NewKey(serialized_format_proto).
+    EciesAeadHkdfKeyFormat key_format;
+    ASSERT_TRUE(key_format.ParseFromString(
+        HybridKeyTemplates::
+            EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256()
+                .value()));
     auto result = key_factory.NewKey(key_format.SerializeAsString());
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());

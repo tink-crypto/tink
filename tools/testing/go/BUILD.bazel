@@ -13,6 +13,9 @@ go_binary(
         "//go/aead:go_default_library",
         "//go/keyset:go_default_library",
         "//go/testkeyset:go_default_library",
+        "//go/core/registry:go_default_library",
+        "//go/integration/awskms:go_default_library",
+        "//go/integration/gcpkms:go_default_library",
     ],
 )
 
@@ -85,5 +88,24 @@ go_binary(
         "//go/daead:go_default_library",
         "//go/keyset:go_default_library",
         "//go/testkeyset:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "generate_envelope_keyset",
+    testonly = 1,  # keep
+    srcs = ["generate_envelope_keyset.go"],
+    out = "generate_envelope_keyset",
+    data = [
+        "//testdata:credentials",
+    ],
+    deps = [
+         "//go/aead:go_default_library",
+         "//go/core/registry:go_default_library",
+         "//go/insecurecleartextkeyset:go_default_library",
+         "//go/integration/awskms:go_default_library",
+         "//go/integration/gcpkms:go_default_library",
+         "//go/keyset:go_default_library",
+         "//proto:tink_go_proto",
     ],
 )

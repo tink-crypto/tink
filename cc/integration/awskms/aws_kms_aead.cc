@@ -67,7 +67,7 @@ AwsKmsAead::AwsKmsAead(absl::string_view key_arn,
 }
 
 // static
-StatusOr<std::unique_ptr<AwsKmsAead>>
+StatusOr<std::unique_ptr<Aead>>
 AwsKmsAead::New(absl::string_view key_arn,
                 std::shared_ptr<Aws::KMS::KMSClient> aws_client) {
   if (key_arn.empty()) {
@@ -78,9 +78,8 @@ AwsKmsAead::New(absl::string_view key_arn,
     return Status(util::error::INVALID_ARGUMENT,
                   "AWS KMS client cannot be null.");
   }
-  std::unique_ptr<AwsKmsAead> kms_aead(
-      new AwsKmsAead(key_arn, std::move(aws_client)));
-  return std::move(kms_aead);
+  std::unique_ptr<Aead> aead(new AwsKmsAead(key_arn, aws_client));
+  return std::move(aead);
 }
 
 StatusOr<std::string> AwsKmsAead::Encrypt(

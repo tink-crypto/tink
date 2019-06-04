@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_AEAD_AEAD_SET_WRAPPER_H_
-#define TINK_AEAD_AEAD_SET_WRAPPER_H_
+#ifndef TINK_AEAD_AEAD_WRAPPER_H_
+#define TINK_AEAD_AEAD_WRAPPER_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
@@ -43,4 +43,4 @@ class AeadWrapper : public PrimitiveWrapper<Aead> {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_AEAD_AEAD_SET_WRAPPER_H_
+#endif  // TINK_AEAD_AEAD_WRAPPER_H_

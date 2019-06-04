@@ -117,6 +117,7 @@ tink_cc_library(
     test_util.cc
     test_util.h
   DEPS
+    tink::util::constants
     tink::util::enums
     tink::util::protobuf_helper
     tink::util::status
@@ -128,6 +129,7 @@ tink_cc_library(
     tink::core::hybrid_encrypt
     tink::core::input_stream
     tink::core::keyset_handle
+    tink::core::kms_client
     tink::core::mac
     tink::core::output_stream
     tink::core::public_key_sign
@@ -238,4 +240,17 @@ tink_cc_test(
     tink::subtle::random
     absl::memory
     absl::strings
+)
+
+tink_cc_test(
+  NAME test_util_test
+  SRCS
+    test_util_test.cc
+  DEPS
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
+    tink::util::test_util
+    tink::subtle::random
+    absl::strings
+    gmock
 )

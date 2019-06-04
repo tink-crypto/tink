@@ -24,17 +24,15 @@ namespace crypto {
 namespace tink {
 namespace {
 
-using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::HashType;
+using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 
-KeyTemplate* NewHmacKeyTemplate(int key_size_in_bytes,
-                                int tag_size_in_bytes,
+KeyTemplate* NewHmacKeyTemplate(int key_size_in_bytes, int tag_size_in_bytes,
                                 HashType hash_type) {
   KeyTemplate* key_template = new KeyTemplate;
-  key_template->set_type_url(
-      "type.googleapis.com/google.crypto.tink.HmacKey");
+  key_template->set_type_url("type.googleapis.com/google.crypto.tink.HmacKey");
   key_template->set_output_prefix_type(OutputPrefixType::TINK);
   HmacKeyFormat key_format;
   key_format.set_key_size(key_size_in_bytes);
@@ -44,15 +42,13 @@ KeyTemplate* NewHmacKeyTemplate(int key_size_in_bytes,
   return key_template;
 }
 
-
 }  // anonymous namespace
 
 // static
 const KeyTemplate& MacKeyTemplates::HmacSha256HalfSizeTag() {
   static const KeyTemplate* key_template =
       NewHmacKeyTemplate(/* key_size_in_bytes= */ 32,
-                         /* tag_size_in_bytes= */ 16,
-                         HashType::SHA256);
+                         /* tag_size_in_bytes= */ 16, HashType::SHA256);
   return *key_template;
 }
 
@@ -60,8 +56,23 @@ const KeyTemplate& MacKeyTemplates::HmacSha256HalfSizeTag() {
 const KeyTemplate& MacKeyTemplates::HmacSha256() {
   static const KeyTemplate* key_template =
       NewHmacKeyTemplate(/* key_size_in_bytes= */ 32,
-                         /* tag_size_in_bytes= */ 32,
-                         HashType::SHA256);
+                         /* tag_size_in_bytes= */ 32, HashType::SHA256);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& MacKeyTemplates::HmacSha512HalfSizeTag() {
+  static const KeyTemplate* key_template =
+      NewHmacKeyTemplate(/* key_size_in_bytes= */ 64,
+                         /* tag_size_in_bytes= */ 32, HashType::SHA512);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& MacKeyTemplates::HmacSha512() {
+  static const KeyTemplate* key_template =
+      NewHmacKeyTemplate(/* key_size_in_bytes= */ 64,
+                         /* tag_size_in_bytes= */ 64, HashType::SHA512);
   return *key_template;
 }
 

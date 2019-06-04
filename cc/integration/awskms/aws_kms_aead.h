@@ -32,7 +32,7 @@ class AwsKmsAead : public Aead {
  public:
   // Creates a new AwsKmsAead that is bound to the key specified in 'key_arn',
   // and that uses the given client when communicating with the KMS.
-  static crypto::tink::util::StatusOr<std::unique_ptr<AwsKmsAead>>
+  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
   New(absl::string_view key_arn,
       std::shared_ptr<Aws::KMS::KMSClient> aws_client);
 

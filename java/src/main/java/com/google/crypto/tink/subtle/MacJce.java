@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Mac;
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -26,13 +27,17 @@ import java.security.NoSuchAlgorithmException;
  *
  * @since 1.0.0
  */
+@Immutable
 public final class MacJce implements Mac {
   static final int MIN_TAG_SIZE_IN_BYTES = 10;
   static final int MIN_KEY_SIZE_IN_BYTES = 16;
 
-  private javax.crypto.Mac mac;
+  @SuppressWarnings("Immutable")  // We do not mutate the underlying mac.
+  private final javax.crypto.Mac mac;
+
   private final int digestSize;
   private final String algorithm;
+  @SuppressWarnings("Immutable")  // We do not mutate the key.
   private final java.security.Key key;
 
   public MacJce(String algorithm, java.security.Key key, int digestSize)

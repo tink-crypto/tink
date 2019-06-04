@@ -45,17 +45,10 @@ func TestHybridFactoryTest(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sPrimaryPub, err := proto.Marshal(primaryPrivProto.PublicKey)
-	if err != nil {
-		t.Error(err)
-	}
 
 	primaryPrivKey := testutil.NewKey(
 		testutil.NewKeyData(eciesAEADHKDFPrivateKeyTypeURL, sPrimaryPriv, tinkpb.KeyData_ASYMMETRIC_PRIVATE),
 		tinkpb.KeyStatusType_ENABLED, 8, tinkpb.OutputPrefixType_RAW)
-	primaryPubKey := testutil.NewKey(
-		testutil.NewKeyData(eciesAEADHKDFPublicKeyTypeURL, sPrimaryPub, tinkpb.KeyData_ASYMMETRIC_PUBLIC),
-		tinkpb.KeyStatusType_ENABLED, 42, tinkpb.OutputPrefixType_RAW)
 
 	rawPrivProto, err := testutil.GenerateECIESAEADHKDFPrivateKey(c, ht, rawPtFmt, rawDek, rawSalt)
 	if err != nil {
@@ -65,23 +58,9 @@ func TestHybridFactoryTest(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sRawPub, err := proto.Marshal(rawPrivProto.PublicKey)
-	if err != nil {
-		t.Error(err)
-	}
 	rawPrivKey := testutil.NewKey(
 		testutil.NewKeyData(eciesAEADHKDFPrivateKeyTypeURL, sRawPriv, tinkpb.KeyData_ASYMMETRIC_PRIVATE),
 		tinkpb.KeyStatusType_ENABLED, 11, tinkpb.OutputPrefixType_RAW)
-	rawPubKey := testutil.NewKey(
-		testutil.NewKeyData(eciesAEADHKDFPublicKeyTypeURL, sRawPub, tinkpb.KeyData_ASYMMETRIC_PUBLIC),
-		tinkpb.KeyStatusType_ENABLED, 43, tinkpb.OutputPrefixType_RAW)
-
-	pubKeys := []*tinkpb.Keyset_Key{primaryPubKey, rawPubKey}
-	pubKeyset := testutil.NewKeyset(pubKeys[0].KeyId, pubKeys)
-	khPub, err := testkeyset.NewHandle(pubKeyset)
-	if err != nil {
-		t.Error(err)
-	}
 
 	privKeys := []*tinkpb.Keyset_Key{primaryPrivKey, rawPrivKey}
 	privKeyset := testutil.NewKeyset(privKeys[0].KeyId, privKeys)
@@ -89,6 +68,12 @@ func TestHybridFactoryTest(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	khPub, err := khPriv.Public()
+	if err != nil {
+		t.Error(err)
+	}
+
 	e, err := NewHybridEncrypt(khPub)
 	if err != nil {
 		t.Error(err)

@@ -1,0 +1,76 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])  # Apache 2.0
+
+load("@build_stack_rules_proto//cpp:cpp_grpc_library.bzl", "cpp_grpc_library")
+
+cpp_grpc_library(
+    name = "gcp_kms_service_proto",
+    deps = [
+        "@googleapis//google/cloud/kms/v1:kms_proto",
+    ],
+)
+
+cc_library(
+    name = "gcp_kms_aead",
+    srcs = ["gcp_kms_aead.cc"],
+    hdrs = ["gcp_kms_aead.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":gcp_kms_service_proto",
+        "//cc:aead",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_github_grpc_grpc//:grpc++",
+    ],
+)
+
+cc_library(
+    name = "gcp_kms_client",
+    srcs = ["gcp_kms_client.cc"],
+    hdrs = ["gcp_kms_client.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":gcp_kms_aead",
+        "//cc:kms_client",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+# tests
+
+# TODO(b/119547792): Temporarily disabling until reliability concerns are addressed.
+#cc_test(
+#    name = "gcp_kms_aead_test",
+#    size = "medium",
+#    srcs = ["gcp_kms_aead_test.cc"],
+#    deps = [
+#        ":gcp_kms_aead",
+#        "//cc/util:errors",
+#        "//cc/util:status",
+#        "//cc/util:statusor",
+#        "@com_google_googletest//:gtest_main",
+#    ],
+#)
+#
+#cc_test(
+#    name = "gcp_kms_client_test",
+#    size = "medium",
+#    srcs = ["gcp_kms_client_test.cc"],
+#    data = ["//testdata:credentials"],
+#    deps = [
+#        ":gcp_kms_client",
+#        "//cc/util:errors",
+#        "//cc/util:status",
+#        "//cc/util:statusor",
+#        "@com_google_googletest//:gtest_main",
+#    ],
+#)

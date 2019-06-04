@@ -16,6 +16,7 @@ goog.module('tink.KeysetHandleTest');
 goog.setTestOnly('tink.KeysetHandleTest');
 
 const Aead = goog.require('tink.Aead');
+const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
 const Bytes = goog.require('tink.subtle.Bytes');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
@@ -32,16 +33,23 @@ const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixTy
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 const {createKeyset} = goog.require('tink.testUtils');
 
 testSuite({
   setUp() {
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+
     HybridConfig.register();
   },
 
   async tearDown() {
     await Registry.reset();
+
+    // Reset the promise timeout to default value.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
   },
 
   /////////////////////////////////////////////////////////////////////////////
@@ -105,15 +113,23 @@ testSuite({
   /////////////////////////////////////////////////////////////////////////////
   // tests for generateNew method
   async testGenerateNew() {
-    try {
-      await KeysetHandle.generateNew(null);
-    } catch (e) {
-      assertEquals(
-          'CustomError: KeysetHandle -- generateNew: Not implemented yet.',
-          e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
+    const keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
+    const keysetHandle = await KeysetHandle.generateNew(keyTemplate);
+    const keyset = keysetHandle.getKeyset();
+    assertEquals(keyset.getKeyList().length, 1);
+
+    const key = keyset.getKeyList()[0];
+    assertEquals(key.getKeyId(), keyset.getPrimaryKeyId());
+    assertEquals(key.getOutputPrefixType(), keyTemplate.getOutputPrefixType());
+    assertEquals(key.getStatus(), PbKeyStatusType.ENABLED);
+
+    const keyData = key.getKeyData();
+    assertEquals(keyData.getTypeUrl(), keyTemplate.getTypeUrl());
+
+    const aead = await keysetHandle.getPrimitive(Aead);
+    const plaintext = Random.randBytes(20);
+    const ciphertext = await aead.encrypt(plaintext);
+    assertObjectEquals(plaintext, await aead.decrypt(ciphertext));
   },
 
   /////////////////////////////////////////////////////////////////////////////

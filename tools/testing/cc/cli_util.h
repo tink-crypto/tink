@@ -20,7 +20,9 @@
 #include <iostream>
 #include <fstream>
 
+#include "tink/input_stream.h"
 #include "tink/keyset_handle.h"
+#include "tink/output_stream.h"
 
 // Helper function for CLI applications.
 class CliUtil {
@@ -61,6 +63,13 @@ class CliUtil {
   // Writes the given 'output' to the specified file.
   // In case of errors writes a log message and aborts.
   static void Write(const std::string& output, const std::string& filename);
+
+  // Reads all bytes from the specified 'input_stream', and writes them
+  // into 'output_stream', where both 'input_stream' and 'output_stream'
+  // must be non-null.  Afte writing all the bytes, closes 'output_stream'.
+  // In case of errors writes a log message and aborts.
+  static void CopyStream(crypto::tink::InputStream* input_stream,
+                         crypto::tink::OutputStream* output_stream);
 };
 
 #endif  // TOOLS_TESTING_CC_CLI_UTIL_H_

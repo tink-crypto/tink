@@ -16,11 +16,11 @@
 
 #include "tink/mac/mac_key_templates.h"
 
+#include "gtest/gtest.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "proto/common.pb.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -70,6 +70,51 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
 
     // Check that reference to the same object is returned.
     const KeyTemplate& key_template_2 = MacKeyTemplates::HmacSha256();
+    EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    HmacKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+  }
+
+  {  // Test Hmac256BittagSha512().
+    // Check that returned template is correct.
+    const KeyTemplate& key_template = MacKeyTemplates::HmacSha512HalfSizeTag();
+    EXPECT_EQ(type_url, key_template.type_url());
+    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+    HmacKeyFormat key_format;
+    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+    EXPECT_EQ(64, key_format.key_size());
+    EXPECT_EQ(32, key_format.params().tag_size());
+    EXPECT_EQ(HashType::SHA512, key_format.params().hash());
+
+    // Check that reference to the same object is returned.
+    const KeyTemplate& key_template_2 =
+        MacKeyTemplates::HmacSha512HalfSizeTag();
+    EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    HmacKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+  }
+
+  {  // Test Hmac512BittagSha512().
+    // Check that returned template is correct.
+    const KeyTemplate& key_template = MacKeyTemplates::HmacSha512();
+    EXPECT_EQ(type_url, key_template.type_url());
+    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+    HmacKeyFormat key_format;
+    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+    EXPECT_EQ(64, key_format.key_size());
+    EXPECT_EQ(64, key_format.params().tag_size());
+    EXPECT_EQ(HashType::SHA512, key_format.params().hash());
+
+    // Check that reference to the same object is returned.
+    const KeyTemplate& key_template_2 = MacKeyTemplates::HmacSha512();
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.

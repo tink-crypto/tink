@@ -9,6 +9,7 @@ go_library(
     srcs = [
         "binary_io.go",
         "handle.go",
+        "json_io.go",
         "keyset.go",
         "manager.go",
         "mem_io.go",
@@ -28,6 +29,7 @@ go_library(
         "//go/tink:go_default_library",
         "//proto:tink_go_proto",
         "@com_github_golang_protobuf//proto:go_default_library",
+        "@com_github_golang_protobuf//jsonpb:go_default_library",
     ],
 )
 
@@ -35,6 +37,7 @@ go_test(
     name = "go_default_test",
     srcs = [
         "binary_io_test.go",
+        "json_io_test.go",
         "handle_test.go",
         "manager_test.go",
         "validation_test.go",

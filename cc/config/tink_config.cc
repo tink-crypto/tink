@@ -22,6 +22,7 @@
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/hybrid/hybrid_config.h"
 #include "tink/signature/signature_config.h"
+#include "tink/streamingaead/streaming_aead_config.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -35,6 +36,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   config->MergeFrom(HybridConfig::Latest());  // includes Mac & Aead
   config->MergeFrom(SignatureConfig::Latest());
   config->MergeFrom(DeterministicAeadConfig::Latest());
+  config->MergeFrom(StreamingAeadConfig::Latest());
   config->set_config_name("TINK");
   return config;
 }
@@ -53,7 +55,9 @@ util::Status TinkConfig::Register() {
   if (!status.ok()) return status;
   status = SignatureConfig::Register();
   if (!status.ok()) return status;
-  return DeterministicAeadConfig::Register();
+  status = DeterministicAeadConfig::Register();
+  if (!status.ok()) return status;
+  return StreamingAeadConfig::Register();
 }
 
 }  // namespace tink

@@ -26,6 +26,7 @@ const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 class KeysetWriter {
   /**
    * @param {!PbKeyset|!PbEncryptedKeyset} keyset
+   * @return {!Uint8Array}
    */
   write(keyset) {}
 }

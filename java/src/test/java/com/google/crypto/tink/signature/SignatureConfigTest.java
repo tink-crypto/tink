@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -57,7 +58,7 @@ public class SignatureConfigTest {
     }
     String typeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
     try {
-      Registry.getKeyManager(typeUrl);
+      Registry.getUntypedKeyManager(typeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
@@ -71,7 +72,7 @@ public class SignatureConfigTest {
     Registry.getCatalogue("tinkpublickeyverify");
 
     // After registration the key manager should be present.
-    Registry.getKeyManager(typeUrl);
+    Registry.getKeyManager(typeUrl, PublicKeySign.class);
 
     // Running init() manually again should succeed.
     SignatureConfig.register();

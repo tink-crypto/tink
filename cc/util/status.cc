@@ -29,15 +29,21 @@ namespace {
 
 
 const Status& GetCancelled() {
-  static const Status status(::crypto::tink::util::error::CANCELLED, "");
-  return status;
+  static const Status* status =
+      new Status(::crypto::tink::util::error::CANCELLED, "");
+  return *status;
 }
 
 const Status& GetUnknown() {
-  static const Status status(::crypto::tink::util::error::UNKNOWN, "");
-  return status;
+  static const Status* status =
+      new Status(::crypto::tink::util::error::UNKNOWN, "");
+  return *status;
 }
 
+const Status& GetOk() {
+  static const Status* status = new Status;
+  return *status;
+}
 
 }  // namespace
 
@@ -62,7 +68,7 @@ Status& Status::operator=(const Status& other) {
 
 const Status& Status::CANCELLED = GetCancelled();
 const Status& Status::UNKNOWN = GetUnknown();
-const Status& Status::OK = Status();
+const Status& Status::OK = GetOk();
 
 std::string Status::ToString() const {
   if (code_ == ::crypto::tink::util::error::OK) {

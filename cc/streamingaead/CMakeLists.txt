@@ -1,5 +1,6 @@
 tink_module(streamingaead)
 
+
 tink_cc_library(
   NAME streaming_aead_wrapper
   SRCS
@@ -15,6 +16,7 @@ tink_cc_library(
     tink::core::registry
     tink::core::streaming_aead
     tink::proto::tink_cc_proto
+    tink::streamingaead::decrypting_input_stream
     tink::util::status
     tink::util::statusor
 )
@@ -97,21 +99,53 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME shared_input_stream
+  SRCS shared_input_stream.h
+  DEPS
+    absl::memory
+    tink::core::input_stream
+    tink::util::errors
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME decrypting_input_stream
+  SRCS
+    decrypting_input_stream.cc
+    decrypting_input_stream.h
+  DEPS
+    tink::core::input_stream
+    tink::core::primitive_set
+    tink::core::streaming_aead
+    tink::streamingaead::buffered_input_stream
+    tink::streamingaead::shared_input_stream
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+    absl::memory
+)
+
 # tests
 
 tink_cc_test(
   NAME streaming_aead_wrapper_test
   SRCS streaming_aead_wrapper_test.cc
   DEPS
+    absl::memory
+    absl::strings
     tink::core::input_stream
     tink::core::output_stream
     tink::core::primitive_set
     tink::core::streaming_aead
     tink::proto::tink_cc_proto
     tink::streamingaead::streaming_aead_wrapper
+    tink::subtle::random
+    tink::subtle::test_util
     tink::util::istream_input_stream
     tink::util::ostream_output_stream
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
 )
 
@@ -190,3 +224,39 @@ tink_cc_test(
     tink::util::test_matchers
 )
 
+tink_cc_test(
+  NAME decrypting_input_stream_test
+  SRCS decrypting_input_stream_test.cc
+  DEPS
+    absl::memory
+    absl::strings
+    tink::streamingaead::decrypting_input_stream
+    tink::core::input_stream
+    tink::core::output_stream
+    tink::core::primitive_set
+    tink::core::streaming_aead
+    tink::proto::tink_cc_proto
+    tink::subtle::random
+    tink::subtle::test_util
+    tink::util::istream_input_stream
+    tink::util::ostream_output_stream
+    tink::util::status
+    tink::util::test_matchers
+    tink::util::test_util
+)
+
+tink_cc_test(
+  NAME shared_input_stream_test
+  SRCS shared_input_stream_test.cc
+  DEPS
+    absl::memory
+    absl::strings
+    tink::core::input_stream
+    tink::streamingaead::buffered_input_stream
+    tink::streamingaead::shared_input_stream
+    tink::subtle::random
+    tink::subtle::test_util
+    tink::util::istream_input_stream
+    tink::util::status
+    tink::util::test_matchers
+)

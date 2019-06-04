@@ -81,7 +81,7 @@ public class MacWrapperTest {
             keys[(i + 1) % j],
             keys[(i + 2) % j],
             keys[(i + 3) % j]));
-      Mac mac = new MacWrapper().wrap(Registry.getPrimitives(keysetHandle));
+      Mac mac = new MacWrapper().wrap(Registry.getPrimitives(keysetHandle, Mac.class));
       byte[] plaintext = "plaintext".getBytes("UTF-8");
       byte[] tag = mac.computeMac(plaintext);
       if (!keys[i].getOutputPrefixType().equals(OutputPrefixType.RAW)) {
@@ -113,7 +113,7 @@ public class MacWrapperTest {
       // mac with a non-primary RAW key, verify with the keyset
       KeysetHandle keysetHandle2 = TestUtil.createKeysetHandle(
           TestUtil.createKeyset(raw, legacy, tink, crunchy));
-      Mac mac2 = new MacWrapper().wrap(Registry.getPrimitives(keysetHandle2));
+      Mac mac2 = new MacWrapper().wrap(Registry.getPrimitives(keysetHandle2, Mac.class));
       tag = mac2.computeMac(plaintext);
       try {
         mac.verifyMac(tag, plaintext);
@@ -130,7 +130,7 @@ public class MacWrapperTest {
           OutputPrefixType.TINK);
       keysetHandle2 = TestUtil.createKeysetHandle(
           TestUtil.createKeyset(random));
-      mac2 = new MacWrapper().wrap(Registry.getPrimitives(keysetHandle2));
+      mac2 = new MacWrapper().wrap(Registry.getPrimitives(keysetHandle2, Mac.class));
       tag = mac2.computeMac(plaintext);
       try {
         mac.verifyMac(tag, plaintext);
@@ -151,7 +151,7 @@ public class MacWrapperTest {
         OutputPrefixType.RAW);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(primary));
-    Mac mac = new MacWrapper().wrap(Registry.getPrimitives(keysetHandle));
+    Mac mac = new MacWrapper().wrap(Registry.getPrimitives(keysetHandle, Mac.class));
     byte[] plaintext = "blah".getBytes("UTF-8");
     byte[] tag = mac.computeMac(plaintext);
     // no prefix

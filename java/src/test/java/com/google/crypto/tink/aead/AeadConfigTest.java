@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -59,7 +60,7 @@ public class AeadConfigTest {
     // Before registration, key manager should be absent.
     String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
     try {
-      Registry.getKeyManager(typeUrl);
+      Registry.getUntypedKeyManager(typeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
@@ -73,7 +74,7 @@ public class AeadConfigTest {
     Registry.getCatalogue("tinkaead");
 
     // After registration the key manager should be present.
-    Registry.getKeyManager(typeUrl);
+    Registry.getKeyManager(typeUrl, Aead.class);
 
     // Running init() manually again should succeed.
     AeadConfig.register();

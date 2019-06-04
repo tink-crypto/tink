@@ -15,7 +15,7 @@
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 TINKEY_CLI="$ROOT_DIR/tools/tinkey/tinkey"
-
+ENVELOPE_CLI="$ROOT_DIR/tools/testing/go/generate_envelope_keyset"
 #############################################################################
 ##### Helper functions.
 
@@ -67,6 +67,45 @@ generate_symmetric_key() {
   echo "Done generating a symmetric keyset."
 }
 
+# Generates an AWS Envelope Encryption using $key_template,
+# which should be supported by Tinkey.
+# Stores the key in file $aws_keyset_file.
+generate_aws_keyset() {
+  local key_name="$1"
+  local key_template="$2"
+  local output_format="$3"
+  if [ "$output_format" == "" ]; then
+    output_format="BINARY"
+  fi
+  aws_keyset_file="$TEST_TMPDIR/${key_name}_aws_keyset.bin"
+  echo "--- Using AWS KMS and template $key_template to generate keyset"\
+       "to file $aws_keyset_file ..."
+
+  $ENVELOPE_CLI $aws_keyset_file "AWS" $key_template || exit 1
+
+  echo "Done generating an AWS KMS generated keyset."
+}
+
+# Generates an GCP Envelope Encryption using $key_template,
+# which should be supported by Tinkey.
+# Stores the key in file $gcp_keyset_file.
+generate_gcp_keyset() {
+  local key_name="$1"
+  local key_template="$2"
+  local output_format="$3"
+
+  if [ "$output_format" == "" ]; then
+    output_format="BINARY"
+  fi
+  gcp_keyset_file="$TEST_TMPDIR/${key_name}_gcp_keyset.bin"
+  echo "--- Using GCP KMS and template $key_template to generate keyset"\
+      "to file $gcp_keyset_file ..."
+  $ENVELOPE_CLI $gcp_keyset_file "GCP" $key_template || exit 1
+
+  echo "Done generating an GCP KMS generated keyset."
+
+}
+
 # Generates some example plaintext data, and stores it in $plaintext_file.
 generate_plaintext() {
   local plaintext_name="$1"
@@ -80,7 +119,7 @@ generate_plaintext() {
 generate_long_plaintext() {
   local plaintext_name="$1"
   local size_mb="$2"
-  local bytes_in_mb=1048576
+  local bytes_in_mb="$3"
 
   plaintext_file="$TEST_TMPDIR/${plaintext_name}_plaintext.bin"
   dd if=/dev/urandom of="$plaintext_file" bs=$bytes_in_mb count="$2"
