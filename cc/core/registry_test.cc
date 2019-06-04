@@ -75,8 +75,7 @@ class RegistryTest : public ::testing::Test {
 
 class TestKeyFactory : public KeyFactory {
  public:
-  TestKeyFactory(const std::string& key_type) : key_type_(key_type) {
-  }
+  explicit TestKeyFactory(const std::string& key_type) : key_type_(key_type) {}
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
       const MessageLite& key_format) const override {
@@ -102,9 +101,8 @@ class TestKeyFactory : public KeyFactory {
 
 class TestAeadKeyManager : public KeyManager<Aead> {
  public:
-  TestAeadKeyManager(const std::string& key_type)
-      : key_type_(key_type), key_factory_(key_type) {
-  }
+  explicit TestAeadKeyManager(const std::string& key_type)
+      : key_type_(key_type), key_factory_(key_type) {}
 
   util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const KeyData& key) const override {
