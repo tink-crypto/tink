@@ -682,6 +682,8 @@ TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
   auto result =
       Registry::get_key_manager<int>(AesGcmKeyManager().get_key_type());
   EXPECT_FALSE(result.ok());
+  EXPECT_THAT(result.status().error_message(),
+              HasSubstr(AesGcmKeyManager().get_key_type()));
   // Note: The C++ standard does not guarantee the next line.  If some toolchain
   // update fails it, one can delete it.
   EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
@@ -695,6 +697,7 @@ TEST_F(RegistryTest, GetCatalogueErrorMessage) {
                   .ok());
   auto result = Registry::get_catalogue<int>(catalogue_name);
   EXPECT_FALSE(result.ok());
+  EXPECT_THAT(result.status().error_message(), HasSubstr(catalogue_name));
   // Note: The C++ standard does not guarantee the next line.  If some toolchain
   // update fails it, one can delete it.
   EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
