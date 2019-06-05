@@ -28,18 +28,24 @@ import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesEaxKey;
+import com.google.crypto.tink.proto.AesGcmKey;
+import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.AesEaxJce;
+import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.MacJce;
+import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -106,6 +112,7 @@ public class RegistryTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
+    Registry.reset();
     TinkConfig.register();
   }
 
@@ -153,9 +160,8 @@ public class RegistryTest {
       Registry.getKeyManager(MacConfig.HMAC_TYPE_URL, Aead.class);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "Primitive type com.google.crypto.tink.Mac");
-      assertExceptionContains(
-          e, "does not match requested primitive type com.google.crypto.tink.Aead");
+      assertExceptionContains(e, "com.google.crypto.tink.Mac");
+      assertExceptionContains(e, "com.google.crypto.tink.Aead not supported");
     }
   }
 
@@ -729,9 +735,136 @@ public class RegistryTest {
       Registry.getPrimitives(keysetHandle, Aead.class);
       fail("Non Aead keys. Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "Primitive type com.google.crypto.tink.Mac");
-      assertExceptionContains(e, "not match requested primitive type com.google.crypto.tink.Aead");
+      assertExceptionContains(e, "com.google.crypto.tink.Mac");
+      assertExceptionContains(e, "com.google.crypto.tink.Aead not supported");
     }
+  }
+
+  /** Implementation of an InternalKeyManager for testing. */
+  private static class TestInternalKeyManager extends InternalKeyManager<AesGcmKey> {
+    public TestInternalKeyManager() {
+      super(
+          AesGcmKey.class,
+          new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
+            @Override
+            public Aead getPrimitive(AesGcmKey key) throws GeneralSecurityException {
+              return new AesGcmJce(key.getKeyValue().toByteArray());
+            }
+          },
+          new PrimitiveFactory<FakeAead, AesGcmKey>(FakeAead.class) {
+            @Override
+            public FakeAead getPrimitive(AesGcmKey key) {
+              return new FakeAead();
+            }
+          });
+    }
+
+    @Override
+    public String getKeyType() {
+      return "type.googleapis.com/google.crypto.tink.AesGcmKey";
+    }
+
+    @Override
+    public int getVersion() {
+      return 1;
+    }
+
+    @Override
+    public KeyMaterialType keyMaterialType() {
+      return KeyMaterialType.SYMMETRIC;
+    }
+
+    @Override
+    public void validateKey(AesGcmKey keyProto) throws GeneralSecurityException {
+      // Throw by hand so we can verify the exception comes from here.
+      if (keyProto.getKeyValue().size() != 16) {
+        throw new GeneralSecurityException("validateKey(AesGcmKey) failed");
+      }
+    }
+
+    @Override
+    public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
+      return AesGcmKey.parseFrom(byteString);
+    }
+
+    @Override
+    public KeyFactory<AesGcmKeyFormat, AesGcmKey> keyFactory() {
+      return new KeyFactory<AesGcmKeyFormat, AesGcmKey>(AesGcmKeyFormat.class) {
+        @Override
+        public void validateKeyFormat(AesGcmKeyFormat format) throws GeneralSecurityException {
+          // Throw by hand so we can verify the exception comes from here.
+          if (format.getKeySize() != 16) {
+            throw new GeneralSecurityException("validateKeyFormat(AesGcmKeyFormat) failed");
+          }
+        }
+
+        @Override
+        public AesGcmKeyFormat parseKeyFormat(ByteString byteString)
+            throws InvalidProtocolBufferException {
+          return AesGcmKeyFormat.parseFrom(byteString);
+        }
+
+        @Override
+        public AesGcmKey createKey(AesGcmKeyFormat format) throws GeneralSecurityException {
+          return AesGcmKey.newBuilder()
+              .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+              .setVersion(getVersion())
+              .build();
+        }
+      };
+    }
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager() throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager_getKeyManagerAead_works() throws Exception {
+    Registry.reset();
+    TestInternalKeyManager testInternalKeyManager = new TestInternalKeyManager();
+    Registry.registerKeyManager(testInternalKeyManager, true);
+    KeyManager<Aead> km = Registry.getKeyManager(testInternalKeyManager.getKeyType(), Aead.class);
+    assertThat(km.getKeyType()).isEqualTo(testInternalKeyManager.getKeyType());
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager_getKeyManagerFakeAead_works() throws Exception {
+    Registry.reset();
+    TestInternalKeyManager testInternalKeyManager = new TestInternalKeyManager();
+    Registry.registerKeyManager(testInternalKeyManager, true);
+    KeyManager<FakeAead> km =
+        Registry.getKeyManager(testInternalKeyManager.getKeyType(), FakeAead.class);
+    assertThat(km.getKeyType()).isEqualTo(testInternalKeyManager.getKeyType());
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager_getKeyManagerMac_throws() throws Exception {
+    Registry.reset();
+    TestInternalKeyManager testInternalKeyManager = new TestInternalKeyManager();
+    Registry.registerKeyManager(testInternalKeyManager, true);
+    try {
+      Registry.getKeyManager(testInternalKeyManager.getKeyType(), Mac.class);
+      fail();
+    } catch (GeneralSecurityException e) {
+        assertExceptionContains(e, "com.google.crypto.tink.Mac");
+        assertExceptionContains(e, "com.google.crypto.tink.Aead");
+        assertExceptionContains(e, "com.google.crypto.tink.RegistryTest.FakeAead");
+    }
+  }
+
+  // Checks that calling getUntypedKeyManager will return the keymanager for the *first* implemented
+  // class in the constructor.
+  @Test
+  public void testRegisterInternalKeyManager_getUntypedKeyManager_returnsAead() throws Exception {
+    Registry.reset();
+    TestInternalKeyManager testInternalKeyManager = new TestInternalKeyManager();
+    Registry.registerKeyManager(testInternalKeyManager, true);
+    KeyManager<?> km =
+        Registry.getUntypedKeyManager(testInternalKeyManager.getKeyType());
+    assertThat(km.getPrimitiveClass()).isEqualTo(Aead.class);
   }
 
   private static class Catalogue1 implements Catalogue<Aead> {
@@ -885,4 +1018,6 @@ public class RegistryTest {
       assertExceptionContains(e, "Aead");
     }
   }
+
+  private static class FakeAead {}
 }

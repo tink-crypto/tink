@@ -182,7 +182,7 @@ public class MacFactoryTest {
       MacFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "not match requested primitive type com.google.crypto.tink.Mac");
+      assertExceptionContains(e, "com.google.crypto.tink.Mac not supported");
     }
 
     // invalid as the primary key.
@@ -191,7 +191,7 @@ public class MacFactoryTest {
       MacFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "not match requested primitive type com.google.crypto.tink.Mac");
+      assertExceptionContains(e, "com.google.crypto.tink.Mac not supported");
     }
   }
 }

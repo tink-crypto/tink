@@ -216,8 +216,7 @@ public class DeterministicAeadFactoryTest {
       DeterministicAeadFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(
-          e, "not match requested primitive type com.google.crypto.tink.DeterministicAead");
+      assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead not supported");
     }
 
     // invalid as the primary key.
@@ -226,8 +225,7 @@ public class DeterministicAeadFactoryTest {
       DeterministicAeadFactory.getPrimitive(keysetHandle);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(
-          e, "not match requested primitive type com.google.crypto.tink.DeterministicAead");
+      assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead not supported");
     }
   }
 }
