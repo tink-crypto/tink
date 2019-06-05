@@ -313,3 +313,13 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "validation_test",
+    srcs = ["validation_test.cc"],
+    deps = [
+        ":test_matchers",
+        ":validation",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

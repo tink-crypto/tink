@@ -61,7 +61,7 @@ util::Status ValidateKeyset(const Keyset& keyset) {
                      "A valid keyset must contain at least one key.");
   }
 
-  int primary_key_id = keyset.primary_key_id();
+  uint32_t primary_key_id = keyset.primary_key_id();
   bool has_primary_key = false;
   bool contains_only_public_key_material = true;
   int enabled_keys = 0;

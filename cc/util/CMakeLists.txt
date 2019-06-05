@@ -254,3 +254,13 @@ tink_cc_test(
     absl::strings
     gmock
 )
+
+tink_cc_test(
+  NAME validation_test
+  SRCS
+    validation_test.cc
+  DEPS
+    tink::util::test_matchers
+    tink::util::validation
+    gmock
+)
