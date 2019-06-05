@@ -775,10 +775,10 @@ go_repository(
 
 http_archive(
     name = "io_bazel_rules_closure",
-    sha256 = "319e5e0127a83436b55588877a9d81464c2780c0dffc809065cf299d772670f5",
-    strip_prefix = "rules_closure-87d24b1df8b62405de8dd059cb604fd9d4b1e395",
+    sha256 = "6113983b357de085515c5356405e2391fda88edc3d8f214789b560a0e70d9968",
+    strip_prefix = "rules_closure-6794c2755113e967394eec53ed4ceb6c7eb4d065",
     urls = [
-        "https://github.com/bazelbuild/rules_closure/archive/87d24b1df8b62405de8dd059cb604fd9d4b1e395.zip",
+        "https://github.com/bazelbuild/rules_closure/archive/6794c2755113e967394eec53ed4ceb6c7eb4d065.zip",
     ],
 )
 
