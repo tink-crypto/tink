@@ -43,7 +43,7 @@ namespace {
 
 class EciesAeadHkdfPublicKeyManagerTest : public ::testing::Test {
  protected:
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     ASSERT_TRUE(Registry::RegisterKeyManager(
                     absl::make_unique<AesGcmKeyManager>(), true)
                     .ok());

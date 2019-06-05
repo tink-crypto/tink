@@ -37,7 +37,7 @@ using google::crypto::tink::OutputPrefixType;
 
 class HybridKeyTemplatesTest : public ::testing::Test {
  protected:
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     // Initialize the registry, so that the templates can be tested.
     HybridConfig::Register();
   }
