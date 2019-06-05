@@ -407,7 +407,7 @@ Authentication Code)](PRIMITIVES.md#message-authentication-code):
     mac.verifyMac(tag, data);
 ```
 
-### Digital Signatures
+### Digitial Signatures
 
 Here is an example of how to sign or verify a [digital
 signature](PRIMITIVES.md#digital-signatures):
