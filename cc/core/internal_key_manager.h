@@ -28,7 +28,11 @@
 namespace crypto {
 namespace tink {
 
+template <typename... P>
+class List {};
+
 namespace internal {
+
 // InternalKeyFactory should not be used directly: it is an implementation
 // detail. The internal key factory provides the functions which are required
 // if an InternalKeyManager can create new keys: ValidateKeyFormat and
@@ -56,11 +60,10 @@ class InternalKeyFactory<KeyProto, void> {
 }  // namespace internal
 
 // We declare a InternalKeyManager without giving an implementation. We then
-// provide a specialization only for the case where PrimitivesTuple is a
-// std::tuple of multiple primitives. This allows to ensure that such is always
-// the case.
-template <typename KeyProto, typename KeyFormatProto,
-          typename PrimitivesTuple>
+// provide a specialization only for the case where PrimitivesList is a
+// List with multiple interfaces primitives. This allows to ensure
+// that such is always the case.
+template <typename KeyProto, typename KeyFormatProto, typename PrimitivesList>
 class InternalKeyManager;
 
 // An InternalKeyManager manages a single key proto. This includes
@@ -74,11 +77,9 @@ class InternalKeyManager;
 // The constructor should take unique pointers to primitive factories.
 //
 // InternalKeyManager uses templates for KeyProto, KeyFormatProto and a list of
-// Primitives which have to be provided as a std::tuple.
-template <typename KeyProto, typename KeyFormatProto,
-          typename... Primitives>
-class InternalKeyManager<KeyProto, KeyFormatProto,
-                         std::tuple<Primitives...>>
+// Primitives which have to be provided as a List.
+template <typename KeyProto, typename KeyFormatProto, typename... Primitives>
+class InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>
     : public internal::InternalKeyFactory<KeyProto, KeyFormatProto> {
  public:
   // A PrimitiveFactory<Primitive> knows how to create instances of the

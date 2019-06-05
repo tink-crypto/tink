@@ -14,8 +14,6 @@
 #ifndef TINK_CORE_KEY_MANAGER_IMPL_H_
 #define TINK_CORE_KEY_MANAGER_IMPL_H_
 
-#include <tuple>
-
 #include "tink/core/internal_key_manager.h"
 #include "tink/core/key_manager_base.h"
 #include "tink/key_manager.h"
@@ -35,14 +33,14 @@ class KeyFactoryImpl;
 
 // First partial template specialization for KeyFactoryImpl: the given
 // InternalKeyManager is of the form InternalKeyManager<KeyProto,
-// KeyFormatProto, std::tuple<Primitives...>>.
+// KeyFormatProto, List<Primitives...>>.
 template <class KeyProto, class KeyFormatProto, class... Primitives>
 class KeyFactoryImpl<
-    InternalKeyManager<KeyProto, KeyFormatProto, std::tuple<Primitives...>>>
+    InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>>
     : public KeyFactory {
  public:
   explicit KeyFactoryImpl(
-      InternalKeyManager<KeyProto, KeyFormatProto, std::tuple<Primitives...>>*
+      InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
           internal_key_manager)
       : internal_key_manager_(internal_key_manager) {}
 
@@ -97,23 +95,22 @@ class KeyFactoryImpl<
   }
 
  private:
-  InternalKeyManager<KeyProto, KeyFormatProto, std::tuple<Primitives...>>*
+  InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
       internal_key_manager_;
 };
 
 // Second partial template specialization for KeyFactoryImpl: the given
 // InternalKeyManager is of the form InternalKeyManager<KeyProto, void,
-// std::tuple<Primitives...>>.
+// List<Primitives...>>.
 template <class KeyProto, class... Primitives>
-class KeyFactoryImpl<
-    InternalKeyManager<KeyProto, void, std::tuple<Primitives...>>>
+class KeyFactoryImpl<InternalKeyManager<KeyProto, void, List<Primitives...>>>
     : public KeyFactory {
  public:
   // We don't need the InternalKeyManager, but this is called from a template,
   // so the easiest way to ignore the argument is to provide a constructor which
   // ignores the argument.
   explicit KeyFactoryImpl(
-      InternalKeyManager<KeyProto, void, std::tuple<Primitives...>>*
+      InternalKeyManager<KeyProto, void, List<Primitives...>>*
           internal_key_manager) {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
@@ -141,29 +138,29 @@ class KeyFactoryImpl<
 // Template declaration of the class "KeyManagerImpl" with two template
 // arguments. There is only one specialization which is defined, namely when
 // the InternalKeyManager argument is of the form InternalKeyManager<KeyProto,
-// KeyFormatProto, std::tuple<Primitives...>>. We don't provide a specialization
-// for the case KeyFormatProto = void, so the compiler will pick this
-// instantiation in this case.
+// KeyFormatProto, List<Primitives...>>. We don't provide a
+// specialization for the case KeyFormatProto = void, so the compiler will pick
+// this instantiation in this case.
 template <class Primitive, class InternalKeyManager>
 class KeyManagerImpl;
 
 // The first template argument to the KeyManagerImpl is the primitive for which
 // we should generate a KeyManager. The second is the InternalKeyManager, which
-// takes itself template arguments. The tuple of the Primitives there must
+// takes itself template arguments. The list of the Primitives there must
 // contain the first Primitive argument (otherwise there will be failures at
 // runtime).
 template <class Primitive, class KeyProto, class KeyFormatProto,
           class... Primitives>
 class KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
-                                                   std::tuple<Primitives...>>>
+                                                   List<Primitives...>>>
     : public KeyManager<Primitive> {
  public:
   explicit KeyManagerImpl(
-      InternalKeyManager<KeyProto, KeyFormatProto, std::tuple<Primitives...>>*
+      InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
           internal_key_manager)
       : internal_key_manager_(internal_key_manager),
         key_factory_(absl::make_unique<KeyFactoryImpl<InternalKeyManager<
-                         KeyProto, KeyFormatProto, std::tuple<Primitives...>>>>(
+                         KeyProto, KeyFormatProto, List<Primitives...>>>>(
             internal_key_manager_)) {}
 
   // Constructs an instance of Primitive for the given 'key_data'.
@@ -216,7 +213,7 @@ class KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
   }
 
  private:
-  InternalKeyManager<KeyProto, KeyFormatProto, std::tuple<Primitives...>>*
+  InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
       internal_key_manager_;
   std::unique_ptr<KeyFactory> key_factory_;
 };
@@ -228,13 +225,12 @@ class KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
 //     MakeKeyManager<Aead>(my_internal_key_manager.get());
 template <class Primitive, class KeyProto, class KeyFormatProto,
           class... Primitives>
-std::unique_ptr<KeyManager<Primitive>>
-MakeKeyManager(
-    InternalKeyManager<KeyProto, KeyFormatProto, std::tuple<Primitives...>>*
+std::unique_ptr<KeyManager<Primitive>> MakeKeyManager(
+    InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
         internal_key_manager) {
   return absl::make_unique<
       KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
-                                                   std::tuple<Primitives...>>>>(
+                                                   List<Primitives...>>>>(
       internal_key_manager);
 }
 

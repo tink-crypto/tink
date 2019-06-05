@@ -58,7 +58,7 @@ class AeadVariant {
 
 class ExampleInternalKeyManager
     : public InternalKeyManager<AesGcmKey, AesGcmKeyFormat,
-                                std::tuple<Aead, AeadVariant>> {
+                                List<Aead, AeadVariant>> {
  public:
   class AeadFactory : public PrimitiveFactory<Aead> {
    public:
@@ -348,8 +348,7 @@ TEST(KeyManagerImplTest, GetPrimitiveFails) {
 // Next, we test some of the methods with an InternalKeyManager which has no
 // factory.
 class ExampleInternalKeyManagerWithoutFactory
-    : public InternalKeyManager<AesGcmKey, void,
-                                std::tuple<Aead, AeadVariant>> {
+    : public InternalKeyManager<AesGcmKey, void, List<Aead, AeadVariant>> {
  public:
   class AeadFactory : public PrimitiveFactory<Aead> {
    public:
