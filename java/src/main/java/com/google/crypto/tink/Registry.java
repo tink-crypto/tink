@@ -311,16 +311,16 @@ public final class Registry {
     }
     String typeUrl = manager.getKeyType();
     if (keyManagerMap.containsKey(typeUrl)) {
-      KeyManager<?> existingManager = keyManagerMap.get(typeUrl).getUntypedKeyManager();
+      KeyManagerContainer container = keyManagerMap.get(typeUrl);
       boolean existingNewKeyAllowed = newKeyAllowedMap.get(typeUrl).booleanValue();
-      if (!manager.getClass().equals(existingManager.getClass())
+      if (!manager.getClass().equals(container.getImplementingClass())
           // Disallow changing newKeyAllowed from false to true.
           || (!existingNewKeyAllowed && newKeyAllowed)) {
         logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
         throw new GeneralSecurityException(
             String.format(
                 "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-                typeUrl, existingManager.getClass().getName(), manager.getClass().getName()));
+                typeUrl, container.getImplementingClass().getName(), manager.getClass().getName()));
       }
     }
     keyManagerMap.put(typeUrl, createContainerFor(manager));
@@ -335,16 +335,16 @@ public final class Registry {
     }
     String typeUrl = manager.getKeyType();
     if (keyManagerMap.containsKey(typeUrl)) {
-      KeyManager<?> existingManager = keyManagerMap.get(typeUrl).getUntypedKeyManager();
+      KeyManagerContainer container = keyManagerMap.get(typeUrl);
       boolean existingNewKeyAllowed = newKeyAllowedMap.get(typeUrl).booleanValue();
-      if (!manager.getClass().equals(existingManager.getClass())
+      if (!manager.getClass().equals(container.getImplementingClass())
           // Disallow changing newKeyAllowed from false to true.
           || ((!existingNewKeyAllowed) && newKeyAllowed)) {
         logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
         throw new GeneralSecurityException(
             String.format(
                 "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-                typeUrl, existingManager.getClass().getName(), manager.getClass().getName()));
+                typeUrl, container.getImplementingClass().getName(), manager.getClass().getName()));
       }
     }
     keyManagerMap.put(typeUrl, createContainerFor(manager));

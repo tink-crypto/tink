@@ -867,6 +867,77 @@ public class RegistryTest {
     assertThat(km.getPrimitiveClass()).isEqualTo(Aead.class);
   }
 
+  @Test
+  public void testRegisterInternalKeyManager_MoreRestrictedNewKeyAllowed_shouldWork()
+      throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+    Registry.registerKeyManager(new TestInternalKeyManager(), false);
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager_SameNewKeyAllowed_shouldWork() throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+    Registry.registerKeyManager(new TestInternalKeyManager(), false);
+    Registry.registerKeyManager(new TestInternalKeyManager(), false);
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager_LessRestrictedNewKeyAllowed_throws() throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestInternalKeyManager(), false);
+    try {
+      Registry.registerKeyManager(new TestInternalKeyManager(), true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager_DifferentClass_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+    try {
+      // Note: due to the {} this is a subclass of TestInternalKeyManager.
+      Registry.registerKeyManager(new TestInternalKeyManager() {}, true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager_AfterKeyManager_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(
+        new CustomAeadKeyManager(new TestInternalKeyManager().getKeyType()));
+    try {
+      Registry.registerKeyManager(new TestInternalKeyManager(), true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterInternalKeyManager_BeforeKeyManager_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+    try {
+      Registry.registerKeyManager(
+          new CustomAeadKeyManager(new TestInternalKeyManager().getKeyType()));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
   private static class Catalogue1 implements Catalogue<Aead> {
     @Override
     public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {
