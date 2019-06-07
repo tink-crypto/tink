@@ -122,9 +122,20 @@ run_macos_tests() {
   //objc:TinkTests || ( ls -l ; df -h / ; exit 1 )
 }
 
+run_cmake_tests() {
+  cmake --version
+  cmake .
+  make
+  echo "============ DONE TESTING WITH cmake ======="
+}
+
 run_linux_tests
 
 if [[ "${PLATFORM}" == 'darwin' ]]; then
   run_macos_tests
+fi
+
+if [[ "${PLATFORM}" == 'linux' ]]; then
+  run_cmake_tests
 fi
 

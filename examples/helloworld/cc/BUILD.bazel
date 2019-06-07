@@ -50,18 +50,3 @@ sh_test(
         "local",  # This tests needs g++.
     ],
 )
-
-sh_test(
-    name = "cmake_build_test",
-    size = "enormous",
-    srcs = [
-        "cmake_build_test.sh",
-    ],
-    data = [
-        ":hello_world_files",
-        "//:cmake_source_files",
-    ],
-    tags = [
-        "local",  # This tests needs CMake.
-    ],
-)
