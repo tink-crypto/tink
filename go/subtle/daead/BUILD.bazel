@@ -19,7 +19,7 @@ go_test(
         "aes_siv_test.go",
     ],
     data = [
-        "//third_party/wycheproof:testvectors",
+        "@wycheproof//testvectors:all",  # keep
     ],
     deps = [
         ":go_default_library",

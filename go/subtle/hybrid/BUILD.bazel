@@ -27,7 +27,7 @@ go_test(
         "elliptic_curves_test.go",
         "hkdf_test.go",
     ],
-    data = ["//third_party/wycheproof:testvectors"],
+    data = ["@wycheproof//testvectors:all"],
     embed = [":go_default_library"],
     deps = [
         "//go/subtle/random:go_default_library",
