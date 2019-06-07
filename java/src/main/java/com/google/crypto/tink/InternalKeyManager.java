@@ -83,6 +83,7 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
    * @throws IllegalArgumentException if two of the passed in factories produce primitives of the
    *     same class.
    */
+  @SafeVarargs  // Safe because we do not reference the array (see Effective Java ed. 3, Item 32).
   protected InternalKeyManager(
       Class<KeyProtoT> clazz, PrimitiveFactory<?, KeyProtoT>... factories) {
     this.clazz = clazz;
