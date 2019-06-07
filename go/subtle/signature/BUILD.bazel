@@ -28,7 +28,7 @@ go_test(
         "ed25519_signer_verifier_test.go",
     ],
     data = [
-        "@wycheproof//testvectors:all",  # keep
+        "//third_party/wycheproof:testvectors",
     ],
     deps = [
         ":go_default_library",

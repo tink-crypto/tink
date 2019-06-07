@@ -70,8 +70,8 @@ type testcase struct {
 // Test cases same as the java tests from
 // //third_party/tink/java/src/test/java/com/google/crypto/tink/subtle/EllipticCurvesTest.java
 var (
-	testVectors = []string{"../../../../wycheproof/testvectors/ecdh_test.json",
-		"../../../../wycheproof/testvectors/ecdh_test.json",
+	testVectors = []string{"../../../third_party/wycheproof/testvectors/ecdh_test.json",
+		"../../../third_party/wycheproof/testvectors/ecdh_test.json",
 	}
 	tEC1 = []testEC1{
 		{

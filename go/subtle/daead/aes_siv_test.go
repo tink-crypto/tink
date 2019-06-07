@@ -250,7 +250,7 @@ func TestAESSIV_CiphertextModifications(t *testing.T) {
 }
 
 func TestAESSIV_WycheproofVectors(t *testing.T) {
-	f, err := os.Open("../../../../wycheproof/testvectors/aes_siv_cmac_test.json")
+	f, err := os.Open("../../../third_party/wycheproof/testvectors/aes_siv_cmac_test.json")
 	if err != nil {
 		t.Fatalf("Cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath.", err)
 	}
