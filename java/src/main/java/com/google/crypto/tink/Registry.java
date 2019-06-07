@@ -79,7 +79,7 @@ public final class Registry {
   private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
       new ConcurrentHashMap<>(); // typeUrl -> newKeyAllowed mapping
 
-  private static final ConcurrentMap<String, Catalogue> catalogueMap =
+  private static final ConcurrentMap<String, Catalogue<?>> catalogueMap =
       new ConcurrentHashMap<>(); //  name -> catalogue mapping
 
   private static final ConcurrentMap<Class<?>, PrimitiveWrapper<?>> primitiveWrapperMap =
@@ -412,6 +412,7 @@ public final class Registry {
     }
     Class<P> classObject = wrapper.getPrimitiveClass();
     if (primitiveWrapperMap.containsKey(classObject)) {
+      @SuppressWarnings("unchecked") // We know that we only inserted objects of the correct type.
       PrimitiveWrapper<P> existingWrapper =
           (PrimitiveWrapper<P>) (primitiveWrapperMap.get(classObject));
       if (!wrapper.getClass().equals(existingWrapper.getClass())) {
