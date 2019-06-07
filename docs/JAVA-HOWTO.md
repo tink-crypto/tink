@@ -179,7 +179,7 @@ e.g., writing to a file:
 
     // Generate the key material...
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.AES_128_GCM);
+        AeadKeyTemplates.AES128_GCM);
 
     // and write it to a file.
     String keysetFilename = "my_keyset.json";
@@ -204,7 +204,7 @@ as follows:
 
     // Generate the key material...
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.AES_128_GCM);
+        AeadKeyTemplates.AES128_GCM);
 
     // and write it to a file...
     String keysetFilename = "my_keyset.json";
