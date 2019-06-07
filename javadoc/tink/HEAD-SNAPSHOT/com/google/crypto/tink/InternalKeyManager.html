@@ -277,8 +277,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockListLast">
 <li class="blockList">
 <h4>InternalKeyManager</h4>
-<pre>protected&nbsp;InternalKeyManager(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&gt;&nbsp;clazz,
-                             <a href="../../../../com/google/crypto/tink/InternalKeyManager.PrimitiveFactory.html" title="class in com.google.crypto.tink">InternalKeyManager.PrimitiveFactory</a>&lt;?,<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&gt;...&nbsp;factories)</pre>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/SafeVarargs.html?is-external=true" title="class or interface in java.lang">@SafeVarargs</a>
+protected&nbsp;InternalKeyManager(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&gt;&nbsp;clazz,
+                                          <a href="../../../../com/google/crypto/tink/InternalKeyManager.PrimitiveFactory.html" title="class in com.google.crypto.tink">InternalKeyManager.PrimitiveFactory</a>&lt;?,<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="type parameter in InternalKeyManager">KeyProtoT</a>&gt;...&nbsp;factories)</pre>
 <div class="block">Constructs a new InternalKeyManager.
 
  <p>Takes an arbitrary number of <a href="../../../../com/google/crypto/tink/InternalKeyManager.PrimitiveFactory.html" title="class in com.google.crypto.tink"><code>InternalKeyManager.PrimitiveFactory</code></a> objects as input. These will be used
