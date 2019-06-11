@@ -34,7 +34,7 @@ go_test(
         "xchacha20poly1305_vectors_test.go",
     ],
     data = [
-        "@wycheproof//testvectors:all",  # keep
+        "//third_party/wycheproof:testvectors",
     ],
     deps = [
         ":go_default_library",

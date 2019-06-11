@@ -117,10 +117,10 @@ func TestWycheproofVectors(t *testing.T) {
 		Filename string
 		Encoding string
 	}{
-		{"../../../../wycheproof/testvectors/ecdsa_test.json", "DER"},
-		{"../../../../wycheproof/testvectors/ecdsa_secp256r1_sha256_p1363_test.json", "IEEE_P1363"},
-		{"../../../../wycheproof/testvectors/ecdsa_secp384r1_sha512_p1363_test.json", "IEEE_P1363"},
-		{"../../../../wycheproof/testvectors/ecdsa_secp521r1_sha512_p1363_test.json", "IEEE_P1363"},
+		{"../../../third_party/wycheproof/testvectors/ecdsa_test.json", "DER"},
+		{"../../../third_party/wycheproof/testvectors/ecdsa_secp256r1_sha256_p1363_test.json", "IEEE_P1363"},
+		{"../../../third_party/wycheproof/testvectors/ecdsa_secp384r1_sha512_p1363_test.json", "IEEE_P1363"},
+		{"../../../third_party/wycheproof/testvectors/ecdsa_secp521r1_sha512_p1363_test.json", "IEEE_P1363"},
 	}
 
 	for _, v := range vectors {

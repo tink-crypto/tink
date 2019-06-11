@@ -44,7 +44,7 @@ func TestWycheproofParsing(t *testing.T) {
 		TestGroups []*AeadGroup `json:"testGroups"`
 	}
 
-	bytes, err := ioutil.ReadFile("../../../wycheproof/testvectors/aes_gcm_test.json")
+	bytes, err := ioutil.ReadFile("../../third_party/wycheproof/testvectors/aes_gcm_test.json")
 	if err != nil {
 		t.Fatal(err)
 	}

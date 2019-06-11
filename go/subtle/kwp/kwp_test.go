@@ -108,7 +108,7 @@ type KwpSuite struct {
 }
 
 func TestWycheproofCases(t *testing.T) {
-	suiteBytes, err := ioutil.ReadFile("../../../../wycheproof/testvectors/kwp_test.json")
+	suiteBytes, err := ioutil.ReadFile("../../../third_party/wycheproof/testvectors/kwp_test.json")
 	if err != nil {
 		t.Fatal(err)
 	}
