@@ -75,7 +75,7 @@ func (g *AWSClient) Supported(keyURI string) bool {
 
 // LoadCredentials loads the credentials in credentialPath. If credentialPath is  null, loads the
 // default credentials.
-func (g *AWSClient) LoadCredentials(credentialPath string) (interface{}, error) {
+func (g *AWSClient) LoadCredentials(credentialPath string) (*AWSClient, error) {
 	var creds *credentials.Credentials
 	if len(credentialPath) <= 0 {
 		return nil, errCred
@@ -96,9 +96,19 @@ func (g *AWSClient) LoadCredentials(credentialPath string) (interface{}, error) 
 }
 
 // LoadDefaultCredentials loads with the default credentials.
-func (g *AWSClient) LoadDefaultCredentials() (interface{}, error) {
+func (g *AWSClient) LoadDefaultCredentials() (*AWSClient, error) {
 	session := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(g.region),
+	}))
+	g.kms = kms.New(session)
+	return g, nil
+}
+
+// WithCredentials retrieves credentials using a provider.
+func (g *AWSClient) WithCredentials(p *credentials.Credentials) (*AWSClient, error) {
+	session := session.Must(session.NewSession(&aws.Config{
+		Region:      aws.String(g.region),
+		Credentials: p,
 	}))
 	g.kms = kms.New(session)
 	return g, nil
