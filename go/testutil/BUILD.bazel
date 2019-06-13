@@ -42,7 +42,7 @@ go_test(
         "wycheproofutil_test.go",
     ],
     data = [
-        "@wycheproof//testvectors:all",
+        "//third_party/wycheproof:testvectors",
     ],
     deps = [
         "//go/testutil:go_default_library",

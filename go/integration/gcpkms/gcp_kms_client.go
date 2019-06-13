@@ -69,11 +69,11 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"google.golang.org/api/cloudkms/v1"
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/cloudkms/v1"
 )
 
 const (
@@ -114,7 +114,7 @@ func (g *GCPClient) Supported(keyURI string) bool {
 
 // LoadCredentials loads the credentials in credentialPath. If credentialPath is  null, loads the
 // default credentials.
-func (g *GCPClient) LoadCredentials(credentialPath string) (interface{}, error) {
+func (g *GCPClient) LoadCredentials(credentialPath string) (*GCPClient, error) {
 	ctx := context.Background()
 	if len(credentialPath) <= 0 {
 		return nil, errCred
@@ -137,7 +137,7 @@ func (g *GCPClient) LoadCredentials(credentialPath string) (interface{}, error) 
 }
 
 // LoadDefaultCredentials loads with the default credentials.
-func (g *GCPClient) LoadDefaultCredentials() (interface{}, error) {
+func (g *GCPClient) LoadDefaultCredentials() (*GCPClient, error) {
 	ctx := context.Background()
 	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {

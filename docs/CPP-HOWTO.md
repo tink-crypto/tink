@@ -218,8 +218,12 @@ directly in C++ code, one can use
     // use the keyset...
 ```
 
-where `key_template` can be initialized with one of pre-generated templates from
-[examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates)-folder.
+where `key_template` can be obtain from util classes corresponding to Tink primitives, e.g.
+[MacKeyTemplates](https://github.com/google/tink/blob/master/cc/mac/mac_key_templates.h),
+[AeadKeyTemplates](https://github.com/google/tink/blob/master/cc/aead/aead_key_templates.h),
+or
+[HybridKeyTemplates](https://github.com/google/tink/blob/master/cc/hybrid/hybrid_key_templates.h).
+
 
 
 ## Loading Existing Keysets

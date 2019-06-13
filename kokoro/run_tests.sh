@@ -53,8 +53,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   # TODO(b/73748835): Workaround on Kokoro.
   rm -f ~/.bazelrc
 
-  # TODO(b/131821833) Use the latest version of Bazel.
-  use_bazel.sh 0.25.3
+  use_bazel.sh latest
 
   if [[ "${PLATFORM}" == 'darwin' ]]; then
     export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
@@ -123,9 +122,20 @@ run_macos_tests() {
   //objc:TinkTests || ( ls -l ; df -h / ; exit 1 )
 }
 
+run_cmake_tests() {
+  cmake --version
+  cmake .
+  make
+  echo "============ DONE TESTING WITH cmake ======="
+}
+
 run_linux_tests
 
 if [[ "${PLATFORM}" == 'darwin' ]]; then
   run_macos_tests
+fi
+
+if [[ "${PLATFORM}" == 'linux' ]]; then
+  run_cmake_tests
 fi
 
