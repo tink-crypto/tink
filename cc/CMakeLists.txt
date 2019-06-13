@@ -144,6 +144,14 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME random_access_stream
+  SRCS random_access_stream.h
+  DEPS
+    tink::util::buffer
+    tink::util::status
+)
+
+tink_cc_library(
   NAME aead
   SRCS aead.h
   DEPS

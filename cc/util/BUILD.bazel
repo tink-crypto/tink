@@ -2,6 +2,20 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
+
+cc_library(
+    name = "buffer",
+    srcs = ["buffer.cc"],
+    hdrs = ["buffer.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":status",
+        ":statusor",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
 cc_library(
     name = "constants",
     srcs = ["constants.cc"],
@@ -99,6 +113,21 @@ cc_library(
         ":status",
         ":statusor",
         "//cc:output_stream",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "file_random_access_stream",
+    srcs = ["file_random_access_stream.cc"],
+    hdrs = ["file_random_access_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":buffer",
+        ":errors",
+        ":status",
+        "//cc:random_access_stream",
         "@com_google_absl//absl/memory",
     ],
 )
@@ -212,6 +241,23 @@ cc_library(
 # tests
 
 cc_test(
+    name = "buffer_test",
+    size = "small",
+    srcs = ["buffer_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":buffer",
+        ":status",
+        ":test_matchers",
+        "//cc/subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "errors_test",
     size = "small",
     srcs = ["errors_test.cc"],
@@ -262,6 +308,23 @@ cc_test(
     linkopts = ["-lpthread"],
     deps = [
         ":file_output_stream",
+        ":test_util",
+        "//cc/subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "file_random_access_stream_test",
+    size = "medium",
+    srcs = ["file_random_access_stream_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":buffer",
+        ":file_random_access_stream",
         ":test_util",
         "//cc/subtle:random",
         "@com_google_absl//absl/memory",

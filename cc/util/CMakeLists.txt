@@ -1,6 +1,17 @@
 tink_module(util)
 
 tink_cc_library(
+  NAME buffer
+  SRCS
+    buffer.cc
+    buffer.h
+  DEPS
+    absl::memory
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME constants
   SRCS
     constants.cc
@@ -82,6 +93,19 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::core::output_stream
+    absl::memory
+)
+
+tink_cc_library(
+  NAME file_random_access_stream
+  SRCS
+    file_random_access_stream.cc
+    file_random_access_stream.h
+  DEPS
+    tink::util::buffer
+    tink::util::errors
+    tink::util::status
+    tink::core::random_access_stream
     absl::memory
 )
 
@@ -176,6 +200,19 @@ tink_cc_library(
 # tests
 
 tink_cc_test(
+  NAME buffer_test
+  SRCS
+    buffer_test.cc
+  DEPS
+    absl::memory
+    absl::strings
+    tink::subtle::random
+    tink::util::buffer
+    tink::util::status
+    tink::util::test_matchers
+)
+
+tink_cc_test(
   NAME errors_test
   SRCS
     errors_test.cc
@@ -212,6 +249,19 @@ tink_cc_test(
     file_output_stream_test.cc
   DEPS
     tink::util::file_output_stream
+    tink::util::test_util
+    tink::subtle::random
+    absl::memory
+    absl::strings
+)
+
+tink_cc_test(
+  NAME file_random_access_stream_test
+  SRCS
+    file_random_access_stream_test.cc
+  DEPS
+    tink::util::buffer
+    tink::util::file_random_access_stream
     tink::util::test_util
     tink::subtle::random
     absl::memory

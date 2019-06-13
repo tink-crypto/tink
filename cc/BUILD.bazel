@@ -144,6 +144,18 @@ cc_library(
 )
 
 cc_library(
+    name = "random_access_stream",
+    hdrs = ["random_access_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cc/util:buffer",
+        "//cc/util:status",
+    ],
+)
+
+cc_library(
     name = "aead",
     hdrs = ["aead.h"],
     include_prefix = "tink",
