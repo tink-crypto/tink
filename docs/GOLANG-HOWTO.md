@@ -272,7 +272,7 @@ func main() {
 
         khPriv, err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
         if err != nil {
-                log.Fata(err)
+                log.Fatal(err)
         }
 
         he, err := hybrid.NewHybridEncrypt(khPriv)
@@ -294,7 +294,7 @@ func main() {
 
         pt, err := hd.Decrypt(ct, []byte("context info"))
         if err != nil {
-                log.Fata(err)
+                log.Fatal(err)
         }
 
         fmt.Printf("Cipher text: %s\nPlain text: %s\n", ct, pt)
@@ -305,7 +305,9 @@ func main() {
 
 ### Envelope encryption
 
-Tink APIs work with GCP and AWS KMS.
+Tink APIs work with GCP and AWS KMS (cf. more info on
+[Key Management Systems](KEY-MANAGEMENT.md#key-management-systems)
+and [Credentials](KEY-MANAGEMENT.md#credentials)).
 
 ```go
 package main
@@ -320,17 +322,19 @@ import (
 )
 
 const (
-        keyURI          = "gcp-kms://......"
+        keyURI          = "gcp-kms://......"   // customize for your key
         credentialsPath = "/mysecurestorage/credentials.json"
 )
 
 func main() {
-
-        gcpclient := gcpkms.NewGCPClient(keyURI)
-
-        _, err := gcpclient.LoadCredentials(credentialsPath)
+        gcpclient, err := gcpkms.NewGCPClient(keyURI)
         if err != nil {
-                log.Fata(err)
+                log.Fatal(err)
+        }
+
+        _, err = gcpclient.LoadCredentials(credentialsPath)
+        if err != nil {
+                log.Fatal(err)
         }
 
         registry.RegisterKMSClient(gcpclient)
@@ -338,20 +342,20 @@ func main() {
         dek := aead.AES128CTRHMACSHA256KeyTemplate()
         kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
         if err != nil {
-                log.Fata(err)
+                log.Fatal(err)
         }
 
         a, err := aead.New(kh)
         if err != nil {
-                log.Fata(err)
+                log.Fatal(err)
         }
 
-        ct, err = a.Encrypt([]byte("secret message"), []byte("associated data"))
+        ct, err := a.Encrypt([]byte("secret message"), []byte("associated data"))
         if err != nil {
                 log.Fatal(err)
         }
 
-        pt, err = a.Decrypt(ct, []byte("associated data"))
+        pt, err := a.Decrypt(ct, []byte("associated data"))
         if err != nil {
                 log.Fatal(err)
         }
