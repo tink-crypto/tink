@@ -544,6 +544,7 @@ tink_cc_library(
     tink::core::key_manager
     tink::core::internal_key_manager
     tink::proto::tink_cc_proto
+    tink::util::constants
     tink::util::statusor
 )
 
