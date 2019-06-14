@@ -7104,6 +7104,10 @@
 <div class="block">
  Required.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/InternalPrivateKeyManager.html#getPublicKey-KeyProtoT-">getPublicKey(KeyProtoT)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/InternalPrivateKeyManager.html" title="class in com.google.crypto.tink">InternalPrivateKeyManager</a></dt>
+<dd>
+<div class="block">Creates a public key from the given private key.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EcdsaPrivateKey.Builder.html#getPublicKey--">getPublicKey()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EcdsaPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">EcdsaPrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
@@ -7205,6 +7209,10 @@
 <dd>
 <div class="block">
  Required.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/InternalPrivateKeyManager.html#getPublicKeyClass--">getPublicKeyClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/InternalPrivateKeyManager.html" title="class in com.google.crypto.tink">InternalPrivateKeyManager</a></dt>
+<dd>
+<div class="block">Returns the class corresponding to the public key protobuffer.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrivateKeyManager.html#getPublicKeyData-com.google.protobuf.ByteString-">getPublicKeyData(ByteString)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink">PrivateKeyManager</a></dt>
 <dd>
@@ -9346,6 +9354,13 @@
 <dd>
 <div class="block">A PrimitiveFactory knows how to create primitives from a given key.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/InternalPrivateKeyManager.html" title="class in com.google.crypto.tink"><span class="typeNameLink">InternalPrivateKeyManager</span></a>&lt;<a href="com/google/crypto/tink/InternalPrivateKeyManager.html" title="type parameter in InternalPrivateKeyManager">KeyProtoT</a> extends com.google.protobuf.MessageLite,<a href="com/google/crypto/tink/InternalPrivateKeyManager.html" title="type parameter in InternalPrivateKeyManager">PublicKeyProtoT</a> extends com.google.protobuf.MessageLite&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
+<dd>
+<div class="block">A PrivateKeyManager is like an <a href="com/google/crypto/tink/InternalKeyManager.html" title="class in com.google.crypto.tink"><code>InternalKeyManager</code></a>, but additionally has a method to
+ create a public key.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/InternalPrivateKeyManager.html#InternalPrivateKeyManager-java.lang.Class-java.lang.Class-com.google.crypto.tink.InternalKeyManager.PrimitiveFactory...-">InternalPrivateKeyManager(Class&lt;KeyProtoT&gt;, Class&lt;PublicKeyProtoT&gt;, InternalKeyManager.PrimitiveFactory&lt;?, KeyProtoT&gt;...)</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/InternalPrivateKeyManager.html" title="class in com.google.crypto.tink">InternalPrivateKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Bytes.html#intToByteArray-int-int-">intToByteArray(int, int)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Bytes.html" title="class in com.google.crypto.tink.subtle">Bytes</a></dt>
 <dd>
 <div class="block">Transforms a passed value to a LSB first byte array with the size of the specified capacity</div>
