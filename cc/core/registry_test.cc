@@ -28,14 +28,18 @@
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/catalogue.h"
+#include "tink/core/internal_key_manager.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/keyset_manager.h"
+#include "tink/subtle/aes_gcm_boringssl.h"
+#include "tink/subtle/random.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_keyset_handle.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
@@ -50,9 +54,12 @@ using crypto::tink::test::AddLegacyKey;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
+using crypto::tink::test::IsOk;
+using crypto::tink::test::StatusIs;
 using crypto::tink::util::Status;
 using google::crypto::tink::AesCtrHmacAeadKey;
 using google::crypto::tink::AesGcmKey;
+using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
@@ -62,7 +69,9 @@ using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 using portable_proto::MessageLite;
+using ::testing::Eq;
 using ::testing::HasSubstr;
+using ::testing::SizeIs;
 
 class RegistryTest : public ::testing::Test {
  protected:
@@ -699,6 +708,213 @@ TEST_F(RegistryTest, GetCatalogueErrorMessage) {
   // Note: The C++ standard does not guarantee the next line.  If some toolchain
   // update fails it, one can delete it.
   EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
+}
+
+// A class for testing. We will construct objects from an aead key, so that we
+// can check that a keymanager can handle multiple primitives. It is really
+// insecure, as it does nothing except provide access to the key.
+class AeadVariant {
+ public:
+  explicit AeadVariant(std::string s) : s_(s) {}
+
+  std::string get() { return s_; }
+
+ private:
+  std::string s_;
+};
+
+class ExampleInternalKeyManager
+    : public InternalKeyManager<AesGcmKey, AesGcmKeyFormat,
+                                List<Aead, AeadVariant>> {
+ public:
+  class AeadFactory : public PrimitiveFactory<Aead> {
+   public:
+    crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
+        const AesGcmKey& key) const override {
+      // Ignore the key and returned one with a fixed size for this test.
+      return {subtle::AesGcmBoringSsl::New(key.key_value())};
+    }
+  };
+
+  class AeadVariantFactory : public PrimitiveFactory<AeadVariant> {
+   public:
+    crypto::tink::util::StatusOr<std::unique_ptr<AeadVariant>> Create(
+        const AesGcmKey& key) const override {
+      return absl::make_unique<AeadVariant>(key.key_value());
+    }
+  };
+
+  ExampleInternalKeyManager()
+      : InternalKeyManager(absl::make_unique<AeadFactory>(),
+                           absl::make_unique<AeadVariantFactory>()) {}
+
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
+  }
+
+  uint32_t get_version() const override { return kVersion; }
+
+  const std::string& get_key_type() const override { return kKeyType; }
+
+  crypto::tink::util::Status ValidateKey(const AesGcmKey& key) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const AesGcmKeyFormat& key_format) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::StatusOr<AesGcmKey> CreateKey(
+      const AesGcmKeyFormat& key_format) const override {
+    AesGcmKey result;
+    result.set_key_value(subtle::Random::GetRandomBytes(key_format.key_size()));
+    return result;
+  }
+
+ private:
+  static const int kVersion = 0;
+  const std::string kKeyType = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+};
+
+TEST_F(RegistryTest, RegisterInternalKeyManager) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+}
+
+TEST_F(RegistryTest, InternalKeyManagerGetFirstKeyManager) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+  AesGcmKeyFormat format;
+  format.set_key_size(16);
+  AesGcmKey key = ExampleInternalKeyManager().CreateKey(format).ValueOrDie();
+  auto aead = Registry::get_key_manager<Aead>(
+                  "type.googleapis.com/google.crypto.tink.AesGcmKey")
+                  .ValueOrDie()
+                  ->GetPrimitive(key)
+                  .ValueOrDie();
+  std::string encryption = aead->Encrypt("TESTMESSAGE", "").ValueOrDie();
+  std::string decryption = aead->Decrypt(encryption, "").ValueOrDie();
+  EXPECT_THAT(decryption, Eq("TESTMESSAGE"));
+}
+
+TEST_F(RegistryTest, InternalKeyManagerGetSecondKeyManager) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+  AesGcmKeyFormat format;
+  format.set_key_size(16);
+  AesGcmKey key = ExampleInternalKeyManager().CreateKey(format).ValueOrDie();
+  auto aead_variant = Registry::get_key_manager<AeadVariant>(
+                          "type.googleapis.com/google.crypto.tink.AesGcmKey")
+                          .ValueOrDie()
+                          ->GetPrimitive(key)
+                          .ValueOrDie();
+  EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
+}
+
+TEST_F(RegistryTest, InternalKeyManagerNotSupportedPrimitive) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+  EXPECT_THAT(Registry::get_key_manager<Mac>(
+                  "type.googleapis.com/google.crypto.tink.AesGcmKey")
+                  .status(),
+              StatusIs(util::error::INVALID_ARGUMENT,
+                       HasSubstr("not among supported primitives")));
+}
+
+TEST_F(RegistryTest, InternalKeyManagerNewKey) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+
+  AesGcmKeyFormat format;
+  format.set_key_size(32);
+  KeyTemplate key_template;
+  key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  key_template.set_value(format.SerializeAsString());
+
+  KeyData key_data = *Registry::NewKeyData(key_template).ValueOrDie();
+  EXPECT_THAT(key_data.type_url(),
+              Eq("type.googleapis.com/google.crypto.tink.AesGcmKey"));
+  EXPECT_THAT(key_data.key_material_type(),
+              Eq(google::crypto::tink::KeyData::SYMMETRIC));
+  AesGcmKey key;
+  key.ParseFromString(key_data.value());
+  EXPECT_THAT(key.key_value(), SizeIs(32));
+}
+
+TEST_F(RegistryTest, InternalKeyManagerNewKeyInvalidSize) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+
+  AesGcmKeyFormat format;
+  format.set_key_size(33);
+  KeyTemplate key_template;
+  key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  key_template.set_value(format.SerializeAsString());
+
+  EXPECT_THAT(Registry::NewKeyData(key_template).status(), IsOk());
+}
+
+TEST_F(RegistryTest, RegisterInternalKeyManagerTwiceMoreRestrictive) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), false),
+              IsOk());
+}
+
+TEST_F(RegistryTest, RegisterInternalKeyManagerTwice) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), false),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), false),
+              IsOk());
+}
+
+TEST_F(RegistryTest, RegisterInternalKeyManagerLessRestrictive) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), false),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              StatusIs(util::error::ALREADY_EXISTS));
+}
+
+TEST_F(RegistryTest, RegisterInternalKeyManagerBeforeKeyManager) {
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterKeyManager(
+                  absl::make_unique<TestAeadKeyManager>(
+                      "type.googleapis.com/google.crypto.tink.AesGcmKey"),
+                  true),
+              StatusIs(util::error::ALREADY_EXISTS));
+}
+
+TEST_F(RegistryTest, RegisterInternalKeyManagerAfterKeyManager) {
+  EXPECT_THAT(Registry::RegisterKeyManager(
+                  absl::make_unique<TestAeadKeyManager>(
+                      "type.googleapis.com/google.crypto.tink.AesGcmKey"),
+                  true),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterInternalKeyManager(
+                  absl::make_unique<ExampleInternalKeyManager>(), true),
+              StatusIs(util::error::ALREADY_EXISTS));
 }
 
 }  // namespace

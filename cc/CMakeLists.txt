@@ -386,7 +386,9 @@ tink_cc_library(
     core/registry_impl.h
   DEPS
     tink::core::catalogue
+    tink::core::internal_key_manager
     tink::core::key_manager
+    tink::core::key_manager_impl
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::util::errors
@@ -597,6 +599,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::catalogue
     tink::core::crypto_format
+    tink::core::internal_key_manager
     tink::core::keyset_manager
     tink::core::registry
     tink::aead::aead_catalogue
@@ -609,6 +612,7 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
+    tink::util:test_matchers
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto
@@ -794,6 +798,7 @@ tink_cc_test(
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_boringssl
+    tink::subtle::random
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

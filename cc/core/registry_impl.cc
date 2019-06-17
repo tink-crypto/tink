@@ -42,7 +42,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
                      "for creation of new keys.",
                      type_url.c_str());
   }
-  return it->second.key_factory.NewKeyData(key_template.value());
+  return it->second.key_factory->NewKeyData(key_template.value());
 }
 
 StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
@@ -54,7 +54,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
                      type_url.c_str());
   }
   auto factory =
-      dynamic_cast<const PrivateKeyFactory*>(&it->second.key_factory);
+      dynamic_cast<const PrivateKeyFactory*>(it->second.key_factory);
   if (factory == nullptr) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "KeyManager for type '%s' does not have "

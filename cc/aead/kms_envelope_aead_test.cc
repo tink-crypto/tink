@@ -81,8 +81,9 @@ TEST(KmsEnvelopeAeadTest, WrongDekPrimitive) {
   std::string remote_aead_name = "kms-backed-aead";
   auto remote_aead = absl::make_unique<DummyAead>(remote_aead_name);
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
-  EXPECT_THAT(aead_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
-                                             HasSubstr("Wrong Primitive")));
+  EXPECT_THAT(aead_result.status(),
+              StatusIs(util::error::INVALID_ARGUMENT,
+                       HasSubstr("not among supported primitives")));
 }
 
 TEST(KmsEnvelopeAeadTest, DecryptionErrors) {

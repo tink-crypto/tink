@@ -112,6 +112,13 @@ class Registry {
     return RegisterKeyManager(absl::WrapUnique(manager), new_key_allowed);
   }
 
+  template <class InternalKeyManager>
+  static crypto::tink::util::Status RegisterInternalKeyManager(
+      std::unique_ptr<InternalKeyManager> manager, bool new_key_allowed) {
+    return RegistryImpl::GlobalInstance().RegisterInternalKeyManager(
+        manager.release(), new_key_allowed);
+  }
+
   template <class ConcretePrimitiveWrapper>
   static crypto::tink::util::Status RegisterPrimitiveWrapper(
       std::unique_ptr<ConcretePrimitiveWrapper> wrapper) {
