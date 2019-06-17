@@ -110,7 +110,8 @@ class RegistryImpl {
 
  private:
   // All information for a given type url.
-  struct KeyTypeInfo {
+  class KeyTypeInfo {
+   public:
     // Information for each primitive which is available for a key type.
     struct PerPrimitiveIndex {
       template <typename P>
@@ -132,65 +133,47 @@ class RegistryImpl {
 
     template <typename P>
     KeyTypeInfo(KeyManager<P>* key_manager, bool new_key_allowed)
-        : key_manager_type_index(std::type_index(typeid(*key_manager))),
-          per_primitive_managers(std::vector<PerPrimitiveIndex>(
+        : key_manager_type_index_(std::type_index(typeid(*key_manager))),
+          per_primitive_managers_(std::vector<PerPrimitiveIndex>(
               {PerPrimitiveIndex(absl::WrapUnique(key_manager))})),
-          new_key_allowed(new_key_allowed),
-          internal_key_factory(nullptr),
-          key_factory(&key_manager->get_key_factory()),
-          internal_key_manager(nullptr) {}
+          new_key_allowed_(new_key_allowed),
+          internal_key_factory_(nullptr),
+          key_factory_(&key_manager->get_key_factory()),
+          internal_key_manager_(nullptr) {}
 
     template <typename KeyProto, typename KeyFormatProto,
               typename... Primitives>
     KeyTypeInfo(InternalKeyManager<KeyProto, KeyFormatProto,
                                    List<Primitives...>>* key_manager,
                 bool new_key_allowed)
-        : key_manager_type_index(std::type_index(typeid(*key_manager))),
-          per_primitive_managers({PerPrimitiveIndex(
+        : key_manager_type_index_(std::type_index(typeid(*key_manager))),
+          per_primitive_managers_({PerPrimitiveIndex(
               internal::MakeKeyManager<Primitives>(key_manager))...}),
-          new_key_allowed(new_key_allowed),
-          internal_key_factory(
+          new_key_allowed_(new_key_allowed),
+          internal_key_factory_(
               absl::make_unique<internal::KeyFactoryImpl<InternalKeyManager<
                   KeyProto, KeyFormatProto, List<Primitives...>>>>(
                   key_manager)),
-          key_factory(internal_key_factory.get()),
-          internal_key_manager(absl::WrapUnique(key_manager)) {}
-
-    // dynamic std::type_index of the actual key manager class for which this
-    // key was inserted.
-    std::type_index key_manager_type_index;
-    // For each primitive, the corresponding names and key_manager.
-    std::vector<PerPrimitiveIndex> per_primitive_managers;
-    // Whether the key manager allows creating new keys.
-    bool new_key_allowed;
-    // A factory constructed from an internal key manager. Owned version of
-    // key_factory if constructed with an InternalKeyManager. This is nullptr if
-    // constructed with a KeyManager.
-    std::unique_ptr<const KeyFactory> internal_key_factory;
-    // Unowned copy of internal_key_factory, always different from
-    // nullptr.
-    const KeyFactory* key_factory;
-    // The owned pointer in case we use an InternalKeyManager, nullptr if
-    // constructed with a KeyManager.
-    std::shared_ptr<void> internal_key_manager;
+          key_factory_(internal_key_factory_.get()),
+          internal_key_manager_(absl::WrapUnique(key_manager)) {}
 
     template <typename P>
     crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
         absl::string_view requested_type_url) const {
       std::type_index index_to_find = std::type_index(typeid(P));
       auto it = std::find_if(
-          per_primitive_managers.begin(), per_primitive_managers.end(),
+          per_primitive_managers_.begin(), per_primitive_managers_.end(),
           [&index_to_find](const PerPrimitiveIndex& per_primitive_index) {
             return index_to_find == per_primitive_index.type_index;
           });
-      if (it == per_primitive_managers.end()) {
+      if (it == per_primitive_managers_.end()) {
         return crypto::tink::util::Status(
             crypto::tink::util::error::INVALID_ARGUMENT,
             absl::StrCat(
                 "Primitive type ", typeid(P).name(),
                 " not among supported primitives ",
-                absl::StrJoin(per_primitive_managers.begin(),
-                              per_primitive_managers.end(), ", ",
+                absl::StrJoin(per_primitive_managers_.begin(),
+                              per_primitive_managers_.end(), ", ",
                               [](std::string* out,
                                  const PerPrimitiveIndex& per_primitive_index) {
                                 absl::StrAppend(
@@ -200,6 +183,34 @@ class RegistryImpl {
       }
       return static_cast<const KeyManager<P>*>(it->key_manager.get());
     }
+
+    const std::type_index& key_manager_type_index() const {
+      return key_manager_type_index_;
+    }
+
+    bool new_key_allowed() const { return new_key_allowed_; }
+    void set_new_key_allowed(bool b) { new_key_allowed_ = b; }
+
+    const KeyFactory& key_factory() const { return *key_factory_; }
+
+   private:
+    // dynamic std::type_index of the actual key manager class for which this
+    // key was inserted.
+    std::type_index key_manager_type_index_;
+    // For each primitive, the corresponding names and key_manager.
+    std::vector<PerPrimitiveIndex> per_primitive_managers_;
+    // Whether the key manager allows creating new keys.
+    bool new_key_allowed_;
+    // A factory constructed from an internal key manager. Owned version of
+    // key_factory if constructed with an InternalKeyManager. This is nullptr if
+    // constructed with a KeyManager.
+    std::unique_ptr<const KeyFactory> internal_key_factory_;
+    // Unowned copy of internal_key_factory, always different from
+    // nullptr.
+    const KeyFactory* key_factory_;
+    // The owned pointer in case we use an InternalKeyManager, nullptr if
+    // constructed with a KeyManager.
+    std::shared_ptr<void> internal_key_manager_;
   };
 
   // All information for a given primitive label.
@@ -307,19 +318,19 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
   auto it = type_url_to_info_.find(type_url);
 
   if (it != type_url_to_info_.end()) {
-    if (it->second.key_manager_type_index !=
+    if (it->second.key_manager_type_index() !=
         std::type_index(typeid(*owned_manager))) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A manager for type '%s' has been already registered.",
                        type_url.c_str());
     } else {
-      if (!it->second.new_key_allowed && new_key_allowed) {
+      if (!it->second.new_key_allowed() && new_key_allowed) {
         return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                          "A manager for type '%s' has been already registered "
                          "with forbidden new key operation.",
                          type_url.c_str());
       }
-      it->second.new_key_allowed = new_key_allowed;
+      it->second.set_new_key_allowed(new_key_allowed);
     }
   } else {
     type_url_to_info_.emplace(
@@ -346,19 +357,19 @@ crypto::tink::util::Status RegistryImpl::RegisterInternalKeyManager(
   auto it = type_url_to_info_.find(type_url);
 
   if (it != type_url_to_info_.end()) {
-    if (it->second.key_manager_type_index !=
+    if (it->second.key_manager_type_index() !=
         std::type_index(typeid(*manager))) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A manager for type '%s' has been already registered.",
                        type_url.c_str());
     } else {
-      if (!it->second.new_key_allowed && new_key_allowed) {
+      if (!it->second.new_key_allowed() && new_key_allowed) {
         return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                          "A manager for type '%s' has been already registered "
                          "with forbidden new key operation.",
                          type_url.c_str());
       }
-      it->second.new_key_allowed = new_key_allowed;
+      it->second.set_new_key_allowed(new_key_allowed);
     }
   } else {
     type_url_to_info_.emplace(
