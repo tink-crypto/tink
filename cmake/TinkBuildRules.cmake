@@ -179,6 +179,8 @@ function(tink_cc_test)
 
   set_property(TARGET ${_target_name}
                PROPERTY FOLDER "${TINK_IDE_FOLDER}/Tests")
+  set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD ${TINK_CXX_STANDARD})
+  set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD_REQUIRED true)
 
   if (${CMAKE_VERSION} VERSION_LESS 3.9)
     add_test(NAME ${_target_name} COMMAND ${_target_name})

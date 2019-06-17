@@ -123,10 +123,14 @@ run_macos_tests() {
 }
 
 run_cmake_tests() {
+  echo "========================================================= Running cmake"
   cmake --version
-  cmake .
-  make
-  echo "============ DONE TESTING WITH cmake ======="
+  cmake . -DTINK_BUILD_TESTS=ON
+  echo "==================================================== Building with make"
+  make -j8 all
+  echo "===================================================== Testing with make"
+  CTEST_OUTPUT_ON_FAILURE=1 make test
+  echo "================================================ Done testing with make"
 }
 
 run_linux_tests
