@@ -32,11 +32,7 @@
 
 include(CMakeParseArguments)
 
-# GoogleTest is available only since CMake version 3.9,
-# so we're using FindGTest for older versions.
-if (${CMAKE_VERSION} VERSION_LESS 3.9)
-  include(FindGTest)
-else()
+if (NOT ${CMAKE_VERSION} VERSION_LESS 3.9)
   include(GoogleTest)
 endif()
 
@@ -184,8 +180,8 @@ function(tink_cc_test)
   set_property(TARGET ${_target_name}
                PROPERTY FOLDER "${TINK_IDE_FOLDER}/Tests")
 
-  if (${CMAKE_VERSION} VERSION_LESS 3.10)
-    gtest_add_tests(TARGET ${_target_name})
+  if (${CMAKE_VERSION} VERSION_LESS 3.9)
+    add_test(NAME ${_target_name} COMMAND ${_target_name})
   else()
     gtest_discover_tests(${_target_name})
   endif()

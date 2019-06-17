@@ -100,7 +100,7 @@ enable tests and build the shared library as well:
     $ mkdir tink-build && cd tink-build
     $ cmake ../tink -DTINK_BUILD_SHARED_LIB=ON -DTINK_BUILD_TESTS=ON -DCMAKE_GENERATOR=Ninja
     $ ninja
-    $ ninja test
+    $ CTEST_OUTPUT_ON_FAILURE=1 ninja test
     $ ninja package
 
 This combination of options ensures that the entire CMake configuration is
