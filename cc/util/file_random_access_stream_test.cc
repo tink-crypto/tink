@@ -16,15 +16,12 @@
 
 #include "tink/util/file_random_access_stream.h"
 
-#include <fcntl.h>
-#include <unistd.h>
 #include <thread>  // NOLINT(build/c++11)
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "tink/subtle/random.h"
 #include "tink/util/buffer.h"
 #include "tink/util/test_util.h"
 
@@ -32,37 +29,6 @@ namespace crypto {
 namespace tink {
 namespace util {
 namespace {
-
-// Creates a new test file with the specified 'filename', writes 'size' random
-// bytes to the file, and returns a file descriptor for reading from the file.
-// A copy of the bytes written to the file is returned in 'file_contents'.
-int GetTestFileDescriptor(
-    absl::string_view filename, int size, std::string* file_contents) {
-  std::string full_filename =
-      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
-  (*file_contents) = subtle::Random::GetRandomBytes(size);
-  mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
-  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
-  if (fd == -1) {
-    std::clog << "Cannot create file " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  if (write(fd, file_contents->data(), size) != size) {
-    std::clog << "Failed to write " << size << " bytes to file "
-              << full_filename << " error: " << errno << std::endl;
-
-    exit(1);
-  }
-  close(fd);
-  fd = open(full_filename.c_str(), O_RDONLY);
-  if (fd == -1) {
-    std::clog << "Cannot re-open file " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  return fd;
-}
 
 // Reads the entire 'ra_stream' in chunks of size 'chunk_size',
 // until no more bytes can be read, and puts the read bytes into 'contents'.
@@ -109,12 +75,12 @@ void ReadAndVerifyChunk(RandomAccessStream* ra_stream,
 }
 
 TEST(FileRandomAccessStreamTest, ReadingStreams) {
-  //  for (auto stream_size : {0, 10, 100, 1000, 10000, 1000000}) {
-  for (auto stream_size : {0, 10, 100, 1000}) {
+  for (auto stream_size : {0, 10, 100, 1000, 10000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
-    int input_fd = GetTestFileDescriptor(filename, stream_size, &file_contents);
+    int input_fd =
+        test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     EXPECT_EQ(stream_size, file_contents.size());
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     std::string stream_contents;
@@ -132,7 +98,8 @@ TEST(FileRandomAccessStreamTest, ConcurrentReads) {
   for (auto stream_size : {100, 1000, 10000, 100000}) {
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
-    int input_fd = GetTestFileDescriptor(filename, stream_size, &file_contents);
+    int input_fd =
+        test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     EXPECT_EQ(stream_size, file_contents.size());
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     std::thread read_0(ReadAndVerifyChunk,
@@ -154,7 +121,8 @@ TEST(FileRandomAccessStreamTest, NegativeReadPosition) {
   for (auto stream_size : {0, 10, 100, 1000, 10000}) {
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
-    int input_fd = GetTestFileDescriptor(filename, stream_size, &file_contents);
+    int input_fd =
+        test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     int count = 42;
     auto buffer = std::move(Buffer::New(count).ValueOrDie());
@@ -172,7 +140,8 @@ TEST(FileRandomAccessStreamTest, NegativeReadCount) {
   for (auto stream_size : {0, 10, 100, 1000, 10000}) {
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
-    int input_fd = GetTestFileDescriptor(filename, stream_size, &file_contents);
+    int input_fd =
+        test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     auto buffer = std::move(Buffer::New(42).ValueOrDie());
     int64_t position = 0;
@@ -189,7 +158,8 @@ TEST(FileRandomAccessStreamTest, ReadPositionAfterEof) {
   for (auto stream_size : {0, 10, 100, 1000, 10000}) {
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
-    int input_fd = GetTestFileDescriptor(filename, stream_size, &file_contents);
+    int input_fd =
+        test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     int count = 42;
     auto buffer = std::move(Buffer::New(count).ValueOrDie());

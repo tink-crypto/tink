@@ -53,7 +53,19 @@ namespace test {
 // Various utilities for testing.
 ///////////////////////////////////////////////////////////////////////////////
 
-// Converts a hexadecimal std::string into a std::string of bytes.
+// Creates a new test file with the specified 'filename', writes 'size' random
+// bytes to the file, and returns a file descriptor for reading from the file.
+// A copy of the bytes written to the file is returned in 'file_contents'.
+int GetTestFileDescriptor(
+    absl::string_view filename, int size, std::string* file_contents);
+
+// Creates a new test file with the specified 'filename', ready for writing.
+int GetTestFileDescriptor(absl::string_view filename);
+
+// Reads the test file specified by 'filename', and returns its contents.
+std::string ReadTestFile(std::string filename);
+
+  // Converts a hexadecimal std::string into a std::string of bytes.
 // Returns a status if the size of the input is odd or if the input contains
 // characters that are not hexadecimal.
 crypto::tink::util::StatusOr<std::string> HexDecode(absl::string_view hex);

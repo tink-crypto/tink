@@ -160,6 +160,7 @@ tink_cc_library(
     tink::core::public_key_verify
     tink::core::streaming_aead
     tink::aead::aes_gcm_key_manager
+    tink::subtle::random
     tink::subtle::subtle_util_boringssl
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto
@@ -238,7 +239,6 @@ tink_cc_test(
   DEPS
     tink::util::file_input_stream
     tink::util::test_util
-    tink::subtle::random
     absl::memory
     absl::strings
 )
@@ -263,7 +263,6 @@ tink_cc_test(
     tink::util::buffer
     tink::util::file_random_access_stream
     tink::util::test_util
-    tink::subtle::random
     absl::memory
     absl::strings
 )

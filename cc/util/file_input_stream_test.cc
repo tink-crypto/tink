@@ -16,50 +16,15 @@
 
 #include "tink/util/file_input_stream.h"
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <vector>
-
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "tink/subtle/random.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace {
-
-// Creates a new test file with the specified 'filename', writes 'size' random
-// bytes to the file, and returns a file descriptor for reading from the file.
-// A copy of the bytes written to the file is returned in 'file_contents'.
-int GetTestFileDescriptor(
-    absl::string_view filename, int size, std::string* file_contents) {
-  std::string full_filename =
-      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
-  (*file_contents) = subtle::Random::GetRandomBytes(size);
-  mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
-  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
-  if (fd == -1) {
-    std::clog << "Cannot create file " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  if (write(fd, file_contents->data(), size) != size) {
-    std::clog << "Failed to write " << size << " bytes to file "
-              << full_filename << " error: " << errno << std::endl;
-
-    exit(1);
-  }
-  close(fd);
-  fd = open(full_filename.c_str(), O_RDONLY);
-  if (fd == -1) {
-    std::clog << "Cannot re-open file " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  return fd;
-}
 
 // Reads the specified 'input_stream' until no more bytes can be read,
 // and puts the read bytes into 'contents'.
@@ -81,11 +46,12 @@ class FileInputStreamTest : public ::testing::Test {
 };
 
 TEST_F(FileInputStreamTest, testReadingStreams) {
-  std::vector<int> stream_sizes = {0, 10, 100, 1000, 10000, 100000, 1000000};
-  for (auto stream_size : stream_sizes) {
+  for (auto stream_size : {0, 10, 100, 1000, 10000, 100000, 1000000}) {
+    SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
-    int input_fd = GetTestFileDescriptor(filename, stream_size, &file_contents);
+    int input_fd =
+        test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     EXPECT_EQ(stream_size, file_contents.size());
     auto input_stream = absl::make_unique<util::FileInputStream>(input_fd);
     std::string stream_contents;
@@ -97,12 +63,13 @@ TEST_F(FileInputStreamTest, testReadingStreams) {
 }
 
 TEST_F(FileInputStreamTest, testCustomBufferSizes) {
-  std::vector<int> buffer_sizes = {1, 10, 100, 1000, 10000};
   int stream_size = 100000;
-  for (auto buffer_size : buffer_sizes) {
+  for (auto buffer_size : {1, 10, 100, 1000, 10000}) {
+    SCOPED_TRACE(absl::StrCat("buffer_size = ", buffer_size));
     std::string file_contents;
     std::string filename = absl::StrCat(buffer_size, "_buffer_size_test.bin");
-    int input_fd = GetTestFileDescriptor(filename, stream_size, &file_contents);
+    int input_fd =
+        test::GetTestFileDescriptor(filename, stream_size, &file_contents);
     EXPECT_EQ(stream_size, file_contents.size());
     auto input_stream =
         absl::make_unique<util::FileInputStream>(input_fd, buffer_size);
@@ -121,7 +88,8 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
   const void* buffer;
   std::string file_contents;
   std::string filename = absl::StrCat(buffer_size, "_backup_test.bin");
-  int input_fd = GetTestFileDescriptor(filename, stream_size, &file_contents);
+  int input_fd =
+      test::GetTestFileDescriptor(filename, stream_size, &file_contents);
   EXPECT_EQ(stream_size, file_contents.size());
 
   // Prepare the stream and do the first call to Next().
@@ -136,9 +104,9 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
             std::string(static_cast<const char*>(buffer), buffer_size));
 
   // BackUp several times, but in total fewer bytes than returned by Next().
-  std::vector<int> backup_sizes = {0, 1, 5, 0, 10, 100, -42, 400, 20, -100};
   int total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (auto backup_size : {0, 1, 5, 0, 10, 100, -42, 400, 20, -100}) {
+    SCOPED_TRACE(absl::StrCat("backup_size = ", backup_size));
     input_stream->BackUp(backup_size);
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, input_stream->Position());
@@ -153,9 +121,9 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
       std::string(static_cast<const char*>(buffer), total_backup_size));
 
   // BackUp() some bytes, again fewer than returned by Next().
-  backup_sizes = {0, 72, -94, 37, 82};
   total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (auto backup_size : {0, 72, -94, 37, 82}) {
+    SCOPED_TRACE(absl::StrCat("backup_size = ", backup_size));
     input_stream->BackUp(backup_size);
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, input_stream->Position());
@@ -180,9 +148,10 @@ TEST_F(FileInputStreamTest, testBackupAndPosition) {
       std::string(static_cast<const char*>(buffer), buffer_size));
 
   // BackUp a few times, with total over the returned buffer_size.
-  backup_sizes = {0, 72, -100, buffer_size/2, 200, -25, buffer_size, 42};
   total_backup_size = 0;
-  for (auto backup_size : backup_sizes) {
+  for (auto backup_size :
+           {0, 72, -100, buffer_size/2, 200, -25, buffer_size, 42}) {
+    SCOPED_TRACE(absl::StrCat("backup_size = ", backup_size));
     input_stream->BackUp(backup_size);
     total_backup_size = std::min(buffer_size,
                                  total_backup_size + std::max(0, backup_size));

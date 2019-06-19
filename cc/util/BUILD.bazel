@@ -189,6 +189,7 @@ cc_library(
         "//cc:public_key_verify",
         "//cc:streaming_aead",
         "//cc/aead:aes_gcm_key_manager",
+        "//cc/subtle:random",
         "//cc/subtle:subtle_util_boringssl",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
@@ -293,7 +294,6 @@ cc_test(
     deps = [
         ":file_input_stream",
         ":test_util",
-        "//cc/subtle:random",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -326,7 +326,6 @@ cc_test(
         ":buffer",
         ":file_random_access_stream",
         ":test_util",
-        "//cc/subtle:random",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
