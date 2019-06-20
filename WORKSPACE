@@ -112,10 +112,10 @@ http_archive(
 http_archive(
     name = "com_github_grpc_grpc",
     urls = [
-        "https://github.com/grpc/grpc/archive/v1.20.0.tar.gz"
+        "https://github.com/grpc/grpc/archive/v1.21.3.tar.gz"
     ],
-    sha256 = "01c5e617d098a33672ddb640d0e50831fb7c613999435e5dcf115021abde6b9a",
-    strip_prefix = "grpc-1.20.0",
+    sha256 = "50747c8939c535b1059f19534de263eb9b7570b5347390fb24b0bbce8763e9a4",
+    strip_prefix = "grpc-1.21.3",
 )
 
 # Binds needed by gRPC.
