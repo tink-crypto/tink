@@ -24,6 +24,25 @@ set -x
 # Change to repo root
 cd git*/tink
 
-# Verify that the gcloud alpha tools are present
-gcloud alpha
+# Only in Kokoro environments.
+if [[ -n "${KOKORO_ROOT}" ]]; then
+  # TODO(b/73748835): Workaround on Kokoro.
+  rm -f ~/.bazelrc
 
+  use_bazel.sh latest || exit 1
+fi
+
+BAZEL_WRAPPER="${KOKORO_GFILE_DIR}/bazel_wrapper.py"
+chmod +x "${BAZEL_WRAPPER}"
+
+echo "using bazel binary: $(which bazel)"
+"${BAZEL_WRAPPER}" version
+
+time "${BAZEL_WRAPPER}" \
+  test \
+  --bazelrc="${KOKORO_GFILE_DIR}/bazel-rbe.bazelrc" \
+  --config=remote \
+  --remote_accept_cached=true \
+  --remote_local_fallback=false \
+  -- \
+  //tink/cc/...
