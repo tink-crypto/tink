@@ -126,7 +126,7 @@ bind(
 
 bind(
     name = "zlib",
-    actual = "@zlib_archive//:zlib",
+    actual = "@zlib//:zlib",
 )
 
 bind(
@@ -170,7 +170,7 @@ http_archive(
 )
 
 http_archive(
-    name = "zlib_archive",
+    name = "zlib",
     urls = [
         "https://mirror.bazel.build/zlib.net/zlib-1.2.11.tar.gz",
     ],
