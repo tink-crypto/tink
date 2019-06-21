@@ -110,6 +110,16 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME shared_random_access_stream
+  SRCS shared_random_access_stream.h
+  DEPS
+    absl::memory
+    tink::core::random_access_stream
+    tink::util::buffer
+    tink::util::status
+)
+
+tink_cc_library(
   NAME decrypting_input_stream
   SRCS
     decrypting_input_stream.cc
@@ -259,4 +269,18 @@ tink_cc_test(
     tink::util::istream_input_stream
     tink::util::status
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME shared_random_access_stream_test
+  SRCS shared_random_access_stream_test.cc
+  DEPS
+    absl::memory
+    absl::strings
+    tink::core::random_access_stream
+    tink::streamingaead::shared_random_access_stream
+    tink::util::buffer
+    tink::util::file_random_access_stream
+    tink::util::status
+    tink::util::test_util
 )

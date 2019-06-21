@@ -127,6 +127,19 @@ cc_library(
 )
 
 cc_library(
+    name = "shared_random_access_stream",
+    srcs = ["shared_random_access_stream.h"],
+    hdrs = ["shared_random_access_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:random_access_stream",
+        "//cc/util:buffer",
+        "//cc/util:status",
+    ],
+)
+
+cc_library(
     name = "decrypting_input_stream",
     srcs = ["decrypting_input_stream.cc"],
     hdrs = ["decrypting_input_stream.h"],
@@ -300,6 +313,24 @@ cc_test(
         "//cc/util:istream_input_stream",
         "//cc/util:status",
         "//cc/util:test_matchers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "shared_random_access_stream_test",
+    size = "small",
+    srcs = ["shared_random_access_stream_test.cc"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":shared_random_access_stream",
+        "//cc:random_access_stream",
+        "//cc/util:buffer",
+        "//cc/util:file_random_access_stream",
+        "//cc/util:status",
+        "//cc/util:test_util",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
