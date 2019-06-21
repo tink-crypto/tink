@@ -39,9 +39,11 @@ echo "using bazel binary: $(which bazel)"
 "${BAZEL_WRAPPER}" version
 
 time "${BAZEL_WRAPPER}" \
-  test \
   --bazelrc="${KOKORO_GFILE_DIR}/bazel-rbe.bazelrc" \
+  test \
   --config=remote \
+  --incompatible_disable_deprecated_attr_params=false \
+  --incompatible_depset_is_not_iterable=false  \
   --remote_accept_cached=true \
   --remote_local_fallback=false \
   -- \
