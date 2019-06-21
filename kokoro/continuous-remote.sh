@@ -47,4 +47,7 @@ time "${BAZEL_WRAPPER}" \
   --remote_accept_cached=true \
   --remote_local_fallback=false \
   -- \
-  //tink/cc/...
+  //cc/... \
+  //java/... \
+  -//java:src/test/java/com/google/crypto/tink/aead/KmsAeadKeyManagerTest \
+  -//java:src/test/java/com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManagerTest
