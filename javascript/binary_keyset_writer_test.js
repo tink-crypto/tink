@@ -12,6 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @fileoverview
+ * @suppress {checkTypes, reportUnknownTypes}
+ */
 goog.module('tink.BinaryKeysetWriterTest');
 goog.setTestOnly('tink.BinaryKeysetWriterTest');
 

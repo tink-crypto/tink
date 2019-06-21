@@ -38,6 +38,20 @@ closure_js_library(
 )
 
 closure_js_library(
+    name = "binary_writer",
+    #lenient = True,
+    srcs = [
+        "binary_keyset_writer.js",
+    ],
+    deps = [
+        ":readers_writers",
+        "//javascript/exception",
+        "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
     name = "readers_writers",
     #lenient = True,
     srcs = [
@@ -64,6 +78,7 @@ closure_js_library(
         ":registry",
         ":util",
         "//javascript/exception",
+        "//javascript/subtle",
         "//proto:tink_closure_proto",
         "@io_bazel_rules_closure//closure/library",
     ],
@@ -77,6 +92,8 @@ closure_js_library(
     ],
     deps = [
         ":keyset_handle",
+        ":binary_reader",
+        ":binary_writer",
         "//proto:tink_closure_proto",
         "@io_bazel_rules_closure//closure/library",
     ],
@@ -220,6 +237,7 @@ closure_js_test(
     ]),
     entry_points = {
         "binary_keyset_reader_test.js": ["tink.BinaryKeysetReaderTest"],
+        "binary_keyset_writer_test.js": ["tink.BinaryKeysetWriterTest"],
         "cleartext_keyset_handle_test.js": ["tink.CleartextKeysetHandleTest"],
         "config_test.js": ["tink.ConfigTest"],
         "crypto_format_test.js": ["tink.CryptoFormatTest"],
@@ -231,6 +249,7 @@ closure_js_test(
     },
     deps = [
         ":binary_reader",
+        ":binary_writer",
         ":catalogue",
         ":cleartext_keyset_handle",
         ":config",
