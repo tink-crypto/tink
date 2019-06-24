@@ -32,10 +32,12 @@
 #include "tink/kms_client.h"
 #include "tink/mac.h"
 #include "tink/output_stream.h"
+#include "tink/random_access_stream.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/streaming_aead.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/buffer.h"
 #include "tink/util/constants.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -58,6 +60,11 @@ namespace test {
 // A copy of the bytes written to the file is returned in 'file_contents'.
 int GetTestFileDescriptor(
     absl::string_view filename, int size, std::string* file_contents);
+
+// Creates a new test file with the specified 'filename', with contents from
+// 'file_contents', and returns a file descriptor for reading from the file.
+int GetTestFileDescriptor(
+    absl::string_view filename, absl::string_view file_contents);
 
 // Creates a new test file with the specified 'filename', ready for writing.
 int GetTestFileDescriptor(absl::string_view filename);
@@ -239,6 +246,16 @@ class DummyStreamingAead : public StreamingAead {
         absl::StrCat(streaming_aead_name_, associated_data))};
   }
 
+  crypto::tink::util::StatusOr<
+      std::unique_ptr<crypto::tink::RandomAccessStream>>
+  NewDecryptingRandomAccessStream(
+      std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
+      absl::string_view associated_data) override {
+    return {absl::make_unique<DummyDecryptingRandomAccessStream>(
+        std::move(ciphertext_source),
+        absl::StrCat(streaming_aead_name_, associated_data))};
+  }
+
   // Upon first call to Next() writes to 'ct_dest' the specifed 'header',
   // and subsequently forwards all methods calls to the corresponding
   // methods of 'cd_dest'.
@@ -360,6 +377,59 @@ class DummyStreamingAead : public StreamingAead {
     bool after_init_;
     util::Status status_;
   };  // class DummyDecryptingStream
+
+  // Upon first call to PRead() tries to read from 'ct_source' a header
+  // that is expected to be equal to 'expected_header'.  If this
+  // header matching succeeds, all subsequent method calls are forwarded
+  // to the corresponding methods of 'cd_source'.
+  class DummyDecryptingRandomAccessStream :
+      public crypto::tink::RandomAccessStream {
+   public:
+    DummyDecryptingRandomAccessStream(
+        std::unique_ptr<crypto::tink::RandomAccessStream> ct_source,
+        absl::string_view expected_header)
+        : ct_source_(std::move(ct_source)), exp_header_(expected_header),
+          after_init_(false), status_(util::OkStatus()) {}
+
+    crypto::tink::util::Status PRead(
+        int64_t position, int count,
+        crypto::tink::util::Buffer* dest_buffer) override {
+      if (!after_init_) {  // Try to initialize.
+        after_init_ = true;
+        dest_buffer->set_size(0);
+        auto buf = std::move(
+            util::Buffer::New(exp_header_.size()).ValueOrDie());
+        status_ = ct_source_->PRead(0, exp_header_.size(), buf.get());
+        if (!status_.ok() &&
+            status_.error_code() != util::error::OUT_OF_RANGE) return status_;
+        if (buf->size() < exp_header_.size()) {
+          status_ = util::Status(
+              util::error::INVALID_ARGUMENT, "Could not read header");
+        } else if (memcmp(buf->get_mem_block(), exp_header_.data(),
+                          static_cast<int>(exp_header_.size()))) {
+          status_ = util::Status(
+              util::error::INVALID_ARGUMENT, "Corrupted header");
+        }
+      }
+      if (!status_.ok()) return status_;
+      return ct_source_->PRead(
+          position + exp_header_.size(), count, dest_buffer);
+    }
+
+    int64_t size() const override {
+      if (after_init_ && status_.ok()) {
+        auto pt_size = ct_source_->size() - exp_header_.size();
+        if (pt_size >= 0) return pt_size;
+      }
+      return -1;
+    }
+
+   private:
+    std::unique_ptr<crypto::tink::RandomAccessStream> ct_source_;
+    std::string exp_header_;
+    bool after_init_;
+    util::Status status_;
+  };  // class DummyDecryptingRandomAccessStream
 
  private:
   std::string streaming_aead_name_;

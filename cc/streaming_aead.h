@@ -22,6 +22,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
+#include "tink/random_access_stream.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -50,7 +51,7 @@ class StreamingAead {
       std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination,
       absl::string_view associated_data) = 0;
 
-  // Returns a wrapper around 'ciphertext_source', such that reading via the
+  // Returns a wrapper around 'ciphertext_source', such that reading
   // via the wrapper leads to AEAD-decryption of the underlying ciphertext,
   // using 'associated_data' as associated authenticated data, and the
   // read bytes are bytes of the resulting plaintext.
@@ -59,6 +60,17 @@ class StreamingAead {
       std::unique_ptr<crypto::tink::InputStream>>
   NewDecryptingStream(
       std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
+      absl::string_view associated_data) = 0;
+
+  // Returns a wrapper around 'ciphertext_source', such that reading
+  // via the wrapper leads to AEAD-decryption of the underlying ciphertext,
+  // using 'associated_data' as associated authenticated data, and the
+  // read bytes are bytes of the resulting plaintext.
+  // Reading through the wrapper is thread safe.
+  virtual crypto::tink::util::StatusOr<
+      std::unique_ptr<crypto::tink::RandomAccessStream>>
+  NewDecryptingRandomAccessStream(
+      std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
       absl::string_view associated_data) = 0;
 
   virtual ~StreamingAead() {}

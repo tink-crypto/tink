@@ -591,6 +591,7 @@ cc_library(
         ":streaming_aead_encrypting_stream",
         "//cc:input_stream",
         "//cc:output_stream",
+        "//cc:random_access_stream",
         "//cc:streaming_aead",
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",

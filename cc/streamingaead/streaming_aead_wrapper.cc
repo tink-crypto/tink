@@ -21,7 +21,9 @@
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
 #include "tink/primitive_set.h"
+#include "tink/random_access_stream.h"
 #include "tink/streamingaead/decrypting_input_stream.h"
+#include "tink/streamingaead/decrypting_random_access_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -66,6 +68,12 @@ class StreamingAeadSetWrapper: public StreamingAead {
       std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
       absl::string_view associated_data) override;
 
+  crypto::tink::util::StatusOr<
+      std::unique_ptr<crypto::tink::RandomAccessStream>>
+  NewDecryptingRandomAccessStream(
+      std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
+      absl::string_view associated_data) override;
+
   ~StreamingAeadSetWrapper() override {}
 
  private:
@@ -90,6 +98,14 @@ StreamingAeadSetWrapper::NewDecryptingStream(
     std::unique_ptr<InputStream> ciphertext_source,
     absl::string_view associated_data) {
   return {streamingaead::DecryptingInputStream::New(
+      primitives_, std::move(ciphertext_source), associated_data)};
+}
+
+StatusOr<std::unique_ptr<RandomAccessStream>>
+StreamingAeadSetWrapper::NewDecryptingRandomAccessStream(
+    std::unique_ptr<RandomAccessStream> ciphertext_source,
+    absl::string_view associated_data) {
+  return {streamingaead::DecryptingRandomAccessStream::New(
       primitives_, std::move(ciphertext_source), associated_data)};
 }
 

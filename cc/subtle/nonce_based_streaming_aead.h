@@ -20,6 +20,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
+#include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/stream_segment_encrypter.h"
@@ -45,6 +46,12 @@ class NonceBasedStreamingAead : public StreamingAead {
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
   NewDecryptingStream(
       std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
+      absl::string_view associated_data) override;
+
+  crypto::tink::util::StatusOr<
+      std::unique_ptr<crypto::tink::RandomAccessStream>>
+  NewDecryptingRandomAccessStream(
+      std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
       absl::string_view associated_data) override;
 
  protected:

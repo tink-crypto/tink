@@ -20,12 +20,16 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/random/random.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/primitive_set.h"
+#include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"
+#include "tink/util/buffer.h"
+#include "tink/util/file_random_access_stream.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
@@ -45,6 +49,36 @@ using google::crypto::tink::OutputPrefixType;
 using subtle::test::ReadFromStream;
 using subtle::test::WriteToStream;
 using testing::HasSubstr;
+
+// Creates an RandomAccessStream with the specified contents.
+std::unique_ptr<RandomAccessStream> GetRandomAccessStream(
+    absl::string_view contents) {
+  absl::BitGen gen;
+  auto index = absl::Uniform<int>(absl::interval_closed, gen, 0, 10000);
+  std::string filename = absl::StrCat("stream_data_file_", index, ".txt");
+  int input_fd = test::GetTestFileDescriptor(filename, contents);
+  return {absl::make_unique<util::FileRandomAccessStream>(input_fd)};
+}
+
+// Reads the entire 'ra_stream', until no more bytes can be read,
+// and puts the read bytes into 'contents'.
+// Returns the status of the last ra_stream->PRead()-operation.
+util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
+  int chunk_size = 42;
+  contents->clear();
+  auto buffer = std::move(util::Buffer::New(chunk_size).ValueOrDie());
+  int64_t position = 0;
+  auto status = ra_stream->PRead(position, chunk_size, buffer.get());
+  while (status.ok()) {
+    contents->append(buffer->get_mem_block(), buffer->size());
+    position = contents->size();
+    status = ra_stream->PRead(position, chunk_size, buffer.get());
+  }
+  if (status.error_code() == util::error::OUT_OF_RANGE) {  // EOF
+    EXPECT_EQ(0, buffer->size());
+  }
+  return status;
+}
 
 // A container for specification of instances of DummyStreamingAead
 // to be created for testing.
@@ -154,6 +188,59 @@ TEST(StreamingAeadSetWrapperTest, BasicEncryptionAndDecryption) {
   }
 }
 
+TEST(StreamingAeadSetWrapperTest, DecryptionWithRandomAccessStream) {
+  uint32_t key_id_0 = 1234543;
+  uint32_t key_id_1 = 726329;
+  uint32_t key_id_2 = 7213743;
+  std::string saead_name_0 = "streaming_aead0";
+  std::string saead_name_1 = "streaming_aead1";
+  std::string saead_name_2 = "streaming_aead2";
+
+  auto saead_set = GetTestStreamingAeadSet(
+      {{key_id_0, saead_name_0, OutputPrefixType::RAW},
+       {key_id_1, saead_name_1, OutputPrefixType::RAW},
+       {key_id_2, saead_name_2, OutputPrefixType::RAW}});
+
+  // Wrap saead_set and test the resulting StreamingAead.
+  StreamingAeadWrapper wrapper;
+  auto wrap_result = wrapper.Wrap(std::move(saead_set));
+  EXPECT_TRUE(wrap_result.ok()) << wrap_result.status();
+  auto saead = std::move(wrap_result.ValueOrDie());
+  for (int pt_size : {0, 1, 10, 100, 10000}) {
+    std::string plaintext = subtle::Random::GetRandomBytes(pt_size);
+    for (std::string aad : {"some_aad", "", "some other aad"}) {
+      SCOPED_TRACE(absl::StrCat("pt_size = ", pt_size,
+                                ", aad = '", aad, "'"));
+
+      // Prepare ciphertext destination stream.
+      auto ct_stream = absl::make_unique<std::stringstream>();
+      // A reference to the ciphertext buffer, for later validation.
+      auto ct_buf = ct_stream->rdbuf();
+      std::unique_ptr<OutputStream> ct_destination(
+          absl::make_unique<util::OstreamOutputStream>(std::move(ct_stream)));
+
+      // Encrypt the plaintext.
+      auto enc_stream_result =
+          saead->NewEncryptingStream(std::move(ct_destination), aad);
+      EXPECT_THAT(enc_stream_result.status(), IsOk());
+      auto enc_stream = std::move(enc_stream_result.ValueOrDie());
+      auto status = WriteToStream(enc_stream.get(), plaintext);
+      EXPECT_THAT(status, IsOk());
+      EXPECT_EQ(absl::StrCat(saead_name_2, aad, plaintext), ct_buf->str());
+
+      // Decrypt the ciphertext.
+      auto ct_source = GetRandomAccessStream(ct_buf->str());
+      auto dec_stream_result =
+          saead->NewDecryptingRandomAccessStream(std::move(ct_source), aad);
+      EXPECT_THAT(dec_stream_result.status(), IsOk());
+      std::string decrypted;
+      status = ReadAll(dec_stream_result.ValueOrDie().get(), &decrypted);
+      EXPECT_THAT(status, StatusIs(util::error::OUT_OF_RANGE,
+                                   HasSubstr("EOF")));
+      EXPECT_EQ(plaintext, decrypted);
+    }
+  }
+}
 
 TEST(StreamingAeadSetWrapperTest, DecryptionAfterWrapperIsDestroyed) {
   uint32_t key_id_0 = 1234543;

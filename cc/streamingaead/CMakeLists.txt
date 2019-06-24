@@ -13,10 +13,12 @@ tink_cc_library(
     tink::core::output_stream
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::core::random_access_stream
     tink::core::registry
     tink::core::streaming_aead
     tink::proto::tink_cc_proto
     tink::streamingaead::decrypting_input_stream
+    tink::streamingaead::decrypting_random_access_stream
     tink::util::status
     tink::util::statusor
 )
@@ -136,6 +138,24 @@ tink_cc_library(
     absl::memory
 )
 
+tink_cc_library(
+  NAME decrypting_random_access_stream
+  SRCS
+    decrypting_random_access_stream.cc
+    decrypting_random_access_stream.h
+  DEPS
+    absl::memory
+    absl::synchronization
+    tink::core::primitive_set
+    tink::core::random_access_stream
+    tink::core::streaming_aead
+    tink::streamingaead::shared_random_access_stream
+    tink::util::buffer
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -143,15 +163,19 @@ tink_cc_test(
   SRCS streaming_aead_wrapper_test.cc
   DEPS
     absl::memory
+    absl::random
     absl::strings
     tink::core::input_stream
     tink::core::output_stream
     tink::core::primitive_set
+    tink::core::random_access_stream
     tink::core::streaming_aead
     tink::proto::tink_cc_proto
     tink::streamingaead::streaming_aead_wrapper
     tink::subtle::random
     tink::subtle::test_util
+    tink::util::buffer
+    tink::util::file_random_access_stream
     tink::util::istream_input_stream
     tink::util::ostream_output_stream
     tink::util::status
@@ -249,6 +273,28 @@ tink_cc_test(
     tink::subtle::random
     tink::subtle::test_util
     tink::util::istream_input_stream
+    tink::util::ostream_output_stream
+    tink::util::status
+    tink::util::test_matchers
+    tink::util::test_util
+)
+
+tink_cc_test(
+  NAME decrypting_random_access_stream_test
+  SRCS decrypting_random_access_stream_test.cc
+  DEPS
+    absl::memory
+    absl::random
+    absl::strings
+    tink::core::output_stream
+    tink::core::primitive_set
+    tink::core::random_access_stream
+    tink::core::streaming_aead
+    tink::proto::tink_cc_proto
+    tink::streamingaead::decrypting_random_access_stream
+    tink::subtle::random
+    tink::subtle::test_util
+    tink::util::file_random_access_stream
     tink::util::ostream_output_stream
     tink::util::status
     tink::util::test_matchers

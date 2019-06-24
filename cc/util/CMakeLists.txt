@@ -158,6 +158,7 @@ tink_cc_library(
     tink::core::output_stream
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::core::random_access_stream
     tink::core::streaming_aead
     tink::aead::aes_gcm_key_manager
     tink::subtle::random
@@ -168,6 +169,7 @@ tink_cc_library(
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::ed25519_cc_proto
     tink::proto::tink_cc_proto
+    tink::util::buffer
     absl::memory
     absl::strings
 )

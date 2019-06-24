@@ -57,9 +57,14 @@ namespace test {
 
 int GetTestFileDescriptor(
     absl::string_view filename, int size, std::string* file_contents) {
+  (*file_contents) = subtle::Random::GetRandomBytes(size);
+  return GetTestFileDescriptor(filename, *file_contents);
+}
+
+int GetTestFileDescriptor(
+    absl::string_view filename, absl::string_view file_contents) {
   std::string full_filename =
       absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
-  (*file_contents) = subtle::Random::GetRandomBytes(size);
   mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
   int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
   if (fd == -1) {
@@ -67,7 +72,8 @@ int GetTestFileDescriptor(
               << " error: " << errno << std::endl;
     exit(1);
   }
-  if (write(fd, file_contents->data(), size) != size) {
+  auto size = file_contents.size();
+  if (write(fd, file_contents.data(), size) != size) {
     std::clog << "Failed to write " << size << " bytes to file "
               << full_filename << " error: " << errno << std::endl;
 
@@ -83,7 +89,7 @@ int GetTestFileDescriptor(
   return fd;
 }
 
-// Creates a new test file with the specified 'filename', ready for writing.
+
 int GetTestFileDescriptor(absl::string_view filename) {
   std::string full_filename =
       absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
