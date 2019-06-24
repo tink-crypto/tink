@@ -36,7 +36,7 @@ BAZEL_WRAPPER="${KOKORO_GFILE_DIR}/bazel_wrapper.py"
 chmod +x "${BAZEL_WRAPPER}"
 
 echo "using bazel binary: $(which bazel)"
-"${BAZEL_WRAPPER}" version
+bazel version
 
 time "${BAZEL_WRAPPER}" \
   --bazelrc="${KOKORO_GFILE_DIR}/bazel-rbe.bazelrc" \
