@@ -2,6 +2,8 @@
 
 set -e
 
+cd git*/tink
+
 echo "========================================================= Running cmake"
 cmake --version
 cmake . -DTINK_BUILD_TESTS=ON
