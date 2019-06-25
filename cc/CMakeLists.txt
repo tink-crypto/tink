@@ -60,7 +60,6 @@ set(TINK_PUBLIC_APIS
   streaming_aead_key_templates.h
   tink_config.h
   "${TINK_VERSION_H}"
-  tink::util::buffer
 )
 
 set(TINK_PUBLIC_API_DEPS
