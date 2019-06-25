@@ -14,6 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE  // needed for vasprintf(3)
+#endif
+
 #include "tink/util/errors.h"
 
 #include <stdarg.h>
