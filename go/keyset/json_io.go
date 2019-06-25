@@ -73,7 +73,6 @@ func NewJSONWriter(w io.Writer) *JSONWriter {
 	return &JSONWriter{
 		w: w,
 		j: &jsonpb.Marshaler{
-			OrigName:     true, // snake-case the json fields to be compatible with Java
 			EmitDefaults: true,
 		},
 	}
