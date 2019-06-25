@@ -17,6 +17,11 @@ set -ue
 
 #############################################################################
 ##### Test for using Tink in a CMake project.
+## This expects the following variables to be set:
+## TEST_TMPDIR -- a temporary directory we can use
+## TEST_DATA_DIR -- the directory in which the project with hello_world.cc
+##                  can be found.
+## TEST_SRCDIR -- The directory in which Tink is stored.
 
 # XDG_CACHE_HOME must be set for a successful build of BoringSSL.
 export XDG_CACHE_HOME="$TEST_TMPDIR/cache"
@@ -25,8 +30,6 @@ CMAKE_LISTS_FILE="$TEST_DATA_DIR/CMakeLists_for_CMakeBuildTest.txt"
 HELLO_WORLD_SRC="$TEST_DATA_DIR/hello_world.cc"
 KEYSET_FILE="$TEST_DATA_DIR/aes128_gcm_test_keyset_json.txt"
 
-# TINK_SRC_DIR is hacky, but Bazel has no variable for the full source dir.
-TINK_SRC_DIR="$TEST_TMPDIR/../../"
 PROJECT_DIR="$TEST_TMPDIR/my_project"
 PLAINTEXT_FILE="$TEST_TMPDIR/example_plaintext.txt"
 CIPHERTEXT_FILE="$TEST_TMPDIR/ciphertext.bin"
