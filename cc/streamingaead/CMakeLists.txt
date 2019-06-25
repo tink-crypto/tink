@@ -163,7 +163,6 @@ tink_cc_test(
   SRCS streaming_aead_wrapper_test.cc
   DEPS
     absl::memory
-    absl::random
     absl::strings
     tink::core::input_stream
     tink::core::output_stream
@@ -284,7 +283,6 @@ tink_cc_test(
   SRCS decrypting_random_access_stream_test.cc
   DEPS
     absl::memory
-    absl::random
     absl::strings
     tink::core::output_stream
     tink::core::primitive_set

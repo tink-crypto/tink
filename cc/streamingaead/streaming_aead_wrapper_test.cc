@@ -20,7 +20,6 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
-#include "absl/random/random.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/primitive_set.h"
@@ -50,12 +49,12 @@ using subtle::test::ReadFromStream;
 using subtle::test::WriteToStream;
 using testing::HasSubstr;
 
-// Creates an RandomAccessStream with the specified contents.
+// Creates a RandomAccessStream with the specified contents.
 std::unique_ptr<RandomAccessStream> GetRandomAccessStream(
     absl::string_view contents) {
-  absl::BitGen gen;
-  auto index = absl::Uniform<int>(absl::interval_closed, gen, 0, 10000);
+  static int index = 1;
   std::string filename = absl::StrCat("stream_data_file_", index, ".txt");
+  index++;
   int input_fd = test::GetTestFileDescriptor(filename, contents);
   return {absl::make_unique<util::FileRandomAccessStream>(input_fd)};
 }
