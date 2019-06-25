@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ####################################################################################
-
-#!/bin/bash
 
 # Fail on any error.
 set -e
@@ -32,20 +32,45 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   use_bazel.sh latest || exit 1
 fi
 
-BAZEL_WRAPPER="${KOKORO_GFILE_DIR}/bazel_wrapper.py"
-chmod +x "${BAZEL_WRAPPER}"
-
-echo "using bazel binary: $(which bazel)"
+echo "Using bazel binary: $(which bazel)"
 bazel version
 
-time "${BAZEL_WRAPPER}" \
+# Create an invocation ID for the bazel, and write it as an artifact.
+# Kokoro will use that later to post the bazel invocation details.
+INVOCATION_ID=$(uuidgen)
+echo "Invocation ID = ${INVOCATION_ID}"
+ID_OUT="${KOKORO_ARTIFACTS_DIR}/bazel_invocation_ids"
+echo "${INVOCATION_ID}" >> "${ID_OUT}"
+
+# Setup all the RBE args needed by bazel.
+declare -a RBE_ARGS
+RBE_ARGS=(
+  --invocation_id="${INVOCATION_ID}"
+  --auth_enabled=true
+  --auth_credentials="${KOKORO_BAZEL_AUTH_CREDENTIAL}"
+  --auth_scope=https://www.googleapis.com/auth/cloud-source-tools
+  --bes_backend="${BES_BACKEND}"
+  --bes_timeout=600s
+  --project_id="${KOKORO_BES_PROJECT_ID}"
+  --remote_cache="${REMOTE_CACHE}"
+  --remote_executor="${REMOTE_CACHE}"
+  --remote_accept_cached=true
+  --remote_local_fallback=false
+  --test_env=USER=anon
+  --remote_instance_name="${KOKORO_FOUNDRY_PROJECT_ID}/instances/default_instance"
+)
+readonly RBE_ARGS
+
+# Run all C++ and Java tests.
+# TODO(candrian): Figure out why the KMS tests are failing.
+# TODO(candrian): Add the remaining tests (Go, Python etc.)
+bazel \
   --bazelrc="${KOKORO_GFILE_DIR}/bazel-rbe.bazelrc" \
-  test \
+  test "${RBE_ARGS[@]}" \
   --config=remote \
+  --test_output=errors \
   --incompatible_disable_deprecated_attr_params=false \
   --incompatible_depset_is_not_iterable=false  \
-  --remote_accept_cached=true \
-  --remote_local_fallback=false \
   -- \
   //cc/... \
   //java/... \
