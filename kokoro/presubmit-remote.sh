@@ -49,11 +49,11 @@ RBE_ARGS=(
   --auth_enabled=true
   --auth_credentials="${KOKORO_BAZEL_AUTH_CREDENTIAL}"
   --auth_scope=https://www.googleapis.com/auth/cloud-source-tools
-  --bes_backend="${BES_BACKEND}"
+  --bes_backend="${KOKORO_BES_BACKEND_ADDRESS}"
   --bes_timeout=600s
   --project_id="${KOKORO_BES_PROJECT_ID}"
-  --remote_cache="${REMOTE_CACHE}"
-  --remote_executor="${REMOTE_CACHE}"
+  --remote_cache="${KOKORO_FOUNDRY_BACKEND_ADDRESS}"
+  --remote_executor="${KOKORO_FOUNDRY_BACKEND_ADDRESS}"
   --remote_accept_cached=true
   --remote_local_fallback=false
   --test_env=USER=anon
