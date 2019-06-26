@@ -30,6 +30,8 @@ import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
+import com.google.crypto.tink.proto.Ed25519PrivateKey;
+import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.KeyData;
@@ -935,6 +937,387 @@ public class RegistryTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
+    }
+  }
+
+  private static class PublicPrimitiveA {}
+
+  private static class PublicPrimitiveB {}
+
+  private static class TestInternalPublicKeyManager extends InternalKeyManager<Ed25519PublicKey> {
+
+    public TestInternalPublicKeyManager() {
+      super(
+          Ed25519PublicKey.class,
+          new PrimitiveFactory<PublicPrimitiveA, Ed25519PublicKey>(PublicPrimitiveA.class) {
+            @Override
+            public PublicPrimitiveA getPrimitive(Ed25519PublicKey key) {
+              return new PublicPrimitiveA();
+            }
+          },
+          new PrimitiveFactory<PublicPrimitiveB, Ed25519PublicKey>(PublicPrimitiveB.class) {
+            @Override
+            public PublicPrimitiveB getPrimitive(Ed25519PublicKey key) {
+              return new PublicPrimitiveB();
+            }
+          });
+    }
+
+    @Override
+    public String getKeyType() {
+      return "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
+    }
+
+    @Override
+    public int getVersion() {
+      return 1;
+    }
+
+    @Override
+    public KeyMaterialType keyMaterialType() {
+      return KeyMaterialType.ASYMMETRIC_PUBLIC;
+    }
+
+    @Override
+    public void validateKey(Ed25519PublicKey keyProto) throws GeneralSecurityException {
+      if (keyProto.getKeyValue().size() != 32) {
+        throw new GeneralSecurityException("validateKey(Ed25519PublicKey) failed");
+      }
+    }
+
+    @Override
+    public Ed25519PublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
+      return Ed25519PublicKey.parseFrom(byteString);
+    }
+  }
+
+  private static class PrivatePrimitiveA {}
+
+  private static class PrivatePrimitiveB {}
+
+  private static class TestInternalPrivateKeyManager
+      extends InternalPrivateKeyManager<Ed25519PrivateKey, Ed25519PublicKey> {
+    public TestInternalPrivateKeyManager() {
+      super(
+          Ed25519PrivateKey.class,
+          Ed25519PublicKey.class,
+          new PrimitiveFactory<PrivatePrimitiveA, Ed25519PrivateKey>(PrivatePrimitiveA.class) {
+            @Override
+            public PrivatePrimitiveA getPrimitive(Ed25519PrivateKey key) {
+              return new PrivatePrimitiveA();
+            }
+          },
+          new PrimitiveFactory<PrivatePrimitiveB, Ed25519PrivateKey>(PrivatePrimitiveB.class) {
+            @Override
+            public PrivatePrimitiveB getPrimitive(Ed25519PrivateKey key) {
+              return new PrivatePrimitiveB();
+            }
+          });
+    }
+
+    @Override
+    public String getKeyType() {
+      return "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
+    }
+
+    @Override
+    public int getVersion() {
+      return 1;
+    }
+
+    @Override
+    public KeyMaterialType keyMaterialType() {
+      return KeyMaterialType.ASYMMETRIC_PRIVATE;
+    }
+
+    @Override
+    public void validateKey(Ed25519PrivateKey keyProto) throws GeneralSecurityException {
+      // Throw by hand so we can verify the exception comes from here.
+      if (keyProto.getKeyValue().size() != 32) {
+        throw new GeneralSecurityException("validateKey(Ed25519PrivateKey) failed");
+      }
+    }
+
+    @Override
+    public Ed25519PrivateKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
+      return Ed25519PrivateKey.parseFrom(byteString);
+    }
+
+    @Override
+    public Ed25519PublicKey getPublicKey(Ed25519PrivateKey privateKey) {
+      return privateKey.getPublicKey();
+    }
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers() throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_getPrivateKeyManagerPrimitiveA_works()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    KeyManager<PrivatePrimitiveA> km =
+        Registry.getKeyManager(
+            new TestInternalPrivateKeyManager().getKeyType(), PrivatePrimitiveA.class);
+    assertThat(km.getKeyType()).isEqualTo(new TestInternalPrivateKeyManager().getKeyType());
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_getPrivateKeyManagerPrimitiveB_works()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    KeyManager<PrivatePrimitiveB> km =
+        Registry.getKeyManager(
+            new TestInternalPrivateKeyManager().getKeyType(), PrivatePrimitiveB.class);
+    assertThat(km.getKeyType()).isEqualTo(new TestInternalPrivateKeyManager().getKeyType());
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_getPrivateKeyManagerPublicA_works()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    KeyManager<PublicPrimitiveA> km =
+        Registry.getKeyManager(
+            new TestInternalPublicKeyManager().getKeyType(), PublicPrimitiveA.class);
+    assertThat(km.getKeyType()).isEqualTo(new TestInternalPublicKeyManager().getKeyType());
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_getPrivateKeyManagerPublicB_works()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    KeyManager<PublicPrimitiveB> km =
+        Registry.getKeyManager(
+            new TestInternalPublicKeyManager().getKeyType(), PublicPrimitiveB.class);
+    assertThat(km.getKeyType()).isEqualTo(new TestInternalPublicKeyManager().getKeyType());
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_getPrivateKeyManagerWrongPrimitive_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    try {
+      Registry.getKeyManager(new TestInternalPrivateKeyManager().getKeyType(), Mac.class);
+      fail();
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "com.google.crypto.tink.Mac");
+      assertExceptionContains(e, "PrivatePrimitiveA");
+      assertExceptionContains(e, "PrivatePrimitiveB");
+    }
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_getPublicKeyManagerWrongPrimitive_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    try {
+      Registry.getKeyManager(new TestInternalPublicKeyManager().getKeyType(), Mac.class);
+      fail();
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "com.google.crypto.tink.Mac");
+      assertExceptionContains(e, "PublicPrimitiveA");
+      assertExceptionContains(e, "PublicPrimitiveB");
+    }
+  }
+
+  // Checks that calling getUntypedKeyManager will return the keymanager for the *first* implemented
+  // class in the constructor.
+  @Test
+  public void testRegisterAssymmetricKeyManagers_getUntypedPrivateKeyManager_returnsPrimitiveA()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    KeyManager<?> km =
+        Registry.getUntypedKeyManager(new TestInternalPrivateKeyManager().getKeyType());
+    assertThat(km.getPrimitiveClass()).isEqualTo(PrivatePrimitiveA.class);
+  }
+
+  // Checks that calling getUntypedKeyManager will return the keymanager for the *first* implemented
+  // class in the constructor.
+  @Test
+  public void testRegisterAssymmetricKeyManagers_getUntypedPublicKeyManager_returnsPrimitiveA()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    KeyManager<?> km =
+        Registry.getUntypedKeyManager(new TestInternalPublicKeyManager().getKeyType());
+    assertThat(km.getPrimitiveClass()).isEqualTo(PublicPrimitiveA.class);
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_MoreRestrictedNewKeyAllowed_shouldWork()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), false);
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_SameNewKeyAllowed_shouldWork() throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), false);
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), false);
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_LessRestrictedNewKeyAllowed_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), false);
+    try {
+      Registry.registerAsymmetricKeyManagers(
+          new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_PublicKeyManagerCanBeRegisteredAlone()
+      throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestInternalPublicKeyManager(), false);
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    Registry.registerKeyManager(new TestInternalPublicKeyManager(), false);
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_PublicKeyManagerReRegister_getPublicKeyData()
+      throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestInternalPublicKeyManager(), false);
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    Registry.registerKeyManager(new TestInternalPublicKeyManager(), false);
+
+    // Check that getPublicKeyData works now.
+    Ed25519PrivateKey privateKey =
+        Ed25519PrivateKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
+            .setPublicKey(
+                Ed25519PublicKey.newBuilder()
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(32))))
+            .build();
+    KeyData publicKeyData =
+        Registry.getPublicKeyData(
+            new TestInternalPrivateKeyManager().getKeyType(), privateKey.toByteString());
+    assertThat(publicKeyData.getTypeUrl())
+        .isEqualTo(new TestInternalPublicKeyManager().getKeyType());
+    Ed25519PublicKey publicKey = Ed25519PublicKey.parseFrom(publicKeyData.getValue());
+    assertThat(publicKey.getKeyValue()).isEqualTo(privateKey.getPublicKey().getKeyValue());
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_DifferentClassPrivateKey_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    try {
+      // Note: due to the {} this is a subclass of TestInternalPrivateKeyManager.
+      Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager() {}, new TestInternalPublicKeyManager(), true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_DifferentClassPublicKey_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    try {
+      // Note: due to the {} this is a subclass of TestInternalPublicKeyManager.
+      Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager() {}, true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_thenNormalRegister_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    try {
+      // Note: due to the {} this is a subclass.
+      Registry.registerKeyManager(
+          new TestInternalPrivateKeyManager() {}, true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_thenNormalRegisterForPublic_throws()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    try {
+      // Note: due to the {} this is a subclass.
+      Registry.registerKeyManager(
+          new TestInternalPublicKeyManager() {}, true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterAssymmetricKeyManagers_ThrowsWithDifferentPublicKeyManager()
+      throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+    try {
+      Registry.registerAsymmetricKeyManagers(
+          new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager() {
+            @Override
+            public String getKeyType() {
+              return "bla";
+            }
+          }, true);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "public key manager corresponding to");
     }
   }
 

@@ -110,6 +110,12 @@ public final class Registry {
      * KeyManager}.
      */
     Set<Class<?>> supportedPrimitives();
+
+    /**
+     * The Class object corresponding to the public key manager when this key manager was registered
+     * as first argument with "registerAsymmetricKeyManagers". Null otherwise.
+     */
+    Class<?> publicKeyManagerClassOrNull();
   }
 
   private static <P> KeyManagerContainer createContainerFor(KeyManager<P> keyManager) {
@@ -140,6 +146,11 @@ public final class Registry {
       @Override
       public Set<Class<?>> supportedPrimitives() {
         return Collections.<Class<?>>singleton(localKeyManager.getPrimitiveClass());
+      }
+
+      @Override
+      public Class<?> publicKeyManagerClassOrNull() {
+        return null;
       }
     };
   }
@@ -172,6 +183,55 @@ public final class Registry {
       @Override
       public Set<Class<?>> supportedPrimitives() {
         return localKeyManager.supportedPrimitives();
+      }
+
+      @Override
+      public Class<?> publicKeyManagerClassOrNull() {
+        return null;
+      }
+    };
+  }
+
+  private static <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
+      KeyManagerContainer createPrivateKeyContainerFor(
+          final InternalPrivateKeyManager<KeyProtoT, PublicKeyProtoT> internalPrivateKeyManager,
+          final InternalKeyManager<PublicKeyProtoT> internalPublicKeyManager) {
+    final InternalPrivateKeyManager<KeyProtoT, PublicKeyProtoT> localPrivateKeyManager =
+        internalPrivateKeyManager;
+    final InternalKeyManager<PublicKeyProtoT> localPublicKeyManager = internalPublicKeyManager;
+    return new KeyManagerContainer() {
+      @Override
+      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
+          throws GeneralSecurityException {
+        try {
+          return new PrivateKeyManagerImpl<>(
+              localPrivateKeyManager, localPublicKeyManager, primitiveClass);
+        } catch (IllegalArgumentException e) {
+          throw new GeneralSecurityException("Primitive type not supported", e);
+        }
+      }
+
+      @Override
+      public KeyManager<?> getUntypedKeyManager() {
+        return new PrivateKeyManagerImpl<>(
+            localPrivateKeyManager,
+            localPublicKeyManager,
+            localPrivateKeyManager.firstSupportedPrimitiveClass());
+      }
+
+      @Override
+      public Class<?> getImplementingClass() {
+        return localPrivateKeyManager.getClass();
+      }
+
+      @Override
+      public Set<Class<?>> supportedPrimitives() {
+        return localPrivateKeyManager.supportedPrimitives();
+      }
+
+      @Override
+      public Class<?> publicKeyManagerClassOrNull() {
+        return localPublicKeyManager.getClass();
       }
     };
   }
@@ -354,6 +414,68 @@ public final class Registry {
       keyManagerMap.put(typeUrl, createContainerFor(manager));
     }
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
+  }
+
+  /**
+   * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
+   * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
+   *
+   * <p>If there is an existing key manager, throws an exception if {@code manager} and the existing
+   * key manager aren't instances of the same class, or if {@code newKeyAllowed} is true while the
+   * existing key manager could not create new keys. Otherwise registration succeeds.
+   *
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}, or the registration tries to re-enable the generation of new
+   *     keys.
+   */
+  public static synchronized <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
+      void registerAsymmetricKeyManagers(
+          final InternalPrivateKeyManager<KeyProtoT, PublicKeyProtoT> internalPrivateKeyManager,
+          final InternalKeyManager<PublicKeyProtoT> internalPublicKeyManager,
+          boolean newKeyAllowed) throws GeneralSecurityException {
+    if (internalPrivateKeyManager == null || internalPublicKeyManager == null) {
+      throw new IllegalArgumentException("given key managers must be non-null.");
+    }
+    String privateTypeUrl = internalPrivateKeyManager.getKeyType();
+    String publicTypeUrl = internalPublicKeyManager.getKeyType();
+    ensureKeyManagerInsertable(privateTypeUrl, internalPrivateKeyManager.getClass(), newKeyAllowed);
+    ensureKeyManagerInsertable(publicTypeUrl, internalPublicKeyManager.getClass(), false);
+    if (privateTypeUrl.equals(publicTypeUrl)) {
+      throw new GeneralSecurityException("Private and public key type must be different.");
+    }
+
+    if (keyManagerMap.containsKey(privateTypeUrl)) {
+      Class<?> existingPublicKeyManagerClass =
+          keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull();
+      if (existingPublicKeyManagerClass != null) {
+        if (!existingPublicKeyManagerClass.equals(internalPublicKeyManager.getClass())) {
+          logger.warning(
+              "Attempted overwrite of a registered key manager for key type "
+                  + privateTypeUrl
+                  + " with inconsistent public key type "
+                  + publicTypeUrl);
+          throw new GeneralSecurityException(
+              String.format(
+                  "public key manager corresponding to %s is already registered with %s, cannot"
+                      + " be re-registered with %s",
+                  internalPrivateKeyManager.getClass().getName(),
+                  existingPublicKeyManagerClass.getName(),
+                  internalPublicKeyManager.getClass().getName()));
+        }
+      }
+    }
+
+    if (!keyManagerMap.containsKey(privateTypeUrl)
+        || keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull() == null) {
+      keyManagerMap.put(
+          privateTypeUrl,
+          createPrivateKeyContainerFor(internalPrivateKeyManager, internalPublicKeyManager));
+    }
+    newKeyAllowedMap.put(privateTypeUrl, newKeyAllowed);
+    if (!keyManagerMap.containsKey(publicTypeUrl)) {
+      keyManagerMap.put(publicTypeUrl, createContainerFor(internalPublicKeyManager));
+    }
+    newKeyAllowedMap.put(publicTypeUrl, false);
   }
 
   /**
