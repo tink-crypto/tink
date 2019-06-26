@@ -40,16 +40,8 @@ have multiple implementations, and user chooses a desired implementation by
 using a key of corresponding type (see the [this
 section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 
-The following table summarizes Golang implementations of primitives that are
-currently available
-
-Primitive          | Implementations
------------------- | ---------------------------------
-AEAD               | AES-GCM, AES-CTR-HMAC
-Deterministic AEAD | AES-SIV
-MAC                | HMAC-SHA256
-Digital Signatures | ECDSA over NIST curves, Ed25519
-Hybrid Encryption  | ECIES with AEAD and HKDF
+A list of primitives and their implemenations currently supported by Tink in
+Golang can be found [here](PRIMITIVES.md#golang).
 
 ### AEAD
 
