@@ -16,14 +16,17 @@
 
 #include "tink/util/test_util.h"
 
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <cstdlib>
 
 #include "absl/memory/memory.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/keyset_handle.h"
+#include "tink/subtle/random.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
@@ -51,6 +54,82 @@ using google::crypto::tink::OutputPrefixType;
 namespace crypto {
 namespace tink {
 namespace test {
+
+int GetTestFileDescriptor(
+    absl::string_view filename, int size, std::string* file_contents) {
+  (*file_contents) = subtle::Random::GetRandomBytes(size);
+  return GetTestFileDescriptor(filename, *file_contents);
+}
+
+int GetTestFileDescriptor(
+    absl::string_view filename, absl::string_view file_contents) {
+  std::string full_filename =
+      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
+  mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
+  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
+  if (fd == -1) {
+    std::clog << "Cannot create file " << full_filename
+              << " error: " << errno << std::endl;
+    exit(1);
+  }
+  auto size = file_contents.size();
+  if (write(fd, file_contents.data(), size) != size) {
+    std::clog << "Failed to write " << size << " bytes to file "
+              << full_filename << " error: " << errno << std::endl;
+
+    exit(1);
+  }
+  close(fd);
+  fd = open(full_filename.c_str(), O_RDONLY);
+  if (fd == -1) {
+    std::clog << "Cannot re-open file " << full_filename
+              << " error: " << errno << std::endl;
+    exit(1);
+  }
+  return fd;
+}
+
+
+int GetTestFileDescriptor(absl::string_view filename) {
+  std::string full_filename =
+      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
+  mode_t mode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
+  int fd = open(full_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, mode);
+  if (fd == -1) {
+    std::clog << "Cannot create file " << full_filename
+              << " error: " << errno << std::endl;
+    exit(1);
+  }
+  return fd;
+}
+
+std::string ReadTestFile(std::string filename) {
+  std::string full_filename =
+      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
+  int fd = open(full_filename.c_str(), O_RDONLY);
+  if (fd == -1) {
+    std::clog << "Cannot open file " << full_filename
+              << " error: " << errno << std::endl;
+    exit(1);
+  }
+  std::string contents;
+  int buffer_size = 128 * 1024;
+  auto buffer = absl::make_unique<uint8_t[]>(buffer_size);
+  int read_result = read(fd, buffer.get(), buffer_size);
+  while (read_result > 0) {
+    std::clog << "Read " << read_result << " bytes" << std::endl;
+    contents.append(reinterpret_cast<const char*>(buffer.get()), read_result);
+    read_result = read(fd, buffer.get(), buffer_size);
+  }
+  if (read_result < 0) {
+    std::clog << "Error reading file " << full_filename
+              << " error: " << errno << std::endl;
+    exit(1);
+  }
+  close(fd);
+  std::clog << "Read in total " << contents.length() << " bytes" << std::endl;
+  return contents;
+}
 
 util::StatusOr<std::string> HexDecode(absl::string_view hex) {
   if (hex.size() % 2 != 0) {

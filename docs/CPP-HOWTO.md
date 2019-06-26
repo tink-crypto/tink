@@ -275,20 +275,10 @@ that specifies what operations are offered by the primitive. A primitive can
 have multiple implementations, and user chooses a desired implementation by
 using a key of corresponding type (see the [this
 section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
+A list of primitives and their implemenations currently supported by
+Tink in C++ can be found [here](PRIMITIVES.md#c).
 
-The following table summarizes C++ implementations of primitives that are
-currently available or planned (the latter are listed in brackets).
-
-| Primitive          | Implementations                               |
-| ------------------ | --------------------------------------------- |
-| AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305 |
-| Deterministic AEAD | AES-SIV                                       |
-| Streaming AEAD     | AES-GCM-HKDF-STREAMING                        |
-| MAC                | HMAC-SHA2                                     |
-| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
-| Hybrid Encryption  | ECIES with AEAD and HKDF                      |
-
-The user obtains a primitive by calling the function `getPrimitive<>` of the
+A user obtains a primitive by calling the function `getPrimitive<>` of the
 `KeysetHandle`.
 
 ### Symmetric Key Encryption

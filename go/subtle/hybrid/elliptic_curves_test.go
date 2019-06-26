@@ -616,8 +616,8 @@ func TestVectors(t *testing.T) {
 					continue
 				}
 				cShared, err := ComputeSharedSecret(&pubKey.Point, pvtKey)
-				got := strings.TrimLeft(hex.EncodeToString(cShared), "0")
-				want := strings.TrimLeft(test.Shared, "0")
+				got := hex.EncodeToString(cShared)
+				want := test.Shared
 				if test.Result == "invalid" {
 					if err != nil { // shared secret was not computed
 						continue

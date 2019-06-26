@@ -254,23 +254,10 @@ that specifies what operations are offered by the primitive. A primitive can
 have multiple implementations, and user chooses a desired implementation by
 using a key of corresponding type (see the [this
 section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
+A list of primitives and their implemenations currently supported by
+Tink in Java can be found [here](PRIMITIVES.md#java).
 
-The following table summarizes Java implementations of primitives that are
-currently available or planned (the latter are listed in brackets).
-
-| Primitive          | Implementations                                                 |
-| ------------------ | --------------------------------------------------------------- |
-| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305 |
-| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                  |
-| Deterministic AEAD | AES-SIV                                                         |
-| MAC                | HMAC-SHA2                                                       |
-| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS     |
-| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)                      |
-
-Exact listings of primitives and their implementations available in a release _x.y.z_ of Tink
-are given in a corresponding [`TinkConfig.TINK_x_y_z`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/TinkConfig.java)-variable.
-
-The user obtains a primitive by calling the function `getPrimitive(classObject)`
+A user obtains a primitive by calling the function `getPrimitive(classObject)`
 of the `KeysetHandle`, where the `classObject` is the class object corresponding
 to the primitive (for example `Aead.class` for AEAD).
 

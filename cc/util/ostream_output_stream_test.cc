@@ -22,6 +22,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/subtle/random.h"
 #include "tink/util/test_util.h"
@@ -64,35 +65,12 @@ util::Status WriteToStream(util::OstreamOutputStream* output_stream,
   return output_stream->Close();
 }
 
-// Reads the test file specified by 'filename', and returns its contents.
-std::string ReadFile(std::string filename) {
-  std::string full_filename =
-      absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
-  std::string contents;
-  int buffer_size = 128 * 1024;
-  auto buffer = absl::make_unique<uint8_t[]>(buffer_size);
-  std::ifstream input(full_filename, std::ifstream::binary);
-  while (input.good()) {
-    input.read(reinterpret_cast<char*>(buffer.get()), buffer_size);
-    int read_result = input.gcount();
-    std::clog << "Read " << read_result << " bytes" << std::endl;
-    contents.append(reinterpret_cast<const char*>(buffer.get()), read_result);
-  }
-  if (!input.eof()) {
-    std::clog << "Error reading ostream " << full_filename
-              << " error: " << errno << std::endl;
-    exit(1);
-  }
-  input.close();
-  std::clog << "Read in total " << contents.length() << " bytes" << std::endl;
-  return contents;
-}
-
 class OstreamOutputStreamTest : public ::testing::Test {
 };
 
 TEST_F(OstreamOutputStreamTest, WritingStreams) {
   for (size_t stream_size : {0, 10, 100, 1000, 10000, 100000, 1000000}) {
+    SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
     std::string filename = absl::StrCat(stream_size, "_writing_test.bin");
     auto output = GetTestOstream(filename);
@@ -100,7 +78,7 @@ TEST_F(OstreamOutputStreamTest, WritingStreams) {
         std::move(output));
     auto status = WriteToStream(output_stream.get(), stream_contents);
     EXPECT_TRUE(status.ok()) << status;
-    std::string ostream_contents = ReadFile(filename);
+    std::string ostream_contents = test::ReadTestFile(filename);
     EXPECT_EQ(stream_size, ostream_contents.size());
     EXPECT_EQ(stream_contents, ostream_contents);
   }
@@ -110,6 +88,7 @@ TEST_F(OstreamOutputStreamTest, CustomBufferSizes) {
   int stream_size = 1024 * 1024;
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
   for (int buffer_size : {1, 10, 100, 1000, 10000, 100000, 1000000}) {
+    SCOPED_TRACE(absl::StrCat("buffer_size = ", buffer_size));
     std::string filename = absl::StrCat(buffer_size, "_buffer_size_test.bin");
     auto output = GetTestOstream(filename);
     auto output_stream = absl::make_unique<util::OstreamOutputStream>(
@@ -121,7 +100,7 @@ TEST_F(OstreamOutputStreamTest, CustomBufferSizes) {
     output_stream->BackUp(buffer_size);
     auto status = WriteToStream(output_stream.get(), stream_contents);
     EXPECT_TRUE(status.ok()) << status;
-    std::string ostream_contents = ReadFile(filename);
+    std::string ostream_contents = test::ReadTestFile(filename);
     EXPECT_EQ(stream_size, ostream_contents.size());
     EXPECT_EQ(stream_contents, ostream_contents);
   }
@@ -148,6 +127,7 @@ TEST_F(OstreamOutputStreamTest, BackupAndPosition) {
   // BackUp several times, but in total fewer bytes than returned by Next().
   int total_backup_size = 0;
   for (int backup_size : {0, 1, 5, 0, 10, 100, -42, 400, 20, -100}) {
+    SCOPED_TRACE(absl::StrCat("backup_size = ", backup_size));
     output_stream->BackUp(backup_size);
     total_backup_size += std::max(backup_size, 0);
     EXPECT_EQ(buffer_size - total_backup_size, output_stream->Position());
@@ -161,6 +141,7 @@ TEST_F(OstreamOutputStreamTest, BackupAndPosition) {
   // BackUp() some bytes, again fewer than returned by Next().
   total_backup_size = 0;
   for (int backup_size : {0, 72, -94, 37, 82}) {
+    SCOPED_TRACE(absl::StrCat("backup_size = ", backup_size));
     output_stream->BackUp(backup_size);
     total_backup_size += std::max(0, backup_size);
     EXPECT_EQ(buffer_size - total_backup_size, output_stream->Position());
@@ -183,6 +164,7 @@ TEST_F(OstreamOutputStreamTest, BackupAndPosition) {
   total_backup_size = 0;
   for (int backup_size :
            {0, 72, -100, buffer_size / 2, 200, -25, buffer_size / 2, 42}) {
+    SCOPED_TRACE(absl::StrCat("backup_size = ", backup_size));
     output_stream->BackUp(backup_size);
     total_backup_size = std::min(buffer_size,
                                  total_backup_size + std::max(backup_size, 0));
@@ -203,7 +185,7 @@ TEST_F(OstreamOutputStreamTest, BackupAndPosition) {
   auto status = WriteToStream(
       output_stream.get(), stream_contents.substr(output_stream->Position()));
   EXPECT_TRUE(status.ok()) << status;
-  std::string ostream_contents = ReadFile(filename);
+  std::string ostream_contents = test::ReadTestFile(filename);
   EXPECT_EQ(stream_size, ostream_contents.size());
   EXPECT_EQ(stream_contents, ostream_contents);
 }

@@ -237,10 +237,14 @@ func ComputeSharedSecret(pub *ECPoint, priv *ECPrivateKey) ([]byte, error) {
 	if err := validatePublicPoint(&ECPoint{X: x, Y: y}, priv); err != nil {
 		return nil, errors.New("invalid shared key")
 	}
-	return x.Bytes(), nil
+
+	sharedSecret := make([]byte, maxSharedKeyLength(priv.PublicKey))
+	xBytes := x.Bytes()
+	copy(sharedSecret[len(sharedSecret)-len(xBytes):], xBytes)
+	return sharedSecret, nil
 }
 
-func maxSharedKeyLength(pub *ECPublicKey) int {
+func maxSharedKeyLength(pub ECPublicKey) int {
 	return (pub.Curve.Params().BitSize + 7) / 8
 }
 

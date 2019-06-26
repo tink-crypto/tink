@@ -112,10 +112,10 @@ http_archive(
 http_archive(
     name = "com_github_grpc_grpc",
     urls = [
-        "https://github.com/grpc/grpc/archive/v1.20.0.tar.gz"
+        "https://github.com/grpc/grpc/archive/v1.21.3.tar.gz"
     ],
-    sha256 = "01c5e617d098a33672ddb640d0e50831fb7c613999435e5dcf115021abde6b9a",
-    strip_prefix = "grpc-1.20.0",
+    sha256 = "50747c8939c535b1059f19534de263eb9b7570b5347390fb24b0bbce8763e9a4",
+    strip_prefix = "grpc-1.21.3",
 )
 
 # Binds needed by gRPC.
@@ -126,7 +126,7 @@ bind(
 
 bind(
     name = "zlib",
-    actual = "@zlib_archive//:zlib",
+    actual = "@zlib//:zlib",
 )
 
 bind(
@@ -170,7 +170,7 @@ http_archive(
 )
 
 http_archive(
-    name = "zlib_archive",
+    name = "zlib",
     urls = [
         "https://mirror.bazel.build/zlib.net/zlib-1.2.11.tar.gz",
     ],
@@ -787,3 +787,23 @@ load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
 
 closure_repositories()
 
+
+#-----------------------------------------------------------------------------
+# Remote Build Execution
+#-----------------------------------------------------------------------------
+http_archive(
+    name = "bazel_toolchains",
+    sha256 = "4598bf5a8b4f5ced82c782899438a7ba695165d47b3bf783ce774e89a8c6e617",
+    strip_prefix = "bazel-toolchains-0.27.0",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/0.27.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/0.27.0.tar.gz",
+    ],
+)
+
+load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
+
+# Creates a default toolchain config for RBE.
+# Use this as is if you are using the rbe_ubuntu16_04 container,
+# otherwise refer to RBE docs.
+rbe_autoconfig(name = "rbe_default")

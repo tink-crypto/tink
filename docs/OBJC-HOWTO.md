@@ -281,23 +281,15 @@ Instead, use the iOS keychain as demonstrated above.
 Tink, hence they form the core of Tink API. A primitive is just an interface
 that specifies what operations are offered by the primitive. A primitive can
 have multiple implementations, and user chooses a desired implementation by
-using a key of corresponding type (see the [this
-section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
+using a key of corresponding type (see the
+[this section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
+A list of primitives and their implemenations currently supported by Tink in
+Objective-C can be found [here](PRIMITIVES.md#objective-c).
 
-The following table summarizes Obj-C implementations of primitives that are
-currently available or planned (the latter are listed in brackets).
-
-Primitive          | Implementations
------------------- | ---------------------------------
-AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX
-MAC                | HMAC-SHA2
-Digital Signatures | ECDSA over NIST curves, (Ed25519)
-Hybrid Encryption  | ECIES with AEAD and HKDF
-
-Tink user accesses implementations of a primitive via a factory that corresponds
-to the primitive: AEAD via `TINKAeadFactory`, MAC via `TINKMacFactory`, etc.
-where each factory offers corresponding `primitiveWithKeysetHandle:error:`
-methods.
+A Tink user accesses implementations of a primitive via a factory that
+corresponds to the primitive: AEAD via `TINKAeadFactory`, MAC via
+`TINKMacFactory`, etc. where each factory offers corresponding
+`primitiveWithKeysetHandle:error:` methods.
 
 ### Symmetric Key Encryption
 

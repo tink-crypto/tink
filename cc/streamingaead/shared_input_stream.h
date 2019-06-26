@@ -1,4 +1,4 @@
-// Copyright 2019 Google Inc.
+// Copyright 2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ namespace crypto {
 namespace tink {
 namespace streamingaead {
 
-// An InputStream that wraps another InputStream as a shared_ptr.
+// An InputStream that wraps another InputStream as a non-owned pointer.
+// The wrapper forwards all calls to the wrapped InputStream,
+// which must remain alive as long as as the wrapper is in use.
 class SharedInputStream : public crypto::tink::InputStream {
  public:
   // Constructs an InputStream that wraps 'input_stream',

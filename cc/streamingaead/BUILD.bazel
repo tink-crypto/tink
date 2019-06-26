@@ -11,11 +11,13 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":decrypting_input_stream",
+        ":decrypting_random_access_stream",
         "//cc:crypto_format",
         "//cc:input_stream",
         "//cc:output_stream",
         "//cc:primitive_set",
         "//cc:primitive_wrapper",
+        "//cc:random_access_stream",
         "//cc:registry",
         "//cc:streaming_aead",
         "//cc/util:status",
@@ -127,6 +129,19 @@ cc_library(
 )
 
 cc_library(
+    name = "shared_random_access_stream",
+    srcs = ["shared_random_access_stream.h"],
+    hdrs = ["shared_random_access_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:random_access_stream",
+        "//cc/util:buffer",
+        "//cc/util:status",
+    ],
+)
+
+cc_library(
     name = "decrypting_input_stream",
     srcs = ["decrypting_input_stream.cc"],
     hdrs = ["decrypting_input_stream.h"],
@@ -145,6 +160,26 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "decrypting_random_access_stream",
+    srcs = ["decrypting_random_access_stream.cc"],
+    hdrs = ["decrypting_random_access_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+         ":shared_random_access_stream",
+        "//cc:primitive_set",
+        "//cc:random_access_stream",
+        "//cc:streaming_aead",
+        "//cc/util:buffer",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -157,9 +192,12 @@ cc_test(
         "//cc:input_stream",
         "//cc:output_stream",
         "//cc:primitive_set",
+        "//cc:random_access_stream",
         "//cc:streaming_aead",
         "//cc/subtle:random",
         "//cc/subtle:test_util",
+        "//cc/util:buffer",
+        "//cc/util:file_random_access_stream",
         "//cc/util:istream_input_stream",
         "//cc/util:ostream_output_stream",
         "//cc/util:status",
@@ -287,6 +325,30 @@ cc_test(
 )
 
 cc_test(
+    name = "decrypting_random_access_stream_test",
+    size = "small",
+    srcs = ["decrypting_random_access_stream_test.cc"],
+    deps = [
+        ":decrypting_random_access_stream",
+        "//cc:output_stream",
+        "//cc:primitive_set",
+        "//cc:random_access_stream",
+        "//cc:streaming_aead",
+        "//cc/subtle:random",
+        "//cc/subtle:test_util",
+        "//cc/util:file_random_access_stream",
+        "//cc/util:ostream_output_stream",
+        "//cc/util:status",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "shared_input_stream_test",
     size = "small",
     srcs = ["shared_input_stream_test.cc"],
@@ -300,6 +362,24 @@ cc_test(
         "//cc/util:istream_input_stream",
         "//cc/util:status",
         "//cc/util:test_matchers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "shared_random_access_stream_test",
+    size = "small",
+    srcs = ["shared_random_access_stream_test.cc"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":shared_random_access_stream",
+        "//cc:random_access_stream",
+        "//cc/util:buffer",
+        "//cc/util:file_random_access_stream",
+        "//cc/util:status",
+        "//cc/util:test_util",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",

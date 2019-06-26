@@ -515,6 +515,7 @@ tink_cc_library(
     tink::subtle::streaming_aead_encrypting_stream
     tink::core::input_stream
     tink::core::output_stream
+    tink::core::random_access_stream
     tink::core::streaming_aead
     tink::util::statusor
     absl::strings

@@ -293,6 +293,31 @@ public final class Registry {
   }
 
   /**
+   * Throws a general security exception iff there is already a key manager registered for typeURL,
+   * and at least one of the following is true:
+   *   * The class implementing the existing key manager differs from the given one.
+   *   * The value of newKeyAllowed currently registered is false, but the input parameter is true.
+   */
+  private static synchronized <P> void ensureKeyManagerInsertable(
+      String typeUrl, Class<?> implementingClass, boolean newKeyAllowed)
+      throws GeneralSecurityException {
+    if (!keyManagerMap.containsKey(typeUrl)) {
+      return;
+    }
+    KeyManagerContainer container = keyManagerMap.get(typeUrl);
+    if (!container.getImplementingClass().equals(implementingClass)) {
+        logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
+      throw new GeneralSecurityException(
+          String.format(
+              "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
+              typeUrl, container.getImplementingClass().getName(), implementingClass.getName()));
+    }
+    if (newKeyAllowed && !newKeyAllowedMap.get(typeUrl)) {
+      throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
+    }
+  }
+
+  /**
    * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
    * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
    *
@@ -310,20 +335,10 @@ public final class Registry {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
     String typeUrl = manager.getKeyType();
-    if (keyManagerMap.containsKey(typeUrl)) {
-      KeyManagerContainer container = keyManagerMap.get(typeUrl);
-      boolean existingNewKeyAllowed = newKeyAllowedMap.get(typeUrl).booleanValue();
-      if (!manager.getClass().equals(container.getImplementingClass())
-          // Disallow changing newKeyAllowed from false to true.
-          || (!existingNewKeyAllowed && newKeyAllowed)) {
-        logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
-        throw new GeneralSecurityException(
-            String.format(
-                "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-                typeUrl, container.getImplementingClass().getName(), manager.getClass().getName()));
-      }
+    ensureKeyManagerInsertable(typeUrl, manager.getClass(), newKeyAllowed);
+    if (!keyManagerMap.containsKey(typeUrl)) {
+      keyManagerMap.put(typeUrl, createContainerFor(manager));
     }
-    keyManagerMap.put(typeUrl, createContainerFor(manager));
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
   }
 
@@ -334,20 +349,10 @@ public final class Registry {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
     String typeUrl = manager.getKeyType();
-    if (keyManagerMap.containsKey(typeUrl)) {
-      KeyManagerContainer container = keyManagerMap.get(typeUrl);
-      boolean existingNewKeyAllowed = newKeyAllowedMap.get(typeUrl).booleanValue();
-      if (!manager.getClass().equals(container.getImplementingClass())
-          // Disallow changing newKeyAllowed from false to true.
-          || ((!existingNewKeyAllowed) && newKeyAllowed)) {
-        logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
-        throw new GeneralSecurityException(
-            String.format(
-                "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-                typeUrl, container.getImplementingClass().getName(), manager.getClass().getName()));
-      }
+    ensureKeyManagerInsertable(typeUrl, manager.getClass(), newKeyAllowed);
+    if (!keyManagerMap.containsKey(typeUrl)) {
+      keyManagerMap.put(typeUrl, createContainerFor(manager));
     }
-    keyManagerMap.put(typeUrl, createContainerFor(manager));
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
   }
 

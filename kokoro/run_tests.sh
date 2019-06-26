@@ -123,24 +123,8 @@ run_macos_tests() {
   //objc:TinkTests || ( ls -l ; df -h / ; exit 1 )
 }
 
-run_cmake_tests() {
-  echo "========================================================= Running cmake"
-  cmake --version
-  cmake . -DTINK_BUILD_TESTS=ON
-  echo "==================================================== Building with make"
-  make -j8 all
-  echo "===================================================== Testing with make"
-  CTEST_OUTPUT_ON_FAILURE=1 make test
-  echo "================================================ Done testing with make"
-}
-
 run_linux_tests
 
 if [[ "${PLATFORM}" == 'darwin' ]]; then
   run_macos_tests
 fi
-
-if [[ "${PLATFORM}" == 'linux' ]]; then
-  run_cmake_tests
-fi
-

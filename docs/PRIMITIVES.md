@@ -5,14 +5,87 @@ so-called _primitives_, which provide an abstract representation of the provided
 functionality.  Currently Tink supports the following cryptographic operations
 via the corresponding primitives:
 
-- authenticated encryption with associated data (primitive: AEAD)
-- message authentication codes (primitive: MAC),
-- digital signatures (primitives: PublicKeySign and PublicKeyVerify)
-- hybrid encryption (primitives: HybridEncrypt and HybridDecrypt).
+-   authenticated encryption with associated data (primitive: AEAD)
+-   *streaming* authenticated encryption with associated data (primitive:
+    StreamingAead)
+-   *deterministic* authenticated encryption with associated data (primitive:
+    DeterministicAead)
+-   message authentication codes (primitive: MAC),
+-   digital signatures (primitives: PublicKeySign and PublicKeyVerify)
+-   hybrid encryption (primitives: HybridEncrypt and HybridDecrypt).
 
-This document describes the main properties of Tink’s primitives.
+The tables in the section below summarise the current implementations of
+primitives available in the corresponding languages, and the subsequent sections
+describe the main properties of Tink primitives.
 
-General properties of all primitives:
+## Supported primitives and their implementations
+
+**Primitive**      | **Java** | **C++** | **ObjC** | **Go**
+------------------ | -------- | ------- | -------- | ------
+AEAD               | yes      | yes     | yes      | yes
+Streaming AEAD     | yes      | yes     | no       | no
+Deterministic AEAD | yes      | yes     | yes      | yes
+MAC                | yes      | yes     | yes      | yes
+Digital Signatures | yes      | yes     | yes      | yes
+Hybrid Encryption  | yes      | yes     | yes      | yes
+
+In development: JavaScript and Python.
+
+### Java
+
+| Primitive          | Java Implementations                            |
+| ------------------ | ----------------------------------------------- |
+| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope,   |
+:                    : CHACHA20-POLY1305                               :
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING  |
+| Deterministic AEAD | AES-SIV                                         |
+| MAC                | HMAC-SHA2                                       |
+| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, |
+:                    : RSA-SSA-PSS                                     :
+| Hybrid Encryption  | ECIES with AEAD and HKDF                        |
+
+Exact listings of primitives and their implementations available in the latest
+release of Tink in Java are given in
+[`TinkConfig.LATEST`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/TinkConfig.java)-variable.
+
+### C++
+
+| Primitive          | C++ Implementations                             |
+| ------------------ | ----------------------------------------------- |
+| AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope,   |
+:                    : XCHACHA20-POLY1305                              :
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING                          |
+| Deterministic AEAD | AES-SIV                                         |
+| MAC                | HMAC-SHA2                                       |
+| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, |
+:                    : RSA-SSA-PSS                                     :
+| Hybrid Encryption  | ECIES with AEAD and HKDF                        |
+
+Exact listings of primitives and their implementations available in the latest
+release of Tink in C++ are given via
+[`TinkConfig::Latest()`](https://github.com/google/tink/blob/master/cc/config/tink_config.cc)-method.
+
+### Objective-C
+
+Primitive          | Objective-C Implementations
+------------------ | -----------------------------------------------------------
+AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, XCHACHA20-POLY1305
+Deterministic AEAD | AES-SIV
+MAC                | HMAC-SHA2
+Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
+Hybrid Encryption  | ECIES with AEAD and HKDF
+
+### Golang
+
+Primitive          | Golang Implementations
+------------------ | -------------------------------
+AEAD               | AES-GCM, AES-CTR-HMAC
+Deterministic AEAD | AES-SIV
+MAC                | HMAC-SHA2
+Digital Signatures | ECDSA over NIST curves, Ed25519
+Hybrid Encryption  | ECIES with AEAD and HKDF
+
+## General properties of all primitives:
 
 - stateless (hence thread-safe)
 - copy-safe (for the parameters)

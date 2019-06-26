@@ -51,6 +51,7 @@ set(TINK_PUBLIC_APIS
   public_key_sign_factory.h
   public_key_verify.h
   public_key_verify_factory.h
+  random_access_stream.h
   registry.h
   signature_config.h
   signature_key_templates.h
@@ -83,6 +84,7 @@ set(TINK_PUBLIC_API_DEPS
   tink::core::public_key_verify
   tink::core::mac
   tink::core::primitive_set
+  tink::core::random_access_stream
   tink::core::registry
   tink::core::registry_impl
   tink::core::streaming_aead
@@ -107,6 +109,7 @@ set(TINK_PUBLIC_API_DEPS
   tink::signature::signature_key_templates
   tink::streamingaead::streaming_aead_config
   tink::streamingaead::streaming_aead_key_templates
+  tink::util::buffer
   tink::util::errors
   tink::util::protobuf_helper
   tink::util::status
@@ -173,6 +176,7 @@ tink_cc_library(
   DEPS
     tink::core::input_stream
     tink::core::output_stream
+    tink::core::random_access_stream
     tink::util::statusor
     absl::strings
 )
