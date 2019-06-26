@@ -8,12 +8,15 @@ from google3.third_party.tink.python import aead
 from google3.third_party.tink.python import daead
 from google3.third_party.tink.python import key_manager
 from google3.third_party.tink.python import mac
+from google3.third_party.tink.python import signature
 from google3.third_party.tink.python import tink_config
 
 
 Aead = aead.Aead
 DeterministicAead = daead.DeterministicAead
 Mac = mac.Mac
+PublicKeySign = signature.PublicKeySign
+PublicKeyVerify = signature.PublicKeyVerify
 KeyManager = key_manager.KeyManager
 PrivateKeyManager = key_manager.PrivateKeyManager
 
