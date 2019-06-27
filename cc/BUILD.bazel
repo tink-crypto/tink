@@ -723,11 +723,11 @@ genrule(
         ":linux_x86_64": "tar -cv -f $@ --dereference --transform \"s/^cc/tink/\" " +
                          "    --show-transformed-names `find cc/ -name \"*.h\"`; " +
                          "tar -rv -f $@ -C $(GENDIR) --dereference " +
-                         "    `cd $(GENDIR); find proto/ -name \"*.pb.h\"`",
+                         "    `cd $(GENDIR); find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`",
         ":mac_x86_64": "tar -cv -f $@ --dereference -s \"/^cc/tink/p\" " +
                        "    `find cc/ -name \"*.h\"`; " +
                        "tar -rv -f $@ -C $(GENDIR) --dereference " +
-                       "    `cd $(GENDIR); find proto/ -name \"*.pb.h\"`",
+                       "    `cd $(GENDIR); find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`",
     }),
     local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
 )
@@ -742,15 +742,12 @@ genrule(
         "tink_deps_headers.tar",
     ],
     # The command below collects headers of Tink dependencies in two steps:
-    #  * First a tar-archive with all Abseil .h-files is created.
-    #  * Then, absl .inc files are added to the tar-archive.
-    #  * Then .h-files of Protobuf library are added to the tar-archive.
+    #  * First a tar-archive with all Abseil .h and .inc-files is created.
+    #  * Then .h and .inc files of Protobuf library are added to the tar-archive.
     cmd = "tar -cv -f $@ -C external/com_google_absl --dereference " +
-          "    `cd external/com_google_absl; find absl/ -name \"*.h\"`; " +
-          "tar -rv -f $@ -C external/com_google_absl --dereference " +
-          "    `cd external/com_google_absl; find absl/ -name \"*.inc\"`; " +
+          "    `cd external/com_google_absl; find absl/ -name \"*.h\" -or -name \"*.inc\"`; " +
           "tar -rv -f $@ -C external/com_google_protobuf/src --dereference " +
-          "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\"`",
+          "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\" -or -name \"*.inc\"`",
     local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
     tags = [
         "manual",  # Does not run on OSX yet.  TODO(b/78299422)
