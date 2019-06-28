@@ -16,8 +16,8 @@ Tink can be installed with Maven or Gradle. The Maven group ID is
 `com.google.crypto.tink`, and the artifact ID is `tink`.
 
 The most recent release is
-[1.2.2](https://github.com/google/tink/releases/tag/v1.2.2), released
-2019-01-24.
+[1.3.0-rc1](https://github.com/google/tink/releases/tag/v1.3.0-rc1), released
+2019-06-28.
 
 Java developers can add Tink using Maven:
 
@@ -25,7 +25,7 @@ Java developers can add Tink using Maven:
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>tink</artifactId>
-  <version>1.2.2</version>
+  <version>1.3.0-rc1</version>
 </dependency>
 ```
 
@@ -33,7 +33,7 @@ Android developers can add Tink using Gradle:
 
 ```
 dependencies {
-  compile 'com.google.crypto.tink:tink-android:1.2.2'
+  compile 'com.google.crypto.tink:tink-android:1.3.0-rc1'
 }
 ```
 
@@ -82,10 +82,10 @@ dependencies {
 ## API docs
 
 *   Java:
-    *   [1.2.1](https://google.github.com/tink/javadoc/tink/1.2.1)
+    *   [1.3.0-rc1](https://google.github.com/tink/javadoc/tink/1.3.0-rc1)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.2.1](https://google.github.com/tink/javadoc/tink-android/1.2.1)
+    *   [1.3.0-rc1](https://google.github.com/tink/javadoc/tink-android/1.3.0-rc1)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important Warnings

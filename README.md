@@ -96,13 +96,13 @@ AEAD primitive in Java:
 
 ## Current status
 
-*   [Java and Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md) and
-    [Obj-C](docs/OBJC-HOWTO.md) are field tested and ready for production. The
-    latest version is
-    [1.2.2](https://github.com/google/tink/releases/tag/v1.2.2), released on
-    2019-01-24.
+*   [Java and Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md),
+    [Obj-C](docs/OBJC-HOWTO.md), and [Go](docs/GOLANG-HOWTO.md) are field
+    tested and ready for production. The latest version is
+    [1.3.0-rc1](https://github.com/google/tink/releases/tag/v1.3.0-rc1),
+    released on 2019-06-28.
 
-*   Tink for Go and JavaScript are in active development.
+*   Tink for Python and JavaScript are in active development.
 
 ## Learn more
 

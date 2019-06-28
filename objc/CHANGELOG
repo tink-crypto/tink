@@ -1,3 +1,9 @@
+Version 1.3.0-rc1
+==================================
+Added RSA signatures (RSA-SSA-PKCS1, RSA-PSS), ED25519 signatures,
+deterministic AEAD (AES-SIV), and XCHACHA20-POLY1305 AEAD.
+This is a pre-release version.
+
 Version 1.2.2
 ==================================
 Staticly linking BoringSSL in the CocoaPod build to prevent namespace clashes
