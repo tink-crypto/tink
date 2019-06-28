@@ -35,13 +35,11 @@ In development: JavaScript and Python.
 
 | Primitive          | Java Implementations                            |
 | ------------------ | ----------------------------------------------- |
-| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope,   |
-:                    : CHACHA20-POLY1305                               :
+| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305 |
 | Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING  |
 | Deterministic AEAD | AES-SIV                                         |
 | MAC                | HMAC-SHA2                                       |
-| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, |
-:                    : RSA-SSA-PSS                                     :
+| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                        |
 
 Exact listings of primitives and their implementations available in the latest
@@ -52,13 +50,11 @@ release of Tink in Java are given in
 
 | Primitive          | C++ Implementations                             |
 | ------------------ | ----------------------------------------------- |
-| AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope,   |
-:                    : XCHACHA20-POLY1305                              :
+| AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305 |
 | Streaming AEAD     | AES-GCM-HKDF-STREAMING                          |
 | Deterministic AEAD | AES-SIV                                         |
 | MAC                | HMAC-SHA2                                       |
-| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, |
-:                    : RSA-SSA-PSS                                     :
+| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                        |
 
 Exact listings of primitives and their implementations available in the latest
