@@ -1,0 +1,19 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])  # Apache 2.0
+
+# Configuration for Remote Build Execution (RBE) builds.
+# It is used to select() RBE-specific args for tests.
+#
+# Example:
+# args = select({
+#   "//tools/remote_build_execution:rbe": ["--no_external_tests"],
+#   "//conditions:default": [],
+# }),
+#
+# This will set the --no_external_tests command line flag when a test is run
+# on RBE.
+config_setting(
+    name = "rbe",
+    values = {"define": "RBE=1"},
+)
