@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"com.google.crypto.tink.integration.gcpkms","l":"GcpKmsAead"},{"p":"com.google.crypto.tink.integration.gcpkms","l":"GcpKmsClient"}]
