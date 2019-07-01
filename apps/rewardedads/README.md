@@ -7,7 +7,7 @@ AdMob Rewarded Ads.
 
 The most recent release is
 [1.3.0-rc1](https://github.com/google/tink/releases/tag/v1.3.0-rc1), released
-2019-06-28. API docs can be found
+2019-07-01. API docs can be found
 [here](https://google.github.com/tink/javadoc/apps-rewardedads/1.3.0-rc1).
 
 The Maven group ID is `com.google.crypto.tink`, and the artifact ID is

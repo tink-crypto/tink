@@ -100,7 +100,7 @@ AEAD primitive in Java:
     [Obj-C](docs/OBJC-HOWTO.md), and [Go](docs/GOLANG-HOWTO.md) are field
     tested and ready for production. The latest version is
     [1.3.0-rc1](https://github.com/google/tink/releases/tag/v1.3.0-rc1),
-    released on 2019-06-28.
+    released on 2019-07-01.
 
 *   Tink for Python and JavaScript are in active development.
 

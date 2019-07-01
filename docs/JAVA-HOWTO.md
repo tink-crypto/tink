@@ -17,7 +17,7 @@ Tink can be installed with Maven or Gradle. The Maven group ID is
 
 The most recent release is
 [1.3.0-rc1](https://github.com/google/tink/releases/tag/v1.3.0-rc1), released
-2019-06-28.
+2019-07-01.
 
 Java developers can add Tink using Maven:
 
