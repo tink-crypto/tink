@@ -1,1 +1,0 @@
-typeSearchIndex = [{"p":"com.google.crypto.tink.integration.awskms","l":"AwsKmsAead"},{"p":"com.google.crypto.tink.integration.awskms","l":"AwsKmsClient"}]
