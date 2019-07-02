@@ -31,7 +31,7 @@ namespace subtle {
 class StreamingAeadDecryptingStream : public InputStream {
  public:
   // A factory that produces decrypting streams.
-  // The returned stream is a wrapper around 'ciphertext_destination',
+  // The returned stream is a wrapper around 'ciphertext_source',
   // such that any bytes written via the wrapper are AEAD-decrypted
   // by 'segment_decrypter' using 'associated_data' as associated
   // authenticated data.
