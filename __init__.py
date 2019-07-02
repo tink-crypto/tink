@@ -6,6 +6,7 @@ from __future__ import print_function
 
 from google3.third_party.tink.python import aead
 from google3.third_party.tink.python import daead
+from google3.third_party.tink.python import hybrid
 from google3.third_party.tink.python import key_manager
 from google3.third_party.tink.python import mac
 from google3.third_party.tink.python import signature
@@ -14,9 +15,12 @@ from google3.third_party.tink.python import tink_config
 
 Aead = aead.Aead
 DeterministicAead = daead.DeterministicAead
+HybridDecrypt = hybrid.HybridDecrypt
+HybridEncrypt = hybrid.HybridEncrypt
 Mac = mac.Mac
 PublicKeySign = signature.PublicKeySign
 PublicKeyVerify = signature.PublicKeyVerify
+
 KeyManager = key_manager.KeyManager
 PrivateKeyManager = key_manager.PrivateKeyManager
 
