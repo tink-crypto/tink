@@ -554,6 +554,26 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME internal_private_key_manager
+  SRCS
+    core/internal_private_key_manager.h
+  DEPS
+    tink::core::internal_key_manager
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME private_key_manager_impl
+  SRCS
+    core/private_key_manager_impl.h
+  DEPS
+    tink::core::internal_private_key_manager
+    tink::core::key_manager_impl
+    tink::core::key_manager
+    tink::util::validation
+)
+
 if (TINK_BUILD_SHARED_LIB)
   add_library(tink SHARED
     ${TINK_PUBLIC_APIS}
@@ -816,6 +836,20 @@ tink_cc_test(
     tink::core::aead
     tink::core::key_manager_impl
     tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
+    tink::subtle::aes_gcm_boringssl
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::validation
+)
+
+tink_cc_test(
+  NAME private_key_manager_impl_test
+  SRCS core/private_key_manager_impl_test.cc
+  DEPS
+    tink::core::key_manager_impl
+    tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_boringssl
     tink::util::status
