@@ -141,7 +141,8 @@ class PrivateKeyManagerImpl<
 // Using this, all template arguments except the first one can be infered.
 // Example:
 //   std::unique_ptr<KeyManager<PublicKeySign>> km =
-//     MakeKeyManager<PublicKeySign>(internal_private_km, internal_public_km);
+//     MakePrivateKeyManager<PublicKeySign>(internal_private_km,
+//                                          internal_public_km);
 template <class Primitive, class PrivateKeyProto, class KeyFormatProto,
           class PublicKeyProto, class PrivatePrimitivesList,
           class PublicPrimitivesList>
