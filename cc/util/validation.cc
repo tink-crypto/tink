@@ -89,8 +89,7 @@ util::Status ValidateKeyset(const Keyset& keyset) {
       has_primary_key = true;
     }
 
-    if (key.key_data().key_material_type() !=
-        KeyData::KeyMaterialType::KeyData_KeyMaterialType_ASYMMETRIC_PUBLIC) {
+    if (key.key_data().key_material_type() != KeyData::ASYMMETRIC_PUBLIC) {
       contains_only_public_key_material = false;
     }
   }
