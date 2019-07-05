@@ -44,7 +44,8 @@ class PrivateKeyFactoryImpl : public PrivateKeyFactory {
           public_key_manager)
       : key_factory_impl_(private_key_manager),
         private_key_manager_(private_key_manager),
-        public_key_manager_(public_key_manager) {}
+        public_key_type_(public_key_manager->get_key_type()),
+        public_key_material_type_(public_key_manager->key_material_type()) {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(const portable_proto::MessageLite& key_format) const override {
@@ -76,12 +77,9 @@ class PrivateKeyFactoryImpl : public PrivateKeyFactory {
     util::StatusOr<PublicKeyProto> public_key_result =
         private_key_manager_->GetPublicKey(private_key);
     if (!public_key_result.ok()) return public_key_result.status();
-    validation =
-        public_key_manager_->ValidateKey(public_key_result.ValueOrDie());
-    if (!validation.ok()) return validation;
-    key_data->set_type_url(public_key_manager_->get_key_type());
+    key_data->set_type_url(public_key_type_);
     key_data->set_value(public_key_result.ValueOrDie().SerializeAsString());
-    key_data->set_key_material_type(public_key_manager_->key_material_type());
+    key_data->set_key_material_type(public_key_material_type_);
     return std::move(key_data);
   }
 
@@ -96,8 +94,8 @@ class PrivateKeyFactoryImpl : public PrivateKeyFactory {
   InternalPrivateKeyManager<PrivateKeyProto, PrivateKeyFormatProto,
                             PublicKeyProto, PrivatePrimitivesList>*
       private_key_manager_;
-  InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>*
-      public_key_manager_;
+  const std::string public_key_type_;
+  google::crypto::tink::KeyData::KeyMaterialType public_key_material_type_;
 };
 
 template <class Primitive, class InternalPrivateKeyManager,
@@ -137,12 +135,16 @@ class PrivateKeyManagerImpl<
       private_key_factory_;
 };
 
-// Helper function to create a KeyManager<Primitive> for a private keyManager.
-// Using this, all template arguments except the first one can be infered.
-// Example:
+// Helper function to create a KeyManager<Primitive> for a
+// InternalPrivateKeyManager. Using this, all template arguments except the
+// first one can be infered. Example:
 //   std::unique_ptr<KeyManager<PublicKeySign>> km =
 //     MakePrivateKeyManager<PublicKeySign>(internal_private_km,
 //                                          internal_public_km);
+//
+// When creating a KeyManager like this, the passed in "private_key_manager"
+// must outlive the constructed KeyManager. The passed in "public_key_manager"
+// however must only be valid during construction of the KeyManager.
 template <class Primitive, class PrivateKeyProto, class KeyFormatProto,
           class PublicKeyProto, class PrivatePrimitivesList,
           class PublicPrimitivesList>

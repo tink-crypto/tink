@@ -185,22 +185,22 @@ TEST(PrivateKeyManagerImplTest, GetPublicKeyDataValidatePrivateKey) {
                HasSubstr("GetPublicKeyDataValidatePrivateKey")));
 }
 
-TEST(PrivateKeyManagerImplTest, GetPublicKeyDataValidatePublicKey) {
+TEST(PrivateKeyManagerImplTest, PublicKeyManagerCanHaveShortLifetime) {
   ExampleInternalPrivateKeyManager private_km;
-  ExampleInternalPublicKeyManager public_km;
-  EXPECT_CALL(public_km, ValidateKey)
-      .WillOnce(Return(ToStatusF(util::error::OUT_OF_RANGE,
-                                 "GetPublicKeyDataValidatePublicKey")));
+  std::unique_ptr<KeyManager<PrivatePrimitive>> key_manager;
+  {
+    ExampleInternalPublicKeyManager public_km;
+    key_manager =
+        MakePrivateKeyManager<PrivatePrimitive>(&private_km, &public_km);
+    // Let the public_km go out of scope; the key_manager should still work.
+  }
 
-  std::unique_ptr<KeyManager<PrivatePrimitive>> key_manager =
-      MakePrivateKeyManager<PrivatePrimitive>(&private_km, &public_km);
-
+  EcdsaKeyFormat key_format;
+  key_format.mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
+  auto key = key_manager->get_key_factory().NewKey(key_format).ValueOrDie();
   EXPECT_THAT(
-      dynamic_cast<const PrivateKeyFactory&>(key_manager->get_key_factory())
-          .GetPublicKeyData(EcdsaPrivateKey().SerializeAsString())
-          .status(),
-      StatusIs(util::error::OUT_OF_RANGE,
-               HasSubstr("GetPublicKeyDataValidatePublicKey")));
+      dynamic_cast<EcdsaPrivateKey&>(*key).public_key().params().encoding(),
+      Eq(EcdsaSignatureEncoding::DER));
 }
 
 }  // namespace
