@@ -57,10 +57,10 @@ namespace subtle {
 //    encrypts get_plaintext_segment_size() bytes of plaintext
 //  * if the ciphertext stream encrypts at least one byte of plaintext,
 //    then the last segment encrypts at least one byte of plaintext
-//  * 'other' is (get_ciphertext_offset() - get_header().size()) bytes long,
-//    and represents potential other bytes already written to the stream;
-//    the purpose of ciphertext offset is to allow alignment of ciphertext
-//    segments with segments of the underlying storage or transmission stream.
+//  * 'other' is get_ciphertext_offset() bytes long, and represents potential
+//    other bytes already written to the stream;  the purpose of ciphertext
+//    offset is to allow alignment of ciphertext segments with segments
+//    of the underlying storage or transmission stream.
 class StreamSegmentEncrypter {
  public:
   // Encrypts 'plaintext' as a segment, and writes the resulting ciphertext
@@ -89,7 +89,12 @@ class StreamSegmentEncrypter {
   virtual int get_ciphertext_segment_size() const = 0;
 
   // Returns the offset (in bytes) of the ciphertext within an encrypted stream.
-  // The offset is not smaller than the size of the header.
+  // The offset is non-negative, and not larger than
+  //   ciphertext_segment_size - (header_size + segment_overhead)
+  // where
+  //   ciphertext_segment_size = get_ciphertext_segment_size()
+  //   header_size = get_header().size()
+  //   segment_overhead = ciphertext_segment_size - get_plaintext_segment_size()
   virtual int get_ciphertext_offset() const = 0;
 
   virtual ~StreamSegmentEncrypter() {}

@@ -38,11 +38,11 @@ namespace subtle {
 // nonce prefix.
 //
 // The format of a ciphertext is
-//   header || segment_0 || segment_1 || ... || segment_k.
+//   other || header || segment_0 || segment_1 || ... || segment_k.
 // where:
 //  - segment_i is the i-th segment of the ciphertext.
 //  - the size of segment_1 .. segment_{k-1} is get_ciphertext_segment_size()
-//  - segment_0 is shorter, so that segment_0, the header and other information
+//  - segment_0 is shorter, so that segment_0, the header, and other information
 //    of size get_ciphertext_offset() align with get_ciphertext_segment_size().
 //
 // The format of the header is
@@ -62,7 +62,7 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
     std::string ikm;
     HashType hkdf_hash;
     int derived_key_size;
-    int first_segment_offset;
+    int ciphertext_offset;
     int ciphertext_segment_size;
     std::string associated_data;
   };

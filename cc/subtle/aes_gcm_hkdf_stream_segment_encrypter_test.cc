@@ -34,18 +34,18 @@ namespace {
 
 TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
   for (int key_size : {16, 32}) {
-    for (int first_segment_offset : {0, 5, 10}) {
+    for (int ciphertext_offset : {0, 5, 10}) {
       for (int ct_segment_size : {80, 128, 200}) {
         SCOPED_TRACE(absl::StrCat(
             "key_size = ", key_size,
-            ", first_segment_offset = ", first_segment_offset,
+            ", ciphertext_offset = ", ciphertext_offset,
             ", ciphertext_segment_size = ", ct_segment_size));
 
         // Construct an encrypter.
         AesGcmHkdfStreamSegmentEncrypter::Params params;
         params.key_value = Random::GetRandomBytes(key_size);
         params.salt = Random::GetRandomBytes(key_size);
-        params.first_segment_offset = first_segment_offset;
+        params.ciphertext_offset = ciphertext_offset;
         params.ciphertext_segment_size = ct_segment_size;
         auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
         EXPECT_TRUE(result.ok()) << result.status();
@@ -62,8 +62,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
         EXPECT_EQ(ct_segment_size, enc->get_ciphertext_segment_size());
         EXPECT_EQ(ct_segment_size - /* tag_size = */ 16,
                   enc->get_plaintext_segment_size());
-        EXPECT_EQ(header_size + first_segment_offset,
-                  enc->get_ciphertext_offset());
+        EXPECT_EQ(ciphertext_offset, enc->get_ciphertext_offset());
         int segment_number = 0;
         for (int pt_size : {1, 10, enc->get_plaintext_segment_size()}) {
           for (bool is_last_segment : {false, true}) {
@@ -98,16 +97,16 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
 
 TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongKeySize) {
   for (int key_size : {12, 24, 64}) {
-    for (int first_segment_offset : {0, 5, 10}) {
+    for (int ciphertext_offset : {0, 5, 10}) {
       for (int ct_segment_size : {128, 200}) {
            SCOPED_TRACE(absl::StrCat(
                "key_size = ", key_size,
-               ", first_segment_offset = ", first_segment_offset,
+               ", ciphertext_offset = ", ciphertext_offset,
                ", ciphertext_segment_size = ", ct_segment_size));
         AesGcmHkdfStreamSegmentEncrypter::Params params;
         params.key_value = Random::GetRandomBytes(key_size);
         params.salt = Random::GetRandomBytes(key_size);
-        params.first_segment_offset = first_segment_offset;
+        params.ciphertext_offset = ciphertext_offset;
         params.ciphertext_segment_size = ct_segment_size;
         auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
         EXPECT_FALSE(result.ok());
@@ -128,7 +127,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongSaltSize) {
       AesGcmHkdfStreamSegmentEncrypter::Params params;
       params.key_value = Random::GetRandomBytes(key_size);
       params.salt = Random::GetRandomBytes(key_size + salt_size_delta);
-      params.first_segment_offset = 0;
+      params.ciphertext_offset = 0;
       params.ciphertext_segment_size = 128;
       auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
       EXPECT_FALSE(result.ok());
@@ -139,16 +138,16 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongSaltSize) {
   }
 }
 
-TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongFirstSegmentOffset) {
+TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextOffset) {
   for (int key_size : {16, 32}) {
-    for (int first_segment_offset : {-16, -10, -3, -1}) {
+    for (int ciphertext_offset : {-16, -10, -3, -1}) {
       SCOPED_TRACE(absl::StrCat(
           "key_size = ", key_size,
-          ", first_segment_offset = ", first_segment_offset));
+          ", ciphertext_offset = ", ciphertext_offset));
       AesGcmHkdfStreamSegmentEncrypter::Params params;
       params.key_value = Random::GetRandomBytes(key_size);
       params.salt = Random::GetRandomBytes(key_size);
-      params.first_segment_offset = first_segment_offset;
+      params.ciphertext_offset = ciphertext_offset;
       params.ciphertext_segment_size = 128;
       auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
       EXPECT_FALSE(result.ok());
@@ -161,8 +160,8 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongFirstSegmentOffset) {
 
 TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextSegmentSize) {
   for (int key_size : {16, 32}) {
-    for (int first_segment_offset : {0, 1, 5, 10}) {
-      int min_ct_segment_size = key_size + first_segment_offset +
+    for (int ciphertext_offset : {0, 1, 5, 10}) {
+      int min_ct_segment_size = key_size + ciphertext_offset +
                                 8 +   // nonce_prefix_size + 1
                                 16;   // tag_size
       for (int ct_segment_size : {min_ct_segment_size - 5,
@@ -170,12 +169,12 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextSegmentSize) {
               min_ct_segment_size + 1, min_ct_segment_size + 10}) {
         SCOPED_TRACE(absl::StrCat(
             "key_size = ", key_size,
-            ", first_segment_offset = ", first_segment_offset,
+            ", ciphertext_offset = ", ciphertext_offset,
             ", ciphertext_segment_size = ", ct_segment_size));
         AesGcmHkdfStreamSegmentEncrypter::Params params;
         params.key_value = Random::GetRandomBytes(key_size);
         params.salt = Random::GetRandomBytes(key_size);
-        params.first_segment_offset = first_segment_offset;
+        params.ciphertext_offset = ciphertext_offset;
         params.ciphertext_segment_size = ct_segment_size;
         auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
         if (ct_segment_size < min_ct_segment_size) {

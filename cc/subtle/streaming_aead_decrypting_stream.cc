@@ -93,7 +93,8 @@ StatusOr<std::unique_ptr<InputStream>> StreamingAeadDecryptingStream::New(
   dec_stream->ct_source_ = std::move(ciphertext_source);
   int first_segment_size =
       dec_stream->segment_decrypter_->get_ciphertext_segment_size() -
-      dec_stream->segment_decrypter_->get_ciphertext_offset();
+      dec_stream->segment_decrypter_->get_ciphertext_offset() -
+      dec_stream->segment_decrypter_->get_header_size();
   if (first_segment_size <= 0) {
     return Status(util::error::INTERNAL,
                   "Size of the first segment must be greater than 0.");

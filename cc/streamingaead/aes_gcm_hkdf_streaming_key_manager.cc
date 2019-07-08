@@ -106,7 +106,7 @@ AesGcmHkdfStreamingKeyManager::GetPrimitiveFromKey(
       util::Enums::ProtoToSubtle(key.params().hkdf_hash_type()),
       key.params().derived_key_size(),
       key.params().ciphertext_segment_size(),
-      /* first_segment_offset = */ 0);
+      /* ciphertext_offset = */ 0);
   if (!streaming_result.ok()) return streaming_result.status();
   return {std::move(streaming_result.ValueOrDie())};
 }

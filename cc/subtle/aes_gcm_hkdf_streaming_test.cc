@@ -44,18 +44,18 @@ TEST(AesGcmHkdfStreamingTest, testBasic) {
            derived_key_size <= ikm_size;
            derived_key_size += 16) {
         for (int ct_segment_size : {80, 128, 200}) {
-          for (int first_segment_offset : {0, 10, 16}) {
+          for (int ciphertext_offset : {0, 10, 16}) {
             SCOPED_TRACE(absl::StrCat(
                 "hkdf_hash = ", EnumToString(hkdf_hash),
                 ", ikm_size = ", ikm_size,
                 ", derived_key_size = ", derived_key_size,
                 ", ciphertext_segment_size = ", ct_segment_size,
-                ", first_segment_offset = ", first_segment_offset));
+                ", ciphertext_offset = ", ciphertext_offset));
             // Create AesGcmHkdfStreaming.
             std::string ikm = Random::GetRandomBytes(ikm_size);
             auto result = AesGcmHkdfStreaming::New(
                 ikm, hkdf_hash, derived_key_size,
-                ct_segment_size, first_segment_offset);
+                ct_segment_size, ciphertext_offset);
             EXPECT_TRUE(result.ok()) << result.status();
             auto streaming_aead = std::move(result.ValueOrDie());
 
@@ -117,12 +117,12 @@ TEST(AesGcmHkdfStreamingTest, testIkmSmallerThanDerivedKey) {
   int ikm_size = 16;
   int derived_key_size = 17;
   int ct_segment_size = 100;
-  int first_segment_offset = 10;
+  int ciphertext_offset = 10;
   HashType hkdf_hash = SHA256;
   std::string ikm = Random::GetRandomBytes(ikm_size);
 
   auto result = AesGcmHkdfStreaming::New(
-      ikm, hkdf_hash, derived_key_size, ct_segment_size, first_segment_offset);
+      ikm, hkdf_hash, derived_key_size, ct_segment_size, ciphertext_offset);
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "ikm too small",
@@ -133,13 +133,13 @@ TEST(AesGcmHkdfStreamingTest, testIkmSize) {
   for (int ikm_size : {5, 10, 15}) {
     int derived_key_size = ikm_size;
     int ct_segment_size = 100;
-    int first_segment_offset = 0;
+    int ciphertext_offset = 0;
     HashType hkdf_hash = SHA256;
     std::string ikm = Random::GetRandomBytes(ikm_size);
 
     auto result = AesGcmHkdfStreaming::New(
         ikm, hkdf_hash, derived_key_size,
-        ct_segment_size, first_segment_offset);
+        ct_segment_size, ciphertext_offset);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "ikm too small",
@@ -151,12 +151,12 @@ TEST(AesGcmHkdfStreamingTest, testWrongHkdfHash) {
   int ikm_size = 16;
   int derived_key_size = 16;
   int ct_segment_size = 100;
-  int first_segment_offset = 10;
+  int ciphertext_offset = 10;
   HashType hkdf_hash = SHA384;
   std::string ikm = Random::GetRandomBytes(ikm_size);
 
   auto result = AesGcmHkdfStreaming::New(ikm, hkdf_hash, derived_key_size,
-                                         ct_segment_size, first_segment_offset);
+                                         ct_segment_size, ciphertext_offset);
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "unsupported hkdf_hash",
@@ -167,28 +167,28 @@ TEST(AesGcmHkdfStreamingTest, testWrongDerivedKeySize) {
   int ikm_size = 20;
   int derived_key_size = 20;
   int ct_segment_size = 100;
-  int first_segment_offset = 10;
+  int ciphertext_offset = 10;
   HashType hkdf_hash = SHA256;
   std::string ikm = Random::GetRandomBytes(ikm_size);
 
   auto result = AesGcmHkdfStreaming::New(
-      ikm, hkdf_hash, derived_key_size, ct_segment_size, first_segment_offset);
+      ikm, hkdf_hash, derived_key_size, ct_segment_size, ciphertext_offset);
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be 16 or 32",
                       result.status().error_message());
 }
 
-TEST(AesGcmHkdfStreamingTest, testWrongFirstSegmentOffset) {
+TEST(AesGcmHkdfStreamingTest, testWrongCiphertextOffset) {
   int ikm_size = 32;
   int derived_key_size = 32;
   int ct_segment_size = 100;
-  int first_segment_offset = -5;
+  int ciphertext_offset = -5;
   HashType hkdf_hash = SHA256;
   std::string ikm = Random::GetRandomBytes(ikm_size);
 
   auto result = AesGcmHkdfStreaming::New(
-      ikm, hkdf_hash, derived_key_size, ct_segment_size, first_segment_offset);
+      ikm, hkdf_hash, derived_key_size, ct_segment_size, ciphertext_offset);
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be non-negative",
@@ -199,12 +199,12 @@ TEST(AesGcmHkdfStreamingTest, testWrongCiphertextSegmentSize) {
   int ikm_size = 32;
   int derived_key_size = 32;
   int ct_segment_size = 64;
-  int first_segment_offset = 40;
+  int ciphertext_offset = 40;
   HashType hkdf_hash = SHA256;
   std::string ikm = Random::GetRandomBytes(ikm_size);
 
   auto result = AesGcmHkdfStreaming::New(
-      ikm, hkdf_hash, derived_key_size, ct_segment_size, first_segment_offset);
+      ikm, hkdf_hash, derived_key_size, ct_segment_size, ciphertext_offset);
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "ciphertext_segment_size too small",

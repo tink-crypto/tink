@@ -84,7 +84,7 @@ class DummyStreamSegmentEncrypter : public StreamSegmentEncrypter {
     do {
       int seg_len = pt_segment_size_;
       if (pos == 0) {  // The first segment.
-        seg_len -= ct_offset_;
+        seg_len -= (ct_offset_ + header_.size());
       }
       if (seg_len > plaintext.size() - pos) {  // The last segment.
         seg_len = plaintext.size() - pos;

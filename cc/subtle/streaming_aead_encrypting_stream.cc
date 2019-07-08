@@ -80,7 +80,9 @@ StatusOr<std::unique_ptr<OutputStream>> StreamingAeadEncryptingStream::New(
   enc_stream->ct_destination_ = std::move(ciphertext_destination);
   int first_segment_size =
       enc_stream->segment_encrypter_->get_plaintext_segment_size() -
-      enc_stream->segment_encrypter_->get_ciphertext_offset();
+      enc_stream->segment_encrypter_->get_ciphertext_offset() -
+      enc_stream->segment_encrypter_->get_header().size();
+
   if (first_segment_size <= 0) {
     return Status(util::error::INTERNAL,
                   "Size of the first segment must be greater than 0.");

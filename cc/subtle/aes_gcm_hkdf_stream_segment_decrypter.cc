@@ -73,14 +73,14 @@ util::Status Validate(const AesGcmHkdfStreamSegmentDecrypter::Params& params) {
   if (params.ikm.size() < 16 || params.ikm.size() < params.derived_key_size) {
     return util::Status(util::error::INVALID_ARGUMENT, "ikm too small");
   }
-  if (params.first_segment_offset < 0) {
+  if (params.ciphertext_offset < 0) {
     return util::Status(util::error::INVALID_ARGUMENT,
-                        "first_segment_offset must be non-negative");
+                        "ciphertext_offset must be non-negative");
   }
   int header_size = 1 + params.derived_key_size +
                     AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
   if (params.ciphertext_segment_size <
-      params.first_segment_offset + header_size +
+      params.ciphertext_offset + header_size +
       AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext_segment_size too small");
@@ -101,7 +101,7 @@ util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>
   int header_size = 1 + params.derived_key_size +
                     AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
   decrypter->header_size_ = header_size;
-  decrypter->ciphertext_offset_ = header_size + params.first_segment_offset;
+  decrypter->ciphertext_offset_ = params.ciphertext_offset;
   decrypter->ciphertext_segment_size_ = params.ciphertext_segment_size;
   decrypter->derived_key_size_ = params.derived_key_size;
   decrypter->associated_data_ = params.associated_data;

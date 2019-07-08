@@ -42,7 +42,7 @@ Status Validate(absl::string_view ikm,
                 HashType hkdf_hash,
                 int derived_key_size,
                 int ciphertext_segment_size,
-                int first_segment_offset) {
+                int ciphertext_offset) {
   if (!(hkdf_hash == SHA1 || hkdf_hash == SHA256 || hkdf_hash == SHA512)) {
     return Status(util::error::INVALID_ARGUMENT, "unsupported hkdf_hash");
   }
@@ -53,12 +53,12 @@ Status Validate(absl::string_view ikm,
     return util::Status(util::error::INVALID_ARGUMENT,
                         "derived_key_size must be 16 or 32");
   }
-  if (first_segment_offset < 0) {
+  if (ciphertext_offset < 0) {
     return util::Status(util::error::INVALID_ARGUMENT,
-                        "first_segment_offset must be non-negative");
+                        "ciphertext_offset must be non-negative");
   }
   if (ciphertext_segment_size <
-      first_segment_offset + derived_key_size) {
+      ciphertext_offset + derived_key_size) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext_segment_size too small");
   }
@@ -71,9 +71,9 @@ AesGcmHkdfStreaming::New(absl::string_view ikm,
                          HashType hkdf_hash,
                          int derived_key_size,
                          int ciphertext_segment_size,
-                         int first_segment_offset) {
+                         int ciphertext_offset) {
   auto status = Validate(ikm, hkdf_hash, derived_key_size,
-                         ciphertext_segment_size, first_segment_offset);
+                         ciphertext_segment_size, ciphertext_offset);
   if (!status.ok()) return status;
   std::unique_ptr<AesGcmHkdfStreaming>
       streaming_aead(new AesGcmHkdfStreaming());
@@ -81,7 +81,7 @@ AesGcmHkdfStreaming::New(absl::string_view ikm,
   streaming_aead->hkdf_hash_ = hkdf_hash;
   streaming_aead->derived_key_size_ = derived_key_size;
   streaming_aead->ciphertext_segment_size_ = ciphertext_segment_size;
-  streaming_aead->first_segment_offset_ = first_segment_offset;
+  streaming_aead->ciphertext_offset_ = ciphertext_offset;
   return std::move(streaming_aead);
 }
 
@@ -95,7 +95,7 @@ AesGcmHkdfStreaming::NewSegmentEncrypter(
       derived_key_size_);
   if (!hkdf_result.ok()) return hkdf_result.status();
   params.key_value = hkdf_result.ValueOrDie();
-  params.first_segment_offset = first_segment_offset_;
+  params.ciphertext_offset = ciphertext_offset_;
   params.ciphertext_segment_size = ciphertext_segment_size_;
   return AesGcmHkdfStreamSegmentEncrypter::New(params);
 }
@@ -107,7 +107,7 @@ AesGcmHkdfStreaming::NewSegmentDecrypter(
   params.ikm = ikm_;
   params.hkdf_hash = hkdf_hash_;
   params.derived_key_size = derived_key_size_;
-  params.first_segment_offset = first_segment_offset_;
+  params.ciphertext_offset = ciphertext_offset_;
   params.ciphertext_segment_size = ciphertext_segment_size_;
   params.associated_data = std::string(associated_data);
   return AesGcmHkdfStreamSegmentDecrypter::New(params);

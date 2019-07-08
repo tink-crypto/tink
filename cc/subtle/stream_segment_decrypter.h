@@ -63,7 +63,12 @@ class StreamSegmentDecrypter {
   virtual int get_ciphertext_segment_size() const = 0;
 
   // Returns the offset (in bytes) of the ciphertext within an decrypted stream.
-  // The offset is not smaller than the size of the header.
+  // The offset is non-negative, and not larger than
+  //   ciphertext_segment_size - (header_size + segment_overhead)
+  // where
+  //   ciphertext_segment_size = get_ciphertext_segment_size()
+  //   header_size = get_header_size()
+  //   segment_overhead = ciphertext_segment_size - get_plaintext_segment_size()
   virtual int get_ciphertext_offset() const = 0;
 
   virtual ~StreamSegmentDecrypter() {}

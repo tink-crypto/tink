@@ -73,7 +73,7 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
   struct Params {
     std::string key_value;
     std::string salt;
-    int first_segment_offset;
+    int ciphertext_offset;
     int ciphertext_segment_size;
   };
 

@@ -39,7 +39,7 @@ class AesGcmHkdfStreaming : public NonceBasedStreamingAead {
       HashType hkdf_hash,
       int derived_key_size,
       int ciphertext_segment_size,
-      int first_segment_offset);
+      int ciphertext_offset);
 
   ~AesGcmHkdfStreaming() override {}
 
@@ -56,7 +56,7 @@ class AesGcmHkdfStreaming : public NonceBasedStreamingAead {
   HashType hkdf_hash_;
   int derived_key_size_;
   int ciphertext_segment_size_;
-  int first_segment_offset_;
+  int ciphertext_offset_;
 };
 
 }  // namespace subtle

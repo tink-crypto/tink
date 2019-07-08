@@ -76,26 +76,26 @@ TEST_F(StreamingAeadEncryptingStreamTest, WritingStreams) {
   std::vector<int> pt_sizes = {0, 10, 100, 1000, 10000, 100000, 1000000};
   std::vector<int> pt_segment_sizes = {64, 100, 128, 1000, 1024};
   std::vector<int> header_sizes = {5, 10, 32};
-  std::vector<int> ct_offset_deltas = {0, 1, 5, 15};
+  std::vector<int> ct_offsets = {0, 1, 5, 15};
   for (auto pt_size : pt_sizes) {
     for (auto pt_segment_size : pt_segment_sizes) {
       for (auto header_size : header_sizes) {
-        for (auto offset_delta : ct_offset_deltas) {
+        for (auto ct_offset : ct_offsets) {
           SCOPED_TRACE(absl::StrCat("pt_size = ", pt_size,
                                     ", pt_segment_size = ", pt_segment_size,
                                     ", header_size = ", header_size,
-                                    ", offset_delta = ", offset_delta));
+                                    ", ct_offset = ", ct_offset));
           // Get an encrypting stream.
           ValidationRefs refs;
           auto enc_stream = GetEncryptingStream(pt_segment_size, header_size,
-              /* ct_offset = */ header_size + offset_delta, &refs);
+              ct_offset, &refs);
 
           // First buffer returned by Next();
           void* buffer;
           auto next_result = enc_stream->Next(&buffer);
           EXPECT_TRUE(next_result.ok()) << next_result.status();
           int buffer_size = next_result.ValueOrDie();
-          EXPECT_EQ(pt_segment_size - header_size - offset_delta, buffer_size);
+          EXPECT_EQ(pt_segment_size - (header_size + ct_offset), buffer_size);
           EXPECT_EQ(buffer_size, enc_stream->Position());
 
           // Backup the entire first buffer.
@@ -130,7 +130,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, EmptyPlaintext) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   // Close the stream.
   auto close_status = enc_stream->Close();
@@ -158,7 +158,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, EmptyPlaintextWithBackup) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   // Get the first segment.
   auto next_result = enc_stream->Next(&buffer);
@@ -195,7 +195,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintext) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   // Get the first segment, and close the stream.
   auto next_result = enc_stream->Next(&buffer);
@@ -230,7 +230,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, NextAfterBackup) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   // Get the first segment.
   auto next_result = enc_stream->Next(&buffer);
@@ -276,7 +276,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintextWithBackup) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   // Get the first segment.
   auto next_result = enc_stream->Next(&buffer);
@@ -314,7 +314,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintext) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   int seg_count = 5;
   // Get the first segment.
@@ -366,7 +366,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintextWithBackup) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   int seg_count = 5;
   // Get the first segment.
@@ -420,7 +420,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintextWithFullBackup) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   int seg_count = 5;
   // Get the first segment.
@@ -473,7 +473,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, BackupAndPosition) {
   // Get an encrypting stream.
   ValidationRefs refs;
   auto enc_stream = GetEncryptingStream(
-      pt_segment_size, header_size, /* ct_offset = */ header_size, &refs);
+      pt_segment_size, header_size, /* ct_offset = */ 0, &refs);
 
   // The first buffer.
   auto next_result = enc_stream->Next(&buffer);

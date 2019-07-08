@@ -74,31 +74,31 @@ TEST_F(StreamingAeadDecryptingStreamTest, WritingStreams) {
   std::vector<int> pt_sizes = {0, 10, 100, 1000, 10000, 100000, 1000000};
   std::vector<int> pt_segment_sizes = {64, 100, 128, 1000, 1024};
   std::vector<int> header_sizes = {5, 10, 32};
-  std::vector<int> ct_offset_deltas = {0, 1, 5, 15};
+  std::vector<int> ct_offsets = {0, 1, 5, 15};
   for (auto pt_size : pt_sizes) {
     for (auto pt_segment_size : pt_segment_sizes) {
       for (auto header_size : header_sizes) {
-        for (auto offset_delta : ct_offset_deltas) {
+        for (auto ct_offset : ct_offsets) {
           SCOPED_TRACE(absl::StrCat("pt_size = ", pt_size,
                                     ", pt_segment_size = ", pt_segment_size,
                                     ", header_size = ", header_size,
-                                    ", offset_delta = ", offset_delta));
+                                    ", ct_offset = ", ct_offset));
           // Get a decrypting stream.
           std::string pt = Random::GetRandomBytes(pt_size);
           DummyStreamSegmentEncrypter seg_enc(pt_segment_size, header_size,
-              /* ct_offset = */ header_size + offset_delta);
+              ct_offset);
           std::string ct = seg_enc.GenerateCiphertext(pt);
 
           ValidationRefs refs;
           auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-              /* ct_offset = */ header_size + offset_delta, ct, &refs);
+              ct_offset, ct, &refs);
 
           // First buffer returned by Next();
           const void* buffer;
           auto next_result = dec_stream->Next(&buffer);
           EXPECT_TRUE(next_result.ok()) << next_result.status();
           int buffer_size = next_result.ValueOrDie();
-          int exp_buffer_size = pt_segment_size - header_size - offset_delta;
+          int exp_buffer_size = pt_segment_size - (header_size + ct_offset);
           if (exp_buffer_size > pt_size) exp_buffer_size = pt_size;
           EXPECT_EQ(exp_buffer_size, buffer_size);
           EXPECT_EQ(buffer_size, dec_stream->Position());
@@ -126,7 +126,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, EmptyCiphertext) {
   // Get a decrypting stream.
   ValidationRefs refs;
   auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-      /* ct_offset = */ header_size, /* ciphertext = */ "", &refs);
+      /* ct_offset = */ 0, /* ciphertext = */ "", &refs);
 
   // First buffer returned by Next();
   const void* buffer;
@@ -144,7 +144,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, InvalidStreamHeader) {
   // Get a decrypting stream.
   ValidationRefs refs;
   auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-      /* ct_offset = */ header_size, std::string(header_size, 'a'), &refs);
+      /* ct_offset = */ 0, std::string(header_size, 'a'), &refs);
 
   // First buffer returned by Next();
   const void* buffer;
@@ -163,12 +163,12 @@ TEST_F(StreamingAeadDecryptingStreamTest, TruncatedLastSegment) {
   // Get a decrypting stream.
   std::string pt = Random::GetRandomBytes(pt_size);
   DummyStreamSegmentEncrypter seg_enc(pt_segment_size, header_size,
-      /* ct_offset = */ header_size);
+      /* ct_offset = */ 0);
   std::string ct = seg_enc.GenerateCiphertext(pt);
 
   ValidationRefs refs;
   auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-      /* ct_offset = */ header_size, ct.substr(0, ct.size()-2), &refs);
+      /* ct_offset = */ 0, ct.substr(0, ct.size()-2), &refs);
 
   // First buffer returned by Next();
   std::string decrypted;
@@ -187,13 +187,13 @@ TEST_F(StreamingAeadDecryptingStreamTest, OneSegmentPlaintext) {
   // Get a decrypting stream.
   std::string pt = Random::GetRandomBytes(pt_segment_size - header_size);
   DummyStreamSegmentEncrypter seg_enc(pt_segment_size, header_size,
-      /* ct_offset = */ header_size);
+      /* ct_offset = */ 0);
   std::string ct = seg_enc.GenerateCiphertext(pt);
   EXPECT_EQ(seg_enc.get_ciphertext_segment_size(), ct.size());
 
   ValidationRefs refs;
   auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-      /* ct_offset = */ header_size, ct, &refs);
+      /* ct_offset = */ 0, ct, &refs);
 
   // Get the first segment.
   const void* buffer;
@@ -218,7 +218,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, OneSegmentAndOneBytePlaintext) {
   // Get a decrypting stream.
   std::string pt = Random::GetRandomBytes(pt_segment_size - header_size + 1);
   DummyStreamSegmentEncrypter seg_enc(pt_segment_size, header_size,
-      /* ct_offset = */ header_size);
+      /* ct_offset = */ 0);
   std::string ct = seg_enc.GenerateCiphertext(pt);
   EXPECT_EQ(seg_enc.get_ciphertext_segment_size() +
             DummyStreamSegmentEncrypter::kSegmentTagSize + 1,
@@ -226,7 +226,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, OneSegmentAndOneBytePlaintext) {
 
   ValidationRefs refs;
   auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-      /* ct_offset = */ header_size, ct, &refs);
+      /* ct_offset = */ 0, ct, &refs);
 
   // Get the first segment.
   const void* buffer;
@@ -259,11 +259,11 @@ TEST_F(StreamingAeadDecryptingStreamTest, NextAfterBackUp) {
   // Get a decrypting stream.
   std::string pt = Random::GetRandomBytes(pt_size);
   DummyStreamSegmentEncrypter seg_enc(pt_segment_size, header_size,
-      /* ct_offset = */ header_size);
+      /* ct_offset = */ 0);
   std::string ct = seg_enc.GenerateCiphertext(pt);
   ValidationRefs refs;
   auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-      /* ct_offset = */ header_size, ct, &refs);
+      /* ct_offset = */ 0, ct, &refs);
 
   // Get the first segment.
   const void* buffer;
@@ -315,11 +315,11 @@ TEST_F(StreamingAeadDecryptingStreamTest, BackupAndPosition) {
   // Get a decrypting stream.
   std::string pt = Random::GetRandomBytes(pt_size);
   DummyStreamSegmentEncrypter seg_enc(pt_segment_size, header_size,
-      /* ct_offset = */ header_size);
+      /* ct_offset = */ 0);
   std::string ct = seg_enc.GenerateCiphertext(pt);
   ValidationRefs refs;
   auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-      /* ct_offset = */ header_size, ct, &refs);
+      /* ct_offset = */ 0, ct, &refs);
 
   // The first segment.
   const void* buffer;

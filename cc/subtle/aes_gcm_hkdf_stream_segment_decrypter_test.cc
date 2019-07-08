@@ -40,7 +40,7 @@ util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
 GetEncrypter(absl::string_view ikm,
              HashType hkdf_hash,
              int derived_key_size,
-             int first_segment_offset,
+             int ciphertext_offset,
              int ciphertext_segment_size,
              absl::string_view associated_data) {
   AesGcmHkdfStreamSegmentEncrypter::Params params;
@@ -50,7 +50,7 @@ GetEncrypter(absl::string_view ikm,
       derived_key_size);
   if (!hkdf_result.ok()) return hkdf_result.status();
   params.key_value = hkdf_result.ValueOrDie();
-  params.first_segment_offset = first_segment_offset;
+  params.ciphertext_offset = ciphertext_offset;
   params.ciphertext_segment_size = ciphertext_segment_size;
   return AesGcmHkdfStreamSegmentEncrypter::New(params);
 }
@@ -61,7 +61,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
       for (int derived_key_size = 16;
            derived_key_size <= ikm_size;
            derived_key_size += 16) {
-        for (int first_segment_offset : {0, 5, 10}) {
+        for (int ciphertext_offset : {0, 5, 10}) {
           for (int ct_segment_size : {80, 128, 200}) {
             for (std::string associated_data : {"associated data", "42", ""}) {
               SCOPED_TRACE(absl::StrCat(
@@ -69,7 +69,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
                   ", ikm_size = ", ikm_size,
                   ", associated_data = '", associated_data, "'",
                   ", derived_key_size = ", derived_key_size,
-                  ", first_segment_offset = ", first_segment_offset,
+                  ", ciphertext_offset = ", ciphertext_offset,
                   ", ciphertext_segment_size = ", ct_segment_size));
 
               // Construct a decrypter.
@@ -77,7 +77,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
               params.ikm = Random::GetRandomBytes(ikm_size);
               params.hkdf_hash = hkdf_hash;
               params.derived_key_size = derived_key_size;
-              params.first_segment_offset = first_segment_offset;
+              params.ciphertext_offset = ciphertext_offset;
               params.ciphertext_segment_size = ct_segment_size;
               params.associated_data = associated_data;
               auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
@@ -95,7 +95,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
               // Get an encrypter and initialize the decrypter.
               auto enc = std::move(
                   GetEncrypter(params.ikm, hkdf_hash, derived_key_size,
-                               first_segment_offset, ct_segment_size,
+                               ciphertext_offset, ct_segment_size,
                                associated_data).ValueOrDie());
               status = dec->Init(enc->get_header());
               EXPECT_TRUE(status.ok()) << status;
@@ -108,8 +108,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
               EXPECT_EQ(ct_segment_size, dec->get_ciphertext_segment_size());
               EXPECT_EQ(ct_segment_size - /* tag_size = */ 16,
                         dec->get_plaintext_segment_size());
-              EXPECT_EQ(header_size + first_segment_offset,
-                        dec->get_ciphertext_offset());
+              EXPECT_EQ(ciphertext_offset, dec->get_ciphertext_offset());
               int segment_number = 0;
               for (int pt_size : {1, 10, dec->get_plaintext_segment_size()}) {
                 for (bool is_last_segment : {false, true}) {
@@ -157,13 +156,13 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongDerivedKeySize) {
       for (int ct_segment_size : {128, 200}) {
         SCOPED_TRACE(absl::StrCat(
             "derived_key_size = ", derived_key_size,
-            "hkdf_hash = ", EnumToString(hkdf_hash),
+            ", hkdf_hash = ", EnumToString(hkdf_hash),
             ", ciphertext_segment_size = ", ct_segment_size));
         AesGcmHkdfStreamSegmentDecrypter::Params params;
         params.ikm = Random::GetRandomBytes(derived_key_size);
         params.hkdf_hash = hkdf_hash;
         params.derived_key_size = derived_key_size;
-        params.first_segment_offset = 0;
+        params.ciphertext_offset = 0;
         params.ciphertext_segment_size = ct_segment_size;
         params.associated_data = "associated data";
         auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
@@ -182,13 +181,13 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongIkmSize) {
       for (int ikm_size_delta : {-8, -4, -2, -1}) {
         SCOPED_TRACE(absl::StrCat(
             "derived_key_size = ", derived_key_size,
-            "hkdf_hash = ", EnumToString(hkdf_hash),
+            ", hkdf_hash = ", EnumToString(hkdf_hash),
             ", ikm_size_delta = ", ikm_size_delta));
         AesGcmHkdfStreamSegmentDecrypter::Params params;
         params.ikm = Random::GetRandomBytes(derived_key_size + ikm_size_delta);
         params.hkdf_hash = hkdf_hash;
         params.derived_key_size = derived_key_size;
-        params.first_segment_offset = 0;
+        params.ciphertext_offset = 0;
         params.ciphertext_segment_size = 128;
         params.associated_data = "associated data";
         auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
@@ -201,19 +200,19 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongIkmSize) {
   }
 }
 
-TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongFirstSegmentOffset) {
+TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongCiphertextOffset) {
   for (int derived_key_size : {16, 32}) {
     for (HashType hkdf_hash : {SHA1, SHA256, SHA512}) {
-      for (int first_segment_offset : {-16, -10, -3, -1}) {
+      for (int ciphertext_offset : {-16, -10, -3, -1}) {
         SCOPED_TRACE(absl::StrCat(
             "derived_key_size = ", derived_key_size,
-            "hkdf_hash = ", EnumToString(hkdf_hash),
-            ", first_segment_offset = ", first_segment_offset));
+            ", hkdf_hash = ", EnumToString(hkdf_hash),
+            ", ciphertext_offset = ", ciphertext_offset));
         AesGcmHkdfStreamSegmentDecrypter::Params params;
         params.ikm = Random::GetRandomBytes(derived_key_size);
         params.hkdf_hash = hkdf_hash;
         params.derived_key_size = derived_key_size;
-        params.first_segment_offset = first_segment_offset;
+        params.ciphertext_offset = ciphertext_offset;
         params.ciphertext_segment_size = 128;
         params.associated_data = "associated data";
         auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
@@ -229,8 +228,8 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongFirstSegmentOffset) {
 TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongCiphertextSegmentSize) {
   for (int derived_key_size : {16, 32}) {
     for (HashType hkdf_hash : {SHA1, SHA256, SHA512}) {
-      for (int first_segment_offset : {0, 1, 5, 10}) {
-        int min_ct_segment_size = derived_key_size + first_segment_offset +
+      for (int ciphertext_offset : {0, 1, 5, 10}) {
+        int min_ct_segment_size = derived_key_size + ciphertext_offset +
                                   8 +   // nonce_prefix_size + 1
                                   16;   // tag_size
         for (int ct_segment_size : {min_ct_segment_size - 5,
@@ -238,13 +237,13 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongCiphertextSegmentSize) {
                 min_ct_segment_size + 1, min_ct_segment_size + 10}) {
           SCOPED_TRACE(absl::StrCat(
               "derived_key_size = ", derived_key_size,
-              ", first_segment_offset = ", first_segment_offset,
+              ", ciphertext_offset = ", ciphertext_offset,
               ", ciphertext_segment_size = ", ct_segment_size));
           AesGcmHkdfStreamSegmentDecrypter::Params params;
           params.ikm = Random::GetRandomBytes(derived_key_size);
           params.hkdf_hash = hkdf_hash;
           params.derived_key_size = derived_key_size;
-          params.first_segment_offset = first_segment_offset;
+          params.ciphertext_offset = ciphertext_offset;
           params.ciphertext_segment_size = ct_segment_size;
           auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
           if (ct_segment_size < min_ct_segment_size) {
