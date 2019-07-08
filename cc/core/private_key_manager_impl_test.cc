@@ -162,6 +162,7 @@ TEST(PrivateKeyManagerImplTest, GetPublicKeyData) {
       dynamic_cast<const PrivateKeyFactory&>(key_manager->get_key_factory())
           .GetPublicKeyData(private_key.SerializeAsString())
           .ValueOrDie();
+  ASSERT_THAT(key_data->type_url(), Eq(public_km.get_key_type()));
   EcdsaPublicKey public_key;
   public_key.ParseFromString(key_data->value());
   EXPECT_THAT(public_key.params().encoding(), Eq(EcdsaSignatureEncoding::DER));
