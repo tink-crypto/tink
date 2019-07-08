@@ -151,4 +151,6 @@ Tink is maintained by (A-Z):
 -   Charles Lee
 -   Quan Nguyen
 -   Bartosz Przydatek
+-   Enzo Puig
 -   Veronika Slívová
+-   Jürg Wullschleger
