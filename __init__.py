@@ -27,7 +27,7 @@ PrivateKeyManager = core.PrivateKeyManager
 Registry = core.Registry
 
 new_keyset_handle = core.new_keyset_handle
-read_keyset_handle = core.read
+read_keyset_handle = core.read_keyset_handle
 KeysetHandle = core.KeysetHandle
 
 
