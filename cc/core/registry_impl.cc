@@ -64,6 +64,28 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
   return result;
 }
 
+crypto::tink::util::Status RegistryImpl::CheckInsertable(
+    const std::string& type_url, const std::type_index& key_manager_type_index,
+    bool new_key_allowed) const {
+  auto it = type_url_to_info_.find(type_url);
+
+  if (it == type_url_to_info_.end()) {
+    return crypto::tink::util::Status::OK;
+  }
+  if (it->second.key_manager_type_index() != key_manager_type_index) {
+    return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+                     "A manager for type '%s' has been already registered.",
+                     type_url.c_str());
+  }
+  if (!it->second.new_key_allowed() && new_key_allowed) {
+    return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+                     "A manager for type '%s' has been already registered "
+                     "with forbidden new key operation.",
+                     type_url.c_str());
+  }
+  return crypto::tink::util::Status::OK;
+}
+
 void RegistryImpl::Reset() {
   absl::MutexLock lock(&maps_mutex_);
   type_url_to_info_.clear();

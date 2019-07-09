@@ -237,6 +237,12 @@ class RegistryImpl {
   crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*> get_wrapper()
       const LOCKS_EXCLUDED(maps_mutex_);
 
+  // Returns OK if the key manager with the given type index can be inserted
+  // for type url type_url and parameter new_key_allowed. Otherwise returns
+  // an error to be returned to the user.
+  crypto::tink::util::Status CheckInsertable(
+      const std::string& type_url, const std::type_index& key_manager_type_index,
+      bool new_key_allowed) const SHARED_LOCKS_REQUIRED(maps_mutex_);
 
   mutable absl::Mutex maps_mutex_;
   std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_
@@ -315,23 +321,13 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
                      type_url.c_str());
   }
   absl::MutexLock lock(&maps_mutex_);
-  auto it = type_url_to_info_.find(type_url);
+  crypto::tink::util::Status status = CheckInsertable(
+      type_url, std::type_index(typeid(*owned_manager)), new_key_allowed);
+  if (!status.ok()) return status;
 
+  auto it = type_url_to_info_.find(type_url);
   if (it != type_url_to_info_.end()) {
-    if (it->second.key_manager_type_index() !=
-        std::type_index(typeid(*owned_manager))) {
-      return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
-                       "A manager for type '%s' has been already registered.",
-                       type_url.c_str());
-    } else {
-      if (!it->second.new_key_allowed() && new_key_allowed) {
-        return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
-                         "A manager for type '%s' has been already registered "
-                         "with forbidden new key operation.",
-                         type_url.c_str());
-      }
-      it->second.set_new_key_allowed(new_key_allowed);
-    }
+    it->second.set_new_key_allowed(new_key_allowed);
   } else {
     type_url_to_info_.emplace(
         std::piecewise_construct, std::forward_as_tuple(type_url),
@@ -354,23 +350,13 @@ crypto::tink::util::Status RegistryImpl::RegisterInternalKeyManager(
   }
   std::string type_url = owned_manager->get_key_type();
   absl::MutexLock lock(&maps_mutex_);
-  auto it = type_url_to_info_.find(type_url);
+  crypto::tink::util::Status status = CheckInsertable(
+      type_url, std::type_index(typeid(*owned_manager)), new_key_allowed);
+  if (!status.ok()) return status;
 
+  auto it = type_url_to_info_.find(type_url);
   if (it != type_url_to_info_.end()) {
-    if (it->second.key_manager_type_index() !=
-        std::type_index(typeid(*manager))) {
-      return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
-                       "A manager for type '%s' has been already registered.",
-                       type_url.c_str());
-    } else {
-      if (!it->second.new_key_allowed() && new_key_allowed) {
-        return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
-                         "A manager for type '%s' has been already registered "
-                         "with forbidden new key operation.",
-                         type_url.c_str());
-      }
-      it->second.set_new_key_allowed(new_key_allowed);
-    }
+    it->second.set_new_key_allowed(new_key_allowed);
   } else {
     type_url_to_info_.emplace(
         std::piecewise_construct, std::forward_as_tuple(type_url),
