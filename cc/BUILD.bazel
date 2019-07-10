@@ -465,7 +465,9 @@ cc_library(
     deps = [
         ":catalogue",
         ":core/internal_key_manager",
+        ":core/internal_private_key_manager",
         ":core/key_manager_impl",
+        ":core/private_key_manager_impl",
         ":key_manager",
         ":primitive_set",
         ":primitive_wrapper",
@@ -839,6 +841,7 @@ cc_test(
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
+        "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",

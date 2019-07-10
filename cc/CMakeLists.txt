@@ -391,8 +391,10 @@ tink_cc_library(
   DEPS
     tink::core::catalogue
     tink::core::internal_key_manager
+    tink::core::internal_private_key_manager
     tink::core::key_manager
     tink::core::key_manager_impl
+    tink::core::private_key_manager_impl
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::util::errors
@@ -640,6 +642,7 @@ tink_cc_test(
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto
+    tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
     gmock
