@@ -273,10 +273,10 @@ To load encrypted keysets, one can use
 Tink, hence they form the core of Tink API. A primitive is just an interface
 that specifies what operations are offered by the primitive. A primitive can
 have multiple implementations, and user chooses a desired implementation by
-using a key of corresponding type (see the [this
-section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
-A list of primitives and their implemenations currently supported by
-Tink in C++ can be found [here](PRIMITIVES.md#c).
+using a key of corresponding type (see
+[this section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details). A
+list of primitives and their implementations currently supported by Tink in C++
+can be found [here](PRIMITIVES.md#c).
 
 A user obtains a primitive by calling the function `getPrimitive<>` of the
 `KeysetHandle`.
