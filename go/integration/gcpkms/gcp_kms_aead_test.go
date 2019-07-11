@@ -24,8 +24,8 @@ import (
 	// context is used to cancel outstanding requests
 	// TEST_SRCDIR to read the roots.pem
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
@@ -55,7 +55,10 @@ func setupKMS(t *testing.T) {
 	if err != nil {
 		t.Errorf("error setting up gcp client: %v", err)
 	}
-	_, err = g.LoadCredentials(credFile)
+	gcpClient, err := g.LoadCredentials(credFile)
+	if gcpClient == nil {
+		t.Fatalf("error initialising gcp client : %v", gcpClient)
+	}
 	if err != nil {
 		t.Errorf("error loading credentials : %v", err)
 	}
