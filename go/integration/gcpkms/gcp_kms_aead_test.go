@@ -57,7 +57,7 @@ func setupKMS(t *testing.T) {
 	}
 	gcpClient, err := g.LoadCredentials(credFile)
 	if gcpClient == nil {
-		t.Fatalf("error initialising gcp client : %v", gcpClient)
+		t.Fatal("error initialising gcp client as it is nil")
 	}
 	if err != nil {
 		t.Errorf("error loading credentials : %v", err)
