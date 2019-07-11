@@ -5,7 +5,7 @@
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-licenses(["notice"])  # Apache 2.0
+licenses(["notice"])
 
 exports_files(["LICENSE"])
 
