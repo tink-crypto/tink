@@ -203,5 +203,5 @@ assert_file_contains() {
 
 # Keeps name of file while removing the path part.
 get_file_name() {
-  echo $1 | sed -e "s/.*\///"
+  basename "$@"
 }
