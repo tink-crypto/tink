@@ -39,7 +39,7 @@ aead_basic_test() {
     echo "## TEST for key template $key_template"
     for encrypt_cli in ${encrypt_clis[*]}
     do
-      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      local encrypt_cli_name=$(basename $encrypt_cli)
       echo "## ENCRYPTING using $encrypt_cli_name"
       local test_instance="${test_name}_${key_template}"
       generate_symmetric_key "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
@@ -56,7 +56,7 @@ aead_basic_test() {
       assert_files_different $plaintext_file $encrypted_file
       for decrypt_cli in ${decrypt_clis[*]}
       do
-        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypt_cli_name=$(basename "$decrypt_cli")
         local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
         echo "## DECRYPTING using $decrypt_cli_name"
         $decrypt_cli $symmetric_key_file "decrypt" $encrypted_file\
@@ -86,7 +86,7 @@ aead_aws_test() {
     echo "## TEST for key template $key_template"
     for encrypt_cli in ${encrypt_clis[*]}
     do
-      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      local encrypt_cli_name=$(basename $encrypt_cli)
       echo "## ENCRYPTING using $encrypt_cli_name"
       local test_instance="${test_name}_${key_template}"
       generate_aws_keyset "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
@@ -103,7 +103,7 @@ aead_aws_test() {
       assert_files_different $plaintext_file $encrypted_file
       for decrypt_cli in ${decrypt_clis[*]}
       do
-        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypt_cli_name=$(basename "$decrypt_cli")
         local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
         echo "## DECRYPTING using $decrypt_cli_name"
         $decrypt_cli $aws_keyset_file "decrypt" $encrypted_file\
@@ -133,7 +133,7 @@ aead_gcp_test() {
     echo "## TEST for key template $key_template"
     for encrypt_cli in ${encrypt_clis[*]}
     do
-      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      local encrypt_cli_name=$(basename $encrypt_cli)
       echo "## ENCRYPTING using $encrypt_cli_name"
       local test_instance="${test_name}_${key_template}"
       generate_gcp_keyset "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
@@ -150,7 +150,7 @@ aead_gcp_test() {
 
       for decrypt_cli in ${decrypt_clis[*]}
       do
-        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypt_cli_name=$(basename "$decrypt_cli")
         local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
         echo "## DECRYPTING using $decrypt_cli_name"
         $decrypt_cli $gcp_keyset_file "decrypt" $encrypted_file\

@@ -37,7 +37,7 @@ streaming_aead_basic_test() {
     echo "## TEST for key template $key_template"
     for encrypt_cli in ${encrypt_clis[*]}
     do
-      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      local encrypt_cli_name=$(basename $encrypt_cli)
       echo "## ENCRYPTING using $encrypt_cli_name"
       local test_instance="${test_name}_${key_template}"
       local test_file_size_mb=5
@@ -55,7 +55,7 @@ streaming_aead_basic_test() {
       assert_files_different $plaintext_file $encrypted_file
       for decrypt_cli in ${decrypt_clis[*]}
       do
-        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypt_cli_name=$(basename "$decrypt_cli")
         local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
         echo "## DECRYPTING using $decrypt_cli_name"
         $decrypt_cli $symmetric_key_file "decrypt" $encrypted_file\
@@ -81,7 +81,3 @@ KEY_TEMPLATES=(AES128_CTR_HMAC_SHA256_4KB AES256_CTR_HMAC_SHA256_4KB)
 ENCRYPT_CLIS=($JAVA_AEAD_CLI)
 DECRYPT_CLIS=($JAVA_AEAD_CLI)
 streaming_aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
-
-
-
-

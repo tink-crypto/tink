@@ -74,5 +74,3 @@ deterministic_aead_basic_test "CC-GO"\
     $CC_DAEAD_CLI $GO_DAEAD_CLI "${KEY_TEMPLATES[*]}"
 deterministic_aead_basic_test "GO-CC"\
     $GO_DAEAD_CLI $CC_DAEAD_CLI "${KEY_TEMPLATES[*]}"
-
-

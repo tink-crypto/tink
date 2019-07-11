@@ -23,7 +23,7 @@ source $TEST_UTIL || exit 1
 
 #############################################################################
 ##### Run the actual tests.
-TINK_VERSION=$(cat $VERSION_FILE | grep "TINK_VERSION_LABEL" | cut -d \" -f 2)
+TINK_VERSION=$(grep "TINK_VERSION_LABEL" $VERSION_FILE | cut -d \" -f 2)
 echo "CONFIG: $TINK_VERSION"
 CC_TINK_VERSION=$($CC_VERSION_CLI)
 echo "CC: $CC_TINK_VERSION"

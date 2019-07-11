@@ -122,7 +122,7 @@ generate_long_plaintext() {
   local bytes_in_mb="$3"
 
   plaintext_file="$TEST_TMPDIR/${plaintext_name}_plaintext.bin"
-  dd if=/dev/urandom of="$plaintext_file" bs=$bytes_in_mb count="$2"
+  dd if=/dev/urandom of="$plaintext_file" bs="$bytes_in_mb" count="$size_mb"
 }
 
 
@@ -199,9 +199,4 @@ assert_file_contains() {
   fi
   done
   echo "+++ Success: file contains all expected substrings."
-}
-
-# Keeps name of file while removing the path part.
-get_file_name() {
-  basename "$@"
 }
