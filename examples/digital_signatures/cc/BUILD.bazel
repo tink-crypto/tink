@@ -1,0 +1,38 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "util",
+    srcs = ["util.cc"],
+    hdrs = ["util.h"],
+    deps = [
+        "//cc:binary_keyset_reader",
+        "//cc:binary_keyset_writer",
+        "//cc:cleartext_keyset_handle",
+        "//cc:config",
+        "//cc:keyset_handle",
+        "//cc:keyset_reader",
+        "//cc:keyset_writer",
+        "//cc/config:tink_config",
+        "//cc/util:status",
+    ],
+)
+
+cc_binary(
+    name = "digital_signatures_cli",
+    srcs = ["digital_signatures_cli.cc"],
+    deps = [
+        ":util",
+        "//cc:public_key_sign",
+        "//cc:public_key_verify",
+        "//cc/signature:signature_key_templates",
+    ],
+)
+
+sh_test(
+    name = "digital_signatures_cli_test",
+    size = "small",
+    srcs = ["digital_signatures_cli_test.sh"],
+    data = [":digital_signatures_cli"],
+)
