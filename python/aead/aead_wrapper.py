@@ -21,7 +21,7 @@ from __future__ import print_function
 
 from typing import Type
 
-from google3.pyglib import logging
+from pyglib import logging
 
 from tink.python.aead import aead
 from tink.python.core import crypto_format

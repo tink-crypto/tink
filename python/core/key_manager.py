@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import abc
 
-import google3
+# Special imports
 
 from typing import Any, Generic, Text, Type, TypeVar
 
