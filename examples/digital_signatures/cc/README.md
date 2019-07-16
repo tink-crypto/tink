@@ -1,8 +1,8 @@
 # C++ Digital Signatures CLI
 
-This is a command-line tool that can generate [Digital Signature]
-(../../../docs/PRIMITIVES.md#digital-signatures) keys, and create and
-verify digital signatures.
+This is a command-line tool that can generate
+[Digital Signature](../../../docs/PRIMITIVES.md#digital-signatures)
+keys, and create and verify digital signatures.
 
 It demonstrates the basic steps of using Tink, namely loading key material,
 obtaining a primitive, and using the primitive to do crypto.
