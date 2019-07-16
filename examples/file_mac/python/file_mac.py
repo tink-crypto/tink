@@ -32,10 +32,8 @@ import binascii
 # Special imports
 from absl import app
 from absl import flags
+from absl import logging
 import tink
-
-from pyglib import logging
-
 
 FLAGS = flags.FLAGS
 
@@ -95,7 +93,12 @@ def main(argv):
     logging.info('MAC output is %s', binascii.hexlify(code).decode('utf-8'))
     return 0
 
-  expected_code = binascii.unhexlify(expected_code_hex)
+  try:
+    expected_code = binascii.unhexlify(expected_code_hex)
+  except binascii.Error as e:
+    logging.error('Error reading expected code: %s', e)
+    return 1
+
   try:
     cipher.verify_mac(expected_code, data)
     logging.info('MAC outputs matched. Success!')
