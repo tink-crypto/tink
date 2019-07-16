@@ -16,6 +16,7 @@
 
 #include "tink/python/util/clif.h"
 
+#include <assert.h>
 #include "absl/strings/str_cat.h"
 #include "tink/util/status.h"
 
@@ -45,7 +46,7 @@ void ErrorFromStatus(const Status& status) {
     // which is OK.
     kUtilStatusError =
         clif::ImportFQName("google3.util.task.python.error.StatusNotOk");
-    DCHECK(kUtilStatusError != nullptr);
+    assert(kUtilStatusError != nullptr);
   }
   PyObject* message_set_object;
   message_set_object = Py_None;
@@ -100,7 +101,7 @@ PyObject* Clif_PyObjFrom(const Status& c, const clif::py::PostConv& unused) {
 }
 
 std::string PyExcFetch() {
-  CHECK(PyErr_Occurred()) << "Must only call PyExcFetch after an exception.";
+  assert(PyErr_Occurred());  // Must only call PyExcFetch after an exception.
   PyObject* ptype;
   PyObject* pvalue;
   PyObject* ptraceback;

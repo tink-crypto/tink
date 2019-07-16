@@ -17,7 +17,7 @@
 #ifndef TINK_PYTHON_UTIL_CLIF_H_
 #define TINK_PYTHON_UTIL_CLIF_H_
 
-#include "base/logging.h"
+#include <assert.h>
 #include "devtools/clif/python/types.h"
 #include "util/python/pyobject.h"
 #include "tink/util/status.h"
@@ -66,7 +66,7 @@ PyObject* Clif_PyObjFrom(StatusOr<T>&& c,  // NOLINT:c++11
 
 template<typename T>
 bool Clif_PyObjAs(PyObject* p, StatusOr<T>* c) {
-  CHECK(c != nullptr);
+  assert(c != nullptr);
 
   if (PyErr_Occurred()) {
     *c = StatusFromPyException();
