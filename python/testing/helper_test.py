@@ -23,7 +23,7 @@ from tink.python.core import tink_error
 from tink.python.testing import helper
 
 
-class HelperTest(googletest.TestCase):
+class HelperTest(unittest.TestCase):
 
   def test_fake_mac_success(self):
     mac = helper.FakeMac('Name')

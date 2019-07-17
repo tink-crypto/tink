@@ -43,7 +43,7 @@ def new_primitives_and_keys(key_id, output_prefix_type):
   return fake_hybrid_decrypt, fake_hybrid_encrypt, fake_dec_key, fake_enc_key
 
 
-class HybridWrapperTest(googletest.TestCase):
+class HybridWrapperTest(unittest.TestCase):
 
   def test_encrypt_decrypt(self):
     dec, enc, dec_key, enc_key = new_primitives_and_keys(1234, tink_pb2.TINK)

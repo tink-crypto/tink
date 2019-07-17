@@ -27,7 +27,7 @@ from tink.proto import tink_pb2
 from tink.python.aead import aead_key_templates
 
 
-class AeadKeyTemplatesTest(googletest.TestCase):
+class AeadKeyTemplatesTest(unittest.TestCase):
 
   def test_aes128_eax(self):
     template = aead_key_templates.AES128_EAX

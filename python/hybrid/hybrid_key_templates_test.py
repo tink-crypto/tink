@@ -26,7 +26,7 @@ from tink.python.aead import aead_key_templates
 from tink.python.hybrid import hybrid_key_templates
 
 
-class HybridKeyTemplatesTest(googletest.TestCase):
+class HybridKeyTemplatesTest(unittest.TestCase):
 
   def test_ecies_p256_hkdf_hmac_sha256_aes128_gcm(self):
     template = hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM

@@ -22,7 +22,7 @@ import unittest
 from tink.python.cc.clif import cc_tink_config
 
 
-class CcTinkConfigTest(googletest.TestCase):
+class CcTinkConfigTest(unittest.TestCase):
 
   def test_latest(self):
     cc_tink_config.register()

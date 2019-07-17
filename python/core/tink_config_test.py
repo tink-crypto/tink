@@ -52,7 +52,7 @@ def _public_primitive_and_key(private_key, primitive_class, output_prefix_type):
       output_prefix_type)
 
 
-class TinkConfigTest(googletest.TestCase):
+class TinkConfigTest(unittest.TestCase):
 
   def test_all_aead_templates_are_registered(self):
     for template in [

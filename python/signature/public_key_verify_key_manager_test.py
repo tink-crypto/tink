@@ -48,7 +48,7 @@ def new_ecdsa_key_template(hash_type, curve_type, encoding, public=True):
   return key_template
 
 
-class PublicKeyVerifyKeyManagerTest(googletest.TestCase):
+class PublicKeyVerifyKeyManagerTest(unittest.TestCase):
 
   def setUp(self):
     super(PublicKeyVerifyKeyManagerTest, self).setUp()

@@ -27,7 +27,7 @@ from tink.python.core import tink_error
 from tink.python.testing import helper
 
 
-class AeadWrapperTest(googletest.TestCase):
+class AeadWrapperTest(unittest.TestCase):
 
   def new_primitive_key_pair(self, key_id, output_prefix_type):
     fake_key = helper.fake_key(key_id=key_id,

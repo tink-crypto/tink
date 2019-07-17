@@ -51,7 +51,7 @@ def example_encrypted_keyset():
   return encrypted_keyset
 
 
-class JsonKeysetWriterTest(googletest.TestCase):
+class JsonKeysetWriterTest(unittest.TestCase):
 
   def test_write_read(self):
     keyset = example_keyset()
@@ -93,7 +93,7 @@ class JsonKeysetWriterTest(googletest.TestCase):
       writer.write_encrypted(example_keyset())
 
 
-class BinaryKeysetReaderTest(googletest.TestCase):
+class BinaryKeysetReaderTest(unittest.TestCase):
 
   def test_write_read(self):
     keyset = example_keyset()
