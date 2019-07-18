@@ -294,7 +294,7 @@ corresponds to the primitive: AEAD via `TINKAeadFactory`, MAC via
 ### Symmetric Key Encryption
 
 Here is how you can obtain and use an [AEAD (Authenticated Encryption with
-Associated Data](PRIMITIVES.md#authenticated-encryption-with-associated-data)
+Associated Data)](PRIMITIVES.md#authenticated-encryption-with-associated-data)
 primitive to encrypt or decrypt data:
 
 ```objc
