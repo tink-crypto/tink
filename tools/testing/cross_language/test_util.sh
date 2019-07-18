@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +12,6 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 TINKEY_CLI="$ROOT_DIR/tools/tinkey/tinkey"
@@ -122,7 +122,7 @@ generate_long_plaintext() {
   local bytes_in_mb="$3"
 
   plaintext_file="$TEST_TMPDIR/${plaintext_name}_plaintext.bin"
-  dd if=/dev/urandom of="$plaintext_file" bs=$bytes_in_mb count="$2"
+  dd if=/dev/urandom of="$plaintext_file" bs="$bytes_in_mb" count="$size_mb"
 }
 
 
@@ -199,9 +199,4 @@ assert_file_contains() {
   fi
   done
   echo "+++ Success: file contains all expected substrings."
-}
-
-# Keeps name of file while removing the path part.
-get_file_name() {
-  echo $1 | sed -e "s/.*\///"
 }

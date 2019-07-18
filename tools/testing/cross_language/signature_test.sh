@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +12,6 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 CC_SIGN_CLI="$ROOT_DIR/tools/testing/cc/public_key_sign_cli_cc"
@@ -45,7 +45,7 @@ signature_basic_test() {
       echo "## TEST for key template $key_template, output prefix $output_prefix"
       for sign_cli in ${sign_clis[*]}
       do
-        local sign_cli_name=`get_file_name $sign_cli`
+        local sign_cli_name=$(basename $sign_cli)
         echo "## SIGNING using $sign_cli_name"
         local test_instance="${test_name}_${key_template}"
 
@@ -59,7 +59,7 @@ signature_basic_test() {
 
         for verify_cli in ${verify_clis[*]}
         do
-          local verify_cli_name=`get_file_name "$verify_cli"`
+          local verify_cli_name=$(basename "$verify_cli")
           local verification_file="$TEST_TMPDIR/${test_instance}_SIGN_${output_prefix}_${sign_cli_name}_VERIFY_${verify_cli_name}_verification.bin"
           echo "## VERIFYING using $verify_cli_name"
           $verify_cli $pub_key_file $signature_file $plaintext_file\

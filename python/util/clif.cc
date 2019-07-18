@@ -16,13 +16,11 @@
 
 #include "tink/python/util/clif.h"
 
-#include "google/protobuf/message_set.pb.h"
+#include <assert.h>
 #include "absl/strings/str_cat.h"
-#include "tink/util/canonical_errors.h"
+#include "tink/util/status.h"
 
-#if !defined(PORTABLE_STATUS)
-#include "tink/util/status_payload.h"
-#endif
+
 
 namespace crypto {
 namespace tink {
@@ -48,7 +46,7 @@ void ErrorFromStatus(const Status& status) {
     // which is OK.
     kUtilStatusError =
         clif::ImportFQName("google3.util.task.python.error.StatusNotOk");
-    DCHECK(kUtilStatusError != nullptr);
+    assert(kUtilStatusError != nullptr);
   }
   PyObject* message_set_object;
   message_set_object = Py_None;
@@ -69,29 +67,29 @@ Status StatusFromPyException() {
   }
 
   if (PyErr_ExceptionMatches(PyExc_MemoryError)) {
-    return ::util::ResourceExhaustedError(PyExcFetch());
+    return Status(util::error::RESOURCE_EXHAUSTED, PyExcFetch());
   }
   if (PyErr_ExceptionMatches(PyExc_NotImplementedError)) {
-    return ::util::UnimplementedError(PyExcFetch());
+    return Status(util::error::UNIMPLEMENTED, PyExcFetch());
   }
   if (PyErr_ExceptionMatches(PyExc_KeyboardInterrupt)) {
-    return ::util::AbortedError(PyExcFetch());
+    return Status(util::error::ABORTED, PyExcFetch());
   }
   if (PyErr_ExceptionMatches(PyExc_SystemError) ||
       PyErr_ExceptionMatches(PyExc_SyntaxError)) {
-    return ::util::InternalError(PyExcFetch());
+    return Status(util::error::INTERNAL, PyExcFetch());
   }
   if (PyErr_ExceptionMatches(PyExc_TypeError)) {
-    return ::util::InvalidArgumentError(PyExcFetch());
+    return Status(util::error::INVALID_ARGUMENT, PyExcFetch());
   }
   if (PyErr_ExceptionMatches(PyExc_ValueError)) {
-    return ::util::OutOfRangeError(PyExcFetch());
+    return Status(util::error::OUT_OF_RANGE, PyExcFetch());
   }
   if (PyErr_ExceptionMatches(PyExc_LookupError)) {
-    return ::util::NotFoundError(PyExcFetch());
+    return Status(util::error::NOT_FOUND, PyExcFetch());
   }
 
-  return ::util::UnknownError(PyExcFetch());
+  return Status(util::error::UNKNOWN, PyExcFetch());
 }
 
 PyObject* Clif_PyObjFrom(const Status& c, const clif::py::PostConv& unused) {
@@ -103,7 +101,7 @@ PyObject* Clif_PyObjFrom(const Status& c, const clif::py::PostConv& unused) {
 }
 
 std::string PyExcFetch() {
-  CHECK(PyErr_Occurred()) << "Must only call PyExcFetch after an exception.";
+  assert(PyErr_Occurred());  // Must only call PyExcFetch after an exception.
   PyObject* ptype;
   PyObject* pvalue;
   PyObject* ptraceback;

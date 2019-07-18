@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +12,6 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 CC_ENCRYPT_CLI="$ROOT_DIR/tools/testing/cc/hybrid_encrypt_cli_cc"
@@ -41,7 +41,7 @@ hybrid_basic_test() {
     echo "## TEST for key template $key_template"
     for encrypt_cli in ${encrypt_clis[*]}
     do
-      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      local encrypt_cli_name=$(basename $encrypt_cli)
       echo "## ENCRYPTING using $encrypt_cli_name"
       local test_instance="${test_name}_${key_template}"
       generate_asymmetric_keys "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
@@ -58,7 +58,7 @@ hybrid_basic_test() {
       assert_files_different $plaintext_file $encrypted_file
       for decrypt_cli in ${decrypt_clis[*]}
       do
-        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypt_cli_name=$(basename "$decrypt_cli")
         local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
         echo "## DECRYPTING using $decrypt_cli_name"
         $decrypt_cli $priv_key_file $encrypted_file $context_info_file \

@@ -119,6 +119,16 @@ class Registry {
         manager.release(), new_key_allowed);
   }
 
+  template <class InternalPrivateKeyManager, class InternalKeyManager>
+  static crypto::tink::util::Status RegisterAsymmetricKeyManagers(
+      std::unique_ptr<InternalPrivateKeyManager> private_key_manager,
+      std::unique_ptr<InternalKeyManager> public_key_manager,
+      bool new_key_allowed) {
+    return RegistryImpl::GlobalInstance().RegisterAsymmetricKeyManagers(
+        private_key_manager.release(), public_key_manager.release(),
+        new_key_allowed);
+  }
+
   template <class ConcretePrimitiveWrapper>
   static crypto::tink::util::Status RegisterPrimitiveWrapper(
       std::unique_ptr<ConcretePrimitiveWrapper> wrapper) {

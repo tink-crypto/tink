@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +12,6 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 GCP_KMS_AEAD_CLI="$ROOT_DIR/tools/testing/cc/gcp_kms_aead_cli"
@@ -69,4 +69,3 @@ $GCP_KMS_AEAD_CLI $BAD_GCP_KEY_NAME_FILE $CREDENTIALS_GCP_JSON_FILE\
   encrypt $plaintext_file "$associated_data" $encrypted_file 2> $log_file
 
 assert_file_contains $log_file "Project" "not found"
-

@@ -2,7 +2,7 @@ package(
     default_visibility = ["//tools/build_defs:internal_pkg"],
 )
 
-licenses(["notice"])  # Apache 2.0
+licenses(["notice"])
 
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure_js_test")
 

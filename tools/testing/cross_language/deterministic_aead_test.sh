@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +12,6 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 CC_DAEAD_CLI="$ROOT_DIR/tools/testing/cc/deterministic_aead_cli_cc"
@@ -74,5 +74,3 @@ deterministic_aead_basic_test "CC-GO"\
     $CC_DAEAD_CLI $GO_DAEAD_CLI "${KEY_TEMPLATES[*]}"
 deterministic_aead_basic_test "GO-CC"\
     $GO_DAEAD_CLI $CC_DAEAD_CLI "${KEY_TEMPLATES[*]}"
-
-

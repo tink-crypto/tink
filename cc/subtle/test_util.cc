@@ -31,8 +31,8 @@ util::Status WriteToStream(OutputStream* output_stream,
   void* buffer;
   int pos = 0;
   int remaining = contents.length();
-  int available_space;
-  int available_bytes;
+  int available_space = 0;
+  int available_bytes = 0;
   while (remaining > 0) {
     auto next_result = output_stream->Next(&buffer);
     if (!next_result.ok()) return next_result.status();

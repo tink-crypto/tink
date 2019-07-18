@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +12,6 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 CC_MAC_CLI="$ROOT_DIR/tools/testing/cc/mac_cli_cc"
@@ -39,7 +39,7 @@ mac_basic_test() {
       echo $compute_mac_clis
       for compute_mac_cli in ${compute_mac_clis[*]}
       do
-        local compute_mac_cli_name=`get_file_name $compute_mac_cli`
+        local compute_mac_cli_name=$(basename $compute_mac_cli)
         echo "## COMPUTING MAC using $compute_mac_cli_name"
         local test_instance="${test_name}_${key_template}"
 
@@ -54,7 +54,7 @@ mac_basic_test() {
 
         for verify_mac_cli in ${verify_mac_clis[*]}
         do
-          local verify_mac_cli_name=`get_file_name $verify_mac_cli`
+          local verify_mac_cli_name=$(basename $verify_mac_cli)
           local result_file="$TEST_TMPDIR/${test_instance}_MAC_${compute_mac_cli_name}_VERIFY_${verify_mac_cli_name}_verification.txt"
 
           echo "## VERIFYING using $verify_mac_cli_name"
