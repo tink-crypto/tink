@@ -46,7 +46,7 @@ class Aead(object):
     Returns:
       the resulting ciphertext as bytes.
     Raises:
-      google3.third_party.tink.python.error.Error if the encryption fails.
+      tink.TinkError if the encryption fails.
     """
     pass
 
@@ -63,6 +63,6 @@ class Aead(object):
     Returns:
       the resulting plaintext as bytes.
     Raises:
-      google3.third_party.tink.python.error.Error if the decryption fails.
+      tink.TinkError if the decryption fails.
     """
     raise NotImplementedError()

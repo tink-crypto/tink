@@ -44,7 +44,6 @@ class PublicKeyVerify(object):
       data: The data bytes to be checked.
 
     Raises:
-      google3.third_party.tink.python.tink_error.TinkError if the verification
-      fails.
+      tink.TinkError if the verification fails.
     """
     raise NotImplementedError()
