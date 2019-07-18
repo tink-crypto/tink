@@ -23,7 +23,7 @@ from tink.proto import tink_pb2
 from tink.python import core
 
 
-class JsonKeysetReaderTest(googletest.TestCase):
+class JsonKeysetReaderTest(unittest.TestCase):
 
   def test_read(self):
     json_keyset = """
@@ -83,7 +83,7 @@ class JsonKeysetReaderTest(googletest.TestCase):
       reader.read_encrypted()
 
 
-class BinaryKeysetReaderTest(googletest.TestCase):
+class BinaryKeysetReaderTest(unittest.TestCase):
 
   def test_read(self):
     keyset = tink_pb2.Keyset()

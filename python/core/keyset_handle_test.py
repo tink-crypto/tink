@@ -68,7 +68,7 @@ def _master_key_aead():
       aead.Aead)
 
 
-class KeysetHandleTest(googletest.TestCase):
+class KeysetHandleTest(unittest.TestCase):
 
   def test_generate_new(self):
     keyset_info = core.new_keyset_handle(

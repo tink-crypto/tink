@@ -38,7 +38,7 @@ def new_primitive_key_pair(key_id, output_prefix_type):
   return fake_sign, fake_key,
 
 
-class PublicKeyVerifyWrapperTest(googletest.TestCase):
+class PublicKeyVerifyWrapperTest(unittest.TestCase):
 
   def test_verify_signature(self):
     pair0 = new_primitive_key_pair(1234, tink_pb2.RAW)

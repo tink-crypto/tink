@@ -27,7 +27,7 @@ from tink.python.core import crypto_format
 from tink.python.testing import helper
 
 
-class PrimitiveSetTest(googletest.TestCase):
+class PrimitiveSetTest(unittest.TestCase):
 
   def test_primitive_returns_entry(self):
     key = helper.fake_key(key_id=1)

@@ -31,7 +31,7 @@ def to_byte(c):
     return chr(c).encode()
 
 
-class CryptoFormatTest(googletest.TestCase):
+class CryptoFormatTest(unittest.TestCase):
 
   def test_tink_prefix(self):
     key = tink_pb2.Keyset.Key()

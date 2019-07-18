@@ -57,8 +57,7 @@ class KeyManager(Generic[P]):
     Returns:
       A primitive, for example an instance of Aead or Mac.
     Raises:
-      google3.third_party.tink.python.tink_error.TinkError if getting the
-      primitive fails.
+      tink.TinkError if getting the primitive fails.
     """
     pass
 
@@ -77,8 +76,7 @@ class KeyManager(Generic[P]):
     Returns:
       A KeyData protocol buffer that contains the key.
     Raises:
-      google3.third_party.tink.python.error.TinkError if the key generation
-      fails.
+      tink.TinkError if the key generation fails.
     """
     pass
 
@@ -99,8 +97,7 @@ class PrivateKeyManager(KeyManager[P]):
     Returns:
       A KeyData protocol buffer that contains the public key.
     Raises:
-      google3.third_party.tink.python.error.TinkError if the key generation
-      fails.
+      tink.TinkError if the key generation fails.
     """
     pass
 

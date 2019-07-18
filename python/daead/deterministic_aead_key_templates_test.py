@@ -24,7 +24,7 @@ from tink.proto import tink_pb2
 from tink.python.daead import deterministic_aead_key_templates
 
 
-class DeterministicAeadKeyTemplatesTest(googletest.TestCase):
+class DeterministicAeadKeyTemplatesTest(unittest.TestCase):
 
   def test_aes256_siv(self):
     template = deterministic_aead_key_templates.AES256_SIV

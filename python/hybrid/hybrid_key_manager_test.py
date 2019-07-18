@@ -46,7 +46,7 @@ def _hybrid_encrypt_key_manager():
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
 
 
-class HybridKeyManagerTest(googletest.TestCase):
+class HybridKeyManagerTest(unittest.TestCase):
 
   def test_hybrid_decrypt_primitive_class(self):
     self.assertEqual(_hybrid_decrypt_key_manager().primitive_class(),

@@ -84,10 +84,8 @@ class KeysetHandle(object):
     Returns:
       The primitive.
     Raises:
-      google3.third_party.tink.python.error.tink_error.TinkError if creation of
-      the
-      primitive fails, for example if primitive_class cannot be used with this
-      KeysetHandle.
+      tink.TinkError if creation of the primitive fails, for example if
+      primitive_class cannot be used with this KeysetHandle.
     """
     _validate_keyset(self._keyset)
     pset = primitive_set.PrimitiveSet(primitive_class)

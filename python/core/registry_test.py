@@ -92,7 +92,7 @@ def _mac_set(mac_list):
   return mac_set
 
 
-class RegistryTest(googletest.TestCase):
+class RegistryTest(unittest.TestCase):
 
   def setUp(self):
     super(RegistryTest, self).setUp()

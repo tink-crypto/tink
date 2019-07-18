@@ -32,7 +32,7 @@ def setUpModule():
   tink_config.register()
 
 
-class DeterministicAeadKeyManagerTest(googletest.TestCase):
+class DeterministicAeadKeyManagerTest(unittest.TestCase):
 
   def setUp(self):
     super(DeterministicAeadKeyManagerTest, self).setUp()
