@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink.python.aead import aead
 from tink.python.aead import aead_wrapper
@@ -27,7 +27,7 @@ from tink.python.core import tink_error
 from tink.python.testing import helper
 
 
-class AeadWrapperTest(unittest.TestCase):
+class AeadWrapperTest(absltest.TestCase):
 
   def new_primitive_key_pair(self, key_id, output_prefix_type):
     fake_key = helper.fake_key(key_id=key_id,
@@ -143,4 +143,4 @@ class AeadWrapperTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

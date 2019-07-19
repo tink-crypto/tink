@@ -21,7 +21,7 @@ from __future__ import print_function
 
 import io
 
-import unittest
+from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink.python import core
 
@@ -51,7 +51,7 @@ def example_encrypted_keyset():
   return encrypted_keyset
 
 
-class JsonKeysetWriterTest(unittest.TestCase):
+class JsonKeysetWriterTest(absltest.TestCase):
 
   def test_write_read(self):
     keyset = example_keyset()
@@ -93,7 +93,7 @@ class JsonKeysetWriterTest(unittest.TestCase):
       writer.write_encrypted(example_keyset())
 
 
-class BinaryKeysetReaderTest(unittest.TestCase):
+class BinaryKeysetReaderTest(absltest.TestCase):
 
   def test_write_read(self):
     keyset = example_keyset()
@@ -125,4 +125,4 @@ class BinaryKeysetReaderTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

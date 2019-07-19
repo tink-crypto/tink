@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """Tests for tink.python.registry."""
-import unittest
+from absl.testing import absltest
 
 from tink.proto import tink_pb2
 
@@ -92,7 +92,7 @@ def _mac_set(mac_list):
   return mac_set
 
 
-class RegistryTest(unittest.TestCase):
+class RegistryTest(absltest.TestCase):
 
   def setUp(self):
     super(RegistryTest, self).setUp()
@@ -244,4 +244,4 @@ class RegistryTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

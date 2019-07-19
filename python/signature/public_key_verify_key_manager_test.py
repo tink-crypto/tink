@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
@@ -48,7 +48,7 @@ def new_ecdsa_key_template(hash_type, curve_type, encoding, public=True):
   return key_template
 
 
-class PublicKeyVerifyKeyManagerTest(unittest.TestCase):
+class PublicKeyVerifyKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(PublicKeyVerifyKeyManagerTest, self).setUp()
@@ -102,4 +102,4 @@ class PublicKeyVerifyKeyManagerTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

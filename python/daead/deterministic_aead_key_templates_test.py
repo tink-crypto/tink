@@ -18,13 +18,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
 from tink.python.daead import deterministic_aead_key_templates
 
 
-class DeterministicAeadKeyTemplatesTest(unittest.TestCase):
+class DeterministicAeadKeyTemplatesTest(absltest.TestCase):
 
   def test_aes256_siv(self):
     template = deterministic_aead_key_templates.AES256_SIV
@@ -48,4 +48,4 @@ class DeterministicAeadKeyTemplatesTest(unittest.TestCase):
     self.assertEqual(42, key_format.key_size)
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink.python import core
 from tink.python.hybrid import hybrid_decrypt
@@ -43,7 +43,7 @@ def new_primitives_and_keys(key_id, output_prefix_type):
   return fake_hybrid_decrypt, fake_hybrid_encrypt, fake_dec_key, fake_enc_key
 
 
-class HybridWrapperTest(unittest.TestCase):
+class HybridWrapperTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
     dec, enc, dec_key, enc_key = new_primitives_and_keys(1234, tink_pb2.TINK)
@@ -168,4 +168,4 @@ class HybridWrapperTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

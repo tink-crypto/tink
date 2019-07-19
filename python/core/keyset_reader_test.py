@@ -18,12 +18,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink.python import core
 
 
-class JsonKeysetReaderTest(unittest.TestCase):
+class JsonKeysetReaderTest(absltest.TestCase):
 
   def test_read(self):
     json_keyset = """
@@ -83,7 +83,7 @@ class JsonKeysetReaderTest(unittest.TestCase):
       reader.read_encrypted()
 
 
-class BinaryKeysetReaderTest(unittest.TestCase):
+class BinaryKeysetReaderTest(absltest.TestCase):
 
   def test_read(self):
     keyset = tink_pb2.Keyset()
@@ -143,4 +143,4 @@ class BinaryKeysetReaderTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

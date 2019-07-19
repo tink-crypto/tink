@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
@@ -46,7 +46,7 @@ def _hybrid_encrypt_key_manager():
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
 
 
-class HybridKeyManagerTest(unittest.TestCase):
+class HybridKeyManagerTest(absltest.TestCase):
 
   def test_hybrid_decrypt_primitive_class(self):
     self.assertEqual(_hybrid_decrypt_key_manager().primitive_class(),
@@ -122,4 +122,4 @@ class HybridKeyManagerTest(unittest.TestCase):
       hybrid_dec.decrypt(b'bad ciphertext', b'some context info')
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

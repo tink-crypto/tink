@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink.python import aead
 from tink.python import core
@@ -27,7 +27,7 @@ from tink.python.core import crypto_format
 from tink.python.testing import helper
 
 
-class PrimitiveSetTest(unittest.TestCase):
+class PrimitiveSetTest(absltest.TestCase):
 
   def test_primitive_returns_entry(self):
     key = helper.fake_key(key_id=1)
@@ -167,4 +167,4 @@ class PrimitiveSetTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

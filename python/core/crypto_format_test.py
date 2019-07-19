@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink.python import core
 
@@ -31,7 +31,7 @@ def to_byte(c):
     return chr(c).encode()
 
 
-class CryptoFormatTest(unittest.TestCase):
+class CryptoFormatTest(absltest.TestCase):
 
   def test_tink_prefix(self):
     key = tink_pb2.Keyset.Key()
@@ -81,4 +81,4 @@ class CryptoFormatTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()
