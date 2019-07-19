@@ -123,3 +123,35 @@ func TestWithNoSecretsFunctionsFailWhenHandlingSecretKeyMaterial(t *testing.T) {
 		t.Error("keyset.ReadWithNoSecrets should fail when importing secret key material")
 	}
 }
+
+func TestWithNoSecretsFunctionsFailWhenUnknownKeyMaterial(t *testing.T) {
+	// Create a keyset containing secret key material (symmetric)
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_UNKNOWN_KEYMATERIAL)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	ks := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	h, _ := testkeyset.NewHandle(ks)
+
+	if err := h.WriteWithNoSecrets(&keyset.MemReaderWriter{}); err == nil {
+		t.Error("handle.WriteWithNoSecrets() should fail when exporting secret key material")
+	}
+
+	if _, err := keyset.ReadWithNoSecrets(&keyset.MemReaderWriter{Keyset: testkeyset.KeysetMaterial(h)}); err == nil {
+		t.Error("keyset.ReadWithNoSecrets should fail when importing secret key material")
+	}
+}
+
+func TestWithNoSecretsFunctionsFailWithAsymmetricPrivateKeyMaterial(t *testing.T) {
+	// Create a keyset containing secret key material (symmetric)
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_ASYMMETRIC_PRIVATE)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	ks := testutil.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	h, _ := testkeyset.NewHandle(ks)
+
+	if err := h.WriteWithNoSecrets(&keyset.MemReaderWriter{}); err == nil {
+		t.Error("handle.WriteWithNoSecrets() should fail when exporting secret key material")
+	}
+
+	if _, err := keyset.ReadWithNoSecrets(&keyset.MemReaderWriter{Keyset: testkeyset.KeysetMaterial(h)}); err == nil {
+		t.Error("keyset.ReadWithNoSecrets should fail when importing secret key material")
+	}
+}
