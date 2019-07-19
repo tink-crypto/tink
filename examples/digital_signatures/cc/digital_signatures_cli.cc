@@ -17,7 +17,7 @@
 //
 // The first argument is the operation and it should be one of the following:
 // gen-private-key get-public-key sign verify.
-// Additional arguments depend on the operaton.
+// Additional arguments depend on the operation.
 //
 // gen-private-key
 //   Generates a new private keyset using the RsaSsaPkcs13072Sha256F4 template.
