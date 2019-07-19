@@ -107,8 +107,9 @@ echo "+++ Starting test $test_name..."
 MAC_OUTPUT_FILE="$TEST_TMPDIR/computed_mac_log.txt"
 
 ##### Run computation.
-test_command $FILE_MAC_CLI $KEYSET_FILE $DATA_FILE --alsologtostderr 2> $MAC_OUTPUT_FILE
-TEST_STATUS=$?
+$FILE_MAC_CLI $KEYSET_FILE $DATA_FILE --alsologtostderr 2> $MAC_OUTPUT_FILE
+##### Check that the correct MAC was produced in the logs
+test_command grep --quiet --ignore-case "$CORRECT_MAC" "$MAC_OUTPUT_FILE"
 
 if [[ $TEST_STATUS -eq 0 ]]; then
   echo "+++ Success: MAC computation was successful."
