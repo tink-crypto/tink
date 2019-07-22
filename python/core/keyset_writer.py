@@ -22,7 +22,7 @@ from __future__ import print_function
 import abc
 import io
 
-from google3.net.proto2.python.public import json_format
+from google.protobuf import json_format
 from tink.proto import tink_pb2
 from tink.python.core import tink_error
 
