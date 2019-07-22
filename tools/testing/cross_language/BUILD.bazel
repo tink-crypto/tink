@@ -51,6 +51,10 @@ sh_test(
         "//tools/tinkey",
         "//testdata:credentials",
     ],
+    args = select({
+      "//tools/remote_build_execution:rbe": ["--no_external_tests"],
+      "//conditions:default": [],
+    }),
 )
 
 sh_test(

@@ -48,5 +48,6 @@ sh_test(
     ],
     tags = [
         "local",  # This tests needs g++.
+        "no_rbe",
     ],
 )

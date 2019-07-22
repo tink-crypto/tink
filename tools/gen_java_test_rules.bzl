@@ -35,6 +35,7 @@ def gen_java_test_rules(
         flaky_tests = [],
         manual_tests = [],
         notsan_tests = [],
+        no_rbe_tests = [],
         resources = [],
         tags = [],
         prefix = "",
@@ -60,6 +61,9 @@ def gen_java_test_rules(
         notsan = []
         if test in notsan_tests:
             notsan = ["notsan"]
+        no_rbe = []
+        if test in no_rbe_tests:
+            no_rbe = ["no_rbe"]
         flaky = 0
         if (test in flaky_tests) or ("flaky" in tags):
             flaky = 1
@@ -75,7 +79,7 @@ def gen_java_test_rules(
             jvm_flags = jvm_flags,
             args = args,
             flaky = flaky,
-            tags = tags + manual + notsan,
+            tags = tags + manual + notsan + no_rbe,
             test_class = java_class,
             visibility = visibility,
             shard_count = shard_count,

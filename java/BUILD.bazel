@@ -281,6 +281,10 @@ gen_java_test_rules(
         # b/112019120
         "src/test/java/com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJceTest",
     ],
+    no_rbe_tests = [
+        "src/test/java/com/google/crypto/tink/aead/KmsAeadKeyManagerTest",
+        "src/test/java/com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManagerTest",
+    ],
     medium_tests = [
         "src/test/java/com/google/crypto/tink/subtle/AesCtrHmacStreamingTest",
         "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",

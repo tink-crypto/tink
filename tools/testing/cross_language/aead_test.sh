@@ -20,7 +20,14 @@ PY3_AEAD_CLI="" # placeholder, please ignore
 GO_AEAD_CLI="$ROOT_DIR/tools/testing/go/aead_cli_go"
 JAVA_AEAD_CLI="$ROOT_DIR/tools/testing/aead_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+RUN_EXTERNAL_TESTS=true
 
+# TODO(b/136245485): Update this script to use go/gbash.
+# Tests that require external resources cannot run on RBE. If the
+# --no_external_tests flag is specified disable these test cases.
+if [ "$1" == "--no_external_tests" ]; then
+  RUN_EXTERNAL_TESTS=false
+fi
 
 source $TEST_UTIL || exit 1
 
@@ -175,13 +182,14 @@ ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $PY2_AEAD_CLI $PY3_AEAD_CLI)
 DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $PY2_AEAD_CLI $PY3_AEAD_CLI)
 aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
-KEY_TEMPLATES=(AES128_GCM AES128_CTR_HMAC_SHA256)
+if [ "$RUN_EXTERNAL_TESTS" = true ]; then
+  KEY_TEMPLATES=(AES128_GCM AES128_CTR_HMAC_SHA256)
+  ENCRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
+  DECRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
+  aead_gcp_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
-ENCRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
-DECRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
-aead_gcp_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
+  # lint placeholder header, please ignore
+  aead_aws_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
-# lint placeholder header, please ignore
-aead_aws_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
-
-# lint placeholder footer, please ignore
+  # lint placeholder footer, please ignore
+fi
