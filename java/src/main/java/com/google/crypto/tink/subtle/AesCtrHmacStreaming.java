@@ -29,7 +29,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Streaming encryption using AES-CTR and HMAC.
  *
- * <p>Each ciphertext uses a new AES-CTR key and HMAC key that ared derived from the key derivation
+ * <p>Each ciphertext uses a new AES-CTR key and HMAC key that are derived from the key derivation
  * key, a randomly chosen salt of the same size as the key and a nonce prefix using HKDF.
  *
  * <p>The the format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The
