@@ -193,7 +193,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   }
 
   /**
-   * Returns the expected size of the ciphertext for a given plaintext The returned value includes
+   * Returns the expected size of the ciphertext for a given plaintext. The returned value includes
    * the header and offset.
    */
   public long expectedCiphertextSize(long plaintextSize) {
