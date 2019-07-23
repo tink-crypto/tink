@@ -30,8 +30,8 @@ namespace tink {
 namespace subtle {
 namespace {
 
-constexpr uint32 kTagSize = 16;
-constexpr uint32 kSmallTagSize = 10;
+constexpr uint32_t kTagSize = 16;
+constexpr uint32_t kSmallTagSize = 10;
 
 TEST(AesCmacBoringSslTest, Basic) {
   std::string key(test::HexDecodeOrDie(

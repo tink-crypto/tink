@@ -33,7 +33,7 @@ namespace subtle {
 
 // static
 util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(
-    const std::string& key_value, uint32 tag_size) {
+    const std::string& key_value, uint32_t tag_size) {
   if (key_value.size() != kSmallKeySize && key_value.size() != kBigKeySize) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }
@@ -44,7 +44,7 @@ util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(
   return std::move(cmac);
 }
 
-AesCmacBoringSsl::AesCmacBoringSsl(const std::string& key_value, uint32 tag_size)
+AesCmacBoringSsl::AesCmacBoringSsl(const std::string& key_value, uint32_t tag_size)
     : key_value_(key_value), tag_size_(tag_size) {}
 
 util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
