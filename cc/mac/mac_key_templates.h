@@ -66,6 +66,13 @@ class MacKeyTemplates {
   //   - hash function: SHA512
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& HmacSha512();
+
+  // Returns a KeyTemplate that generates new instances of AesCmacKey
+  // with the following parameters:
+  //   - key size: 32 bytes
+  //   - tag size: 16 bytes
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& AesCmac();
 };
 
 }  // namespace tink

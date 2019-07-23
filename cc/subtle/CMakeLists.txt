@@ -138,6 +138,22 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME aes_cmac_boringssl
+  SRCS
+    aes_cmac_boringssl.cc
+    aes_cmac_boringssl.h
+  DEPS
+    tink::subtle::common_enums
+    tink::subtle::subtle_util_boringssl
+    tink::core::mac
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+    crypto
+    absl::strings
+)
+
+tink_cc_library(
   NAME hmac_boringssl
   SRCS
     hmac_boringssl.cc
@@ -579,6 +595,18 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::hkdf
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+)
+
+tink_cc_test(
+  NAME aes_cmac_boringssl_test
+  SRCS aes_cmac_boringssl_test.cc
+  DEPS
+    tink::subtle::common_enums
+    tink::subtle::aes_cmac_boringssl
+    tink::core::mac
     tink::util::status
     tink::util::statusor
     tink::util::test_util

@@ -35,6 +35,7 @@ tink_cc_library(
     mac_catalogue.cc
     mac_catalogue.h
   DEPS
+    tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::core::catalogue
     tink::util::status
@@ -63,8 +64,31 @@ tink_cc_library(
     mac_key_templates.cc
     mac_key_templates.h
   DEPS
+    tink::proto::aes_cmac_cc_proto
     tink::proto::common_cc_proto
     tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
+  NAME aes_cmac_key_manager
+  SRCS
+    aes_cmac_key_manager.cc
+    aes_cmac_key_manager.h
+  DEPS
+    tink::core::key_manager
+    tink::core::key_manager_base
+    tink::core::mac
+    tink::subtle::aes_cmac_boringssl
+    tink::subtle::random
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    tink::proto::common_cc_proto
+    tink::proto::aes_cmac_cc_proto
     tink::proto::tink_cc_proto
 )
 
@@ -157,10 +181,27 @@ tink_cc_test(
   NAME mac_key_templates_test
   SRCS mac_key_templates_test.cc
   DEPS
+    tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::mac::mac_key_templates
+    tink::proto::aes_cmac_cc_proto
     tink::proto::common_cc_proto
     tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME aes_cmac_key_manager_test
+  SRCS aes_cmac_key_manager_test.cc
+  DEPS
+    tink::mac::aes_cmac_key_manager
+    tink::core::mac
+    tink::util::status
+    tink::util::statusor
+    tink::proto::aes_ctr_cc_proto
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::aes_cmac_cc_proto
     tink::proto::tink_cc_proto
 )
 
