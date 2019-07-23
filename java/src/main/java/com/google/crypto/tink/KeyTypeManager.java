@@ -31,14 +31,14 @@ import java.util.Set;
  * An object which collects all the operations which one can do on for a single key type, identified
  * by a single KeyProto.
  *
- * <p>An InternalKeyManager manages all the operations one can do on a given KeyProto. This includes
+ * <p>A KeyTypeManager manages all the operations one can do on a given KeyProto. This includes
  * generating primitives, generating keys (if applicable), parsing and validating keys and key
  * formats. This object is meant to be implemented, i.e., one should use it via the {@link
  * Registry}, and not directly.
  *
  * <p>In order to implement a new key manager, one should subclass this class, setting the type
  * parameter to the proto of the corresponding key (e.g., subclass {@code
- * InternalKeyManager<AesGcmKey>}).
+ * KeyTypeManager<AesGcmKey>}).
  *
  * <p>For each primitive the key manager should implement, one needs to add an argument to the
  * constructor. The type of it should be a {@code PrimitiveFactory<PrimitiveT, KeyT>}, an object
@@ -49,7 +49,7 @@ import java.util.Set;
  * KeyProtoT>}, where one has to specify a proto for the key format as well.
  */
 @Alpha
-public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
+public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
   /** A PrimitiveFactory knows how to create primitives from a given key. */
   protected abstract static class PrimitiveFactory<PrimitiveT, KeyT> {
     private final Class<PrimitiveT> clazz;
@@ -75,7 +75,7 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
   private final Class<?> firstPrimitiveClass;
 
   /**
-   * Constructs a new InternalKeyManager.
+   * Constructs a new KeyTypeManager.
    *
    * <p>Takes an arbitrary number of {@link PrimitiveFactory} objects as input. These will be used
    * and provided via {@link #createPrimitive} to the user.
@@ -83,15 +83,14 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
    * @throws IllegalArgumentException if two of the passed in factories produce primitives of the
    *     same class.
    */
-  @SafeVarargs  // Safe because we do not reference the array (see Effective Java ed. 3, Item 32).
-  protected InternalKeyManager(
-      Class<KeyProtoT> clazz, PrimitiveFactory<?, KeyProtoT>... factories) {
+  @SafeVarargs // Safe because we do not reference the array (see Effective Java ed. 3, Item 32).
+  protected KeyTypeManager(Class<KeyProtoT> clazz, PrimitiveFactory<?, KeyProtoT>... factories) {
     this.clazz = clazz;
     Map<Class<?>, PrimitiveFactory<?, KeyProtoT>> factoriesMap = new HashMap<>();
     for (PrimitiveFactory<?, KeyProtoT> factory : factories) {
       if (factoriesMap.containsKey(factory.getPrimitiveClass())) {
         throw new IllegalArgumentException(
-            "InternalKeyManager constructed with duplicate factories for primitive "
+            "KeyTypeManager constructed with duplicate factories for primitive "
                 + factory.getPrimitiveClass().getCanonicalName());
       }
       factoriesMap.put(factory.getPrimitiveClass(), factory);
@@ -170,9 +169,9 @@ public abstract class InternalKeyManager<KeyProtoT extends MessageLite> {
   /**
    * A {@code KeyFactory} creates new keys from a given KeyFormat.
    *
-   * <p>A KeyFactory implements all the methods which are required if an InternalKeyManager should
-   * also be able to generate keys. In particular, in this case it needs to have some KeyFormat
-   * protocol buffer which can be validated, parsed, and from which a key can be generated.
+   * <p>A KeyFactory implements all the methods which are required if a KeyTypeManager should also
+   * be able to generate keys. In particular, in this case it needs to have some KeyFormat protocol
+   * buffer which can be validated, parsed, and from which a key can be generated.
    */
   protected abstract static class KeyFactory<KeyFormatProtoT extends MessageLite, KeyT> {
     private final Class<KeyFormatProtoT> clazz;

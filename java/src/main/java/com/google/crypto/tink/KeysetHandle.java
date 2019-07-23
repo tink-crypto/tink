@@ -258,7 +258,7 @@ public final class KeysetHandle {
   }
 
   /**
-   * Validates that an keyset handle contains enough key material to build a keyset on.
+   * Validates that a keyset handle contains enough key material to build a keyset on.
    *
    * @throws GeneralSecurityException
    */
