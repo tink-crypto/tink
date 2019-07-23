@@ -33,9 +33,9 @@ testSuite({
   },
 
   async testGetOutputPrefixUnknownPrefixType() {
-    let key = new PbKey();
-    key.setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
-    key.setKeyId(0xAABBCCDD);
+    let key = new PbKey()
+                  .setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX)
+                  .setKeyId(2864434397);
 
     try {
       CryptoFormat.getOutputPrefix(key);
@@ -49,8 +49,7 @@ testSuite({
   async testGetOutputPrefixInvalidKeyId() {
     // Key id has to be an unsigned 32-bit integer.
     const invalidKeyIds = [0.2, -10, 2**32];
-    let key = new PbKey();
-    key.setOutputPrefixType(PbOutputPrefixType.TINK);
+    let key = new PbKey().setOutputPrefixType(PbOutputPrefixType.TINK);
 
     const invalidKeyIdsLength = invalidKeyIds.length;
     for (let i = 0; i < invalidKeyIdsLength; i++) {
@@ -67,9 +66,9 @@ testSuite({
   },
 
   async testGetOutputPrefixTink() {
-    let key = new PbKey();
-    key.setOutputPrefixType(PbOutputPrefixType.TINK);
-    key.setKeyId(0xAABBCCDD);
+    let key = new PbKey()
+                  .setOutputPrefixType(PbOutputPrefixType.TINK)
+                  .setKeyId(2864434397);
     const expectedResult =
         new Uint8Array([CryptoFormat.TINK_START_BYTE, 0xAA, 0xBB, 0xCC, 0xDD]);
 
@@ -78,9 +77,9 @@ testSuite({
   },
 
   async testGetOutputPrefixLegacy() {
-    let key = new PbKey();
-    key.setOutputPrefixType(PbOutputPrefixType.LEGACY);
-    key.setKeyId(0x01020304);
+    let key = new PbKey()
+                  .setOutputPrefixType(PbOutputPrefixType.LEGACY)
+                  .setKeyId(16909060);
     const expectedResult = new Uint8Array(
         [CryptoFormat.LEGACY_START_BYTE, 0x01, 0x02, 0x03, 0x04]);
 
@@ -89,9 +88,9 @@ testSuite({
   },
 
   async testGetOutputPrefixRaw() {
-    let key = new PbKey();
-    key.setOutputPrefixType(PbOutputPrefixType.RAW);
-    key.setKeyId(0x16154211);
+    let key = new PbKey()
+                  .setOutputPrefixType(PbOutputPrefixType.RAW)
+                  .setKeyId(370491921);
     const expectedResult = new Uint8Array(0);
 
     const actualResult = CryptoFormat.getOutputPrefix(key);

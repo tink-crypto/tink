@@ -49,10 +49,10 @@ const createKey = function(keyId = 0x12345678, legacy = false, enabled = true) {
 
   key.setKeyId(keyId);
 
-  const keyData = new PbKeyData();
-  keyData.setTypeUrl('someTypeUrl');
-  keyData.setValue(new Uint8Array(10));
-  keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+  const keyData = new PbKeyData()
+                      .setTypeUrl('someTypeUrl')
+                      .setValue(new Uint8Array(10))
+                      .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
   key.setKeyData(keyData);
 
   return key;

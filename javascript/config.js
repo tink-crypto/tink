@@ -55,12 +55,12 @@ class Config {
       newKeyAllowed) {
     const typeUrl = 'type.googleapis.com/google.crypto.tink.' + keyProtoName;
 
-    const entry = new PbKeyTypeEntry();
-    entry.setCatalogueName(catalogueName);
-    entry.setPrimitiveName(primitiveName);
-    entry.setTypeUrl(typeUrl);
-    entry.setKeyManagerVersion(keyManagerVersion);
-    entry.setNewKeyAllowed(newKeyAllowed);
+    const entry = new PbKeyTypeEntry()
+                      .setCatalogueName(catalogueName)
+                      .setPrimitiveName(primitiveName)
+                      .setTypeUrl(typeUrl)
+                      .setKeyManagerVersion(keyManagerVersion)
+                      .setNewKeyAllowed(newKeyAllowed);
 
     return entry;
   }

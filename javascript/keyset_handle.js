@@ -110,9 +110,9 @@ class KeysetHandle {
    * @return {!Promise<!PbKeyset>}
    */
   static async generateNewKeyset_(keyTemplate) {
-    const key = new PbKeyset.Key();
-    key.setStatus(PbKeyStatusType.ENABLED);
-    key.setOutputPrefixType(keyTemplate.getOutputPrefixType());
+    const key = new PbKeyset.Key()
+                    .setStatus(PbKeyStatusType.ENABLED)
+                    .setOutputPrefixType(keyTemplate.getOutputPrefixType());
     const keyId = KeysetHandle.generateNewKeyId_();
     key.setKeyId(keyId);
     const keyData = await Registry.newKeyData(keyTemplate);
