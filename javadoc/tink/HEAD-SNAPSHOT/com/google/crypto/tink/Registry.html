@@ -347,29 +347,29 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i21" class="rowColor">
 <td class="colFirst"><code>static &lt;KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;<br>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerAsymmetricKeyManagers-com.google.crypto.tink.InternalPrivateKeyManager-com.google.crypto.tink.InternalKeyManager-boolean-">registerAsymmetricKeyManagers</a></span>(<a href="../../../../com/google/crypto/tink/InternalPrivateKeyManager.html" title="class in com.google.crypto.tink">InternalPrivateKeyManager</a>&lt;KeyProtoT,PublicKeyProtoT&gt;&nbsp;internalPrivateKeyManager,
-                             <a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="class in com.google.crypto.tink">InternalKeyManager</a>&lt;PublicKeyProtoT&gt;&nbsp;internalPublicKeyManager,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerAsymmetricKeyManagers-com.google.crypto.tink.PrivateKeyTypeManager-com.google.crypto.tink.KeyTypeManager-boolean-">registerAsymmetricKeyManagers</a></span>(<a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a>&lt;KeyProtoT,PublicKeyProtoT&gt;&nbsp;privateKeyTypeManager,
+                             <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;PublicKeyProtoT&gt;&nbsp;publicKeyTypeManager,
                              boolean&nbsp;newKeyAllowed)</code>
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
 </td>
 </tr>
 <tr id="i22" class="altColor">
-<td class="colFirst"><code>static &lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;<br>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.InternalKeyManager-boolean-">registerKeyManager</a></span>(<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="class in com.google.crypto.tink">InternalKeyManager</a>&lt;KeyProtoT&gt;&nbsp;manager,
-                  boolean&nbsp;newKeyAllowed)</code>&nbsp;</td>
-</tr>
-<tr id="i23" class="rowColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-">registerKeyManager</a></span>(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager)</code>
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-boolean-">registerKeyManager</a></span>(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager,
                   boolean&nbsp;newKeyAllowed)</code>
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
 </td>
+</tr>
+<tr id="i24" class="altColor">
+<td class="colFirst"><code>static &lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;<br>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyTypeManager-boolean-">registerKeyManager</a></span>(<a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;KeyProtoT&gt;&nbsp;manager,
+                  boolean&nbsp;newKeyAllowed)</code>&nbsp;</td>
 </tr>
 <tr id="i25" class="rowColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;void</code></td>
@@ -523,13 +523,13 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="registerKeyManager-com.google.crypto.tink.InternalKeyManager-boolean-">
+<a name="registerKeyManager-com.google.crypto.tink.KeyTypeManager-boolean-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>registerKeyManager</h4>
-<pre>public static&nbsp;&lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;&nbsp;void&nbsp;registerKeyManager(<a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="class in com.google.crypto.tink">InternalKeyManager</a>&lt;KeyProtoT&gt;&nbsp;manager,
+<pre>public static&nbsp;&lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;&nbsp;void&nbsp;registerKeyManager(<a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;KeyProtoT&gt;&nbsp;manager,
                                                                                           boolean&nbsp;newKeyAllowed)
                                                                                    throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <dl>
@@ -538,14 +538,14 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="registerAsymmetricKeyManagers-com.google.crypto.tink.InternalPrivateKeyManager-com.google.crypto.tink.InternalKeyManager-boolean-">
+<a name="registerAsymmetricKeyManagers-com.google.crypto.tink.PrivateKeyTypeManager-com.google.crypto.tink.KeyTypeManager-boolean-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>registerAsymmetricKeyManagers</h4>
-<pre>public static&nbsp;&lt;KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;&nbsp;void&nbsp;registerAsymmetricKeyManagers(<a href="../../../../com/google/crypto/tink/InternalPrivateKeyManager.html" title="class in com.google.crypto.tink">InternalPrivateKeyManager</a>&lt;KeyProtoT,PublicKeyProtoT&gt;&nbsp;internalPrivateKeyManager,
-                                                                                                                                                             <a href="../../../../com/google/crypto/tink/InternalKeyManager.html" title="class in com.google.crypto.tink">InternalKeyManager</a>&lt;PublicKeyProtoT&gt;&nbsp;internalPublicKeyManager,
+<pre>public static&nbsp;&lt;KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;&nbsp;void&nbsp;registerAsymmetricKeyManagers(<a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a>&lt;KeyProtoT,PublicKeyProtoT&gt;&nbsp;privateKeyTypeManager,
+                                                                                                                                                             <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;PublicKeyProtoT&gt;&nbsp;publicKeyTypeManager,
                                                                                                                                                              boolean&nbsp;newKeyAllowed)
                                                                                                                                                       throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>. If <code>newKeyAllowed</code> is
