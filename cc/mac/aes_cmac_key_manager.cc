@@ -71,6 +71,7 @@ StatusOr<std::unique_ptr<AesCmacKey>> AesCmacKeyFactory::NewKeyFromFormat(
   cmac_key->set_version(AesCmacKeyManager::kVersion);
   cmac_key->set_key_value(
       subtle::Random::GetRandomBytes(cmac_key_format.key_size()));
+  *cmac_key->mutable_params() = cmac_key_format.params();
   return absl::implicit_cast<StatusOr<std::unique_ptr<AesCmacKey>>>(
       std::move(cmac_key));
 }

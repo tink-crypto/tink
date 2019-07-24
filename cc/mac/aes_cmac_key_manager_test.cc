@@ -213,6 +213,7 @@ TEST_F(AesCmacKeyManagerTest, testNewKeyBasic) {
     std::unique_ptr<AesCmacKey> cmac_key(
         static_cast<AesCmacKey*>(key.release()));
     EXPECT_EQ(0, cmac_key->version());
+    EXPECT_EQ(16, cmac_key->params().tag_size());
     EXPECT_EQ(key_format.key_size(), cmac_key->key_value().size());
   }
 
@@ -224,6 +225,7 @@ TEST_F(AesCmacKeyManagerTest, testNewKeyBasic) {
     std::unique_ptr<AesCmacKey> cmac_key(
         static_cast<AesCmacKey*>(key.release()));
     EXPECT_EQ(0, cmac_key->version());
+    EXPECT_EQ(16, cmac_key->params().tag_size());
     EXPECT_EQ(key_format.key_size(), cmac_key->key_value().size());
   }
 
@@ -236,6 +238,7 @@ TEST_F(AesCmacKeyManagerTest, testNewKeyBasic) {
     AesCmacKey cmac_key;
     EXPECT_TRUE(cmac_key.ParseFromString(key_data->value()));
     EXPECT_EQ(0, cmac_key.version());
+    EXPECT_EQ(16, cmac_key.params().tag_size());
     EXPECT_EQ(key_format.key_size(), cmac_key.key_value().size());
   }
 }
