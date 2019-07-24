@@ -27,8 +27,7 @@ cd git*/tink
 source ./kokoro/run_tests.sh
 
 # Test that Tink can be installed with the standard Go tooling.
-# TODO(b/135058321): re-enable once it is fixed.
-# go get github.com/google/tink/go/...
+go get github.com/google/tink/go/...
 
 # Run all manual tests.
 time bazel test \

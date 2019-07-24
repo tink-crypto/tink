@@ -24,4 +24,7 @@ set -x
 # Change to repo root
 cd git*/tink
 
+# Test that Tink can be installed with the standard Go tooling.
+go get github.com/google/tink/go/...
+
 ./kokoro/run_tests.sh
