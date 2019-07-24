@@ -22,9 +22,9 @@ from absl.testing import absltest
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
 from tink.proto import tink_pb2
+from tink.python import tink_config
 from tink.python.aead import aead
 from tink.python.aead import aead_key_manager
-from tink.python.core import tink_config
 from tink.python.core import tink_error
 
 

@@ -23,7 +23,7 @@ from absl.testing import absltest
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
 from tink.proto import tink_pb2
-from tink.python.core import tink_config
+from tink.python import tink_config
 from tink.python.core import tink_error
 from tink.python.signature import public_key_sign_key_manager
 from tink.python.signature import public_key_verify_key_manager

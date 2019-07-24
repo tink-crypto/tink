@@ -21,7 +21,7 @@ from __future__ import print_function
 from absl.testing import absltest
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
-from tink.python.core import tink_config
+from tink.python import tink_config
 from tink.python.core import tink_error
 from tink.python.daead import deterministic_aead
 from tink.python.daead import deterministic_aead_key_manager

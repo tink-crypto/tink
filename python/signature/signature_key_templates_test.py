@@ -26,7 +26,7 @@ from tink.proto import ecdsa_pb2
 from tink.proto import rsa_ssa_pkcs1_pb2
 from tink.proto import rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
-from tink.python.core import tink_config
+from tink.python import tink_config
 from tink.python.signature import public_key_sign_key_manager
 from tink.python.signature import signature_key_templates
 

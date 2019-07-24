@@ -27,7 +27,7 @@ from tink.python import aead
 from tink.python import core
 from tink.python import hybrid
 from tink.python import mac
-from tink.python.core import tink_config
+from tink.python import tink_config
 from tink.python.testing import helper
 
 

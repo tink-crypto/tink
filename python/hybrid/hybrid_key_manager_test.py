@@ -22,8 +22,8 @@ from absl.testing import absltest
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
+from tink.python import tink_config
 from tink.python.aead import aead_key_templates
-from tink.python.core import tink_config
 from tink.python.core import tink_error
 from tink.python.hybrid import hybrid_decrypt
 from tink.python.hybrid import hybrid_decrypt_key_manager

@@ -24,7 +24,7 @@ from tink.python import daead
 from tink.python import hybrid
 from tink.python import mac
 from tink.python import signature
-from tink.python.core import tink_config
+from tink.python import tink_config
 
 
 Aead = aead.Aead
