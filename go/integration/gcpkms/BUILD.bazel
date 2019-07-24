@@ -38,4 +38,5 @@ go_test(
         "//go/subtle/random:go_default_library",
         "//go/tink:go_default_library",
     ],
+    tags = ["no_rbe"],
 )

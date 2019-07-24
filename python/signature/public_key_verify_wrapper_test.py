@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 
 from tink.proto import tink_pb2
 from tink.python.core import primitive_set
@@ -38,7 +38,7 @@ def new_primitive_key_pair(key_id, output_prefix_type):
   return fake_sign, fake_key,
 
 
-class PublicKeyVerifyWrapperTest(unittest.TestCase):
+class PublicKeyVerifyWrapperTest(absltest.TestCase):
 
   def test_verify_signature(self):
     pair0 = new_primitive_key_pair(1234, tink_pb2.RAW)
@@ -67,4 +67,4 @@ class PublicKeyVerifyWrapperTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
 from tink.python.core import tink_config
@@ -32,7 +32,7 @@ def setUpModule():
   tink_config.register()
 
 
-class DeterministicAeadKeyManagerTest(unittest.TestCase):
+class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(DeterministicAeadKeyManagerTest, self).setUp()
@@ -78,4 +78,4 @@ class DeterministicAeadKeyManagerTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

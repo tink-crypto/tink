@@ -21,7 +21,7 @@ from __future__ import print_function
 
 import io
 
-import unittest
+from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink.python import aead
 from tink.python import core
@@ -68,7 +68,7 @@ def _master_key_aead():
       aead.Aead)
 
 
-class KeysetHandleTest(unittest.TestCase):
+class KeysetHandleTest(absltest.TestCase):
 
   def test_generate_new(self):
     keyset_info = core.new_keyset_handle(
@@ -296,4 +296,4 @@ class KeysetHandleTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

@@ -249,7 +249,8 @@ public class KeysetHandleTest {
       KeysetHandle unused = KeysetHandle.readNoSecret(keyset.toByteArray());
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset contains secret key material");
+      assertExceptionContains(e, "keyset contains key material of type");
+      assertExceptionContains(e, " type.googleapis.com/google.crypto.tink.HmacKey");
     }
 
     try {
@@ -257,7 +258,7 @@ public class KeysetHandleTest {
           KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray()));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset contains secret key material");
+      assertExceptionContains(e, "keyset contains key material");
     }
   }
 
@@ -269,7 +270,7 @@ public class KeysetHandleTest {
       KeysetHandle unused = KeysetHandle.readNoSecret(keyset.toByteArray());
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset contains secret key material");
+      assertExceptionContains(e, "keyset contains key material");
     }
 
     try {
@@ -277,7 +278,7 @@ public class KeysetHandleTest {
           KeysetHandle.readNoSecret(BinaryKeysetReader.withBytes(keyset.toByteArray()));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset contains secret key material");
+      assertExceptionContains(e, "keyset contains key material");
     }
   }
 
@@ -331,7 +332,7 @@ public class KeysetHandleTest {
       handle.writeNoSecret(null /* writer */);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset contains secret key material");
+      assertExceptionContains(e, "keyset contains key material");
     }
   }
 
@@ -343,7 +344,7 @@ public class KeysetHandleTest {
       handle.writeNoSecret(null /* writer */);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset contains secret key material");
+      assertExceptionContains(e, "keyset contains key material");
     }
   }
 }

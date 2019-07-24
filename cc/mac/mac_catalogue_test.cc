@@ -29,8 +29,37 @@ namespace {
 class MacCatalogueTest : public ::testing::Test {
 };
 
-TEST_F(MacCatalogueTest, testBasic) {
+TEST_F(MacCatalogueTest, testBasicHmac) {
   std::string key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
+  MacCatalogue catalogue;
+
+  {
+    auto manager_result = catalogue.GetKeyManager(key_type, "Mac", 0);
+    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
+  }
+
+  {
+    auto manager_result = catalogue.GetKeyManager(key_type, "mAC", 0);
+    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
+  }
+
+  {
+    auto manager_result = catalogue.GetKeyManager(key_type, "Aead", 0);
+    EXPECT_FALSE(manager_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  }
+
+  {
+    auto manager_result = catalogue.GetKeyManager(key_type, "Mac", 1);
+    EXPECT_FALSE(manager_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  }
+}
+
+TEST_F(MacCatalogueTest, testBasicAesCmac) {
+  std::string key_type = "type.googleapis.com/google.crypto.tink.AesCmacKey";
   MacCatalogue catalogue;
 
   {

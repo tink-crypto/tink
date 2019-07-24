@@ -108,4 +108,5 @@ go_binary(
          "//go/keyset:go_default_library",
          "//proto:tink_go_proto",
     ],
+    tags = ["no_rbe"],
 )

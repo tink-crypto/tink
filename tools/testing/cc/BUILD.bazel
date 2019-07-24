@@ -147,6 +147,7 @@ sh_test(
         "//testdata:credentials",
         "//tools/testing/cross_language:test_lib",
     ],
+    tags = ["no_rbe"],
 )
 
 # TODO(b/119547792): Temporarily disabling until reliability concerns are addressed.

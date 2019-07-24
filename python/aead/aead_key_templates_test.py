@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import aes_ctr_hmac_aead_pb2
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
@@ -27,7 +27,7 @@ from tink.proto import tink_pb2
 from tink.python.aead import aead_key_templates
 
 
-class AeadKeyTemplatesTest(unittest.TestCase):
+class AeadKeyTemplatesTest(absltest.TestCase):
 
   def test_aes128_eax(self):
     template = aead_key_templates.AES128_EAX
@@ -145,4 +145,4 @@ class AeadKeyTemplatesTest(unittest.TestCase):
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

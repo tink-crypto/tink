@@ -22,7 +22,7 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * Implementation of the {@link KeyManager} interface based on an {@link InternalKeyManager}.
+ * Implementation of the {@link KeyManager} interface based on an {@link KeyTypeManager}.
  *
  * <p>Choosing {@code PrimitiveT} equal to {@link java.lang.Void} is valid; in this case the
  * functions {@link #getPrimitive} will throw if invoked.
@@ -30,19 +30,19 @@ import java.security.GeneralSecurityException;
 @Alpha
 class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyManager<PrimitiveT> {
   public KeyManagerImpl(
-      InternalKeyManager<KeyProtoT> internalKeyManager, Class<PrimitiveT> primitiveClass) {
-    if (!internalKeyManager.supportedPrimitives().contains(primitiveClass)
+      KeyTypeManager<KeyProtoT> keyTypeManager, Class<PrimitiveT> primitiveClass) {
+    if (!keyTypeManager.supportedPrimitives().contains(primitiveClass)
         && !Void.class.equals(primitiveClass)) {
       throw new IllegalArgumentException(
           String.format(
               "Given internalKeyMananger %s does not support primitive class %s",
-              internalKeyManager.toString(), primitiveClass.getName()));
+              keyTypeManager.toString(), primitiveClass.getName()));
     }
-    this.internalKeyManager = internalKeyManager;
+    this.keyTypeManager = keyTypeManager;
     this.primitiveClass = primitiveClass;
   }
 
-  private final InternalKeyManager<KeyProtoT> internalKeyManager;
+  private final KeyTypeManager<KeyProtoT> keyTypeManager;
   private final Class<PrimitiveT> primitiveClass;
 
   private static <CastedT> CastedT castOrThrowSecurityException(
@@ -59,11 +59,11 @@ class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyMa
   @Override
   public final PrimitiveT getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      KeyProtoT keyProto = internalKeyManager.parseKey(serializedKey);
+      KeyProtoT keyProto = keyTypeManager.parseKey(serializedKey);
       return validateKeyAndGetPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException(
-          "Failures parsing proto of type " + internalKeyManager.getKeyClass().getName(), e);
+          "Failures parsing proto of type " + keyTypeManager.getKeyClass().getName(), e);
     }
   }
 
@@ -72,8 +72,8 @@ class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyMa
     return validateKeyAndGetPrimitive(
         castOrThrowSecurityException(
             key,
-            "Expected proto of type " + internalKeyManager.getKeyClass().getName(),
-            internalKeyManager.getKeyClass()));
+            "Expected proto of type " + keyTypeManager.getKeyClass().getName(),
+            keyTypeManager.getKeyClass()));
   }
 
   @Override
@@ -83,7 +83,7 @@ class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyMa
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException(
           "Failures parsing proto of type "
-              + internalKeyManager.keyFactory().getKeyFormatClass().getName(),
+              + keyTypeManager.keyFactory().getKeyFormatClass().getName(),
           e);
     }
   }
@@ -100,12 +100,12 @@ class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyMa
 
   @Override
   public final String getKeyType() {
-    return internalKeyManager.getKeyType();
+    return keyTypeManager.getKeyType();
   }
 
   @Override
   public int getVersion() {
-    return internalKeyManager.getVersion();
+    return keyTypeManager.getVersion();
   }
 
   @Override
@@ -115,7 +115,7 @@ class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyMa
       return KeyData.newBuilder()
           .setTypeUrl(getKeyType())
           .setValue(key.toByteString())
-          .setKeyMaterialType(internalKeyManager.keyMaterialType())
+          .setKeyMaterialType(keyTypeManager.keyMaterialType())
           .build();
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Unexpected proto", e);
@@ -132,24 +132,24 @@ class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyMa
     if (Void.class.equals(primitiveClass)) {
       throw new GeneralSecurityException("Cannot create a primitive for Void");
     }
-    internalKeyManager.validateKey(keyProto);
-    return internalKeyManager.getPrimitive(keyProto, primitiveClass);
+    keyTypeManager.validateKey(keyProto);
+    return keyTypeManager.getPrimitive(keyProto, primitiveClass);
   }
 
   /**
    * A helper class which exposes functions bundling multiple functions of the given {@link
-   * InternalKeyManager.KeyFactory}.
+   * KeyTypeManager.KeyFactory}.
    *
    * <p>The KeyFactory uses generics. By bundling functions in a class which uses the same generics
    * we can refer to the types in code.
    */
   private static class KeyFactoryHelper<
       KeyFormatProtoT extends MessageLite, KeyProtoT extends MessageLite> {
-    KeyFactoryHelper(InternalKeyManager.KeyFactory<KeyFormatProtoT, KeyProtoT> keyFactory) {
+    KeyFactoryHelper(KeyTypeManager.KeyFactory<KeyFormatProtoT, KeyProtoT> keyFactory) {
       this.keyFactory = keyFactory;
     }
 
-    final InternalKeyManager.KeyFactory<KeyFormatProtoT, KeyProtoT> keyFactory;
+    final KeyTypeManager.KeyFactory<KeyFormatProtoT, KeyProtoT> keyFactory;
 
     private KeyProtoT validateCreate(KeyFormatProtoT keyFormat) throws GeneralSecurityException {
       keyFactory.validateKeyFormat(keyFormat);
@@ -171,6 +171,6 @@ class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyMa
   }
 
   private KeyFactoryHelper<?, KeyProtoT> keyFactoryHelper() {
-    return new KeyFactoryHelper<>(internalKeyManager.keyFactory());
+    return new KeyFactoryHelper<>(keyTypeManager.keyFactory());
   }
 }

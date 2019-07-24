@@ -16,6 +16,7 @@
 
 #include "tink/mac/mac_key_templates.h"
 
+#include "proto/aes_cmac.pb.h"
 #include "proto/common.pb.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
@@ -24,6 +25,7 @@ namespace crypto {
 namespace tink {
 namespace {
 
+using google::crypto::tink::AesCmacKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::KeyTemplate;
@@ -38,6 +40,19 @@ KeyTemplate* NewHmacKeyTemplate(int key_size_in_bytes, int tag_size_in_bytes,
   key_format.set_key_size(key_size_in_bytes);
   key_format.mutable_params()->set_tag_size(tag_size_in_bytes);
   key_format.mutable_params()->set_hash(hash_type);
+  key_format.SerializeToString(key_template->mutable_value());
+  return key_template;
+}
+
+KeyTemplate* NewAesCmacKeyTemplate(int key_size_in_bytes,
+                                   int tag_size_in_bytes) {
+  KeyTemplate* key_template = new KeyTemplate;
+  key_template->set_type_url(
+      "type.googleapis.com/google.crypto.tink.AesCmacKey");
+  key_template->set_output_prefix_type(OutputPrefixType::TINK);
+  AesCmacKeyFormat key_format;
+  key_format.set_key_size(key_size_in_bytes);
+  key_format.mutable_params()->set_tag_size(tag_size_in_bytes);
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
@@ -73,6 +88,13 @@ const KeyTemplate& MacKeyTemplates::HmacSha512() {
   static const KeyTemplate* key_template =
       NewHmacKeyTemplate(/* key_size_in_bytes= */ 64,
                          /* tag_size_in_bytes= */ 64, HashType::SHA512);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& MacKeyTemplates::AesCmac() {
+  static const KeyTemplate* key_template = NewAesCmacKeyTemplate(
+      /* key_size_in_bytes= */ 32, /* tag_size_in_bytes= */ 16);
   return *key_template;
 }
 

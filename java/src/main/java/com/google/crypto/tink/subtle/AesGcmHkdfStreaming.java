@@ -151,7 +151,7 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   }
 
   /**
-   * Returns the expected size of the ciphertext for a given plaintext The returned value includes
+   * Returns the expected size of the ciphertext for a given plaintext. The returned value includes
    * the header and offset.
    */
   public long expectedCiphertextSize(long plaintextSize) {
@@ -251,8 +251,14 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
           keySpec,
           paramsForSegment(noncePrefix, encryptedSegments, isLastSegment));
       encryptedSegments++;
-      cipher.update(part1, ciphertext);
-      cipher.doFinal(part2, ciphertext);
+      // `update(nonEmpty)`, `doFinal(empty)` is known to cause problems on Android 23.
+      // See https://github.com/google/tink/issues/229
+      if (part2.hasRemaining()) {
+        cipher.update(part1, ciphertext);
+        cipher.doFinal(part2, ciphertext);
+      } else {
+        cipher.doFinal(part1, ciphertext);
+      }
     }
 
     @Override

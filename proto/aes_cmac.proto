@@ -1,3 +1,5 @@
+// Copyright 2017 Google Inc.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,15 +14,27 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.ProtoTest');
-goog.setTestOnly('tink.ProtoTest');
+syntax = "proto3";
 
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const testSuite = goog.require('goog.testing.testSuite');
+package google.crypto.tink;
 
-testSuite({
-  testField() {
-    const keyset = new PbKeyset().setPrimaryKeyId(1);
-    assertEquals(1, keyset.getPrimaryKeyId());
-  },
-});
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option objc_class_prefix = "TINKPB";
+option go_package = "github.com/google/tink/proto/aes_cmac_go_proto";
+
+message AesCmacParams {
+  uint32 tag_size = 1;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.AesCmacKey
+message AesCmacKey {
+  uint32 version = 1;
+  bytes key_value = 2;
+  AesCmacParams params = 3;
+}
+
+message AesCmacKeyFormat {
+  uint32 key_size = 1;
+  AesCmacParams params = 2;
+}

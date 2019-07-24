@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
@@ -26,7 +26,7 @@ from tink.python.aead import aead_key_templates
 from tink.python.hybrid import hybrid_key_templates
 
 
-class HybridKeyTemplatesTest(unittest.TestCase):
+class HybridKeyTemplatesTest(absltest.TestCase):
 
   def test_ecies_p256_hkdf_hmac_sha256_aes128_gcm(self):
     template = hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
@@ -80,4 +80,4 @@ class HybridKeyTemplatesTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

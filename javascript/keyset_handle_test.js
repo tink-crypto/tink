@@ -67,8 +67,7 @@ testSuite({
   },
 
   async testConstructorKeysetWithEmptyListOfKeys() {
-    const keyset = new PbKeyset();
-    keyset.setKeyList([]);
+    const keyset = new PbKeyset().setKeyList([]);
     try {
       new KeysetHandle(keyset);
     } catch (e) {
@@ -602,10 +601,10 @@ const createKey = function(
   key.setOutputPrefixType(outputPrefix);
   key.setKeyId(keyId);
 
-  const keyData = new PbKeyData();
-  keyData.setTypeUrl(keyTypeUrl);
-  keyData.setValue(new Uint8Array([1]));
-  keyData.setKeyMaterialType(opt_keyMaterialType);
+  const keyData = new PbKeyData()
+                      .setTypeUrl(keyTypeUrl)
+                      .setValue(new Uint8Array([1]))
+                      .setKeyMaterialType(opt_keyMaterialType);
   key.setKeyData(keyData);
 
   return key;

@@ -224,8 +224,7 @@ testSuite({
   async testRegisterKeyManager_moreRestrictiveNewKeyAllowed() {
     const keyType = 'someTypeUrl';
     const keyManager1 = new DummyKeyManager1(keyType);
-    const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(keyType);
+    const keyTemplate = new PbKeyTemplate().setTypeUrl(keyType);
 
     //Register the key manager with new_key_allowed and test that it is possible
     //to create a new key data.
@@ -246,8 +245,7 @@ testSuite({
   async testRegisterKeyManager_lessRestrictiveNewKeyAllowed() {
     const keyType = 'someTypeUrl';
     const keyManager1 = new DummyKeyManager1(keyType);
-    const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(keyType);
+    const keyTemplate = new PbKeyTemplate().setTypeUrl(keyType);
 
     Registry.registerKeyManager(keyManager1, false);
 
@@ -315,8 +313,7 @@ testSuite({
   async testNewKeyData_noManagerForGivenKeyType() {
     const keyManager1 = new DummyKeyManager1('someKeyType');
     const differentKeyType = 'otherKeyType';
-    const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(differentKeyType);
+    const keyTemplate = new PbKeyTemplate().setTypeUrl(differentKeyType);
 
     Registry.registerKeyManager(keyManager1);
     try {
@@ -332,8 +329,8 @@ testSuite({
 
   async testNewKeyData_newKeyDisallowed() {
     const keyManager1 = new DummyKeyManager1('someKeyType');
-    const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(keyManager1.getKeyType());
+    const keyTemplate =
+        new PbKeyTemplate().setTypeUrl(keyManager1.getKeyType());
 
     Registry.registerKeyManager(keyManager1, false);
     try {
@@ -359,8 +356,7 @@ testSuite({
     }
 
     for (let i = 0; i < keyTypesLength; i++) {
-      const keyTemplate = new PbKeyTemplate();
-      keyTemplate.setTypeUrl(keyTypes[i]);
+      const keyTemplate = new PbKeyTemplate().setTypeUrl(keyTypes[i]);
       const result = await Registry.newKeyData(keyTemplate);
       assertEquals(keyTypes[i], result.getTypeUrl());
     }
@@ -378,8 +374,7 @@ testSuite({
     }
 
     for (let i = 0; i < keyTypesLength; i++) {
-      const keyTemplate = new PbKeyTemplate();
-      keyTemplate.setTypeUrl(keyTypes[i]);
+      const keyTemplate = new PbKeyTemplate().setTypeUrl(keyTypes[i]);
       const result = await Registry.newKeyData(keyTemplate);
       assertEquals(keyTypes[i], result.getTypeUrl());
     }
@@ -414,8 +409,7 @@ testSuite({
   // tests for newKey method
   async testNewKey_noManagerForGivenKeyType() {
     const notRegisteredKeyType = 'not_registered_key_type';
-    const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(notRegisteredKeyType);
+    const keyTemplate = new PbKeyTemplate().setTypeUrl(notRegisteredKeyType);
 
     try {
       await Registry.newKey(keyTemplate);
@@ -429,8 +423,7 @@ testSuite({
 
   async testNewKey_newKeyDisallowed() {
     const keyManager = new DummyKeyManagerForNewKeyTests('someKeyType');
-    const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(keyManager.getKeyType());
+    const keyTemplate = new PbKeyTemplate().setTypeUrl(keyManager.getKeyType());
     Registry.registerKeyManager(keyManager, /* opt_newKeyAllowed = */ false);
 
     try {
@@ -460,8 +453,7 @@ testSuite({
     // For every keyType verify that it calls new key method of the
     // corresponding KeyManager (KeyFactory).
     for (let i = 0; i < keyTypesLength; i++) {
-      const keyTemplate = new PbKeyTemplate();
-      keyTemplate.setTypeUrl(keyTypes[i]);
+      const keyTemplate = new PbKeyTemplate().setTypeUrl(keyTypes[i]);
 
       const key =
           /** @type {!PbAesCtrKey} */ (await Registry.newKey(keyTemplate));
@@ -504,8 +496,7 @@ testSuite({
   async testGetPrimitive_differentKeyTypes() {
     const keyDataType = 'key_data_key_type_url';
     const anotherType = 'another_key_type_url';
-    const keyData = new PbKeyData();
-    keyData.setTypeUrl(keyDataType);
+    const keyData = new PbKeyData().setTypeUrl(keyDataType);
 
     try {
       await Registry.getPrimitive(null, keyData, anotherType);
@@ -530,8 +521,7 @@ testSuite({
 
   async testGetPrimitive_missingKeyManager() {
     const keyDataType = 'key_data_key_type_url';
-    const keyData = new PbKeyData();
-    keyData.setTypeUrl(keyDataType);
+    const keyData = new PbKeyData().setTypeUrl(keyDataType);
 
     try {
       await Registry.getPrimitive(null, keyData);
@@ -796,10 +786,8 @@ const createAesCtrHmacAeadTestKeyTemplate = function() {
   const IV_SIZE = 12;
   const TAG_SIZE = 16;
 
-  let keyFormat = new PbAesCtrHmacAeadKeyFormat();
-
-  // set AES CTR key
-  keyFormat.setAesCtrKeyFormat(new PbAesCtrKeyFormat());
+  let keyFormat = new PbAesCtrHmacAeadKeyFormat().setAesCtrKeyFormat(
+      new PbAesCtrKeyFormat());
   keyFormat.getAesCtrKeyFormat().setKeySize(KEY_SIZE);
   keyFormat.getAesCtrKeyFormat().setParams(new PbAesCtrParams());
   keyFormat.getAesCtrKeyFormat().getParams().setIvSize(IV_SIZE);
@@ -811,10 +799,11 @@ const createAesCtrHmacAeadTestKeyTemplate = function() {
   keyFormat.getHmacKeyFormat().getParams().setHash(PbHashType.SHA1);
   keyFormat.getHmacKeyFormat().getParams().setTagSize(TAG_SIZE);
 
-  let keyTemplate = new PbKeyTemplate();
-  keyTemplate.setTypeUrl(
-      'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey');
-  keyTemplate.setValue(keyFormat.serializeBinary());
+  let keyTemplate =
+      new PbKeyTemplate()
+          .setTypeUrl(
+              'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey')
+          .setValue(keyFormat.serializeBinary());
   return keyTemplate;
 };
 
@@ -889,8 +878,7 @@ class DummyKeyFactory {
    * @override
    */
   newKey(keyFormat) {
-    const key = new PbAesCtrKey();
-    key.setKeyValue(this.NEW_KEY_METHOD_RESULT_);
+    const key = new PbAesCtrKey().setKeyValue(this.NEW_KEY_METHOD_RESULT_);
 
     return key;
   }
@@ -899,11 +887,11 @@ class DummyKeyFactory {
    * @override
    */
   newKeyData(serializedKeyFormat) {
-    let /** PbKeyData */ keyData = new PbKeyData();
-
-    keyData.setTypeUrl(this.KEY_TYPE_);
-    keyData.setValue(this.NEW_KEY_METHOD_RESULT_);
-    keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL);
+    let keyData =
+        new PbKeyData()
+            .setTypeUrl(this.KEY_TYPE_)
+            .setValue(this.NEW_KEY_METHOD_RESULT_)
+            .setKeyMaterialType(PbKeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL);
 
     return keyData;
   }

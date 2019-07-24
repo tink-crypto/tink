@@ -353,6 +353,51 @@ objc_proto_compile(
 )
 
 # -----------------------------------------------
+# aes_cmac
+# -----------------------------------------------
+proto_library(
+    name = "aes_cmac_proto",
+    srcs = [
+        "aes_cmac.proto",
+    ],
+    deps = [],
+)
+
+cc_proto_library(
+    name = "aes_cmac_cc_proto",
+    deps = [":aes_cmac_proto"],
+)
+
+java_proto_library(
+    name = "aes_cmac_java_proto",
+    deps = [":aes_cmac_proto"],
+)
+
+java_lite_proto_library(
+    name = "aes_cmac_java_proto_lite",
+    deps = [":aes_cmac_proto"],
+)
+
+closure_proto_library(
+    name = "aes_cmac_closure_proto",
+    deps = [":aes_cmac_proto"],
+)
+
+go_proto_library(
+    name = "aes_cmac_go_proto",
+    importpath = "github.com/google/tink/proto/aes_cmac_go_proto",
+    proto = ":aes_cmac_proto",
+    deps = [],
+)
+
+objc_proto_compile(
+    name = "aes_cmac_objc_pb",
+    protos = ["aes_cmac.proto"],
+    tags = ["manual"],
+    deps = [],
+)
+
+# -----------------------------------------------
 # hmac
 # -----------------------------------------------
 proto_library(
