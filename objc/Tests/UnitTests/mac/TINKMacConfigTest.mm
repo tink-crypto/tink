@@ -34,6 +34,7 @@
 
 - (void)testConfigContents {
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
+  std::string aes_cmac_key_type = "type.googleapis.com/google.crypto.tink.AesCmacKey";
 
   NSError *error = nil;
   TINKMacConfig *macConfig = [[TINKMacConfig alloc] initWithError:&error];
@@ -41,13 +42,18 @@
   XCTAssertNil(error);
 
   google::crypto::tink::RegistryConfig config = macConfig.ccConfig;
-  XCTAssertTrue(config.entry_size() == 1);
+  XCTAssertTrue(config.entry_size() == 2);
 
   XCTAssertEqual("TinkMac", config.entry(0).catalogue_name());
   XCTAssertEqual("Mac", config.entry(0).primitive_name());
   XCTAssertEqual(hmac_key_type, config.entry(0).type_url());
   XCTAssertTrue(config.entry(0).new_key_allowed());
   XCTAssertEqual(config.entry(0).key_manager_version(), 0);
+  XCTAssertEqual("TinkMac", config.entry(1).catalogue_name());
+  XCTAssertEqual("Mac", config.entry(1).primitive_name());
+  XCTAssertEqual(aes_cmac_key_type, config.entry(1).type_url());
+  XCTAssertTrue(config.entry(1).new_key_allowed());
+  XCTAssertEqual(config.entry(1).key_manager_version(), 0);
 
   // Registration of standard key types works.
   error = nil;
