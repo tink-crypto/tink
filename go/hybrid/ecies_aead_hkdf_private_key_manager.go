@@ -88,6 +88,9 @@ func (km *eciesAEADHKDFPrivateKeyKeyManager) NewKey(serializedKeyFormat []byte) 
 		return nil, errInvalidECIESAEADHKDFPrivateKeyKeyFormat
 	}
 	curve, err := subtle.GetCurve(keyFormat.Params.KemParams.CurveType.String())
+	if err != nil {
+		return nil, err
+	}
 	pvt, err := subtle.GenerateECDHKeyPair(curve)
 	if err != nil {
 		return nil, err

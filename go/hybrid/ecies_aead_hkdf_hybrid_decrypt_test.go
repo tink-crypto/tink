@@ -82,6 +82,9 @@ func modifyDecrypt(t *testing.T, c string, k *tinkpb.KeyTemplate) {
 			copy(mSalt, salt)
 			mSalt[i] ^= (1 << uint8(j))
 			d, err = subtle.NewECIESAEADHKDFHybridDecrypt(pvt, mSalt, "SHA256", "UNCOMPRESSED", rDem)
+			if err != nil {
+				t.Fatalf("subtle.NewECIESAEADHKDFHybridDecrypt:%v", err)
+			}
 			if _, err := d.Decrypt(ct, context); err == nil {
 				t.Fatalf("invalid salt should throw exception")
 			}

@@ -168,7 +168,7 @@ func TestETAEncryptDecrypt(t *testing.T) {
 		t.Fatalf("decryption failed, error: %v", err)
 	}
 
-	if bytes.Compare(plaintext, message) != 0 {
+	if !bytes.Equal(plaintext, message) {
 		t.Errorf("invalid plaintext, got: %q, want: %q", plaintext, message)
 	}
 }
@@ -202,7 +202,7 @@ func TestETAEncryptDecryptRandomMessage(t *testing.T) {
 			t.Fatalf("decryption failed, error: %v", err)
 		}
 
-		if bytes.Compare(plaintext, message) != 0 {
+		if !bytes.Equal(plaintext, message) {
 			t.Errorf("invalid plaintext, got: %q, want: %q", plaintext, message)
 		}
 	}
@@ -232,7 +232,7 @@ func TestETAMultipleEncrypt(t *testing.T) {
 		t.Fatalf("encryption failed, error: %v", err)
 	}
 
-	if bytes.Compare(ciphertext1, ciphertext2) == 0 {
+	if bytes.Equal(ciphertext1, ciphertext2) {
 		t.Error("ciphertexts must not be the same")
 	}
 }
@@ -273,7 +273,7 @@ func TestETADecryptModifiedCiphertext(t *testing.T) {
 		// Save the byte to be modified.
 		b := modct[i/8]
 		modct[i/8] ^= (1 << uint(i%8))
-		if bytes.Compare(ciphertext, modct) == 0 {
+		if bytes.Equal(ciphertext, modct) {
 			t.Errorf("modified ciphertext shouldn't be the same as aad")
 		}
 		if _, err := cipher.Decrypt(modct, aad); err == nil {
@@ -290,7 +290,7 @@ func TestETADecryptModifiedCiphertext(t *testing.T) {
 		// Save the byte to be modified.
 		b := modaad[i/8]
 		modaad[i/8] ^= (1 << uint(i%8))
-		if bytes.Compare(aad, modaad) == 0 {
+		if bytes.Equal(aad, modaad) {
 			t.Errorf("modified aad shouldn't be the same as aad")
 		}
 		if _, err := cipher.Decrypt(ciphertext, modaad); err == nil {

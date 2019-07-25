@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/crypto/hkdf"
 	"github.com/google/tink/go/subtle"
+	"golang.org/x/crypto/hkdf"
 )
 
 const (
@@ -61,7 +61,7 @@ func computeHKDF(hashAlg string, key []byte, salt []byte, info []byte, tagSize u
 		return nil, fmt.Errorf("hkdf: %s", err)
 	}
 	hashFunc := subtle.GetHashFunc(hashAlg)
-	if salt == nil || len(salt) == 0 {
+	if len(salt) == 0 {
 		salt = make([]byte, tagSize)
 	}
 
