@@ -34,8 +34,7 @@ const testSuite = goog.require('goog.testing.testSuite');
 testSuite({
   // tests for validateKey method
   async testValidateKeyMissingKeyData() {
-    const key = createKey();
-    key.setKeyData(null);
+    const key = createKey().setKeyData(null);
 
     try {
       await Util.validateKey(key);
@@ -48,8 +47,8 @@ testSuite({
   },
 
   async testValidateKeyUnknownPrefix() {
-    const key = createKey();
-    key.setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
+    const key =
+        createKey().setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
 
     try {
       await Util.validateKey(key);
@@ -62,8 +61,7 @@ testSuite({
   },
 
   async testValidateKeyUnknownStatus() {
-    const key = createKey();
-    key.setStatus(PbKeyStatusType.UNKNOWN_STATUS);
+    const key = createKey().setStatus(PbKeyStatusType.UNKNOWN_STATUS);
 
     try {
       await Util.validateKey(key);
@@ -132,8 +130,7 @@ testSuite({
   async testValidateKeysetWithInvalidKey() {
     const keyset = createKeyset();
     const key =
-        createKey(/* opt_id = */ 0xFFFFFFFF, /* opt_enabled = */ true);
-    key.setStatus(PbKeyStatusType.UNKNOWN_STATUS);
+        createKey(4294967295, true).setStatus(PbKeyStatusType.UNKNOWN_STATUS);
     keyset.addKey(key);
 
     try {
@@ -243,19 +240,17 @@ class ExceptionText {
  *
  * @return {!PbKeyset.Key}
  */
-const createKey = function(opt_id = 0x12345678, opt_enabled = true,
-    opt_publicKey = false) {
-  const keyData = new PbKeyData();
-  keyData.setTypeUrl('someTypeUrl');
-  keyData.setValue(new Uint8Array(10));
+const createKey = function(
+    opt_id = 0x12345678, opt_enabled = true, opt_publicKey = false) {
+  const keyData =
+      new PbKeyData().setTypeUrl('someTypeUrl').setValue(new Uint8Array(10));
   if (opt_publicKey) {
     keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
   } else {
     keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
   }
 
-  const key = new PbKeyset.Key();
-  key.setKeyData(keyData);
+  const key = new PbKeyset.Key().setKeyData(keyData);
   if (opt_enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
   } else {

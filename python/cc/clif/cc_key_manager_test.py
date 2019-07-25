@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_siv_pb2
 from tink.proto import common_pb2
@@ -37,7 +37,7 @@ def setUpModule():
   cc_tink_config.register()
 
 
-class AeadKeyManagerTest(googletest.TestCase):
+class AeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(AeadKeyManagerTest, self).setUp()
@@ -82,7 +82,7 @@ class AeadKeyManagerTest(googletest.TestCase):
     self.assertEqual(aead.decrypt(ciphertext, associated_data), plaintext)
 
 
-class DeterministicAeadKeyManagerTest(googletest.TestCase):
+class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(DeterministicAeadKeyManagerTest, self).setUp()
@@ -127,7 +127,7 @@ class DeterministicAeadKeyManagerTest(googletest.TestCase):
         aead.decrypt_deterministically(ciphertext, associated_data), plaintext)
 
 
-class HybridKeyManagerTest(googletest.TestCase):
+class HybridKeyManagerTest(absltest.TestCase):
 
   def hybrid_decrypt_key_manager(self):
     return cc_key_manager.HybridDecryptKeyManager.from_cc_registry(
@@ -181,7 +181,7 @@ class HybridKeyManagerTest(googletest.TestCase):
       hybrid_decrypt.decrypt(b'bad ciphertext', b'some context info')
 
 
-class MacKeyManagerTest(googletest.TestCase):
+class MacKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(MacKeyManagerTest, self).setUp()
@@ -236,7 +236,7 @@ class MacKeyManagerTest(googletest.TestCase):
       mac.verify_mac(b'0123456789ABCDEF', b'data')
 
 
-class PublicKeySignVerifyKeyManagerTest(googletest.TestCase):
+class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(PublicKeySignVerifyKeyManagerTest, self).setUp()
@@ -328,4 +328,4 @@ class PublicKeySignVerifyKeyManagerTest(googletest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

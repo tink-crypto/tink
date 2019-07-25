@@ -1,7 +1,6 @@
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-licenses(["notice"])  # Apache 2.0
-
+licenses(["notice"])
 
 PUBLIC_APIS = [
     "common_enums.h",
@@ -147,6 +146,24 @@ cc_library(
     deps = [
         ":common_enums",
         ":subtle_util_boringssl",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "aes_cmac_boringssl",
+    srcs = ["aes_cmac_boringssl.cc"],
+    hdrs = ["aes_cmac_boringssl.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":common_enums",
+        ":subtle_util_boringssl",
+        "//cc:mac",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -673,6 +690,22 @@ cc_test(
     deps = [
         ":common_enums",
         ":hkdf",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_cmac_boringssl_test",
+    size = "small",
+    srcs = ["aes_cmac_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aes_cmac_boringssl",
+        ":common_enums",
+        "//cc:mac",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",

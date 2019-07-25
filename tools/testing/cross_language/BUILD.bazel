@@ -1,6 +1,6 @@
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-licenses(["notice"])  # Apache 2.0
+licenses(["notice"])
 
 filegroup(
     name = "test_lib",
@@ -51,6 +51,10 @@ sh_test(
         "//tools/tinkey",
         "//testdata:credentials",
     ],
+    args = select({
+      "//tools/remote_build_execution:rbe": ["--no_external_tests"],
+      "//conditions:default": [],
+    }),
 )
 
 sh_test(

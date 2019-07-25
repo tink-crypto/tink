@@ -91,12 +91,17 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 
 AEAD primitive (Authenticated Encryption with Associated Data) provides
 functionality of symmetric authenticated encryption. Implementations of this
-primitive are secure against adaptive chosen ciphertext attacks.  When
-encrypting a plaintext one can optionally provide _associated data_ that should
-be authenticated but not encrypted. That is, the encryption with associated data
-ensures authenticity (ie. who the sender is) and integrity (ie. data has not
-been tampered with) of that data, but not its secrecy
-(see [RFC 5116](https://tools.ietf.org/html/rfc5116)).
+primitive are secure against adaptive chosen ciphertext attacks.
+
+When encrypting a plaintext one can optionally provide _associated data_ that
+should be authenticated but not encrypted. That is, the encryption with
+associated data ensures authenticity (ie. who the sender is) and integrity (ie.
+data has not been tampered with) of that data, but not its secrecy (see
+[RFC 5116](https://tools.ietf.org/html/rfc5116)). This is often used for binding
+encryptions to a context. For example, in a banking database the contents of a
+row (e.g. bank account balance) can be encrypted using the customer's id as
+_associated data_. This would prevent swapping encrypted data between customers'
+records.
 
 Minimal properties:
 

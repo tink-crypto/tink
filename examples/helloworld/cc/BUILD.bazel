@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-licenses(["notice"])  # Apache 2.0
+licenses(["notice"])
 
 filegroup(
     name = "hello_world_files",
@@ -48,5 +48,6 @@ sh_test(
     ],
     tags = [
         "local",  # This tests needs g++.
+        "no_rbe",
     ],
 )

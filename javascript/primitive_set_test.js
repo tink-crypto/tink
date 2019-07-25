@@ -30,8 +30,8 @@ testSuite({
   // tests for addPrimitive method
   testAddPrimitiveUnknownCryptoFormat() {
     const primitive = new DummyAead1();
-    const key = createKey();
-    key.setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
+    const key =
+        createKey().setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
     try {
@@ -185,8 +185,7 @@ testSuite({
     assertObjectEquals(expectedResult, result);
 
     // Add RAW primitives and check the result again after each adding.
-    let key = createKey();
-    key.setOutputPrefixType(PbOutputPrefixType.RAW);
+    let key = createKey().setOutputPrefixType(PbOutputPrefixType.RAW);
 
     let addResult = primitiveSet.addPrimitive(new DummyAead1(), key);
     expectedResult.push(addResult);
@@ -270,12 +269,11 @@ testSuite({
   testSetPrimary_rawPrimitives() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     for (let i = 0; i < 3; i++) {
-      const key = createKey(/* opt_keyId = */ i);
-      key.setOutputPrefixType(PbOutputPrefixType.RAW);
+      const key = createKey(i).setOutputPrefixType(PbOutputPrefixType.RAW);
       primitiveSet.addPrimitive(new DummyAead1(), key);
     }
-    const primaryKey = createKey(/* opt_keyId = */ 0xFF);
-    primaryKey.setOutputPrefixType(PbOutputPrefixType.RAW);
+    const primaryKey =
+        createKey(255).setOutputPrefixType(PbOutputPrefixType.RAW);
     const primaryEntry =
         primitiveSet.addPrimitive(new DummyAead1(), primaryKey);
     primitiveSet.setPrimary(primaryEntry);

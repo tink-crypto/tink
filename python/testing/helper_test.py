@@ -18,12 +18,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.python.core import tink_error
 from tink.python.testing import helper
 
 
-class HelperTest(googletest.TestCase):
+class HelperTest(absltest.TestCase):
 
   def test_fake_mac_success(self):
     mac = helper.FakeMac('Name')
@@ -136,4 +136,4 @@ class HelperTest(googletest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

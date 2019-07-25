@@ -19,6 +19,7 @@
 #include "absl/strings/ascii.h"
 #include "tink/catalogue.h"
 #include "tink/key_manager.h"
+#include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -32,6 +33,10 @@ crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Mac>>> CreateKeyManager(
     const std::string& type_url) {
   if (type_url == HmacKeyManager::static_key_type()) {
     std::unique_ptr<KeyManager<Mac>> manager(new HmacKeyManager());
+    return std::move(manager);
+  }
+  if (type_url == AesCmacKeyManager::static_key_type()) {
+    std::unique_ptr<KeyManager<Mac>> manager(new AesCmacKeyManager());
     return std::move(manager);
   }
   return ToStatusF(crypto::tink::util::error::NOT_FOUND,

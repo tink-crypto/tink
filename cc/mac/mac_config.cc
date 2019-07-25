@@ -30,8 +30,11 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   google::crypto::tink::RegistryConfig* config =
       new google::crypto::tink::RegistryConfig();
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      MacConfig::kCatalogueName, MacConfig::kPrimitiveName,
-      "HmacKey", 0, true));
+      MacConfig::kCatalogueName, MacConfig::kPrimitiveName, "HmacKey", 0,
+      true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      MacConfig::kCatalogueName, MacConfig::kPrimitiveName, "AesCmacKey", 0,
+      true));
   config->set_config_name("TINK_MAC");
   return config;
 }

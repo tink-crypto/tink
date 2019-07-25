@@ -88,11 +88,11 @@ testSuite({
   },
 
   testRegister_entryMissingPrimitiveName() {
-    const entry = new PbKeyTypeEntry();
-    entry.setCatalogueName('some_catalogue_name');
-    entry.setTypeUrl('some_type_url');
-    entry.setKeyManagerVersion(0);
-    entry.setNewKeyAllowed(true);
+    const entry = new PbKeyTypeEntry()
+                      .setCatalogueName('some_catalogue_name')
+                      .setTypeUrl('some_type_url')
+                      .setKeyManagerVersion(0)
+                      .setNewKeyAllowed(true);
 
     try {
       Config.register(entry);
@@ -103,11 +103,11 @@ testSuite({
   },
 
   testRegister_entryMissingCatalogueName() {
-    const entry = new PbKeyTypeEntry();
-    entry.setPrimitiveName('some_primitive_name');
-    entry.setTypeUrl('some_type_url');
-    entry.setKeyManagerVersion(0);
-    entry.setNewKeyAllowed(true);
+    const entry = new PbKeyTypeEntry()
+                      .setPrimitiveName('some_primitive_name')
+                      .setTypeUrl('some_type_url')
+                      .setKeyManagerVersion(0)
+                      .setNewKeyAllowed(true);
 
     try {
       Config.register(entry);
@@ -118,11 +118,11 @@ testSuite({
   },
 
   testRegister_entryMissingTypeUrl() {
-    const entry = new PbKeyTypeEntry();
-    entry.setPrimitiveName('some_primitive_name');
-    entry.setCatalogueName('some_catalgoue_name');
-    entry.setKeyManagerVersion(0);
-    entry.setNewKeyAllowed(true);
+    const entry = new PbKeyTypeEntry()
+                      .setPrimitiveName('some_primitive_name')
+                      .setCatalogueName('some_catalgoue_name')
+                      .setKeyManagerVersion(0)
+                      .setNewKeyAllowed(true);
 
     try {
       Config.register(entry);
@@ -201,8 +201,8 @@ testSuite({
     const entry = Config.getTinkKeyTypeEntry(
         catalogueName, primitiveName, keyProtoName, keyManagerVersion,
         newKeyAllowed);
-    const registryConfig = new PbRegistryConfig();
-    registryConfig.setConfigName('Test_aead_config');
+    const registryConfig =
+        new PbRegistryConfig().setConfigName('Test_aead_config');
     registryConfig.addEntry(entry);
 
     Registry.addCatalogue(catalogueName, new AeadCatalogue());

@@ -1,6 +1,6 @@
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-licenses(["notice"])  # Apache 2.0
+licenses(["notice"])
 
 cc_library(
     name = "aws_crypto",

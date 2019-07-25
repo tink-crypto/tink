@@ -20,8 +20,7 @@ const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
   testField() {
-    const keyset = new PbKeyset();
-    keyset.setPrimaryKeyId(1);
+    const keyset = new PbKeyset().setPrimaryKeyId(1);
     assertEquals(1, keyset.getPrimaryKeyId());
   },
 });

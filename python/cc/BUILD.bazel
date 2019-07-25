@@ -1,0 +1,30 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "cc_key_manager",
+    hdrs = ["cc_key_manager.h"],
+    include_prefix = "tink/",
+    deps = [
+        "//cc",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "cc_tink_config",
+    srcs = ["cc_tink_config.cc"],
+    hdrs = ["cc_tink_config.h"],
+    include_prefix = "tink/python",
+    strip_include_prefix = "/python",
+    deps = [
+        "//cc",
+        "//cc/config:tink_config",
+        "//cc/util:status",
+        "//proto:config_cc_proto",
+    ],
+)

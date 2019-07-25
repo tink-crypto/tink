@@ -34,8 +34,8 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class PrivateKeyManagerImplTest {
 
-  private static class TestInternalPublicKeyManager extends InternalKeyManager<Ed25519PublicKey> {
-    public TestInternalPublicKeyManager() {
+  private static class TestPublicKeyTypeManager extends KeyTypeManager<Ed25519PublicKey> {
+    public TestPublicKeyTypeManager() {
       super(Ed25519PublicKey.class);
     }
 
@@ -67,9 +67,9 @@ public final class PrivateKeyManagerImplTest {
     }
   }
 
-  private static class TestInternalPrivateKeyManager
-      extends InternalPrivateKeyManager<Ed25519PrivateKey, Ed25519PublicKey> {
-    public TestInternalPrivateKeyManager() {
+  private static class TestPrivateKeyTypeManager
+      extends PrivateKeyTypeManager<Ed25519PrivateKey, Ed25519PublicKey> {
+    public TestPrivateKeyTypeManager() {
       super(Ed25519PrivateKey.class, Ed25519PublicKey.class);
     }
 
@@ -109,8 +109,8 @@ public final class PrivateKeyManagerImplTest {
 
   @Test
   public void getPublicKeyData_works() throws Exception {
-    TestInternalPrivateKeyManager privateManager = new TestInternalPrivateKeyManager();
-    TestInternalPublicKeyManager publicManager = new TestInternalPublicKeyManager();
+    TestPrivateKeyTypeManager privateManager = new TestPrivateKeyTypeManager();
+    TestPublicKeyTypeManager publicManager = new TestPublicKeyTypeManager();
     PrivateKeyManager<Void> manager =
         new PrivateKeyManagerImpl<>(privateManager, publicManager, Void.class);
     Ed25519PrivateKey privateKey =
@@ -132,8 +132,8 @@ public final class PrivateKeyManagerImplTest {
 
   @Test
   public void getPublicKeyData_invalidPrivateKey_throws() throws Exception {
-    TestInternalPrivateKeyManager privateManager = new TestInternalPrivateKeyManager();
-    TestInternalPublicKeyManager publicManager = new TestInternalPublicKeyManager();
+    TestPrivateKeyTypeManager privateManager = new TestPrivateKeyTypeManager();
+    TestPublicKeyTypeManager publicManager = new TestPublicKeyTypeManager();
     PrivateKeyManager<Void> manager =
         new PrivateKeyManagerImpl<>(privateManager, publicManager, Void.class);
     Ed25519PrivateKey privateKey =
@@ -155,8 +155,8 @@ public final class PrivateKeyManagerImplTest {
 
   @Test
   public void getPublicKeyData_invalidPublicKey_throws() throws Exception {
-    TestInternalPrivateKeyManager privateManager = new TestInternalPrivateKeyManager();
-    TestInternalPublicKeyManager publicManager = new TestInternalPublicKeyManager();
+    TestPrivateKeyTypeManager privateManager = new TestPrivateKeyTypeManager();
+    TestPublicKeyTypeManager publicManager = new TestPublicKeyTypeManager();
     PrivateKeyManager<Void> manager =
         new PrivateKeyManagerImpl<>(privateManager, publicManager, Void.class);
     Ed25519PrivateKey privateKey =

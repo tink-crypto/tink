@@ -65,6 +65,9 @@ TEST_F(TinkConfigTest, testBasic) {
   mac_key_type_entries.push_back(
       {"TinkMac", "Mac",
        "type.googleapis.com/google.crypto.tink.HmacKey", true, 0});
+  mac_key_type_entries.push_back(
+      {"TinkMac", "Mac",
+       "type.googleapis.com/google.crypto.tink.AesCmacKey", true, 0});
   all_key_type_entries.insert(std::end(all_key_type_entries),
                               std::begin(mac_key_type_entries),
                               std::end(mac_key_type_entries));

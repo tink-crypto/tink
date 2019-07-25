@@ -45,6 +45,11 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME aes_cmac_cc_proto
+  SRCS aes_cmac.proto
+)
+
+tink_cc_proto(
   NAME hmac_cc_proto
   SRCS hmac.proto
   DEPS tink::proto::common_cc_proto

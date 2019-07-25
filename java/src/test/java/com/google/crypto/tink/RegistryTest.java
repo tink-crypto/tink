@@ -742,9 +742,9 @@ public class RegistryTest {
     }
   }
 
-  /** Implementation of an InternalKeyManager for testing. */
-  private static class TestInternalKeyManager extends InternalKeyManager<AesGcmKey> {
-    public TestInternalKeyManager() {
+  /** Implementation of a KeyTypeManager for testing. */
+  private static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
+    public TestKeyTypeManager() {
       super(
           AesGcmKey.class,
           new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
@@ -818,37 +818,37 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterInternalKeyManager() throws Exception {
+  public void testRegisterKeyTypeManager() throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+    Registry.registerKeyManager(new TestKeyTypeManager(), true);
   }
 
   @Test
-  public void testRegisterInternalKeyManager_getKeyManagerAead_works() throws Exception {
+  public void testRegisterKeyTypeManager_getKeyManagerAead_works() throws Exception {
     Registry.reset();
-    TestInternalKeyManager testInternalKeyManager = new TestInternalKeyManager();
-    Registry.registerKeyManager(testInternalKeyManager, true);
-    KeyManager<Aead> km = Registry.getKeyManager(testInternalKeyManager.getKeyType(), Aead.class);
-    assertThat(km.getKeyType()).isEqualTo(testInternalKeyManager.getKeyType());
+    TestKeyTypeManager testKeyTypeManager = new TestKeyTypeManager();
+    Registry.registerKeyManager(testKeyTypeManager, true);
+    KeyManager<Aead> km = Registry.getKeyManager(testKeyTypeManager.getKeyType(), Aead.class);
+    assertThat(km.getKeyType()).isEqualTo(testKeyTypeManager.getKeyType());
   }
 
   @Test
-  public void testRegisterInternalKeyManager_getKeyManagerFakeAead_works() throws Exception {
+  public void testRegisterKeyTypeManager_getKeyManagerFakeAead_works() throws Exception {
     Registry.reset();
-    TestInternalKeyManager testInternalKeyManager = new TestInternalKeyManager();
-    Registry.registerKeyManager(testInternalKeyManager, true);
+    TestKeyTypeManager testKeyTypeManager = new TestKeyTypeManager();
+    Registry.registerKeyManager(testKeyTypeManager, true);
     KeyManager<FakeAead> km =
-        Registry.getKeyManager(testInternalKeyManager.getKeyType(), FakeAead.class);
-    assertThat(km.getKeyType()).isEqualTo(testInternalKeyManager.getKeyType());
+        Registry.getKeyManager(testKeyTypeManager.getKeyType(), FakeAead.class);
+    assertThat(km.getKeyType()).isEqualTo(testKeyTypeManager.getKeyType());
   }
 
   @Test
-  public void testRegisterInternalKeyManager_getKeyManagerMac_throws() throws Exception {
+  public void testRegisterKeyTypeManager_getKeyManagerMac_throws() throws Exception {
     Registry.reset();
-    TestInternalKeyManager testInternalKeyManager = new TestInternalKeyManager();
-    Registry.registerKeyManager(testInternalKeyManager, true);
+    TestKeyTypeManager testKeyTypeManager = new TestKeyTypeManager();
+    Registry.registerKeyManager(testKeyTypeManager, true);
     try {
-      Registry.getKeyManager(testInternalKeyManager.getKeyType(), Mac.class);
+      Registry.getKeyManager(testKeyTypeManager.getKeyType(), Mac.class);
       fail();
     } catch (GeneralSecurityException e) {
         assertExceptionContains(e, "com.google.crypto.tink.Mac");
@@ -860,38 +860,36 @@ public class RegistryTest {
   // Checks that calling getUntypedKeyManager will return the keymanager for the *first* implemented
   // class in the constructor.
   @Test
-  public void testRegisterInternalKeyManager_getUntypedKeyManager_returnsAead() throws Exception {
+  public void testRegisterKeyTypeManager_getUntypedKeyManager_returnsAead() throws Exception {
     Registry.reset();
-    TestInternalKeyManager testInternalKeyManager = new TestInternalKeyManager();
-    Registry.registerKeyManager(testInternalKeyManager, true);
-    KeyManager<?> km =
-        Registry.getUntypedKeyManager(testInternalKeyManager.getKeyType());
+    TestKeyTypeManager testKeyTypeManager = new TestKeyTypeManager();
+    Registry.registerKeyManager(testKeyTypeManager, true);
+    KeyManager<?> km = Registry.getUntypedKeyManager(testKeyTypeManager.getKeyType());
     assertThat(km.getPrimitiveClass()).isEqualTo(Aead.class);
   }
 
   @Test
-  public void testRegisterInternalKeyManager_MoreRestrictedNewKeyAllowed_shouldWork()
-      throws Exception {
+  public void testRegisterKeyTypeManager_MoreRestrictedNewKeyAllowed_shouldWork() throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestInternalKeyManager(), true);
-    Registry.registerKeyManager(new TestInternalKeyManager(), false);
+    Registry.registerKeyManager(new TestKeyTypeManager(), true);
+    Registry.registerKeyManager(new TestKeyTypeManager(), false);
   }
 
   @Test
-  public void testRegisterInternalKeyManager_SameNewKeyAllowed_shouldWork() throws Exception {
+  public void testRegisterKeyTypeManager_SameNewKeyAllowed_shouldWork() throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestInternalKeyManager(), true);
-    Registry.registerKeyManager(new TestInternalKeyManager(), true);
-    Registry.registerKeyManager(new TestInternalKeyManager(), false);
-    Registry.registerKeyManager(new TestInternalKeyManager(), false);
+    Registry.registerKeyManager(new TestKeyTypeManager(), true);
+    Registry.registerKeyManager(new TestKeyTypeManager(), true);
+    Registry.registerKeyManager(new TestKeyTypeManager(), false);
+    Registry.registerKeyManager(new TestKeyTypeManager(), false);
   }
 
   @Test
-  public void testRegisterInternalKeyManager_LessRestrictedNewKeyAllowed_throws() throws Exception {
+  public void testRegisterKeyTypeManager_LessRestrictedNewKeyAllowed_throws() throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestInternalKeyManager(), false);
+    Registry.registerKeyManager(new TestKeyTypeManager(), false);
     try {
-      Registry.registerKeyManager(new TestInternalKeyManager(), true);
+      Registry.registerKeyManager(new TestKeyTypeManager(), true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -899,13 +897,12 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterInternalKeyManager_DifferentClass_throws()
-      throws Exception {
+  public void testRegisterKeyTypeManager_DifferentClass_throws() throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+    Registry.registerKeyManager(new TestKeyTypeManager(), true);
     try {
-      // Note: due to the {} this is a subclass of TestInternalKeyManager.
-      Registry.registerKeyManager(new TestInternalKeyManager() {}, true);
+      // Note: due to the {} this is a subclass of TestKeyTypeManager.
+      Registry.registerKeyManager(new TestKeyTypeManager() {}, true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -913,13 +910,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterInternalKeyManager_AfterKeyManager_throws()
-      throws Exception {
+  public void testRegisterKeyTypeManager_AfterKeyManager_throws() throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(
-        new CustomAeadKeyManager(new TestInternalKeyManager().getKeyType()));
+    Registry.registerKeyManager(new CustomAeadKeyManager(new TestKeyTypeManager().getKeyType()));
     try {
-      Registry.registerKeyManager(new TestInternalKeyManager(), true);
+      Registry.registerKeyManager(new TestKeyTypeManager(), true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -927,13 +922,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterInternalKeyManager_BeforeKeyManager_throws()
-      throws Exception {
+  public void testRegisterKeyTypeManager_BeforeKeyManager_throws() throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestInternalKeyManager(), true);
+    Registry.registerKeyManager(new TestKeyTypeManager(), true);
     try {
-      Registry.registerKeyManager(
-          new CustomAeadKeyManager(new TestInternalKeyManager().getKeyType()));
+      Registry.registerKeyManager(new CustomAeadKeyManager(new TestKeyTypeManager().getKeyType()));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -944,9 +937,9 @@ public class RegistryTest {
 
   private static class PublicPrimitiveB {}
 
-  private static class TestInternalPublicKeyManager extends InternalKeyManager<Ed25519PublicKey> {
+  private static class TestPublicKeyTypeManager extends KeyTypeManager<Ed25519PublicKey> {
 
-    public TestInternalPublicKeyManager() {
+    public TestPublicKeyTypeManager() {
       super(
           Ed25519PublicKey.class,
           new PrimitiveFactory<PublicPrimitiveA, Ed25519PublicKey>(PublicPrimitiveA.class) {
@@ -995,9 +988,9 @@ public class RegistryTest {
 
   private static class PrivatePrimitiveB {}
 
-  private static class TestInternalPrivateKeyManager
-      extends InternalPrivateKeyManager<Ed25519PrivateKey, Ed25519PublicKey> {
-    public TestInternalPrivateKeyManager() {
+  private static class TestPrivateKeyTypeManager
+      extends PrivateKeyTypeManager<Ed25519PrivateKey, Ed25519PublicKey> {
+    public TestPrivateKeyTypeManager() {
       super(
           Ed25519PrivateKey.class,
           Ed25519PublicKey.class,
@@ -1053,7 +1046,7 @@ public class RegistryTest {
   public void testRegisterAssymmetricKeyManagers() throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
   }
 
   @Test
@@ -1061,11 +1054,11 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     KeyManager<PrivatePrimitiveA> km =
         Registry.getKeyManager(
-            new TestInternalPrivateKeyManager().getKeyType(), PrivatePrimitiveA.class);
-    assertThat(km.getKeyType()).isEqualTo(new TestInternalPrivateKeyManager().getKeyType());
+            new TestPrivateKeyTypeManager().getKeyType(), PrivatePrimitiveA.class);
+    assertThat(km.getKeyType()).isEqualTo(new TestPrivateKeyTypeManager().getKeyType());
   }
 
   @Test
@@ -1073,11 +1066,11 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     KeyManager<PrivatePrimitiveB> km =
         Registry.getKeyManager(
-            new TestInternalPrivateKeyManager().getKeyType(), PrivatePrimitiveB.class);
-    assertThat(km.getKeyType()).isEqualTo(new TestInternalPrivateKeyManager().getKeyType());
+            new TestPrivateKeyTypeManager().getKeyType(), PrivatePrimitiveB.class);
+    assertThat(km.getKeyType()).isEqualTo(new TestPrivateKeyTypeManager().getKeyType());
   }
 
   @Test
@@ -1085,11 +1078,10 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     KeyManager<PublicPrimitiveA> km =
-        Registry.getKeyManager(
-            new TestInternalPublicKeyManager().getKeyType(), PublicPrimitiveA.class);
-    assertThat(km.getKeyType()).isEqualTo(new TestInternalPublicKeyManager().getKeyType());
+        Registry.getKeyManager(new TestPublicKeyTypeManager().getKeyType(), PublicPrimitiveA.class);
+    assertThat(km.getKeyType()).isEqualTo(new TestPublicKeyTypeManager().getKeyType());
   }
 
   @Test
@@ -1097,11 +1089,10 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     KeyManager<PublicPrimitiveB> km =
-        Registry.getKeyManager(
-            new TestInternalPublicKeyManager().getKeyType(), PublicPrimitiveB.class);
-    assertThat(km.getKeyType()).isEqualTo(new TestInternalPublicKeyManager().getKeyType());
+        Registry.getKeyManager(new TestPublicKeyTypeManager().getKeyType(), PublicPrimitiveB.class);
+    assertThat(km.getKeyType()).isEqualTo(new TestPublicKeyTypeManager().getKeyType());
   }
 
   @Test
@@ -1109,9 +1100,9 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     try {
-      Registry.getKeyManager(new TestInternalPrivateKeyManager().getKeyType(), Mac.class);
+      Registry.getKeyManager(new TestPrivateKeyTypeManager().getKeyType(), Mac.class);
       fail();
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "com.google.crypto.tink.Mac");
@@ -1125,9 +1116,9 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     try {
-      Registry.getKeyManager(new TestInternalPublicKeyManager().getKeyType(), Mac.class);
+      Registry.getKeyManager(new TestPublicKeyTypeManager().getKeyType(), Mac.class);
       fail();
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "com.google.crypto.tink.Mac");
@@ -1143,9 +1134,8 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
-    KeyManager<?> km =
-        Registry.getUntypedKeyManager(new TestInternalPrivateKeyManager().getKeyType());
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
+    KeyManager<?> km = Registry.getUntypedKeyManager(new TestPrivateKeyTypeManager().getKeyType());
     assertThat(km.getPrimitiveClass()).isEqualTo(PrivatePrimitiveA.class);
   }
 
@@ -1156,9 +1146,8 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
-    KeyManager<?> km =
-        Registry.getUntypedKeyManager(new TestInternalPublicKeyManager().getKeyType());
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
+    KeyManager<?> km = Registry.getUntypedKeyManager(new TestPublicKeyTypeManager().getKeyType());
     assertThat(km.getPrimitiveClass()).isEqualTo(PublicPrimitiveA.class);
   }
 
@@ -1167,22 +1156,22 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), false);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
   }
 
   @Test
   public void testRegisterAssymmetricKeyManagers_SameNewKeyAllowed_shouldWork() throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), false);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), false);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
   }
 
   @Test
@@ -1190,10 +1179,10 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), false);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
     try {
       Registry.registerAsymmetricKeyManagers(
-          new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+          new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -1204,20 +1193,20 @@ public class RegistryTest {
   public void testRegisterAssymmetricKeyManagers_PublicKeyManagerCanBeRegisteredAlone()
       throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestInternalPublicKeyManager(), false);
+    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
-    Registry.registerKeyManager(new TestInternalPublicKeyManager(), false);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
+    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
   }
 
   @Test
   public void testRegisterAssymmetricKeyManagers_PublicKeyManagerReRegister_getPublicKeyData()
       throws Exception {
     Registry.reset();
-    Registry.registerKeyManager(new TestInternalPublicKeyManager(), false);
+    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
-    Registry.registerKeyManager(new TestInternalPublicKeyManager(), false);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
+    Registry.registerKeyManager(new TestPublicKeyTypeManager(), false);
 
     // Check that getPublicKeyData works now.
     Ed25519PrivateKey privateKey =
@@ -1229,9 +1218,8 @@ public class RegistryTest {
             .build();
     KeyData publicKeyData =
         Registry.getPublicKeyData(
-            new TestInternalPrivateKeyManager().getKeyType(), privateKey.toByteString());
-    assertThat(publicKeyData.getTypeUrl())
-        .isEqualTo(new TestInternalPublicKeyManager().getKeyType());
+            new TestPrivateKeyTypeManager().getKeyType(), privateKey.toByteString());
+    assertThat(publicKeyData.getTypeUrl()).isEqualTo(new TestPublicKeyTypeManager().getKeyType());
     Ed25519PublicKey publicKey = Ed25519PublicKey.parseFrom(publicKeyData.getValue());
     assertThat(publicKey.getKeyValue()).isEqualTo(privateKey.getPublicKey().getKeyValue());
   }
@@ -1241,11 +1229,11 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     try {
-      // Note: due to the {} this is a subclass of TestInternalPrivateKeyManager.
+      // Note: due to the {} this is a subclass of TestPrivateKeyTypeManager.
       Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager() {}, new TestInternalPublicKeyManager(), true);
+          new TestPrivateKeyTypeManager() {}, new TestPublicKeyTypeManager(), true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -1257,11 +1245,11 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     try {
-      // Note: due to the {} this is a subclass of TestInternalPublicKeyManager.
+      // Note: due to the {} this is a subclass of TestPublicKeyTypeManager.
       Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager() {}, true);
+          new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager() {}, true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -1273,11 +1261,10 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     try {
       // Note: due to the {} this is a subclass.
-      Registry.registerKeyManager(
-          new TestInternalPrivateKeyManager() {}, true);
+      Registry.registerKeyManager(new TestPrivateKeyTypeManager() {}, true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -1289,11 +1276,10 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     try {
       // Note: due to the {} this is a subclass.
-      Registry.registerKeyManager(
-          new TestInternalPublicKeyManager() {}, true);
+      Registry.registerKeyManager(new TestPublicKeyTypeManager() {}, true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -1305,15 +1291,17 @@ public class RegistryTest {
       throws Exception {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
-        new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager(), true);
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
     try {
       Registry.registerAsymmetricKeyManagers(
-          new TestInternalPrivateKeyManager(), new TestInternalPublicKeyManager() {
+          new TestPrivateKeyTypeManager(),
+          new TestPublicKeyTypeManager() {
             @Override
             public String getKeyType() {
               return "bla";
             }
-          }, true);
+          },
+          true);
       fail();
     } catch (GeneralSecurityException e) {
       // Expected.

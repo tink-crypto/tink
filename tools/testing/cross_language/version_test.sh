@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +12,6 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 VERSION_FILE="$ROOT_DIR/tink_version.bzl"
@@ -23,7 +23,7 @@ source $TEST_UTIL || exit 1
 
 #############################################################################
 ##### Run the actual tests.
-TINK_VERSION=$(cat $VERSION_FILE | grep "TINK_VERSION_LABEL" | cut -d \" -f 2)
+TINK_VERSION=$(grep "TINK_VERSION_LABEL" $VERSION_FILE | cut -d \" -f 2)
 echo "CONFIG: $TINK_VERSION"
 CC_TINK_VERSION=$($CC_VERSION_CLI)
 echo "CC: $CC_TINK_VERSION"

@@ -1,6 +1,6 @@
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-licenses(["notice"])  # Apache 2.0 # keep
+licenses(["notice"])  # keep
 
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
@@ -41,4 +41,5 @@ go_test(
         "//go/keyset:go_default_library",
         "//go/core/registry:go_default_library",
     ],
+    tags = ["no_rbe"],
 )

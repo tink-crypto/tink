@@ -18,11 +18,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import unittest
+from absl.testing import absltest
 from tink.python.cc.clif import cc_tink_config
 
 
-class CcTinkConfigTest(googletest.TestCase):
+class CcTinkConfigTest(absltest.TestCase):
 
   def test_latest(self):
     cc_tink_config.register()
@@ -40,4 +40,4 @@ class CcTinkConfigTest(googletest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()

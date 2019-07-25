@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,14 +12,22 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
 
 ROOT_DIR="$TEST_SRCDIR/tink"
 CC_AEAD_CLI="$ROOT_DIR/tools/testing/cc/aead_cli_cc"
+PY2_AEAD_CLI="" # placeholder, please ignore
+PY3_AEAD_CLI="" # placeholder, please ignore
 GO_AEAD_CLI="$ROOT_DIR/tools/testing/go/aead_cli_go"
 JAVA_AEAD_CLI="$ROOT_DIR/tools/testing/aead_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+RUN_EXTERNAL_TESTS=true
 
+# TODO(b/136245485): Update this script to use go/gbash.
+# Tests that require external resources cannot run on RBE. If the
+# --no_external_tests flag is specified disable these test cases.
+if [ "$1" == "--no_external_tests" ]; then
+  RUN_EXTERNAL_TESTS=false
+fi
 
 source $TEST_UTIL || exit 1
 
@@ -39,7 +48,7 @@ aead_basic_test() {
     echo "## TEST for key template $key_template"
     for encrypt_cli in ${encrypt_clis[*]}
     do
-      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      local encrypt_cli_name=$(basename $encrypt_cli)
       echo "## ENCRYPTING using $encrypt_cli_name"
       local test_instance="${test_name}_${key_template}"
       generate_symmetric_key "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
@@ -56,7 +65,7 @@ aead_basic_test() {
       assert_files_different $plaintext_file $encrypted_file
       for decrypt_cli in ${decrypt_clis[*]}
       do
-        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypt_cli_name=$(basename "$decrypt_cli")
         local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
         echo "## DECRYPTING using $decrypt_cli_name"
         $decrypt_cli $symmetric_key_file "decrypt" $encrypted_file\
@@ -86,7 +95,7 @@ aead_aws_test() {
     echo "## TEST for key template $key_template"
     for encrypt_cli in ${encrypt_clis[*]}
     do
-      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      local encrypt_cli_name=$(basename $encrypt_cli)
       echo "## ENCRYPTING using $encrypt_cli_name"
       local test_instance="${test_name}_${key_template}"
       generate_aws_keyset "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
@@ -103,7 +112,7 @@ aead_aws_test() {
       assert_files_different $plaintext_file $encrypted_file
       for decrypt_cli in ${decrypt_clis[*]}
       do
-        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypt_cli_name=$(basename "$decrypt_cli")
         local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
         echo "## DECRYPTING using $decrypt_cli_name"
         $decrypt_cli $aws_keyset_file "decrypt" $encrypted_file\
@@ -133,7 +142,7 @@ aead_gcp_test() {
     echo "## TEST for key template $key_template"
     for encrypt_cli in ${encrypt_clis[*]}
     do
-      local encrypt_cli_name=`get_file_name $encrypt_cli`
+      local encrypt_cli_name=$(basename $encrypt_cli)
       echo "## ENCRYPTING using $encrypt_cli_name"
       local test_instance="${test_name}_${key_template}"
       generate_gcp_keyset "${test_instance}_ENCRYPT_${encrypt_cli_name}" \
@@ -150,7 +159,7 @@ aead_gcp_test() {
 
       for decrypt_cli in ${decrypt_clis[*]}
       do
-        local decrypt_cli_name=`get_file_name "$decrypt_cli"`
+        local decrypt_cli_name=$(basename "$decrypt_cli")
         local decrypted_file="$TEST_TMPDIR/${test_instance}_ENCRYPT_${encrypt_cli_name}_DECRYPT_${decrypt_cli_name}_decrypted.bin"
         echo "## DECRYPTING using $decrypt_cli_name"
         $decrypt_cli $gcp_keyset_file "decrypt" $encrypted_file\
@@ -164,22 +173,23 @@ aead_gcp_test() {
 #############################################################################
 ##### Run the actual tests.
 KEY_TEMPLATES=(AES128_GCM AES256_GCM AES128_CTR_HMAC_SHA256 AES256_CTR_HMAC_SHA256)
-ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI)
-DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI)
+ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI $PY2_AEAD_CLI $PY3_AEAD_CLI)
+DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI $PY2_AEAD_CLI $PY3_AEAD_CLI)
 aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
 KEY_TEMPLATES=(AES128_EAX AES256_EAX)
-ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI)
-DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI)
+ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $PY2_AEAD_CLI $PY3_AEAD_CLI)
+DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $PY2_AEAD_CLI $PY3_AEAD_CLI)
 aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
-KEY_TEMPLATES=(AES128_GCM AES128_CTR_HMAC_SHA256)
+if [ "$RUN_EXTERNAL_TESTS" = true ]; then
+  KEY_TEMPLATES=(AES128_GCM AES128_CTR_HMAC_SHA256)
+  ENCRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
+  DECRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
+  aead_gcp_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
-ENCRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
-DECRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
-aead_gcp_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
+  # lint placeholder header, please ignore
+  aead_aws_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
-# lint placeholder header, please ignore
-aead_aws_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
-
-# lint placeholder footer, please ignore
+  # lint placeholder footer, please ignore
+fi

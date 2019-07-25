@@ -202,9 +202,15 @@ func (h *Handle) hasSecrets() bool {
 		if k == nil || k.KeyData == nil {
 			continue
 		}
-		if k.KeyData.KeyMaterialType == tinkpb.KeyData_ASYMMETRIC_PRIVATE || k.KeyData.KeyMaterialType == tinkpb.KeyData_SYMMETRIC {
+		if k.KeyData.KeyMaterialType == tinkpb.KeyData_UNKNOWN_KEYMATERIAL {
 			return true
 		}
+		if k.KeyData.KeyMaterialType == tinkpb.KeyData_ASYMMETRIC_PRIVATE {
+			return true
+		}
+    if k.KeyData.KeyMaterialType == tinkpb.KeyData_SYMMETRIC {
+    	return true
+    }
 	}
 	return false
 }

@@ -249,13 +249,16 @@ public final class KeysetHandle {
       if (key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL
           || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.SYMMETRIC
           || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
-        throw new GeneralSecurityException("keyset contains secret key material");
+        throw new GeneralSecurityException(
+            String.format(
+                "keyset contains key material of type %s for type url %s",
+                key.getKeyData().getKeyMaterialType(), key.getKeyData().getTypeUrl()));
       }
     }
   }
 
   /**
-   * Validates that an keyset handle contains enough key material to build a keyset on.
+   * Validates that a keyset handle contains enough key material to build a keyset on.
    *
    * @throws GeneralSecurityException
    */

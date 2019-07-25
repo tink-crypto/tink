@@ -23,10 +23,10 @@ import java.security.GeneralSecurityException;
 
 /**
  * Implementation of the {@link PrivateKeyManager} interface based on an {@link
- * InternalPrivateKeyManager} and the corresponding public key manager, implemented by an
- * {@link InternalKeyManager}.
- * *
- * Choosing {@code PrimitiveT} equal to {@link java.lang.Void} is valid; in this case the
+ * PrivateKeyTypeManager} and the corresponding public key manager, implemented by an {@link
+ * KeyTypeManager}.
+ *
+ * <p>Choosing {@code PrimitiveT} equal to {@link java.lang.Void} is valid; in this case the
  * functions {@link #getPrimitive} will throw if invoked.
  */
 @Alpha
@@ -34,12 +34,12 @@ class PrivateKeyManagerImpl<
         PrimitiveT, KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
     extends KeyManagerImpl<PrimitiveT, KeyProtoT> implements PrivateKeyManager<PrimitiveT> {
 
-  private final InternalPrivateKeyManager<KeyProtoT, PublicKeyProtoT> privateKeyManager;
-  private final InternalKeyManager<PublicKeyProtoT> publicKeyManager;
+  private final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyManager;
+  private final KeyTypeManager<PublicKeyProtoT> publicKeyManager;
 
   public PrivateKeyManagerImpl(
-      InternalPrivateKeyManager<KeyProtoT, PublicKeyProtoT> privateKeyManager,
-      InternalKeyManager<PublicKeyProtoT> publicKeyManager,
+      PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyManager,
+      KeyTypeManager<PublicKeyProtoT> publicKeyManager,
       Class<PrimitiveT> primitiveClass) {
     super(privateKeyManager, primitiveClass);
     this.privateKeyManager = privateKeyManager;

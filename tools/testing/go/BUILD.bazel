@@ -1,6 +1,6 @@
 package(default_visibility = ["//tools/testing:__subpackages__"])
 
-licenses(["notice"])  # Apache 2.0
+licenses(["notice"])
 
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
@@ -108,4 +108,5 @@ go_binary(
          "//go/keyset:go_default_library",
          "//proto:tink_go_proto",
     ],
+    tags = ["no_rbe"],
 )

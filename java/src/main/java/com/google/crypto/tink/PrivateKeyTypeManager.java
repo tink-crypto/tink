@@ -19,19 +19,19 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * A PrivateKeyManager is like an {@link InternalKeyManager}, but additionally has a method to
- * create a public key.
+ * A PrivateKeyManager is like an {@link KeyTypeManager}, but additionally has a method to create a
+ * public key.
  */
 @Alpha
-public abstract class InternalPrivateKeyManager<
+public abstract class PrivateKeyTypeManager<
         KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
-    extends InternalKeyManager<KeyProtoT> {
+    extends KeyTypeManager<KeyProtoT> {
 
   @SafeVarargs // Safe because super() is marked as safe.
-  protected InternalPrivateKeyManager(
+  protected PrivateKeyTypeManager(
       Class<KeyProtoT> clazz,
       Class<PublicKeyProtoT> publicKeyClazz,
-      InternalKeyManager.PrimitiveFactory<?, KeyProtoT>... factories) {
+      KeyTypeManager.PrimitiveFactory<?, KeyProtoT>... factories) {
     super(clazz, factories);
     this.publicKeyClazz = publicKeyClazz;
   }

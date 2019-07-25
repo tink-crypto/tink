@@ -43,6 +43,7 @@ ID_OUT="${KOKORO_ARTIFACTS_DIR}/bazel_invocation_ids"
 echo "${INVOCATION_ID}" >> "${ID_OUT}"
 
 # Setup all the RBE args needed by bazel.
+# The kokoro env variables are set in tink/kokoro/presubmit-remote.cfg.
 declare -a RBE_ARGS
 RBE_ARGS=(
   --invocation_id="${INVOCATION_ID}"
@@ -54,25 +55,41 @@ RBE_ARGS=(
   --project_id="${KOKORO_BES_PROJECT_ID}"
   --remote_cache="${KOKORO_FOUNDRY_BACKEND_ADDRESS}"
   --remote_executor="${KOKORO_FOUNDRY_BACKEND_ADDRESS}"
-  --remote_accept_cached=true
-  --remote_local_fallback=false
   --test_env=USER=anon
   --remote_instance_name="${KOKORO_FOUNDRY_PROJECT_ID}/instances/default_instance"
 )
 readonly RBE_ARGS
 
-# Run all C++ and Java tests.
-# TODO(candrian): Figure out why the KMS tests are failing.
-# TODO(candrian): Add the remaining tests (Go, Python etc.)
-bazel \
-  --bazelrc="${KOKORO_GFILE_DIR}/bazel-rbe.bazelrc" \
+# Build all targets, except objc and proto.
+time bazel \
+  --bazelrc="tools/remote_build_execution/bazel-rbe.bazelrc" \
+  build "${RBE_ARGS[@]}" \
+  --config=remote \
+  --build_tag_filters=-no_rbe \
+  --incompatible_disable_deprecated_attr_params=false \
+  --incompatible_depset_is_not_iterable=false \
+  -- \
+  //... \
+  -//objc/... \
+  -//proto/...
+
+
+# Run all the tests except objc.
+# TODO(b/136239863): Fix the broken java tests.
+time bazel \
+  --bazelrc="tools/remote_build_execution/bazel-rbe.bazelrc" \
   test "${RBE_ARGS[@]}" \
   --config=remote \
   --test_output=errors \
   --incompatible_disable_deprecated_attr_params=false \
-  --incompatible_depset_is_not_iterable=false  \
+  --incompatible_depset_is_not_iterable=false \
   -- \
-  //cc/... \
-  //java/... \
+  //... \
+  -//objc/... \
+  -//proto/... \
   -//java:src/test/java/com/google/crypto/tink/aead/KmsAeadKeyManagerTest \
-  -//java:src/test/java/com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManagerTest
+  -//java:src/test/java/com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManagerTest \
+  -//tools/tinkey:src/test/java/com/google/crypto/tink/tinkey/AddKeyCommandTest \
+  -//tools/tinkey:src/test/java/com/google/crypto/tink/tinkey/CreateKeysetCommandTest \
+  -//tools/tinkey:src/test/java/com/google/crypto/tink/tinkey/CreatePublicKeysetCommandTest \
+  -//tools/tinkey:src/test/java/com/google/crypto/tink/tinkey/RotateKeysetCommandTest
