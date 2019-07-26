@@ -21,6 +21,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "config_util",
+    srcs = ["config_util.cc"],
+    hdrs = ["config_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//proto:config_cc_proto",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -40,6 +51,16 @@ cc_test(
         "//cc:registry",
         "//cc:streaming_aead",
         "//cc/util:status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_util_test",
+    size = "small",
+    srcs = ["config_util_test.cc"],
+    deps = [
+        ":config_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

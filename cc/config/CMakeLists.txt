@@ -16,6 +16,15 @@ tink_cc_library(
     tink::proto::config_cc_proto
 )
 
+tink_cc_library(
+  NAME config_util
+  SRCS
+    config_util.cc
+    config_util.h
+  DEPS
+    tink::proto::config_cc_proto
+)
+
 # tests
 
 tink_cc_test(
@@ -33,4 +42,12 @@ tink_cc_test(
     tink::core::registry
     tink::core::streaming_aead
     tink::util::status
+)
+
+tink_cc_test(
+  NAME config_util_test
+  SRCS config_util_test.cc
+  DEPS
+    tink::config::config_util
+    gmock
 )
