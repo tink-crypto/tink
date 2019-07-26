@@ -218,7 +218,7 @@ directly in C++ code, one can use
     // use the keyset...
 ```
 
-where `key_template` can be obtain from util classes corresponding to Tink primitives, e.g.
+where `key_template` can be obtained from util classes corresponding to Tink primitives, e.g.
 [MacKeyTemplates](https://github.com/google/tink/blob/master/cc/mac/mac_key_templates.h),
 [AeadKeyTemplates](https://github.com/google/tink/blob/master/cc/aead/aead_key_templates.h),
 or
