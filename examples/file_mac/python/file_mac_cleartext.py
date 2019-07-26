@@ -13,6 +13,8 @@
 # limitations under the License.
 """A command-line utility for checking file integrity with a MAC.
 
+It loads cleartext keys from disk - this is not recommended!
+
 It requires 2 or 3 arguments:
   keyset-file: name of the file with the keyset to be used for the MAC
   data-file:  name of the file with the input data to be checked
