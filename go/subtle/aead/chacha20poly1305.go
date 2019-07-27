@@ -52,7 +52,7 @@ func (ca *ChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
 
 	n := ca.newNonce()
 	ct := c.Seal(nil, n, pt, aad)
-	var ret []byte
+	ret := make([]byte, 0, len(n) + len(ct))
 	ret = append(ret, n...)
 	ret = append(ret, ct...)
 	return ret, nil
