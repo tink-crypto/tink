@@ -320,16 +320,13 @@ tink_cc_library(
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::core::key_manager
-    tink::core::public_key_sign
-    tink::core::public_key_verify
     tink::core::registry
     tink::aead::aead_config
     tink::daead::deterministic_aead_config
     tink::hybrid::hybrid_decrypt_wrapper
     tink::hybrid::hybrid_encrypt_wrapper
     tink::mac::mac_config
-    tink::signature::public_key_sign_wrapper
-    tink::signature::public_key_verify_wrapper
+    tink::signature::signature_config
     tink::streamingaead::streaming_aead_config
     tink::util::errors
     tink::util::status

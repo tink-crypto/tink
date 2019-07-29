@@ -24,10 +24,7 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/mac/mac_config.h"
-#include "tink/public_key_sign.h"
-#include "tink/public_key_verify.h"
-#include "tink/signature/public_key_sign_wrapper.h"
-#include "tink/signature/public_key_verify_wrapper.h"
+#include "tink/signature/signature_config.h"
 #include "tink/streamingaead/streaming_aead_config.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -90,10 +87,9 @@ util::Status Config::Register(
       status = Register<HybridDecrypt>(entry);
     } else if (primitive_name == "hybridencrypt") {
       status = Register<HybridEncrypt>(entry);
-    } else if (primitive_name == "publickeysign") {
-      status = Register<PublicKeySign>(entry);
-    } else if (primitive_name == "publickeyverify") {
-      status = Register<PublicKeyVerify>(entry);
+    } else if (primitive_name == "publickeysign" ||
+               primitive_name == "publickeyverify") {
+      status = SignatureConfig::Register();
     } else if (primitive_name == "streamingaead") {
       // We don't support catalogues anymore -- we hence simply register
       // everything from the streamingaead config.
@@ -128,12 +124,9 @@ util::Status Config::RegisterWrapper(
   } else if (lowercase_primitive_name == "hybridencrypt") {
     return Registry::RegisterPrimitiveWrapper(
         absl::make_unique<HybridEncryptWrapper>());
-  } else if (lowercase_primitive_name == "publickeysign") {
-    return Registry::RegisterPrimitiveWrapper(
-        absl::make_unique<PublicKeySignWrapper>());
-  } else if (lowercase_primitive_name == "publickeyverify") {
-    return Registry::RegisterPrimitiveWrapper(
-        absl::make_unique<PublicKeyVerifyWrapper>());
+  } else if (lowercase_primitive_name == "publickeysign" ||
+             lowercase_primitive_name == "publickeyverify") {
+    return SignatureConfig::Register();
   } else if (lowercase_primitive_name == "streamingaead") {
     // We don't support catalogues anymore -- we hence simply register
     // everything from the streamingaead config.

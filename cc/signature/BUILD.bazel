@@ -318,44 +318,6 @@ cc_library(
 )
 
 cc_library(
-    name = "public_key_sign_catalogue",
-    srcs = ["public_key_sign_catalogue.cc"],
-    hdrs = ["public_key_sign_catalogue.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":ecdsa_sign_key_manager",
-        ":ed25519_sign_key_manager",
-        ":rsa_ssa_pkcs1_sign_key_manager",
-        ":rsa_ssa_pss_sign_key_manager",
-        "//cc:catalogue",
-        "//cc:key_manager",
-        "//cc:public_key_sign",
-        "//cc/util:status",
-        "//cc/util:statusor",
-    ],
-)
-
-cc_library(
-    name = "public_key_verify_catalogue",
-    srcs = ["public_key_verify_catalogue.cc"],
-    hdrs = ["public_key_verify_catalogue.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":ecdsa_verify_key_manager",
-        ":ed25519_verify_key_manager",
-        ":rsa_ssa_pkcs1_verify_key_manager",
-        ":rsa_ssa_pss_verify_key_manager",
-        "//cc:catalogue",
-        "//cc:key_manager",
-        "//cc:public_key_verify",
-        "//cc/util:status",
-        "//cc/util:statusor",
-    ],
-)
-
-cc_library(
     name = "signature_config",
     srcs = ["signature_config.cc"],
     hdrs = ["signature_config.h"],
@@ -363,9 +325,17 @@ cc_library(
     strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        ":public_key_sign_catalogue",
-        ":public_key_verify_catalogue",
-        "//cc:config",
+        ":ecdsa_sign_key_manager",
+        ":ed25519_sign_key_manager",
+        ":rsa_ssa_pkcs1_sign_key_manager",
+        ":rsa_ssa_pss_sign_key_manager",
+        ":ecdsa_verify_key_manager",
+        ":ed25519_verify_key_manager",
+        ":rsa_ssa_pkcs1_verify_key_manager",
+        ":rsa_ssa_pss_verify_key_manager",
+        ":public_key_sign_wrapper",
+        ":public_key_verify_wrapper",
+        "//cc/config:config_util",
         "//cc:registry",
         "//cc/util:status",
         "//proto:config_cc_proto",
@@ -641,34 +611,6 @@ cc_test(
         "//proto:rsa_ssa_pss_cc_proto",
         "//proto:tink_cc_proto",
         "@boringssl//:crypto",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "public_key_sign_catalogue_test",
-    size = "small",
-    srcs = ["public_key_sign_catalogue_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    deps = [
-        ":public_key_sign_catalogue",
-        "//cc:catalogue",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "public_key_verify_catalogue_test",
-    size = "small",
-    srcs = ["public_key_verify_catalogue_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    deps = [
-        ":public_key_verify_catalogue",
-        "//cc:catalogue",
-        "//cc/util:status",
-        "//cc/util:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )
