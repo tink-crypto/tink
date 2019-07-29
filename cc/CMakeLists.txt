@@ -316,7 +316,6 @@ tink_cc_library(
     core/config.cc
     config.h
   DEPS
-    tink::core::aead
     tink::core::catalogue
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
@@ -324,7 +323,7 @@ tink_cc_library(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::core::registry
-    tink::aead::aead_wrapper
+    tink::aead::aead_config
     tink::daead::deterministic_aead_config
     tink::hybrid::hybrid_decrypt_wrapper
     tink::hybrid::hybrid_encrypt_wrapper
@@ -625,7 +624,6 @@ tink_cc_test(
     tink::core::internal_key_manager
     tink::core::keyset_manager
     tink::core::registry
-    tink::aead::aead_catalogue
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
     tink::hybrid::ecies_aead_hkdf_private_key_manager

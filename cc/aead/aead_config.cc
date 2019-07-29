@@ -17,9 +17,15 @@
 #include "tink/aead/aead_config.h"
 
 #include "absl/memory/memory.h"
-#include "tink/aead/aead_catalogue.h"
+#include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
+#include "tink/aead/aes_eax_key_manager.h"
+#include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/aead/aes_gcm_siv_key_manager.h"
+#include "tink/aead/kms_aead_key_manager.h"
+#include "tink/aead/kms_envelope_aead_key_manager.h"
+#include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/aead/aead_wrapper.h"
-#include "tink/config.h"
+#include "tink/config/config_util.h"
 #include "tink/mac/mac_config.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
@@ -36,28 +42,27 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   google::crypto::tink::RegistryConfig* config =
       new google::crypto::tink::RegistryConfig();
   config->MergeFrom(MacConfig::Latest());
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesCtrHmacAeadKey", 0, true));
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesGcmKey", 0, true));
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesGcmSivKey", 0, true));
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesEaxKey", 0, true));
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "XChaCha20Poly1305Key", 0, true));
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "KmsAeadKey", 0, true));
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
-      "KmsEnvelopeAeadKey", 0,
-      true));
+      "KmsEnvelopeAeadKey", 0, true));
   config->set_config_name("TINK_AEAD");
   return config;
 }
@@ -77,10 +82,28 @@ const google::crypto::tink::RegistryConfig& AeadConfig::Latest() {
 util::Status AeadConfig::Register() {
   auto status = MacConfig::Register();
   if (!status.ok()) return status;
-  status = Registry::AddCatalogue(kCatalogueName,
-                                  absl::make_unique<AeadCatalogue>());
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<AesCtrHmacAeadKeyManager>(), true);
   if (!status.ok()) return status;
-  return Config::Register(Latest());
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<AesGcmKeyManager>(), true);
+  if (!status.ok()) return status;
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<AesGcmSivKeyManager>(), true);
+  if (!status.ok()) return status;
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<AesEaxKeyManager>(), true);
+  if (!status.ok()) return status;
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<XChaCha20Poly1305KeyManager>(), true);
+  if (!status.ok()) return status;
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<KmsAeadKeyManager>(), true);
+  if (!status.ok()) return status;
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<KmsEnvelopeAeadKeyManager>(), true);
+  if (!status.ok()) return status;
+  return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
 }
 
 }  // namespace tink

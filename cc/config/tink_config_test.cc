@@ -298,36 +298,6 @@ TEST_F(TinkConfigTest, testBasic) {
   }
 }  // namespace
 
-TEST_F(TinkConfigTest, testRegister) {
-  std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
-
-  // Try on empty registry.
-  auto status = Config::Register(TinkConfig::Latest());
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
-  auto manager_result = Registry::get_key_manager<Aead>(key_type);
-  EXPECT_FALSE(manager_result.ok());
-
-  // Register and try again.
-  status = TinkConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-  manager_result = Registry::get_key_manager<Aead>(key_type);
-  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-
-  // Try Register() again, should succeed (idempotence).
-  status = TinkConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-
-  // Reset the registry, and try overriding a catalogue with a different one.
-  Registry::Reset();
-  status = Registry::AddCatalogue(
-      "TinkHybridDecrypt", absl::make_unique<DummyHybridDecryptCatalogue>());
-  EXPECT_TRUE(status.ok()) << status;
-  status = TinkConfig::Register();
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
-}
-
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

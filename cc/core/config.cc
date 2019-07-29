@@ -17,8 +17,7 @@
 #include "tink/config.h"
 
 #include "absl/strings/ascii.h"
-#include "tink/aead.h"
-#include "tink/aead/aead_wrapper.h"
+#include "tink/aead/aead_config.h"
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
@@ -84,7 +83,7 @@ util::Status Config::Register(
     if (primitive_name == "mac") {
       status = MacConfig::Register();
     } else if (primitive_name == "aead") {
-      status = Register<Aead>(entry);
+      status = AeadConfig::Register();
     } else if (primitive_name == "deterministicaead") {
       status = DeterministicAeadConfig::Register();
     } else if (primitive_name == "hybriddecrypt") {
@@ -120,7 +119,7 @@ util::Status Config::RegisterWrapper(
   if (lowercase_primitive_name == "mac") {
     return MacConfig::Register();
   } else if (lowercase_primitive_name == "aead") {
-    return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
+    return AeadConfig::Register();
   } else if (lowercase_primitive_name == "deterministicaead") {
     return DeterministicAeadConfig::Register();
   } else if (lowercase_primitive_name == "hybriddecrypt") {

@@ -17,7 +17,6 @@
 #ifndef TINK_CONFIG_H_
 #define TINK_CONFIG_H_
 
-#include "tink/aead.h"
 #include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/hybrid_encrypt.h"

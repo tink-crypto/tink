@@ -24,7 +24,6 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/aead/aead_catalogue.h"
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/catalogue.h"
@@ -145,19 +144,6 @@ class TestAeadKeyManager : public KeyManager<Aead> {
  private:
   std::string key_type_;
   TestKeyFactory key_factory_;
-};
-
-class TestAeadCatalogue : public Catalogue<Aead> {
- public:
-  TestAeadCatalogue() {}
-
-  util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
-      GetKeyManager(const std::string& type_url,
-                    const std::string& primitive_name,
-                    uint32_t min_version) const override {
-    return util::Status(util::error::UNIMPLEMENTED,
-                        "This is a test catalogue.");
-  }
 };
 
 template <typename P>
@@ -349,41 +335,6 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   auto manager = manager_result.ValueOrDie();
   EXPECT_TRUE(manager->DoesSupport(key_type_1));
-}
-
-TEST_F(RegistryTest, testAddCatalogue) {
-  std::string catalogue_name = "SomeCatalogue";
-
-  std::unique_ptr<TestAeadCatalogue> null_catalogue = nullptr;
-  auto status =
-      Registry::AddCatalogue(catalogue_name, std::move(null_catalogue));
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
-
-  // Add a catalogue.
-  status = Registry::AddCatalogue(catalogue_name,
-                                  absl::make_unique<TestAeadCatalogue>());
-  EXPECT_TRUE(status.ok()) << status;
-
-  // Add the same catalogue again, it should work (idempotence).
-  status = Registry::AddCatalogue(catalogue_name,
-                                  absl::make_unique<TestAeadCatalogue>());
-  EXPECT_TRUE(status.ok()) << status;
-
-  // Try overriding a catalogue.
-  status = Registry::AddCatalogue(catalogue_name,
-                                  absl::make_unique<AeadCatalogue>());
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
-
-  // Check the catalogue is still present.
-  auto catalogue_result = Registry::get_catalogue<Aead>(catalogue_name);
-  EXPECT_TRUE(catalogue_result.ok()) << catalogue_result.status();
-  auto catalogue = catalogue_result.ValueOrDie();
-  auto manager_result = catalogue->GetKeyManager("some type_url", "Aead", 0);
-  EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(util::error::UNIMPLEMENTED, manager_result.status().error_code())
-      << manager_result.status();  // TestAeadCatalogue return UNIMPLEMENTED.
 }
 
 TEST_F(RegistryTest, testGettingPrimitives) {
@@ -696,20 +647,6 @@ TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
   EXPECT_FALSE(result.ok());
   EXPECT_THAT(result.status().error_message(),
               HasSubstr(AesGcmKeyManager().get_key_type()));
-  // Note: The C++ standard does not guarantee the next line.  If some toolchain
-  // update fails it, one can delete it.
-  EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
-}
-
-TEST_F(RegistryTest, GetCatalogueErrorMessage) {
-  std::string catalogue_name = "SomeCatalogue";
-
-  ASSERT_TRUE(Registry::AddCatalogue(catalogue_name,
-                                     absl::make_unique<TestAeadCatalogue>())
-                  .ok());
-  auto result = Registry::get_catalogue<int>(catalogue_name);
-  EXPECT_FALSE(result.ok());
-  EXPECT_THAT(result.status().error_message(), HasSubstr(catalogue_name));
   // Note: The C++ standard does not guarantee the next line.  If some toolchain
   // update fails it, one can delete it.
   EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
