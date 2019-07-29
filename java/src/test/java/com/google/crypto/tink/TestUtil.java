@@ -537,6 +537,17 @@ public class TestUtil {
   }
 
   /**
+   * Check that this is running in Remote Build Execution.
+   *
+   * @return true if running on Remote Build Execution.
+   */
+  public static boolean isRemoteBuildExecution() {
+    // This check depends on the system property rbe being set to 1.
+    // The property is set in kokoro/presubmit-remote.sh via bazel: --jvmopt=-Drbe=1.
+    return "1".equals(System.getProperty("rbe"));
+  }
+
+  /**
    * Best-effort checks that this is running under tsan. Returns false in doubt and externally to
    * google.
    */

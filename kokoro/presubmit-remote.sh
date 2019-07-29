@@ -75,21 +75,16 @@ time bazel \
 
 
 # Run all the tests except objc.
-# TODO(b/136239863): Fix the broken java tests.
 time bazel \
   --bazelrc="tools/remote_build_execution/bazel-rbe.bazelrc" \
   test "${RBE_ARGS[@]}" \
   --config=remote \
   --test_output=errors \
+  --test_tag_filters=-no_rbe \
+  --jvmopt=-Drbe=1 \
   --incompatible_disable_deprecated_attr_params=false \
   --incompatible_depset_is_not_iterable=false \
   -- \
   //... \
   -//objc/... \
-  -//proto/... \
-  -//java:src/test/java/com/google/crypto/tink/aead/KmsAeadKeyManagerTest \
-  -//java:src/test/java/com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManagerTest \
-  -//tools/tinkey:src/test/java/com/google/crypto/tink/tinkey/AddKeyCommandTest \
-  -//tools/tinkey:src/test/java/com/google/crypto/tink/tinkey/CreateKeysetCommandTest \
-  -//tools/tinkey:src/test/java/com/google/crypto/tink/tinkey/CreatePublicKeysetCommandTest \
-  -//tools/tinkey:src/test/java/com/google/crypto/tink/tinkey/RotateKeysetCommandTest
+  -//proto/...

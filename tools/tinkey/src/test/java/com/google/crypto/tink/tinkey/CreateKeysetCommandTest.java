@@ -17,6 +17,7 @@
 package com.google.crypto.tink.tinkey;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assume.assumeFalse;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.TestUtil;
@@ -75,6 +76,8 @@ public class CreateKeysetCommandTest {
 
   private void testCreateEncrypted_shouldCreateNewKeyset(
       String outFormat) throws Exception {
+    // This test requires KMS/internet access and thus cannot run on RBE.
+    assumeFalse(TestUtil.isRemoteBuildExecution());
     // Create an encrypted keyset.
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
