@@ -386,11 +386,11 @@ tink_cc_library(
     core/registry_impl.h
   DEPS
     tink::core::catalogue
-    tink::core::internal_key_manager
-    tink::core::internal_private_key_manager
     tink::core::key_manager
+    tink::core::key_type_manager
     tink::core::key_manager_impl
     tink::core::private_key_manager_impl
+    tink::core::private_key_type_manager
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::util::errors
@@ -528,13 +528,12 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME internal_key_manager
+  NAME key_type_manager
   SRCS
-    core/internal_key_manager.h
+    core/key_type_manager.h
   DEPS
     absl::hash
     absl::container
-    tink::core::internal_key_manager
     tink::proto::tink_cc_proto
     tink::util::status
     tink::util::statusor
@@ -546,18 +545,18 @@ tink_cc_library(
     core/key_manager_impl.h
   DEPS
     tink::core::key_manager
-    tink::core::internal_key_manager
+    tink::core::key_type_manager
     tink::proto::tink_cc_proto
     tink::util::constants
     tink::util::statusor
 )
 
 tink_cc_library(
-  NAME internal_private_key_manager
+  NAME private_key_type_manager
   SRCS
-    core/internal_private_key_manager.h
+    core/private_key_type_manager.h
   DEPS
-    tink::core::internal_key_manager
+    tink::core::key_type_manager
     tink::util::statusor
 )
 
@@ -566,7 +565,7 @@ tink_cc_library(
   SRCS
     core/private_key_manager_impl.h
   DEPS
-    tink::core::internal_private_key_manager
+    tink::core::private_key_type_manager
     tink::core::key_manager_impl
     tink::core::key_manager
     tink::util::validation
@@ -621,7 +620,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::catalogue
     tink::core::crypto_format
-    tink::core::internal_key_manager
+    tink::core::key_type_manager
     tink::core::keyset_manager
     tink::core::registry
     tink::aead::aead_wrapper
@@ -812,11 +811,11 @@ tink_cc_test(
 )
 
 tink_cc_test(
-  NAME internal_key_manager_test
-  SRCS core/internal_key_manager_test.cc
+  NAME key_type_manager_test
+  SRCS core/key_type_manager_test.cc
   DEPS
     tink::core::aead
-    tink::core::internal_key_manager
+    tink::core::key_type_manager
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_boringssl
@@ -847,6 +846,7 @@ tink_cc_test(
   SRCS core/private_key_manager_impl_test.cc
   DEPS
     tink::core::key_manager_impl
+    tink::core::private_key_type_manager
     tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_boringssl

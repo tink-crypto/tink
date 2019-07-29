@@ -17,8 +17,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/core/internal_private_key_manager.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/core/private_key_type_manager.h"
 #include "tink/registry.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
@@ -50,9 +50,9 @@ using ::testing::Return;
 class PrivatePrimitive {};
 class PublicPrimitive {};
 
-class ExampleInternalPrivateKeyManager
-    : public InternalPrivateKeyManager<EcdsaPrivateKey, EcdsaKeyFormat,
-                                       EcdsaPublicKey, List<PrivatePrimitive>> {
+class ExamplePrivateKeyTypeManager
+    : public PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat,
+                                   EcdsaPublicKey, List<PrivatePrimitive>> {
  public:
   class PrivatePrimitiveFactory : public PrimitiveFactory<PrivatePrimitive> {
    public:
@@ -62,9 +62,8 @@ class ExampleInternalPrivateKeyManager
     }
   };
 
-  ExampleInternalPrivateKeyManager()
-      : InternalPrivateKeyManager(
-            absl::make_unique<PrivatePrimitiveFactory>()) {}
+  ExamplePrivateKeyTypeManager()
+      : PrivateKeyTypeManager(absl::make_unique<PrivatePrimitiveFactory>()) {}
 
   google::crypto::tink::KeyData::KeyMaterialType key_material_type()
       const override {
@@ -101,8 +100,8 @@ class ExampleInternalPrivateKeyManager
       "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
 };
 
-class ExampleInternalPublicKeyManager
-    : public InternalKeyManager<EcdsaPublicKey, void, List<PublicPrimitive>> {
+class TestPublicKeyTypeManager
+    : public KeyTypeManager<EcdsaPublicKey, void, List<PublicPrimitive>> {
  public:
   class PublicPrimitiveFactory : public PrimitiveFactory<PublicPrimitive> {
    public:
@@ -112,8 +111,8 @@ class ExampleInternalPublicKeyManager
     }
   };
 
-  ExampleInternalPublicKeyManager()
-      : InternalKeyManager(absl::make_unique<PublicPrimitiveFactory>()) {}
+  TestPublicKeyTypeManager()
+      : KeyTypeManager(absl::make_unique<PublicPrimitiveFactory>()) {}
 
   google::crypto::tink::KeyData::KeyMaterialType key_material_type()
       const override {
@@ -135,8 +134,8 @@ class ExampleInternalPublicKeyManager
 };
 
 TEST(PrivateKeyManagerImplTest, FactoryNewKeyFromMessage) {
-  ExampleInternalPrivateKeyManager private_km;
-  ExampleInternalPublicKeyManager public_km;
+  ExamplePrivateKeyTypeManager private_km;
+  TestPublicKeyTypeManager public_km;
   std::unique_ptr<KeyManager<PrivatePrimitive>> key_manager =
       MakePrivateKeyManager<PrivatePrimitive>(&private_km, &public_km);
 
@@ -149,8 +148,8 @@ TEST(PrivateKeyManagerImplTest, FactoryNewKeyFromMessage) {
 }
 
 TEST(PrivateKeyManagerImplTest, GetPublicKeyData) {
-  ExampleInternalPrivateKeyManager private_km;
-  ExampleInternalPublicKeyManager public_km;
+  ExamplePrivateKeyTypeManager private_km;
+  TestPublicKeyTypeManager public_km;
   std::unique_ptr<KeyManager<PrivatePrimitive>> key_manager =
       MakePrivateKeyManager<PrivatePrimitive>(&private_km, &public_km);
 
@@ -169,8 +168,8 @@ TEST(PrivateKeyManagerImplTest, GetPublicKeyData) {
 }
 
 TEST(PrivateKeyManagerImplTest, GetPublicKeyDataValidatePrivateKey) {
-  ExampleInternalPrivateKeyManager private_km;
-  ExampleInternalPublicKeyManager public_km;
+  ExamplePrivateKeyTypeManager private_km;
+  TestPublicKeyTypeManager public_km;
   EXPECT_CALL(private_km, ValidateKey)
       .WillOnce(Return(ToStatusF(util::error::OUT_OF_RANGE,
                                  "GetPublicKeyDataValidatePrivateKey")));
@@ -187,10 +186,10 @@ TEST(PrivateKeyManagerImplTest, GetPublicKeyDataValidatePrivateKey) {
 }
 
 TEST(PrivateKeyManagerImplTest, PublicKeyManagerCanHaveShortLifetime) {
-  ExampleInternalPrivateKeyManager private_km;
+  ExamplePrivateKeyTypeManager private_km;
   std::unique_ptr<KeyManager<PrivatePrimitive>> key_manager;
   {
-    ExampleInternalPublicKeyManager public_km;
+    TestPublicKeyTypeManager public_km;
     key_manager =
         MakePrivateKeyManager<PrivatePrimitive>(&private_km, &public_km);
     // Let the public_km go out of scope; the key_manager should still work.

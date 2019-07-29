@@ -26,10 +26,10 @@
 #include "absl/strings/str_join.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/catalogue.h"
-#include "tink/core/internal_key_manager.h"
-#include "tink/core/internal_private_key_manager.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_manager_impl.h"
+#include "tink/core/private_key_type_manager.h"
 #include "tink/key_manager.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
@@ -74,8 +74,8 @@ class RegistryImpl {
 
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class KeyProto, class KeyFormatProto, class... P>
-  crypto::tink::util::Status RegisterInternalKeyManager(
-      InternalKeyManager<KeyProto, KeyFormatProto, List<P...>>* manager,
+  crypto::tink::util::Status RegisterKeyTypeManager(
+      KeyTypeManager<KeyProto, KeyFormatProto, List<P...>>* manager,
       bool new_key_allowed) LOCKS_EXCLUDED(maps_mutex_);
 
   // Takes ownership of 'private_key_manager' and 'public_key_manager'. Both
@@ -83,9 +83,9 @@ class RegistryImpl {
   template <class PrivateKeyProto, class KeyFormatProto, class PublicKeyProto,
             class PrivatePrimitivesList, class PublicPrimitivesList>
   crypto::tink::util::Status RegisterAsymmetricKeyManagers(
-      InternalPrivateKeyManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                                PrivatePrimitivesList>* private_key_manager,
-      InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>*
+      PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
+                            PrivatePrimitivesList>* private_key_manager,
+      KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
           public_key_manager,
       bool new_key_allowed) LOCKS_EXCLUDED(maps_mutex_);
 
@@ -138,10 +138,10 @@ class RegistryImpl {
       // A pointer to a KeyManager<P>. We use a shared_ptr because
       // shared_ptr<void> is valid (as opposed to unique_ptr<void>).
       //
-      // If an InternalKeyManager was inserted, the KeyManager<P> was
+      // If a KeyTypeManager was inserted, the KeyManager<P> was
       // constructed at the time it was inserted. The constructed object is
-      // owned by this pointer here; the original InternalKeyManager is owned
-      // by the internal_key_manager element of KeyTypeInfo.
+      // owned by this pointer here; the original KeyTypeManager is owned
+      // by the key_type_manager element of KeyTypeInfo.
       std::shared_ptr<void> key_manager;
       // std::type_index of the primitive for which this key was inserted.
       std::type_index type_index;
@@ -157,13 +157,13 @@ class RegistryImpl {
           new_key_allowed_(new_key_allowed),
           internal_key_factory_(nullptr),
           key_factory_(&key_manager->get_key_factory()),
-          internal_key_manager_(nullptr) {}
+          key_type_manager_(nullptr) {}
 
     // Takes ownership of the 'key_manager'.
     template <typename KeyProto, typename KeyFormatProto,
               typename... Primitives>
-    KeyTypeInfo(InternalKeyManager<KeyProto, KeyFormatProto,
-                                   List<Primitives...>>* key_manager,
+    KeyTypeInfo(KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>*
+                    key_manager,
                 bool new_key_allowed)
         : key_manager_type_index_(std::type_index(typeid(*key_manager))),
           public_key_manager_type_index_(absl::nullopt),
@@ -171,11 +171,11 @@ class RegistryImpl {
               internal::MakeKeyManager<Primitives>(key_manager))...}),
           new_key_allowed_(new_key_allowed),
           internal_key_factory_(
-              absl::make_unique<internal::KeyFactoryImpl<InternalKeyManager<
+              absl::make_unique<internal::KeyFactoryImpl<KeyTypeManager<
                   KeyProto, KeyFormatProto, List<Primitives...>>>>(
                   key_manager)),
           key_factory_(internal_key_factory_.get()),
-          internal_key_manager_(absl::WrapUnique(key_manager)) {}
+          key_type_manager_(absl::WrapUnique(key_manager)) {}
 
     // Takes ownership of the 'private_key_manager', but *not* of the
     // 'public_key_manager'. The public_key_manager must only be alive for the
@@ -183,12 +183,12 @@ class RegistryImpl {
     template <typename PrivateKeyProto, typename KeyFormatProto,
               typename PublicKeyProto, typename PublicPrimitivesList,
               typename... PrivatePrimitives>
-    KeyTypeInfo(InternalPrivateKeyManager<
-                    PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                    List<PrivatePrimitives...>>* private_key_manager,
-                InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>*
-                    public_key_manager,
-                bool new_key_allowed)
+    KeyTypeInfo(
+        PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
+                              List<PrivatePrimitives...>>* private_key_manager,
+        KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
+            public_key_manager,
+        bool new_key_allowed)
         : key_manager_type_index_(
               std::type_index(typeid(*private_key_manager))),
           public_key_manager_type_index_(
@@ -203,7 +203,7 @@ class RegistryImpl {
                   List<PrivatePrimitives...>, PublicPrimitivesList>>(
                   private_key_manager, public_key_manager)),
           key_factory_(internal_key_factory_.get()),
-          internal_key_manager_(absl::WrapUnique(private_key_manager)) {}
+          key_type_manager_(absl::WrapUnique(private_key_manager)) {}
 
     template <typename P>
     crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
@@ -260,15 +260,15 @@ class RegistryImpl {
     // Whether the key manager allows creating new keys.
     bool new_key_allowed_;
     // A factory constructed from an internal key manager. Owned version of
-    // key_factory if constructed with an InternalKeyManager. This is nullptr if
+    // key_factory if constructed with a KeyTypeManager. This is nullptr if
     // constructed with a KeyManager.
     std::unique_ptr<const KeyFactory> internal_key_factory_;
     // Unowned copy of internal_key_factory, always different from
     // nullptr.
     const KeyFactory* key_factory_;
-    // The owned pointer in case we use an InternalKeyManager, nullptr if
+    // The owned pointer in case we use a KeyTypeManager, nullptr if
     // constructed with a KeyManager.
-    std::shared_ptr<void> internal_key_manager_;
+    std::shared_ptr<void> key_type_manager_;
   };
 
   // All information for a given primitive label.
@@ -395,10 +395,10 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
 }
 
 template <class KeyProto, class KeyFormatProto, class... P>
-crypto::tink::util::Status RegistryImpl::RegisterInternalKeyManager(
-    InternalKeyManager<KeyProto, KeyFormatProto, List<P...>>* manager,
+crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
+    KeyTypeManager<KeyProto, KeyFormatProto, List<P...>>* manager,
     bool new_key_allowed) {
-  std::unique_ptr<InternalKeyManager<KeyProto, KeyFormatProto, List<P...>>>
+  std::unique_ptr<KeyTypeManager<KeyProto, KeyFormatProto, List<P...>>>
       owned_manager = absl::WrapUnique(manager);
 
   if (manager == nullptr) {
@@ -426,9 +426,9 @@ crypto::tink::util::Status RegistryImpl::RegisterInternalKeyManager(
 template <class PrivateKeyProto, class KeyFormatProto, class PublicKeyProto,
           class PrivatePrimitivesList, class PublicPrimitivesList>
 crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
-    InternalPrivateKeyManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                              PrivatePrimitivesList>* private_key_manager,
-    InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>*
+    PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
+                          PrivatePrimitivesList>* private_key_manager,
+    KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
         public_key_manager,
     bool new_key_allowed) LOCKS_EXCLUDED(maps_mutex_) {
   auto owned_private_key_manager = absl::WrapUnique(private_key_manager);

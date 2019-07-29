@@ -27,7 +27,7 @@
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/catalogue.h"
-#include "tink/core/internal_key_manager.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
@@ -665,9 +665,8 @@ class AeadVariant {
   std::string s_;
 };
 
-class ExampleInternalKeyManager
-    : public InternalKeyManager<AesGcmKey, AesGcmKeyFormat,
-                                List<Aead, AeadVariant>> {
+class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                    List<Aead, AeadVariant>> {
  public:
   class AeadFactory : public PrimitiveFactory<Aead> {
    public:
@@ -686,9 +685,9 @@ class ExampleInternalKeyManager
     }
   };
 
-  ExampleInternalKeyManager()
-      : InternalKeyManager(absl::make_unique<AeadFactory>(),
-                           absl::make_unique<AeadVariantFactory>()) {}
+  ExampleKeyTypeManager()
+      : KeyTypeManager(absl::make_unique<AeadFactory>(),
+                       absl::make_unique<AeadVariantFactory>()) {}
 
   google::crypto::tink::KeyData::KeyMaterialType key_material_type()
       const override {
@@ -720,19 +719,19 @@ class ExampleInternalKeyManager
   const std::string kKeyType = "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
-TEST_F(RegistryTest, RegisterInternalKeyManager) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+TEST_F(RegistryTest, RegisterKeyTypeManager) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
 }
 
-TEST_F(RegistryTest, InternalKeyManagerGetFirstKeyManager) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+TEST_F(RegistryTest, KeyTypeManagerGetFirstKeyManager) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
   AesGcmKeyFormat format;
   format.set_key_size(16);
-  AesGcmKey key = ExampleInternalKeyManager().CreateKey(format).ValueOrDie();
+  AesGcmKey key = ExampleKeyTypeManager().CreateKey(format).ValueOrDie();
   auto aead = Registry::get_key_manager<Aead>(
                   "type.googleapis.com/google.crypto.tink.AesGcmKey")
                   .ValueOrDie()
@@ -743,13 +742,13 @@ TEST_F(RegistryTest, InternalKeyManagerGetFirstKeyManager) {
   EXPECT_THAT(decryption, Eq("TESTMESSAGE"));
 }
 
-TEST_F(RegistryTest, InternalKeyManagerGetSecondKeyManager) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+TEST_F(RegistryTest, KeyTypeManagerGetSecondKeyManager) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
   AesGcmKeyFormat format;
   format.set_key_size(16);
-  AesGcmKey key = ExampleInternalKeyManager().CreateKey(format).ValueOrDie();
+  AesGcmKey key = ExampleKeyTypeManager().CreateKey(format).ValueOrDie();
   auto aead_variant = Registry::get_key_manager<AeadVariant>(
                           "type.googleapis.com/google.crypto.tink.AesGcmKey")
                           .ValueOrDie()
@@ -758,9 +757,9 @@ TEST_F(RegistryTest, InternalKeyManagerGetSecondKeyManager) {
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
 }
 
-TEST_F(RegistryTest, InternalKeyManagerNotSupportedPrimitive) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+TEST_F(RegistryTest, KeyTypeManagerNotSupportedPrimitive) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
   EXPECT_THAT(Registry::get_key_manager<Mac>(
                   "type.googleapis.com/google.crypto.tink.AesGcmKey")
@@ -769,9 +768,9 @@ TEST_F(RegistryTest, InternalKeyManagerNotSupportedPrimitive) {
                        HasSubstr("not among supported primitives")));
 }
 
-TEST_F(RegistryTest, InternalKeyManagerNewKey) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+TEST_F(RegistryTest, KeyTypeManagerNewKey) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
 
   AesGcmKeyFormat format;
@@ -790,9 +789,9 @@ TEST_F(RegistryTest, InternalKeyManagerNewKey) {
   EXPECT_THAT(key.key_value(), SizeIs(32));
 }
 
-TEST_F(RegistryTest, InternalKeyManagerNewKeyInvalidSize) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+TEST_F(RegistryTest, KeyTypeManagerNewKeyInvalidSize) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
 
   AesGcmKeyFormat format;
@@ -804,42 +803,42 @@ TEST_F(RegistryTest, InternalKeyManagerNewKeyInvalidSize) {
   EXPECT_THAT(Registry::NewKeyData(key_template).status(), IsOk());
 }
 
-TEST_F(RegistryTest, RegisterInternalKeyManagerTwiceMoreRestrictive) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+TEST_F(RegistryTest, RegisterKeyTypeManagerTwiceMoreRestrictive) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), false),
-              IsOk());
-}
-
-TEST_F(RegistryTest, RegisterInternalKeyManagerTwice) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
-              IsOk());
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
-              IsOk());
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), false),
-              IsOk());
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), false),
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), false),
               IsOk());
 }
 
-TEST_F(RegistryTest, RegisterInternalKeyManagerLessRestrictive) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), false),
+TEST_F(RegistryTest, RegisterKeyTypeManagerTwice) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), false),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), false),
+              IsOk());
+}
+
+TEST_F(RegistryTest, RegisterKeyTypeManagerLessRestrictive) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), false),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               StatusIs(util::error::ALREADY_EXISTS));
 }
 
-TEST_F(RegistryTest, RegisterInternalKeyManagerBeforeKeyManager) {
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+TEST_F(RegistryTest, RegisterKeyTypeManagerBeforeKeyManager) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
   EXPECT_THAT(Registry::RegisterKeyManager(
                   absl::make_unique<TestAeadKeyManager>(
@@ -848,24 +847,24 @@ TEST_F(RegistryTest, RegisterInternalKeyManagerBeforeKeyManager) {
               StatusIs(util::error::ALREADY_EXISTS));
 }
 
-TEST_F(RegistryTest, RegisterInternalKeyManagerAfterKeyManager) {
+TEST_F(RegistryTest, RegisterKeyTypeManagerAfterKeyManager) {
   EXPECT_THAT(Registry::RegisterKeyManager(
                   absl::make_unique<TestAeadKeyManager>(
                       "type.googleapis.com/google.crypto.tink.AesGcmKey"),
                   true),
               IsOk());
-  EXPECT_THAT(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<ExampleInternalKeyManager>(), true),
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
               StatusIs(util::error::ALREADY_EXISTS));
 }
 
 class PrivatePrimitiveA {};
 class PrivatePrimitiveB {};
 
-class TestInternalPrivateKeyManager
-    : public InternalPrivateKeyManager<
-          EcdsaPrivateKey, EcdsaKeyFormat, EcdsaPublicKey,
-          List<PrivatePrimitiveA, PrivatePrimitiveB>> {
+class TestPrivateKeyTypeManager
+    : public PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat,
+                                   EcdsaPublicKey,
+                                   List<PrivatePrimitiveA, PrivatePrimitiveB>> {
  public:
   class PrivatePrimitiveAFactory : public PrimitiveFactory<PrivatePrimitiveA> {
    public:
@@ -882,10 +881,9 @@ class TestInternalPrivateKeyManager
     }
   };
 
-  TestInternalPrivateKeyManager()
-      : InternalPrivateKeyManager(
-            absl::make_unique<PrivatePrimitiveAFactory>(),
-            absl::make_unique<PrivatePrimitiveBFactory>()) {}
+  TestPrivateKeyTypeManager()
+      : PrivateKeyTypeManager(absl::make_unique<PrivatePrimitiveAFactory>(),
+                              absl::make_unique<PrivatePrimitiveBFactory>()) {}
 
   google::crypto::tink::KeyData::KeyMaterialType key_material_type()
       const override {
@@ -926,9 +924,9 @@ class TestInternalPrivateKeyManager
 class PublicPrimitiveA {};
 class PublicPrimitiveB {};
 
-class TestInternalPublicKeyManager
-    : public InternalKeyManager<EcdsaPublicKey, void,
-                                List<PublicPrimitiveA, PublicPrimitiveB>> {
+class TestPublicKeyTypeManager
+    : public KeyTypeManager<EcdsaPublicKey, void,
+                            List<PublicPrimitiveA, PublicPrimitiveB>> {
  public:
   class PublicPrimitiveAFactory : public PrimitiveFactory<PublicPrimitiveA> {
    public:
@@ -945,9 +943,9 @@ class TestInternalPublicKeyManager
     }
   };
 
-  TestInternalPublicKeyManager()
-      : InternalKeyManager(absl::make_unique<PublicPrimitiveAFactory>(),
-                           absl::make_unique<PublicPrimitiveBFactory>()) {}
+  TestPublicKeyTypeManager()
+      : KeyTypeManager(absl::make_unique<PublicPrimitiveAFactory>(),
+                       absl::make_unique<PublicPrimitiveBFactory>()) {}
 
   google::crypto::tink::KeyData::KeyMaterialType key_material_type()
       const override {
@@ -969,133 +967,133 @@ class TestInternalPublicKeyManager
 
 TEST_F(RegistryTest, RegisterAsymmetricKeyManagers) {
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestInternalPrivateKeyManager>(),
-      absl::make_unique<TestInternalPublicKeyManager>(), true);
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), true);
   ASSERT_TRUE(status.ok()) << status;
 }
 
 TEST_F(RegistryTest, AsymmetricMoreRestrictiveNewKey) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestInternalPrivateKeyManager>(),
-      absl::make_unique<TestInternalPublicKeyManager>(), false);
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), false);
   ASSERT_TRUE(status.ok()) << status;
 }
 
 TEST_F(RegistryTest, AsymmetricSameNewKey) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestInternalPrivateKeyManager>(),
-      absl::make_unique<TestInternalPublicKeyManager>(), true);
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), true);
   ASSERT_TRUE(status.ok()) << status;
 
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), false)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), false)
                   .ok());
   status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestInternalPrivateKeyManager>(),
-      absl::make_unique<TestInternalPublicKeyManager>(), false);
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), false);
   ASSERT_TRUE(status.ok()) << status;
 }
 
 TEST_F(RegistryTest, AsymmetricLessRestrictiveGivesError) {
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestInternalPrivateKeyManager>(),
-      absl::make_unique<TestInternalPublicKeyManager>(), false);
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), false);
   ASSERT_TRUE(status.ok()) << status;
   EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true),
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true),
               StatusIs(util::error::ALREADY_EXISTS,
                        HasSubstr("forbidden new key operation")));
 }
 
 TEST_F(RegistryTest, AsymmetricPrivateRegisterAlone) {
-  ASSERT_TRUE(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<TestInternalPrivateKeyManager>(), true)
+  ASSERT_TRUE(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<TestPrivateKeyTypeManager>(), true)
                   .ok());
-  ASSERT_TRUE(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+  ASSERT_TRUE(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
-  ASSERT_TRUE(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<TestInternalPrivateKeyManager>(), true)
+  ASSERT_TRUE(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<TestPrivateKeyTypeManager>(), true)
                   .ok());
-  ASSERT_TRUE(Registry::RegisterInternalKeyManager(
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+  ASSERT_TRUE(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
 }
 
 TEST_F(RegistryTest, AsymmetricGetPrimitiveA) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PrivatePrimitiveA>*> km =
       Registry::get_key_manager<PrivatePrimitiveA>(
-          TestInternalPrivateKeyManager().get_key_type());
+          TestPrivateKeyTypeManager().get_key_type());
   ASSERT_TRUE(km.ok()) << km.status();
   EXPECT_THAT(km.ValueOrDie()->get_key_type(),
-              Eq(TestInternalPrivateKeyManager().get_key_type()));
+              Eq(TestPrivateKeyTypeManager().get_key_type()));
 }
 
 TEST_F(RegistryTest, AsymmetricGetPrimitiveB) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PrivatePrimitiveB>*> km =
       Registry::get_key_manager<PrivatePrimitiveB>(
-          TestInternalPrivateKeyManager().get_key_type());
+          TestPrivateKeyTypeManager().get_key_type());
   ASSERT_TRUE(km.ok()) << km.status();
   EXPECT_THAT(km.ValueOrDie()->get_key_type(),
-              Eq(TestInternalPrivateKeyManager().get_key_type()));
+              Eq(TestPrivateKeyTypeManager().get_key_type()));
 }
 
 TEST_F(RegistryTest, AsymmetricGetPublicPrimitiveA) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PublicPrimitiveA>*> km =
       Registry::get_key_manager<PublicPrimitiveA>(
-          TestInternalPublicKeyManager().get_key_type());
+          TestPublicKeyTypeManager().get_key_type());
   ASSERT_TRUE(km.ok()) << km.status();
   EXPECT_THAT(km.ValueOrDie()->get_key_type(),
-              Eq(TestInternalPublicKeyManager().get_key_type()));
+              Eq(TestPublicKeyTypeManager().get_key_type()));
 }
 
 TEST_F(RegistryTest, AsymmetricGetPublicPrimitiveB) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PublicPrimitiveB>*> km =
       Registry::get_key_manager<PublicPrimitiveB>(
-          TestInternalPublicKeyManager().get_key_type());
+          TestPublicKeyTypeManager().get_key_type());
   ASSERT_TRUE(km.ok()) << km.status();
   EXPECT_THAT(km.ValueOrDie()->get_key_type(),
-              Eq(TestInternalPublicKeyManager().get_key_type()));
+              Eq(TestPublicKeyTypeManager().get_key_type()));
 }
 
 TEST_F(RegistryTest, AsymmetricGetWrongPrimitiveError) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PublicPrimitiveA>*> km =
       Registry::get_key_manager<PublicPrimitiveA>(
-          TestInternalPrivateKeyManager().get_key_type());
+          TestPrivateKeyTypeManager().get_key_type());
   EXPECT_THAT(km.status(),
               StatusIs(util::error::INVALID_ARGUMENT,
                        HasSubstr("not among supported primitives")));
@@ -1103,20 +1101,20 @@ TEST_F(RegistryTest, AsymmetricGetWrongPrimitiveError) {
 
 TEST(PrivateKeyManagerImplTest, AsymmetricFactoryNewKeyFromMessage) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
 
   EcdsaKeyFormat key_format;
   key_format.mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
   KeyTemplate key_template;
-  key_template.set_type_url(TestInternalPrivateKeyManager().get_key_type());
+  key_template.set_type_url(TestPrivateKeyTypeManager().get_key_type());
   key_template.set_value(key_format.SerializeAsString());
   key_template.set_output_prefix_type(OutputPrefixType::TINK);
   std::unique_ptr<KeyData> key_data =
       Registry::NewKeyData(key_template).ValueOrDie();
   EXPECT_THAT(key_data->type_url(),
-              Eq(TestInternalPrivateKeyManager().get_key_type()));
+              Eq(TestPrivateKeyTypeManager().get_key_type()));
   EcdsaPrivateKey private_key;
   private_key.ParseFromString(key_data->value());
   EXPECT_THAT(private_key.public_key().params().encoding(),
@@ -1125,74 +1123,74 @@ TEST(PrivateKeyManagerImplTest, AsymmetricFactoryNewKeyFromMessage) {
 
 TEST(PrivateKeyManagerImplTest, AsymmetricNewKeyDisallowed) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), false)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), false)
                   .ok());
 
   KeyTemplate key_template;
-  key_template.set_type_url(TestInternalPrivateKeyManager().get_key_type());
+  key_template.set_type_url(TestPrivateKeyTypeManager().get_key_type());
   EXPECT_THAT(Registry::NewKeyData(key_template).status(),
               StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("not allow")));
 }
 
 TEST_F(RegistryTest, AsymmetricGetPublicKeyData) {
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestInternalPrivateKeyManager>(),
-      absl::make_unique<TestInternalPublicKeyManager>(), true);
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), true);
   EcdsaPrivateKey private_key;
   private_key.mutable_public_key()->mutable_params()->set_encoding(
       EcdsaSignatureEncoding::DER);
 
   std::unique_ptr<KeyData> key_data =
-      Registry::GetPublicKeyData(TestInternalPrivateKeyManager().get_key_type(),
+      Registry::GetPublicKeyData(TestPrivateKeyTypeManager().get_key_type(),
                                  private_key.SerializeAsString())
           .ValueOrDie();
   ASSERT_THAT(key_data->type_url(),
-              Eq(TestInternalPublicKeyManager().get_key_type()));
+              Eq(TestPublicKeyTypeManager().get_key_type()));
   EcdsaPublicKey public_key;
   public_key.ParseFromString(key_data->value());
   EXPECT_THAT(public_key.params().encoding(), Eq(EcdsaSignatureEncoding::DER));
 }
 
-class TestInternalPrivateKeyManager2 : public TestInternalPrivateKeyManager {};
-class TestInternalPublicKeyManager2 : public TestInternalPublicKeyManager {};
+class TestPrivateKeyTypeManager2 : public TestPrivateKeyTypeManager {};
+class TestPublicKeyTypeManager2 : public TestPublicKeyTypeManager {};
 
 TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithWrongClasses) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   EXPECT_THAT(
       Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestInternalPrivateKeyManager2>(),
-          absl::make_unique<TestInternalPublicKeyManager>(), true),
+          absl::make_unique<TestPrivateKeyTypeManager2>(),
+          absl::make_unique<TestPublicKeyTypeManager>(), true),
       StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
   EXPECT_THAT(
       Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestInternalPrivateKeyManager>(),
-          absl::make_unique<TestInternalPublicKeyManager2>(), true),
+          absl::make_unique<TestPrivateKeyTypeManager>(),
+          absl::make_unique<TestPublicKeyTypeManager2>(), true),
       StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
   EXPECT_THAT(
       Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestInternalPrivateKeyManager2>(),
-          absl::make_unique<TestInternalPublicKeyManager2>(), true),
+          absl::make_unique<TestPrivateKeyTypeManager2>(),
+          absl::make_unique<TestPublicKeyTypeManager2>(), true),
       StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
   EXPECT_THAT(
-      Registry::RegisterInternalKeyManager(
-          absl::make_unique<TestInternalPrivateKeyManager2>(), true),
+      Registry::RegisterKeyTypeManager(
+          absl::make_unique<TestPrivateKeyTypeManager2>(), true),
       StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
   EXPECT_THAT(
-      Registry::RegisterInternalKeyManager(
-          absl::make_unique<TestInternalPublicKeyManager2>(), true),
+      Registry::RegisterKeyTypeManager(
+          absl::make_unique<TestPublicKeyTypeManager2>(), true),
       StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
 }
 
-class TestInternalPublicKeyManagerWithDifferentKeyType
-    : public TestInternalPublicKeyManager {
+class TestPublicKeyTypeManagerWithDifferentKeyType
+    : public TestPublicKeyTypeManager {
   const std::string& get_key_type() const override { return kKeyType; }
 
  private:
@@ -1201,13 +1199,13 @@ class TestInternalPublicKeyManagerWithDifferentKeyType
 
 TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithNewKeyType) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestInternalPrivateKeyManager>(),
-                  absl::make_unique<TestInternalPublicKeyManager>(), true)
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
   EXPECT_THAT(
       Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestInternalPrivateKeyManager>(),
-          absl::make_unique<TestInternalPublicKeyManagerWithDifferentKeyType>(),
+          absl::make_unique<TestPrivateKeyTypeManager>(),
+          absl::make_unique<TestPublicKeyTypeManagerWithDifferentKeyType>(),
           true),
       StatusIs(util::error::INVALID_ARGUMENT,
                HasSubstr("cannot be re-registered")));

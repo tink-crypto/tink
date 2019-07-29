@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CORE_INTERNAL_KEY_MANAGER_H_
-#define TINK_CORE_INTERNAL_KEY_MANAGER_H_
+#ifndef TINK_CORE_KEY_TYPE_MANAGER_H_
+#define TINK_CORE_KEY_TYPE_MANAGER_H_
 
 #include <typeindex>
 
@@ -35,7 +35,7 @@ namespace internal {
 
 // InternalKeyFactory should not be used directly: it is an implementation
 // detail. The internal key factory provides the functions which are required
-// if an InternalKeyManager can create new keys: ValidateKeyFormat and
+// if a KeyTypeManager can create new keys: ValidateKeyFormat and
 // CreateKey. The special case where KeyFormatProto = void implies that the
 // functions do not exist.
 template <typename KeyProto, typename KeyFormatProto>
@@ -59,27 +59,27 @@ class InternalKeyFactory<KeyProto, void> {
 
 }  // namespace internal
 
-// We declare a InternalKeyManager without giving an implementation. We then
+// We declare a KeyTypeManager without giving an implementation. We then
 // provide a specialization only for the case where PrimitivesList is a
 // List with multiple interfaces primitives. This allows to ensure
 // that such is always the case.
 template <typename KeyProto, typename KeyFormatProto, typename PrimitivesList>
-class InternalKeyManager;
+class KeyTypeManager;
 
-// An InternalKeyManager manages a single key proto. This includes
+// A KeyTypeManager manages a single key proto. This includes
 //  * parsing and validating keys
 //  * parsing and validating key formats (in case generating keys is allowed).
 //  * creating primitives.
-// To implement, one should subclass InternalKeyManager with the corresponding
+// To implement, one should subclass KeyTypeManager with the corresponding
 // KeyProto as a template parameter; KeyFormatProto should be void in case
 // the key manager cannot produce keys and a protobuf otherwise.
 //
 // The constructor should take unique pointers to primitive factories.
 //
-// InternalKeyManager uses templates for KeyProto, KeyFormatProto and a list of
+// KeyTypeManager uses templates for KeyProto, KeyFormatProto and a list of
 // Primitives which have to be provided as a List.
 template <typename KeyProto, typename KeyFormatProto, typename... Primitives>
-class InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>
+class KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>
     : public internal::InternalKeyFactory<KeyProto, KeyFormatProto> {
  public:
   // A PrimitiveFactory<Primitive> knows how to create instances of the
@@ -92,9 +92,9 @@ class InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>
         const KeyProto& key) const = 0;
   };
 
-  // Creates a new InternalKeyManager. The parameter(s) primitives must be some
+  // Creates a new KeyTypeManager. The parameter(s) primitives must be some
   // number of unique_ptr<PrimitiveFactory<P>> types.
-  explicit InternalKeyManager(
+  explicit KeyTypeManager(
       std::unique_ptr<PrimitiveFactory<Primitives>>... primitives) {
     static_assert(
         !crypto::tink::internal::HasDuplicates<Primitives...>::value,
@@ -151,4 +151,4 @@ class InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CORE_INTERNAL_KEY_MANAGER_H_
+#endif  // TINK_CORE_KEY_TYPE_MANAGER_H_

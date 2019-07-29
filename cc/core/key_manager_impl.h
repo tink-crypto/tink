@@ -14,8 +14,8 @@
 #ifndef TINK_CORE_KEY_MANAGER_IMPL_H_
 #define TINK_CORE_KEY_MANAGER_IMPL_H_
 
-#include "tink/core/internal_key_manager.h"
 #include "tink/core/key_manager_base.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/key_manager.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
@@ -27,22 +27,21 @@ namespace internal {
 // Template declaration of the class "KeyFactoryImpl" with a single template
 // argument. We first declare it, then later give two "partial template
 // specializations". This will imply that the KeyFactoryImpl can only be
-// instantiated with arguments of the form InternalKeyManager<...>.
-template <class InternalKeyManager>
+// instantiated with arguments of the form KeyTypeManager<...>.
+template <class KeyTypeManager>
 class KeyFactoryImpl;
 
 // First partial template specialization for KeyFactoryImpl: the given
-// InternalKeyManager is of the form InternalKeyManager<KeyProto,
+// KeyTypeManager is of the form KeyTypeManager<KeyProto,
 // KeyFormatProto, List<Primitives...>>.
 template <class KeyProto, class KeyFormatProto, class... Primitives>
 class KeyFactoryImpl<
-    InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>>
+    KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>>
     : public KeyFactory {
  public:
-  explicit KeyFactoryImpl(
-      InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
-          internal_key_manager)
-      : internal_key_manager_(internal_key_manager) {}
+  explicit KeyFactoryImpl(KeyTypeManager<KeyProto, KeyFormatProto,
+                                         List<Primitives...>>* key_type_manager)
+      : key_type_manager_(key_type_manager) {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(const portable_proto::MessageLite& key_format) const override {
@@ -52,13 +51,13 @@ class KeyFactoryImpl<
           absl::StrCat("Key format proto '", key_format.GetTypeName(),
                        "' is not supported by this manager."));
     }
-    auto validation = internal_key_manager_->ValidateKeyFormat(
+    auto validation = key_type_manager_->ValidateKeyFormat(
         static_cast<const KeyFormatProto&>(key_format));
     if (!validation.ok()) {
       return validation;
     }
     crypto::tink::util::StatusOr<KeyProto> new_key_result =
-        internal_key_manager_->CreateKey(
+        key_type_manager_->CreateKey(
             static_cast<const KeyFormatProto&>(key_format));
     if (!new_key_result.ok()) return new_key_result.status();
     return absl::implicit_cast<std::unique_ptr<portable_proto::MessageLite>>(
@@ -74,7 +73,7 @@ class KeyFactoryImpl<
           absl::StrCat("Could not parse the passed string as proto '",
                        KeyFormatProto().GetTypeName(), "'."));
     }
-    auto validation = internal_key_manager_->ValidateKeyFormat(key_format);
+    auto validation = key_type_manager_->ValidateKeyFormat(key_format);
     if (!validation.ok()) {
       return validation;
     }
@@ -90,28 +89,27 @@ class KeyFactoryImpl<
     key_data->set_type_url(
         absl::StrCat(kTypeGoogleapisCom, KeyProto().GetTypeName()));
     key_data->set_value(new_key.SerializeAsString());
-    key_data->set_key_material_type(internal_key_manager_->key_material_type());
+    key_data->set_key_material_type(key_type_manager_->key_material_type());
     return std::move(key_data);
   }
 
  private:
-  InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
-      internal_key_manager_;
+  KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>*
+      key_type_manager_;
 };
 
 // Second partial template specialization for KeyFactoryImpl: the given
-// InternalKeyManager is of the form InternalKeyManager<KeyProto, void,
+// KeyTypeManager is of the form KeyTypeManager<KeyProto, void,
 // List<Primitives...>>.
 template <class KeyProto, class... Primitives>
-class KeyFactoryImpl<InternalKeyManager<KeyProto, void, List<Primitives...>>>
+class KeyFactoryImpl<KeyTypeManager<KeyProto, void, List<Primitives...>>>
     : public KeyFactory {
  public:
-  // We don't need the InternalKeyManager, but this is called from a template,
+  // We don't need the KeyTypeManager, but this is called from a template,
   // so the easiest way to ignore the argument is to provide a constructor which
   // ignores the argument.
   explicit KeyFactoryImpl(
-      InternalKeyManager<KeyProto, void, List<Primitives...>>*
-          internal_key_manager) {}
+      KeyTypeManager<KeyProto, void, List<Primitives...>>* key_type_manager) {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(const portable_proto::MessageLite& key_format) const override {
@@ -137,31 +135,31 @@ class KeyFactoryImpl<InternalKeyManager<KeyProto, void, List<Primitives...>>>
 
 // Template declaration of the class "KeyManagerImpl" with two template
 // arguments. There is only one specialization which is defined, namely when
-// the InternalKeyManager argument is of the form InternalKeyManager<KeyProto,
+// the KeyTypeManager argument is of the form KeyTypeManager<KeyProto,
 // KeyFormatProto, List<Primitives...>>. We don't provide a
 // specialization for the case KeyFormatProto = void, so the compiler will pick
 // this instantiation in this case.
-template <class Primitive, class InternalKeyManager>
+template <class Primitive, class KeyTypeManager>
 class KeyManagerImpl;
 
 // The first template argument to the KeyManagerImpl is the primitive for which
-// we should generate a KeyManager. The second is the InternalKeyManager, which
+// we should generate a KeyManager. The second is the KeyTypeManager, which
 // takes itself template arguments. The list of the Primitives there must
 // contain the first Primitive argument (otherwise there will be failures at
 // runtime).
 template <class Primitive, class KeyProto, class KeyFormatProto,
           class... Primitives>
-class KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
-                                                   List<Primitives...>>>
+class KeyManagerImpl<
+    Primitive, KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>>
     : public KeyManager<Primitive> {
  public:
-  explicit KeyManagerImpl(
-      InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
-          internal_key_manager)
-      : internal_key_manager_(internal_key_manager),
-        key_factory_(absl::make_unique<KeyFactoryImpl<InternalKeyManager<
-                         KeyProto, KeyFormatProto, List<Primitives...>>>>(
-            internal_key_manager_)) {}
+  explicit KeyManagerImpl(KeyTypeManager<KeyProto, KeyFormatProto,
+                                         List<Primitives...>>* key_type_manager)
+      : key_type_manager_(key_type_manager),
+        key_factory_(
+            absl::make_unique<KeyFactoryImpl<
+                KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>>>(
+                key_type_manager_)) {}
 
   // Constructs an instance of Primitive for the given 'key_data'.
   crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> GetPrimitive(
@@ -177,11 +175,11 @@ class KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
                        "Could not parse key_data.value as key type '%s'.",
                        key_data.type_url().c_str());
     }
-    auto validation = internal_key_manager_->ValidateKey(key_proto);
+    auto validation = key_type_manager_->ValidateKey(key_proto);
     if (!validation.ok()) {
       return validation;
     }
-    return internal_key_manager_->template GetPrimitive<Primitive>(key_proto);
+    return key_type_manager_->template GetPrimitive<Primitive>(key_proto);
   }
 
   crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> GetPrimitive(
@@ -193,19 +191,19 @@ class KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
                        key_type.c_str());
     }
     const KeyProto& key_proto = static_cast<const KeyProto&>(key);
-    auto validation = internal_key_manager_->ValidateKey(key_proto);
+    auto validation = key_type_manager_->ValidateKey(key_proto);
     if (!validation.ok()) {
       return validation;
     }
-    return internal_key_manager_->template GetPrimitive<Primitive>(key_proto);
+    return key_type_manager_->template GetPrimitive<Primitive>(key_proto);
   }
 
   uint32_t get_version() const override {
-    return internal_key_manager_->get_version();
+    return key_type_manager_->get_version();
   }
 
   const std::string& get_key_type() const override {
-    return internal_key_manager_->get_key_type();
+    return key_type_manager_->get_key_type();
   }
 
   const KeyFactory& get_key_factory() const override {
@@ -213,25 +211,25 @@ class KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
   }
 
  private:
-  InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
-      internal_key_manager_;
+  KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>*
+      key_type_manager_;
   std::unique_ptr<KeyFactory> key_factory_;
 };
 
-// Helper function to create a KeyManager<Primitive> from an InternalKeyManager.
+// Helper function to create a KeyManager<Primitive> from a KeyTypeManager.
 // Using this, all template arguments except the first one can be infered.
 // Example:
 //   std::unique_ptr<KeyManager<Aead>> km =
-//     MakeKeyManager<Aead>(my_internal_key_manager.get());
+//     MakeKeyManager<Aead>(my_key_type_manager.get());
 template <class Primitive, class KeyProto, class KeyFormatProto,
           class... Primitives>
 std::unique_ptr<KeyManager<Primitive>> MakeKeyManager(
-    InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>*
-        internal_key_manager) {
+    KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>*
+        key_type_manager) {
   return absl::make_unique<
-      KeyManagerImpl<Primitive, InternalKeyManager<KeyProto, KeyFormatProto,
-                                                   List<Primitives...>>>>(
-      internal_key_manager);
+      KeyManagerImpl<Primitive, KeyTypeManager<KeyProto, KeyFormatProto,
+                                               List<Primitives...>>>>(
+      key_type_manager);
 }
 
 }  // namespace internal

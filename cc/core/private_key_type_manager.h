@@ -16,7 +16,7 @@
 
 #include <memory>
 
-#include "tink/core/internal_key_manager.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -24,25 +24,25 @@ namespace tink {
 
 template <typename KeyProto, typename KeyFormatProto, typename PublicKeyProto,
           typename... Primitives>
-class InternalPrivateKeyManager;
+class PrivateKeyTypeManager;
 
-// An InternalPrivateKeyManager is an extension of InternalKeyManager. One
+// A PrivateKeyTypeManager is an extension of KeyTypeManager. One
 // should implement this in case there is a public key corresponding to the
 // private key managed by this manager.
-// Hence, in addition to the tasks a InternalKeyManager does, in order to
-// implement a InternalPrivateKeyManager one needs to provide a function
+// Hence, in addition to the tasks a KeyTypeManager does, in order to
+// implement a PrivateKeyTypeManager one needs to provide a function
 // StatusOr<PublicKeyProto> GetPublicKey(const KeyProto& private_key) const = 0;
 template <typename KeyProto, typename KeyFormatProto, typename PublicKeyProto,
           typename... Primitives>
-class InternalPrivateKeyManager<KeyProto, KeyFormatProto, PublicKeyProto,
-                                List<Primitives...>>
-    : public InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>> {
+class PrivateKeyTypeManager<KeyProto, KeyFormatProto, PublicKeyProto,
+                            List<Primitives...>>
+    : public KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>> {
  public:
-  explicit InternalPrivateKeyManager(
-      std::unique_ptr<typename InternalKeyManager<KeyProto, KeyFormatProto,
-                                                  List<Primitives...>>::
+  explicit PrivateKeyTypeManager(
+      std::unique_ptr<typename KeyTypeManager<KeyProto, KeyFormatProto,
+                                              List<Primitives...>>::
                           template PrimitiveFactory<Primitives>>... primitives)
-      : InternalKeyManager<KeyProto, KeyFormatProto, List<Primitives...>>(
+      : KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>(
             std::move(primitives)...) {}
 
   virtual crypto::tink::util::StatusOr<PublicKeyProto> GetPublicKey(

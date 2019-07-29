@@ -56,9 +56,8 @@ class AeadVariant {
   std::string s_;
 };
 
-class ExampleInternalKeyManager
-    : public InternalKeyManager<AesGcmKey, AesGcmKeyFormat,
-                                List<Aead, AeadVariant>> {
+class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                    List<Aead, AeadVariant>> {
  public:
   class AeadFactory : public PrimitiveFactory<Aead> {
    public:
@@ -77,9 +76,9 @@ class ExampleInternalKeyManager
     }
   };
 
-  ExampleInternalKeyManager()
-      : InternalKeyManager(absl::make_unique<AeadFactory>(),
-                           absl::make_unique<AeadVariantFactory>()) {}
+  ExampleKeyTypeManager()
+      : KeyTypeManager(absl::make_unique<AeadFactory>(),
+                       absl::make_unique<AeadVariantFactory>()) {}
 
   google::crypto::tink::KeyData::KeyMaterialType key_material_type()
       const override {
@@ -110,7 +109,7 @@ class ExampleInternalKeyManager
 };
 
 TEST(KeyManagerImplTest, FactoryNewKeyFromMessage) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -122,7 +121,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromMessage) {
 }
 
 TEST(KeyManagerImplTest, FactoryNewKeyFromStringView) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -136,7 +135,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromStringView) {
 }
 
 TEST(KeyManagerImplTest, FactoryNewKeyFromKeyData) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -152,7 +151,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromKeyData) {
 }
 
 TEST(KeyManagerImplTest, FactoryNewKeyFromMessageCallsValidate) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -167,7 +166,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromMessageCallsValidate) {
 }
 
 TEST(KeyManagerImplTest, FactoryNewKeyFromStringViewCallsValidate) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -184,7 +183,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromStringViewCallsValidate) {
 }
 
 TEST(KeyManagerImplTest, FactoryNewKeyFromKeyDataCallsValidate) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -201,7 +200,7 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromKeyDataCallsValidate) {
 }
 
 TEST(KeyManagerImplTest, GetPrimitiveAead) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       MakeKeyManager<Aead>(&internal_km);
 
@@ -219,7 +218,7 @@ TEST(KeyManagerImplTest, GetPrimitiveAead) {
 }
 
 TEST(KeyManagerImplTest, GetPrimitiveAeadVariant) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -236,7 +235,7 @@ TEST(KeyManagerImplTest, GetPrimitiveAeadVariant) {
 }
 
 TEST(KeyManagerImplTest, GetPrimitiveFromKey) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       MakeKeyManager<Aead>(&internal_km);
 
@@ -253,14 +252,14 @@ TEST(KeyManagerImplTest, GetPrimitiveFromKey) {
 }
 
 TEST(KeyManagerImplTest, GetKeyType) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       MakeKeyManager<Aead>(&internal_km);
   EXPECT_THAT(key_manager->get_key_type(), Eq(internal_km.get_key_type()));
 }
 
 TEST(KeyManagerImplTest, GetVersion) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       MakeKeyManager<Aead>(&internal_km);
   EXPECT_CALL(internal_km, get_version()).WillOnce(Return(121351));
@@ -268,7 +267,7 @@ TEST(KeyManagerImplTest, GetVersion) {
 }
 
 TEST(KeyManagerImplTest, DoesSupport) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       MakeKeyManager<Aead>(&internal_km);
   EXPECT_TRUE(key_manager->DoesSupport(internal_km.get_key_type()));
@@ -280,7 +279,7 @@ TEST(KeyManagerImplTest, DoesSupport) {
 }
 
 TEST(KeyManagerImplTest, GetPrimitiveCallsValidate) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       MakeKeyManager<Aead>(&internal_km);
 
@@ -303,7 +302,7 @@ TEST(KeyManagerImplTest, GetPrimitiveCallsValidate) {
 }
 
 TEST(KeyManagerImplTest, GetPrimitiveFromKeyCallsValidate) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       MakeKeyManager<Aead>(&internal_km);
 
@@ -331,7 +330,7 @@ TEST(KeyManagerImplTest, GetPrimitiveFromKeyCallsValidate) {
 // time error.
 class NotSupported {};
 TEST(KeyManagerImplTest, GetPrimitiveFails) {
-  ExampleInternalKeyManager internal_km;
+  ExampleKeyTypeManager internal_km;
   std::unique_ptr<KeyManager<NotSupported>> key_manager =
       MakeKeyManager<NotSupported>(&internal_km);
   AesGcmKeyFormat key_format;
@@ -345,10 +344,10 @@ TEST(KeyManagerImplTest, GetPrimitiveFails) {
                        HasSubstr("No PrimitiveFactory was registered")));
 }
 
-// Next, we test some of the methods with an InternalKeyManager which has no
+// Next, we test some of the methods with a KeyTypeManager which has no
 // factory.
-class ExampleInternalKeyManagerWithoutFactory
-    : public InternalKeyManager<AesGcmKey, void, List<Aead, AeadVariant>> {
+class ExampleKeyTypeManagerWithoutFactory
+    : public KeyTypeManager<AesGcmKey, void, List<Aead, AeadVariant>> {
  public:
   class AeadFactory : public PrimitiveFactory<Aead> {
    public:
@@ -367,9 +366,9 @@ class ExampleInternalKeyManagerWithoutFactory
     }
   };
 
-  ExampleInternalKeyManagerWithoutFactory()
-      : InternalKeyManager(absl::make_unique<AeadFactory>(),
-                           absl::make_unique<AeadVariantFactory>()) {}
+  ExampleKeyTypeManagerWithoutFactory()
+      : KeyTypeManager(absl::make_unique<AeadFactory>(),
+                       absl::make_unique<AeadVariantFactory>()) {}
 
   google::crypto::tink::KeyData::KeyMaterialType key_material_type()
       const override {
@@ -392,7 +391,7 @@ class ExampleInternalKeyManagerWithoutFactory
 };
 
 TEST(KeyManagerImplTest, GetPrimitiveWithoutFactoryAead) {
-  ExampleInternalKeyManagerWithoutFactory internal_km;
+  ExampleKeyTypeManagerWithoutFactory internal_km;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       MakeKeyManager<Aead>(&internal_km);
 
@@ -400,7 +399,7 @@ TEST(KeyManagerImplTest, GetPrimitiveWithoutFactoryAead) {
   key_format.set_key_size(16);
 
   KeyData key_data = test::AsKeyData(
-      ExampleInternalKeyManager().CreateKey(key_format).ValueOrDie(),
+      ExampleKeyTypeManager().CreateKey(key_format).ValueOrDie(),
       KeyData::SYMMETRIC);
 
   auto aead = key_manager->GetPrimitive(key_data).ValueOrDie();
@@ -410,7 +409,7 @@ TEST(KeyManagerImplTest, GetPrimitiveWithoutFactoryAead) {
 }
 
 TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromMessage) {
-  ExampleInternalKeyManagerWithoutFactory internal_km;
+  ExampleKeyTypeManagerWithoutFactory internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -421,7 +420,7 @@ TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromMessage) {
 }
 
 TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromStringView) {
-  ExampleInternalKeyManagerWithoutFactory internal_km;
+  ExampleKeyTypeManagerWithoutFactory internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 
@@ -435,7 +434,7 @@ TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromStringView) {
 }
 
 TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromKeyData) {
-  ExampleInternalKeyManagerWithoutFactory internal_km;
+  ExampleKeyTypeManagerWithoutFactory internal_km;
   std::unique_ptr<KeyManager<AeadVariant>> key_manager =
       MakeKeyManager<AeadVariant>(&internal_km);
 

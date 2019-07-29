@@ -112,17 +112,17 @@ class Registry {
     return RegisterKeyManager(absl::WrapUnique(manager), new_key_allowed);
   }
 
-  template <class InternalKeyManager>
-  static crypto::tink::util::Status RegisterInternalKeyManager(
-      std::unique_ptr<InternalKeyManager> manager, bool new_key_allowed) {
-    return RegistryImpl::GlobalInstance().RegisterInternalKeyManager(
+  template <class KeyTypeManager>
+  static crypto::tink::util::Status RegisterKeyTypeManager(
+      std::unique_ptr<KeyTypeManager> manager, bool new_key_allowed) {
+    return RegistryImpl::GlobalInstance().RegisterKeyTypeManager(
         manager.release(), new_key_allowed);
   }
 
-  template <class InternalPrivateKeyManager, class InternalKeyManager>
+  template <class PrivateKeyTypeManager, class KeyTypeManager>
   static crypto::tink::util::Status RegisterAsymmetricKeyManagers(
-      std::unique_ptr<InternalPrivateKeyManager> private_key_manager,
-      std::unique_ptr<InternalKeyManager> public_key_manager,
+      std::unique_ptr<PrivateKeyTypeManager> private_key_manager,
+      std::unique_ptr<KeyTypeManager> public_key_manager,
       bool new_key_allowed) {
     return RegistryImpl::GlobalInstance().RegisterAsymmetricKeyManagers(
         private_key_manager.release(), public_key_manager.release(),

@@ -14,8 +14,8 @@
 #ifndef TINK_CORE_PRIVATE_KEY_MANAGER_IMPL_H_
 #define TINK_CORE_PRIVATE_KEY_MANAGER_IMPL_H_
 
-#include "tink/core/internal_private_key_manager.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/core/private_key_type_manager.h"
 #include "tink/key_manager.h"
 #include "tink/util/validation.h"
 namespace crypto {
@@ -27,20 +27,20 @@ namespace internal {
 // The template arguments PrivatePrimitivesList and PublicPrimitivesList should
 // be of type List<Primitives...>. The assumption is that the given pointers in
 // the constructor are of type
-//   InternalPrivateKeyManager<PrivateKeyProto, PrivateKeyFormatProto,
+//   PrivateKeyTypeManager<PrivateKeyProto, PrivateKeyFormatProto,
 //                             PublicKeyProto, PrivatePrimitivesList>
 // and
-//   InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>.
+//   KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>.
 template <class PrivateKeyProto, class PrivateKeyFormatProto,
           class PublicKeyProto, class PrivatePrimitivesList,
           class PublicPrimitivesList>
 class PrivateKeyFactoryImpl : public PrivateKeyFactory {
  public:
   PrivateKeyFactoryImpl(
-      InternalPrivateKeyManager<PrivateKeyProto, PrivateKeyFormatProto,
-                                PublicKeyProto, PrivatePrimitivesList>*
+      PrivateKeyTypeManager<PrivateKeyProto, PrivateKeyFormatProto,
+                            PublicKeyProto, PrivatePrimitivesList>*
           private_key_manager,
-      InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>*
+      KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
           public_key_manager)
       : key_factory_impl_(private_key_manager),
         private_key_manager_(private_key_manager),
@@ -88,18 +88,17 @@ class PrivateKeyFactoryImpl : public PrivateKeyFactory {
   // inheritance to have it as a sub class. This means we have to forward the
   // calls to NewKeyData as above, but developers do not have to know about
   // virtual inheritance.
-  KeyFactoryImpl<InternalKeyManager<PrivateKeyProto, PrivateKeyFormatProto,
-                                    PrivatePrimitivesList>>
+  KeyFactoryImpl<KeyTypeManager<PrivateKeyProto, PrivateKeyFormatProto,
+                                PrivatePrimitivesList>>
       key_factory_impl_;
-  InternalPrivateKeyManager<PrivateKeyProto, PrivateKeyFormatProto,
-                            PublicKeyProto, PrivatePrimitivesList>*
-      private_key_manager_;
+  PrivateKeyTypeManager<PrivateKeyProto, PrivateKeyFormatProto, PublicKeyProto,
+                        PrivatePrimitivesList>* private_key_manager_;
   const std::string public_key_type_;
   google::crypto::tink::KeyData::KeyMaterialType public_key_material_type_;
 };
 
-template <class Primitive, class InternalPrivateKeyManager,
-          class InternalPublicKeyManager>
+template <class Primitive, class PrivateKeyTypeManager,
+          class PublicKeyTypeManager>
 class PrivateKeyManagerImpl;
 
 template <class Primitive, class PrivateKeyProto, class KeyFormatProto,
@@ -107,21 +106,21 @@ template <class Primitive, class PrivateKeyProto, class KeyFormatProto,
           class PublicPrimitivesList>
 class PrivateKeyManagerImpl<
     Primitive,
-    InternalPrivateKeyManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                              PrivatePrimitivesList>,
-    InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>>
+    PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
+                          PrivatePrimitivesList>,
+    KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>>
     : public KeyManagerImpl<Primitive,
-                            InternalKeyManager<PrivateKeyProto, KeyFormatProto,
-                                               PrivatePrimitivesList>> {
+                            KeyTypeManager<PrivateKeyProto, KeyFormatProto,
+                                           PrivatePrimitivesList>> {
  public:
   explicit PrivateKeyManagerImpl(
-      InternalPrivateKeyManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                                PrivatePrimitivesList>* private_key_manager,
-      InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>*
+      PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
+                            PrivatePrimitivesList>* private_key_manager,
+      KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
           public_key_manager)
       : KeyManagerImpl<Primitive,
-                       InternalKeyManager<PrivateKeyProto, KeyFormatProto,
-                                          PrivatePrimitivesList>>(
+                       KeyTypeManager<PrivateKeyProto, KeyFormatProto,
+                                      PrivatePrimitivesList>>(
             private_key_manager),
         private_key_factory_(private_key_manager, public_key_manager) {}
 
@@ -136,7 +135,7 @@ class PrivateKeyManagerImpl<
 };
 
 // Helper function to create a KeyManager<Primitive> for a
-// InternalPrivateKeyManager. Using this, all template arguments except the
+// PrivateKeyTypeManager. Using this, all template arguments except the
 // first one can be infered. Example:
 //   std::unique_ptr<KeyManager<PublicKeySign>> km =
 //     MakePrivateKeyManager<PublicKeySign>(internal_private_km,
@@ -149,15 +148,15 @@ template <class Primitive, class PrivateKeyProto, class KeyFormatProto,
           class PublicKeyProto, class PrivatePrimitivesList,
           class PublicPrimitivesList>
 std::unique_ptr<KeyManager<Primitive>> MakePrivateKeyManager(
-    InternalPrivateKeyManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                              PrivatePrimitivesList>* private_key_manager,
-    InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>*
+    PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
+                          PrivatePrimitivesList>* private_key_manager,
+    KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
         public_key_manager) {
   return absl::make_unique<PrivateKeyManagerImpl<
       Primitive,
-      InternalPrivateKeyManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
-                                PrivatePrimitivesList>,
-      InternalKeyManager<PublicKeyProto, void, PublicPrimitivesList>>>(
+      PrivateKeyTypeManager<PrivateKeyProto, KeyFormatProto, PublicKeyProto,
+                            PrivatePrimitivesList>,
+      KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>>>(
       private_key_manager, public_key_manager);
 }
 
