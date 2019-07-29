@@ -318,7 +318,6 @@ tink_cc_library(
   DEPS
     tink::core::aead
     tink::core::catalogue
-    tink::core::deterministic_aead
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::core::key_manager
@@ -327,7 +326,7 @@ tink_cc_library(
     tink::core::registry
     tink::core::streaming_aead
     tink::aead::aead_wrapper
-    tink::daead::deterministic_aead_wrapper
+    tink::daead::deterministic_aead_config
     tink::hybrid::hybrid_decrypt_wrapper
     tink::hybrid::hybrid_encrypt_wrapper
     tink::mac::mac_config

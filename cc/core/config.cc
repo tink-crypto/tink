@@ -19,8 +19,7 @@
 #include "absl/strings/ascii.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_wrapper.h"
-#include "tink/daead/deterministic_aead_wrapper.h"
-#include "tink/deterministic_aead.h"
+#include "tink/daead/deterministic_aead_config.h"
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
 #include "tink/hybrid_decrypt.h"
@@ -88,7 +87,7 @@ util::Status Config::Register(
     } else if (primitive_name == "aead") {
       status = Register<Aead>(entry);
     } else if (primitive_name == "deterministicaead") {
-      status = Register<DeterministicAead>(entry);
+      status = DeterministicAeadConfig::Register();
     } else if (primitive_name == "hybriddecrypt") {
       status = Register<HybridDecrypt>(entry);
     } else if (primitive_name == "hybridencrypt") {
@@ -122,8 +121,7 @@ util::Status Config::RegisterWrapper(
   } else if (lowercase_primitive_name == "aead") {
     return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
   } else if (lowercase_primitive_name == "deterministicaead") {
-    return Registry::RegisterPrimitiveWrapper(
-        absl::make_unique<DeterministicAeadWrapper>());
+    return DeterministicAeadConfig::Register();
   } else if (lowercase_primitive_name == "hybriddecrypt") {
     return Registry::RegisterPrimitiveWrapper(
         absl::make_unique<HybridDecryptWrapper>());

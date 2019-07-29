@@ -17,7 +17,6 @@
 #ifndef TINK_DAEAD_DETERMINISTIC_AEAD_CONFIG_H_
 #define TINK_DAEAD_DETERMINISTIC_AEAD_CONFIG_H_
 
-#include "tink/config.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 

@@ -378,7 +378,6 @@ cc_library(
     deps = [
         ":aead",
         ":catalogue",
-        ":deterministic_aead",
         ":hybrid_decrypt",
         ":hybrid_encrypt",
         ":key_manager",
@@ -387,7 +386,7 @@ cc_library(
         ":registry",
         ":streaming_aead",
         "//cc/aead:aead_wrapper",
-        "//cc/daead:deterministic_aead_wrapper",
+        "//cc/daead:deterministic_aead_config",
         "//cc/hybrid:hybrid_decrypt_wrapper",
         "//cc/hybrid:hybrid_encrypt_wrapper",
         "//cc/mac:mac_config",

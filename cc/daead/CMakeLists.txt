@@ -40,27 +40,14 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME deterministic_aead_catalogue
-  SRCS
-    deterministic_aead_catalogue.cc
-    deterministic_aead_catalogue.h
-  DEPS
-    tink::daead::aes_siv_key_manager
-    tink::core::catalogue
-    tink::core::deterministic_aead
-    tink::core::key_manager
-    tink::util::status
-    absl::memory
-)
-
-tink_cc_library(
   NAME deterministic_aead_config
   SRCS
     deterministic_aead_config.cc
     deterministic_aead_config.h
   DEPS
-    tink::daead::deterministic_aead_catalogue
-    tink::core::config
+    tink::daead::aes_siv_key_manager
+    tink::daead::deterministic_aead_wrapper
+    tink::config::config_util
     tink::mac::mac_config
     tink::util::status
     tink::proto::config_cc_proto
@@ -122,18 +109,6 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::tink_cc_proto
     absl::memory
-)
-
-tink_cc_test(
-  NAME deterministic_aead_catalogue_test
-  SRCS deterministic_aead_catalogue_test.cc
-  DEPS
-    tink::daead::deterministic_aead_catalogue
-    tink::daead::deterministic_aead_config
-    tink::core::catalogue
-    tink::core::deterministic_aead
-    tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_test(
