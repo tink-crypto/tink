@@ -25,6 +25,11 @@ namespace tink {
 TEST(CreateKeyTypeEntry, Simple) {
   google::crypto::tink::KeyTypeEntry entry = CreateTinkKeyTypeEntry(
       "catalogue", "primitive_name", "key_proto_name", 12, true);
+  EXPECT_THAT(entry.primitive_name(), Eq("primitive_name"));
+  EXPECT_THAT(entry.type_url(),
+              Eq("type.googleapis.com/google.crypto.tink.key_proto_name"));
+  EXPECT_THAT(entry.key_manager_version(), Eq(12));
+  EXPECT_THAT(entry.new_key_allowed(), Eq(true));
   EXPECT_THAT(entry.catalogue_name(), Eq("catalogue"));
 }
 
