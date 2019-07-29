@@ -2,7 +2,6 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])
 
-
 cc_library(
     name = "streaming_aead_wrapper",
     srcs = ["streaming_aead_wrapper.cc"],
@@ -28,33 +27,16 @@ cc_library(
 )
 
 cc_library(
-    name = "streaming_aead_catalogue",
-    srcs = ["streaming_aead_catalogue.cc"],
-    hdrs = ["streaming_aead_catalogue.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":aes_gcm_hkdf_streaming_key_manager",
-        "//cc:catalogue",
-        "//cc:key_manager",
-        "//cc:streaming_aead",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
-cc_library(
     name = "streaming_aead_config",
     srcs = ["streaming_aead_config.cc"],
     hdrs = ["streaming_aead_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":streaming_aead_catalogue",
+        ":aes_gcm_hkdf_streaming_key_manager",
         ":streaming_aead_wrapper",
-        "//cc:config",
         "//cc:registry",
+        "//cc/config:config_util",
         "//cc/util:status",
         "//proto:config_cc_proto",
         "@com_google_absl//absl/memory",
@@ -167,7 +149,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-         ":shared_random_access_stream",
+        ":shared_random_access_stream",
         "//cc:primitive_set",
         "//cc:random_access_stream",
         "//cc:streaming_aead",
@@ -242,21 +224,6 @@ cc_test(
         "//proto:aes_gcm_hkdf_streaming_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "streaming_aead_catalogue_test",
-    size = "small",
-    srcs = ["streaming_aead_catalogue_test.cc"],
-    deps = [
-        ":streaming_aead_catalogue",
-        ":streaming_aead_config",
-        "//cc:catalogue",
-        "//cc:streaming_aead",
-        "//cc/util:status",
-        "//cc/util:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -324,7 +324,6 @@ tink_cc_library(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::core::registry
-    tink::core::streaming_aead
     tink::aead::aead_wrapper
     tink::daead::deterministic_aead_config
     tink::hybrid::hybrid_decrypt_wrapper
@@ -332,7 +331,7 @@ tink_cc_library(
     tink::mac::mac_config
     tink::signature::public_key_sign_wrapper
     tink::signature::public_key_verify_wrapper
-    tink::streamingaead::streaming_aead_wrapper
+    tink::streamingaead::streaming_aead_config
     tink::util::errors
     tink::util::status
     tink::util::statusor

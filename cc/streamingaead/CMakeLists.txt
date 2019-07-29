@@ -24,31 +24,16 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME streaming_aead_catalogue
-  SRCS
-    streaming_aead_catalogue.cc
-    streaming_aead_catalogue.h
-  DEPS
-    absl::strings
-    tink::core::catalogue
-    tink::core::key_manager
-    tink::core::streaming_aead
-    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
-    tink::util::status
-    tink::util::statusor
-)
-
-tink_cc_library(
   NAME streaming_aead_config
   SRCS
     streaming_aead_config.cc
     streaming_aead_config.h
   DEPS
     absl::memory
-    tink::core::config
+    tink::config::config_util
     tink::core::registry
     tink::proto::config_cc_proto
-    tink::streamingaead::streaming_aead_catalogue
+    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_wrapper
     tink::util::status
 )
@@ -210,18 +195,6 @@ tink_cc_test(
     tink::proto::tink_cc_proto
     tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_key_templates
-)
-
-tink_cc_test(
-  NAME streaming_aead_catalogue_test
-  SRCS streaming_aead_catalogue_test.cc
-  DEPS
-    tink::core::catalogue
-    tink::core::streaming_aead
-    tink::streamingaead::streaming_aead_catalogue
-    tink::streamingaead::streaming_aead_config
-    tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_test(

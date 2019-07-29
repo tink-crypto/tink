@@ -85,37 +85,6 @@ TEST_F(StreamingAeadConfigTest, testBasic) {
       aes_gcm_hkdf_streaming_key_type));
 }
 
-TEST_F(StreamingAeadConfigTest, testRegister) {
-  std::string key_type =
-      "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
-
-  // Try on empty registry.
-  auto status = Config::Register(StreamingAeadConfig::Latest());
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
-  auto manager_result = Registry::get_key_manager<StreamingAead>(key_type);
-  EXPECT_FALSE(manager_result.ok());
-
-  // Register and try again.
-  status = StreamingAeadConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-  manager_result = Registry::get_key_manager<StreamingAead>(key_type);
-  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-
-  // Try Register() again, should succeed (idempotence).
-  status = StreamingAeadConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-
-  // Reset the registry, and try overriding a catalogue with a different one.
-  Registry::Reset();
-  status = Registry::AddCatalogue(
-      "TinkStreamingAead", absl::make_unique<DummyStreamingAeadCatalogue>());
-  EXPECT_TRUE(status.ok()) << status;
-  status = StreamingAeadConfig::Register();
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
-}
-
 // Tests that the StreamingAeadWrapper has been properly registered
 // and we can wrap primitives.
 TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
