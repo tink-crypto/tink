@@ -23,7 +23,6 @@
 #include "tink/hybrid_encrypt.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
-#include "tink/mac.h"
 #include "tink/registry.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"

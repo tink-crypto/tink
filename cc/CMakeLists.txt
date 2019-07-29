@@ -322,7 +322,6 @@ tink_cc_library(
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::core::key_manager
-    tink::core::mac
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::core::registry
@@ -331,7 +330,7 @@ tink_cc_library(
     tink::daead::deterministic_aead_wrapper
     tink::hybrid::hybrid_decrypt_wrapper
     tink::hybrid::hybrid_encrypt_wrapper
-    tink::mac::mac_wrapper
+    tink::mac::mac_config
     tink::signature::public_key_sign_wrapper
     tink::signature::public_key_verify_wrapper
     tink::streamingaead::streaming_aead_wrapper

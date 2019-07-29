@@ -22,23 +22,14 @@ tink_cc_library(
     mac_config.cc
     mac_config.h
   DEPS
-    tink::mac::mac_catalogue
-    tink::core::config
+    tink::mac::aes_cmac_key_manager
+    tink::mac::hmac_key_manager
+    tink::mac::mac_wrapper
+    tink::config::config_util
+    tink::core::registry
     tink::util::status
     tink::proto::config_cc_proto
     absl::memory
-)
-
-tink_cc_library(
-  NAME mac_catalogue
-  SRCS
-    mac_catalogue.cc
-    mac_catalogue.h
-  DEPS
-    tink::mac::aes_cmac_key_manager
-    tink::mac::hmac_key_manager
-    tink::core::catalogue
-    tink::util::status
 )
 
 tink_cc_library(
@@ -127,18 +118,6 @@ tink_cc_test(
     tink::util::status
     tink::util::test_util
     tink::proto::tink_cc_proto
-)
-
-tink_cc_test(
-  NAME mac_catalogue_test
-  SRCS mac_catalogue_test.cc
-  DEPS
-    tink::mac::mac_catalogue
-    tink::mac::mac_config
-    tink::core::catalogue
-    tink::core::config
-    tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_test(

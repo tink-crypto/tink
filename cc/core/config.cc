@@ -25,8 +25,7 @@
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
-#include "tink/mac.h"
-#include "tink/mac/mac_wrapper.h"
+#include "tink/mac/mac_config.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/public_key_sign_wrapper.h"
@@ -85,7 +84,7 @@ util::Status Config::Register(
     std::string primitive_name = absl::AsciiStrToLower(entry.primitive_name());
 
     if (primitive_name == "mac") {
-      status = Register<Mac>(entry);
+      status = MacConfig::Register();
     } else if (primitive_name == "aead") {
       status = Register<Aead>(entry);
     } else if (primitive_name == "deterministicaead") {
@@ -119,7 +118,7 @@ util::Status Config::Register(
 util::Status Config::RegisterWrapper(
     absl::string_view lowercase_primitive_name) {
   if (lowercase_primitive_name == "mac") {
-    return Registry::RegisterPrimitiveWrapper(absl::make_unique<MacWrapper>());
+    return MacConfig::Register();
   } else if (lowercase_primitive_name == "aead") {
     return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
   } else if (lowercase_primitive_name == "deterministicaead") {

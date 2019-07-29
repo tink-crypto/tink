@@ -92,36 +92,6 @@ TEST_F(MacConfigTest, testBasic) {
   EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(aes_cmac_key_type));
 }
 
-TEST_F(MacConfigTest, testRegister) {
-  std::string key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
-
-  // Try on empty registry.
-  auto status = Config::Register(MacConfig::Latest());
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
-  auto manager_result = Registry::get_key_manager<Mac>(key_type);
-  EXPECT_FALSE(manager_result.ok());
-
-  // Register and try again.
-  status = MacConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-  manager_result = Registry::get_key_manager<Mac>(key_type);
-  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-
-  // Try Register() again, should succeed (idempotence).
-  status = MacConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-
-  // Reset the registry, and try overriding a catalogue with a different one.
-  Registry::Reset();
-  status =
-      Registry::AddCatalogue("TinkMac", absl::make_unique<DummyMacCatalogue>());
-  EXPECT_TRUE(status.ok()) << status;
-  status = MacConfig::Register();
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
-}
-
 // Tests that the MacWrapper has been properly registered and we can wrap
 // primitives.
 TEST_F(MacConfigTest, WrappersRegistered) {
