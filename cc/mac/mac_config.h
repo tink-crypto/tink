@@ -41,7 +41,7 @@ class MacConfig {
   // in the current Tink release.
   static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Registers key managers for all Mac key types
+  // Registers Mac primitive wrapper and key managers for all Mac key types
   // from the current Tink release.
   static crypto::tink::util::Status Register();
 

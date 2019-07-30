@@ -56,12 +56,15 @@ const google::crypto::tink::RegistryConfig& MacConfig::Latest() {
 
 // static
 util::Status MacConfig::Register() {
+  // Register key managers.
   auto status = Registry::RegisterKeyManager(
       absl::make_unique<HmacKeyManager>(), true);
   if (!status.ok()) return status;
   status = Registry::RegisterKeyManager(
       absl::make_unique<AesCmacKeyManager>(), true);
   if (!status.ok()) return status;
+
+  // Register primitive wrapper.
   return Registry::RegisterPrimitiveWrapper(absl::make_unique<MacWrapper>());
 }
 

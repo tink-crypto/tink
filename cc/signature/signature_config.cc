@@ -98,6 +98,7 @@ const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
 
 // static
 util::Status SignatureConfig::Register() {
+  // Register key managers.
   // ECDSA
   auto status = Registry::RegisterKeyManager(
       absl::make_unique<EcdsaSignKeyManager>(), true);
@@ -130,6 +131,7 @@ util::Status SignatureConfig::Register() {
       absl::make_unique<RsaSsaPkcs1VerifyKeyManager>(), true);
   if (!status.ok()) return status;
 
+  // Register primitive wrappers.
   status = Registry::RegisterPrimitiveWrapper(
       absl::make_unique<PublicKeySignWrapper>());
   if (!status.ok()) return status;

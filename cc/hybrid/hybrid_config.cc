@@ -64,6 +64,8 @@ const google::crypto::tink::RegistryConfig& HybridConfig::Latest() {
 // static
 util::Status HybridConfig::Register() {
   auto status = AeadConfig::Register();
+
+  // Register key managers.
   if (!status.ok()) return status;
   status = Registry::RegisterKeyManager(
       absl::make_unique<EciesAeadHkdfPrivateKeyManager>(), true);
@@ -71,6 +73,8 @@ util::Status HybridConfig::Register() {
   status = Registry::RegisterKeyManager(
       absl::make_unique<EciesAeadHkdfPublicKeyManager>(), true);
   if (!status.ok()) return status;
+
+  // Register primitive wrappers.
   status = Registry::RegisterPrimitiveWrapper(
       absl::make_unique<HybridEncryptWrapper>());
   if (!status.ok()) return status;

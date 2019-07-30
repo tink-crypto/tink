@@ -41,8 +41,8 @@ class StreamingAeadConfig {
   // in the current Tink release.
   static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Registers key managers for all StreamingAead key types
-  // from the current Tink release.
+  // Registers StreamingAead primitive wrapper and key managers for all
+  // StreamingAead key types from the current Tink release.
   static crypto::tink::util::Status Register();
 
  private:

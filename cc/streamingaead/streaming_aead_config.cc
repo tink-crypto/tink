@@ -53,9 +53,12 @@ const google::crypto::tink::RegistryConfig& StreamingAeadConfig::Latest() {
 
 // static
 util::Status StreamingAeadConfig::Register() {
+  // Register key manager.
   auto status = Registry::RegisterKeyManager(
       absl::make_unique<AesGcmHkdfStreamingKeyManager>(), true);
   if (!status.ok()) return status;
+
+  // Register primitive wrapper.
   return Registry::RegisterPrimitiveWrapper(
       absl::make_unique<StreamingAeadWrapper>());
 }

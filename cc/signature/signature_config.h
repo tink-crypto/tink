@@ -47,8 +47,9 @@ class SignatureConfig {
   // supported in the current Tink release.
   static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Registers key managers for all implementations of PublicKeySign
-  // and PublicKeyVerify from the current Tink release.
+  // Registers PublicKeySign and PublicKeyVerify primitive wrappers, and key
+  // managers for all implementations of PublicKeySign and PublicKeyVerify from
+  // the current Tink release.
   static crypto::tink::util::Status Register();
 
  private:

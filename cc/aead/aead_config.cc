@@ -82,6 +82,8 @@ const google::crypto::tink::RegistryConfig& AeadConfig::Latest() {
 util::Status AeadConfig::Register() {
   auto status = MacConfig::Register();
   if (!status.ok()) return status;
+
+  // Register key managers.
   status = Registry::RegisterKeyManager(
       absl::make_unique<AesCtrHmacAeadKeyManager>(), true);
   if (!status.ok()) return status;
@@ -103,6 +105,8 @@ util::Status AeadConfig::Register() {
   status = Registry::RegisterKeyManager(
       absl::make_unique<KmsEnvelopeAeadKeyManager>(), true);
   if (!status.ok()) return status;
+
+  // Register primitive wrapper.
   return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
 }
 

@@ -54,9 +54,12 @@ const google::crypto::tink::RegistryConfig& DeterministicAeadConfig::Latest() {
 
 // static
 util::Status DeterministicAeadConfig::Register() {
-  auto status =
-      Registry::RegisterKeyManager(absl::make_unique<AesSivKeyManager>(), true);
+  // Register key manager.
+  auto status = Registry::RegisterKeyManager(
+      absl::make_unique<AesSivKeyManager>(), true);
   if (!status.ok()) return status;
+
+  // Register primitive wrapper.
   return Registry::RegisterPrimitiveWrapper(
       absl::make_unique<DeterministicAeadWrapper>());
 }
