@@ -811,7 +811,6 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead",
-        ":catalogue",
         ":core/key_type_manager",
         ":crypto_format",
         ":keyset_manager",

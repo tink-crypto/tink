@@ -26,7 +26,6 @@
 #include "tink/aead.h"
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/catalogue.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
