@@ -17,6 +17,7 @@
 #include "tink/config.h"
 
 #include "absl/strings/ascii.h"
+#include "absl/strings/str_cat.h"
 #include "tink/aead/aead_config.h"
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/hybrid/hybrid_config.h"
@@ -91,12 +92,13 @@ util::Status Config::Register(
       // everything from the streamingaead config.
       status = StreamingAeadConfig::Register();
     } else {
-      status = ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                         "A non-standard primitive '%s' '%s', "
-                         "use directly Config::Register<P>(KeyTypeEntry&).",
-                         entry.primitive_name().c_str(),
-                         primitive_name.c_str()
-                         );
+      status = util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+                            absl::StrCat("Non-standard primitive '",
+                                         entry.primitive_name(),
+                                         "', call Registry::RegisterKeyManager "
+                                         "and Registry::"
+                                         "RegisterPrimitiveWrapper directly.")
+                           );
     }
     if (!status.ok()) return status;
   }
