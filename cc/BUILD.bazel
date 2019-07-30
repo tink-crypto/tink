@@ -366,6 +366,7 @@ cc_library(
     deps = [
         ":key_manager",
         "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 

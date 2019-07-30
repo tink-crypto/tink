@@ -308,6 +308,7 @@ tink_cc_library(
   DEPS
     tink::core::key_manager
     tink::util::statusor
+    absl::base
 )
 
 tink_cc_library(

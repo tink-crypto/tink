@@ -17,23 +17,16 @@
 #ifndef TINK_CATALOGUE_H_
 #define TINK_CATALOGUE_H_
 
+#include "absl/base/macros.h"
 #include "tink/key_manager.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 
-// A catalogue of KeyManager objects.
-//
-// It is basically a map from a (key type, primitive name)-tuple to
-// KeyManager-objects, that determine the implementation that handles
-// the keys of the given key type.
-//
-// Tink includes default per-primitive catalogues, but it also
-// supports custom catalogues to enable user-defined configuration of
-// run-time environment via Registry.
+// This class is deprecated. We don't support catalogues anymore.
 template <class P>
-class Catalogue {
+class ABSL_DEPRECATED("We don't support catalogues anymore.") Catalogue {
  public:
   // Returns a key manager for the given 'type_url', 'primitive_name',
   // and version at least 'min_version' (if any found).
