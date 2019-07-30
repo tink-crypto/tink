@@ -42,7 +42,6 @@ cc_test(
     deps = [
         ":tink_config",
         "//cc:aead",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:deterministic_aead",
         "//cc:hybrid_decrypt",

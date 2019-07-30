@@ -18,7 +18,6 @@
 
 #include "gtest/gtest.h"
 #include "tink/aead.h"
-#include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
@@ -33,17 +32,6 @@
 namespace crypto {
 namespace tink {
 namespace {
-
-class DummyHybridDecryptCatalogue : public Catalogue<HybridDecrypt> {
- public:
-  DummyHybridDecryptCatalogue() {}
-
-  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridDecrypt>>>
-  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
-                uint32_t min_version) const override {
-    return util::Status::UNKNOWN;
-  }
-};
 
 class TinkConfigTest : public ::testing::Test {
  protected:

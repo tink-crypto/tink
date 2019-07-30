@@ -33,7 +33,6 @@ tink_cc_test(
   DEPS
     tink::config::tink_config
     tink::core::aead
-    tink::core::catalogue
     tink::core::config
     tink::core::deterministic_aead
     tink::core::hybrid_decrypt
