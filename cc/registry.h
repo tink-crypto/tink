@@ -56,6 +56,7 @@ class Registry {
   // (cannot return reference directly, as StatusOr does not support it,
   // see https://goo.gl/x0ymDz)
   template <class P>
+  ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
       const std::string& catalogue_name) {
     return RegistryImpl::GlobalInstance().get_catalogue<P>(catalogue_name);
@@ -68,6 +69,7 @@ class Registry {
   // and fails if the given 'catalogue' tries to override
   // an existing, different catalogue for the specified name.
   template <class ConcreteCatalogue>
+  ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::Status AddCatalogue(
       const std::string& catalogue_name,
       std::unique_ptr<ConcreteCatalogue> catalogue) {

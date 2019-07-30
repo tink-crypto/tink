@@ -26,7 +26,7 @@ namespace tink {
 
 // This class is deprecated. We don't support catalogues anymore.
 template <class P>
-class ABSL_DEPRECATED("We don't support catalogues anymore.") Catalogue {
+class ABSL_DEPRECATED("Catalogues are not supported anymore.") Catalogue {
  public:
   // Returns a key manager for the given 'type_url', 'primitive_name',
   // and version at least 'min_version' (if any found).
