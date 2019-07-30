@@ -99,39 +99,8 @@ util::Status Config::Register(
                          );
     }
     if (!status.ok()) return status;
-    status = RegisterWrapper(primitive_name);
-    if (!status.ok()) return status;
   }
   return util::Status::OK;
-}
-
-// static
-util::Status Config::RegisterWrapper(
-    absl::string_view lowercase_primitive_name) {
-  if (lowercase_primitive_name == "mac") {
-    return MacConfig::Register();
-  } else if (lowercase_primitive_name == "aead") {
-    return AeadConfig::Register();
-  } else if (lowercase_primitive_name == "deterministicaead") {
-    return DeterministicAeadConfig::Register();
-  } else if (lowercase_primitive_name == "hybridencrypt" ||
-             lowercase_primitive_name == "hybriddecrypt") {
-    return HybridConfig::Register();
-  } else if (lowercase_primitive_name == "publickeysign" ||
-             lowercase_primitive_name == "publickeyverify") {
-    return SignatureConfig::Register();
-  } else if (lowercase_primitive_name == "streamingaead") {
-    // We don't support catalogues anymore -- we hence simply register
-    // everything from the streamingaead config.
-    return StreamingAeadConfig::Register();
-  } else {
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
-        absl::StrCat("Cannot register primitive wrapper for non-standard "
-                     "primitive ",
-                     lowercase_primitive_name,
-                     " (call Registry::RegisterPrimitiveWrapper directly)"));
-  }
 }
 
 }  // namespace tink

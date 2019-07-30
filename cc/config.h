@@ -57,13 +57,10 @@ class Config {
   static crypto::tink::util::Status Register(
       const google::crypto::tink::KeyTypeEntry& entry);
 
-  // Registers key managers according to the specification in 'config'.
+  // Registers key managers and primitive wrappers according to the
+  // specification in 'config'.
   static crypto::tink::util::Status Register(
       const google::crypto::tink::RegistryConfig& config);
-
-  // Registers primitive wrappers for the entry given in KeyTypeEntry.
-  static crypto::tink::util::Status RegisterWrapper(
-      absl::string_view lowercase_primitive_name);
 
  private:
   static crypto::tink::util::Status Validate(
