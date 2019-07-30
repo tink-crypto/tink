@@ -36,9 +36,9 @@ class AesGcmKeyFactory {
 
     AesGcmKeyFactory.validateKeyFormat_(keyFormatProto);
 
-    const key = new PbAesGcmKey();
-    key.setKeyValue(Random.randBytes(keyFormatProto.getKeySize()));
-    key.setVersion(AesGcmKeyManager.VERSION_);
+    const key = new PbAesGcmKey()
+                    .setKeyValue(Random.randBytes(keyFormatProto.getKeySize()))
+                    .setVersion(AesGcmKeyManager.VERSION_);
 
     return key;
   }
@@ -46,11 +46,11 @@ class AesGcmKeyFactory {
   /** @override */
   newKeyData(serializedKeyFormat) {
     const key = /** @type {!PbAesGcmKey} */ (this.newKey(serializedKeyFormat));
-    const keyData = new PbKeyData();
-
-    keyData.setTypeUrl(AesGcmKeyManager.KEY_TYPE);
-    keyData.setValue(key.serializeBinary());
-    keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+    const keyData =
+        new PbKeyData()
+            .setTypeUrl(AesGcmKeyManager.KEY_TYPE)
+            .setValue(key.serializeBinary())
+            .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
 
     return keyData;
   }

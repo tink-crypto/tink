@@ -114,28 +114,28 @@ class AeadKeyTemplates {
   static newAesCtrHmacSha256KeyTemplate_(
       aesKeySize, ivSize, hmacKeySize, tagSize) {
     // Define AES CTR key format.
-    const aesCtrKeyFormat = new PbAesCtrKeyFormat();
-    aesCtrKeyFormat.setKeySize(aesKeySize);
-    aesCtrKeyFormat.setParams(new PbAesCtrParams());
+    const aesCtrKeyFormat = new PbAesCtrKeyFormat()
+                                .setKeySize(aesKeySize)
+                                .setParams(new PbAesCtrParams());
     aesCtrKeyFormat.getParams().setIvSize(ivSize);
 
     // Define HMAC key format.
-    const hmacKeyFormat = new PbHmacKeyFormat();
-    hmacKeyFormat.setKeySize(hmacKeySize);
-    hmacKeyFormat.setParams(new PbHmacParams());
+    const hmacKeyFormat = new PbHmacKeyFormat()
+                              .setKeySize(hmacKeySize)
+                              .setParams(new PbHmacParams());
     hmacKeyFormat.getParams().setTagSize(tagSize);
     hmacKeyFormat.getParams().setHash(PbHashType.SHA256);
 
     // Define AES CTR HMAC AEAD key format.
-    const keyFormat = new PbAesCtrHmacAeadKeyFormat();
-    keyFormat.setAesCtrKeyFormat(aesCtrKeyFormat);
-    keyFormat.setHmacKeyFormat(hmacKeyFormat);
+    const keyFormat = new PbAesCtrHmacAeadKeyFormat()
+                          .setAesCtrKeyFormat(aesCtrKeyFormat)
+                          .setHmacKeyFormat(hmacKeyFormat);
 
     // Define key template.
-    const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
-    keyTemplate.setOutputPrefixType(PbOutputPrefixType.TINK);
-    keyTemplate.setValue(keyFormat.serializeBinary());
+    const keyTemplate = new PbKeyTemplate()
+                            .setTypeUrl(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)
+                            .setOutputPrefixType(PbOutputPrefixType.TINK)
+                            .setValue(keyFormat.serializeBinary());
 
     return keyTemplate;
   }
@@ -149,14 +149,13 @@ class AeadKeyTemplates {
    */
   static newAesGcmKeyTemplate_(keySize) {
     // Define AES GCM key format.
-    const keyFormat = new PbAesGcmKeyFormat();
-    keyFormat.setKeySize(keySize);
+    const keyFormat = new PbAesGcmKeyFormat().setKeySize(keySize);
 
     // Define key template.
-    const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(AeadConfig.AES_GCM_TYPE_URL);
-    keyTemplate.setOutputPrefixType(PbOutputPrefixType.TINK);
-    keyTemplate.setValue(keyFormat.serializeBinary());
+    const keyTemplate = new PbKeyTemplate()
+                            .setTypeUrl(AeadConfig.AES_GCM_TYPE_URL)
+                            .setOutputPrefixType(PbOutputPrefixType.TINK)
+                            .setValue(keyFormat.serializeBinary());
 
     return keyTemplate;
   }

@@ -267,8 +267,8 @@ testSuite({
     const manager = new EcdsaPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const keyData =
-        await manager.getKeyFactory().newKeyData(keyFormat.serializeBinary());
-    keyData.setTypeUrl('unsupported_key_type_url');
+        (await manager.getKeyFactory().newKeyData(keyFormat.serializeBinary()))
+            .setTypeUrl('unsupported_key_type_url');
 
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
@@ -295,9 +295,8 @@ testSuite({
     const manager = new EcdsaPrivateKeyManager();
     const version = manager.getVersion() + 1;
     const keyFormat = createKeyFormat();
-    const key = await manager.getKeyFactory().newKey(keyFormat);
-
-    key.setVersion(version);
+    const key =
+        (await manager.getKeyFactory().newKey(keyFormat)).setVersion(version);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -535,10 +534,9 @@ class ExceptionText {
  * @return {!PbEcdsaParams}
  */
 const createParams = function(curveType, hashType, encoding) {
-  const params = new PbEcdsaParams();
-  params.setCurve(curveType);
-  params.setHashType(hashType);
-  params.setEncoding(encoding);
+  const params =
+      new PbEcdsaParams().setCurve(curveType).setHashType(hashType).setEncoding(
+          encoding);
 
   return params;
 };
@@ -554,8 +552,7 @@ const createKeyFormat = function(
     opt_curveType = PbEllipticCurveType.NIST_P256,
     opt_hashType = PbHashType.SHA256,
     opt_encodingType = PbEcdsaSignatureEncoding.DER) {
-  const keyFormat = new PbEcdsaKeyFormat();
-  keyFormat.setParams(
+  const keyFormat = new PbEcdsaKeyFormat().setParams(
       createParams(opt_curveType, opt_hashType, opt_encodingType));
   return keyFormat;
 };

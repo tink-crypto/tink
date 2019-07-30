@@ -45,8 +45,7 @@ const Registry = goog.require('tink.Registry');
  * @return {!PbRegistryConfig}
  */
 const latest = function() {
-  const config = new PbRegistryConfig();
-  config.setConfigName(CONFIG_NAME_);
+  const config = new PbRegistryConfig().setConfigName(CONFIG_NAME_);
 
   config.addEntry(createEntry_(
       ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE, /* keyManagerVersion = */ 0,
@@ -85,13 +84,12 @@ const register = function() {
 const createEntry_ = function(
     typeUrl, keyManagerVersion, primitiveName, catalogueName,
     opt_newKeyAllowed = true) {
-  const entry = new PbKeyTypeEntry;
-
-  entry.setPrimitiveName(primitiveName);
-  entry.setTypeUrl(typeUrl);
-  entry.setKeyManagerVersion(keyManagerVersion);
-  entry.setNewKeyAllowed(opt_newKeyAllowed);
-  entry.setCatalogueName(catalogueName);
+  const entry = new PbKeyTypeEntry()
+                    .setPrimitiveName(primitiveName)
+                    .setTypeUrl(typeUrl)
+                    .setKeyManagerVersion(keyManagerVersion)
+                    .setNewKeyAllowed(opt_newKeyAllowed)
+                    .setCatalogueName(catalogueName);
 
   return entry;
 };

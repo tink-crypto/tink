@@ -37,8 +37,8 @@ testSuite({
   //////////////////////////////////////////////////////////////////////////////
 
   testConstructor_unsupportedKeyType() {
-    const template = AeadKeyTemplates.aes128CtrHmacSha256();
-    template.setTypeUrl('some_unsupported_type_url');
+    const template = AeadKeyTemplates.aes128CtrHmacSha256().setTypeUrl(
+        'some_unsupported_type_url');
 
     try {
       new RegistryEciesAeadHkdfDemHelper(template);

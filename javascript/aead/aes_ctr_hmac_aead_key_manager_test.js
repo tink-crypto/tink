@@ -47,10 +47,8 @@ const createTestKeyFormat = function() {
   const TAG_SIZE = 16;
 
 
-  let keyFormat = new PbAesCtrHmacAeadKeyFormat();
-
-  // set AES CTR key
-  keyFormat.setAesCtrKeyFormat(new PbAesCtrKeyFormat());
+  let keyFormat = new PbAesCtrHmacAeadKeyFormat().setAesCtrKeyFormat(
+      new PbAesCtrKeyFormat());
   keyFormat.getAesCtrKeyFormat().setKeySize(KEY_SIZE);
   keyFormat.getAesCtrKeyFormat().setParams(new PbAesCtrParams());
   keyFormat.getAesCtrKeyFormat().getParams().setIvSize(IV_SIZE);
@@ -75,12 +73,8 @@ const createTestKey = function() {
   const TAG_SIZE = 16;
 
 
-  let key = new PbAesCtrHmacAeadKey();
-
-  key.setVersion(0);
-
-  // set AES CTR key
-  key.setAesCtrKey(new PbAesCtrKey());
+  let key =
+      new PbAesCtrHmacAeadKey().setVersion(0).setAesCtrKey(new PbAesCtrKey());
   key.getAesCtrKey().setVersion(0);
   key.getAesCtrKey().setParams(new PbAesCtrParams());
   key.getAesCtrKey().getParams().setIvSize(IV_SIZE);
@@ -102,11 +96,10 @@ const createTestKey = function() {
  * @return {!PbKeyData}
  */
 const createTestKeyData = function() {
-  let keyData = new PbKeyData();
-
-  keyData.setTypeUrl(KEY_TYPE);
-  keyData.setValue(createTestKey().serializeBinary());
-  keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+  let keyData = new PbKeyData()
+                    .setTypeUrl(KEY_TYPE)
+                    .setValue(createTestKey().serializeBinary())
+                    .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
 
   return keyData;
 };
@@ -386,8 +379,7 @@ testSuite({
 
   async testGetPrimitiveUnsupportedKeyDataType() {
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbKeyData */ keyData = createTestKeyData();
-    keyData.setTypeUrl('bad type url');
+    let keyData = createTestKeyData().setTypeUrl('bad type url');
 
     try {
       await aeadKeyManager.getPrimitive(Aead, keyData);

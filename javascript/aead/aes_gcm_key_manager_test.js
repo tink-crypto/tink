@@ -126,8 +126,7 @@ testSuite({
 
   async testGetPrimitive_unsupportedKeyDataType() {
     const manager = new AesGcmKeyManager();
-    const /** !PbKeyData */ keyData = createTestKeyData();
-    keyData.setTypeUrl('bad_type_url');
+    const keyData = createTestKeyData().setTypeUrl('bad_type_url');
 
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
@@ -153,9 +152,7 @@ testSuite({
   async testGetPrimitive_badVersion() {
     const version = 1;
     const manager = new AesGcmKeyManager();
-    const /** !PbAesGcmKey */ key = createTestKey();
-
-    key.setVersion(version);
+    const key = createTestKey().setVersion(version);
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
@@ -186,8 +183,7 @@ testSuite({
 
   async testGetPrimitive_badSerialization() {
     const manager = new AesGcmKeyManager();
-    const keyData = createTestKeyData();
-    keyData.setValue(new Uint8Array([]));
+    const keyData = createTestKeyData().setValue(new Uint8Array([]));
 
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
@@ -337,8 +333,7 @@ class ExceptionText {
  * @return {!PbAesGcmKeyFormat}
  */
 const createTestKeyFormat = function(opt_keySize = 16) {
-  const keyFormat = new PbAesGcmKeyFormat();
-  keyFormat.setKeySize(opt_keySize);
+  const keyFormat = new PbAesGcmKeyFormat().setKeySize(opt_keySize);
   return keyFormat;
 };
 
@@ -347,10 +342,8 @@ const createTestKeyFormat = function(opt_keySize = 16) {
  * @return {!PbAesGcmKey}
  */
 const createTestKey = function(opt_keySize = 16) {
-  const key = new PbAesGcmKey();
-
-  key.setVersion(0);
-  key.setKeyValue(Random.randBytes(opt_keySize));
+  const key = new PbAesGcmKey().setVersion(0).setKeyValue(
+      Random.randBytes(opt_keySize));
 
   return key;
 };
@@ -360,11 +353,10 @@ const createTestKey = function(opt_keySize = 16) {
  * @return {!PbKeyData}
  */
 const createTestKeyData = function(opt_keySize) {
-  const keyData = new PbKeyData();
-
-  keyData.setTypeUrl(KEY_TYPE);
-  keyData.setValue(createTestKey(opt_keySize).serializeBinary());
-  keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+  const keyData = new PbKeyData()
+                      .setTypeUrl(KEY_TYPE)
+                      .setValue(createTestKey(opt_keySize).serializeBinary())
+                      .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
 
   return keyData;
 };
