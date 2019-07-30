@@ -613,6 +613,7 @@ tink_cc_test(
   SRCS core/registry_test.cc
   DEPS
     tink::core::aead
+    tink::core::catalogue
     tink::core::crypto_format
     tink::core::key_type_manager
     tink::core::keyset_manager
