@@ -88,8 +88,6 @@ util::Status Config::Register(
                primitive_name == "publickeyverify") {
       status = SignatureConfig::Register();
     } else if (primitive_name == "streamingaead") {
-      // We don't support catalogues anymore -- we hence simply register
-      // everything from the streamingaead config.
       status = StreamingAeadConfig::Register();
     } else {
       status = util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
