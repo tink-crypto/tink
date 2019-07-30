@@ -169,37 +169,6 @@ TEST_F(HybridConfigTest, testBasic) {
       encrypt_manager_result.ValueOrDie()->DoesSupport(encrypt_key_type));
 }
 
-TEST_F(HybridConfigTest, testRegister) {
-  std::string key_type =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
-
-  // Try on empty registry.
-  auto status = Config::Register(HybridConfig::Latest());
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
-  auto manager_result = Registry::get_key_manager<HybridEncrypt>(key_type);
-  EXPECT_FALSE(manager_result.ok());
-
-  // Register and try again.
-  status = HybridConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-  manager_result = Registry::get_key_manager<HybridEncrypt>(key_type);
-  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-
-  // Try Register() again, should succeed (idempotence).
-  status = HybridConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-
-  // Reset the registry, and try overriding a catalogue with a different one.
-  Registry::Reset();
-  status = Registry::AddCatalogue("TinkHybridDecrypt",
-                                  new DummyHybridDecryptCatalogue());
-  EXPECT_TRUE(status.ok()) << status;
-  status = HybridConfig::Register();
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
-}
-
 // Tests that the HybridEncryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, EncryptWrapperRegistered) {

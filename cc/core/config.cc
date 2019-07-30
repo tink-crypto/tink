@@ -19,10 +19,7 @@
 #include "absl/strings/ascii.h"
 #include "tink/aead/aead_config.h"
 #include "tink/daead/deterministic_aead_config.h"
-#include "tink/hybrid/hybrid_decrypt_wrapper.h"
-#include "tink/hybrid/hybrid_encrypt_wrapper.h"
-#include "tink/hybrid_decrypt.h"
-#include "tink/hybrid_encrypt.h"
+#include "tink/hybrid/hybrid_config.h"
 #include "tink/mac/mac_config.h"
 #include "tink/signature/signature_config.h"
 #include "tink/streamingaead/streaming_aead_config.h"
@@ -83,10 +80,9 @@ util::Status Config::Register(
       status = AeadConfig::Register();
     } else if (primitive_name == "deterministicaead") {
       status = DeterministicAeadConfig::Register();
-    } else if (primitive_name == "hybriddecrypt") {
-      status = Register<HybridDecrypt>(entry);
-    } else if (primitive_name == "hybridencrypt") {
-      status = Register<HybridEncrypt>(entry);
+    } else if (primitive_name == "hybridencrypt" ||
+               primitive_name == "hybriddecrypt") {
+      status = HybridConfig::Register();
     } else if (primitive_name == "publickeysign" ||
                primitive_name == "publickeyverify") {
       status = SignatureConfig::Register();
@@ -118,12 +114,9 @@ util::Status Config::RegisterWrapper(
     return AeadConfig::Register();
   } else if (lowercase_primitive_name == "deterministicaead") {
     return DeterministicAeadConfig::Register();
-  } else if (lowercase_primitive_name == "hybriddecrypt") {
-    return Registry::RegisterPrimitiveWrapper(
-        absl::make_unique<HybridDecryptWrapper>());
-  } else if (lowercase_primitive_name == "hybridencrypt") {
-    return Registry::RegisterPrimitiveWrapper(
-        absl::make_unique<HybridEncryptWrapper>());
+  } else if (lowercase_primitive_name == "hybridencrypt" ||
+             lowercase_primitive_name == "hybriddecrypt") {
+    return HybridConfig::Register();
   } else if (lowercase_primitive_name == "publickeysign" ||
              lowercase_primitive_name == "publickeyverify") {
     return SignatureConfig::Register();

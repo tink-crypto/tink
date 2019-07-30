@@ -317,14 +317,11 @@ tink_cc_library(
     config.h
   DEPS
     tink::core::catalogue
-    tink::core::hybrid_decrypt
-    tink::core::hybrid_encrypt
     tink::core::key_manager
     tink::core::registry
     tink::aead::aead_config
     tink::daead::deterministic_aead_config
-    tink::hybrid::hybrid_decrypt_wrapper
-    tink::hybrid::hybrid_encrypt_wrapper
+    tink::hybrid::hybrid_config
     tink::mac::mac_config
     tink::signature::signature_config
     tink::streamingaead::streaming_aead_config

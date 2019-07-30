@@ -19,8 +19,6 @@
 
 #include "tink/catalogue.h"
 #include "tink/config.h"
-#include "tink/hybrid_encrypt.h"
-#include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
 #include "tink/registry.h"
 #include "tink/util/errors.h"
