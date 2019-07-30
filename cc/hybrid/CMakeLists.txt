@@ -207,7 +207,6 @@ tink_cc_test(
   DEPS
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
-    tink::core::catalogue
     tink::core::config
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt

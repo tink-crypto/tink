@@ -16,7 +16,6 @@
 
 #include "tink/mac/mac_config.h"
 
-#include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
@@ -31,19 +30,6 @@ namespace tink {
 namespace {
 
 using ::crypto::tink::test::DummyMac;
-
-class DummyMacCatalogue : public Catalogue<Mac> {
- public:
-  DummyMacCatalogue() {}
-
-  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Mac>>>
-  GetKeyManager(const std::string& type_url,
-                const std::string& primitive_name,
-                uint32_t min_version) const override {
-    return util::Status::UNKNOWN;
-  }
-};
-
 
 class MacConfigTest : public ::testing::Test {
  protected:

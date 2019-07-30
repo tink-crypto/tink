@@ -539,7 +539,6 @@ tink_cc_test(
   DEPS
     tink::signature::signature_config
     tink::signature::signature_key_templates
-    tink::core::catalogue
     tink::core::config
     tink::core::keyset_handle
     tink::core::public_key_sign

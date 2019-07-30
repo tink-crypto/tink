@@ -623,7 +623,6 @@ cc_test(
     deps = [
         ":signature_config",
         ":signature_key_templates",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:keyset_handle",
         "//cc:public_key_sign",

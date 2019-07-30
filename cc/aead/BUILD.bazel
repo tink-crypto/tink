@@ -301,7 +301,6 @@ cc_test(
         ":aead_config",
         ":aead_key_templates",
         "//cc:aead",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:keyset_handle",
         "//cc:registry",

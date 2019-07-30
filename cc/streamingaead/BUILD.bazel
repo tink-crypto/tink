@@ -235,7 +235,6 @@ cc_test(
     deps = [
         ":streaming_aead_config",
         ":streaming_aead_key_templates",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:keyset_handle",
         "//cc:registry",

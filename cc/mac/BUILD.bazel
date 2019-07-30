@@ -148,7 +148,6 @@ cc_test(
     deps = [
         ":mac_config",
         ":mac_key_templates",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:keyset_handle",
         "//cc:mac",

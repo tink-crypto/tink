@@ -141,7 +141,6 @@ cc_test(
     deps = [
         ":deterministic_aead_config",
         ":deterministic_aead_key_templates",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:deterministic_aead",
         "//cc:keyset_handle",

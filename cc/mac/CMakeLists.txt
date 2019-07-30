@@ -126,7 +126,6 @@ tink_cc_test(
   DEPS
     tink::mac::mac_config
     tink::mac::mac_key_templates
-    tink::core::catalogue
     tink::core::config
     tink::core::keyset_handle
     tink::core::mac

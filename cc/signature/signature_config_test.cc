@@ -18,7 +18,6 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"
@@ -35,17 +34,6 @@ namespace {
 
 using ::crypto::tink::test::DummyPublicKeySign;
 using ::crypto::tink::test::DummyPublicKeyVerify;
-
-class DummySignCatalogue : public Catalogue<PublicKeySign> {
- public:
-  DummySignCatalogue() {}
-
-  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<PublicKeySign>>>
-  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
-                uint32_t min_version) const override {
-    return util::Status::UNKNOWN;
-  }
-};
 
 class SignatureConfigTest : public ::testing::Test {
  protected:

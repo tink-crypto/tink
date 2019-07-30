@@ -18,7 +18,6 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/daead/deterministic_aead_key_templates.h"
 #include "tink/deterministic_aead.h"
@@ -33,17 +32,6 @@ namespace {
 
 using ::crypto::tink::test::DummyDeterministicAead;
 using ::testing::Eq;
-
-class DummyDaeadCatalogue : public Catalogue<DeterministicAead> {
- public:
-  DummyDaeadCatalogue() {}
-
-  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<DeterministicAead>>>
-  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
-                uint32_t min_version) const override {
-    return util::Status::UNKNOWN;
-  }
-};
 
 class DeterministicAeadConfigTest : public ::testing::Test {
  protected:

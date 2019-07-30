@@ -202,7 +202,6 @@ tink_cc_test(
   SRCS streaming_aead_config_test.cc
   DEPS
     absl::memory
-    tink::core::catalogue
     tink::core::config
     tink::core::keyset_handle
     tink::core::registry

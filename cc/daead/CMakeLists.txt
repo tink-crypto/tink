@@ -117,7 +117,6 @@ tink_cc_test(
   DEPS
     tink::daead::deterministic_aead_config
     tink::daead::deterministic_aead_key_templates
-    tink::core::catalogue
     tink::core::config
     tink::core::deterministic_aead
     tink::core::keyset_handle

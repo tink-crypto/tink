@@ -246,7 +246,6 @@ cc_test(
     deps = [
         ":hybrid_config",
         ":hybrid_key_templates",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",

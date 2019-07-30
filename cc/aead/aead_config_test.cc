@@ -20,7 +20,6 @@
 #include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_key_templates.h"
-#include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
@@ -33,17 +32,6 @@ namespace {
 
 using ::crypto::tink::test::DummyAead;
 using ::testing::Eq;
-
-class DummyAeadCatalogue : public Catalogue<Aead> {
- public:
-  DummyAeadCatalogue() {}
-
-  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>> GetKeyManager(
-      const std::string& type_url, const std::string& primitive_name,
-      uint32_t min_version) const override {
-    return util::Status::UNKNOWN;
-  }
-};
 
 class AeadConfigTest : public ::testing::Test {
  protected:

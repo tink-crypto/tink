@@ -267,7 +267,6 @@ tink_cc_test(
     tink::aead::aead_config
     tink::aead::aead_key_templates
     tink::core::aead
-    tink::core::catalogue
     tink::core::config
     tink::core::keyset_handle
     tink::core::registry

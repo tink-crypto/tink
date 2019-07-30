@@ -18,7 +18,6 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/catalogue.h"
 #include "tink/config.h"
 #include "tink/hybrid/hybrid_key_templates.h"
 #include "tink/hybrid_decrypt.h"
@@ -34,17 +33,6 @@ namespace {
 
 using ::crypto::tink::test::DummyHybridDecrypt;
 using ::crypto::tink::test::DummyHybridEncrypt;
-
-class DummyHybridDecryptCatalogue : public Catalogue<HybridDecrypt> {
- public:
-  DummyHybridDecryptCatalogue() {}
-
-  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridDecrypt>>>
-  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
-                uint32_t min_version) const override {
-    return util::Status::UNKNOWN;
-  }
-};
 
 class HybridConfigTest : public ::testing::Test {
  protected:
