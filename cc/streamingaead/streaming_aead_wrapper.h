@@ -36,7 +36,7 @@ namespace tink {
 //     the ciphertext prefix.
 class StreamingAeadWrapper : public PrimitiveWrapper<StreamingAead> {
  public:
-  // Returns an StreamingAead-primitive that uses StreamingAead-instances
+  // Returns a StreamingAead-primitive that uses StreamingAead-instances
   // provided in 'streaming_aead_set', which must be non-NULL and must contain
   // a primary instance.
   util::StatusOr<std::unique_ptr<StreamingAead>> Wrap(
