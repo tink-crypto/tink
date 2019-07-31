@@ -67,10 +67,6 @@ public class SignatureConfigTest {
     // Initialize the config.
     SignatureConfig.register();
 
-    // Now the catalogues should be present.
-    Registry.getCatalogue("tinkpublickeysign");
-    Registry.getCatalogue("tinkpublickeyverify");
-
     // After registration the key manager should be present.
     Registry.getKeyManager(typeUrl, PublicKeySign.class);
 

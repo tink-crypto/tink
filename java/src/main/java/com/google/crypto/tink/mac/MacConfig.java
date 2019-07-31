@@ -89,8 +89,8 @@ public final class MacConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.addCatalogue(CATALOGUE_NAME, new MacCatalogue());
-    Config.register(LATEST);
+    Registry.registerKeyManager(new HmacKeyManager());
+    Registry.registerPrimitiveWrapper(new MacWrapper());
   }
 
   /**

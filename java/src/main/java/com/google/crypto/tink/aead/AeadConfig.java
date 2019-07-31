@@ -136,10 +136,15 @@ public final class AeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    // The order of these calls matters.
     MacConfig.register();
-    Registry.addCatalogue(CATALOGUE_NAME, new AeadCatalogue());
-    Config.register(LATEST);
+    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager());
+    Registry.registerKeyManager(new AesEaxKeyManager());
+    Registry.registerKeyManager(new AesGcmKeyManager());
+    Registry.registerKeyManager(new ChaCha20Poly1305KeyManager());
+    Registry.registerKeyManager(new KmsAeadKeyManager());
+    Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager());
+    Registry.registerKeyManager(new XChaCha20Poly1305KeyManager());
+    Registry.registerPrimitiveWrapper(new AeadWrapper());
   }
 
   /**

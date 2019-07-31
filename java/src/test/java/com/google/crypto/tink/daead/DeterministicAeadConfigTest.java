@@ -62,10 +62,6 @@ public class DeterministicAeadConfigTest {
     // Initialize the config.
     DeterministicAeadConfig.register();
 
-    // Now the catalogues should be present.
-    RegistryConfig unused = DeterministicAeadConfig.TINK_1_1_0;
-    Registry.getCatalogue("tinkdeterministicaead");
-
     // After registration, the key manager should be present.
     Registry.getKeyManager(typeUrl, DeterministicAead.class);
 

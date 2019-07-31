@@ -75,11 +75,6 @@ public class HybridConfigTest {
     // Initialize the config.
     HybridConfig.register();
 
-    // Now the catalogues should be present.
-    Registry.getCatalogue("tinkmac");
-    Registry.getCatalogue("tinkhybriddecrypt");
-    Registry.getCatalogue("tinkhybridencrypt");
-
     Registry.getKeyManager(typeUrl, HybridDecrypt.class);
 
     // Running init() manually again should succeed.

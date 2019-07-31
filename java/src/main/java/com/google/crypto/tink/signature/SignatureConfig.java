@@ -146,8 +146,19 @@ public final class SignatureConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.addCatalogue(PUBLIC_KEY_SIGN_CATALOGUE_NAME, new PublicKeySignCatalogue());
-    Registry.addCatalogue(PUBLIC_KEY_VERIFY_CATALOGUE_NAME, new PublicKeyVerifyCatalogue());
-    Config.register(LATEST);
+    Registry.registerKeyManager(new EcdsaSignKeyManager());
+    Registry.registerKeyManager(new EcdsaVerifyKeyManager());
+
+    Registry.registerKeyManager(new Ed25519PrivateKeyManager());
+    Registry.registerKeyManager(new Ed25519PublicKeyManager());
+
+    Registry.registerKeyManager(new RsaSsaPkcs1SignKeyManager());
+    Registry.registerKeyManager(new RsaSsaPkcs1VerifyKeyManager());
+
+    Registry.registerKeyManager(new RsaSsaPssSignKeyManager());
+    Registry.registerKeyManager(new RsaSsaPssVerifyKeyManager());
+
+    Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());
+    Registry.registerPrimitiveWrapper(new PublicKeyVerifyWrapper());
   }
 }

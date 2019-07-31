@@ -69,10 +69,6 @@ public class AeadConfigTest {
     // Initialize the config.
     AeadConfig.register();
 
-    // Now the catalogues should be present.
-    Registry.getCatalogue("tinkmac");
-    Registry.getCatalogue("tinkaead");
-
     // After registration the key manager should be present.
     Registry.getKeyManager(typeUrl, Aead.class);
 

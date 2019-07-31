@@ -60,10 +60,6 @@ public class MacConfigTest {
     // Initialize the config.
     MacConfig.register();
 
-    // Now the catalogues should be present.
-    Registry.getCatalogue("tinkmac");
-    Registry.getCatalogue("tinkmac");
-
     // After registration the key manager should be present.
     Registry.getKeyManager(typeUrl);
 

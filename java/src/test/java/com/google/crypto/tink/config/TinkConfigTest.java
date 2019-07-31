@@ -129,15 +129,6 @@ public class TinkConfigTest {
     // Initialize the config.
     TinkConfig.register();
 
-    // Now the catalogues should be present.
-    Registry.getCatalogue("tinkmac");
-    Registry.getCatalogue("tinkaead");
-    Registry.getCatalogue("tinkdeterministicaead");
-    Registry.getCatalogue("tinkhybridencrypt");
-    Registry.getCatalogue("tinkhybriddecrypt");
-    Registry.getCatalogue("tinkpublickeysign");
-    Registry.getCatalogue("tinkpublickeyverify");
-
     // After registration the key managers should be present.
     Config.register(TinkConfig.TINK_1_1_0);
     Registry.getUntypedKeyManager(macTypeUrl);

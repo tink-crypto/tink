@@ -134,10 +134,10 @@ public final class HybridConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    // The order of these calls matters.
-    AeadConfig.register(); // includes Mac
-    Registry.addCatalogue(HYBRID_ENCRYPT_CATALOGUE_NAME, new HybridEncryptCatalogue());
-    Registry.addCatalogue(HYBRID_DECRYPT_CATALOGUE_NAME, new HybridDecryptCatalogue());
-    Config.register(LATEST);
+    AeadConfig.register();
+    Registry.registerKeyManager(new EciesAeadHkdfPrivateKeyManager());
+    Registry.registerKeyManager(new EciesAeadHkdfPublicKeyManager());
+    Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
+    Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
   }
 }
