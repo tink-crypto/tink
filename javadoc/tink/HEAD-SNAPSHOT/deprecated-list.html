@@ -72,12 +72,34 @@
 <h1 title="Deprecated API" class="title">Deprecated API</h1>
 <h2 title="Contents">Contents</h2>
 <ul>
+<li><a href="#interface">Deprecated Interfaces</a></li>
 <li><a href="#class">Deprecated Classes</a></li>
 <li><a href="#field">Deprecated Fields</a></li>
 <li><a href="#method">Deprecated Methods</a></li>
 </ul>
 </div>
-<div class="contentContainer"><a name="class">
+<div class="contentContainer"><a name="interface">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<table class="deprecatedSummary" border="0" cellpadding="3" cellspacing="0" summary="Deprecated Interfaces table, listing deprecated interfaces, and an explanation">
+<caption><span>Deprecated Interfaces</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Interface and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">com.google.crypto.tink.proto.KeyTypeEntryOrBuilder</a></td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/RegistryConfigOrBuilder.html" title="interface in com.google.crypto.tink.proto">com.google.crypto.tink.proto.RegistryConfigOrBuilder</a></td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<a name="class">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -122,36 +144,42 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.KeyTypeEntry</a></td>
+</tr>
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">com.google.crypto.tink.mac.MacFactory</a>
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(Mac.class)</code> after registering the <code>MacWrapper</code> instead.</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">com.google.crypto.tink.NoSecretKeysetHandle</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/KeysetHandle.html#readNoSecret-com.google.crypto.tink.KeysetReader-"><code>KeysetHandle.readNoSecret(com.google.crypto.tink.KeysetReader)</code></a> instead</span></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature">com.google.crypto.tink.signature.PublicKeySignConfig</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><code>Config</code></a> and <a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature"><code>SignatureConfig</code></a></span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/PublicKeySignFactory.html" title="class in com.google.crypto.tink.signature">com.google.crypto.tink.signature.PublicKeySignFactory</a>
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(PublicKeySign.class)</code> after registering the
      <code>PublicKeySignWrapper</code> instead.</span></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/PublicKeyVerifyConfig.html" title="class in com.google.crypto.tink.signature">com.google.crypto.tink.signature.PublicKeyVerifyConfig</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><code>Config</code></a> and <a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature"><code>SignatureConfig</code></a></span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/PublicKeyVerifyFactory.html" title="class in com.google.crypto.tink.signature">com.google.crypto.tink.signature.PublicKeyVerifyFactory</a>
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(PublicKeyVerify.class)</code> after registering the
      <code>PublicKeyVerifyWrapper</code> instead.</span></div>
 </td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/RegistryConfig.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.RegistryConfig</a></td>
 </tr>
 <tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/streamingaead/StreamingAeadFactory.html" title="class in com.google.crypto.tink.streamingaead">com.google.crypto.tink.streamingaead.StreamingAeadFactory</a>
