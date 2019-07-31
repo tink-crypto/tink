@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -48,75 +47,16 @@ public final class SignatureConfig {
 
   /** @deprecated */
   @Deprecated
-  public static final RegistryConfig TINK_1_0_0 =
-      RegistryConfig.newBuilder()
-          .setConfigName("TINK_SIGNATURE_1_0_0")
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "EcdsaPrivateKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "Ed25519PrivateKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "EcdsaPublicKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
-          .build();
-
+  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
   /**
    * @deprecated
    * @since 1.1.0
    */
   @Deprecated
-  public static final RegistryConfig TINK_1_1_0 =
-      RegistryConfig.newBuilder()
-          .mergeFrom(TINK_1_0_0)
-          .setConfigName("TINK_SIGNATURE_1_1_0")
-          .build();
+  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /** @since 1.2.0 */
-  public static final RegistryConfig LATEST =
-      RegistryConfig.newBuilder()
-          .setConfigName("TINK_SIGNATURE")
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "EcdsaPrivateKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "Ed25519PrivateKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_SIGN_CATALOGUE_NAME,
-                  "PublicKeySign",
-                  "RsaSsaPkcs1PrivateKey",
-                  0,
-                  true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "RsaSsaPssPrivateKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "EcdsaPublicKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME,
-                  "PublicKeyVerify",
-                  "RsaSsaPkcs1PublicKey",
-                  0,
-                  true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME,
-                  "PublicKeyVerify",
-                  "RsaSsaPssPublicKey",
-                  0,
-                  true))
-          .build();
+  public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   static {
     try {

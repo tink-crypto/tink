@@ -17,13 +17,10 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -72,141 +69,5 @@ public class SignatureConfigTest {
 
     // Running init() manually again should succeed.
     SignatureConfig.register();
-  }
-
-  @Test
-  public void testConfigContents() throws Exception {
-    RegistryConfig config = SignatureConfig.TINK_1_0_0;
-    assertEquals(4, config.getEntryCount());
-    assertEquals("TINK_SIGNATURE_1_0_0", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkPublicKeySign",
-        "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(1),
-        "TinkPublicKeySign",
-        "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(2),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(3),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
-        true,
-        0);
-  }
-
-  @Test
-  public void testConfigContents1_1_0() throws Exception {
-    RegistryConfig config = SignatureConfig.TINK_1_1_0;
-    assertEquals(4, config.getEntryCount());
-    assertEquals("TINK_SIGNATURE_1_1_0", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkPublicKeySign",
-        "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(1),
-        "TinkPublicKeySign",
-        "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(2),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(3),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
-        true,
-        0);
-  }
-
-  @Test
-  public void testConfigContents_LATEST() throws Exception {
-    RegistryConfig config = SignatureConfig.LATEST;
-    assertEquals(8, config.getEntryCount());
-    assertEquals("TINK_SIGNATURE", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkPublicKeySign",
-        "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(1),
-        "TinkPublicKeySign",
-        "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(2),
-        "TinkPublicKeySign",
-        "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(3),
-        "TinkPublicKeySign",
-        "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(4),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(5),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(6),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(7),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey",
-        true,
-        0);
   }
 }

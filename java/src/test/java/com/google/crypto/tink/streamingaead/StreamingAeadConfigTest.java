@@ -17,13 +17,10 @@
 package com.google.crypto.tink.streamingaead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -72,49 +69,5 @@ public class StreamingAeadConfigTest {
 
     // Running init() manually again should succeed.
     StreamingAeadConfig.register();
-  }
-
-  @Test
-  public void testConfigContents_1_1_0() throws Exception {
-    RegistryConfig config = StreamingAeadConfig.TINK_1_1_0;
-    assertEquals(2, config.getEntryCount());
-    assertEquals("TINK_STREAMINGAEAD_1_1_0", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkStreamingAead",
-        "StreamingAead",
-        "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(1),
-        "TinkStreamingAead",
-        "StreamingAead",
-        "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
-        true,
-        0);
-  }
-
-  @Test
-  public void testConfigContents_LATEST() throws Exception {
-    RegistryConfig config = StreamingAeadConfig.LATEST;
-    assertEquals(2, config.getEntryCount());
-    assertEquals("TINK_STREAMINGAEAD", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkStreamingAead",
-        "StreamingAead",
-        "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey",
-        true,
-        0);
-    TestUtil.verifyConfigEntry(
-        config.getEntry(1),
-        "TinkStreamingAead",
-        "StreamingAead",
-        "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
-        true,
-        0);
   }
 }

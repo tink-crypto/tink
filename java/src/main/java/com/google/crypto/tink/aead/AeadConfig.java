@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -47,60 +46,20 @@ public final class AeadConfig {
   private static final String PRIMITIVE_NAME = "Aead";
 
   /** @deprecated */
-  @Deprecated
-  public static final RegistryConfig TINK_1_0_0 =
-      RegistryConfig.newBuilder()
-          .mergeFrom(MacConfig.TINK_1_0_0)
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacAeadKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "AesEaxKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "AesGcmKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "ChaCha20Poly1305Key", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "KmsAeadKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "KmsEnvelopeAeadKey", 0, true))
-          .setConfigName("TINK_AEAD_1_0_0")
-          .build();
+  @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
 
   /**
    * @deprecated
    * @since 1.1.0
    */
-  @Deprecated
-  public static final RegistryConfig TINK_1_1_0 =
-      RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_AEAD_1_1_0").build();
+  @Deprecated public static final RegistryConfig TINK_1_1_0 = TINK_1_0_0;
 
-  /** @since 1.2.0 */
-  public static final RegistryConfig LATEST =
-      RegistryConfig.newBuilder()
-          .mergeFrom(MacConfig.LATEST)
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacAeadKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "AesEaxKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "AesGcmKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "ChaCha20Poly1305Key", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "KmsAeadKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "KmsEnvelopeAeadKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "XChaCha20Poly1305Key", 0, true))
-          .setConfigName("TINK_AEAD")
-          .build();
+  /**
+   * * @deprecated
+   *
+   * @since 1.2.0
+   */
+  @Deprecated public static final RegistryConfig LATEST = TINK_1_0_0;
 
   static {
     try {
