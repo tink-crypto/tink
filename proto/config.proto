@@ -28,6 +28,9 @@ option go_package = "github.com/google/tink/proto/config_go_proto";
 // specifying the corresponding primitive, key manager, and deprecation status.
 // All fields are required.
 message KeyTypeEntry {
+  // KeyTypeEntry is no longer supported.
+  option deprecated = true;
+
   string primitive_name = 1;       // E.g. “Aead”, “Mac”, ... (case-insensitive)
   string type_url = 2;             // Name of the key type.
   uint32 key_manager_version = 3;  // Minimum required version of key manager.
@@ -40,6 +43,9 @@ message KeyTypeEntry {
 // to be available via the Registry after initialization.
 // All fields are required.
 message RegistryConfig {
+  // RegistryConfig is no longer supported.
+  option deprecated = true;
+
   string config_name = 1;
   repeated KeyTypeEntry entry = 2;
 }
