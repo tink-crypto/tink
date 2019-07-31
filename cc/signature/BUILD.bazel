@@ -621,6 +621,8 @@ cc_test(
     srcs = ["signature_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":rsa_ssa_pss_sign_key_manager",
+        ":rsa_ssa_pss_verify_key_manager",
         ":signature_config",
         ":signature_key_templates",
         "//cc:config",

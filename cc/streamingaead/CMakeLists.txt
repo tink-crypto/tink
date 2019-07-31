@@ -206,6 +206,7 @@ tink_cc_test(
     tink::core::keyset_handle
     tink::core::registry
     tink::core::streaming_aead
+    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_config
     tink::streamingaead::streaming_aead_key_templates
     tink::util::status

@@ -27,28 +27,10 @@
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
+using google::crypto::tink::RegistryConfig;
+
 namespace crypto {
 namespace tink {
-
-namespace {
-
-google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
-  google::crypto::tink::RegistryConfig* config =
-      new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(AeadConfig::Latest());
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      HybridConfig::kHybridDecryptCatalogueName,
-      HybridConfig::kHybridDecryptPrimitiveName,
-      "EciesAeadHkdfPrivateKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      HybridConfig::kHybridEncryptCatalogueName,
-      HybridConfig::kHybridEncryptPrimitiveName,
-      "EciesAeadHkdfPublicKey", 0, true));
-  config->set_config_name("TINK_HYBRID");
-  return config;
-}
-
-}  // anonymous namespace
 
 constexpr char HybridConfig::kHybridDecryptCatalogueName[];
 constexpr char HybridConfig::kHybridDecryptPrimitiveName[];
@@ -56,8 +38,8 @@ constexpr char HybridConfig::kHybridEncryptCatalogueName[];
 constexpr char HybridConfig::kHybridEncryptPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& HybridConfig::Latest() {
-  static const auto config = GenerateRegistryConfig();
+const RegistryConfig& HybridConfig::Latest() {
+  static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
 

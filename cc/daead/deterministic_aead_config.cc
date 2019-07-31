@@ -29,26 +29,12 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-namespace {
-
-google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
-  google::crypto::tink::RegistryConfig* config =
-      new google::crypto::tink::RegistryConfig();
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      DeterministicAeadConfig::kCatalogueName,
-      DeterministicAeadConfig::kPrimitiveName, "AesSivKey", 0, true));
-  config->set_config_name("TINK_DAEAD");
-  return config;
-}
-
-}  // anonymous namespace
-
 constexpr char DeterministicAeadConfig::kCatalogueName[];
 constexpr char DeterministicAeadConfig::kPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& DeterministicAeadConfig::Latest() {
-  static const auto config = GenerateRegistryConfig();
+const RegistryConfig& DeterministicAeadConfig::Latest() {
+  static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
 

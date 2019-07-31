@@ -139,6 +139,7 @@ cc_test(
     srcs = ["deterministic_aead_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":aes_siv_key_manager",
         ":deterministic_aead_config",
         ":deterministic_aead_key_templates",
         "//cc:config",

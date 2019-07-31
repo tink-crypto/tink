@@ -36,45 +36,12 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-namespace {
-
-google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
-  google::crypto::tink::RegistryConfig* config =
-      new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(MacConfig::Latest());
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
-      "AesCtrHmacAeadKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
-      "AesGcmKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
-      "AesGcmSivKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
-      "AesEaxKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
-      "XChaCha20Poly1305Key", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
-      "KmsAeadKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
-      "KmsEnvelopeAeadKey", 0, true));
-  config->set_config_name("TINK_AEAD");
-  return config;
-}
-
-}  // anonymous namespace
-
 constexpr char AeadConfig::kCatalogueName[];
 constexpr char AeadConfig::kPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& AeadConfig::Latest() {
-  static const auto config = GenerateRegistryConfig();
+const RegistryConfig& AeadConfig::Latest() {
+  static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
 

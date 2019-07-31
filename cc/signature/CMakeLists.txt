@@ -537,6 +537,8 @@ tink_cc_test(
   NAME signature_config_test
   SRCS signature_config_test.cc
   DEPS
+    tink::signature::rsa_ssa_pss_sign_key_manager
+    tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::signature_config
     tink::signature::signature_key_templates
     tink::core::config

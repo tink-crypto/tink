@@ -32,58 +32,10 @@
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
+using google::crypto::tink::RegistryConfig;
+
 namespace crypto {
 namespace tink {
-
-namespace {
-
-google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
-  google::crypto::tink::RegistryConfig* config =
-      new google::crypto::tink::RegistryConfig();
-  // ECDSA
-  config->add_entry()->MergeFrom(
-      CreateTinkKeyTypeEntry(SignatureConfig::kPublicKeySignCatalogueName,
-                                   SignatureConfig::kPublicKeySignPrimitiveName,
-                                   "EcdsaPrivateKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      SignatureConfig::kPublicKeyVerifyCatalogueName,
-      SignatureConfig::kPublicKeyVerifyPrimitiveName, "EcdsaPublicKey", 0,
-      true));
-
-  // ED25519
-  config->add_entry()->MergeFrom(
-      CreateTinkKeyTypeEntry(SignatureConfig::kPublicKeySignCatalogueName,
-                                   SignatureConfig::kPublicKeySignPrimitiveName,
-                                   "Ed25519PrivateKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      SignatureConfig::kPublicKeyVerifyCatalogueName,
-      SignatureConfig::kPublicKeyVerifyPrimitiveName, "Ed25519PublicKey", 0,
-      true));
-
-  // RSA SSA PSS
-  config->add_entry()->MergeFrom(
-      CreateTinkKeyTypeEntry(SignatureConfig::kPublicKeySignCatalogueName,
-                                   SignatureConfig::kPublicKeySignPrimitiveName,
-                                   "RsaSsaPssPrivateKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      SignatureConfig::kPublicKeyVerifyCatalogueName,
-      SignatureConfig::kPublicKeyVerifyPrimitiveName, "RsaSsaPssPublicKey", 0,
-      true));
-
-  // RSA SSA PKCS1
-  config->add_entry()->MergeFrom(
-      CreateTinkKeyTypeEntry(SignatureConfig::kPublicKeySignCatalogueName,
-                                   SignatureConfig::kPublicKeySignPrimitiveName,
-                                   "RsaSsaPkcs1PrivateKey", 0, true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      SignatureConfig::kPublicKeyVerifyCatalogueName,
-      SignatureConfig::kPublicKeyVerifyPrimitiveName, "RsaSsaPkcs1PublicKey", 0,
-      true));
-  config->set_config_name("TINK_SIGNATURE");
-  return config;
-}
-
-}  // anonymous namespace
 
 constexpr char SignatureConfig::kPublicKeySignCatalogueName[];
 constexpr char SignatureConfig::kPublicKeyVerifyCatalogueName[];
@@ -92,7 +44,7 @@ constexpr char SignatureConfig::kPublicKeyVerifyPrimitiveName[];
 
 // static
 const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
-  static const auto config = GenerateRegistryConfig();
+  static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
 

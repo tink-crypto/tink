@@ -124,6 +124,7 @@ tink_cc_test(
   NAME mac_config_test
   SRCS mac_config_test.cc
   DEPS
+    tink::mac::hmac_key_manager
     tink::mac::mac_config
     tink::mac::mac_key_templates
     tink::core::config

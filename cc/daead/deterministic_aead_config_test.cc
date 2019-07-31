@@ -19,11 +19,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/config.h"
+#include "tink/daead/aes_siv_key_manager.h"
 #include "tink/daead/deterministic_aead_key_templates.h"
 #include "tink/deterministic_aead.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -31,6 +33,8 @@ namespace tink {
 namespace {
 
 using ::crypto::tink::test::DummyDeterministicAead;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
 class DeterministicAeadConfigTest : public ::testing::Test {
@@ -38,31 +42,16 @@ class DeterministicAeadConfigTest : public ::testing::Test {
   void SetUp() override { Registry::Reset(); }
 };
 
-TEST_F(DeterministicAeadConfigTest, testBasic) {
-  std::string aes_siv_key_type = "type.googleapis.com/google.crypto.tink.AesSivKey";
-  auto& config = DeterministicAeadConfig::Latest();
-
-  EXPECT_EQ(1, DeterministicAeadConfig::Latest().entry_size());
-
-  EXPECT_EQ("TinkDeterministicAead", config.entry(0).catalogue_name());
-  EXPECT_EQ("DeterministicAead", config.entry(0).primitive_name());
-  EXPECT_EQ(aes_siv_key_type, config.entry(0).type_url());
-  EXPECT_EQ(true, config.entry(0).new_key_allowed());
-  EXPECT_EQ(0, config.entry(0).key_manager_version());
-
-  // No key manager before registration.
-  auto manager_result =
-      Registry::get_key_manager<DeterministicAead>(aes_siv_key_type);
-  EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
-
-  // Registration of standard key types works.
-  auto status = DeterministicAeadConfig::Register();
-  EXPECT_TRUE(status.ok()) << status;
-  manager_result =
-      Registry::get_key_manager<DeterministicAead>(aes_siv_key_type);
-  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-  EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(aes_siv_key_type));
+TEST_F(DeterministicAeadConfigTest, Basic) {
+  EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
+                  AesSivKeyManager().get_key_type())
+                  .status(),
+              StatusIs(util::error::NOT_FOUND));
+  DeterministicAeadConfig::Register();
+  EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
+                  AesSivKeyManager().get_key_type())
+                  .status(),
+              IsOk());
 }
 
 // Tests that the DeterministicAeadWrapper has been properly registered and we

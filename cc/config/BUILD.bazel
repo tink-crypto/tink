@@ -49,7 +49,9 @@ cc_test(
         "//cc:mac",
         "//cc:registry",
         "//cc:streaming_aead",
+        "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",
+        "//cc/util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )

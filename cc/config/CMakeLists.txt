@@ -31,6 +31,7 @@ tink_cc_test(
   NAME tink_config_test
   SRCS tink_config_test.cc
   DEPS
+    tink::aead::aes_gcm_key_manager
     tink::config::tink_config
     tink::core::aead
     tink::core::config
@@ -40,6 +41,7 @@ tink_cc_test(
     tink::core::mac
     tink::core::registry
     tink::core::streaming_aead
+    tink::util::test_matchers
     tink::util::status
 )
 

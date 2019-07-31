@@ -115,6 +115,7 @@ tink_cc_test(
   NAME deterministic_aead_config_test
   SRCS deterministic_aead_config_test.cc
   DEPS
+    tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_config
     tink::daead::deterministic_aead_key_templates
     tink::core::config

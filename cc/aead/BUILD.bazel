@@ -300,6 +300,7 @@ cc_test(
     deps = [
         ":aead_config",
         ":aead_key_templates",
+        ":aes_gcm_key_manager",
         "//cc:aead",
         "//cc:config",
         "//cc:keyset_handle",

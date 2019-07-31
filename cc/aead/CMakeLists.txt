@@ -266,6 +266,7 @@ tink_cc_test(
   DEPS
     tink::aead::aead_config
     tink::aead::aead_key_templates
+    tink::aead::aes_gcm_key_manager
     tink::core::aead
     tink::core::config
     tink::core::keyset_handle

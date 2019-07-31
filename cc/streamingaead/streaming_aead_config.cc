@@ -28,26 +28,12 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-namespace {
-
-google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
-  google::crypto::tink::RegistryConfig* config =
-      new google::crypto::tink::RegistryConfig();
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      StreamingAeadConfig::kCatalogueName, StreamingAeadConfig::kPrimitiveName,
-      "AesGcmHkdfStreamingKey", 0, true));
-  config->set_config_name("TINK_STREAMING_AEAD");
-  return config;
-}
-
-}  // anonymous namespace
-
 constexpr char StreamingAeadConfig::kCatalogueName[];
 constexpr char StreamingAeadConfig::kPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& StreamingAeadConfig::Latest() {
-  static const auto config = GenerateRegistryConfig();
+const RegistryConfig& StreamingAeadConfig::Latest() {
+  static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
 

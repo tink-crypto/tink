@@ -25,32 +25,17 @@
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
+using google::crypto::tink::RegistryConfig;
+
 namespace crypto {
 namespace tink {
-
-namespace {
-
-google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
-  google::crypto::tink::RegistryConfig* config =
-      new google::crypto::tink::RegistryConfig();
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      MacConfig::kCatalogueName, MacConfig::kPrimitiveName, "HmacKey", 0,
-      true));
-  config->add_entry()->MergeFrom(CreateTinkKeyTypeEntry(
-      MacConfig::kCatalogueName, MacConfig::kPrimitiveName, "AesCmacKey", 0,
-      true));
-  config->set_config_name("TINK_MAC");
-  return config;
-}
-
-}  // anonymous namespace
 
 constexpr char MacConfig::kCatalogueName[];
 constexpr char MacConfig::kPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& MacConfig::Latest() {
-  static auto config = GenerateRegistryConfig();
+const RegistryConfig& MacConfig::Latest() {
+  static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
 

@@ -146,6 +146,7 @@ cc_test(
     srcs = ["mac_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":hmac_key_manager",
         ":mac_config",
         ":mac_key_templates",
         "//cc:config",

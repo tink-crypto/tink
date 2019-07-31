@@ -233,6 +233,7 @@ cc_test(
     size = "small",
     srcs = ["streaming_aead_config_test.cc"],
     deps = [
+        ":aes_gcm_hkdf_streaming_key_manager",
         ":streaming_aead_config",
         ":streaming_aead_key_templates",
         "//cc:config",
