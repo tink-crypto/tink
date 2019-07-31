@@ -24,19 +24,8 @@ from tink.python.cc.clif import cc_tink_config
 
 class CcTinkConfigTest(absltest.TestCase):
 
-  def test_latest(self):
+  def test_register(self):
     cc_tink_config.register()
-    latest = cc_tink_config.latest()
-    primitive_names = {entry.primitive_name for entry in latest.entry}
-    self.assertIn('Aead', primitive_names)
-    self.assertIn('Mac', primitive_names)
-    self.assertIn('PublicKeySign', primitive_names)
-    type_urls = {entry.type_url for entry in latest.entry}
-    self.assertIn('type.googleapis.com/google.crypto.tink.AesEaxKey', type_urls)
-    self.assertIn('type.googleapis.com/google.crypto.tink.AesGcmKey', type_urls)
-    self.assertIn('type.googleapis.com/google.crypto.tink.HmacKey', type_urls)
-    self.assertIn('type.googleapis.com/google.crypto.tink.EcdsaPrivateKey',
-                  type_urls)
 
 
 if __name__ == '__main__':

@@ -14,17 +14,3 @@ cc_library(
         "//proto:tink_cc_proto",
     ],
 )
-
-cc_library(
-    name = "cc_tink_config",
-    srcs = ["cc_tink_config.cc"],
-    hdrs = ["cc_tink_config.h"],
-    include_prefix = "tink/python",
-    strip_include_prefix = "/python",
-    deps = [
-        "//cc",
-        "//cc/config:tink_config",
-        "//cc/util:status",
-        "//proto:config_cc_proto",
-    ],
-)

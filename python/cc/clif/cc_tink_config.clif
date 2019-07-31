@@ -18,4 +18,3 @@ from "tink/python/util/clif.h" import *  # StatusOr
 from "tink/python/cc/cc_tink_config.h":
   namespace `crypto::tink`:
     def `CcTinkConfigRegister` as register() -> Status
-    def `CcTinkConfigLatest` as latest() -> RegistryConfig
