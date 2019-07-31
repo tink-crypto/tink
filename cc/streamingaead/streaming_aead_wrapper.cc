@@ -77,7 +77,7 @@ class StreamingAeadSetWrapper: public StreamingAead {
   ~StreamingAeadSetWrapper() override {}
 
  private:
-  // We use a shared_ptr here to ensure that primitves_ stays alive
+  // We use a shared_ptr here to ensure that primitives_ stays alive
   // as long as it might be needed by some decrypting stream returned
   // by NewDecryptingStream.  This can happen after this wrapper
   // is destroyed, as we refer to primitives_ only when the user attempts
