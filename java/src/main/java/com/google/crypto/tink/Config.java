@@ -81,6 +81,11 @@ public final class Config {
    */
   public static void registerKeyType(KeyTypeEntry entry) throws GeneralSecurityException {
     validate(entry);
+    // Catalogues are no longer supported; we simply return on those catalogues which have been
+    // removed.
+    if (entry.getCatalogueName().equals("TinkStreamingAead")) {
+      return;
+    }
     Catalogue<?> catalogue = Registry.getCatalogue(entry.getCatalogueName());
     Registry.registerPrimitiveWrapper(catalogue.getPrimitiveWrapper());
     KeyManager<?> keyManager =

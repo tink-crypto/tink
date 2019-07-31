@@ -96,7 +96,8 @@ public final class StreamingAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.addCatalogue(CATALOGUE_NAME, new StreamingAeadCatalogue());
-    Config.register(LATEST);
+    Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager());
+    Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager());
+    Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
   }
 }

@@ -67,9 +67,6 @@ public class StreamingAeadConfigTest {
     // Initialize the config.
     StreamingAeadConfig.register();
 
-    // Now the catalogues should be present.
-    Registry.getCatalogue("TinkStreamingAead");
-
     // After registration the key manager should be present.
     Registry.getKeyManager(typeUrl, StreamingAead.class);
 
