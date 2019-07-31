@@ -17,10 +17,16 @@
 #ifndef TINK_CONFIG_H_
 #define TINK_CONFIG_H_
 
+#include "absl/strings/ascii.h"
+#include "tink/aead/aead_config.h"
 #include "tink/catalogue.h"
-#include "tink/config.h"
+#include "tink/daead/deterministic_aead_config.h"
+#include "tink/hybrid/hybrid_config.h"
 #include "tink/key_manager.h"
+#include "tink/mac/mac_config.h"
 #include "tink/registry.h"
+#include "tink/signature/signature_config.h"
+#include "tink/streamingaead/streaming_aead_config.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
@@ -45,12 +51,10 @@ class Config {
  public:
   // Returns a KeyTypeEntry for Tink key types with the specified parameters.
   static std::unique_ptr<google::crypto::tink::KeyTypeEntry>
-  GetTinkKeyTypeEntry(
-      const std::string& catalogue_name,
-      const std::string& primitive_name,
-      const std::string& key_proto_name,
-      int key_manager_version,
-      bool new_key_allowed);
+  GetTinkKeyTypeEntry(const std::string& catalogue_name,
+                      const std::string& primitive_name,
+                      const std::string& key_proto_name, int key_manager_version,
+                      bool new_key_allowed);
 
   // Registers a key manager according to the specification in 'entry'.
   template <class P>
@@ -70,22 +74,37 @@ class Config {
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation details of templated methods.
 
-
 // static
-template<class P>
+template <class P>
 crypto::tink::util::Status Config::Register(
     const google::crypto::tink::KeyTypeEntry& entry) {
-  crypto::tink::util::Status status = Validate(entry);
+  util::Status status;
+  std::string primitive_name = absl::AsciiStrToLower(entry.primitive_name());
+
+  if (primitive_name == "mac") {
+    status = MacConfig::Register();
+  } else if (primitive_name == "aead") {
+    status = AeadConfig::Register();
+  } else if (primitive_name == "deterministicaead") {
+    status = DeterministicAeadConfig::Register();
+  } else if (primitive_name == "hybridencrypt" ||
+             primitive_name == "hybriddecrypt") {
+    status = HybridConfig::Register();
+  } else if (primitive_name == "publickeysign" ||
+             primitive_name == "publickeyverify") {
+    status = SignatureConfig::Register();
+  } else if (primitive_name == "streamingaead") {
+    status = StreamingAeadConfig::Register();
+  } else {
+    status = util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StrCat("Non-standard primitive '", entry.primitive_name(),
+                     "', call Registry::RegisterKeyManager "
+                     "and Registry::"
+                     "RegisterPrimitiveWrapper directly."));
+  }
   if (!status.ok()) return status;
-  auto catalogue_result =
-      Registry::get_catalogue<P>(entry.catalogue_name());
-  if (!catalogue_result.ok()) return catalogue_result.status();
-  auto catalogue = catalogue_result.ValueOrDie();
-  auto key_manager_result = catalogue->GetKeyManager(
-      entry.type_url(), entry.primitive_name(), entry.key_manager_version());
-  if (!key_manager_result.ok()) return key_manager_result.status();
-  return Registry::RegisterKeyManager(
-      std::move(key_manager_result.ValueOrDie()), entry.new_key_allowed());
+  return util::Status::OK;
 }
 
 }  // namespace tink

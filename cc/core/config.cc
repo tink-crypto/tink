@@ -18,12 +18,6 @@
 
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
-#include "tink/aead/aead_config.h"
-#include "tink/daead/deterministic_aead_config.h"
-#include "tink/hybrid/hybrid_config.h"
-#include "tink/mac/mac_config.h"
-#include "tink/signature/signature_config.h"
-#include "tink/streamingaead/streaming_aead_config.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -35,12 +29,10 @@ namespace crypto {
 namespace tink {
 
 // static
-std::unique_ptr<google::crypto::tink::KeyTypeEntry>
-Config::GetTinkKeyTypeEntry(const std::string& catalogue_name,
-                            const std::string& primitive_name,
-                            const std::string& key_proto_name,
-                            int key_manager_version,
-                            bool new_key_allowed) {
+std::unique_ptr<google::crypto::tink::KeyTypeEntry> Config::GetTinkKeyTypeEntry(
+    const std::string& catalogue_name, const std::string& primitive_name,
+    const std::string& key_proto_name, int key_manager_version,
+    bool new_key_allowed) {
   std::string prefix = "type.googleapis.com/google.crypto.tink.";
   std::unique_ptr<KeyTypeEntry> entry(new KeyTypeEntry());
   entry->set_catalogue_name(catalogue_name);
@@ -54,8 +46,7 @@ Config::GetTinkKeyTypeEntry(const std::string& catalogue_name,
 // static
 crypto::tink::util::Status Config::Validate(const KeyTypeEntry& entry) {
   if (entry.type_url().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "Missing type_url.");
+    return util::Status(util::error::INVALID_ARGUMENT, "Missing type_url.");
   }
   if (entry.primitive_name().empty()) {
     return util::Status(util::error::INVALID_ARGUMENT,
@@ -71,35 +62,19 @@ crypto::tink::util::Status Config::Validate(const KeyTypeEntry& entry) {
 // static
 util::Status Config::Register(
     const google::crypto::tink::RegistryConfig& config) {
-  for (const auto& entry : config.entry()) {
-    util::Status status;
-    std::string primitive_name = absl::AsciiStrToLower(entry.primitive_name());
-
-    if (primitive_name == "mac") {
-      status = MacConfig::Register();
-    } else if (primitive_name == "aead") {
-      status = AeadConfig::Register();
-    } else if (primitive_name == "deterministicaead") {
-      status = DeterministicAeadConfig::Register();
-    } else if (primitive_name == "hybridencrypt" ||
-               primitive_name == "hybriddecrypt") {
-      status = HybridConfig::Register();
-    } else if (primitive_name == "publickeysign" ||
-               primitive_name == "publickeyverify") {
-      status = SignatureConfig::Register();
-    } else if (primitive_name == "streamingaead") {
-      status = StreamingAeadConfig::Register();
-    } else {
-      status = util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
-                            absl::StrCat("Non-standard primitive '",
-                                         entry.primitive_name(),
-                                         "', call Registry::RegisterKeyManager "
-                                         "and Registry::"
-                                         "RegisterPrimitiveWrapper directly.")
-                           );
-    }
-    if (!status.ok()) return status;
-  }
+  util::Status status;
+  status = MacConfig::Register();
+  if (!status.ok()) return status;
+  status = AeadConfig::Register();
+  if (!status.ok()) return status;
+  status = DeterministicAeadConfig::Register();
+  if (!status.ok()) return status;
+  status = HybridConfig::Register();
+  if (!status.ok()) return status;
+  status = SignatureConfig::Register();
+  if (!status.ok()) return status;
+  status = StreamingAeadConfig::Register();
+  if (!status.ok()) return status;
   return util::Status::OK;
 }
 
