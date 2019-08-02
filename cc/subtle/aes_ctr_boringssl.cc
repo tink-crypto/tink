@@ -95,12 +95,12 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
                           reinterpret_cast<const uint8_t*>(plaintext.data()),
                           plaintext.size());
   if (ret != 1) {
-    util::Status(util::error::INTERNAL, "encryption failed");
+    return util::Status(util::error::INTERNAL, "encryption failed");
   }
   written += len;
 
   if (written != ciphertext_size) {
-    util::Status(util::error::INTERNAL, "incorrect ciphertext size");
+    return util::Status(util::error::INTERNAL, "incorrect ciphertext size");
   }
   return std::string(reinterpret_cast<const char*>(&ct[0]), written);
 }
@@ -141,7 +141,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
       reinterpret_cast<const uint8_t*>(&ciphertext.data()[read]),
       plaintext_size);
   if (ret != 1) {
-    util::Status(util::error::INTERNAL, "decryption failed");
+    return util::Status(util::error::INTERNAL, "decryption failed");
   }
   written += len;
 
