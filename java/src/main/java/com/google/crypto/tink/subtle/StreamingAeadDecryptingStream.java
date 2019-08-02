@@ -106,8 +106,8 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
   /**
    * Tries to read the header of the ciphertext.
    *
-   * @return true if the header has been fully read and false if not enogh bytes were available from
-   *     the ciphertext stream.
+   * @return true if the header has been fully read and false if not enough bytes were available
+   *     from the ciphertext stream.
    * @throws IOException when an exception occurs while reading from @code{in} or when the header is
    *     too short.
    */
