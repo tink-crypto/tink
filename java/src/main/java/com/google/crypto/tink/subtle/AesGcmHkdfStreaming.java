@@ -31,7 +31,7 @@ import javax.crypto.spec.SecretKeySpec;
  * <p>Each ciphertext uses a new AES-GCM key that is derived from the key derivation key, a randomly
  * chosen salt of the same size as the key and a nonce prefix.
  *
- * <p>The the format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The
+ * <p>The format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The
  * header has size this.getHeaderLength(). Its format is headerLength || salt || prefix. where
  * headerLength is 1 byte determining the size of the header, salt is a salt used in the key
  * derivation and prefix is the prefix of the nonce. In principle headerLength is redundant
