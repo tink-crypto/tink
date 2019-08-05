@@ -31,9 +31,8 @@ from __future__ import print_function
 # Special imports
 from absl import app
 from absl import flags
+from absl import logging
 import tink
-
-from pyglib import logging
 
 
 FLAGS = flags.FLAGS

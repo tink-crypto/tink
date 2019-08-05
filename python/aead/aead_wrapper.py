@@ -19,9 +19,10 @@ from __future__ import division
 from __future__ import google_type_annotations
 from __future__ import print_function
 
-from typing import Type
+# Special imports
+from absl import logging
 
-from pyglib import logging
+from typing import Type
 
 from tink.python.aead import aead
 from tink.python.core import crypto_format
