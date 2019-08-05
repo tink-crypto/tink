@@ -146,6 +146,7 @@ Tink is maintained by (A-Z):
 
 -   Haris Andrianakis
 -   Daniel Bleichenbacher
+-   Tanuj Dhir
 -   Thai Duong
 -   Thomas Holenstein
 -   Charles Lee
@@ -153,4 +154,5 @@ Tink is maintained by (A-Z):
 -   Bartosz Przydatek
 -   Enzo Puig
 -   Veronika Slívová
+-   Paula Vidas
 -   Jürg Wullschleger
