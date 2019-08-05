@@ -127,7 +127,7 @@ std::shared_ptr<PrimitiveSet<StreamingAead>> GetTestStreamingAeadSet(
     auto entry_result = saead_set->AddPrimitive(std::move(saead), *key);
     EXPECT_TRUE(entry_result.ok());
     if (i + 1 == spec.size()) {
-      saead_set->set_primary(entry_result.ValueOrDie());
+      EXPECT_THAT(saead_set->set_primary(entry_result.ValueOrDie()), IsOk());
     }
     i++;
   }

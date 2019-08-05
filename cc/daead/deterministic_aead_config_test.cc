@@ -47,7 +47,7 @@ TEST_F(DeterministicAeadConfigTest, Basic) {
                   AesSivKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
-  DeterministicAeadConfig::Register();
+  EXPECT_THAT(DeterministicAeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
                   AesSivKeyManager().get_key_type())
                   .status(),
@@ -64,11 +64,13 @@ TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
   key.set_key_id(1234);
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
   auto primitive_set = absl::make_unique<PrimitiveSet<DeterministicAead>>();
-  primitive_set->set_primary(
-      primitive_set
-          ->AddPrimitive(absl::make_unique<DummyDeterministicAead>("dummy"),
-                         key)
-          .ValueOrDie());
+  ASSERT_THAT(
+      primitive_set->set_primary(
+          primitive_set
+              ->AddPrimitive(absl::make_unique<DummyDeterministicAead>("dummy"),
+                             key)
+              .ValueOrDie()),
+      IsOk());
 
   auto registry_wrapped = Registry::Wrap(std::move(primitive_set));
 

@@ -225,6 +225,7 @@ tink_cc_test(
     tink::core::hybrid_decrypt
     tink::core::primitive_set
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
@@ -237,6 +238,7 @@ tink_cc_test(
     tink::core::hybrid_encrypt
     tink::core::primitive_set
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
@@ -287,6 +289,7 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+    tink::util::test_matchers
 )
 
 tink_cc_test(

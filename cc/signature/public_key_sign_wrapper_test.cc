@@ -21,12 +21,14 @@
 #include "tink/public_key_sign.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
+#include "tink/util/test_matchers.h"
 
-using crypto::tink::test::DummyPublicKeySign;
-using crypto::tink::test::DummyPublicKeyVerify;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::DummyPublicKeySign;
+using ::crypto::tink::test::DummyPublicKeyVerify;
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -105,7 +107,7 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
     ASSERT_TRUE(entry_result.ok());
 
     // The last key is the primary.
-    pk_sign_set->set_primary(entry_result.ValueOrDie());
+    ASSERT_THAT(pk_sign_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
     // Wrap pk_sign_set and test the resulting PublicKeySign.
     auto pk_sign_result = PublicKeySignWrapper().Wrap(std::move(pk_sign_set));
@@ -138,7 +140,7 @@ TEST_F(PublicKeySignSetWrapperTest, testLegacySignatures) {
         new DummyPublicKeySign(signature_name));
     auto entry_result = pk_sign_set->AddPrimitive(std::move(pk_sign), key);
     ASSERT_TRUE(entry_result.ok());
-    pk_sign_set->set_primary(entry_result.ValueOrDie());
+    ASSERT_THAT(pk_sign_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
     // Wrap pk_sign_set and test the resulting PublicKeySign.
     auto pk_sign_result = PublicKeySignWrapper().Wrap(std::move(pk_sign_set));

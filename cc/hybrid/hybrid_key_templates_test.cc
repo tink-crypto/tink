@@ -16,13 +16,14 @@
 
 #include "tink/hybrid/hybrid_key_templates.h"
 
+#include "gtest/gtest.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/hybrid_config.h"
+#include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -34,12 +35,13 @@ using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::IsOk;
 
 class HybridKeyTemplatesTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() {
     // Initialize the registry, so that the templates can be tested.
-    HybridConfig::Register();
+    ASSERT_THAT(HybridConfig::Register(), IsOk());
   }
 };
 

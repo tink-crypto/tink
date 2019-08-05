@@ -15,17 +15,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/mac/mac_wrapper.h"
+
+#include "gtest/gtest.h"
 #include "tink/crypto_format.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 using crypto::tink::test::DummyMac;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::IsOk;
 
 namespace crypto {
 namespace tink {
@@ -84,7 +87,7 @@ TEST(MacWrapperTest, Basic) {
                                        keyset.key(2));
   ASSERT_TRUE(entry_result.ok());
   // The last key is the primary.
-  mac_set->set_primary(entry_result.ValueOrDie());
+  ASSERT_THAT(mac_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
   // Wrap mac_set and test the resulting Mac.
   auto mac_result = MacWrapper().Wrap(std::move(mac_set));
@@ -120,7 +123,7 @@ TEST(MacWrapperTest, testLegacyAuthentication) {
   std::unique_ptr<Mac> mac(new DummyMac(mac_name));
   auto entry_result = mac_set->AddPrimitive(std::move(mac), key);
   ASSERT_TRUE(entry_result.ok());
-  mac_set->set_primary(entry_result.ValueOrDie());
+  ASSERT_THAT(mac_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
   // Wrap mac_set and test the resulting Mac.
   auto mac_result = MacWrapper().Wrap(std::move(mac_set));

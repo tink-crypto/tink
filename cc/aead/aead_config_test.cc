@@ -46,7 +46,7 @@ TEST_F(AeadConfigTest, RegisterWorks) {
   EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
-  AeadConfig::Register();
+  EXPECT_THAT(AeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
                   .status(),
               IsOk());
@@ -62,9 +62,11 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
   key.set_key_id(1234);
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
   auto primitive_set = absl::make_unique<PrimitiveSet<Aead>>();
-  primitive_set->set_primary(
-      primitive_set->AddPrimitive(absl::make_unique<DummyAead>("dummy"), key)
-          .ValueOrDie());
+  ASSERT_THAT(primitive_set->set_primary(
+                  primitive_set
+                      ->AddPrimitive(absl::make_unique<DummyAead>("dummy"), key)
+                      .ValueOrDie()),
+              IsOk());
 
   auto primitive_result = Registry::Wrap(std::move(primitive_set));
 

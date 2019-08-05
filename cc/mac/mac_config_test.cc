@@ -46,7 +46,7 @@ TEST_F(MacConfigTest, Basic) {
   EXPECT_THAT(
       Registry::get_key_manager<Mac>(HmacKeyManager().get_key_type()).status(),
       StatusIs(util::error::NOT_FOUND));
-  MacConfig::Register();
+  ASSERT_THAT(MacConfig::Register(), IsOk());
   EXPECT_THAT(
       Registry::get_key_manager<Mac>(HmacKeyManager().get_key_type()).status(),
       IsOk());
@@ -62,9 +62,13 @@ TEST_F(MacConfigTest, WrappersRegistered) {
   key.set_key_id(1234);
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
   auto primitive_set = absl::make_unique<PrimitiveSet<Mac>>();
-  primitive_set->set_primary(
-      primitive_set->AddPrimitive(absl::make_unique<DummyMac>("dummy"), key)
-          .ValueOrDie());
+  ASSERT_TRUE(
+      primitive_set
+          ->set_primary(
+              primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyMac>("dummy"), key)
+                  .ValueOrDie())
+          .ok());
 
   auto primitive_result = Registry::Wrap(std::move(primitive_set));
 

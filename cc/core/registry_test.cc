@@ -651,7 +651,7 @@ TEST_F(RegistryTest, UsualWrappingTest) {
           .ok());
   auto entry_result = primitive_set->AddPrimitive(
       absl::make_unique<DummyAead>("primary_aead"), keyset.key(2));
-  primitive_set->set_primary(entry_result.ValueOrDie());
+  ASSERT_THAT(primitive_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
   EXPECT_TRUE(
       Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>())

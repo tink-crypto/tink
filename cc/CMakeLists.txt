@@ -779,6 +779,7 @@ tink_cc_test(
     tink::core::mac
     tink::core::primitive_set
     tink::util::protobuf_helper
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )

@@ -53,7 +53,7 @@ TEST_F(HybridConfigTest, Basic) {
                   EciesAeadHkdfPublicKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
-  HybridConfig::Register();
+  EXPECT_THAT(HybridConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   EciesAeadHkdfPrivateKeyManager().get_key_type())
                   .status(),
@@ -74,10 +74,12 @@ TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
   key.set_key_id(1234);
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   auto primitive_set = absl::make_unique<PrimitiveSet<HybridEncrypt>>();
-  primitive_set->set_primary(
-      primitive_set
-          ->AddPrimitive(absl::make_unique<DummyHybridEncrypt>("dummy"), key)
-          .ValueOrDie());
+  ASSERT_THAT(primitive_set->set_primary(
+                  primitive_set
+                      ->AddPrimitive(
+                          absl::make_unique<DummyHybridEncrypt>("dummy"), key)
+                      .ValueOrDie()),
+              IsOk());
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
@@ -103,10 +105,12 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
   key.set_key_id(1234);
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   auto primitive_set = absl::make_unique<PrimitiveSet<HybridDecrypt>>();
-  primitive_set->set_primary(
-      primitive_set
-          ->AddPrimitive(absl::make_unique<DummyHybridDecrypt>("dummy"), key)
-          .ValueOrDie());
+  ASSERT_THAT(primitive_set->set_primary(
+                  primitive_set
+                      ->AddPrimitive(
+                          absl::make_unique<DummyHybridDecrypt>("dummy"), key)
+                      .ValueOrDie()),
+              IsOk());
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 

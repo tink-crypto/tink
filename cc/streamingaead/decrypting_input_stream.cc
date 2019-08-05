@@ -85,7 +85,10 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
       }
     }
     // Not a match, rewind and try the next primitive.
-    buffered_ct_source_->Rewind();
+    Status s = buffered_ct_source_->Rewind();
+    if (!s.ok()) {
+      return s;
+    }
   }
   return Status(util::error::INVALID_ARGUMENT,
                 "Could not find a decrypter matching the ciphertext stream.");

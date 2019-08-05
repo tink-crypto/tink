@@ -54,7 +54,7 @@ TEST_F(SignatureConfigTest, testBasic) {
                   RsaSsaPssVerifyKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
-  SignatureConfig::Register();
+  EXPECT_THAT(SignatureConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   RsaSsaPssSignKeyManager().get_key_type())
                   .status(),
@@ -75,10 +75,10 @@ TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
   key.set_key_id(1234);
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeySign>>();
-  primitive_set->set_primary(
+  ASSERT_THAT(primitive_set->set_primary(
       primitive_set
           ->AddPrimitive(absl::make_unique<DummyPublicKeySign>("dummy"), key)
-          .ValueOrDie());
+          .ValueOrDie()), IsOk());
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
@@ -104,10 +104,12 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
   key.set_key_id(1234);
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeyVerify>>();
-  primitive_set->set_primary(
-      primitive_set
-          ->AddPrimitive(absl::make_unique<DummyPublicKeyVerify>("dummy"), key)
-          .ValueOrDie());
+  ASSERT_THAT(primitive_set->set_primary(
+                  primitive_set
+                      ->AddPrimitive(
+                          absl::make_unique<DummyPublicKeyVerify>("dummy"), key)
+                      .ValueOrDie()),
+              IsOk());
   std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
   std::string signature = DummyPublicKeySign("dummy").Sign("message").ValueOrDie();
 

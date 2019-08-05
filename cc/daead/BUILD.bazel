@@ -126,6 +126,7 @@ cc_test(
         "//cc:deterministic_aead",
         "//cc:primitive_set",
         "//cc/util:status",
+        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",

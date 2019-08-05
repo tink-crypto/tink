@@ -15,17 +15,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/signature/public_key_verify_wrapper.h"
+
 #include "gtest/gtest.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
-using crypto::tink::test::DummyPublicKeySign;
-using crypto::tink::test::DummyPublicKeyVerify;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::DummyPublicKeySign;
+using ::crypto::tink::test::DummyPublicKeyVerify;
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -105,7 +108,7 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
     ASSERT_TRUE(entry_result.ok());
 
     // The last key is the primary.
-    pk_verify_set->set_primary(entry_result.ValueOrDie());
+    ASSERT_THAT(pk_verify_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
     // Wrap pk_verify_set and test the resulting PublicKeyVerify.
     auto pk_verify_result =

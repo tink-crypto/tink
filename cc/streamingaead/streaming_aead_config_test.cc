@@ -50,7 +50,7 @@ TEST_F(StreamingAeadConfigTest, Basic) {
                   AesGcmHkdfStreamingKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
-  StreamingAeadConfig::Register();
+  EXPECT_THAT(StreamingAeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesGcmHkdfStreamingKeyManager().get_key_type())
                   .status(),
@@ -67,8 +67,12 @@ TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
   key.set_key_id(1234);
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
   auto primitive_set = absl::make_unique<PrimitiveSet<StreamingAead>>();
-  primitive_set->set_primary(primitive_set->AddPrimitive(
-      absl::make_unique<DummyStreamingAead>("dummy"), key).ValueOrDie());
+  ASSERT_THAT(primitive_set->set_primary(
+                  primitive_set
+                      ->AddPrimitive(
+                          absl::make_unique<DummyStreamingAead>("dummy"), key)
+                      .ValueOrDie()),
+              IsOk());
 
   auto primitive_result = Registry::Wrap(std::move(primitive_set));
   ASSERT_TRUE(primitive_result.ok()) << primitive_result.status();

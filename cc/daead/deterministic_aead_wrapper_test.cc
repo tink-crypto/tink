@@ -15,17 +15,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/daead/deterministic_aead_wrapper.h"
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/deterministic_aead.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
-using crypto::tink::test::DummyDeterministicAead;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::DummyDeterministicAead;
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -100,7 +103,7 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     entry_result = daead_set->AddPrimitive(std::move(daead), keyset.key(2));
     ASSERT_TRUE(entry_result.ok());
     // The last key is the primary.
-    daead_set->set_primary(entry_result.ValueOrDie());
+    ASSERT_THAT(daead_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
     // Wrap daead_set and test the resulting DeterministicAead.
     auto daead_result =

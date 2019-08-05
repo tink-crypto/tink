@@ -320,6 +320,7 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
@@ -352,6 +353,7 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
