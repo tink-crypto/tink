@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,39 +11,35 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+#include "tink/subtle/streaming_aead_test_util.h"
 
-#include "tink/config/tink_config.h"
-
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/aead.h"
-#include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/config.h"
-#include "tink/deterministic_aead.h"
-#include "tink/hybrid_decrypt.h"
-#include "tink/hybrid_encrypt.h"
-#include "tink/mac.h"
-#include "tink/public_key_sign.h"
-#include "tink/public_key_verify.h"
-#include "tink/registry.h"
-#include "tink/streaming_aead.h"
-#include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
+#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
-namespace {
 
+using ::crypto::tink::test::DummyStreamingAead;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 
-TEST(TinkConfigTest, RegisterWorks) {
-  EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
-                  .status(),
-              StatusIs(util::error::NOT_FOUND));
-  EXPECT_THAT(TinkConfig::Register(), IsOk());
-  EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
-                  .status(),
-              IsOk());
+namespace {
+
+TEST(EncryptThenDecrypt, Basic) {
+  DummyStreamingAead streaming_aead("Aead 1");
+  EXPECT_THAT(
+      EncryptThenDecrypt(&streaming_aead, &streaming_aead, "plaintext", "aad"),
+      IsOk());
+}
+
+TEST(EncryptThenDecrypt, DifferentAeads) {
+  DummyStreamingAead streaming_aead_1("Aead 1");
+  DummyStreamingAead streaming_aead_2("Aead 2");
+  EXPECT_THAT(EncryptThenDecrypt(&streaming_aead_1, &streaming_aead_2,
+                                 "plaintext", "aad"),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 }  // namespace

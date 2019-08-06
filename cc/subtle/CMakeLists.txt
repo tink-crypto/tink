@@ -553,6 +553,20 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME streaming_aead_test_util
+  SRCS
+    streaming_aead_test_util.cc
+    streaming_aead_test_util.h
+  DEPS
+    absl::strings
+    tink::core::streaming_aead
+    tink::util::test_util
+    tink::util::ostream_output_stream
+    tink::util::istream_input_stream
+    tink::util::status
+)
+
 # tests
 
 tink_cc_test(
