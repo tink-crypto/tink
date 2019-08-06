@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/subtle/streaming_aead_test_util.h"
 
+#include <sstream>
+#include <string>
+
 #include "tink/subtle/test_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"

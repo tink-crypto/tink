@@ -643,6 +643,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":test_util",
+        "//cc:streaming_aead",
         "//cc/util:istream_input_stream",
         "//cc/util:ostream_output_stream",
         "//cc/util:status",
