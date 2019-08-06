@@ -40,7 +40,7 @@ const RegistryConfig& StreamingAeadConfig::Latest() {
 // static
 util::Status StreamingAeadConfig::Register() {
   // Register key manager.
-  auto status = Registry::RegisterKeyManager(
+  auto status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmHkdfStreamingKeyManager>(), true);
   if (!status.ok()) return status;
 

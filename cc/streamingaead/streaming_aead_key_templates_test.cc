@@ -16,8 +16,10 @@
 
 #include "tink/streamingaead/streaming_aead_key_templates.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
+#include "tink/util/test_matchers.h"
 #include "proto/aes_gcm_hkdf_streaming.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
@@ -31,62 +33,90 @@ namespace crypto {
 namespace tink {
 namespace {
 
+using ::testing::Eq;
+using ::testing::Ref;
+using ::crypto::tink::test::IsOk;
 
-TEST(StreamingAeadKeyTemplatesTest, testAesGcmHkdfStreamingKeyTemplates) {
-  std::string type_url =
-      "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
+TEST(Aes128GcmHkdf4KBTest, TypeUrl) {
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes128GcmHkdf4KB().type_url(),
+      Eq("type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey"));
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes128GcmHkdf4KB().type_url(),
+      Eq(AesGcmHkdfStreamingKeyManager().get_key_type()));
+}
 
-  {  // Test Aes128GcmHkdf4KB().
-    // Check that returned template is correct.
+TEST(Aes128GcmHkdf4KBTest, OutputPrefixType) {
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes128GcmHkdf4KB().output_prefix_type(),
+      Eq(OutputPrefixType::RAW));
+}
+
+TEST(Aes128GcmHkdf4KBTest, SameReference) {
+  // Check that reference to the same object is returned.
+  EXPECT_THAT(StreamingAeadKeyTemplates::Aes128GcmHkdf4KB(),
+              Ref(StreamingAeadKeyTemplates::Aes128GcmHkdf4KB()));
+}
+
+TEST(Aes128GcmHkdf4KBTest, WorksWithKeyTypeManager) {
     const KeyTemplate& key_template =
         StreamingAeadKeyTemplates::Aes128GcmHkdf4KB();
-    EXPECT_EQ(type_url, key_template.type_url());
-    EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
     AesGcmHkdfStreamingKeyFormat key_format;
     EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
-    EXPECT_EQ(16, key_format.key_size());
-    EXPECT_EQ(16, key_format.params().derived_key_size());
-    EXPECT_EQ(4096, key_format.params().ciphertext_segment_size());
-    EXPECT_EQ(HashType::SHA256, key_format.params().hkdf_hash_type());
+  EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKeyFormat(key_format),
+              IsOk());
+}
 
-    // Check that reference to the same object is returned.
-    const KeyTemplate& key_template_2 =
+TEST(Aes128GcmHkdf4KBTest, CheckValues) {
+    const KeyTemplate& key_template =
         StreamingAeadKeyTemplates::Aes128GcmHkdf4KB();
-    EXPECT_EQ(&key_template, &key_template_2);
+    AesGcmHkdfStreamingKeyFormat key_format;
+    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+    EXPECT_THAT(key_format.key_size(), Eq(16));
+    EXPECT_THAT(key_format.params().derived_key_size(), Eq(16));
+    EXPECT_THAT(key_format.params().ciphertext_segment_size(), Eq(4096));
+    EXPECT_THAT(key_format.params().hkdf_hash_type(), Eq(HashType::SHA256));
+}
 
-    // Check that the template works with the key manager.
-    AesGcmHkdfStreamingKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
-    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
-  }
+TEST(Aes256GcmHkdf4KBTest, TypeUrl) {
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes256GcmHkdf4KB().type_url(),
+      Eq("type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey"));
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes256GcmHkdf4KB().type_url(),
+      Eq(AesGcmHkdfStreamingKeyManager().get_key_type()));
+}
 
-  {  // Test Aes256GcmHkdf4KB().
-    // Check that returned template is correct.
+TEST(Aes256GcmHkdf4KBTest, OutputPrefixType) {
+  EXPECT_THAT(
+      StreamingAeadKeyTemplates::Aes256GcmHkdf4KB().output_prefix_type(),
+      Eq(OutputPrefixType::RAW));
+}
+
+TEST(Aes256GcmHkdf4KBTest, SameReference) {
+  // Check that reference to the same object is returned.
+  EXPECT_THAT(StreamingAeadKeyTemplates::Aes256GcmHkdf4KB(),
+              Ref(StreamingAeadKeyTemplates::Aes256GcmHkdf4KB()));
+}
+
+TEST(Aes256GcmHkdf4KBTest, WorksWithKeyTypeManager) {
     const KeyTemplate& key_template =
         StreamingAeadKeyTemplates::Aes256GcmHkdf4KB();
-    EXPECT_EQ(type_url, key_template.type_url());
-    EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
     AesGcmHkdfStreamingKeyFormat key_format;
     EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
-    EXPECT_EQ(32, key_format.key_size());
-    EXPECT_EQ(32, key_format.params().derived_key_size());
-    EXPECT_EQ(4096, key_format.params().ciphertext_segment_size());
-    EXPECT_EQ(HashType::SHA256, key_format.params().hkdf_hash_type());
+  EXPECT_THAT(AesGcmHkdfStreamingKeyManager().ValidateKeyFormat(key_format),
+              IsOk());
+}
 
-    // Check that reference to the same object is returned.
-    const KeyTemplate& key_template_2 =
+TEST(Aes256GcmHkdf4KBTest, CheckValues) {
+    const KeyTemplate& key_template =
         StreamingAeadKeyTemplates::Aes256GcmHkdf4KB();
-    EXPECT_EQ(&key_template, &key_template_2);
-
-    // Check that the template works with the key manager.
-    AesGcmHkdfStreamingKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
-    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
-  }
+    AesGcmHkdfStreamingKeyFormat key_format;
+    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+    EXPECT_THAT(key_format.key_size(), Eq(32));
+    EXPECT_THAT(key_format.params().derived_key_size(), Eq(32));
+    EXPECT_THAT(key_format.params().ciphertext_segment_size(), Eq(4096));
+    EXPECT_THAT(key_format.params().hkdf_hash_type(), Eq(HashType::SHA256));
 }
 
 }  // namespace
