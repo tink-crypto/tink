@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -124,9 +124,10 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
                       bad_result.status().error_message());
 
   // Register DEM key manager.
-  auto key_manager = absl::make_unique<AesGcmKeyManager>();
-  std::string dem_key_type = key_manager->get_key_type();
-  ASSERT_TRUE(Registry::RegisterKeyManager(std::move(key_manager), true).ok());
+  std::string dem_key_type = AesGcmKeyManager().get_key_type();
+  ASSERT_TRUE(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<AesGcmKeyManager>(), true)
+                  .ok());
 
   // Generate and test many keys with various parameters.
   std::string context_info = "some context info";

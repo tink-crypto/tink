@@ -30,6 +30,7 @@ cc_library(
     strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
+        ":aead_wrapper",
         ":aes_ctr_hmac_aead_key_manager",
         ":aes_eax_key_manager",
         ":aes_gcm_key_manager",
@@ -37,7 +38,6 @@ cc_library(
         ":kms_aead_key_manager",
         ":kms_envelope_aead_key_manager",
         ":xchacha20_poly1305_key_manager",
-        ":aead_wrapper",
         "//cc/config:config_util",
         "//cc/mac:mac_config",
         "//cc/util:status",
@@ -109,12 +109,12 @@ cc_library(
 
 cc_library(
     name = "aes_gcm_key_manager",
-    srcs = ["aes_gcm_key_manager.cc"],
     hdrs = ["aes_gcm_key_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
         "//cc:aead",
+        "//cc:core/key_type_manager",
         "//cc:key_manager",
         "//cc:key_manager_base",
         "//cc/subtle:aes_gcm_boringssl",
@@ -346,6 +346,7 @@ cc_test(
         ":aes_gcm_key_manager",
         ":aes_gcm_siv_key_manager",
         ":xchacha20_poly1305_key_manager",
+        "//cc/util:test_matchers",
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_eax_cc_proto",
         "//proto:aes_gcm_cc_proto",
@@ -385,6 +386,7 @@ cc_test(
         "//cc:aead",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:test_matchers",
         "//proto:aes_eax_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
@@ -463,8 +465,8 @@ cc_test(
         "//cc/util:test_matchers",
         "//cc/util:test_util",
         "//proto:aes_eax_cc_proto",
-        "//proto:kms_aead_cc_proto",
         "//proto:common_cc_proto",
+        "//proto:kms_aead_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -518,4 +520,3 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
-

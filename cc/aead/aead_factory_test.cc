@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@
 using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
+using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
@@ -55,9 +56,7 @@ TEST_F(AeadFactoryTest, testBasic) {
 
 TEST_F(AeadFactoryTest, testPrimitive) {
   // Prepare a template for generating keys for a Keyset.
-  AesGcmKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-  std::string key_type = key_manager.get_key_type();
+  std::string key_type = AesGcmKeyManager().get_key_type();
 
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
@@ -65,18 +64,18 @@ TEST_F(AeadFactoryTest, testPrimitive) {
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  auto new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddTinkKey(key_type, key_id_1, *new_key, KeyStatusType::ENABLED,
+  AesGcmKey new_key = AesGcmKeyManager().CreateKey(key_format).ValueOrDie();
+  AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddRawKey(key_type, key_id_2, *new_key, KeyStatusType::ENABLED,
+  new_key = AesGcmKeyManager().CreateKey(key_format).ValueOrDie();
+  AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddTinkKey(key_type, key_id_3, *new_key, KeyStatusType::ENABLED,
+  new_key = AesGcmKeyManager().CreateKey(key_format).ValueOrDie();
+  AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
@@ -113,8 +112,10 @@ TEST_F(AeadFactoryTest, testPrimitive) {
                       decrypt_result.status().error_message());
 
   // Create raw ciphertext with 2nd key, and decrypt with Aead-instance.
-  auto raw_aead = std::move(
-      key_manager.GetPrimitive(keyset.key(1).key_data()).ValueOrDie());
+  AesGcmKey raw_key;
+  EXPECT_TRUE(raw_key.ParseFromString(keyset.key(1).key_data().value()));
+  auto raw_aead =
+      std::move(AesGcmKeyManager().GetPrimitive<Aead>(raw_key).ValueOrDie());
   std::string raw_ciphertext = raw_aead->Encrypt(plaintext, aad).ValueOrDie();
   decrypt_result = aead->Decrypt(ciphertext, aad);
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();

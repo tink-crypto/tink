@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc.
+// Copyright 2018 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 #include "tink/aead/aead_key_templates.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
+#include "tink/util/test_matchers.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
@@ -41,6 +43,10 @@ using google::crypto::tink::OutputPrefixType;
 namespace crypto {
 namespace tink {
 namespace {
+
+using ::crypto::tink::test::IsOk;
+using ::testing::Eq;
+using ::testing::Ref;
 
 TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
   std::string type_url = "type.googleapis.com/google.crypto.tink.AesEaxKey";
@@ -90,50 +96,66 @@ TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
   }
 }
 
-TEST(AeadKeyTemplatesTest, testAesGcmKeyTemplates) {
-  std::string type_url = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+TEST(Aes256Gcm, Basics) {
+  EXPECT_THAT(AeadKeyTemplates::Aes256Gcm().type_url(),
+              Eq("type.googleapis.com/google.crypto.tink.AesGcmKey"));
+  EXPECT_THAT(AeadKeyTemplates::Aes256Gcm().type_url(),
+              Eq(AesGcmKeyManager().get_key_type()));
+}
 
-  {  // Test Aes128Gcm().
-    // Check that returned template is correct.
-    const KeyTemplate& key_template = AeadKeyTemplates::Aes128Gcm();
-    EXPECT_EQ(type_url, key_template.type_url());
-    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
-    AesGcmKeyFormat key_format;
-    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
-    EXPECT_EQ(16, key_format.key_size());
+TEST(Aes256Gcm, OutputPrefixType) {
+  EXPECT_THAT(AeadKeyTemplates::Aes256Gcm().output_prefix_type(),
+              Eq(OutputPrefixType::TINK));
+}
 
-    // Check that reference to the same object is returned.
-    const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes128Gcm();
-    EXPECT_EQ(&key_template, &key_template_2);
+TEST(Aes256Gcm, MultipleCallsSameReference) {
+  EXPECT_THAT(AeadKeyTemplates::Aes256Gcm(),
+              Ref(AeadKeyTemplates::Aes256Gcm()));
+}
 
-    // Check that the template works with the key manager.
-    AesGcmKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
-    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
-  }
+TEST(Aes256Gcm, WorksWithKeyTypeManager) {
+  const KeyTemplate& key_template = AeadKeyTemplates::Aes256Gcm();
+  AesGcmKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
 
-  {  // Test Aes256Gcm().
-    // Check that returned template is correct.
-    const KeyTemplate& key_template = AeadKeyTemplates::Aes256Gcm();
-    EXPECT_EQ(type_url, key_template.type_url());
-    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
-    AesGcmKeyFormat key_format;
-    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
-    EXPECT_EQ(32, key_format.key_size());
+TEST(Aes256Gcm, CheckValues) {
+  const KeyTemplate& key_template = AeadKeyTemplates::Aes256Gcm();
+  AesGcmKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(key_format.key_size(), Eq(32));
+}
 
-    // Check that reference to the same object is returned.
-    const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes256Gcm();
-    EXPECT_EQ(&key_template, &key_template_2);
+TEST(Aes128Gcm, Basics) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128Gcm().type_url(),
+              Eq("type.googleapis.com/google.crypto.tink.AesGcmKey"));
+  EXPECT_THAT(AeadKeyTemplates::Aes128Gcm().type_url(),
+              Eq(AesGcmKeyManager().get_key_type()));
+}
 
-    // Check that the template works with the key manager.
-    AesGcmKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
-    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
-  }
+TEST(Aes128Gcm, OutputPrefixType) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128Gcm().output_prefix_type(),
+              Eq(OutputPrefixType::TINK));
+}
+
+TEST(Aes128Gcm, MultipleCallsSameReference) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128Gcm(),
+              Ref(AeadKeyTemplates::Aes128Gcm()));
+}
+
+TEST(Aes128Gcm, WorksWithKeyTypeManager) {
+  const KeyTemplate& key_template = AeadKeyTemplates::Aes128Gcm();
+  AesGcmKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST(Aes128Gcm, CheckValues) {
+  const KeyTemplate& key_template = AeadKeyTemplates::Aes128Gcm();
+  AesGcmKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(key_format.key_size(), Eq(16));
 }
 
 TEST(AeadKeyTemplatesTest, testAesGcmSivKeyTemplates) {

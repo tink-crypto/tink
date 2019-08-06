@@ -96,11 +96,11 @@ tink_cc_library(
 tink_cc_library(
   NAME aes_gcm_key_manager
   SRCS
-    aes_gcm_key_manager.cc
     aes_gcm_key_manager.h
   DEPS
     tink::core::aead
     tink::core::key_manager
+    tink::core::key_type_manager
     tink::core::key_manager_base
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
@@ -304,6 +304,7 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::aead::aes_gcm_siv_key_manager
     tink::aead::xchacha20_poly1305_key_manager
+    tink::util::test_matchers
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
@@ -335,6 +336,7 @@ tink_cc_test(
     tink::core::aead
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto

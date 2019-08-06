@@ -27,6 +27,7 @@
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/catalogue.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
@@ -307,7 +308,7 @@ TEST_F(RegistryTest, testBasic) {
 }
 
 TEST_F(RegistryTest, testRegisterKeyManager) {
-  std::string key_type_1 = AesGcmKeyManager::static_key_type();
+  std::string key_type_1 = AesGcmKeyManager().get_key_type();
 
   std::unique_ptr<TestAeadKeyManager> null_key_manager = nullptr;
   auto status = Registry::RegisterKeyManager(std::move(null_key_manager), true);
@@ -325,8 +326,9 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
   EXPECT_TRUE(status.ok()) << status;
 
   // Try overriding a key manager.
-  status =
-      Registry::RegisterKeyManager(absl::make_unique<AesGcmKeyManager>(), true);
+  AesGcmKeyManager key_type_manager;
+  status = Registry::RegisterKeyManager(
+      crypto::tink::internal::MakeKeyManager<Aead>(&key_type_manager), true);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
 
@@ -518,8 +520,9 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
   auto status = Registry::RegisterKeyManager(
       absl::make_unique<EciesAeadHkdfPrivateKeyManager>(), true);
   ASSERT_TRUE(status.ok()) << status;
-  status =
-      Registry::RegisterKeyManager(absl::make_unique<AesGcmKeyManager>(), true);
+  AesGcmKeyManager key_type_manager;
+  status = Registry::RegisterKeyManager(
+      crypto::tink::internal::MakeKeyManager<Aead>(&key_type_manager), true);
   ASSERT_TRUE(status.ok()) << status;
 
   // Get a test private key.
@@ -541,7 +544,7 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
 
   // Try with a wrong key type.
   auto wrong_key_type_result = Registry::GetPublicKeyData(
-      AesGcmKeyManager::static_key_type(), ecies_key.SerializeAsString());
+      AesGcmKeyManager().get_key_type(), ecies_key.SerializeAsString());
   EXPECT_FALSE(wrong_key_type_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
             wrong_key_type_result.status().error_code());
@@ -683,8 +686,10 @@ TEST_F(RegistryTest, UsualWrappingTest) {
 // Tests that the error message in GetKeyManager contains the type_id.name() of
 // the primitive for which the key manager was actually registered.
 TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
+  AesGcmKeyManager key_type_manager;
   EXPECT_TRUE(
-      Registry::RegisterKeyManager(absl::make_unique<AesGcmKeyManager>(), true)
+      Registry::RegisterKeyManager(
+          crypto::tink::internal::MakeKeyManager<Aead>(&key_type_manager), true)
           .ok());
   auto result =
       Registry::get_key_manager<int>(AesGcmKeyManager().get_key_type());

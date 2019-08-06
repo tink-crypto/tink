@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
   KeyTemplate key_template;
-  key_template.set_type_url(AesGcmKeyManager::static_key_type());
+  key_template.set_type_url(AesGcmKeyManager().get_key_type());
   key_template.set_output_prefix_type(OutputPrefixType::TINK);
   key_template.set_value(key_format.SerializeAsString());
 
@@ -66,7 +66,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   EXPECT_EQ(key_id_0, keyset.primary_key_id());
   EXPECT_EQ(KeyStatusType::ENABLED, keyset.key(0).status());
   EXPECT_EQ(OutputPrefixType::TINK, keyset.key(0).output_prefix_type());
-  EXPECT_EQ(AesGcmKeyManager::static_key_type(),
+  EXPECT_EQ(AesGcmKeyManager().get_key_type(),
             keyset.key(0).key_data().type_url());
   EXPECT_EQ(KeyData::SYMMETRIC, keyset.key(0).key_data().key_material_type());
 
@@ -83,7 +83,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
                keyset.key(1).key_data().value());
   EXPECT_EQ(KeyStatusType::ENABLED, keyset.key(1).status());
   EXPECT_EQ(OutputPrefixType::RAW, keyset.key(1).output_prefix_type());
-  EXPECT_EQ(AesGcmKeyManager::static_key_type(),
+  EXPECT_EQ(AesGcmKeyManager().get_key_type(),
             keyset.key(1).key_data().type_url());
   EXPECT_EQ(KeyData::SYMMETRIC, keyset.key(1).key_data().key_material_type());
 
@@ -102,7 +102,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
                keyset.key(2).key_data().value());
   EXPECT_EQ(KeyStatusType::ENABLED, keyset.key(2).status());
   EXPECT_EQ(OutputPrefixType::LEGACY, keyset.key(2).output_prefix_type());
-  EXPECT_EQ(AesGcmKeyManager::static_key_type(),
+  EXPECT_EQ(AesGcmKeyManager().get_key_type(),
             keyset.key(2).key_data().type_url());
   EXPECT_EQ(KeyData::SYMMETRIC, keyset.key(2).key_data().key_material_type());
 

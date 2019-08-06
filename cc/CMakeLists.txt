@@ -615,6 +615,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::catalogue
     tink::core::crypto_format
+    tink::core::key_manager_impl
     tink::core::key_type_manager
     tink::core::keyset_manager
     tink::core::registry
@@ -717,6 +718,7 @@ tink_cc_test(
     tink::core::config
     tink::core::json_keyset_reader
     tink::core::json_keyset_writer
+    tink::core::key_manager_impl
     tink::core::keyset_handle
     tink::static
     tink::aead::aead_key_templates

@@ -812,6 +812,7 @@ cc_test(
     deps = [
         ":aead",
         ":catalogue",
+        ":core/key_manager_impl",
         ":core/key_type_manager",
         ":crypto_format",
         ":keyset_manager",
@@ -945,6 +946,7 @@ cc_test(
         ":binary_keyset_reader",
         ":cleartext_keyset_handle",
         ":config",
+        ":core/key_manager_impl",
         ":json_keyset_reader",
         ":json_keyset_writer",
         ":keyset_handle",

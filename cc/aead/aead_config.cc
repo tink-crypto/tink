@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ util::Status AeadConfig::Register() {
   status = Registry::RegisterKeyManager(
       absl::make_unique<AesCtrHmacAeadKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), true);
   if (!status.ok()) return status;
   status = Registry::RegisterKeyManager(

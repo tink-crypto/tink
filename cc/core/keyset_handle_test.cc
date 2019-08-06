@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "tink/core/key_manager_impl.h"
 #include "tink/keyset_handle.h"
 
 #include "gtest/gtest.h"
@@ -353,10 +354,10 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
   { // A keyset with multiple keys.
     EcdsaSignKeyManager key_manager;
     const KeyFactory& key_factory = key_manager.get_key_factory();
-    AesGcmKeyManager aead_key_manager;
-    const KeyFactory& aead_key_factory = aead_key_manager.get_key_factory();
     Keyset keyset;
 
+    google::crypto::tink::AesGcmKeyFormat aead_key_format;
+    aead_key_format.set_key_size(16);
     AddTinkKey(EcdsaSignKeyManager::static_key_type(),
                /* key_id= */ 623628,
                *(key_factory.NewKey(
@@ -364,14 +365,12 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
                KeyStatusType::ENABLED,
                KeyData::ASYMMETRIC_PRIVATE,
                &keyset);
-    AddLegacyKey(
-        AesGcmKeyManager::static_key_type(),
-        /* key_id= */ 42,
-        *(aead_key_factory.NewKey(AeadKeyTemplates::Aes128Gcm().value())
-              .ValueOrDie()),
-        KeyStatusType::ENABLED,
-        KeyData::ASYMMETRIC_PRIVATE,  // Intentionally wrong setting.
-        &keyset);
+    AddLegacyKey(AesGcmKeyManager().get_key_type(),
+                 /* key_id= */ 42,
+                 AesGcmKeyManager().CreateKey(aead_key_format).ValueOrDie(),
+                 KeyStatusType::ENABLED,
+                 KeyData::ASYMMETRIC_PRIVATE,  // Intentionally wrong setting.
+                 &keyset);
     keyset.set_primary_key_id(42);
     auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
     auto public_handle_result = handle->GetPublicKeysetHandle();
@@ -445,9 +444,11 @@ TEST_F(KeysetHandleTest, GetPrimitiveCustomKeyManager) {
           .ok());
   // Without custom key manager it now fails.
   ASSERT_FALSE(handle->GetPrimitive<Aead>().ok());
-  AesGcmKeyManager key_manager;
+  AesGcmKeyManager key_type_manager;
+  std::unique_ptr<KeyManager<Aead>> key_manager =
+      crypto::tink::internal::MakeKeyManager<Aead>(&key_type_manager);
   // With custom key manager it works ok.
-  ASSERT_TRUE(handle->GetPrimitive<Aead>(&key_manager).ok());
+  ASSERT_TRUE(handle->GetPrimitive<Aead>(key_manager.get()).ok());
 }
 
 // Compile time check: ensures that the KeysetHandle can be copied.
