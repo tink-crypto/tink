@@ -382,6 +382,27 @@ cc_library(
 )
 
 cc_library(
+    name = "aes_ctr_hmac_stream_segment_encrypter",
+    srcs = ["aes_ctr_hmac_stream_segment_encrypter.cc"],
+    hdrs = ["aes_ctr_hmac_stream_segment_encrypter.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":common_enums",
+        ":hmac_boringssl",
+        ":random",
+        ":stream_segment_encrypter",
+        ":subtle_util",
+        "//cc:mac",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
     name = "aes_eax_boringssl",
     srcs = ["aes_eax_boringssl.cc"],
     hdrs = ["aes_eax_boringssl.h"],
@@ -510,6 +531,14 @@ cc_library(
     name = "common_enums",
     srcs = ["common_enums.cc"],
     hdrs = ["common_enums.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+)
+
+cc_library(
+    name = "subtle_util",
+    srcs = ["subtle_util.cc"],
+    hdrs = ["subtle_util.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
 )
@@ -826,6 +855,25 @@ cc_test(
 )
 
 cc_test(
+    name = "aes_ctr_hmac_stream_segment_encrypter_test",
+    size = "small",
+    srcs = ["aes_ctr_hmac_stream_segment_encrypter_test.cc"],
+    deps = [
+        ":aes_ctr_hmac_stream_segment_encrypter",
+        ":common_enums",
+        ":random",
+        ":stream_segment_encrypter",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "aes_eax_boringssl_test",
     size = "small",
     srcs = ["aes_eax_boringssl_test.cc"],
@@ -1111,6 +1159,16 @@ cc_test(
     linkopts = ["-pthread"],
     deps = [
         ":common_enums",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "subtle_util_test",
+    size = "small",
+    srcs = ["subtle_util_test.cc"],
+    deps = [
+        ":subtle_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
