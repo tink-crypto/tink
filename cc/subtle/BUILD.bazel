@@ -618,7 +618,6 @@ cc_library(
     deps = [
         ":stream_segment_encrypter",
         "//cc:output_stream",
-        "//cc/util:status",
         "//cc/util:statusor",
         "@com_google_absl//absl/memory",
     ],

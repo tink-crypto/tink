@@ -170,6 +170,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
+        ":buffer",
         ":constants",
         ":enums",
         ":protobuf_helper",
@@ -192,7 +193,6 @@ cc_library(
         "//cc/aead:aes_gcm_key_manager",
         "//cc/subtle:random",
         "//cc/subtle:subtle_util_boringssl",
-        "//cc/util:buffer",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",

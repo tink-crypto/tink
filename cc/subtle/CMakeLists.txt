@@ -539,7 +539,6 @@ tink_cc_library(
   DEPS
     tink::subtle::stream_segment_encrypter
     tink::core::output_stream
-    tink::util::status
     tink::util::statusor
     absl::memory
 )

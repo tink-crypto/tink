@@ -176,12 +176,12 @@ Status StreamingAeadEncryptingStream::Close() {
     status_ = segment_encrypter_->EncryptSegment(
         pt_to_encrypt_, /* is_last_segment = */ false, &ct_buffer_);
     if (!status_.ok()) {
-      ct_destination_->Close();
+      ct_destination_->Close().IgnoreError();
       return status_;
     }
     status_ = WriteToStream(ct_buffer_, ct_destination_.get());
     if (!status_.ok()) {
-      ct_destination_->Close();
+      ct_destination_->Close().IgnoreError();
       return status_;
     }
   }
@@ -190,12 +190,12 @@ Status StreamingAeadEncryptingStream::Close() {
   status_ = segment_encrypter_->EncryptSegment(
       *pt_last_segment, /* is_last_segment = */ true, &ct_buffer_);
   if (!status_.ok()) {
-    ct_destination_->Close();
+    ct_destination_->Close().IgnoreError();
     return status_;
   }
   status_ = WriteToStream(ct_buffer_, ct_destination_.get());
   if (!status_.ok()) {
-    ct_destination_->Close();
+    ct_destination_->Close().IgnoreError();
     return status_;
   }
   status_ = Status(util::error::FAILED_PRECONDITION, "Stream closed");
