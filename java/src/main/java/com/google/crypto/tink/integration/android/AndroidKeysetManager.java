@@ -86,7 +86,7 @@ import javax.annotation.concurrent.GuardedBy;
  * @since 1.0.0
  */
 public final class AndroidKeysetManager {
-  private static final String TAG = AndroidKeysetManager.class.getName();
+  private static final String TAG = AndroidKeysetManager.class.getSimpleName();
   private final KeysetReader reader;
   private final KeysetWriter writer;
   private final boolean useKeystore;
