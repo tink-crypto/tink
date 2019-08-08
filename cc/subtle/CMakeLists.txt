@@ -585,10 +585,10 @@ tink_cc_library(
   DEPS
     absl::strings
     tink::core::streaming_aead
-    tink::util::test_util
     tink::util::ostream_output_stream
     tink::util::istream_input_stream
     tink::util::status
+    tink::subtle::test_util
 )
 
 # tests
@@ -1020,4 +1020,14 @@ tink_cc_test(
     tink::util::statusor
     absl::memory
     absl::strings
+)
+
+tink_cc_test(
+  NAME streaming_aead_test_util_test
+  SRCS streaming_aead_test_util_test.cc
+  DEPS
+    tink::subtle::streaming_aead_test_util
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
 )
