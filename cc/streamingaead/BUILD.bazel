@@ -66,6 +66,7 @@ cc_library(
         "//cc:core/key_type_manager",
         "//cc:key_manager",
         "//cc:streaming_aead",
+        "//cc/subtle:aes_gcm_hkdf_stream_segment_encrypter",
         "//cc/subtle:aes_gcm_hkdf_streaming",
         "//cc/subtle:random",
         "//cc/util:constants",

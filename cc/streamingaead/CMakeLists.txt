@@ -61,6 +61,7 @@ tink_cc_library(
     tink::core::streaming_aead
     tink::proto::aes_gcm_hkdf_streaming_cc_proto
     tink::proto::tink_cc_proto
+    tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
     tink::subtle::aes_gcm_hkdf_streaming
     tink::subtle::random
     tink::util::constants

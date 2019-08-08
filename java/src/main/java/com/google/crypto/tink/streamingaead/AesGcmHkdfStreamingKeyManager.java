@@ -48,6 +48,9 @@ class AesGcmHkdfStreamingKeyManager
 
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
+  
+  private static final int NONCE_PREFIX_IN_BYTES = 7;
+  private static final int TAG_SIZE_IN_BYTES = 16;
 
   /** @param serializedKey serialized {@code AesGcmHkdfStreamingKey} proto */
   @Override
@@ -118,9 +121,11 @@ class AesGcmHkdfStreamingKeyManager
     if (params.getHkdfHashType() == HashType.UNKNOWN_HASH) {
       throw new GeneralSecurityException("unknown HKDF hash type");
     }
-    if (params.getCiphertextSegmentSize() < params.getDerivedKeySize() + 8) {
+    if (params.getCiphertextSegmentSize() <= params.getDerivedKeySize() + 1 + NONCE_PREFIX_IN_BYTES
+        + TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException(
-          "ciphertext_segment_size must be at least (derived_key_size + 8)");
+          "ciphertext_segment_size must be at least (derived_key_size + NONCE_PREFIX_IN_BYTES + "
+          + "TAG_SIZE_IN_BYTES + 2)");
     }
   }
 }

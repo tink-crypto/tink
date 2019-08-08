@@ -175,7 +175,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, WrongCiphertextSegmentSize) {
       for (int ciphertext_offset : {0, 1, 5, 10}) {
         int min_ct_segment_size = key_size + ciphertext_offset +
                                   8 +  // nonce_prefix_size + 1
-                                  tag_size;
+                                  tag_size + 1;
         for (int ct_segment_size :
              {min_ct_segment_size - 5, min_ct_segment_size - 1,
               min_ct_segment_size, min_ct_segment_size + 1,

@@ -57,8 +57,9 @@ Status Validate(absl::string_view ikm,
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext_offset must be non-negative");
   }
-  if (ciphertext_segment_size <
-      ciphertext_offset + derived_key_size) {
+  if (ciphertext_segment_size <=
+      ciphertext_offset + derived_key_size +
+      AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext_segment_size too small");
   }

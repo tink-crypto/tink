@@ -16,12 +16,14 @@
 
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
 
+#include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/random.h"
 #include "tink/util/validation.h"
 
 namespace crypto {
 namespace tink {
 
+using ::crypto::tink::subtle::AesGcmHkdfStreamSegmentEncrypter;
 using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::AesGcmHkdfStreamingKey;
@@ -38,8 +40,10 @@ Status ValidateParams(const AesGcmHkdfStreamingParams& params) {
         params.hkdf_hash_type() == HashType::SHA512)) {
     return Status(util::error::INVALID_ARGUMENT, "unsupported hkdf_hash_type");
   }
-  if (params.ciphertext_segment_size() <
-      (params.derived_key_size() + 8) + 16) {  // header_size + tag_size
+  int header_size = 1 + params.derived_key_size() +
+      AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
+  if (params.ciphertext_segment_size() <=
+      header_size + AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
     return Status(util::error::INVALID_ARGUMENT,
                   "ciphertext_segment_size too small");
   }

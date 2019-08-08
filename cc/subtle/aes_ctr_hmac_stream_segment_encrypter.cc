@@ -65,7 +65,7 @@ util::Status Validate(const AesCtrHmacStreamSegmentEncrypter::Params& params) {
   }
   int header_size = 1 + params.salt.size() +
                     AesCtrHmacStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
-  if (params.ciphertext_segment_size <
+  if (params.ciphertext_segment_size <=
       params.ciphertext_offset + header_size + params.tag_size) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext_segment_size too small");
