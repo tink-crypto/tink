@@ -78,10 +78,17 @@ class KeyTypeManager;
 //
 // KeyTypeManager uses templates for KeyProto, KeyFormatProto and a list of
 // Primitives which have to be provided as a List.
-template <typename KeyProto, typename KeyFormatProto, typename... Primitives>
-class KeyTypeManager<KeyProto, KeyFormatProto, List<Primitives...>>
-    : public internal::InternalKeyFactory<KeyProto, KeyFormatProto> {
+template <typename KeyProtoParam, typename KeyFormatProtoParam,
+          typename... Primitives>
+class KeyTypeManager<KeyProtoParam, KeyFormatProtoParam, List<Primitives...>>
+    : public internal::InternalKeyFactory<KeyProtoParam, KeyFormatProtoParam> {
  public:
+  // The types used in this key type manager; these can be useful when writing
+  // templated code.
+  using KeyProto = KeyProtoParam;
+  using KeyFormatProto = KeyFormatProtoParam;
+  using PrimitiveList = List<Primitives...>;
+
   // A PrimitiveFactory<Primitive> knows how to create instances of the
   // Primitive.
   template <typename Primitive>

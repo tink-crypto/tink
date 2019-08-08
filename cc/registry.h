@@ -114,11 +114,14 @@ class Registry {
     return RegisterKeyManager(absl::WrapUnique(manager), new_key_allowed);
   }
 
-  template <class KeyTypeManager>
+  template <class KTManager>
   static crypto::tink::util::Status RegisterKeyTypeManager(
-      std::unique_ptr<KeyTypeManager> manager, bool new_key_allowed) {
-    return RegistryImpl::GlobalInstance().RegisterKeyTypeManager(
-        manager.release(), new_key_allowed);
+      std::unique_ptr<KTManager> manager, bool new_key_allowed) {
+    return RegistryImpl::GlobalInstance()
+        .RegisterKeyTypeManager<typename KTManager::KeyProto,
+                                typename KTManager::KeyFormatProto,
+                                typename KTManager::PrimitiveList>(
+            std::move(manager), new_key_allowed);
   }
 
   template <class PrivateKeyTypeManager, class KeyTypeManager>

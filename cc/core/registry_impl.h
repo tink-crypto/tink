@@ -73,9 +73,10 @@ class RegistryImpl {
   }
 
   // Takes ownership of 'manager', which must be non-nullptr.
-  template <class KeyProto, class KeyFormatProto, class... P>
+  template <class KeyProto, class KeyFormatProto, class PrimitiveList>
   crypto::tink::util::Status RegisterKeyTypeManager(
-      KeyTypeManager<KeyProto, KeyFormatProto, List<P...>>* manager,
+      std::unique_ptr<KeyTypeManager<KeyProto, KeyFormatProto, PrimitiveList>>
+          manager,
       bool new_key_allowed) LOCKS_EXCLUDED(maps_mutex_);
 
   // Takes ownership of 'private_key_manager' and 'public_key_manager'. Both
@@ -394,14 +395,12 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
   return crypto::tink::util::Status::OK;
 }
 
-template <class KeyProto, class KeyFormatProto, class... P>
+template <class KeyProto, class KeyFormatProto, class PrimitiveList>
 crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
-    KeyTypeManager<KeyProto, KeyFormatProto, List<P...>>* manager,
+    std::unique_ptr<KeyTypeManager<KeyProto, KeyFormatProto, PrimitiveList>>
+        owned_manager,
     bool new_key_allowed) {
-  std::unique_ptr<KeyTypeManager<KeyProto, KeyFormatProto, List<P...>>>
-      owned_manager = absl::WrapUnique(manager);
-
-  if (manager == nullptr) {
+  if (owned_manager == nullptr) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'manager' must be non-null.");
