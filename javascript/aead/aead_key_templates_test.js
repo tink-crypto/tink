@@ -144,4 +144,26 @@ testSuite({
     // Test that the template works with AesCtrHmacAeadKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
   },
+
+  testAes256GcmNoPrefix() {
+    // The created key should have the following parameters.
+    const expectedKeySize = 32;
+    const expectedOutputPrefix = PbOutputPrefixType.RAW;
+    // Expected type URL is the one supported by AesGcmKeyManager.
+    const manager = new AesGcmKeyManager();
+    const expectedTypeUrl = manager.getKeyType();
+
+    const keyTemplate = AeadKeyTemplates.aes256GcmNoPrefix();
+
+    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
+    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+
+    // Test key size value in key format.
+    const keyFormat =
+        PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
+    assertEquals(expectedKeySize, keyFormat.getKeySize());
+
+    // Test that the template works with AesCtrHmacAeadKeyManager.
+    manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+  }
 });
