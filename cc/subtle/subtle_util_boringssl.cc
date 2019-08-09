@@ -18,6 +18,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
 #include "openssl/bn.h"
+#include "openssl/cipher.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
 #include "openssl/err.h"
@@ -543,6 +544,19 @@ util::Status SubtleUtilBoringSSL::CopyCrtParams(
   dq.ValueOrDie().release();
   crt.ValueOrDie().release();
   return util::OkStatus();
+}
+
+// static
+const EVP_CIPHER* SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
+    uint32_t size_in_bytes) {
+  switch (size_in_bytes) {
+    case 16:
+      return EVP_aes_128_ctr();
+    case 32:
+      return EVP_aes_256_ctr();
+    default:
+      return nullptr;
+  }
 }
 
 namespace boringssl {

@@ -21,6 +21,7 @@
 
 #include "absl/strings/string_view.h"
 #include "openssl/bn.h"
+#include "openssl/cipher.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/subtle/common_enums.h"
@@ -186,6 +187,9 @@ class SubtleUtilBoringSSL {
 
   // Copies the CRT params and dp, dq into the RSA key.
   static util::Status CopyCrtParams(const RsaPrivateKey &key, RSA *rsa);
+
+  // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
+  static const EVP_CIPHER* GetAesCtrCipherForKeySize(uint32_t size_in_bytes);
 };
 
 namespace boringssl {
