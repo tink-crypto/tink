@@ -72,12 +72,33 @@
 <h1 title="Deprecated API" class="title">Deprecated API</h1>
 <h2 title="Contents">Contents</h2>
 <ul>
+<li><a href="#interface">Deprecated Interfaces</a></li>
 <li><a href="#class">Deprecated Classes</a></li>
 <li><a href="#field">Deprecated Fields</a></li>
 <li><a href="#method">Deprecated Methods</a></li>
 </ul>
 </div>
-<div class="contentContainer"><a name="class">
+<div class="contentContainer"><a name="interface">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<table class="deprecatedSummary" border="0" cellpadding="3" cellspacing="0" summary="Deprecated Interfaces table, listing deprecated interfaces, and an explanation">
+<caption><span>Deprecated Interfaces</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Interface and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink">com.google.crypto.tink.Catalogue</a>
+<div class="block"><span class="deprecationComment">Catalogues are no longer supported.</span></div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<a name="class">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -238,8 +259,18 @@
 </tr>
 <tbody>
 <tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/Registry.html#addCatalogue-java.lang.String-com.google.crypto.tink.Catalogue-">com.google.crypto.tink.Registry.addCatalogue(String, Catalogue&lt;?&gt;)</a>
+<div class="block"><span class="deprecationComment">Catalogues are no longer supported.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#ecPointDecode-java.security.spec.EllipticCurve-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-byte:A-">com.google.crypto.tink.subtle.EllipticCurves.ecPointDecode(EllipticCurve, EllipticCurves.PointFormatType, byte[])</a>
 <div class="block"><span class="deprecationComment">use {#pointDecode}</span></div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/Registry.html#getCatalogue-java.lang.String-">com.google.crypto.tink.Registry.getCatalogue(String)</a>
+<div class="block"><span class="deprecationComment">Catalogues are no longer supported.</span></div>
 </td>
 </tr>
 <tr class="rowColor">

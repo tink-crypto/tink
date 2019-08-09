@@ -101,7 +101,9 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#addCatalogue-java.lang.String-com.google.crypto.tink.Catalogue-">addCatalogue(String, Catalogue&lt;?&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
-<div class="block">Tries to add a catalogue, to enable custom configuration of key types and key managers.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Catalogues are no longer supported.</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RegistryConfig.Builder.html#addEntry-com.google.crypto.tink.proto.KeyTypeEntry-">addEntry(KeyTypeEntry)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a></dt>
 <dd>
@@ -687,7 +689,9 @@
 <dl>
 <dt><a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Catalogue</span></a>&lt;<a href="com/google/crypto/tink/Catalogue.html" title="type parameter in Catalogue">P</a>&gt; - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
-<div class="block">A catalogue of <a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> objects.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Catalogues are no longer supported.</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KeyTypeEntry.html#CATALOGUE_NAME_FIELD_NUMBER">CATALOGUE_NAME_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></dt>
 <dd>&nbsp;</dd>
@@ -2536,7 +2540,9 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#getCatalogue-java.lang.String-">getCatalogue(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
-<div class="block">Tries to get a catalogue associated with <code>catalogueName</code>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Catalogues are no longer supported.</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KeyTypeEntry.Builder.html#getCatalogueName--">getCatalogueName()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a></dt>
 <dd>
@@ -3678,7 +3684,9 @@
  Actual keys in the Keyset.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Catalogue.html#getKeyManager-java.lang.String-java.lang.String-int-">getKeyManager(String, String, int)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink">Catalogue</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#getKeyManager-java.lang.String-">getKeyManager(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -4903,6 +4911,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Catalogue.html#getPrimitiveWrapper--">getPrimitiveWrapper()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink">Catalogue</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Returns a new primitive wrapper for this primitive.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html#getPrivateKey--">getPrivateKey()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign.KeyPair</a></dt>
