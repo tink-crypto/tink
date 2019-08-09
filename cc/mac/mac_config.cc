@@ -45,7 +45,7 @@ util::Status MacConfig::Register() {
   auto status = Registry::RegisterKeyManager(
       absl::make_unique<HmacKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesCmacKeyManager>(), true);
   if (!status.ok()) return status;
 

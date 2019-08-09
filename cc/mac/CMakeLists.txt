@@ -64,14 +64,14 @@ tink_cc_library(
 tink_cc_library(
   NAME aes_cmac_key_manager
   SRCS
-    aes_cmac_key_manager.cc
     aes_cmac_key_manager.h
   DEPS
     tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::core::mac
     tink::subtle::aes_cmac_boringssl
     tink::subtle::random
+    tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
@@ -164,10 +164,12 @@ tink_cc_test(
     tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::mac::mac_key_templates
+    tink::util::test_matchers
     tink::proto::aes_cmac_cc_proto
     tink::proto::common_cc_proto
     tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
+    gmock
 )
 
 tink_cc_test(
@@ -176,6 +178,7 @@ tink_cc_test(
   DEPS
     tink::mac::aes_cmac_key_manager
     tink::core::mac
+    tink::util::test_matchers
     tink::util::status
     tink::util::statusor
     tink::proto::aes_ctr_cc_proto
@@ -183,6 +186,7 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::aes_cmac_cc_proto
     tink::proto::tink_cc_proto
+    gmock
 )
 
 tink_cc_test(
