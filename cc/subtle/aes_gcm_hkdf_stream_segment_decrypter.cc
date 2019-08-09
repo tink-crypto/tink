@@ -175,6 +175,9 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
   if (ciphertext.size() > get_ciphertext_segment_size()) {
     return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too long");
   }
+  if (ciphertext.size() < AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
+    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+  }
   if (plaintext_buffer == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "plaintext_buffer must be non-null");
