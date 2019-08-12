@@ -591,6 +591,18 @@ tink_cc_library(
     tink::subtle::test_util
 )
 
+tink_cc_library(
+  NAME hybrid_test_util
+  SRCS
+    hybrid_test_util.cc
+    hybrid_test_util.h
+  DEPS
+    absl::strings
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+    tink::util::status
+)
+
 # tests
 
 tink_cc_test(
@@ -1031,3 +1043,20 @@ tink_cc_test(
     tink::util::test_util
     gmock
 )
+
+tink_cc_test(
+  NAME hybrid_test_util_test
+  SRCS hybrid_test_util_test.cc
+  DEPS
+    tink::subtle::hybrid_test_util
+    tink::subtle::test_util
+    tink::core::output_stream
+    tink::util::ostream_output_stream
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    absl::memory
+    absl::strings
+    gmock
+)
+

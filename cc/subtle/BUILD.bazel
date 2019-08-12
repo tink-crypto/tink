@@ -679,6 +679,20 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "hybrid_test_util",
+    testonly = 1,
+    srcs = ["hybrid_test_util.cc"],
+    hdrs = ["hybrid_test_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:hybrid_decrypt",
+        "//cc:hybrid_encrypt",
+        "//cc/util:status",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1260,6 +1274,17 @@ cc_test(
     srcs = ["streaming_aead_test_util_test.cc"],
     deps = [
         ":streaming_aead_test_util",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hybrid_test_util_test",
+    srcs = ["hybrid_test_util_test.cc"],
+    deps = [
+        ":hybrid_test_util",
         "//cc/util:test_matchers",
         "//cc/util:test_util",
         "@com_google_googletest//:gtest_main",
