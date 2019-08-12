@@ -382,23 +382,28 @@ cc_library(
 )
 
 cc_library(
-    name = "aes_ctr_hmac_stream_segment_encrypter",
-    srcs = ["aes_ctr_hmac_stream_segment_encrypter.cc"],
-    hdrs = ["aes_ctr_hmac_stream_segment_encrypter.h"],
+    name = "aes_ctr_hmac_streaming",
+    srcs = ["aes_ctr_hmac_streaming.cc"],
+    hdrs = ["aes_ctr_hmac_streaming.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
         ":common_enums",
+        ":hkdf",
         ":hmac_boringssl",
+        ":nonce_based_streaming_aead",
         ":random",
+        ":stream_segment_decrypter",
         ":stream_segment_encrypter",
         ":subtle_util",
+        ":subtle_util_boringssl",
         "//cc:mac",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -868,14 +873,16 @@ cc_test(
 )
 
 cc_test(
-    name = "aes_ctr_hmac_stream_segment_encrypter_test",
+    name = "aes_ctr_hmac_streaming_test",
     size = "small",
-    srcs = ["aes_ctr_hmac_stream_segment_encrypter_test.cc"],
+    srcs = ["aes_ctr_hmac_streaming_test.cc"],
     deps = [
-        ":aes_ctr_hmac_stream_segment_encrypter",
+        ":aes_ctr_hmac_streaming",
         ":common_enums",
         ":random",
+        ":stream_segment_decrypter",
         ":stream_segment_encrypter",
+        ":streaming_aead_test_util",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_matchers",

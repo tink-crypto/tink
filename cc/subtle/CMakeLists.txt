@@ -341,21 +341,27 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME aes_ctr_hmac_stream_segment_encrypter
+  NAME aes_ctr_hmac_streaming
   SRCS
-    aes_ctr_hmac_stream_segment_encrypter.cc
-    aes_ctr_hmac_stream_segment_encrypter.h
+    aes_ctr_hmac_streaming.cc
+    aes_ctr_hmac_streaming.h
   DEPS
-    tink::subtle::random
-    tink::subtle::stream_segment_encrypter
     tink::subtle::common_enums
+    tink::subtle::hkdf
     tink::subtle::hmac_boringssl
+    tink::subtle::nonce_based_streaming_aead
+    tink::subtle::random
+    tink::subtle::stream_segment_decrypter
+    tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util
+    tink::subtle::subtle_util_boringssl
+    tink::core::mac
     tink::util::errors
     tink::util::status
     tink::util::statusor
     crypto
     absl::memory
+    absl::strings
 )
 
 tink_cc_library(
@@ -739,13 +745,15 @@ tink_cc_test(
 )
 
 tink_cc_test(
-  NAME aes_ctr_hmac_stream_segment_encrypter_test
-  SRCS aes_ctr_hmac_stream_segment_encrypter_test.cc
+  NAME aes_ctr_hmac_streaming_test
+  SRCS aes_ctr_hmac_streaming_test.cc
   DEPS
-    tink::subtle::aes_ctr_hmac_stream_segment_encrypter
-    tink::subtle::random
-    tink::subtle::stream_segment_encrypter
+    tink::subtle::aes_ctr_hmac_streaming
     tink::subtle::common_enums
+    tink::subtle::random
+    tink::subtle::stream_segment_decrypter
+    tink::subtle::stream_segment_encrypter
+    tink::subtle::streaming_aead_test_util
     tink::util::status
     tink::util::statusor
     tink::util::test_util

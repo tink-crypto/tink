@@ -14,15 +14,14 @@
 
 #include "tink/subtle/subtle_util.h"
 
-#include <cstdint>
+#include <string>
 
 #include "gtest/gtest.h"
 
 TEST(SubtleUtilTest, Basic) {
-  std::vector<uint8_t> dst(4);
-  crypto::tink::subtle::BigEndianStore32(0x12345678, dst.data());
-  EXPECT_EQ(dst[0], 0x12);
-  EXPECT_EQ(dst[1], 0x34);
-  EXPECT_EQ(dst[2], 0x56);
-  EXPECT_EQ(dst[3], 0x78);
+  std::string result = crypto::tink::subtle::BigEndian32(0x12345678);
+  EXPECT_EQ(result[0], 0x12);
+  EXPECT_EQ(result[1], 0x34);
+  EXPECT_EQ(result[2], 0x56);
+  EXPECT_EQ(result[3], 0x78);
 }

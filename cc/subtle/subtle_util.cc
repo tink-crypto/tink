@@ -18,11 +18,13 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-void BigEndianStore32(uint32_t val, uint8_t* dst) {
-  dst[0] = (val >> 24) & 0xff;
-  dst[1] = (val >> 16) & 0xff;
-  dst[2] = (val >> 8) & 0xff;
-  dst[3] = val & 0xff;
+std::string BigEndian32(uint32_t val) {
+  std::string result(4, '\0');
+  result[0] = (val >> 24) & 0xff;
+  result[1] = (val >> 16) & 0xff;
+  result[2] = (val >> 8) & 0xff;
+  result[3] = val & 0xff;
+  return result;
 }
 
 }  // namespace subtle

@@ -16,14 +16,14 @@
 #define TINK_SUBTLE_SUBTLE_UTIL_H_
 
 #include <cstdint>
+#include <string>
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 
-// Stores |val| in big endian order to |dst|, which needs be at least 4 bytes
-// long.
-void BigEndianStore32(uint32_t val, uint8_t* dst);
+// Returnes big endian order representation of |val|.
+std::string BigEndian32(uint32_t val);
 
 }  // namespace subtle
 }  // namespace tink
