@@ -219,11 +219,12 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     return Random.randBytes(keySizeInBytes);
   }
 
-  private byte[] nonceForSegment(byte[] prefix, int segmentNr, boolean last) {
+  private byte[] nonceForSegment(byte[] prefix, long segmentNr, boolean last)
+      throws GeneralSecurityException {
     ByteBuffer nonce = ByteBuffer.allocate(NONCE_SIZE_IN_BYTES);
     nonce.order(ByteOrder.BIG_ENDIAN);
     nonce.put(prefix);
-    nonce.putInt(segmentNr);
+    SubtleUtil.putAsUnsigedInt(nonce, segmentNr);
     nonce.put((byte) (last ? 1 : 0));
     nonce.putInt(0);
     return nonce.array();
@@ -259,7 +260,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     private final Mac mac;
     private final byte[] noncePrefix;
     private ByteBuffer header;
-    private int encryptedSegments = 0;
+    private long encryptedSegments = 0;
 
     public AesCtrHmacStreamEncrypter(byte[] aad) throws GeneralSecurityException {
       cipher = cipherInstance();
@@ -327,12 +328,6 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
       mac.update(ctCopy);
       byte[] tag = mac.doFinal();
       ciphertext.put(tag, 0, tagSizeInBytes);
-    }
-
-    @Override
-    // TODO(b/74250492): So far this is unused.
-    public synchronized int getEncryptedSegments() {
-      return encryptedSegments;
     }
   }
 

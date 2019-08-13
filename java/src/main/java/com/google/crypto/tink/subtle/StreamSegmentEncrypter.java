@@ -62,7 +62,5 @@ public interface StreamSegmentEncrypter {
         boolean isLastSegment,
         ByteBuffer ciphertext)
         throws GeneralSecurityException;
-
-  int getEncryptedSegments();
 }
 

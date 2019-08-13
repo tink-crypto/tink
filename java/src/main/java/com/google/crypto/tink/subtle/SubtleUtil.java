@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.subtle.Enums.HashType;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -150,5 +151,18 @@ public class SubtleUtil {
       tPos += c.length;
     }
     return t;
+  }
+
+  /**
+   * Inserts {@param value} as unsigned into into {@param buffer}.
+   *
+   * <p>@throws GeneralSecurityException if not 0 <= value < 2^32.
+   */
+  public static void putAsUnsigedInt(ByteBuffer buffer, long value)
+      throws GeneralSecurityException {
+    if (!(0 <= value && value < 0x100000000L)) {
+      throw new GeneralSecurityException("Index out of range");
+    }
+    buffer.putInt((int) value);
   }
 }

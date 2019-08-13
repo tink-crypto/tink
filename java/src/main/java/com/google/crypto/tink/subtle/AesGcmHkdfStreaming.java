@@ -260,11 +260,6 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
         cipher.doFinal(part1, ciphertext);
       }
     }
-
-    @Override
-    public synchronized int getEncryptedSegments() {
-      return encryptedSegments;
-    }
   }
 
   /** An instance of a crypter used to decrypt a ciphertext stream. */
