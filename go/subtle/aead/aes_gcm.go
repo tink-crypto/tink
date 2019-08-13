@@ -67,7 +67,7 @@ func (a *AESGCM) Encrypt(pt, aad []byte) ([]byte, error) {
 	}
 	iv := a.newIV()
 	ct := cipher.Seal(nil, iv, pt, aad)
-	var ret []byte
+	ret := make([]byte, 0, len(iv) + len(ct))
 	ret = append(ret, iv...)
 	ret = append(ret, ct...)
 	return ret, nil

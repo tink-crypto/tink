@@ -60,7 +60,7 @@ func (a *encryptPrimitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ret []byte
+	ret := make([]byte, 0, len(primary.Prefix) + len(ct))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, ct...)
 	return ret, nil

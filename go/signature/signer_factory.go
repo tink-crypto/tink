@@ -69,7 +69,7 @@ func (s *signerSet) Sign(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ret []byte
+	ret := make([]byte, 0, len(primary.Prefix) + len(signature))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, signature...)
 	return ret, nil
