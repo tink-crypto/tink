@@ -19,6 +19,7 @@
 #include "absl/memory/memory.h"
 #include "tink/config/config_util.h"
 #include "tink/registry.h"
+#include "tink/streamingaead/aes_ctr_hmac_streaming_key_manager.h"
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
 #include "tink/streamingaead/streaming_aead_wrapper.h"
 #include "tink/util/status.h"
@@ -39,9 +40,13 @@ const RegistryConfig& StreamingAeadConfig::Latest() {
 
 // static
 util::Status StreamingAeadConfig::Register() {
-  // Register key manager.
+  // Register key managers.
   auto status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmHkdfStreamingKeyManager>(), true);
+  if (!status.ok()) return status;
+
+  status = Registry::RegisterKeyTypeManager(
+      absl::make_unique<AesCtrHmacStreamingKeyManager>(), true);
   if (!status.ok()) return status;
 
   // Register primitive wrapper.

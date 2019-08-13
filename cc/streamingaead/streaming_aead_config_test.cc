@@ -25,6 +25,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/streaming_aead.h"
+#include "tink/streamingaead/aes_ctr_hmac_streaming_key_manager.h"
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
 #include "tink/streamingaead/streaming_aead_key_templates.h"
 #include "tink/util/status.h"
@@ -50,9 +51,17 @@ TEST_F(StreamingAeadConfigTest, Basic) {
                   AesGcmHkdfStreamingKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
+                  AesCtrHmacStreamingKeyManager().get_key_type())
+                  .status(),
+              StatusIs(util::error::NOT_FOUND));
   EXPECT_THAT(StreamingAeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesGcmHkdfStreamingKeyManager().get_key_type())
+                  .status(),
+              IsOk());
+  EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
+                  AesCtrHmacStreamingKeyManager().get_key_type())
                   .status(),
               IsOk());
 }

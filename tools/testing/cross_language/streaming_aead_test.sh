@@ -68,16 +68,7 @@ streaming_aead_basic_test() {
 
 #############################################################################
 ##### Run the actual tests.
-
-# Common tests for C++ and Java.
-KEY_TEMPLATES=(AES128_GCM_HKDF_4KB AES256_GCM_HKDF_4KB)
+KEY_TEMPLATES=(AES128_GCM_HKDF_4KB AES256_GCM_HKDF_4KB AES128_CTR_HMAC_SHA256_4KB AES256_CTR_HMAC_SHA256_4KB)
 ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI)
 DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI)
-streaming_aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
-
-
-# These tests work only for Java.
-KEY_TEMPLATES=(AES128_CTR_HMAC_SHA256_4KB AES256_CTR_HMAC_SHA256_4KB)
-ENCRYPT_CLIS=($JAVA_AEAD_CLI)
-DECRYPT_CLIS=($JAVA_AEAD_CLI)
 streaming_aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"

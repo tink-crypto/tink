@@ -33,6 +33,7 @@ tink_cc_library(
     tink::config::config_util
     tink::core::registry
     tink::proto::config_cc_proto
+    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
     tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_wrapper
     tink::util::status
@@ -63,6 +64,29 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
     tink::subtle::aes_gcm_hkdf_streaming
+    tink::subtle::random
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+)
+
+tink_cc_library(
+  NAME aes_ctr_hmac_streaming_key_manager
+  SRCS
+    aes_ctr_hmac_streaming_key_manager.cc
+    aes_ctr_hmac_streaming_key_manager.h
+  DEPS
+    absl::strings
+    tink::core::key_manager
+    tink::core::key_type_manager
+    tink::core::streaming_aead
+    tink::proto::aes_ctr_hmac_streaming_cc_proto
+    tink::proto::tink_cc_proto
+    tink::subtle::aes_ctr_hmac_streaming
     tink::subtle::random
     tink::util::constants
     tink::util::enums
@@ -192,6 +216,29 @@ tink_cc_test(
 )
 
 tink_cc_test(
+  NAME aes_ctr_hmac_streaming_key_manager_test
+  SRCS aes_ctr_hmac_streaming_key_manager_test.cc
+  DEPS
+    absl::strings
+    tink::core::streaming_aead
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_ctr_hmac_streaming_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
+    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
+    tink::subtle::aes_ctr_hmac_streaming
+    tink::subtle::common_enums
+    tink::subtle::random
+    tink::subtle::streaming_aead_test_util
+    tink::subtle::test_util
+    tink::util::istream_input_stream
+    tink::util::ostream_output_stream
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
   NAME streaming_aead_key_templates_test
   SRCS streaming_aead_key_templates_test.cc
   DEPS
@@ -212,6 +259,7 @@ tink_cc_test(
     tink::core::keyset_handle
     tink::core::registry
     tink::core::streaming_aead
+    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
     tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_config
     tink::streamingaead::streaming_aead_key_templates
