@@ -60,6 +60,9 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
+    deps = [
+        "@com_google_absl//absl/base:core_headers",
+    ]
 )
 
 cc_library(

@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include "absl/base/attributes.h"
+
 // placeholder_forward_declaration, please ignore
 
 namespace crypto {
@@ -124,6 +126,11 @@ enum Code {
 
 }  // namespace error
 
+// TODO(tholenst) Remove this compile time flag in Tink 1.5. This should not be
+// used, except as a temporary measure.
+#ifndef CPP_TINK_TEMPORARY_STATUS_MUST_NOT_USE_RESULT
+class ABSL_MUST_USE_RESULT Status;
+#endif
 
 // A Status is a combination of an error code and a std::string message (for non-OK
 // error codes).
