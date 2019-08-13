@@ -17,10 +17,12 @@
 #include "tink/streamingaead/streaming_aead_key_templates.h"
 
 #include "proto/aes_gcm_hkdf_streaming.pb.h"
+#include "proto/aes_ctr_hmac_streaming.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::AesGcmHkdfStreamingKeyFormat;
+using google::crypto::tink::AesCtrHmacStreamingKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
@@ -45,6 +47,24 @@ KeyTemplate* NewAesGcmHkdfStreamingKeyTemplate(int ikm_size_in_bytes) {
   return key_template;
 }
 
+KeyTemplate* NewAesCtrHmacStreamingKeyTemplate(int ikm_size_in_bytes) {
+  KeyTemplate* key_template = new KeyTemplate;
+  key_template->set_type_url(
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey");
+  key_template->set_output_prefix_type(OutputPrefixType::RAW);
+  AesCtrHmacStreamingKeyFormat key_format;
+  key_format.set_key_size(ikm_size_in_bytes);
+  auto params = key_format.mutable_params();
+  params->set_ciphertext_segment_size(4096);
+  params->set_derived_key_size(ikm_size_in_bytes);
+  params->set_hkdf_hash_type(HashType::SHA256);
+  auto hmac_params = params->mutable_hmac_params();
+  hmac_params->set_hash(HashType::SHA256);
+  hmac_params->set_tag_size(32);
+  key_format.SerializeToString(key_template->mutable_value());
+  return key_template;
+}
+
 }  // anonymous namespace
 
 // static
@@ -58,6 +78,20 @@ const KeyTemplate& StreamingAeadKeyTemplates::Aes128GcmHkdf4KB() {
 const KeyTemplate& StreamingAeadKeyTemplates::Aes256GcmHkdf4KB() {
   static const KeyTemplate* key_template =
       NewAesGcmHkdfStreamingKeyTemplate(/* ikm_size_in_bytes= */ 32);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment4KB() {
+  static const KeyTemplate* key_template =
+      NewAesCtrHmacStreamingKeyTemplate(/* ikm_size_in_bytes= */ 16);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment4KB() {
+  static const KeyTemplate* key_template =
+      NewAesCtrHmacStreamingKeyTemplate(/* ikm_size_in_bytes= */ 32);
   return *key_template;
 }
 

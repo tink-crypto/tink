@@ -45,6 +45,7 @@ tink_cc_library(
     streaming_aead_key_templates.cc
     streaming_aead_key_templates.h
   DEPS
+    tink::proto::aes_ctr_hmac_streaming_cc_proto
     tink::proto::aes_gcm_hkdf_streaming_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
@@ -242,9 +243,11 @@ tink_cc_test(
   NAME streaming_aead_key_templates_test
   SRCS streaming_aead_key_templates_test.cc
   DEPS
+    tink::proto::aes_ctr_hmac_streaming_cc_proto
     tink::proto::aes_gcm_hkdf_streaming_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
+    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
     tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_key_templates
     tink::util::test_matchers
