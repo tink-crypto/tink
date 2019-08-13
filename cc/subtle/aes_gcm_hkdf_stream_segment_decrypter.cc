@@ -79,7 +79,7 @@ util::Status Validate(const AesGcmHkdfStreamSegmentDecrypter::Params& params) {
   }
   int header_size = 1 + params.derived_key_size +
                     AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
-  if (params.ciphertext_segment_size <
+  if (params.ciphertext_segment_size <=
       params.ciphertext_offset + header_size +
       AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT,
@@ -174,6 +174,9 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
   }
   if (ciphertext.size() > get_ciphertext_segment_size()) {
     return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too long");
+  }
+  if (ciphertext.size() < AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
+    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
   }
   if (plaintext_buffer == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,

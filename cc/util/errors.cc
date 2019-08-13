@@ -36,7 +36,9 @@ Status ToStatusF(Code code, const char* format, ...) {
   va_list ap;
   va_start(ap, format);
   char* p;
-  vasprintf(&p, format, ap);
+  if (vasprintf(&p, format, ap) < 0) {
+    abort();
+  }
   va_end(ap);
   Status status(code, p);
   free(p);

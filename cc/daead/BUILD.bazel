@@ -46,22 +46,6 @@ cc_library(
 )
 
 cc_library(
-    name = "deterministic_aead_catalogue",
-    srcs = ["deterministic_aead_catalogue.cc"],
-    hdrs = ["deterministic_aead_catalogue.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":aes_siv_key_manager",
-        "//cc:catalogue",
-        "//cc:deterministic_aead",
-        "//cc:key_manager",
-        "//cc/util:status",
-        "@com_google_absl//absl/memory",
-    ],
-)
-
-cc_library(
     name = "deterministic_aead_config",
     srcs = ["deterministic_aead_config.cc"],
     hdrs = ["deterministic_aead_config.h"],
@@ -69,8 +53,9 @@ cc_library(
     strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        ":deterministic_aead_catalogue",
-        "//cc:config",
+        ":aes_siv_key_manager",
+        ":deterministic_aead_wrapper",
+        "//cc/config:config_util",
         "//cc/mac:mac_config",
         "//cc/util:status",
         "//proto:config_cc_proto",
@@ -141,25 +126,10 @@ cc_test(
         "//cc:deterministic_aead",
         "//cc:primitive_set",
         "//cc/util:status",
+        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "deterministic_aead_catalogue_test",
-    size = "small",
-    srcs = ["deterministic_aead_catalogue_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    deps = [
-        ":deterministic_aead_catalogue",
-        ":deterministic_aead_config",
-        "//cc:catalogue",
-        "//cc:deterministic_aead",
-        "//cc/util:status",
-        "//cc/util:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -170,9 +140,9 @@ cc_test(
     srcs = ["deterministic_aead_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":aes_siv_key_manager",
         ":deterministic_aead_config",
         ":deterministic_aead_key_templates",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:deterministic_aead",
         "//cc:keyset_handle",

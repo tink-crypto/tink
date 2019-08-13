@@ -287,49 +287,22 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME public_key_sign_catalogue
-  SRCS
-    public_key_sign_catalogue.cc
-    public_key_sign_catalogue.h
-  DEPS
-    tink::signature::ecdsa_sign_key_manager
-    tink::signature::ed25519_sign_key_manager
-    tink::signature::rsa_ssa_pkcs1_sign_key_manager
-    tink::signature::rsa_ssa_pss_sign_key_manager
-    tink::core::catalogue
-    tink::core::key_manager
-    tink::core::public_key_sign
-    tink::util::status
-    tink::util::statusor
-)
-
-tink_cc_library(
-  NAME public_key_verify_catalogue
-  SRCS
-    public_key_verify_catalogue.cc
-    public_key_verify_catalogue.h
-  DEPS
-    tink::signature::ecdsa_verify_key_manager
-    tink::signature::ed25519_verify_key_manager
-    tink::signature::rsa_ssa_pkcs1_verify_key_manager
-    tink::signature::rsa_ssa_pss_verify_key_manager
-    tink::core::catalogue
-    tink::core::key_manager
-    tink::core::public_key_verify
-    tink::util::status
-    tink::util::statusor
-    absl::str_format
-)
-
-tink_cc_library(
   NAME signature_config
   SRCS
     signature_config.cc
     signature_config.h
   DEPS
-    tink::signature::public_key_sign_catalogue
-    tink::signature::public_key_verify_catalogue
-    tink::core::config
+    tink::signature::ecdsa_sign_key_manager
+    tink::signature::ed25519_sign_key_manager
+    tink::signature::rsa_ssa_pkcs1_sign_key_manager
+    tink::signature::rsa_ssa_pss_sign_key_manager
+    tink::signature::ecdsa_verify_key_manager
+    tink::signature::ed25519_verify_key_manager
+    tink::signature::rsa_ssa_pkcs1_verify_key_manager
+    tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::signature::public_key_sign_wrapper
+    tink::signature::public_key_verify_wrapper
+    tink::config::config_util
     tink::core::registry
     tink::util::status
     tink::proto::config_cc_proto
@@ -347,6 +320,7 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
@@ -379,6 +353,7 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
@@ -561,32 +536,13 @@ tink_cc_test(
 )
 
 tink_cc_test(
-  NAME public_key_sign_catalogue_test
-  SRCS public_key_sign_catalogue_test.cc
-  DEPS
-    tink::signature::public_key_sign_catalogue
-    tink::core::catalogue
-    tink::util::status
-    tink::util::statusor
-)
-
-tink_cc_test(
-  NAME public_key_verify_catalogue_test
-  SRCS public_key_verify_catalogue_test.cc
-  DEPS
-    tink::signature::public_key_verify_catalogue
-    tink::core::catalogue
-    tink::util::status
-    tink::util::statusor
-)
-
-tink_cc_test(
   NAME signature_config_test
   SRCS signature_config_test.cc
   DEPS
+    tink::signature::rsa_ssa_pss_sign_key_manager
+    tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::signature_config
     tink::signature::signature_key_templates
-    tink::core::catalogue
     tink::core::config
     tink::core::keyset_handle
     tink::core::public_key_sign

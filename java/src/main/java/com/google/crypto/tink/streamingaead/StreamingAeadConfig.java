@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -47,28 +46,10 @@ public final class StreamingAeadConfig {
 
   /** @deprecated */
   @Deprecated
-  public static final RegistryConfig TINK_1_1_0 =
-      RegistryConfig.newBuilder()
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacStreamingKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesGcmHkdfStreamingKey", 0, true))
-          .setConfigName("TINK_STREAMINGAEAD_1_1_0")
-          .build();
+  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /** @since 1.2.0 */
-  public static final RegistryConfig LATEST =
-      RegistryConfig.newBuilder()
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacStreamingKey", 0, true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesGcmHkdfStreamingKey", 0, true))
-          .setConfigName("TINK_STREAMINGAEAD")
-          .build();
+  public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   static {
     try {
@@ -96,7 +77,8 @@ public final class StreamingAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.addCatalogue(CATALOGUE_NAME, new StreamingAeadCatalogue());
-    Config.register(LATEST);
+    Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager());
+    Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager());
+    Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
   }
 }

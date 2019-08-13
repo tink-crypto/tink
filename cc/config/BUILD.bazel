@@ -21,6 +21,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "config_util",
+    srcs = ["config_util.cc"],
+    hdrs = ["config_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//proto:config_cc_proto",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -31,7 +42,6 @@ cc_test(
     deps = [
         ":tink_config",
         "//cc:aead",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:deterministic_aead",
         "//cc:hybrid_decrypt",
@@ -39,7 +49,19 @@ cc_test(
         "//cc:mac",
         "//cc:registry",
         "//cc:streaming_aead",
+        "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",
+        "//cc/util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_util_test",
+    size = "small",
+    srcs = ["config_util_test.cc"],
+    deps = [
+        ":config_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

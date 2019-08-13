@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -48,55 +47,18 @@ public final class HybridConfig {
   private static final String HYBRID_DECRYPT_CATALOGUE_NAME = "TinkHybridDecrypt";
 
   /** @deprecated */
-  @Deprecated
-  public static final RegistryConfig TINK_1_0_0 =
-      RegistryConfig.newBuilder()
-          .mergeFrom(AeadConfig.TINK_1_0_0)
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  HYBRID_DECRYPT_CATALOGUE_NAME,
-                  "HybridDecrypt",
-                  "EciesAeadHkdfPrivateKey",
-                  0,
-                  true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  HYBRID_ENCRYPT_CATALOGUE_NAME,
-                  "HybridEncrypt",
-                  "EciesAeadHkdfPublicKey",
-                  0,
-                  true))
-          .setConfigName("TINK_HYBRID_1_0_0")
-          .build();
-
+  @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
   /**
    * @deprecated
    * @since 1.1.0
    */
-  @Deprecated
-  public static final RegistryConfig TINK_1_1_0 =
-      RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_HYBRID_1_1_0").build();
+  @Deprecated public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
-  /** @since 1.2.0 */
-  public static final RegistryConfig LATEST =
-      RegistryConfig.newBuilder()
-          .mergeFrom(AeadConfig.LATEST)
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  HYBRID_DECRYPT_CATALOGUE_NAME,
-                  "HybridDecrypt",
-                  "EciesAeadHkdfPrivateKey",
-                  0,
-                  true))
-          .addEntry(
-              Config.getTinkKeyTypeEntry(
-                  HYBRID_ENCRYPT_CATALOGUE_NAME,
-                  "HybridEncrypt",
-                  "EciesAeadHkdfPublicKey",
-                  0,
-                  true))
-          .setConfigName("TINK_HYBRID")
-          .build();
+  /**
+   * @deprecated
+   * @since 1.2.0
+   */
+  @Deprecated public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   static {
     try {
@@ -134,10 +96,10 @@ public final class HybridConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    // The order of these calls matters.
-    AeadConfig.register(); // includes Mac
-    Registry.addCatalogue(HYBRID_ENCRYPT_CATALOGUE_NAME, new HybridEncryptCatalogue());
-    Registry.addCatalogue(HYBRID_DECRYPT_CATALOGUE_NAME, new HybridDecryptCatalogue());
-    Config.register(LATEST);
+    AeadConfig.register();
+    Registry.registerKeyManager(new EciesAeadHkdfPrivateKeyManager());
+    Registry.registerKeyManager(new EciesAeadHkdfPublicKeyManager());
+    Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
+    Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
   }
 }

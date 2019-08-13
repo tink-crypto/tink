@@ -44,8 +44,8 @@ class AeadConfig {
    * @return {!PbRegistryConfig}
    */
   static latest() {
-    const config = new PbRegistryConfig();
-    config.setConfigName(AeadConfig.CONFIG_NAME_);
+    const config =
+        new PbRegistryConfig().setConfigName(AeadConfig.CONFIG_NAME_);
 
     config.addEntry(AeadConfig.createEntry_(
         AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, /* keyManagerVersion = */ 0));
@@ -79,13 +79,12 @@ class AeadConfig {
    * @private
    */
   static createEntry_(typeUrl, keyManagerVersion, opt_newKeyAllowed = true) {
-    const entry = new PbKeyTypeEntry;
-
-    entry.setPrimitiveName(AeadConfig.PRIMITIVE_NAME);
-    entry.setTypeUrl(typeUrl);
-    entry.setKeyManagerVersion(keyManagerVersion);
-    entry.setNewKeyAllowed(opt_newKeyAllowed);
-    entry.setCatalogueName(AeadConfig.CATALOGUE_NAME);
+    const entry = new PbKeyTypeEntry()
+                      .setPrimitiveName(AeadConfig.PRIMITIVE_NAME)
+                      .setTypeUrl(typeUrl)
+                      .setKeyManagerVersion(keyManagerVersion)
+                      .setNewKeyAllowed(opt_newKeyAllowed)
+                      .setCatalogueName(AeadConfig.CATALOGUE_NAME);
 
     return entry;
   }

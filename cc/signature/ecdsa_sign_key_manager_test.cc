@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -288,17 +288,8 @@ TEST_F(EcdsaSignKeyManagerTest, testPublicKeyExtractionErrors) {
       &(key_manager.get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
 
-  AesGcmKeyManager aead_key_manager;
-  auto aead_private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
-      &(aead_key_manager.get_key_factory()));
-  ASSERT_EQ(nullptr, aead_private_key_factory);
-
-  auto aead_key_result = aead_key_manager.get_key_factory().NewKey(
-      AeadKeyTemplates::Aes128Gcm().value());
-  ASSERT_TRUE(aead_key_result.ok()) << aead_key_result.status();
-  auto aead_key = std::move(aead_key_result.ValueOrDie());
   auto public_key_data_result = private_key_factory->GetPublicKeyData(
-      aead_key->SerializeAsString());
+      google::crypto::tink::AesGcmKey().SerializeAsString());
   EXPECT_FALSE(public_key_data_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
             public_key_data_result.status().error_code());

@@ -187,11 +187,11 @@ const ECDSA_PRIVATE_KEY_MANAGER_VERSION = 0;
  */
 const createKeysetHandleFromKeyData = function(keyData) {
   const keyId = 1;
-  const key = new PbKeyset.Key();
-  key.setKeyData(keyData);
-  key.setStatus(PbKeyStatusType.ENABLED);
-  key.setKeyId(keyId);
-  key.setOutputPrefixType(PbOutputPrefixType.TINK);
+  const key = new PbKeyset.Key()
+                  .setKeyData(keyData)
+                  .setStatus(PbKeyStatusType.ENABLED)
+                  .setKeyId(keyId)
+                  .setOutputPrefixType(PbOutputPrefixType.TINK);
 
   const keyset = new PbKeyset();
   keyset.addKey(key);

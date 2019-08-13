@@ -257,8 +257,8 @@ testSuite({
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const keyData =
-        await manager.getKeyFactory().newKeyData(keyFormat.serializeBinary());
-    keyData.setTypeUrl('unsupported_key_type_url');
+        (await manager.getKeyFactory().newKeyData(keyFormat.serializeBinary()))
+            .setTypeUrl('unsupported_key_type_url');
 
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
@@ -285,9 +285,8 @@ testSuite({
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const version = manager.getVersion() + 1;
     const keyFormat = createKeyFormat();
-    const key = await manager.getKeyFactory().newKey(keyFormat);
-
-    key.setVersion(version);
+    const key =
+        (await manager.getKeyFactory().newKey(keyFormat)).setVersion(version);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -502,10 +501,9 @@ class ExceptionText {
 const createKemParams = function(
     opt_curveType = PbEllipticCurveType.NIST_P256,
     opt_hashType = PbHashType.SHA256) {
-  const kemParams = new PbEciesHkdfKemParams();
-
-  kemParams.setCurveType(opt_curveType);
-  kemParams.setHkdfHashType(opt_hashType);
+  const kemParams = new PbEciesHkdfKemParams()
+                        .setCurveType(opt_curveType)
+                        .setHkdfHashType(opt_hashType);
 
   return kemParams;
 };
@@ -519,8 +517,7 @@ const createDemParams = function(opt_keyTemplate) {
     opt_keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
   }
 
-  const demParams = new PbEciesAeadDemParams();
-  demParams.setAeadDem(opt_keyTemplate);
+  const demParams = new PbEciesAeadDemParams().setAeadDem(opt_keyTemplate);
 
   return demParams;
 };
@@ -536,11 +533,10 @@ const createDemParams = function(opt_keyTemplate) {
 const createKeyParams = function(
     opt_curveType, opt_hashType, opt_keyTemplate,
     opt_pointFormat = PbPointFormat.UNCOMPRESSED) {
-  const params = new PbEciesAeadHkdfParams();
-
-  params.setKemParams(createKemParams(opt_curveType, opt_hashType));
-  params.setDemParams(createDemParams(opt_keyTemplate));
-  params.setEcPointFormat(opt_pointFormat);
+  const params = new PbEciesAeadHkdfParams()
+                     .setKemParams(createKemParams(opt_curveType, opt_hashType))
+                     .setDemParams(createDemParams(opt_keyTemplate))
+                     .setEcPointFormat(opt_pointFormat);
 
   return params;
 };
@@ -555,8 +551,7 @@ const createKeyParams = function(
  */
 const createKeyFormat = function(
     opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat) {
-  const keyFormat = new PbEciesAeadHkdfKeyFormat();
-  keyFormat.setParams(createKeyParams(
+  const keyFormat = new PbEciesAeadHkdfKeyFormat().setParams(createKeyParams(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
   return keyFormat;
 };

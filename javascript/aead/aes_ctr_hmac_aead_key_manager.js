@@ -62,24 +62,23 @@ class AesCtrHmacAeadKeyFactory {
     }
 
     this.validateAesCtrKeyFormat(keyFormatProto.getAesCtrKeyFormat());
-    let /** PbAesCtrKey */ aesCtrKey = new PbAesCtrKey();
-    aesCtrKey.setVersion(AesCtrHmacAeadKeyFactory.VERSION_);
-    aesCtrKey.setParams(keyFormatProto.getAesCtrKeyFormat().getParams());
-    aesCtrKey.setKeyValue(
-        Random.randBytes(keyFormatProto.getAesCtrKeyFormat().getKeySize()));
+    let aesCtrKey =
+        new PbAesCtrKey()
+            .setVersion(AesCtrHmacAeadKeyFactory.VERSION_)
+            .setParams(keyFormatProto.getAesCtrKeyFormat().getParams())
+            .setKeyValue(Random.randBytes(
+                keyFormatProto.getAesCtrKeyFormat().getKeySize()));
 
     this.validateHmacKeyFormat(keyFormatProto.getHmacKeyFormat());
-    let /** PbHmacKey */ hmacKey = new PbHmacKey();
-    hmacKey.setVersion(AesCtrHmacAeadKeyFactory.VERSION_);
-    hmacKey.setParams(keyFormatProto.getHmacKeyFormat().getParams());
-    hmacKey.setKeyValue(
-        Random.randBytes(keyFormatProto.getHmacKeyFormat().getKeySize()));
+    let hmacKey = new PbHmacKey()
+                      .setVersion(AesCtrHmacAeadKeyFactory.VERSION_)
+                      .setParams(keyFormatProto.getHmacKeyFormat().getParams())
+                      .setKeyValue(Random.randBytes(
+                          keyFormatProto.getHmacKeyFormat().getKeySize()));
 
 
-    let /** PbAesCtrHmacAeadKey */ aesCtrHmacAeadKey =
-        new PbAesCtrHmacAeadKey();
-    aesCtrHmacAeadKey.setAesCtrKey(aesCtrKey);
-    aesCtrHmacAeadKey.setHmacKey(hmacKey);
+    let aesCtrHmacAeadKey =
+        new PbAesCtrHmacAeadKey().setAesCtrKey(aesCtrKey).setHmacKey(hmacKey);
 
     return aesCtrHmacAeadKey;
   }
@@ -90,11 +89,10 @@ class AesCtrHmacAeadKeyFactory {
   newKeyData(serializedKeyFormat) {
     const key =
         /** @type {!PbAesCtrHmacAeadKey} */ (this.newKey(serializedKeyFormat));
-    let /** !PbKeyData */ keyData = new PbKeyData();
-
-    keyData.setTypeUrl(AesCtrHmacAeadKeyManager.KEY_TYPE);
-    keyData.setValue(key.serializeBinary());
-    keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+    let keyData = new PbKeyData()
+                      .setTypeUrl(AesCtrHmacAeadKeyManager.KEY_TYPE)
+                      .setValue(key.serializeBinary())
+                      .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
 
     return keyData;
   }
@@ -307,9 +305,9 @@ class AesCtrHmacAeadKeyManager {
 
     Validators.validateVersion(key.getVersion(), this.getVersion());
 
-    let keyFormat = new PbAesCtrKeyFormat();
-    keyFormat.setParams(key.getParams());
-    keyFormat.setKeySize(key.getKeyValue_asU8().length);
+    let keyFormat = new PbAesCtrKeyFormat()
+                        .setParams(key.getParams())
+                        .setKeySize(key.getKeyValue_asU8().length);
     this.keyFactory_.validateAesCtrKeyFormat(keyFormat);
   }
 
@@ -328,9 +326,9 @@ class AesCtrHmacAeadKeyManager {
 
     Validators.validateVersion(key.getVersion(), this.getVersion());
 
-    let keyFormat = new PbHmacKeyFormat();
-    keyFormat.setParams(key.getParams());
-    keyFormat.setKeySize(key.getKeyValue_asU8().length);
+    let keyFormat = new PbHmacKeyFormat()
+                        .setParams(key.getParams())
+                        .setKeySize(key.getKeyValue_asU8().length);
     this.keyFactory_.validateHmacKeyFormat(keyFormat);
   }
 }

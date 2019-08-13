@@ -396,7 +396,8 @@ class DummyStreamingAead : public StreamingAead {
         crypto::tink::util::Buffer* dest_buffer) override {
       if (!after_init_) {  // Try to initialize.
         after_init_ = true;
-        dest_buffer->set_size(0);
+        status_ = dest_buffer->set_size(0);
+        if (!status_.ok()) return status_;
         auto buf = std::move(
             util::Buffer::New(exp_header_.size()).ValueOrDie());
         status_ = ct_source_->PRead(0, exp_header_.size(), buf.get());

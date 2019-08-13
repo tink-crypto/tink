@@ -15,16 +15,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
+
+#include "gtest/gtest.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
-using crypto::tink::test::DummyHybridEncrypt;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::DummyHybridEncrypt;
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -102,7 +105,8 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
         std::move(hybrid_encrypt), keyset.key(2));
     ASSERT_TRUE(entry_result.ok());
     // The last key is the primary.
-    hybrid_encrypt_set->set_primary(entry_result.ValueOrDie());
+    ASSERT_THAT(hybrid_encrypt_set->set_primary(entry_result.ValueOrDie()),
+                IsOk());
 
     // Wrap hybrid_encrypt_set and test the resulting HybridEncrypt.
     auto hybrid_encrypt_result = HybridEncryptWrapper().Wrap(

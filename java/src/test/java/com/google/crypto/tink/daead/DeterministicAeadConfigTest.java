@@ -17,13 +17,10 @@
 package com.google.crypto.tink.daead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -62,44 +59,10 @@ public class DeterministicAeadConfigTest {
     // Initialize the config.
     DeterministicAeadConfig.register();
 
-    // Now the catalogues should be present.
-    RegistryConfig unused = DeterministicAeadConfig.TINK_1_1_0;
-    Registry.getCatalogue("tinkdeterministicaead");
-
     // After registration, the key manager should be present.
     Registry.getKeyManager(typeUrl, DeterministicAead.class);
 
     // Running init() manually again should succeed.
     DeterministicAeadConfig.register();
-  }
-
-  @Test
-  public void testConfigContents_1_1_0() throws Exception {
-    RegistryConfig config = DeterministicAeadConfig.TINK_1_1_0;
-    assertEquals(1, config.getEntryCount());
-    assertEquals("TINK_DETERMINISTIC_AEAD_1_1_0", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkDeterministicAead",
-        "DeterministicAead",
-        "type.googleapis.com/google.crypto.tink.AesSivKey",
-        true,
-        0);
-  }
-
-  @Test
-  public void testConfigContents_LATEST() throws Exception {
-    RegistryConfig config = DeterministicAeadConfig.LATEST;
-    assertEquals(1, config.getEntryCount());
-    assertEquals("TINK_DETERMINISTIC_AEAD", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkDeterministicAead",
-        "DeterministicAead",
-        "type.googleapis.com/google.crypto.tink.AesSivKey",
-        true,
-        0);
   }
 }

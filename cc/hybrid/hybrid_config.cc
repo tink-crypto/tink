@@ -18,34 +18,19 @@
 
 #include "absl/memory/memory.h"
 #include "tink/aead/aead_config.h"
-#include "tink/config.h"
-#include "tink/hybrid/hybrid_decrypt_catalogue.h"
-#include "tink/hybrid/hybrid_encrypt_catalogue.h"
+#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "tink/config/config_util.h"
+#include "tink/registry.h"
+#include "tink/hybrid/hybrid_decrypt_wrapper.h"
+#include "tink/hybrid/hybrid_encrypt_wrapper.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
+using google::crypto::tink::RegistryConfig;
+
 namespace crypto {
 namespace tink {
-
-namespace {
-
-google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
-  google::crypto::tink::RegistryConfig* config =
-      new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(AeadConfig::Latest());
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      HybridConfig::kHybridDecryptCatalogueName,
-      HybridConfig::kHybridDecryptPrimitiveName,
-      "EciesAeadHkdfPrivateKey", 0, true));
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      HybridConfig::kHybridEncryptCatalogueName,
-      HybridConfig::kHybridEncryptPrimitiveName,
-      "EciesAeadHkdfPublicKey", 0, true));
-  config->set_config_name("TINK_HYBRID");
-  return config;
-}
-
-}  // anonymous namespace
 
 constexpr char HybridConfig::kHybridDecryptCatalogueName[];
 constexpr char HybridConfig::kHybridDecryptPrimitiveName[];
@@ -53,22 +38,30 @@ constexpr char HybridConfig::kHybridEncryptCatalogueName[];
 constexpr char HybridConfig::kHybridEncryptPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& HybridConfig::Latest() {
-  static const auto config = GenerateRegistryConfig();
+const RegistryConfig& HybridConfig::Latest() {
+  static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
 
 // static
 util::Status HybridConfig::Register() {
   auto status = AeadConfig::Register();
+
+  // Register key managers.
   if (!status.ok()) return status;
-  status = Registry::AddCatalogue(kHybridDecryptCatalogueName,
-                                  absl::make_unique<HybridDecryptCatalogue>());
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::AddCatalogue(kHybridEncryptCatalogueName,
-                                  absl::make_unique<HybridEncryptCatalogue>());
+  status = Registry::RegisterKeyManager(
+      absl::make_unique<EciesAeadHkdfPublicKeyManager>(), true);
   if (!status.ok()) return status;
-  return Config::Register(Latest());
+
+  // Register primitive wrappers.
+  status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<HybridEncryptWrapper>());
+  if (!status.ok()) return status;
+  return Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<HybridDecryptWrapper>());
 }
 
 }  // namespace tink

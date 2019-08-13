@@ -77,7 +77,7 @@ util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
   }
   int header_size = 1 + params.salt.size() +
                     AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
-  if (params.ciphertext_segment_size <
+  if (params.ciphertext_segment_size <=
       params.ciphertext_offset + header_size +
       AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT,

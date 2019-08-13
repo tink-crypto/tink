@@ -17,7 +17,6 @@
 #ifndef TINK_AEAD_AEAD_CONFIG_H_
 #define TINK_AEAD_AEAD_CONFIG_H_
 
-#include "tink/config.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
@@ -42,7 +41,7 @@ class AeadConfig {
   // in the current Tink release.
   static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Registers key managers for all Aead key types
+  // Registers Aead primitive wrapper and key managers for all Aead key types
   // from the current Tink release.
   static crypto::tink::util::Status Register();
 

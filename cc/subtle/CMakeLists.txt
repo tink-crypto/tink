@@ -341,6 +341,30 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME aes_ctr_hmac_streaming
+  SRCS
+    aes_ctr_hmac_streaming.cc
+    aes_ctr_hmac_streaming.h
+  DEPS
+    tink::subtle::common_enums
+    tink::subtle::hkdf
+    tink::subtle::hmac_boringssl
+    tink::subtle::nonce_based_streaming_aead
+    tink::subtle::random
+    tink::subtle::stream_segment_decrypter
+    tink::subtle::stream_segment_encrypter
+    tink::subtle::subtle_util
+    tink::subtle::subtle_util_boringssl
+    tink::core::mac
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+    crypto
+    absl::memory
+    absl::strings
+)
+
+tink_cc_library(
   NAME aes_eax_boringssl
   SRCS
     aes_eax_boringssl.cc
@@ -455,6 +479,13 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME subtle_util
+  SRCS
+    subtle_util.cc
+    subtle_util.h
+)
+
+tink_cc_library(
   NAME subtle_util_boringssl
   SRCS
     subtle_util_boringssl.cc
@@ -514,7 +545,6 @@ tink_cc_library(
   DEPS
     tink::subtle::stream_segment_encrypter
     tink::core::output_stream
-    tink::util::status
     tink::util::statusor
     absl::memory
 )
@@ -551,6 +581,32 @@ tink_cc_library(
     tink::util::statusor
     absl::memory
     absl::strings
+)
+
+tink_cc_library(
+  NAME streaming_aead_test_util
+  SRCS
+    streaming_aead_test_util.cc
+    streaming_aead_test_util.h
+  DEPS
+    absl::strings
+    tink::core::streaming_aead
+    tink::util::ostream_output_stream
+    tink::util::istream_input_stream
+    tink::util::status
+    tink::subtle::test_util
+)
+
+tink_cc_library(
+  NAME hybrid_test_util
+  SRCS
+    hybrid_test_util.cc
+    hybrid_test_util.h
+  DEPS
+    absl::strings
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+    tink::util::status
 )
 
 # tests
@@ -685,6 +741,24 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_util
+    absl::strings
+)
+
+tink_cc_test(
+  NAME aes_ctr_hmac_streaming_test
+  SRCS aes_ctr_hmac_streaming_test.cc
+  DEPS
+    tink::subtle::aes_ctr_hmac_streaming
+    tink::subtle::common_enums
+    tink::subtle::random
+    tink::subtle::stream_segment_decrypter
+    tink::subtle::stream_segment_encrypter
+    tink::subtle::streaming_aead_test_util
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    tink::util::test_matchers
+    absl::memory
     absl::strings
 )
 
@@ -901,6 +975,12 @@ tink_cc_test(
 )
 
 tink_cc_test(
+  NAME subtle_util_test
+  SRCS subtle_util_test
+  DEPS tink::subtle::subtle_util
+)
+
+tink_cc_test(
   NAME subtle_util_boringssl_test
   SRCS subtle_util_boringssl_test.cc
   DATA wycheproof::testvectors
@@ -961,3 +1041,30 @@ tink_cc_test(
     absl::memory
     absl::strings
 )
+
+tink_cc_test(
+  NAME streaming_aead_test_util_test
+  SRCS streaming_aead_test_util_test.cc
+  DEPS
+    tink::subtle::streaming_aead_test_util
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
+)
+
+tink_cc_test(
+  NAME hybrid_test_util_test
+  SRCS hybrid_test_util_test.cc
+  DEPS
+    tink::subtle::hybrid_test_util
+    tink::subtle::test_util
+    tink::core::output_stream
+    tink::util::ostream_output_stream
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    absl::memory
+    absl::strings
+    gmock
+)
+

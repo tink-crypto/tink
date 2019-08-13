@@ -88,8 +88,8 @@ testSuite({
 
   async testGetPrimitive_unsupportedKeyDataType() {
     const manager = new EcdsaPublicKeyManager();
-    const /** !PbKeyData */ keyData = await createKeyData();
-    keyData.setTypeUrl('unsupported_key_type_url');
+    const keyData =
+        (await createKeyData()).setTypeUrl('unsupported_key_type_url');
 
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
@@ -115,8 +115,7 @@ testSuite({
   async testGetPrimitive_highVersion() {
     const version = 1;
     const manager = new EcdsaPublicKeyManager();
-    const key = await createKey();
-    key.setVersion(version);
+    const key = (await createKey()).setVersion(version);
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
@@ -128,8 +127,7 @@ testSuite({
 
   async testGetPrimitive_missingParams() {
     const manager = new EcdsaPublicKeyManager();
-    const key = await createKey();
-    key.setParams(null);
+    const key = (await createKey()).setParams(null);
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
@@ -352,10 +350,9 @@ class ExceptionText {
  * @return {!PbEcdsaParams}
  */
 const createParams = function(curveType, hashType, encoding) {
-  const params = new PbEcdsaParams();
-  params.setCurve(curveType);
-  params.setHashType(hashType);
-  params.setEncoding(encoding);
+  const params =
+      new PbEcdsaParams().setCurve(curveType).setHashType(hashType).setEncoding(
+          encoding);
 
   return params;
 };
@@ -375,9 +372,8 @@ const createKey = async function(
   const curveSubtleType = Util.curveTypeProtoToSubtle(opt_curveType);
   const curveName = EllipticCurves.curveToString(curveSubtleType);
 
-  const key = new PbEcdsaPublicKey();
-  key.setVersion(0);
-  key.setParams(createParams(opt_curveType, opt_hashType, opt_encoding));
+  const key = new PbEcdsaPublicKey().setVersion(0).setParams(
+      createParams(opt_curveType, opt_hashType, opt_encoding));
 
   const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
   const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
@@ -393,11 +389,11 @@ const createKey = async function(
  * @return {!PbKeyData}
  */
 const createKeyDataFromKey = function(key) {
-  const keyData = new PbKeyData();
-
-  keyData.setTypeUrl(KEY_TYPE);
-  keyData.setValue(key.serializeBinary());
-  keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
+  const keyData =
+      new PbKeyData()
+          .setTypeUrl(KEY_TYPE)
+          .setValue(key.serializeBinary())
+          .setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
 
   return keyData;
 };

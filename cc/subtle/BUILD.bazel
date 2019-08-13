@@ -382,6 +382,32 @@ cc_library(
 )
 
 cc_library(
+    name = "aes_ctr_hmac_streaming",
+    srcs = ["aes_ctr_hmac_streaming.cc"],
+    hdrs = ["aes_ctr_hmac_streaming.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":common_enums",
+        ":hkdf",
+        ":hmac_boringssl",
+        ":nonce_based_streaming_aead",
+        ":random",
+        ":stream_segment_decrypter",
+        ":stream_segment_encrypter",
+        ":subtle_util",
+        ":subtle_util_boringssl",
+        "//cc:mac",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "aes_eax_boringssl",
     srcs = ["aes_eax_boringssl.cc"],
     hdrs = ["aes_eax_boringssl.h"],
@@ -515,6 +541,14 @@ cc_library(
 )
 
 cc_library(
+    name = "subtle_util",
+    srcs = ["subtle_util.cc"],
+    hdrs = ["subtle_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+)
+
+cc_library(
     name = "subtle_util_boringssl",
     srcs = ["subtle_util_boringssl.cc"],
     hdrs = ["subtle_util_boringssl.h"],
@@ -589,7 +623,6 @@ cc_library(
     deps = [
         ":stream_segment_encrypter",
         "//cc:output_stream",
-        "//cc/util:status",
         "//cc/util:statusor",
         "@com_google_absl//absl/memory",
     ],
@@ -631,6 +664,37 @@ cc_library(
         "//cc/util:statusor",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "streaming_aead_test_util",
+    testonly = 1,
+    srcs = ["streaming_aead_test_util.cc"],
+    hdrs = ["streaming_aead_test_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":test_util",
+        "//cc:streaming_aead",
+        "//cc/util:istream_input_stream",
+        "//cc/util:ostream_output_stream",
+        "//cc/util:status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "hybrid_test_util",
+    testonly = 1,
+    srcs = ["hybrid_test_util.cc"],
+    hdrs = ["hybrid_test_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:hybrid_decrypt",
+        "//cc:hybrid_encrypt",
+        "//cc/util:status",
     ],
 )
 
@@ -803,6 +867,27 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_ctr_hmac_streaming_test",
+    size = "small",
+    srcs = ["aes_ctr_hmac_streaming_test.cc"],
+    deps = [
+        ":aes_ctr_hmac_streaming",
+        ":common_enums",
+        ":random",
+        ":stream_segment_decrypter",
+        ":stream_segment_encrypter",
+        ":streaming_aead_test_util",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1099,6 +1184,16 @@ cc_test(
 )
 
 cc_test(
+    name = "subtle_util_test",
+    size = "small",
+    srcs = ["subtle_util_test.cc"],
+    deps = [
+        ":subtle_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "subtle_util_boringssl_test",
     size = "small",
     srcs = ["subtle_util_boringssl_test.cc"],
@@ -1177,6 +1272,28 @@ cc_test(
         "//cc/util:statusor",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "streaming_aead_test_util_test",
+    srcs = ["streaming_aead_test_util_test.cc"],
+    deps = [
+        ":streaming_aead_test_util",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hybrid_test_util_test",
+    srcs = ["hybrid_test_util_test.cc"],
+    deps = [
+        ":hybrid_test_util",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -272,7 +272,7 @@ func main() {
                 log.Fatal(err)
         }
 
-        ct, err := h.Encrypt([]byte("secret message"), []byte("context info"))
+        ct, err := he.Encrypt([]byte("secret message"), []byte("context info"))
         if err != nil {
                 log.Fatal(err)
         }

@@ -81,6 +81,18 @@ public final class Config {
    */
   public static void registerKeyType(KeyTypeEntry entry) throws GeneralSecurityException {
     validate(entry);
+    // Catalogues are no longer supported; we simply return on those catalogues which have been
+    // removed, as the key managers will be registered already.
+    if (entry.getCatalogueName().equals("TinkAead")
+        || entry.getCatalogueName().equals("TinkMac")
+        || entry.getCatalogueName().equals("TinkHybridDecrypt")
+        || entry.getCatalogueName().equals("TinkHybridEncrypt")
+        || entry.getCatalogueName().equals("TinkPublicKeySign")
+        || entry.getCatalogueName().equals("TinkPublicKeyVerify")
+        || entry.getCatalogueName().equals("TinkStreamingAead")
+        || entry.getCatalogueName().equals("TinkDeterministicAead")) {
+      return;
+    }
     Catalogue<?> catalogue = Registry.getCatalogue(entry.getCatalogueName());
     Registry.registerPrimitiveWrapper(catalogue.getPrimitiveWrapper());
     KeyManager<?> keyManager =

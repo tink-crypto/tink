@@ -10,10 +10,13 @@ cc_library(
     strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        ":hybrid_decrypt_catalogue",
-        ":hybrid_encrypt_catalogue",
-        "//cc:config",
+        ":ecies_aead_hkdf_private_key_manager",
+        ":ecies_aead_hkdf_public_key_manager",
+        ":hybrid_decrypt_wrapper",
+        ":hybrid_encrypt_wrapper",
+        "//cc:registry",
         "//cc/aead:aead_config",
+        "//cc/config:config_util",
         "//cc/util:status",
         "//proto:config_cc_proto",
         "@com_google_absl//absl/memory",
@@ -59,22 +62,6 @@ cc_library(
 )
 
 cc_library(
-    name = "hybrid_decrypt_catalogue",
-    srcs = ["hybrid_decrypt_catalogue.cc"],
-    hdrs = ["hybrid_decrypt_catalogue.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":ecies_aead_hkdf_private_key_manager",
-        "//cc:catalogue",
-        "//cc:hybrid_decrypt",
-        "//cc:key_manager",
-        "//cc/util:status",
-        "//cc/util:statusor",
-    ],
-)
-
-cc_library(
     name = "hybrid_decrypt_factory",
     srcs = ["hybrid_decrypt_factory.cc"],
     hdrs = ["hybrid_decrypt_factory.h"],
@@ -90,22 +77,6 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "@com_google_absl//absl/base:core_headers",
-    ],
-)
-
-cc_library(
-    name = "hybrid_encrypt_catalogue",
-    srcs = ["hybrid_encrypt_catalogue.cc"],
-    hdrs = ["hybrid_encrypt_catalogue.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":ecies_aead_hkdf_public_key_manager",
-        "//cc:catalogue",
-        "//cc:hybrid_encrypt",
-        "//cc:key_manager",
-        "//cc/util:status",
-        "//cc/util:statusor",
     ],
 )
 
@@ -275,7 +246,6 @@ cc_test(
     deps = [
         ":hybrid_config",
         ":hybrid_key_templates",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
@@ -298,6 +268,7 @@ cc_test(
         "//cc:hybrid_decrypt",
         "//cc:primitive_set",
         "//cc/util:status",
+        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
@@ -314,23 +285,9 @@ cc_test(
         "//cc:hybrid_encrypt",
         "//cc:primitive_set",
         "//cc/util:status",
+        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "hybrid_decrypt_catalogue_test",
-    size = "small",
-    srcs = ["hybrid_decrypt_catalogue_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    deps = [
-        ":hybrid_decrypt_catalogue",
-        "//cc:catalogue",
-        "//cc:hybrid_decrypt",
-        "//cc/util:status",
-        "//cc/util:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -354,21 +311,6 @@ cc_test(
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "hybrid_encrypt_catalogue_test",
-    size = "small",
-    srcs = ["hybrid_encrypt_catalogue_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    deps = [
-        ":hybrid_encrypt_catalogue",
-        "//cc:catalogue",
-        "//cc:hybrid_encrypt",
-        "//cc/util:status",
-        "//cc/util:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -403,6 +345,7 @@ cc_test(
         ":hybrid_config",
         ":hybrid_key_templates",
         "//cc/aead:aead_key_templates",
+        "//cc/util:test_matchers",
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",

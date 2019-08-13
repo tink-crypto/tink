@@ -189,10 +189,9 @@ testSuite({
 const createKemParams = function(
     opt_curveType = PbEllipticCurveType.NIST_P256,
     opt_hashType = PbHashType.SHA256) {
-  const kemParams = new PbEciesHkdfKemParams();
-
-  kemParams.setCurveType(opt_curveType);
-  kemParams.setHkdfHashType(opt_hashType);
+  const kemParams = new PbEciesHkdfKemParams()
+                        .setCurveType(opt_curveType)
+                        .setHkdfHashType(opt_hashType);
 
   return kemParams;
 };
@@ -207,8 +206,7 @@ const createDemParams = function(opt_keyTemplate) {
     opt_keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
   }
 
-  const demParams = new PbEciesAeadDemParams();
-  demParams.setAeadDem(opt_keyTemplate);
+  const demParams = new PbEciesAeadDemParams().setAeadDem(opt_keyTemplate);
 
   return demParams;
 };
@@ -224,11 +222,10 @@ const createDemParams = function(opt_keyTemplate) {
 const createKeyParams = function(
     opt_curveType, opt_hashType, opt_keyTemplate,
     opt_pointFormat = PbPointFormat.UNCOMPRESSED) {
-  const params = new PbEciesAeadHkdfParams();
-
-  params.setKemParams(createKemParams(opt_curveType, opt_hashType));
-  params.setDemParams(createDemParams(opt_keyTemplate));
-  params.setEcPointFormat(opt_pointFormat);
+  const params = new PbEciesAeadHkdfParams()
+                     .setKemParams(createKemParams(opt_curveType, opt_hashType))
+                     .setDemParams(createDemParams(opt_keyTemplate))
+                     .setEcPointFormat(opt_pointFormat);
 
   return params;
 };
@@ -249,10 +246,9 @@ const createKey = async function(
       /** @type {!PbEllipticCurveType} */ (opt_curveType));
   const curveName = EllipticCurves.curveToString(curveTypeSubtle);
 
-  const publicKeyProto = new PbEciesAeadHkdfPublicKey();
-  publicKeyProto.setVersion(0);
-  publicKeyProto.setParams(createKeyParams(
-      opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
+  const publicKeyProto =
+      new PbEciesAeadHkdfPublicKey().setVersion(0).setParams(createKeyParams(
+          opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
 
 
   const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);

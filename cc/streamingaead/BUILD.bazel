@@ -2,7 +2,6 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])
 
-
 cc_library(
     name = "streaming_aead_wrapper",
     srcs = ["streaming_aead_wrapper.cc"],
@@ -28,33 +27,17 @@ cc_library(
 )
 
 cc_library(
-    name = "streaming_aead_catalogue",
-    srcs = ["streaming_aead_catalogue.cc"],
-    hdrs = ["streaming_aead_catalogue.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":aes_gcm_hkdf_streaming_key_manager",
-        "//cc:catalogue",
-        "//cc:key_manager",
-        "//cc:streaming_aead",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
-cc_library(
     name = "streaming_aead_config",
     srcs = ["streaming_aead_config.cc"],
     hdrs = ["streaming_aead_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":streaming_aead_catalogue",
+        ":aes_ctr_hmac_streaming_key_manager",
+        ":aes_gcm_hkdf_streaming_key_manager",
         ":streaming_aead_wrapper",
-        "//cc:config",
         "//cc:registry",
+        "//cc/config:config_util",
         "//cc/util:status",
         "//proto:config_cc_proto",
         "@com_google_absl//absl/memory",
@@ -81,11 +64,13 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
+        "//cc:core/key_type_manager",
         "//cc:key_manager",
-        "//cc:key_manager_base",
         "//cc:streaming_aead",
+        "//cc/subtle:aes_gcm_hkdf_stream_segment_encrypter",
         "//cc/subtle:aes_gcm_hkdf_streaming",
         "//cc/subtle:random",
+        "//cc/util:constants",
         "//cc/util:enums",
         "//cc/util:errors",
         "//cc/util:protobuf_helper",
@@ -93,7 +78,31 @@ cc_library(
         "//cc/util:statusor",
         "//cc/util:validation",
         "//proto:aes_gcm_hkdf_streaming_cc_proto",
-        "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "aes_ctr_hmac_streaming_key_manager",
+    srcs = ["aes_ctr_hmac_streaming_key_manager.cc"],
+    hdrs = ["aes_ctr_hmac_streaming_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:core/key_type_manager",
+        "//cc:key_manager",
+        "//cc:streaming_aead",
+        "//cc/subtle:aes_ctr_hmac_streaming",
+        "//cc/subtle:random",
+        "//cc/util:constants",
+        "//cc/util:enums",
+        "//cc/util:errors",
+        "//cc/util:protobuf_helper",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:validation",
+        "//proto:aes_ctr_hmac_streaming_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
@@ -167,7 +176,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-         ":shared_random_access_stream",
+        ":shared_random_access_stream",
         "//cc:primitive_set",
         "//cc:random_access_stream",
         "//cc:streaming_aead",
@@ -217,14 +226,44 @@ cc_test(
     deps = [
         ":aes_gcm_hkdf_streaming_key_manager",
         "//cc:streaming_aead",
+        "//cc/subtle:aes_gcm_hkdf_streaming",
+        "//cc/subtle:common_enums",
         "//cc/subtle:random",
+        "//cc/subtle:streaming_aead_test_util",
         "//cc/subtle:test_util",
         "//cc/util:istream_input_stream",
         "//cc/util:ostream_output_stream",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:test_matchers",
         "//proto:aes_eax_cc_proto",
         "//proto:aes_gcm_hkdf_streaming_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_ctr_hmac_streaming_key_manager_test",
+    size = "small",
+    srcs = ["aes_ctr_hmac_streaming_key_manager_test.cc"],
+    deps = [
+        ":aes_ctr_hmac_streaming_key_manager",
+        "//cc:streaming_aead",
+        "//cc/subtle:aes_ctr_hmac_streaming",
+        "//cc/subtle:common_enums",
+        "//cc/subtle:random",
+        "//cc/subtle:streaming_aead_test_util",
+        "//cc/subtle:test_util",
+        "//cc/util:istream_input_stream",
+        "//cc/util:ostream_output_stream",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//proto:aes_eax_cc_proto",
+        "//proto:aes_ctr_hmac_streaming_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
@@ -239,24 +278,10 @@ cc_test(
     deps = [
         ":aes_gcm_hkdf_streaming_key_manager",
         ":streaming_aead_key_templates",
+        "//cc/util:test_matchers",
         "//proto:aes_gcm_hkdf_streaming_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "streaming_aead_catalogue_test",
-    size = "small",
-    srcs = ["streaming_aead_catalogue_test.cc"],
-    deps = [
-        ":streaming_aead_catalogue",
-        ":streaming_aead_config",
-        "//cc:catalogue",
-        "//cc:streaming_aead",
-        "//cc/util:status",
-        "//cc/util:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -266,9 +291,10 @@ cc_test(
     size = "small",
     srcs = ["streaming_aead_config_test.cc"],
     deps = [
+        ":aes_ctr_hmac_streaming_key_manager",
+        ":aes_gcm_hkdf_streaming_key_manager",
         ":streaming_aead_config",
         ":streaming_aead_key_templates",
-        "//cc:catalogue",
         "//cc:config",
         "//cc:keyset_handle",
         "//cc:registry",

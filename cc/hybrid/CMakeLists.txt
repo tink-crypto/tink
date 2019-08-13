@@ -6,9 +6,12 @@ tink_cc_library(
     hybrid_config.cc
     hybrid_config.h
   DEPS
-    tink::hybrid::hybrid_decrypt_catalogue
-    tink::hybrid::hybrid_encrypt_catalogue
-    tink::core::config
+    tink::hybrid::ecies_aead_hkdf_private_key_manager
+    tink::hybrid::ecies_aead_hkdf_public_key_manager
+    tink::hybrid::hybrid_decrypt_wrapper
+    tink::hybrid::hybrid_encrypt_wrapper
+    tink::core::registry
+    tink::config::config_util
     tink::aead::aead_config
     tink::util::status
     tink::proto::config_cc_proto
@@ -50,20 +53,6 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME hybrid_decrypt_catalogue
-  SRCS
-    hybrid_decrypt_catalogue.cc
-    hybrid_decrypt_catalogue.h
-  DEPS
-    tink::hybrid::ecies_aead_hkdf_private_key_manager
-    tink::core::catalogue
-    tink::core::hybrid_decrypt
-    tink::core::key_manager
-    tink::util::status
-    tink::util::statusor
-)
-
-tink_cc_library(
   NAME hybrid_decrypt_factory
   SRCS
     hybrid_decrypt_factory.cc
@@ -78,20 +67,6 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     absl::base
-)
-
-tink_cc_library(
-  NAME hybrid_encrypt_catalogue
-  SRCS
-    hybrid_encrypt_catalogue.cc
-    hybrid_encrypt_catalogue.h
-  DEPS
-    tink::hybrid::ecies_aead_hkdf_public_key_manager
-    tink::core::catalogue
-    tink::core::hybrid_encrypt
-    tink::core::key_manager
-    tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_library(
@@ -232,7 +207,6 @@ tink_cc_test(
   DEPS
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
-    tink::core::catalogue
     tink::core::config
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
@@ -251,6 +225,7 @@ tink_cc_test(
     tink::core::hybrid_decrypt
     tink::core::primitive_set
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
@@ -263,19 +238,9 @@ tink_cc_test(
     tink::core::hybrid_encrypt
     tink::core::primitive_set
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
-)
-
-tink_cc_test(
-  NAME hybrid_decrypt_catalogue_test
-  SRCS hybrid_decrypt_catalogue_test.cc
-  DEPS
-    tink::hybrid::hybrid_decrypt_catalogue
-    tink::core::catalogue
-    tink::core::hybrid_decrypt
-    tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_test(
@@ -295,17 +260,6 @@ tink_cc_test(
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
-)
-
-tink_cc_test(
-  NAME hybrid_encrypt_catalogue_test
-  SRCS hybrid_encrypt_catalogue_test.cc
-  DEPS
-    tink::hybrid::hybrid_encrypt_catalogue
-    tink::core::catalogue
-    tink::core::hybrid_encrypt
-    tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_test(
@@ -335,6 +289,7 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+    tink::util::test_matchers
 )
 
 tink_cc_test(

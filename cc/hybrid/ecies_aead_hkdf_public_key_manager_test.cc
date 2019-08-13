@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ namespace {
 class EciesAeadHkdfPublicKeyManagerTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() {
-    ASSERT_TRUE(Registry::RegisterKeyManager(
+    ASSERT_TRUE(Registry::RegisterKeyTypeManager(
                     absl::make_unique<AesGcmKeyManager>(), true)
                     .ok());
   }

@@ -128,7 +128,7 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
 
   /**
    * Tries to read the header of the ciphertext.
-   * @return true if the header has been fully read and false if not enogh bytes were available
+   * @return true if the header has been fully read and false if not enough bytes were available
    *          from the ciphertext stream.
    * @throws IOException when an exception occurs while reading the ciphertextStream or when
    *         the header is too short.

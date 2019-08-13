@@ -85,7 +85,7 @@ std::unique_ptr<InputStream> GetCiphertextSource(StreamingAead* saead,
   auto ct_stream3 = absl::make_unique<std::stringstream>(ct_buf->str());
   auto input =  absl::make_unique<IstreamInputStream>(std::move(ct_stream3));
   std::string reads;
-  ReadFromStream(input.get(), &reads);
+  EXPECT_THAT(ReadFromStream(input.get(), &reads), IsOk());
   auto ct_stream2 = absl::make_unique<std::stringstream>(ct_buf->str());
   return absl::make_unique<IstreamInputStream>(std::move(ct_stream2));
 }
@@ -117,7 +117,7 @@ std::shared_ptr<PrimitiveSet<StreamingAead>> GetTestStreamingAeadSet(
     auto entry_result = saead_set->AddPrimitive(std::move(saead), *key);
     EXPECT_TRUE(entry_result.ok());
     if (i + 1 == spec.size()) {
-      saead_set->set_primary(entry_result.ValueOrDie());
+      EXPECT_THAT(saead_set->set_primary(entry_result.ValueOrDie()), IsOk());
     }
     i++;
   }

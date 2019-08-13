@@ -85,7 +85,6 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
     super(ciphertextStream);
     decrypter = streamAead.newStreamSegmentDecrypter();
     headerLength = streamAead.getHeaderLength();
-    headerRead = false;
     aad = Arrays.copyOf(associatedData, associatedData.length);
     // ciphertextSegment is one byte longer than a ciphertext segment,
     // so that the code can decide if the current segment is the last segment in the
@@ -107,8 +106,8 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
   /**
    * Tries to read the header of the ciphertext.
    *
-   * @return true if the header has been fully read and false if not enogh bytes were available from
-   *     the ciphertext stream.
+   * @return true if the header has been fully read and false if not enough bytes were available
+   *     from the ciphertext stream.
    * @throws IOException when an exception occurs while reading from @code{in} or when the header is
    *     too short.
    */

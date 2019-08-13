@@ -44,7 +44,7 @@ TEST_F(ConfigTest, testValidation) {
   entry.set_primitive_name("some primitive");
   status = Config::Register<Mac>(entry);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
 }
 
 

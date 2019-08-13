@@ -159,8 +159,7 @@ class RegistryEciesAeadHkdfDemHelper {
    * @return {!PbAesGcmKey}
    */
   replaceAesGcmKeyValue_(symmetricKey) {
-    const key = /** @type {!PbAesGcmKey} */ (this.key_);
-    key.setKeyValue(symmetricKey);
+    const key = this.key_.setKeyValue(symmetricKey);
     return key;
   }
 

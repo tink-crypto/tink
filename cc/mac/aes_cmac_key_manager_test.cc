@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,234 +11,178 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 #include "tink/mac/aes_cmac_key_manager.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/mac.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "proto/aes_cmac.pb.h"
-#include "proto/aes_ctr.pb.h"
-#include "proto/common.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::AesCmacKey;
-using google::crypto::tink::AesCmacKeyFormat;
-using google::crypto::tink::AesCtrKey;
-using google::crypto::tink::AesCtrKeyFormat;
-using google::crypto::tink::HashType;
-using google::crypto::tink::KeyData;
-
 namespace {
 
-class AesCmacKeyManagerTest : public ::testing::Test {
- protected:
-  std::string key_type_prefix_ = "type.googleapis.com/";
-  std::string cmac_key_type_ = "type.googleapis.com/google.crypto.tink.AesCmacKey";
-};
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::AesCmacKey;
+using ::google::crypto::tink::AesCmacKeyFormat;
+using ::google::crypto::tink::AesCmacParams;
+using ::testing::Eq;
+using ::testing::Not;
+using ::testing::SizeIs;
 
-TEST_F(AesCmacKeyManagerTest, testBasic) {
-  AesCmacKeyManager key_manager;
-
-  EXPECT_EQ(0, key_manager.get_version());
-  EXPECT_EQ("type.googleapis.com/google.crypto.tink.AesCmacKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+TEST(AesCmacKeyManagerTest, Basics) {
+  EXPECT_THAT(AesCmacKeyManager().get_version(), Eq(0));
+  EXPECT_THAT(AesCmacKeyManager().get_key_type(),
+              Eq("type.googleapis.com/google.crypto.tink.AesCmacKey"));
+  EXPECT_THAT(AesCmacKeyManager().key_material_type(),
+              Eq(google::crypto::tink::KeyData::SYMMETRIC));
 }
 
-TEST_F(AesCmacKeyManagerTest, testKeyDataErrors) {
-  AesCmacKeyManager key_manager;
-
-  {  // Bad key type.
-    KeyData key_data;
-    std::string bad_key_type =
-        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-    key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
-                        result.status().error_message());
-  }
-
-  {  // Bad key value.
-    KeyData key_data;
-    key_data.set_type_url(cmac_key_type_);
-    key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad version.
-    KeyData key_data;
-    AesCmacKey key;
-    key.set_version(1);
-    key_data.set_type_url(cmac_key_type_);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
-                        result.status().error_message());
-  }
+TEST(AesCmacKeyManagerTest, ValidateEmptyKey) {
+  EXPECT_THAT(AesCmacKeyManager().ValidateKey(AesCmacKey()), Not(IsOk()));
 }
 
-TEST_F(AesCmacKeyManagerTest, testKeyMessageErrors) {
-  AesCmacKeyManager key_manager;
-
-  {  // Bad protobuffer.
-    AesCtrKey key_message;
-    auto result = key_manager.GetPrimitive(key_message);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesCtrKey",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
+AesCmacParams ValidParams() {
+  AesCmacParams params;
+  params.set_tag_size(16);
+  return params;
 }
 
-TEST_F(AesCmacKeyManagerTest, testPrimitives) {
-  AesCmacKeyManager key_manager;
-  AesCmacKey key;
-
-  key.set_version(0);
-  key.mutable_params()->set_tag_size(16);
-  key.set_key_value("some key of sufficient length...");
-
-  {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto cmac = std::move(result.ValueOrDie());
-    auto cmac_result = cmac->ComputeMac("some data");
-    EXPECT_TRUE(cmac_result.ok());
-  }
-
-  {  // Using KeyData proto.
-    KeyData key_data;
-    key_data.set_type_url(cmac_key_type_);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto cmac = std::move(result.ValueOrDie());
-    auto cmac_result = cmac->ComputeMac("some data");
-    EXPECT_TRUE(cmac_result.ok());
-  }
+AesCmacKeyFormat ValidKeyFormat() {
+  AesCmacKeyFormat format;
+  *format.mutable_params() = ValidParams();
+  format.set_key_size(32);
+  return format;
 }
 
-TEST_F(AesCmacKeyManagerTest, testNewKeyErrors) {
-  AesCmacKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-
-  {  // Bad key format.
-    AesCtrKeyFormat key_format;
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesCtrKeyFormat",
-                        result.status().error_message());
-  }
-
-  {  // Bad serialized key format.
-    auto result = key_factory.NewKey("some bad serialized proto");
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad AesCmacKeyFormat: small key_size.
-    AesCmacKeyFormat key_format;
-    key_format.set_key_size(8);
-    key_format.mutable_params()->set_tag_size(16);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "invalid key_size",
-                        result.status().error_message());
-  }
-
-  {  // Bad AesCmacKeyFormat: BlockCipher not supported.
-    AesCmacKeyFormat key_format;
-    key_format.set_key_size(32);
-    key_format.mutable_params()->set_tag_size(17);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "tag_size",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "too big",
-                        result.status().error_message());
-  }
-
-  {  // Bad AesCmacKeyFormat: BlockCipher not supported.
-    AesCmacKeyFormat key_format;
-    key_format.set_key_size(32);
-    key_format.mutable_params()->set_tag_size(9);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "tag_size",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
-                        result.status().error_message());
-  }
+TEST(AesCmacKeyManagerTest, ValidateEmptyKeyFormat) {
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(AesCmacKeyFormat()),
+              Not(IsOk()));
 }
 
-TEST_F(AesCmacKeyManagerTest, testNewKeyBasic) {
-  AesCmacKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-  AesCmacKeyFormat key_format;
-  key_format.set_key_size(32);
-  key_format.mutable_params()->set_tag_size(16);
+TEST(AesCmacKeyManagerTest, ValidateSimpleKeyFormat) {
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(ValidKeyFormat()), IsOk());
+}
 
-  { // Via NewKey(format_proto).
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix_ + key->GetTypeName(), cmac_key_type_);
-    std::unique_ptr<AesCmacKey> cmac_key(
-        static_cast<AesCmacKey*>(key.release()));
-    EXPECT_EQ(0, cmac_key->version());
-    EXPECT_EQ(16, cmac_key->params().tag_size());
-    EXPECT_EQ(key_format.key_size(), cmac_key->key_value().size());
-  }
+TEST(AesCmacKeyManagerTest, ValidateKeyFormatKeySizes) {
+  AesCmacKeyFormat format = ValidKeyFormat();
 
-  { // Via NewKey(serialized_format_proto).
-    auto result = key_factory.NewKey(key_format.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix_ + key->GetTypeName(), cmac_key_type_);
-    std::unique_ptr<AesCmacKey> cmac_key(
-        static_cast<AesCmacKey*>(key.release()));
-    EXPECT_EQ(0, cmac_key->version());
-    EXPECT_EQ(16, cmac_key->params().tag_size());
-    EXPECT_EQ(key_format.key_size(), cmac_key->key_value().size());
-  }
+  format.set_key_size(0);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
 
-  { // Via NewKeyData(serialized_format_proto).
-    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key_data = std::move(result.ValueOrDie());
-    EXPECT_EQ(cmac_key_type_, key_data->type_url());
-    EXPECT_EQ(KeyData::SYMMETRIC, key_data->key_material_type());
-    AesCmacKey cmac_key;
-    EXPECT_TRUE(cmac_key.ParseFromString(key_data->value()));
-    EXPECT_EQ(0, cmac_key.version());
-    EXPECT_EQ(16, cmac_key.params().tag_size());
-    EXPECT_EQ(key_format.key_size(), cmac_key.key_value().size());
-  }
+  format.set_key_size(1);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+
+  format.set_key_size(15);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+
+  format.set_key_size(16);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+
+  format.set_key_size(17);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+
+  format.set_key_size(31);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+
+  format.set_key_size(32);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), IsOk());
+
+  format.set_key_size(33);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+}
+
+TEST(AesCmacKeyManagerTest, ValidateKeyFormatTagSizes) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+
+  format.mutable_params()->set_tag_size(0);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+
+  format.mutable_params()->set_tag_size(9);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+
+  format.mutable_params()->set_tag_size(10);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), IsOk());
+
+  format.mutable_params()->set_tag_size(11);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), IsOk());
+
+  format.mutable_params()->set_tag_size(12);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), IsOk());
+
+  format.mutable_params()->set_tag_size(15);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), IsOk());
+
+  format.mutable_params()->set_tag_size(16);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), IsOk());
+
+  format.mutable_params()->set_tag_size(17);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+
+  format.mutable_params()->set_tag_size(32);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+}
+
+TEST(AesCmacKeyManagerTest, CreateKey) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  ASSERT_THAT(AesCmacKeyManager().CreateKey(format).status(), IsOk());
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  EXPECT_THAT(key.version(), Eq(0));
+  EXPECT_THAT(key.key_value(), SizeIs(format.key_size()));
+  EXPECT_THAT(key.params().tag_size(), Eq(format.params().tag_size()));
+}
+
+TEST(AesCmacKeyManagerTest, ValidateKey) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), IsOk());
+}
+
+TEST(AesCmacKeyManagerTest, ValidateKeyInvalidVersion) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  key.set_version(1);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(AesCmacKeyManagerTest, ValidateKeyShortKey) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  key.set_key_value("0123456789abcdef");
+  EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(AesCmacKeyManagerTest, ValidateKeyLongTagSize) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  key.mutable_params()->set_tag_size(17);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+
+TEST(AesCmacKeyManagerTest, ValidateKeyTooShortTagSize) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  key.mutable_params()->set_tag_size(9);
+  EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(AesCmacKeyManagerTest, GetPrimitive) {
+  AesCmacKeyFormat format = ValidKeyFormat();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  auto manager_mac_or = AesCmacKeyManager().GetPrimitive<Mac>(key);
+  ASSERT_THAT(manager_mac_or.status(), IsOk());
+  auto mac_value_or = manager_mac_or.ValueOrDie()->ComputeMac("some plaintext");
+  ASSERT_THAT(mac_value_or.status(), IsOk());
+
+  auto direct_mac_or =
+      subtle::AesCmacBoringSsl::New(key.key_value(), key.params().tag_size());
+  ASSERT_THAT(direct_mac_or.status(), IsOk());
+  EXPECT_THAT(direct_mac_or.ValueOrDie()->VerifyMac(mac_value_or.ValueOrDie(),
+                                                    "some plaintext"), IsOk());
 }
 
 }  // namespace

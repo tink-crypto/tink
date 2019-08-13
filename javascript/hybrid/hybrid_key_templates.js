@@ -98,15 +98,16 @@ class HybridKeyTemplates {
 const createEciesAeadHkdfKeyTemplate_ = function(
     curveType, hkdfHash, pointFormat, demKeyTemplate, hkdfSalt) {
   // key format
-  const keyFormat = new PbEciesAeadHkdfKeyFormat();
-  keyFormat.setParams(createEciesAeadHkdfParams_(
-      curveType, hkdfHash, pointFormat, demKeyTemplate, hkdfSalt));
+  const keyFormat =
+      new PbEciesAeadHkdfKeyFormat().setParams(createEciesAeadHkdfParams_(
+          curveType, hkdfHash, pointFormat, demKeyTemplate, hkdfSalt));
 
   // key template
-  const keyTemplate = new PbKeyTemplate();
-  keyTemplate.setTypeUrl(HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE);
-  keyTemplate.setValue(keyFormat.serializeBinary());
-  keyTemplate.setOutputPrefixType(PbOutputPrefixType.TINK);
+  const keyTemplate =
+      new PbKeyTemplate()
+          .setTypeUrl(HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE)
+          .setValue(keyFormat.serializeBinary())
+          .setOutputPrefixType(PbOutputPrefixType.TINK);
 
   return keyTemplate;
 };
@@ -124,20 +125,19 @@ const createEciesAeadHkdfKeyTemplate_ = function(
 const createEciesAeadHkdfParams_ = function(
     curveType, hkdfHash, pointFormat, demKeyTemplate, hkdfSalt) {
   // KEM params
-  const kemParams = new PbEciesHkdfKemParams();
-  kemParams.setCurveType(curveType);
-  kemParams.setHkdfHashType(hkdfHash);
-  kemParams.setHkdfSalt(hkdfSalt);
+  const kemParams = new PbEciesHkdfKemParams()
+                        .setCurveType(curveType)
+                        .setHkdfHashType(hkdfHash)
+                        .setHkdfSalt(hkdfSalt);
 
   // DEM params
-  const demParams = new PbEciesAeadDemParams();
-  demParams.setAeadDem(demKeyTemplate);
+  const demParams = new PbEciesAeadDemParams().setAeadDem(demKeyTemplate);
 
   // params
-  const params = new PbEciesAeadHkdfParams();
-  params.setKemParams(kemParams);
-  params.setDemParams(demParams);
-  params.setEcPointFormat(pointFormat);
+  const params = new PbEciesAeadHkdfParams()
+                     .setKemParams(kemParams)
+                     .setDemParams(demParams)
+                     .setEcPointFormat(pointFormat);
 
   return params;
 };

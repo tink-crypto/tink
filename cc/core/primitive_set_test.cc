@@ -14,20 +14,22 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "tink/primitive_set.h"
+
 #include <thread>  // NOLINT(build/c++11)
 
-#include "tink/primitive_set.h"
+#include "gtest/gtest.h"
 #include "tink/crypto_format.h"
 #include "tink/mac.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::test::DummyMac;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
-
+using ::crypto::tink::test::DummyMac;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::IsOk;
 
 namespace crypto {
 namespace tink {
@@ -170,7 +172,8 @@ TEST_F(PrimitiveSetTest, Basic) {
 
   add_primitive_result = primitive_set.AddPrimitive(std::move(mac_3), key_3);
   EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
-  primitive_set.set_primary(add_primitive_result.ValueOrDie());
+  EXPECT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
+              IsOk());
 
   add_primitive_result = primitive_set.AddPrimitive(std::move(mac_4), key_4);
   EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
@@ -273,7 +276,8 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
     auto add_primitive_result =
         primitive_set.AddPrimitive(std::move(mac_1), key_1);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
-    primitive_set.set_primary(add_primitive_result.ValueOrDie());
+    ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
+                IsOk());
 
     std::string identifier = "";
     const auto& primitives =
@@ -300,7 +304,8 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
     auto add_primitive_result =
         primitive_set.AddPrimitive(std::move(mac_1), key_1);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
-    primitive_set.set_primary(add_primitive_result.ValueOrDie());
+    ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
+                IsOk());
 
     std::string identifier = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
     const auto& primitives =
@@ -327,7 +332,8 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
     auto add_primitive_result =
         primitive_set.AddPrimitive(std::move(mac_1), key_1);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
-    primitive_set.set_primary(add_primitive_result.ValueOrDie());
+    ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
+                IsOk());
 
     std::string identifier = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
     const auto& primitives =

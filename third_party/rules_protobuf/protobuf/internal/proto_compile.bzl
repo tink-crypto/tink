@@ -73,7 +73,7 @@ def _get_offset_path(root, path):
     return "../" * depth + path
 
 def _get_import_mappings_for(files, prefix, label):
-    """For a set of files that belong the the given context label, create a mapping to the given prefix."""
+    """For a set of files that belong to the given context label, create a mapping to the given prefix."""
 
     mappings = {}
     for file in files:

@@ -56,6 +56,7 @@ class Registry {
   // (cannot return reference directly, as StatusOr does not support it,
   // see https://goo.gl/x0ymDz)
   template <class P>
+  ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
       const std::string& catalogue_name) {
     return RegistryImpl::GlobalInstance().get_catalogue<P>(catalogue_name);
@@ -68,6 +69,7 @@ class Registry {
   // and fails if the given 'catalogue' tries to override
   // an existing, different catalogue for the specified name.
   template <class ConcreteCatalogue>
+  ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::Status AddCatalogue(
       const std::string& catalogue_name,
       std::unique_ptr<ConcreteCatalogue> catalogue) {
@@ -112,17 +114,20 @@ class Registry {
     return RegisterKeyManager(absl::WrapUnique(manager), new_key_allowed);
   }
 
-  template <class InternalKeyManager>
-  static crypto::tink::util::Status RegisterInternalKeyManager(
-      std::unique_ptr<InternalKeyManager> manager, bool new_key_allowed) {
-    return RegistryImpl::GlobalInstance().RegisterInternalKeyManager(
-        manager.release(), new_key_allowed);
+  template <class KTManager>
+  static crypto::tink::util::Status RegisterKeyTypeManager(
+      std::unique_ptr<KTManager> manager, bool new_key_allowed) {
+    return RegistryImpl::GlobalInstance()
+        .RegisterKeyTypeManager<typename KTManager::KeyProto,
+                                typename KTManager::KeyFormatProto,
+                                typename KTManager::PrimitiveList>(
+            std::move(manager), new_key_allowed);
   }
 
-  template <class InternalPrivateKeyManager, class InternalKeyManager>
+  template <class PrivateKeyTypeManager, class KeyTypeManager>
   static crypto::tink::util::Status RegisterAsymmetricKeyManagers(
-      std::unique_ptr<InternalPrivateKeyManager> private_key_manager,
-      std::unique_ptr<InternalKeyManager> public_key_manager,
+      std::unique_ptr<PrivateKeyTypeManager> private_key_manager,
+      std::unique_ptr<KeyTypeManager> public_key_manager,
       bool new_key_allowed) {
     return RegistryImpl::GlobalInstance().RegisterAsymmetricKeyManagers(
         private_key_manager.release(), public_key_manager.release(),

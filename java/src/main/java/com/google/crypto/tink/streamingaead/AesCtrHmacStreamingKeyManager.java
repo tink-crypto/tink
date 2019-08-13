@@ -52,6 +52,8 @@ class AesCtrHmacStreamingKeyManager
 
   /** Minimum tag size in bytes. This provides minimum 80-bit security strength. */
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
+  
+  private static final int NONCE_PREFIX_IN_BYTES = 7;
 
   /** @param serializedKey serialized {@code AesCtrHmacStreamingKey} proto */
   @Override
@@ -138,9 +140,11 @@ class AesCtrHmacStreamingKeyManager
     validateHmacParams(params.getHmacParams());
 
     if (params.getCiphertextSegmentSize()
-        < params.getDerivedKeySize() + params.getHmacParams().getTagSize() + 8) {
+        <= params.getDerivedKeySize() + params.getHmacParams().getTagSize() + 1
+           + NONCE_PREFIX_IN_BYTES) {
       throw new GeneralSecurityException(
-          "ciphertext_segment_size must be at least (derived_key_size + tag_size + 8)");
+          "ciphertext_segment_size must be at least (derived_key_size + tag_size + "
+          + "NONCE_PREFIX_IN_BYTES + 2)");
     }
   }
 

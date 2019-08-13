@@ -158,17 +158,16 @@ const createEcdsaKeyTemplate = function(
     curveType, hashType, encoding, outputPrefixType) {
   // key format
   const keyFormat = new PbEcdsaKeyFormat();
-  const params = new PbEcdsaParams();
-  params.setCurve(curveType);
-  params.setHashType(hashType);
-  params.setEncoding(encoding);
+  const params =
+      new PbEcdsaParams().setCurve(curveType).setHashType(hashType).setEncoding(
+          encoding);
   keyFormat.setParams(params);
 
   // key template
-  const keyTemplate = new PbKeyTemplate();
-  keyTemplate.setTypeUrl(SignatureConfig.ECDSA_PRIVATE_KEY_TYPE);
-  keyTemplate.setValue(keyFormat.serializeBinary());
-  keyTemplate.setOutputPrefixType(outputPrefixType);
+  const keyTemplate = new PbKeyTemplate()
+                          .setTypeUrl(SignatureConfig.ECDSA_PRIVATE_KEY_TYPE)
+                          .setValue(keyFormat.serializeBinary())
+                          .setOutputPrefixType(outputPrefixType);
 
   return keyTemplate;
 };

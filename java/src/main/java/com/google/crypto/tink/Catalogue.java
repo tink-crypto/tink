@@ -31,7 +31,9 @@ import java.security.GeneralSecurityException;
  * handled by this catalogue.
  *
  * @since 1.0.0
+ * @deprecated Catalogues are no longer supported.
  */
+@Deprecated
 public interface Catalogue<P> {
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl}, {@code primitiveName}, and version

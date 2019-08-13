@@ -97,8 +97,8 @@ testSuite({
 
   async testGetPrimitive_unsupportedKeyDataType() {
     const manager = new EciesAeadHkdfPublicKeyManager();
-    const /** PbKeyData */ keyData = await createKeyData();
-    keyData.setTypeUrl('unsupported_key_type_url');
+    const keyData =
+        (await createKeyData()).setTypeUrl('unsupported_key_type_url');
 
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
@@ -124,8 +124,7 @@ testSuite({
   async testGetPrimitive_highVersion() {
     const version = 1;
     const manager = new EciesAeadHkdfPublicKeyManager();
-    const key = await createKey();
-    key.setVersion(version);
+    const key = (await createKey()).setVersion(version);
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
@@ -137,8 +136,7 @@ testSuite({
 
   async testGetPrimitive_missingParams() {
     const manager = new EciesAeadHkdfPublicKeyManager();
-    const key = await createKey();
-    key.setParams(null);
+    const key = (await createKey()).setParams(null);
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
@@ -185,8 +183,7 @@ testSuite({
 
   async testGetPrimitive_invalidKey() {
     const manager = new EciesAeadHkdfPublicKeyManager();
-    const key = await createKey();
-    key.setX(null);
+    const key = (await createKey()).setX(null);
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
@@ -369,10 +366,9 @@ class ExceptionText {
 const createKemParams = function(
     opt_curveType = PbEllipticCurveType.NIST_P256,
     opt_hashType = PbHashType.SHA256) {
-  const kemParams = new PbEciesHkdfKemParams();
-
-  kemParams.setCurveType(opt_curveType);
-  kemParams.setHkdfHashType(opt_hashType);
+  const kemParams = new PbEciesHkdfKemParams()
+                        .setCurveType(opt_curveType)
+                        .setHkdfHashType(opt_hashType);
 
   return kemParams;
 };
@@ -387,8 +383,7 @@ const createDemParams = function(opt_keyTemplate) {
     opt_keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
   }
 
-  const demParams = new PbEciesAeadDemParams();
-  demParams.setAeadDem(opt_keyTemplate);
+  const demParams = new PbEciesAeadDemParams().setAeadDem(opt_keyTemplate);
 
   return demParams;
 };
@@ -404,11 +399,10 @@ const createDemParams = function(opt_keyTemplate) {
 const createKeyParams = function(
     opt_curveType, opt_hashType, opt_keyTemplate,
     opt_pointFormat = PbPointFormat.UNCOMPRESSED) {
-  const params = new PbEciesAeadHkdfParams();
-
-  params.setKemParams(createKemParams(opt_curveType, opt_hashType));
-  params.setDemParams(createDemParams(opt_keyTemplate));
-  params.setEcPointFormat(opt_pointFormat);
+  const params = new PbEciesAeadHkdfParams()
+                     .setKemParams(createKemParams(opt_curveType, opt_hashType))
+                     .setDemParams(createDemParams(opt_keyTemplate))
+                     .setEcPointFormat(opt_pointFormat);
 
   return params;
 };
@@ -428,10 +422,9 @@ const createKey = async function(
   const curveSubtleType = Util.curveTypeProtoToSubtle(opt_curveType);
   const curveName = EllipticCurves.curveToString(curveSubtleType);
 
-  const key = new PbEciesAeadHkdfPublicKey();
-  key.setVersion(0);
-  key.setParams(createKeyParams(
-      opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
+  const key =
+      new PbEciesAeadHkdfPublicKey().setVersion(0).setParams(createKeyParams(
+          opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
 
 
   const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
@@ -448,11 +441,11 @@ const createKey = async function(
  * @return {!PbKeyData}
  */
 const createKeyDataFromKey = function(key) {
-  const keyData = new PbKeyData();
-
-  keyData.setTypeUrl(KEY_TYPE);
-  keyData.setValue(key.serializeBinary());
-  keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
+  const keyData =
+      new PbKeyData()
+          .setTypeUrl(KEY_TYPE)
+          .setValue(key.serializeBinary())
+          .setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
 
   return keyData;
 };

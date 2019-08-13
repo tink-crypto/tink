@@ -19,13 +19,11 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME aead_catalogue
+  NAME aead_config
   SRCS
-    aead_catalogue.cc
-    aead_catalogue.h
+    aead_config.cc
+    aead_config.h
   DEPS
-    absl::memory
-    absl::strings
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_eax_key_manager
     tink::aead::aes_gcm_key_manager
@@ -33,21 +31,8 @@ tink_cc_library(
     tink::aead::kms_aead_key_manager
     tink::aead::kms_envelope_aead_key_manager
     tink::aead::xchacha20_poly1305_key_manager
-    tink::core::aead
-    tink::core::catalogue
-    tink::core::key_manager
-    tink::util::status
-)
-
-tink_cc_library(
-  NAME aead_config
-  SRCS
-    aead_config.cc
-    aead_config.h
-  DEPS
-    tink::aead::aead_catalogue
     tink::aead::aead_wrapper
-    tink::core::config
+    tink::config::config_util
     tink::mac::mac_config
     tink::util::status
     tink::proto::config_cc_proto
@@ -111,11 +96,11 @@ tink_cc_library(
 tink_cc_library(
   NAME aes_gcm_key_manager
   SRCS
-    aes_gcm_key_manager.cc
     aes_gcm_key_manager.h
   DEPS
     tink::core::aead
     tink::core::key_manager
+    tink::core::key_type_manager
     tink::core::key_manager_base
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
@@ -271,20 +256,9 @@ tink_cc_test(
     tink::core::aead
     tink::core::primitive_set
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
-)
-
-tink_cc_test(
-  NAME aead_catalogue_test
-  SRCS aead_catalogue_test.cc
-  DEPS
-    tink::aead::aead_catalogue
-    tink::aead::aead_config
-    tink::core::aead
-    tink::core::catalogue
-    tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_test(
@@ -293,8 +267,8 @@ tink_cc_test(
   DEPS
     tink::aead::aead_config
     tink::aead::aead_key_templates
+    tink::aead::aes_gcm_key_manager
     tink::core::aead
-    tink::core::catalogue
     tink::core::config
     tink::core::keyset_handle
     tink::core::registry
@@ -330,6 +304,7 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::aead::aes_gcm_siv_key_manager
     tink::aead::xchacha20_poly1305_key_manager
+    tink::util::test_matchers
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
@@ -361,6 +336,7 @@ tink_cc_test(
     tink::core::aead
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto

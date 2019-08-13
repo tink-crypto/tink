@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.daead;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -44,20 +43,14 @@ public final class DeterministicAeadConfig {
 
   /** @deprecated */
   @Deprecated
-  public static final RegistryConfig TINK_1_1_0 =
-      RegistryConfig.newBuilder()
-          .addEntry(
-              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "AesSivKey", 0, true))
-          .setConfigName("TINK_DETERMINISTIC_AEAD_1_1_0")
-          .build();
+  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
-  /** @since 1.2.0 */
-  public static final RegistryConfig LATEST =
-      RegistryConfig.newBuilder()
-          .addEntry(
-              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "AesSivKey", 0, true))
-          .setConfigName("TINK_DETERMINISTIC_AEAD")
-          .build();
+  /**
+   * @deprecated
+   * @since 1.2.0
+   */
+  @Deprecated
+  public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   static {
     try {
@@ -90,8 +83,7 @@ public final class DeterministicAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.addCatalogue(CATALOGUE_NAME, new DeterministicAeadCatalogue());
-    Config.register(LATEST);
+    Registry.registerKeyManager(new AesSivKeyManager());
     Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
   }
 }

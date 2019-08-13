@@ -37,8 +37,8 @@ class TinkConfig {
   // in the current Tink release.
   static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Registers all key managers for all primitives supported
-  // in the current Tink release.
+  // Registers all primitive wrappers and all key managers for all primitives
+  // supported in the current Tink release.
   static crypto::tink::util::Status Register();
 
  private:

@@ -55,10 +55,11 @@ class EcdsaPrivateKeyFactory {
   async newKeyData(serializedKeyFormat) {
     const key = await this.newKey(serializedKeyFormat);
 
-    const keyData = new PbKeyData();
-    keyData.setTypeUrl(EcdsaPrivateKeyManager.KEY_TYPE);
-    keyData.setValue(key.serializeBinary());
-    keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PRIVATE);
+    const keyData =
+        new PbKeyData()
+            .setTypeUrl(EcdsaPrivateKeyManager.KEY_TYPE)
+            .setValue(key.serializeBinary())
+            .setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PRIVATE);
     return keyData;
   }
 
@@ -67,11 +68,11 @@ class EcdsaPrivateKeyFactory {
     const privateKey =
         EcdsaPrivateKeyManager.deserializePrivateKey_(serializedPrivateKey);
 
-    const publicKeyData = new PbKeyData();
-    publicKeyData.setValue(privateKey.getPublicKey().serializeBinary());
-    publicKeyData.setTypeUrl(EcdsaPublicKeyManager.KEY_TYPE);
-    publicKeyData.setKeyMaterialType(
-        PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
+    const publicKeyData =
+        new PbKeyData()
+            .setValue(privateKey.getPublicKey().serializeBinary())
+            .setTypeUrl(EcdsaPublicKeyManager.KEY_TYPE)
+            .setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
     return publicKeyData;
   }
 
@@ -110,19 +111,18 @@ class EcdsaPrivateKeyFactory {
    * @return {!PbEcdsaPrivateKey}
    */
   static jsonToProtoKey_(jsonPrivateKey, jsonPublicKey, params) {
-    const publicKeyProto = new PbEcdsaPublicKey();
-    publicKeyProto.setVersion(EcdsaPublicKeyManager.VERSION);
-    publicKeyProto.setParams(params);
-    publicKeyProto.setX(
-        Bytes.fromBase64(jsonPublicKey['x'], /* opt_webSafe = */ true));
-    publicKeyProto.setY(
-        Bytes.fromBase64(jsonPublicKey['y'], /* opt_webSafe = */ true));
+    const publicKeyProto =
+        new PbEcdsaPublicKey()
+            .setVersion(EcdsaPublicKeyManager.VERSION)
+            .setParams(params)
+            .setX(Bytes.fromBase64(jsonPublicKey['x'], true))
+            .setY(Bytes.fromBase64(jsonPublicKey['y'], true));
 
-    const privateKeyProto = new PbEcdsaPrivateKey();
-    privateKeyProto.setVersion(EcdsaPrivateKeyManager.VERSION_);
-    privateKeyProto.setPublicKey(publicKeyProto);
-    privateKeyProto.setKeyValue(
-        Bytes.fromBase64(jsonPrivateKey['d'], /* opt_webSafe = */ true));
+    const privateKeyProto =
+        new PbEcdsaPrivateKey()
+            .setVersion(EcdsaPrivateKeyManager.VERSION_)
+            .setPublicKey(publicKeyProto)
+            .setKeyValue(Bytes.fromBase64(jsonPrivateKey['d'], true));
     return privateKeyProto;
   }
 

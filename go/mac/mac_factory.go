@@ -62,7 +62,7 @@ func (m *primitiveSet) ComputeMAC(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ret []byte
+	ret := make([]byte, 0, len(primary.Prefix) + len(mac))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, mac...)
 	return ret, nil

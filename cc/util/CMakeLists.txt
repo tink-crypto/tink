@@ -47,6 +47,8 @@ tink_cc_library(
   SRCS
     status.cc
     status.h
+  DEPS
+    absl::base
   PUBLIC
 )
 

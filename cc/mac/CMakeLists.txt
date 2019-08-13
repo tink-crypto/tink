@@ -22,23 +22,14 @@ tink_cc_library(
     mac_config.cc
     mac_config.h
   DEPS
-    tink::mac::mac_catalogue
-    tink::core::config
+    tink::mac::aes_cmac_key_manager
+    tink::mac::hmac_key_manager
+    tink::mac::mac_wrapper
+    tink::config::config_util
+    tink::core::registry
     tink::util::status
     tink::proto::config_cc_proto
     absl::memory
-)
-
-tink_cc_library(
-  NAME mac_catalogue
-  SRCS
-    mac_catalogue.cc
-    mac_catalogue.h
-  DEPS
-    tink::mac::aes_cmac_key_manager
-    tink::mac::hmac_key_manager
-    tink::core::catalogue
-    tink::util::status
 )
 
 tink_cc_library(
@@ -73,14 +64,14 @@ tink_cc_library(
 tink_cc_library(
   NAME aes_cmac_key_manager
   SRCS
-    aes_cmac_key_manager.cc
     aes_cmac_key_manager.h
   DEPS
     tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::core::mac
     tink::subtle::aes_cmac_boringssl
     tink::subtle::random
+    tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
@@ -125,29 +116,18 @@ tink_cc_test(
     tink::core::mac
     tink::core::primitive_set
     tink::util::status
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
-)
-
-tink_cc_test(
-  NAME mac_catalogue_test
-  SRCS mac_catalogue_test.cc
-  DEPS
-    tink::mac::mac_catalogue
-    tink::mac::mac_config
-    tink::core::catalogue
-    tink::core::config
-    tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_test(
   NAME mac_config_test
   SRCS mac_config_test.cc
   DEPS
+    tink::mac::hmac_key_manager
     tink::mac::mac_config
     tink::mac::mac_key_templates
-    tink::core::catalogue
     tink::core::config
     tink::core::keyset_handle
     tink::core::mac
@@ -184,10 +164,12 @@ tink_cc_test(
     tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::mac::mac_key_templates
+    tink::util::test_matchers
     tink::proto::aes_cmac_cc_proto
     tink::proto::common_cc_proto
     tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
+    gmock
 )
 
 tink_cc_test(
@@ -196,6 +178,7 @@ tink_cc_test(
   DEPS
     tink::mac::aes_cmac_key_manager
     tink::core::mac
+    tink::util::test_matchers
     tink::util::status
     tink::util::statusor
     tink::proto::aes_ctr_cc_proto
@@ -203,6 +186,7 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::aes_cmac_cc_proto
     tink::proto::tink_cc_proto
+    gmock
 )
 
 tink_cc_test(

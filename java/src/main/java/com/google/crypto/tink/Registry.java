@@ -267,7 +267,9 @@ public final class Registry {
    *
    * @throws GeneralSecurityException if there's an existing catalogue is not an instance of the
    *     same class as {@code catalogue}
+   * @deprecated Catalogues are no longer supported.
    */
+  @Deprecated
   public static synchronized void addCatalogue(String catalogueName, Catalogue<?> catalogue)
       throws GeneralSecurityException {
     if (catalogueName == null) {
@@ -291,8 +293,10 @@ public final class Registry {
   /**
    * Tries to get a catalogue associated with {@code catalogueName}.
    *
+   * @deprecated Catalogues are no longer supported.
    * @throws GeneralSecurityException if cannot find any catalogue
    */
+  @Deprecated
   public static Catalogue<?> getCatalogue(String catalogueName)
       throws GeneralSecurityException {
     if (catalogueName == null) {

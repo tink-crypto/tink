@@ -68,20 +68,22 @@ Status FileRandomAccessStream::PRead(int64_t position, int count,
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "position cannot be negative");
   }
-  dest_buffer->set_size(count);
+  crypto::tink::util::Status status = dest_buffer->set_size(count);
+  if (!status.ok()) return status;
   if (count == 0) {
     return Status::OK;
   }
   int read_count = pread(fd_, dest_buffer->get_mem_block(), count, position);
   if (read_count == 0) {
-    dest_buffer->set_size(0);
+    dest_buffer->set_size(0).IgnoreError();
     return Status(util::error::OUT_OF_RANGE, "EOF");
   }
   if (read_count < 0) {
-    dest_buffer->set_size(0);
+    dest_buffer->set_size(0).IgnoreError();
     return ToStatusF(util::error::UNKNOWN, "I/O error: %d", errno);
   }
-  dest_buffer->set_size(read_count);
+  status = dest_buffer->set_size(read_count);
+  if (!status.ok()) return status;
   return Status::OK;
 }
 

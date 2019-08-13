@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
+#include "openssl/cipher.h"
 #include "openssl/curve25519.h"
 #include "openssl/digest.h"
 #include "openssl/ec.h"
@@ -450,6 +451,14 @@ TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {
   ASSERT_THAT(
       SubtleUtilBoringSSL::ValidateRsaModulusSize(BN_num_bits(n_1024.get())),
       Not(IsOk()));
+}
+
+TEST(SublteUtilBoringSSLTest, GetCipherForKeySize) {
+  EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(16),
+            EVP_aes_128_ctr());
+  EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(32),
+            EVP_aes_256_ctr());
+  EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(64), nullptr);
 }
 
 TEST(ComputeHashTest, AcceptsNullStringView) {

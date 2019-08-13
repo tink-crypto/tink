@@ -16,15 +16,24 @@ tink_cc_library(
     tink::proto::config_cc_proto
 )
 
+tink_cc_library(
+  NAME config_util
+  SRCS
+    config_util.cc
+    config_util.h
+  DEPS
+    tink::proto::config_cc_proto
+)
+
 # tests
 
 tink_cc_test(
   NAME tink_config_test
   SRCS tink_config_test.cc
   DEPS
+    tink::aead::aes_gcm_key_manager
     tink::config::tink_config
     tink::core::aead
-    tink::core::catalogue
     tink::core::config
     tink::core::deterministic_aead
     tink::core::hybrid_decrypt
@@ -32,5 +41,14 @@ tink_cc_test(
     tink::core::mac
     tink::core::registry
     tink::core::streaming_aead
+    tink::util::test_matchers
     tink::util::status
+)
+
+tink_cc_test(
+  NAME config_util_test
+  SRCS config_util_test.cc
+  DEPS
+    tink::config::config_util
+    gmock
 )

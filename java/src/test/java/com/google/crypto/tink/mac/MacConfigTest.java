@@ -17,12 +17,9 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -60,59 +57,10 @@ public class MacConfigTest {
     // Initialize the config.
     MacConfig.register();
 
-    // Now the catalogues should be present.
-    Registry.getCatalogue("tinkmac");
-    Registry.getCatalogue("tinkmac");
-
     // After registration the key manager should be present.
     Registry.getKeyManager(typeUrl);
 
     // Running init() manually again should succeed.
     MacConfig.register();
-  }
-
-  @Test
-  public void testConfigContents1_0_0() throws Exception {
-    RegistryConfig config = MacConfig.TINK_1_0_0;
-    assertEquals(1, config.getEntryCount());
-    assertEquals("TINK_MAC_1_0_0", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkMac",
-        "Mac",
-        "type.googleapis.com/google.crypto.tink.HmacKey",
-        true,
-        0);
-  }
-
-  @Test
-  public void testConfigContents1_1_0() throws Exception {
-    RegistryConfig config = MacConfig.TINK_1_1_0;
-    assertEquals(1, config.getEntryCount());
-    assertEquals("TINK_MAC_1_1_0", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkMac",
-        "Mac",
-        "type.googleapis.com/google.crypto.tink.HmacKey",
-        true,
-        0);
-  }
-
-  @Test
-  public void testConfigContents_LATEST() throws Exception {
-    RegistryConfig config = MacConfig.LATEST;
-    assertEquals(1, config.getEntryCount());
-    assertEquals("TINK_MAC", config.getConfigName());
-
-    TestUtil.verifyConfigEntry(
-        config.getEntry(0),
-        "TinkMac",
-        "Mac",
-        "type.googleapis.com/google.crypto.tink.HmacKey",
-        true,
-        0);
   }
 }

@@ -15,16 +15,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/aead/aead_wrapper.h"
+
 #include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
-using crypto::tink::test::DummyAead;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::DummyAead;
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
@@ -84,7 +87,7 @@ TEST(AeadSetWrapperTest, Basic) {
   entry_result = aead_set->AddPrimitive(std::move(aead), keyset.key(2));
   ASSERT_TRUE(entry_result.ok());
   // The last key is the primary.
-  aead_set->set_primary(entry_result.ValueOrDie());
+  ASSERT_THAT(aead_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
   // Wrap aead_set and test the resulting Aead.
   AeadWrapper wrapper;

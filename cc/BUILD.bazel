@@ -366,6 +366,7 @@ cc_library(
     deps = [
         ":key_manager",
         "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
@@ -376,25 +377,15 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":aead",
         ":catalogue",
-        ":deterministic_aead",
-        ":hybrid_decrypt",
-        ":hybrid_encrypt",
         ":key_manager",
-        ":mac",
-        ":public_key_sign",
-        ":public_key_verify",
         ":registry",
-        ":streaming_aead",
-        "//cc/aead:aead_wrapper",
-        "//cc/daead:deterministic_aead_wrapper",
-        "//cc/hybrid:hybrid_decrypt_wrapper",
-        "//cc/hybrid:hybrid_encrypt_wrapper",
-        "//cc/mac:mac_wrapper",
-        "//cc/signature:public_key_sign_wrapper",
-        "//cc/signature:public_key_verify_wrapper",
-        "//cc/streamingaead:streaming_aead_wrapper",
+        "//cc/aead:aead_config",
+        "//cc/daead:deterministic_aead_config",
+        "//cc/hybrid:hybrid_config",
+        "//cc/mac:mac_config",
+        "//cc/signature:signature_config",
+        "//cc/streamingaead:streaming_aead_config",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -464,10 +455,10 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":catalogue",
-        ":core/internal_key_manager",
-        ":core/internal_private_key_manager",
         ":core/key_manager_impl",
+        ":core/key_type_manager",
         ":core/private_key_manager_impl",
+        ":core/private_key_type_manager",
         ":key_manager",
         ":primitive_set",
         ":primitive_wrapper",
@@ -630,8 +621,8 @@ cc_library(
 )
 
 cc_library(
-    name = "core/internal_key_manager",
-    hdrs = ["core/internal_key_manager.h"],
+    name = "core/key_type_manager",
+    hdrs = ["core/key_type_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
@@ -649,7 +640,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":core/internal_key_manager",
+        ":core/key_type_manager",
         ":key_manager",
         ":key_manager_base",
         "//cc/util:statusor",
@@ -658,12 +649,12 @@ cc_library(
 )
 
 cc_library(
-    name = "core/internal_private_key_manager",
-    hdrs = ["core/internal_private_key_manager.h"],
+    name = "core/private_key_type_manager",
+    hdrs = ["core/private_key_type_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":core/internal_key_manager",
+        ":core/key_type_manager",
         "//cc/util:statusor",
     ],
 )
@@ -674,8 +665,8 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":core/internal_private_key_manager",
         ":core/key_manager_impl",
+        ":core/private_key_type_manager",
         ":key_manager",
         "//cc/util:validation",
     ],
@@ -821,11 +812,11 @@ cc_test(
     deps = [
         ":aead",
         ":catalogue",
-        ":core/internal_key_manager",
+        ":core/key_manager_impl",
+        ":core/key_type_manager",
         ":crypto_format",
         ":keyset_manager",
         ":registry",
-        "//cc/aead:aead_catalogue",
         "//cc/aead:aead_wrapper",
         "//cc/aead:aes_gcm_key_manager",
         "//cc/hybrid:ecies_aead_hkdf_private_key_manager",
@@ -955,6 +946,7 @@ cc_test(
         ":binary_keyset_reader",
         ":cleartext_keyset_handle",
         ":config",
+        ":core/key_manager_impl",
         ":json_keyset_reader",
         ":json_keyset_writer",
         ":keyset_handle",
@@ -1034,6 +1026,7 @@ cc_test(
         ":mac",
         ":primitive_set",
         "//cc/util:protobuf_helper",
+        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
@@ -1068,11 +1061,11 @@ cc_test(
 )
 
 cc_test(
-    name = "core/internal_key_manager_test",
-    srcs = ["core/internal_key_manager_test.cc"],
+    name = "core/key_type_manager_test",
+    srcs = ["core/key_type_manager_test.cc"],
     deps = [
         ":aead",
-        ":core/internal_key_manager",
+        ":core/key_type_manager",
         "//cc/subtle",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -1104,9 +1097,9 @@ cc_test(
     name = "core/private_key_manager_impl_test",
     srcs = ["core/private_key_manager_impl_test.cc"],
     deps = [
-        ":core/internal_private_key_manager",
         ":core/key_manager_impl",
         ":core/private_key_manager_impl",
+        ":core/private_key_type_manager",
         ":registry",
         "//cc/subtle",
         "//cc/util:status",
