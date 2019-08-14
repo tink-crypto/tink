@@ -17,6 +17,7 @@
 #ifndef TINK_MAC_MAC_CONFIG_H_
 #define TINK_MAC_MAC_CONFIG_H_
 
+#include "absl/base/macros.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
@@ -31,7 +32,6 @@ namespace tink {
 //
 //   auto status = MacConfig::Register();
 //
-// For more information on creation and usage of Mac instances see MacFactory.
 class MacConfig {
  public:
   static constexpr char kCatalogueName[] = "TinkMac";
@@ -39,6 +39,7 @@ class MacConfig {
 
   // Returns config of Mac implementations supported
   // in the current Tink release.
+  ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
 
   // Registers Mac primitive wrapper and key managers for all Mac key types

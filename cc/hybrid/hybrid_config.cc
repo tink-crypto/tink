@@ -32,11 +32,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-constexpr char HybridConfig::kHybridDecryptCatalogueName[];
-constexpr char HybridConfig::kHybridDecryptPrimitiveName[];
-constexpr char HybridConfig::kHybridEncryptCatalogueName[];
-constexpr char HybridConfig::kHybridEncryptPrimitiveName[];
-
 // static
 const RegistryConfig& HybridConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();

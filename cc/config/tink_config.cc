@@ -24,28 +24,16 @@
 #include "tink/signature/signature_config.h"
 #include "tink/streamingaead/streaming_aead_config.h"
 #include "tink/util/status.h"
+#include "proto/config.pb.h"
+
+using google::crypto::tink::RegistryConfig;
 
 namespace crypto {
 namespace tink {
 
-namespace {
-
-google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
-  google::crypto::tink::RegistryConfig* config =
-      new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(HybridConfig::Latest());  // includes Mac & Aead
-  config->MergeFrom(SignatureConfig::Latest());
-  config->MergeFrom(DeterministicAeadConfig::Latest());
-  config->MergeFrom(StreamingAeadConfig::Latest());
-  config->set_config_name("TINK");
-  return config;
-}
-
-}  // anonymous namespace
-
 // static
-const google::crypto::tink::RegistryConfig& TinkConfig::Latest() {
-  static auto config = GenerateRegistryConfig();
+const RegistryConfig& TinkConfig::Latest() {
+  static const RegistryConfig* config = new RegistryConfig();
   return *config;
 }
 

@@ -37,11 +37,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-constexpr char SignatureConfig::kPublicKeySignCatalogueName[];
-constexpr char SignatureConfig::kPublicKeyVerifyCatalogueName[];
-constexpr char SignatureConfig::kPublicKeySignPrimitiveName[];
-constexpr char SignatureConfig::kPublicKeyVerifyPrimitiveName[];
-
 // static
 const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();

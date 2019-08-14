@@ -14,6 +14,7 @@ tink_cc_library(
     tink::streamingaead::streaming_aead_config
     tink::util::status
     tink::proto::config_cc_proto
+    absl::base
 )
 
 tink_cc_library(

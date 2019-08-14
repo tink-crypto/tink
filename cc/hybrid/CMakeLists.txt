@@ -15,6 +15,7 @@ tink_cc_library(
     tink::aead::aead_config
     tink::util::status
     tink::proto::config_cc_proto
+    absl::base
     absl::memory
 )
 

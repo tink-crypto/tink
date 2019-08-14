@@ -57,10 +57,6 @@ release of Tink in Java are given in
 | Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                        |
 
-Exact listings of primitives and their implementations available in the latest
-release of Tink in C++ are given via
-[`TinkConfig::Latest()`](https://github.com/google/tink/blob/master/cc/config/tink_config.cc)-method.
-
 ### Objective-C
 
 Primitive          | Objective-C Implementations

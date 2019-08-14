@@ -17,6 +17,7 @@
 #ifndef TINK_SIGNATURE_SIGNATURE_CONFIG_H_
 #define TINK_SIGNATURE_SIGNATURE_CONFIG_H_
 
+#include "absl/base/macros.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
@@ -34,8 +35,6 @@ namespace tink {
 //
 //   auto status = SignatureConfig::Register();
 //
-// For more information on creation and usage of instances of PublicKeySign
-// and PublicKeyVerify see PublicKeySignFactory resp. PublicKeyVerifyFactory.
 class SignatureConfig {
  public:
   static constexpr char kPublicKeySignCatalogueName[] = "TinkPublicKeySign";
@@ -45,6 +44,7 @@ class SignatureConfig {
 
   // Returns config with implementations of PublicKeySign and PublicKeyVerify
   // supported in the current Tink release.
+  ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
 
   // Registers PublicKeySign and PublicKeyVerify primitive wrappers, and key

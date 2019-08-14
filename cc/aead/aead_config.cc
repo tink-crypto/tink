@@ -36,9 +36,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-constexpr char AeadConfig::kCatalogueName[];
-constexpr char AeadConfig::kPrimitiveName[];
-
 // static
 const RegistryConfig& AeadConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();

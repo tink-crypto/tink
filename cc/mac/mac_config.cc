@@ -30,9 +30,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-constexpr char MacConfig::kCatalogueName[];
-constexpr char MacConfig::kPrimitiveName[];
-
 // static
 const RegistryConfig& MacConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();
