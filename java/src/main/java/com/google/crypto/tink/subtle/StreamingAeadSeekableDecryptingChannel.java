@@ -258,7 +258,7 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   /**
    * Atomic read from a given position.
    *
-   * This method works in the same way as read(ByteBuffer), except that is tart at the given
+   * This method works in the same way as read(ByteBuffer), except that it starts at the given
    * position and does not modify the channel's position.
    */
   public synchronized int read(ByteBuffer dst, long start) throws IOException {
