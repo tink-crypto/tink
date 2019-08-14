@@ -173,7 +173,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
    * be able to generate keys. In particular, in this case it needs to have some KeyFormat protocol
    * buffer which can be validated, parsed, and from which a key can be generated.
    */
-  protected abstract static class KeyFactory<KeyFormatProtoT extends MessageLite, KeyT> {
+  public abstract static class KeyFactory<KeyFormatProtoT extends MessageLite, KeyT> {
     private final Class<KeyFormatProtoT> clazz;
     public KeyFactory(Class<KeyFormatProtoT> clazz) {
       this.clazz = clazz;

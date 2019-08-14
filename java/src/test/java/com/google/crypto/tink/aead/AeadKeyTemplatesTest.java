@@ -37,7 +37,7 @@ public class AeadKeyTemplatesTest {
   @Test
   public void testAES128_GCM() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES128_GCM;
-    assertEquals(AesGcmKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesGcmKeyFormat format = AesGcmKeyFormat.parseFrom(template.getValue());
     assertEquals(16, format.getKeySize());
@@ -46,7 +46,7 @@ public class AeadKeyTemplatesTest {
   @Test
   public void testAES256_GCM() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES256_GCM;
-    assertEquals(AesGcmKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesGcmKeyFormat format = AesGcmKeyFormat.parseFrom(template.getValue());
     assertEquals(32, format.getKeySize());
@@ -58,7 +58,7 @@ public class AeadKeyTemplatesTest {
     // to test that the function correctly puts them in the resulting template.
     int keySize = 42;
     KeyTemplate template = AeadKeyTemplates.createAesGcmKeyTemplate(keySize);
-    assertEquals(AesGcmKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
 
     AesGcmKeyFormat format = AesGcmKeyFormat.parseFrom(template.getValue());
