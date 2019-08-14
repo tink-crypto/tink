@@ -64,7 +64,7 @@ func TestUnsupportedKeyTemplates(t *testing.T) {
 }
 
 func TestAead(t *testing.T) {
-	for c, _ := range keyTemplates {
+	for c := range keyTemplates {
 		pt := random.GetRandomBytes(20)
 		ad := random.GetRandomBytes(20)
 		rDem, err := newRegisterECIESAEADHKDFDemHelper(c)

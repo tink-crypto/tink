@@ -55,7 +55,7 @@ func TestED25519Deterministic(t *testing.T) {
 	if err := verifier.Verify(sign2, data); err != nil {
 		t.Errorf("unexpected error when verifying: %s", err)
 	}
-	if bytes.Compare(sign1, sign2) != 0 {
+	if !bytes.Equal(sign1, sign2) {
 		t.Error("deterministic signature check failure")
 	}
 
@@ -69,6 +69,9 @@ func TestEd25519VerifyModifiedSignature(t *testing.T) {
 	}
 	// Use the private key and public key directly to create new instances
 	signer, verifier, err := newSignerVerifier(t, &priv, &public)
+	if err != nil {
+		t.Fatalf("failed to create new signer verifier: %v", err)
+	}
 
 	sign, err := signer.Sign(data)
 	if err != nil {
@@ -93,6 +96,9 @@ func TestEd25519VerifyModifiedMessage(t *testing.T) {
 
 	// Use the private key and public key directly to create new instances
 	signer, verifier, err := newSignerVerifier(t, &priv, &public)
+	if err != nil {
+		t.Fatalf("failed to create new signer verifier: %v", err)
+	}
 
 	sign, err := signer.Sign(data)
 	if err != nil {
@@ -188,6 +194,9 @@ func TestVectorsED25519(t *testing.T) {
 	}
 	for _, g := range content.TestGroups {
 		pvtKey, err := hex.DecodeString(g.Key.Sk)
+		if err != nil {
+			t.Fatalf("cannot decode sk key: %s", err)
+		}
 		pubKey, err := hex.DecodeString(g.Key.Pk)
 		if err != nil {
 			t.Fatalf("cannot decode private key: %s", err)

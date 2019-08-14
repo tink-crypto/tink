@@ -166,7 +166,7 @@ func testEncryptDecrypt(template *tinkpb.KeyTemplate, typeURL string) error {
 		return fmt.Errorf("decryption failed, error: %v", err)
 	}
 
-	if bytes.Compare(plaintext, decrypted) != 0 {
+	if !bytes.Equal(plaintext, decrypted) {
 		return fmt.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, plaintext)
 	}
 

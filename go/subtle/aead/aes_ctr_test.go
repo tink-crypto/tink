@@ -117,7 +117,7 @@ func TestNistTestVector(t *testing.T) {
 		t.Errorf("failed to decrypt ciphertext, error: %v", err)
 	}
 
-	if bytes.Compare(plaintext, message) != 0 {
+	if !bytes.Equal(plaintext, message) {
 		t.Errorf("plaintext doesn't match message")
 	}
 }
@@ -139,7 +139,7 @@ func TestMultipleEncrypt(t *testing.T) {
 	if err != nil {
 		t.Errorf("encryption failed, error: %v", err)
 	}
-	if bytes.Compare(ct1, ct2) == 0 {
+	if bytes.Equal(ct1, ct2) {
 		t.Error("the two ciphertexts cannot be equal")
 	}
 	// Encrypt 100 times and verify that the result is 100 different ciphertexts.
@@ -183,7 +183,7 @@ func TestEncryptDecrypt(t *testing.T) {
 		t.Errorf("decryption failed, error: %v", err)
 	}
 
-	if bytes.Compare(message, plaintext) != 0 {
+	if !bytes.Equal(message, plaintext) {
 		t.Errorf("decryption result mismatch, got: %v, want: %v", plaintext, message)
 	}
 }
@@ -211,7 +211,7 @@ func TestEncryptRandomMessage(t *testing.T) {
 			t.Errorf("decryption failed at iteration %d, error: %v", i, err)
 		}
 
-		if bytes.Compare(plaintext, message) != 0 {
+		if !bytes.Equal(plaintext, message) {
 			t.Errorf("plaintext doesn't match message, i = %d", i)
 		}
 	}
@@ -240,7 +240,7 @@ func TestEncryptRandomKeyAndMessage(t *testing.T) {
 			t.Errorf("decryption failed at iteration %d, error: %v", i, err)
 		}
 
-		if bytes.Compare(plaintext, message) != 0 {
+		if !bytes.Equal(plaintext, message) {
 			t.Errorf("plaintext doesn't match message, i = %d", i)
 		}
 	}

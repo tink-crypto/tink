@@ -21,14 +21,14 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"golang.org/x/crypto/ed25519"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/subtle"
 	subtlehybrid "github.com/google/tink/go/subtle/hybrid"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
+	"golang.org/x/crypto/ed25519"
 
 	subtedaead "github.com/google/tink/go/subtle/daead"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
@@ -111,10 +111,7 @@ var _ registry.KMSClient = (*DummyKMSClient)(nil)
 
 // Supported true if this client does support keyURI
 func (d *DummyKMSClient) Supported(keyURI string) bool {
-	if keyURI == "dummy" {
-		return true
-	}
-	return false
+	return keyURI == "dummy"
 }
 
 // LoadCredentials loads the credentials in credentialPath. If credentialPath is null, loads the
