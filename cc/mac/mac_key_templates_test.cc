@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/util/test_matchers.h"
@@ -59,9 +60,10 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    HmacKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    HmacKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -81,9 +83,10 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    HmacKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    HmacKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -104,9 +107,10 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    HmacKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    HmacKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -126,9 +130,10 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    HmacKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    HmacKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }

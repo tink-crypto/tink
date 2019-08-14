@@ -58,9 +58,10 @@ TEST_F(MacFactoryTest, testBasic) {
 
 TEST_F(MacFactoryTest, testPrimitive) {
   // Prepare a format for generating keys for a Keyset.
-  HmacKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-  std::string key_type = key_manager.get_key_type();
+  HmacKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
+  std::string key_type = key_manager->get_key_type();
 
   HmacKeyFormat key_format;
   key_format.set_key_size(16);
@@ -122,7 +123,7 @@ TEST_F(MacFactoryTest, testPrimitive) {
 
   // Create raw MAC value with 2nd key, and verify with Mac-instance.
   auto raw_mac = std::move(
-      key_manager.GetPrimitive(keyset.key(1).key_data()).ValueOrDie());
+      key_manager->GetPrimitive(keyset.key(1).key_data()).ValueOrDie());
   std::string raw_mac_value = raw_mac->ComputeMac(data).ValueOrDie();
   status = mac->VerifyMac(raw_mac_value, data);
   EXPECT_TRUE(status.ok()) << status;

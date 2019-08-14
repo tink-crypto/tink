@@ -20,7 +20,6 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"
-#include "tink/key_manager.h"
 #include "tink/subtle/hmac_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
@@ -43,63 +42,25 @@ using google::crypto::tink::HashType;
 using google::crypto::tink::HmacKey;
 using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::HmacParams;
-using google::crypto::tink::KeyData;
 
-class HmacKeyFactory : public KeyFactoryBase<HmacKey, HmacKeyFormat> {
- public:
-  HmacKeyFactory() {}
+namespace {
 
-  KeyData::KeyMaterialType key_material_type() const override {
-    return KeyData::SYMMETRIC;
-  }
+constexpr int kMinKeySizeInBytes = 16;
+constexpr int kMinTagSizeInBytes = 10;
 
- protected:
-  StatusOr<std::unique_ptr<HmacKey>> NewKeyFromFormat(
-      const HmacKeyFormat& hmac_key_format) const override;
-};
+}  // namespace
 
-StatusOr<std::unique_ptr<HmacKey>> HmacKeyFactory::NewKeyFromFormat(
+StatusOr<HmacKey> HmacKeyManager::CreateKey(
     const HmacKeyFormat& hmac_key_format) const {
-  Status status =  HmacKeyManager::Validate(hmac_key_format);
-  if (!status.ok()) return status;
-  auto hmac_key = absl::make_unique<HmacKey>();
-  hmac_key->set_version(HmacKeyManager::kVersion);
-  *(hmac_key->mutable_params()) = hmac_key_format.params();
-  hmac_key->set_key_value(
+  HmacKey hmac_key;
+  hmac_key.set_version(get_version());
+  *(hmac_key.mutable_params()) = hmac_key_format.params();
+  hmac_key.set_key_value(
       subtle::Random::GetRandomBytes(hmac_key_format.key_size()));
-  return absl::implicit_cast<StatusOr<std::unique_ptr<HmacKey>>>(
-        std::move(hmac_key));
+  return hmac_key;
 }
 
-constexpr uint32_t HmacKeyManager::kVersion;
-
-const int kMinKeySizeInBytes = 16;
-const int kMinTagSizeInBytes = 10;
-
-HmacKeyManager::HmacKeyManager() : key_factory_(new HmacKeyFactory()) {}
-
-uint32_t HmacKeyManager::get_version() const {
-  return kVersion;
-}
-
-const KeyFactory& HmacKeyManager::get_key_factory() const {
-  return *key_factory_;
-}
-
-StatusOr<std::unique_ptr<Mac>> HmacKeyManager::GetPrimitiveFromKey(
-    const HmacKey& hmac_key) const {
-  Status status = Validate(hmac_key);
-  if (!status.ok()) return status;
-  auto hmac_result = subtle::HmacBoringSsl::New(
-      util::Enums::ProtoToSubtle(hmac_key.params().hash()),
-      hmac_key.params().tag_size(),
-      hmac_key.key_value());
-  if (!hmac_result.ok()) return hmac_result.status();
-  return std::move(hmac_result.ValueOrDie());
-}
-
-// static
-Status HmacKeyManager::Validate(const HmacParams& params) {
+Status HmacKeyManager::ValidateParams(const HmacParams& params) const {
   if (params.tag_size() < kMinTagSizeInBytes) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid HmacParams: tag_size %d is too small.",
@@ -122,24 +83,24 @@ Status HmacKeyManager::Validate(const HmacParams& params) {
   return Status::OK;
 }
 
-// static
-Status HmacKeyManager::Validate(const HmacKey& key) {
-  Status status = ValidateVersion(key.version(), kVersion);
+Status HmacKeyManager::ValidateKey(const HmacKey& key) const {
+  Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().size() < kMinKeySizeInBytes) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid HmacKey: key_value is too short.");
   }
-  return Validate(key.params());
+  return ValidateParams(key.params());
 }
 
 // static
-Status HmacKeyManager::Validate(const HmacKeyFormat& key_format) {
+Status HmacKeyManager::ValidateKeyFormat(
+    const HmacKeyFormat& key_format) const {
   if (key_format.key_size() < kMinKeySizeInBytes) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid HmacKeyFormat: key_size is too small.");
   }
-  return Validate(key_format.params());
+  return ValidateParams(key_format.params());
 }
 
 }  // namespace tink

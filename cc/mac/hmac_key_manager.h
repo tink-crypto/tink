@@ -20,9 +20,11 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "tink/core/key_manager_base.h"
-#include "tink/key_manager.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/mac.h"
+#include "tink/subtle/hmac_boringssl.h"
+#include "tink/util/constants.h"
+#include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -34,36 +36,46 @@ namespace crypto {
 namespace tink {
 
 class HmacKeyManager
-    : public KeyManagerBase<Mac, google::crypto::tink::HmacKey> {
+    : public KeyTypeManager<google::crypto::tink::HmacKey,
+                            google::crypto::tink::HmacKeyFormat, List<Mac>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class MacFactory : public PrimitiveFactory<Mac> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Mac>> Create(
+        const google::crypto::tink::HmacKey& hmac_key) const override {
+      return subtle::HmacBoringSsl::New(
+          util::Enums::ProtoToSubtle(hmac_key.params().hash()),
+          hmac_key.params().tag_size(), hmac_key.key_value());
+    }
+  };
 
-  HmacKeyManager();
+  HmacKeyManager() : KeyTypeManager(absl::make_unique<MacFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
+  }
 
-  virtual ~HmacKeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<Mac>> GetPrimitiveFromKey(
-      const google::crypto::tink::HmacKey& hmac_key) const override;
+
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::HmacKey& key) const override;
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const google::crypto::tink::HmacKeyFormat& key_format) const override;
+
+  crypto::tink::util::StatusOr<google::crypto::tink::HmacKey> CreateKey(
+      const google::crypto::tink::HmacKeyFormat& key_format) const override;
 
  private:
-  friend class HmacKeyFactory;
+  crypto::tink::util::Status ValidateParams(
+      const google::crypto::tink::HmacParams& params) const;
 
-  std::unique_ptr<KeyFactory> key_factory_;
 
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::HmacParams& params);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::HmacKey& key);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::HmacKeyFormat& key_format);
+  const std::string key_type_ = absl::StrCat(
+      kTypeGoogleapisCom, google::crypto::tink::HmacKey().GetTypeName());
 };
 
 }  // namespace tink

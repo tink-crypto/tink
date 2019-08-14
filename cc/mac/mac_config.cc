@@ -39,7 +39,7 @@ const RegistryConfig& MacConfig::Latest() {
 // static
 util::Status MacConfig::Register() {
   // Register key managers.
-  auto status = Registry::RegisterKeyManager(
+  auto status = Registry::RegisterKeyTypeManager(
       absl::make_unique<HmacKeyManager>(), true);
   if (!status.ok()) return status;
   status = Registry::RegisterKeyTypeManager(

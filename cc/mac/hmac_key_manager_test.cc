@@ -16,6 +16,7 @@
 
 #include "tink/mac/hmac_key_manager.h"
 
+#include "tink/core/key_manager_impl.h"
 #include "tink/mac.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -45,23 +46,25 @@ class HmacKeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(HmacKeyManagerTest, testBasic) {
-  HmacKeyManager key_manager;
+  HmacKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.HmacKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
-  HmacKeyManager key_manager;
+  HmacKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type =
         "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -74,7 +77,7 @@ TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(hmac_key_type);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -87,7 +90,7 @@ TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(hmac_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -96,11 +99,12 @@ TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(HmacKeyManagerTest, testKeyMessageErrors) {
-  HmacKeyManager key_manager;
+  HmacKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesCtrKey key_message;
-    auto result = key_manager.GetPrimitive(key_message);
+    auto result = key_manager->GetPrimitive(key_message);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesCtrKey",
@@ -112,7 +116,8 @@ TEST_F(HmacKeyManagerTest, testKeyMessageErrors) {
 
 // TODO(przydatek): do real verification of HMACs once they are implemented.
 TEST_F(HmacKeyManagerTest, testPrimitives) {
-  HmacKeyManager key_manager;
+  HmacKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
   HmacKey key;
 
   key.set_version(0);
@@ -121,7 +126,7 @@ TEST_F(HmacKeyManagerTest, testPrimitives) {
   key.set_key_value("some key of sufficient length");
 
   {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hmac = std::move(result.ValueOrDie());
     auto hmac_result = hmac->ComputeMac("some data");
@@ -132,7 +137,7 @@ TEST_F(HmacKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(hmac_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hmac = std::move(result.ValueOrDie());
     auto hmac_result = hmac->ComputeMac("some data");
@@ -141,8 +146,9 @@ TEST_F(HmacKeyManagerTest, testPrimitives) {
 }
 
 TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
-  HmacKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  HmacKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   {  // Bad key format.
     AesCtrKeyFormat key_format;
@@ -218,8 +224,9 @@ TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
 }
 
 TEST_F(HmacKeyManagerTest, testNewKeyBasic) {
-  HmacKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  HmacKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Mac>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   HmacKeyFormat key_format;
   key_format.set_key_size(16);
   key_format.mutable_params()->set_hash(HashType::SHA256);
