@@ -42,10 +42,6 @@ In development: JavaScript and Python.
 | Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                        |
 
-Exact listings of primitives and their implementations available in the latest
-release of Tink in Java are given in
-[`TinkConfig.LATEST`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/TinkConfig.java)-variable.
-
 ### C++
 
 | Primitive          | C++ Implementations                             |
