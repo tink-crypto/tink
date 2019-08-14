@@ -91,7 +91,7 @@ class EncryptThenAuthenticate {
     Validators.requireUint8Array(plaintext);
     const payload = await this.cipher_.encrypt(plaintext);
     let aad = new Uint8Array(0);
-    if (goog.isDefAndNotNull(opt_associatedData)) {
+    if (opt_associatedData != null) {
       aad = opt_associatedData;
       Validators.requireUint8Array(opt_associatedData);
     }
@@ -117,7 +117,7 @@ class EncryptThenAuthenticate {
     const payload = new Uint8Array(
         ciphertext.subarray(0, ciphertext.length - this.tagSize_));
     let aad = new Uint8Array(0);
-    if (goog.isDefAndNotNull(opt_associatedData)) {
+    if (opt_associatedData != null) {
       aad = opt_associatedData;
       Validators.requireUint8Array(opt_associatedData);
     }
