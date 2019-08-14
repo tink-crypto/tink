@@ -26,6 +26,11 @@ namespace crypto {
 namespace tink {
 namespace util {
 
+#ifndef CPP_TINK_TEMPORARY_STATUS_MUST_NOT_USE_RESULT
+template <typename T>
+class ABSL_MUST_USE_RESULT StatusOr;
+#endif
+
 // A StatusOr holds a Status (in the case of an error), or a value T.
 template <typename T>
 class StatusOr {
