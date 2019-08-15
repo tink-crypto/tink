@@ -977,7 +977,9 @@ tink_cc_test(
 tink_cc_test(
   NAME subtle_util_test
   SRCS subtle_util_test
-  DEPS tink::subtle::subtle_util
+  DEPS
+    tink::subtle::subtle_util
+    gmock
 )
 
 tink_cc_test(
