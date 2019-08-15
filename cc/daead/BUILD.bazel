@@ -103,13 +103,10 @@ cc_test(
     deps = [
         ":aes_siv_key_manager",
         "//cc:aead",
-        "//cc:core/key_manager_impl",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:aes_eax_cc_proto",
+        "//cc/util:test_matchers",
         "//proto:aes_siv_cc_proto",
-        "//proto:common_cc_proto",
-        "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

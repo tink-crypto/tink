@@ -16,8 +16,6 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::aes_siv_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
     absl::strings
 )
 
@@ -90,13 +88,10 @@ tink_cc_test(
   DEPS
     tink::daead::aes_siv_key_manager
     tink::core::deterministic_aead
-    tink::core::key_manager_impl
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_eax_cc_proto
     tink::proto::aes_siv_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
+    gmock
 )
 
 tink_cc_test(
