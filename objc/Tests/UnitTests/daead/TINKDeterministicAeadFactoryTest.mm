@@ -43,6 +43,7 @@ using crypto::tink::KeyFactory;
 using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
+using google::crypto::tink::AesSivKey;
 using google::crypto::tink::AesSivKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
@@ -69,10 +70,7 @@ using google::crypto::tink::KeyStatusType;
 }
 
 - (void)testPrimitive {
-  // Prepare a template for generating keys for a Keyset.
-  AesSivKeyManager key_manager;
-  const KeyFactory &key_factory = key_manager.get_key_factory();
-  std::string key_type = key_manager.get_key_type();
+  std::string key_type = AesSivKeyManager().get_key_type();
 
   AesSivKeyFormat key_format;
   key_format.set_key_size(64);
@@ -80,16 +78,16 @@ using google::crypto::tink::KeyStatusType;
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  auto new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddTinkKey(key_type, key_id_1, *new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
+  auto new_key = AesSivKeyManager().CreateKey(key_format).ValueOrDie();
+  AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddRawKey(key_type, key_id_2, *new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
+  new_key = AesSivKeyManager().CreateKey(key_format).ValueOrDie();
+  AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddTinkKey(key_type, key_id_3, *new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
+  new_key = AesSivKeyManager().CreateKey(key_format).ValueOrDie();
+  AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
 
@@ -124,7 +122,10 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertTrue([plaintext isEqual:decrypted]);
 
   // Create raw ciphertext with 2nd key, and decrypt with Aead-instance.
-  auto raw_aead = std::move(key_manager.GetPrimitive(keyset.key(1).key_data()).ValueOrDie());
+  AesSivKey raw_key;
+  XCTAssertTrue(raw_key.ParseFromString(keyset.key(1).key_data().value()));
+  auto raw_aead = std::move(AesSivKeyManager()
+                            .GetPrimitive<crypto::tink::DeterministicAead>(raw_key).ValueOrDie());
   std::string raw_ciphertext = raw_aead
                                    ->EncryptDeterministically(absl::string_view("some_plaintext"),
                                                               absl::string_view("some_aad"))

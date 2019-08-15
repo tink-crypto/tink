@@ -16,6 +16,7 @@
 
 #include "tink/daead/aes_siv_key_manager.h"
 
+#include "tink/core/key_manager_impl.h"
 #include "tink/deterministic_aead.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -44,23 +45,27 @@ class AesSivKeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(AesSivKeyManagerTest, testBasic) {
-  AesSivKeyManager key_manager;
+  AesSivKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<DeterministicAead>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.AesSivKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(AesSivKeyManagerTest, testKeyDataErrors) {
-  AesSivKeyManager key_manager;
+  AesSivKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<DeterministicAead>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type =
         "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -73,7 +78,7 @@ TEST_F(AesSivKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(aes_siv_key_type_);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -86,7 +91,7 @@ TEST_F(AesSivKeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(aes_siv_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -101,7 +106,7 @@ TEST_F(AesSivKeyManagerTest, testKeyDataErrors) {
       KeyData key_data;
       key_data.set_type_url(aes_siv_key_type_);
       key_data.set_value(key.SerializeAsString());
-      auto result = key_manager.GetPrimitive(key_data);
+      auto result = key_manager->GetPrimitive(key_data);
       if (len == 64) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
@@ -119,11 +124,13 @@ TEST_F(AesSivKeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(AesSivKeyManagerTest, testKeyMessageErrors) {
-  AesSivKeyManager key_manager;
+  AesSivKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<DeterministicAead>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesEaxKey key;
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
@@ -137,7 +144,7 @@ TEST_F(AesSivKeyManagerTest, testKeyMessageErrors) {
       AesSivKey key;
       key.set_version(0);
       key.set_key_value(std::string(len, 'a'));
-      auto result = key_manager.GetPrimitive(key);
+      auto result = key_manager->GetPrimitive(key);
       if (len == 64) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
@@ -157,7 +164,9 @@ TEST_F(AesSivKeyManagerTest, testKeyMessageErrors) {
 TEST_F(AesSivKeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string aad = "some aad";
-  AesSivKeyManager key_manager;
+  AesSivKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<DeterministicAead>(&key_type_manager);
   AesSivKey key;
 
   key.set_version(0);
@@ -165,7 +174,7 @@ TEST_F(AesSivKeyManagerTest, testPrimitives) {
       "64 bytes of key 0123456789abcdef0123456789abcdef0123456789abcdef");
 
   {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aes_siv = std::move(result.ValueOrDie());
     auto encrypt_result = aes_siv->EncryptDeterministically(plaintext, aad);
@@ -180,7 +189,7 @@ TEST_F(AesSivKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(aes_siv_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aes_siv = std::move(result.ValueOrDie());
     auto encrypt_result = aes_siv->EncryptDeterministically(plaintext, aad);
@@ -193,8 +202,10 @@ TEST_F(AesSivKeyManagerTest, testPrimitives) {
 }
 
 TEST_F(AesSivKeyManagerTest, testNewKeyErrors) {
-  AesSivKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  AesSivKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<DeterministicAead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   {  // Bad key format.
     AesEaxKeyFormat key_format;
@@ -221,14 +232,16 @@ TEST_F(AesSivKeyManagerTest, testNewKeyErrors) {
     auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "key size",
                         result.status().error_message());
   }
 }
 
 TEST_F(AesSivKeyManagerTest, testNewKeyBasic) {
-  AesSivKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  AesSivKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<DeterministicAead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   AesSivKeyFormat key_format;
   key_format.set_key_size(64);
 

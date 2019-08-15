@@ -3,14 +3,13 @@ tink_module(daead)
 tink_cc_library(
   NAME aes_siv_key_manager
   SRCS
-    aes_siv_key_manager.cc
     aes_siv_key_manager.h
   DEPS
     tink::core::aead
-    tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::subtle::aes_siv_boringssl
     tink::subtle::random
+    tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::status
@@ -19,7 +18,7 @@ tink_cc_library(
     tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
-    absl::base
+    absl::strings
 )
 
 tink_cc_library(
@@ -90,7 +89,8 @@ tink_cc_test(
   SRCS aes_siv_key_manager_test.cc
   DEPS
     tink::daead::aes_siv_key_manager
-    tink::core::aead
+    tink::core::deterministic_aead
+    tink::core::key_manager_impl
     tink::util::status
     tink::util::statusor
     tink::proto::aes_eax_cc_proto
@@ -134,6 +134,7 @@ tink_cc_test(
   NAME deterministic_aead_factory_test
   SRCS deterministic_aead_factory_test.cc
   DEPS
+    tink::core::key_manager_impl
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_config
     tink::daead::deterministic_aead_factory
@@ -151,6 +152,7 @@ tink_cc_test(
   NAME deterministic_aead_key_templates_test
   SRCS deterministic_aead_key_templates_test.cc
   DEPS
+    tink::core::key_manager_impl
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_key_templates
     tink::proto::aes_siv_cc_proto

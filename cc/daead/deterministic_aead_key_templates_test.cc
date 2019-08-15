@@ -17,6 +17,7 @@
 #include "tink/daead/deterministic_aead_key_templates.h"
 
 #include "gtest/gtest.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "proto/aes_siv.pb.h"
 #include "proto/common.pb.h"
@@ -49,10 +50,12 @@ TEST(DeterministicAeadKeyTemplatesTest, testAesSivKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    AesSivKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    AesSivKeyManager key_type_manager;
+    auto key_manager =
+        internal::MakeKeyManager<DeterministicAead>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
     auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
+        key_manager->get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }

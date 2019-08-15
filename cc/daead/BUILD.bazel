@@ -4,25 +4,22 @@ licenses(["notice"])
 
 cc_library(
     name = "aes_siv_key_manager",
-    srcs = ["aes_siv_key_manager.cc"],
     hdrs = ["aes_siv_key_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        "//cc:aead",
-        "//cc:key_manager",
-        "//cc:key_manager_base",
+        "//cc:core/key_type_manager",
+        "//cc:deterministic_aead",
         "//cc/subtle:aes_siv_boringssl",
         "//cc/subtle:random",
+        "//cc/util:constants",
         "//cc/util:errors",
         "//cc/util:protobuf_helper",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:validation",
         "//proto:aes_siv_cc_proto",
-        "//proto:common_cc_proto",
-        "//proto:tink_cc_proto",
-        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -75,7 +72,6 @@ cc_library(
         "//cc:deterministic_aead",
         "//cc:key_manager",
         "//cc:keyset_handle",
-        "//cc:primitive_set",
         "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -107,6 +103,7 @@ cc_test(
     deps = [
         ":aes_siv_key_manager",
         "//cc:aead",
+        "//cc:core/key_manager_impl",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:aes_eax_cc_proto",
@@ -185,6 +182,7 @@ cc_test(
     deps = [
         ":aes_siv_key_manager",
         ":deterministic_aead_key_templates",
+        "//cc:core/key_manager_impl",
         "//proto:aes_siv_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
