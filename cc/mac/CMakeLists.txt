@@ -199,9 +199,7 @@ tink_cc_test(
     tink::core::mac
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_ctr_cc_proto
-    tink::proto::aes_ctr_hmac_aead_cc_proto
-    tink::proto::common_cc_proto
+    tink::util::test_matchers
     tink::proto::hmac_cc_proto
-    tink::proto::tink_cc_proto
+    gmock
 )

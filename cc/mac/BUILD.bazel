@@ -235,11 +235,10 @@ cc_test(
         "//cc:mac",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:aes_ctr_cc_proto",
+        "//cc/util:test_matchers",
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",
-        "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
