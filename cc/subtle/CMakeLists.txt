@@ -272,6 +272,7 @@ tink_cc_library(
     aes_gcm_boringssl.h
   DEPS
     tink::subtle::random
+    tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::core::aead
     tink::util::errors
@@ -405,6 +406,7 @@ tink_cc_library(
   DEPS
     tink::subtle::ind_cpa_cipher
     tink::subtle::random
+    tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::util::errors
     tink::util::status

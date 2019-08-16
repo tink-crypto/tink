@@ -23,6 +23,7 @@
 #include "openssl/evp.h"
 #include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -87,7 +88,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "could not initialize ctx");
   }
-  ciphertext.resize(iv_size_ + plaintext.size());
+  ResizeStringUninitialized(&ciphertext, iv_size_ + plaintext.size());
   int len;
   ret = EVP_EncryptUpdate(
       ctx.get(), reinterpret_cast<uint8_t*>(&ciphertext[iv_size_]), &len,
@@ -126,7 +127,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
 
   size_t plaintext_size = ciphertext.size() - iv_size_;
   std::string plaintext;
-  plaintext.resize(plaintext_size);
+  ResizeStringUninitialized(&plaintext, plaintext_size);
   size_t read = iv_size_;
   int len;
   ret = EVP_DecryptUpdate(

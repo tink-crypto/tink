@@ -21,6 +21,7 @@
 
 #include "tink/aead.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -70,7 +71,8 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
 util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
     absl::string_view plaintext, absl::string_view additional_data) const {
   std::string result = Random::GetRandomBytes(IV_SIZE_IN_BYTES);
-  result.resize(IV_SIZE_IN_BYTES + plaintext.size() + TAG_SIZE_IN_BYTES);
+  ResizeStringUninitialized(
+      &result, IV_SIZE_IN_BYTES + plaintext.size() + TAG_SIZE_IN_BYTES);
   size_t len;
   if (EVP_AEAD_CTX_seal(
           ctx_.get(), reinterpret_cast<uint8_t*>(&result[IV_SIZE_IN_BYTES]),
@@ -91,7 +93,8 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
   }
 
   std::string result;
-  result.resize(ciphertext.size() - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES);
+  ResizeStringUninitialized(
+      &result, ciphertext.size() - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES);
   size_t len;
   if (EVP_AEAD_CTX_open(
           ctx_.get(), reinterpret_cast<uint8_t*>(&result[0]), &len,

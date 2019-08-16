@@ -306,6 +306,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":random",
+        ":subtle_util",
         ":subtle_util_boringssl",
         "//cc:aead",
         "//cc/util:errors",
@@ -453,6 +454,7 @@ cc_library(
     deps = [
         ":ind_cpa_cipher",
         ":random",
+        ":subtle_util",
         ":subtle_util_boringssl",
         "//cc/util:errors",
         "//cc/util:status",
