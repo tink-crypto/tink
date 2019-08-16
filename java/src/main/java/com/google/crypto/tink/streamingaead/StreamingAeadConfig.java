@@ -41,9 +41,6 @@ public final class StreamingAeadConfig {
   public static final String AES_GCM_HKDF_STREAMINGAEAD_TYPE_URL =
       AesGcmHkdfStreamingKeyManager.TYPE_URL;
 
-  private static final String CATALOGUE_NAME = "TinkStreamingAead";
-  private static final String PRIMITIVE_NAME = "StreamingAead";
-
   /** @deprecated */
   @Deprecated
   public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();

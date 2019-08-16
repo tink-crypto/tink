@@ -42,8 +42,6 @@ public final class SignatureConfig {
   public static final String ECDSA_PRIVATE_KEY_TYPE_URL = EcdsaSignKeyManager.TYPE_URL;
   public static final String ED25519_PUBLIC_KEY_TYPE_URL = Ed25519PublicKeyManager.TYPE_URL;
   public static final String ED25519_PRIVATE_KEY_TYPE_URL = Ed25519PrivateKeyManager.TYPE_URL;
-  private static final String PUBLIC_KEY_SIGN_CATALOGUE_NAME = "TinkPublicKeySign";
-  private static final String PUBLIC_KEY_VERIFY_CATALOGUE_NAME = "TinkPublicKeyVerify";
 
   /** @deprecated */
   @Deprecated

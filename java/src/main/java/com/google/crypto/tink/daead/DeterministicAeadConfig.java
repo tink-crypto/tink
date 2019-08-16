@@ -38,9 +38,6 @@ import java.security.GeneralSecurityException;
 public final class DeterministicAeadConfig {
   public static final String AES_SIV_TYPE_URL = AesSivKeyManager.TYPE_URL;
 
-  private static final String CATALOGUE_NAME = "TinkDeterministicAead";
-  private static final String PRIMITIVE_NAME = "DeterministicAead";
-
   /** @deprecated */
   @Deprecated
   public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();

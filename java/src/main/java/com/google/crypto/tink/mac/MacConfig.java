@@ -37,9 +37,6 @@ import java.security.GeneralSecurityException;
 public final class MacConfig {
   public static final String HMAC_TYPE_URL = HmacKeyManager.TYPE_URL;
 
-  private static final String CATALOGUE_NAME = "TinkMac";
-  private static final String PRIMITIVE_NAME = "Mac";
-
   /** @deprecated */
   @Deprecated
   public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();

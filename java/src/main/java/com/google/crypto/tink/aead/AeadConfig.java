@@ -42,9 +42,6 @@ public final class AeadConfig {
   public static final String CHACHA20_POLY1305_TYPE_URL = ChaCha20Poly1305KeyManager.TYPE_URL;
   public static final String XCHACHA20_POLY1305_TYPE_URL = XChaCha20Poly1305KeyManager.TYPE_URL;
 
-  private static final String CATALOGUE_NAME = "TinkAead";
-  private static final String PRIMITIVE_NAME = "Aead";
-
   /** @deprecated */
   @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
 
