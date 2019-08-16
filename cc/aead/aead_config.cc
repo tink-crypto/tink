@@ -57,7 +57,7 @@ util::Status AeadConfig::Register() {
   status = Registry::RegisterKeyManager(
       absl::make_unique<AesGcmSivKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesEaxKeyManager>(), true);
   if (!status.ok()) return status;
   status = Registry::RegisterKeyManager(

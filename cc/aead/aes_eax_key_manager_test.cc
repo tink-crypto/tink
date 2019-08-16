@@ -14,12 +14,13 @@
 
 #include "tink/aead/aes_eax_key_manager.h"
 
+#include "gtest/gtest.h"
 #include "tink/aead.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "gtest/gtest.h"
-#include "proto/aes_gcm.pb.h"
 #include "proto/aes_eax.pb.h"
+#include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
@@ -37,28 +38,28 @@ namespace {
 class AesEaxKeyManagerTest : public ::testing::Test {
  protected:
   std::string key_type_prefix = "type.googleapis.com/";
-  std::string aes_eax_key_type =
-      "type.googleapis.com/google.crypto.tink.AesEaxKey";
+  std::string aes_eax_key_type = "type.googleapis.com/google.crypto.tink.AesEaxKey";
 };
 
 TEST_F(AesEaxKeyManagerTest, testBasic) {
-  AesEaxKeyManager key_manager;
+  AesEaxKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.AesEaxKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(AesEaxKeyManagerTest, testKeyDataErrors) {
-  AesEaxKeyManager key_manager;
+  AesEaxKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
-    std::string bad_key_type =
-        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
+    std::string bad_key_type = "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -71,7 +72,7 @@ TEST_F(AesEaxKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(aes_eax_key_type);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -84,7 +85,7 @@ TEST_F(AesEaxKeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(aes_eax_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -100,17 +101,16 @@ TEST_F(AesEaxKeyManagerTest, testKeyDataErrors) {
       KeyData key_data;
       key_data.set_type_url(aes_eax_key_type);
       key_data.set_value(key.SerializeAsString());
-      auto result = key_manager.GetPrimitive(key_data);
+      auto result = key_manager->GetPrimitive(key_data);
       if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
         EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                  result.status().error_code());
+        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring,
                             std::to_string(len) + " bytes",
                             result.status().error_message());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
+        EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid key size",
                             result.status().error_message());
       }
     }
@@ -126,17 +126,16 @@ TEST_F(AesEaxKeyManagerTest, testKeyDataErrors) {
       KeyData key_data;
       key_data.set_type_url(aes_eax_key_type);
       key_data.set_value(key.SerializeAsString());
-      auto result = key_manager.GetPrimitive(key_data);
+      auto result = key_manager->GetPrimitive(key_data);
       if (iv_size == 12 || iv_size == 16) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
         EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                  result.status().error_code());
+        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring,
                             std::to_string(iv_size) + " bytes",
                             result.status().error_message());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
+        EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid IV size",
                             result.status().error_message());
       }
     }
@@ -144,11 +143,12 @@ TEST_F(AesEaxKeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(AesEaxKeyManagerTest, testKeyMessageErrors) {
-  AesEaxKeyManager key_manager;
+  AesEaxKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesGcmKey key;
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesGcmKey",
@@ -163,17 +163,16 @@ TEST_F(AesEaxKeyManagerTest, testKeyMessageErrors) {
       key.set_version(0);
       key.set_key_value(std::string(len, 'a'));
       key.mutable_params()->set_iv_size(16);
-      auto result = key_manager.GetPrimitive(key);
+      auto result = key_manager->GetPrimitive(key);
       if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
         EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                  result.status().error_code());
+        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring,
                             std::to_string(len) + " bytes",
                             result.status().error_message());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
+        EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid key size",
                             result.status().error_message());
       }
     }
@@ -186,17 +185,16 @@ TEST_F(AesEaxKeyManagerTest, testKeyMessageErrors) {
       key.set_version(0);
       key.set_key_value(std::string(key_size, 'a'));
       key.mutable_params()->set_iv_size(iv_size);
-      auto result = key_manager.GetPrimitive(key);
+      auto result = key_manager->GetPrimitive(key);
       if (iv_size == 12 || iv_size == 16) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
         EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                  result.status().error_code());
+        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring,
                             std::to_string(iv_size) + " bytes",
                             result.status().error_message());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
+        EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid IV size",
                             result.status().error_message());
       }
     }
@@ -206,7 +204,8 @@ TEST_F(AesEaxKeyManagerTest, testKeyMessageErrors) {
 TEST_F(AesEaxKeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string aad = "some aad";
-  AesEaxKeyManager key_manager;
+  AesEaxKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   AesEaxKey key;
 
   key.set_version(0);
@@ -214,7 +213,7 @@ TEST_F(AesEaxKeyManagerTest, testPrimitives) {
   key.mutable_params()->set_iv_size(16);
 
   {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aes_eax = std::move(result.ValueOrDie());
     auto encrypt_result = aes_eax->Encrypt(plaintext, aad);
@@ -228,7 +227,7 @@ TEST_F(AesEaxKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(aes_eax_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aes_eax = std::move(result.ValueOrDie());
     auto encrypt_result = aes_eax->Encrypt(plaintext, aad);
@@ -240,8 +239,9 @@ TEST_F(AesEaxKeyManagerTest, testPrimitives) {
 }
 
 TEST_F(AesEaxKeyManagerTest, testNewKeyErrors) {
-  AesEaxKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  AesEaxKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   {  // Bad key format.
     AesGcmKeyFormat key_format;
@@ -268,19 +268,20 @@ TEST_F(AesEaxKeyManagerTest, testNewKeyErrors) {
     auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid key size",
                         result.status().error_message());
   }
 }
 
 TEST_F(AesEaxKeyManagerTest, testNewKeyBasic) {
-  AesEaxKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  AesEaxKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   AesEaxKeyFormat key_format;
   key_format.set_key_size(16);
   key_format.mutable_params()->set_iv_size(12);
 
-  { // Via NewKey(format_proto).
+  {  // Via NewKey(format_proto).
     auto result = key_factory.NewKey(key_format);
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());
@@ -292,7 +293,7 @@ TEST_F(AesEaxKeyManagerTest, testNewKeyBasic) {
     EXPECT_EQ(key_format.params().iv_size(), aes_eax_key->params().iv_size());
   }
 
-  { // Via NewKey(serialized_format_proto).
+  {  // Via NewKey(serialized_format_proto).
     auto result = key_factory.NewKey(key_format.SerializeAsString());
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());
@@ -304,7 +305,7 @@ TEST_F(AesEaxKeyManagerTest, testNewKeyBasic) {
     EXPECT_EQ(key_format.params().iv_size(), aes_eax_key->params().iv_size());
   }
 
-  { // Via NewKeyData(serialized_format_proto).
+  {  // Via NewKeyData(serialized_format_proto).
     auto result = key_factory.NewKeyData(key_format.SerializeAsString());
     EXPECT_TRUE(result.ok()) << result.status();
     auto key_data = std::move(result.ValueOrDie());

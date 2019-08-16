@@ -75,23 +75,20 @@ tink_cc_library(
 tink_cc_library(
   NAME aes_eax_key_manager
   SRCS
-    aes_eax_key_manager.cc
     aes_eax_key_manager.h
   DEPS
     tink::core::aead
-    tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::subtle::aes_eax_boringssl
     tink::subtle::random
+    tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
     tink::util::validation
     tink::proto::aes_eax_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
-    absl::base
+    absl::strings
 )
 
 tink_cc_library(
@@ -321,6 +318,7 @@ tink_cc_test(
   DEPS
     tink::aead::aes_eax_key_manager
     tink::core::aead
+    tink::core::key_manager_impl
     tink::util::status
     tink::util::statusor
     tink::proto::aes_eax_cc_proto
