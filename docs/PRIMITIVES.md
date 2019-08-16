@@ -49,7 +49,7 @@ In development: JavaScript and Python.
 | AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305 |
 | Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING  |
 | Deterministic AEAD | AES-SIV                                         |
-| MAC                | HMAC-SHA2                                       |
+| MAC                | HMAC-SHA2, AES-CMAC                             |
 | Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                        |
 
