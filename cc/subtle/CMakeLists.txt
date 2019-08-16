@@ -584,6 +584,17 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME aead_test_util
+  SRCS
+    aead_test_util.cc
+    aead_test_util.h
+  DEPS
+    absl::strings
+    tink::core::aead
+    tink::util::status
+)
+
+tink_cc_library(
   NAME streaming_aead_test_util
   SRCS
     streaming_aead_test_util.cc
@@ -1045,12 +1056,30 @@ tink_cc_test(
 )
 
 tink_cc_test(
+  NAME aead_test_util_test
+  SRCS aead_test_util_test.cc
+  DEPS
+    tink::subtle::aead_test_util
+    tink::util::test_matchers
+    tink::util::test_util
+    absl::strings
+    gmock
+)
+
+
+tink_cc_test(
   NAME streaming_aead_test_util_test
   SRCS streaming_aead_test_util_test.cc
   DEPS
     tink::subtle::streaming_aead_test_util
-    tink::util::test_matchers
+    tink::subtle::test_util
+    tink::core::output_stream
+    tink::util::ostream_output_stream
+    tink::util::status
+    tink::util::statusor
     tink::util::test_util
+    absl::memory
+    absl::strings
     gmock
 )
 
@@ -1059,13 +1088,8 @@ tink_cc_test(
   SRCS hybrid_test_util_test.cc
   DEPS
     tink::subtle::hybrid_test_util
-    tink::subtle::test_util
-    tink::core::output_stream
-    tink::util::ostream_output_stream
-    tink::util::status
-    tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
-    absl::memory
     absl::strings
     gmock
 )

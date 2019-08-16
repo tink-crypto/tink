@@ -668,6 +668,21 @@ cc_library(
 )
 
 cc_library(
+    name = "aead_test_util",
+    testonly = 1,
+    srcs = ["aead_test_util.cc"],
+    hdrs = ["aead_test_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":test_util",
+        "//cc:aead",
+        "//cc/util:status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "streaming_aead_test_util",
     testonly = 1,
     srcs = ["streaming_aead_test_util.cc"],
@@ -1272,6 +1287,17 @@ cc_test(
         "//cc/util:statusor",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aead_test_util_test",
+    srcs = ["aead_test_util_test.cc"],
+    deps = [
+        ":aead_test_util",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

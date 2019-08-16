@@ -387,6 +387,7 @@ cc_test(
         "//cc:aead",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/subtle:aead_test_util",
         "//cc/util:test_matchers",
         "//proto:aes_eax_cc_proto",
         "//proto:aes_gcm_cc_proto",
