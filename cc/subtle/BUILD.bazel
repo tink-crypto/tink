@@ -516,15 +516,13 @@ cc_library(
 
 cc_library(
     name = "aes_gcm_siv_boringssl",
-    srcs = [
-        "aes_gcm_siv_boringssl.cc",
-    ],
+    srcs = ["aes_gcm_siv_boringssl.cc"],
     hdrs = ["aes_gcm_siv_boringssl.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
         ":random",
-        ":subtle_util_boringssl",
+        ":subtle_util",
         "//cc:aead",
         "//cc/util:errors",
         "//cc/util:status",
