@@ -108,7 +108,7 @@ public final class GcpKmsClient implements KmsClient {
   }
 
   /** Loads the provided credential. */
-  private KmsClient withCredentials(GoogleCredential credential) {
+  public KmsClient withCredentials(GoogleCredential credential) {
     if (credential.createScopedRequired()) {
       credential = credential.createScoped(CloudKMSScopes.all());
     }
