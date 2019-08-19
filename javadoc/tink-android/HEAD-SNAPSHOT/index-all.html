@@ -311,6 +311,16 @@
 <dd>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesSivKey</code> with a 64-byte key.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#AES_CMAC">AES_CMAC</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
+<dd>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <code>com.google.crypto.tink.proto.CmacKey</code> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   Tag size: 16 bytes
+   OutputPrefixType: TINK
+ </div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#AES_CTR_HMAC_AEAD_TYPE_URL">AES_CTR_HMAC_AEAD_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL">AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadConfig</a></dt>
@@ -327,11 +337,45 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#AES_SIV_TYPE_URL">AES_SIV_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html" title="class in com.google.crypto.tink.daead">DeterministicAeadConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmac.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmac</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/AesCmac.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">AesCmac</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">An implementation of CMAC following <a href="https://tools.ietf.org/html/rfc4493">RFC 4493</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCmac.html#AesCmac-byte:A-int-">AesCmac(byte[], int)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCmac.html" title="class in com.google.crypto.tink.subtle">AesCmac</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKey</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>
+<div class="block">
+ key_type: type.googleapis.com/google.crypto.tink.AesCmacKey</div>
+</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKey.Builder</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>
+<div class="block">
+ key_type: type.googleapis.com/google.crypto.tink.AesCmacKey</div>
+</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKeyFormat</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>
+<div class="block">Protobuf type <code>google.crypto.tink.AesCmacKeyFormat</code></div>
+</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKeyFormat.Builder</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>
+<div class="block">Protobuf type <code>google.crypto.tink.AesCmacKeyFormat</code></div>
+</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKeyFormatOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacKeyOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacParams</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>
+<div class="block">Protobuf type <code>google.crypto.tink.AesCmacParams</code></div>
+</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacParams.Builder.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacParams.Builder</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
+<dd>
+<div class="block">Protobuf type <code>google.crypto.tink.AesCmacParams</code></div>
+</dd>
+<dt><a href="com/google/crypto/tink/proto/AesCmacParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">AesCmacParamsOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/AesCtr.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">AesCtr</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
@@ -965,6 +1009,10 @@
 <div class="block">
  Optional.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#clearKeySize--">clearKeySize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 key_size = 1;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.Builder.html#clearKeySize--">clearKeySize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
@@ -1000,6 +1048,10 @@
 <dd>
 <div class="block">
  Required.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#clearKeyValue--">clearKeyValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional bytes key_value = 2;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html#clearKeyValue--">clearKeyValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey.Builder</a></dt>
 <dd>
@@ -1115,6 +1167,14 @@
 <dd>
 <div class="block">
  The following parameters are used to optimize RSA signature computation.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#clearParams--">clearParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#clearParams--">clearParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html#clearParams--">clearParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey.Builder</a></dt>
 <dd>
@@ -1287,6 +1347,10 @@
 <div class="block">
  See Keyset.Key.status.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.Builder.html#clearTagSize--">clearTagSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacParams.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 tag_size = 1;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/HmacParams.Builder.html#clearTagSize--">clearTagSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/HmacParams.Builder.html" title="class in com.google.crypto.tink.proto">HmacParams.Builder</a></dt>
 <dd>
 <div class="block"><code>optional uint32 tag_size = 2;</code></div>
@@ -1327,6 +1391,10 @@
 <dd>
 <div class="block">
  Optional.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#clearVersion--">clearVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 version = 1;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.Builder.html#clearVersion--">clearVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey.Builder</a></dt>
 <dd>
@@ -1755,6 +1823,12 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html#DQ_FIELD_NUMBER">DQ_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#DQ_FIELD_NUMBER">DQ_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
@@ -2772,6 +2846,12 @@
 <div class="block">
  Private exponent.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKeyFormat</a></dt>
@@ -3772,6 +3852,18 @@
 <div class="block">
  Optional.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#getKeySize--">getKeySize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 key_size = 1;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#getKeySize--">getKeySize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>
+<div class="block"><code>optional uint32 key_size = 1;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html#getKeySize--">getKeySize()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCmacKeyFormatOrBuilder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 key_size = 1;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.Builder.html#getKeySize--">getKeySize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
@@ -3902,6 +3994,18 @@
 <dd>
 <div class="block">
  Required.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#getKeyValue--">getKeyValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional bytes key_value = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#getKeyValue--">getKeyValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>
+<div class="block"><code>optional bytes key_value = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html#getKeyValue--">getKeyValue()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCmacKeyOrBuilder</a></dt>
+<dd>
+<div class="block"><code>optional bytes key_value = 2;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html#getKeyValue--">getKeyValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey.Builder</a></dt>
 <dd>
@@ -4347,6 +4451,30 @@
 <dd>
 <div class="block">
  The following parameters are used to optimize RSA signature computation.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html#getParams--">getParams()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCmacKeyFormatOrBuilder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html#getParams--">getParams()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCmacKeyOrBuilder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey.Builder</a></dt>
 <dd>
@@ -5091,6 +5219,12 @@
  Salt length (see https://tools.ietf.org/html/rfc8017#section-9.1.1)
  Required.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKeyFormat</a></dt>
@@ -5301,6 +5435,18 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html#getSymmetricKeySizeInBytes--">getSymmetricKeySizeInBytes()</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html" title="interface in com.google.crypto.tink.subtle">EciesAeadHkdfDemHelper</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.Builder.html#getTagSize--">getTagSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacParams.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 tag_size = 1;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#getTagSize--">getTagSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>
+<div class="block"><code>optional uint32 tag_size = 1;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParamsOrBuilder.html#getTagSize--">getTagSize()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCmacParamsOrBuilder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 tag_size = 1;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/HmacParams.Builder.html#getTagSize--">getTagSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/HmacParams.Builder.html" title="class in com.google.crypto.tink.proto">HmacParams.Builder</a></dt>
 <dd>
 <div class="block"><code>optional uint32 tag_size = 2;</code></div>
@@ -5480,6 +5626,18 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a></dt>
 <dd>
 <div class="block">Returns the version number of this KeyManager.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 version = 1;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>
+<div class="block"><code>optional uint32 version = 1;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html#getVersion--">getVersion()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCmacKeyOrBuilder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 version = 1;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.Builder.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey.Builder</a></dt>
 <dd>
@@ -6010,6 +6168,30 @@
 <div class="block">
  Optional.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html#hasParams--">hasParams()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCmacKeyFormatOrBuilder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html#hasParams--">hasParams()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCmacKeyOrBuilder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey.Builder</a></dt>
 <dd>
 <div class="block"><code>optional .google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
@@ -6392,6 +6574,7 @@
    Key size: 32 bytes
    Tag size: 16 bytes
    Hash function: SHA256
+   OutputPrefixType: TINK
  </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_256BITTAG">HMAC_SHA256_256BITTAG</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
@@ -6402,6 +6585,7 @@
    Key size: 32 bytes
    Tag size: 32 bytes
    Hash function: SHA256
+   OutputPrefixType: TINK
  </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA512_256BITTAG">HMAC_SHA512_256BITTAG</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
@@ -6412,6 +6596,7 @@
    Key size: 64 bytes
    Tag size: 32 bytes
    Hash function: SHA512
+   OutputPrefixType: TINK
  </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA512_512BITTAG">HMAC_SHA512_512BITTAG</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
@@ -6422,6 +6607,7 @@
    Key size: 64 bytes
    Tag size: 64 bytes
    Hash function: SHA512
+   OutputPrefixType: TINK
  </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacConfig.html#HMAC_TYPE_URL">HMAC_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac">MacConfig</a></dt>
@@ -6679,6 +6865,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#KEY_PAIR_GENERATOR">KEY_PAIR_GENERATOR</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#KEY_SIZE_FIELD_NUMBER">KEY_SIZE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.html#KEY_SIZE_FIELD_NUMBER">KEY_SIZE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKeyFormat</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrKeyFormat.html#KEY_SIZE_FIELD_NUMBER">KEY_SIZE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrKeyFormat</a></dt>
@@ -6694,6 +6882,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/HmacKeyFormat.html#KEY_SIZE_FIELD_NUMBER">KEY_SIZE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/HmacKeyFormat.html" title="class in com.google.crypto.tink.proto">HmacKeyFormat</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KmsAeadKeyFormat.html#KEY_URI_FIELD_NUMBER">KEY_URI_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KmsAeadKeyFormat.html" title="class in com.google.crypto.tink.proto">KmsAeadKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#KEY_VALUE_FIELD_NUMBER">KEY_VALUE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html#KEY_VALUE_FIELD_NUMBER">KEY_VALUE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey</a></dt>
 <dd>&nbsp;</dd>
@@ -7101,6 +7291,14 @@
 <div class="block">
  Optional.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#mergeParams-com.google.crypto.tink.proto.AesCmacParams-">mergeParams(AesCmacParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#mergeParams-com.google.crypto.tink.proto.AesCmacParams-">mergeParams(AesCmacParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html#mergeParams-com.google.crypto.tink.proto.AesCtrHmacStreamingParams-">mergeParams(AesCtrHmacStreamingParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey.Builder</a></dt>
 <dd>
 <div class="block"><code>optional .google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
@@ -7248,6 +7446,18 @@
 <dd>
 <div class="block">Returns a new EncryptThenAuthenticate instance using AES-CTR and HMAC.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#newBuilder-com.google.crypto.tink.proto.AesCmacKey-">newBuilder(AesCmacKey)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#newBuilder-com.google.crypto.tink.proto.AesCmacKeyFormat-">newBuilder(AesCmacKeyFormat)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#newBuilder-com.google.crypto.tink.proto.AesCmacParams-">newBuilder(AesCmacParams)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#newBuilder-com.google.crypto.tink.proto.AesCtrHmacAeadKey-">newBuilder(AesCtrHmacAeadKey)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
@@ -7622,6 +7832,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#P_FIELD_NUMBER">P_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKeyFormat</a></dt>
@@ -7661,6 +7875,18 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
@@ -7902,6 +8128,54 @@
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/NoSecretKeysetHandle.html#read-com.google.crypto.tink.KeysetReader-"><code>NoSecretKeysetHandle.read(com.google.crypto.tink.KeysetReader)</code></a> instead</span></div>
 </div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseFrom-byte:A-">parseFrom(byte[])</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom(byte[], ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseFrom-java.io.InputStream-">parseFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom(CodedInputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseFrom-byte:A-">parseFrom(byte[])</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom(byte[], ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseFrom-java.io.InputStream-">parseFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom(CodedInputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseFrom-byte:A-">parseFrom(byte[])</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom(byte[], ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseFrom-java.io.InputStream-">parseFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom(CodedInputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
@@ -8830,6 +9104,12 @@
 <dd>
 <div class="block">Parses a serialized key proto.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKeyFormat</a></dt>
@@ -9213,6 +9493,8 @@
 <dd>
 <div class="block">Tries to register with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><code>Catalogue</code></a> needed to handle StreamingAead key types supported in Tink.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmac.html#registerAllExtensions-com.google.protobuf.ExtensionRegistryLite-">registerAllExtensions(ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmac.html" title="class in com.google.crypto.tink.proto">AesCmac</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtr.html#registerAllExtensions-com.google.protobuf.ExtensionRegistryLite-">registerAllExtensions(ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtr.html" title="class in com.google.crypto.tink.proto">AesCtr</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAead.html#registerAllExtensions-com.google.protobuf.ExtensionRegistryLite-">registerAllExtensions(ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAead.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAead</a></dt>
@@ -9913,6 +10195,10 @@
 <div class="block">
  Optional.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#setKeySize-int-">setKeySize(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 key_size = 1;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.Builder.html#setKeySize-int-">setKeySize(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
@@ -9953,6 +10239,10 @@
 <dd>
 <div class="block">
  Required.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#setKeyValue-com.google.protobuf.ByteString-">setKeyValue(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional bytes key_value = 2;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html#setKeyValue-com.google.protobuf.ByteString-">setKeyValue(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey.Builder</a></dt>
 <dd>
@@ -10089,6 +10379,22 @@
 <dd>
 <div class="block">
  The following parameters are used to optimize RSA signature computation.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#setParams-com.google.crypto.tink.proto.AesCmacParams-">setParams(AesCmacParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#setParams-com.google.crypto.tink.proto.AesCmacParams.Builder-">setParams(AesCmacParams.Builder)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#setParams-com.google.crypto.tink.proto.AesCmacParams-">setParams(AesCmacParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html#setParams-com.google.crypto.tink.proto.AesCmacParams.Builder-">setParams(AesCmacParams.Builder)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>optional .google.crypto.tink.AesCmacParams params = 2;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html#setParams-com.google.crypto.tink.proto.AesCtrHmacStreamingParams-">setParams(AesCtrHmacStreamingParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey.Builder</a></dt>
 <dd>
@@ -10408,6 +10714,10 @@
 <div class="block">
  See Keyset.Key.status.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.Builder.html#setTagSize-int-">setTagSize(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacParams.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 tag_size = 1;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/HmacParams.Builder.html#setTagSize-int-">setTagSize(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/HmacParams.Builder.html" title="class in com.google.crypto.tink.proto">HmacParams.Builder</a></dt>
 <dd>
 <div class="block"><code>optional uint32 tag_size = 2;</code></div>
@@ -10463,6 +10773,10 @@
 <dd>
 <div class="block">
  Optional.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#setVersion-int-">setVersion(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
+<dd>
+<div class="block"><code>optional uint32 version = 1;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.Builder.html#setVersion-int-">setVersion(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey.Builder</a></dt>
 <dd>
@@ -10716,6 +11030,8 @@
 </a>
 <h2 class="title">T</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#TAG_SIZE_FIELD_NUMBER">TAG_SIZE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/HmacParams.html#TAG_SIZE_FIELD_NUMBER">TAG_SIZE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/HmacParams.html" title="class in com.google.crypto.tink.proto">HmacParams</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineWrapper.TCipher.html#TCipher--">TCipher()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineWrapper.TCipher.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TCipher</a></dt>
@@ -11128,6 +11444,8 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Version.html#Version--">Version()</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/Version.html" title="class in com.google.crypto.tink">Version</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey</a></dt>
@@ -11325,6 +11643,12 @@ the order they are declared.</div>
 <dd>
 <div class="block">Tries to write to <code>writer</code> this keyset which must not contain any secret key material.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.html" title="class in com.google.crypto.tink.proto">AesCmacKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCmacKeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacParams.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacParams.html" title="class in com.google.crypto.tink.proto">AesCmacParams</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKeyFormat</a></dt>
