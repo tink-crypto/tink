@@ -3,6 +3,7 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 licenses(["notice"])
 
 full_proto_deps = [
+    "//proto:aes_cmac_java_proto",
     "//proto:aes_ctr_hmac_aead_java_proto",
     "//proto:aes_ctr_hmac_streaming_java_proto",
     "//proto:aes_ctr_java_proto",
@@ -27,6 +28,7 @@ full_proto_deps = [
 ]
 
 lite_proto_deps = [
+    "//proto:aes_cmac_java_proto_lite",
     "//proto:aes_ctr_hmac_aead_java_proto_lite",
     "//proto:aes_ctr_hmac_streaming_java_proto_lite",
     "//proto:aes_ctr_java_proto_lite",
