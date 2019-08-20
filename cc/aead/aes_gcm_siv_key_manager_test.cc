@@ -1,4 +1,4 @@
-// Copyright 2019 Google Inc.
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "tink/aead.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_eax.pb.h"
@@ -44,22 +45,24 @@ class AesGcmSivKeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(AesGcmSivKeyManagerTest, testBasic) {
-  AesGcmSivKeyManager key_manager;
+  AesGcmSivKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(AesGcmSivKeyManagerTest, testKeyDataErrors) {
-  AesGcmSivKeyManager key_manager;
+  AesGcmSivKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type = "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -72,7 +75,7 @@ TEST_F(AesGcmSivKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(aes_gcm_siv_key_type_);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -85,7 +88,7 @@ TEST_F(AesGcmSivKeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(aes_gcm_siv_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -100,7 +103,7 @@ TEST_F(AesGcmSivKeyManagerTest, testKeyDataErrors) {
       KeyData key_data;
       key_data.set_type_url(aes_gcm_siv_key_type_);
       key_data.set_value(key.SerializeAsString());
-      auto result = key_manager.GetPrimitive(key_data);
+      auto result = key_manager->GetPrimitive(key_data);
       if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
@@ -117,11 +120,12 @@ TEST_F(AesGcmSivKeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(AesGcmSivKeyManagerTest, testKeyMessageErrors) {
-  AesGcmSivKeyManager key_manager;
+  AesGcmSivKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesEaxKey key;
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
@@ -135,7 +139,7 @@ TEST_F(AesGcmSivKeyManagerTest, testKeyMessageErrors) {
       AesGcmSivKey key;
       key.set_version(0);
       key.set_key_value(std::string(len, 'a'));
-      auto result = key_manager.GetPrimitive(key);
+      auto result = key_manager->GetPrimitive(key);
       if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
@@ -154,14 +158,15 @@ TEST_F(AesGcmSivKeyManagerTest, testKeyMessageErrors) {
 TEST_F(AesGcmSivKeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string aad = "some aad";
-  AesGcmSivKeyManager key_manager;
+  AesGcmSivKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   AesGcmSivKey key;
 
   key.set_version(0);
   key.set_key_value("16 bytes of key ");
 
   {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aes_gcm_siv = std::move(result.ValueOrDie());
     auto encrypt_result = aes_gcm_siv->Encrypt(plaintext, aad);
@@ -176,7 +181,7 @@ TEST_F(AesGcmSivKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(aes_gcm_siv_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aes_gcm_siv = std::move(result.ValueOrDie());
     auto encrypt_result = aes_gcm_siv->Encrypt(plaintext, aad);
@@ -189,8 +194,9 @@ TEST_F(AesGcmSivKeyManagerTest, testPrimitives) {
 }
 
 TEST_F(AesGcmSivKeyManagerTest, testNewKeyErrors) {
-  AesGcmSivKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  AesGcmSivKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   {  // Bad key format.
     AesEaxKeyFormat key_format;
@@ -225,8 +231,9 @@ TEST_F(AesGcmSivKeyManagerTest, testNewKeyErrors) {
 }
 
 TEST_F(AesGcmSivKeyManagerTest, testNewKeyBasic) {
-  AesGcmSivKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  AesGcmSivKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   AesGcmSivKeyFormat key_format;
   key_format.set_key_size(16);
 
