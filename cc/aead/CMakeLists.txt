@@ -352,12 +352,11 @@ tink_cc_test(
   DEPS
     tink::aead::aes_gcm_siv_key_manager
     tink::core::key_type_manager
+    tink::subtle::aead_test_util
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_eax_cc_proto
+    tink::util::test_matchers
     tink::proto::aes_gcm_siv_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
