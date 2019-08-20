@@ -528,7 +528,7 @@ tink_cc_library(
     core/key_type_manager.h
   DEPS
     absl::hash
-    absl::container
+    absl::flat_hash_map
     tink::proto::tink_cc_proto
     tink::util::status
     tink::util::statusor
