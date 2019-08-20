@@ -152,6 +152,7 @@ tink_cc_library(
   DEPS
     tink::util::buffer
     tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_library(

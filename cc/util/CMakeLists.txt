@@ -107,6 +107,7 @@ tink_cc_library(
     tink::util::buffer
     tink::util::errors
     tink::util::status
+    tink::util::statusor
     tink::core::random_access_stream
     absl::memory
 )
@@ -172,8 +173,10 @@ tink_cc_library(
     tink::proto::ed25519_cc_proto
     tink::proto::tink_cc_proto
     tink::util::buffer
+    absl::core_headers
     absl::memory
     absl::strings
+    absl::synchronization
 )
 
 tink_cc_library(

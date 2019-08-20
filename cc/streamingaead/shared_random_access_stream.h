@@ -20,6 +20,7 @@
 #include "tink/random_access_stream.h"
 #include "tink/util/buffer.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -45,7 +46,7 @@ class SharedRandomAccessStream : public crypto::tink::RandomAccessStream {
     return random_access_stream_->PRead(position, count, dest_buffer);
   }
 
-  int64_t size() const override {
+  crypto::tink::util::StatusOr<int64_t> size() override {
     return random_access_stream_->size();
   }
 

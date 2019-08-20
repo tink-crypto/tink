@@ -25,12 +25,14 @@
 #include "tink/util/buffer.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace util {
 
 using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 
 namespace {
 
@@ -91,10 +93,10 @@ FileRandomAccessStream::~FileRandomAccessStream() {
   close_ignoring_eintr(fd_);
 }
 
-int64_t FileRandomAccessStream::size() const {
+StatusOr<int64_t> FileRandomAccessStream::size() {
   struct stat s;
   if (fstat(fd_, &s) == -1) {
-    return -1;
+    return Status(util::error::UNAVAILABLE, "size unavailable");
   } else {
     return s.st_size;
   }

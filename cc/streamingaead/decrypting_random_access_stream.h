@@ -51,7 +51,7 @@ class DecryptingRandomAccessStream : public crypto::tink::RandomAccessStream {
   ~DecryptingRandomAccessStream() override {}
   crypto::tink::util::Status PRead(int64_t position, int count,
       crypto::tink::util::Buffer* dest_buffer) override;
-  int64_t size() const override;
+  crypto::tink::util::StatusOr<int64_t> size() override;
 
  private:
   DecryptingRandomAccessStream(

@@ -120,12 +120,13 @@ util::Status DecryptingRandomAccessStream::PRead(
                 "Could not find a decrypter matching the ciphertext stream.");
 }
 
-int64_t DecryptingRandomAccessStream::size() const {
+StatusOr<int64_t> DecryptingRandomAccessStream::size() {
   absl::ReaderMutexLock lock(&matching_mutex_);
   if (matching_stream_ != nullptr) {
     return matching_stream_->size();
   }
-  return -1;
+  // TODO(b/139722894): attempt matching here?
+  return Status(util::error::UNAVAILABLE, "no matching found yet");
 }
 
 }  // namespace streamingaead

@@ -60,7 +60,7 @@ void ReadAndVerifyChunk(RandomAccessStream* ra_stream,
                             ", position = ", position,
                             ", count = ", count));
   auto buffer = std::move(Buffer::New(count).ValueOrDie());
-  int stream_size = ra_stream->size();
+  int stream_size = ra_stream->size().ValueOrDie();
   EXPECT_EQ(file_contents.size(), stream_size);
   auto status = ra_stream->PRead(position, count, buffer.get());
   EXPECT_TRUE(status.ok());
@@ -89,7 +89,7 @@ TEST(FileRandomAccessStreamTest, ReadingStreams) {
     EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
     EXPECT_EQ("EOF", status.error_message());
     EXPECT_EQ(file_contents, stream_contents);
-    EXPECT_EQ(stream_size, ra_stream->size());
+    EXPECT_EQ(stream_size, ra_stream->size().ValueOrDie());
   }
 }
 

@@ -131,6 +131,7 @@ tink_cc_library(
     tink::core::random_access_stream
     tink::util::buffer
     tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_library(
