@@ -342,13 +342,14 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::hybrid::hybrid_key_templates
     tink::core::hybrid_decrypt
-    tink::core::private_key_manager_impl
     tink::aead::aead_key_templates
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
+    tink::subtle::hybrid_test_util
     tink::proto::aes_eax_cc_proto
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
@@ -359,12 +360,15 @@ tink_cc_test(
   NAME ecies_aead_hkdf_public_key_manager_test
   SRCS ecies_aead_hkdf_public_key_manager_test.cc
   DEPS
+    tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::core::hybrid_encrypt
     tink::core::registry
+    tink::aead::aead_key_templates
     tink::aead::aes_gcm_key_manager
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_eax_cc_proto
     tink::proto::common_cc_proto
