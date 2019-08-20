@@ -95,9 +95,11 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   // Prepare HybridEncrypt-instances.
   auto ecies_key_manager = absl::make_unique<EciesAeadHkdfPublicKeyManager>();
   std::unique_ptr<HybridEncrypt> ecies_1 = std::move(
-      ecies_key_manager->GetPrimitive(ecies_key_1.public_key()).ValueOrDie());
+      ecies_key_manager->GetPrimitive<HybridEncrypt>(ecies_key_1.public_key())
+          .ValueOrDie());
   std::unique_ptr<HybridEncrypt> ecies_2 = std::move(
-      ecies_key_manager->GetPrimitive(ecies_key_2.public_key()).ValueOrDie());
+      ecies_key_manager->GetPrimitive<HybridEncrypt>(ecies_key_2.public_key())
+          .ValueOrDie());
 
   // Create a KeysetHandle and use it with the factory.
   auto hybrid_decrypt_result = HybridDecryptFactory::GetPrimitive(

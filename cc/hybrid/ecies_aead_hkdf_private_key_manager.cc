@@ -39,37 +39,20 @@ using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
+using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EciesHkdfKemParams;
-using google::crypto::tink::KeyData;
 
-class EciesAeadHkdfPrivateKeyFactory
-    : public PrivateKeyFactory,
-      public KeyFactoryBase<EciesAeadHkdfPrivateKey,
-                            EciesAeadHkdfKeyFormat> {
- public:
-  EciesAeadHkdfPrivateKeyFactory() {}
-
-  KeyData::KeyMaterialType key_material_type() const override {
-    return KeyData::ASYMMETRIC_PRIVATE;
+Status EciesAeadHkdfPrivateKeyManager::ValidateKeyFormat(
+    const EciesAeadHkdfKeyFormat& key_format) const {
+  if (!key_format.has_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
   }
+  return EciesAeadHkdfPublicKeyManager().ValidateParams(key_format.params());
+}
 
-  // Returns KeyData proto that contains EciesAeadHkdfPublicKey
-  // extracted from the given serialized_private_key, which must contain
-  // EciesAeadHkdfPrivateKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  GetPublicKeyData(absl::string_view serialized_private_key) const override;
-
- protected:
-  StatusOr<std::unique_ptr<EciesAeadHkdfPrivateKey>> NewKeyFromFormat(
-      const EciesAeadHkdfKeyFormat& ecies_key_format) const override;
-};
-
-StatusOr<std::unique_ptr<EciesAeadHkdfPrivateKey>>
-EciesAeadHkdfPrivateKeyFactory::NewKeyFromFormat(
+StatusOr<EciesAeadHkdfPrivateKey>
+EciesAeadHkdfPrivateKeyManager::CreateKey(
     const EciesAeadHkdfKeyFormat& ecies_key_format) const {
-  Status status = EciesAeadHkdfPublicKeyManager::Validate(ecies_key_format);
-  if (!status.ok()) return status;
-
   // Generate new EC key.
   const EciesHkdfKemParams& kem_params = ecies_key_format.params().kem_params();
   auto ec_key_result = subtle::SubtleUtilBoringSSL::GetNewEcKey(
@@ -78,72 +61,32 @@ EciesAeadHkdfPrivateKeyFactory::NewKeyFromFormat(
   auto ec_key = ec_key_result.ValueOrDie();
 
   // Build EciesAeadHkdfPrivateKey.
-  std::unique_ptr<EciesAeadHkdfPrivateKey> ecies_private_key(
-      new EciesAeadHkdfPrivateKey());
-  ecies_private_key->set_version(EciesAeadHkdfPrivateKeyManager::kVersion);
-  ecies_private_key->set_key_value(ec_key.priv);
-  auto ecies_public_key = ecies_private_key->mutable_public_key();
-  ecies_public_key->set_version(EciesAeadHkdfPrivateKeyManager::kVersion);
+  EciesAeadHkdfPrivateKey ecies_private_key;
+  ecies_private_key.set_version(get_version());
+  ecies_private_key.set_key_value(ec_key.priv);
+  auto ecies_public_key = ecies_private_key.mutable_public_key();
+  ecies_public_key->set_version(get_version());
   ecies_public_key->set_x(ec_key.pub_x);
   ecies_public_key->set_y(ec_key.pub_y);
   *(ecies_public_key->mutable_params()) = ecies_key_format.params();
 
-  return absl::implicit_cast<
-      StatusOr<std::unique_ptr<EciesAeadHkdfPrivateKey>>>(
-      std::move(ecies_private_key));
+  return ecies_private_key;
 }
 
-StatusOr<std::unique_ptr<KeyData>>
-EciesAeadHkdfPrivateKeyFactory::GetPublicKeyData(
-    absl::string_view serialized_private_key) const {
-  EciesAeadHkdfPrivateKey private_key;
-  if (!private_key.ParseFromString(std::string(serialized_private_key))) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Could not parse the passed string as proto '%s'.",
-                     EciesAeadHkdfPrivateKeyManager::static_key_type().c_str());
-  }
-  auto status = EciesAeadHkdfPrivateKeyManager::Validate(private_key);
-  if (!status.ok()) return status;
-  auto key_data = absl::make_unique<KeyData>();
-  key_data->set_type_url(EciesAeadHkdfPublicKeyManager::static_key_type());
-  key_data->set_value(private_key.public_key().SerializeAsString());
-  key_data->set_key_material_type(KeyData:: ASYMMETRIC_PUBLIC);
-  return std::move(key_data);
+StatusOr<EciesAeadHkdfPublicKey>
+EciesAeadHkdfPrivateKeyManager::GetPublicKey(
+    const EciesAeadHkdfPrivateKey& private_key) const {
+  return private_key.public_key();
 }
 
-constexpr uint32_t EciesAeadHkdfPrivateKeyManager::kVersion;
-
-EciesAeadHkdfPrivateKeyManager::EciesAeadHkdfPrivateKeyManager()
-    : key_factory_(new EciesAeadHkdfPrivateKeyFactory()) {
-}
-
-const KeyFactory& EciesAeadHkdfPrivateKeyManager::get_key_factory() const {
-  return *key_factory_;
-}
-
-uint32_t EciesAeadHkdfPrivateKeyManager::get_version() const {
-  return kVersion;
-}
-
-StatusOr<std::unique_ptr<HybridDecrypt>>
-EciesAeadHkdfPrivateKeyManager::GetPrimitiveFromKey(
-    const EciesAeadHkdfPrivateKey& ecies_private_key) const {
-  Status status = Validate(ecies_private_key);
-  if (!status.ok()) return status;
-  auto ecies_result = EciesAeadHkdfHybridDecrypt::New(ecies_private_key);
-  if (!ecies_result.ok()) return ecies_result.status();
-  return std::move(ecies_result.ValueOrDie());
-}
-
-// static
-Status EciesAeadHkdfPrivateKeyManager::Validate(
-    const EciesAeadHkdfPrivateKey& key) {
-  Status status = ValidateVersion(key.version(), kVersion);
+Status EciesAeadHkdfPrivateKeyManager::ValidateKey(
+    const EciesAeadHkdfPrivateKey& key) const {
+  Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_public_key()) {
     return Status(util::error::INVALID_ARGUMENT, "Missing public_key.");
   }
-  return EciesAeadHkdfPublicKeyManager::Validate(key.public_key());
+  return EciesAeadHkdfPublicKeyManager().ValidateKey(key.public_key());
 }
 
 }  // namespace tink

@@ -20,9 +20,11 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "tink/core/key_manager_base.h"
+#include "tink/core/key_type_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/key_manager.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -34,40 +36,38 @@ namespace crypto {
 namespace tink {
 
 class EciesAeadHkdfPublicKeyManager
-    : public KeyManagerBase<HybridEncrypt,
-                            google::crypto::tink::EciesAeadHkdfPublicKey> {
+    : public KeyTypeManager<google::crypto::tink::EciesAeadHkdfPublicKey, void,
+                            List<HybridEncrypt>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class HybridEncryptFactory : public PrimitiveFactory<HybridEncrypt> {
+    crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>> Create(
+        const google::crypto::tink::EciesAeadHkdfPublicKey& ecies_public_key)
+        const override {
+      return EciesAeadHkdfHybridEncrypt::New(ecies_public_key);
+    }
+  };
 
-  EciesAeadHkdfPublicKeyManager();
+  EciesAeadHkdfPublicKeyManager()
+      : KeyTypeManager(absl::make_unique<HybridEncryptFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::ASYMMETRIC_PUBLIC;
+  }
 
-  virtual ~EciesAeadHkdfPublicKeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>>
-  GetPrimitiveFromKey(const google::crypto::tink::EciesAeadHkdfPublicKey&
-                          recipient_key) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::EciesAeadHkdfPublicKey& key) const override;
 
+  crypto::tink::util::Status ValidateParams(
+      const google::crypto::tink::EciesAeadHkdfParams& params) const;
  private:
-  // Friends that re-use proto validation helpers.
-  friend class EciesAeadHkdfPrivateKeyFactory;
-  friend class EciesAeadHkdfPrivateKeyManager;
-
-  std::unique_ptr<KeyFactory> key_factory_;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfParams& params);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfPublicKey& key);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfKeyFormat& key_format);
+  const std::string key_type_ = absl::StrCat(
+      kTypeGoogleapisCom,
+      google::crypto::tink::EciesAeadHkdfPublicKey().GetTypeName());
 };
 
 }  // namespace tink

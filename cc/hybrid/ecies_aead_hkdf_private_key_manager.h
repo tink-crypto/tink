@@ -20,9 +20,12 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "tink/core/key_manager_base.h"
+#include "tink/core/key_type_manager.h"
+#include "tink/core/private_key_type_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -34,34 +37,50 @@ namespace crypto {
 namespace tink {
 
 class EciesAeadHkdfPrivateKeyManager
-    : public KeyManagerBase<HybridDecrypt,
-                            google::crypto::tink::EciesAeadHkdfPrivateKey> {
+    : public PrivateKeyTypeManager<
+          google::crypto::tink::EciesAeadHkdfPrivateKey,
+          google::crypto::tink::EciesAeadHkdfKeyFormat,
+          google::crypto::tink::EciesAeadHkdfPublicKey, List<HybridDecrypt>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class HybridDecryptFactory : public PrimitiveFactory<HybridDecrypt> {
+    crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> Create(
+        const google::crypto::tink::EciesAeadHkdfPrivateKey& ecies_private_key)
+        const override {
+      return EciesAeadHkdfHybridDecrypt::New(ecies_private_key);
+    }
+  };
 
-  EciesAeadHkdfPrivateKeyManager();
+  EciesAeadHkdfPrivateKeyManager()
+      : PrivateKeyTypeManager(absl::make_unique<HybridDecryptFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::ASYMMETRIC_PRIVATE;
+  }
 
-  virtual ~EciesAeadHkdfPrivateKeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
-  GetPrimitiveFromKey(const google::crypto::tink::EciesAeadHkdfPrivateKey&
-                          ecies_private_key) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::EciesAeadHkdfPrivateKey& key) const override;
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const google::crypto::tink::EciesAeadHkdfKeyFormat& ecies_key_format)
+      const override;
+
+  crypto::tink::util::StatusOr<google::crypto::tink::EciesAeadHkdfPrivateKey>
+  CreateKey(const google::crypto::tink::EciesAeadHkdfKeyFormat& key_format)
+      const override;
+
+  crypto::tink::util::StatusOr<google::crypto::tink::EciesAeadHkdfPublicKey>
+  GetPublicKey(const google::crypto::tink::EciesAeadHkdfPrivateKey& private_key)
+      const override;
 
  private:
-  friend class EciesAeadHkdfPrivateKeyFactory;
-
-  std::unique_ptr<KeyFactory> key_factory_;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfPrivateKey& key);
+  const std::string key_type_ = absl::StrCat(
+      kTypeGoogleapisCom,
+      google::crypto::tink::EciesAeadHkdfPrivateKey().GetTypeName());
 };
 
 }  // namespace tink

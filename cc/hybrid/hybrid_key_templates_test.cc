@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/hybrid_key_templates.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
@@ -80,8 +81,7 @@ TEST_F(HybridKeyTemplatesTest, testEciesAeadHkdf) {
     // Check that the template works with the key manager.
     EciesAeadHkdfPrivateKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+    EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
   }
 
   {  // Test EciesP256HkdfHmacSha256Aes128CtrHmacSha256().
@@ -115,8 +115,7 @@ TEST_F(HybridKeyTemplatesTest, testEciesAeadHkdf) {
     // Check that the template works with the key manager.
     EciesAeadHkdfPrivateKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+    EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
   }
 
   {  // Test EciesP256CompressedHkdfHmacSha256Aes128Gcm().
@@ -147,8 +146,7 @@ TEST_F(HybridKeyTemplatesTest, testEciesAeadHkdf) {
     // Check that the template works with the key manager.
     EciesAeadHkdfPrivateKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+    EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
   }
 
   {  // Test EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256().
@@ -179,8 +177,7 @@ TEST_F(HybridKeyTemplatesTest, testEciesAeadHkdf) {
     // Check that the template works with the key manager.
     EciesAeadHkdfPrivateKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+    EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
   }
 }
 

@@ -55,23 +55,26 @@ class EciesAeadHkdfPublicKeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(EciesAeadHkdfPublicKeyManagerTest, testBasic) {
-  EciesAeadHkdfPublicKeyManager key_manager;
-
-  EXPECT_EQ(0, key_manager.get_version());
+  EciesAeadHkdfPublicKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&key_type_manager);
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(EciesAeadHkdfPublicKeyManagerTest, testKeyDataErrors) {
-  EciesAeadHkdfPublicKeyManager key_manager;
+  EciesAeadHkdfPublicKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type =
         "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -84,7 +87,7 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(ecies_public_key_type);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -97,7 +100,7 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(ecies_public_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -106,11 +109,13 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(EciesAeadHkdfPublicKeyManagerTest, testKeyMessageErrors) {
-  EciesAeadHkdfPublicKeyManager key_manager;
+  EciesAeadHkdfPublicKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesEaxKey key;
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
@@ -123,13 +128,15 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testKeyMessageErrors) {
 TEST_F(EciesAeadHkdfPublicKeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string context_info = "some context info";
-  EciesAeadHkdfPublicKeyManager key_manager;
+  EciesAeadHkdfPublicKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&key_type_manager);
   EciesAeadHkdfPublicKey key = test::GetEciesAesGcmHkdfTestKey(
       EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
       HashType::SHA256, 32).public_key();
 
   {  // Using Key proto.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hybrid_encrypt = std::move(result.ValueOrDie());
     auto encrypt_result = hybrid_encrypt->Encrypt(plaintext, context_info);
@@ -140,7 +147,7 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(ecies_public_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hybrid_encrypt = std::move(result.ValueOrDie());
     auto encrypt_result = hybrid_encrypt->Encrypt(plaintext, context_info);
@@ -149,8 +156,10 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testPrimitives) {
 }
 
 TEST_F(EciesAeadHkdfPublicKeyManagerTest, testNewKeyError) {
-  EciesAeadHkdfPublicKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  EciesAeadHkdfPublicKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   { // Via NewKey(format_proto).
     EciesAeadHkdfKeyFormat key_format;

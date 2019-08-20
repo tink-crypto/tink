@@ -44,10 +44,8 @@ util::Status HybridConfig::Register() {
 
   // Register key managers.
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
-      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(), true);
-  if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
       absl::make_unique<EciesAeadHkdfPublicKeyManager>(), true);
   if (!status.ok()) return status;
 

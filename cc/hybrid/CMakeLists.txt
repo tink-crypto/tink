@@ -167,8 +167,10 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::core::hybrid_decrypt
     tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
+    tink::core::private_key_type_manager
     tink::subtle::subtle_util_boringssl
+    tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
@@ -190,8 +192,9 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_hybrid_encrypt
     tink::core::hybrid_encrypt
     tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::core::registry
+    tink::util::constants
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
@@ -339,6 +342,7 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::hybrid::hybrid_key_templates
     tink::core::hybrid_decrypt
+    tink::core::private_key_manager_impl
     tink::aead::aead_key_templates
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager

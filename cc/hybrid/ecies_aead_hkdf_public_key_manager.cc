@@ -33,43 +33,14 @@ namespace crypto {
 namespace tink {
 
 using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
-using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfParams;
 using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 
-constexpr uint32_t EciesAeadHkdfPublicKeyManager::kVersion;
-
-EciesAeadHkdfPublicKeyManager::EciesAeadHkdfPublicKeyManager()
-    : key_factory_(KeyFactory::AlwaysFailingFactory(
-          util::Status(util::error::UNIMPLEMENTED,
-                       "Operation not supported for public keys, "
-                       "please use EciesAeadHkdfPrivateKeyManager."))) {}
-
-const KeyFactory& EciesAeadHkdfPublicKeyManager::get_key_factory() const {
-  return *key_factory_;
-}
-
-uint32_t EciesAeadHkdfPublicKeyManager::get_version() const {
-  return kVersion;
-}
-
-StatusOr<std::unique_ptr<HybridEncrypt>>
-EciesAeadHkdfPublicKeyManager::GetPrimitiveFromKey(
-    const EciesAeadHkdfPublicKey& recipient_key) const {
-  Status status = Validate(recipient_key);
-  if (!status.ok()) return status;
-  auto ecies_result = EciesAeadHkdfHybridEncrypt::New(recipient_key);
-  if (!ecies_result.ok()) return ecies_result.status();
-  return std::move(ecies_result.ValueOrDie());
-}
-
-// static
-Status EciesAeadHkdfPublicKeyManager::Validate(
-    const EciesAeadHkdfParams& params) {
+Status EciesAeadHkdfPublicKeyManager::ValidateParams(
+    const EciesAeadHkdfParams& params) const {
   // Validate KEM params.
   if (!params.has_kem_params()) {
     return Status(util::error::INVALID_ARGUMENT, "Missing kem_params.");
@@ -94,25 +65,16 @@ Status EciesAeadHkdfPublicKeyManager::Validate(
   return Status::OK;
 }
 
-// static
-Status EciesAeadHkdfPublicKeyManager::Validate(
-    const EciesAeadHkdfPublicKey& key) {
-  Status status = ValidateVersion(key.version(), kVersion);
+Status EciesAeadHkdfPublicKeyManager::ValidateKey(
+    const EciesAeadHkdfPublicKey& key) const {
+  Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_params()) {
     return Status(util::error::INVALID_ARGUMENT, "Missing params.");
   }
-  return Validate(key.params());
+  return ValidateParams(key.params());
 }
 
-// static
-Status EciesAeadHkdfPublicKeyManager::Validate(
-    const EciesAeadHkdfKeyFormat& key_format) {
-  if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
-  }
-  return Validate(key_format.params());
-}
 
 }  // namespace tink
 }  // namespace crypto

@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 
+#include "tink/core/private_key_manager_impl.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/registry.h"
 #include "tink/aead/aead_key_templates.h"
@@ -64,7 +65,9 @@ class EciesAeadHkdfPrivateKeyManagerTest : public ::testing::Test {
 // Checks whether given key is compatible with the given format.
 void CheckNewKey(const EciesAeadHkdfPrivateKey& ecies_key,
                  const EciesAeadHkdfKeyFormat& key_format) {
-  EciesAeadHkdfPrivateKeyManager key_manager;
+  EciesAeadHkdfPrivateKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridDecrypt>(&key_type_manager);
   EXPECT_EQ(0, ecies_key.version());
   EXPECT_TRUE(ecies_key.has_public_key());
   EXPECT_GT(ecies_key.key_value().length(), 0);
@@ -73,28 +76,32 @@ void CheckNewKey(const EciesAeadHkdfPrivateKey& ecies_key,
   EXPECT_GT(ecies_key.public_key().y().length(), 0);
   EXPECT_EQ(ecies_key.public_key().params().SerializeAsString(),
             key_format.params().SerializeAsString());
-  auto primitive_result = key_manager.GetPrimitive(ecies_key);
+  auto primitive_result = key_manager->GetPrimitive(ecies_key);
   EXPECT_TRUE(primitive_result.ok()) << primitive_result.status();
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testBasic) {
-  EciesAeadHkdfPrivateKeyManager key_manager;
+  EciesAeadHkdfPrivateKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridDecrypt>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
-  EciesAeadHkdfPrivateKeyManager key_manager;
+  EciesAeadHkdfPrivateKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridDecrypt>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type =
         "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -107,7 +114,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(ecies_private_key_type);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -120,7 +127,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(ecies_private_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -129,11 +136,13 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyMessageErrors) {
-  EciesAeadHkdfPrivateKeyManager key_manager;
+  EciesAeadHkdfPrivateKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<HybridDecrypt>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesEaxKey key;
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
@@ -146,18 +155,24 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyMessageErrors) {
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string context_info = "some context info";
-  EciesAeadHkdfPublicKeyManager public_key_manager;
-  EciesAeadHkdfPrivateKeyManager private_key_manager;
+  EciesAeadHkdfPublicKeyManager public_key_type_manager;
+  EciesAeadHkdfPrivateKeyManager private_key_type_manager;
+  auto public_key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&public_key_type_manager);
+  auto private_key_manager =
+      internal::MakePrivateKeyManager<HybridDecrypt>(&private_key_type_manager,
+                                                     &public_key_type_manager);
+
   EciesAeadHkdfPrivateKey key = test::GetEciesAesGcmHkdfTestKey(
       EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
       HashType::SHA256, 32);
-  auto hybrid_encrypt = std::move(public_key_manager.GetPrimitive(
+  auto hybrid_encrypt = std::move(public_key_manager->GetPrimitive(
       key.public_key()).ValueOrDie());
   std::string ciphertext =
       hybrid_encrypt->Encrypt(plaintext, context_info).ValueOrDie();
 
   {  // Using Key proto.
-    auto result = private_key_manager.GetPrimitive(key);
+    auto result = private_key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hybrid_decrypt = std::move(result.ValueOrDie());
     auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
@@ -168,7 +183,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(ecies_private_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = private_key_manager.GetPrimitive(key_data);
+    auto result = private_key_manager->GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hybrid_decrypt = std::move(result.ValueOrDie());
     auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
@@ -177,8 +192,14 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPrimitives) {
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyCreation) {
-  EciesAeadHkdfPrivateKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  EciesAeadHkdfPublicKeyManager public_key_type_manager;
+  EciesAeadHkdfPrivateKeyManager private_key_type_manager;
+  auto public_key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&public_key_type_manager);
+  auto private_key_manager =
+      internal::MakePrivateKeyManager<HybridDecrypt>(&private_key_type_manager,
+                                                     &public_key_type_manager);
+  const KeyFactory& key_factory = private_key_manager->get_key_factory();
 
   { // Via NewKey(format_proto).
     EciesAeadHkdfKeyFormat key_format;
@@ -253,9 +274,15 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyCreation) {
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPublicKeyExtraction) {
-  EciesAeadHkdfPrivateKeyManager key_manager;
+  EciesAeadHkdfPublicKeyManager public_key_type_manager;
+  EciesAeadHkdfPrivateKeyManager private_key_type_manager;
+  auto public_key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&public_key_type_manager);
+  auto private_key_manager =
+      internal::MakePrivateKeyManager<HybridDecrypt>(&private_key_type_manager,
+                                                     &public_key_type_manager);
   auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
-      &(key_manager.get_key_factory()));
+      &(private_key_manager->get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
 
   auto new_key_result = private_key_factory->NewKey(
@@ -267,7 +294,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPublicKeyExtraction) {
       new_key->SerializeAsString());
   EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
   auto public_key_data = std::move(public_key_data_result.ValueOrDie());
-  EXPECT_EQ(EciesAeadHkdfPublicKeyManager::static_key_type(),
+  EXPECT_EQ(EciesAeadHkdfPublicKeyManager().get_key_type(),
             public_key_data->type_url());
   EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
   EXPECT_EQ(new_key->public_key().SerializeAsString(),
@@ -275,9 +302,15 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPublicKeyExtraction) {
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPublicKeyExtractionErrors) {
-  EciesAeadHkdfPrivateKeyManager key_manager;
+  EciesAeadHkdfPublicKeyManager public_key_type_manager;
+  EciesAeadHkdfPrivateKeyManager private_key_type_manager;
+  auto public_key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&public_key_type_manager);
+  auto private_key_manager =
+      internal::MakePrivateKeyManager<HybridDecrypt>(&private_key_type_manager,
+                                                     &public_key_type_manager);
   auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
-      &(key_manager.get_key_factory()));
+      &(private_key_manager->get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
 
   AesCtrHmacAeadKeyManager aead_key_manager;
@@ -297,8 +330,14 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPublicKeyExtractionErrors) {
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyErrors) {
-  EciesAeadHkdfPrivateKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  EciesAeadHkdfPublicKeyManager public_key_type_manager;
+  EciesAeadHkdfPrivateKeyManager private_key_type_manager;
+  auto public_key_manager =
+      internal::MakeKeyManager<HybridEncrypt>(&public_key_type_manager);
+  auto private_key_manager =
+      internal::MakePrivateKeyManager<HybridDecrypt>(&private_key_type_manager,
+                                                     &public_key_type_manager);
+  const KeyFactory& key_factory = private_key_manager->get_key_factory();
 
   // Empty key format.
   EciesAeadHkdfKeyFormat key_format;
