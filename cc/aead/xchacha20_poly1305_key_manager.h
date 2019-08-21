@@ -21,45 +21,79 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/core/key_manager_base.h"
-#include "tink/key_manager.h"
+#include "tink/core/key_type_manager.h"
+#include "tink/subtle/random.h"
+#include "tink/subtle/xchacha20_poly1305_boringssl.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "proto/tink.pb.h"
+#include "tink/util/validation.h"
 #include "proto/xchacha20_poly1305.pb.h"
 
 namespace crypto {
 namespace tink {
 
 class XChaCha20Poly1305KeyManager
-    : public KeyManagerBase<Aead, google::crypto::tink::XChaCha20Poly1305Key> {
+    : public KeyTypeManager<google::crypto::tink::XChaCha20Poly1305Key,
+                            google::crypto::tink::XChaCha20Poly1305KeyFormat,
+                            List<Aead>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class AeadFactory : public PrimitiveFactory<Aead> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
+        const google::crypto::tink::XChaCha20Poly1305Key& key) const override {
+      return subtle::XChacha20Poly1305BoringSsl::New(key.key_value());
+    }
+  };
 
-  XChaCha20Poly1305KeyManager();
+  XChaCha20Poly1305KeyManager()
+      : KeyTypeManager(absl::make_unique<AeadFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
+  }
 
-  virtual ~XChaCha20Poly1305KeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveFromKey(
-      const google::crypto::tink::XChaCha20Poly1305Key& key) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::XChaCha20Poly1305Key& key) const override {
+    crypto::tink::util::Status status =
+        ValidateVersion(key.version(), get_version());
+    if (!status.ok()) return status;
+    uint32_t key_size = key.key_value().size();
+    if (key.key_value().size() != kKeySizeInBytes) {
+      return crypto::tink::util::Status(
+          util::error::INVALID_ARGUMENT,
+          absl::StrCat("Invalid XChaCha20Poly1305Key: key_value has ", key_size,
+                       " bytes; supported size: ", kKeySizeInBytes, " bytes."));
+    }
+    return crypto::tink::util::Status::OK;
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const google::crypto::tink::XChaCha20Poly1305KeyFormat& key_format)
+      const override {
+    return crypto::tink::util::Status::OK;
+  }
+
+  crypto::tink::util::StatusOr<google::crypto::tink::XChaCha20Poly1305Key>
+  CreateKey(const google::crypto::tink::XChaCha20Poly1305KeyFormat& key_format)
+      const override {
+    google::crypto::tink::XChaCha20Poly1305Key result;
+    result.set_version(get_version());
+    result.set_key_value(subtle::Random::GetRandomBytes(kKeySizeInBytes));
+    return result;
+  }
 
  private:
-  friend class XChaCha20Poly1305KeyFactory;
-
-  std::unique_ptr<KeyFactory> key_factory_;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::XChaCha20Poly1305Key& key);
+  const std::string key_type_ =
+      absl::StrCat(kTypeGoogleapisCom,
+                   google::crypto::tink::XChaCha20Poly1305Key().GetTypeName());
+  const int kKeySizeInBytes = 32;
 };
 
 }  // namespace tink

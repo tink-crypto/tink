@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "tink/aead.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_eax.pb.h"
@@ -42,23 +43,25 @@ class XChaCha20Poly1305KeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(XChaCha20Poly1305KeyManagerTest, testBasic) {
-  XChaCha20Poly1305KeyManager key_manager;
+  XChaCha20Poly1305KeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyDataErrors) {
-  XChaCha20Poly1305KeyManager key_manager;
+  XChaCha20Poly1305KeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type =
         "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -71,7 +74,7 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(xchaha20_poly1305_key_type);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -84,7 +87,7 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(xchaha20_poly1305_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -99,7 +102,7 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyDataErrors) {
       KeyData key_data;
       key_data.set_type_url(xchaha20_poly1305_key_type);
       key_data.set_value(key.SerializeAsString());
-      auto result = key_manager.GetPrimitive(key_data);
+      auto result = key_manager->GetPrimitive(key_data);
       if (len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
@@ -116,11 +119,12 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyMessageErrors) {
-  XChaCha20Poly1305KeyManager key_manager;
+  XChaCha20Poly1305KeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesEaxKey key;
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
@@ -134,7 +138,7 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyMessageErrors) {
       XChaCha20Poly1305Key key;
       key.set_version(0);
       key.set_key_value(std::string(len, 'a'));
-      auto result = key_manager.GetPrimitive(key);
+      auto result = key_manager->GetPrimitive(key);
       if (len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
@@ -153,14 +157,15 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyMessageErrors) {
 TEST_F(XChaCha20Poly1305KeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string aad = "some aad";
-  XChaCha20Poly1305KeyManager key_manager;
+  XChaCha20Poly1305KeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   XChaCha20Poly1305Key key;
 
   key.set_version(0);
   key.set_key_value("32 bytes of key 0123456789abcdef");
 
   {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto xchaha20_poly1305 = std::move(result.ValueOrDie());
     auto encrypt_result = xchaha20_poly1305->Encrypt(plaintext, aad);
@@ -175,7 +180,7 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(xchaha20_poly1305_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto xchaha20_poly1305 = std::move(result.ValueOrDie());
     auto encrypt_result = xchaha20_poly1305->Encrypt(plaintext, aad);
@@ -188,8 +193,9 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testPrimitives) {
 }
 
 TEST_F(XChaCha20Poly1305KeyManagerTest, testNewKeyBasic) {
-  XChaCha20Poly1305KeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  XChaCha20Poly1305KeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   { // Via NewKey(format_proto).
     auto result = key_factory.NewKey(nullptr /* ignored */);
     EXPECT_TRUE(result.ok()) << result.status();

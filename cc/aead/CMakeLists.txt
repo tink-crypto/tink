@@ -166,12 +166,10 @@ tink_cc_library(
 tink_cc_library(
   NAME xchacha20_poly1305_key_manager
   SRCS
-    xchacha20_poly1305_key_manager.cc
     xchacha20_poly1305_key_manager.h
   DEPS
     tink::core::aead
-    tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::subtle::random
     tink::subtle::xchacha20_poly1305_boringssl
     tink::util::errors
@@ -179,8 +177,6 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::proto::empty_cc_proto
-    tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
     absl::strings
 )
@@ -381,6 +377,7 @@ tink_cc_test(
   DEPS
     tink::aead::xchacha20_poly1305_key_manager
     tink::core::aead
+    tink::core::key_manager_impl
     tink::util::status
     tink::util::statusor
     tink::proto::aes_eax_cc_proto

@@ -184,23 +184,20 @@ cc_library(
 
 cc_library(
     name = "xchacha20_poly1305_key_manager",
-    srcs = ["xchacha20_poly1305_key_manager.cc"],
     hdrs = ["xchacha20_poly1305_key_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
         "//cc:aead",
-        "//cc:key_manager",
-        "//cc:key_manager_base",
+        "//cc:core/key_type_manager",
         "//cc/subtle:random",
         "//cc/subtle:xchacha20_poly1305_boringssl",
+        "//cc/util:constants",
         "//cc/util:errors",
         "//cc/util:protobuf_helper",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:validation",
-        "//proto:empty_cc_proto",
-        "//proto:tink_cc_proto",
         "//proto:xchacha20_poly1305_cc_proto",
         "@com_google_absl//absl/strings",
     ],
@@ -441,6 +438,7 @@ cc_test(
     deps = [
         ":xchacha20_poly1305_key_manager",
         "//cc:aead",
+        "//cc:core/key_manager_impl",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:aes_eax_cc_proto",
