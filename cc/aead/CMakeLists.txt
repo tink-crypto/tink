@@ -378,12 +378,12 @@ tink_cc_test(
     tink::aead::xchacha20_poly1305_key_manager
     tink::core::aead
     tink::core::key_manager_impl
+    tink::subtle::aead_test_util
     tink::util::status
     tink::util::statusor
-    tink::proto::aes_eax_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
+    tink::util::test_matchers
     tink::proto::xchacha20_poly1305_cc_proto
+    gmock
 )
 
 tink_cc_test(
