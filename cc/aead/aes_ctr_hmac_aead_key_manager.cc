@@ -22,6 +22,7 @@
 #include "tink/aead.h"
 #include "tink/key_manager.h"
 #include "tink/mac.h"
+#include "tink/mac/hmac_key_manager.h"
 #include "tink/registry.h"
 #include "tink/subtle/aes_ctr_boringssl.h"
 #include "tink/subtle/encrypt_then_authenticate.h"
@@ -39,97 +40,65 @@
 namespace crypto {
 namespace tink {
 
+namespace {
+constexpr int kMinKeySizeInBytes = 16;
+constexpr int kMinIvSizeInBytes = 12;
+constexpr int kMinTagSizeInBytes = 10;
+}
+
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::AesCtrHmacAeadKey;
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::HashType;
-using google::crypto::tink::KeyData;
 
-class AesCtrHmacAeadKeyFactory
-    : public KeyFactoryBase<AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {
- public:
-  AesCtrHmacAeadKeyFactory() = default;
+StatusOr<AesCtrHmacAeadKey> AesCtrHmacAeadKeyManager::CreateKey(
+    const AesCtrHmacAeadKeyFormat& aes_ctr_hmac_aead_key_format) const {
+  AesCtrHmacAeadKey aes_ctr_hmac_aead_key;
+  aes_ctr_hmac_aead_key.set_version(get_version());
 
-  KeyData::KeyMaterialType key_material_type() const override {
-    return KeyData::SYMMETRIC;
+  // Generate AesCtrKey.
+  auto aes_ctr_key = aes_ctr_hmac_aead_key.mutable_aes_ctr_key();
+  aes_ctr_key->set_version(get_version());
+  *(aes_ctr_key->mutable_params()) =
+      aes_ctr_hmac_aead_key_format.aes_ctr_key_format().params();
+  aes_ctr_key->set_key_value(subtle::Random::GetRandomBytes(
+      aes_ctr_hmac_aead_key_format.aes_ctr_key_format().key_size()));
+
+  // Generate HmacKey.
+  auto hmac_key_or = HmacKeyManager().CreateKey(
+      aes_ctr_hmac_aead_key_format.hmac_key_format());
+  if (!hmac_key_or.status().ok()) {
+    return hmac_key_or.status();
   }
+  *aes_ctr_hmac_aead_key.mutable_hmac_key() = hmac_key_or.ValueOrDie();
 
- protected:
-  StatusOr<std::unique_ptr<AesCtrHmacAeadKey>> NewKeyFromFormat(
-      const AesCtrHmacAeadKeyFormat& aes_ctr_hmac_aead_key_format)
-      const override {
-    Status status =
-        AesCtrHmacAeadKeyManager::Validate(aes_ctr_hmac_aead_key_format);
-    if (!status.ok()) return status;
-
-    auto aes_ctr_hmac_aead_key = absl::make_unique<AesCtrHmacAeadKey>();
-    aes_ctr_hmac_aead_key->set_version(AesCtrHmacAeadKeyManager::kVersion);
-
-    // Generate AesCtrKey.
-    auto aes_ctr_key = aes_ctr_hmac_aead_key->mutable_aes_ctr_key();
-    aes_ctr_key->set_version(AesCtrHmacAeadKeyManager::kVersion);
-    *(aes_ctr_key->mutable_params()) =
-        aes_ctr_hmac_aead_key_format.aes_ctr_key_format().params();
-    aes_ctr_key->set_key_value(subtle::Random::GetRandomBytes(
-        aes_ctr_hmac_aead_key_format.aes_ctr_key_format().key_size()));
-
-    // Generate HmacKey.
-    auto hmac_key = aes_ctr_hmac_aead_key->mutable_hmac_key();
-    hmac_key->set_version(AesCtrHmacAeadKeyManager::kVersion);
-    *(hmac_key->mutable_params()) =
-        aes_ctr_hmac_aead_key_format.hmac_key_format().params();
-    hmac_key->set_key_value(subtle::Random::GetRandomBytes(
-        aes_ctr_hmac_aead_key_format.hmac_key_format().key_size()));
-
-    return absl::implicit_cast<StatusOr<std::unique_ptr<AesCtrHmacAeadKey>>>(
-        std::move(aes_ctr_hmac_aead_key));
-  }
-};
-
-constexpr char AesCtrHmacAeadKeyManager::kHmacKeyType[];
-constexpr uint32_t AesCtrHmacAeadKeyManager::kVersion;
-
-const int kMinKeySizeInBytes = 16;
-const int kMinIvSizeInBytes = 12;
-const int kMinTagSizeInBytes = 10;
-
-AesCtrHmacAeadKeyManager::AesCtrHmacAeadKeyManager()
-    : key_factory_(absl::make_unique<AesCtrHmacAeadKeyFactory>()) {}
-
-const KeyFactory& AesCtrHmacAeadKeyManager::get_key_factory() const {
-  return *key_factory_;
+  return aes_ctr_hmac_aead_key;
 }
 
-uint32_t AesCtrHmacAeadKeyManager::get_version() const { return kVersion; }
-
-StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitiveFromKey(
-    const AesCtrHmacAeadKey& aes_ctr_hmac_aead_key) const {
-  Status status = Validate(aes_ctr_hmac_aead_key);
-  if (!status.ok()) return status;
+StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::AeadFactory::Create(
+    const AesCtrHmacAeadKey& key) const {
   auto aes_ctr_result = subtle::AesCtrBoringSsl::New(
-      aes_ctr_hmac_aead_key.aes_ctr_key().key_value(),
-      aes_ctr_hmac_aead_key.aes_ctr_key().params().iv_size());
+      key.aes_ctr_key().key_value(),
+      key.aes_ctr_key().params().iv_size());
   if (!aes_ctr_result.ok()) return aes_ctr_result.status();
 
-  auto hmac_result = Registry::GetPrimitive<Mac>(
-      kHmacKeyType, aes_ctr_hmac_aead_key.hmac_key());
+  auto hmac_result = HmacKeyManager().GetPrimitive<Mac>(key.hmac_key());
   if (!hmac_result.ok()) return hmac_result.status();
 
   auto cipher_res = subtle::EncryptThenAuthenticate::New(
       std::move(aes_ctr_result.ValueOrDie()),
-      std::move(hmac_result.ValueOrDie()),
-      aes_ctr_hmac_aead_key.hmac_key().params().tag_size());
+      std::move(hmac_result.ValueOrDie()), key.hmac_key().params().tag_size());
   if (!cipher_res.ok()) {
     return cipher_res.status();
   }
   return std::move(cipher_res.ValueOrDie());
 }
 
-// static
-Status AesCtrHmacAeadKeyManager::Validate(const AesCtrHmacAeadKey& key) {
-  Status status = ValidateVersion(key.version(), kVersion);
+Status AesCtrHmacAeadKeyManager::ValidateKey(
+    const AesCtrHmacAeadKey& key) const {
+  Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
 
   // Validate AesCtrKey.
@@ -144,12 +113,11 @@ Status AesCtrHmacAeadKeyManager::Validate(const AesCtrHmacAeadKey& key) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid AesCtrHmacAeadKey: IV size out of range.");
   }
-  return Status::OK;
+  return HmacKeyManager().ValidateKey(key.hmac_key());
 }
 
-// static
-Status AesCtrHmacAeadKeyManager::Validate(
-    const AesCtrHmacAeadKeyFormat& key_format) {
+Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
+    const AesCtrHmacAeadKeyFormat& key_format) const {
   // Validate AesCtrKeyFormat.
   auto aes_ctr_key_format = key_format.aes_ctr_key_format();
   auto status = ValidateAesKeySize(aes_ctr_key_format.key_size());
@@ -190,7 +158,7 @@ Status AesCtrHmacAeadKeyManager::Validate(
     }
   }
 
-  return Status::OK;
+  return HmacKeyManager().ValidateKeyFormat(key_format.hmac_key_format());
 }
 
 }  // namespace tink

@@ -48,7 +48,7 @@ util::Status AeadConfig::Register() {
   if (!status.ok()) return status;
 
   // Register key managers.
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesCtrHmacAeadKeyManager>(), true);
   if (!status.ok()) return status;
   status = Registry::RegisterKeyTypeManager(

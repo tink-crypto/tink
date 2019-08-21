@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/core/key_manager_base.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/key_manager.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -34,41 +35,40 @@ namespace crypto {
 namespace tink {
 
 class AesCtrHmacAeadKeyManager
-    : public KeyManagerBase<Aead, google::crypto::tink::AesCtrHmacAeadKey> {
+    : public KeyTypeManager<google::crypto::tink::AesCtrHmacAeadKey,
+                            google::crypto::tink::AesCtrHmacAeadKeyFormat,
+                            List<Aead>> {
  public:
-  static constexpr char kHmacKeyType[] =
-      "type.googleapis.com/google.crypto.tink.HmacKey";
-  static constexpr uint32_t kVersion = 0;
+  class AeadFactory : public PrimitiveFactory<Aead> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
+        const google::crypto::tink::AesCtrHmacAeadKey& key) const override;
+  };
 
-  AesCtrHmacAeadKeyManager();
+  AesCtrHmacAeadKeyManager()
+      : KeyTypeManager(absl::make_unique<AeadFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
+  }
 
-  virtual ~AesCtrHmacAeadKeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveFromKey(
-      const google::crypto::tink::AesCtrHmacAeadKey& aes_ctr_hmac_aead_key)
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::AesCtrHmacAeadKey& key) const override;
+  crypto::tink::util::Status ValidateKeyFormat(
+      const google::crypto::tink::AesCtrHmacAeadKeyFormat& key) const override;
+
+  crypto::tink::util::StatusOr<google::crypto::tink::AesCtrHmacAeadKey>
+  CreateKey(const google::crypto::tink::AesCtrHmacAeadKeyFormat& key_format)
       const override;
 
  private:
-  friend class AesCtrHmacAeadKeyFactory;
-
-  std::unique_ptr<KeyFactory> key_factory_;
-
-  // Constructs an instance of AES-CTR-HMAC-AEAD Aead for the given 'key'.
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveImpl(
-      const google::crypto::tink::AesCtrHmacAeadKey& key) const;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesCtrHmacAeadKey& key);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesCtrHmacAeadKeyFormat& key_format);
+  const std::string key_type_ =
+      absl::StrCat(kTypeGoogleapisCom,
+                   google::crypto::tink::AesCtrHmacAeadKey().GetTypeName());
 };
 
 }  // namespace tink

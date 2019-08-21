@@ -55,23 +55,25 @@ class AesCtrHmacAeadKeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(AesCtrHmacAeadKeyManagerTest, testBasic) {
-  AesCtrHmacAeadKeyManager key_manager;
+  AesCtrHmacAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyDataErrors) {
-  AesCtrHmacAeadKeyManager key_manager;
+  AesCtrHmacAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type =
         "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -84,7 +86,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(aes_ctr_hmac_aead_key_type);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -97,7 +99,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(aes_ctr_hmac_aead_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -118,7 +120,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyDataErrors) {
       KeyData key_data;
       key_data.set_type_url(aes_ctr_hmac_aead_key_type);
       key_data.set_value(key.SerializeAsString());
-      auto result = key_manager.GetPrimitive(key_data);
+      auto result = key_manager->GetPrimitive(key_data);
       if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
@@ -136,11 +138,12 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyMessageErrors) {
-  AesCtrHmacAeadKeyManager key_manager;
+  AesCtrHmacAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesGcmKey key;
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesGcmKey",
@@ -160,7 +163,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyMessageErrors) {
       hmac_key->set_key_value(std::string(len, 'b'));
       hmac_key->mutable_params()->set_hash(HashType::SHA1);
       hmac_key->mutable_params()->set_tag_size(10);
-      auto result = key_manager.GetPrimitive(key);
+      auto result = key_manager->GetPrimitive(key);
       if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
@@ -179,7 +182,8 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testKeyMessageErrors) {
 TEST_F(AesCtrHmacAeadKeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string aad = "some aad";
-  AesCtrHmacAeadKeyManager key_manager;
+  AesCtrHmacAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   AesCtrHmacAeadKey key;
 
   key.set_version(0);
@@ -192,7 +196,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testPrimitives) {
   hmac_key->mutable_params()->set_tag_size(10);
 
   {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto cipher = std::move(result.ValueOrDie());
     auto encrypt_result = cipher->Encrypt(plaintext, aad);
@@ -206,7 +210,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(aes_ctr_hmac_aead_key_type);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto cipher = std::move(result.ValueOrDie());
     auto encrypt_result = cipher->Encrypt(plaintext, aad);
@@ -218,8 +222,9 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testPrimitives) {
 }
 
 TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyErrors) {
-  AesCtrHmacAeadKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  AesCtrHmacAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   {  // Bad key format.
     AesGcmKeyFormat key_format;
@@ -269,8 +274,9 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyErrors) {
 }
 
 TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyBasic) {
-  AesCtrHmacAeadKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  AesCtrHmacAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   AesCtrHmacAeadKeyFormat key_format;
   auto aes_ctr_key_format = key_format.mutable_aes_ctr_key_format();
   aes_ctr_key_format->set_key_size(16);

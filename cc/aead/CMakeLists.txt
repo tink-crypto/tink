@@ -142,14 +142,15 @@ tink_cc_library(
     aes_ctr_hmac_aead_key_manager.h
   DEPS
     tink::core::aead
-    tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::core::mac
     tink::core::registry
+    tink::mac::hmac_key_manager
     tink::subtle::aes_ctr_boringssl
     tink::subtle::encrypt_then_authenticate
     tink::subtle::hmac_boringssl
     tink::subtle::random
+    tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
@@ -302,6 +303,7 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::aead::aes_gcm_siv_key_manager
     tink::aead::xchacha20_poly1305_key_manager
+    tink::core::key_manager_impl
     tink::util::test_matchers
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_eax_cc_proto
