@@ -17,7 +17,7 @@
 package com.google.crypto.tink.daead;
 
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -34,54 +34,36 @@ import java.security.InvalidKeyException;
  * This key manager generates new {@code AesSivKey} keys and produces new instances of {@code
  * AesSiv}.
  */
-class AesSivKeyManager extends KeyManagerBase<DeterministicAead, AesSivKey, AesSivKeyFormat> {
+class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
   public AesSivKeyManager() {
-    super(DeterministicAead.class, AesSivKey.class, AesSivKeyFormat.class, TYPE_URL);
-  }
-
-  private static final int VERSION = 0;
-
-  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesSivKey";
-
-  @Override
-  protected DeterministicAead getPrimitiveFromKey(AesSivKey keyProto)
-      throws GeneralSecurityException {
-    return new AesSiv(keyProto.getKeyValue().toByteArray());
+    super(
+        AesSivKey.class,
+        new PrimitiveFactory<DeterministicAead, AesSivKey>(DeterministicAead.class) {
+          @Override
+          public DeterministicAead getPrimitive(AesSivKey key) throws GeneralSecurityException {
+            return new AesSiv(key.getKeyValue().toByteArray());
+          }
+        });
   }
 
   @Override
-  public AesSivKey newKeyFromFormat(AesSivKeyFormat format) throws GeneralSecurityException {
-    return AesSivKey.newBuilder()
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-        .setVersion(VERSION)
-        .build();
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.AesSivKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.SYMMETRIC;
   }
 
   @Override
-  protected AesSivKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return AesSivKey.parseFrom(byteString);
-  }
-
-  @Override
-  protected AesSivKeyFormat parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return AesSivKeyFormat.parseFrom(byteString);
-  }
-
-  @Override
-  protected void validateKey(AesSivKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), VERSION);
+  public void validateKey(AesSivKey key) throws GeneralSecurityException {
+    Validators.validateVersion(key.getVersion(), getVersion());
     if (key.getKeyValue().size() != 64) {
       throw new InvalidKeyException(
           "invalid key size: " + key.getKeyValue().size() + ". Valid keys must have 64 bytes.");
@@ -89,10 +71,34 @@ class AesSivKeyManager extends KeyManagerBase<DeterministicAead, AesSivKey, AesS
   }
 
   @Override
-  protected void validateKeyFormat(AesSivKeyFormat format) throws GeneralSecurityException {
-    if (format.getKeySize() != 64) {
-      throw new InvalidAlgorithmParameterException(
-          "invalid key size: " + format.getKeySize() + ". Valid keys must have 64 bytes.");
-    }
+  public AesSivKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
+    return AesSivKey.parseFrom(byteString);
+  }
+
+  @Override
+  public KeyFactory<AesSivKeyFormat, AesSivKey> keyFactory() {
+    return new KeyFactory<AesSivKeyFormat, AesSivKey>(AesSivKeyFormat.class) {
+      @Override
+      public void validateKeyFormat(AesSivKeyFormat format) throws GeneralSecurityException {
+        if (format.getKeySize() != 64) {
+          throw new InvalidAlgorithmParameterException(
+              "invalid key size: " + format.getKeySize() + ". Valid keys must have 64 bytes.");
+        }
+      }
+
+      @Override
+      public AesSivKeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return AesSivKeyFormat.parseFrom(byteString);
+      }
+
+      @Override
+      public AesSivKey createKey(AesSivKeyFormat format) throws GeneralSecurityException {
+        return AesSivKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+            .setVersion(getVersion())
+            .build();
+      }
+    };
   }
 }

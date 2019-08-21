@@ -21,6 +21,8 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.AesSivKey;
@@ -80,7 +82,8 @@ public class AesSivKeyManagerTest {
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
     for (KeyTemplate keyTemplate : keyTemplates) {
-      AesSivKeyManager keyManager = new AesSivKeyManager();
+    KeyManager<DeterministicAead> keyManager =
+        new KeyManagerImpl<>(new AesSivKeyManager(), DeterministicAead.class);
       Set<String> keys = new TreeSet<String>();
       // Calls newKey multiple times and make sure that they generate different keys.
       int numTests = 10;
@@ -105,7 +108,8 @@ public class AesSivKeyManagerTest {
       return;
     }
 
-    AesSivKeyManager keyManager = new AesSivKeyManager();
+    KeyManager<DeterministicAead> keyManager =
+        new KeyManagerImpl<>(new AesSivKeyManager(), DeterministicAead.class);
 
     try {
       // AesSiv doesn't accept 32-byte keys.
@@ -145,7 +149,8 @@ public class AesSivKeyManagerTest {
               + " but not installed. Skip all AesSivKeyManager tests");
       return;
     }
-    AesSivKeyManager keyManager = new AesSivKeyManager();
+    KeyManager<DeterministicAead> keyManager =
+        new KeyManagerImpl<>(new AesSivKeyManager(), DeterministicAead.class);
 
     try {
       keyManager.getPrimitive(createAesSivKey(32));

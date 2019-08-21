@@ -28,7 +28,8 @@ import java.security.GeneralSecurityException;
  * functions {@link #getPrimitive} will throw if invoked.
  */
 @Alpha
-class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite> implements KeyManager<PrimitiveT> {
+public class KeyManagerImpl<PrimitiveT, KeyProtoT extends MessageLite>
+    implements KeyManager<PrimitiveT> {
   public KeyManagerImpl(
       KeyTypeManager<KeyProtoT> keyTypeManager, Class<PrimitiveT> primitiveClass) {
     if (!keyTypeManager.supportedPrimitives().contains(primitiveClass)
