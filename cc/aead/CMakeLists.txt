@@ -368,12 +368,16 @@ tink_cc_test(
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::core::config
     tink::mac::mac_config
-    tink::util::status
-    tink::util::statusor
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
+    tink::subtle::aead_test_util
+    tink::subtle::aes_ctr_boringssl
+    tink::util::enums
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
 )
 
 tink_cc_test(
