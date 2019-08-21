@@ -500,7 +500,7 @@ cc_test(
 cc_test(
     name = "kms_envelope_aead_key_manager_test",
     size = "small",
-    srcs = ["kms_aead_key_manager_test.cc"],
+    srcs = ["kms_envelope_aead_key_manager_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead_config",
