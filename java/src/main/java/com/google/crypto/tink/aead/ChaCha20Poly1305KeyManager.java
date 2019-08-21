@@ -19,7 +19,7 @@ package com.google.crypto.tink.aead;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
-import com.google.crypto.tink.proto.Empty;
+import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.ChaCha20Poly1305;
 import com.google.crypto.tink.subtle.Random;
@@ -33,9 +33,9 @@ import java.security.GeneralSecurityException;
  * instances of {@code ChaCha20Poly1305}.
  */
 class ChaCha20Poly1305KeyManager
-    extends KeyManagerBase<Aead, ChaCha20Poly1305Key, Empty> {
+    extends KeyManagerBase<Aead, ChaCha20Poly1305Key, ChaCha20Poly1305KeyFormat> {
   public ChaCha20Poly1305KeyManager() {
-    super(Aead.class, ChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
+    super(Aead.class, ChaCha20Poly1305Key.class, ChaCha20Poly1305KeyFormat.class, TYPE_URL);
   }
 
   /** Type url that this manager supports */
@@ -53,7 +53,8 @@ class ChaCha20Poly1305KeyManager
   }
 
   @Override
-  protected ChaCha20Poly1305Key newKeyFromFormat(Empty unused) throws GeneralSecurityException {
+  protected ChaCha20Poly1305Key newKeyFromFormat(ChaCha20Poly1305KeyFormat unused)
+      throws GeneralSecurityException {
     return ChaCha20Poly1305Key.newBuilder()
         .setVersion(VERSION)
         .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
@@ -77,8 +78,9 @@ class ChaCha20Poly1305KeyManager
   }
 
   @Override
-  protected Empty parseKeyFormatProto(ByteString byteString) throws InvalidProtocolBufferException {
-    return Empty.parseFrom(byteString);
+  protected ChaCha20Poly1305KeyFormat parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return ChaCha20Poly1305KeyFormat.parseFrom(byteString);
   }
 
   @Override
@@ -90,5 +92,6 @@ class ChaCha20Poly1305KeyManager
   }
 
   @Override
-  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
+  protected void validateKeyFormat(ChaCha20Poly1305KeyFormat unused)
+      throws GeneralSecurityException {}
 }

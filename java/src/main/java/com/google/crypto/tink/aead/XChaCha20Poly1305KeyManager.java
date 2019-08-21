@@ -18,9 +18,9 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManagerBase;
-import com.google.crypto.tink.proto.Empty;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
+import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.subtle.XChaCha20Poly1305;
@@ -32,9 +32,10 @@ import java.security.GeneralSecurityException;
  * This instance of {@code KeyManager} generates new {@code XChaCha20Poly1305} keys and produces new
  * instances of {@code XChaCha20Poly1305}.
  */
-class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305Key, Empty> {
+class XChaCha20Poly1305KeyManager
+    extends KeyManagerBase<Aead, XChaCha20Poly1305Key, XChaCha20Poly1305KeyFormat> {
   public XChaCha20Poly1305KeyManager() {
-    super(Aead.class, XChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
+    super(Aead.class, XChaCha20Poly1305Key.class, XChaCha20Poly1305KeyFormat.class, TYPE_URL);
   }
 
   public static final String TYPE_URL =
@@ -55,7 +56,8 @@ class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305
   }
 
   @Override
-  protected XChaCha20Poly1305Key newKeyFromFormat(Empty unused) throws GeneralSecurityException {
+  protected XChaCha20Poly1305Key newKeyFromFormat(XChaCha20Poly1305KeyFormat unused)
+      throws GeneralSecurityException {
     return XChaCha20Poly1305Key.newBuilder()
         .setVersion(VERSION)
         .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
@@ -74,8 +76,9 @@ class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305
   }
 
   @Override
-  protected Empty parseKeyFormatProto(ByteString byteString) throws InvalidProtocolBufferException {
-    return Empty.parseFrom(byteString);
+  protected XChaCha20Poly1305KeyFormat parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return XChaCha20Poly1305KeyFormat.parseFrom(byteString);
   }
 
   @Override
@@ -87,5 +90,6 @@ class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305
   }
 
   @Override
-  protected void validateKeyFormat(Empty empty) throws GeneralSecurityException {}
+  protected void validateKeyFormat(XChaCha20Poly1305KeyFormat unused)
+      throws GeneralSecurityException {}
 }
