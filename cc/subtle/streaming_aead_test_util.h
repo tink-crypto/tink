@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_STREAMINGAEAD_TEST_UTIL_H_
-#define TINK_STREAMINGAEAD_TEST_UTIL_H_
+#ifndef TINK_SUBTLE_STREAMING_AEAD_TEST_UTIL_H_
+#define TINK_SUBTLE_STREAMING_AEAD_TEST_UTIL_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/streaming_aead.h"
@@ -32,4 +32,4 @@ crypto::tink::util::Status EncryptThenDecrypt(
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_STREAMINGAEAD_TEST_UTIL_H_
+#endif  // TINK_SUBTLE_STREAMING_AEAD_TEST_UTIL_H_
