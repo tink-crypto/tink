@@ -31,8 +31,8 @@ from tink.python.core import tink_error
 class _AeadCcToPyWrapper(aead.Aead):
   """Transforms cliffed C++ Aead primitive into a Python primitive."""
 
-  def __init__(self, cc_primitve: cc_aead.Aead):
-    self._aead = cc_primitve
+  def __init__(self, cc_primitive: cc_aead.Aead):
+    self._aead = cc_primitive
 
   @tink_error.use_tink_errors
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:

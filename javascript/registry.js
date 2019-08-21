@@ -36,7 +36,7 @@ const SecurityException = goog.require('tink.exception.SecurityException');
  * Regular users will not usually work with Registry directly, but via primitive
  * factories, which query Registry for the specific KeyManagers in the
  * background. Registry is public though to enable configurations with custom
- * catalogues (primitves or KeyManagers).
+ * catalogues (primitives or KeyManagers).
  *
  * @final
  */

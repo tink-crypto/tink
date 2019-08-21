@@ -239,7 +239,7 @@ class RegistryTest(absltest.TestCase):
   def test_register_inconsistent_wrapper_fails(self):
     with self.assertRaisesRegex(
         core.TinkError,
-        'Wrapper for primitive Mac generates incompatibe primitve'):
+        'Wrapper for primitive Mac generates incompatible primitive'):
       self.reg.register_primitive_wrapper(InconsistentWrapper())
 
 
