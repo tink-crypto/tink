@@ -63,7 +63,7 @@ util::Status AeadConfig::Register() {
   status = Registry::RegisterKeyManager(
       absl::make_unique<XChaCha20Poly1305KeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<KmsAeadKeyManager>(), true);
   if (!status.ok()) return status;
   status = Registry::RegisterKeyManager(

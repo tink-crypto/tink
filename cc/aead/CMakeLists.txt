@@ -188,21 +188,16 @@ tink_cc_library(
 tink_cc_library(
   NAME kms_aead_key_manager
   SRCS
-    kms_aead_key_manager.cc
     kms_aead_key_manager.h
   DEPS
     tink::core::aead
-    tink::core::key_manager
-    tink::core::key_manager_base
-    tink::core::kms_client
+    tink::core::key_type_manager
     tink::core::kms_clients
-    tink::util::errors
-    tink::util::protobuf_helper
+    tink::util::constants
     tink::util::status
     tink::util::statusor
     tink::util::validation
     tink::proto::kms_aead_cc_proto
-    tink::proto::tink_cc_proto
     absl::strings
 )
 

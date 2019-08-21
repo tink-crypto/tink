@@ -208,23 +208,18 @@ cc_library(
 
 cc_library(
     name = "kms_aead_key_manager",
-    srcs = ["kms_aead_key_manager.cc"],
     hdrs = ["kms_aead_key_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
         "//cc:aead",
-        "//cc:key_manager",
-        "//cc:key_manager_base",
-        "//cc:kms_client",
+        "//cc:core/key_type_manager",
         "//cc:kms_clients",
-        "//cc/util:errors",
-        "//cc/util:protobuf_helper",
+        "//cc/util:constants",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:validation",
         "//proto:kms_aead_cc_proto",
-        "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
 )

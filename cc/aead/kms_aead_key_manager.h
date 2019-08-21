@@ -19,45 +19,71 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/core/key_manager_base.h"
-#include "tink/key_manager.h"
+#include "tink/core/key_type_manager.h"
+#include "tink/kms_clients.h"
+#include "tink/util/constants.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/validation.h"
 #include "proto/kms_aead.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
 class KmsAeadKeyManager
-    : public KeyManagerBase<Aead, google::crypto::tink::KmsAeadKey> {
+    : public KeyTypeManager<google::crypto::tink::KmsAeadKey,
+                            google::crypto::tink::KmsAeadKeyFormat,
+                            List<Aead>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class AeadFactory : public PrimitiveFactory<Aead> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
+        const google::crypto::tink::KmsAeadKey& kms_aead_key) const override {
+      const auto& key_uri = kms_aead_key.params().key_uri();
+      auto kms_client_result = KmsClients::Get(key_uri);
+      if (!kms_client_result.ok()) return kms_client_result.status();
+      return kms_client_result.ValueOrDie()->GetAead(key_uri);
+    }
+  };
 
-  KmsAeadKeyManager();
+  KmsAeadKeyManager() : KeyTypeManager(absl::make_unique<AeadFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::REMOTE;
+  }
 
-  ~KmsAeadKeyManager() override {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveFromKey(
-      const google::crypto::tink::KmsAeadKey& key) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::KmsAeadKey& key) const override {
+    crypto::tink::util::Status status =
+        ValidateVersion(key.version(), get_version());
+    if (!status.ok()) return status;
+    return ValidateKeyFormat(key.params());
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const google::crypto::tink::KmsAeadKeyFormat& key_format) const override {
+    if (key_format.key_uri().empty()) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "Missing key_uri.");
+    }
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::StatusOr<google::crypto::tink::KmsAeadKey> CreateKey(
+      const google::crypto::tink::KmsAeadKeyFormat& key_format) const override {
+    google::crypto::tink::KmsAeadKey kms_aead_key;
+    kms_aead_key.set_version(get_version());
+    *(kms_aead_key.mutable_params()) = key_format;
+    return kms_aead_key;
+  }
 
  private:
-  friend class KmsAeadKeyFactory;
-
-  std::unique_ptr<KeyFactory> key_factory_;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::KmsAeadKey& key);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::KmsAeadKeyFormat& key_format);
+  const std::string key_type_ = absl::StrCat(
+      kTypeGoogleapisCom, google::crypto::tink::KmsAeadKey().GetTypeName());
 };
 
 }  // namespace tink
