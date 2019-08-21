@@ -1,17 +1,18 @@
 # Tink for Obj-C HOW-TO
 
-The following subsections present instructions and/or Obj-C snippets for some
-common tasks in [Tink](https://github.com/google/tink).
+This document contains instructions and Obj-C code snippets for common tasks in
+[Tink](https://github.com/google/tink).
 
-## Installing Tink
+## Setup intructions
 
 Tink is released as a [Cocoapod](https://cocoapods.org/). It can be installed by
-using the pod command as described below.
+using the pod command as described below, which is the recommended way to use
+Tink.
 
-We also provide step-by-step instructions on how to build and use Tink from
-source. However, Cocoapods is the recommended way to use Tink.
+We also provide step-by-step instructions on building and using Tink from
+source.
 
-#### Supported Platforms
+#### Supported platforms
 
  * iOS 9.0 or newer
  * Xcode 9.2 or newer
@@ -29,17 +30,18 @@ source. However, Cocoapods is the recommended way to use Tink.
    ```sh
    pod init
    ```
+
    This command creates a file called Podfile.
 
 3. Edit the Podfile.
 
-   For a stable release, add the following line:
+   For the current stable release, add the following line:
 
    ```
    pod 'Tink'
    ```
 
-   For a pre-release use the following line instead:
+   For a particular version, use a line like the following instead:
 
    ```
    pod 'Tink', '1.2.0-rc2'
@@ -69,7 +71,7 @@ source. However, Cocoapods is the recommended way to use Tink.
    #import "Tink/TINKAead.h"
    ```
 
-### Installing from the source
+### Installing from source
 
 #### Prerequisites
 
@@ -81,13 +83,13 @@ installed:
 
 #### Step-by-step instructions
 
-1.  Clone Tink from GitHub:
+1.  Clone Tink from GitHub.
 
     ```sh
     git clone https://github.com/google/tink/
     ```
 
-2.  Build the library and generate a static iOS framework:
+2.  Build the library and generate a static iOS framework.
 
     ```sh
     cd tink
@@ -109,7 +111,7 @@ installed:
         the App Store you should generate a framework that includes only the ARM
         architectures and link it to your binary.
 
-3.  Unzip Tink\_framework.zip into your Xcode project folder:
+3.  Unzip Tink\_framework.zip into your Xcode project folder.
 
     ```sh
     unzip bazel-bin/objc/Tink_framework.zip -d /path/to/your/project/folder/
@@ -129,10 +131,21 @@ installed:
 
     *   Find `Other Linker Flags` and add `-lc++`
 
-5.  Start using Tink in your code:
+5.  Start using Tink in your code.
 
-    Add `#import "Tink/Tink.h"` in your code and start using
-    Tink.
+   You can import the umbrella header:
+
+   ```objc
+   #import "Tink/Tink.h"
+   ```
+
+   Or individual headers:
+
+   ```objc
+   #import "Tink/TINKAeadConfig.h"
+   #import "Tink/TINKAeadKeyTemplate.h"
+   #import "Tink/TINKAead.h"
+   ```
 
 ## Initializing Tink
 
@@ -175,17 +188,17 @@ To use only implementations of the AEAD primitive:
     }
 ```
 
-## Generating New Key(set)s
+## Generating new keys and keysets
 
-To avoid accidental leakage of sensitive key material one should be careful
-mixing keyset generation and usage in code. To support the separation
-between these activities the Tink package provides a command-line tool called
+To avoid accidental leakage of sensitive key material, you should avoid mixing
+keyset generation and usage in code. To support the separation between these
+activities the Tink package provides a command-line tool called
 [Tinkey](TINKEY.md), which can be used for common key management tasks.
 
 Still, if there is a need to generate a KeysetHandle with fresh key material
 directly in Obj-C code, one can use
 [`TINKKeysetHandle`](https://github.com/google/tink/blob/master/objc/TINKKeysetHandle.h)
-with one of the available KeyTemplates (AeadKeyTemplate, HybridKeyTemplate etc):
+with one of the available KeyTemplates (AeadKeyTemplate, HybridKeyTemplate, etc.):
 
 ```objc
     #import "Tink/TINKAeadKeyTemplate.h"
@@ -203,7 +216,7 @@ with one of the available KeyTemplates (AeadKeyTemplate, HybridKeyTemplate etc):
     }
 ```
 
-## Storing Keysets
+## Storing keysets
 
 After generating key material, you might want to persist it to a storage system.
 Tink supports storing keysets to the iOS keychain where they remain encrypted:
@@ -231,7 +244,7 @@ The keysets are stored in the keychain with the following options set:
 These settings prevent the keysets from leaving the device and keep them
 encrypted until the device is unlocked once.
 
-## Loading Existing Keysets
+## Loading existing keysets
 
 To load keysets from the iOS keychain:
 
@@ -275,27 +288,29 @@ Instead, use the iOS keychain as demonstrated above.
     }
 ```
 
-## Obtaining and Using Primitives
+## Obtaining and using primitives
 
 [_Primitives_](PRIMITIVES.md) represent cryptographic operations offered by
 Tink, hence they form the core of Tink API. A primitive is just an interface
 that specifies what operations are offered by the primitive. A primitive can
-have multiple implementations, and user chooses a desired implementation by
-using a key of corresponding type (see the
-[this section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
-A list of primitives and their implemenations currently supported by Tink in
-Objective-C can be found [here](PRIMITIVES.md#objective-c).
+have multiple implementations, and you choose a desired implementation by using
+a key of corresponding type (see the [this
+section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).  A list of
+primitives and their implemenations currently supported by Tink in Objective-C
+can be found [here](PRIMITIVES.md#objective-c).
 
-A Tink user accesses implementations of a primitive via a factory that
-corresponds to the primitive: AEAD via `TINKAeadFactory`, MAC via
-`TINKMacFactory`, etc. where each factory offers corresponding
-`primitiveWithKeysetHandle:error:` methods.
+You access implementations of a primitive via a factory that corresponds to the
+primitive which offers corresponding `primitiveWithKeysetHandle:error:` methods.
 
-### Symmetric Key Encryption
+*  AEAD via `TINKAeadFactory`
+*  MAC via `TINKMacFactory`
+*  etc.
 
-Here is how you can obtain and use an [AEAD (Authenticated Encryption with
-Associated Data)](PRIMITIVES.md#authenticated-encryption-with-associated-data)
-primitive to encrypt or decrypt data:
+### Symmetric key encryption
+
+You can use an [AEAD (Authenticated Encryption with Associated
+Data)](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive to
+encrypt or decrypt data:
 
 ```objc
     #import "Tink/TINKAead.h"
@@ -319,7 +334,7 @@ primitive to encrypt or decrypt data:
     }
 ```
 
-### Hybrid Encryption
+### Hybrid encryption
 
 To decrypt using [a combination of public key encryption and symmetric key
 encryption](PRIMITIVES.md#hybrid-encryption):
