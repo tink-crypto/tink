@@ -23,6 +23,8 @@ option java_multiple_files = true;
 option objc_class_prefix = "TINKPB";
 option go_package = "github.com/google/tink/proto/xchacha20_poly1305_go_proto";
 
+message XChaCha20Poly1305KeyFormat {}
+
 // key_type: type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key
 message XChaCha20Poly1305Key {
   uint32 version = 1;

@@ -37,11 +37,12 @@ using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::XChaCha20Poly1305Key;
+using google::crypto::tink::XChaCha20Poly1305KeyFormat;
 
 const int kKeySizeInBytes = 32;
 
 class XChaCha20Poly1305KeyFactory
-    : public KeyFactoryBase<XChaCha20Poly1305Key, google::crypto::tink::Empty> {
+    : public KeyFactoryBase<XChaCha20Poly1305Key, XChaCha20Poly1305KeyFormat> {
  public:
   XChaCha20Poly1305KeyFactory() {}
 
@@ -51,7 +52,7 @@ class XChaCha20Poly1305KeyFactory
 
  protected:
   StatusOr<std::unique_ptr<XChaCha20Poly1305Key>> NewKeyFromFormat(
-      const google::crypto::tink::Empty&) const override {
+      const google::crypto::tink::XChaCha20Poly1305KeyFormat&) const override {
     auto xchacha20_poly1305_key = absl::make_unique<XChaCha20Poly1305Key>();
     xchacha20_poly1305_key->set_version(XChaCha20Poly1305KeyManager::kVersion);
     xchacha20_poly1305_key->set_key_value(
