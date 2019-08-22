@@ -428,6 +428,8 @@ tink_cc_test(
   DEPS
     tink::aead::aead_config
     tink::aead::aead_key_templates
+    tink::aead::aes_eax_key_manager
+    tink::aead::kms_envelope_aead
     tink::aead::kms_envelope_aead_key_manager
     tink::core::aead
     tink::core::kms_client
@@ -437,7 +439,9 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    tink::subtle::aead_test_util
     tink::proto::aes_eax_cc_proto
     tink::proto::kms_envelope_cc_proto
     tink::proto::tink_cc_proto
+    gmock
 )
