@@ -66,7 +66,7 @@ util::Status AeadConfig::Register() {
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<KmsAeadKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<KmsEnvelopeAeadKeyManager>(), true);
   if (!status.ok()) return status;
 

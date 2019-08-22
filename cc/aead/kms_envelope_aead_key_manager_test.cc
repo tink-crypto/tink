@@ -17,6 +17,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/registry.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
@@ -55,52 +56,57 @@ class KmsEnvelopeAeadKeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(KmsEnvelopeAeadKeyManagerTest, Basic) {
-  KmsEnvelopeAeadKeyManager key_manager;
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerTest, KeyDataErrors_BadKeyType) {
-  KmsEnvelopeAeadKeyManager key_manager;
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   KeyData key_data;
   std::string bad_key_type =
       "type.googleapis.com/google.crypto.tink.SomeOtherKey";
   key_data.set_type_url(bad_key_type);
-  auto result = key_manager.GetPrimitive(key_data);
+  auto result = key_manager->GetPrimitive(key_data);
   EXPECT_THAT(result.status(),
       StatusIs(util::error::INVALID_ARGUMENT,
                AllOf(HasSubstr(bad_key_type), HasSubstr("not supported"))));
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerTest, KeyDataErrors_BadKeyValue) {
-  KmsEnvelopeAeadKeyManager key_manager;
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   KeyData key_data;
   key_data.set_type_url(env_aead_key_type_);
   key_data.set_value("some bad serialized proto");
-  auto result = key_manager.GetPrimitive(key_data);
+  auto result = key_manager->GetPrimitive(key_data);
   EXPECT_THAT(result.status(),
       StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("not parse")));
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerTest, KeyDataErrors_BadVersion) {
-  KmsEnvelopeAeadKeyManager key_manager;
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   KeyData key_data;
   KmsEnvelopeAeadKey key;
   key.set_version(1);
   key_data.set_type_url(env_aead_key_type_);
   key_data.set_value(key.SerializeAsString());
-  auto result = key_manager.GetPrimitive(key_data);
+  auto result = key_manager->GetPrimitive(key_data);
   EXPECT_THAT(result.status(),
       StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerTest, KeyMessageErrors_BadProtobuf) {
-  KmsEnvelopeAeadKeyManager key_manager;
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   AesEaxKey key;
-  auto result = key_manager.GetPrimitive(key);
+  auto result = key_manager->GetPrimitive(key);
   EXPECT_THAT(result.status(),
       StatusIs(util::error::INVALID_ARGUMENT,
                AllOf(HasSubstr("AesEaxKey"), HasSubstr("not supported"))));
@@ -123,7 +129,8 @@ TEST_F(KmsEnvelopeAeadKeyManagerTest, Primitives) {
       absl::make_unique<DummyKmsClient>(uri_2_prefix, ""));
   EXPECT_THAT(status, IsOk());
 
-  KmsEnvelopeAeadKeyManager key_manager;
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   KmsEnvelopeAeadKey key;
   key.set_version(0);
   key.mutable_params()->set_kek_uri(uri_1);
@@ -131,7 +138,7 @@ TEST_F(KmsEnvelopeAeadKeyManagerTest, Primitives) {
       AeadKeyTemplates::Aes128Eax();
 
   {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_THAT(result.status(), IsOk());
     auto envelope_aead = std::move(result.ValueOrDie());
     auto encrypt_result = envelope_aead->Encrypt(plaintext, aad);
@@ -147,7 +154,7 @@ TEST_F(KmsEnvelopeAeadKeyManagerTest, Primitives) {
     KeyData key_data;
     key_data.set_type_url(env_aead_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_THAT(result.status(), IsOk());
     auto envelope_aead = std::move(result.ValueOrDie());
     auto encrypt_result = envelope_aead->Encrypt(plaintext, aad);
@@ -161,7 +168,7 @@ TEST_F(KmsEnvelopeAeadKeyManagerTest, Primitives) {
 
   {  // Using key message and a KmsClient not bound to a specific key.
     key.mutable_params()->set_kek_uri(uri_2);
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_THAT(result.status(), IsOk());
     auto envelope_aead = std::move(result.ValueOrDie());
     auto encrypt_result = envelope_aead->Encrypt(plaintext, aad);
@@ -183,7 +190,8 @@ TEST_F(KmsEnvelopeAeadKeyManagerTest, PrimitivesErrors) {
       absl::make_unique<DummyKmsClient>(uri_1_prefix, uri_1));
   EXPECT_THAT(status, IsOk());
 
-  KmsEnvelopeAeadKeyManager key_manager;
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
   KmsEnvelopeAeadKey key;
   key.set_version(0);
   key.mutable_params()->set_kek_uri(uri_1);
@@ -191,7 +199,7 @@ TEST_F(KmsEnvelopeAeadKeyManagerTest, PrimitivesErrors) {
       AeadKeyTemplates::Aes128Eax();
 
   {  // No KeyManager for DEK template.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_THAT(result.status(),
                 StatusIs(util::error::NOT_FOUND,
                          AllOf(HasSubstr("No manager"),
@@ -200,15 +208,16 @@ TEST_F(KmsEnvelopeAeadKeyManagerTest, PrimitivesErrors) {
 
   {  // A key with an unknown KEK URI.
     key.mutable_params()->set_kek_uri("some unknown kek uri");
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_THAT(result.status(), StatusIs(util::error::NOT_FOUND,
                                           HasSubstr("KmsClient")));
   }
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerTest, NewKeyErrors) {
-  KmsEnvelopeAeadKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   {  // Bad key format.
     AesEaxKeyFormat key_format;
@@ -227,8 +236,9 @@ TEST_F(KmsEnvelopeAeadKeyManagerTest, NewKeyErrors) {
 }
 
 TEST_F(KmsEnvelopeAeadKeyManagerTest, NewKeyBasic) {
-  KmsEnvelopeAeadKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   KmsEnvelopeAeadKeyFormat key_format;
   key_format.set_kek_uri("some key uri");
 

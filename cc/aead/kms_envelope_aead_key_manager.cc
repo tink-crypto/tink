@@ -17,7 +17,6 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/key_manager.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
 #include "tink/aead/kms_envelope_aead.h"
@@ -27,55 +26,15 @@
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/kms_envelope.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::KmsEnvelopeAeadKey;
-using ::google::crypto::tink::KmsEnvelopeAeadKeyFormat;
-using ::google::crypto::tink::KeyData;
 
-class KmsEnvelopeAeadKeyFactory :
-      public KeyFactoryBase<KmsEnvelopeAeadKey, KmsEnvelopeAeadKeyFormat> {
- public:
-  KmsEnvelopeAeadKeyFactory() {}
-
-  KeyData::KeyMaterialType key_material_type() const override {
-    return KeyData::REMOTE;
-  }
-
- protected:
-  StatusOr<std::unique_ptr<KmsEnvelopeAeadKey>> NewKeyFromFormat(
-      const KmsEnvelopeAeadKeyFormat& key_format) const override {
-    Status status = KmsEnvelopeAeadKeyManager::Validate(key_format);
-    if (!status.ok()) return status;
-    auto key = absl::make_unique<KmsEnvelopeAeadKey>();
-    key->set_version(KmsEnvelopeAeadKeyManager::kVersion);
-    *(key->mutable_params()) = key_format;
-    return std::move(key);
-  }
-};
-
-constexpr uint32_t KmsEnvelopeAeadKeyManager::kVersion;
-
-KmsEnvelopeAeadKeyManager::KmsEnvelopeAeadKeyManager()
-    : key_factory_(absl::make_unique<KmsEnvelopeAeadKeyFactory>()) {}
-
-uint32_t KmsEnvelopeAeadKeyManager::get_version() const {
-  return kVersion;
-}
-
-const KeyFactory& KmsEnvelopeAeadKeyManager::get_key_factory() const {
-  return *key_factory_;
-}
-
-StatusOr<std::unique_ptr<Aead>> KmsEnvelopeAeadKeyManager::GetPrimitiveFromKey(
+StatusOr<std::unique_ptr<Aead>> KmsEnvelopeAeadKeyManager::AeadFactory::Create(
     const KmsEnvelopeAeadKey& key) const {
-  Status status = Validate(key);
-  if (!status.ok()) return status;
   const auto& kek_uri = key.params().kek_uri();
   auto kms_client_result = KmsClients::Get(kek_uri);
   if (!kms_client_result.ok()) return kms_client_result.status();
@@ -83,22 +42,6 @@ StatusOr<std::unique_ptr<Aead>> KmsEnvelopeAeadKeyManager::GetPrimitiveFromKey(
   if (!aead_result.ok()) return aead_result.status();
   return KmsEnvelopeAead::New(key.params().dek_template(),
                               std::move(aead_result.ValueOrDie()));
-}
-
-// static
-Status KmsEnvelopeAeadKeyManager::Validate(const KmsEnvelopeAeadKey& key) {
-  Status status = ValidateVersion(key.version(), kVersion);
-  if (!status.ok()) return status;
-  return Validate(key.params());
-}
-
-// static
-Status KmsEnvelopeAeadKeyManager::Validate(
-    const KmsEnvelopeAeadKeyFormat& key_format) {
-  if (key_format.kek_uri().empty()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing kek_uri.");
-  }
-  return util::OkStatus();
 }
 
 }  // namespace tink

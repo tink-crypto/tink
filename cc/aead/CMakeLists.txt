@@ -222,18 +222,17 @@ tink_cc_library(
     absl::memory
     absl::strings
     tink::core::aead
-    tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::core::kms_client
     tink::core::kms_clients
     tink::aead::kms_envelope_aead
+    tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
     tink::util::validation
     tink::proto::kms_envelope_cc_proto
-    tink::proto::tink_cc_proto
 )
 
 # tests
