@@ -656,6 +656,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
+        ":nonce_based_streaming_aead",
         ":stream_segment_decrypter",
         ":stream_segment_encrypter",
         "//cc:input_stream",
@@ -710,6 +711,25 @@ cc_library(
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
         "//cc/util:status",
+    ],
+)
+
+cc_library(
+    name = "decrypting_random_access_stream",
+    srcs = ["decrypting_random_access_stream.cc"],
+    hdrs = ["decrypting_random_access_stream.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":stream_segment_decrypter",
+        "//cc:random_access_stream",
+        "//cc/util:buffer",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/synchronization",
     ],
 )
 
@@ -1320,6 +1340,27 @@ cc_test(
         ":hybrid_test_util",
         "//cc/util:test_matchers",
         "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "decrypting_random_access_stream_test",
+    srcs = ["decrypting_random_access_stream_test.cc"],
+    deps = [
+        ":decrypting_random_access_stream",
+        "//cc:output_stream",
+        "//cc:random_access_stream",
+        "//cc:streaming_aead",
+        "//cc/subtle:random",
+        "//cc/subtle:test_util",
+        "//cc/util:file_random_access_stream",
+        "//cc/util:ostream_output_stream",
+        "//cc/util:status",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

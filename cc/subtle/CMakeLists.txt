@@ -575,6 +575,7 @@ tink_cc_library(
     test_util.cc
     test_util.h
   DEPS
+    tink::subtle::nonce_based_streaming_aead
     tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::core::input_stream
@@ -620,6 +621,23 @@ tink_cc_library(
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::util::status
+)
+
+tink_cc_library(
+  NAME decrypting_random_access_stream
+  SRCS
+    decrypting_random_access_stream.cc
+    decrypting_random_access_stream.h
+  DEPS
+    absl::core_headers
+    absl::memory
+    absl::synchronization
+    tink::subtle::stream_segment_decrypter
+    tink::core::random_access_stream
+    tink::util::buffer
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
 )
 
 # tests
@@ -1096,3 +1114,21 @@ tink_cc_test(
     gmock
 )
 
+tink_cc_test(
+  NAME decrypting_random_access_stream_test
+  SRCS decrypting_random_access_stream_test.cc
+  DEPS
+    absl::memory
+    absl::strings
+    tink::core::output_stream
+    tink::core::random_access_stream
+    tink::core::streaming_aead
+    tink::subtle::decrypting_random_access_stream
+    tink::subtle::random
+    tink::subtle::test_util
+    tink::util::file_random_access_stream
+    tink::util::ostream_output_stream
+    tink::util::status
+    tink::util::test_matchers
+    tink::util::test_util
+)
