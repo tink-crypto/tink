@@ -397,10 +397,9 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
-    tink::proto::aes_eax_cc_proto
+    tink::subtle::aead_test_util
     tink::proto::kms_aead_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
+    gmock
 )
 
 tink_cc_test(
