@@ -19,7 +19,6 @@ const Aead = goog.require('tink.Aead');
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
-const Catalogue = goog.require('tink.Catalogue');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
@@ -51,76 +50,6 @@ const userAgent = goog.require('goog.userAgent');
 testSuite({
   async tearDown() {
     Registry.reset();
-  },
-
-  /////////////////////////////////////////////////////////////////////////////
-  // tests for addCatalogue method
-  testAddCatalogue_nullCatalogue() {
-    try {
-      Registry.addCatalogue('some catalogue', null);
-    } catch (e) {
-      assertEquals(ExceptionText.nullCatalogue(), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
-  testAddCatalogue_emptyName() {
-    try {
-      Registry.addCatalogue('', new DummyCatalogue1());
-    } catch (e) {
-      assertEquals(ExceptionText.missingCatalogueName(), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
-  testAddCatalogue_overwritingAttempt() {
-    try {
-      Registry.addCatalogue('some catalogue', new DummyCatalogue1());
-      Registry.addCatalogue('some catalogue', new DummyCatalogue2());
-    } catch (e) {
-      assertEquals(ExceptionText.overwrittingCatalogueAttempt(), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
-  testAddCatalogue_shouldWork() {
-    for (let i = 0; i < 10; i++) {
-      Registry.addCatalogue('first' + i.toString(), new DummyCatalogue1());
-      Registry.addCatalogue('second' + i.toString(), new DummyCatalogue2());
-      Registry.addCatalogue('third' + i.toString(), new DummyCatalogue3());
-    }
-  },
-
-  /////////////////////////////////////////////////////////////////////////////
-  // tests for getCatalogue method
-  testGetCatalogue_missingCatalogue() {
-    const name = 'first';
-
-    try {
-      Registry.getCatalogue(name);
-    } catch (e) {
-      assertEquals(ExceptionText.catalogueMissing(name), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
-  testGetCatalogue_whichWasAdded() {
-    const numberOfCatalogues = 10;
-    let catalogueNames = [];
-
-    for (let i = 0; i < numberOfCatalogues; i++) {
-      catalogueNames.push('catalogue' + i.toString());
-      Registry.addCatalogue(catalogueNames[i], new DummyCatalogue1());
-    }
-
-    for (let i = 0; i < numberOfCatalogues; i++) {
-      const result = Registry.getCatalogue(catalogueNames[i]);
-      assertTrue(result instanceof DummyCatalogue1);
-    }
   },
 
   /////////////////////////////////////////////////////////////////////////////
@@ -660,31 +589,6 @@ class ExceptionText {
         ' has not been registered.';
   }
 
-  /** @return {string} */
-  static nullCatalogue() {
-    return 'CustomError: Catalogue cannot be null.';
-  }
-
-  /** @return {string} */
-  static missingCatalogueName() {
-    return 'CustomError: Catalogue must have name.';
-  }
-
-  /** @return {string} */
-  static overwrittingCatalogueAttempt() {
-    return 'CustomError: Catalogue name already exists.';
-  }
-
-  /**
-   * @param {string} catalogueName
-   *
-   * @return {string}
-   */
-  static catalogueMissing(catalogueName) {
-    return 'CustomError: Catalogue with name ' + catalogueName +
-        ' has not been added.';
-  }
-
   /**
    * @return {string}
    */
@@ -806,47 +710,6 @@ const createAesCtrHmacAeadTestKeyTemplate = function() {
           .setValue(keyFormat.serializeBinary());
   return keyTemplate;
 };
-
-
-// Catalogues classes for testing purposes
-/**
- * @final
- * @implements {Catalogue}
- */
-class DummyCatalogue1 {
-  /**
-   * @override
-   */
-  getKeyManager(typeUrl, primitiveName, minVersion) {
-    throw new SecurityException('Not implemented, only for testing purposes.');
-  }
-}
-
-/**
- * @final
- * @implements {Catalogue}
- */
-class DummyCatalogue2 {
-  /**
-   * @override
-   */
-  getKeyManager(typeUrl, primitiveName, minVersion) {
-    throw new SecurityException('Not implemented, only for testing purposes.');
-  }
-}
-
-/**
- * @final
- * @implements {Catalogue}
- */
-class DummyCatalogue3 {
-  /**
-   * @override
-   */
-  getKeyManager(typeUrl, primitiveName, minVersion) {
-    throw new SecurityException('Not implemented, only for testing purposes.');
-  }
-}
 
 // Key factory and key manager classes used in tests
 /**

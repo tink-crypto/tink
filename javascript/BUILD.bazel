@@ -115,23 +115,11 @@ closure_js_library(
 )
 
 closure_js_library(
-    name = "catalogue",
-    srcs = [
-        "catalogue.js",
-    ],
-    deps = [
-        ":key_manager",
-        "@io_bazel_rules_closure//closure/library",
-    ],
-)
-
-closure_js_library(
     name = "registry",
     srcs = [
         "registry.js",
     ],
     deps = [
-        ":catalogue",
         ":key_manager",
         ":primitive_set",
         ":primitive_wrapper",
@@ -165,21 +153,6 @@ closure_js_library(
         "//javascript/subtle",
         "//proto:common_closure_proto",
         "//proto:tink_closure_proto",
-        "@io_bazel_rules_closure//closure/library",
-    ],
-)
-
-closure_js_library(
-    name = "config",
-    srcs = [
-        "config.js",
-    ],
-    deps = [
-        ":catalogue",
-        ":key_manager",
-        ":registry",
-        "//javascript/exception",
-        "//proto:config_closure_proto",
         "@io_bazel_rules_closure//closure/library",
     ],
 )

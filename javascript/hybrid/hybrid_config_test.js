@@ -50,9 +50,7 @@ testSuite({
   },
 
   testConstants() {
-    assertEquals(ENCRYPT_CATALOGUE_NAME, HybridConfig.ENCRYPT_CATALOGUE_NAME);
     assertEquals(ENCRYPT_PRIMITIVE_NAME, HybridConfig.ENCRYPT_PRIMITIVE_NAME);
-    assertEquals(DECRYPT_CATALOGUE_NAME, HybridConfig.DECRYPT_CATALOGUE_NAME);
     assertEquals(DECRYPT_PRIMITIVE_NAME, HybridConfig.DECRYPT_PRIMITIVE_NAME);
 
     assertEquals(
@@ -62,56 +60,6 @@ testSuite({
         ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE,
         HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE);
   },
-
-  testLatest() {
-    // Generate registry configuration and check its name.
-    const registryConfig = HybridConfig.latest();
-    assertEquals(CONFIG_NAME, registryConfig.getConfigName());
-
-    // Verify that it contains entries for all supported key types and nothing
-    // else. Moreover check the parameters of each generated entry.
-    const keyTypeEntryList = registryConfig.getEntryList();
-    assertEquals(NUMBER_OF_SUPPORTED_KEY_TYPES, keyTypeEntryList.length);
-
-    let containsEciesAeadHkdfPublicKeyType = false;
-    let containsEciesAeadHkdfPrivateKeyType = false;
-
-    for (let entry of keyTypeEntryList) {
-      const typeUrl = entry.getTypeUrl();
-      switch (typeUrl) {
-        case ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE: {
-          containsEciesAeadHkdfPrivateKeyType = true;
-          assertEquals(DECRYPT_PRIMITIVE_NAME, entry.getPrimitiveName());
-          assertEquals(DECRYPT_CATALOGUE_NAME, entry.getCatalogueName());
-          assertEquals(
-              ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_VERSION,
-              entry.getKeyManagerVersion());
-          assertEquals(true, entry.getNewKeyAllowed());
-          break;
-        }
-
-        case ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE: {
-          containsEciesAeadHkdfPublicKeyType = true;
-          assertEquals(ENCRYPT_PRIMITIVE_NAME, entry.getPrimitiveName());
-          assertEquals(ENCRYPT_CATALOGUE_NAME, entry.getCatalogueName());
-          assertEquals(
-              ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_VERSION,
-              entry.getKeyManagerVersion());
-          assertEquals(true, entry.getNewKeyAllowed());
-          break;
-        }
-
-        default: {
-          assertObjectEquals(null, entry);
-          fail('Contains unknown key type url ' + typeUrl + '.');
-        }
-      }
-    }
-
-    assertTrue(containsEciesAeadHkdfPublicKeyType);
-    assertTrue(containsEciesAeadHkdfPrivateKeyType);
-  },
-
 
   testRegister_correctKeyManagersWereRegistered() {
     HybridConfig.register();
@@ -136,8 +84,8 @@ testSuite({
       HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128CtrHmacSha256()
     ];
     // The following function adds all templates in uncompiled tests, thus if
-    // a new template is added without updating HybridConfig or HybridCatalogue
-    // correctly then at least the uncompiled tests should fail.
+    // a new template is added without updating HybridConfig correctly then at
+    // least the uncompiled tests should fail.
     // But the templates are included also above as the following function does
     // not add anything to the list in compiled code.
     templates =
@@ -168,19 +116,11 @@ testSuite({
 
 // Constants used in tests.
 const ENCRYPT_PRIMITIVE_NAME = 'HybridEncrypt';
-const ENCRYPT_CATALOGUE_NAME = 'TinkHybridEncrypt';
 const DECRYPT_PRIMITIVE_NAME = 'HybridDecrypt';
-const DECRYPT_CATALOGUE_NAME = 'TinkHybridDecrypt';
-const CONFIG_NAME = 'TINK_HYBRID';
-const NUMBER_OF_SUPPORTED_KEY_TYPES = 2;
-
 const ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
-const ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_VERSION = 0;
-
 const ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';
-const ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_VERSION = 0;
 
 /**
  * Creates a keyset containing only the key given by keyData and returns it

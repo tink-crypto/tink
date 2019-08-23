@@ -50,61 +50,12 @@ testSuite({
   },
 
   testConstants() {
-    assertEquals(VERIFY_CATALOGUE_NAME, SignatureConfig.VERIFY_CATALOGUE_NAME);
     assertEquals(VERIFY_PRIMITIVE_NAME, SignatureConfig.VERIFY_PRIMITIVE_NAME);
-    assertEquals(SIGN_CATALOGUE_NAME, SignatureConfig.SIGN_CATALOGUE_NAME);
     assertEquals(SIGN_PRIMITIVE_NAME, SignatureConfig.SIGN_PRIMITIVE_NAME);
 
     assertEquals(ECDSA_PUBLIC_KEY_TYPE, SignatureConfig.ECDSA_PUBLIC_KEY_TYPE);
     assertEquals(
         ECDSA_PRIVATE_KEY_TYPE, SignatureConfig.ECDSA_PRIVATE_KEY_TYPE);
-  },
-
-  testLatest() {
-    // Generate registry configuration and check its name.
-    const registryConfig = SignatureConfig.latest();
-    assertEquals(CONFIG_NAME, registryConfig.getConfigName());
-
-    // Verify that it contains entries for all supported key types and nothing
-    // else. Moreover check the parameters of each generated entry.
-    const keyTypeEntryList = registryConfig.getEntryList();
-    assertEquals(NUMBER_OF_SUPPORTED_KEY_TYPES, keyTypeEntryList.length);
-
-    let containsEcdsaPublicKeyType = false;
-    let containsEcdsaPrivateKeyType = false;
-
-    for (let entry of keyTypeEntryList) {
-      const typeUrl = entry.getTypeUrl();
-      switch (typeUrl) {
-        case ECDSA_PRIVATE_KEY_TYPE: {
-          containsEcdsaPrivateKeyType = true;
-          assertEquals(SIGN_PRIMITIVE_NAME, entry.getPrimitiveName());
-          assertEquals(SIGN_CATALOGUE_NAME, entry.getCatalogueName());
-          assertEquals(
-              ECDSA_PRIVATE_KEY_MANAGER_VERSION, entry.getKeyManagerVersion());
-          assertEquals(true, entry.getNewKeyAllowed());
-          break;
-        }
-
-        case ECDSA_PUBLIC_KEY_TYPE: {
-          containsEcdsaPublicKeyType = true;
-          assertEquals(VERIFY_PRIMITIVE_NAME, entry.getPrimitiveName());
-          assertEquals(VERIFY_CATALOGUE_NAME, entry.getCatalogueName());
-          assertEquals(
-              ECDSA_PUBLIC_KEY_MANAGER_VERSION, entry.getKeyManagerVersion());
-          assertEquals(true, entry.getNewKeyAllowed());
-          break;
-        }
-
-        default: {
-          assertObjectEquals(null, entry);
-          fail('Contains unknown key type url ' + typeUrl + '.');
-        }
-      }
-    }
-
-    assertTrue(containsEcdsaPublicKeyType);
-    assertTrue(containsEcdsaPrivateKeyType);
   },
 
 
@@ -134,10 +85,10 @@ testSuite({
 
     ];
     // The following function adds all templates in uncompiled tests, thus if
-    // a new template is added without updating SignatureConfig or
-    // SignatureCatalogue correctly then at least the uncompiled tests should
-    // fail. But the templates are included also above as the following function
-    // does not add anything to the list in compiled code.
+    // a new template is added without updating SignatureConfig correctly then
+    // at least the uncompiled tests should fail. But the templates are included
+    // also above as the following function does not add anything to the list in
+    // compiled code.
     templates =
         templates.concat(getListOfTemplatesFromSignatureKeyTemplatesClass());
 
@@ -164,19 +115,11 @@ testSuite({
 
 // Constants used in tests.
 const VERIFY_PRIMITIVE_NAME = 'PublicKeyVerify';
-const VERIFY_CATALOGUE_NAME = 'TinkPublicKeyVerify';
 const SIGN_PRIMITIVE_NAME = 'PublicKeySign';
-const SIGN_CATALOGUE_NAME = 'TinkPublicKeySign';
-const CONFIG_NAME = 'TINK_SIGNATURE';
-const NUMBER_OF_SUPPORTED_KEY_TYPES = 2;
-
 const ECDSA_PUBLIC_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
-const ECDSA_PUBLIC_KEY_MANAGER_VERSION = 0;
-
 const ECDSA_PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey';
-const ECDSA_PRIVATE_KEY_MANAGER_VERSION = 0;
 
 /**
  * Creates a keyset containing only the key given by keyData and returns it

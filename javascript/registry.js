@@ -14,7 +14,6 @@
 
 goog.module('tink.Registry');
 
-const Catalogue = goog.require('tink.Catalogue');
 const KeyManager = goog.require('tink.KeyManager');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
@@ -35,62 +34,11 @@ const SecurityException = goog.require('tink.exception.SecurityException');
  *
  * Regular users will not usually work with Registry directly, but via primitive
  * factories, which query Registry for the specific KeyManagers in the
- * background. Registry is public though to enable configurations with custom
- * catalogues (primitives or KeyManagers).
+ * background.
  *
  * @final
  */
 class Registry {
-  /**
-   * Returns a catalogue with the given name.
-   * Throws exception if no catalogue with the given name is found.
-   *
-   * @template P
-   * @static
-   *
-   * @param {string} catalogueName
-   *
-   * @return {!Catalogue<P>}
-   */
-  static getCatalogue(catalogueName) {
-    const catalogue = Registry.nameToCatalogueMap_.get(catalogueName);
-    if (!catalogue) {
-      throw new SecurityException(
-          'Catalogue with name ' + catalogueName + ' has not been added.');
-    }
-    return catalogue;
-  }
-
-  /**
-   * Adds the given catalogue under the specified catalogueName to enable custom
-   * configuration of key types and key managers.
-   *
-   * Adding a custom catalogue should be a one-time operation and fails if there
-   * exists a catalouge with catalogueName.
-   *
-   * @template P
-   * @static
-   *
-   * @param {string} catalogueName
-   * @param {!Catalogue<P>} catalogue
-   */
-  // This function could be async and there would be no problem with concurency
-  // as it does not use await at all. But without async it is more consistent
-  // with Java version.
-  static addCatalogue(catalogueName, catalogue) {
-    if (!catalogueName) {
-      throw new SecurityException('Catalogue must have name.');
-    }
-    if (!catalogue) {
-      throw new SecurityException('Catalogue cannot be null.');
-    }
-    if (Registry.nameToCatalogueMap_.has(catalogueName)) {
-      throw new SecurityException('Catalogue name already exists.');
-    }
-    Registry.nameToCatalogueMap_.set(catalogueName, catalogue);
-  }
-
-
   /**
    * Register the given manager for the given key type. Manager must be
    * non-nullptr. New keys are allowed if not specified.
@@ -246,8 +194,7 @@ class Registry {
 
   /**
    * Resets the registry.
-   * After reset the registry is empty, i.e. it contains neither catalogues
-   * nor key managers.
+   * After reset the registry is empty, i.e. it contains no key managers.
    *
    * This method is only for testing.
    *
@@ -256,7 +203,6 @@ class Registry {
   static reset() {
     Registry.typeToManagerMap_.clear();
     Registry.typeToNewKeyAllowedMap_.clear();
-    Registry.nameToCatalogueMap_.clear();
   }
 
   /**
@@ -342,12 +288,6 @@ Registry.typeToManagerMap_ = new Map();
  * @static @private {!Map<string,boolean>}
  */
 Registry.typeToNewKeyAllowedMap_ = new Map();
-
-// catalogues maps
-/**
- * @static @private {!Map<string,!Catalogue>}
- */
-Registry.nameToCatalogueMap_ = new Map();
 
 // primitive wrappers map
 /**

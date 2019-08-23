@@ -130,11 +130,6 @@ java_lite_proto_library(
     deps = [":config_proto"],
 )
 
-closure_proto_library(
-    name = "config_closure_proto",
-    deps = [":config_proto"],
-)
-
 go_proto_library(
     name = "config_go_proto",
     importpath = "github.com/google/tink/proto/config_go_proto",
