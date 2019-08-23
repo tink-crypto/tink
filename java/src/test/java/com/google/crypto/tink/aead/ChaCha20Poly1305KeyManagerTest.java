@@ -16,21 +16,19 @@
 
 package com.google.crypto.tink.aead;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CryptoFormat;
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.KeyManagerImpl;
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
-import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.Random;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
-import java.util.Set;
 import java.util.TreeSet;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -38,47 +36,107 @@ import org.junit.runners.JUnit4;
 /** Test for ChaCha20Poly1305KeyManager. */
 @RunWith(JUnit4.class)
 public class ChaCha20Poly1305KeyManagerTest {
-  @BeforeClass
-  public static void setUp() throws GeneralSecurityException {
-    AeadConfig.register();
+  @Test
+  public void basics() throws Exception {
+    assertThat(new ChaCha20Poly1305KeyManager().getKeyType())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key");
+    assertThat(new ChaCha20Poly1305KeyManager().getVersion()).isEqualTo(0);
+    assertThat(new ChaCha20Poly1305KeyManager().keyMaterialType())
+        .isEqualTo(KeyMaterialType.SYMMETRIC);
   }
 
   @Test
-  public void testBasic() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.CHACHA20_POLY1305);
-    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
+  public void validateKeyFormat() throws Exception {
+    new ChaCha20Poly1305KeyManager()
+        .keyFactory()
+        .validateKeyFormat(ChaCha20Poly1305KeyFormat.getDefaultInstance());
+  }
+
+
+  @Test
+  public void validateKey_empty() throws Exception {
+    try {
+      new ChaCha20Poly1305KeyManager().validateKey(ChaCha20Poly1305Key.getDefaultInstance());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKey_checkAllLengths() throws Exception {
+    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
+    for (int i = 0; i < 100; i++) {
+      if (i == 32) {
+        manager.validateKey(createChaCha20Poly1305Key(i));
+      } else {
+        try {
+          manager.validateKey(createChaCha20Poly1305Key(i));
+          fail();
+        } catch (GeneralSecurityException e) {
+          // expected
+        }
+      }
+    }
+  }
+
+  @Test
+  public void validateKey_version() throws Exception {
+    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
+
+    try {
+      manager.validateKey(
+          ChaCha20Poly1305Key.newBuilder(createChaCha20Poly1305Key(32)).setVersion(1).build());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void createKey_valid() throws Exception {
+    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
+    manager.validateKey(
+        manager.keyFactory().createKey(ChaCha20Poly1305KeyFormat.getDefaultInstance()));
+  }
+
+  @Test
+  public void createKey_values() throws Exception {
+    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
+    ChaCha20Poly1305Key key =
+        manager.keyFactory().createKey(ChaCha20Poly1305KeyFormat.getDefaultInstance());
+    assertThat(key.getVersion()).isEqualTo(0);
+    assertThat(key.getKeyValue()).hasSize(32);
+  }
+
+  @Test
+  public void createKey_multipleCallsCreateDifferentKeys() throws Exception {
+    TreeSet<String> keys = new TreeSet<>();
+    ChaCha20Poly1305KeyManager.KeyFactory<ChaCha20Poly1305KeyFormat, ChaCha20Poly1305Key> factory =
+        new ChaCha20Poly1305KeyManager().keyFactory();
+    final int numKeys = 1000;
+    for (int i = 0; i < numKeys; ++i) {
+      keys.add(
+          TestUtil.hexEncode(
+              factory.createKey(ChaCha20Poly1305KeyFormat.getDefaultInstance()).toByteArray()));
+    }
+    assertThat(keys).hasSize(numKeys);
   }
 
   @Test
   public void testCiphertextSize() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.CHACHA20_POLY1305);
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead aead =
+        new ChaCha20Poly1305KeyManager().getPrimitive(createChaCha20Poly1305Key(32), Aead.class);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
     byte[] associatedData = "associatedData".getBytes("UTF-8");
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertEquals(
-        CryptoFormat.NON_RAW_PREFIX_SIZE + 12 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */,
-        ciphertext.length);
+    assertEquals(12 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */, ciphertext.length);
   }
 
-  @Test
-  public void testNewKeyMultipleTimes() throws Exception {
-    KeyTemplate keyTemplate = AeadKeyTemplates.CHACHA20_POLY1305;
-    KeyManager<Aead> keyManager =
-        new KeyManagerImpl<>(new ChaCha20Poly1305KeyManager(), Aead.class);
-    Set<String> keys = new TreeSet<String>();
-    // Calls newKey multiple times and make sure that they generate different keys.
-    int numTests = 10;
-    for (int i = 0; i < numTests; i++) {
-      ChaCha20Poly1305Key key = (ChaCha20Poly1305Key) keyManager.newKey(keyTemplate.getValue());
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(32, key.getKeyValue().toByteArray().length);
-
-      KeyData keyData = keyManager.newKeyData(keyTemplate.getValue());
-      key = ChaCha20Poly1305Key.parseFrom(keyData.getValue());
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(32, key.getKeyValue().toByteArray().length);
-    }
-    assertEquals(numTests * 2, keys.size());
+  private ChaCha20Poly1305Key createChaCha20Poly1305Key(int keySize) {
+    return ChaCha20Poly1305Key.newBuilder()
+        .setVersion(0)
+        .setKeyValue(ByteString.copyFrom(Random.randBytes(keySize)))
+        .build();
   }
 }
