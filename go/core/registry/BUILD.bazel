@@ -13,6 +13,7 @@ go_library(
         "registry.go",
     ],
     importpath = "github.com/google/tink/go/core/registry",
+    visibility = ["//visibility:public"],
     deps = [
         "//go/tink:go_default_library",
         "//proto:tink_go_proto",
