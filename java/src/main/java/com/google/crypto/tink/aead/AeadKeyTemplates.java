@@ -134,7 +134,7 @@ public final class AeadKeyTemplates {
    */
   public static final KeyTemplate CHACHA20_POLY1305 =
       KeyTemplate.newBuilder()
-          .setTypeUrl(ChaCha20Poly1305KeyManager.TYPE_URL)
+          .setTypeUrl(new ChaCha20Poly1305KeyManager().getKeyType())
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 

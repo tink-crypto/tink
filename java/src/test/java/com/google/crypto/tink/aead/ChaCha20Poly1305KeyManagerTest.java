@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
@@ -62,7 +64,8 @@ public class ChaCha20Poly1305KeyManagerTest {
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
     KeyTemplate keyTemplate = AeadKeyTemplates.CHACHA20_POLY1305;
-    ChaCha20Poly1305KeyManager keyManager = new ChaCha20Poly1305KeyManager();
+    KeyManager<Aead> keyManager =
+        new KeyManagerImpl<>(new ChaCha20Poly1305KeyManager(), Aead.class);
     Set<String> keys = new TreeSet<String>();
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 10;
