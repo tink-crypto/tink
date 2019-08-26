@@ -39,7 +39,6 @@ using crypto::tink::util::StatusOr;
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaPublicKey;
-using google::crypto::tink::KeyData;
 
 StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::CreateKey(
     const EcdsaKeyFormat& ecdsa_key_format) const {

@@ -16,374 +16,248 @@
 
 #include "tink/signature/ecdsa_sign_key_manager.h"
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "tink/public_key_sign.h"
-#include "tink/registry.h"
-#include "tink/aead/aead_key_templates.h"
-#include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/signature/signature_key_templates.h"
+#include "tink/public_key_verify.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
+#include "tink/subtle/ecdsa_verify_boringssl.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/enums.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
-#include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
-#include "proto/aes_eax.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::AesEaxKey;
-using google::crypto::tink::AesEaxKeyFormat;
-using google::crypto::tink::EcdsaKeyFormat;
-using google::crypto::tink::EcdsaPrivateKey;
-using google::crypto::tink::EcdsaSignatureEncoding;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::HashType;
-using google::crypto::tink::KeyData;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::Enums;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::EcdsaKeyFormat;
+using ::google::crypto::tink::EcdsaParams;
+using ::google::crypto::tink::EcdsaPrivateKey;
+using ::google::crypto::tink::EcdsaPublicKey;
+using ::google::crypto::tink::EcdsaSignatureEncoding;
+using ::google::crypto::tink::EllipticCurveType;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
+using ::testing::Eq;
+using ::testing::Gt;
+using ::testing::HasSubstr;
+using ::testing::Not;
+using ::testing::SizeIs;
 
 namespace {
 
-class EcdsaSignKeyManagerTest : public ::testing::Test {
- protected:
-  std::string key_type_prefix_ = "type.googleapis.com/";
-  std::string ecdsa_sign_key_type_ =
-      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-};
-
-// Checks whether given key is compatible with the given format.
-void CheckNewKey(const EcdsaPrivateKey& ecdsa_key,
-                 const EcdsaKeyFormat& key_format) {
-  EcdsaSignKeyManager sign_key_type_manager;
-  EcdsaVerifyKeyManager verify_key_type_manager;
-  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-      &sign_key_type_manager, &verify_key_type_manager);
-
-  EXPECT_EQ(0, ecdsa_key.version());
-  EXPECT_TRUE(ecdsa_key.has_public_key());
-  EXPECT_GT(ecdsa_key.key_value().length(), 0);
-  EXPECT_EQ(0, ecdsa_key.public_key().version());
-  EXPECT_GT(ecdsa_key.public_key().x().length(), 0);
-  EXPECT_GT(ecdsa_key.public_key().y().length(), 0);
-  EXPECT_EQ(ecdsa_key.public_key().params().SerializeAsString(),
-            key_format.params().SerializeAsString());
-  auto primitive_result = key_manager->GetPrimitive(ecdsa_key);
-  EXPECT_TRUE(primitive_result.ok()) << primitive_result.status();
+TEST(EcdsaSignKeyManagerTest, Basic) {
+  EXPECT_THAT(EcdsaSignKeyManager().get_version(), Eq(0));
+  EXPECT_THAT(EcdsaSignKeyManager().key_material_type(),
+              Eq(KeyData::ASYMMETRIC_PRIVATE));
+  EXPECT_THAT(EcdsaSignKeyManager().get_key_type(),
+              Eq("type.googleapis.com/google.crypto.tink.EcdsaPrivateKey"));
 }
 
-TEST_F(EcdsaSignKeyManagerTest, testBasic) {
-  EcdsaSignKeyManager sign_key_type_manager;
-  EcdsaVerifyKeyManager verify_key_type_manager;
-  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-      &sign_key_type_manager, &verify_key_type_manager);
-
-  EXPECT_EQ(0, key_manager->get_version());
-  EXPECT_EQ("type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
-            key_manager->get_key_type());
-  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
+TEST(EcdsaSignKeyManagerTest, ValidateEmptyKeyFormat) {
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(EcdsaKeyFormat()),
+              Not(IsOk()));
 }
 
-TEST_F(EcdsaSignKeyManagerTest, testKeyDataErrors) {
-  EcdsaSignKeyManager sign_key_type_manager;
-  EcdsaVerifyKeyManager verify_key_type_manager;
-  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-      &sign_key_type_manager, &verify_key_type_manager);
-
-  {  // Bad key type.
-    KeyData key_data;
-    std::string bad_key_type =
-        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-    key_data.set_type_url(bad_key_type);
-    auto result = key_manager->GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
-                        result.status().error_message());
-  }
-
-  {  // Bad key value.
-    KeyData key_data;
-    key_data.set_type_url(ecdsa_sign_key_type_);
-    key_data.set_value("some bad serialized proto");
-    auto result = key_manager->GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad version.
-    KeyData key_data;
-    EcdsaPrivateKey key;
-    key.set_version(1);
-    key_data.set_type_url(ecdsa_sign_key_type_);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager->GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
-                        result.status().error_message());
-  }
-}
-
-TEST_F(EcdsaSignKeyManagerTest, testKeyMessageErrors) {
-  EcdsaSignKeyManager sign_key_type_manager;
-  EcdsaVerifyKeyManager verify_key_type_manager;
-  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-      &sign_key_type_manager, &verify_key_type_manager);
-
-  {  // Bad protobuffer.
-    AesEaxKey key;
-    auto result = key_manager->GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
-
-  {  // Bad elliptic curve.
-    EcdsaPrivateKey key;
-    auto public_key = key.mutable_public_key();
-    public_key->mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
-    public_key->mutable_params()->set_curve(EllipticCurveType::UNKNOWN_CURVE);
-    auto result = key_manager->GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported elliptic curve",
-                        result.status().error_message());
-  }
-
-  {  // Bad hash type for NIST P256.
-    EcdsaPrivateKey key;
-    auto public_key = key.mutable_public_key();
-    public_key->mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
-    public_key->mutable_params()->set_curve(EllipticCurveType::NIST_P256);
-    public_key->mutable_params()->set_hash_type(HashType::SHA512);
-    auto result = key_manager->GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Only SHA256",
-                        result.status().error_message());
-  }
-
-  {  // Bad hash type for NIST P384.
-    EcdsaPrivateKey key;
-    auto public_key = key.mutable_public_key();
-    public_key->mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
-    public_key->mutable_params()->set_curve(EllipticCurveType::NIST_P384);
-    public_key->mutable_params()->set_hash_type(HashType::SHA256);
-    auto result = key_manager->GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Only SHA512",
-                        result.status().error_message());
-  }
-
-  {  // Bad hash type for NIST P521.
-    EcdsaPrivateKey key;
-    auto public_key = key.mutable_public_key();
-    public_key->mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
-    public_key->mutable_params()->set_curve(EllipticCurveType::NIST_P384);
-    public_key->mutable_params()->set_hash_type(HashType::SHA256);
-    auto result = key_manager->GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Only SHA512",
-                        result.status().error_message());
-  }
-}
-
-TEST_F(EcdsaSignKeyManagerTest, testPrimitives) {
-  EcdsaSignatureEncoding encodings[2] = {EcdsaSignatureEncoding::DER,
-                                         EcdsaSignatureEncoding::IEEE_P1363};
-  for (EcdsaSignatureEncoding encoding : encodings) {
-    std::string message = "some message to sign";
-    EcdsaSignKeyManager sign_key_type_manager;
-    EcdsaVerifyKeyManager verify_key_type_manager;
-    auto sign_key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-        &sign_key_type_manager, &verify_key_type_manager);
-    EcdsaPrivateKey key = test::GetEcdsaTestPrivateKey(
-        EllipticCurveType::NIST_P256, HashType::SHA256, encoding);
-
-    {  // Using Key proto.
-      auto result = sign_key_manager->GetPrimitive(key);
-      EXPECT_TRUE(result.ok()) << result.status();
-      auto sign = std::move(result.ValueOrDie());
-      auto signing_result = sign->Sign(message);
-      EXPECT_TRUE(signing_result.ok()) << signing_result.status();
-    }
-
-    {  // Using KeyData proto.
-      KeyData key_data;
-      key_data.set_type_url(ecdsa_sign_key_type_);
-      key_data.set_value(key.SerializeAsString());
-      auto result = sign_key_manager->GetPrimitive(key_data);
-      EXPECT_TRUE(result.ok()) << result.status();
-      auto sign = std::move(result.ValueOrDie());
-      auto signing_result = sign->Sign(message);
-      EXPECT_TRUE(signing_result.ok()) << signing_result.status();
-    }
-  }
-}
-
-TEST_F(EcdsaSignKeyManagerTest, testNewKeyCreation) {
-  EcdsaSignKeyManager sign_key_type_manager;
-  EcdsaVerifyKeyManager verify_key_type_manager;
-  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-      &sign_key_type_manager, &verify_key_type_manager);
-  const KeyFactory& key_factory = key_manager->get_key_factory();
-
-  { // Via NewKey(format_proto).
-    EcdsaKeyFormat key_format;
-    ASSERT_TRUE(key_format.ParseFromString(
-        SignatureKeyTemplates::EcdsaP256().value()));
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    ASSERT_EQ(ecdsa_sign_key_type_, key_type_prefix_ + key->GetTypeName());
-    std::unique_ptr<EcdsaPrivateKey> ecdsa_key(
-        static_cast<EcdsaPrivateKey*>(key.release()));
-    CheckNewKey(*ecdsa_key, key_format);
-  }
-
-  { // Via NewKey(serialized_format_proto).
-    EcdsaKeyFormat key_format;
-    ASSERT_TRUE(key_format.ParseFromString(
-        SignatureKeyTemplates::EcdsaP384().value()));
-    auto result = key_factory.NewKey(key_format.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    ASSERT_EQ(ecdsa_sign_key_type_, key_type_prefix_ + key->GetTypeName());
-    std::unique_ptr<EcdsaPrivateKey> ecdsa_key(
-        static_cast<EcdsaPrivateKey*>(key.release()));
-    CheckNewKey(*ecdsa_key, key_format);
-  }
-
-  { // Via NewKeyData(serialized_format_proto).
-    EcdsaKeyFormat key_format;
-    ASSERT_TRUE(key_format.ParseFromString(
-        SignatureKeyTemplates::EcdsaP521().value()));
-    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key_data = std::move(result.ValueOrDie());
-    EXPECT_EQ(ecdsa_sign_key_type_, key_data->type_url());
-    EXPECT_EQ(KeyData::ASYMMETRIC_PRIVATE, key_data->key_material_type());
-    EcdsaPrivateKey ecdsa_key;
-    ASSERT_TRUE(ecdsa_key.ParseFromString(key_data->value()));
-    CheckNewKey(ecdsa_key, key_format);
-  }
-}
-
-TEST_F(EcdsaSignKeyManagerTest, testPublicKeyExtraction) {
-  EcdsaSignKeyManager sign_key_type_manager;
-  EcdsaVerifyKeyManager verify_key_type_manager;
-  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-      &sign_key_type_manager, &verify_key_type_manager);
-  auto private_key_factory =
-      dynamic_cast<const PrivateKeyFactory*>(&(key_manager->get_key_factory()));
-  ASSERT_NE(private_key_factory, nullptr);
-
-  auto new_key_result = private_key_factory->NewKey(
-      SignatureKeyTemplates::EcdsaP256().value());
-  std::unique_ptr<EcdsaPrivateKey> new_key(
-      reinterpret_cast<EcdsaPrivateKey*>(
-          new_key_result.ValueOrDie().release()));
-  auto public_key_data_result = private_key_factory->GetPublicKeyData(
-      new_key->SerializeAsString());
-  EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
-  auto public_key_data = std::move(public_key_data_result.ValueOrDie());
-  EXPECT_EQ(EcdsaVerifyKeyManager().get_key_type(),
-            public_key_data->type_url());
-  EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
-  EXPECT_EQ(new_key->public_key().SerializeAsString(),
-            public_key_data->value());
-}
-
-TEST_F(EcdsaSignKeyManagerTest, testPublicKeyExtractionErrors) {
-  EcdsaSignKeyManager sign_key_type_manager;
-  EcdsaVerifyKeyManager verify_key_type_manager;
-  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-      &sign_key_type_manager, &verify_key_type_manager);
-  auto private_key_factory =
-      dynamic_cast<const PrivateKeyFactory*>(&(key_manager->get_key_factory()));
-  ASSERT_NE(private_key_factory, nullptr);
-
-  auto public_key_data_result = private_key_factory->GetPublicKeyData(
-      google::crypto::tink::AesGcmKey().SerializeAsString());
-  EXPECT_FALSE(public_key_data_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            public_key_data_result.status().error_code());
-}
-
-TEST_F(EcdsaSignKeyManagerTest, testNewKeyErrors) {
-  EcdsaSignKeyManager sign_key_type_manager;
-  EcdsaVerifyKeyManager verify_key_type_manager;
-  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
-      &sign_key_type_manager, &verify_key_type_manager);
-  const KeyFactory& key_factory = key_manager->get_key_factory();
-
-  // Empty key format.
+EcdsaKeyFormat CreateValidKeyFormat() {
   EcdsaKeyFormat key_format;
-  {
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Missing params",
-                        result.status().error_message());
-  }
-
-  // Wrong encoding.
-  auto params = key_format.mutable_params();
-  {
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported signature encoding",
-                        result.status().error_message());
-  }
-  // Wrong curve
+  EcdsaParams* params = key_format.mutable_params();
+  params->set_hash_type(HashType::SHA256);
+  params->set_curve(EllipticCurveType::NIST_P256);
   params->set_encoding(EcdsaSignatureEncoding::DER);
-  {
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported elliptic curve",
-                        result.status().error_message());
-  }
+  return key_format;
+}
 
-  // Wrong hash for the curve.
+TEST(EcdsaSignKeyManagerTest, ValidateKeyFormat) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), IsOk());
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatUnknownCurve) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  EcdsaParams* params = format.mutable_params();
+  params->set_curve(EllipticCurveType::UNKNOWN_CURVE);
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP256) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  EcdsaParams* params = format.mutable_params();
+  params->set_curve(EllipticCurveType::NIST_P256);
+  params->set_hash_type(HashType::SHA512);
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+  EXPECT_THAT(
+      EcdsaSignKeyManager().ValidateKeyFormat(format),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA256")));
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP384) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  EcdsaParams* params = format.mutable_params();
+  params->set_curve(EllipticCurveType::NIST_P384);
+  params->set_hash_type(HashType::SHA256);
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+  EXPECT_THAT(
+      EcdsaSignKeyManager().ValidateKeyFormat(format),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP521) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  EcdsaParams* params = format.mutable_params();
   params->set_curve(EllipticCurveType::NIST_P521);
-  {
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Only SHA512",
-                        result.status().error_message());
-  }
+  params->set_hash_type(HashType::SHA256);
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
+  EXPECT_THAT(
+      EcdsaSignKeyManager().ValidateKeyFormat(format),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+}
 
-  // Bad serialized format.
-  {
-    auto result = key_factory.NewKey("some bad serialization");
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Could not parse",
-                        result.status().error_message());
-  }
+TEST(EcdsaSignKeyManagerTest, CreateKey) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  StatusOr<EcdsaPrivateKey> key_or = EcdsaSignKeyManager().CreateKey(format);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EcdsaPrivateKey key = key_or.ValueOrDie();
 
-  // Wrong format proto.
-  {
-    AesEaxKeyFormat wrong_key_format;
-    auto result = key_factory.NewKey(wrong_key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "is not supported",
-                        result.status().error_message());
-  }
+  EXPECT_THAT(key.version(), Eq(0));
+
+  EXPECT_THAT(key.public_key().version(), Eq(key.version()));
+  EXPECT_THAT(key.public_key().params().hash_type(),
+              Eq(format.params().hash_type()));
+  EXPECT_THAT(key.public_key().params().curve(), Eq(format.params().curve()));
+  EXPECT_THAT(key.public_key().params().encoding(),
+              Eq(format.params().encoding()));
+
+  EXPECT_THAT(key.public_key().x(), SizeIs(Gt(0)));
+  EXPECT_THAT(key.public_key().y(), SizeIs(Gt(0)));
+
+  EXPECT_THAT(key.key_value(), SizeIs(Gt(0)));
+}
+
+TEST(EcdsaSignKeyManagerTest, CreateKeyValid) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  StatusOr<EcdsaPrivateKey> key_or = EcdsaSignKeyManager().CreateKey(format);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key_or.ValueOrDie()), IsOk());
+}
+
+EcdsaPrivateKey CreateValidKey() {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  return EcdsaSignKeyManager().CreateKey(format).ValueOrDie();
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateKey) {
+  EcdsaPrivateKey key = CreateValidKey();
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), IsOk());
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP256) {
+  EcdsaPrivateKey key = CreateValidKey();
+  EcdsaParams* params = key.mutable_public_key()->mutable_params();
+  params->set_curve(EllipticCurveType::NIST_P256);
+  params->set_hash_type(HashType::SHA512);
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
+  EXPECT_THAT(
+      EcdsaSignKeyManager().ValidateKey(key),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA256")));
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
+  EcdsaPrivateKey key = CreateValidKey();
+  EcdsaParams* params = key.mutable_public_key()->mutable_params();
+  params->set_curve(EllipticCurveType::NIST_P384);
+  params->set_hash_type(HashType::SHA256);
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
+  EXPECT_THAT(
+      EcdsaSignKeyManager().ValidateKey(key),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
+  EcdsaPrivateKey key = CreateValidKey();
+  EcdsaParams* params = key.mutable_public_key()->mutable_params();
+  params->set_curve(EllipticCurveType::NIST_P521);
+  params->set_hash_type(HashType::SHA256);
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
+  EXPECT_THAT(
+      EcdsaSignKeyManager().ValidateKey(key),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+}
+
+TEST(EcdsaSignKeyManagerTest, GetPublicKey) {
+  EcdsaPrivateKey key = CreateValidKey();
+  StatusOr<EcdsaPublicKey> public_key_or =
+      EcdsaSignKeyManager().GetPublicKey(key);
+
+  ASSERT_THAT(public_key_or.status(), IsOk());
+  EcdsaPublicKey public_key = public_key_or.ValueOrDie();
+
+  EXPECT_THAT(public_key.version(), Eq(key.public_key().version()));
+  EXPECT_THAT(public_key.params().hash_type(),
+              Eq(key.public_key().params().hash_type()));
+  EXPECT_THAT(public_key.params().curve(),
+              Eq(key.public_key().params().curve()));
+  EXPECT_THAT(public_key.params().encoding(),
+              Eq(key.public_key().params().encoding()));
+
+  EXPECT_THAT(public_key.x(), Eq(key.public_key().x()));
+  EXPECT_THAT(public_key.y(), Eq(key.public_key().y()));
+}
+
+TEST(EcdsaSignKeyManagerTest, Create) {
+  EcdsaPrivateKey private_key = CreateValidKey();
+  EcdsaPublicKey public_key =
+      EcdsaSignKeyManager().GetPublicKey(private_key).ValueOrDie();
+
+  auto signer_or =
+      EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
+  ASSERT_THAT(signer_or.status(), IsOk());
+
+  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
+  ec_key.pub_x = public_key.x();
+  ec_key.pub_y = public_key.y();
+  auto direct_verifier_or = subtle::EcdsaVerifyBoringSsl::New(
+      ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
+      Enums::ProtoToSubtle(public_key.params().encoding()));
+  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+
+  std::string message = "Some message";
+  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
+                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+              IsOk());
+}
+
+TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
+  EcdsaPrivateKey private_key = CreateValidKey();
+  // Note: we create a new key in the next line.
+  EcdsaPublicKey public_key =
+      EcdsaSignKeyManager().GetPublicKey(CreateValidKey()).ValueOrDie();
+
+  auto signer_or =
+      EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
+  ASSERT_THAT(signer_or.status(), IsOk());
+
+  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
+  ec_key.pub_x = public_key.x();
+  ec_key.pub_y = public_key.y();
+  auto direct_verifier_or = subtle::EcdsaVerifyBoringSsl::New(
+      ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
+      Enums::ProtoToSubtle(public_key.params().encoding()));
+  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+
+  std::string message = "Some message";
+  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
+                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+              Not(IsOk()));
 }
 
 }  // namespace
