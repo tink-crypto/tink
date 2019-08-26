@@ -17,7 +17,6 @@
 #include "tink/signature/ecdsa_verify_key_manager.h"
 
 #include "absl/strings/string_view.h"
-#include "tink/key_manager.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -28,7 +27,6 @@
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/ecdsa.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -36,46 +34,27 @@ namespace tink {
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaParams;
 using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 
-constexpr uint32_t EcdsaVerifyKeyManager::kVersion;
-
-EcdsaVerifyKeyManager::EcdsaVerifyKeyManager()
-    : key_factory_(KeyFactory::AlwaysFailingFactory(
-          util::Status(util::error::UNIMPLEMENTED,
-                       "Operation not supported for public keys, "
-                       "please use the EcdsaSignKeyManager."))) {}
-
-const KeyFactory& EcdsaVerifyKeyManager::get_key_factory() const {
-  return *key_factory_;
-}
-
-uint32_t EcdsaVerifyKeyManager::get_version() const { return kVersion; }
-
 StatusOr<std::unique_ptr<PublicKeyVerify>>
-EcdsaVerifyKeyManager::GetPrimitiveFromKey(
+EcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const EcdsaPublicKey& ecdsa_public_key) const {
-  Status status = Validate(ecdsa_public_key);
-  if (!status.ok()) return status;
   subtle::SubtleUtilBoringSSL::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(ecdsa_public_key.params().curve());
   ec_key.pub_x = ecdsa_public_key.x();
   ec_key.pub_y = ecdsa_public_key.y();
-  auto ecdsa_result = subtle::EcdsaVerifyBoringSsl::New(
+  auto result = subtle::EcdsaVerifyBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(ecdsa_public_key.params().hash_type()),
       Enums::ProtoToSubtle(ecdsa_public_key.params().encoding()));
-  if (!ecdsa_result.ok()) return ecdsa_result.status();
-  std::unique_ptr<PublicKeyVerify> ecdsa(ecdsa_result.ValueOrDie().release());
-  return std::move(ecdsa);
+  if (!result.ok()) return result.status();
+  return {std::move(result.ValueOrDie())};
 }
 
-// static
-Status EcdsaVerifyKeyManager::Validate(const EcdsaParams& params) {
+Status EcdsaVerifyKeyManager::ValidateParams(const EcdsaParams& params) const {
   switch (params.encoding()) {
     case EcdsaSignatureEncoding::DER:  // fall through
     case EcdsaSignatureEncoding::IEEE_P1363:
@@ -108,19 +87,10 @@ Status EcdsaVerifyKeyManager::Validate(const EcdsaParams& params) {
   return Status::OK;
 }
 
-// static
-Status EcdsaVerifyKeyManager::Validate(const EcdsaPublicKey& key) {
-  Status status = ValidateVersion(key.version(), kVersion);
+Status EcdsaVerifyKeyManager::ValidateKey(const EcdsaPublicKey& key) const {
+  Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  return Validate(key.params());
-}
-
-// static
-Status EcdsaVerifyKeyManager::Validate(const EcdsaKeyFormat& key_format) {
-  if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
-  }
-  return Validate(key_format.params());
+  return ValidateParams(key.params());
 }
 
 }  // namespace tink

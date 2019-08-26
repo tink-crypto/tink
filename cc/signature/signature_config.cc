@@ -47,10 +47,8 @@ const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
 util::Status SignatureConfig::Register() {
   // Register key managers.
   // ECDSA
-  auto status = Registry::RegisterKeyManager(
-      absl::make_unique<EcdsaSignKeyManager>(), true);
-  if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  auto status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<EcdsaSignKeyManager>(),
       absl::make_unique<EcdsaVerifyKeyManager>(), true);
   if (!status.ok()) return status;
 

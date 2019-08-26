@@ -19,7 +19,10 @@
 #include "gtest/gtest.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
+#include "tink/core/key_manager_impl.h"
+#include "tink/core/private_key_manager_impl.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
+#include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/ed25519_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
@@ -29,7 +32,6 @@
 #include "proto/empty.pb.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
 #include "proto/rsa_ssa_pss.pb.h"
-
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -65,9 +67,13 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithDerEncoding) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the key manager works with the template.
-    EcdsaSignKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EcdsaSignKeyManager sign_key_type_manager;
+    EcdsaVerifyKeyManager verify_key_type_manager;
+    auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+        &sign_key_type_manager, &verify_key_type_manager);
+
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -87,9 +93,12 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithDerEncoding) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    EcdsaSignKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EcdsaSignKeyManager sign_key_type_manager;
+    EcdsaVerifyKeyManager verify_key_type_manager;
+    auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+        &sign_key_type_manager, &verify_key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -109,9 +118,12 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithDerEncoding) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    EcdsaSignKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EcdsaSignKeyManager sign_key_type_manager;
+    EcdsaVerifyKeyManager verify_key_type_manager;
+    auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+        &sign_key_type_manager, &verify_key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
@@ -136,9 +148,12 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithIeeeEncoding) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the key manager works with the template.
-    EcdsaSignKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EcdsaSignKeyManager sign_key_type_manager;
+    EcdsaVerifyKeyManager verify_key_type_manager;
+    auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+        &sign_key_type_manager, &verify_key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -159,9 +174,12 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithIeeeEncoding) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    EcdsaSignKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EcdsaSignKeyManager sign_key_type_manager;
+    EcdsaVerifyKeyManager verify_key_type_manager;
+    auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+        &sign_key_type_manager, &verify_key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -182,9 +200,12 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithIeeeEncoding) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    EcdsaSignKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EcdsaSignKeyManager sign_key_type_manager;
+    EcdsaVerifyKeyManager verify_key_type_manager;
+    auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+        &sign_key_type_manager, &verify_key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }

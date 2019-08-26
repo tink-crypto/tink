@@ -64,8 +64,7 @@ class PublicKeyVerifyKeyManagerTest(absltest.TestCase):
   def test_new_key_data(self):
     key_template = new_ecdsa_key_template(
         common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER, True)
-    with self.assertRaisesRegex(tink_error.TinkError,
-                                'Operation not supported'):
+    with self.assertRaisesRegex(tink_error.TinkError, 'not supported'):
       self.key_manager.new_key_data(key_template)
 
   def test_verify_success(self):

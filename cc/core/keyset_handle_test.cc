@@ -46,6 +46,7 @@ using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
 using crypto::tink::test::IsOk;
 using crypto::tink::test::StatusIs;
+using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
@@ -298,31 +299,27 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
   }
   { // A keyset with multiple keys.
     EcdsaSignKeyManager key_manager;
-    const KeyFactory& key_factory = key_manager.get_key_factory();
     Keyset keyset;
     int key_count = 3;
 
-    AddTinkKey(EcdsaSignKeyManager::static_key_type(),
+    EcdsaKeyFormat key_format;
+    ASSERT_TRUE(
+        key_format.ParseFromString(SignatureKeyTemplates::EcdsaP256().value()));
+    AddTinkKey(EcdsaSignKeyManager().get_key_type(),
                /* key_id= */ 623628,
-               *(key_factory.NewKey(
-                   SignatureKeyTemplates::EcdsaP256().value()).ValueOrDie()),
-               KeyStatusType::ENABLED,
-               KeyData::ASYMMETRIC_PRIVATE,
-               &keyset);
-    AddLegacyKey(EcdsaSignKeyManager::static_key_type(),
+               key_manager.CreateKey(key_format).ValueOrDie(),
+               KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
+    ASSERT_TRUE(
+        key_format.ParseFromString(SignatureKeyTemplates::EcdsaP384().value()));
+    AddLegacyKey(EcdsaSignKeyManager().get_key_type(),
                  /* key_id= */ 36285,
-                 *(key_factory.NewKey(
-                     SignatureKeyTemplates::EcdsaP384().value()).ValueOrDie()),
-                 KeyStatusType::DISABLED,
-                 KeyData::ASYMMETRIC_PRIVATE,
-                 &keyset);
-    AddRawKey(EcdsaSignKeyManager::static_key_type(),
-              /* key_id= */ 42,
-              *(key_factory.NewKey(
-                  SignatureKeyTemplates::EcdsaP384().value()).ValueOrDie()),
-              KeyStatusType::ENABLED,
-              KeyData::ASYMMETRIC_PRIVATE,
-              &keyset);
+                 key_manager.CreateKey(key_format).ValueOrDie(),
+                 KeyStatusType::DISABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
+    ASSERT_TRUE(
+        key_format.ParseFromString(SignatureKeyTemplates::EcdsaP384().value()));
+    AddRawKey(EcdsaSignKeyManager().get_key_type(),
+              /* key_id= */ 42, key_manager.CreateKey(key_format).ValueOrDie(),
+              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
     keyset.set_primary_key_id(42);
     auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
     auto public_handle_result = handle->GetPublicKeysetHandle();
@@ -352,19 +349,17 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
                         public_handle_result.status().error_message());
   }
   { // A keyset with multiple keys.
-    EcdsaSignKeyManager key_manager;
-    const KeyFactory& key_factory = key_manager.get_key_factory();
     Keyset keyset;
 
+    EcdsaKeyFormat ecdsa_key_format;
+    ASSERT_TRUE(ecdsa_key_format.ParseFromString(
+        SignatureKeyTemplates::EcdsaP256().value()));
     google::crypto::tink::AesGcmKeyFormat aead_key_format;
     aead_key_format.set_key_size(16);
-    AddTinkKey(EcdsaSignKeyManager::static_key_type(),
+    AddTinkKey(EcdsaSignKeyManager().get_key_type(),
                /* key_id= */ 623628,
-               *(key_factory.NewKey(
-                   SignatureKeyTemplates::EcdsaP256().value()).ValueOrDie()),
-               KeyStatusType::ENABLED,
-               KeyData::ASYMMETRIC_PRIVATE,
-               &keyset);
+               EcdsaSignKeyManager().CreateKey(ecdsa_key_format).ValueOrDie(),
+               KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
     AddLegacyKey(AesGcmKeyManager().get_key_type(),
                  /* key_id= */ 42,
                  AesGcmKeyManager().CreateKey(aead_key_format).ValueOrDie(),
