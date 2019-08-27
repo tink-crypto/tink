@@ -30,15 +30,14 @@
 #include "proto/aes_eax.pb.h"
 #include "proto/common.pb.h"
 #include "proto/ed25519.pb.h"
-#include "proto/empty.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
 using google::crypto::tink::AesEaxKey;
+using google::crypto::tink::Ed25519KeyFormat;
 using google::crypto::tink::Ed25519PrivateKey;
-using google::crypto::tink::Empty;
 using google::crypto::tink::KeyData;
 
 namespace {
@@ -178,7 +177,7 @@ TEST_F(Ed25519SignKeyManagerTest, testPublicKeyExtractionErrors) {
 TEST_F(Ed25519SignKeyManagerTest, testNewKey) {
   Ed25519SignKeyManager key_manager;
   const KeyFactory& key_factory = key_manager.get_key_factory();
-  Empty key_format;
+  Ed25519KeyFormat key_format;
   auto result = key_factory.NewKey(key_format);
   EXPECT_TRUE(result.ok());
 }

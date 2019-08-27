@@ -29,7 +29,6 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
-#include "proto/empty.pb.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
 #include "proto/rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"
@@ -41,7 +40,7 @@ namespace {
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::Empty;
+using google::crypto::tink::Ed25519KeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
@@ -354,8 +353,8 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithEd25519) {
   // Check that the key manager works with the template.
   Ed25519SignKeyManager key_manager;
   EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-  Empty empty;
-  auto new_key_result = key_manager.get_key_factory().NewKey(empty);
+  Ed25519KeyFormat key_format;
+  auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 

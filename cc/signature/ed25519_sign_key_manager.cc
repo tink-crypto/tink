@@ -31,7 +31,6 @@
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/ed25519.pb.h"
-#include "proto/empty.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -40,12 +39,12 @@ namespace tink {
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::Ed25519PrivateKey;
-using google::crypto::tink::Empty;
+using google::crypto::tink::Ed25519KeyFormat;
 using google::crypto::tink::KeyData;
 
 class Ed25519PrivateKeyFactory
     : public PrivateKeyFactory,
-      public KeyFactoryBase<Ed25519PrivateKey, Empty> {
+      public KeyFactoryBase<Ed25519PrivateKey, Ed25519KeyFormat> {
  public:
   Ed25519PrivateKeyFactory() {}
 
@@ -61,11 +60,12 @@ class Ed25519PrivateKeyFactory
 
  protected:
   StatusOr<std::unique_ptr<Ed25519PrivateKey>> NewKeyFromFormat(
-      const Empty& unused) const override;
+      const Ed25519KeyFormat& unused) const override;
 };
 
 StatusOr<std::unique_ptr<Ed25519PrivateKey>>
-Ed25519PrivateKeyFactory::NewKeyFromFormat(const Empty& unused) const {
+Ed25519PrivateKeyFactory::NewKeyFromFormat(
+    const Ed25519KeyFormat& unused) const {
   auto key = subtle::SubtleUtilBoringSSL::GetNewEd25519Key();
 
   // Build Ed25519PrivateKey.
