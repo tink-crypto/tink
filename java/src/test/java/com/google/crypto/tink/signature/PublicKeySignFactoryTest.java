@@ -59,7 +59,7 @@ public class PublicKeySignFactoryTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 tinkPrivateKey,
-                EcdsaSignKeyManager.TYPE_URL,
+                new EcdsaSignKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
             1,
             KeyStatusType.ENABLED,
@@ -72,7 +72,7 @@ public class PublicKeySignFactoryTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 legacyPrivateKey,
-                EcdsaSignKeyManager.TYPE_URL,
+                new EcdsaSignKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
             2,
             KeyStatusType.ENABLED,
@@ -85,7 +85,7 @@ public class PublicKeySignFactoryTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 rawPrivateKey,
-                EcdsaSignKeyManager.TYPE_URL,
+                new EcdsaSignKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
             3,
             KeyStatusType.ENABLED,
@@ -98,7 +98,7 @@ public class PublicKeySignFactoryTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 crunchyPrivateKey,
-                EcdsaSignKeyManager.TYPE_URL,
+                new EcdsaSignKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
             4,
             KeyStatusType.ENABLED,
@@ -131,7 +131,7 @@ public class PublicKeySignFactoryTest {
                       TestUtil.createKey(
                           TestUtil.createKeyData(
                               privateKeys[i].getPublicKey(),
-                              EcdsaVerifyKeyManager.TYPE_URL,
+                              new EcdsaVerifyKeyManager().getKeyType(),
                               KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
                           keys[i].getKeyId(),
                           KeyStatusType.ENABLED,
@@ -153,7 +153,7 @@ public class PublicKeySignFactoryTest {
                       TestUtil.createKey(
                           TestUtil.createKeyData(
                               randomPrivKey.getPublicKey(),
-                              EcdsaVerifyKeyManager.TYPE_URL,
+                              new EcdsaVerifyKeyManager().getKeyType(),
                               KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
                           keys[i].getKeyId(),
                           KeyStatusType.ENABLED,

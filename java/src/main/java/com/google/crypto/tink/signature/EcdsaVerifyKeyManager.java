@@ -16,10 +16,9 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
-import com.google.crypto.tink.proto.Empty;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
@@ -33,62 +32,50 @@ import java.security.interfaces.ECPublicKey;
  * This key manager produces new instances of {@code EcdsaVerifyJce}. It doesn't support key
  * generation.
  */
-class EcdsaVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, EcdsaPublicKey, Empty> {
+class EcdsaVerifyKeyManager extends KeyTypeManager<EcdsaPublicKey> {
   public EcdsaVerifyKeyManager() {
-    super(PublicKeyVerify.class, EcdsaPublicKey.class, Empty.class, TYPE_URL);
-  }
-
-  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
-  /** Current version of this key manager. Keys with greater version are not supported. */
-  protected static final int VERSION = 0;
-
-  @Override
-  public PublicKeyVerify getPrimitiveFromKey(EcdsaPublicKey keyProto)
-      throws GeneralSecurityException {
-    ECPublicKey publicKey =
-        EllipticCurves.getEcPublicKey(
-            SigUtil.toCurveType(keyProto.getParams().getCurve()),
-            keyProto.getX().toByteArray(),
-            keyProto.getY().toByteArray());
-    return new EcdsaVerifyJce(
-        publicKey,
-        SigUtil.toHashType(keyProto.getParams().getHashType()),
-        SigUtil.toEcdsaEncoding(keyProto.getParams().getEncoding()));
+    super(
+        EcdsaPublicKey.class,
+        new PrimitiveFactory<PublicKeyVerify, EcdsaPublicKey>(PublicKeyVerify.class) {
+          @Override
+          public PublicKeyVerify getPrimitive(EcdsaPublicKey keyProto)
+              throws GeneralSecurityException {
+            ECPublicKey publicKey =
+                EllipticCurves.getEcPublicKey(
+                    SigUtil.toCurveType(keyProto.getParams().getCurve()),
+                    keyProto.getX().toByteArray(),
+                    keyProto.getY().toByteArray());
+            return new EcdsaVerifyJce(
+                publicKey,
+                SigUtil.toHashType(keyProto.getParams().getHashType()),
+                SigUtil.toEcdsaEncoding(keyProto.getParams().getEncoding()));
+          }
+        });
   }
 
   @Override
-  public EcdsaPublicKey newKeyFromFormat(Empty unused) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented");
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.ASYMMETRIC_PUBLIC;
   }
 
   @Override
-  protected EcdsaPublicKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
+  public EcdsaPublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
     return EcdsaPublicKey.parseFrom(byteString);
   }
 
   @Override
-  protected Empty parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return Empty.parseFrom(byteString);
-  }
-
-  @Override
-  protected void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {
-    Validators.validateVersion(pubKey.getVersion(), VERSION);
+  public void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {
+    Validators.validateVersion(pubKey.getVersion(), getVersion());
     SigUtil.validateEcdsaParams(pubKey.getParams());
   }
-
-  @Override
-  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

@@ -56,7 +56,7 @@ public class PublicKeyVerifyIntegrationTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 tinkPrivateKey.getPublicKey(),
-                EcdsaVerifyKeyManager.TYPE_URL,
+                new EcdsaVerifyKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
             1,
             KeyStatusType.ENABLED,
@@ -69,7 +69,7 @@ public class PublicKeyVerifyIntegrationTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 legacyPrivateKey.getPublicKey(),
-                EcdsaVerifyKeyManager.TYPE_URL,
+                new EcdsaVerifyKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
             2,
             KeyStatusType.ENABLED,
@@ -82,7 +82,7 @@ public class PublicKeyVerifyIntegrationTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 rawPrivateKey.getPublicKey(),
-                EcdsaVerifyKeyManager.TYPE_URL,
+                new EcdsaVerifyKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
             3,
             KeyStatusType.ENABLED,
@@ -95,7 +95,7 @@ public class PublicKeyVerifyIntegrationTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 crunchyPrivateKey.getPublicKey(),
-                EcdsaVerifyKeyManager.TYPE_URL,
+                new EcdsaVerifyKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
             4,
             KeyStatusType.ENABLED,
@@ -120,7 +120,7 @@ public class PublicKeyVerifyIntegrationTest {
                         TestUtil.createKey(
                             TestUtil.createKeyData(
                                 privateKeys[k],
-                                EcdsaSignKeyManager.TYPE_URL,
+                                new EcdsaSignKeyManager().getKeyType(),
                                 KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
                             keys[k].getKeyId(),
                             KeyStatusType.ENABLED,
@@ -145,7 +145,7 @@ public class PublicKeyVerifyIntegrationTest {
                       TestUtil.createKey(
                           TestUtil.createKeyData(
                               randomPrivKey,
-                              EcdsaSignKeyManager.TYPE_URL,
+                              new EcdsaSignKeyManager().getKeyType(),
                               KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
                           1,
                           KeyStatusType.ENABLED,

@@ -18,6 +18,8 @@ package com.google.crypto.tink.signature;
 
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TestUtil.BytesMutation;
@@ -244,7 +246,8 @@ public class EcdsaVerifyKeyManagerTest {
       byte[] pubY)
       throws Exception {
     EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curve, encoding, pubX, pubY);
-    EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
+    KeyManager<PublicKeyVerify> verifyManager =
+        new KeyManagerImpl<>(new EcdsaVerifyKeyManager(), PublicKeyVerify.class);
     return verifyManager.getPrimitive(ecdsaPubKey);
   }
 }
