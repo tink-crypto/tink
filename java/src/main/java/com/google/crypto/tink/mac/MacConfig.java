@@ -35,7 +35,7 @@ import java.security.GeneralSecurityException;
  * @since 1.0.0
  */
 public final class MacConfig {
-  public static final String HMAC_TYPE_URL = HmacKeyManager.TYPE_URL;
+  public static final String HMAC_TYPE_URL = new HmacKeyManager().getKeyType();
 
   /** @deprecated */
   @Deprecated
@@ -83,7 +83,7 @@ public final class MacConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerKeyManager(new HmacKeyManager());
+    Registry.registerKeyManager(new HmacKeyManager(), true);
     Registry.registerKeyManager(new AesCmacKeyManager(), true);
     Registry.registerPrimitiveWrapper(new MacWrapper());
   }

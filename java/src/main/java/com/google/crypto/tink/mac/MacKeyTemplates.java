@@ -132,7 +132,7 @@ public final class MacKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(HmacKeyManager.TYPE_URL)
+        .setTypeUrl(new HmacKeyManager().getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

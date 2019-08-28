@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
@@ -34,51 +34,42 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * This key manager generates new {@code HmacKey} keys and produces new instances of {@code MacJce}.
  */
-class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
+class HmacKeyManager extends KeyTypeManager<HmacKey> {
   public HmacKeyManager() {
-    super(Mac.class, HmacKey.class, HmacKeyFormat.class, TYPE_URL);
+    super(
+        HmacKey.class,
+        new PrimitiveFactory<Mac, HmacKey>(Mac.class) {
+          @Override
+          public Mac getPrimitive(HmacKey key) throws GeneralSecurityException {
+            HashType hash = key.getParams().getHash();
+            byte[] keyValue = key.getKeyValue().toByteArray();
+            SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
+            int tagSize = key.getParams().getTagSize();
+            switch (hash) {
+              case SHA1:
+                return new MacJce("HMACSHA1", keySpec, tagSize);
+              case SHA256:
+                return new MacJce("HMACSHA256", keySpec, tagSize);
+              case SHA512:
+                return new MacJce("HMACSHA512", keySpec, tagSize);
+              default:
+                throw new GeneralSecurityException("unknown hash");
+            }
+          }
+        });
   }
-  /** Type url that this manager does support. */
-  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";
-  /** Current version of this key manager. Keys with version equal or smaller are supported. */
-  private static final int VERSION = 0;
 
+  private static final int VERSION = 0;
+  
   /** Minimum key size in bytes. */
   private static final int MIN_KEY_SIZE_IN_BYTES = 16;
 
   /** Minimum tag size in bytes. This provides minimum 80-bit security strength. */
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
 
-  /** @param serializedKey serialized {@code HmacKey} proto */
   @Override
-  public Mac getPrimitiveFromKey(HmacKey keyProto) throws GeneralSecurityException {
-    HashType hash = keyProto.getParams().getHash();
-    byte[] keyValue = keyProto.getKeyValue().toByteArray();
-    SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
-    int tagSize = keyProto.getParams().getTagSize();
-    switch (hash) {
-      case SHA1:
-        return new MacJce("HMACSHA1", keySpec, tagSize);
-      case SHA256:
-        return new MacJce("HMACSHA256", keySpec, tagSize);
-      case SHA512:
-        return new MacJce("HMACSHA512", keySpec, tagSize);
-      default:
-        throw new GeneralSecurityException("unknown hash");
-    }
-  }
-
-  /**
-   * @param serializedKeyFormat serialized {@code HmacKeyFormat} proto
-   * @return new {@code HmacKey} proto
-   */
-  @Override
-  public HmacKey newKeyFromFormat(HmacKeyFormat format) throws GeneralSecurityException {
-    return HmacKey.newBuilder()
-        .setVersion(VERSION)
-        .setParams(format.getParams())
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-        .build();
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.HmacKey";
   }
 
   @Override
@@ -87,40 +78,25 @@ class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.SYMMETRIC;
   }
 
   @Override
-  protected HmacKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return HmacKey.parseFrom(byteString);
-  }
-
-  @Override
-  protected HmacKeyFormat parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return HmacKeyFormat.parseFrom(byteString);
-  }
-
-  @Override
-  protected void validateKey(HmacKey key) throws GeneralSecurityException {
+  public void validateKey(HmacKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("key too short");
     }
-    validate(key.getParams());
+    validateParams(key.getParams());
   }
 
   @Override
-  protected void validateKeyFormat(HmacKeyFormat format) throws GeneralSecurityException {
-    if (format.getKeySize() < MIN_KEY_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("key too short");
-    }
-    validate(format.getParams());
+  public HmacKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
+    return HmacKey.parseFrom(byteString);
   }
 
-  private void validate(HmacParams params) throws GeneralSecurityException {
+  private static void validateParams(HmacParams params) throws GeneralSecurityException {
     if (params.getTagSize() < MIN_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("tag size too small");
     }
@@ -143,5 +119,33 @@ class HmacKeyManager extends KeyManagerBase<Mac, HmacKey, HmacKeyFormat> {
       default:
         throw new GeneralSecurityException("unknown hash type");
     }
+  }
+
+  @Override
+  public KeyFactory<HmacKeyFormat, HmacKey> keyFactory() {
+    return new KeyFactory<HmacKeyFormat, HmacKey>(HmacKeyFormat.class) {
+      @Override
+      public void validateKeyFormat(HmacKeyFormat format) throws GeneralSecurityException {
+        if (format.getKeySize() < MIN_KEY_SIZE_IN_BYTES) {
+          throw new GeneralSecurityException("key too short");
+        }
+        validateParams(format.getParams());
+      }
+
+      @Override
+      public HmacKeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return HmacKeyFormat.parseFrom(byteString);
+      }
+
+      @Override
+      public HmacKey createKey(HmacKeyFormat format) throws GeneralSecurityException {
+        return HmacKey.newBuilder()
+            .setVersion(VERSION)
+            .setParams(format.getParams())
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+            .build();
+      }
+    };
   }
 }

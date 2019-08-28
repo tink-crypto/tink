@@ -19,6 +19,9 @@ package com.google.crypto.tink.mac;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
+import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
@@ -38,16 +41,17 @@ import org.junit.runners.JUnit4;
 public class HmacKeyManagerTest {
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
-    HmacKeyManager keyManager = new HmacKeyManager();
+    KeyManager<Mac> keyManager = new KeyManagerImpl<>(new HmacKeyManager(), Mac.class);
     HmacKeyFormat hmacKeyFormat = HmacKeyFormat.newBuilder()
         .setParams(HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(16).build())
         .setKeySize(32)
         .build();
     ByteString serialized = ByteString.copyFrom(hmacKeyFormat.toByteArray());
-    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(HmacKeyManager.TYPE_URL)
-        .setValue(serialized)
-        .build();
+    KeyTemplate keyTemplate =
+        KeyTemplate.newBuilder()
+            .setTypeUrl(new HmacKeyManager().getKeyType())
+            .setValue(serialized)
+            .build();
     // Calls newKey multiple times and make sure that we get different HmacKey each time.
     Set<String> keys = new TreeSet<String>();
     int numTests = 27;
@@ -69,12 +73,13 @@ public class HmacKeyManagerTest {
 
   @Test
   public void testNewKeyCorruptedFormat() throws Exception {
-    HmacKeyManager keyManager = new HmacKeyManager();
+    KeyManager<Mac> keyManager = new KeyManagerImpl<>(new HmacKeyManager(), Mac.class);
     ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(HmacKeyManager.TYPE_URL)
-        .setValue(serialized)
-        .build();
+    KeyTemplate keyTemplate =
+        KeyTemplate.newBuilder()
+            .setTypeUrl(new HmacKeyManager().getKeyType())
+            .setValue(serialized)
+            .build();
     try {
       keyManager.newKey(serialized);
       fail("Corrupted format, should have thrown exception");
