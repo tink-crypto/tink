@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
@@ -34,98 +34,96 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesGcmHkdfStreamingKey} keys and produces new instances of
  * {@code AesGcmHkdfStreaming}.
  */
-class AesGcmHkdfStreamingKeyManager
-    extends KeyManagerBase<StreamingAead, AesGcmHkdfStreamingKey, AesGcmHkdfStreamingKeyFormat> {
+class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStreamingKey> {
   public AesGcmHkdfStreamingKeyManager() {
     super(
-        StreamingAead.class,
         AesGcmHkdfStreamingKey.class,
-        AesGcmHkdfStreamingKeyFormat.class,
-        TYPE_URL);
+        new PrimitiveFactory<StreamingAead, AesGcmHkdfStreamingKey>(StreamingAead.class) {
+          @Override
+          public StreamingAead getPrimitive(AesGcmHkdfStreamingKey key)
+              throws GeneralSecurityException {
+            return new AesGcmHkdfStreaming(
+                key.getKeyValue().toByteArray(),
+                StreamingAeadUtil.toHmacAlgo(key.getParams().getHkdfHashType()),
+                key.getParams().getDerivedKeySize(),
+                key.getParams().getCiphertextSegmentSize(),
+                /* firstSegmentOffset= */ 0);
+          }
+        });
   }
 
-  private static final int VERSION = 0;
-
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
-  
   private static final int NONCE_PREFIX_IN_BYTES = 7;
   private static final int TAG_SIZE_IN_BYTES = 16;
 
-  /** @param serializedKey serialized {@code AesGcmHkdfStreamingKey} proto */
   @Override
-  public StreamingAead getPrimitiveFromKey(AesGcmHkdfStreamingKey keyProto)
-      throws GeneralSecurityException {
-    return new AesGcmHkdfStreaming(
-        keyProto.getKeyValue().toByteArray(),
-        StreamingAeadUtil.toHmacAlgo(
-            keyProto.getParams().getHkdfHashType()),
-        keyProto.getParams().getDerivedKeySize(),
-        keyProto.getParams().getCiphertextSegmentSize(),
-        /* firstSegmentOffset= */ 0);
-  }
-
-  /**
-   * @param serializedKeyFormat serialized {@code AesGcmHkdfStreamingKeyFormat} proto
-   * @return new {@code AesGcmHkdfStreamingKey} proto
-   */
-  @Override
-  public AesGcmHkdfStreamingKey newKeyFromFormat(AesGcmHkdfStreamingKeyFormat format)
-      throws GeneralSecurityException {
-    return AesGcmHkdfStreamingKey.newBuilder()
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-        .setParams(format.getParams())
-        .setVersion(VERSION)
-        .build();
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.SYMMETRIC;
   }
 
   @Override
-  protected AesGcmHkdfStreamingKey parseKeyProto(ByteString byteString)
+  public void validateKey(AesGcmHkdfStreamingKey key) throws GeneralSecurityException {
+    Validators.validateVersion(key.getVersion(), getVersion());
+    validateParams(key.getParams());
+  }
+
+  @Override
+  public AesGcmHkdfStreamingKey parseKey(ByteString byteString)
       throws InvalidProtocolBufferException {
     return AesGcmHkdfStreamingKey.parseFrom(byteString);
   }
 
   @Override
-  protected AesGcmHkdfStreamingKeyFormat parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return AesGcmHkdfStreamingKeyFormat.parseFrom(byteString);
+  public KeyFactory<AesGcmHkdfStreamingKeyFormat, AesGcmHkdfStreamingKey> keyFactory() {
+    return new KeyFactory<AesGcmHkdfStreamingKeyFormat, AesGcmHkdfStreamingKey>(
+        AesGcmHkdfStreamingKeyFormat.class) {
+      @Override
+      public void validateKeyFormat(AesGcmHkdfStreamingKeyFormat format)
+          throws GeneralSecurityException {
+        if (format.getKeySize() < 16) {
+          throw new GeneralSecurityException("key_size must be at least 16 bytes");
+        }
+        validateParams(format.getParams());
+      }
+
+      @Override
+      public AesGcmHkdfStreamingKeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return AesGcmHkdfStreamingKeyFormat.parseFrom(byteString);
+      }
+
+      @Override
+      public AesGcmHkdfStreamingKey createKey(AesGcmHkdfStreamingKeyFormat format)
+          throws GeneralSecurityException {
+        return AesGcmHkdfStreamingKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+            .setParams(format.getParams())
+            .setVersion(getVersion())
+            .build();
+      }
+    };
   }
 
-  @Override
-  protected void validateKey(AesGcmHkdfStreamingKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), VERSION);
-    validate(key.getParams());
-  }
-
-  @Override
-  protected void validateKeyFormat(AesGcmHkdfStreamingKeyFormat format)
+  private static void validateParams(AesGcmHkdfStreamingParams params)
       throws GeneralSecurityException {
-    if (format.getKeySize() < 16) {
-      throw new GeneralSecurityException("key_size must be at least 16 bytes");
-    }
-    validate(format.getParams());
-  }
-
-  private void validate(AesGcmHkdfStreamingParams params) throws GeneralSecurityException {
     Validators.validateAesKeySize(params.getDerivedKeySize());
     if (params.getHkdfHashType() == HashType.UNKNOWN_HASH) {
       throw new GeneralSecurityException("unknown HKDF hash type");
     }
-    if (params.getCiphertextSegmentSize() <= params.getDerivedKeySize() + 1 + NONCE_PREFIX_IN_BYTES
-        + TAG_SIZE_IN_BYTES) {
+    if (params.getCiphertextSegmentSize()
+        < params.getDerivedKeySize() + NONCE_PREFIX_IN_BYTES + TAG_SIZE_IN_BYTES + 2) {
       throw new GeneralSecurityException(
           "ciphertext_segment_size must be at least (derived_key_size + NONCE_PREFIX_IN_BYTES + "
-          + "TAG_SIZE_IN_BYTES + 2)");
+              + "TAG_SIZE_IN_BYTES + 2)");
     }
   }
 }

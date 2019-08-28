@@ -153,7 +153,7 @@ public final class StreamingAeadKeyTemplates {
             .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(AesGcmHkdfStreamingKeyManager.TYPE_URL)
+        .setTypeUrl(new AesGcmHkdfStreamingKeyManager().getKeyType())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
   }
