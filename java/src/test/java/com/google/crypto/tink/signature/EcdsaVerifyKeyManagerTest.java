@@ -16,17 +16,20 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TestUtil.BytesMutation;
+import com.google.crypto.tink.proto.EcdsaKeyFormat;
+import com.google.crypto.tink.proto.EcdsaParams;
+import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
@@ -50,13 +53,97 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class EcdsaVerifyKeyManagerTest {
-  private static class HashAndCurveType {
-    public HashType hashType;
-    public EllipticCurveType curveType;
+  private final EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
+  private final EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
+  private final EcdsaSignKeyManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> factory =
+      signManager.keyFactory();
 
-    public HashAndCurveType(HashType hashType, EllipticCurveType curveType) {
-      this.hashType = hashType;
-      this.curveType = curveType;
+  private EcdsaPrivateKey createKey(
+      HashType hashType, EllipticCurveType curveType, EcdsaSignatureEncoding encoding)
+      throws GeneralSecurityException {
+    return factory.createKey(
+        EcdsaKeyFormat.newBuilder()
+            .setParams(
+                EcdsaParams.newBuilder()
+                    .setHashType(hashType)
+                    .setCurve(curveType)
+                    .setEncoding(encoding))
+            .build());
+  }
+
+  @Test
+  public void basics() throws Exception {
+    assertThat(verifyManager.getKeyType())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.EcdsaPublicKey");
+    assertThat(verifyManager.getVersion()).isEqualTo(0);
+    assertThat(verifyManager.keyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
+  }
+
+  @Test
+  public void validateKey_usualPublicKey() throws Exception {
+    verifyManager.validateKey(
+        signManager.getPublicKey(
+            createKey(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER)));
+    verifyManager.validateKey(
+        signManager.getPublicKey(
+            createKey(
+                HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.IEEE_P1363)));
+    verifyManager.validateKey(
+        signManager.getPublicKey(
+            createKey(HashType.SHA384, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER)));
+    verifyManager.validateKey(
+        signManager.getPublicKey(
+            createKey(
+                HashType.SHA384, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.IEEE_P1363)));
+    verifyManager.validateKey(
+        signManager.getPublicKey(
+            createKey(HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER)));
+    verifyManager.validateKey(
+        signManager.getPublicKey(
+            createKey(
+                HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.IEEE_P1363)));
+    verifyManager.validateKey(
+        signManager.getPublicKey(
+            createKey(HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER)));
+    verifyManager.validateKey(
+        signManager.getPublicKey(
+            createKey(
+                HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.IEEE_P1363)));
+  }
+
+  private EcdsaPublicKey validPublicKey() throws Exception {
+    return signManager.getPublicKey(
+        createKey(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
+  }
+
+  @Test
+  public void validateKey_wrongVersion_throws() throws Exception {
+    EcdsaPublicKey wrongVersionKey =
+        EcdsaPublicKey.newBuilder(validPublicKey()).setVersion(1).build();
+    try {
+      verifyManager.validateKey(wrongVersionKey);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected.
+    }
+  }
+
+  @Test
+  public void validateKey_badParams_throws() throws Exception {
+    EcdsaPublicKey validKey = validPublicKey();
+    EcdsaPublicKey wrongHashKey =
+        EcdsaPublicKey.newBuilder(validKey)
+            .setParams(
+                EcdsaParams.newBuilder(validKey.getParams())
+                    .setHashType(HashType.SHA256)
+                    .setCurve(EllipticCurveType.NIST_P521)
+                    .build())
+            .build();
+    try {
+      verifyManager.validateKey(wrongHashKey);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected.
     }
   }
 
@@ -134,11 +221,7 @@ public class EcdsaVerifyKeyManagerTest {
     for (int i = 0; i < rfcTestVectors.length; i++) {
       RfcTestVector t = rfcTestVectors[i];
       PublicKeyVerify verifier = createVerifier(t);
-      try {
-        verifier.verify(t.sig, t.msg);
-      } catch (GeneralSecurityException e) {
-        fail("Valid signature, should not throw exception");
-      }
+      verifier.verify(t.sig, t.msg);
       for (BytesMutation mutation : TestUtil.generateMutations(t.sig)) {
         try {
           verifier.verify(mutation.value, t.msg);
@@ -151,6 +234,16 @@ public class EcdsaVerifyKeyManagerTest {
           // Expected.
         }
       }
+    }
+  }
+
+  private static class HashAndCurveType {
+    public HashType hashType;
+    public EllipticCurveType curveType;
+
+    public HashAndCurveType(HashType hashType, EllipticCurveType curveType) {
+      this.hashType = hashType;
+      this.curveType = curveType;
     }
   }
 
@@ -188,11 +281,7 @@ public class EcdsaVerifyKeyManagerTest {
               EcdsaSignatureEncoding.DER,
               w.getAffineX().toByteArray(),
               w.getAffineY().toByteArray());
-      try {
-        verifier.verify(signature, msg);
-      } catch (GeneralSecurityException e) {
-        fail("Valid signature, should not throw exception");
-      }
+      verifier.verify(signature, msg);
     }
   }
 
@@ -246,8 +335,8 @@ public class EcdsaVerifyKeyManagerTest {
       byte[] pubY)
       throws Exception {
     EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curve, encoding, pubX, pubY);
-    KeyManager<PublicKeyVerify> verifyManager =
-        new KeyManagerImpl<>(new EcdsaVerifyKeyManager(), PublicKeyVerify.class);
-    return verifyManager.getPrimitive(ecdsaPubKey);
+    // Validating so that we throw exceptions when it is expected.
+    verifyManager.validateKey(ecdsaPubKey);
+    return verifyManager.getPrimitive(ecdsaPubKey, PublicKeyVerify.class);
   }
 }
