@@ -48,7 +48,7 @@ class Aead(object):
     Raises:
       tink.TinkError if the encryption fails.
     """
-    pass
+    raise NotImplementedError()
 
   @abc.abstractmethod
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
