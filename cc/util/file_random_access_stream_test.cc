@@ -75,7 +75,7 @@ void ReadAndVerifyChunk(RandomAccessStream* ra_stream,
 }
 
 TEST(FileRandomAccessStreamTest, ReadingStreams) {
-  for (auto stream_size : {0, 10, 100, 1000, 10000, 1000000}) {
+  for (auto stream_size : {1, 10, 100, 1000, 10000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
@@ -157,7 +157,7 @@ TEST(FileRandomAccessStreamTest, NegativeReadPosition) {
   }
 }
 
-TEST(FileRandomAccessStreamTest, NegativeReadCount) {
+TEST(FileRandomAccessStreamTest, NotPositiveReadCount) {
   for (auto stream_size : {0, 10, 100, 1000, 10000}) {
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
@@ -166,7 +166,7 @@ TEST(FileRandomAccessStreamTest, NegativeReadCount) {
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     auto buffer = std::move(Buffer::New(42).ValueOrDie());
     int64_t position = 0;
-    for (auto count : {-100, -10, -1}) {
+    for (auto count : {-100, -10, -1, 0}) {
       SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size,
                                 " count = ", count));
       auto status = ra_stream->PRead(position, count, buffer.get());
