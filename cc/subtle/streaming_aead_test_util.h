@@ -22,12 +22,18 @@
 namespace crypto {
 namespace tink {
 
-// Encrypt with NewEncryptingStream, then decrypt using NewDecryptingStream.
+// Encrypt with NewEncryptingStream, then decrypt using NewDecryptingStream,
+// and NewDecryptingRandomAccessStream (for a few fragments).
+// 'ciphertext_offset' is the offset of the actual ciphertext in the
+// computed ciphertext stream (cf. description of StreamSegmentEncrypter
+// in stream_segment_encrypter.h).
 // Any error will be propagated to the caller. Returns OK if the resulting
-// decryption is equal to the plaintext.
-crypto::tink::util::Status EncryptThenDecrypt(
-    StreamingAead* encrypter, StreamingAead* decrypter,
-    absl::string_view plaintext, absl::string_view associated_data);
+// decryptions are equal to the plaintext.
+crypto::tink::util::Status EncryptThenDecrypt(StreamingAead* encrypter,
+                                              StreamingAead* decrypter,
+                                              absl::string_view plaintext,
+                                              absl::string_view associated_data,
+                                              int ciphertext_offset);
 
 }  // namespace tink
 }  // namespace crypto

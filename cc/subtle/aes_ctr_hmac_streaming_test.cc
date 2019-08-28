@@ -380,10 +380,11 @@ TEST(AesCtrHmacStreamingTest, Basic) {
                   std::string plaintext(plaintext_size, 'p');
                   std::string associated_data = "associated data";
 
-                  EXPECT_THAT(EncryptThenDecrypt(streaming_aead.get(),
-                                                 streaming_aead.get(),
-                                                 plaintext, associated_data),
-                              IsOk());
+                  EXPECT_THAT(
+                      EncryptThenDecrypt(streaming_aead.get(),
+                                         streaming_aead.get(), plaintext,
+                                         associated_data, ciphertext_offset),
+                      IsOk());
                 }
               }
             }

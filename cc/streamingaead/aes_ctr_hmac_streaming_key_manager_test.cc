@@ -130,7 +130,7 @@ TEST(AesCtrHmacStreamingKeyManagerTest, GetPrimitive) {
       EncryptThenDecrypt(streaming_aead_from_manager_result.ValueOrDie().get(),
                          streaming_aead_direct_result.ValueOrDie().get(),
                          subtle::Random::GetRandomBytes(10000),
-                         "some associated data"),
+                         "some associated data", params.ciphertext_offset),
       IsOk());
 }
 

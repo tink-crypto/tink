@@ -39,11 +39,13 @@ namespace test {
 // Various utilities for testing.
 ///////////////////////////////////////////////////////////////////////////////
 
-// Writes 'contents' the specified 'output_stream', and closes the stream.
+// Writes 'contents' the specified 'output_stream', and if 'close_stream'
+// is true, then closes the stream.
 // Returns the status of output_stream->Close()-operation, or a non-OK status
 // of a prior output_stream->Next()-operation, if any.
 util::Status WriteToStream(OutputStream* output_stream,
-                           absl::string_view contents);
+                           absl::string_view contents,
+                           bool close_stream = true);
 
 // Reads all bytes from the specified 'input_stream', and puts
 // them into 'output', where both 'input_stream' and 'output must be non-null.

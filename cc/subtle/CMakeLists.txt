@@ -557,6 +557,7 @@ tink_cc_library(
     nonce_based_streaming_aead.cc
     nonce_based_streaming_aead.h
   DEPS
+    tink::subtle::decrypting_random_access_stream
     tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::subtle::streaming_aead_decrypting_stream
@@ -604,10 +605,14 @@ tink_cc_library(
     streaming_aead_test_util.h
   DEPS
     absl::strings
+    tink::core::random_access_stream
     tink::core::streaming_aead
     tink::util::ostream_output_stream
     tink::util::istream_input_stream
+    tink::util::buffer
+    tink::util::file_random_access_stream
     tink::util::status
+    tink::util::test_util
     tink::subtle::test_util
 )
 
@@ -765,12 +770,14 @@ tink_cc_test(
     tink::subtle::aes_gcm_hkdf_streaming
     tink::subtle::common_enums
     tink::subtle::random
+    tink::subtle::streaming_aead_test_util
     tink::subtle::test_util
     tink::core::output_stream
     tink::util::ostream_output_stream
     tink::util::istream_input_stream
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     absl::strings
 )
