@@ -651,7 +651,7 @@ primitive (step #1). We define then three protocol buffer messages (step #2):
  * `MyCustomAeadKey`: holds the actual key material and parameters needed for its use.
  * `MyCustomAeadKeyFormat`: holds parameters needed for generation of a new `MyCustomAeadKey`-key.
 
-```protocol-buffer
+```proto
     syntax = "proto3";
     package mycompany.mypackage;
 
