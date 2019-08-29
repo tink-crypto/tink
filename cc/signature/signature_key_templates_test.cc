@@ -24,6 +24,7 @@
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/ed25519_sign_key_manager.h"
+#include "tink/signature/ed25519_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -351,10 +352,14 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithEd25519) {
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the key manager works with the template.
-  Ed25519SignKeyManager key_manager;
-  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  Ed25519SignKeyManager sign_key_type_manager;
+  Ed25519VerifyKeyManager verify_key_type_manager;
+  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+      &sign_key_type_manager, &verify_key_type_manager);
+
+  EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
   Ed25519KeyFormat key_format;
-  auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+  auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 

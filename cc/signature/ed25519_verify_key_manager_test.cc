@@ -17,6 +17,7 @@
 #include "tink/signature/ed25519_verify_key_manager.h"
 
 #include "gtest/gtest.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
@@ -48,22 +49,26 @@ class Ed25519VerifyKeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(Ed25519VerifyKeyManagerTest, testBasic) {
-  Ed25519VerifyKeyManager key_manager;
+  Ed25519VerifyKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(Ed25519VerifyKeyManagerTest, testKeyDataErrors) {
-  Ed25519VerifyKeyManager key_manager;
+  Ed25519VerifyKeyManager verify_key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&verify_key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type = "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -76,7 +81,7 @@ TEST_F(Ed25519VerifyKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(ed25519_verify_key_type_);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -89,7 +94,7 @@ TEST_F(Ed25519VerifyKeyManagerTest, testKeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(ed25519_verify_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -98,11 +103,13 @@ TEST_F(Ed25519VerifyKeyManagerTest, testKeyDataErrors) {
 }
 
 TEST_F(Ed25519VerifyKeyManagerTest, testKeyMessageErrors) {
-  Ed25519VerifyKeyManager key_manager;
+  Ed25519VerifyKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
 
   {  // Bad protobuffer.
     AesEaxKey key;
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
@@ -114,16 +121,21 @@ TEST_F(Ed25519VerifyKeyManagerTest, testKeyMessageErrors) {
 
 TEST_F(Ed25519VerifyKeyManagerTest, testPrimitives) {
   std::string message = "some message to sign";
-  Ed25519SignKeyManager sign_key_manager;
-  Ed25519VerifyKeyManager verify_key_manager;
+  Ed25519SignKeyManager sign_key_type_manager;
+  Ed25519VerifyKeyManager verify_key_type_manager;
+  auto sign_key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+      &sign_key_type_manager, &verify_key_type_manager);
+  auto verify_key_manager = internal::MakeKeyManager<PublicKeyVerify>(
+      &verify_key_type_manager);
+
   Ed25519PrivateKey private_key = test::GetEd25519TestPrivateKey();
   Ed25519PublicKey key = private_key.public_key();
   auto sign =
-      std::move(sign_key_manager.GetPrimitive(private_key).ValueOrDie());
+      std::move(sign_key_manager->GetPrimitive(private_key).ValueOrDie());
   std::string signature = sign->Sign(message).ValueOrDie();
 
   {  // Using Key proto.
-    auto result = verify_key_manager.GetPrimitive(key);
+    auto result = verify_key_manager->GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto verify = std::move(result.ValueOrDie());
     auto verify_status = verify->Verify(signature, message);
@@ -134,7 +146,7 @@ TEST_F(Ed25519VerifyKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(ed25519_verify_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = verify_key_manager.GetPrimitive(key_data);
+    auto result = verify_key_manager->GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto verify = std::move(result.ValueOrDie());
     auto verify_status = verify->Verify(signature, message);
@@ -143,14 +155,14 @@ TEST_F(Ed25519VerifyKeyManagerTest, testPrimitives) {
 }
 
 TEST_F(Ed25519VerifyKeyManagerTest, testNewKey) {
-  Ed25519VerifyKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  Ed25519VerifyKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   Ed25519KeyFormat key_format;
   auto result = key_factory.NewKey(key_format);
   EXPECT_FALSE(result.ok());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                      "Operation not supported for public keys, please use the "
-                      "Ed25519SignKeyManager.",
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
                       result.status().error_message());
 }
 

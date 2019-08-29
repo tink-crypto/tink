@@ -136,11 +136,11 @@ tink_cc_library(
     ed25519_sign_key_manager.h
   DEPS
     tink::signature::ed25519_verify_key_manager
-    tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::private_key_type_manager
     tink::core::public_key_sign
     tink::subtle::ed25519_sign_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
@@ -148,8 +148,6 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::ed25519_cc_proto
-    tink::proto::empty_cc_proto
-    tink::proto::tink_cc_proto
     absl::memory
     absl::strings
 )
@@ -160,11 +158,11 @@ tink_cc_library(
     ed25519_verify_key_manager.cc
     ed25519_verify_key_manager.h
   DEPS
-    tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::core::public_key_verify
     tink::subtle::ed25519_verify_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::status
@@ -397,6 +395,7 @@ tink_cc_test(
   DEPS
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager
+    tink::core::key_manager_impl
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::core::registry
@@ -473,6 +472,7 @@ tink_cc_test(
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager
     tink::signature::signature_key_templates
+    tink::core::private_key_manager_impl
     tink::core::public_key_sign
     tink::core::registry
     tink::aead::aead_key_templates

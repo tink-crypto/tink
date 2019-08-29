@@ -53,10 +53,8 @@ util::Status SignatureConfig::Register() {
   if (!status.ok()) return status;
 
   // ED25519
-  status = Registry::RegisterKeyManager(
-      absl::make_unique<Ed25519SignKeyManager>(), true);
-  if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<Ed25519SignKeyManager>(),
       absl::make_unique<Ed25519VerifyKeyManager>(), true);
   if (!status.ok()) return status;
 
