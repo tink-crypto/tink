@@ -129,7 +129,7 @@ public final class StreamingAeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(AesCtrHmacStreamingKeyManager.TYPE_URL)
+        .setTypeUrl(new AesCtrHmacStreamingKeyManager().getKeyType())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
   }

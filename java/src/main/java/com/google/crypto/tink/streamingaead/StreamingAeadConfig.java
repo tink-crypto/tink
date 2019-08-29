@@ -37,7 +37,7 @@ import java.security.GeneralSecurityException;
  */
 public final class StreamingAeadConfig {
   public static final String AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL =
-      AesCtrHmacStreamingKeyManager.TYPE_URL;
+      new AesCtrHmacStreamingKeyManager().getKeyType();
   public static final String AES_GCM_HKDF_STREAMINGAEAD_TYPE_URL =
       new AesGcmHkdfStreamingKeyManager().getKeyType();
 
@@ -74,7 +74,7 @@ public final class StreamingAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager());
+    Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager(), /* newKeyAllowed = */ true);
     Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager(), /* newKeyAllowed = */ true);
     Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
   }

@@ -19,6 +19,8 @@ package com.google.crypto.tink.streamingaead;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.TestUtil;
@@ -44,7 +46,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
   private static final int AES_KEY_SIZE = 16;
   private HmacParams hmacParams;
   private AesCtrHmacStreamingParams keyParams;
-  private AesCtrHmacStreamingKeyManager keyManager;
+  private KeyManager<StreamingAead> keyManager;
 
   @Before
   public void setUp() throws GeneralSecurityException {
@@ -56,7 +58,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
             .setHkdfHashType(HashType.SHA256)
             .setHmacParams(hmacParams)
             .build();
-    keyManager = new AesCtrHmacStreamingKeyManager();
+    keyManager = new KeyManagerImpl<>(new AesCtrHmacStreamingKeyManager(), StreamingAead.class);
   }
 
   @Test
