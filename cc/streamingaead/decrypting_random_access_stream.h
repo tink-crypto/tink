@@ -69,9 +69,9 @@ class DecryptingRandomAccessStream : public crypto::tink::RandomAccessStream {
   std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source_;
   std::string associated_data_;
   mutable absl::Mutex matching_mutex_;
-  bool attempted_matching_ GUARDED_BY(matching_mutex_);
+  bool attempted_matching_ ABSL_GUARDED_BY(matching_mutex_);
   std::unique_ptr<crypto::tink::RandomAccessStream> matching_stream_
-      GUARDED_BY(matching_mutex_);
+      ABSL_GUARDED_BY(matching_mutex_);
 };
 
 }  // namespace streamingaead

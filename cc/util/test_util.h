@@ -421,7 +421,7 @@ class DummyStreamingAead : public StreamingAead {
     }
 
    private:
-    void Initialize() EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
+    void Initialize() ABSL_EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
       auto buf = std::move(
           util::Buffer::New(exp_header_.size()).ValueOrDie());
       status_ = ct_source_->PRead(0, exp_header_.size(), buf.get());
@@ -440,7 +440,7 @@ class DummyStreamingAead : public StreamingAead {
     std::unique_ptr<crypto::tink::RandomAccessStream> ct_source_;
     std::string exp_header_;
     mutable absl::Mutex status_mutex_;
-    util::Status status_ GUARDED_BY(status_mutex_);
+    util::Status status_ ABSL_GUARDED_BY(status_mutex_);
   };  // class DummyDecryptingRandomAccessStream
 
  private:

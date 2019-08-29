@@ -78,7 +78,7 @@ class DecryptingRandomAccessStream : public crypto::tink::RandomAccessStream {
   std::unique_ptr<crypto::tink::RandomAccessStream> ct_source_;
 
   mutable absl::Mutex status_mutex_;
-  crypto::tink::util::Status status_ GUARDED_BY(status_mutex_);
+  crypto::tink::util::Status status_ ABSL_GUARDED_BY(status_mutex_);
   int header_size_;
   int ct_offset_;
   int ct_segment_size_;

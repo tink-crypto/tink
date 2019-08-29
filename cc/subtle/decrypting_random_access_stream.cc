@@ -109,7 +109,7 @@ util::Status DecryptingRandomAccessStream::PRead(int64_t position, int count,
 // and detects ciphertext truncation attacks.  However, a support for dynamic
 // streams can be added in the future if needed.
 void DecryptingRandomAccessStream::InitializeIfNeeded()
-    EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
+    ABSL_EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
   if (status_.error_code() != util::error::UNAVAILABLE) {
     // Already initialized or stream failed permanently.
     return;
