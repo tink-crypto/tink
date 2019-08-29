@@ -101,18 +101,11 @@ public class AesSivKeyManagerTest {
   @Test
   public void validateKey_version() throws Exception {
     AesSivKeyManager manager = new AesSivKeyManager();
-
-    for (int i = 0; i < 100; i++) {
-      if (i == 64) {
-        manager.validateKey(createAesSivKey(i));
-      } else {
-        try {
-          manager.validateKey(createAesSivKey(i));
-          fail();
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
-      }
+    try {
+      manager.validateKey(AesSivKey.newBuilder(createAesSivKey(64)).setVersion(1).build());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
     }
   }
 
