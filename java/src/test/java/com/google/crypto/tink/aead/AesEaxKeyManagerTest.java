@@ -22,6 +22,8 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -60,10 +62,10 @@ public class AesEaxKeyManagerTest {
         .build();
     ByteString serialized = ByteString.copyFrom(eaxKeyFormat.toByteArray());
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(AesEaxKeyManager.TYPE_URL)
+        .setTypeUrl(new AesEaxKeyManager().getKeyType())
         .setValue(serialized)
         .build();
-    AesEaxKeyManager keyManager = new AesEaxKeyManager();
+    KeyManager<Aead> keyManager = new KeyManagerImpl<>(new AesEaxKeyManager(), Aead.class);
     Set<String> keys = new TreeSet<String>();
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 27;
@@ -88,10 +90,10 @@ public class AesEaxKeyManagerTest {
   public void testNewKeyWithCorruptedFormat() throws Exception {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(AesEaxKeyManager.TYPE_URL)
+        .setTypeUrl(new AesEaxKeyManager().getKeyType())
         .setValue(serialized)
         .build();
-    AesEaxKeyManager keyManager = new AesEaxKeyManager();
+    KeyManager<Aead> keyManager = new KeyManagerImpl<>(new AesEaxKeyManager(), Aead.class);
     try {
       keyManager.newKey(serialized);
       fail("Corrupted format, should have thrown exception");

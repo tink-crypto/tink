@@ -176,7 +176,7 @@ public final class AeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(AesEaxKeyManager.TYPE_URL)
+        .setTypeUrl(new AesEaxKeyManager().getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

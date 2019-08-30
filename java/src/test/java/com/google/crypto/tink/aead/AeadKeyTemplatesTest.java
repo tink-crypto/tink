@@ -68,7 +68,7 @@ public class AeadKeyTemplatesTest {
   @Test
   public void testAES128_EAX() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES128_EAX;
-    assertEquals(AesEaxKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesEaxKeyFormat format = AesEaxKeyFormat.parseFrom(template.getValue());
     assertEquals(16, format.getKeySize());
@@ -79,7 +79,7 @@ public class AeadKeyTemplatesTest {
   @Test
   public void testAES256_EAX() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES256_EAX;
-    assertEquals(AesEaxKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesEaxKeyFormat format = AesEaxKeyFormat.parseFrom(template.getValue());
     assertEquals(32, format.getKeySize());
@@ -94,7 +94,7 @@ public class AeadKeyTemplatesTest {
     int keySize = 42;
     int ivSize = 72;
     KeyTemplate template = AeadKeyTemplates.createAesEaxKeyTemplate(keySize, ivSize);
-    assertEquals(AesEaxKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
 
     AesEaxKeyFormat format = AesEaxKeyFormat.parseFrom(template.getValue());
