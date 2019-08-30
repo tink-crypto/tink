@@ -39,6 +39,7 @@ PUBLIC_APIS = [
     "mac_config.h",
     "mac_factory.h",
     "mac_key_templates.h",
+    "output_stream_with_result.h",
     "output_stream.h",
     "public_key_sign.h",
     "public_key_sign_factory.h",
@@ -51,6 +52,7 @@ PUBLIC_APIS = [
     "streaming_aead.h",
     "streaming_aead_config.h",
     "streaming_aead_key_templates.h",
+    "streaming_mac.h",
     "tink_config.h",
     "version.h",
 ]
@@ -72,11 +74,13 @@ PUBLIC_API_DEPS = [
     ":keyset_writer",
     ":kms_client",
     ":mac",
+    ":output_stream_with_result",
     ":output_stream",
     ":primitive_set",
     ":public_key_sign",
     ":public_key_verify",
     ":streaming_aead",
+    ":streaming_mac",
     ":random_access_stream",
     ":registry",
     ":registry_impl",
@@ -160,6 +164,19 @@ cc_library(
 )
 
 cc_library(
+    name = "output_stream_with_result",
+    hdrs = ["output_stream_with_result.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":output_stream",
+        "//cc/util:status",
+        "//cc/util:statusor",
+    ],
+)
+
+cc_library(
     name = "aead",
     hdrs = ["aead.h"],
     include_prefix = "tink",
@@ -193,6 +210,20 @@ cc_library(
         ":input_stream",
         ":output_stream",
         ":random_access_stream",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "streaming_mac",
+    hdrs = ["streaming_mac.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":output_stream_with_result",
+        "//cc/util:status",
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
     ],

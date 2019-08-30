@@ -46,6 +46,7 @@ set(TINK_PUBLIC_APIS
   mac_config.h
   mac_factory.h
   mac_key_templates.h
+  output_stream_with_result.h
   output_stream.h
   public_key_sign.h
   public_key_sign_factory.h
@@ -58,6 +59,7 @@ set(TINK_PUBLIC_APIS
   streaming_aead.h
   streaming_aead_config.h
   streaming_aead_key_templates.h
+  streaming_mac.h
   tink_config.h
   "${TINK_VERSION_H}"
 )
@@ -79,6 +81,7 @@ set(TINK_PUBLIC_API_DEPS
   tink::core::keyset_reader
   tink::core::keyset_writer
   tink::core::kms_client
+  tink::core::output_stream_with_result
   tink::core::output_stream
   tink::core::public_key_sign
   tink::core::public_key_verify
@@ -88,6 +91,7 @@ set(TINK_PUBLIC_API_DEPS
   tink::core::registry
   tink::core::registry_impl
   tink::core::streaming_aead
+  tink::core::streaming_mac
   tink::core::version
   tink::aead::aead_config
   tink::aead::aead_factory
@@ -156,6 +160,15 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME output_stream_with_result
+  SRCS output_stream_with_result.h
+  DEPS
+    tink::core::output_stream_with_result
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME aead
   SRCS aead.h
   DEPS
@@ -178,6 +191,16 @@ tink_cc_library(
     tink::core::input_stream
     tink::core::output_stream
     tink::core::random_access_stream
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_library(
+  NAME streaming_mac
+  SRCS streaming_mac.h
+  DEPS
+    tink::core::output_stream_with_result
+    tink::util::status
     tink::util::statusor
     absl::strings
 )
