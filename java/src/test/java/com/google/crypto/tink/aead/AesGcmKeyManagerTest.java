@@ -18,13 +18,13 @@ package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Random;
@@ -42,6 +42,13 @@ public class AesGcmKeyManagerTest {
   private final AesGcmKeyManager manager = new AesGcmKeyManager();
   private final AesGcmKeyManager.KeyFactory<AesGcmKeyFormat, AesGcmKey> factory =
       manager.keyFactory();
+
+  @Test
+  public void basics() throws Exception {
+    assertThat(manager.getKeyType()).isEqualTo("type.googleapis.com/google.crypto.tink.AesGcmKey");
+    assertThat(manager.getVersion()).isEqualTo(0);
+    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
+  }
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
@@ -120,7 +127,7 @@ public class AesGcmKeyManagerTest {
     for (int i = 0; i < numTests; i++) {
       keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
     }
-    assertEquals(numTests, keys.size());
+    assertThat(keys).hasSize(numTests);
   }
 
   @Test
