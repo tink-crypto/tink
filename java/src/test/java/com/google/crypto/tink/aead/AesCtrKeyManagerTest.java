@@ -19,12 +19,15 @@ package com.google.crypto.tink.aead;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.subtle.IndCpaCipher;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -43,11 +46,13 @@ public class AesCtrKeyManagerTest {
         .setKeySize(16)
         .build();
     ByteString serialized = ByteString.copyFrom(ctrKeyFormat.toByteArray());
-    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(AesCtrKeyManager.TYPE_URL)
-        .setValue(serialized)
-        .build();
-    AesCtrKeyManager keyManager = new AesCtrKeyManager();
+    KeyTemplate keyTemplate =
+        KeyTemplate.newBuilder()
+            .setTypeUrl(new AesCtrKeyManager().getKeyType())
+            .setValue(serialized)
+            .build();
+    KeyManager<IndCpaCipher> keyManager =
+        new KeyManagerImpl<>(new AesCtrKeyManager(), IndCpaCipher.class);
     Set<String> keys = new TreeSet<String>();
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 27;
@@ -71,11 +76,13 @@ public class AesCtrKeyManagerTest {
   @Test
   public void testNewKeyWithCorruptedFormat() throws Exception {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(AesCtrKeyManager.TYPE_URL)
-        .setValue(serialized)
-        .build();
-    AesCtrKeyManager keyManager = new AesCtrKeyManager();
+    KeyTemplate keyTemplate =
+        KeyTemplate.newBuilder()
+            .setTypeUrl(new AesCtrKeyManager().getKeyType())
+            .setValue(serialized)
+            .build();
+    KeyManager<IndCpaCipher> keyManager =
+        new KeyManagerImpl<>(new AesCtrKeyManager(), IndCpaCipher.class);
     try {
       keyManager.newKey(serialized);
       fail("Corrupted format, should have thrown exception");
