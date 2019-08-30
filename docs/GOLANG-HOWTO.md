@@ -1,9 +1,9 @@
 # Tink for Go HOW-TO
 
-The following subsections present instructions and/or Go snippets for some
-common cryptographic tasks in [Tink](https://github.com/google/tink).
+This document contains instructions and Go code snippets for common tasks in
+[Tink](https://github.com/google/tink).
 
-## Installing Tink
+## Setup instructions
 
 To install Tink locally run:
 
@@ -28,7 +28,7 @@ bazel build ... && bazel test ...
 
 ## GoDoc
 
-GoDocs for the Tink API can be found
+Documentation for the Tink API can be found
 [here](https://godoc.org/github.com/google/tink).
 
 ## Obtaining and using primitives
@@ -36,7 +36,7 @@ GoDocs for the Tink API can be found
 [_Primitives_](PRIMITIVES.md) represent cryptographic operations offered by
 Tink, hence they form the core of Tink API. A primitive is just an interface
 that specifies what operations are offered by the primitive. A primitive can
-have multiple implementations, and user chooses a desired implementation by
+have multiple implementations, and you choose a desired implementation by
 using a key of corresponding type (see the [this
 section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 
@@ -359,11 +359,11 @@ func main() {
 
 ## Key management
 
-### Generating new key(set)s
+### Generating new keys and keysets
 
-To take advantage of key rotation and other key management features, a Tink user
-works usually not with single keys, but with keysets. Keysets are just sets of
-keys with some additional parameters and metadata.
+To take advantage of key rotation and other key management features, you usually
+do not work with single keys, but with keysets. Keysets are just sets of keys
+with some additional parameters and metadata.
 
 Internally Tink stores keysets as Protocol Buffers, but you can work with
 keysets via a wrapper called keyset handle. You can generate a new keyset and

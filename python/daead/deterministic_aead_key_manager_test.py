@@ -61,7 +61,7 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
     key_template = deterministic_aead_key_templates.create_aes_siv_key_template(
         63)
     with self.assertRaisesRegex(tink_error.TinkError,
-                                'Invalid AesSivKeyFormat'):
+                                'Invalid key size'):
       self.key_manager.new_key_data(key_template)
 
   def test_encrypt_decrypt(self):

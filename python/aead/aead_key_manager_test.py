@@ -93,7 +93,7 @@ class AeadKeyManagerTest(absltest.TestCase):
   def test_invalid_params_throw_exception(self):
     key_template = self.new_aes_eax_key_template(9, 16)
     with self.assertRaisesRegex(tink_error.TinkError,
-                                'Invalid AesEaxKeyFormat'):
+                                'Invalid IV size'):
       self.key_manager_eax.new_key_data(key_template)
 
     key_template = self.new_aes_gcm_key_template(17)

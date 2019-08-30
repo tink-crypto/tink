@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingAead;
@@ -27,13 +27,10 @@ import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacParams;
-import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.ByteString;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -41,54 +38,190 @@ import org.junit.runners.JUnit4;
 /** Test for AesCtrHmacStreamingKeyManager. */
 @RunWith(JUnit4.class)
 public class AesCtrHmacStreamingKeyManagerTest {
-  private static final int AES_KEY_SIZE = 16;
-  private HmacParams hmacParams;
-  private AesCtrHmacStreamingParams keyParams;
-  private AesCtrHmacStreamingKeyManager keyManager;
+  private final AesCtrHmacStreamingKeyManager manager = new AesCtrHmacStreamingKeyManager();
+  private final AesCtrHmacStreamingKeyManager.KeyFactory<
+          AesCtrHmacStreamingKeyFormat, AesCtrHmacStreamingKey>
+      factory = manager.keyFactory();
 
-  @Before
-  public void setUp() throws GeneralSecurityException {
-    hmacParams = HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(16).build();
-    keyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(128)
-            .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA256)
-            .setHmacParams(hmacParams)
-            .build();
-    keyManager = new AesCtrHmacStreamingKeyManager();
+  // Returns an HmacParams.Builder with valid parameters
+  private static HmacParams.Builder createHmacParams() {
+    return HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(32);
+  }
+
+  // Returns an AesCtrHmacStreamingParams.Builder with valid parameters
+  private static AesCtrHmacStreamingParams.Builder createParams() {
+    return AesCtrHmacStreamingParams.newBuilder()
+        .setCiphertextSegmentSize(1024)
+        .setDerivedKeySize(32)
+        .setHkdfHashType(HashType.SHA256)
+        .setHmacParams(createHmacParams());
+  }
+
+  // Returns an AesCtrHmacStreamingKeyFormat.Builder with valid parameters
+  private static AesCtrHmacStreamingKeyFormat.Builder createKeyFormat() {
+    return AesCtrHmacStreamingKeyFormat.newBuilder().setKeySize(32).setParams(createParams());
   }
 
   @Test
-  public void testBasic() throws Exception {
-    // Create primitive from a given key.
-    AesCtrHmacStreamingKey key =
-        AesCtrHmacStreamingKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(20)))
-            .setParams(keyParams)
-            .build();
-    StreamingAead streamingAead = keyManager.getPrimitive(key);
-    StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
+  public void basics() throws Exception {
+    assertThat(manager.getKeyType())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey");
+    assertThat(manager.getVersion()).isEqualTo(0);
+    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
+  }
 
-    // Create a key from KeyFormat, and use the key.
-    AesCtrHmacStreamingKeyFormat keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(16).build();
-    ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
-    key = (AesCtrHmacStreamingKey) keyManager.newKey(serializedKeyFormat);
-    streamingAead = keyManager.getPrimitive(key);
-    StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
+  @Test
+  public void validateKeyFormat_empty_throws() throws Exception {
+    try {
+      factory.validateKeyFormat(AesCtrHmacStreamingKeyFormat.getDefaultInstance());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_valid() throws Exception {
+    AesCtrHmacStreamingKeyFormat format = createKeyFormat().build();
+
+    factory.validateKeyFormat(format);
+  }
+
+  @Test
+  public void validateKeyFormat_derivedKeySizes() throws Exception {
+    for (int derivedKeySize = 0; derivedKeySize < 42; ++derivedKeySize) {
+      AesCtrHmacStreamingKeyFormat format =
+          createKeyFormat().setParams(createParams().setDerivedKeySize(derivedKeySize)).build();
+      if (derivedKeySize == 16 || derivedKeySize == 32) {
+        factory.validateKeyFormat(format);
+      } else {
+        try {
+          factory.validateKeyFormat(format);
+          fail();
+        } catch (GeneralSecurityException e) {
+          // expected
+        }
+      }
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_smallKey_throws() throws Exception {
+    // TODO(b/140161847): Also check for key size 16.
+    AesCtrHmacStreamingKeyFormat format = createKeyFormat().setKeySize(15).build();
+    try {
+      factory.validateKeyFormat(format);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_unkownHash_throws() throws Exception {
+    AesCtrHmacStreamingKeyFormat format =
+        createKeyFormat().setParams(createParams().setHkdfHashType(HashType.UNKNOWN_HASH)).build();
+    try {
+      factory.validateKeyFormat(format);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_unkownHmacHash_throws() throws Exception {
+    AesCtrHmacStreamingKeyFormat format =
+        createKeyFormat()
+            .setParams(
+                createParams().setHmacParams(createHmacParams().setHash(HashType.UNKNOWN_HASH)))
+            .build();
+    try {
+      factory.validateKeyFormat(format);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_smallSegment_throws() throws Exception {
+    AesCtrHmacStreamingKeyFormat format =
+        createKeyFormat().setParams(createParams().setCiphertextSegmentSize(45)).build();
+
+    try {
+      factory.validateKeyFormat(format);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_tagSizeTooBigSha1_throws() throws Exception {
+    AesCtrHmacStreamingKeyFormat format =
+        createKeyFormat()
+            .setParams(
+                createParams()
+                    .setHmacParams(createHmacParams().setHash(HashType.SHA1).setTagSize(21)))
+            .build();
+
+    try {
+      factory.validateKeyFormat(format);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_tagSizeTooBigSha256_throws() throws Exception {
+    AesCtrHmacStreamingKeyFormat format =
+        createKeyFormat()
+            .setParams(
+                createParams()
+                    .setHmacParams(createHmacParams().setHash(HashType.SHA256).setTagSize(33)))
+            .build();
+
+    try {
+      factory.validateKeyFormat(format);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_tagSizeTooBigSha512_throws() throws Exception {
+    AesCtrHmacStreamingKeyFormat format =
+        createKeyFormat()
+            .setParams(
+                createParams()
+                    .setHmacParams(createHmacParams().setHash(HashType.SHA512).setTagSize(65)))
+            .build();
+
+    try {
+      factory.validateKeyFormat(format);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void createKey_values() throws Exception {
+    AesCtrHmacStreamingKeyFormat format = createKeyFormat().build();
+    AesCtrHmacStreamingKey key = factory.createKey(format);
+    assertThat(key.getVersion()).isEqualTo(0);
+    assertThat(key.getKeyValue()).hasSize(format.getKeySize());
+    assertThat(key.getParams()).isEqualTo(format.getParams());
   }
 
   @Test
   public void testSkip() throws Exception {
-    AesCtrHmacStreamingKey key =
-        AesCtrHmacStreamingKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(20)))
-            .setParams(keyParams)
-            .build();
-    StreamingAead streamingAead = keyManager.getPrimitive(key);
+    AesCtrHmacStreamingKeyFormat format = createKeyFormat().build();
+    AesCtrHmacStreamingKey key = factory.createKey(format);
+    StreamingAead streamingAead = manager.getPrimitive(key, StreamingAead.class);
     int offset = 0;
     int plaintextSize = 1 << 16;
     // Runs the test with different sizes for the chunks to skip.
@@ -98,144 +231,14 @@ public class AesCtrHmacStreamingKeyManagerTest {
   }
 
   @Test
-  public void testNewKeyMultipleTimes() throws Exception {
-    AesCtrHmacStreamingKeyFormat keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(16).build();
-    ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
-    Set<String> keys = new TreeSet<String>();
+  public void createKey_multipleTimes_differentValues() throws Exception {
+    AesCtrHmacStreamingKeyFormat keyFormat = createKeyFormat().build();
+    Set<String> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys.
-    int numTests = 27;
-    for (int i = 0; i < numTests / 3; i++) {
-      AesCtrHmacStreamingKey key = (AesCtrHmacStreamingKey) keyManager.newKey(keyFormat);
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(16, key.getKeyValue().toByteArray().length);
-
-      key = (AesCtrHmacStreamingKey) keyManager.newKey(serializedKeyFormat);
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(16, key.getKeyValue().toByteArray().length);
-
-      KeyData keyData = keyManager.newKeyData(serializedKeyFormat);
-      key = AesCtrHmacStreamingKey.parseFrom(keyData.getValue());
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(16, key.getKeyValue().toByteArray().length);
+    int numTests = 100;
+    for (int i = 0; i < numTests; i++) {
+      keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }
-    assertEquals(numTests, keys.size());
-  }
-
-  private void testNewKeyWithBadFormat(AesCtrHmacStreamingParams badKeyParams) throws Exception {
-    AesCtrHmacStreamingKeyFormat keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();
-    testNewKeyWithBadFormat(keyFormat);
-  }
-
-  private void testNewKeyWithBadFormat(AesCtrHmacStreamingKeyFormat keyFormat) throws Exception {
-    ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
-    try {
-      keyManager.newKey(keyFormat);
-      fail("Bad format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      keyManager.newKeyData(serializedKeyFormat);
-      fail("Bad format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-  }
-
-  @Test
-  public void testNewKeyWithBadFormat() throws Exception {
-    // key_size too small.
-    AesCtrHmacStreamingKeyFormat keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(15).build();
-    testNewKeyWithBadFormat(keyFormat);
-
-    // Unknown HKDF HashType.
-    AesCtrHmacStreamingParams badKeyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(128)
-            .setDerivedKeySize(AES_KEY_SIZE)
-            .build();
-    testNewKeyWithBadFormat(badKeyParams);
-
-    // derived_key_size too small.
-    badKeyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(128)
-            .setDerivedKeySize(10)
-            .setHkdfHashType(HashType.SHA256)
-            .build();
-    testNewKeyWithBadFormat(badKeyParams);
-
-    // ciphertext_segment_size too small.
-    badKeyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(15)
-            .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA256)
-            .build();
-    testNewKeyWithBadFormat(badKeyParams);
-
-    // No HmacParams.
-    badKeyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(130)
-            .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA256)
-            .build();
-    testNewKeyWithBadFormat(badKeyParams);
-
-    // Unknown HmacParams.hash.
-    badKeyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(130)
-            .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA256)
-            .setHmacParams(HmacParams.newBuilder().build())
-            .build();
-    testNewKeyWithBadFormat(badKeyParams);
-
-    // tag size too small.
-    badKeyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(130)
-            .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA256)
-            .setHmacParams(
-                HmacParams.newBuilder()
-                    .setHash(HashType.SHA256)
-                    .setTagSize(9)
-                    .build())
-            .build();
-    testNewKeyWithBadFormat(badKeyParams);
-
-    // tag size too big.
-    badKeyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(130)
-            .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA256)
-            .setHmacParams(
-                HmacParams.newBuilder()
-                    .setHash(HashType.SHA256)
-                    .setTagSize(33)
-                    .build())
-            .build();
-    testNewKeyWithBadFormat(badKeyParams);
-
-    // All params good.
-    AesCtrHmacStreamingParams goodKeyParams =
-        AesCtrHmacStreamingParams.newBuilder()
-            .setCiphertextSegmentSize(130)
-            .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA256)
-            .setHmacParams(hmacParams)
-            .build();
-    keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(goodKeyParams).setKeySize(16).build();
-    ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
-    AesCtrHmacStreamingKey unusedKey = (AesCtrHmacStreamingKey) keyManager.newKey(keyFormat);
-    unusedKey = (AesCtrHmacStreamingKey) keyManager.newKey(serializedKeyFormat);
+    assertThat(keys).hasSize(numTests);
   }
 }

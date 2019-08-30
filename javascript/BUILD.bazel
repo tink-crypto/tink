@@ -7,6 +7,20 @@ licenses(["notice"])
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure_js_test")
 
 closure_js_library(
+    name = "javascript",
+    visibility = ["//visibility:public"],
+    exports = [
+        ":primitives",
+        ":binary_reader",
+        ":binary_writer",
+        ":readers_writers",
+        ":keyset_handle",
+        ":key_manager",
+        ":registry",
+    ],
+)
+
+closure_js_library(
     name = "primitives",
     srcs = [
         "aead.js",
@@ -31,6 +45,18 @@ closure_js_library(
         ":readers_writers",
         "//javascript/exception",
         "//proto:tink_closure_proto",
+        "@io_bazel_rules_closure//closure/library",
+    ],
+)
+
+closure_js_library(
+    name = "binary_writer",
+    srcs = [
+        "binary_keyset_writer.js",
+    ],
+    deps = [
+        ":readers_writers",
+        "//javascript/exception",
         "@io_bazel_rules_closure//closure/library",
     ],
 )
@@ -115,23 +141,11 @@ closure_js_library(
 )
 
 closure_js_library(
-    name = "catalogue",
-    srcs = [
-        "catalogue.js",
-    ],
-    deps = [
-        ":key_manager",
-        "@io_bazel_rules_closure//closure/library",
-    ],
-)
-
-closure_js_library(
     name = "registry",
     srcs = [
         "registry.js",
     ],
     deps = [
-        ":catalogue",
         ":key_manager",
         ":primitive_set",
         ":primitive_wrapper",
@@ -165,21 +179,6 @@ closure_js_library(
         "//javascript/subtle",
         "//proto:common_closure_proto",
         "//proto:tink_closure_proto",
-        "@io_bazel_rules_closure//closure/library",
-    ],
-)
-
-closure_js_library(
-    name = "config",
-    srcs = [
-        "config.js",
-    ],
-    deps = [
-        ":catalogue",
-        ":key_manager",
-        ":registry",
-        "//javascript/exception",
-        "//proto:config_closure_proto",
         "@io_bazel_rules_closure//closure/library",
     ],
 )

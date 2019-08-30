@@ -14,13 +14,9 @@
 
 goog.module('tink.aead.AeadConfig');
 
-const AeadCatalogue = goog.require('tink.aead.AeadCatalogue');
 const AeadWrapper = goog.require('tink.aead.AeadWrapper');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
-const Config = goog.require('tink.Config');
-const PbKeyTypeEntry = goog.require('proto.google.crypto.tink.KeyTypeEntry');
-const PbRegistryConfig = goog.require('proto.google.crypto.tink.RegistryConfig');
 const Registry = goog.require('tink.Registry');
 
 
@@ -38,68 +34,23 @@ const Registry = goog.require('tink.Registry');
  */
 class AeadConfig {
   /**
-   * Returns config of Aead implementations supported in the current Tink
-   * release.
-   *
-   * @return {!PbRegistryConfig}
-   */
-  static latest() {
-    const config =
-        new PbRegistryConfig().setConfigName(AeadConfig.CONFIG_NAME_);
-
-    config.addEntry(AeadConfig.createEntry_(
-        AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, /* keyManagerVersion = */ 0));
-
-    config.addEntry(AeadConfig.createEntry_(
-        AeadConfig.AES_GCM_TYPE_URL, /* keyManagerVersion = */ 0));
-
-    return config;
-  }
-
-  /**
    * Registers key managers for all Aead key types from the current Tink
    * release.
    */
   static register() {
     // TODO MacConfig.register() should be here.
-    Registry.addCatalogue(AeadConfig.CATALOGUE_NAME, new AeadCatalogue());
+    Registry.registerKeyManager(new AesGcmKeyManager());
+    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager());
     Registry.registerPrimitiveWrapper(new AeadWrapper());
-    Config.register(AeadConfig.latest());
-  }
-
-  /**
-   * Creates KeyTypeEntry for the given parameters. The primitiveName and
-   * catalogueName are set according to correspoding AeadConfig variables.
-   *
-   * @param {string} typeUrl
-   * @param {number} keyManagerVersion
-   * @param {boolean=} opt_newKeyAllowed
-   *
-   * @return {!PbKeyTypeEntry}
-   * @private
-   */
-  static createEntry_(typeUrl, keyManagerVersion, opt_newKeyAllowed = true) {
-    const entry = new PbKeyTypeEntry()
-                      .setPrimitiveName(AeadConfig.PRIMITIVE_NAME)
-                      .setTypeUrl(typeUrl)
-                      .setKeyManagerVersion(keyManagerVersion)
-                      .setNewKeyAllowed(opt_newKeyAllowed)
-                      .setCatalogueName(AeadConfig.CATALOGUE_NAME);
-
-    return entry;
   }
 }
 
 /** @const @private {string} */
 AeadConfig.CONFIG_NAME_ = 'TINK_AEAD';
 /** @const {string} */
-AeadConfig.CATALOGUE_NAME = 'TinkAead';
-/** @const {string} */
 AeadConfig.PRIMITIVE_NAME = 'Aead';
-
 /** @const {string} */
 AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.KEY_TYPE;
-
 /** @const {string} */
 AeadConfig.AES_GCM_TYPE_URL = AesGcmKeyManager.KEY_TYPE;
 

@@ -20,9 +20,11 @@
 #include <limits>
 #include <string>
 
+#include "absl/base/thread_annotations.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "absl/synchronization/mutex.h"
 #include "tink/aead.h"
 #include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
@@ -389,52 +391,61 @@ class DummyStreamingAead : public StreamingAead {
         std::unique_ptr<crypto::tink::RandomAccessStream> ct_source,
         absl::string_view expected_header)
         : ct_source_(std::move(ct_source)), exp_header_(expected_header),
-          after_init_(false), status_(util::OkStatus()) {}
+          status_(util::Status(util::error::UNAVAILABLE, "not initialized")) {}
 
     crypto::tink::util::Status PRead(
         int64_t position, int count,
         crypto::tink::util::Buffer* dest_buffer) override {
-      if (!after_init_) {  // Try to initialize.
-        after_init_ = true;
-        status_ = dest_buffer->set_size(0);
+      {  // Initialize, if not initialized yet.
+        absl::MutexLock lock(&status_mutex_);
+        if (status_.error_code() == util::error::UNAVAILABLE) Initialize();
         if (!status_.ok()) return status_;
-        auto buf = std::move(
-            util::Buffer::New(exp_header_.size()).ValueOrDie());
-        status_ = ct_source_->PRead(0, exp_header_.size(), buf.get());
-        if (!status_.ok() &&
-            status_.error_code() != util::error::OUT_OF_RANGE) return status_;
-        if (buf->size() < exp_header_.size()) {
-          status_ = util::Status(
-              util::error::INVALID_ARGUMENT, "Could not read header");
-        } else if (memcmp(buf->get_mem_block(), exp_header_.data(),
-                          static_cast<int>(exp_header_.size()))) {
-          status_ = util::Status(
-              util::error::INVALID_ARGUMENT, "Corrupted header");
-        }
       }
-      if (!status_.ok()) return status_;
+      auto status = dest_buffer->set_size(0);
+      if (!status.ok()) return status;
       return ct_source_->PRead(
           position + exp_header_.size(), count, dest_buffer);
     }
 
-    int64_t size() const override {
-      if (after_init_ && status_.ok()) {
-        auto pt_size = ct_source_->size() - exp_header_.size();
-        if (pt_size >= 0) return pt_size;
+    util::StatusOr<int64_t> size() override {
+      {  // Initialize, if not initialized yet.
+        absl::MutexLock lock(&status_mutex_);
+        if (status_.error_code() == util::error::UNAVAILABLE) Initialize();
+        if (!status_.ok()) return status_;
       }
-      return -1;
+      auto ct_size_result = ct_source_->size();
+      if (!ct_size_result.ok()) return ct_size_result.status();
+      auto pt_size = ct_size_result.ValueOrDie() - exp_header_.size();
+      if (pt_size >= 0) return pt_size;
+      return util::Status(util::error::UNAVAILABLE, "size not available");
     }
 
    private:
+    void Initialize() ABSL_EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
+      auto buf = std::move(
+          util::Buffer::New(exp_header_.size()).ValueOrDie());
+      status_ = ct_source_->PRead(0, exp_header_.size(), buf.get());
+      if (!status_.ok() &&
+          status_.error_code() != util::error::OUT_OF_RANGE) return;
+      if (buf->size() < exp_header_.size()) {
+        status_ = util::Status(
+            util::error::INVALID_ARGUMENT, "Could not read header");
+      } else if (memcmp(buf->get_mem_block(), exp_header_.data(),
+                        static_cast<int>(exp_header_.size()))) {
+        status_ = util::Status(
+            util::error::INVALID_ARGUMENT, "Corrupted header");
+      }
+    }
+
     std::unique_ptr<crypto::tink::RandomAccessStream> ct_source_;
     std::string exp_header_;
-    bool after_init_;
-    util::Status status_;
+    mutable absl::Mutex status_mutex_;
+    util::Status status_ ABSL_GUARDED_BY(status_mutex_);
   };  // class DummyDecryptingRandomAccessStream
 
  private:
   std::string streaming_aead_name_;
-};
+};  // class DummyStreamingAead
 
 // A dummy implementation of HybridEncrypt-interface.
 // An instance of DummyHybridEncrypt can be identified by a name specified

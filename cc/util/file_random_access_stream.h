@@ -22,6 +22,7 @@
 #include "tink/random_access_stream.h"
 #include "tink/util/buffer.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -41,7 +42,7 @@ class FileRandomAccessStream : public crypto::tink::RandomAccessStream {
                                    int count,
                                    Buffer* dest_buffer) override;
 
-  int64_t size() const override;
+  crypto::tink::util::StatusOr<int64_t> size() override;
 
  private:
   int fd_;

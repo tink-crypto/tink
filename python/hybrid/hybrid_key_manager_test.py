@@ -96,8 +96,9 @@ class HybridKeyManagerTest(absltest.TestCase):
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
     key_template.value = key_format.SerializeToString()
     key_template.output_prefix_type = tink_pb2.TINK
-    with self.assertRaisesRegex(tink_error.TinkError,
-                                'Operation not supported for public keys'):
+    with self.assertRaisesRegex(
+        tink_error.TinkError,
+        'Creating new keys is not supported for this key manager'):
       key_manager = _hybrid_encrypt_key_manager()
       key_manager.new_key_data(key_template)
 

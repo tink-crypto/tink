@@ -17,6 +17,7 @@
 #ifndef TINK_STREAMINGAEAD_STREAMING_AEAD_CONFIG_H_
 #define TINK_STREAMINGAEAD_STREAMING_AEAD_CONFIG_H_
 
+#include "absl/base/macros.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
@@ -39,6 +40,7 @@ class StreamingAeadConfig {
 
   // Returns config of StreamingAead implementations supported
   // in the current Tink release.
+  ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
 
   // Registers StreamingAead primitive wrapper and key managers for all

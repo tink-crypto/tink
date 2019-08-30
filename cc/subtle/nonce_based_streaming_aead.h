@@ -62,7 +62,7 @@ class NonceBasedStreamingAead : public StreamingAead {
   virtual crypto::tink::util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
   NewSegmentEncrypter(absl::string_view associated_data) const = 0;
 
-  // Returns a new StreamSegmentEncrypter that uses `associated_data` for AEAD.
+  // Returns a new StreamSegmentDecrypter that uses `associated_data` for AEAD.
   virtual crypto::tink::util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>
   NewSegmentDecrypter(absl::string_view associated_data) const = 0;
 };

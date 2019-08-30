@@ -44,8 +44,6 @@ class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
         });
   }
 
-  private static final int VERSION = 0;
-
   @Override
   public String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.AesGcmKey";
@@ -53,7 +51,7 @@ class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
@@ -90,7 +88,7 @@ class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       public AesGcmKey createKey(AesGcmKeyFormat format) throws GeneralSecurityException {
         return AesGcmKey.newBuilder()
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .setVersion(VERSION)
+            .setVersion(getVersion())
             .build();
       }
     };

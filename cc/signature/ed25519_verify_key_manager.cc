@@ -17,7 +17,6 @@
 #include "tink/signature/ed25519_verify_key_manager.h"
 
 #include "absl/strings/string_view.h"
-#include "tink/key_manager.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ed25519_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -35,45 +34,20 @@ using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::Ed25519PublicKey;
 
-constexpr uint32_t Ed25519VerifyKeyManager::kVersion;
-
-Ed25519VerifyKeyManager::Ed25519VerifyKeyManager()
-    : key_factory_(KeyFactory::AlwaysFailingFactory(
-          util::Status(util::error::UNIMPLEMENTED,
-                       "Operation not supported for public keys, "
-                       "please use the Ed25519SignKeyManager."))) {}
-
-const KeyFactory& Ed25519VerifyKeyManager::get_key_factory() const {
-  return *key_factory_;
-}
-
-uint32_t Ed25519VerifyKeyManager::get_version() const { return kVersion; }
-
 StatusOr<std::unique_ptr<PublicKeyVerify>>
-Ed25519VerifyKeyManager::GetPrimitiveFromKey(
-    const Ed25519PublicKey& ed25519_public_key) const {
-  Status status = Validate(ed25519_public_key);
-  if (!status.ok()) return status;
-
-  auto ed25519_result =
-      subtle::Ed25519VerifyBoringSsl::New(ed25519_public_key.key_value());
-  if (!ed25519_result.ok()) return ed25519_result.status();
-
-  std::unique_ptr<PublicKeyVerify> ed25519(
-      ed25519_result.ValueOrDie().release());
-  return std::move(ed25519);
+Ed25519VerifyKeyManager::PublicKeyVerifyFactory::Create(
+    const Ed25519PublicKey& public_key) const {
+  return subtle::Ed25519VerifyBoringSsl::New(public_key.key_value());
 }
 
-// static
-Status Ed25519VerifyKeyManager::Validate(const Ed25519PublicKey& key) {
-  Status status = ValidateVersion(key.version(), kVersion);
+Status Ed25519VerifyKeyManager::ValidateKey(const Ed25519PublicKey& key) const {
+  Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
 
   if (key.key_value().length() != 32) {
     return Status(util::error::INVALID_ARGUMENT,
                   "The ED25519 public key must be 32-bytes long.");
   }
-
   return Status::OK;
 }
 

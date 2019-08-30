@@ -17,6 +17,7 @@
 #ifndef TINK_DAEAD_DETERMINISTIC_AEAD_CONFIG_H_
 #define TINK_DAEAD_DETERMINISTIC_AEAD_CONFIG_H_
 
+#include "absl/base/macros.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
@@ -32,8 +33,6 @@ namespace tink {
 //
 //   auto status = DeterministicAeadConfig::Register();
 //
-// For more information on creation and usage of DeterministicAead instances
-// see DeterministicAeadFactory.
 class DeterministicAeadConfig {
  public:
   static constexpr char kCatalogueName[] = "TinkDeterministicAead";
@@ -41,6 +40,7 @@ class DeterministicAeadConfig {
 
   // Returns config of DeterministicAead implementations supported
   // in the current Tink release.
+  ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
 
   // Registers DeterministicAead primitive wrapper and key managers for all

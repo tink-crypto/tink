@@ -19,45 +19,70 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/core/key_manager_base.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/key_manager.h"
+#include "tink/util/constants.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/validation.h"
 #include "proto/kms_envelope.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
 class KmsEnvelopeAeadKeyManager
-    : public KeyManagerBase<Aead, google::crypto::tink::KmsEnvelopeAeadKey> {
+    : public KeyTypeManager<google::crypto::tink::KmsEnvelopeAeadKey,
+                            google::crypto::tink::KmsEnvelopeAeadKeyFormat,
+                            List<Aead>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class AeadFactory : public PrimitiveFactory<Aead> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
+        const google::crypto::tink::KmsEnvelopeAeadKey& key) const override;
+  };
 
-  KmsEnvelopeAeadKeyManager();
+  KmsEnvelopeAeadKeyManager()
+      : KeyTypeManager(absl::make_unique<AeadFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::REMOTE;
+  }
 
-  ~KmsEnvelopeAeadKeyManager() override {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveFromKey(
-      const google::crypto::tink::KmsEnvelopeAeadKey& key) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::KmsEnvelopeAeadKey& key) const override {
+    crypto::tink::util::Status status =
+        ValidateVersion(key.version(), get_version());
+    if (!status.ok()) return status;
+    return ValidateKeyFormat(key.params());
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const google::crypto::tink::KmsEnvelopeAeadKeyFormat& format)
+      const override {
+    if (format.kek_uri().empty()) {
+      return crypto::tink::util::Status(util::error::INVALID_ARGUMENT,
+                                        "Missing kek_uri.");
+    }
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::StatusOr<google::crypto::tink::KmsEnvelopeAeadKey>
+  CreateKey(const google::crypto::tink::KmsEnvelopeAeadKeyFormat& key_format)
+      const override {
+    google::crypto::tink::KmsEnvelopeAeadKey key;
+    key.set_version(get_version());
+    *(key.mutable_params()) = key_format;
+    return key;
+  }
 
  private:
-  friend class KmsEnvelopeAeadKeyFactory;
-
-  std::unique_ptr<KeyFactory> key_factory_;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::KmsEnvelopeAeadKey& key);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::KmsEnvelopeAeadKeyFormat& key_format);
+  const std::string key_type_ =
+      absl::StrCat(kTypeGoogleapisCom,
+                   google::crypto::tink::KmsEnvelopeAeadKey().GetTypeName());
 };
 
 }  // namespace tink

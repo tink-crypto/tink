@@ -44,6 +44,7 @@ using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::HashType;
+using google::crypto::tink::HmacKey;
 using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
@@ -70,9 +71,8 @@ using google::crypto::tink::KeyStatusType;
 
 - (void)testPrimitive {
   // Prepare a template for generating keys for a Keyset.
+  std::string key_type = HmacKeyManager().get_key_type();
   HmacKeyManager key_manager;
-  const KeyFactory &key_factory = key_manager.get_key_factory();
-  std::string key_type = key_manager.get_key_type();
 
   HmacKeyFormat key_format;
   key_format.set_key_size(16);
@@ -82,16 +82,16 @@ using google::crypto::tink::KeyStatusType;
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  auto new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddTinkKey(key_type, key_id_1, *new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
+  HmacKey new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddRawKey(key_type, key_id_2, *new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
+  new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
-  AddTinkKey(key_type, key_id_3, *new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
+  new_key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
 

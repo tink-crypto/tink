@@ -168,11 +168,12 @@ TEST(DecryptingRandomAccessStreamTest, BasicDecryption) {
         auto dec_stream_result =
             DecryptingRandomAccessStream::New(saead_set, std::move(ct), aad);
         EXPECT_THAT(dec_stream_result.status(), IsOk());
+        auto dec_stream = std::move(dec_stream_result.ValueOrDie());
         std::string decrypted;
-        auto status = ReadAll(dec_stream_result.ValueOrDie().get(),
-                              &decrypted);
+        auto status = ReadAll(dec_stream.get(), &decrypted);
         EXPECT_THAT(status, StatusIs(util::error::OUT_OF_RANGE,
                                      HasSubstr("EOF")));
+        EXPECT_EQ(pt_size, dec_stream->size().ValueOrDie());
         EXPECT_EQ(plaintext, decrypted);
       }
     }

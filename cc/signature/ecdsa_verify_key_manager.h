@@ -20,54 +20,49 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "tink/core/key_manager_base.h"
-#include "tink/key_manager.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/public_key_verify.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/ecdsa.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
 class EcdsaVerifyKeyManager
-    : public KeyManagerBase<PublicKeyVerify,
-                            google::crypto::tink::EcdsaPublicKey> {
+    : public KeyTypeManager<google::crypto::tink::EcdsaPublicKey, void,
+                            List<PublicKeyVerify>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class PublicKeyVerifyFactory : public PrimitiveFactory<PublicKeyVerify> {
+    crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>> Create(
+        const google::crypto::tink::EcdsaPublicKey& ecdsa_public_key)
+        const override;
+  };
 
-  EcdsaVerifyKeyManager();
+  EcdsaVerifyKeyManager()
+      : KeyTypeManager(absl::make_unique<PublicKeyVerifyFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::ASYMMETRIC_PUBLIC;
+  }
 
-  virtual ~EcdsaVerifyKeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>>
-  GetPrimitiveFromKey(const google::crypto::tink::EcdsaPublicKey&
-                          ecdsa_public_key) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::EcdsaPublicKey& key) const override;
+
+  crypto::tink::util::Status ValidateParams(
+      const google::crypto::tink::EcdsaParams& params) const;
 
  private:
-  // Friends that re-use proto validation helpers.
-  friend class EcdsaPrivateKeyFactory;
-  friend class EcdsaSignKeyManager;
-
-  std::unique_ptr<KeyFactory> key_factory_;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EcdsaParams& params);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EcdsaPublicKey& key);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EcdsaKeyFormat& key_format);
+  const std::string key_type_ = absl::StrCat(
+      kTypeGoogleapisCom, google::crypto::tink::EcdsaPublicKey().GetTypeName());
 };
 
 }  // namespace tink

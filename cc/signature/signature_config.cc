@@ -37,11 +37,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-constexpr char SignatureConfig::kPublicKeySignCatalogueName[];
-constexpr char SignatureConfig::kPublicKeyVerifyCatalogueName[];
-constexpr char SignatureConfig::kPublicKeySignPrimitiveName[];
-constexpr char SignatureConfig::kPublicKeyVerifyPrimitiveName[];
-
 // static
 const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();
@@ -52,18 +47,14 @@ const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
 util::Status SignatureConfig::Register() {
   // Register key managers.
   // ECDSA
-  auto status = Registry::RegisterKeyManager(
-      absl::make_unique<EcdsaSignKeyManager>(), true);
-  if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  auto status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<EcdsaSignKeyManager>(),
       absl::make_unique<EcdsaVerifyKeyManager>(), true);
   if (!status.ok()) return status;
 
   // ED25519
-  status = Registry::RegisterKeyManager(
-      absl::make_unique<Ed25519SignKeyManager>(), true);
-  if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<Ed25519SignKeyManager>(),
       absl::make_unique<Ed25519VerifyKeyManager>(), true);
   if (!status.ok()) return status;
 

@@ -61,7 +61,11 @@ public final class TinkConfig {
           .setConfigName("TINK_1_1_0")
           .build();
 
-  /** @since 1.2.0 */
+  /**
+   * @deprecated This is not supported anymore.
+   * @since 1.2.0
+   */
+  @Deprecated
   public static final RegistryConfig LATEST =
       RegistryConfig.newBuilder()
           .mergeFrom(HybridConfig.LATEST) // include AeadConfig.LATEST and MacConfig.LATEST

@@ -38,7 +38,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void testECDSA_P256() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P256;
-    assertEquals(EcdsaSignKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
 
@@ -51,7 +51,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void testECDSA_P256_IEEE_P1363() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P256_IEEE_P1363;
-    assertEquals(EcdsaSignKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
 
@@ -64,7 +64,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void testECDSA_P384() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P384;
-    assertEquals(EcdsaSignKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
 
@@ -77,7 +77,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void testECDSA_P384_IEEE_P1363() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P384_IEEE_P1363;
-    assertEquals(EcdsaSignKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
 
@@ -90,7 +90,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void testECDSA_P521_IEEE_P1363() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P521_IEEE_P1363;
-    assertEquals(EcdsaSignKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
 
@@ -108,7 +108,7 @@ public class SignatureKeyTemplatesTest {
     EllipticCurveType curve = EllipticCurveType.UNKNOWN_CURVE;
     EcdsaSignatureEncoding encoding = EcdsaSignatureEncoding.IEEE_P1363;
     KeyTemplate template = SignatureKeyTemplates.createEcdsaKeyTemplate(hashType, curve, encoding);
-    assertEquals(EcdsaSignKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
 
     EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());

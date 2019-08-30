@@ -25,6 +25,11 @@ namespace subtle {
 // Returnes big endian order representation of |val|.
 std::string BigEndian32(uint32_t val);
 
+// Like std::string::resize, but the newly allocated storage may be left
+// uninitialized. C++11 provides no portable way to do this. Using this function
+// allows us to do this on a per compiler/library version basis.
+void ResizeStringUninitialized(std::string* s, size_t new_size);
+
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

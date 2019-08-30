@@ -29,9 +29,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-constexpr char DeterministicAeadConfig::kCatalogueName[];
-constexpr char DeterministicAeadConfig::kPrimitiveName[];
-
 // static
 const RegistryConfig& DeterministicAeadConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();
@@ -41,7 +38,7 @@ const RegistryConfig& DeterministicAeadConfig::Latest() {
 // static
 util::Status DeterministicAeadConfig::Register() {
   // Register key manager.
-  auto status = Registry::RegisterKeyManager(
+  auto status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesSivKeyManager>(), true);
   if (!status.ok()) return status;
 

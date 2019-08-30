@@ -58,7 +58,7 @@ class KmsClients {
       LocalGet(absl::string_view key_uri);
   absl::Mutex clients_mutex_;
   std::vector<std::unique_ptr<KmsClient>> clients_
-      GUARDED_BY(clients_mutex_);
+      ABSL_GUARDED_BY(clients_mutex_);
 
   static KmsClients& GlobalInstance();
 };

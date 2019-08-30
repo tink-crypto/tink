@@ -13,6 +13,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/subtle_util.h"
+// placeholder_subtle_util_cc
 
 namespace crypto {
 namespace tink {
@@ -26,6 +27,11 @@ std::string BigEndian32(uint32_t val) {
   result[3] = val & 0xff;
   return result;
 }
+
+void ResizeStringUninitialized(std::string* s, size_t new_size) {
+  s->resize(new_size);
+}
+
 
 }  // namespace subtle
 }  // namespace tink

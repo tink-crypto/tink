@@ -12,7 +12,6 @@ closure_js_library(
     name = "hybrid",
     exports = [
         ":ecies_aead_hkdf_key_managers",
-        ":hybrid_catalogues",
         ":hybrid_config",
         ":hybrid_key_templates",
         ":hybrid_wrappers",
@@ -79,34 +78,15 @@ closure_js_library(
 )
 
 closure_js_library(
-    name = "hybrid_catalogues",
-    srcs = [
-        "hybrid_decrypt_catalogue.js",
-        "hybrid_encrypt_catalogue.js",
-    ],
-    deps = [
-        ":ecies_aead_hkdf_key_managers",
-        "//javascript:catalogue",
-        "//javascript:key_manager",
-        "//javascript:primitives",
-        "//javascript/exception",
-        "@io_bazel_rules_closure//closure/library",
-    ],
-)
-
-closure_js_library(
     name = "hybrid_config",
     srcs = [
         "hybrid_config.js",
     ],
     deps = [
         ":ecies_aead_hkdf_key_managers",
-        ":hybrid_catalogues",
         ":hybrid_wrappers",
-        "//javascript:config",
         "//javascript:registry",
         "//javascript/aead:aead_config",
-        "//proto:config_closure_proto",
         "@io_bazel_rules_closure//closure/library",
     ],
 )

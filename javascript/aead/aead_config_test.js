@@ -45,62 +45,12 @@ testSuite({
   },
 
   testConstants() {
-    assertEquals(CATALOGUE_NAME, AeadConfig.CATALOGUE_NAME);
     assertEquals(PRIMITIVE_NAME, AeadConfig.PRIMITIVE_NAME);
 
     assertEquals(
         AES_CTR_HMAC_AEAD_KEY_TYPE, AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
     assertEquals(AES_GCM_KEY_TYPE, AeadConfig.AES_GCM_TYPE_URL);
   },
-
-  testLatest() {
-    // Generate registry configuration and check its name.
-    const registryConfig = AeadConfig.latest();
-    assertEquals(CONFIG_NAME, registryConfig.getConfigName());
-
-    // Verify that it contains entries for all supported key types and nothing
-    // else. Moreover check the parameters of each generated entry.
-    const keyTypeEntryList = registryConfig.getEntryList();
-    assertEquals(NUMBER_OF_SUPPORTED_KEY_TYPES, keyTypeEntryList.length);
-
-    let containsAesCtrHmacAeadKeyType = false;
-    let containsAesGcmKeyType = false;
-
-    for (let entry of keyTypeEntryList) {
-      // Primitive name as well as Catalogue name should be the same for all
-      // entries.
-      assertEquals(
-          PRIMITIVE_NAME.toLowerCase(), entry.getPrimitiveName().toLowerCase());
-      assertEquals(CATALOGUE_NAME, entry.getCatalogueName());
-
-      switch (entry.getTypeUrl()) {
-        case AES_CTR_HMAC_AEAD_KEY_TYPE: {
-          containsAesCtrHmacAeadKeyType = true;
-          assertEquals(AES_CTR_HMAC_AEAD_VERSION, entry.getKeyManagerVersion());
-          assertEquals(
-              AES_CTR_HMAC_AEAD_NEW_KEY_ALLOWED, entry.getNewKeyAllowed());
-          break;
-        }
-
-        case AES_GCM_KEY_TYPE: {
-          containsAesGcmKeyType = true;
-          assertEquals(AES_GCM_VERSION, entry.getKeyManagerVersion());
-          assertEquals(AES_GCM_NEW_KEY_ALLOWED, entry.getNewKeyAllowed());
-          break;
-        }
-
-          // TODO add tests that contains other key types here, whenever they
-          // are available in Tink.
-
-        default:
-          fail('Contains unknown key type url' + entry.getTypeUrl() + '.');
-      }
-    }
-
-    assertTrue(containsAesCtrHmacAeadKeyType);
-    assertTrue(containsAesGcmKeyType);
-  },
-
 
   testRegister_correspondingKeyManagersWereRegistered() {
     AeadConfig.register();
@@ -147,19 +97,9 @@ testSuite({
 
 // Constants used in tests.
 const PRIMITIVE_NAME = 'Aead';
-const CATALOGUE_NAME = 'TinkAead';
-const CONFIG_NAME = 'TINK_AEAD';
-// TODO update whenever new key type is available.
-const NUMBER_OF_SUPPORTED_KEY_TYPES = 2;
-
 const AES_CTR_HMAC_AEAD_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
-const AES_CTR_HMAC_AEAD_VERSION = 0;
-const AES_CTR_HMAC_AEAD_NEW_KEY_ALLOWED = true;
-
 const AES_GCM_KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
-const AES_GCM_VERSION = 0;
-const AES_GCM_NEW_KEY_ALLOWED = true;
 
 /**
  * Creates a keyset containing only the key given by keyData and returns it

@@ -106,11 +106,13 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, GetPrimitive) {
       AesGcmHkdfStreamingKeyManager().GetPrimitive<StreamingAead>(key);
   EXPECT_THAT(streaming_aead_from_manager_result.status(), IsOk());
 
+  int derived_key_size = 16;
+  int ciphertext_segment_size = 1024;
+  int ciphertext_offset = 0;
   auto streaming_aead_direct_result =
       crypto::tink::subtle::AesGcmHkdfStreaming::New(
           "16 bytes of key ", crypto::tink::subtle::HashType::SHA256,
-          /*derived_key_size=*/16, /*ciphertext_segment_size=*/1024,
-          /*ciphertext_offset=*/0);
+          derived_key_size, ciphertext_segment_size, ciphertext_offset);
   EXPECT_THAT(streaming_aead_direct_result.status(), IsOk());
 
   // Check that the two primitives are the same by encrypting with one, and
@@ -119,7 +121,7 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, GetPrimitive) {
       EncryptThenDecrypt(streaming_aead_from_manager_result.ValueOrDie().get(),
                          streaming_aead_direct_result.ValueOrDie().get(),
                          subtle::Random::GetRandomBytes(10000),
-                         "some associated data"),
+                         "some associated data", ciphertext_offset),
       IsOk());
 }
 

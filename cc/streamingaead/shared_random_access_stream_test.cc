@@ -66,7 +66,7 @@ TEST(SharedRandomAccessStreamTest, ReadingStreams) {
     EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
     EXPECT_EQ("EOF", status.error_message());
     EXPECT_EQ(file_contents, stream_contents);
-    EXPECT_EQ(stream_size, shared_stream.size());
+    EXPECT_EQ(stream_size, shared_stream.size().ValueOrDie());
   }
 }
 

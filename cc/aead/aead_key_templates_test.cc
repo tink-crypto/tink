@@ -23,6 +23,7 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"
@@ -66,10 +67,11 @@ TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    AesEaxKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    AesEaxKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
     auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
+        key_manager->get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -88,10 +90,11 @@ TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    AesEaxKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    AesEaxKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
     auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
+        key_manager->get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
@@ -175,10 +178,11 @@ TEST(AeadKeyTemplatesTest, testAesGcmSivKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    AesGcmSivKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    AesGcmSivKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
     auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
+        key_manager->get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -196,10 +200,11 @@ TEST(AeadKeyTemplatesTest, testAesGcmSivKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    AesGcmSivKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    AesGcmSivKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
     auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
+        key_manager->get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
@@ -225,10 +230,11 @@ TEST(AeadKeyTemplatesTest, testAesCtrHmacAeadKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    AesCtrHmacAeadKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    AesCtrHmacAeadKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
     auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
+        key_manager->get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -250,10 +256,11 @@ TEST(AeadKeyTemplatesTest, testAesCtrHmacAeadKeyTemplates) {
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
-    AesCtrHmacAeadKeyManager key_manager;
-    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    AesCtrHmacAeadKeyManager key_type_manager;
+    auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+    EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
     auto new_key_result =
-        key_manager.get_key_factory().NewKey(key_template.value());
+        key_manager->get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
@@ -272,10 +279,11 @@ TEST(AeadKeyTemplatesTest, testXChaCha20Poly1305KeyTemplates) {
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the template works with the key manager.
-  XChaCha20Poly1305KeyManager key_manager;
-  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  XChaCha20Poly1305KeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
   auto new_key_result =
-      key_manager.get_key_factory().NewKey(key_template.value());
+      key_manager->get_key_factory().NewKey(key_template.value());
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 

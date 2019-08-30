@@ -16,6 +16,7 @@
 #include "tink/daead/deterministic_aead_factory.h"
 
 #include "gtest/gtest.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/crypto_format.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/daead/deterministic_aead_config.h"
@@ -25,7 +26,6 @@
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_siv.pb.h"
-#include "proto/tink.pb.h"
 
 using crypto::tink::TestKeysetHandle;
 using crypto::tink::test::AddRawKey;
@@ -54,9 +54,11 @@ TEST_F(DeterministicAeadFactoryTest, testBasic) {
 
 TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
   // Prepare a template for generating keys for a Keyset.
-  AesSivKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-  std::string key_type = key_manager.get_key_type();
+  AesSivKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<DeterministicAead>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
+  std::string key_type = key_manager->get_key_type();
 
   AesSivKeyFormat key_format;
   key_format.set_key_size(64);
@@ -114,7 +116,7 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
   // Create raw ciphertext with 2nd key, and decrypt
   // with DeterministicAead-instance.
   auto raw_daead = std::move(
-      key_manager.GetPrimitive(keyset.key(1).key_data()).ValueOrDie());
+      key_manager->GetPrimitive(keyset.key(1).key_data()).ValueOrDie());
   std::string raw_ciphertext =
       raw_daead->EncryptDeterministically(plaintext, aad).ValueOrDie();
   decrypt_result = daead->DecryptDeterministically(ciphertext, aad);

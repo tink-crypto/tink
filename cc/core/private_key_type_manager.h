@@ -11,8 +11,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_CORE_INTERNAL_PRIVATE_KEY_MANAGER_H_
-#define TINK_CORE_INTERNAL_PRIVATE_KEY_MANAGER_H_
+#ifndef TINK_CORE_PRIVATE_KEY_TYPE_MANAGER_H_
+#define TINK_CORE_PRIVATE_KEY_TYPE_MANAGER_H_
 
 #include <memory>
 
@@ -52,4 +52,4 @@ class PrivateKeyTypeManager<KeyProto, KeyFormatProto, PublicKeyProto,
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CORE_INTERNAL_PRIVATE_KEY_MANAGER_H_
+#endif  // TINK_CORE_PRIVATE_KEY_TYPE_MANAGER_H_

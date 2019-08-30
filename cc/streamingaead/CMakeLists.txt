@@ -37,6 +37,7 @@ tink_cc_library(
     tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_wrapper
     tink::util::status
+    absl::base
 )
 
 tink_cc_library(
@@ -130,6 +131,7 @@ tink_cc_library(
     tink::core::random_access_stream
     tink::util::buffer
     tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_library(

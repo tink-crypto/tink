@@ -17,254 +17,211 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
+#include "tink/aead/aes_eax_key_manager.h"
+#include "tink/aead/kms_envelope_aead.h"
 #include "tink/registry.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/subtle/aead_test_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
 #include "tink/util/test_matchers.h"
 #include "gtest/gtest.h"
-#include "proto/aes_eax.pb.h"
 #include "proto/kms_envelope.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-using crypto::tink::test::IsOk;
-using crypto::tink::test::StatusIs;
-using crypto::tink::test::DummyKmsClient;
-using google::crypto::tink::AesEaxKey;
-using google::crypto::tink::AesEaxKeyFormat;
-using google::crypto::tink::KmsEnvelopeAeadKey;
-using google::crypto::tink::KmsEnvelopeAeadKeyFormat;
-using google::crypto::tink::KeyData;
-using testing::AllOf;
-using testing::HasSubstr;
+using ::crypto::tink::test::DummyAead;
+using ::crypto::tink::test::DummyKmsClient;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::KmsEnvelopeAeadKey;
+using ::google::crypto::tink::KmsEnvelopeAeadKeyFormat;
+using ::testing::Eq;
+using ::testing::Not;
 
 namespace {
 
-class KmsEnvelopeAeadKeyManagerTest : public ::testing::Test {
- protected:
-  std::string key_type_prefix_ = "type.googleapis.com/";
-  std::string env_aead_key_type_ =
-      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
-};
-
-TEST_F(KmsEnvelopeAeadKeyManagerTest, Basic) {
-  KmsEnvelopeAeadKeyManager key_manager;
-
-  EXPECT_EQ(0, key_manager.get_version());
-  EXPECT_EQ("type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+TEST(KmsEnvelopeAeadKeyManagerTest, Basics) {
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().get_version(), Eq(0));
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().get_key_type(),
+              Eq("type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey"));
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().key_material_type(),
+              Eq(google::crypto::tink::KeyData::REMOTE));
 }
 
-TEST_F(KmsEnvelopeAeadKeyManagerTest, KeyDataErrors_BadKeyType) {
-  KmsEnvelopeAeadKeyManager key_manager;
-  KeyData key_data;
-  std::string bad_key_type =
-      "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-  key_data.set_type_url(bad_key_type);
-  auto result = key_manager.GetPrimitive(key_data);
-  EXPECT_THAT(result.status(),
-      StatusIs(util::error::INVALID_ARGUMENT,
-               AllOf(HasSubstr(bad_key_type), HasSubstr("not supported"))));
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateEmptyKey) {
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKey(KmsEnvelopeAeadKey()),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
-TEST_F(KmsEnvelopeAeadKeyManagerTest, KeyDataErrors_BadKeyValue) {
-  KmsEnvelopeAeadKeyManager key_manager;
-  KeyData key_data;
-  key_data.set_type_url(env_aead_key_type_);
-  key_data.set_value("some bad serialized proto");
-  auto result = key_manager.GetPrimitive(key_data);
-  EXPECT_THAT(result.status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("not parse")));
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateValidKey) {
+  KmsEnvelopeAeadKey key;
+  key.set_version(0);
+  key.mutable_params()->set_kek_uri("Some uri");
+  *(key.mutable_params()->mutable_dek_template()) =
+      AeadKeyTemplates::Aes128Eax();
+
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKey(key), IsOk());
 }
 
-TEST_F(KmsEnvelopeAeadKeyManagerTest, KeyDataErrors_BadVersion) {
-  KmsEnvelopeAeadKeyManager key_manager;
-  KeyData key_data;
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateWrongVersion) {
   KmsEnvelopeAeadKey key;
   key.set_version(1);
-  key_data.set_type_url(env_aead_key_type_);
-  key_data.set_value(key.SerializeAsString());
-  auto result = key_manager.GetPrimitive(key_data);
-  EXPECT_THAT(result.status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
-}
-
-TEST_F(KmsEnvelopeAeadKeyManagerTest, KeyMessageErrors_BadProtobuf) {
-  KmsEnvelopeAeadKeyManager key_manager;
-  AesEaxKey key;
-  auto result = key_manager.GetPrimitive(key);
-  EXPECT_THAT(result.status(),
-      StatusIs(util::error::INVALID_ARGUMENT,
-               AllOf(HasSubstr("AesEaxKey"), HasSubstr("not supported"))));
-}
-
-TEST_F(KmsEnvelopeAeadKeyManagerTest, Primitives) {
-  std::string plaintext = "some plaintext";
-  std::string aad = "some aad";
-
-  // Initialize Registry and KmsClients.
-  EXPECT_THAT(AeadConfig::Register(), IsOk());
-  std::string uri_1_prefix = "prefix1";
-  std::string uri_2_prefix = "prefix2";
-  std::string uri_1 = absl::StrCat(uri_1_prefix + ":some_uri1");
-  std::string uri_2 = absl::StrCat(uri_2_prefix + ":some_uri2");
-  auto status = KmsClients::Add(
-      absl::make_unique<DummyKmsClient>(uri_1_prefix, uri_1));
-  EXPECT_THAT(status, IsOk());
-  status = KmsClients::Add(
-      absl::make_unique<DummyKmsClient>(uri_2_prefix, ""));
-  EXPECT_THAT(status, IsOk());
-
-  KmsEnvelopeAeadKeyManager key_manager;
-  KmsEnvelopeAeadKey key;
-  key.set_version(0);
-  key.mutable_params()->set_kek_uri(uri_1);
+  key.mutable_params()->set_kek_uri("Some uri");
   *(key.mutable_params()->mutable_dek_template()) =
       AeadKeyTemplates::Aes128Eax();
-
-  {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_THAT(result.status(), IsOk());
-    auto envelope_aead = std::move(result.ValueOrDie());
-    auto encrypt_result = envelope_aead->Encrypt(plaintext, aad);
-    EXPECT_THAT(encrypt_result.status(), IsOk());
-    auto ciphertext = encrypt_result.ValueOrDie();
-    EXPECT_THAT(ciphertext, HasSubstr(uri_1));
-    auto decrypt_result = envelope_aead->Decrypt(ciphertext, aad);
-    EXPECT_THAT(decrypt_result.status(), IsOk());
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
-  }
-
-  {  // Using KeyData proto.
-    KeyData key_data;
-    key_data.set_type_url(env_aead_key_type_);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_THAT(result.status(), IsOk());
-    auto envelope_aead = std::move(result.ValueOrDie());
-    auto encrypt_result = envelope_aead->Encrypt(plaintext, aad);
-    EXPECT_THAT(encrypt_result.status(), IsOk());
-    auto ciphertext = encrypt_result.ValueOrDie();
-    EXPECT_THAT(ciphertext, HasSubstr(uri_1));
-    auto decrypt_result = envelope_aead->Decrypt(ciphertext, aad);
-    EXPECT_THAT(decrypt_result.status(), IsOk());
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
-  }
-
-  {  // Using key message and a KmsClient not bound to a specific key.
-    key.mutable_params()->set_kek_uri(uri_2);
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_THAT(result.status(), IsOk());
-    auto envelope_aead = std::move(result.ValueOrDie());
-    auto encrypt_result = envelope_aead->Encrypt(plaintext, aad);
-    EXPECT_THAT(encrypt_result.status(), IsOk());
-    auto ciphertext = encrypt_result.ValueOrDie();
-    EXPECT_THAT(ciphertext, HasSubstr(uri_2));
-    auto decrypt_result = envelope_aead->Decrypt(ciphertext, aad);
-    EXPECT_THAT(decrypt_result.status(), IsOk());
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
-  }
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
-TEST_F(KmsEnvelopeAeadKeyManagerTest, PrimitivesErrors) {
-  // Initialize Registry and KmsClients.
-  Registry::Reset();
-  std::string uri_1_prefix = "prefix1";
-  std::string uri_1 = absl::StrCat(uri_1_prefix + ":some_uri1");
-  auto status = KmsClients::Add(
-      absl::make_unique<DummyKmsClient>(uri_1_prefix, uri_1));
-  EXPECT_THAT(status, IsOk());
-
-  KmsEnvelopeAeadKeyManager key_manager;
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateNoUri) {
   KmsEnvelopeAeadKey key;
-  key.set_version(0);
-  key.mutable_params()->set_kek_uri(uri_1);
+  key.set_version(1);
   *(key.mutable_params()->mutable_dek_template()) =
       AeadKeyTemplates::Aes128Eax();
-
-  {  // No KeyManager for DEK template.
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_THAT(result.status(),
-                StatusIs(util::error::NOT_FOUND,
-                         AllOf(HasSubstr("No manager"),
-                               HasSubstr("AesEaxKey"))));
-  }
-
-  {  // A key with an unknown KEK URI.
-    key.mutable_params()->set_kek_uri("some unknown kek uri");
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_THAT(result.status(), StatusIs(util::error::NOT_FOUND,
-                                          HasSubstr("KmsClient")));
-  }
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
-TEST_F(KmsEnvelopeAeadKeyManagerTest, NewKeyErrors) {
-  KmsEnvelopeAeadKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-
-  {  // Bad key format.
-    AesEaxKeyFormat key_format;
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_THAT(result.status(),
-                StatusIs(util::error::INVALID_ARGUMENT,
-                         AllOf(HasSubstr("AesEaxKeyFormat"),
-                               HasSubstr("not supported"))));
-  }
-
-  {  // Bad serialized key format.
-    auto result = key_factory.NewKey("some bad serialized proto");
-    EXPECT_THAT(result.status(), StatusIs(util::error::INVALID_ARGUMENT,
-                                          HasSubstr("not parse")));
-  }
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatEmptyKey) {
+  EXPECT_THAT(
+      KmsEnvelopeAeadKeyManager().ValidateKeyFormat(KmsEnvelopeAeadKeyFormat()),
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
-TEST_F(KmsEnvelopeAeadKeyManagerTest, NewKeyBasic) {
-  KmsEnvelopeAeadKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatValidKey) {
   KmsEnvelopeAeadKeyFormat key_format;
-  key_format.set_kek_uri("some key uri");
+  key_format.set_kek_uri("Some uri");
+  *key_format.mutable_dek_template() = AeadKeyTemplates::Aes128Eax();
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKeyFormat(key_format),
+              IsOk());
+}
 
-  { // Via NewKey(format_proto).
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_THAT(result.status(), IsOk());
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix_ + key->GetTypeName(), env_aead_key_type_);
-    std::unique_ptr<KmsEnvelopeAeadKey> env_aead_key(
-        reinterpret_cast<KmsEnvelopeAeadKey*>(key.release()));
-    EXPECT_EQ(0, env_aead_key->version());
-    EXPECT_EQ(key_format.kek_uri(), env_aead_key->params().kek_uri());
-  }
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatNoUri) {
+  KmsEnvelopeAeadKeyFormat key_format;
+  *key_format.mutable_dek_template() = AeadKeyTemplates::Aes128Eax();
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKeyFormat(key_format),
+              Not(IsOk()));
+}
 
-  { // Via NewKey(serialized_format_proto).
-    auto result = key_factory.NewKey(key_format.SerializeAsString());
-    EXPECT_THAT(result.status(), IsOk());
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix_ + key->GetTypeName(), env_aead_key_type_);
-    std::unique_ptr<KmsEnvelopeAeadKey> env_aead_key(
-        reinterpret_cast<KmsEnvelopeAeadKey*>(key.release()));
-    EXPECT_EQ(0, env_aead_key->version());
-    EXPECT_EQ(key_format.kek_uri(), env_aead_key->params().kek_uri());
-  }
+TEST(KmsEnvelopeAeadKeyManagerTest, ValidateKeyFormatNoTemplate) {
+  KmsEnvelopeAeadKeyFormat key_format;
+  *key_format.mutable_dek_template() = AeadKeyTemplates::Aes128Eax();
+  EXPECT_THAT(KmsEnvelopeAeadKeyManager().ValidateKeyFormat(key_format),
+              Not(IsOk()));
+}
 
-  { // Via NewKeyData(serialized_format_proto).
-    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
-    EXPECT_THAT(result.status(), IsOk());
-    auto key_data = std::move(result.ValueOrDie());
-    EXPECT_EQ(env_aead_key_type_, key_data->type_url());
-    EXPECT_EQ(KeyData::REMOTE, key_data->key_material_type());
-    KmsEnvelopeAeadKey env_aead_key;
-    EXPECT_TRUE(env_aead_key.ParseFromString(key_data->value()));
-    EXPECT_EQ(0, env_aead_key.version());
-    EXPECT_EQ(key_format.kek_uri(), env_aead_key.params().kek_uri());
+TEST(KmsEnvelopeAeadKeyManagerTest, CreateKey) {
+  KmsEnvelopeAeadKeyFormat key_format;
+  key_format.set_kek_uri("Some uri");
+  *key_format.mutable_dek_template() = AeadKeyTemplates::Aes128Eax();
+  auto key_or = KmsEnvelopeAeadKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().params().kek_uri(), Eq(key_format.kek_uri()));
+  EXPECT_THAT(key_or.ValueOrDie().params().dek_template().value(),
+              Eq(key_format.dek_template().value()));
+}
+
+class KmsEnvelopeAeadKeyManagerCreateTest : public ::testing::Test {
+ public:
+  // The KmsClients class has a global variable which keeps the registered
+  // clients. To reflect that in the test, we set them up in the SetUpTestSuite
+  // function.
+  static void SetUpTestSuite() {
+    if (!KmsClients::Add(
+             absl::make_unique<DummyKmsClient>("prefix1", "prefix1:some_key1"))
+             .ok())
+      abort();
+    if (!KmsClients::Add(absl::make_unique<DummyKmsClient>("prefix2", "")).ok())
+      abort();
+
+    if (!Registry::RegisterKeyTypeManager(absl::make_unique<AesEaxKeyManager>(),
+                                          true)
+             .ok())
+      abort();
   }
+};
+
+TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAead) {
+  KmsEnvelopeAeadKey key;
+  key.set_version(0);
+  key.mutable_params()->set_kek_uri("prefix1:some_key1");
+  *(key.mutable_params()->mutable_dek_template()) =
+      AeadKeyTemplates::Aes128Eax();
+
+  auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
+  ASSERT_THAT(kms_aead.status(), IsOk());
+
+  auto direct_aead =
+      KmsEnvelopeAead::New(key.params().dek_template(),
+                           absl::make_unique<DummyAead>("prefix1:some_key1"));
+  ASSERT_THAT(direct_aead.status(), IsOk());
+
+  EXPECT_THAT(
+      EncryptThenDecrypt(kms_aead.ValueOrDie().get(),
+                         direct_aead.ValueOrDie().get(), "plaintext", "aad"),
+      IsOk());
+}
+
+TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongKeyName) {
+  KmsEnvelopeAeadKey key;
+  key.set_version(0);
+  key.mutable_params()->set_kek_uri("prefix1:some_other_key");
+  *(key.mutable_params()->mutable_dek_template()) =
+      AeadKeyTemplates::Aes128Eax();
+
+  auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
+  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+}
+
+TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongTypeUrl) {
+  KmsEnvelopeAeadKey key;
+  key.set_version(0);
+  key.mutable_params()->set_kek_uri("prefix1:some_other_key");
+  *(key.mutable_params()->mutable_dek_template()) =
+      AeadKeyTemplates::Aes128Eax();
+  key.mutable_params()->mutable_dek_template()->set_type_url(
+      "Some unkonwn type url");
+
+  auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
+  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+}
+
+TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadWrongPrefix) {
+  KmsEnvelopeAeadKey key;
+  key.set_version(0);
+  key.mutable_params()->set_kek_uri("non-existing-prefix:some_key1");
+  *(key.mutable_params()->mutable_dek_template()) =
+      AeadKeyTemplates::Aes128Eax();
+
+  auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
+  ASSERT_THAT(kms_aead.status(), Not(IsOk()));
+}
+
+TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
+  KmsEnvelopeAeadKey key;
+  key.set_version(0);
+  key.mutable_params()->set_kek_uri("prefix2:some_key2");
+  *(key.mutable_params()->mutable_dek_template()) =
+      AeadKeyTemplates::Aes128Eax();
+
+  auto kms_aead = KmsEnvelopeAeadKeyManager().GetPrimitive<Aead>(key);
+  ASSERT_THAT(kms_aead.status(), IsOk());
+
+  auto direct_aead =
+      KmsEnvelopeAead::New(key.params().dek_template(),
+                           absl::make_unique<DummyAead>("prefix2:some_key2"));
+  ASSERT_THAT(direct_aead.status(), IsOk());
+
+  EXPECT_THAT(
+      EncryptThenDecrypt(kms_aead.ValueOrDie().get(),
+                         direct_aead.ValueOrDie().get(), "plaintext", "aad"),
+      IsOk());
 }
 
 }  // namespace

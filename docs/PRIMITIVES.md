@@ -42,10 +42,6 @@ In development: JavaScript and Python.
 | Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                        |
 
-Exact listings of primitives and their implementations available in the latest
-release of Tink in Java are given in
-[`TinkConfig.LATEST`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/TinkConfig.java)-variable.
-
 ### C++
 
 | Primitive          | C++ Implementations                             |
@@ -53,13 +49,9 @@ release of Tink in Java are given in
 | AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305 |
 | Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING  |
 | Deterministic AEAD | AES-SIV                                         |
-| MAC                | HMAC-SHA2                                       |
+| MAC                | HMAC-SHA2, AES-CMAC                             |
 | Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                        |
-
-Exact listings of primitives and their implementations available in the latest
-release of Tink in C++ are given via
-[`TinkConfig::Latest()`](https://github.com/google/tink/blob/master/cc/config/tink_config.cc)-method.
 
 ### Objective-C
 

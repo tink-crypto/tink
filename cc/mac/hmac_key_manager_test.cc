@@ -16,254 +16,215 @@
 
 #include "tink/mac/hmac_key_manager.h"
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/mac.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "gtest/gtest.h"
-#include "proto/aes_ctr.pb.h"
-#include "proto/common.pb.h"
+#include "tink/util/test_matchers.h"
 #include "proto/hmac.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::AesCtrKey;
-using google::crypto::tink::AesCtrKeyFormat;
-using google::crypto::tink::HashType;
-using google::crypto::tink::HmacKey;
-using google::crypto::tink::HmacKeyFormat;
-using google::crypto::tink::KeyData;
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::HmacKey;
+using ::google::crypto::tink::HmacKeyFormat;
+using ::google::crypto::tink::KeyData;
+using ::testing::Eq;
+using ::testing::Not;
+using ::testing::SizeIs;
 
 namespace {
 
-class HmacKeyManagerTest : public ::testing::Test {
- protected:
-  std::string key_type_prefix = "type.googleapis.com/";
-  std::string hmac_key_type =
-      "type.googleapis.com/google.crypto.tink.HmacKey";
-};
-
-TEST_F(HmacKeyManagerTest, testBasic) {
-  HmacKeyManager key_manager;
-
-  EXPECT_EQ(0, key_manager.get_version());
-  EXPECT_EQ("type.googleapis.com/google.crypto.tink.HmacKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+TEST(HmacKeyManagerTest, Basics) {
+  EXPECT_THAT(HmacKeyManager().get_version(), Eq(0));
+  EXPECT_THAT(HmacKeyManager().get_key_type(),
+              Eq("type.googleapis.com/google.crypto.tink.HmacKey"));
+  EXPECT_THAT(HmacKeyManager().key_material_type(),
+              Eq(google::crypto::tink::KeyData::SYMMETRIC));
 }
 
-TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
-  HmacKeyManager key_manager;
-
-  {  // Bad key type.
-    KeyData key_data;
-    std::string bad_key_type =
-        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-    key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
-                        result.status().error_message());
-  }
-
-  {  // Bad key value.
-    KeyData key_data;
-    key_data.set_type_url(hmac_key_type);
-    key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad version.
-    KeyData key_data;
-    HmacKey key;
-    key.set_version(1);
-    key_data.set_type_url(hmac_key_type);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
-                        result.status().error_message());
-  }
+TEST(HmacKeyManagerTest, ValidateEmptyKey) {
+  EXPECT_THAT(HmacKeyManager().ValidateKey(HmacKey()), Not(IsOk()));
 }
 
-TEST_F(HmacKeyManagerTest, testKeyMessageErrors) {
-  HmacKeyManager key_manager;
-
-  {  // Bad protobuffer.
-    AesCtrKey key_message;
-    auto result = key_manager.GetPrimitive(key_message);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesCtrKey",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
+TEST(HmacKeyManagerTest, ValidateEmptyKeyFormat) {
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(HmacKeyFormat()), Not(IsOk()));
 }
 
-// TODO(przydatek): do real verification of HMACs once they are implemented.
-TEST_F(HmacKeyManagerTest, testPrimitives) {
-  HmacKeyManager key_manager;
-  HmacKey key;
-
-  key.set_version(0);
-  key.mutable_params()->set_tag_size(16);
-  key.mutable_params()->set_hash(HashType::SHA256);
-  key.set_key_value("some key of sufficient length");
-
-  {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto hmac = std::move(result.ValueOrDie());
-    auto hmac_result = hmac->ComputeMac("some data");
-    EXPECT_TRUE(hmac_result.ok());
-  }
-
-  {  // Using KeyData proto.
-    KeyData key_data;
-    key_data.set_type_url(hmac_key_type);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto hmac = std::move(result.ValueOrDie());
-    auto hmac_result = hmac->ComputeMac("some data");
-    EXPECT_TRUE(hmac_result.ok());
-  }
+TEST(HmacKeyManagerTest, ValidKeyFormat) {
+  HmacKeyFormat key_format;
+  key_format.mutable_params()->set_tag_size(16);
+  key_format.mutable_params()->set_hash(HashType::SHA256);
+  key_format.set_key_size(16);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), IsOk());
 }
 
-TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
-  HmacKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-
-  {  // Bad key format.
-    AesCtrKeyFormat key_format;
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesCtrKeyFormat",
-                        result.status().error_message());
-  }
-
-  {  // Bad serialized key format.
-    auto result = key_factory.NewKey("some bad serialized proto");
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad HmacKeyFormat: small key_size.
+TEST(HmacKeyManagerTest, ValidateKeyFormatSmallTagSizes) {
+  for (int i = 0; i < 10; ++i) {
     HmacKeyFormat key_format;
-    key_format.set_key_size(8);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
-                        result.status().error_message());
-  }
-
-  {  // Bad HmacKeyFormat: HashType not supported.
-    HmacKeyFormat key_format;
-    key_format.set_key_size(16);
-    key_format.mutable_params()->set_tag_size(10);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "HashType",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
-
-  {  // Bad HmacKeyFormat: tag_size too small.
-    HmacKeyFormat key_format;
-    key_format.set_key_size(16);
+    key_format.mutable_params()->set_tag_size(i);
     key_format.mutable_params()->set_hash(HashType::SHA256);
-    key_format.mutable_params()->set_tag_size(8);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "tag_size",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
-                        result.status().error_message());
-  }
-
-  {  // Bad HmacKeyFormat: tag_size too big.
-    HmacKeyFormat key_format;
     key_format.set_key_size(16);
-    key_format.mutable_params()->set_hash(HashType::SHA256);
-    key_format.mutable_params()->set_tag_size(42);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "tag_size",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "too big",
-                        result.status().error_message());
+    EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()))
+        << " for length " << i;
   }
 }
 
-TEST_F(HmacKeyManagerTest, testNewKeyBasic) {
-  HmacKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+TEST(HmacKeyManagerTest, ValidateKeyFormatTagSizesSha1) {
+  HmacKeyFormat key_format;
+  key_format.mutable_params()->set_hash(HashType::SHA1);
+  key_format.set_key_size(16);
+
+  key_format.mutable_params()->set_tag_size(10);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.mutable_params()->set_tag_size(20);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.mutable_params()->set_tag_size(21);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
+}
+
+TEST(HmacKeyManagerTest, ValidateKeyFormatTagSizesSha256) {
+  HmacKeyFormat key_format;
+  key_format.mutable_params()->set_hash(HashType::SHA256);
+  key_format.set_key_size(16);
+
+  key_format.mutable_params()->set_tag_size(10);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.mutable_params()->set_tag_size(32);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.mutable_params()->set_tag_size(33);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
+}
+
+TEST(HmacKeyManagerTest, ValidateKeyFormatTagSizesSha512) {
+  HmacKeyFormat key_format;
+  key_format.mutable_params()->set_hash(HashType::SHA512);
+  key_format.set_key_size(16);
+
+  key_format.mutable_params()->set_tag_size(10);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.mutable_params()->set_tag_size(64);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+  key_format.mutable_params()->set_tag_size(65);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
+}
+
+TEST(HmacKeyManagerTest, ValidateKeyFormatKeySizes) {
+  HmacKeyFormat key_format;
+  key_format.mutable_params()->set_hash(HashType::SHA512);
+  key_format.mutable_params()->set_tag_size(64);
+
+  key_format.set_key_size(15);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
+
+  key_format.set_key_size(16);
+  EXPECT_THAT(HmacKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST(HmacKeyManagerTest, CreateKey) {
   HmacKeyFormat key_format;
   key_format.set_key_size(16);
+  key_format.mutable_params()->set_tag_size(10);
+  key_format.mutable_params()->set_hash(HashType::SHA512);
+  auto hmac_key_or = HmacKeyManager().CreateKey(key_format);
+  ASSERT_THAT(hmac_key_or.status(), IsOk());
+  EXPECT_THAT(hmac_key_or.ValueOrDie().version(), Eq(0));
+  EXPECT_THAT(hmac_key_or.ValueOrDie().params().hash(),
+              Eq(key_format.params().hash()));
+  EXPECT_THAT(hmac_key_or.ValueOrDie().params().tag_size(),
+              Eq(key_format.params().tag_size()));
+  EXPECT_THAT(hmac_key_or.ValueOrDie().key_value(),
+              SizeIs(key_format.key_size()));
+
+  EXPECT_THAT(HmacKeyManager().ValidateKey(hmac_key_or.ValueOrDie()),
+              IsOk());
+}
+
+TEST(HmacKeyManagerTest, ValidKey) {
+  HmacKey key;
+  key.set_version(0);
+
+  key.mutable_params()->set_hash(HashType::SHA256);
+  key.mutable_params()->set_tag_size(10);
+  key.set_key_value("0123456789abcdef");
+
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), IsOk());
+}
+
+TEST(HmacKeyManagerTest, ValidateKeyTagSizesSha1) {
+  HmacKey key;
+  key.set_version(0);
+  key.mutable_params()->set_hash(HashType::SHA1);
+  key.set_key_value("0123456789abcdef");
+
+  key.mutable_params()->set_tag_size(10);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), IsOk());
+  key.mutable_params()->set_tag_size(20);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), IsOk());
+  key.mutable_params()->set_tag_size(21);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(HmacKeyManagerTest, ValidateKeyTagSizesSha256) {
+  HmacKey key;
+  key.set_version(0);
+  key.mutable_params()->set_hash(HashType::SHA256);
+  key.set_key_value("0123456789abcdef");
+
+  key.mutable_params()->set_tag_size(10);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), IsOk());
+  key.mutable_params()->set_tag_size(32);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), IsOk());
+  key.mutable_params()->set_tag_size(33);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(HmacKeyManagerTest, ValidateKeyTagSizesSha512) {
+  HmacKey key;
+  key.set_version(0);
+  key.mutable_params()->set_hash(HashType::SHA512);
+  key.set_key_value("0123456789abcdef");
+
+  key.mutable_params()->set_tag_size(10);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), IsOk());
+  key.mutable_params()->set_tag_size(64);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), IsOk());
+  key.mutable_params()->set_tag_size(65);
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(HmacKeyManagerTest, ValidateKeyShortKey) {
+  HmacKey key;
+  key.set_version(0);
+
+  key.mutable_params()->set_hash(HashType::SHA256);
+  key.mutable_params()->set_tag_size(10);
+  key.set_key_value("0123456789abcde");
+
+  EXPECT_THAT(HmacKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(HmacKeyManagerTest, GetPrimitive) {
+  HmacKeyFormat key_format;
+  key_format.mutable_params()->set_tag_size(16);
   key_format.mutable_params()->set_hash(HashType::SHA256);
-  key_format.mutable_params()->set_tag_size(18);
+  key_format.set_key_size(16);
+  HmacKey key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  auto manager_mac_or = HmacKeyManager().GetPrimitive<Mac>(key);
+  ASSERT_THAT(manager_mac_or.status(), IsOk());
+  auto mac_value_or = manager_mac_or.ValueOrDie()->ComputeMac("some plaintext");
+  ASSERT_THAT(mac_value_or.status(), IsOk());
 
-  { // Via NewKey(format_proto).
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix + key->GetTypeName(), hmac_key_type);
-    std::unique_ptr<HmacKey> hmac_key(
-        static_cast<HmacKey*>(key.release()));
-    EXPECT_EQ(0, hmac_key->version());
-    EXPECT_EQ(key_format.params().hash(), hmac_key->params().hash());
-    EXPECT_EQ(key_format.params().tag_size(), hmac_key->params().tag_size());
-    EXPECT_EQ(key_format.key_size(), hmac_key->key_value().size());
-  }
-
-  { // Via NewKey(serialized_format_proto).
-    auto result = key_factory.NewKey(key_format.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix + key->GetTypeName(), hmac_key_type);
-    std::unique_ptr<HmacKey> hmac_key(
-        static_cast<HmacKey*>(key.release()));
-    EXPECT_EQ(0, hmac_key->version());
-    EXPECT_EQ(key_format.params().hash(), hmac_key->params().hash());
-    EXPECT_EQ(key_format.params().tag_size(), hmac_key->params().tag_size());
-    EXPECT_EQ(key_format.key_size(), hmac_key->key_value().size());
-  }
-
-  { // Via NewKeyData(serialized_format_proto).
-    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key_data = std::move(result.ValueOrDie());
-    EXPECT_EQ(hmac_key_type, key_data->type_url());
-    EXPECT_EQ(KeyData::SYMMETRIC, key_data->key_material_type());
-    HmacKey hmac_key;
-    EXPECT_TRUE(hmac_key.ParseFromString(key_data->value()));
-    EXPECT_EQ(0, hmac_key.version());
-    EXPECT_EQ(key_format.params().hash(), hmac_key.params().hash());
-    EXPECT_EQ(key_format.params().tag_size(), hmac_key.params().tag_size());
-    EXPECT_EQ(key_format.key_size(), hmac_key.key_value().size());
-  }
+  auto direct_mac_or = subtle::HmacBoringSsl::New(
+      util::Enums::ProtoToSubtle(key.params().hash()),
+      key.params().tag_size(), key.key_value());
+  ASSERT_THAT(direct_mac_or.status(), IsOk());
+  EXPECT_THAT(direct_mac_or.ValueOrDie()->VerifyMac(mac_value_or.ValueOrDie(),
+                                                    "some plaintext"), IsOk());
 }
 
 }  // namespace

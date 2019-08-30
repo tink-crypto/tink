@@ -16,19 +16,17 @@
 
 package com.google.crypto.tink.aead;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CryptoFormat;
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
-import java.security.GeneralSecurityException;
+import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
+import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.subtle.XChaCha20Poly1305;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -36,46 +34,65 @@ import org.junit.runners.JUnit4;
 /** Test for XChaCha20Poly1305KeyManager. */
 @RunWith(JUnit4.class)
 public class XChaCha20Poly1305KeyManagerTest {
-  @BeforeClass
-  public static void setUp() throws GeneralSecurityException {
-    AeadConfig.register();
+  private final XChaCha20Poly1305KeyManager manager = new XChaCha20Poly1305KeyManager();
+  private final XChaCha20Poly1305KeyManager.KeyFactory<
+          XChaCha20Poly1305KeyFormat, XChaCha20Poly1305Key>
+      factory = manager.keyFactory();
+
+  @Test
+  public void basics() throws Exception {
+    assertThat(manager.getKeyType())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key");
+    assertThat(manager.getVersion()).isEqualTo(0);
+    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
   }
 
   @Test
-  public void testBasic() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.XCHACHA20_POLY1305);
-    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
+  public void validateKeyFormat() throws Exception {
+    factory.validateKeyFormat(XChaCha20Poly1305KeyFormat.getDefaultInstance());
   }
 
   @Test
-  public void testCiphertextSize() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.XCHACHA20_POLY1305);
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
-    byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] associatedData = "associatedData".getBytes("UTF-8");
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertEquals(
-        CryptoFormat.NON_RAW_PREFIX_SIZE + 24 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */,
-        ciphertext.length);
+  public void createKey_valid() throws Exception {
+    manager.validateKey(factory.createKey(XChaCha20Poly1305KeyFormat.getDefaultInstance()));
   }
 
   @Test
-  public void testNewKeyMultipleTimes() throws Exception {
-    KeyTemplate keyTemplate = AeadKeyTemplates.XCHACHA20_POLY1305;
-    XChaCha20Poly1305KeyManager keyManager = new XChaCha20Poly1305KeyManager();
-    Set<String> keys = new TreeSet<String>();
-    // Calls newKey multiple times and make sure that they generate different keys.
-    int numTests = 10;
-    for (int i = 0; i < numTests; i++) {
-      XChaCha20Poly1305Key key = (XChaCha20Poly1305Key) keyManager.newKey(keyTemplate.getValue());
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(32, key.getKeyValue().toByteArray().length);
+  public void createKey_correctVersion() throws Exception {
+    assertThat(factory.createKey(XChaCha20Poly1305KeyFormat.getDefaultInstance()).getVersion())
+        .isEqualTo(0);
+  }
 
-      KeyData keyData = keyManager.newKeyData(keyTemplate.getValue());
-      key = XChaCha20Poly1305Key.parseFrom(keyData.getValue());
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(32, key.getKeyValue().toByteArray().length);
+  @Test
+  public void createKey_keySize() throws Exception {
+    assertThat(factory.createKey(XChaCha20Poly1305KeyFormat.getDefaultInstance()).getKeyValue())
+        .hasSize(32);
+  }
+
+  @Test
+  public void createKey_multipleCallsCreateDifferentKeys() throws Exception {
+    Set<String> keys = new TreeSet<>();
+    final int numKeys = 100;
+    for (int i = 0; i < numKeys; ++i) {
+      keys.add(
+          TestUtil.hexEncode(
+              factory
+                  .createKey(XChaCha20Poly1305KeyFormat.getDefaultInstance())
+                  .getKeyValue()
+                  .toByteArray()));
     }
-    assertEquals(numTests * 2, keys.size());
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void getPrimitive() throws Exception {
+    XChaCha20Poly1305Key key = factory.createKey(XChaCha20Poly1305KeyFormat.getDefaultInstance());
+    Aead managerAead = manager.getPrimitive(key, Aead.class);
+    Aead directAead = new XChaCha20Poly1305(key.getKeyValue().toByteArray());
+
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+    assertThat(directAead.decrypt(managerAead.encrypt(plaintext, associatedData), associatedData))
+        .isEqualTo(plaintext);
   }
 }

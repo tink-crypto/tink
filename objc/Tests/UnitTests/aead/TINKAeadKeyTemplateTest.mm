@@ -32,6 +32,8 @@
 #import "proto/Hmac.pbobjc.h"
 #import "proto/Tink.pbobjc.h"
 
+using google::crypto::tink::XChaCha20Poly1305KeyFormat;
+
 @interface TINKAeadKeyTemplatesTest : XCTestCase
 @end
 
@@ -195,8 +197,10 @@
   // Check that the template works with the key manager.
   crypto::tink::XChaCha20Poly1305KeyManager key_manager;
   XCTAssertTrue(key_manager.get_key_type() == tpl.ccKeyTemplate->type_url());
-  auto new_key_result = key_manager.get_key_factory().NewKey(tpl.ccKeyTemplate->value());
-  XCTAssertTrue(new_key_result.ok());
+  XChaCha20Poly1305KeyFormat key_format;
+  XCTAssertTrue(key_format.ParseFromString(tpl.ccKeyTemplate->value()));
+  auto validation = key_manager.ValidateKeyFormat(key_format);
+  XCTAssertTrue(validation.ok());
 }
 
 @end

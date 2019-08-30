@@ -66,6 +66,10 @@ class StreamingAead {
   // via the wrapper leads to AEAD-decryption of the underlying ciphertext,
   // using 'associated_data' as associated authenticated data, and the
   // read bytes are bytes of the resulting plaintext.
+  // Note that the returned wrapper's size()-method reports size that is
+  // not checked for integrity.  For example, if the ciphertext file has been
+  // truncated then size() will return a wrong result.  Reading the last block
+  // of the plaintext will verify whether size() is correct.
   // Reading through the wrapper is thread safe.
   virtual crypto::tink::util::StatusOr<
       std::unique_ptr<crypto::tink::RandomAccessStream>>

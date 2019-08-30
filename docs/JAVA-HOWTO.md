@@ -1,35 +1,81 @@
 # Tink for Java HOW-TO
 
-The following subsections present instructions and/or Java-snippets for some
-common tasks in [Tink](https://github.com/google/tink).
+This document contains instructions and Java code snippets for common tasks in
+[Tink](https://github.com/google/tink).
 
-If you want to contribute, please read [Java hacking guide](JAVA-HACKING.md).
+If you want to contribute code to the Java implementation, please read the [Java
+hacking guide](JAVA-HACKING.md).
 
-## Installation
-
-Tink for Java comes in two flavors:
-
--   The main flavor.
--   The Android flavor that is optimized for Android.
-
-Tink can be installed with Maven or Gradle. The Maven group ID is
-`com.google.crypto.tink`, and the artifact ID is `tink`.
+## Setup instructions
 
 The most recent release is
 [1.3.0-rc1](https://github.com/google/tink/releases/tag/v1.3.0-rc1), released
 2019-07-01.
 
-Java developers can add Tink using Maven:
+In addition to the versioned releases, snapshots of Tink are regurlarly built
+using the master branch of the Tink GitHub repository.
+
+Tink for Java has two primary build targets specified:
+
+- "tink": the default, for general purpose use
+- "android": which is optimized for use in Android projects
+
+### Maven
+
+You can can include Tink in Java projects projects using
+[Maven](https://maven.apache.org/).
+
+The Maven group ID is `com.google.crypto.tink`, and the artifact ID is `tink`.
+
+You can specify the current release of Tink as a project dependency using the
+following configuration:
 
 ```xml
-<dependency>
-  <groupId>com.google.crypto.tink</groupId>
-  <artifactId>tink</artifactId>
-  <version>1.3.0-rc1</version>
-</dependency>
+<dependencies>
+  <dependency>
+    <groupId>com.google.crypto.tink</groupId>
+    <artifactId>tink</artifactId>
+    <version>1.3.0-rc1</version>
+  </dependency>
+</dependencies>
 ```
 
-Android developers can add Tink using Gradle:
+You can specify the latest snapshot as a project dependency by using the version
+`HEAD-SNAPSHOT`:
+
+```xml
+<repositories>
+  <repository>
+    <id>sonatype-snapshots</id>
+    <name>sonatype-snapshots</name>
+    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    <snapshots>
+      <enabled>true</enabled>
+      <updatePolicy>always</updatePolicy>
+    </snapshots>
+    <releases>
+      <updatePolicy>always</updatePolicy>
+    </releases>
+  </repository>
+</repositories>
+
+...
+
+<dependencies>
+  <dependency>
+    <groupId>com.google.crypto.tink</groupId>
+    <artifactId>tink</artifactId>
+    <version>HEAD-SNAPSHOT</version>
+  </dependency>
+</dependencies>
+```
+
+### Gradle
+
+You can include Tink in Android projects using [Gradle](https://gradle.org).
+
+You can specify the current release of Tink as a project dependency using the
+following configuration:
 
 ```
 dependencies {
@@ -37,37 +83,8 @@ dependencies {
 }
 ```
 
-### Snapshots
-
-Snapshots of Tink built from the master branch are available through Maven using
-version `HEAD-SNAPSHOT`.
-
-To add a dependency using Maven:
-
-```xml
-<repositories>
-<repository>
-  <id>sonatype-snapshots</id>
-  <name>sonatype-snapshots</name>
-  <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-  <snapshots>
-    <enabled>true</enabled>
-    <updatePolicy>always</updatePolicy>
-  </snapshots>
-  <releases>
-    <updatePolicy>always</updatePolicy>
-  </releases>
-</repository>
-</repositories>
-
-<dependency>
-  <groupId>com.google.crypto.tink</groupId>
-  <artifactId>tink</artifactId>
-  <version>HEAD-SNAPSHOT</version>
-</dependency>
-```
-
-To add a dependency using Gradle:
+You can specify the latest snapshot as a project dependency using the following
+configuration:
 
 ```
 repositories {
@@ -79,7 +96,7 @@ dependencies {
 }
 ```
 
-## API docs
+## API documentation
 
 *   Java:
     *   [1.3.0-rc1](https://google.github.com/tink/javadoc/tink/1.3.0-rc1)
@@ -88,25 +105,25 @@ dependencies {
     *   [1.3.0-rc1](https://google.github.com/tink/javadoc/tink-android/1.3.0-rc1)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
-## Important Warnings
+## Important warnings
 
-Do not use APIs including fields and methods marked with the `@Alpha`
-annotation. They can be modified in any way, or even removed, at any time. They
-are in the package, but not for official, production release, but only for
+**Do not use APIs which have fields or methods marked with the `@Alpha`
+annotation.** They can be modified in any way, or even removed, at any time.
+They are in the package, but not for official, production release, but only for
 testing.
 
-Do not use APIs in the `com.google.crypto.tink.subtle`. While they're generally
+**Do not use APIs in `com.google.crypto.tink.subtle`.** While they're generally
 safe to use, they're not meant for public consumption and can be modified in any
 way, or even removed, at any time.
 
 ## Initializing Tink
 
-Tink provides customizable initialization, which allows for choosing specific
+Tink provides customizable initialization, which allows you to choose specific
 implementations (identified by _key types_) of desired primitives. This
 initialization happens via _registration_ of the implementations.
 
 For example, if you want to use all implementations of all primitives in Tink,
-the initialization would look as follows:
+the initialization would be:
 
 ```java
     import com.google.crypto.tink.config.TinkConfig;
@@ -122,8 +139,8 @@ To use only implementations of the AEAD primitive:
     AeadConfig.register();
 ```
 
-For custom initialization the registration proceeds directly via
-`Registry`-class:
+For custom initialization the registration proceeds directly via the
+`Registry` class:
 
 ```java
     import com.google.crypto.tink.Registry;
@@ -134,14 +151,14 @@ For custom initialization the registration proceeds directly via
 
 ```
 
-## Generating New Key(set)s
+## Generating new keys and keysets
 
 Each `KeyManager`-implementation provides `newKey(..)`-methods that generate new
-keys of the corresponding key type. However to avoid accidental leakage of
-sensitive key material you should be careful with mixing key(set) generation
-with key(set) usage in code. To support the separation between these activities
-Tink package provides a command-line tool called [Tinkey](TINKEY.md), which can
-be used for common key management tasks.
+keys of the corresponding key type. However, to avoid accidental leakage of
+sensitive key material, you should avoid mixing key(set) generation with
+key(set) usage in code. To support the separation between these activities, Tink
+provides a command-line tool called [Tinkey](TINKEY.md), which can be used for
+common key management tasks.
 
 Still, if there is a need to generate a KeysetHandle with fresh key material
 directly in Java code, you can use
@@ -165,7 +182,7 @@ and
 [HybridKeyTemplates](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/hybrid/HybridKeyTemplates.java),
 respectively.
 
-## Storing Keysets
+## Storing keysets
 
 After generating key material, you might want to persist it to a storage system,
 e.g., writing to a file:
@@ -188,12 +205,11 @@ e.g., writing to a file:
 ```
 
 Storing cleartext keysets on disk is not recommended. Tink supports encrypting
-keysets with master keys stored in a remote [key management
+keysets with master keys stored in remote [key management
 systems](KEY-MANAGEMENT.md).
 
-For example, you can encrypt the key material with a Google Cloud KMS key at
-`gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`
-as follows:
+For example, you can encrypt the key material with a key stored in Google Cloud
+KMS key as follows:
 
 ```java
     import com.google.crypto.tink.JsonKeysetWriter;
@@ -214,9 +230,9 @@ as follows:
         new GcpKmsClient().getAead(masterKeyUri));
 ```
 
-## Loading Existing Keysets
+## Loading existing keysets
 
-To load encrypted keysets, you can use
+To load encrypted keysets, use
 [`KeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetHandle.java):
 
 ```java
@@ -246,26 +262,27 @@ To load cleartext keysets, use
         JsonKeysetReader.withFile(new File(keysetFilename)));
 ```
 
-## Obtaining and Using Primitives
+## Obtaining and using primitives
 
-[_Primitives_](PRIMITIVES.md) represent cryptographic operations offered by
-Tink, hence they form the core of Tink API. A primitive is just an interface
-that specifies what operations are offered by the primitive. A primitive can
-have multiple implementations, and user chooses a desired implementation by
-using a key of corresponding type (see the [this
-section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
-A list of primitives and their implemenations currently supported by
-Tink in Java can be found [here](PRIMITIVES.md#java).
+[Primitives](PRIMITIVES.md) represent cryptographic operations offered by Tink,
+hence they form the core of the Tink API. A primitive is an interface which
+specifies what operations are offered by the primitive. A primitive can have
+multiple implementations, and you choose a desired implementation by using a key
+of a corresponding type (see [this
+document](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for further details).
 
-A user obtains a primitive by calling the function `getPrimitive(classObject)`
-of the `KeysetHandle`, where the `classObject` is the class object corresponding
-to the primitive (for example `Aead.class` for AEAD).
+A list of primitives and the implemenations currently supported by Tink in Java
+can be found [here](PRIMITIVES.md#java).
+
+You obtain a primitive by calling the method `getPrimitive(classObject)` of a
+`KeysetHandle`, where the `classObject` is the class object corresponding to the
+primitive (for example `Aead.class` for AEAD).
 
 ### Symmetric Key Encryption
 
-Here is how you can obtain and use an [AEAD (Authenticated Encryption with
-Associated Data](PRIMITIVES.md#authenticated-encryption-with-associated-data)
-primitive to encrypt or decrypt data:
+You can obtain and use an [AEAD (Authenticated Encryption with Associated
+Data](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive to
+encrypt or decrypt data:
 
 ```java
     import com.google.crypto.tink.Aead;
@@ -286,10 +303,10 @@ primitive to encrypt or decrypt data:
     byte[] decrypted = aead.decrypt(ciphertext, aad);
 ```
 
-### Deterministic Symmetric Key Encryption
+### Deterministic symmetric key encryption
 
-Here is how you can obtain and use an [DeterministicAEAD (Deterministic
-Authenticated Encryption with Associated
+You can obtain and use a [DeterministicAEAD (Deterministic Authenticated
+Encryption with Associated
 Data](PRIMITIVES.md#deterministic-authenticated-encryption-with-associated-data)
 primitive to encrypt or decrypt data:
 
@@ -313,9 +330,9 @@ primitive to encrypt or decrypt data:
     byte[] decrypted = daead.decryptDeterministically(ciphertext, aad);
 ```
 
-### Symmetric Key Encryption of Streaming Data
+### Symmetric key encryption of streaming data
 
-Here is how you can obtain and use an [Streaming AEAD (Streaming Authenticated Encryption with
+You can obtain and use a [Streaming AEAD (Streaming Authenticated Encryption with
 Associated Data)](PRIMITIVES.md#streaming-authenticated-encryption-with-associated-data) primitive
 to encrypt or decrypt data streams:
 
@@ -372,7 +389,7 @@ to encrypt or decrypt data streams:
 
 ### Message Authentication Code
 
-The following snippets shows how to compute or verify a [MAC (Message
+You can compute or verify a [MAC (Message
 Authentication Code)](PRIMITIVES.md#message-authentication-code):
 
 ```java
@@ -394,9 +411,9 @@ Authentication Code)](PRIMITIVES.md#message-authentication-code):
     mac.verifyMac(tag, data);
 ```
 
-### Digital Signatures
+### Digital signatures
 
-Here is an example of how to sign or verify a [digital
+You can sign or verify a [digital
 signature](PRIMITIVES.md#digital-signatures):
 
 ```java
@@ -430,7 +447,7 @@ signature](PRIMITIVES.md#digital-signatures):
     verifier.verify(signature, data);
 ```
 
-### Hybrid Encryption
+### Hybrid encryption
 
 To encrypt or decrypt using [a combination of public key encryption and
 symmetric key encryption](PRIMITIVES.md#hybrid-encryption) one can
@@ -469,18 +486,21 @@ use the following:
     byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
 ```
 
-### Envelope Encryption
+### Envelope encryption
 
-Via the AEAD interface, Tink supports
-[envelope](http://docs.aws.amazon.com/kms/latest/developerguide/workflow.html)
-[encryption](https://cloud.google.com/kms/docs/data-encryption-keys) (a.k.a. KMS
-Envelope) which is getting popular with Cloud users.
+Via the AEAD interface, Tink supports envelope encryption, which is getting
+popular with Cloud users.
 
-In this mode, Cloud users first create a key encryption key (KEK) in a Key
+For more context, reference the following cloud service provider documentation:
+
+* [Amazon Web Services](http://docs.aws.amazon.com/kms/latest/developerguide/workflow.html)
+* [Google Cloud Platform](https://cloud.google.com/kms/docs/data-encryption-keys)
+
+In this mode, you first create a key encryption key (KEK) in a Key
 Management System (KMS) such as AWS KMS or Google Cloud KMS. To encrypt some
-data, users then generate locally a data encryption key (DEK), encrypt data with
-the DEK, ask the KMS to encrypt the DEK with the KEK, and stores the encrypted
-DEK with the encrypted data. At a later point Cloud users can retrieve encrypted
+data, you then generate locally a data encryption key (DEK), encrypt data with
+the DEK, ask the KMS to encrypt the DEK with the KEK, and store the encrypted
+DEK with the encrypted data. At a later point, you can retrieve the encrypted
 data and the DEK, ask the KMS to decrypt DEK, and use the decrypted DEK to
 decrypt the data.
 
@@ -512,14 +532,16 @@ using the credentials in `credentials.json` as follows:
     byte[] ciphertext = aead.encrypt(plaintext, aad);
 ```
 
-## Key Rotation
+## Key rotation
 
-The support for key rotation in Tink is provided via
-[`KeysetManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetManager.java)-class.
+Support for key rotation in Tink is provided via the
+[`KeysetManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetManager.java)
+class.
 
 You have to provide a `KeysetHandle`-object that contains the keyset that should
 be rotated, and a specification of the new key via a
-[`KeyTemplate`](https://github.com/google/tink/blob/master/proto/tink.proto#L50)-message.
+[`KeyTemplate`](https://github.com/google/tink/blob/master/proto/tink.proto#L50)
+message.
 
 ```java
     import com.google.crypto.tink.KeysetHandle;
@@ -535,39 +557,40 @@ be rotated, and a specification of the new key via a
         .getKeysetHandle();
 ```
 
-Some common specifications are available as pre-generated templates
-in [examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates)-folder,
-and can be accessed via `...KeyTemplates.java` classes of the respective
-primitives.  After a successful rotation the resulting keyset contains a new key
-generated according to the specification in `keyTemplate`, and the new key
-becomes the _primary key_ of the keyset.  For the rotation to succeed the
-`Registry` must contain a key manager for the key type specified in
-`keyTemplate`.
+Some common specifications are available as pre-generated templates in
+[examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates),
+and can be accessed via the `...KeyTemplates.java` classes of the respective
+primitives.
+
+After a successful rotation, the resulting keyset contains a new key generated
+according to the specification in `keyTemplate`, and the new key becomes the
+_primary key_ of the keyset.  For the rotation to succeed the `Registry` must
+contain a key manager for the key type specified in `keyTemplate`.
 
 Alternatively, you can use [Tinkey](TINKEY.md) to rotate or manage a keyset.
 
-## Custom Implementation of a Primitive
+## Custom implementation of a primitive
 
-**NOTE**: The usage of **custom key managers should be enjoyed
-responsibly**: we (i.e. Tink developers) have no way checking or enforcing that
-a custom implementation satisfies security properties of the corresponding
-primitive interface, so it is up to the implementer and the user of the custom
-implementation ensure the required properties.
+**NOTE**: The usage of **custom key managers should be enjoyed responsibly**. We
+(i.e. Tink developers) have no way of checking or enforcing that a custom
+implementation satisfies security properties of the corresponding primitive
+interface, so it is up to the implementer and the user of the custom
+implementation ensure the required properties are met.
 
-**TIP** For a working example, please check out the
+**TIP**: For a working example, please check out the
 [AES-CBC-HMAC](https://github.com/thaidn/tink-examples/blob/master/timestamper/src/main/java/com/timestamper/AesCbcHmacKeyManager.java)
 implementation of the AEAD primitive in the
 [timestamper](https://github.com/thaidn/tink-examples/tree/master/timestamper)
 example.
 
 The main cryptographic operations offered by Tink are accessible via so-called
-_primitives_, which essentially are interfaces that represent corresponding
-cryptographic functionalities. While Tink comes with several standard
-implementations of common primitives, it allows also for adding custom
-implementations of primitives. Such implementations allow for seamless
-integration of Tink with custom third-party cryptographic schemes or hardware
-modules, and in combination with [key rotation](#key-rotation)-features enable
-painless migration between cryptographic schemes.
+_primitives_, which are interfaces that represent corresponding cryptographic
+functionalities. While Tink comes with several standard implementations of
+common primitives, it also allows for adding custom implementations of
+primitives. Such implementations allow for seamless integration of Tink with
+custom third-party cryptographic schemes or hardware modules, and in combination
+with [key rotation](#key-rotation) features, enables the painless migration
+between cryptographic schemes.
 
 To create a custom implementation of a primitive proceed as follows:
 
@@ -575,13 +598,13 @@ To create a custom implementation of a primitive proceed as follows:
 2.  Define protocol buffers that hold key material and parameters for the custom
     cryptographic scheme; the name of the key protocol buffer (a.k.a. type URL)
     determines the _key type_ for the custom implementation.
-3.  Implement
+3.  Implement a
     [`KeyManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java)
     interface for the _primitive_ from step #1 and the _key type_ from step #2.
 
 To use a custom implementation of a primitive in an application, register with
 the [`Registry`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Registry.java)
-the custom `KeyManager`-implementation (from step #3 above) for the custom key
+the custom `KeyManager` implementation (from step #3 above) for the custom key
 type (from step #2 above):
 
 ```java
@@ -599,13 +622,13 @@ above), you should provide definitions of three messages:
  * `...Params`: parameters of an instantiation of the primitive,
    needed when a key is being used.
  * `...Key`: the actual key proto, contains the key material and the
-   corresponding `...Params`-proto.
+   corresponding `...Params` proto.
  * `...KeyFormat`: parameters needed to generate a new key.
 
-Here are a few conventions/recommendations wrt. defining these messages
-(see [tink.proto](https://github.com/google/tink/blob/master/proto/tink.proto)
-and definitions of [existing key types](https://github.com/google/tink/blob/master/proto/)
-for details):
+Here are a few conventions/recommendations when defining these messages (see
+[tink.proto](https://github.com/google/tink/blob/master/proto/tink.proto) and
+definitions of [existing key
+types](https://github.com/google/tink/blob/master/proto/) for details):
 
  * `...Key` should contain a version field (a monotonic counter, `uint32 version;`),
    which identifies the version of implementation that can work with this key.
@@ -615,19 +638,20 @@ for details):
    one has all information it needs to generate a new `...Key` message.
 
 Alternatively, depending on the use case requirements, you can skip step #2
-entirely and re-use for the key material an existing protocol buffer messages.
-In such a case you should not configure the Registry via the `Config`-class, but
+entirely and re-use an existing protocol buffer messages for the key material.
+In such a case, you should not configure the Registry via the `Config`-class, but
 rather register the needed `KeyManager`-instances manually.
 
 For a concrete example, let's assume that we'd like a custom implementation of
-[`Aead`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Aead.java)-primitive
-(step #1). We define then three protocol buffer messages (step #2):
+the
+[`Aead`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Aead.java)
+primitive (step #1). We define then three protocol buffer messages (step #2):
 
  * `MyCustomAeadParams`: holds parameters needed for the use of the key material.
  * `MyCustomAeadKey`: holds the actual key material and parameters needed for its use.
  * `MyCustomAeadKeyFormat`: holds parameters needed for generation of a new `MyCustomAeadKey`-key.
 
-```protocol-buffer
+```proto
     syntax = "proto3";
     package mycompany.mypackage;
 
@@ -663,5 +687,5 @@ and the corresponding _key manager_ implements (step #3) the interface
     }
 ```
 
-After registering `MyCustomAeadKeyManager` with the Registry it will be used
-when a user calls `keysetHandle.getPrimitive(Aead.class)`.
+After registering `MyCustomAeadKeyManager` with the Registry, it will be used
+when you call `keysetHandle.getPrimitive(Aead.class)`.

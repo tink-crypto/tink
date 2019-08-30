@@ -16,14 +16,12 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManagerBase;
-import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
@@ -40,87 +38,31 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances of {@code
  * EcdsaSignJce}.
  */
-class EcdsaSignKeyManager
-    extends KeyManagerBase<PublicKeySign, EcdsaPrivateKey, EcdsaKeyFormat>
-    implements PrivateKeyManager<PublicKeySign> {
+class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPublicKey> {
   public EcdsaSignKeyManager() {
-    super(PublicKeySign.class, EcdsaPrivateKey.class, EcdsaKeyFormat.class, TYPE_URL);
+    super(
+        EcdsaPrivateKey.class,
+        EcdsaPublicKey.class,
+        new PrimitiveFactory<PublicKeySign, EcdsaPrivateKey>(PublicKeySign.class) {
+          @Override
+          public PublicKeySign getPrimitive(EcdsaPrivateKey key) throws GeneralSecurityException {
+            ECPrivateKey privateKey =
+                EllipticCurves.getEcPrivateKey(
+                    SigUtil.toCurveType(key.getPublicKey().getParams().getCurve()),
+                    key.getKeyValue().toByteArray());
+            return new EcdsaSignJce(
+                privateKey,
+                SigUtil.toHashType(key.getPublicKey().getParams().getHashType()),
+                SigUtil.toEcdsaEncoding(key.getPublicKey().getParams().getEncoding()));
+          }
+        });
   }
 
-  /** Type url that this manager supports */
-  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-
-  /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
   @Override
-  public PublicKeySign getPrimitiveFromKey(EcdsaPrivateKey keyProto)
-      throws GeneralSecurityException {
-    ECPrivateKey privateKey =
-        EllipticCurves.getEcPrivateKey(
-            SigUtil.toCurveType(keyProto.getPublicKey().getParams().getCurve()),
-            keyProto.getKeyValue().toByteArray());
-    return new EcdsaSignJce(
-        privateKey,
-        SigUtil.toHashType(keyProto.getPublicKey().getParams().getHashType()),
-        SigUtil.toEcdsaEncoding(keyProto.getPublicKey().getParams().getEncoding()));
-  }
-
-  @Override
-  public EcdsaPrivateKey newKeyFromFormat(EcdsaKeyFormat format)
-      throws GeneralSecurityException {
-    EcdsaParams ecdsaParams = format.getParams();
-    KeyPair keyPair = EllipticCurves.generateKeyPair(SigUtil.toCurveType(ecdsaParams.getCurve()));
-    ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
-    ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
-    ECPoint w = pubKey.getW();
-
-    // Creates EcdsaPublicKey.
-    EcdsaPublicKey ecdsaPubKey =
-        EcdsaPublicKey.newBuilder()
-            .setVersion(VERSION)
-            .setParams(ecdsaParams)
-            .setX(ByteString.copyFrom(w.getAffineX().toByteArray()))
-            .setY(ByteString.copyFrom(w.getAffineY().toByteArray()))
-            .build();
-
-    // Creates EcdsaPrivateKey.
-    return EcdsaPrivateKey.newBuilder()
-        .setVersion(VERSION)
-        .setPublicKey(ecdsaPubKey)
-        .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
-        .build();
-  }
-
-  @Override
-  public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      EcdsaPrivateKey privKeyProto = EcdsaPrivateKey.parseFrom(serializedKey);
-      return KeyData.newBuilder()
-          .setTypeUrl(EcdsaVerifyKeyManager.TYPE_URL)
-          .setValue(privKeyProto.getPublicKey().toByteString())
-          .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
-          .build();
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized EcdsaPrivateKey proto", e);
-    }
-  }
-
-  @Override
-  protected KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.ASYMMETRIC_PRIVATE;
-  }
-
-  @Override
-  protected EcdsaPrivateKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return EcdsaPrivateKey.parseFrom(byteString);
-  }
-
-  @Override
-  protected EcdsaKeyFormat parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return EcdsaKeyFormat.parseFrom(byteString);
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
   }
 
   @Override
@@ -129,13 +71,66 @@ class EcdsaSignKeyManager
   }
 
   @Override
-  protected void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
-    Validators.validateVersion(privKey.getVersion(), VERSION);
+  public EcdsaPublicKey getPublicKey(EcdsaPrivateKey key) throws GeneralSecurityException {
+    return key.getPublicKey();
+  }
+
+  @Override
+  public KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.ASYMMETRIC_PRIVATE;
+  }
+
+  @Override
+  public EcdsaPrivateKey parseKey(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return EcdsaPrivateKey.parseFrom(byteString);
+  }
+
+  @Override
+  public void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
+    Validators.validateVersion(privKey.getVersion(), getVersion());
     SigUtil.validateEcdsaParams(privKey.getPublicKey().getParams());
   }
 
   @Override
-  protected void validateKeyFormat(EcdsaKeyFormat format) throws GeneralSecurityException {
-    SigUtil.validateEcdsaParams(format.getParams());
+  public KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> keyFactory() {
+    return new KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey>(EcdsaKeyFormat.class) {
+      @Override
+      public void validateKeyFormat(EcdsaKeyFormat format) throws GeneralSecurityException {
+        SigUtil.validateEcdsaParams(format.getParams());
+      }
+
+      @Override
+      public EcdsaKeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return EcdsaKeyFormat.parseFrom(byteString);
+      }
+
+      @Override
+      public EcdsaPrivateKey createKey(EcdsaKeyFormat format) throws GeneralSecurityException {
+        EcdsaParams ecdsaParams = format.getParams();
+        KeyPair keyPair =
+            EllipticCurves.generateKeyPair(SigUtil.toCurveType(ecdsaParams.getCurve()));
+        ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
+        ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
+        ECPoint w = pubKey.getW();
+
+        // Creates EcdsaPublicKey.
+        EcdsaPublicKey ecdsaPubKey =
+            EcdsaPublicKey.newBuilder()
+                .setVersion(VERSION)
+                .setParams(ecdsaParams)
+                .setX(ByteString.copyFrom(w.getAffineX().toByteArray()))
+                .setY(ByteString.copyFrom(w.getAffineY().toByteArray()))
+                .build();
+
+        // Creates EcdsaPrivateKey.
+        return EcdsaPrivateKey.newBuilder()
+            .setVersion(VERSION)
+            .setPublicKey(ecdsaPubKey)
+            .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
+            .build();
+      }
+    };
   }
 }

@@ -32,7 +32,7 @@ public class MacKeyTemplatesTest {
   @Test
   public void testHMAC_SHA256_128BITTAG() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    assertEquals(HmacKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
 
@@ -44,7 +44,7 @@ public class MacKeyTemplatesTest {
   @Test
   public void testHMAC_SHA256_256BITTAG() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_256BITTAG;
-    assertEquals(HmacKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
 
@@ -56,7 +56,7 @@ public class MacKeyTemplatesTest {
   @Test
   public void testHMAC_SHA512_256BITTAG() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA512_256BITTAG;
-    assertEquals(HmacKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
 
@@ -68,7 +68,7 @@ public class MacKeyTemplatesTest {
   @Test
   public void testHMAC_SHA512_512BITTAG() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA512_512BITTAG;
-    assertEquals(HmacKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
 
@@ -85,7 +85,7 @@ public class MacKeyTemplatesTest {
     int tagSize = 24;
     HashType hashType = HashType.SHA512;
     KeyTemplate template = MacKeyTemplates.createHmacKeyTemplate(keySize, tagSize, hashType);
-    assertEquals(HmacKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
 
     HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());

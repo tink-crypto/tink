@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_STREAMINGAEAD_TEST_UTIL_H_
-#define TINK_STREAMINGAEAD_TEST_UTIL_H_
+#ifndef TINK_SUBTLE_STREAMING_AEAD_TEST_UTIL_H_
+#define TINK_SUBTLE_STREAMING_AEAD_TEST_UTIL_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/streaming_aead.h"
@@ -22,14 +22,20 @@
 namespace crypto {
 namespace tink {
 
-// Encrypt with NewEncryptingStream, then decrypt using NewDecryptingStream.
+// Encrypt with NewEncryptingStream, then decrypt using NewDecryptingStream,
+// and NewDecryptingRandomAccessStream (for a few fragments).
+// 'ciphertext_offset' is the offset of the actual ciphertext in the
+// computed ciphertext stream (cf. description of StreamSegmentEncrypter
+// in stream_segment_encrypter.h).
 // Any error will be propagated to the caller. Returns OK if the resulting
-// decryption is equal to the plaintext.
-crypto::tink::util::Status EncryptThenDecrypt(
-    StreamingAead* encrypter, StreamingAead* decrypter,
-    absl::string_view plaintext, absl::string_view associated_data);
+// decryptions are equal to the plaintext.
+crypto::tink::util::Status EncryptThenDecrypt(StreamingAead* encrypter,
+                                              StreamingAead* decrypter,
+                                              absl::string_view plaintext,
+                                              absl::string_view associated_data,
+                                              int ciphertext_offset);
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_STREAMINGAEAD_TEST_UTIL_H_
+#endif  // TINK_SUBTLE_STREAMING_AEAD_TEST_UTIL_H_

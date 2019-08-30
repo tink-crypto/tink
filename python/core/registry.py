@@ -182,7 +182,7 @@ class Registry(object):
         pset_module.PrimitiveSet(wrapper.primitive_class()))
     if not isinstance(wrapped, wrapper.primitive_class()):
       raise tink_error.TinkError(
-          'Wrapper for primitive {} generates incompatibe primitve of type {}'
+          'Wrapper for primitive {} generates incompatible primitive of type {}'
           .format(wrapper.primitive_class().__name__,
                   type(wrapped).__name__))
     cls._wrappers[wrapper.primitive_class()] = wrapper

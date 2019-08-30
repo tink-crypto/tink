@@ -11,7 +11,6 @@ load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library")
 closure_js_library(
     name = "signature",
     exports = [
-        ":catalogues",
         ":config",
         ":ecdsa_key_managers",
         ":key_templates",
@@ -75,34 +74,15 @@ closure_js_library(
 )
 
 closure_js_library(
-    name = "catalogues",
-    srcs = [
-        "public_key_sign_catalogue.js",
-        "public_key_verify_catalogue.js",
-    ],
-    deps = [
-        ":ecdsa_key_managers",
-        "//javascript:catalogue",
-        "//javascript:key_manager",
-        "//javascript:primitives",
-        "//javascript/exception",
-        "@io_bazel_rules_closure//closure/library",
-    ],
-)
-
-closure_js_library(
     name = "config",
     srcs = [
         "signature_config.js",
     ],
     deps = [
-        ":catalogues",
         ":ecdsa_key_managers",
         ":wrappers",
-        "//javascript:config",
         "//javascript:registry",
         "//javascript/aead:aead_config",
-        "//proto:config_closure_proto",
         "@io_bazel_rules_closure//closure/library",
     ],
 )

@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,15 +16,9 @@
 
 package com.google.crypto.tink.signature;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Config;
-import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
@@ -33,249 +27,265 @@ import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.subtle.EllipticCurves;
-import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.ByteString;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECPoint;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for EcdsaSignKeyManager.
- *
- * <p>TODO(quannguyen): Add more tests.
- */
+/** Unit tests for EcdsaSignKeyManager. */
 @RunWith(JUnit4.class)
 public class EcdsaSignKeyManagerTest {
-  @BeforeClass
-  public static void setUp() throws Exception {
-    Config.register(SignatureConfig.TINK_1_0_0);
-    ;
+  private final EcdsaSignKeyManager manager = new EcdsaSignKeyManager();
+  private final EcdsaSignKeyManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> factory =
+      manager.keyFactory();
+
+  private static EcdsaKeyFormat createKeyFormat(
+      HashType hashType, EllipticCurveType curveType, EcdsaSignatureEncoding encoding) {
+    return EcdsaKeyFormat.newBuilder()
+        .setParams(
+            EcdsaParams.newBuilder()
+                .setHashType(hashType)
+                .setCurve(curveType)
+                .setEncoding(encoding))
+        .build();
   }
 
-  private static class HashAndCurveType {
-    public HashType hashType;
-    public EllipticCurveType curveType;
-
-    public HashAndCurveType(HashType hashType, EllipticCurveType curveType) {
-      this.hashType = hashType;
-      this.curveType = curveType;
-    }
+  @Test
+  public void basics() throws Exception {
+    assertThat(manager.getKeyType())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
+    assertThat(manager.getVersion()).isEqualTo(0);
+    assertThat(manager.keyMaterialType())
+        .isEqualTo(KeyMaterialType.ASYMMETRIC_PRIVATE);
   }
 
-  final byte[] msg = Random.randBytes(20);
-
-  private void testNewKeyWithVerifier(KeyTemplate keyTemplate) throws Exception {
-    // Call newKey multiple times and make sure that it generates different keys.
-    int numTests = 9;
-    EcdsaPrivateKey[] privKeys = new EcdsaPrivateKey[numTests];
-    EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
-    Set<String> keys = new TreeSet<String>();
-    for (int j = 0; j < numTests / 3; j++) {
-      privKeys[3 * j] =
-          (EcdsaPrivateKey)
-              signManager.newKey(EcdsaKeyFormat.parseFrom(keyTemplate.getValue()));
-      keys.add(TestUtil.hexEncode(privKeys[3 * j].toByteArray()));
-
-      privKeys[3 * j + 1] = (EcdsaPrivateKey) signManager.newKey(keyTemplate.getValue());
-      keys.add(TestUtil.hexEncode(privKeys[3 * j + 1].toByteArray()));
-
-      privKeys[3 * j + 2] =
-          EcdsaPrivateKey.parseFrom(
-              signManager.newKeyData(keyTemplate.getValue()).getValue());
-      keys.add(TestUtil.hexEncode(privKeys[3 * j + 2].toByteArray()));
-    }
-    assertEquals(numTests, keys.size());
-
-    // Tests that generated keys have an adequate size. This is best-effort because keys might
-    // have leading zeros that are stripped off. These tests are flaky; the probability of
-    // failure is 2^-64 which happens when a key has 8 leading zeros.
-    for (int j = 0; j < numTests; j++) {
-      int keySize = privKeys[j].getKeyValue().toByteArray().length;
-      EcdsaKeyFormat ecdsaKeyFormat = EcdsaKeyFormat.parseFrom(keyTemplate.getValue());
-      switch (ecdsaKeyFormat.getParams().getCurve()) {
-        case NIST_P256:
-          assertTrue(256 / 8 - 8 <= keySize);
-          assertTrue(256 / 8 + 1 >= keySize);
-          break;
-        case NIST_P384:
-          assertTrue(384 / 8 - 8 <= keySize);
-          assertTrue(384 / 8 + 1 >= keySize);
-          break;
-        case NIST_P521:
-          assertTrue(521 / 8 - 8 <= keySize);
-          assertTrue(521 / 8 + 1 >= keySize);
-          break;
-        default:
-          break;
-      }
-    }
-
-    // Test whether signer works correctly with the corresponding verifier.
-    EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
-    for (int j = 0; j < numTests; j++) {
-      PublicKeySign signer = signManager.getPrimitive(privKeys[j]);
-      byte[] signature = signer.sign(msg);
-      for (int k = 0; k < numTests; k++) {
-        PublicKeyVerify verifier = verifyManager.getPrimitive(privKeys[k].getPublicKey());
-        if (j == k) { // The same key
-          try {
-            verifier.verify(signature, msg);
-          } catch (GeneralSecurityException ex) {
-            fail("Valid signature, should not throw exception");
-          }
-        } else { // Different keys
-          try {
-            verifier.verify(signature, msg);
-            fail("Invalid signature, should have thrown exception");
-          } catch (GeneralSecurityException expected) {
-            // Expected
-          }
-        }
-      }
+  @Test
+  public void validateKeyFormat_empty() throws Exception {
+    try {
+      factory.validateKeyFormat(EcdsaKeyFormat.getDefaultInstance());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
     }
   }
 
   @Test
-  public void testNewKeyWithVerifier() throws Exception {
-    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P256);
-    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P384);
-    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P521);
-    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P256_IEEE_P1363);
-    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P384_IEEE_P1363);
-    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P521_IEEE_P1363);
+  public void validateKeyFormat_valid() throws Exception {
+    // SHA256 NIST_P256 DER
+    factory.validateKeyFormat(
+        createKeyFormat(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
+    // SHA256 NIST_P256 IEEE_P1363
+    factory.validateKeyFormat(
+        createKeyFormat(
+            HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.IEEE_P1363));
+    // SHA384 NIST_P384 DER
+    factory.validateKeyFormat(
+        createKeyFormat(HashType.SHA384, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
+    // SHA384 NIST_P384 IEEE_P1363
+    factory.validateKeyFormat(
+        createKeyFormat(
+            HashType.SHA384, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.IEEE_P1363));
+    // SHA512 NIST_P384 DER
+    factory.validateKeyFormat(
+        createKeyFormat(HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
+    // SHA512 NIST_P384 IEEE_P1363
+    factory.validateKeyFormat(
+        createKeyFormat(
+            HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.IEEE_P1363));
+    // SHA512 NIST_P521 DER
+    factory.validateKeyFormat(
+        createKeyFormat(HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
+    // SHA512 NIST_P521 IEEE_P1363
+    factory.validateKeyFormat(
+        createKeyFormat(
+            HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.IEEE_P1363));
   }
 
   @Test
-  public void testNewKeyWithCorruptedFormat() {
-    ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyTemplate keyTemplate =
-        KeyTemplate.newBuilder()
-            .setTypeUrl(EcdsaSignKeyManager.TYPE_URL)
-            .setValue(serialized)
-            .build();
-    EcdsaSignKeyManager keyManager = new EcdsaSignKeyManager();
+  public void validateKeyFormat_noSha1() throws Exception {
     try {
-      keyManager.newKey(serialized);
-      fail("Corrupted format, should have thrown exception");
+      factory.validateKeyFormat(
+          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
+      fail();
     } catch (GeneralSecurityException expected) {
       // Expected
     }
     try {
-      keyManager.newKeyData(keyTemplate.getValue());
-      fail("Corrupted format, should have thrown exception");
+      factory.validateKeyFormat(
+          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
+      fail();
     } catch (GeneralSecurityException expected) {
       // Expected
     }
-  }
-
-  private void testNewKeyUnsupportedKeyFormat(HashAndCurveType hashAndCurve) throws Exception {
-    HashType hashType = hashAndCurve.hashType;
-    EllipticCurveType curveType = hashAndCurve.curveType;
-    EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
-    EcdsaParams ecdsaParams =
-        EcdsaParams.newBuilder()
-            .setHashType(hashType)
-            .setCurve(curveType)
-            .setEncoding(EcdsaSignatureEncoding.DER)
-            .build();
-    EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder().setParams(ecdsaParams).build();
     try {
-      EcdsaPrivateKey unusedPrivKey = (EcdsaPrivateKey) signManager.newKey(ecdsaFormat);
-      fail("Unsupported key format, should have thrown exception: " + hashType + " " + curveType);
+      factory.validateKeyFormat(
+          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
+      fail();
     } catch (GeneralSecurityException expected) {
       // Expected
     }
   }
 
   @Test
-  public void testNewKeyUnsupportedKeyFormat() throws Exception {
-    HashAndCurveType[] hashAndCurves = {
-      new HashAndCurveType(HashType.SHA1, EllipticCurveType.NIST_P256),
-      new HashAndCurveType(HashType.SHA1, EllipticCurveType.NIST_P384),
-      new HashAndCurveType(HashType.SHA1, EllipticCurveType.NIST_P521),
-      new HashAndCurveType(HashType.SHA256, EllipticCurveType.NIST_P384),
-      new HashAndCurveType(HashType.SHA256, EllipticCurveType.NIST_P521),
-      new HashAndCurveType(HashType.SHA512, EllipticCurveType.NIST_P256),
-    };
-    for (int i = 0; i < hashAndCurves.length; i++) {
-      testNewKeyUnsupportedKeyFormat(hashAndCurves[i]);
-    }
-  }
-
-  private void testGetPrimitiveWithUnsupportedKey(HashAndCurveType hashAndCurve) throws Exception {
-    HashType hashType = hashAndCurve.hashType;
-    EllipticCurveType curveType = hashAndCurve.curveType;
-    KeyPair keyPair = EllipticCurves.generateKeyPair(SigUtil.toCurveType(curveType));
-    ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
-    ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
-
-    ECPoint w = pubKey.getW();
-    EcdsaPublicKey ecdsaPubKey =
-        TestUtil.createEcdsaPubKey(
-            hashType,
-            curveType,
-            EcdsaSignatureEncoding.DER,
-            w.getAffineX().toByteArray(),
-            w.getAffineY().toByteArray());
-    EcdsaPrivateKey ecdsaPrivKey =
-        TestUtil.createEcdsaPrivKey(ecdsaPubKey, privKey.getS().toByteArray());
-
-    EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
+  public void validateKeyFormat_p384NotWithSha256() throws Exception {
     try {
-      PublicKeySign unusedSigner = signManager.getPrimitive(ecdsaPrivKey);
-      fail("Unsupported key, should have thrown exception: " + hashType + " " + curveType);
+      factory.validateKeyFormat(
+          createKeyFormat(
+              HashType.SHA256, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
+      fail();
     } catch (GeneralSecurityException expected) {
       // Expected
     }
   }
 
   @Test
-  public void testGetPrimitiveWithUnsupportedKey() throws Exception {
-    HashAndCurveType[] hashAndCurves = {
-      new HashAndCurveType(HashType.SHA1, EllipticCurveType.NIST_P256),
-      new HashAndCurveType(HashType.SHA1, EllipticCurveType.NIST_P384),
-      new HashAndCurveType(HashType.SHA1, EllipticCurveType.NIST_P521),
-      new HashAndCurveType(HashType.SHA256, EllipticCurveType.NIST_P384),
-      new HashAndCurveType(HashType.SHA256, EllipticCurveType.NIST_P521),
-      new HashAndCurveType(HashType.SHA512, EllipticCurveType.NIST_P256),
-    };
-    for (int i = 0; i < hashAndCurves.length; i++) {
-      testGetPrimitiveWithUnsupportedKey(hashAndCurves[i]);
+  public void validateKeyFormat_p521OnlyWithSha512() throws Exception {
+    try {
+      factory.validateKeyFormat(
+          createKeyFormat(
+              HashType.SHA256, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
+      fail();
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+    try {
+      factory.validateKeyFormat(
+          createKeyFormat(
+              HashType.SHA384, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
+      fail();
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_unkownsProhibited() throws Exception {
+    try {
+      factory.validateKeyFormat(
+          createKeyFormat(
+              HashType.UNKNOWN_HASH, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
+      fail();
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+    try {
+      factory.validateKeyFormat(
+          createKeyFormat(
+              HashType.SHA256, EllipticCurveType.UNKNOWN_CURVE, EcdsaSignatureEncoding.DER));
+      fail();
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+    try {
+      factory.validateKeyFormat(
+          createKeyFormat(
+              HashType.SHA256,
+              EllipticCurveType.NIST_P256,
+              EcdsaSignatureEncoding.UNKNOWN_ENCODING));
+      fail();
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+  }
+
+  @Test
+  public void validateKey_empty() throws Exception {
+    try {
+      manager.validateKey(EcdsaPrivateKey.getDefaultInstance());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
     }
   }
 
   /** Tests that a public key is extracted properly from a private key. */
   @Test
-  public void testGetPublicKeyData() throws Exception {
-    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
-    KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
-    EcdsaSignKeyManager privateManager = new EcdsaSignKeyManager();
-    KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
-    assertEquals(EcdsaVerifyKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
-    assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
-    EcdsaPrivateKey privateKey = EcdsaPrivateKey.parseFrom(privateKeyData.getValue());
-    assertArrayEquals(
-        privateKey.getPublicKey().toByteArray(), publicKeyData.getValue().toByteArray());
+  public void getPublicKey_checkValues() throws Exception {
+    EcdsaPrivateKey privateKey =
+        factory.createKey(
+            createKeyFormat(
+                HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
+    EcdsaPublicKey publicKey = manager.getPublicKey(privateKey);
 
-    EcdsaVerifyKeyManager publicManager = new EcdsaVerifyKeyManager();
-    PublicKeySign signer = privateManager.getPrimitive(privateKeyData.getValue());
-    PublicKeyVerify verifier = publicManager.getPrimitive(publicKeyData.getValue());
-    byte[] message = Random.randBytes(20);
-    try {
-      verifier.verify(signer.sign(message), message);
-    } catch (GeneralSecurityException e) {
-      fail("Should not fail: " + e);
+    assertThat(publicKey).isEqualTo(privateKey.getPublicKey());
+  }
+
+  // Tests that generated keys have an adequate size. This is best-effort because keys might
+  // have leading zeros that are stripped off. These tests are flaky; the probability of
+  // failure is 2^-64 which happens when a key has 8 leading zeros.
+  @Test
+  public void createKey_NISTP256_keySize() throws Exception {
+    EcdsaPrivateKey privateKey =
+        factory.createKey(
+            createKeyFormat(
+                HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
+    assertThat(privateKey.getKeyValue().size()).isAtLeast(256 / 8 - 8);
+    assertThat(privateKey.getKeyValue().size()).isAtMost(256 / 8 + 1);
+  }
+
+  // Tests that generated keys have an adequate size. This is best-effort because keys might
+  // have leading zeros that are stripped off. These tests are flaky; the probability of
+  // failure is 2^-64 which happens when a key has 8 leading zeros.
+  @Test
+  public void createKey_NISTP384_keySize() throws Exception {
+    EcdsaPrivateKey privateKey =
+        factory.createKey(
+            createKeyFormat(
+                HashType.SHA384, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
+    assertThat(privateKey.getKeyValue().size()).isAtLeast(384 / 8 - 8);
+    assertThat(privateKey.getKeyValue().size()).isAtMost(384 / 8 + 1);
+  }
+
+  // Tests that generated keys have an adequate size. This is best-effort because keys might
+  // have leading zeros that are stripped off. These tests are flaky; the probability of
+  // failure is 2^-64 which happens when a key has 8 leading zeros.
+  @Test
+  public void createKey_NISTP521_keySize() throws Exception {
+    EcdsaPrivateKey privateKey =
+        factory.createKey(
+            createKeyFormat(
+                HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
+    assertThat(privateKey.getKeyValue().size()).isAtLeast(521 / 8 - 8);
+    assertThat(privateKey.getKeyValue().size()).isAtMost(521 / 8 + 1);
+  }
+
+  @Test
+  public void createKey_NISTP256_differentValues() throws Exception {
+    EcdsaKeyFormat format =
+        createKeyFormat(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);
+    Set<String> keys = new TreeSet<>();
+    int numTests = 100;
+    for (int i = 0; i < numTests; i++) {
+      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
     }
+    assertThat(keys).hasSize(numTests);
+  }
+
+  @Test
+  public void createKey_NISTP384_differentValues() throws Exception {
+    EcdsaKeyFormat format =
+        createKeyFormat(HashType.SHA384, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER);
+    Set<String> keys = new TreeSet<>();
+    int numTests = 100;
+    for (int i = 0; i < numTests; i++) {
+      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
+    }
+    assertThat(keys).hasSize(numTests);
+  }
+
+
+  @Test
+  public void createKey_NISTP521_differentValues() throws Exception {
+    EcdsaKeyFormat format =
+        createKeyFormat(HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER);
+    Set<String> keys = new TreeSet<>();
+    int numTests = 100;
+    for (int i = 0; i < numTests; i++) {
+      keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
+    }
+    assertThat(keys).hasSize(numTests);
   }
 }

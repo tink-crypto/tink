@@ -36,9 +36,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-constexpr char AeadConfig::kCatalogueName[];
-constexpr char AeadConfig::kPrimitiveName[];
-
 // static
 const RegistryConfig& AeadConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();
@@ -51,25 +48,25 @@ util::Status AeadConfig::Register() {
   if (!status.ok()) return status;
 
   // Register key managers.
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesCtrHmacAeadKeyManager>(), true);
   if (!status.ok()) return status;
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmSivKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesEaxKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<XChaCha20Poly1305KeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<KmsAeadKeyManager>(), true);
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<KmsEnvelopeAeadKeyManager>(), true);
   if (!status.ok()) return status;
 

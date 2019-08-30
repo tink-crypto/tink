@@ -71,7 +71,7 @@ class AesGcm {
    */
   async encrypt(plaintext, opt_associatedData) {
     Validators.requireUint8Array(plaintext);
-    if (goog.isDefAndNotNull(opt_associatedData)) {
+    if (opt_associatedData != null) {
       Validators.requireUint8Array(opt_associatedData);
     }
     const iv = Random.randBytes(IV_SIZE_IN_BYTES);
@@ -81,7 +81,7 @@ class AesGcm {
       'tagLength': TAG_SIZE_IN_BITS,
     };
     // Edge can't handle an empty array
-    if (goog.isDefAndNotNull(opt_associatedData) && opt_associatedData.length) {
+    if (opt_associatedData != null && opt_associatedData.length) {
       alg['additionalData'] = opt_associatedData;
     }
     const ciphertext =
@@ -97,7 +97,7 @@ class AesGcm {
     if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BITS / 8) {
       throw new SecurityException('ciphertext too short');
     }
-    if (goog.isDefAndNotNull(opt_associatedData)) {
+    if (opt_associatedData != null) {
       Validators.requireUint8Array(opt_associatedData);
     }
     const iv = new Uint8Array(IV_SIZE_IN_BYTES);
@@ -108,7 +108,7 @@ class AesGcm {
       'tagLength': TAG_SIZE_IN_BITS,
     };
     // Edge can't handle an empty array
-    if (goog.isDefAndNotNull(opt_associatedData) && opt_associatedData.length) {
+    if (opt_associatedData != null && opt_associatedData.length) {
       alg['additionalData'] = opt_associatedData;
     }
     try {

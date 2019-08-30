@@ -17,6 +17,7 @@
 #ifndef TINK_HYBRID_HYBRID_CONFIG_H_
 #define TINK_HYBRID_HYBRID_CONFIG_H_
 
+#include "absl/base/macros.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
@@ -34,8 +35,6 @@ namespace tink {
 //
 //   auto status = HybridConfig::Register();
 //
-// For more information on creation and usage of instances of HybridDecrypt
-// and HybridDecrypt see HybridEncryptFactory resp. HybridDecryptFactory.
 class HybridConfig {
  public:
   static constexpr char kHybridDecryptCatalogueName[] = "TinkHybridDecrypt";
@@ -45,6 +44,7 @@ class HybridConfig {
 
   // Returns config with implementations of HybridEncrypt and HybridDecrypt
   // supported in the current Tink release.
+  ABSL_DEPRECATED("This is not supported anymore.")
   static const google::crypto::tink::RegistryConfig& Latest();
 
   // Registers HybridEncrypt and HybridDecrypt primitive wrappers, and key

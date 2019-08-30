@@ -19,47 +19,94 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/core/key_manager_base.h"
-#include "tink/key_manager.h"
+#include "tink/core/key_type_manager.h"
+#include "tink/subtle/aes_eax_boringssl.h"
+#include "tink/subtle/random.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/validation.h"
 #include "proto/aes_eax.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
 class AesEaxKeyManager
-    : public KeyManagerBase<Aead, google::crypto::tink::AesEaxKey> {
+    : public KeyTypeManager<google::crypto::tink::AesEaxKey,
+                            google::crypto::tink::AesEaxKeyFormat, List<Aead>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class AeadFactory : public PrimitiveFactory<Aead> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
+        const google::crypto::tink::AesEaxKey& key) const override {
+      return subtle::AesEaxBoringSsl::New(key.key_value(),
+                                          key.params().iv_size());
+    }
+  };
 
-  AesEaxKeyManager();
+  AesEaxKeyManager() : KeyTypeManager(absl::make_unique<AeadFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
+  }
 
-  virtual ~AesEaxKeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveFromKey(
-      const google::crypto::tink::AesEaxKey& aes_eax_key) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::AesEaxKey& key) const override {
+    crypto::tink::util::Status status =
+        ValidateVersion(key.version(), get_version());
+    if (!status.ok()) return status;
+    status = ValidateKeySize(key.key_value().size());
+    if (!status.ok()) return status;
+    return ValidateIvSize(key.params().iv_size());
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const google::crypto::tink::AesEaxKeyFormat& key_format) const override {
+    crypto::tink::util::Status status = ValidateKeySize(key_format.key_size());
+    if (!status.ok()) return status;
+    return ValidateIvSize(key_format.params().iv_size());
+  }
+
+  crypto::tink::util::StatusOr<google::crypto::tink::AesEaxKey> CreateKey(
+      const google::crypto::tink::AesEaxKeyFormat& key_format) const override {
+    google::crypto::tink::AesEaxKey aes_eax_key;
+    aes_eax_key.set_version(get_version());
+    aes_eax_key.set_key_value(
+        subtle::Random::GetRandomBytes(key_format.key_size()));
+    aes_eax_key.mutable_params()->set_iv_size(
+        key_format.params().iv_size());
+    return aes_eax_key;
+  }
 
  private:
-  friend class AesEaxKeyFactory;
+  crypto::tink::util::Status ValidateKeySize(uint32_t key_size) const {
+    if (key_size != 16 && key_size != 32) {
+      return crypto::tink::util::Status(
+          util::error::INVALID_ARGUMENT,
+          absl::StrCat("Invalid key size: ", key_size,
+                       " bytes, expected 16 or 32 bytes."));
+    }
+    return crypto::tink::util::OkStatus();
+  }
 
-  std::unique_ptr<KeyFactory> key_factory_;
+  crypto::tink::util::Status ValidateIvSize(uint32_t iv_size) const {
+    if (iv_size != 12 && iv_size != 16) {
+      return crypto::tink::util::Status(
+          util::error::INVALID_ARGUMENT,
+          absl::StrCat("Invalid IV size: ", iv_size,
+                       " bytes, expected 12 or 16 bytes."));
+    }
+    return crypto::tink::util::OkStatus();
+  }
 
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesEaxKey& key);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesEaxKeyFormat& key_format);
+  const std::string key_type_ = absl::StrCat(
+      kTypeGoogleapisCom, google::crypto::tink::AesEaxKey().GetTypeName());
 };
 
 }  // namespace tink

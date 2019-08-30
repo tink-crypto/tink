@@ -51,24 +51,24 @@ class RegistryImpl {
 
   template <class P>
   crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
-      const std::string& catalogue_name) const LOCKS_EXCLUDED(maps_mutex_);
+      const std::string& catalogue_name) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::Status AddCatalogue(const std::string& catalogue_name,
                                           Catalogue<P>* catalogue)
-      LOCKS_EXCLUDED(maps_mutex_);
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Registers the given 'manager' for the key type 'manager->get_key_type()'.
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
   crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager,
                                                 bool new_key_allowed)
-      LOCKS_EXCLUDED(maps_mutex_);
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
   crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager)
-      LOCKS_EXCLUDED(maps_mutex_) {
+      ABSL_LOCKS_EXCLUDED(maps_mutex_) {
     return RegisterKeyManager(manager, /* new_key_allowed= */ true);
   }
 
@@ -77,7 +77,7 @@ class RegistryImpl {
   crypto::tink::util::Status RegisterKeyTypeManager(
       std::unique_ptr<KeyTypeManager<KeyProto, KeyFormatProto, PrimitiveList>>
           manager,
-      bool new_key_allowed) LOCKS_EXCLUDED(maps_mutex_);
+      bool new_key_allowed) ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Takes ownership of 'private_key_manager' and 'public_key_manager'. Both
   // must be non-nullptr.
@@ -88,42 +88,42 @@ class RegistryImpl {
                             PrivatePrimitivesList>* private_key_manager,
       KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
           public_key_manager,
-      bool new_key_allowed) LOCKS_EXCLUDED(maps_mutex_);
+      bool new_key_allowed) ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
-      const std::string& type_url) const LOCKS_EXCLUDED(maps_mutex_);
-
+      const std::string& type_url) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Takes ownership of 'wrapper', which must be non-nullptr.
   template <class P>
   crypto::tink::util::Status RegisterPrimitiveWrapper(
-      PrimitiveWrapper<P>* wrapper) LOCKS_EXCLUDED(maps_mutex_);
+      PrimitiveWrapper<P>* wrapper) ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const google::crypto::tink::KeyData& key_data)
-      const LOCKS_EXCLUDED(maps_mutex_);
+      const google::crypto::tink::KeyData& key_data) const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const std::string& type_url, const portable_proto::MessageLite& key)
-      const LOCKS_EXCLUDED(maps_mutex_);
+      const std::string& type_url, const portable_proto::MessageLite& key) const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(const google::crypto::tink::KeyTemplate& key_template)
-      const LOCKS_EXCLUDED(maps_mutex_);
+  NewKeyData(const google::crypto::tink::KeyTemplate& key_template) const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  GetPublicKeyData(const std::string& type_url, const std::string& serialized_private_key)
-      const LOCKS_EXCLUDED(maps_mutex_);
+  GetPublicKeyData(const std::string& type_url,
+                   const std::string& serialized_private_key) const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> Wrap(
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const
-      LOCKS_EXCLUDED(maps_mutex_);
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
-  void Reset() LOCKS_EXCLUDED(maps_mutex_);
+  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
  private:
   // All information for a given type url.
@@ -293,26 +293,26 @@ class RegistryImpl {
   RegistryImpl& operator=(const RegistryImpl&) = delete;
 
   template <class P>
-  crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*> get_wrapper()
-      const LOCKS_EXCLUDED(maps_mutex_);
+  crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*> get_wrapper() const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Returns OK if the key manager with the given type index can be inserted
   // for type url type_url and parameter new_key_allowed. Otherwise returns
   // an error to be returned to the user.
   crypto::tink::util::Status CheckInsertable(
       const std::string& type_url, const std::type_index& key_manager_type_index,
-      bool new_key_allowed) const SHARED_LOCKS_REQUIRED(maps_mutex_);
+      bool new_key_allowed) const ABSL_SHARED_LOCKS_REQUIRED(maps_mutex_);
 
   mutable absl::Mutex maps_mutex_;
   std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_
-      GUARDED_BY(maps_mutex_);
+      ABSL_GUARDED_BY(maps_mutex_);
   // A map from the type_id to the corresponding wrapper. We use a shared_ptr
   // because shared_ptr<void> is valid (as opposed to unique_ptr<void>).
   std::unordered_map<std::type_index, std::shared_ptr<void>>
-      primitive_to_wrapper_ GUARDED_BY(maps_mutex_);
+      primitive_to_wrapper_ ABSL_GUARDED_BY(maps_mutex_);
 
   std::unordered_map<std::string, LabelInfo> name_to_catalogue_map_
-      GUARDED_BY(maps_mutex_);
+      ABSL_GUARDED_BY(maps_mutex_);
 };
 
 template <class P>
@@ -429,7 +429,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
                           PrivatePrimitivesList>* private_key_manager,
     KeyTypeManager<PublicKeyProto, void, PublicPrimitivesList>*
         public_key_manager,
-    bool new_key_allowed) LOCKS_EXCLUDED(maps_mutex_) {
+    bool new_key_allowed) ABSL_LOCKS_EXCLUDED(maps_mutex_) {
   auto owned_private_key_manager = absl::WrapUnique(private_key_manager);
   auto owned_public_key_manager = absl::WrapUnique(public_key_manager);
   if (private_key_manager == nullptr) {

@@ -15,6 +15,7 @@ tink_cc_library(
     tink::aead::aead_config
     tink::util::status
     tink::proto::config_cc_proto
+    absl::base
     absl::memory
 )
 
@@ -166,8 +167,10 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::core::hybrid_decrypt
     tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
+    tink::core::private_key_type_manager
     tink::subtle::subtle_util_boringssl
+    tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
@@ -189,8 +192,9 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_hybrid_encrypt
     tink::core::hybrid_encrypt
     tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
     tink::core::registry
+    tink::util::constants
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
@@ -343,7 +347,9 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
+    tink::subtle::hybrid_test_util
     tink::proto::aes_eax_cc_proto
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
@@ -354,12 +360,15 @@ tink_cc_test(
   NAME ecies_aead_hkdf_public_key_manager_test
   SRCS ecies_aead_hkdf_public_key_manager_test.cc
   DEPS
+    tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::core::hybrid_encrypt
     tink::core::registry
+    tink::aead::aead_key_templates
     tink::aead::aes_gcm_key_manager
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_eax_cc_proto
     tink::proto::common_cc_proto

@@ -124,6 +124,7 @@ objc_library(
     hdrs = [
         "TINKAllConfig.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":registry_config",
         "//cc/config:tink_config",
@@ -138,6 +139,7 @@ objc_library(
     hdrs = [
         "TINKBinaryKeysetReader.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
         ":tink_cc_pb",
@@ -168,6 +170,7 @@ objc_library(
     hdrs = [
         "TINKConfig.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":registry_config",
         "//cc:config",
@@ -181,6 +184,7 @@ objc_library(
     hdrs = [
         "TINKJSONKeysetReader.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
         ":tink_cc_pb",
@@ -198,6 +202,7 @@ objc_library(
         "TINKKeyTemplate.h",
         "core/TINKKeyTemplate_Internal.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":tink_cc_pb",
         "//cc/util:status",
@@ -215,6 +220,7 @@ objc_library(
     sdk_frameworks = [
         "Security",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":aead",
         ":aead_internal",
@@ -237,6 +243,7 @@ objc_library(
         "TINKKeysetReader.h",
         "core/TINKKeysetReader_Internal.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "//cc:keyset_reader",
     ],
@@ -249,6 +256,7 @@ objc_library(
         "TINKRegistryConfig.h",
         "core/TINKRegistryConfig_Internal.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":config_cc_pb",
     ],
@@ -267,6 +275,7 @@ objc_library(
     name = "version",
     srcs = [":version_m"],
     hdrs = ["TINKVersion.h"],
+    visibility = ["//visibility:public"],
 )
 
 ############################
@@ -276,6 +285,7 @@ objc_library(
 objc_library(
     name = "aead",
     hdrs = ["TINKAead.h"],
+    visibility = ["//visibility:public"],
 )
 
 objc_library(
@@ -295,6 +305,7 @@ objc_library(
     name = "aead_config",
     srcs = ["aead/TINKAeadConfig.mm"],
     hdrs = ["TINKAeadConfig.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":registry_config",
         "//cc/aead:aead_config",
@@ -308,6 +319,7 @@ objc_library(
     name = "aead_factory",
     srcs = ["aead/TINKAeadFactory.mm"],
     hdrs = ["TINKAeadFactory.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":aead",
         ":aead_internal",
@@ -323,6 +335,7 @@ objc_library(
     name = "aead_key_template",
     srcs = ["aead/TINKAeadKeyTemplate.mm"],
     hdrs = ["TINKAeadKeyTemplate.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":key_template",
         ":tink_cc_pb",
@@ -339,6 +352,7 @@ objc_library(
 objc_library(
     name = "deterministic_aead",
     hdrs = ["TINKDeterministicAead.h"],
+    visibility = ["//visibility:public"],
 )
 
 objc_library(
@@ -359,6 +373,7 @@ objc_library(
     name = "deterministic_aead_config",
     srcs = ["daead/TINKDeterministicAeadConfig.mm"],
     hdrs = ["TINKDeterministicAeadConfig.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":registry_config",
         "//cc/daead:deterministic_aead_config",
@@ -372,6 +387,7 @@ objc_library(
     name = "deterministic_aead_factory",
     srcs = ["daead/TINKDeterministicAeadFactory.mm"],
     hdrs = ["TINKDeterministicAeadFactory.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":deterministic_aead",
         ":deterministic_aead_internal",
@@ -387,6 +403,7 @@ objc_library(
     name = "deterministic_aead_key_template",
     srcs = ["daead/TINKDeterministicAeadKeyTemplate.mm"],
     hdrs = ["TINKDeterministicAeadKeyTemplate.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":key_template",
         ":tink_cc_pb",
@@ -405,6 +422,7 @@ objc_library(
     hdrs = [
         "TINKHybridDecrypt.h",
     ],
+    visibility = ["//visibility:public"],
 )
 
 objc_library(
@@ -412,12 +430,14 @@ objc_library(
     hdrs = [
         "TINKHybridEncrypt.h",
     ],
+    visibility = ["//visibility:public"],
 )
 
 objc_library(
     name = "hybrid_decrypt_factory",
     srcs = ["hybrid/TINKHybridDecryptFactory.mm"],
     hdrs = ["TINKHybridDecryptFactory.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":hybrid_decrypt",
         ":hybrid_decrypt_internal",
@@ -446,6 +466,7 @@ objc_library(
     name = "hybrid_encrypt_factory",
     srcs = ["hybrid/TINKHybridEncryptFactory.mm"],
     hdrs = ["TINKHybridEncryptFactory.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":hybrid_encrypt",
         ":hybrid_encrypt_internal",
@@ -474,6 +495,7 @@ objc_library(
     name = "hybrid_config",
     srcs = ["hybrid/TINKHybridConfig.mm"],
     hdrs = ["TINKHybridConfig.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":registry_config",
         "//cc/hybrid:hybrid_config",
@@ -487,6 +509,7 @@ objc_library(
     name = "hybrid_key_template",
     srcs = ["hybrid/TINKHybridKeyTemplate.mm"],
     hdrs = ["TINKHybridKeyTemplate.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":key_template",
         ":tink_cc_pb",
@@ -505,12 +528,14 @@ objc_library(
     hdrs = [
         "TINKMac.h",
     ],
+    visibility = ["//visibility:public"],
 )
 
 objc_library(
     name = "mac_config",
     srcs = ["mac/TINKMacConfig.mm"],
     hdrs = ["TINKMacConfig.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":registry_config",
         "//cc/mac:mac_config",
@@ -524,6 +549,7 @@ objc_library(
     name = "mac_factory",
     srcs = ["mac/TINKMacFactory.mm"],
     hdrs = ["TINKMacFactory.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
         ":mac",
@@ -552,6 +578,7 @@ objc_library(
     name = "mac_key_template",
     srcs = ["mac/TINKMacKeyTemplate.mm"],
     hdrs = ["TINKMacKeyTemplate.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":key_template",
         ":tink_cc_pb",
@@ -587,6 +614,7 @@ objc_library(
     hdrs = [
         "TINKPublicKeySign.h",
     ],
+    visibility = ["//visibility:public"],
 )
 
 objc_library(
@@ -594,12 +622,14 @@ objc_library(
     hdrs = [
         "TINKPublicKeyVerify.h",
     ],
+    visibility = ["//visibility:public"],
 )
 
 objc_library(
     name = "signature_config",
     srcs = ["signature/TINKSignatureConfig.mm"],
     hdrs = ["TINKSignatureConfig.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":registry_config",
         "//cc/signature:signature_config",
@@ -612,6 +642,7 @@ objc_library(
     name = "signature_key_template",
     srcs = ["signature/TINKSignatureKeyTemplate.mm"],
     hdrs = ["TINKSignatureKeyTemplate.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":key_template",
         ":tink_cc_pb",
@@ -651,6 +682,7 @@ objc_library(
     name = "public_key_sign_factory",
     srcs = ["signature/TINKPublicKeySignFactory.mm"],
     hdrs = ["TINKPublicKeySignFactory.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
         ":public_key_sign",
@@ -666,6 +698,7 @@ objc_library(
     name = "public_key_verify_factory",
     srcs = ["signature/TINKPublicKeyVerifyFactory.mm"],
     hdrs = ["TINKPublicKeyVerifyFactory.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
         ":public_key_verify",

@@ -40,6 +40,7 @@ cc_library(
         "//cc/config:config_util",
         "//cc/util:status",
         "//proto:config_cc_proto",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
     ],
 )
@@ -148,6 +149,7 @@ cc_library(
         "//cc:random_access_stream",
         "//cc/util:buffer",
         "//cc/util:status",
+        "//cc/util:statusor",
     ],
 )
 

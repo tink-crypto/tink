@@ -23,6 +23,7 @@
 #include "openssl/evp.h"
 #include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -73,36 +74,32 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_CIPHER_CTX");
   }
-  const std::string iv = Random::GetRandomBytes(iv_size_);
-  // OpenSSL expects that the IV must be a full block.
-  uint8_t iv_block[BLOCK_SIZE];
-  memset(iv_block, 0, sizeof(iv_block));
-  memcpy(iv_block, iv.data(), iv.size());
+  std::string ciphertext = Random::GetRandomBytes(iv_size_);
+  // OpenSSL expects that the IV must be a full block. We pad with zeros.
+  std::string iv_block = ciphertext;
+  // Note that BLOCK_SIZE >= iv_size_ is checked in the factory method.
+  // We explicitly add the '\0' argument to stress that we need to initialize
+  // the new memory.
+  iv_block.resize(BLOCK_SIZE, '\0');
+
   int ret = EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr /* engine */,
                                reinterpret_cast<const uint8_t*>(key_.data()),
-                               iv_block);
+                               reinterpret_cast<const uint8_t*>(&iv_block[0]));
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "could not initialize ctx");
   }
-  size_t ciphertext_size = iv.size() + plaintext.size();
-  // Allocates 1 byte more than necessary because we may potentially access
-  // &ct[ciphertext_size] causing vector range check error.
-  std::vector<uint8_t> ct(ciphertext_size + 1);
-  memcpy(&ct[0], reinterpret_cast<const uint8_t*>(iv.data()), iv.size());
-  size_t written = iv.size();
+  ResizeStringUninitialized(&ciphertext, iv_size_ + plaintext.size());
   int len;
-  ret = EVP_EncryptUpdate(ctx.get(), &ct[written], &len,
-                          reinterpret_cast<const uint8_t*>(plaintext.data()),
-                          plaintext.size());
+  ret = EVP_EncryptUpdate(
+      ctx.get(), reinterpret_cast<uint8_t*>(&ciphertext[iv_size_]), &len,
+      reinterpret_cast<const uint8_t*>(plaintext.data()), plaintext.size());
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "encryption failed");
   }
-  written += len;
-
-  if (written != ciphertext_size) {
+  if (len != plaintext.size()) {
     return util::Status(util::error::INTERNAL, "incorrect ciphertext size");
   }
-  return std::string(reinterpret_cast<const char*>(&ct[0]), written);
+  return ciphertext;
 }
 
 util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
@@ -118,37 +115,33 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
   }
 
   // Initialise key and IV
-  uint8_t iv_block[BLOCK_SIZE];
-  memset(iv_block, 0, sizeof(iv_block));
-  memcpy(iv_block, &ciphertext.data()[0], iv_size_);
+  std::string iv_block = std::string(ciphertext.substr(0, iv_size_));
+  iv_block.resize(BLOCK_SIZE, '\0');
   int ret = EVP_DecryptInit_ex(ctx.get(), cipher_, nullptr /* engine */,
                                reinterpret_cast<const uint8_t*>(key_.data()),
-                               iv_block);
+                               reinterpret_cast<const uint8_t*>(&iv_block[0]));
   if (ret != 1) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize key or iv");
   }
 
   size_t plaintext_size = ciphertext.size() - iv_size_;
-  // Allocates 1 byte more than necessary because we may potentially access
-  // &pt[plaintext_size] causing vector range check error.
-  std::vector<uint8_t> pt(plaintext_size + 1);
+  std::string plaintext;
+  ResizeStringUninitialized(&plaintext, plaintext_size);
   size_t read = iv_size_;
-  size_t written = 0;
   int len;
   ret = EVP_DecryptUpdate(
-      ctx.get(), &pt[written], &len,
+      ctx.get(), reinterpret_cast<uint8_t*>(&plaintext[0]), &len,
       reinterpret_cast<const uint8_t*>(&ciphertext.data()[read]),
       plaintext_size);
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "decryption failed");
   }
-  written += len;
 
-  if (written != plaintext_size) {
+  if (len != plaintext_size) {
     return util::Status(util::error::INTERNAL, "incorrect plaintext size");
   }
-  return std::string(reinterpret_cast<const char*>(&pt[0]), written);
+  return plaintext;
 }
 
 }  // namespace subtle

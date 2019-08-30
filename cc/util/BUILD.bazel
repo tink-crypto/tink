@@ -130,6 +130,7 @@ cc_library(
         ":buffer",
         ":errors",
         ":status",
+        ":statusor",
         "//cc:random_access_stream",
         "@com_google_absl//absl/memory",
     ],
@@ -202,8 +203,10 @@ cc_library(
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:ed25519_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
     ],
 )
 

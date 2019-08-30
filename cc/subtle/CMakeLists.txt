@@ -272,6 +272,7 @@ tink_cc_library(
     aes_gcm_boringssl.h
   DEPS
     tink::subtle::random
+    tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::core::aead
     tink::util::errors
@@ -405,6 +406,7 @@ tink_cc_library(
   DEPS
     tink::subtle::ind_cpa_cipher
     tink::subtle::random
+    tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::util::errors
     tink::util::status
@@ -462,7 +464,7 @@ tink_cc_library(
     aes_gcm_siv_boringssl.h
   DEPS
     tink::subtle::random
-    tink::subtle::subtle_util_boringssl
+    tink::subtle::subtle_util
     tink::core::aead
     tink::util::errors
     tink::util::status
@@ -555,6 +557,7 @@ tink_cc_library(
     nonce_based_streaming_aead.cc
     nonce_based_streaming_aead.h
   DEPS
+    tink::subtle::decrypting_random_access_stream
     tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::subtle::streaming_aead_decrypting_stream
@@ -573,6 +576,7 @@ tink_cc_library(
     test_util.cc
     test_util.h
   DEPS
+    tink::subtle::nonce_based_streaming_aead
     tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::core::input_stream
@@ -584,16 +588,31 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME aead_test_util
+  SRCS
+    aead_test_util.cc
+    aead_test_util.h
+  DEPS
+    absl::strings
+    tink::core::aead
+    tink::util::status
+)
+
+tink_cc_library(
   NAME streaming_aead_test_util
   SRCS
     streaming_aead_test_util.cc
     streaming_aead_test_util.h
   DEPS
     absl::strings
+    tink::core::random_access_stream
     tink::core::streaming_aead
     tink::util::ostream_output_stream
     tink::util::istream_input_stream
+    tink::util::buffer
+    tink::util::file_random_access_stream
     tink::util::status
+    tink::util::test_util
     tink::subtle::test_util
 )
 
@@ -607,6 +626,23 @@ tink_cc_library(
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::util::status
+)
+
+tink_cc_library(
+  NAME decrypting_random_access_stream
+  SRCS
+    decrypting_random_access_stream.cc
+    decrypting_random_access_stream.h
+  DEPS
+    absl::core_headers
+    absl::memory
+    absl::synchronization
+    tink::subtle::stream_segment_decrypter
+    tink::core::random_access_stream
+    tink::util::buffer
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
 )
 
 # tests
@@ -734,12 +770,14 @@ tink_cc_test(
     tink::subtle::aes_gcm_hkdf_streaming
     tink::subtle::common_enums
     tink::subtle::random
+    tink::subtle::streaming_aead_test_util
     tink::subtle::test_util
     tink::core::output_stream
     tink::util::ostream_output_stream
     tink::util::istream_input_stream
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     absl::strings
 )
@@ -977,7 +1015,9 @@ tink_cc_test(
 tink_cc_test(
   NAME subtle_util_test
   SRCS subtle_util_test
-  DEPS tink::subtle::subtle_util
+  DEPS
+    tink::subtle::subtle_util
+    gmock
 )
 
 tink_cc_test(
@@ -1043,20 +1083,22 @@ tink_cc_test(
 )
 
 tink_cc_test(
+  NAME aead_test_util_test
+  SRCS aead_test_util_test.cc
+  DEPS
+    tink::subtle::aead_test_util
+    tink::util::test_matchers
+    tink::util::test_util
+    absl::strings
+    gmock
+)
+
+
+tink_cc_test(
   NAME streaming_aead_test_util_test
   SRCS streaming_aead_test_util_test.cc
   DEPS
     tink::subtle::streaming_aead_test_util
-    tink::util::test_matchers
-    tink::util::test_util
-    gmock
-)
-
-tink_cc_test(
-  NAME hybrid_test_util_test
-  SRCS hybrid_test_util_test.cc
-  DEPS
-    tink::subtle::hybrid_test_util
     tink::subtle::test_util
     tink::core::output_stream
     tink::util::ostream_output_stream
@@ -1068,3 +1110,32 @@ tink_cc_test(
     gmock
 )
 
+tink_cc_test(
+  NAME hybrid_test_util_test
+  SRCS hybrid_test_util_test.cc
+  DEPS
+    tink::subtle::hybrid_test_util
+    tink::util::test_matchers
+    tink::util::test_util
+    absl::strings
+    gmock
+)
+
+tink_cc_test(
+  NAME decrypting_random_access_stream_test
+  SRCS decrypting_random_access_stream_test.cc
+  DEPS
+    absl::memory
+    absl::strings
+    tink::core::output_stream
+    tink::core::random_access_stream
+    tink::core::streaming_aead
+    tink::subtle::decrypting_random_access_stream
+    tink::subtle::random
+    tink::subtle::test_util
+    tink::util::file_random_access_stream
+    tink::util::ostream_output_stream
+    tink::util::status
+    tink::util::test_matchers
+    tink::util::test_util
+)

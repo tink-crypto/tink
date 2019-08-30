@@ -23,6 +23,8 @@ option java_multiple_files = true;
 option objc_class_prefix = "TINKPB";
 option go_package = "github.com/google/tink/proto/chacha20_poly1305_go_proto";
 
+message ChaCha20Poly1305KeyFormat {}
+
 // key_type: type.googleapis.com/google.crypto.tink.ChaCha20Poly1305.
 // This key type actually implements ChaCha20Poly1305 as described
 // at https://tools.ietf.org/html/rfc7539#section-2.8.

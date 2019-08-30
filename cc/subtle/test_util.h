@@ -25,6 +25,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
+#include "tink/subtle/nonce_based_streaming_aead.h"
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/status.h"
@@ -38,11 +39,13 @@ namespace test {
 // Various utilities for testing.
 ///////////////////////////////////////////////////////////////////////////////
 
-// Writes 'contents' the specified 'output_stream', and closes the stream.
+// Writes 'contents' the specified 'output_stream', and if 'close_stream'
+// is true, then closes the stream.
 // Returns the status of output_stream->Close()-operation, or a non-OK status
 // of a prior output_stream->Next()-operation, if any.
 util::Status WriteToStream(OutputStream* output_stream,
-                           absl::string_view contents);
+                           absl::string_view contents,
+                           bool close_stream = true);
 
 // Reads all bytes from the specified 'input_stream', and puts
 // them into 'output', where both 'input_stream' and 'output must be non-null.
@@ -235,6 +238,32 @@ class DummyStreamSegmentDecrypter : public StreamSegmentDecrypter {
   int ct_offset_;
   int64_t generated_output_size_;
 };   // class DummyStreamSegmentDecrypter
+
+class DummyStreamingAead : public NonceBasedStreamingAead {
+ public:
+  DummyStreamingAead(int pt_segment_size, int header_size, int ct_offset)
+      : pt_segment_size_(pt_segment_size),
+        header_size_(header_size),
+        ct_offset_(ct_offset) {}
+
+ protected:
+  util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> NewSegmentEncrypter(
+      absl::string_view associated_data) const override {
+    return {absl::make_unique<DummyStreamSegmentEncrypter>(
+        pt_segment_size_, header_size_, ct_offset_)};
+  }
+
+  util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>> NewSegmentDecrypter(
+      absl::string_view associated_data) const override {
+    return {absl::make_unique<DummyStreamSegmentDecrypter>(
+        pt_segment_size_, header_size_, ct_offset_)};
+  }
+
+ private:
+  int pt_segment_size_;
+  int header_size_;
+  int ct_offset_;
+};
 
 }  // namespace test
 }  // namespace subtle

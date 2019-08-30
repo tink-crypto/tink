@@ -16,19 +16,22 @@
 
 package com.google.crypto.tink.mac;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.subtle.MacJce;
+import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -37,55 +40,230 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class HmacKeyManagerTest {
   @Test
-  public void testNewKeyMultipleTimes() throws Exception {
-    HmacKeyManager keyManager = new HmacKeyManager();
-    HmacKeyFormat hmacKeyFormat = HmacKeyFormat.newBuilder()
-        .setParams(HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(16).build())
-        .setKeySize(32)
-        .build();
-    ByteString serialized = ByteString.copyFrom(hmacKeyFormat.toByteArray());
-    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(HmacKeyManager.TYPE_URL)
-        .setValue(serialized)
-        .build();
-    // Calls newKey multiple times and make sure that we get different HmacKey each time.
-    Set<String> keys = new TreeSet<String>();
-    int numTests = 27;
-    for (int i = 0; i < numTests / 3; i++) {
-      HmacKey key = (HmacKey) keyManager.newKey(hmacKeyFormat);
-      assertEquals(32, key.getKeyValue().toByteArray().length);
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-
-      key = (HmacKey) keyManager.newKey(serialized);
-      assertEquals(32, key.getKeyValue().toByteArray().length);
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-
-      key = HmacKey.parseFrom(keyManager.newKeyData(keyTemplate.getValue()).getValue());
-      assertEquals(32, key.getKeyValue().toByteArray().length);
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
+  public void validateKeyFormat_empty() throws Exception {
+    try {
+      new HmacKeyManager().keyFactory().validateKeyFormat(HmacKeyFormat.getDefaultInstance());
+      fail("At least the hash type needs to be set");
+    } catch (GeneralSecurityException e) {
+      // expected.
     }
-    assertEquals(numTests, keys.size());
+  }
+
+  private static HmacKeyFormat makeHmacKeyFormat(int keySize, int tagSize, HashType hashType) {
+    HmacParams params = HmacParams.newBuilder()
+        .setHash(hashType)
+        .setTagSize(tagSize)
+        .build();
+    return HmacKeyFormat.newBuilder()
+        .setParams(params)
+        .setKeySize(keySize)
+        .build();
   }
 
   @Test
-  public void testNewKeyCorruptedFormat() throws Exception {
-    HmacKeyManager keyManager = new HmacKeyManager();
-    ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(HmacKeyManager.TYPE_URL)
-        .setValue(serialized)
-        .build();
+  public void validateKeyFormat_tagSizesSha1() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 11, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 12, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 13, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 14, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 15, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 16, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 17, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 18, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 19, HashType.SHA1));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 20, HashType.SHA1));
     try {
-      keyManager.newKey(serialized);
-      fail("Corrupted format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
+      manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 21, HashType.SHA1));
+      fail("SHA1 HMAC should not support tag size 21");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_tagSizesSha256() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA256));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 11, HashType.SHA256));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 12, HashType.SHA256));
+
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 30, HashType.SHA256));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 31, HashType.SHA256));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 32, HashType.SHA256));
+    try {
+      manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 33, HashType.SHA256));
+      fail("SHA256 HMAC should not support tag size 33");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_tagSizesSha512() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA512));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 11, HashType.SHA512));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 12, HashType.SHA512));
+
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 62, HashType.SHA512));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 63, HashType.SHA512));
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 64, HashType.SHA512));
+    try {
+      manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 65, HashType.SHA512));
+      fail("SHA256 HMAC should not support tag size 65");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKeyFormat_keySizes() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA256));
+    try {
+      manager.keyFactory().validateKeyFormat(makeHmacKeyFormat(15, 10, HashType.SHA256));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void createKey_valid() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    manager.validateKey(manager.keyFactory().createKey(makeHmacKeyFormat(16, 10, HashType.SHA1)));
+    manager.validateKey(manager.keyFactory().createKey(makeHmacKeyFormat(16, 20, HashType.SHA1)));
+    manager.validateKey(manager.keyFactory().createKey(makeHmacKeyFormat(16, 10, HashType.SHA256)));
+    manager.validateKey(manager.keyFactory().createKey(makeHmacKeyFormat(16, 32, HashType.SHA256)));
+    manager.validateKey(manager.keyFactory().createKey(makeHmacKeyFormat(16, 10, HashType.SHA512)));
+    manager.validateKey(manager.keyFactory().createKey(makeHmacKeyFormat(16, 64, HashType.SHA512)));
+  }
+
+  @Test
+  public void createKey_checkValues() throws Exception {
+    HmacKeyFormat keyFormat = makeHmacKeyFormat(16, 10, HashType.SHA256);
+    HmacKey key = new HmacKeyManager().keyFactory().createKey(keyFormat);
+    assertThat(key.getKeyValue()).hasSize(keyFormat.getKeySize());
+    assertThat(key.getParams().getTagSize()).isEqualTo(keyFormat.getParams().getTagSize());
+  }
+
+  @Test
+  public void createKey_multipleTimes() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    HmacKeyFormat keyFormat = makeHmacKeyFormat(16, 10, HashType.SHA256);
+    int numKeys = 100;
+    Set<String> keys = new TreeSet<String>();
+    for (int i = 0; i < numKeys; ++i) {
+      keys.add(
+          TestUtil.hexEncode(
+              manager.keyFactory().createKey(keyFormat).getKeyValue().toByteArray()));
+    }
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void validateKey_wrongVersion_throws() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    HmacKey validKey = manager.keyFactory().createKey(makeHmacKeyFormat(16, 10, HashType.SHA1));
+    try {
+      manager.validateKey(HmacKey.newBuilder(validKey).setVersion(1).build());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKey_notValid_throws() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    HmacKey validKey = manager.keyFactory().createKey(makeHmacKeyFormat(16, 10, HashType.SHA1));
+    try {
+      manager.validateKey(
+          HmacKey.newBuilder(validKey)
+              .setKeyValue(ByteString.copyFrom(Random.randBytes(15)))
+              .build());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
     }
     try {
-      keyManager.newKeyData(keyTemplate.getValue());
-      fail("Corrupted format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
+      manager
+          .validateKey(
+              HmacKey.newBuilder(validKey)
+                  .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(0).build())
+                  .build());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
     }
+    try {
+      manager
+          .validateKey(
+              HmacKey.newBuilder(validKey)
+                  .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(9).build())
+                  .build());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+    try {
+      manager
+          .validateKey(
+              HmacKey.newBuilder(validKey)
+                  .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(21).build())
+                  .build());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+    try {
+      manager
+          .validateKey(
+              HmacKey.newBuilder(validKey)
+                  .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(32).build())
+                  .build());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+
+  @Test
+  public void getPrimitive_worksForSha1() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    HmacKey validKey = manager.keyFactory().createKey(makeHmacKeyFormat(16, 19, HashType.SHA1));
+    Mac managerMac = manager.getPrimitive(validKey, Mac.class);
+    Mac directMac =
+        new MacJce(
+            "HMACSHA1", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"), 19);
+    byte[] message = Random.randBytes(50);
+    managerMac.verifyMac(directMac.computeMac(message), message);
+  }
+
+  @Test
+  public void getPrimitive_worksForSha256() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    HmacKey validKey = manager.keyFactory().createKey(makeHmacKeyFormat(16, 29, HashType.SHA256));
+    Mac managerMac = manager.getPrimitive(validKey, Mac.class);
+    Mac directMac =
+        new MacJce(
+            "HMACSHA256", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"), 29);
+    byte[] message = Random.randBytes(50);
+    managerMac.verifyMac(directMac.computeMac(message), message);
+  }
+
+  @Test
+  public void getPrimitive_worksForSha512() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+    HmacKey validKey = manager.keyFactory().createKey(makeHmacKeyFormat(16, 33, HashType.SHA512));
+    Mac managerMac = manager.getPrimitive(validKey, Mac.class);
+    Mac directMac =
+        new MacJce(
+            "HMACSHA512", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"), 33);
+    byte[] message = Random.randBytes(50);
+    managerMac.verifyMac(directMac.computeMac(message), message);
   }
 }

@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.mac;
 
+import com.google.crypto.tink.proto.AesCmacKeyFormat;
+import com.google.crypto.tink.proto.AesCmacParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
@@ -46,6 +48,7 @@ public final class MacKeyTemplates {
    *   <li>Key size: 32 bytes
    *   <li>Tag size: 16 bytes
    *   <li>Hash function: SHA256
+   *   <li>OutputPrefixType: TINK
    * </ul>
    */
   public static final KeyTemplate HMAC_SHA256_128BITTAG =
@@ -59,6 +62,7 @@ public final class MacKeyTemplates {
    *   <li>Key size: 32 bytes
    *   <li>Tag size: 32 bytes
    *   <li>Hash function: SHA256
+   *   <li>OutputPrefixType: TINK
    * </ul>
    */
   public static final KeyTemplate HMAC_SHA256_256BITTAG =
@@ -72,6 +76,7 @@ public final class MacKeyTemplates {
    *   <li>Key size: 64 bytes
    *   <li>Tag size: 32 bytes
    *   <li>Hash function: SHA512
+   *   <li>OutputPrefixType: TINK
    * </ul>
    */
   public static final KeyTemplate HMAC_SHA512_256BITTAG =
@@ -85,10 +90,32 @@ public final class MacKeyTemplates {
    *   <li>Key size: 64 bytes
    *   <li>Tag size: 64 bytes
    *   <li>Hash function: SHA512
+   *   <li>OutputPrefixType: TINK
    * </ul>
    */
   public static final KeyTemplate HMAC_SHA512_512BITTAG =
       createHmacKeyTemplate(64, 64, HashType.SHA512);
+
+  /**
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.CmacKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Key size: 32 bytes
+   *   <li>Tag size: 16 bytes
+   *   <li>OutputPrefixType: TINK
+   * </ul>
+   */
+  public static final KeyTemplate AES_CMAC =
+      KeyTemplate.newBuilder()
+          .setValue(
+              AesCmacKeyFormat.newBuilder()
+                  .setKeySize(32)
+                  .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
+                  .build().toByteString())
+          .setTypeUrl(new AesCmacKeyManager().getKeyType())
+          .setOutputPrefixType(OutputPrefixType.TINK)
+          .build();
 
   /**
    * @return a {@link KeyTemplate} containing a {@link HmacKeyFormat} with some specified
@@ -105,7 +132,7 @@ public final class MacKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(HmacKeyManager.TYPE_URL)
+        .setTypeUrl(new HmacKeyManager().getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

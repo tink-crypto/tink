@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc.
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,213 +16,119 @@
 
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead.h"
+#include "tink/subtle/aead_test_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "proto/aes_eax.pb.h"
-#include "proto/common.pb.h"
-#include "proto/tink.pb.h"
-#include "proto/xchacha20_poly1305.pb.h"
+#include "tink/util/test_matchers.h"
 
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::AesEaxKey;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::XChaCha20Poly1305Key;
-
 namespace {
 
-class XChaCha20Poly1305KeyManagerTest : public ::testing::Test {
- protected:
-  std::string key_type_prefix = "type.googleapis.com/";
-  std::string xchaha20_poly1305_key_type =
-      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
-};
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::XChaCha20Poly1305Key;
+using ::google::crypto::tink::XChaCha20Poly1305KeyFormat;
+using ::testing::Eq;
+using ::testing::Not;
+using ::testing::SizeIs;
 
-TEST_F(XChaCha20Poly1305KeyManagerTest, testBasic) {
-  XChaCha20Poly1305KeyManager key_manager;
-
-  EXPECT_EQ(0, key_manager.get_version());
-  EXPECT_EQ("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+TEST(XChaCha20Poly1305KeyManagerTest, Basics) {
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().get_version(), Eq(0));
+  EXPECT_THAT(
+      XChaCha20Poly1305KeyManager().get_key_type(),
+      Eq("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key"));
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().key_material_type(),
+              Eq(google::crypto::tink::KeyData::SYMMETRIC));
 }
 
-TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyDataErrors) {
-  XChaCha20Poly1305KeyManager key_manager;
-
-  {  // Bad key type.
-    KeyData key_data;
-    std::string bad_key_type =
-        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-    key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
-                        result.status().error_message());
-  }
-
-  {  // Bad key value.
-    KeyData key_data;
-    key_data.set_type_url(xchaha20_poly1305_key_type);
-    key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad version.
-    KeyData key_data;
-    XChaCha20Poly1305Key key;
-    key.set_version(1);
-    key_data.set_type_url(xchaha20_poly1305_key_type);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
-                        result.status().error_message());
-  }
-
-  {  // Bad key_value size (supported size: 32).
-    for (int len = 0; len < 42; len++) {
-      XChaCha20Poly1305Key key;
-      key.set_version(0);
-      key.set_key_value(std::string(len, 'a'));
-      KeyData key_data;
-      key_data.set_type_url(xchaha20_poly1305_key_type);
-      key_data.set_value(key.SerializeAsString());
-      auto result = key_manager.GetPrimitive(key_data);
-      if (len == 32) {
-        EXPECT_TRUE(result.ok()) << result.status();
-      } else {
-        EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                            std::to_string(len) + " bytes",
-                            result.status().error_message());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported size",
-                            result.status().error_message());
-      }
-    }
-  }
+TEST(XChaCha20Poly1305KeyManagerTest, ValidateEmptyKey) {
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(XChaCha20Poly1305Key()),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
-TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyMessageErrors) {
-  XChaCha20Poly1305KeyManager key_manager;
-
-  {  // Bad protobuffer.
-    AesEaxKey key;
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
-
-  {  // Bad key_value size (supported size: 32).
-    for (int len = 0; len < 42; len++) {
-      XChaCha20Poly1305Key key;
-      key.set_version(0);
-      key.set_key_value(std::string(len, 'a'));
-      auto result = key_manager.GetPrimitive(key);
-      if (len == 32) {
-        EXPECT_TRUE(result.ok()) << result.status();
-      } else {
-        EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                            std::to_string(len) + " bytes",
-                            result.status().error_message());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported size",
-                            result.status().error_message());
-      }
-    }
-  }
-}
-
-TEST_F(XChaCha20Poly1305KeyManagerTest, testPrimitives) {
-  std::string plaintext = "some plaintext";
-  std::string aad = "some aad";
-  XChaCha20Poly1305KeyManager key_manager;
+TEST(XChaCha20Poly1305KeyManagerTest, ValidateValid32ByteKey) {
   XChaCha20Poly1305Key key;
-
   key.set_version(0);
-  key.set_key_value("32 bytes of key 0123456789abcdef");
-
-  {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto xchaha20_poly1305 = std::move(result.ValueOrDie());
-    auto encrypt_result = xchaha20_poly1305->Encrypt(plaintext, aad);
-    EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-    auto decrypt_result =
-        xchaha20_poly1305->Decrypt(encrypt_result.ValueOrDie(), aad);
-    EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
-  }
-
-  {  // Using KeyData proto.
-    KeyData key_data;
-    key_data.set_type_url(xchaha20_poly1305_key_type);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto xchaha20_poly1305 = std::move(result.ValueOrDie());
-    auto encrypt_result = xchaha20_poly1305->Encrypt(plaintext, aad);
-    EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-    auto decrypt_result =
-        xchaha20_poly1305->Decrypt(encrypt_result.ValueOrDie(), aad);
-    EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
-  }
+  key.set_key_value("01234567890123456789012345678901");
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key), IsOk());
 }
 
-TEST_F(XChaCha20Poly1305KeyManagerTest, testNewKeyBasic) {
-  XChaCha20Poly1305KeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-  { // Via NewKey(format_proto).
-    auto result = key_factory.NewKey(nullptr /* ignored */);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix + key->GetTypeName(), xchaha20_poly1305_key_type);
-    std::unique_ptr<XChaCha20Poly1305Key> xchaha20_poly1305_key(
-        static_cast<XChaCha20Poly1305Key*>(key.release()));
-    EXPECT_EQ(0, xchaha20_poly1305_key->version());
-    EXPECT_EQ(32, xchaha20_poly1305_key->key_value().size());
-  }
+TEST(XChaCha20Poly1305KeyManagerTest, ValidateInvalid16ByteKey) {
+  XChaCha20Poly1305Key key;
+  key.set_version(0);
+  key.set_key_value("0123456789012345");
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key), Not(IsOk()));
+}
 
-  { // Via NewKey(serialized_format_proto).
-    auto result = key_factory.NewKey("" /* ignored */);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix + key->GetTypeName(), xchaha20_poly1305_key_type);
-    std::unique_ptr<XChaCha20Poly1305Key> xchaha20_poly1305_key(
-        static_cast<XChaCha20Poly1305Key*>(key.release()));
-    EXPECT_EQ(0, xchaha20_poly1305_key->version());
-    EXPECT_EQ(32, xchaha20_poly1305_key->key_value().size());
-  }
+TEST(XChaCha20Poly1305KeyManagerTest, ValidateInvalid31ByteKey) {
+  XChaCha20Poly1305Key key;
+  key.set_version(0);
+  key.set_key_value("0123456789012345678901234567890");
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key), Not(IsOk()));
+}
 
-  { // Via NewKeyData(serialized_format_proto).
-    auto result = key_factory.NewKeyData("" /* ignored */);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key_data = std::move(result.ValueOrDie());
-    EXPECT_EQ(xchaha20_poly1305_key_type, key_data->type_url());
-    EXPECT_EQ(KeyData::SYMMETRIC, key_data->key_material_type());
-    XChaCha20Poly1305Key xchaha20_poly1305_key;
-    EXPECT_TRUE(xchaha20_poly1305_key.ParseFromString(key_data->value()));
-    EXPECT_EQ(0, xchaha20_poly1305_key.version());
-    EXPECT_EQ(32, xchaha20_poly1305_key.key_value().size());
-  }
+TEST(XChaCha20Poly1305KeyManagerTest, ValidateInvalid33ByteKey) {
+  XChaCha20Poly1305Key key;
+  key.set_version(0);
+  key.set_key_value("012345678901234567890123456789012");
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, ValidateInvalidVersion) {
+  XChaCha20Poly1305Key key;
+  key.set_version(1);
+  key.set_key_value("01234567890123456789012345678901");
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, ValidateKeyFormat) {
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKeyFormat(
+                  XChaCha20Poly1305KeyFormat()),
+              IsOk());
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, CreateKey) {
+  StatusOr<XChaCha20Poly1305Key> key_or =
+      XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
+
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(32));
+  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, CreateKeyValid) {
+  StatusOr<XChaCha20Poly1305Key> key_or =
+      XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
+
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(key_or.ValueOrDie()),
+              IsOk());
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, CreateAead) {
+  StatusOr<XChaCha20Poly1305Key> key_or =
+      XChaCha20Poly1305KeyManager().CreateKey(XChaCha20Poly1305KeyFormat());
+  ASSERT_THAT(key_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<Aead>> aead_or =
+      XChaCha20Poly1305KeyManager().GetPrimitive<Aead>(key_or.ValueOrDie());
+
+  ASSERT_THAT(aead_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<Aead>> direct_aead_or =
+      subtle::XChacha20Poly1305BoringSsl::New(key_or.ValueOrDie().key_value());
+  ASSERT_THAT(direct_aead_or.status(), IsOk());
+
+  ASSERT_THAT(
+      EncryptThenDecrypt(aead_or.ValueOrDie().get(),
+                         direct_aead_or.ValueOrDie().get(), "message", "aad"),
+      IsOk());
 }
 
 }  // namespace

@@ -19,6 +19,7 @@
 
 #include "tink/util/buffer.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -53,12 +54,12 @@ class RandomAccessStream {
       crypto::tink::util::Buffer* dest_buffer) = 0;
 
   // Returns the size of this stream in bytes, if available.
-  // It is the "logical" size of a stream (i.e. of a sequence of bytes),
-  // stating how many bytes are there in the sequence.
+  // If the size is not available, returns a non-Ok status.
+  // The returned value is the "logical" size of a stream, i.e. of
+  // a sequence of bytes), stating how many bytes are there in the sequence.
   // For a successful PRead-operation the starting position should be
-  // in the range 0..size()-1 (otherwise a non-Ok status is returned).
-  // If the size is not available, returns -1;
-  virtual int64_t size() const = 0;
+  // in the range 0..size()-1 (otherwise PRead may return a non-Ok status).
+  virtual crypto::tink::util::StatusOr<int64_t> size() = 0;
 };
 
 }  // namespace tink

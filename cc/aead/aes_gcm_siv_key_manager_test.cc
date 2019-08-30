@@ -1,4 +1,4 @@
-// Copyright 2019 Google Inc.
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,253 +16,159 @@
 
 #include "tink/aead/aes_gcm_siv_key_manager.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead.h"
+#include "tink/subtle/aead_test_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "proto/aes_eax.pb.h"
+#include "tink/util/test_matchers.h"
 #include "proto/aes_gcm_siv.pb.h"
-#include "proto/common.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::AesEaxKey;
-using google::crypto::tink::AesEaxKeyFormat;
-using google::crypto::tink::AesGcmSivKey;
-using google::crypto::tink::AesGcmSivKeyFormat;
-using google::crypto::tink::KeyData;
-
 namespace {
 
-class AesGcmSivKeyManagerTest : public ::testing::Test {
- protected:
-  std::string key_type_prefix_ = "type.googleapis.com/";
-  std::string aes_gcm_siv_key_type_ =
-      "type.googleapis.com/google.crypto.tink.AesGcmSivKey";
-};
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::AesGcmSivKey;
+using ::google::crypto::tink::AesGcmSivKeyFormat;
+using ::testing::Eq;
 
-TEST_F(AesGcmSivKeyManagerTest, testBasic) {
-  AesGcmSivKeyManager key_manager;
-
-  EXPECT_EQ(0, key_manager.get_version());
-  EXPECT_EQ("type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+TEST(AesGcmSivKeyManagerTest, Basics) {
+  EXPECT_THAT(AesGcmSivKeyManager().get_version(), Eq(0));
+  EXPECT_THAT(AesGcmSivKeyManager().get_key_type(),
+              Eq("type.googleapis.com/google.crypto.tink.AesGcmSivKey"));
+  EXPECT_THAT(AesGcmSivKeyManager().key_material_type(),
+              Eq(google::crypto::tink::KeyData::SYMMETRIC));
 }
 
-TEST_F(AesGcmSivKeyManagerTest, testKeyDataErrors) {
-  AesGcmSivKeyManager key_manager;
-
-  {  // Bad key type.
-    KeyData key_data;
-    std::string bad_key_type = "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-    key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
-                        result.status().error_message());
-  }
-
-  {  // Bad key value.
-    KeyData key_data;
-    key_data.set_type_url(aes_gcm_siv_key_type_);
-    key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad version.
-    KeyData key_data;
-    AesGcmSivKey key;
-    key.set_version(1);
-    key_data.set_type_url(aes_gcm_siv_key_type_);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
-                        result.status().error_message());
-  }
-
-  {  // Bad key_value size (supported sizes: 16, 32).
-    for (int len = 0; len < 42; len++) {
-      AesGcmSivKey key;
-      key.set_version(0);
-      key.set_key_value(std::string(len, 'a'));
-      KeyData key_data;
-      key_data.set_type_url(aes_gcm_siv_key_type_);
-      key_data.set_value(key.SerializeAsString());
-      auto result = key_manager.GetPrimitive(key_data);
-      if (len == 16 || len == 32) {
-        EXPECT_TRUE(result.ok()) << result.status();
-      } else {
-        EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                            std::to_string(len) + " bytes",
-                            result.status().error_message());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
-                            result.status().error_message());
-      }
-    }
-  }
+TEST(AesGcmSivKeyManagerTest, ValidateEmptyKey) {
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(AesGcmSivKey()),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
-TEST_F(AesGcmSivKeyManagerTest, testKeyMessageErrors) {
-  AesGcmSivKeyManager key_manager;
-
-  {  // Bad protobuffer.
-    AesEaxKey key;
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
-
-  {  // Bad key_value size (supported sizes: 16, 32).
-    for (int len = 0; len < 42; len++) {
-      AesGcmSivKey key;
-      key.set_version(0);
-      key.set_key_value(std::string(len, 'a'));
-      auto result = key_manager.GetPrimitive(key);
-      if (len == 16 || len == 32) {
-        EXPECT_TRUE(result.ok()) << result.status();
-      } else {
-        EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                            std::to_string(len) + " bytes",
-                            result.status().error_message());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
-                            result.status().error_message());
-      }
-    }
-  }
-}
-
-TEST_F(AesGcmSivKeyManagerTest, testPrimitives) {
-  std::string plaintext = "some plaintext";
-  std::string aad = "some aad";
-  AesGcmSivKeyManager key_manager;
+TEST(AesGcmSivKeyManagerTest, ValidateValid16ByteKey) {
   AesGcmSivKey key;
-
   key.set_version(0);
-  key.set_key_value("16 bytes of key ");
-
-  {  // Using key message only.
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto aes_gcm_siv = std::move(result.ValueOrDie());
-    auto encrypt_result = aes_gcm_siv->Encrypt(plaintext, aad);
-    EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-    auto decrypt_result =
-        aes_gcm_siv->Decrypt(encrypt_result.ValueOrDie(), aad);
-    EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
-  }
-
-  {  // Using KeyData proto.
-    KeyData key_data;
-    key_data.set_type_url(aes_gcm_siv_key_type_);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto aes_gcm_siv = std::move(result.ValueOrDie());
-    auto encrypt_result = aes_gcm_siv->Encrypt(plaintext, aad);
-    EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-    auto decrypt_result =
-        aes_gcm_siv->Decrypt(encrypt_result.ValueOrDie(), aad);
-    EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
-  }
+  key.set_key_value("0123456789abcdef");
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key), IsOk());
 }
 
-TEST_F(AesGcmSivKeyManagerTest, testNewKeyErrors) {
-  AesGcmSivKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-
-  {  // Bad key format.
-    AesEaxKeyFormat key_format;
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKeyFormat",
-                        result.status().error_message());
-  }
-
-  {  // Bad serialized key format.
-    auto result = key_factory.NewKey("some bad serialized proto");
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad AesGcmSivKeyFormat: small key_size.
-    AesGcmSivKeyFormat key_format;
-    key_format.set_key_size(8);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "8 bytes",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported sizes",
-                        result.status().error_message());
-  }
+TEST(AesGcmSivKeyManagerTest, ValidateValid32ByteKey) {
+  AesGcmSivKey key;
+  key.set_version(0);
+  key.set_key_value("01234567890123456789012345678901");
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key), IsOk());
 }
 
-TEST_F(AesGcmSivKeyManagerTest, testNewKeyBasic) {
-  AesGcmSivKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-  AesGcmSivKeyFormat key_format;
-  key_format.set_key_size(16);
+TEST(AesGcmSivKeyManagerTest, InvalidKeySizes17Bytes) {
+  AesGcmSivKey key;
+  key.set_version(0);
+  key.set_key_value("0123456789abcdefg");
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
 
-  {  // Via NewKey(format_proto).
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix_ + key->GetTypeName(), aes_gcm_siv_key_type_);
-    std::unique_ptr<AesGcmSivKey> aes_gcm_siv_key(
-        reinterpret_cast<AesGcmSivKey*>(key.release()));
-    EXPECT_EQ(0, aes_gcm_siv_key->version());
-    EXPECT_EQ(key_format.key_size(), aes_gcm_siv_key->key_value().size());
-  }
+TEST(AesGcmSivKeyManagerTest, InvalidKeySizes24Bytes) {
+  AesGcmSivKey key;
+  key.set_version(0);
+  key.set_key_value("01234567890123");
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
 
-  {  // Via NewKey(serialized_format_proto).
-    auto result = key_factory.NewKey(key_format.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix_ + key->GetTypeName(), aes_gcm_siv_key_type_);
-    std::unique_ptr<AesGcmSivKey> aes_gcm_siv_key(
-        reinterpret_cast<AesGcmSivKey*>(key.release()));
-    EXPECT_EQ(0, aes_gcm_siv_key->version());
-    EXPECT_EQ(key_format.key_size(), aes_gcm_siv_key->key_value().size());
-  }
+TEST(AesGcmSivKeyManagerTest, InvalidKeySizes31Bytes) {
+  AesGcmSivKey key;
+  key.set_version(0);
+  key.set_key_value("0123456789012345678901234567890");
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
 
-  {  // Via NewKeyData(serialized_format_proto).
-    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto key_data = std::move(result.ValueOrDie());
-    EXPECT_EQ(aes_gcm_siv_key_type_, key_data->type_url());
-    EXPECT_EQ(KeyData::SYMMETRIC, key_data->key_material_type());
-    AesGcmSivKey aes_gcm_siv_key;
-    EXPECT_TRUE(aes_gcm_siv_key.ParseFromString(key_data->value()));
-    EXPECT_EQ(0, aes_gcm_siv_key.version());
-    EXPECT_EQ(key_format.key_size(), aes_gcm_siv_key.key_value().size());
-  }
+TEST(AesGcmSivKeyManagerTest, InvalidKeySizes33Bytes) {
+  AesGcmSivKey key;
+  key.set_version(0);
+  key.set_key_value("012345678901234567890123456789012");
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(AesGcmSivKeyManagerTest, ValidateKeyFormat) {
+  AesGcmSivKeyFormat format;
+
+  format.set_key_size(0);
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
+
+  format.set_key_size(1);
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
+
+  format.set_key_size(15);
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
+
+  format.set_key_size(16);
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format), IsOk());
+
+  format.set_key_size(17);
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
+
+  format.set_key_size(31);
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
+
+  format.set_key_size(32);
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format), IsOk());
+
+  format.set_key_size(33);
+  EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(AesGcmSivKeyManagerTest, Create16ByteKey) {
+  AesGcmSivKeyFormat format;
+  format.set_key_size(16);
+
+  StatusOr<AesGcmSivKey> key_or = AesGcmSivKeyManager().CreateKey(format);
+
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value().size(), Eq(format.key_size()));
+}
+
+TEST(AesGcmSivKeyManagerTest, Create32ByteKey) {
+  AesGcmSivKeyFormat format;
+  format.set_key_size(32);
+
+  StatusOr<AesGcmSivKey> key_or = AesGcmSivKeyManager().CreateKey(format);
+
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value().size(), Eq(format.key_size()));
+}
+
+TEST(AesGcmSivKeyManagerTest, CreateAead) {
+  AesGcmSivKeyFormat format;
+  format.set_key_size(32);
+  StatusOr<AesGcmSivKey> key_or = AesGcmSivKeyManager().CreateKey(format);
+  ASSERT_THAT(key_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<Aead>> aead_or =
+      AesGcmSivKeyManager().GetPrimitive<Aead>(key_or.ValueOrDie());
+
+  ASSERT_THAT(aead_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<Aead>> boring_ssl_aead_or =
+      subtle::AesGcmSivBoringSsl::New(key_or.ValueOrDie().key_value());
+  ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
+
+  ASSERT_THAT(EncryptThenDecrypt(aead_or.ValueOrDie().get(),
+                                 boring_ssl_aead_or.ValueOrDie().get(),
+                                 "message", "aad"),
+              IsOk());
 }
 
 }  // namespace

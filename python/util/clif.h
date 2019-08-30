@@ -18,10 +18,10 @@
 #define TINK_PYTHON_UTIL_CLIF_H_
 
 #include <assert.h>
-#include "devtools/clif/python/types.h"
-#include "util/python/pyobject.h"
+#include "clif/python/types.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+// placeholder_pyobject_h, please ignore
 
 // CLIF use `::crypto::tink::util::Status` as Status
 // CLIF use `::crypto::tink::util::StatusOr` as StatusOr

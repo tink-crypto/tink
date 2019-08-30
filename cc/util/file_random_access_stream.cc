@@ -25,12 +25,14 @@
 #include "tink/util/buffer.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace util {
 
 using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 
 namespace {
 
@@ -56,9 +58,9 @@ Status FileRandomAccessStream::PRead(int64_t position, int count,
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "dest_buffer must be non-null");
   }
-  if (count < 0) {
+  if (count <= 0) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "count cannot be negative");
+                     "count must be positive");
   }
   if (count > dest_buffer->allocated_size()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
@@ -70,9 +72,6 @@ Status FileRandomAccessStream::PRead(int64_t position, int count,
   }
   crypto::tink::util::Status status = dest_buffer->set_size(count);
   if (!status.ok()) return status;
-  if (count == 0) {
-    return Status::OK;
-  }
   int read_count = pread(fd_, dest_buffer->get_mem_block(), count, position);
   if (read_count == 0) {
     dest_buffer->set_size(0).IgnoreError();
@@ -91,10 +90,10 @@ FileRandomAccessStream::~FileRandomAccessStream() {
   close_ignoring_eintr(fd_);
 }
 
-int64_t FileRandomAccessStream::size() const {
+StatusOr<int64_t> FileRandomAccessStream::size() {
   struct stat s;
   if (fstat(fd_, &s) == -1) {
-    return -1;
+    return Status(util::error::UNAVAILABLE, "size unavailable");
   } else {
     return s.st_size;
   }

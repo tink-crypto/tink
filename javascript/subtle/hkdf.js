@@ -72,8 +72,7 @@ const compute = async function(size, hash, ikm, info, opt_salt) {
   Validators.requireUint8Array(info);
 
   let salt = opt_salt;
-  if (!goog.isDefAndNotNull(opt_salt) || salt === undefined ||
-      salt.length == 0) {
+  if (opt_salt == null || salt === undefined || salt.length == 0) {
     salt = new Uint8Array(digestSize);
   }
   Validators.requireUint8Array(salt);

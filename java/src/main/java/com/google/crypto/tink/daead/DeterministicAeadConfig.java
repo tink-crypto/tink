@@ -36,10 +36,7 @@ import java.security.GeneralSecurityException;
  * @since 1.1.0
  */
 public final class DeterministicAeadConfig {
-  public static final String AES_SIV_TYPE_URL = AesSivKeyManager.TYPE_URL;
-
-  private static final String CATALOGUE_NAME = "TinkDeterministicAead";
-  private static final String PRIMITIVE_NAME = "DeterministicAead";
+  public static final String AES_SIV_TYPE_URL = new AesSivKeyManager().getKeyType();
 
   /** @deprecated */
   @Deprecated
@@ -83,7 +80,7 @@ public final class DeterministicAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesSivKeyManager());
+    Registry.registerKeyManager(new AesSivKeyManager(), /* newKeyAllowed = */ true);
     Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
   }
 }

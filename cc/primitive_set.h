@@ -154,7 +154,8 @@ class PrimitiveSet {
       CiphertextPrefixToPrimitivesMap;
   Entry<P>* primary_;  // the Entry<P> object is owned by primitives_
   absl::Mutex primitives_mutex_;
-  CiphertextPrefixToPrimitivesMap primitives_ GUARDED_BY(primitives_mutex_);
+  CiphertextPrefixToPrimitivesMap primitives_
+      ABSL_GUARDED_BY(primitives_mutex_);
 };
 
 }  // namespace tink

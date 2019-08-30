@@ -32,11 +32,6 @@ using google::crypto::tink::RegistryConfig;
 namespace crypto {
 namespace tink {
 
-constexpr char HybridConfig::kHybridDecryptCatalogueName[];
-constexpr char HybridConfig::kHybridDecryptPrimitiveName[];
-constexpr char HybridConfig::kHybridEncryptCatalogueName[];
-constexpr char HybridConfig::kHybridEncryptPrimitiveName[];
-
 // static
 const RegistryConfig& HybridConfig::Latest() {
   static const RegistryConfig* config = new RegistryConfig();
@@ -49,10 +44,8 @@ util::Status HybridConfig::Register() {
 
   // Register key managers.
   if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
-      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(), true);
-  if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
       absl::make_unique<EciesAeadHkdfPublicKeyManager>(), true);
   if (!status.ok()) return status;
 

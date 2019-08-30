@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
@@ -35,81 +35,49 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesCtrHmacStreamingKey} keys and produces new instances of
  * {@code AesCtrHmacStreaming}.
  */
-class AesCtrHmacStreamingKeyManager
-    extends KeyManagerBase<StreamingAead, AesCtrHmacStreamingKey, AesCtrHmacStreamingKeyFormat> {
+class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStreamingKey> {
   public AesCtrHmacStreamingKeyManager() {
     super(
-        StreamingAead.class,
         AesCtrHmacStreamingKey.class,
-        AesCtrHmacStreamingKeyFormat.class,
-        TYPE_URL);
+        new PrimitiveFactory<StreamingAead, AesCtrHmacStreamingKey>(StreamingAead.class) {
+          @Override
+          public StreamingAead getPrimitive(AesCtrHmacStreamingKey key)
+              throws GeneralSecurityException {
+            return new AesCtrHmacStreaming(
+                key.getKeyValue().toByteArray(),
+                StreamingAeadUtil.toHmacAlgo(key.getParams().getHkdfHashType()),
+                key.getParams().getDerivedKeySize(),
+                StreamingAeadUtil.toHmacAlgo(key.getParams().getHmacParams().getHash()),
+                key.getParams().getHmacParams().getTagSize(),
+                key.getParams().getCiphertextSegmentSize(),
+                /* firstSegmentOffset= */ 0);
+          }
+        });
   }
-
-  private static final int VERSION = 0;
-
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
 
   /** Minimum tag size in bytes. This provides minimum 80-bit security strength. */
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
-  
+
   private static final int NONCE_PREFIX_IN_BYTES = 7;
 
-  /** @param serializedKey serialized {@code AesCtrHmacStreamingKey} proto */
   @Override
-  public StreamingAead getPrimitiveFromKey(AesCtrHmacStreamingKey keyProto)
-      throws GeneralSecurityException {
-    return new AesCtrHmacStreaming(
-        keyProto.getKeyValue().toByteArray(),
-        StreamingAeadUtil.toHmacAlgo(
-            keyProto.getParams().getHkdfHashType()),
-        keyProto.getParams().getDerivedKeySize(),
-        StreamingAeadUtil.toHmacAlgo(
-            keyProto.getParams().getHmacParams().getHash()),
-        keyProto.getParams().getHmacParams().getTagSize(),
-        keyProto.getParams().getCiphertextSegmentSize(),
-        /* firstSegmentOffset= */ 0);
-  }
-
-  /**
-   * @param serializedKeyFormat serialized {@code AesCtrHmacStreamingKeyFormat} proto
-   * @return new {@code AesCtrHmacStreamingKey} proto
-   */
-  @Override
-  public AesCtrHmacStreamingKey newKeyFromFormat(AesCtrHmacStreamingKeyFormat format)
-      throws GeneralSecurityException {
-    return AesCtrHmacStreamingKey.newBuilder()
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-        .setParams(format.getParams())
-        .setVersion(VERSION)
-        .build();
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.SYMMETRIC;
   }
 
   @Override
-  protected AesCtrHmacStreamingKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return AesCtrHmacStreamingKey.parseFrom(byteString);
-  }
-
-  @Override
-  protected AesCtrHmacStreamingKeyFormat parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return AesCtrHmacStreamingKeyFormat.parseFrom(byteString);
-  }
-
-  @Override
-  protected void validateKey(AesCtrHmacStreamingKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), VERSION);
+  public void validateKey(AesCtrHmacStreamingKey key) throws GeneralSecurityException {
+    Validators.validateVersion(key.getVersion(), getVersion());
     if (key.getKeyValue().size() < 16) {
       throw new GeneralSecurityException("key_value must have at least 16 bytes");
     }
@@ -117,19 +85,48 @@ class AesCtrHmacStreamingKeyManager
       throw new GeneralSecurityException(
           "key_value must have at least as many bits as derived keys");
     }
-    validate(key.getParams());
+    validateParams(key.getParams());
   }
 
   @Override
-  protected void validateKeyFormat(AesCtrHmacStreamingKeyFormat format)
-      throws GeneralSecurityException {
-    if (format.getKeySize() < 16) {
-      throw new GeneralSecurityException("key_size must be at least 16 bytes");
-    }
-    validate(format.getParams());
+  public AesCtrHmacStreamingKey parseKey(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesCtrHmacStreamingKey.parseFrom(byteString);
   }
 
-  private void validate(AesCtrHmacStreamingParams params) throws GeneralSecurityException {
+  @Override
+  public KeyFactory<AesCtrHmacStreamingKeyFormat, AesCtrHmacStreamingKey> keyFactory() {
+    return new KeyFactory<AesCtrHmacStreamingKeyFormat, AesCtrHmacStreamingKey>(
+        AesCtrHmacStreamingKeyFormat.class) {
+      @Override
+      public void validateKeyFormat(AesCtrHmacStreamingKeyFormat format)
+          throws GeneralSecurityException {
+        if (format.getKeySize() < 16) {
+          throw new GeneralSecurityException("key_size must be at least 16 bytes");
+        }
+        validateParams(format.getParams());
+      }
+
+      @Override
+      public AesCtrHmacStreamingKeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return AesCtrHmacStreamingKeyFormat.parseFrom(byteString);
+      }
+
+      @Override
+      public AesCtrHmacStreamingKey createKey(AesCtrHmacStreamingKeyFormat format)
+          throws GeneralSecurityException {
+        return AesCtrHmacStreamingKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+            .setParams(format.getParams())
+            .setVersion(getVersion())
+            .build();
+      }
+    };
+  }
+
+  private static void validateParams(AesCtrHmacStreamingParams params)
+      throws GeneralSecurityException {
     Validators.validateAesKeySize(params.getDerivedKeySize());
     if (params.getHkdfHashType() == HashType.UNKNOWN_HASH) {
       throw new GeneralSecurityException("unknown HKDF hash type");
@@ -140,15 +137,17 @@ class AesCtrHmacStreamingKeyManager
     validateHmacParams(params.getHmacParams());
 
     if (params.getCiphertextSegmentSize()
-        <= params.getDerivedKeySize() + params.getHmacParams().getTagSize() + 1
-           + NONCE_PREFIX_IN_BYTES) {
+        < params.getDerivedKeySize()
+            + params.getHmacParams().getTagSize()
+            + 2
+            + NONCE_PREFIX_IN_BYTES) {
       throw new GeneralSecurityException(
           "ciphertext_segment_size must be at least (derived_key_size + tag_size + "
-          + "NONCE_PREFIX_IN_BYTES + 2)");
+              + "NONCE_PREFIX_IN_BYTES + 2)");
     }
   }
 
-  private void validateHmacParams(HmacParams params) throws GeneralSecurityException {
+  private static void validateHmacParams(HmacParams params) throws GeneralSecurityException {
     if (params.getTagSize() < MIN_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("tag size too small");
     }

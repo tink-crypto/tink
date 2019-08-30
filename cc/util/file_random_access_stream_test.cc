@@ -60,7 +60,7 @@ void ReadAndVerifyChunk(RandomAccessStream* ra_stream,
                             ", position = ", position,
                             ", count = ", count));
   auto buffer = std::move(Buffer::New(count).ValueOrDie());
-  int stream_size = ra_stream->size();
+  int stream_size = ra_stream->size().ValueOrDie();
   EXPECT_EQ(file_contents.size(), stream_size);
   auto status = ra_stream->PRead(position, count, buffer.get());
   EXPECT_TRUE(status.ok());
@@ -70,12 +70,12 @@ void ReadAndVerifyChunk(RandomAccessStream* ra_stream,
     expected_count = stream_size - position;
   }
   EXPECT_EQ(expected_count, read_count);
-  EXPECT_EQ(0, memcmp(file_contents.substr(position, read_count).data(),
+  EXPECT_EQ(0, memcmp(&file_contents[position],
                       buffer->get_mem_block(), read_count));
 }
 
 TEST(FileRandomAccessStreamTest, ReadingStreams) {
-  for (auto stream_size : {0, 10, 100, 1000, 10000, 1000000}) {
+  for (auto stream_size : {1, 10, 100, 1000, 10000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
@@ -89,7 +89,28 @@ TEST(FileRandomAccessStreamTest, ReadingStreams) {
     EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
     EXPECT_EQ("EOF", status.error_message());
     EXPECT_EQ(file_contents, stream_contents);
-    EXPECT_EQ(stream_size, ra_stream->size());
+    EXPECT_EQ(stream_size, ra_stream->size().ValueOrDie());
+  }
+}
+
+TEST(FileRandomAccessStreamTest, ReadingStreamsTillLastByte) {
+  for (auto stream_size : {1, 10, 100, 1000, 10000}) {
+    SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
+    std::string file_contents;
+    std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
+    int input_fd =
+        test::GetTestFileDescriptor(filename, stream_size, &file_contents);
+    EXPECT_EQ(stream_size, file_contents.size());
+    auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
+    auto buffer = std::move(Buffer::New(stream_size).ValueOrDie());
+
+    // Read from the beginning till the last byte.
+    auto status = ra_stream->PRead(/* position = */ 0,
+                                   stream_size, buffer.get());
+    EXPECT_TRUE(status.ok());
+    EXPECT_EQ(stream_size, ra_stream->size().ValueOrDie());
+    EXPECT_EQ(0, memcmp(&file_contents[0],
+                        buffer->get_mem_block(), stream_size));
   }
 }
 
@@ -136,7 +157,7 @@ TEST(FileRandomAccessStreamTest, NegativeReadPosition) {
   }
 }
 
-TEST(FileRandomAccessStreamTest, NegativeReadCount) {
+TEST(FileRandomAccessStreamTest, NotPositiveReadCount) {
   for (auto stream_size : {0, 10, 100, 1000, 10000}) {
     std::string file_contents;
     std::string filename = absl::StrCat(stream_size, "_reading_test.bin");
@@ -145,7 +166,7 @@ TEST(FileRandomAccessStreamTest, NegativeReadCount) {
     auto ra_stream = absl::make_unique<util::FileRandomAccessStream>(input_fd);
     auto buffer = std::move(Buffer::New(42).ValueOrDie());
     int64_t position = 0;
-    for (auto count : {-100, -10, -1}) {
+    for (auto count : {-100, -10, -1, 0}) {
       SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size,
                                 " count = ", count));
       auto status = ra_stream->PRead(position, count, buffer.get());

@@ -45,7 +45,7 @@ public final class DeterministicAeadKeyTemplates {
     AesSivKeyFormat format = AesSivKeyFormat.newBuilder().setKeySize(keySize).build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(AesSivKeyManager.TYPE_URL)
+        .setTypeUrl(new AesSivKeyManager().getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

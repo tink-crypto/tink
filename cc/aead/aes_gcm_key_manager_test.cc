@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead.h"
+#include "tink/subtle/aead_test_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -155,21 +156,6 @@ TEST(AesGcmKeyManagerTest, Create32ByteKey) {
 
   ASSERT_THAT(key_or.status(), IsOk());
   EXPECT_THAT(key_or.ValueOrDie().key_value().size(), Eq(format.key_size()));
-}
-
-crypto::tink::util::Status EncryptThenDecrypt(Aead* encrypter, Aead* decrypter,
-                                              absl::string_view message,
-                                              absl::string_view aad) {
-  StatusOr<std::string> encryption_or = encrypter->Encrypt(message, aad);
-  if (!encryption_or.status().ok()) return encryption_or.status();
-  StatusOr<std::string> decryption_or =
-      decrypter->Decrypt(encryption_or.ValueOrDie(), aad);
-  if (!decryption_or.status().ok()) return decryption_or.status();
-  if (decryption_or.ValueOrDie() != message) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
-                                      "Message/Decryption mismatch");
-  }
-  return util::OkStatus();
 }
 
 TEST(AesGcmKeyManagerTest, CreateAead) {
