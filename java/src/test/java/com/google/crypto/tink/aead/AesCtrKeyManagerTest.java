@@ -16,19 +16,17 @@
 
 package com.google.crypto.tink.aead;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
-import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.crypto.tink.subtle.IndCpaCipher;
-import com.google.protobuf.ByteString;
+import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -39,61 +37,128 @@ import org.junit.runners.JUnit4;
 /** Unit tests for {@link AesCtrKeyManager}. */
 @RunWith(JUnit4.class)
 public class AesCtrKeyManagerTest {
+  private final AesCtrKeyManager manager = new AesCtrKeyManager();
+  private final AesCtrKeyManager.KeyFactory<AesCtrKeyFormat, AesCtrKey> factory =
+      manager.keyFactory();
+
   @Test
-  public void testNewKeyMultipleTimes() throws Exception {
-    AesCtrKeyFormat ctrKeyFormat = AesCtrKeyFormat.newBuilder()
-        .setParams(AesCtrParams.newBuilder().setIvSize(16).build())
-        .setKeySize(16)
-        .build();
-    ByteString serialized = ByteString.copyFrom(ctrKeyFormat.toByteArray());
-    KeyTemplate keyTemplate =
-        KeyTemplate.newBuilder()
-            .setTypeUrl(new AesCtrKeyManager().getKeyType())
-            .setValue(serialized)
-            .build();
-    KeyManager<IndCpaCipher> keyManager =
-        new KeyManagerImpl<>(new AesCtrKeyManager(), IndCpaCipher.class);
-    Set<String> keys = new TreeSet<String>();
-    // Calls newKey multiple times and make sure that they generate different keys.
-    int numTests = 27;
-    for (int i = 0; i < numTests / 3; i++) {
-      AesCtrKey key = (AesCtrKey) keyManager.newKey(ctrKeyFormat);
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(16, key.getKeyValue().toByteArray().length);
-
-      key = (AesCtrKey) keyManager.newKey(serialized);
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(16, key.getKeyValue().toByteArray().length);
-
-      KeyData keyData = keyManager.newKeyData(keyTemplate.getValue());
-      key = AesCtrKey.parseFrom(keyData.getValue());
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-      assertEquals(16, key.getKeyValue().toByteArray().length);
-    }
-    assertEquals(numTests, keys.size());
+  public void basics() throws Exception {
+    assertThat(manager.getKeyType()).isEqualTo("type.googleapis.com/google.crypto.tink.AesCtrKey");
+    assertThat(manager.getVersion()).isEqualTo(0);
+    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
   }
 
   @Test
-  public void testNewKeyWithCorruptedFormat() throws Exception {
-    ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyTemplate keyTemplate =
-        KeyTemplate.newBuilder()
-            .setTypeUrl(new AesCtrKeyManager().getKeyType())
-            .setValue(serialized)
-            .build();
-    KeyManager<IndCpaCipher> keyManager =
-        new KeyManagerImpl<>(new AesCtrKeyManager(), IndCpaCipher.class);
+  public void validateKeyFormat_empty_invalid() throws Exception {
     try {
-      keyManager.newKey(serialized);
-      fail("Corrupted format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
+      factory.validateKeyFormat(AesCtrKeyFormat.getDefaultInstance());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
     }
+  }
+
+  private AesCtrKeyFormat createFormat(int ivSize, int keySize) {
+    return AesCtrKeyFormat.newBuilder()
+        .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
+        .setKeySize(keySize)
+        .build();
+  }
+
+  @Test
+  public void createKey_valid() throws Exception {
+    factory.validateKeyFormat(createFormat(12, 16));
+    factory.validateKeyFormat(createFormat(13, 16));
+    factory.validateKeyFormat(createFormat(14, 16));
+    factory.validateKeyFormat(createFormat(15, 16));
+    factory.validateKeyFormat(createFormat(16, 16));
+
+    factory.validateKeyFormat(createFormat(12, 32));
+    factory.validateKeyFormat(createFormat(13, 32));
+    factory.validateKeyFormat(createFormat(14, 32));
+    factory.validateKeyFormat(createFormat(15, 32));
+    factory.validateKeyFormat(createFormat(16, 32));
+  }
+
+  @Test
+  public void createKey_smallIv_throws() throws Exception {
     try {
-      keyManager.newKeyData(keyTemplate.getValue());
-      fail("Corrupted format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
+      factory.validateKeyFormat(createFormat(11, 16));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
     }
+  }
+
+  @Test
+  public void createKey_bigIv_throws() throws Exception {
+    try {
+      factory.validateKeyFormat(createFormat(17, 16));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void createKey_8ByteAesKey_throws() throws Exception {
+    try {
+      factory.validateKeyFormat(createFormat(16, 8));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void createKey_15ByteAesKey_throws() throws Exception {
+    try {
+      factory.validateKeyFormat(createFormat(16, 15));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void createKey_17ByteAesKey_throws() throws Exception {
+    try {
+      factory.validateKeyFormat(createFormat(16, 17));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void createKey_correctVersion() throws Exception {
+    assertThat(factory.createKey(createFormat(16, 16)).getVersion()).isEqualTo(0);
+  }
+
+  @Test
+  public void createKey_keySize() throws Exception {
+    assertThat(factory.createKey(createFormat(16, 16)).getKeyValue()).hasSize(16);
+    assertThat(factory.createKey(createFormat(16, 32)).getKeyValue()).hasSize(32);
+  }
+
+  @Test
+  public void createKey_multipleCallsCreateDifferentKeys() throws Exception {
+    Set<String> keys = new TreeSet<>();
+    final int numKeys = 100;
+    for (int i = 0; i < numKeys; ++i) {
+      keys.add(
+          TestUtil.hexEncode(factory.createKey(createFormat(16, 16)).getKeyValue().toByteArray()));
+    }
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void getPrimitive() throws Exception {
+    AesCtrKey key = factory.createKey(createFormat(14, 32));
+    IndCpaCipher managerCipher = manager.getPrimitive(key, IndCpaCipher.class);
+    IndCpaCipher directCipher = new AesCtrJceCipher(key.getKeyValue().toByteArray(), 14);
+
+    byte[] plaintext = Random.randBytes(20);
+    assertThat(directCipher.decrypt(managerCipher.encrypt(plaintext))).isEqualTo(plaintext);
   }
 }
