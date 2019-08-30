@@ -395,18 +395,17 @@ tink_cc_test(
   DEPS
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager
-    tink::core::key_manager_impl
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::core::registry
+    tink::subtle::ed25519_sign_boringssl
+    tink::util::enums
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
-    tink::proto::aes_eax_cc_proto
-    tink::proto::common_cc_proto
     tink::proto::ed25519_cc_proto
-    tink::proto::empty_cc_proto
-    tink::proto::tink_cc_proto
+    gmock
 )
 
 tink_cc_test(
@@ -471,21 +470,18 @@ tink_cc_test(
   DEPS
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager
-    tink::signature::signature_key_templates
-    tink::core::private_key_manager_impl
     tink::core::public_key_sign
     tink::core::registry
-    tink::aead::aead_key_templates
-    tink::aead::aes_gcm_key_manager
+    tink::subtle::ed25519_verify_boringssl
+    tink::util::enums
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
-    tink::proto::aes_eax_cc_proto
-    tink::proto::common_cc_proto
     tink::proto::ed25519_cc_proto
-    tink::proto::empty_cc_proto
-    tink::proto::tink_cc_proto
+    absl::flat_hash_set
+    gmock
 )
 
 tink_cc_test(

@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
@@ -33,14 +33,18 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesCtrKey} keys and produces new instances of {@code
  * AesCtrJceCipher}.
  */
-class AesCtrKeyManager extends KeyManagerBase<IndCpaCipher, AesCtrKey, AesCtrKeyFormat> {
+class AesCtrKeyManager extends KeyTypeManager<AesCtrKey> {
   public AesCtrKeyManager() {
-    super(IndCpaCipher.class, AesCtrKey.class, AesCtrKeyFormat.class, TYPE_URL);
+    super(
+        AesCtrKey.class,
+        new PrimitiveFactory<IndCpaCipher, AesCtrKey>(IndCpaCipher.class) {
+          @Override
+          public IndCpaCipher getPrimitive(AesCtrKey key) throws GeneralSecurityException {
+            return new AesCtrJceCipher(
+                key.getKeyValue().toByteArray(), key.getParams().getIvSize());
+          }
+        });
   }
-
-  private static final int VERSION = 0;
-
-  static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesCtrKey";
 
   // In counter mode each message is encrypted with an initialization vector (IV) that must be
   // unique. If one single IV is ever used to encrypt two or more messages, the confidentiality of
@@ -52,56 +56,59 @@ class AesCtrKeyManager extends KeyManagerBase<IndCpaCipher, AesCtrKey, AesCtrKey
   private static final int MIN_IV_SIZE_IN_BYTES = 12;
 
   @Override
-  public IndCpaCipher getPrimitiveFromKey(AesCtrKey keyProto) throws GeneralSecurityException {
-    return new AesCtrJceCipher(
-        keyProto.getKeyValue().toByteArray(), keyProto.getParams().getIvSize());
-  }
-
-  @Override
-  public AesCtrKey newKeyFromFormat(AesCtrKeyFormat format) throws GeneralSecurityException {
-    return AesCtrKey.newBuilder()
-        .setParams(format.getParams())
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-        .setVersion(VERSION)
-        .build();
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.AesCtrKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.SYMMETRIC;
   }
 
   @Override
-  protected AesCtrKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
+  public void validateKey(AesCtrKey key) throws GeneralSecurityException {
+    Validators.validateVersion(key.getVersion(), getVersion());
+    Validators.validateAesKeySize(key.getKeyValue().size());
+    validateParams(key.getParams());
+  }
+
+  @Override
+  public AesCtrKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
     return AesCtrKey.parseFrom(byteString);
   }
 
   @Override
-  protected AesCtrKeyFormat parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return AesCtrKeyFormat.parseFrom(byteString);
+  public KeyFactory<AesCtrKeyFormat, AesCtrKey> keyFactory() {
+    return new KeyFactory<AesCtrKeyFormat, AesCtrKey>(AesCtrKeyFormat.class) {
+      @Override
+      public void validateKeyFormat(AesCtrKeyFormat format) throws GeneralSecurityException {
+        Validators.validateAesKeySize(format.getKeySize());
+        validateParams(format.getParams());
+      }
+
+      @Override
+      public AesCtrKeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return AesCtrKeyFormat.parseFrom(byteString);
+      }
+
+      @Override
+      public AesCtrKey createKey(AesCtrKeyFormat format) throws GeneralSecurityException {
+        return AesCtrKey.newBuilder()
+            .setParams(format.getParams())
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+            .setVersion(getVersion())
+            .build();
+      }
+    };
   }
 
-  @Override
-  protected void validateKey(AesCtrKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), VERSION);
-    Validators.validateAesKeySize(key.getKeyValue().size());
-    validate(key.getParams());
-  }
-
-  @Override
-  protected void validateKeyFormat(AesCtrKeyFormat format) throws GeneralSecurityException {
-    Validators.validateAesKeySize(format.getKeySize());
-    validate(format.getParams());
-  }
-
-  private void validate(AesCtrParams params) throws GeneralSecurityException {
+  private void validateParams(AesCtrParams params) throws GeneralSecurityException {
     if (params.getIvSize() < MIN_IV_SIZE_IN_BYTES || params.getIvSize() > 16) {
       throw new GeneralSecurityException("invalid IV size");
     }

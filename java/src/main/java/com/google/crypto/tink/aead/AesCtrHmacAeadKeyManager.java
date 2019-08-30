@@ -41,7 +41,7 @@ class AesCtrHmacAeadKeyManager
     extends KeyManagerBase<Aead, AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {
   public AesCtrHmacAeadKeyManager() throws GeneralSecurityException {
     super(Aead.class, AesCtrHmacAeadKey.class, AesCtrHmacAeadKeyFormat.class, TYPE_URL);
-    Registry.registerKeyManager(new AesCtrKeyManager());
+    Registry.registerKeyManager(new AesCtrKeyManager(), /*newKeyAllowed=*/ true);
   }
 
   private static final int VERSION = 0;
@@ -52,7 +52,7 @@ class AesCtrHmacAeadKeyManager
   public Aead getPrimitiveFromKey(AesCtrHmacAeadKey keyProto) throws GeneralSecurityException {
     return new EncryptThenAuthenticate(
         Registry.getPrimitive(
-            AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey(), IndCpaCipher.class),
+            new AesCtrKeyManager().getKeyType(), keyProto.getAesCtrKey(), IndCpaCipher.class),
         Registry.getPrimitive(MacConfig.HMAC_TYPE_URL, keyProto.getHmacKey(), Mac.class),
         keyProto.getHmacKey().getParams().getTagSize());
   }
@@ -61,7 +61,8 @@ class AesCtrHmacAeadKeyManager
   public AesCtrHmacAeadKey newKeyFromFormat(AesCtrHmacAeadKeyFormat format)
       throws GeneralSecurityException {
     AesCtrKey aesCtrKey =
-        (AesCtrKey) Registry.newKey(AesCtrKeyManager.TYPE_URL, format.getAesCtrKeyFormat());
+        (AesCtrKey)
+            Registry.newKey(new AesCtrKeyManager().getKeyType(), format.getAesCtrKeyFormat());
     HmacKey hmacKey = (HmacKey) Registry.newKey(MacConfig.HMAC_TYPE_URL, format.getHmacKeyFormat());
     return AesCtrHmacAeadKey.newBuilder()
         .setAesCtrKey(aesCtrKey)
