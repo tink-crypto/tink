@@ -25,7 +25,7 @@ def _java_single_jar(ctx):
         inputs = depset(transitive = [inputs, dep.java.transitive_runtime_deps])
         source_jars = depset(transitive = [source_jars, dep.java.source_jars])
         for td in dep.java.transitive_runtime_deps:
-            if JavaInfo in td:
+            if hasattr(td, "java"):
                 source_jars = depset(transitive = [source_jars, td.java.source_jars])
 
     compress = ""
