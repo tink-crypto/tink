@@ -25,7 +25,7 @@ def _java_single_jar(ctx):
         inputs = depset(transitive = [inputs, dep.java.transitive_runtime_deps])
         source_jars = depset(transitive = [source_jars, dep.java.source_jars])
         for td in dep.java.transitive_runtime_deps:
-            if hasattr(td, "java"):
+            if JavaInfo in td:
                 source_jars = depset(transitive = [source_jars, td.java.source_jars])
 
     compress = ""
@@ -74,7 +74,7 @@ def _java_single_jar(ctx):
 
 java_single_jar = rule(
     attrs = {
-        "deps": attr.label_list(providers = ["java"]),
+        "deps": attr.label_list(providers = [JavaInfo]),
         "_singlejar": attr.label(
             default = Label("@bazel_tools//tools/jdk:singlejar"),
             cfg = "host",
