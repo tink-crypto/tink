@@ -20,13 +20,10 @@ def _java_single_jar(ctx):
     _check_non_empty(ctx.attr.root_packages, "root_packages")
 
     inputs = depset()
-    source_jars = depset()
+    source_jars = []
     for dep in ctx.attr.deps:
-        inputs = depset(transitive = [inputs, dep.java.transitive_runtime_deps])
-        source_jars = depset(transitive = [source_jars, dep.java.source_jars])
-        for td in dep.java.transitive_runtime_deps:
-            if hasattr(td, "java"):
-                source_jars = depset(transitive = [source_jars, td.java.source_jars])
+        inputs = depset(transitive = [inputs, dep[JavaInfo].transitive_runtime_deps])
+        source_jars += dep[JavaInfo].source_jars
 
     compress = ""
     if ctx.attr.compress == "preserve":
@@ -39,7 +36,7 @@ def _java_single_jar(ctx):
         fail("\"compress\" attribute (%s) must be: yes, no, preserve." % ctx.attr.compress)
 
     if ctx.attr.source_jar:
-        inputs = source_jars
+        inputs = depset(direct = source_jars)
         compress = ""
 
     args = ctx.actions.args()
