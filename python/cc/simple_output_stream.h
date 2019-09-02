@@ -17,6 +17,7 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -25,8 +26,9 @@ namespace tink {
 // from Python to C++ via CLIF and vice versa.
 class SimpleOutputStream {
  public:
-  // Writes 'data' to the underlying stream.
-  virtual util::Status Write(absl::string_view data) = 0;
+  // Writes 'data' to the underlying stream and returns the number of bytes
+  // written, which can be less than the size of 'data'.
+  virtual util::StatusOr<int> Write(absl::string_view data) = 0;
 
   // Closes the underlying stream.
   virtual util::Status Close() = 0;

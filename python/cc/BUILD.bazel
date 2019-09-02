@@ -18,8 +18,10 @@ cc_library(
 cc_library(
     name = "simple_output_stream",
     hdrs = ["simple_output_stream.h"],
+    include_prefix = "tink/",
     deps = [
         "//cc/util:status",
+        "//cc/util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
