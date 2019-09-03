@@ -235,7 +235,7 @@ public final class AeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(KmsEnvelopeAeadKeyManager.TYPE_URL)
+        .setTypeUrl(new KmsEnvelopeAeadKeyManager().getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

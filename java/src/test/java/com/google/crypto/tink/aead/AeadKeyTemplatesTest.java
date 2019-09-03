@@ -204,7 +204,7 @@ public class AeadKeyTemplatesTest {
     String kekUri = "some example KEK URI";
     KeyTemplate dekTemplate = AeadKeyTemplates.AES256_GCM;
     KeyTemplate template = AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(kekUri, dekTemplate);
-    assertEquals(KmsEnvelopeAeadKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new KmsEnvelopeAeadKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
 
     KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.parseFrom(template.getValue());
