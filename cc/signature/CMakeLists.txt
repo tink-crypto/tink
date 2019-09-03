@@ -239,12 +239,12 @@ tink_cc_library(
   DEPS
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::sig_util
-    tink::core::key_manager
-    tink::core::key_manager_base
+    tink::core::key_type_manager
+    tink::core::private_key_type_manager
     tink::core::public_key_sign
-    tink::core::registry
     tink::subtle::rsa_ssa_pss_sign_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
@@ -266,9 +266,10 @@ tink_cc_library(
     tink::core::key_manager
     tink::core::key_manager_base
     tink::core::public_key_verify
-    tink::core::registry
+    tink::core::public_key_sign
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
