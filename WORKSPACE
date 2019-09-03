@@ -385,7 +385,7 @@ java_import_external(
 )
 
 java_import_external(
-    name = "com_google_auto_common",
+    name = "com_google_auto_common_0_8",
     licenses = ["notice"],  # Apache 2.0
     jar_sha256 = "97db1709f57b91b32edacb596ef4641872f227b7d99ad90e467f0d77f5ba134a",
     jar_urls = [
@@ -404,7 +404,7 @@ java_import_external(
         "https://repo1.maven.org/maven2/com/google/auto/service/auto-service/1.0-rc3/auto-service-1.0-rc3.jar",
     ],
     deps = [
-        "@com_google_auto_common",
+        "@com_google_auto_common_0_8",
         "@com_google_guava",
     ],
 )
