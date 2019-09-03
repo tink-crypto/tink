@@ -17,7 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -32,55 +32,61 @@ import java.security.GeneralSecurityException;
  * This key manager produces new instances of {@code Aead} that forwards encrypt/decrypt requests to
  * a key residing in a remote KMS.
  */
-class KmsAeadKeyManager extends KeyManagerBase<Aead, KmsAeadKey, KmsAeadKeyFormat> {
+class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
   public KmsAeadKeyManager() {
-    super(Aead.class, KmsAeadKey.class, KmsAeadKeyFormat.class, TYPE_URL);
-  }
-
-  private static final int VERSION = 0;
-
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.KmsAeadKey";
-
-  @Override
-  public Aead getPrimitiveFromKey(KmsAeadKey keyProto) throws GeneralSecurityException {
-    String keyUri = keyProto.getParams().getKeyUri();
-    KmsClient kmsClient = KmsClients.get(keyUri);
-    return kmsClient.getAead(keyUri);
+    super(
+        KmsAeadKey.class,
+        new PrimitiveFactory<Aead, KmsAeadKey>(Aead.class) {
+          @Override
+          public Aead getPrimitive(KmsAeadKey keyProto) throws GeneralSecurityException {
+            String keyUri = keyProto.getParams().getKeyUri();
+            KmsClient kmsClient = KmsClients.get(keyUri);
+            return kmsClient.getAead(keyUri);
+          }
+        });
   }
 
   @Override
-  public KmsAeadKey newKeyFromFormat(KmsAeadKeyFormat format) throws GeneralSecurityException {
-    return KmsAeadKey.newBuilder().setParams(format).setVersion(VERSION).build();
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.KmsAeadKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.REMOTE;
   }
 
   @Override
-  protected KmsAeadKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
+  public void validateKey(KmsAeadKey key) throws GeneralSecurityException {
+    Validators.validateVersion(key.getVersion(), getVersion());
+  }
+
+  @Override
+  public KmsAeadKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
     return KmsAeadKey.parseFrom(byteString);
   }
 
   @Override
-  protected KmsAeadKeyFormat parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return KmsAeadKeyFormat.parseFrom(byteString);
-  }
+  public KeyFactory<KmsAeadKeyFormat, KmsAeadKey> keyFactory() {
+    return new KeyFactory<KmsAeadKeyFormat, KmsAeadKey>(KmsAeadKeyFormat.class) {
+      @Override
+      public void validateKeyFormat(KmsAeadKeyFormat format) throws GeneralSecurityException {}
 
-  @Override
-  protected void validateKey(KmsAeadKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), VERSION);
-  }
+      @Override
+      public KmsAeadKeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return KmsAeadKeyFormat.parseFrom(byteString);
+      }
 
-  @Override
-  protected void validateKeyFormat(KmsAeadKeyFormat format) {}
+      @Override
+      public KmsAeadKey createKey(KmsAeadKeyFormat format) throws GeneralSecurityException {
+        return KmsAeadKey.newBuilder().setParams(format).setVersion(getVersion()).build();
+      }
+    };
+  }
 }

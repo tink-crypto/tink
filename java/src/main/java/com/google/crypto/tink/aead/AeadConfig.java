@@ -37,7 +37,7 @@ public final class AeadConfig {
   public static final String AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.TYPE_URL;
   public static final String AES_GCM_TYPE_URL = new AesGcmKeyManager().getKeyType();
   public static final String AES_EAX_TYPE_URL = new AesEaxKeyManager().getKeyType();
-  public static final String KMS_AEAD_TYPE_URL = KmsAeadKeyManager.TYPE_URL;
+  public static final String KMS_AEAD_TYPE_URL = new KmsAeadKeyManager().getKeyType();
   public static final String KMS_ENVELOPE_AEAD_TYPE_URL = KmsEnvelopeAeadKeyManager.TYPE_URL;
   public static final String CHACHA20_POLY1305_TYPE_URL =
       new ChaCha20Poly1305KeyManager().getKeyType();
@@ -99,7 +99,7 @@ public final class AeadConfig {
     Registry.registerKeyManager(new AesEaxKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new AesGcmKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new ChaCha20Poly1305KeyManager(), /*newKeyAllowed=*/ true);
-    Registry.registerKeyManager(new KmsAeadKeyManager());
+    Registry.registerKeyManager(new KmsAeadKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager());
     Registry.registerKeyManager(new XChaCha20Poly1305KeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerPrimitiveWrapper(new AeadWrapper());

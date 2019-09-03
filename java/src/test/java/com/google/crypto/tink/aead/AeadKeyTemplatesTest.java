@@ -190,7 +190,7 @@ public class AeadKeyTemplatesTest {
     // to test that the function correctly puts them in the resulting template.
     String keyUri = "some example URI";
     KeyTemplate template = AeadKeyTemplates.createKmsAeadKeyTemplate(keyUri);
-    assertEquals(KmsAeadKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new KmsAeadKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
 
     KmsAeadKeyFormat format = KmsAeadKeyFormat.parseFrom(template.getValue());
