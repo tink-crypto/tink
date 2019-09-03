@@ -14,7 +14,7 @@
 
 """Pre-generated KeyTemplate for DeterministicAead.
 
-One can use these templates to generate new tink_pb2.Keyset with
+One can use these templates to generate a new tink_pb2.Keyset with
 tink_pb2.KeysetHandle. To generate a new keyset that contains a single
 tink_pb2.HmacKey, one can do:
 handle = keyset_handle.KeysetHandle(aead_key_templates.AES128_EAX).
