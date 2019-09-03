@@ -431,18 +431,18 @@ tink_cc_test(
   NAME rsa_ssa_pss_verify_key_manager_test
   SRCS rsa_ssa_pss_verify_key_manager_test.cc
   DEPS
+    tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
-    tink::core::config
     tink::core::public_key_sign
     tink::core::public_key_verify
-    tink::core::registry
     tink::util::status
+    tink::util::statusor
     tink::util::test_util
-    tink::proto::aes_eax_cc_proto
-    tink::proto::common_cc_proto
+    tink::util::test_matchers
     tink::proto::rsa_ssa_pss_cc_proto
-    tink::proto::tink_cc_proto
     absl::strings
+    crypto
+    gmock
 )
 
 tink_cc_test(
@@ -514,19 +514,17 @@ tink_cc_test(
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::signature_key_templates
-    tink::core::config
     tink::core::public_key_sign
-    tink::core::registry
-    tink::aead::aead_key_templates
-    tink::aead::aes_gcm_key_manager
+    tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
-    tink::proto::aes_eax_cc_proto
-    tink::proto::common_cc_proto
     tink::proto::rsa_ssa_pss_cc_proto
-    tink::proto::tink_cc_proto
+    absl::flat_hash_set
     crypto
+    gmock
 )
 
 tink_cc_test(
