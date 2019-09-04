@@ -62,6 +62,12 @@ DISABLE_SANDBOX_ARGS=(
 )
 readonly DISABLE_SANDBOX_ARGS
 
+# TODO(b/)
+DISABLE_GRPC_ON_MAC_OS=""
+if [[ "${PLATFORM}" == 'darwin' ]]; then
+  DISABLE_GRPC_ON_MAC_OS="-//cc/integration/gcpkms/..."
+fi
+
 echo "using bazel binary: $(which bazel)"
 bazel version
 
@@ -77,12 +83,14 @@ run_linux_tests() {
   # Build all targets, except objc.
   time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
   -- //... \
+  ${DISABLE_GRPC_ON_MAC_OS} \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run all tests, except manual and objc tests.
   time bazel test \
   --strategy=TestRunner=standalone --test_output=all \
   -- //... \
+  ${DISABLE_GRPC_ON_MAC_OS} \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 }
 
