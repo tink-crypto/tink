@@ -16,45 +16,156 @@
 
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
-#include "tink/core/key_manager_impl.h"
+#include "openssl/bn.h"
+#include "openssl/rsa.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-
-#include "tink/registry.h"
+#include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
+#include "tink/subtle/rsa_ssa_pkcs1_sign_boringssl.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-#include "proto/common.pb.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
 #include "proto/tink.pb.h"
 
-namespace pb = google::crypto::tink;
-
-// TODO(quannguyen): add more tests once RsaSsaPkcs1SignKeyManager is available.
 namespace crypto {
 namespace tink {
 
-using google::crypto::tink::KeyData;
-using google::crypto::tink::RsaSsaPkcs1KeyFormat;
-using google::crypto::tink::RsaSsaPkcs1PublicKey;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::RsaSsaPkcs1KeyFormat;
+using ::google::crypto::tink::RsaSsaPkcs1PrivateKey;
+using ::google::crypto::tink::RsaSsaPkcs1PublicKey;
+using ::testing::Eq;
+using ::testing::HasSubstr;
+using ::testing::Not;
 
 namespace {
 
-// Test vector from
-// https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/Digital-Signatures
-struct NistTestVector {
-  std::string n;
-  std::string e;
-  std::string message;
-  std::string signature;
-  pb::HashType hash_type;
-};
+TEST(RsaSsaPkcs1VerifyKeyManagerTest, Basics) {
+  EXPECT_THAT(RsaSsaPkcs1VerifyKeyManager().get_version(), Eq(0));
+  EXPECT_THAT(RsaSsaPkcs1VerifyKeyManager().key_material_type(),
+              Eq(KeyData::ASYMMETRIC_PUBLIC));
+  EXPECT_THAT(
+      RsaSsaPkcs1VerifyKeyManager().get_key_type(),
+      Eq("type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey"));
+}
 
-class RsaSsaPkcs1VerifyKeyManagerTest : public ::testing::Test {
- protected:
-  const NistTestVector nist_test_vector_{
+TEST(RsaSsaPkcs1VerifyKeyManagerTest, ValidateEmptyKey) {
+  EXPECT_THAT(RsaSsaPkcs1VerifyKeyManager().ValidateKey(RsaSsaPkcs1PublicKey()),
+              Not(IsOk()));
+}
+
+RsaSsaPkcs1KeyFormat CreateKeyFormat(HashType hash_type,
+                                     int modulus_size_in_bits,
+                                     int public_exponent) {
+  RsaSsaPkcs1KeyFormat key_format;
+  auto params = key_format.mutable_params();
+  params->set_hash_type(hash_type);
+  key_format.set_modulus_size_in_bits(modulus_size_in_bits);
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), public_exponent);
+  key_format.set_public_exponent(
+      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
+          .ValueOrDie());
+  return key_format;
+}
+
+RsaSsaPkcs1KeyFormat ValidKeyFormat() {
+  return CreateKeyFormat(HashType::SHA256, 3072, RSA_F4);
+}
+
+RsaSsaPkcs1PrivateKey CreateValidPrivateKey() {
+  return RsaSsaPkcs1SignKeyManager().CreateKey(ValidKeyFormat()).ValueOrDie();
+}
+
+RsaSsaPkcs1PublicKey CreateValidPublicKey() {
+  return RsaSsaPkcs1SignKeyManager()
+      .GetPublicKey(CreateValidPrivateKey())
+      .ValueOrDie();
+}
+
+// Checks that a public key generaed by the SignKeyManager is considered valid.
+TEST(RsaSsaPkcs1VerifyKeyManagerTest, PublicKeyValid) {
+  RsaSsaPkcs1PublicKey key = CreateValidPublicKey();
+  EXPECT_THAT(RsaSsaPkcs1VerifyKeyManager().ValidateKey(key), IsOk());
+}
+
+TEST(RsaSsaPkcs1VerifyKeyManagerTest, PublicKeyWrongVersion) {
+  RsaSsaPkcs1PublicKey key = CreateValidPublicKey();
+  key.set_version(1);
+  EXPECT_THAT(RsaSsaPkcs1VerifyKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(RsaSsaPkcs1VerifyKeyManagerTest, PublicKeyUnkownHashDisallowed) {
+  RsaSsaPkcs1PublicKey key = CreateValidPublicKey();
+  key.mutable_params()->set_hash_type(HashType::UNKNOWN_HASH);
+  EXPECT_THAT(RsaSsaPkcs1VerifyKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
+TEST(RsaSsaPkcs1VerifyKeyManagerTest, ValidateKeyFormatSmallModulusDisallowed) {
+  RsaSsaPkcs1PublicKey key = CreateValidPublicKey();
+  key.set_n("\x23");
+  key.set_e("\x3");
+  EXPECT_THAT(RsaSsaPkcs1VerifyKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT,
+                       HasSubstr("only modulus size >= 2048")));
+}
+
+TEST(RsaSsaPkcs1SignKeyManagerTest, Create) {
+  RsaSsaPkcs1KeyFormat key_format =
+      CreateKeyFormat(HashType::SHA256, 3072, RSA_F4);
+  StatusOr<RsaSsaPkcs1PrivateKey> private_key_or =
+      RsaSsaPkcs1SignKeyManager().CreateKey(key_format);
+  ASSERT_THAT(private_key_or.status(), IsOk());
+  RsaSsaPkcs1PrivateKey private_key = private_key_or.ValueOrDie();
+  RsaSsaPkcs1PublicKey public_key =
+      RsaSsaPkcs1SignKeyManager().GetPublicKey(private_key).ValueOrDie();
+
+  subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key_subtle;
+  private_key_subtle.n = private_key.public_key().n();
+  private_key_subtle.e = private_key.public_key().e();
+  private_key_subtle.d = private_key.d();
+  private_key_subtle.p = private_key.p();
+  private_key_subtle.q = private_key.q();
+  private_key_subtle.dp = private_key.dp();
+  private_key_subtle.dq = private_key.dq();
+  private_key_subtle.crt = private_key.crt();
+
+  auto direct_signer_or = subtle::RsaSsaPkcs1SignBoringSsl::New(
+      private_key_subtle, {crypto::tink::subtle::HashType::SHA256});
+
+  auto verifier_or =
+      RsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
+  ASSERT_THAT(verifier_or.status(), IsOk());
+
+  std::string message = "Some message";
+  EXPECT_THAT(
+      verifier_or.ValueOrDie()->Verify(
+          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+      IsOk());
+}
+
+TEST(RsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
+  // Test vector from
+  // https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/Digital-Signatures
+  struct NistTestVector {
+    std::string n;
+    std::string e;
+    std::string message;
+    std::string signature;
+    HashType hash_type;
+  };
+
+  const NistTestVector nist_test_vector{
       absl::HexStringToBytes(
           "c9548608087bed6be0a4623b9d849aa0b4b4b6114ad0a7d82578076ceefe26ce48d1"
           "448e16d69963510e1e5fc658f3cf8f32a489b62d93fec1cdea6e1dde3feba04bb6a0"
@@ -79,145 +190,19 @@ class RsaSsaPkcs1VerifyKeyManagerTest : public ::testing::Test {
           "34b76711e76813ad5f5c3a5c95399e907650534dbfafec900c21be1308ddff6eda52"
           "5f35e4fb3d275de46250ea1e4b96b60bd125b85f6c52b5419a725cd69b10cefd0901"
           "abe7f9e15940594cf811e34c60f38768244c"),
-      pb::HashType::SHA256};
+      HashType::SHA256};
 
-  std::string rsa_ssa_pkcs1_verify_key_type_ =
-      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey";
-};
-
-TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
-  RsaSsaPkcs1VerifyKeyManager key_type_manager;
-  auto key_manager =
-      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
-
-  EXPECT_EQ(0, key_manager->get_version());
-  EXPECT_EQ("type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
-            key_manager->get_key_type());
-  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
-
-  // NIST test vector should work.
   RsaSsaPkcs1PublicKey key;
-  key.mutable_params()->set_hash_type(nist_test_vector_.hash_type);
+  key.mutable_params()->set_hash_type(nist_test_vector.hash_type);
   key.set_version(0);
-  key.set_n(nist_test_vector_.n);
-  key.set_e(nist_test_vector_.e);
-  auto result = key_manager->GetPrimitive(key);
-  EXPECT_TRUE(result.ok());
-  EXPECT_TRUE(
-      result.ValueOrDie()
-          ->Verify(nist_test_vector_.signature, nist_test_vector_.message)
-          .ok());
-}
-
-TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyDataErrors) {
-  RsaSsaPkcs1VerifyKeyManager key_type_manager;
-  auto key_manager =
-      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
-
-  {  // Bad key type.
-    KeyData key_data;
-    std::string bad_key_type = "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-    key_data.set_type_url(bad_key_type);
-    auto result = key_manager->GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
-                        result.status().error_message());
-  }
-
-  {  // Bad key value.
-    KeyData key_data;
-    key_data.set_type_url(rsa_ssa_pkcs1_verify_key_type_);
-    key_data.set_value("some bad serialized proto");
-    auto result = key_manager->GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad version.
-    KeyData key_data;
-    RsaSsaPkcs1PublicKey key;
-    key.set_version(1);
-    key_data.set_type_url(rsa_ssa_pkcs1_verify_key_type_);
-    key_data.set_value(key.SerializeAsString());
-    auto result = key_manager->GetPrimitive(key_data);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
-                        result.status().error_message());
-  }
-}
-
-TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyMessageErrors) {
-  RsaSsaPkcs1VerifyKeyManager key_type_manager;
-  auto key_manager =
-      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
-
-  {  // Use SHA1 as signature hash.
-    RsaSsaPkcs1PublicKey key;
-    key.mutable_params()->set_hash_type(pb::HashType::SHA1);
-    key.set_version(0);
-    key.set_n(nist_test_vector_.n);
-    key.set_e(nist_test_vector_.e);
-    auto result = key_manager->GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                        "SHA1 is not safe for digital signature",
-                        result.status().error_message());
-  }
-
-  {  // Small modulus.
-    RsaSsaPkcs1PublicKey key;
-    key.mutable_params()->set_hash_type(pb::HashType::SHA256);
-    key.set_version(0);
-    key.set_n("\x23");
-    key.set_e("\x3");
-    auto result = key_manager->GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                        "only modulus size >= 2048-bit is supported",
-                        result.status().error_message());
-  }
-}
-
-TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NewKeyError) {
-  RsaSsaPkcs1VerifyKeyManager key_type_manager;
-  auto key_manager =
-      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
-  const KeyFactory& key_factory = key_manager->get_key_factory();
-
-  {  // Via NewKey(format_proto).
-    RsaSsaPkcs1KeyFormat key_format;
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
-
-  {  // Via NewKey(serialized_format_proto).
-    RsaSsaPkcs1KeyFormat key_format;
-    auto result = key_factory.NewKey(key_format.SerializeAsString());
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
-
-  {  // Via NewKeyData(serialized_format_proto).
-    RsaSsaPkcs1KeyFormat key_format;
-    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-  }
+  key.set_n(nist_test_vector.n);
+  key.set_e(nist_test_vector.e);
+  auto result =
+      RsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(key);
+  EXPECT_THAT(result.status(), IsOk());
+  EXPECT_THAT(result.ValueOrDie()->Verify(nist_test_vector.signature,
+                                          nist_test_vector.message),
+              IsOk());
 }
 
 }  // namespace
