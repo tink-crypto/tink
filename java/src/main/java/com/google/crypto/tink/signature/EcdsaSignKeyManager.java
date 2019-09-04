@@ -58,8 +58,6 @@ class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPu
         });
   }
 
-  private static final int VERSION = 0;
-
   @Override
   public String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
@@ -67,7 +65,7 @@ class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPu
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
@@ -118,7 +116,7 @@ class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPu
         // Creates EcdsaPublicKey.
         EcdsaPublicKey ecdsaPubKey =
             EcdsaPublicKey.newBuilder()
-                .setVersion(VERSION)
+                .setVersion(getVersion())
                 .setParams(ecdsaParams)
                 .setX(ByteString.copyFrom(w.getAffineX().toByteArray()))
                 .setY(ByteString.copyFrom(w.getAffineY().toByteArray()))
@@ -126,7 +124,7 @@ class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPu
 
         // Creates EcdsaPrivateKey.
         return EcdsaPrivateKey.newBuilder()
-            .setVersion(VERSION)
+            .setVersion(getVersion())
             .setPublicKey(ecdsaPubKey)
             .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
             .build();
