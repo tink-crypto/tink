@@ -65,10 +65,8 @@ util::Status SignatureConfig::Register() {
   if (!status.ok()) return status;
 
   // RSA SSA PKCS1
-  status = Registry::RegisterKeyManager(
-      absl::make_unique<RsaSsaPkcs1SignKeyManager>(), true);
-  if (!status.ok()) return status;
-  status = Registry::RegisterKeyManager(
+  status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<RsaSsaPkcs1SignKeyManager>(),
       absl::make_unique<RsaSsaPkcs1VerifyKeyManager>(), true);
   if (!status.ok()) return status;
 

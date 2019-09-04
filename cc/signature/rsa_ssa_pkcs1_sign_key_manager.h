@@ -20,51 +20,63 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "tink/core/key_manager_base.h"
-#include "tink/key_manager.h"
+#include "tink/core/private_key_type_manager.h"
 #include "tink/public_key_sign.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
 class RsaSsaPkcs1SignKeyManager
-    : public KeyManagerBase<PublicKeySign,
-                            google::crypto::tink::RsaSsaPkcs1PrivateKey> {
+    : public PrivateKeyTypeManager<google::crypto::tink::RsaSsaPkcs1PrivateKey,
+                                   google::crypto::tink::RsaSsaPkcs1KeyFormat,
+                                   google::crypto::tink::RsaSsaPkcs1PublicKey,
+                                   List<PublicKeySign>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class PublicKeySignFactory : public PrimitiveFactory<PublicKeySign> {
+    crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>> Create(
+        const google::crypto::tink::RsaSsaPkcs1PrivateKey& private_key)
+        const override;
+  };
 
-  RsaSsaPkcs1SignKeyManager();
+  RsaSsaPkcs1SignKeyManager()
+      : PrivateKeyTypeManager(absl::make_unique<PublicKeySignFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::ASYMMETRIC_PRIVATE;
+  }
 
-  virtual ~RsaSsaPkcs1SignKeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>>
-  GetPrimitiveFromKey(const google::crypto::tink::RsaSsaPkcs1PrivateKey&
-                          key_proto) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::RsaSsaPkcs1PrivateKey& key) const override;
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const google::crypto::tink::RsaSsaPkcs1KeyFormat& key_format)
+      const override;
+
+  crypto::tink::util::StatusOr<google::crypto::tink::RsaSsaPkcs1PrivateKey>
+  CreateKey(const google::crypto::tink::RsaSsaPkcs1KeyFormat& key_format)
+      const override;
+
+  crypto::tink::util::StatusOr<google::crypto::tink::RsaSsaPkcs1PublicKey>
+  GetPublicKey(const google::crypto::tink::RsaSsaPkcs1PrivateKey& private_key)
+      const override {
+    return private_key.public_key();
+  }
 
  private:
-  friend class RsaSsaPkcs1PrivateKeyFactory;
-
-  std::unique_ptr<PrivateKeyFactory> key_factory_;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::RsaSsaPkcs1KeyFormat& key_format);
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::RsaSsaPkcs1PrivateKey& key);
+  const std::string key_type_ =
+      absl::StrCat(kTypeGoogleapisCom,
+                   google::crypto::tink::RsaSsaPkcs1PrivateKey().GetTypeName());
 };
 
 }  // namespace tink

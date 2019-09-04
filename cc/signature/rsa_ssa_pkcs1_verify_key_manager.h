@@ -21,52 +21,50 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "tink/core/key_manager_base.h"
-#include "tink/key_manager.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/public_key_verify.h"
+#include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
 class RsaSsaPkcs1VerifyKeyManager
-    : public KeyManagerBase<PublicKeyVerify,
-                            google::crypto::tink::RsaSsaPkcs1PublicKey> {
+    : public KeyTypeManager<google::crypto::tink::RsaSsaPkcs1PublicKey, void,
+                            List<PublicKeyVerify>> {
  public:
-  static constexpr uint32_t kVersion = 0;
+  class PublicKeyVerifyFactory : public PrimitiveFactory<PublicKeyVerify> {
+    crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>> Create(
+        const google::crypto::tink::RsaSsaPkcs1PublicKey&
+            rsa_ssa_pkcs1_public_key) const override;
+  };
 
-  RsaSsaPkcs1VerifyKeyManager();
+  RsaSsaPkcs1VerifyKeyManager()
+      : KeyTypeManager(absl::make_unique<PublicKeyVerifyFactory>()) {}
 
-  // Returns the version of this key manager.
-  uint32_t get_version() const override;
+  uint32_t get_version() const override { return 0; }
 
-  // Returns a factory that generates keys of the key type
-  // handled by this manager.
-  const KeyFactory& get_key_factory() const override;
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::ASYMMETRIC_PUBLIC;
+  }
 
-  virtual ~RsaSsaPkcs1VerifyKeyManager() {}
+  const std::string& get_key_type() const override { return key_type_; }
 
- protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>>
-  GetPrimitiveFromKey(const google::crypto::tink::RsaSsaPkcs1PublicKey&
-                          rsa_ssa_pkcs1_public_key) const override;
+  crypto::tink::util::Status ValidateKey(
+      const google::crypto::tink::RsaSsaPkcs1PublicKey& key) const override;
+
+  crypto::tink::util::Status ValidateParams(
+      const google::crypto::tink::RsaSsaPkcs1Params& params) const;
 
  private:
-  // Friends that re-use proto validation helpers.
-  friend class RsaSsaPkcs1PrivateKeyFactory;
-  friend class RsaSsaPkcs1SignKeyManager;
-
-  std::unique_ptr<KeyFactory> key_factory_;
-
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::RsaSsaPkcs1Params& params);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::RsaSsaPkcs1PublicKey& key);
+  const std::string key_type_ =
+      absl::StrCat(kTypeGoogleapisCom,
+                   google::crypto::tink::RsaSsaPkcs1PublicKey().GetTypeName());
 };
 
 }  // namespace tink

@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/public_key_sign.h"
 #include "tink/registry.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
@@ -56,7 +57,9 @@ class RsaSsaPkcs1SignKeyManagerTest : public ::testing::Test {
 // Checks whether given key is compatible with the given format.
 void CheckNewKey(const RsaSsaPkcs1PrivateKey& private_key,
                  const RsaSsaPkcs1KeyFormat& key_format) {
-  RsaSsaPkcs1SignKeyManager key_manager;
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
   RsaSsaPkcs1PublicKey public_key = private_key.public_key();
   EXPECT_EQ(0, private_key.version());
   EXPECT_TRUE(private_key.has_public_key());
@@ -66,7 +69,7 @@ void CheckNewKey(const RsaSsaPkcs1PrivateKey& private_key,
   EXPECT_EQ(public_key.params().SerializeAsString(),
             key_format.params().SerializeAsString());
   EXPECT_EQ(key_format.public_exponent(), public_key.e());
-  auto primitive_result = key_manager.GetPrimitive(private_key);
+  auto primitive_result = key_manager->GetPrimitive(private_key);
   EXPECT_TRUE(primitive_result.ok()) << primitive_result.status();
   auto n = std::move(SubtleUtilBoringSSL::str2bn(public_key.n()).ValueOrDie());
   auto d = std::move(SubtleUtilBoringSSL::str2bn(private_key.d()).ValueOrDie());
@@ -103,16 +106,20 @@ void CheckNewKey(const RsaSsaPkcs1PrivateKey& private_key,
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, Basic) {
-  RsaSsaPkcs1SignKeyManager key_manager;
-  EXPECT_EQ(0, key_manager.get_version());
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyFromKeyFormat) {
-  RsaSsaPkcs1SignKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   RsaSsaPkcs1KeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
       SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4().value()));
@@ -127,8 +134,10 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyFromKeyFormat) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyFromSerializedKeyFormat) {
-  RsaSsaPkcs1SignKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   RsaSsaPkcs1KeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
       SignatureKeyTemplates::RsaSsaPkcs14096Sha512F4().value()));
@@ -143,8 +152,10 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyFromSerializedKeyFormat) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyDataFromSerializedKeyFormat) {
-  RsaSsaPkcs1SignKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   RsaSsaPkcs1KeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
       SignatureKeyTemplates::RsaSsaPkcs14096Sha512F4().value()));
@@ -158,9 +169,14 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyDataFromSerializedKeyFormat) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, PublicKeyExtraction) {
-  RsaSsaPkcs1SignKeyManager sign_key_manager;
+  RsaSsaPkcs1SignKeyManager sign_key_type_manager;
+  RsaSsaPkcs1VerifyKeyManager verify_key_type_manager;
+  auto verify_key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&verify_key_type_manager);
+  auto sign_key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+      &sign_key_type_manager, &verify_key_type_manager);
   auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
-      &(sign_key_manager.get_key_factory()));
+      &(sign_key_manager->get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
   auto new_key_result = private_key_factory->NewKey(
       SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4().value());
@@ -171,15 +187,14 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, PublicKeyExtraction) {
       private_key_factory->GetPublicKeyData(private_key->SerializeAsString());
   EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
   auto public_key_data = std::move(public_key_data_result.ValueOrDie());
-  EXPECT_EQ(RsaSsaPkcs1VerifyKeyManager::static_key_type(),
+  EXPECT_EQ(RsaSsaPkcs1VerifyKeyManager().get_key_type(),
             public_key_data->type_url());
   EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
   EXPECT_EQ(private_key->public_key().SerializeAsString(),
             public_key_data->value());
   // Sign with private key and verify with public key.
-  RsaSsaPkcs1VerifyKeyManager verify_key_manager;
-  auto signer = sign_key_manager.GetPrimitive(*private_key);
-  auto verifier = verify_key_manager.GetPrimitive(*public_key_data);
+  auto signer = sign_key_manager->GetPrimitive(*private_key);
+  auto verifier = verify_key_manager->GetPrimitive(*public_key_data);
   std::string message = "Wycheproof";
   EXPECT_TRUE(
       verifier.ValueOrDie()
@@ -188,8 +203,10 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, PublicKeyExtraction) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyWithWeakSignatureHash) {
-  RsaSsaPkcs1SignKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   RsaSsaPkcs1KeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
       SignatureKeyTemplates::RsaSsaPkcs14096Sha512F4().value()));
@@ -203,8 +220,10 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyWithWeakSignatureHash) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyWithSmallModulus) {
-  RsaSsaPkcs1SignKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
   RsaSsaPkcs1KeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
       SignatureKeyTemplates::RsaSsaPkcs14096Sha512F4().value()));
@@ -218,9 +237,14 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyWithSmallModulus) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, GetPrimitiveWithWeakSignatureHash) {
-  RsaSsaPkcs1SignKeyManager sign_key_manager;
+  RsaSsaPkcs1SignKeyManager sign_key_type_manager;
+  RsaSsaPkcs1VerifyKeyManager verify_key_type_manager;
+  auto verify_key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&verify_key_type_manager);
+  auto sign_key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+      &sign_key_type_manager, &verify_key_type_manager);
   auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
-      &(sign_key_manager.get_key_factory()));
+      &(sign_key_manager->get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
   auto new_key_result = private_key_factory->NewKey(
       SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4().value());
@@ -229,7 +253,7 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, GetPrimitiveWithWeakSignatureHash) {
           new_key_result.ValueOrDie().release()));
   private_key->mutable_public_key()->mutable_params()->set_hash_type(
       pb::HashType::SHA1);
-  auto result = sign_key_manager.GetPrimitive(*private_key);
+  auto result = sign_key_manager->GetPrimitive(*private_key);
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring,
@@ -238,9 +262,14 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, GetPrimitiveWithWeakSignatureHash) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, GetPrimitiveWithSmallModulus) {
-  RsaSsaPkcs1SignKeyManager sign_key_manager;
+  RsaSsaPkcs1SignKeyManager sign_key_type_manager;
+  RsaSsaPkcs1VerifyKeyManager verify_key_type_manager;
+  auto verify_key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&verify_key_type_manager);
+  auto sign_key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+      &sign_key_type_manager, &verify_key_type_manager);
   auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
-      &(sign_key_manager.get_key_factory()));
+      &(sign_key_manager->get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
   auto new_key_result = private_key_factory->NewKey(
       SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4().value());
@@ -249,7 +278,7 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, GetPrimitiveWithSmallModulus) {
           new_key_result.ValueOrDie().release()));
   private_key->mutable_public_key()->set_n("\x23");
   private_key->mutable_public_key()->set_e("\x3");
-  auto result = sign_key_manager.GetPrimitive(*private_key);
+  auto result = sign_key_manager->GetPrimitive(*private_key);
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring,
@@ -258,13 +287,15 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, GetPrimitiveWithSmallModulus) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, KeyDataErrors) {
-  RsaSsaPkcs1SignKeyManager key_manager;
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type = "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -277,7 +308,7 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, KeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(rsa_ssa_pkcs1_sign_key_type_);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -290,7 +321,7 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, KeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(rsa_ssa_pkcs1_sign_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -299,8 +330,10 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, KeyDataErrors) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyErrors) {
-  RsaSsaPkcs1SignKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   // Empty key format.
   RsaSsaPkcs1KeyFormat key_format;
@@ -327,9 +360,14 @@ TEST_F(RsaSsaPkcs1SignKeyManagerTest, NewKeyErrors) {
 }
 
 TEST_F(RsaSsaPkcs1SignKeyManagerTest, PublicKeyExtractionErrors) {
-  RsaSsaPkcs1SignKeyManager key_manager;
-  auto private_key_factory =
-      dynamic_cast<const PrivateKeyFactory*>(&(key_manager.get_key_factory()));
+  RsaSsaPkcs1SignKeyManager sign_key_type_manager;
+  RsaSsaPkcs1VerifyKeyManager verify_key_type_manager;
+  auto verify_key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&verify_key_type_manager);
+  auto sign_key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+      &sign_key_type_manager, &verify_key_type_manager);
+  auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
+      &(sign_key_manager->get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
 
   auto public_key_data_result = private_key_factory->GetPublicKeyData(

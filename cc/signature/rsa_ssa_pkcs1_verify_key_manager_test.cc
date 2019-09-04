@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 
@@ -85,12 +86,14 @@ class RsaSsaPkcs1VerifyKeyManagerTest : public ::testing::Test {
 };
 
 TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
-  RsaSsaPkcs1VerifyKeyManager key_manager;
+  RsaSsaPkcs1VerifyKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
 
-  EXPECT_EQ(0, key_manager.get_version());
+  EXPECT_EQ(0, key_manager->get_version());
   EXPECT_EQ("type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
-            key_manager.get_key_type());
-  EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
+            key_manager->get_key_type());
+  EXPECT_TRUE(key_manager->DoesSupport(key_manager->get_key_type()));
 
   // NIST test vector should work.
   RsaSsaPkcs1PublicKey key;
@@ -98,7 +101,7 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
   key.set_version(0);
   key.set_n(nist_test_vector_.n);
   key.set_e(nist_test_vector_.e);
-  auto result = key_manager.GetPrimitive(key);
+  auto result = key_manager->GetPrimitive(key);
   EXPECT_TRUE(result.ok());
   EXPECT_TRUE(
       result.ValueOrDie()
@@ -107,13 +110,15 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyDataErrors) {
-  RsaSsaPkcs1VerifyKeyManager key_manager;
+  RsaSsaPkcs1VerifyKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
 
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type = "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -126,7 +131,7 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyDataErrors) {
     KeyData key_data;
     key_data.set_type_url(rsa_ssa_pkcs1_verify_key_type_);
     key_data.set_value("some bad serialized proto");
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -139,7 +144,7 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyDataErrors) {
     key.set_version(1);
     key_data.set_type_url(rsa_ssa_pkcs1_verify_key_type_);
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = key_manager->GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
@@ -148,7 +153,9 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyDataErrors) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyMessageErrors) {
-  RsaSsaPkcs1VerifyKeyManager key_manager;
+  RsaSsaPkcs1VerifyKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
 
   {  // Use SHA1 as signature hash.
     RsaSsaPkcs1PublicKey key;
@@ -156,7 +163,7 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyMessageErrors) {
     key.set_version(0);
     key.set_n(nist_test_vector_.n);
     key.set_e(nist_test_vector_.e);
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
@@ -170,7 +177,7 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyMessageErrors) {
     key.set_version(0);
     key.set_n("\x23");
     key.set_e("\x3");
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager->GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
@@ -180,8 +187,10 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, KeyMessageErrors) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NewKeyError) {
-  RsaSsaPkcs1VerifyKeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
+  RsaSsaPkcs1VerifyKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeyVerify>(&key_type_manager);
+  const KeyFactory& key_factory = key_manager->get_key_factory();
 
   {  // Via NewKey(format_proto).
     RsaSsaPkcs1KeyFormat key_format;
@@ -189,9 +198,6 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NewKeyError) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                        "use the RsaSsaPkcs1SignKeyManager",
                         result.status().error_message());
   }
 
@@ -202,9 +208,6 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NewKeyError) {
     EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
                         result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                        "use the RsaSsaPkcs1SignKeyManager",
-                        result.status().error_message());
   }
 
   {  // Via NewKeyData(serialized_format_proto).
@@ -213,9 +216,6 @@ TEST_F(RsaSsaPkcs1VerifyKeyManagerTest, NewKeyError) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                        "use the RsaSsaPkcs1SignKeyManager",
                         result.status().error_message());
   }
 }

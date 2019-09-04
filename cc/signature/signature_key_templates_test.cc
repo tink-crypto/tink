@@ -236,9 +236,11 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs13072Sha256F4) {
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the key manager works with the template.
-  RsaSsaPkcs1SignKeyManager key_manager;
-  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-  auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+  auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 
@@ -267,9 +269,11 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs14096Sha512F4) {
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the key manager works with the template.
-  RsaSsaPkcs1SignKeyManager key_manager;
-  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-  auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+  RsaSsaPkcs1SignKeyManager key_type_manager;
+  auto key_manager =
+      internal::MakeKeyManager<PublicKeySign>(&key_type_manager);
+  EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+  auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 
