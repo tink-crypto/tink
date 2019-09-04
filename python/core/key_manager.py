@@ -19,9 +19,6 @@ from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
-
-# Special imports
-
 from typing import Any, Generic, Text, Type, TypeVar
 
 from tink.proto import tink_pb2

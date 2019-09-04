@@ -19,7 +19,7 @@ from __future__ import division
 from __future__ import google_type_annotations
 from __future__ import print_function
 
-import logging
+from absl import logging
 from typing import Type
 
 from tink.proto import tink_pb2
