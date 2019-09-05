@@ -29,7 +29,6 @@
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
-#include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
