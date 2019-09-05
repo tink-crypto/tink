@@ -19,6 +19,10 @@ package com.google.crypto.tink.signature;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Config;
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
+import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.PrivateKeyManagerImpl;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
@@ -44,7 +48,9 @@ public class Ed25519PublicKeyManagerTest {
 
   @Test
   public void testModifiedSignature() throws Exception {
-    Ed25519PrivateKeyManager manager = new Ed25519PrivateKeyManager();
+    PrivateKeyManager<PublicKeySign> manager =
+        new PrivateKeyManagerImpl<>(
+            new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), PublicKeySign.class);
     KeyTemplate template = SignatureKeyTemplates.ED25519;
     MessageLite key = manager.newKey(template.getValue());
     Ed25519PrivateKey keyProto = (Ed25519PrivateKey) key;
@@ -52,7 +58,8 @@ public class Ed25519PublicKeyManagerTest {
     PublicKeySign signer = manager.getPrimitive(key);
     byte[] message = Random.randBytes(20);
     byte[] signature = signer.sign(message);
-    Ed25519PublicKeyManager publicKeyManager = new Ed25519PublicKeyManager();
+    KeyManager<PublicKeyVerify> publicKeyManager =
+        new KeyManagerImpl<>(new Ed25519PublicKeyManager(), PublicKeyVerify.class);
     PublicKeyVerify verifier = publicKeyManager.getPrimitive(keyProto.getPublicKey());
     try {
       verifier.verify(signature, message);

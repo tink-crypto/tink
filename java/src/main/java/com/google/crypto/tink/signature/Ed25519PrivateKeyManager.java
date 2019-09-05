@@ -16,13 +16,11 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManagerBase;
-import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
-import com.google.crypto.tink.proto.Empty;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.Validators;
@@ -34,82 +32,79 @@ import java.security.GeneralSecurityException;
  * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and produces new
  * instances of {@code Ed25519Sign}.
  */
-class Ed25519PrivateKeyManager
-    extends KeyManagerBase<PublicKeySign, Ed25519PrivateKey, Empty>
-    implements PrivateKeyManager<PublicKeySign> {
+class Ed25519PrivateKeyManager extends PrivateKeyTypeManager<Ed25519PrivateKey, Ed25519PublicKey> {
   public Ed25519PrivateKeyManager() {
-    super(PublicKeySign.class, Ed25519PrivateKey.class, Empty.class, TYPE_URL);
-  }
-
-  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
-
-  private static final int VERSION = 0;
-
-  @Override
-  public PublicKeySign getPrimitiveFromKey(Ed25519PrivateKey keyProto)
-      throws GeneralSecurityException {
-    return new Ed25519Sign(keyProto.getKeyValue().toByteArray());
-  }
-
-  @Override
-  public Ed25519PrivateKey newKeyFromFormat(Empty unused) throws GeneralSecurityException {
-    Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
-    Ed25519PublicKey publicKey =
-        Ed25519PublicKey.newBuilder()
-            .setVersion(VERSION)
-            .setKeyValue(ByteString.copyFrom(keyPair.getPublicKey()))
-            .build();
-    return Ed25519PrivateKey.newBuilder()
-        .setVersion(VERSION)
-        .setKeyValue(ByteString.copyFrom(keyPair.getPrivateKey()))
-        .setPublicKey(publicKey)
-        .build();
+    super(
+        Ed25519PrivateKey.class,
+        Ed25519PublicKey.class,
+        new PrimitiveFactory<PublicKeySign, Ed25519PrivateKey>(PublicKeySign.class) {
+          @Override
+          public PublicKeySign getPrimitive(Ed25519PrivateKey keyProto)
+              throws GeneralSecurityException {
+            return new Ed25519Sign(keyProto.getKeyValue().toByteArray());
+          }
+        });
   }
 
   @Override
-  public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      Ed25519PrivateKey privKeyProto = Ed25519PrivateKey.parseFrom(serializedKey);
-      return KeyData.newBuilder()
-          .setTypeUrl(Ed25519PublicKeyManager.TYPE_URL)
-          .setValue(privKeyProto.getPublicKey().toByteString())
-          .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
-          .build();
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized Ed25519PrivateKey proto", e);
-    }
-  }
-
-  @Override
-  protected KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.ASYMMETRIC_PRIVATE;
-  }
-
-  @Override
-  protected Ed25519PrivateKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return Ed25519PrivateKey.parseFrom(byteString);
-  }
-
-  @Override
-  protected Empty parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return Empty.parseFrom(byteString);
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected void validateKey(Ed25519PrivateKey keyProto) throws GeneralSecurityException {
-    Validators.validateVersion(keyProto.getVersion(), VERSION);
+  public Ed25519PublicKey getPublicKey(Ed25519PrivateKey key) throws GeneralSecurityException {
+    return key.getPublicKey();
+  }
+
+  @Override
+  public KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.ASYMMETRIC_PRIVATE;
+  }
+
+  @Override
+  public Ed25519PrivateKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
+    return Ed25519PrivateKey.parseFrom(byteString);
+  }
+
+  @Override
+  public void validateKey(Ed25519PrivateKey keyProto) throws GeneralSecurityException {
+    Validators.validateVersion(keyProto.getVersion(), getVersion());
     if (keyProto.getKeyValue().size() != Ed25519Sign.SECRET_KEY_LEN) {
       throw new GeneralSecurityException("invalid Ed25519 private key: incorrect key length");
     }
   }
 
   @Override
-  protected void validateKeyFormat(Empty unused) {}
+  public KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
+    return new KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(Ed25519KeyFormat.class) {
+      @Override
+      public void validateKeyFormat(Ed25519KeyFormat format) throws GeneralSecurityException {}
+
+      @Override
+      public Ed25519KeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return Ed25519KeyFormat.parseFrom(byteString);
+      }
+
+      @Override
+      public Ed25519PrivateKey createKey(Ed25519KeyFormat format) throws GeneralSecurityException {
+        Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
+        Ed25519PublicKey publicKey =
+            Ed25519PublicKey.newBuilder()
+                .setVersion(getVersion())
+                .setKeyValue(ByteString.copyFrom(keyPair.getPublicKey()))
+                .build();
+        return Ed25519PrivateKey.newBuilder()
+            .setVersion(getVersion())
+            .setKeyValue(ByteString.copyFrom(keyPair.getPrivateKey()))
+            .setPublicKey(publicKey)
+            .build();
+      }
+    };
+  }
 }

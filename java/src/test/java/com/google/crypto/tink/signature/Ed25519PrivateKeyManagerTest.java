@@ -22,7 +22,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Config;
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.PrivateKeyManagerImpl;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
@@ -45,12 +49,13 @@ public class Ed25519PrivateKeyManagerTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     Config.register(SignatureConfig.TINK_1_0_0);
-    ;
   }
 
   @Test
   public void testBasic() throws Exception {
-    Ed25519PrivateKeyManager manager = new Ed25519PrivateKeyManager();
+    PrivateKeyManager<PublicKeySign> manager =
+        new PrivateKeyManagerImpl<>(
+            new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), PublicKeySign.class);
     KeyTemplate template = SignatureKeyTemplates.ED25519;
     MessageLite key = manager.newKey(template.getValue());
     assertTrue(key instanceof Ed25519PrivateKey);
@@ -64,7 +69,8 @@ public class Ed25519PrivateKeyManagerTest {
     byte[] signature = signer.sign(message);
     assertEquals(64, signature.length);
 
-    Ed25519PublicKeyManager publicKeyManager = new Ed25519PublicKeyManager();
+    KeyManager<PublicKeyVerify> publicKeyManager =
+        new KeyManagerImpl<>(new Ed25519PublicKeyManager(), PublicKeyVerify.class);
     PublicKeyVerify verifier = publicKeyManager.getPrimitive(keyProto.getPublicKey());
     assertTrue(verifier instanceof Ed25519Verify);
     try {
@@ -79,15 +85,18 @@ public class Ed25519PrivateKeyManagerTest {
   public void testGetPublicKeyData() throws Exception {
     KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519);
     KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
-    Ed25519PrivateKeyManager privateManager = new Ed25519PrivateKeyManager();
+    PrivateKeyManager<PublicKeySign> privateManager =
+        new PrivateKeyManagerImpl<>(
+            new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), PublicKeySign.class);
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
-    assertEquals(Ed25519PublicKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
+    assertEquals(new Ed25519PublicKeyManager().getKeyType(), publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
     Ed25519PrivateKey privateKey = Ed25519PrivateKey.parseFrom(privateKeyData.getValue());
     assertArrayEquals(
         privateKey.getPublicKey().toByteArray(), publicKeyData.getValue().toByteArray());
 
-    Ed25519PublicKeyManager publicManager = new Ed25519PublicKeyManager();
+    KeyManager<PublicKeyVerify> publicManager =
+        new KeyManagerImpl<>(new Ed25519PublicKeyManager(), PublicKeyVerify.class);
     PublicKeySign signer = privateManager.getPrimitive(privateKeyData.getValue());
     PublicKeyVerify verifier = publicManager.getPrimitive(publicKeyData.getValue());
     byte[] message = Random.randBytes(20);

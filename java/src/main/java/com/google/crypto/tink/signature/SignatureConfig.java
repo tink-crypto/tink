@@ -40,8 +40,10 @@ import java.security.GeneralSecurityException;
 public final class SignatureConfig {
   public static final String ECDSA_PUBLIC_KEY_TYPE_URL = new EcdsaVerifyKeyManager().getKeyType();
   public static final String ECDSA_PRIVATE_KEY_TYPE_URL = new EcdsaSignKeyManager().getKeyType();
-  public static final String ED25519_PUBLIC_KEY_TYPE_URL = Ed25519PublicKeyManager.TYPE_URL;
-  public static final String ED25519_PRIVATE_KEY_TYPE_URL = Ed25519PrivateKeyManager.TYPE_URL;
+  public static final String ED25519_PUBLIC_KEY_TYPE_URL =
+      new Ed25519PublicKeyManager().getKeyType();
+  public static final String ED25519_PRIVATE_KEY_TYPE_URL =
+      new Ed25519PrivateKeyManager().getKeyType();
 
   /** @deprecated */
   @Deprecated
@@ -87,8 +89,8 @@ public final class SignatureConfig {
     Registry.registerAsymmetricKeyManagers(
         new EcdsaSignKeyManager(), new EcdsaVerifyKeyManager(), true);
 
-    Registry.registerKeyManager(new Ed25519PrivateKeyManager());
-    Registry.registerKeyManager(new Ed25519PublicKeyManager());
+    Registry.registerAsymmetricKeyManagers(
+        new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), true);
 
     Registry.registerKeyManager(new RsaSsaPkcs1SignKeyManager());
     Registry.registerKeyManager(new RsaSsaPkcs1VerifyKeyManager());

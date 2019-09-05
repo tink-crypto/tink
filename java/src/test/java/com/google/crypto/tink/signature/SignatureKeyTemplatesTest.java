@@ -120,7 +120,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void testED25519() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ED25519;
-    assertEquals(Ed25519PrivateKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new Ed25519PrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     assertTrue(template.getValue().isEmpty()); // Empty format.
   }

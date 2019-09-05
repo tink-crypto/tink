@@ -16,10 +16,9 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
-import com.google.crypto.tink.proto.Empty;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.Validators;
@@ -31,55 +30,43 @@ import java.security.GeneralSecurityException;
  * This key manager produces new instances of {@code Ed25519Verify}. It doesn't support key
  * generation.
  */
-class Ed25519PublicKeyManager extends KeyManagerBase<PublicKeyVerify, Ed25519PublicKey, Empty> {
+class Ed25519PublicKeyManager extends KeyTypeManager<Ed25519PublicKey> {
   public Ed25519PublicKeyManager() {
-    super(PublicKeyVerify.class, Ed25519PublicKey.class, Empty.class, TYPE_URL);
-  }
-  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
-
-  private static final int VERSION = 0;
-
-  @Override
-  public PublicKeyVerify getPrimitiveFromKey(Ed25519PublicKey keyProto)
-      throws GeneralSecurityException {
-    return new Ed25519Verify(keyProto.getKeyValue().toByteArray());
+    super(
+        Ed25519PublicKey.class,
+        new PrimitiveFactory<PublicKeyVerify, Ed25519PublicKey>(PublicKeyVerify.class) {
+          @Override
+          public PublicKeyVerify getPrimitive(Ed25519PublicKey keyProto) {
+            return new Ed25519Verify(keyProto.getKeyValue().toByteArray());
+          }
+        });
   }
 
   @Override
-  protected Ed25519PublicKey newKeyFromFormat(Empty unused) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented");
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.ASYMMETRIC_PUBLIC;
   }
 
   @Override
-  protected Ed25519PublicKey parseKeyProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
+  public Ed25519PublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
     return Ed25519PublicKey.parseFrom(byteString);
   }
 
   @Override
-  protected Empty parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return Empty.parseFrom(byteString);
-  }
-
-  @Override
-  protected void validateKey(Ed25519PublicKey keyProto) throws GeneralSecurityException {
-    Validators.validateVersion(keyProto.getVersion(), VERSION);
+  public void validateKey(Ed25519PublicKey keyProto) throws GeneralSecurityException {
+    Validators.validateVersion(keyProto.getVersion(), getVersion());
     if (keyProto.getKeyValue().size() != Ed25519Verify.PUBLIC_KEY_LEN) {
       throw new GeneralSecurityException("invalid Ed25519 public key: incorrect key length");
     }
   }
-
-  @Override
-  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

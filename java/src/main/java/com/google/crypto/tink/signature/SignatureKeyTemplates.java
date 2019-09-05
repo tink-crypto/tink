@@ -141,7 +141,7 @@ public final class SignatureKeyTemplates {
    */
   public static final KeyTemplate ED25519 =
       KeyTemplate.newBuilder()
-          .setTypeUrl(Ed25519PrivateKeyManager.TYPE_URL)
+          .setTypeUrl(new Ed25519PrivateKeyManager().getKeyType())
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 
