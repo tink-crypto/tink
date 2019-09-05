@@ -16,24 +16,18 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Config;
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.KeyManagerImpl;
-import com.google.crypto.tink.PrivateKeyManager;
-import com.google.crypto.tink.PrivateKeyManagerImpl;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TestUtil.BytesMutation;
+import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
-import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.proto.Ed25519PublicKey;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.MessageLite;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -41,56 +35,108 @@ import org.junit.runners.JUnit4;
 /** Unit tests for Ed25519PublicKeyManager. */
 @RunWith(JUnit4.class)
 public class Ed25519PublicKeyManagerTest {
-  @Before
-  public void setUp() throws GeneralSecurityException {
-    Config.register(SignatureConfig.TINK_1_0_0);
+  private final Ed25519PrivateKeyManager signManager = new Ed25519PrivateKeyManager();
+  private final Ed25519PrivateKeyManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> factory =
+      signManager.keyFactory();
+
+  private final Ed25519PublicKeyManager verifyManager = new Ed25519PublicKeyManager();
+
+  @Test
+  public void basics() throws Exception {
+    assertThat(verifyManager.getKeyType())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.Ed25519PublicKey");
+    assertThat(verifyManager.getVersion()).isEqualTo(0);
+    assertThat(verifyManager.keyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
   }
 
   @Test
-  public void testModifiedSignature() throws Exception {
-    PrivateKeyManager<PublicKeySign> manager =
-        new PrivateKeyManagerImpl<>(
-            new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), PublicKeySign.class);
-    KeyTemplate template = SignatureKeyTemplates.ED25519;
-    MessageLite key = manager.newKey(template.getValue());
-    Ed25519PrivateKey keyProto = (Ed25519PrivateKey) key;
+  public void validateKey_empty_throws() throws Exception {
+    try {
+      verifyManager.validateKey(Ed25519PublicKey.getDefaultInstance());
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
 
-    PublicKeySign signer = manager.getPrimitive(key);
-    byte[] message = Random.randBytes(20);
+  private Ed25519PrivateKey createPrivateKey() throws GeneralSecurityException {
+    return factory.createKey(Ed25519KeyFormat.getDefaultInstance());
+  }
+
+  @Test
+  public void validateKey() throws Exception {
+    Ed25519PublicKey publicKey = signManager.getPublicKey(createPrivateKey());
+    verifyManager.validateKey(publicKey);
+  }
+
+  @Test
+  public void validateKey_wrongVersion() throws Exception {
+    Ed25519PublicKey publicKey = signManager.getPublicKey(createPrivateKey());
+    Ed25519PublicKey invalidKey = Ed25519PublicKey.newBuilder(publicKey).setVersion(1).build();
+    try {
+      verifyManager.validateKey(invalidKey);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKey_wrongLength31_throws() throws Exception {
+    Ed25519PublicKey publicKey = signManager.getPublicKey(createPrivateKey());
+    Ed25519PublicKey invalidKey = Ed25519PublicKey.newBuilder(publicKey)
+              .setKeyValue(ByteString.copyFrom(Random.randBytes(31)))
+              .build();
+    try {
+      verifyManager.validateKey(invalidKey);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void validateKey_wrongLength64_throws() throws Exception {
+    Ed25519PublicKey publicKey = signManager.getPublicKey(createPrivateKey());
+    Ed25519PublicKey invalidKey = Ed25519PublicKey.newBuilder(publicKey)
+              .setKeyValue(ByteString.copyFrom(Random.randBytes(64)))
+              .build();
+    try {
+      verifyManager.validateKey(invalidKey);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void createPrimitive() throws Exception {
+    Ed25519PrivateKey privateKey = createPrivateKey();
+    Ed25519PublicKey publicKey = signManager.getPublicKey(privateKey);
+
+    PublicKeySign signer = signManager.getPrimitive(privateKey, PublicKeySign.class);
+    PublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, PublicKeyVerify.class);
+
+    byte[] message = Random.randBytes(135);
+    verifier.verify(signer.sign(message), message);
+  }
+
+  @Test
+  public void createPrimitive_anotherKey_throws() throws Exception {
+    Ed25519PrivateKey privateKey = createPrivateKey();
+    // Create a different key.
+    Ed25519PublicKey publicKey = signManager.getPublicKey(createPrivateKey());
+
+    PublicKeySign signer = signManager.getPrimitive(privateKey, PublicKeySign.class);
+    PublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, PublicKeyVerify.class);
+
+    byte[] message = Random.randBytes(135);
     byte[] signature = signer.sign(message);
-    KeyManager<PublicKeyVerify> publicKeyManager =
-        new KeyManagerImpl<>(new Ed25519PublicKeyManager(), PublicKeyVerify.class);
-    PublicKeyVerify verifier = publicKeyManager.getPrimitive(keyProto.getPublicKey());
     try {
       verifier.verify(signature, message);
+      fail();
     } catch (GeneralSecurityException e) {
-      fail("Did not expect GeneralSecurityException: " + e);
-    }
-
-    for (BytesMutation mutation : TestUtil.generateMutations(message)) {
-      try {
-        verifier.verify(signature, mutation.value);
-        fail(
-            String.format(
-                "Invalid message, should have thrown exception: sig = %s, msg = %s,"
-                    + " description = %s",
-                Hex.encode(signature), Hex.encode(mutation.value), mutation.description));
-      } catch (GeneralSecurityException expected) {
-        // Expected.
-      }
-    }
-
-    for (BytesMutation mutation : TestUtil.generateMutations(signature)) {
-      try {
-        verifier.verify(mutation.value, message);
-        fail(
-            String.format(
-                "Invalid signature, should have thrown exception: signature = %s, msg = %s,"
-                    + " description = %s",
-                Hex.encode(mutation.value), Hex.encode(message), mutation.description));
-      } catch (GeneralSecurityException expected) {
-        // Expected.
-      }
+      // expected
     }
   }
 }

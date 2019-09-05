@@ -74,6 +74,7 @@ class Ed25519PrivateKeyManager extends PrivateKeyTypeManager<Ed25519PrivateKey, 
   @Override
   public void validateKey(Ed25519PrivateKey keyProto) throws GeneralSecurityException {
     Validators.validateVersion(keyProto.getVersion(), getVersion());
+    new Ed25519PublicKeyManager().validateKey(keyProto.getPublicKey());
     if (keyProto.getKeyValue().size() != Ed25519Sign.SECRET_KEY_LEN) {
       throw new GeneralSecurityException("invalid Ed25519 private key: incorrect key length");
     }
