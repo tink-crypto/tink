@@ -177,13 +177,13 @@ public final class SignaturePemKeysetReader implements KeysetReader {
               .build();
       RsaSsaPssPublicKey pssPubKey =
           RsaSsaPssPublicKey.newBuilder()
-              .setVersion(RsaSsaPssVerifyKeyManager.VERSION)
+              .setVersion(new RsaSsaPssVerifyKeyManager().getVersion())
               .setParams(params)
               .setE(ByteString.copyFrom(key.getPublicExponent().toByteArray()))
               .setN(ByteString.copyFrom(key.getModulus().toByteArray()))
               .build();
       return KeyData.newBuilder()
-          .setTypeUrl(RsaSsaPssVerifyKeyManager.TYPE_URL)
+          .setTypeUrl(new RsaSsaPssVerifyKeyManager().getKeyType())
           .setValue(pssPubKey.toByteString())
           .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .build();

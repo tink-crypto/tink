@@ -72,7 +72,7 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(ks.getPrimaryKeyId()).isEqualTo(key.getKeyId());
     assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-    assertThat(keyData.getTypeUrl()).isEqualTo(RsaSsaPssVerifyKeyManager.TYPE_URL);
+    assertThat(keyData.getTypeUrl()).isEqualTo(new RsaSsaPssVerifyKeyManager().getKeyType());
     assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
     assertThat(publicKeyProto.getParams().getSigHash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
@@ -150,7 +150,7 @@ public final class SignaturePemKeysetReaderTest {
             PemKeyType.RSA_PSS_2048_SHA256.readKey(new BufferedReader(new StringReader(pem)));
     assertThat(firstKey.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(firstKey.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-    assertThat(keyData.getTypeUrl()).isEqualTo(RsaSsaPssVerifyKeyManager.TYPE_URL);
+    assertThat(keyData.getTypeUrl()).isEqualTo(new RsaSsaPssVerifyKeyManager().getKeyType());
     assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
     assertThat(publicKeyProto.getParams().getSigHash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
@@ -163,7 +163,7 @@ public final class SignaturePemKeysetReaderTest {
     publicKeyProto = RsaSsaPssPublicKey.parseFrom(keyData.getValue());
     assertThat(secondKey.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(secondKey.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-    assertThat(keyData.getTypeUrl()).isEqualTo(RsaSsaPssVerifyKeyManager.TYPE_URL);
+    assertThat(keyData.getTypeUrl()).isEqualTo(new RsaSsaPssVerifyKeyManager().getKeyType());
     assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
     assertThat(publicKeyProto.getParams().getSigHash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
@@ -201,7 +201,7 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(ks.getPrimaryKeyId()).isEqualTo(key.getKeyId());
     assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-    assertThat(keyData.getTypeUrl()).isEqualTo(RsaSsaPssVerifyKeyManager.TYPE_URL);
+    assertThat(keyData.getTypeUrl()).isEqualTo(new RsaSsaPssVerifyKeyManager().getKeyType());
     assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
     assertThat(publicKeyProto.getParams().getSigHash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
@@ -246,7 +246,7 @@ public final class SignaturePemKeysetReaderTest {
             PemKeyType.RSA_PSS_2048_SHA256.readKey(new BufferedReader(new StringReader(rsaPem)));
     assertThat(firstKey.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(firstKey.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-    assertThat(keyData.getTypeUrl()).isEqualTo(RsaSsaPssVerifyKeyManager.TYPE_URL);
+    assertThat(keyData.getTypeUrl()).isEqualTo(new RsaSsaPssVerifyKeyManager().getKeyType());
     assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
     assertThat(rsaPublicKeyProto.getParams().getSigHash()).isEqualTo(HashType.SHA256);
     assertThat(rsaPublicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);

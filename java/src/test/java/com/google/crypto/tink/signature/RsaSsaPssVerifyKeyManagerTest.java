@@ -18,6 +18,8 @@ package com.google.crypto.tink.signature;
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.HashType;
@@ -85,7 +87,8 @@ public final class RsaSsaPssVerifyKeyManagerTest {
       RsaSsaPssPublicKey pubKey =
           TestUtil.createRsaSsaPssPubKey(
               t.modulus, t.exponent, t.sigHash, t.mgf1Hash, t.saltLength);
-      RsaSsaPssVerifyKeyManager keyManager = new RsaSsaPssVerifyKeyManager();
+      KeyManager<PublicKeyVerify> keyManager =
+          new KeyManagerImpl<>(new RsaSsaPssVerifyKeyManager(), PublicKeyVerify.class);
       PublicKeyVerify verifier = keyManager.getPrimitive(pubKey);
       try {
         verifier.verify(t.sig, t.msg);
@@ -105,7 +108,8 @@ public final class RsaSsaPssVerifyKeyManagerTest {
               HashType.SHA256,
               HashType.SHA256,
               32);
-      RsaSsaPssVerifyKeyManager keyManager = new RsaSsaPssVerifyKeyManager();
+      KeyManager<PublicKeyVerify> keyManager =
+          new KeyManagerImpl<>(new RsaSsaPssVerifyKeyManager(), PublicKeyVerify.class);
       keyManager.getPrimitive(pubKey);
       fail("Invalid modulus, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -119,7 +123,8 @@ public final class RsaSsaPssVerifyKeyManagerTest {
     try {
       RsaSsaPssPublicKey pubKey =
           TestUtil.createRsaSsaPssPubKey(t.modulus, t.exponent, HashType.SHA1, HashType.SHA256, 20);
-      RsaSsaPssVerifyKeyManager keyManager = new RsaSsaPssVerifyKeyManager();
+      KeyManager<PublicKeyVerify> keyManager =
+          new KeyManagerImpl<>(new RsaSsaPssVerifyKeyManager(), PublicKeyVerify.class);
       keyManager.getPrimitive(pubKey);
       fail("Invalid hash, should have thrown exception");
     } catch (GeneralSecurityException e) {

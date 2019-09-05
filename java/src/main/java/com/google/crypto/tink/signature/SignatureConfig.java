@@ -95,8 +95,8 @@ public final class SignatureConfig {
     Registry.registerKeyManager(new RsaSsaPkcs1SignKeyManager());
     Registry.registerKeyManager(new RsaSsaPkcs1VerifyKeyManager());
 
-    Registry.registerKeyManager(new RsaSsaPssSignKeyManager());
-    Registry.registerKeyManager(new RsaSsaPssVerifyKeyManager());
+    Registry.registerAsymmetricKeyManagers(
+        new RsaSsaPssSignKeyManager(), new RsaSsaPssVerifyKeyManager(), true);
 
     Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());
     Registry.registerPrimitiveWrapper(new PublicKeyVerifyWrapper());

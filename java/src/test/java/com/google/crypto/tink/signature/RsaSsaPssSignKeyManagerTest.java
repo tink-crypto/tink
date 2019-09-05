@@ -20,7 +20,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.PrivateKeyManagerImpl;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
@@ -71,7 +75,9 @@ public class RsaSsaPssSignKeyManagerTest {
     // Call newKey multiple times and make sure that it generates different keys.
     int numTests = 3;
     RsaSsaPssPrivateKey[] privKeys = new RsaSsaPssPrivateKey[numTests];
-    RsaSsaPssSignKeyManager signManager = new RsaSsaPssSignKeyManager();
+    PrivateKeyManager<PublicKeySign> signManager =
+        new PrivateKeyManagerImpl<>(
+            new RsaSsaPssSignKeyManager(), new RsaSsaPssVerifyKeyManager(), PublicKeySign.class);
     Set<String> keys = new TreeSet<String>();
 
     privKeys[0] =
@@ -93,7 +99,8 @@ public class RsaSsaPssSignKeyManagerTest {
     }
 
     // Test whether signer works correctly with the corresponding verifier.
-    RsaSsaPssVerifyKeyManager verifyManager = new RsaSsaPssVerifyKeyManager();
+    KeyManager<PublicKeyVerify> verifyManager =
+        new KeyManagerImpl<>(new RsaSsaPssVerifyKeyManager(), PublicKeyVerify.class);
     for (int j = 0; j < numTests; j++) {
       PublicKeySign signer = signManager.getPrimitive(privKeys[j]);
       byte[] signature = signer.sign(msg);
@@ -128,10 +135,12 @@ public class RsaSsaPssSignKeyManagerTest {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
     KeyTemplate keyTemplate =
         KeyTemplate.newBuilder()
-            .setTypeUrl(RsaSsaPssSignKeyManager.TYPE_URL)
+            .setTypeUrl(new RsaSsaPssSignKeyManager().getKeyType())
             .setValue(serialized)
             .build();
-    RsaSsaPssSignKeyManager keyManager = new RsaSsaPssSignKeyManager();
+    PrivateKeyManager<PublicKeySign> keyManager =
+        new PrivateKeyManagerImpl<>(
+            new RsaSsaPssSignKeyManager(), new RsaSsaPssVerifyKeyManager(), PublicKeySign.class);
     try {
       keyManager.newKey(serialized);
       fail("Corrupted format, should have thrown exception");
@@ -156,14 +165,17 @@ public class RsaSsaPssSignKeyManagerTest {
     KeysetHandle privateHandle =
         KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4);
     KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
-    RsaSsaPssSignKeyManager privateManager = new RsaSsaPssSignKeyManager();
+    PrivateKeyManager<PublicKeySign> privateManager =
+        new PrivateKeyManagerImpl<>(
+            new RsaSsaPssSignKeyManager(), new RsaSsaPssVerifyKeyManager(), PublicKeySign.class);
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
-    assertEquals(RsaSsaPssVerifyKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
+    assertEquals(new RsaSsaPssVerifyKeyManager().getKeyType(), publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
     RsaSsaPssPrivateKey privateKey = RsaSsaPssPrivateKey.parseFrom(privateKeyData.getValue());
     assertArrayEquals(
         privateKey.getPublicKey().toByteArray(), publicKeyData.getValue().toByteArray());
-    RsaSsaPssVerifyKeyManager publicManager = new RsaSsaPssVerifyKeyManager();
+    KeyManager<PublicKeyVerify> publicManager =
+        new KeyManagerImpl<>(new RsaSsaPssVerifyKeyManager(), PublicKeyVerify.class);
     PublicKeySign signer = privateManager.getPrimitive(privateKeyData.getValue());
     PublicKeyVerify verifier = publicManager.getPrimitive(publicKeyData.getValue());
     byte[] message = Random.randBytes(20);
