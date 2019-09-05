@@ -21,6 +21,22 @@ set -e
 # Display commands to stderr.
 set -x
 
+readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
+
+# Only in Kokoro environments.
+if [[ -n "${KOKORO_ROOT}" ]]; then
+  # TODO(b/73748835): Workaround on Kokoro.
+  rm -f ~/.bazelrc
+
+  # TODO(b/131821833) Use the latest version of Bazel.
+  use_bazel.sh 0.26.1
+
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
+    export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+    export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+  fi
+fi
+
 # Verify required environment variables.
 
 # Required for building Java binaries.
@@ -34,8 +50,6 @@ if [[ -z "${TMP}" ]]; then
   exit 4
 fi
 
-readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
-
 declare -a DISABLE_SANDBOX_ARGS
 DISABLE_SANDBOX_ARGS=(
   --strategy=GenRule=standalone
@@ -47,23 +61,6 @@ DISABLE_SANDBOX_ARGS=(
   --sandbox_tmpfs_path=${TMP}
 )
 readonly DISABLE_SANDBOX_ARGS
-
-# Only in Kokoro environments.
-if [[ -n "${KOKORO_ROOT}" ]]; then
-  # TODO(b/73748835): Workaround on Kokoro.
-  rm -f ~/.bazelrc
-
-  # TODO(b/131821833) Use the latest version of Bazel.
-  use_bazel.sh 0.26.1
-
-  if [[ "${PLATFORM}" == 'darwin' ]]; then
-    export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-    export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
-
-    # TODO(b/120214184): Workaround for broken macos_external time sync.
-    sudo ntpdate -u time.apple.com
-  fi
-fi
 
 echo "using bazel binary: $(which bazel)"
 bazel version
@@ -91,8 +88,8 @@ run_linux_tests() {
 
 run_macos_tests() {
   # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=11.2}"
-  : "${XCODE_VERSION:=9.2}"
+  : "${IOS_SDK_VERSION:=12.2}"
+  : "${XCODE_VERSION:=10.2}"
 
   time bazel fetch ...
 
