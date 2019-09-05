@@ -478,20 +478,6 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME key_manager_base
-  SRCS core/key_manager_base.h
-  DEPS
-    tink::core::key_manager
-    tink::util::constants
-    tink::util::errors
-    tink::util::statusor
-    tink::proto::tink_cc_proto
-    absl::base
-    absl::memory
-    absl::strings
-)
-
-tink_cc_library(
   NAME keyset_manager
   SRCS
     core/keyset_manager.cc
@@ -567,7 +553,8 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::proto::tink_cc_proto
     tink::util::constants
-    tink::util::statusor
+    tink::util::status
+    absl::base
 )
 
 tink_cc_library(

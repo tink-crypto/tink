@@ -99,9 +99,9 @@ tink_cc_library(
     tink::core::aead
     tink::core::key_manager
     tink::core::key_type_manager
-    tink::core::key_manager_base
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
+    tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::status
@@ -120,7 +120,6 @@ tink_cc_library(
   DEPS
     tink::core::aead
     tink::core::key_manager
-    tink::core::key_manager_base
     tink::subtle::aes_gcm_siv_boringssl
     tink::subtle::random
     tink::util::constants

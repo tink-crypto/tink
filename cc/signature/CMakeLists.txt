@@ -262,7 +262,6 @@ tink_cc_library(
     rsa_ssa_pss_verify_key_manager.h
   DEPS
     tink::core::key_manager
-    tink::core::key_manager_base
     tink::core::public_key_verify
     tink::core::public_key_sign
     tink::subtle::rsa_ssa_pss_verify_boringssl

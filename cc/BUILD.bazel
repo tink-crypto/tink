@@ -576,23 +576,6 @@ cc_library(
 )
 
 cc_library(
-    name = "key_manager_base",
-    hdrs = ["core/key_manager_base.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = [
-        ":key_manager",
-        "//cc/util:constants",
-        "//cc/util:errors",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
-        "@com_google_absl//absl/base",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
-cc_library(
     name = "keyset_manager",
     srcs = ["core/keyset_manager.cc"],
     hdrs = ["keyset_manager.h"],
@@ -674,9 +657,10 @@ cc_library(
     deps = [
         ":core/key_type_manager",
         ":key_manager",
-        ":key_manager_base",
-        "//cc/util:statusor",
+        "//cc/util:constants",
+        "//cc/util:status",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
