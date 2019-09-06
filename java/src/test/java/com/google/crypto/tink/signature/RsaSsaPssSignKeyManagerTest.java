@@ -195,6 +195,10 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void createKey_smallKey() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA256, HashType.SHA256, 32, 3072, RSAKeyGenParameterSpec.F4);
     RsaSsaPssPrivateKey key = factory.createKey(format);
@@ -204,6 +208,10 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void createKey_largeKey() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA512, HashType.SHA512, 64, 4096, RSAKeyGenParameterSpec.F4);
     RsaSsaPssPrivateKey key = factory.createKey(format);
@@ -213,12 +221,16 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void createKey_alwaysNewElement() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA256, HashType.SHA256, 32, 3072, RSAKeyGenParameterSpec.F4);
     Set<String> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys -- takes about a
     // second per key.
-    int numTests = TestUtil.isTsan() ? 2 : 5;
+    int numTests = 5;
     for (int i = 0; i < numTests; i++) {
       RsaSsaPssPrivateKey key = factory.createKey(format);
       keys.add(TestUtil.hexEncode(key.getQ().toByteArray()));
@@ -229,6 +241,10 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void getPublicKey_correctValues() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA512, HashType.SHA512, 64, 4096, RSAKeyGenParameterSpec.F4);
     RsaSsaPssPrivateKey key = factory.createKey(format);
@@ -237,6 +253,11 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void createPrimitive() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA512, HashType.SHA512, 64, 4096, RSAKeyGenParameterSpec.F4);
     RsaSsaPssPrivateKey key = factory.createKey(format);

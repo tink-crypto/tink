@@ -118,6 +118,11 @@ public class RsaSsaPssVerifyKeyManagerTest {
 
   @Test
   public void validateKey_generated() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+
     RsaSsaPssKeyFormat keyFormat =
         RsaSsaPssKeyFormat.newBuilder()
             .setParams(
@@ -135,6 +140,11 @@ public class RsaSsaPssVerifyKeyManagerTest {
 
   @Test
   public void validateKey_testVector() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+    
     RsaSsaPssPublicKey publicKey = nistTestVectors[0].publicKeyProto;
     verifyManager.validateKey(publicKey);
   }
@@ -171,6 +181,11 @@ public class RsaSsaPssVerifyKeyManagerTest {
 
   @Test
   public void createPrimitive() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+
     RsaSsaPssKeyFormat keyFormat =
         RsaSsaPssKeyFormat.newBuilder()
             .setParams(
@@ -193,6 +208,11 @@ public class RsaSsaPssVerifyKeyManagerTest {
 
   @Test
   public void createPrimitive_anotherKey_throws() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+
     RsaSsaPssKeyFormat keyFormat =
         RsaSsaPssKeyFormat.newBuilder()
             .setParams(
