@@ -4001,6 +4001,8 @@
 <dd>
 <div class="block">Returns the type URL that identifies the key type of keys managed by this KeyManager.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KmsAeadKeyFormat.Builder.html#getKeyUri--">getKeyUri()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KmsAeadKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">KmsAeadKeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
@@ -5679,6 +5681,8 @@
 <dd>
 <div class="block">Returns the version number of this KeyManager.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCmacKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCmacKey.Builder</a></dt>
 <dd>
 <div class="block"><code>optional uint32 version = 1;</code></div>
@@ -6684,6 +6688,12 @@
 </dd>
 <dt><a href="com/google/crypto/tink/proto/HmacKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">HmacKeyFormatOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">HmacKeyManager</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
+<dd>
+<div class="block">This key manager generates new <code>HmacKey</code> keys and produces new instances of <code>MacJce</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#HmacKeyManager--">HmacKeyManager()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/HmacKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">HmacKeyOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/HmacParams.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">HmacParams</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
@@ -6991,6 +7001,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html#KeyFactory-java.lang.Class-">KeyFactory(Class&lt;KeyFormatProtoT&gt;)</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">KeyManager</span></a>&lt;<a href="com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt; - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">A KeyManager "understands" keys of a specific key type: it can generate keys of the supported
@@ -7016,6 +7028,8 @@
 <dd>
 <div class="block">Returns the <a href="com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto"><code>KeyData.KeyMaterialType</code></a> for this proto.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">Keyset</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>
 <div class="block">
@@ -9228,6 +9242,8 @@
 <dd>
 <div class="block">Parses a serialized key proto.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html#parseKeyFormat-com.google.protobuf.ByteString-">parseKeyFormat(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a></dt>
 <dd>
 <div class="block">Parses a serialized key proto.</div>
@@ -11375,6 +11391,8 @@
 <dd>
 <div class="block">Checks if the given <code>keyProto</code> is a valid key.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#validateKey-com.google.crypto.tink.proto.HmacKey-">validateKey(HmacKey)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#validateKeyFormat-KeyFormatProto-">validateKeyFormat(KeyFormatProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
 <dd>
 <div class="block">Checks if the given <code>keyProto</code> is a valid key format.</div>
