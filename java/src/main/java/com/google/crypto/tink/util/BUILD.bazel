@@ -20,8 +20,8 @@ java_library(
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
-        "@com_google_code_findbugs_jsr305",
-        "@com_google_http_client//jar",
-        "@joda_time//jar",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:joda_time_joda_time",
     ],
 )

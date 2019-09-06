@@ -226,11 +226,10 @@ java_library(
     ],
     deps = [
         ":testonly",
-        "@com_google_guava",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-        "@com_google_truth",
-        "@junit",
-        "@org_json",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
     ],
 )
 
@@ -244,26 +243,19 @@ java_library(
     srcs = glob([
         "src/test/**/*.java",
     ]),
-    runtime_deps = [
-        "@net_bytebuddy_byte_buddy",
-        "@net_bytebuddy_byte_buddy_agent",
-        "@org_objenesis",
-    ],
     deps = [
         ":awskms",
         ":gcpkms",
         ":testonly",
-        "@com_amazonaws_aws_java_sdk_core",
-        "@com_amazonaws_aws_java_sdk_kms",
-        "@com_fasterxml_jackson_core",
-        "@com_google_api_client",
-        "@com_google_guava",
-        "@com_google_http_client",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-        "@com_google_truth",
-        "@junit",
-        "@org_json",
-        "@org_mockito_core",
+        "@maven//:com_amazonaws_aws_java_sdk_core",
+        "@maven//:com_amazonaws_aws_java_sdk_kms",
+        "@maven//:com_google_api_client_google_api_client",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+        "@maven//:org_mockito_mockito_core",
     ],
 )
 
@@ -283,14 +275,14 @@ gen_java_test_rules(
         # b/112019120
         "src/test/java/com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJceTest",
     ],
-    no_rbe_tests = [
-        "src/test/java/com/google/crypto/tink/aead/KmsAeadKeyManagerTest",
-        "src/test/java/com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManagerTest",
-    ],
     medium_tests = [
         "src/test/java/com/google/crypto/tink/subtle/AesCtrHmacStreamingTest",
         "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",
         "src/test/java/com/google/crypto/tink/hybrid/EciesAeadHkdfHybridDecryptTest",
+    ],
+    no_rbe_tests = [
+        "src/test/java/com/google/crypto/tink/aead/KmsAeadKeyManagerTest",
+        "src/test/java/com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManagerTest",
     ],
     test_files = glob(
         [

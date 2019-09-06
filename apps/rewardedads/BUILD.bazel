@@ -20,8 +20,8 @@ java_library(
     deps = [
         "//java",
         "//java:subtle",
-        "@com_google_http_client",
-        "@org_json//jar",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:org_json_json",
     ],
 )
 
@@ -49,9 +49,9 @@ java_library(
     deps = [
         ":rewardedads",
         "//java:testonly",
-        "@com_google_http_client",
-        "@junit",
-        "@org_json//jar",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
     ],
 )
 

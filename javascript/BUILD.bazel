@@ -4,18 +4,24 @@ package(
 
 licenses(["notice"])
 
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_library", "closure_js_test")
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_binary", "closure_js_library", "closure_js_test")
+
+closure_js_binary(
+    name = "javascript_bin",
+    visibility = ["//visibility:public"],
+    deps = [":javascript"],
+)
 
 closure_js_library(
     name = "javascript",
     visibility = ["//visibility:public"],
     exports = [
-        ":primitives",
         ":binary_reader",
         ":binary_writer",
-        ":readers_writers",
-        ":keyset_handle",
         ":key_manager",
+        ":keyset_handle",
+        ":primitives",
+        ":readers_writers",
         ":registry",
     ],
 )
@@ -86,6 +92,7 @@ closure_js_library(
         ":registry",
         ":util",
         "//javascript/exception",
+        "//javascript/subtle",
         "//proto:tink_closure_proto",
         "@io_bazel_rules_closure//closure/library",
     ],

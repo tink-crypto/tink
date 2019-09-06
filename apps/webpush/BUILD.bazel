@@ -40,7 +40,7 @@ java_library(
     deps = [
         ":webpush",
         "//java:testonly",
-        "@junit",
+        "@maven//:junit_junit",
     ],
 )
 

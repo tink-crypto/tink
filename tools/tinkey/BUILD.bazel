@@ -22,15 +22,15 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/aead",
         "//java/src/main/java/com/google/crypto/tink/daead",
         "//java/src/main/java/com/google/crypto/tink/hybrid",
+        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
+        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
         "//java/src/main/java/com/google/crypto/tink/mac",
         "//java/src/main/java/com/google/crypto/tink/signature",
         "//java/src/main/java/com/google/crypto/tink/streamingaead",
-        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
-        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//proto:tink_java_proto",
-        "@args4j//jar",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
+        "@maven//:args4j_args4j",
     ],
 )
 
@@ -42,13 +42,10 @@ java_binary(
     javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.tinkey.Tinkey",
     visibility = ["//tools/testing:__subpackages__"],
-    runtime_deps = [
-        "@com_fasterxml_jackson_core//jar",
-    ],
     deps = [
         ":libtinkey",
         "//java/src/main/java/com/google/crypto/tink/config",
-        "@args4j//jar",
+        "@maven//:args4j_args4j",
     ],
 )
 
@@ -67,8 +64,8 @@ java_library(
         "//java:testonly",
         "//java:testutil",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-        "@com_google_truth//jar",
-        "@junit",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
     ],
 )
 
