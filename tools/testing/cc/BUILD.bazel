@@ -150,16 +150,17 @@ sh_test(
     tags = ["no_rbe"],
 )
 
-# TODO(b/119547792): Temporarily disabling until reliability concerns are addressed.
-#sh_test(
-#    name = "gcp_kms_aead_test",
-#    size = "medium",
-#    srcs = [
-#        "gcp_kms_aead_test.sh",
-#    ],
-#    data = [
-#        ":gcp_kms_aead_cli",
-#        "//testdata:credentials",
-#        "//tools/testing/cross_language:test_lib",
-#    ],
-#)
+sh_test(
+    name = "gcp_kms_aead_test",
+    size = "medium",
+    srcs = [
+        "gcp_kms_aead_test.sh",
+    ],
+    data = [
+        ":gcp_kms_aead_cli",
+        "//testdata:credentials",
+        "//tools/testing/cross_language:test_lib",
+        "@google_root_pem//file",
+    ],
+    tags = ["no_rbe"],
+)
