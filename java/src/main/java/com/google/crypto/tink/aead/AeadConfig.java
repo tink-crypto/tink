@@ -34,7 +34,8 @@ import java.security.GeneralSecurityException;
  * @since 1.0.0
  */
 public final class AeadConfig {
-  public static final String AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.TYPE_URL;
+  public static final String AES_CTR_HMAC_AEAD_TYPE_URL =
+      new AesCtrHmacAeadKeyManager().getKeyType();
   public static final String AES_GCM_TYPE_URL = new AesGcmKeyManager().getKeyType();
   public static final String AES_EAX_TYPE_URL = new AesEaxKeyManager().getKeyType();
   public static final String KMS_AEAD_TYPE_URL = new KmsAeadKeyManager().getKeyType();
@@ -96,7 +97,7 @@ public final class AeadConfig {
    */
   public static void register() throws GeneralSecurityException {
     MacConfig.register();
-    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager());
+    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new AesEaxKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new AesGcmKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new ChaCha20Poly1305KeyManager(), /*newKeyAllowed=*/ true);

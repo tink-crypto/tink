@@ -106,7 +106,7 @@ public class AeadKeyTemplatesTest {
   @Test
   public void testAES128_CTR_HMAC_SHA256() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    assertEquals(AesCtrHmacAeadKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesCtrHmacAeadKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(template.getValue());
 
@@ -125,7 +125,7 @@ public class AeadKeyTemplatesTest {
   @Test
   public void testAES256_CTR_HMAC_SHA256() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES256_CTR_HMAC_SHA256;
-    assertEquals(AesCtrHmacAeadKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesCtrHmacAeadKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(template.getValue());
 
@@ -152,7 +152,7 @@ public class AeadKeyTemplatesTest {
     HashType hashType = HashType.UNKNOWN_HASH;
     KeyTemplate template = AeadKeyTemplates.createAesCtrHmacAeadKeyTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize, hashType);
-    assertEquals(AesCtrHmacAeadKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new AesCtrHmacAeadKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(template.getValue());
 
