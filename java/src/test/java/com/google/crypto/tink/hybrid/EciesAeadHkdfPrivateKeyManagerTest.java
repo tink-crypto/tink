@@ -22,7 +22,11 @@ import static org.junit.Assert.assertEquals;
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.PrivateKeyManagerImpl;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.EcPointFormat;
@@ -62,7 +66,11 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
         HybridKeyTemplates.createEciesAeadHkdfParams(
             curve, hashType, pointFormat, demKeyTemplate, salt);
 
-    EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
+    PrivateKeyManager<HybridDecrypt> manager =
+        new PrivateKeyManagerImpl<>(
+            new EciesAeadHkdfPrivateKeyManager(),
+            new EciesAeadHkdfPublicKeyManager(),
+            HybridDecrypt.class);
     EciesAeadHkdfPrivateKey keyProto =
         (EciesAeadHkdfPrivateKey)
             manager.newKey(EciesAeadHkdfKeyFormat.newBuilder().setParams(params).build());
@@ -72,7 +80,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 keyProto,
-                EciesAeadHkdfPrivateKeyManager.TYPE_URL,
+                new EciesAeadHkdfPrivateKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
             8,
             KeyStatusType.ENABLED,
@@ -81,7 +89,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 keyProto.getPublicKey(),
-                EciesAeadHkdfPublicKeyManager.TYPE_URL,
+                new EciesAeadHkdfPublicKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
             42,
             KeyStatusType.ENABLED,
@@ -103,16 +111,21 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
         KeysetHandle.generateNew(
             HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256);
     KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
-    EciesAeadHkdfPrivateKeyManager privateManager = new EciesAeadHkdfPrivateKeyManager();
+    PrivateKeyManager<HybridDecrypt> privateManager =
+        new PrivateKeyManagerImpl<>(
+            new EciesAeadHkdfPrivateKeyManager(),
+            new EciesAeadHkdfPublicKeyManager(),
+            HybridDecrypt.class);
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
-    assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
+    assertEquals(new EciesAeadHkdfPublicKeyManager().getKeyType(), publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
     EciesAeadHkdfPrivateKey privateKey =
         EciesAeadHkdfPrivateKey.parseFrom(privateKeyData.getValue());
     assertArrayEquals(
         privateKey.getPublicKey().toByteArray(), publicKeyData.getValue().toByteArray());
 
-    EciesAeadHkdfPublicKeyManager publicManager = new EciesAeadHkdfPublicKeyManager();
+    KeyManager<HybridEncrypt> publicManager =
+        new KeyManagerImpl<>(new EciesAeadHkdfPublicKeyManager(), HybridEncrypt.class);
     HybridEncrypt hybridEncrypt = publicManager.getPrimitive(publicKeyData.getValue());
     HybridDecrypt hybridDecrypt = privateManager.getPrimitive(privateKeyData.getValue());
     byte[] message = Random.randBytes(20);

@@ -40,9 +40,9 @@ import java.security.GeneralSecurityException;
  */
 public final class HybridConfig {
   public static final String ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE_URL =
-      EciesAeadHkdfPublicKeyManager.TYPE_URL;
+      new EciesAeadHkdfPublicKeyManager().getKeyType();
   public static final String ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE_URL =
-      EciesAeadHkdfPrivateKeyManager.TYPE_URL;
+      new EciesAeadHkdfPrivateKeyManager().getKeyType();
 
   /** @deprecated */
   @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
@@ -95,8 +95,10 @@ public final class HybridConfig {
    */
   public static void register() throws GeneralSecurityException {
     AeadConfig.register();
-    Registry.registerKeyManager(new EciesAeadHkdfPrivateKeyManager());
-    Registry.registerKeyManager(new EciesAeadHkdfPublicKeyManager());
+    Registry.registerAsymmetricKeyManagers(
+        new EciesAeadHkdfPrivateKeyManager(),
+        new EciesAeadHkdfPublicKeyManager(),
+        /*newKeyAllowed=*/ true);
     Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
     Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
   }

@@ -17,14 +17,12 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.KeyManagerBase;
-import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
@@ -43,113 +41,112 @@ import java.security.spec.ECPoint;
  * {@code EciesAeadHkdfHybridDecrypt}.
  */
 class EciesAeadHkdfPrivateKeyManager
-    extends KeyManagerBase<HybridDecrypt, EciesAeadHkdfPrivateKey, EciesAeadHkdfKeyFormat>
-    implements PrivateKeyManager<HybridDecrypt> {
+    extends PrivateKeyTypeManager<EciesAeadHkdfPrivateKey, EciesAeadHkdfPublicKey> {
   public EciesAeadHkdfPrivateKeyManager() {
     super(
-        HybridDecrypt.class, EciesAeadHkdfPrivateKey.class, EciesAeadHkdfKeyFormat.class, TYPE_URL);
+        EciesAeadHkdfPrivateKey.class,
+        EciesAeadHkdfPublicKey.class,
+        new PrimitiveFactory<HybridDecrypt, EciesAeadHkdfPrivateKey>(HybridDecrypt.class) {
+          @Override
+          public HybridDecrypt getPrimitive(EciesAeadHkdfPrivateKey recipientKeyProto)
+              throws GeneralSecurityException {
+            EciesAeadHkdfParams eciesParams = recipientKeyProto.getPublicKey().getParams();
+            EciesHkdfKemParams kemParams = eciesParams.getKemParams();
+
+            ECPrivateKey recipientPrivateKey =
+                EllipticCurves.getEcPrivateKey(
+                    HybridUtil.toCurveType(kemParams.getCurveType()),
+                    recipientKeyProto.getKeyValue().toByteArray());
+            EciesAeadHkdfDemHelper demHelper =
+                new RegistryEciesAeadHkdfDemHelper(eciesParams.getDemParams().getAeadDem());
+            return new EciesAeadHkdfHybridDecrypt(
+                recipientPrivateKey,
+                kemParams.getHkdfSalt().toByteArray(),
+                HybridUtil.toHmacAlgo(kemParams.getHkdfHashType()),
+                HybridUtil.toPointFormatType(eciesParams.getEcPointFormat()),
+                demHelper);
+          }
+        });
   }
 
-  private static final int VERSION = 0;
-
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  @Override
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  }
 
   @Override
-  public HybridDecrypt getPrimitiveFromKey(EciesAeadHkdfPrivateKey recipientKeyProto)
+  public int getVersion() {
+    return 0;
+  }
+
+  @Override
+  public EciesAeadHkdfPublicKey getPublicKey(EciesAeadHkdfPrivateKey key)
       throws GeneralSecurityException {
-    EciesAeadHkdfParams eciesParams = recipientKeyProto.getPublicKey().getParams();
-    EciesHkdfKemParams kemParams = eciesParams.getKemParams();
-
-    ECPrivateKey recipientPrivateKey =
-        EllipticCurves.getEcPrivateKey(
-            HybridUtil.toCurveType(kemParams.getCurveType()),
-            recipientKeyProto.getKeyValue().toByteArray());
-    EciesAeadHkdfDemHelper demHelper =
-        new RegistryEciesAeadHkdfDemHelper(eciesParams.getDemParams().getAeadDem());
-    return new EciesAeadHkdfHybridDecrypt(
-        recipientPrivateKey,
-        kemParams.getHkdfSalt().toByteArray(),
-        HybridUtil.toHmacAlgo(kemParams.getHkdfHashType()),
-        HybridUtil.toPointFormatType(eciesParams.getEcPointFormat()),
-        demHelper);
+    return key.getPublicKey();
   }
 
   @Override
-  public EciesAeadHkdfPrivateKey newKeyFromFormat(EciesAeadHkdfKeyFormat eciesKeyFormat)
-      throws GeneralSecurityException {
-    EciesHkdfKemParams kemParams = eciesKeyFormat.getParams().getKemParams();
-    KeyPair keyPair =
-        EllipticCurves.generateKeyPair(HybridUtil.toCurveType(kemParams.getCurveType()));
-    ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
-    ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
-    ECPoint w = pubKey.getW();
-
-    // Creates EciesAeadHkdfPublicKey.
-    EciesAeadHkdfPublicKey eciesPublicKey =
-        EciesAeadHkdfPublicKey.newBuilder()
-            .setVersion(VERSION)
-            .setParams(eciesKeyFormat.getParams())
-            .setX(ByteString.copyFrom(w.getAffineX().toByteArray()))
-            .setY(ByteString.copyFrom(w.getAffineY().toByteArray()))
-            .build();
-
-    // Creates EciesAeadHkdfPrivateKey.
-    return EciesAeadHkdfPrivateKey.newBuilder()
-        .setVersion(VERSION)
-        .setPublicKey(eciesPublicKey)
-        .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
-        .build();
-  }
-
-  @Override
-  public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      EciesAeadHkdfPrivateKey privKeyProto = EciesAeadHkdfPrivateKey.parseFrom(serializedKey);
-      return KeyData.newBuilder()
-          .setTypeUrl(EciesAeadHkdfPublicKeyManager.TYPE_URL)
-          .setValue(privKeyProto.getPublicKey().toByteString())
-          .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
-          .build();
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized EciesAeadHkdfPrivateKey proto", e);
-    }
-  }
-
-  @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.ASYMMETRIC_PRIVATE;
   }
 
   @Override
-  protected EciesAeadHkdfPrivateKey parseKeyProto(ByteString byteString)
+  public EciesAeadHkdfPrivateKey parseKey(ByteString byteString)
       throws InvalidProtocolBufferException {
     return EciesAeadHkdfPrivateKey.parseFrom(byteString);
   }
 
   @Override
-  protected EciesAeadHkdfKeyFormat parseKeyFormatProto(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return EciesAeadHkdfKeyFormat.parseFrom(byteString);
-  }
-
-  @Override
-  public int getVersion() {
-    return VERSION;
-  }
-
-  @Override
-  protected void validateKey(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
+  public void validateKey(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
     if (keyProto.getKeyValue().isEmpty()) {
       throw new GeneralSecurityException("invalid ECIES private key");
     }
-    Validators.validateVersion(keyProto.getVersion(), VERSION);
+    Validators.validateVersion(keyProto.getVersion(), getVersion());
     HybridUtil.validate(keyProto.getPublicKey().getParams());
   }
 
   @Override
-  protected void validateKeyFormat(EciesAeadHkdfKeyFormat eciesKeyFormat)
-      throws GeneralSecurityException {
-    HybridUtil.validate(eciesKeyFormat.getParams());
+  public KeyFactory<EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey> keyFactory() {
+    return new KeyFactory<EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey>(
+        EciesAeadHkdfKeyFormat.class) {
+      @Override
+      public void validateKeyFormat(EciesAeadHkdfKeyFormat eciesKeyFormat)
+          throws GeneralSecurityException {
+        HybridUtil.validate(eciesKeyFormat.getParams());
+      }
+
+      @Override
+      public EciesAeadHkdfKeyFormat parseKeyFormat(ByteString byteString)
+          throws InvalidProtocolBufferException {
+        return EciesAeadHkdfKeyFormat.parseFrom(byteString);
+      }
+
+      @Override
+      public EciesAeadHkdfPrivateKey createKey(EciesAeadHkdfKeyFormat eciesKeyFormat)
+          throws GeneralSecurityException {
+        EciesHkdfKemParams kemParams = eciesKeyFormat.getParams().getKemParams();
+        KeyPair keyPair =
+            EllipticCurves.generateKeyPair(HybridUtil.toCurveType(kemParams.getCurveType()));
+        ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
+        ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
+        ECPoint w = pubKey.getW();
+
+        // Creates EciesAeadHkdfPublicKey.
+        EciesAeadHkdfPublicKey eciesPublicKey =
+            EciesAeadHkdfPublicKey.newBuilder()
+                .setVersion(getVersion())
+                .setParams(eciesKeyFormat.getParams())
+                .setX(ByteString.copyFrom(w.getAffineX().toByteArray()))
+                .setY(ByteString.copyFrom(w.getAffineY().toByteArray()))
+                .build();
+
+        // Creates EciesAeadHkdfPrivateKey.
+        return EciesAeadHkdfPrivateKey.newBuilder()
+            .setVersion(getVersion())
+            .setPublicKey(eciesPublicKey)
+            .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
+            .build();
+      }
+    };
   }
 }
