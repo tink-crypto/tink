@@ -21,6 +21,7 @@ from __future__ import google_type_annotations
 from __future__ import print_function
 
 import io
+from typing import BinaryIO
 
 from tink.python.cc.clif import simple_output_stream
 
@@ -28,9 +29,7 @@ from tink.python.cc.clif import simple_output_stream
 class FileObjectAdapter(simple_output_stream.SimpleOutputStream):
   """Wraps a Python file object to SimpleOutputStream for use in C++."""
 
-  # TODO(paulavidas) add BinaryIO type annotation to file_object, after
-  # cr/266767195 is resolved
-  def __init__(self, file_object):
+  def __init__(self, file_object: BinaryIO):
     if not file_object.writable():
       raise TypeError('File object must be writable.')
     self._file_object = file_object
