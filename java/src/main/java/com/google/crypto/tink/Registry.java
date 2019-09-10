@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  * and query the Registry for specific KeyManagers and PrimitiveWrappers. Registry is public though,
  * to enable configurations with custom catalogues, primitives or KeyManagers.
  *
- * <p>To initialize the Registry with all key managers in Tink 1.0.0, one can do as follows:
+ * <p>To initialize the Registry with all key managers:
  *
  * <pre>{@code
  * TinkConfig.register();
@@ -86,7 +86,7 @@ public final class Registry {
       new ConcurrentHashMap<>();
 
   /**
-   * A container which either is constructed from an {@link KeyTypeManager} or from a {@link
+   * A container which either is constructed from a {@link KeyTypeManager} or from a {@link
    * KeyManager}.
    */
   private static interface KeyManagerContainer {
@@ -265,8 +265,8 @@ public final class Registry {
    * throw exception if {@code catalogue} and the existing catalogue aren't instances of the same
    * class, and do nothing if they are.
    *
-   * @throws GeneralSecurityException if there's an existing catalogue is not an instance of the
-   *     same class as {@code catalogue}
+   * @throws GeneralSecurityException if there's an existing catalogue and it is not an instance of
+   *     the same class as {@code catalogue}
    * @deprecated Catalogues are no longer supported.
    */
   @Deprecated
@@ -294,7 +294,7 @@ public final class Registry {
    * Tries to get a catalogue associated with {@code catalogueName}.
    *
    * @deprecated Catalogues are no longer supported.
-   * @throws GeneralSecurityException if cannot find any catalogue
+   * @throws GeneralSecurityException if no catalogue is found
    */
   @Deprecated
   public static Catalogue<?> getCatalogue(String catalogueName)
@@ -486,12 +486,12 @@ public final class Registry {
    * Tries to register {@code manager} for the given {@code typeUrl}. Users can generate new keys
    * with this manager using the {@link Registry#newKey} methods.
    *
-   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing
-   * key manager aren't instances of the same class, and do nothing if they are.
+   * <p>Does nothing if there's an existing key manager and it's an instance of the same class as
+   * {@code manager}.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
-   *     class of {@code manager}
-   * @deprecated use {@link #registerKeyManager(KeyManager<P>)}
+   * @throws GeneralSecurityException if there's an existing key manager and it is not an instance
+   *     of the same class as {@code manager}
+   * @deprecated use {@link #registerKeyManager(KeyManager) registerKeyManager(KeyManager&lt;P&gt;)}
    */
   @Deprecated
   public static synchronized <P> void registerKeyManager(
@@ -503,12 +503,13 @@ public final class Registry {
    * Tries to register {@code manager} for the given {@code typeUrl}. If {@code newKeyAllowed} is
    * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
    *
-   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing
-   * key manager aren't instances of the same class, and do nothing if they are.
+   * <p>Does nothing if there's an existing key manager and it's an instance of the same class as
+   * {@code manager}.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
-   *     class of {@code manager}
-   * @deprecated use {@link #registerKeyManager(KeyManager<P>, boolean)}
+   * @throws GeneralSecurityException if there's an existing key manager and it is not an instance
+   *     of the same class as {@code manager}
+   * @deprecated use {@link #registerKeyManager(KeyManager, boolean)
+   *     registerKeyManager(KeyManager&lt;P&gt;, boolean)}
    */
   @Deprecated
   public static synchronized <P> void registerKeyManager(
@@ -527,14 +528,14 @@ public final class Registry {
   /**
    * Tries to register {@code wrapper} as a new SetWrapper for primitive {@code P}.
    *
-   * <p>If no SetWrapper is registered for {@code P} registers the given one. If already is a
+   * <p>If no SetWrapper is registered for {@code P}, registers the given one. If there already is a
    * SetWrapper registered which is of the same class ass the passed in set wrapper, the call is
    * silently ignored. If the new set wrapper is of a different type, the call fails with a {@code
    * GeneralSecurityException}.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
-   *     class of {@code manager}, or the registration tries to re-enable the generation of new
-   *     keys.
+   * @throws GeneralSecurityException if there's an existing key manager and it is not an instance
+   *     of the class of {@code manager}, or the registration tries to re-enable the generation of
+   *     new keys.
    */
   public static synchronized <P> void registerPrimitiveWrapper(final PrimitiveWrapper<P> wrapper)
       throws GeneralSecurityException {
