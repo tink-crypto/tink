@@ -20,6 +20,8 @@ from __future__ import division
 from __future__ import google_type_annotations
 from __future__ import print_function
 
+import io
+
 from tink.python.cc.clif import simple_output_stream
 
 
@@ -35,7 +37,11 @@ class FileObjectAdapter(simple_output_stream.SimpleOutputStream):
 
   def write(self, data: bytes) -> int:
     """Writes to underlying file object and returns number of bytes written."""
-    return self._file_object.write(data)
+    try:
+      written = self._file_object.write(data)
+      return 0 if written is None else written
+    except io.BlockingIOError as e:
+      return e.characters_written
 
   def close(self) -> None:
     self._file_object.close()
