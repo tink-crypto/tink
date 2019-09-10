@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/cc/simple_output_stream_adapter.h"
+#include "tink/python/cc/python_output_stream.h"
 
 #include <algorithm>
 #include <memory>
@@ -24,15 +24,15 @@
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/cc/simple_output_stream.h"
+#include "tink/python/cc/python_file_object_adapter.h"
 
 namespace crypto {
 namespace tink {
 
-SimpleOutputStreamAdapter::SimpleOutputStreamAdapter(
-    std::unique_ptr<SimpleOutputStream> stream, int buffer_size) {
+PythonOutputStream::PythonOutputStream(
+    std::unique_ptr<PythonFileObjectAdapter> adapter, int buffer_size) {
   if (buffer_size <= 0) buffer_size = 128 * 1024;  // 128 KB
-  stream_ = std::move(stream);
+  adapter_ = std::move(adapter);
   subtle::ResizeStringUninitialized(&buffer_, buffer_size);
   is_first_call_ = true;
   position_ = 0;
@@ -41,7 +41,7 @@ SimpleOutputStreamAdapter::SimpleOutputStreamAdapter(
   status_ = util::OkStatus();
 }
 
-crypto::tink::util::StatusOr<int> SimpleOutputStreamAdapter::Next(void** data) {
+crypto::tink::util::StatusOr<int> PythonOutputStream::Next(void** data) {
   if (!status_.ok()) return status_;
 
   // This is the first call to Next(), so we return the whole buffer.
@@ -67,7 +67,7 @@ crypto::tink::util::StatusOr<int> SimpleOutputStreamAdapter::Next(void** data) {
   // The available space might not span the entire buffer, as writing
   // may succeed only for a prefix of the buffer -- in this case the data still
   // to be written is shifted in the buffer and the remaining space is returned.
-  auto write_result = stream_->Write(buffer_);
+  auto write_result = adapter_->Write(buffer_);
   if (!write_result.ok()) return status_ = write_result.status();
 
   // Some data was written, so we can return some portion of buffer_.
@@ -84,36 +84,34 @@ crypto::tink::util::StatusOr<int> SimpleOutputStreamAdapter::Next(void** data) {
   return written;
 }
 
-void SimpleOutputStreamAdapter::BackUp(int count) {
+void PythonOutputStream::BackUp(int count) {
   if (!status_.ok() || count < 1 || count_in_buffer_ == 0) return;
   int actual_count = std::min(count, count_in_buffer_ - buffer_offset_);
   count_in_buffer_ -= actual_count;
   position_ -= actual_count;
 }
 
-SimpleOutputStreamAdapter::~SimpleOutputStreamAdapter() {
-  Close().IgnoreError();
-}
+PythonOutputStream::~PythonOutputStream() { Close().IgnoreError(); }
 
-util::Status SimpleOutputStreamAdapter::Close() {
+util::Status PythonOutputStream::Close() {
   if (!status_.ok()) return status_;
   if (count_in_buffer_ > 0) {
     // Try to write the remaining bytes.
     int written = 0;
     while (written < count_in_buffer_) {
-      auto write_result = stream_->Write(absl::string_view(buffer_).substr(
+      auto write_result = adapter_->Write(absl::string_view(buffer_).substr(
           written, count_in_buffer_ - written));
       if (!write_result.ok()) return write_result.status();
       written += write_result.ValueOrDie();
     }
   }
-  status_ = stream_->Close();
+  status_ = adapter_->Close();
   if (!status_.ok()) return status_;
   status_ = util::Status(util::error::FAILED_PRECONDITION, "Stream closed");
   return util::OkStatus();
 }
 
-int64_t SimpleOutputStreamAdapter::Position() const { return position_; }
+int64_t PythonOutputStream::Position() const { return position_; }
 
 }  // namespace tink
 }  // namespace crypto

@@ -12,29 +12,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PYTHON_CC_SIMPLE_OUTPUT_STREAM_ADAPTER_H_
-#define TINK_PYTHON_CC_SIMPLE_OUTPUT_STREAM_ADAPTER_H_
+#ifndef TINK_PYTHON_CC_PYTHON_OUTPUT_STREAM_H_
+#define TINK_PYTHON_CC_PYTHON_OUTPUT_STREAM_H_
 
 #include <memory>
 
 #include "tink/output_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/cc/simple_output_stream.h"
+#include "tink/python/cc/python_file_object_adapter.h"
 
 namespace crypto {
 namespace tink {
 
-// An OutputStream that writes to a SimpleOutputStream.
-class SimpleOutputStreamAdapter : public crypto::tink::OutputStream {
+// An OutputStream that writes to a PythonFileObjectAdapter.
+class PythonOutputStream : public OutputStream {
  public:
-  // Constructs an OutputStream that will write to the SimpleOutputStream
-  // specified via 'stream', using a buffer of the specified size, if any
+  // Constructs an OutputStream that will write to the PythonFileObjectAdapter
+  // specified via 'adapter', using a buffer of the specified size, if any
   // (if 'buffer_size' <= 0, a reasonable default will be used).
-  explicit SimpleOutputStreamAdapter(std::unique_ptr<SimpleOutputStream> stream,
-                                     int buffer_size = 0);
+  explicit PythonOutputStream(std::unique_ptr<PythonFileObjectAdapter> adapter,
+                              int buffer_size = 0);
 
-  ~SimpleOutputStreamAdapter() override;
+  ~PythonOutputStream() override;
 
   crypto::tink::util::StatusOr<int> Next(void** data) override;
 
@@ -46,7 +46,7 @@ class SimpleOutputStreamAdapter : public crypto::tink::OutputStream {
 
  private:
   util::Status status_;
-  std::unique_ptr<SimpleOutputStream> stream_;
+  std::unique_ptr<PythonFileObjectAdapter> adapter_;
   std::string buffer_;
   bool is_first_call_;
   int64_t position_;  // current position in the underlying stream (from the
@@ -60,4 +60,4 @@ class SimpleOutputStreamAdapter : public crypto::tink::OutputStream {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PYTHON_CC_SIMPLE_OUTPUT_STREAM_ADAPTER_H_
+#endif  // TINK_PYTHON_CC_PYTHON_OUTPUT_STREAM_H_

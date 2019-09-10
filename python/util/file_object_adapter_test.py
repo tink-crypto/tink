@@ -28,7 +28,6 @@ class FileObjectAdapterTest(absltest.TestCase):
     file_object = io.BytesIO()
     adapter = file_object_adapter.FileObjectAdapter(file_object)
     self.assertEqual(9, adapter.write(b'something'))
-    self.assertEqual(9, adapter.position())
     self.assertEqual(b'something', file_object.getvalue())
     adapter.close()
 
@@ -46,16 +45,6 @@ class FileObjectAdapterTest(absltest.TestCase):
     adapter = file_object_adapter.FileObjectAdapter(file_object)
     adapter.close()
     self.assertRaises(ValueError, adapter.write, b'something')
-
-  def test_position(self):
-    file_object = io.BytesIO()
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
-    self.assertEqual(0, adapter.position())
-    self.assertEqual(9, adapter.write(b'something'))
-    self.assertEqual(9, adapter.position())
-    self.assertEqual(3, adapter.write(b'123'))
-    self.assertEqual(12, adapter.position())
-    adapter.close()
 
   def test_non_writable(self):
     file_object = mock.Mock()

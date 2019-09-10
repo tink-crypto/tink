@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/cc/simple_output_stream_adapter.h"
+#include "tink/python/cc/python_output_stream.h"
 
 #include <memory>
 
@@ -23,14 +23,14 @@
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/cc/simple_output_stream.h"
+#include "tink/python/cc/python_file_object_adapter.h"
 
 namespace crypto {
 namespace tink {
 namespace {
 
-// SimpleOutputStream for testing.
-class TestSimpleOutputStream : public SimpleOutputStream {
+// PythonFileObjectAdapter for testing.
+class TestPythonFileObjectAdapter : public PythonFileObjectAdapter {
  public:
   util::StatusOr<int> Write(absl::string_view data) override {
     buffer_ += std::string(data);
@@ -38,8 +38,6 @@ class TestSimpleOutputStream : public SimpleOutputStream {
   }
 
   util::Status Close() override { return util::OkStatus(); }
-
-  int64_t Position() const override { return buffer_.size(); }
 
   std::string* GetBuffer() { return &buffer_; }
 
@@ -50,7 +48,7 @@ class TestSimpleOutputStream : public SimpleOutputStream {
 // Writes 'contents' to the specified 'output_stream', and closes the stream.
 // Returns the status of output_stream->Close()-operation, or a non-OK status
 // of a prior output_stream->Next()-operation, if any.
-util::Status WriteToStream(SimpleOutputStreamAdapter* output_stream,
+util::Status WriteToStream(PythonOutputStream* output_stream,
                            absl::string_view contents) {
   void* buffer;
   int pos = 0;
@@ -72,14 +70,14 @@ util::Status WriteToStream(SimpleOutputStreamAdapter* output_stream,
   return output_stream->Close();
 }
 
-TEST(SimpleOutputStreamAdapterTest, WritingStreams) {
+TEST(PythonOutputStreamTest, WritingStreams) {
   for (size_t stream_size : {0, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
-    auto output = absl::make_unique<TestSimpleOutputStream>();
+    auto output = absl::make_unique<TestPythonFileObjectAdapter>();
     std::string* output_buffer = output->GetBuffer();
     auto output_stream =
-        absl::make_unique<SimpleOutputStreamAdapter>(std::move(output));
+        absl::make_unique<PythonOutputStream>(std::move(output));
     auto status = WriteToStream(output_stream.get(), stream_contents);
     EXPECT_TRUE(status.ok()) << status;
     EXPECT_EQ(stream_size, output_buffer->size());
@@ -87,15 +85,15 @@ TEST(SimpleOutputStreamAdapterTest, WritingStreams) {
   }
 }
 
-TEST(SimpleOutputStreamAdapterTest, CustomBufferSizes) {
+TEST(PythonOutputStreamTest, CustomBufferSizes) {
   int stream_size = 1024 * 1024;
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
   for (int buffer_size : {1, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("buffer_size = ", buffer_size));
-    auto output = absl::make_unique<TestSimpleOutputStream>();
+    auto output = absl::make_unique<TestPythonFileObjectAdapter>();
     std::string* output_buffer = output->GetBuffer();
-    auto output_stream = absl::make_unique<SimpleOutputStreamAdapter>(
-        std::move(output), buffer_size);
+    auto output_stream =
+        absl::make_unique<PythonOutputStream>(std::move(output), buffer_size);
     void* buffer;
     auto next_result = output_stream->Next(&buffer);
     EXPECT_TRUE(next_result.ok()) << next_result.status();
@@ -108,17 +106,17 @@ TEST(SimpleOutputStreamAdapterTest, CustomBufferSizes) {
   }
 }
 
-TEST(SimpleOutputStreamAdapterTest, BackupAndPosition) {
+TEST(PythonOutputStreamTest, BackupAndPosition) {
   int stream_size = 1024 * 1024;
   int buffer_size = 1234;
   void* buffer;
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
-  auto output = absl::make_unique<TestSimpleOutputStream>();
+  auto output = absl::make_unique<TestPythonFileObjectAdapter>();
   std::string* output_buffer = output->GetBuffer();
 
   // Prepare the stream and do the first call to Next().
-  auto output_stream = absl::make_unique<SimpleOutputStreamAdapter>(
-      std::move(output), buffer_size);
+  auto output_stream =
+      absl::make_unique<PythonOutputStream>(std::move(output), buffer_size);
   EXPECT_EQ(0, output_stream->Position());
   auto next_result = output_stream->Next(&buffer);
   EXPECT_TRUE(next_result.ok()) << next_result.status();

@@ -16,8 +16,8 @@ cc_library(
 )
 
 cc_library(
-    name = "simple_output_stream",
-    hdrs = ["simple_output_stream.h"],
+    name = "python_file_object_adapter",
+    hdrs = ["python_file_object_adapter.h"],
     include_prefix = "tink/python",
     strip_include_prefix = "/python",
     deps = [
@@ -28,13 +28,13 @@ cc_library(
 )
 
 cc_library(
-    name = "simple_output_stream_adapter",
-    srcs = ["simple_output_stream_adapter.cc"],
-    hdrs = ["simple_output_stream_adapter.h"],
+    name = "python_output_stream",
+    srcs = ["python_output_stream.cc"],
+    hdrs = ["python_output_stream.h"],
     include_prefix = "tink/python",
     strip_include_prefix = "/python",
     deps = [
-        ":simple_output_stream",
+        ":python_file_object_adapter",
         "//cc:output_stream",
         "//cc/subtle:subtle_util",
         "//cc/util:errors",
@@ -47,13 +47,13 @@ cc_library(
 )
 
 cc_test(
-    name = "simple_output_stream_adapter_test",
+    name = "python_output_stream_test",
     size = "medium",
-    srcs = ["simple_output_stream_adapter_test.cc"],
+    srcs = ["python_output_stream_test.cc"],
     linkopts = ["-lpthread"],
     deps = [
-        ":simple_output_stream",
-        ":simple_output_stream_adapter",
+        ":python_file_object_adapter",
+        ":python_output_stream",
         "//cc/subtle:random",
         "//cc/util:status",
         "//cc/util:statusor",

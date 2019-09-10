@@ -12,8 +12,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PYTHON_CC_SIMPLE_OUTPUT_STREAM_H_
-#define TINK_PYTHON_CC_SIMPLE_OUTPUT_STREAM_H_
+#ifndef TINK_PYTHON_CC_PYTHON_FILE_OBJECT_ADAPTER_H_
+#define TINK_PYTHON_CC_PYTHON_FILE_OBJECT_ADAPTER_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/util/status.h"
@@ -22,9 +22,9 @@
 namespace crypto {
 namespace tink {
 
-// A simple interface for an output stream like object which can be used to go
-// from Python to C++ via CLIF and vice versa.
-class SimpleOutputStream {
+// Adapts a Python file object for use in C++.
+// This is CLIFed and implemented in Python.
+class PythonFileObjectAdapter {
  public:
   // Writes 'data' to the underlying stream and returns the number of bytes
   // written, which can be less than the size of 'data'.
@@ -33,13 +33,10 @@ class SimpleOutputStream {
   // Closes the underlying stream.
   virtual util::Status Close() = 0;
 
-  // Returns the total number of bytes written.
-  virtual int64_t Position() const = 0;
-
-  virtual ~SimpleOutputStream() {}
+  virtual ~PythonFileObjectAdapter() {}
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PYTHON_CC_SIMPLE_OUTPUT_STREAM_H_
+#endif  // TINK_PYTHON_CC_PYTHON_FILE_OBJECT_ADAPTER_H_
