@@ -25,14 +25,21 @@ import java.security.GeneralSecurityException;
 
 /**
  * This primitive implements <a href="https://cloud.google.com/kms/docs/data-encryption-keys">
- * envelope encryption</a>. In envelope encryption, user generates a data encryption key (DEK)
- * locally, encrypts data with DEK, sends DEK to a KMS to be encrypted (with a key managed by KMS),
- * and stores encrypted DEK with encrypted data; at a later point user can retrieve encrypted data
- * and DEK, use Storky to decrypt DEK, and use decrypted DEK to decrypt the data.
- * The ciphertext structure is as follows:
- *   - Length of encrypted DEK: 4 bytes.
- *   - Encrypted DEK: variable length that is equal to the value specified in the last 4 bytes.
- *   - AEAD payload: variable length.
+ * envelope encryption</a>.
+ *
+ * <p>In envelope encryption, a user generates a data encryption key (DEK) locally, encrypts data
+ * with the DEK, sends the DEK to a KMS to be encrypted (with a key managed by KMS), and then stores
+ * the encrypted DEK with the encrypted data. At a later point, a user can retrieve the encrypted
+ * data and the encyrpted DEK, use the KMS to decrypt the DEK, and use the decrypted DEK to decrypt
+ * the data.
+ *
+ * <p>The ciphertext structure is as follows:
+ *
+ * <ul>
+ *   <li>Length of the encrypted DEK: 4 bytes.
+ *   <li>Encrypted DEK: variable length that is equal to the value specified in the last 4 bytes.
+ *   <li>AEAD payload: variable length.
+ * </ul>
  */
 public final class KmsEnvelopeAead implements Aead {
   private static final byte[] EMPTY_AAD = new byte[0];
