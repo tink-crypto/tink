@@ -158,13 +158,13 @@ public final class SignaturePemKeysetReader implements KeysetReader {
           RsaSsaPkcs1Params.newBuilder().setHashType(getHashType(pemKeyType)).build();
       RsaSsaPkcs1PublicKey pkcs1PubKey =
           RsaSsaPkcs1PublicKey.newBuilder()
-              .setVersion(RsaSsaPkcs1VerifyKeyManager.VERSION)
+              .setVersion(new RsaSsaPkcs1VerifyKeyManager().getVersion())
               .setParams(params)
               .setE(ByteString.copyFrom(key.getPublicExponent().toByteArray()))
               .setN(ByteString.copyFrom(key.getModulus().toByteArray()))
               .build();
       return KeyData.newBuilder()
-          .setTypeUrl(RsaSsaPkcs1VerifyKeyManager.TYPE_URL)
+          .setTypeUrl(new RsaSsaPkcs1VerifyKeyManager().getKeyType())
           .setValue(pkcs1PubKey.toByteString())
           .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .build();

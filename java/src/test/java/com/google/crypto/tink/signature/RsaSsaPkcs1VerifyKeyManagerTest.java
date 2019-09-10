@@ -18,6 +18,8 @@ package com.google.crypto.tink.signature;
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerImpl;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TestUtil.BytesMutation;
@@ -76,7 +78,8 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
     for (NistTestVector t : nistTestVectors) {
       RsaSsaPkcs1PublicKey pubKey =
           TestUtil.createRsaSsaPkcs1PubKey(t.modulus, t.exponent, t.hashType);
-      RsaSsaPkcs1VerifyKeyManager keyManager = new RsaSsaPkcs1VerifyKeyManager();
+      KeyManager<PublicKeyVerify> keyManager =
+          new KeyManagerImpl<>(new RsaSsaPkcs1VerifyKeyManager(), PublicKeyVerify.class);
       PublicKeyVerify verifier = keyManager.getPrimitive(pubKey);
       try {
         verifier.verify(t.sig, t.msg);
@@ -104,7 +107,8 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
       RsaSsaPkcs1PublicKey pubKey =
           TestUtil.createRsaSsaPkcs1PubKey(
               TestUtil.hexDecode("23"), TestUtil.hexDecode("03"), HashType.SHA256);
-      RsaSsaPkcs1VerifyKeyManager keyManager = new RsaSsaPkcs1VerifyKeyManager();
+      KeyManager<PublicKeyVerify> keyManager =
+          new KeyManagerImpl<>(new RsaSsaPkcs1VerifyKeyManager(), PublicKeyVerify.class);
       keyManager.getPrimitive(pubKey);
       fail("Invalid modulus, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -118,7 +122,8 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
     try {
       RsaSsaPkcs1PublicKey pubKey =
           TestUtil.createRsaSsaPkcs1PubKey(t.modulus, t.exponent, HashType.SHA1);
-      RsaSsaPkcs1VerifyKeyManager keyManager = new RsaSsaPkcs1VerifyKeyManager();
+      KeyManager<PublicKeyVerify> keyManager =
+          new KeyManagerImpl<>(new RsaSsaPkcs1VerifyKeyManager(), PublicKeyVerify.class);
       keyManager.getPrimitive(pubKey);
       fail("Invalid hash, should have thrown exception");
     } catch (GeneralSecurityException e) {
