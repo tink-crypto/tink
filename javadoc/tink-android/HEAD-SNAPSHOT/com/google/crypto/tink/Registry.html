@@ -128,7 +128,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  and query the Registry for specific KeyManagers and PrimitiveWrappers. Registry is public though,
  to enable configurations with custom catalogues, primitives or KeyManagers.
 
- <p>To initialize the Registry with all key managers in Tink 1.0.0, one can do as follows:
+ <p>To initialize the Registry with all key managers:
 
  <pre><code>
  TinkConfig.register();
@@ -380,7 +380,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-java.lang.String-com.google.crypto.tink.KeyManager-">registerKeyManager</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
                   <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">use <code>#registerKeyManager(KeyManager<P>)</code></span></div>
+<div class="block"><span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-"><code>registerKeyManager(KeyManager&lt;P&gt;)</code></a></span></div>
 </div>
 </td>
 </tr>
@@ -390,7 +390,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                   <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager,
                   boolean&nbsp;newKeyAllowed)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">use <code>#registerKeyManager(KeyManager<P>, boolean)</code></span></div>
+<div class="block"><span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-boolean-"><code>registerKeyManager(KeyManager&lt;P&gt;, boolean)</code></a></span></div>
 </div>
 </td>
 </tr>
@@ -464,8 +464,8 @@ public static&nbsp;void&nbsp;addCatalogue(<a href="https://docs.oracle.com/javas
  class, and do nothing if they are.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing catalogue is not an instance of the
-     same class as <code>catalogue</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing catalogue and it is not an instance of
+     the same class as <code>catalogue</code></dd>
 </dl>
 </li>
 </ul>
@@ -482,7 +482,7 @@ public static&nbsp;<a href="../../../../com/google/crypto/tink/Catalogue.html" t
 <div class="block">Tries to get a catalogue associated with <code>catalogueName</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if cannot find any catalogue</dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if no catalogue is found</dd>
 </dl>
 </li>
 </ul>
@@ -580,16 +580,16 @@ public static&nbsp;<a href="../../../../com/google/crypto/tink/Catalogue.html" t
 public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerKeyManager(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
                                                       <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager)
                                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <code>#registerKeyManager(KeyManager<P>)</code></span></div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-"><code>registerKeyManager(KeyManager&lt;P&gt;)</code></a></span></div>
 <div class="block">Tries to register <code>manager</code> for the given <code>typeUrl</code>. Users can generate new keys
  with this manager using the <a href="../../../../com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-"><code>newKey(com.google.crypto.tink.proto.KeyTemplate)</code></a> methods.
 
- <p>If there is an existing key manager, throw exception if <code>manager</code> and the existing
- key manager aren't instances of the same class, and do nothing if they are.</div>
+ <p>Does nothing if there's an existing key manager and it's an instance of the same class as
+ <code>manager</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager is not an instance of the
-     class of <code>manager</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager and it is not an instance
+     of the same class as <code>manager</code></dd>
 </dl>
 </li>
 </ul>
@@ -604,16 +604,16 @@ public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerKeyManager(<a href="https://
                                                       <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager,
                                                       boolean&nbsp;newKeyAllowed)
                                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <code>#registerKeyManager(KeyManager<P>, boolean)</code></span></div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-boolean-"><code>registerKeyManager(KeyManager&lt;P&gt;, boolean)</code></a></span></div>
 <div class="block">Tries to register <code>manager</code> for the given <code>typeUrl</code>. If <code>newKeyAllowed</code> is
  true, users can generate new keys with this manager using the <a href="../../../../com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-"><code>newKey(com.google.crypto.tink.proto.KeyTemplate)</code></a> methods.
 
- <p>If there is an existing key manager, throw exception if <code>manager</code> and the existing
- key manager aren't instances of the same class, and do nothing if they are.</div>
+ <p>Does nothing if there's an existing key manager and it's an instance of the same class as
+ <code>manager</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager is not an instance of the
-     class of <code>manager</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager and it is not an instance
+     of the same class as <code>manager</code></dd>
 </dl>
 </li>
 </ul>
@@ -627,14 +627,14 @@ public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerKeyManager(<a href="https://
                                          throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Tries to register <code>wrapper</code> as a new SetWrapper for primitive <code>P</code>.
 
- <p>If no SetWrapper is registered for <code>P</code> registers the given one. If already is a
+ <p>If no SetWrapper is registered for <code>P</code>, registers the given one. If there already is a
  SetWrapper registered which is of the same class ass the passed in set wrapper, the call is
  silently ignored. If the new set wrapper is of a different type, the call fails with a <code>GeneralSecurityException</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager is not an instance of the
-     class of <code>manager</code>, or the registration tries to re-enable the generation of new
-     keys.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager and it is not an instance
+     of the class of <code>manager</code>, or the registration tries to re-enable the generation of
+     new keys.</dd>
 </dl>
 </li>
 </ul>
