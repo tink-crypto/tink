@@ -31,14 +31,18 @@ import org.junit.runners.JUnit4;
 public final class KeyTypeManagerTest {
   private static final ByteString TEST_BYTESTRING = ByteString.copyFromUtf8("Some text");
 
-  private static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
+  /**
+   * A KeyTypeManager for testing. It accepts AesGcmKeys and produces primitives as with the passed
+   * in factory.
+   */
+  public static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
     public TestKeyTypeManager(PrimitiveFactory<?, AesGcmKey>... factories) {
       super(AesGcmKey.class, factories);
     }
 
     @Override
     public String getKeyType() {
-      return "KeyTypeUrl";
+      return "type.googleapis.com/google.crypto.tink.AesGcmKey";
     }
 
     @Override
