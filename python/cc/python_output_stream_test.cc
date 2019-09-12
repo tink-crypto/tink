@@ -23,27 +23,11 @@
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/cc/python_file_object_adapter.h"
+#include "tink/python/cc/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace {
-
-// PythonFileObjectAdapter for testing.
-class TestPythonFileObjectAdapter : public PythonFileObjectAdapter {
- public:
-  util::StatusOr<int> Write(absl::string_view data) override {
-    buffer_ += std::string(data);
-    return data.size();
-  }
-
-  util::Status Close() override { return util::OkStatus(); }
-
-  std::string* GetBuffer() { return &buffer_; }
-
- private:
-  std::string buffer_;
-};
 
 // Writes 'contents' to the specified 'output_stream', and closes the stream.
 // Returns the status of output_stream->Close()-operation, or a non-OK status
@@ -74,7 +58,7 @@ TEST(PythonOutputStreamTest, WritingStreams) {
   for (size_t stream_size : {0, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size));
     std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
-    auto output = absl::make_unique<TestPythonFileObjectAdapter>();
+    auto output = absl::make_unique<test::TestPythonFileObjectAdapter>();
     std::string* output_buffer = output->GetBuffer();
     auto output_stream =
         absl::make_unique<PythonOutputStream>(std::move(output));
@@ -90,7 +74,7 @@ TEST(PythonOutputStreamTest, CustomBufferSizes) {
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
   for (int buffer_size : {1, 10, 100, 1000, 10000, 100000, 1000000}) {
     SCOPED_TRACE(absl::StrCat("buffer_size = ", buffer_size));
-    auto output = absl::make_unique<TestPythonFileObjectAdapter>();
+    auto output = absl::make_unique<test::TestPythonFileObjectAdapter>();
     std::string* output_buffer = output->GetBuffer();
     auto output_stream =
         absl::make_unique<PythonOutputStream>(std::move(output), buffer_size);
@@ -111,7 +95,7 @@ TEST(PythonOutputStreamTest, BackupAndPosition) {
   int buffer_size = 1234;
   void* buffer;
   std::string stream_contents = subtle::Random::GetRandomBytes(stream_size);
-  auto output = absl::make_unique<TestPythonFileObjectAdapter>();
+  auto output = absl::make_unique<test::TestPythonFileObjectAdapter>();
   std::string* output_buffer = output->GetBuffer();
 
   // Prepare the stream and do the first call to Next().
