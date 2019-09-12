@@ -26,12 +26,16 @@ namespace tink {
 // This is CLIFed and implemented in Python.
 class PythonFileObjectAdapter {
  public:
-  // Writes 'data' to the underlying stream and returns the number of bytes
-  // written, which can be less than the size of 'data'.
+  // Writes 'data' to the underlying Python file object and returns the number
+  // of bytes written, which can be less than the size of 'data'.
   virtual util::StatusOr<int> Write(absl::string_view data) = 0;
 
-  // Closes the underlying stream.
+  // Closes the underlying Python file object.
   virtual util::Status Close() = 0;
+
+  // Reads at most 'size' bytes from the underlying Python file object. Returns
+  // OUT_OF_RANGE status if the file object is alreday at EOF.
+  virtual util::StatusOr<std::string> Read(int size) = 0;
 
   virtual ~PythonFileObjectAdapter() {}
 };

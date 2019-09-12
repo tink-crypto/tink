@@ -11,8 +11,8 @@
 # limitations under the License.
 """FileObjectAdapter class.
 
-Used in conjunction with PythonOutputStream to allow a C++ OutputStream
-to write to a Python file-like object.
+Used in conjunction with PythonOutputStream/PythonInputStream to allow a C++
+OutputStream/InputStream to interact with a Python file-like object.
 """
 
 from __future__ import absolute_import
@@ -30,8 +30,6 @@ class FileObjectAdapter(python_file_object_adapter.PythonFileObjectAdapter):
   """Adapts a Python file object for use in C++."""
 
   def __init__(self, file_object: BinaryIO):
-    if not file_object.writable():
-      raise TypeError('File object must be writable.')
     self._file_object = file_object
 
   def write(self, data: bytes) -> int:
@@ -44,3 +42,29 @@ class FileObjectAdapter(python_file_object_adapter.PythonFileObjectAdapter):
 
   def close(self) -> None:
     self._file_object.close()
+
+  def read(self, size: int) -> bytes:
+    """Reads at most 'size' bytes from the underlying file object.
+
+    Args:
+      size: A non-negative integer, maximum number of bytes to read.
+
+    Returns:
+      Bytes that were read. An empty bytes object is returned if no bytes are
+      available at the moment.
+
+    Raises:
+      EOFError if the file object is already at EOF.
+    """
+    if size < 0:
+      raise ValueError('size must be non-negative')
+
+    try:
+      data = self._file_object.read(size)
+      if data is None:
+        return b''
+      elif not data and size > 0:
+        raise EOFError('EOF')
+      return data
+    except io.BlockingIOError:
+      return b''

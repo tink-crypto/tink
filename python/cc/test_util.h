@@ -22,8 +22,8 @@ namespace crypto {
 namespace tink {
 namespace test {
 
-// PythonFileObjectAdapter for testing.
-class TestPythonFileObjectAdapter : public PythonFileObjectAdapter {
+// Writable PythonFileObjectAdapter for testing.
+class TestWritableObject : public PythonFileObjectAdapter {
  public:
   util::StatusOr<int> Write(absl::string_view data) override {
     buffer_ += std::string(data);
@@ -31,6 +31,10 @@ class TestPythonFileObjectAdapter : public PythonFileObjectAdapter {
   }
 
   util::Status Close() override { return util::OkStatus(); }
+
+  util::StatusOr<std::string> Read(int size) override {
+    return util::Status(util::error::UNIMPLEMENTED, "not readable");
+  }
 
   std::string* GetBuffer() { return &buffer_; }
 

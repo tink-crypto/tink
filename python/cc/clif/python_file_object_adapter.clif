@@ -20,3 +20,6 @@ from "tink/python/cc/python_file_object_adapter.h":
 
       @virtual
       def `Close` as close(self) -> Status
+
+      @virtual
+      def `Read` as read(self, size: int) -> StatusOr<bytes>
