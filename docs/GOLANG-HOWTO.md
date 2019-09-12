@@ -283,6 +283,9 @@ func main() {
         }
 
         hd, err := hybrid.NewHybridDecrypt(khPriv)
+        if err != nil {
+                log.Fatal(err)
+        }
 
         pt, err := hd.Decrypt(ct, []byte("context info"))
         if err != nil {
