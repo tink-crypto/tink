@@ -93,6 +93,14 @@ class StreamingAead(object):
       associated_data: Associated data to be used by the AEAD decryption. It
         must match the associated_data supplied for the encryption.
 
+    The cipertext_source's read() method is expected to return an empty bytes
+    object if the stream is already at EOF. In the case where the stream is not
+    at EOF yet but no data is available at the moment, it is expected to either
+    return None or raise BlockingIOError.
+
+    The standard BufferedIOBase and RawIOBase base classes exhibit these
+    behaviours and are hence supported.
+
     Returns:
       A decrypting file object wrapper around 'ciphertext_source', such that
       any bytes read from the wrapper are AEAD-decrypted using 'associated_data'
