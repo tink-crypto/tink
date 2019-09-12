@@ -35,6 +35,7 @@ class StreamingAead(object):
   @abc.abstractmethod
   def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
+    # pyformat: disable
     """Get a new encrypting stream that writes to ciphertext_destination.
 
     Args:
@@ -44,6 +45,17 @@ class StreamingAead(object):
       associated_data: Associated data to be used by the AEAD encryption. It is
         not included in the ciphertext and must be passed in as a parameter for
         decryption.
+
+    The ciphertext_destination's write() method is expected to present one of
+    the following three behaviours in the case of a partial or failed write():
+      - return a non-negative integer number of bytes written
+      - return None (equivalent to returning 0)
+      - raise BlockingIOError with characters_written set correctly to a
+        non-negative integer (equivalent to returning that integer)
+    In the case of a full write, the number of bytes written should be returned.
+
+    The standard BufferedIOBase and RawIOBase base classes exhibit these
+    behaviours and are hence supported.
 
     Returns:
       An encrypting file object wrapper around 'ciphertext_destination', such
@@ -67,6 +79,7 @@ class StreamingAead(object):
     Raises:
       tink.TinkError if the creation fails.
     """
+    # pyformat: enable
     raise NotImplementedError()
 
   @abc.abstractmethod
@@ -79,6 +92,14 @@ class StreamingAead(object):
         will be read.
       associated_data: Associated data to be used by the AEAD decryption. It
         must match the associated_data supplied for the encryption.
+
+    The cipertext_source's read() method is expected to return an empty bytes
+    object if the stream is already at EOF. In the case where the stream is not
+    at EOF yet but no data is available at the moment, it is expected to either
+    return None or raise BlockingIOError.
+
+    The standard BufferedIOBase and RawIOBase base classes exhibit these
+    behaviours and are hence supported.
 
     Returns:
       A decrypting file object wrapper around 'ciphertext_source', such that

@@ -23,20 +23,23 @@
 namespace crypto {
 namespace tink {
 
-util::StatusOr<int> OutputStreamAdapter::Write(absl::string_view data) {
+util::StatusOr<int64_t> OutputStreamAdapter::Write(absl::string_view data) {
   void* buffer;
-  auto next_result = stream_->Next(&buffer);
-  if (!next_result.ok()) return next_result.status();
-  int available = next_result.ValueOrDie();
-  int write_count = std::min(available, static_cast<int>(data.length()));
-  memcpy(buffer, data.data(), write_count);
-  if (write_count < available) stream_->BackUp(available - write_count);
-  return write_count;
+  int64_t written = 0;
+  while (written < data.size()) {
+    auto next_result = stream_->Next(&buffer);
+    if (!next_result.ok()) return next_result.status();
+    int available = next_result.ValueOrDie();
+    int write_count =
+        std::min(available, static_cast<int>(data.size() - written));
+    memcpy(buffer, data.data() + written, write_count);
+    if (write_count < available) stream_->BackUp(available - write_count);
+    written += write_count;
+  }
+  return written;
 }
 
 util::Status OutputStreamAdapter::Close() { return stream_->Close(); }
-
-int64_t OutputStreamAdapter::Position() const { return stream_->Position(); }
 
 }  // namespace tink
 }  // namespace crypto

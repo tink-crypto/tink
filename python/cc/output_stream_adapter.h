@@ -21,25 +21,25 @@
 #include "tink/output_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/cc/simple_output_stream.h"
 
 namespace crypto {
 namespace tink {
 
-// Wraps an OutputStream to SimpleOutputStream for use in Python.
-class OutputStreamAdapter : public SimpleOutputStream {
+// Adapts an OutputStream for use in Python.
+class OutputStreamAdapter {
  public:
   explicit OutputStreamAdapter(std::unique_ptr<OutputStream> stream)
       : stream_(std::move(stream)) {}
 
-  // Writes 'data' to the underlying OutputStream using only one call to Next(),
-  // and returns the number of bytes written. It is possible that only a part of
-  // 'data' was written.
-  util::StatusOr<int> Write(absl::string_view data) override;
+  // Writes 'data' to the underlying OutputStream and returns the number of
+  // bytes written, which may be less than size of 'data'.
+  // It repeatedly calls Next() as long as it returns positive values. This
+  // ensures that in the usual case when we can write all of 'data' the user can
+  // call Write() once and no unnecessary copies are made.
+  util::StatusOr<int64_t> Write(absl::string_view data);
 
-  util::Status Close() override;
-
-  int64_t Position() const override;
+  // Closes the underlying OutputStream.
+  util::Status Close();
 
  private:
   std::unique_ptr<OutputStream> stream_;

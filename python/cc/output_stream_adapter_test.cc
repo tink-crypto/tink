@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/output_stream.h"
+#include "tink/subtle/random.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/test_matchers.h"
 
@@ -43,7 +44,6 @@ TEST(OutputStreamAdapterTest, Basic) {
   auto write_result = adapter->Write("something");
   ASSERT_THAT(write_result.status(), test::IsOk());
   EXPECT_EQ(write_result.ValueOrDie(), 9);
-  EXPECT_EQ(adapter->Position(), 9);
   EXPECT_THAT(adapter->Close(), test::IsOk());
   EXPECT_EQ(buffer_ref->str(), "something");
 }
@@ -73,30 +73,17 @@ TEST(OutputStreamAdapterTest, WriteAfterClose) {
                              testing::HasSubstr("Stream closed")));
 }
 
-TEST(OutputStreamAdapterTest, Position) {
-  std::stringbuf* buffer_ref;
-  auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
-  auto write_result = adapter->Write("something");
-  ASSERT_THAT(write_result.status(), test::IsOk());
-  EXPECT_EQ(write_result.ValueOrDie(), 9);
-  EXPECT_EQ(adapter->Position(), 9);
-  write_result = adapter->Write("123");
-  ASSERT_THAT(write_result.status(), test::IsOk());
-  EXPECT_EQ(write_result.ValueOrDie(), 3);
-  EXPECT_EQ(adapter->Position(), 12);
-}
-
 // In this test size of the OstreamOutputStream buffer is smaller than the
-// size of data to be written, so only a part of data will be written.
-TEST(OutputStreamAdapterTest, PartialWrite) {
+// size of data to be written, so multiple calls to Next() will be needed.
+TEST(OutputStreamAdapterTest, MultipleNext) {
   std::stringbuf* buffer_ref;
   auto adapter = GetOutputStreamAdapter(10, &buffer_ref);
-  auto write_result = adapter->Write(std::string(20, 's'));
+  std::string data = subtle::Random::GetRandomBytes(35);
+  auto write_result = adapter->Write(data);
   ASSERT_THAT(write_result.status(), test::IsOk());
-  EXPECT_EQ(write_result.ValueOrDie(), 10);
-  EXPECT_EQ(adapter->Position(), 10);
+  EXPECT_EQ(write_result.ValueOrDie(), 35);
   EXPECT_THAT(adapter->Close(), test::IsOk());
-  EXPECT_EQ(buffer_ref->str(), std::string(10, 's'));
+  EXPECT_EQ(buffer_ref->str(), data);
 }
 
 }  // namespace

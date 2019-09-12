@@ -17,11 +17,10 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeyManagerBase;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;
-import com.google.crypto.tink.proto.Empty;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
@@ -36,70 +35,58 @@ import java.security.interfaces.ECPublicKey;
  * This key manager produces new instances of {@code EciesAeadHkdfHybridEncrypt}. It doesn't support
  * key generation.
  */
-class EciesAeadHkdfPublicKeyManager
-    extends KeyManagerBase<HybridEncrypt, EciesAeadHkdfPublicKey, Empty> {
+class EciesAeadHkdfPublicKeyManager extends KeyTypeManager<EciesAeadHkdfPublicKey> {
   public EciesAeadHkdfPublicKeyManager() {
-    super(HybridEncrypt.class, EciesAeadHkdfPublicKey.class, Empty.class, TYPE_URL);
-  }
-
-  private static final int VERSION = 0;
-
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
-
-  @Override
-  protected HybridEncrypt getPrimitiveFromKey(EciesAeadHkdfPublicKey recipientKeyProto)
-      throws GeneralSecurityException {
-    EciesAeadHkdfParams eciesParams = recipientKeyProto.getParams();
-    EciesHkdfKemParams kemParams = eciesParams.getKemParams();
-    ECPublicKey recipientPublicKey =
-        EllipticCurves.getEcPublicKey(
-            HybridUtil.toCurveType(kemParams.getCurveType()),
-            recipientKeyProto.getX().toByteArray(),
-            recipientKeyProto.getY().toByteArray());
-    EciesAeadHkdfDemHelper demHelper =
-        new RegistryEciesAeadHkdfDemHelper(eciesParams.getDemParams().getAeadDem());
-    return new EciesAeadHkdfHybridEncrypt(
-        recipientPublicKey,
-        kemParams.getHkdfSalt().toByteArray(),
-        HybridUtil.toHmacAlgo(kemParams.getHkdfHashType()),
-        HybridUtil.toPointFormatType(eciesParams.getEcPointFormat()),
-        demHelper);
+    super(
+        EciesAeadHkdfPublicKey.class,
+        new PrimitiveFactory<HybridEncrypt, EciesAeadHkdfPublicKey>(HybridEncrypt.class) {
+          @Override
+          public HybridEncrypt getPrimitive(EciesAeadHkdfPublicKey recipientKeyProto)
+              throws GeneralSecurityException {
+            EciesAeadHkdfParams eciesParams = recipientKeyProto.getParams();
+            EciesHkdfKemParams kemParams = eciesParams.getKemParams();
+            ECPublicKey recipientPublicKey =
+                EllipticCurves.getEcPublicKey(
+                    HybridUtil.toCurveType(kemParams.getCurveType()),
+                    recipientKeyProto.getX().toByteArray(),
+                    recipientKeyProto.getY().toByteArray());
+            EciesAeadHkdfDemHelper demHelper =
+                new RegistryEciesAeadHkdfDemHelper(eciesParams.getDemParams().getAeadDem());
+            return new EciesAeadHkdfHybridEncrypt(
+                recipientPublicKey,
+                kemParams.getHkdfSalt().toByteArray(),
+                HybridUtil.toHmacAlgo(kemParams.getHkdfHashType()),
+                HybridUtil.toPointFormatType(eciesParams.getEcPointFormat()),
+                demHelper);
+          }
+        });
   }
 
   @Override
-  public EciesAeadHkdfPublicKey newKeyFromFormat(Empty format) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented.");
+  public String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
   }
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
-  protected KeyMaterialType keyMaterialType() {
+  public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.ASYMMETRIC_PUBLIC;
   }
 
   @Override
-  protected EciesAeadHkdfPublicKey parseKeyProto(ByteString byteString)
+  public EciesAeadHkdfPublicKey parseKey(ByteString byteString)
       throws InvalidProtocolBufferException {
     return EciesAeadHkdfPublicKey.parseFrom(byteString);
   }
 
   @Override
-  protected Empty parseKeyFormatProto(ByteString byteString) throws InvalidProtocolBufferException {
-    return Empty.parseFrom(byteString);
-  }
-
-  @Override
-  protected void validateKey(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
+  public void validateKey(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
     // TODO(b/74251423): add more checks.
-    Validators.validateVersion(key.getVersion(), VERSION);
+    Validators.validateVersion(key.getVersion(), getVersion());
     HybridUtil.validate(key.getParams());
   }
-
-  @Override
-  protected void validateKeyFormat(Empty unused) throws GeneralSecurityException {}
 }

@@ -66,7 +66,7 @@ public class HybridEncryptIntegrationTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 primaryPrivProto,
-                EciesAeadHkdfPrivateKeyManager.TYPE_URL,
+                new EciesAeadHkdfPrivateKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
             8,
             KeyStatusType.ENABLED,
@@ -75,7 +75,7 @@ public class HybridEncryptIntegrationTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 primaryPrivProto.getPublicKey(),
-                EciesAeadHkdfPublicKeyManager.TYPE_URL,
+                new EciesAeadHkdfPublicKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
             42,
             KeyStatusType.ENABLED,
@@ -89,7 +89,7 @@ public class HybridEncryptIntegrationTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 rawPrivProto,
-                EciesAeadHkdfPrivateKeyManager.TYPE_URL,
+                new EciesAeadHkdfPrivateKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
             11,
             KeyStatusType.ENABLED,
@@ -98,7 +98,7 @@ public class HybridEncryptIntegrationTest {
         TestUtil.createKey(
             TestUtil.createKeyData(
                 rawPrivProto.getPublicKey(),
-                EciesAeadHkdfPublicKeyManager.TYPE_URL,
+                new EciesAeadHkdfPublicKeyManager().getKeyType(),
                 KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
             43,
             KeyStatusType.ENABLED,

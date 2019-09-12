@@ -23,9 +23,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.TestUtil.DummyAead;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
@@ -195,8 +197,20 @@ public class KeysetHandleTest {
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK));
     KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
-    // The TestKeyManager accepts AES128_GCM keys, but creates a DummyAead which always fails.
-    Aead aead = handle.getPrimitive(new KeyManagerBaseTest.TestKeyManager(), Aead.class);
+    // A key manager which accepts AES_GCM keys, but which creates a DummyAead primitive which
+    // always fails.
+    KeyManager<Aead> manager =
+        new KeyManagerImpl<>(
+            new KeyTypeManagerTest.TestKeyTypeManager(
+                new KeyTypeManagerTest.TestKeyTypeManager.PrimitiveFactory<Aead, AesGcmKey>(
+                    Aead.class) {
+                  @Override
+                  public Aead getPrimitive(AesGcmKey key) {
+                    return new DummyAead();
+                  }
+                }),
+            Aead.class);
+    Aead aead = handle.getPrimitive(manager, Aead.class);
     try {
       aead.encrypt(new byte[0], new byte[0]);
       fail("Expected GeneralSecurityException");

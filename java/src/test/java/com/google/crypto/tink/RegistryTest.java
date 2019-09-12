@@ -124,7 +124,7 @@ public class RegistryTest {
 
   @Test
   public void testGetKeyManager_legacy_shouldWork() throws Exception {
-    testGetKeyManager_shouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, "AesCtrHmacAeadKeyManager");
+    testGetKeyManager_shouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, "KeyManagerImpl");
     testGetKeyManager_shouldWork(AeadConfig.AES_EAX_TYPE_URL, "KeyManagerImpl");
     testGetKeyManager_shouldWork(MacConfig.HMAC_TYPE_URL, "KeyManagerImpl");
   }
@@ -249,7 +249,7 @@ public class RegistryTest {
     }
 
     KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
-    assertThat(manager.getClass().toString()).contains("AesCtrHmacAeadKeyManager");
+    assertThat(manager.getClass().toString()).contains("KeyManagerImpl");
   }
 
   @Test
@@ -317,7 +317,7 @@ public class RegistryTest {
     }
 
     KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
-    assertThat(manager.getClass().toString()).contains("AesCtrHmacAeadKeyManager");
+    assertThat(manager.getClass().toString()).contains("KeyManagerImpl");
   }
 
   @Test

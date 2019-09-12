@@ -30,7 +30,7 @@ namespace tink {
 // PrimitiveSet<Primitive> and wraps it into a single primitive.
 //
 // PrimitiveWrappers need to be written for every new primitive. They can be
-// registered in the registry to be fully integrated in tink.
+// registered in the registry to be fully integrated in Tink.
 template <class Primitive>
 class PrimitiveWrapper {
  public:

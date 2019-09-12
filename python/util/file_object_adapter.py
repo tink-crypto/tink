@@ -11,8 +11,8 @@
 # limitations under the License.
 """FileObjectAdapter class.
 
-Used in conjunction with SimpleOutputStreamAdapter to allow a C++ OutputStream
-to write to a Python file-like objects.
+Used in conjunction with PythonOutputStream/PythonInputStream to allow a C++
+OutputStream/InputStream to interact with a Python file-like object.
 """
 
 from __future__ import absolute_import
@@ -20,25 +20,51 @@ from __future__ import division
 from __future__ import google_type_annotations
 from __future__ import print_function
 
-from tink.python.cc.clif import simple_output_stream
+import io
+from typing import BinaryIO
+
+from tink.python.cc.clif import python_file_object_adapter
 
 
-class FileObjectAdapter(simple_output_stream.SimpleOutputStream):
-  """Wraps a Python file object to SimpleOutputStream for use in C++."""
+class FileObjectAdapter(python_file_object_adapter.PythonFileObjectAdapter):
+  """Adapts a Python file object for use in C++."""
 
-  # TODO(paulavidas) add BinaryIO type annotation to file_object, after
-  # cr/266767195 is resolved
-  def __init__(self, file_object):
-    if not file_object.writable():
-      raise TypeError('File object must be writable.')
+  def __init__(self, file_object: BinaryIO):
     self._file_object = file_object
 
   def write(self, data: bytes) -> int:
     """Writes to underlying file object and returns number of bytes written."""
-    return self._file_object.write(data)
+    try:
+      written = self._file_object.write(data)
+      return 0 if written is None else written
+    except io.BlockingIOError as e:
+      return e.characters_written
 
   def close(self) -> None:
     self._file_object.close()
 
-  def position(self) -> int:
-    return self._file_object.tell()
+  def read(self, size: int) -> bytes:
+    """Reads at most 'size' bytes from the underlying file object.
+
+    Args:
+      size: A non-negative integer, maximum number of bytes to read.
+
+    Returns:
+      Bytes that were read. An empty bytes object is returned if no bytes are
+      available at the moment.
+
+    Raises:
+      EOFError if the file object is already at EOF.
+    """
+    if size < 0:
+      raise ValueError('size must be non-negative')
+
+    try:
+      data = self._file_object.read(size)
+      if data is None:
+        return b''
+      elif not data and size > 0:
+        raise EOFError('EOF')
+      return data
+    except io.BlockingIOError:
+      return b''

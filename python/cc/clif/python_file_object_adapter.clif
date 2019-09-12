@@ -12,9 +12,9 @@
 
 from "tink/python/util/clif.h" import *  # Status, StatusOr
 
-from "tink/python/cc/simple_output_stream.h":
+from "tink/python/cc/python_file_object_adapter.h":
   namespace `crypto::tink`:
-    class SimpleOutputStream:
+    class PythonFileObjectAdapter:
       @virtual
       def `Write` as write(self, data: bytes) -> StatusOr<int>
 
@@ -22,4 +22,4 @@ from "tink/python/cc/simple_output_stream.h":
       def `Close` as close(self) -> Status
 
       @virtual
-      def `Position` as position(self) -> int
+      def `Read` as read(self, size: int) -> StatusOr<bytes>

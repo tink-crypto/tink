@@ -206,7 +206,7 @@ public final class SignatureKeyTemplates {
             .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(RsaSsaPkcs1SignKeyManager.TYPE_URL)
+        .setTypeUrl(new RsaSsaPkcs1SignKeyManager().getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

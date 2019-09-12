@@ -40,7 +40,7 @@ public class HybridKeyTemplatesTest {
   @Test
   public void testECIES_P256_HKDF_HMAC_SHA256_AES128_GCM() throws Exception {
     KeyTemplate template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM;
-    assertEquals(EciesAeadHkdfPrivateKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format = EciesAeadHkdfKeyFormat.parseFrom(template.getValue());
 
@@ -60,7 +60,7 @@ public class HybridKeyTemplatesTest {
   @Test
   public void testECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256() throws Exception {
     KeyTemplate template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256;
-    assertEquals(EciesAeadHkdfPrivateKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format = EciesAeadHkdfKeyFormat.parseFrom(template.getValue());
 
@@ -88,7 +88,7 @@ public class HybridKeyTemplatesTest {
     String salt = "some salt";
     KeyTemplate template = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(
         curveType, hashType, ecPointFormat, demKeyTemplate, salt.getBytes(UTF_8));
-    assertEquals(EciesAeadHkdfPrivateKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format = EciesAeadHkdfKeyFormat.parseFrom(template.getValue());
 

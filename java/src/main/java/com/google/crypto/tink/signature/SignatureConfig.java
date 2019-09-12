@@ -92,8 +92,8 @@ public final class SignatureConfig {
     Registry.registerAsymmetricKeyManagers(
         new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), true);
 
-    Registry.registerKeyManager(new RsaSsaPkcs1SignKeyManager());
-    Registry.registerKeyManager(new RsaSsaPkcs1VerifyKeyManager());
+    Registry.registerAsymmetricKeyManagers(
+        new RsaSsaPkcs1SignKeyManager(), new RsaSsaPkcs1VerifyKeyManager(), true);
 
     Registry.registerAsymmetricKeyManagers(
         new RsaSsaPssSignKeyManager(), new RsaSsaPssVerifyKeyManager(), true);
