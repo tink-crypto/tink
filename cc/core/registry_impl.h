@@ -49,6 +49,10 @@ class RegistryImpl {
     return *instance;
   }
 
+  RegistryImpl() = default;
+  RegistryImpl(const RegistryImpl&) = delete;
+  RegistryImpl& operator=(const RegistryImpl&) = delete;
+
   template <class P>
   crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
       const std::string& catalogue_name) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
@@ -287,10 +291,6 @@ class RegistryImpl {
     // TypeId name of the primitive for which this key was inserted.
     const std::string type_id_name;
   };
-
-  RegistryImpl() = default;
-  RegistryImpl(const RegistryImpl&) = delete;
-  RegistryImpl& operator=(const RegistryImpl&) = delete;
 
   template <class P>
   crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*> get_wrapper() const
