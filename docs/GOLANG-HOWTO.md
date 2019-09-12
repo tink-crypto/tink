@@ -267,7 +267,7 @@ func main() {
                 log.Fatal(err)
         }
 
-        khPub, err := khPriv.PublicKey()
+        khPub, err := khPriv.Public()
         if err != nil {
                 log.Fatal(err)
         }
