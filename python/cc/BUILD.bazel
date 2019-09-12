@@ -101,3 +101,33 @@ cc_library(
         ":python_file_object_adapter",
     ],
 )
+
+cc_library(
+    name = "cc_streaming_aead_wrappers",
+    srcs = ["cc_streaming_aead_wrappers.cc"],
+    hdrs = ["cc_streaming_aead_wrappers.h"],
+    include_prefix = "tink/python",
+    strip_include_prefix = "/python",
+    deps = [
+        ":output_stream_adapter",
+        ":python_file_object_adapter",
+        ":python_output_stream",
+        "@com_google_absl//absl/strings",
+        "//cc:output_stream",
+        "//cc:streaming_aead",
+        "//cc/util:statusor",
+    ],
+)
+
+cc_test(
+    name = "cc_streaming_aead_wrappers_test",
+    size = "small",
+    srcs = ["cc_streaming_aead_wrappers_test.cc"],
+    deps = [
+        ":cc_streaming_aead_wrappers",
+        ":test_util",
+        "@com_google_googletest//:gtest_main",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+    ],
+)
