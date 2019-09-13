@@ -112,10 +112,10 @@ cc_library(
         ":output_stream_adapter",
         ":python_file_object_adapter",
         ":python_output_stream",
-        "@com_google_absl//absl/strings",
         "//cc:output_stream",
         "//cc:streaming_aead",
         "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -126,9 +126,9 @@ cc_test(
     deps = [
         ":cc_streaming_aead_wrappers",
         ":test_util",
-        "@com_google_googletest//:gtest_main",
         "//cc/util:test_matchers",
         "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -160,6 +160,35 @@ cc_test(
         ":test_util",
         "//cc/subtle:random",
         "//cc/util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "input_stream_adapter",
+    srcs = ["input_stream_adapter.cc"],
+    hdrs = ["input_stream_adapter.h"],
+    include_prefix = "tink/python",
+    strip_include_prefix = "/python",
+    deps = [
+        "//cc:input_stream",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "input_stream_adapter_test",
+    size = "small",
+    srcs = ["input_stream_adapter_test.cc"],
+    deps = [
+        ":input_stream_adapter",
+        "//cc:input_stream",
+        "//cc/subtle:random",
+        "//cc/util:istream_input_stream",
+        "//cc/util:test_matchers",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
