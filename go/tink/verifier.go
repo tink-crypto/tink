@@ -15,8 +15,10 @@
 package tink
 
 // Verifier is the verifying interface for digital signature.
-// Implementations of this interface are secure against adaptive chosen-message attacks.
-// Signing data ensures authenticity and integrity of that data, but not its secrecy.
+//
+// Implementations of this interface are secure against adaptive chosen-message
+// attacks.  Signing data ensures authenticity and integrity of that data, but
+// not its secrecy.
 type Verifier interface {
 	// Verifies returns nil if signature is a valid signature for data; otherwise returns an error.
 	Verify(signature, data []byte) error

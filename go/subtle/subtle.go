@@ -46,7 +46,7 @@ func ConvertHashName(name string) string {
 }
 
 // ConvertCurveName converts different forms of a curve name to the
-// name that tink recognizes
+// name that tink recognizes.
 func ConvertCurveName(name string) string {
 	switch name {
 	case "secp256r1", "P-256":

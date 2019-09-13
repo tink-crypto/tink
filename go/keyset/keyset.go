@@ -12,7 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package keyset provides methods to generate, read, write or validate keysets.
+// Package keyset provides methods to generate, read, write or validate
+// keysets.
 package keyset
 
 import (
@@ -20,14 +21,16 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// keysetHandle is used by package insecurecleartextkeyset and package testkeyset (via package internal)
-// to create a keyset.Handle from cleartext key material.
+// keysetHandle is used by package insecurecleartextkeyset and package
+// testkeyset (via package internal) to create a keyset.Handle from cleartext
+// key material.
 func keysetHandle(ks *tinkpb.Keyset) *Handle {
 	return &Handle{ks}
 }
 
-// keysetMaterial is used by package insecurecleartextkeyset and package testkeyset (via package internal)
-// to read the key material in a keyset.Handle.
+// keysetMaterial is used by package insecurecleartextkeyset and package
+// testkeyset (via package internal) to read the key material in a
+// keyset.Handle.
 func keysetMaterial(h *Handle) *tinkpb.Keyset {
 	return h.ks
 }

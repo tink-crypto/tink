@@ -12,10 +12,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package insecurecleartextkeyset provides methods to read or write cleartext keyset material.
+// Package insecurecleartextkeyset provides methods to read or write cleartext
+// keyset material.
 //
-// This package contains dangerous functions, and is separate from the rest of Tink so that its
-// usage can be restricted and audited.
+// This package contains dangerous functions, and is separate from the rest of
+// Tink so that its usage can be restricted and audited.
 package insecurecleartextkeyset
 
 import (
@@ -51,8 +52,9 @@ func Read(r keyset.Reader) (*keyset.Handle, error) {
 }
 
 // Write exports the keyset from h to the given writer w without encrypting it.
-// Storing secret key material in an unencrypted fashion is dangerous. If feasible, you should use
-// func keyset.Handle.Write() instead.
+//
+// Storing secret key material in an unencrypted fashion is dangerous. If
+// feasible, you should use func keyset.Handle.Write() instead.
 func Write(h *keyset.Handle, w keyset.Writer) error {
 	if h == nil {
 		return errInvalidHandle

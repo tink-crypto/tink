@@ -15,8 +15,10 @@
 package tink
 
 // Signer is the signing interface for digital signature.
-// Implementations of this interface are secure against adaptive chosen-message attacks.
-// Signing data ensures authenticity and integrity of that data, but not its secrecy.
+//
+// Implementations of this interface are secure against adaptive chosen-message
+// attacks.  Signing data ensures authenticity and integrity of that data, but
+// not its secrecy.
 type Signer interface {
 	// Computes the digital signature for data.
 	Sign(data []byte) ([]byte, error)

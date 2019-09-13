@@ -12,7 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package daead provides subtle implementations of the DeterministicAEAD primitive.
+// Package daead provides subtle implementations of the DeterministicAEAD
+// primitive.
 package daead
 
 import (
@@ -26,15 +27,17 @@ import (
 )
 
 // AESSIV is an implemenatation of AES-SIV-CMAC as defined in
-// https://tools.ietf.org/html/rfc5297 .
-// AESSIV implements a deterministic encryption with additional
-// data (i.e. the DeterministicAEAD interface). Hence the implementation
-// below is restricted to one AD component.
+// https://tools.ietf.org/html/rfc5297.
 //
-// Security:
-// =========
+// AESSIV implements a deterministic encryption with additional data (i.e. the
+// DeterministicAEAD interface). Hence the implementation below is restricted
+// to one AD component.
+//
+// Security Note:
+//
 // Chatterjee, Menezes and Sarkar analyze AES-SIV in Section 5.1 of
 // https://www.math.uwaterloo.ca/~ajmeneze/publications/tightness.pdf
+//
 // Their analysis shows that AES-SIV is susceptible to an attack in
 // a multi-user setting. Concretely, if an attacker knows the encryption
 // of a message m encrypted and authenticated with k different keys,
@@ -90,7 +93,8 @@ func NewAESSIV(key []byte) (*AESSIV, error) {
 }
 
 // multiplyByX multiplies an element in GF(2^128) by its generator.
-// This functions is incorrectly named "doubling" in section 2.3 of RFC 5297.
+//
+// This function is incorrectly named "doubling" in section 2.3 of RFC 5297.
 func multiplyByX(block []byte) {
 	carry := block[0] >> 7
 	for i := 0; i < aes.BlockSize-1; i++ {
@@ -104,8 +108,8 @@ func multiplyByX(block []byte) {
 	}
 }
 
-// EncryptDeterministically deterministically encrypts plaintext with additionalData as
-// additional authenticated data.
+// EncryptDeterministically deterministically encrypts plaintext with
+// additionalData as additional authenticated data.
 func (asc *AESSIV) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
 	siv := make([]byte, aes.BlockSize)
 	asc.s2v(pt, aad, siv)
@@ -119,8 +123,8 @@ func (asc *AESSIV) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
 	return ct, nil
 }
 
-// DecryptDeterministically deterministically decrypts ciphertext with additionalData as
-// additional authenticated data.
+// DecryptDeterministically deterministically decrypts ciphertext with
+// additionalData as additional authenticated data.
 func (asc *AESSIV) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
 	if len(ct) < aes.BlockSize {
 		return nil, errors.New("aes_siv: ciphertext is too short")
@@ -143,7 +147,8 @@ func (asc *AESSIV) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
 	return pt, nil
 }
 
-// ctrCrypt encrypts (or decrypts) the bytes in in using an SIV and writes the result to out.
+// ctrCrypt encrypts (or decrypts) the bytes in in using an SIV and writes the
+// result to out.
 func (asc *AESSIV) ctrCrypt(siv, in, out []byte) error {
 	// siv might be used outside of ctrCrypt(), so making a copy of it.
 	iv := make([]byte, aes.BlockSize)
@@ -161,7 +166,8 @@ func (asc *AESSIV) ctrCrypt(siv, in, out []byte) error {
 	return nil
 }
 
-// s2v is a Pseudo-Random Function (PRF) construction: https://tools.ietf.org/html/rfc5297.
+// s2v is a Pseudo-Random Function (PRF) construction:
+// https://tools.ietf.org/html/rfc5297.
 func (asc *AESSIV) s2v(msg, aad, siv []byte) {
 	block := make([]byte, aes.BlockSize)
 	asc.cmac(block, block)
@@ -183,7 +189,9 @@ func (asc *AESSIV) s2v(msg, aad, siv []byte) {
 	}
 }
 
-// cmacLong computes CMAC(XorEnd(data, last)), where XorEnd xors the bytes in last to the last bytes in data.
+// cmacLong computes CMAC(XorEnd(data, last)), where XorEnd xors the bytes in
+// last to the last bytes in data.
+//
 // The size of the data must be at least 16 bytes.
 func (asc *AESSIV) cmacLong(data, last, mac []byte) {
 	block := make([]byte, aes.BlockSize)

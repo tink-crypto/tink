@@ -12,8 +12,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package internal provides a coordination point for package keyset, package insecurecleartextkeyset, and package testkeyset.
-// internal must only be imported by these three packages.
+// Package internal provides a coordination point for package keyset, package
+// insecurecleartextkeyset, and package testkeyset.  internal must only be
+// imported by these three packages.
 package internal
 
 // KeysetHandle is a raw constructor of keyset.Handle.

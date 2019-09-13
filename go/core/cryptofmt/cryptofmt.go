@@ -12,7 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package cryptofmt provides constants and convenience methods that define the format of ciphertexts and signatures.
+// Package cryptofmt provides constants and convenience methods that define the
+// format of ciphertexts and signatures.
 package cryptofmt
 
 import (
@@ -45,11 +46,10 @@ const (
 	RawPrefix = ""
 )
 
-/*
-OutputPrefix generates the prefix of ciphertexts produced by the crypto primitive obtained from key.
-The prefix can be either empty (for RAW-type prefix), or consists of a 1-byte indicator of the type
-of the prefix, followed by 4 bytes of the key ID in big endian encoding.
-*/
+// OutputPrefix generates the prefix of ciphertexts produced by the crypto
+// primitive obtained from key.  The prefix can be either empty (for RAW-type
+// prefix), or consists of a 1-byte indicator of the type of the prefix,
+// followed by 4 bytes of the key ID in big endian encoding.
 func OutputPrefix(key *tinkpb.Keyset_Key) (string, error) {
 	switch key.OutputPrefixType {
 	case tinkpb.OutputPrefixType_LEGACY, tinkpb.OutputPrefixType_CRUNCHY:

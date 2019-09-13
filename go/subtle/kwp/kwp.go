@@ -17,17 +17,18 @@
 //
 // The same encryption mode is also defined in RFC 5649. The NIST document is
 // used here as a primary reference, since it contains a security analysis and
-// further recommendations. In particular, Section 8 of NIST SP 800 38f suggests
-// that the allowed key sizes may be restricted. The implementation in this
-// package requires that the key sizes are in the range MinWrapSize and
+// further recommendations. In particular, Section 8 of NIST SP 800 38f
+// suggests that the allowed key sizes may be restricted. The implementation in
+// this package requires that the key sizes are in the range MinWrapSize and
 // MaxWrapSize.
 //
 // The minimum of 16 bytes has been chosen, because 128 bit keys are the
 // smallest key sizes used in tink. Additionally, wrapping short keys with KWP
-// does not use the function W and hence prevents using security arguments based
-// on the assumption that W is a strong pseudorandom. One consequence of using a
-// strong pseudorandom permutation as an underlying function is that leaking
-// partial information about decrypted bytes is not useful for an attack.
+// does not use the function W and hence prevents using security arguments
+// based on the assumption that W is a strong pseudorandom. One consequence of
+// using a strong pseudorandom permutation as an underlying function is that
+// leaking partial information about decrypted bytes is not useful for an
+// attack.
 //
 // The upper bound for the key size is somewhat arbitrary. Setting an upper
 // bound is motivated by the analysis in section A.4 of NIST SP 800 38f:
@@ -58,6 +59,7 @@ type KWP struct {
 }
 
 // NewKWP returns a KWP instance.
+//
 // The key argument should be the AES wrapping key, either 16 or 32 bytes
 // to select AES-128 or AES-256.
 func NewKWP(wrappingKey []byte) (*KWP, error) {

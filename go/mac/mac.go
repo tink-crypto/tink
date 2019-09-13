@@ -13,38 +13,41 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Package mac provides implementations of the MAC primitive.
-// MAC computes a tag for a given message that can be used to authenticate a message.
-// MAC protects data integrity as well as provides for authenticity of the message.
+//
+// MAC computes a tag for a given message that can be used to authenticate a
+// message.  MAC protects data integrity as well as provides for authenticity
+// of the message.
+//
 // Example:
 //
-// package main
+//   package main
 //
-// import (
-//     "fmt"
+//   import (
+//       "fmt"
 //
-//     "github.com/google/tink/go/mac"
-//     "github.com/google/tink/go/keyset"
-// )
+//       "github.com/google/tink/go/mac"
+//       "github.com/google/tink/go/keyset"
+//   )
 //
-// func main() {
+//   func main() {
 //
-//     kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
-//     if err != nil {
-//         // handle the error
-//     }
+//       kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
+//       if err != nil {
+//           // handle the error
+//       }
 //
-//     m := mac.New(kh)
+//       m := mac.New(kh)
 //
-//     mac , err := m.ComputeMac([]byte("this data needs to be MACed"))
-//     if err != nil {
-//         // handle error
-//     }
+//       mac , err := m.ComputeMac([]byte("this data needs to be MACed"))
+//       if err != nil {
+//           // handle error
+//       }
 //
-//     if m.VerifyMAC(mac, []byte("this data needs to be MACed")); err != nil {
-//         //handle error
-//     }
+//       if m.VerifyMAC(mac, []byte("this data needs to be MACed")); err != nil {
+//           //handle error
+//       }
 //
-// }
+//   }
 package mac
 
 import (

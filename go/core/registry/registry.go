@@ -12,18 +12,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package registry provides a container that for each supported key type holds a corresponding KeyManager
-// object, which can generate new keys or instantiate the primitive corresponding to given key.
+// Package registry provides a container that for each supported key type holds
+// a corresponding KeyManager object, which can generate new keys or
+// instantiate the primitive corresponding to given key.
 //
-// Registry is initialized at startup, and is later used to instantiate primitives for given keys
-// or keysets. Keeping KeyManagers for all primitives in a single Registry (rather than having a
-// separate KeyManager per primitive) enables modular construction of compound primitives from
-// "simple" ones, e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
+// Registry is initialized at startup, and is later used to instantiate
+// primitives for given keys or keysets. Keeping KeyManagers for all primitives
+// in a single Registry (rather than having a separate KeyManager per
+// primitive) enables modular construction of compound primitives from "simple"
+// ones, e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
 //
-// Note that regular users will usually not work directly with Registry, but rather
-// via primitive factories, which in the background query the Registry for specific
-// KeyManagers. Registry is public though, to enable configurations with custom
-// primitives and KeyManagers.
+// Note that regular users will usually not work directly with Registry, but
+// rather via primitive factories, which in the background query the Registry
+// for specific KeyManagers. Registry is public though, to enable
+// configurations with custom primitives and KeyManagers.
 package registry
 
 import (

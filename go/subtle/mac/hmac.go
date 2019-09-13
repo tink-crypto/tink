@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package mac provides subtle implementations of the Mac primitive.
+// Package mac provides subtle implementations of the MAC primitive.
 package mac
 
 import (
@@ -102,8 +102,8 @@ func (h *HMAC) ComputeMAC(data []byte) ([]byte, error) {
 	return tag[:h.TagSize], nil
 }
 
-// VerifyMAC verifies whether the given MAC is a correct authentication code (MAC)
-// the given data.
+// VerifyMAC verifies whether the given MAC is a correct message authentication
+// code (MAC) the given data.
 func (h *HMAC) VerifyMAC(mac []byte, data []byte) error {
 	if mac == nil || data == nil {
 		return errHMACInvalidInput
