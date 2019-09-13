@@ -32,9 +32,10 @@ class StreamingAeadDecryptingStream : public InputStream {
  public:
   // A factory that produces decrypting streams.
   // The returned stream is a wrapper around 'ciphertext_source',
-  // such that any bytes written via the wrapper are AEAD-decrypted
-  // by 'segment_decrypter' using 'associated_data' as associated
-  // authenticated data.
+  // such that reading via the wrapper leads to AEAD-decryption of the
+  // underlying ciphertext by 'segment_decrypter', using 'associated_data' as
+  // associated authenticated data, and the read bytes are bytes of the
+  // resulting plaintext.
   static
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
       New(std::unique_ptr<StreamSegmentDecrypter> segment_decrypter,
