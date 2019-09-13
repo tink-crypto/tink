@@ -34,7 +34,8 @@ class PythonFileObjectAdapter {
   virtual util::Status Close() = 0;
 
   // Reads at most 'size' bytes from the underlying Python file object. Returns
-  // OUT_OF_RANGE status if the file object is alreday at EOF.
+  // UNKNOWN status with error message that contains "EOFError" if the file
+  // object is alreday at EOF.
   virtual util::StatusOr<std::string> Read(int size) = 0;
 
   virtual ~PythonFileObjectAdapter() {}

@@ -42,6 +42,35 @@ class TestWritableObject : public PythonFileObjectAdapter {
   std::string buffer_;
 };
 
+// Readable PythonFileObjectAdapter for testing.
+class TestReadableObject : public PythonFileObjectAdapter {
+ public:
+  explicit TestReadableObject(const std::string& data) {
+    buffer_ = data;
+    position_ = 0;
+  }
+
+  util::StatusOr<int> Write(absl::string_view data) override {
+    return util::Status(util::error::UNIMPLEMENTED, "not writable");
+  }
+
+  util::Status Close() override { return util::OkStatus(); }
+
+  util::StatusOr<std::string> Read(int size) override {
+    if (position_ == buffer_.size() && size > 0) {
+      return util::Status(util::error::UNKNOWN, "EOFError");
+    }
+    int actual = std::min(size, static_cast<int>(buffer_.size() - position_));
+    std::string to_return = buffer_.substr(position_, actual);
+    position_ += actual;
+    return to_return;
+  }
+
+ private:
+  std::string buffer_;
+  int position_;
+};
+
 }  // namespace test
 }  // namespace tink
 }  // namespace crypto
