@@ -267,7 +267,12 @@ func main() {
                 log.Fatal(err)
         }
 
-        he, err := hybrid.NewHybridEncrypt(khPriv)
+        khPub, err := khPriv.Public()
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        he, err := hybrid.NewHybridEncrypt(khPub)
         if err != nil {
                 log.Fatal(err)
         }
@@ -277,12 +282,10 @@ func main() {
                 log.Fatal(err)
         }
 
-        khPub, err := khPriv.PublicKey()
+        hd, err := hybrid.NewHybridDecrypt(khPriv)
         if err != nil {
                 log.Fatal(err)
         }
-
-        hd, err := hybrid.NewHybridDecrypt(khPub)
 
         pt, err := hd.Decrypt(ct, []byte("context info"))
         if err != nil {
