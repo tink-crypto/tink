@@ -37,4 +37,5 @@ class PublicKeyVerify {
   verify(signature, message) {}
 }
 
+goog.exportSymbol('tink.PublicKeyVerify', PublicKeyVerify);
 exports = PublicKeyVerify;

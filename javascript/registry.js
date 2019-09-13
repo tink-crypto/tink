@@ -295,4 +295,5 @@ Registry.typeToNewKeyAllowedMap_ = new Map();
  */
 Registry.primitiveTypeToWrapper_ = new Map();
 
+goog.exportSymbol('tink.Registry', Registry);
 exports = Registry;

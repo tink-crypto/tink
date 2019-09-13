@@ -124,6 +124,9 @@ class KeyManager {
   getKeyFactory() {}
 }
 
+goog.exportSymbol('tink.KeyManager', KeyManager);
+goog.exportSymbol('tink.KeyFactory', KeyFactory);
+goog.exportSymbol('tink.PrivateKeyFactory', PrivateKeyFactory);
 exports = {
   KeyManager,
   KeyFactory,

@@ -228,4 +228,5 @@ AesGcmKeyManager.KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
 /** @const @private {number} */
 AesGcmKeyManager.VERSION_ = 0;
 
+goog.exportSymbol('tink.aead.AesGcmKeyManager', AesGcmKeyManager);
 exports = AesGcmKeyManager;

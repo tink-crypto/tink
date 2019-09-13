@@ -142,4 +142,5 @@ const createEciesAeadHkdfParams_ = function(
   return params;
 };
 
+goog.exportSymbol('tink.hybrid.HybridKeyTemplates', HybridKeyTemplates);
 exports = HybridKeyTemplates;

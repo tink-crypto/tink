@@ -44,4 +44,5 @@ class Mac {
   verifyMac(tag, data) {}
 }
 
+goog.exportSymbol('tink.Mac', Mac);
 exports = Mac;

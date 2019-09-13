@@ -35,4 +35,5 @@ class PublicKeySign {
   sign(message) {}
 }
 
+goog.exportSymbol('tink.PublicKeySign', PublicKeySign);
 exports = PublicKeySign;

@@ -39,4 +39,5 @@ class KeysetReader {
   readEncrypted() {}
 }
 
+goog.exportSymbol('tink.KeysetReader', KeysetReader);
 exports = KeysetReader;

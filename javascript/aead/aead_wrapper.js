@@ -156,4 +156,5 @@ class AeadWrapper {
   }
 }
 
+goog.exportSymbol('tink.aead.AeadWrapper', AeadWrapper);
 exports = AeadWrapper;

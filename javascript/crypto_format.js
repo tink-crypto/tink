@@ -134,5 +134,5 @@ CryptoFormat.RAW_PREFIX_SIZE = 0;
  */
 CryptoFormat.RAW_PREFIX = new Uint8Array(0);
 
-
+goog.exportSymbol('tink.CryptoFormat', CryptoFormat);
 exports = CryptoFormat;

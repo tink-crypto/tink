@@ -31,4 +31,5 @@ class KeysetWriter {
   write(keyset) {}
 }
 
+goog.exportSymbol('tink.KeysetWriter', KeysetWriter);
 exports = KeysetWriter;

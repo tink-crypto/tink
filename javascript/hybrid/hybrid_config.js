@@ -56,6 +56,7 @@ const DECRYPT_PRIMITIVE_NAME = 'HybridDecrypt';
 const ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE =
     EciesAeadHkdfPrivateKeyManager.KEY_TYPE;
 
+goog.exportSymbol('tink.hybrid.HybridConfig.register', register);
 exports = {
   register,
   ENCRYPT_PRIMITIVE_NAME,

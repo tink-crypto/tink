@@ -254,6 +254,8 @@ class PrimitiveSet {
   }
 }
 
+goog.exportSymbol('tink.Entry', Entry);
+goog.exportSymbol('tink.PrimitiveSet', PrimitiveSet);
 exports = {
   Entry,
   PrimitiveSet,

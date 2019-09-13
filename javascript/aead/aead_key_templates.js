@@ -182,4 +182,15 @@ class AeadKeyTemplates {
   }
 }
 
+goog.exportProperty(
+    AeadKeyTemplates, 'aes128CtrHmacSha256',
+    AeadKeyTemplates.aes128CtrHmacSha256);
+goog.exportProperty(
+    AeadKeyTemplates, 'aes256CtrHmacSha256',
+    AeadKeyTemplates.aes256CtrHmacSha256);
+goog.exportProperty(AeadKeyTemplates, 'aes128Gcm', AeadKeyTemplates.aes128Gcm);
+goog.exportProperty(AeadKeyTemplates, 'aes256Gcm', AeadKeyTemplates.aes256Gcm);
+goog.exportProperty(
+    AeadKeyTemplates, 'aes256GcmNoPrefix', AeadKeyTemplates.aes256GcmNoPrefix);
+goog.exportSymbol('tink.aead.AeadKeyTemplates', AeadKeyTemplates);
 exports = AeadKeyTemplates;

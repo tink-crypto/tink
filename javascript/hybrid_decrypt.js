@@ -72,4 +72,5 @@ class HybridDecrypt {
   decrypt(ciphertext, opt_contextInfo) {}
 }
 
+goog.exportSymbol('tink.HybridDecrypt', HybridDecrypt);
 exports = HybridDecrypt;

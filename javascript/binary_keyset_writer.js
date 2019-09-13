@@ -34,4 +34,5 @@ class BinaryKeysetWriter {
   }
 }
 
+goog.exportSymbol('tink.BinaryKeysetWriter', BinaryKeysetWriter);
 exports = BinaryKeysetWriter;

@@ -44,4 +44,5 @@ class PrimitiveWrapper {
   getPrimitiveType() {}
 }
 
+goog.exportSymbol('tink.PrimitiveWrapper', PrimitiveWrapper);
 exports = PrimitiveWrapper;
