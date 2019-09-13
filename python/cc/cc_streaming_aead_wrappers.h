@@ -20,8 +20,10 @@
 #include "absl/strings/string_view.h"
 #include "tink/streaming_aead.h"
 #include "tink/util/statusor.h"
+#include "tink/python/cc/input_stream_adapter.h"
 #include "tink/python/cc/output_stream_adapter.h"
 #include "tink/python/cc/python_file_object_adapter.h"
+#include "tink/python/cc/python_input_stream.h"
 #include "tink/python/cc/python_output_stream.h"
 
 namespace crypto {
@@ -30,13 +32,24 @@ namespace tink {
 // Wrapper function for StreamingAead.NewEncryptingStream
 //
 // It uses 'streaming_aead' to create an EncryptingStream that writes the
-// ciphertext to ciphertext_destination through a PythonOutputStream, and
+// ciphertext to 'ciphertext_destination' through a PythonOutputStream, and
 // returns an OutputStreamAdapter that wraps this EncryptingStream.
 // Taking a raw pointer signals to CLIF that the object is borrowed - ownership
 // is not taken, and the value is not copied.
 util::StatusOr<std::unique_ptr<OutputStreamAdapter>> NewCcEncryptingStream(
     StreamingAead* streaming_aead, const absl::string_view aad,
     std::unique_ptr<PythonFileObjectAdapter> ciphertext_destination);
+
+// Wrapper function for StreamingAead.NewDecryptingStream
+//
+// It uses 'streaming_aead' to create a DecryptingStream that reads the
+// ciphertext from 'ciphertext_source' through a PythonInputStream, and
+// returns an InputStreamAdapter that wraps this DecryptingStream.
+// Taking a raw pointer signals to CLIF that the object is borrowed - ownership
+// is not taken, and the value is not copied.
+util::StatusOr<std::unique_ptr<InputStreamAdapter>> NewCcDecryptingStream(
+    StreamingAead* streaming_aead, const absl::string_view aad,
+    std::unique_ptr<PythonFileObjectAdapter> ciphertext_source);
 
 }  // namespace tink
 }  // namespace crypto

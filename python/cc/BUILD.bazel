@@ -109,9 +109,12 @@ cc_library(
     include_prefix = "tink/python",
     strip_include_prefix = "/python",
     deps = [
+        ":input_stream_adapter",
         ":output_stream_adapter",
         ":python_file_object_adapter",
+        ":python_input_stream",
         ":python_output_stream",
+        "//cc:input_stream",
         "//cc:output_stream",
         "//cc:streaming_aead",
         "//cc/util:statusor",

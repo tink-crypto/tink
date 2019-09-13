@@ -14,10 +14,12 @@
 
 #include "tink/python/cc/cc_streaming_aead_wrappers.h"
 
+#include "tink/input_stream.h"
 #include "tink/output_stream.h"
 
 namespace crypto {
 namespace tink {
+
 util::StatusOr<std::unique_ptr<OutputStreamAdapter>> NewCcEncryptingStream(
     StreamingAead* streaming_aead, absl::string_view aad,
     std::unique_ptr<PythonFileObjectAdapter> ciphertext_destination) {
@@ -36,5 +38,23 @@ util::StatusOr<std::unique_ptr<OutputStreamAdapter>> NewCcEncryptingStream(
   // Get an OutputStreamAdapter from the EncryptingStream
   return absl::make_unique<OutputStreamAdapter>(std::move(result.ValueOrDie()));
 }
+
+util::StatusOr<std::unique_ptr<InputStreamAdapter>> NewCcDecryptingStream(
+    StreamingAead* streaming_aead, absl::string_view aad,
+    std::unique_ptr<PythonFileObjectAdapter> ciphertext_source) {
+  // Get a source InputStream from the source PythonFileObjectAdapter.
+  std::unique_ptr<InputStream> source_os =
+      absl::make_unique<PythonInputStream>(std::move(ciphertext_source));
+
+  // Get a DecryptingStream from the source InputStream.
+  auto result = streaming_aead->NewDecryptingStream(std::move(source_os), aad);
+  if (!result.ok()) {
+    return result.status();
+  }
+
+  // Get an InputStreamAdapter from the DecryptingStream
+  return absl::make_unique<InputStreamAdapter>(std::move(result.ValueOrDie()));
+}
+
 }  // namespace tink
 }  // namespace crypto

@@ -24,8 +24,9 @@ namespace tink {
 namespace {
 
 using crypto::tink::test::DummyStreamingAead;
+using crypto::tink::test::IsOk;
 
-TEST(CcStreamingAeadWrappersTest, Basic) {
+TEST(CcStreamingAeadWrappersTest, BasicNewCcEncryptingStream) {
   DummyStreamingAead dummy_saead = DummyStreamingAead("Some streaming AEAD");
   std::unique_ptr<PythonFileObjectAdapter> output =
       absl::make_unique<test::TestWritableObject>();
@@ -33,7 +34,18 @@ TEST(CcStreamingAeadWrappersTest, Basic) {
   auto result =
       NewCcEncryptingStream(&dummy_saead, "associated data", std::move(output));
 
-  EXPECT_THAT(result.status(), test::IsOk());
+  EXPECT_THAT(result.status(), IsOk());
+}
+
+TEST(CcStreamingAeadWrappersTest, BasicNewCcDecryptingStream) {
+  DummyStreamingAead dummy_saead = DummyStreamingAead("Some streaming AEAD");
+  std::unique_ptr<PythonFileObjectAdapter> input =
+      absl::make_unique<test::TestReadableObject>("data");
+
+  auto result =
+      NewCcDecryptingStream(&dummy_saead, "associated data", std::move(input));
+
+  EXPECT_THAT(result.status(), IsOk());
 }
 
 }  // namespace

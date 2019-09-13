@@ -13,6 +13,7 @@
 from "tink/python/util/clif.h" import *  # Status, StatusOr
 from "tink/cc/python/streaming_aead.h" import *  # StreamingAead
 from "tink/python/cc/clif/python_file_object_adapter.h" import *  # PythonFileObjectAdapter
+from "tink/python/cc/clif/input_stream_adapter.h" import *  # InputStreamAdapter
 from "tink/python/cc/clif/output_stream_adapter.h" import *  # OutputStreamAdapter
 
 from "tink/python/cc/cc_streaming_aead_wrappers.h":
@@ -22,3 +23,9 @@ from "tink/python/cc/cc_streaming_aead_wrappers.h":
       aad: bytes,
       destination: PythonFileObjectAdapter
     ) -> StatusOr<OutputStreamAdapter>
+
+    def `NewCcDecryptingStream` as new_cc_decrypting_stream(
+      primitive: StreamingAead,
+      aad: bytes,
+      source: PythonFileObjectAdapter
+    ) -> StatusOr<InputStreamAdapter>
