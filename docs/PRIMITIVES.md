@@ -33,25 +33,25 @@ In development: JavaScript and Python.
 
 ### Java
 
-| Primitive          | Java Implementations                            |
-| ------------------ | ----------------------------------------------- |
-| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305 |
-| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING  |
-| Deterministic AEAD | AES-SIV                                         |
-| MAC                | HMAC-SHA2                                       |
-| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
-| Hybrid Encryption  | ECIES with AEAD and HKDF                        |
+Primitive          | Java Implementations
+------------------ | ---------------------------------------------------------------------------------
+AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305
+Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
+Deterministic AEAD | AES-SIV
+MAC                | HMAC-SHA2
+Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
+Hybrid Encryption  | ECIES with AEAD and HKDF
 
 ### C++
 
-| Primitive          | C++ Implementations                             |
-| ------------------ | ----------------------------------------------- |
-| AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305 |
-| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING  |
-| Deterministic AEAD | AES-SIV                                         |
-| MAC                | HMAC-SHA2, AES-CMAC                             |
-| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS |
-| Hybrid Encryption  | ECIES with AEAD and HKDF                        |
+Primitive          | C++ Implementations
+------------------ | ----------------------------------------------------------------
+AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305
+Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
+Deterministic AEAD | AES-SIV
+MAC                | HMAC-SHA2, AES-CMAC
+Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
+Hybrid Encryption  | ECIES with AEAD and HKDF
 
 ### Objective-C
 
@@ -66,8 +66,8 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 ### Golang
 
 Primitive          | Golang Implementations
------------------- | -------------------------------
-AEAD               | AES-GCM, AES-CTR-HMAC
+------------------ | ----------------------------------------------------------
+AEAD               | AES-GCM, AES-CTR-HMAC, CHACHA20-PLOY1305, XCHACHA-POLY1305
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2
 Digital Signatures | ECDSA over NIST curves, Ed25519
