@@ -18,6 +18,7 @@ from __future__ import print_function
 import io
 
 from absl.testing import absltest
+# TODO(b/141106504) Replace this with unittest.mock
 import mock
 from tink.python.util import file_object_adapter
 

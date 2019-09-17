@@ -56,8 +56,8 @@ class JsonKeysetWriter(KeysetWriter):
     if not isinstance(keyset, tink_pb2.Keyset):
       raise tink_error.TinkError('invalid keyset.')
     json_keyset = json_format.MessageToJson(keyset)
-    # Needed for python 2.7 compatibility. StringIO expects unicode, but
-    # MessageToJson outputs UTF-8.
+    # TODO(b/141106504) Needed for python 2.7 compatibility. StringIO expects
+    # unicode, but MessageToJson outputs UTF-8.
     if isinstance(json_keyset, bytes):
       json_keyset = json_keyset.decode('utf-8')
     self._io_stream.write(json_keyset)
@@ -67,8 +67,8 @@ class JsonKeysetWriter(KeysetWriter):
     if not isinstance(encrypted_keyset, tink_pb2.EncryptedKeyset):
       raise tink_error.TinkError('invalid encrypted keyset.')
     json_keyset = json_format.MessageToJson(encrypted_keyset)
-    # Needed for python 2.7 compatibility. StringIO expects unicode, but
-    # MessageToJson outputs UTF-8.
+    # TODO(b/141106504) Needed for python 2.7 compatibility. StringIO expects
+    # unicode, but MessageToJson outputs UTF-8.
     if isinstance(json_keyset, bytes):
       json_keyset = json_keyset.decode('utf-8')
     self._io_stream.write(json_keyset)
