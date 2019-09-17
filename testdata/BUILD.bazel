@@ -8,6 +8,7 @@ filegroup(
     srcs = [
         "aws_credentials_cc.txt",
         "aws_key_arn.txt",
+        "bad_access_keys_aws.csv",
         "bad_aws_key_arn.txt",
         "bad_aws_credentials_cc.txt",
         "bad_credentials_aws.csv",

@@ -40,7 +40,9 @@ const (
 
 var (
 	// lint placeholder header, please ignore
-	credFile = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/credentials_aws.csv"
+	credFile    = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/credentials_aws.csv"
+	badCredFile = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/bad_access_keys_aws.csv"
+	credINIFile = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/credentials_aws.cred"
 	// lint placeholder footer, please ignore
 )
 
@@ -53,13 +55,13 @@ func init() {
 
 // lint placeholder footer, please ignore
 
-func setupKMS(t *testing.T) {
+func setupKMS(t *testing.T, cf string) {
 	t.Helper()
 	g, err := NewAWSClient(keyURI)
 	if err != nil {
 		t.Fatalf("error setting up aws client: %v", err)
 	}
-	_, err = g.LoadCredentials(credFile)
+	_, err = g.LoadCredentials(cf)
 	if err != nil {
 		t.Fatalf("error loading credentials : %v", err)
 	}
@@ -87,48 +89,66 @@ func basicAEADTest(t *testing.T, a tink.AEAD) error {
 }
 
 func TestBasicAead(t *testing.T) {
-	setupKMS(t)
-	// ignore-placeholder4
-	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
-	if err != nil {
-		t.Fatalf("error getting a new keyset handle: %v", err)
-	}
-	a, err := awsaead(kh)
-	if err != nil {
-		t.Fatalf("error getting the primitive: %v", err)
-	}
-	if err := basicAEADTest(t, a); err != nil {
-		t.Errorf("error in basic aead tests: %v", err)
+	for _, file := range []string{credFile, credINIFile} {
+		setupKMS(t, file)
+		// ignore-placeholder4
+		dek := aead.AES128CTRHMACSHA256KeyTemplate()
+		kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
+		if err != nil {
+			t.Fatalf("error getting a new keyset handle: %v", err)
+		}
+		a, err := awsaead(kh)
+		if err != nil {
+			t.Fatalf("error getting the primitive: %v", err)
+		}
+		if err := basicAEADTest(t, a); err != nil {
+			t.Errorf("error in basic aead tests: %v", err)
+		}
 	}
 }
 
 func TestBasicAeadWithoutAdditionalData(t *testing.T) {
-	setupKMS(t)
-	// ignore-placeholder4
-	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
-	if err != nil {
-		t.Fatalf("error getting a new keyset handle: %v", err)
-	}
-	a, err := awsaead(kh)
-	if err != nil {
-		t.Fatalf("error getting the primitive: %v", err)
-	}
-	for i := 0; i < 100; i++ {
-		pt := random.GetRandomBytes(20)
-		ct, err := a.Encrypt(pt, nil)
+	for _, file := range []string{credFile, credINIFile} {
+		setupKMS(t, file)
+		// ignore-placeholder4
+		dek := aead.AES128CTRHMACSHA256KeyTemplate()
+		kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
 		if err != nil {
-			t.Fatalf("error encrypting data: %v", err)
+			t.Fatalf("error getting a new keyset handle: %v", err)
 		}
-		dt, err := a.Decrypt(ct, nil)
+		a, err := awsaead(kh)
 		if err != nil {
-			t.Fatalf("error decrypting data: %v", err)
+			t.Fatalf("error getting the primitive: %v", err)
 		}
-		if !bytes.Equal(dt, pt) {
-			t.Fatalf("decrypt not inverse of encrypt")
+		for i := 0; i < 100; i++ {
+			pt := random.GetRandomBytes(20)
+			ct, err := a.Encrypt(pt, nil)
+			if err != nil {
+				t.Fatalf("error encrypting data: %v", err)
+			}
+			dt, err := a.Decrypt(ct, nil)
+			if err != nil {
+				t.Fatalf("error decrypting data: %v", err)
+			}
+			if !bytes.Equal(dt, pt) {
+				t.Fatalf("decrypt not inverse of encrypt")
+			}
 		}
 	}
 }
 
 // ignore-placeholder5
+
+func TestLoadBadCSVCredential(t *testing.T) {
+	g, err := NewAWSClient(keyURI)
+	if err != nil {
+		t.Fatalf("error setting up aws client: %v", err)
+	}
+	_, err = g.LoadCredentials(badCredFile)
+	if err == nil {
+		t.Fatalf("does not reject two-column csv file, expect error : %v", errCredCSV)
+	}
+	if err != errCredCSV {
+		t.Fatalf("expect error : %v, got: %v", errCredCSV, err)
+	}
+}

@@ -37,7 +37,9 @@ const (
 )
 
 var (
-	errCred = errors.New("invalid credential path")
+	errCred    = errors.New("invalid credential path")
+	errBadFile = errors.New("cannot open credential path")
+	errCredCSV = errors.New("malformed credential csv file")
 )
 
 // AWSClient represents a client that connects to the AWS KMS backend.
@@ -73,18 +75,21 @@ func (g *AWSClient) Supported(keyURI string) bool {
 	return ((len(g.keyURI) == 0) && (strings.HasPrefix(strings.ToLower(keyURI), awsPrefix)))
 }
 
-// LoadCredentials loads the credentials in credentialPath. If credentialPath is  null, loads the
-// default credentials.
+// LoadCredentials loads the credentials in credentialPath.
 func (g *AWSClient) LoadCredentials(credentialPath string) (*AWSClient, error) {
 	var creds *credentials.Credentials
 	if len(credentialPath) <= 0 {
 		return nil, errCred
 	}
 	c, err := extractCredsCSV(credentialPath)
-	if err != nil {
-		creds = credentials.NewSharedCredentials(credentialPath, "default")
-	} else {
+	switch err {
+	case nil:
 		creds = credentials.NewStaticCredentialsFromCreds(*c)
+	case errBadFile, errCredCSV:
+		return nil, err
+	default:
+		// fallback to load the credential path as .ini shared credentials.
+		creds = credentials.NewSharedCredentials(credentialPath, "default")
 	}
 	session := session.Must(session.NewSession(&aws.Config{
 		Credentials: creds,
@@ -143,7 +148,7 @@ func validateTrimKMSPrefix(keyURI, prefix string) (string, error) {
 func extractCredsCSV(file string) (*credentials.Value, error) {
 	f, err := os.Open(file)
 	if err != nil {
-		return nil, err
+		return nil, errBadFile
 	}
 	defer f.Close()
 
@@ -151,9 +156,27 @@ func extractCredsCSV(file string) (*credentials.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(lines) < 2 {
-		return nil, errors.New("invalid csv file")
+
+	// It is possible that the file is an AWS .ini credential file, and it can be
+	// parsed as 1-column CSV file as well. A real AWS credentials.csv is never 1 column.
+	if len(lines) > 0 && len(lines[0]) == 1 {
+		return nil, errors.New("not a valid CSV credential file")
 	}
+
+	// credentials.csv can be obtained when a AWS IAM user is created through IAM console.
+	// The first line of the csv file is "User name,Password,Access key ID,Secret access key,Console login link"
+	// The 2nd line of it contains 5 comma separated values.
+	// Parse the file with a strict format assumption as follows:
+	// 1. There must be at least 4 columns and 2 rows.
+	// 2. The access key id and the secret access key must be on (0-based) column 2 and 3.
+	if len(lines) < 2 {
+		return nil, errCredCSV
+	}
+
+	if len(lines[1]) < 4 {
+		return nil, errCredCSV
+	}
+
 	return &credentials.Value{
 		AccessKeyID:     lines[1][2],
 		SecretAccessKey: lines[1][3],
