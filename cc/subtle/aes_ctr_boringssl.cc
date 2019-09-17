@@ -34,24 +34,14 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-static const EVP_CIPHER* GetCipherForKeySize(uint32_t size_in_bytes) {
-  switch (size_in_bytes) {
-    case 16:
-      return EVP_aes_128_ctr();
-    case 32:
-      return EVP_aes_256_ctr();
-    default:
-      return nullptr;
-  }
-}
-
 AesCtrBoringSsl::AesCtrBoringSsl(absl::string_view key_value,
                                  uint8_t iv_size, const EVP_CIPHER* cipher)
     : key_(key_value), iv_size_(iv_size), cipher_(cipher) {}
 
 util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
     absl::string_view key_value, uint8_t iv_size) {
-  const EVP_CIPHER* cipher = GetCipherForKeySize(key_value.size());
+  const EVP_CIPHER* cipher =
+      SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(key_value.size());
   if (cipher == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }
