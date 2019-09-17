@@ -29,6 +29,7 @@ enum EllipticCurveType {
   NIST_P256 = 2,
   NIST_P384 = 3,
   NIST_P521 = 4,
+  CURVE25519 = 5,
 };
 
 enum EcPointFormat {

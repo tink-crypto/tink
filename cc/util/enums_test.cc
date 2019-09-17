@@ -38,6 +38,8 @@ TEST_F(EnumsTest, testEllipticCurveType) {
             Enums::SubtleToProto(subtle::EllipticCurveType::NIST_P384));
   EXPECT_EQ(pb::EllipticCurveType::NIST_P521,
             Enums::SubtleToProto(subtle::EllipticCurveType::NIST_P521));
+  EXPECT_EQ(pb::EllipticCurveType::CURVE25519,
+            Enums::SubtleToProto(subtle::EllipticCurveType::CURVE25519));
   EXPECT_EQ(pb::EllipticCurveType::UNKNOWN_CURVE,
             Enums::SubtleToProto(subtle::EllipticCurveType::UNKNOWN_CURVE));
   EXPECT_EQ(pb::EllipticCurveType::UNKNOWN_CURVE,
@@ -49,6 +51,8 @@ TEST_F(EnumsTest, testEllipticCurveType) {
             Enums::ProtoToSubtle(pb::EllipticCurveType::NIST_P384));
   EXPECT_EQ(subtle::EllipticCurveType::NIST_P521,
             Enums::ProtoToSubtle(pb::EllipticCurveType::NIST_P521));
+  EXPECT_EQ(subtle::EllipticCurveType::CURVE25519,
+            Enums::ProtoToSubtle(pb::EllipticCurveType::CURVE25519));
   EXPECT_EQ(subtle::EllipticCurveType::UNKNOWN_CURVE,
             Enums::ProtoToSubtle(pb::EllipticCurveType::UNKNOWN_CURVE));
   EXPECT_EQ(subtle::EllipticCurveType::UNKNOWN_CURVE,
@@ -65,7 +69,7 @@ TEST_F(EnumsTest, testEllipticCurveType) {
       count++;
     }
   }
-  EXPECT_EQ(4, count);
+  EXPECT_EQ(5, count);
 }
 
 TEST_F(EnumsTest, testHashType) {

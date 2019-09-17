@@ -22,6 +22,7 @@
 #include "absl/strings/string_view.h"
 #include "openssl/bn.h"
 #include "openssl/cipher.h"
+#include "openssl/curve25519.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/subtle/common_enums.h"
@@ -39,6 +40,11 @@ class SubtleUtilBoringSSL {
     std::string pub_x;  // affine coordinates in bigendian representation
     std::string pub_y;
     std::string priv;  // big integer in bigendian represnetation
+  };
+
+  struct X25519Key {
+    uint8_t public_value[X25519_PUBLIC_VALUE_LEN];
+    uint8_t private_key[X25519_PRIVATE_KEY_LEN];
   };
 
   struct Ed25519Key {
@@ -127,6 +133,16 @@ class SubtleUtilBoringSSL {
   // Returns a new EC key for the specified curve.
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
       EllipticCurveType curve_type);
+
+  // Returns a new X25519 key.
+  static std::unique_ptr<X25519Key> GenerateNewX25519Key();
+
+  // Returns a X25519Key matching the specified EcKey.
+  static crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>>
+  X25519KeyFromEcKey(const EcKey &ec_key);
+
+  // Returns an EcKey matching the specified X25519Key.
+  static EcKey EcKeyFromX25519Key(const X25519Key *x25519_key);
 
   // Returns a new ED25519 key.
   static std::unique_ptr<Ed25519Key> GetNewEd25519Key();

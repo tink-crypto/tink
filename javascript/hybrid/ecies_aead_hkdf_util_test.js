@@ -52,7 +52,8 @@ testSuite({
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
-      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
+          curve === PbEllipticCurveType.CURVE25519) {
         continue;
       }
       const key = await createKey(curve);
@@ -79,7 +80,8 @@ testSuite({
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
-      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
+          curve === PbEllipticCurveType.CURVE25519) {
         continue;
       }
       const key = await createKey(curve);
@@ -124,7 +126,8 @@ testSuite({
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
-      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
+          curve === PbEllipticCurveType.CURVE25519) {
         continue;
       }
       const key = await createKey(curve);
@@ -153,7 +156,8 @@ testSuite({
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
-      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
+          curve === PbEllipticCurveType.CURVE25519) {
         continue;
       }
       const key = await createKey(curve);

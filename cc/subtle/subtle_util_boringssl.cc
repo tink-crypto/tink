@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
 #include "openssl/bn.h"
@@ -110,6 +111,10 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
 // static
 util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
     EllipticCurveType curve_type) {
+  if (curve_type == EllipticCurveType::CURVE25519) {
+    auto key = GenerateNewX25519Key();
+    return EcKeyFromX25519Key(key.get());
+  }
   auto status_or_group(SubtleUtilBoringSSL::GetEcGroup(curve_type));
   if (!status_or_group.ok()) return status_or_group.status();
   bssl::UniquePtr<EC_GROUP> group(status_or_group.ValueOrDie());
@@ -146,6 +151,50 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
   }
   ec_key.priv = priv_key_str.ValueOrDie();
   return ec_key;
+}
+
+// static
+std::unique_ptr<SubtleUtilBoringSSL::X25519Key>
+SubtleUtilBoringSSL::GenerateNewX25519Key() {
+  auto key = absl::make_unique<X25519Key>();
+  X25519_keypair(key->public_value, key->private_key);
+
+  return key;
+}
+
+// static
+SubtleUtilBoringSSL::EcKey SubtleUtilBoringSSL::EcKeyFromX25519Key(
+    const SubtleUtilBoringSSL::X25519Key *x25519_key) {
+  SubtleUtilBoringSSL::EcKey ec_key;
+  ec_key.curve = EllipticCurveType::CURVE25519;
+  // Curve25519 public key is x, not (x,y).
+  ec_key.pub_x =
+      std::string(reinterpret_cast<const char *>(x25519_key->public_value),
+             X25519_PUBLIC_VALUE_LEN);
+  ec_key.priv = std::string(reinterpret_cast<const char *>(x25519_key->private_key),
+                       X25519_PRIVATE_KEY_LEN);
+  return ec_key;
+}
+
+// static
+util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::X25519Key>>
+SubtleUtilBoringSSL::X25519KeyFromEcKey(
+    const SubtleUtilBoringSSL::EcKey &ec_key) {
+  auto x25519_key = absl::make_unique<SubtleUtilBoringSSL::X25519Key>();
+  if (ec_key.curve != EllipticCurveType::CURVE25519) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "This key is not on curve 25519");
+  }
+  if (!ec_key.pub_y.empty()) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Invalid X25519 key. pub_y is unexpectedly set.");
+  }
+  // Curve25519 public key is x, not (x,y).
+  ec_key.pub_x.copy(reinterpret_cast<char *>(x25519_key->public_value),
+                    X25519_PUBLIC_VALUE_LEN);
+  ec_key.priv.copy(reinterpret_cast<char *>(x25519_key->private_key),
+                   X25519_PRIVATE_KEY_LEN);
+  return std::move(x25519_key);
 }
 
 // static

@@ -46,6 +46,7 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::IsEmpty;
 using ::testing::Not;
+using ::testing::NotNull;
 using ::testing::StrEq;
 
 struct EncodingTestVector {
@@ -427,6 +428,59 @@ TEST(CreatesNewEd25519KeyPairTest, GeneratesDifferentKeysEveryTime) {
   ASSERT_NE(keypair1->public_key, keypair2->public_key);
   ASSERT_NE(keypair1->private_key, keypair2->private_key);
   ASSERT_NE(keypair1->public_key, keypair1->private_key);
+}
+
+TEST(CreateNewX25519KeyTest, KeyIsWellFormed) {
+  auto ec_key_or_status =
+      SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::CURVE25519);
+  ASSERT_THAT(ec_key_or_status.status(), IsOk());
+  auto ec_key = ec_key_or_status.ValueOrDie();
+  EXPECT_EQ(ec_key.curve, EllipticCurveType::CURVE25519);
+  EXPECT_EQ(ec_key.pub_x.length(), X25519_PUBLIC_VALUE_LEN);
+  EXPECT_TRUE(ec_key.pub_y.empty());
+  EXPECT_EQ(ec_key.priv.length(), X25519_PRIVATE_KEY_LEN);
+}
+
+TEST(CreateNewX25519KeyTest, GeneratesDifferentKeysEveryTime) {
+  auto keypair1 = SubtleUtilBoringSSL::GenerateNewX25519Key();
+  auto keypair2 = SubtleUtilBoringSSL::GenerateNewX25519Key();
+
+  EXPECT_FALSE(std::equal(keypair1->private_key,
+                          &keypair1->private_key[X25519_PRIVATE_KEY_LEN],
+                          keypair2->private_key));
+  EXPECT_FALSE(std::equal(keypair1->public_value,
+                          &keypair1->public_value[X25519_PUBLIC_VALUE_LEN],
+                          keypair2->public_value));
+}
+
+TEST(EcKeyFromX25519KeyTest, RoundTripKey) {
+  auto x25519_key = SubtleUtilBoringSSL::GenerateNewX25519Key();
+  ASSERT_THAT(x25519_key, NotNull());
+  auto ec_key = SubtleUtilBoringSSL::EcKeyFromX25519Key(x25519_key.get());
+  ASSERT_EQ(ec_key.curve, EllipticCurveType::CURVE25519);
+
+  auto roundtrip_key_or_status =
+      SubtleUtilBoringSSL::X25519KeyFromEcKey(ec_key);
+  ASSERT_THAT(roundtrip_key_or_status.status(), IsOk());
+
+  auto roundtrip_key = std::move(roundtrip_key_or_status.ValueOrDie());
+  EXPECT_TRUE(std::equal(x25519_key->private_key,
+                         &x25519_key->private_key[X25519_PRIVATE_KEY_LEN],
+                         roundtrip_key->private_key));
+  EXPECT_TRUE(std::equal(x25519_key->public_value,
+                         &x25519_key->public_value[X25519_PUBLIC_VALUE_LEN],
+                         roundtrip_key->public_value));
+}
+
+TEST(X25519KeyFromEcKeyTest, RejectNistPCurves) {
+  auto ec_key_or_status =
+      SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256);
+  ASSERT_THAT(ec_key_or_status.status(), IsOk());
+
+  auto x25519_key_or_status =
+      SubtleUtilBoringSSL::X25519KeyFromEcKey(ec_key_or_status.ValueOrDie());
+  EXPECT_THAT(x25519_key_or_status.status(),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {

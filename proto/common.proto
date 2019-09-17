@@ -29,7 +29,8 @@ enum EllipticCurveType {
   NIST_P256 = 2;
   NIST_P384 = 3;
   NIST_P521 = 4;
-};
+  CURVE25519 = 5;
+}
 
 enum EcPointFormat {
   UNKNOWN_FORMAT = 0;
@@ -42,8 +43,9 @@ enum EcPointFormat {
 
 enum HashType {
   UNKNOWN_HASH = 0;
-  SHA1 = 1; // Using SHA1 for digital signature is deprecated but HMAC-SHA1 is fine.
+  SHA1 = 1;  // Using SHA1 for digital signature is deprecated but HMAC-SHA1 is
+             // fine.
   SHA384 = 2;
   SHA256 = 3;
   SHA512 = 4;
-};
+}

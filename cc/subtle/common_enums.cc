@@ -30,6 +30,8 @@ std::string EnumToString(EllipticCurveType type) {
     return "NIST_P384";
   case EllipticCurveType::NIST_P521:
     return "NIST_P521";
+  case EllipticCurveType::CURVE25519:
+    return "CURVE25519";
   case EllipticCurveType::UNKNOWN_CURVE:
     return "UNKNOWN_CURVE";
   default:

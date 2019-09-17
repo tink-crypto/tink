@@ -145,7 +145,8 @@ testSuite({
 
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
-      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
+          curve === PbEllipticCurveType.CURVE25519) {
         continue;
       }
       for (let hashTypeId of hashTypes) {

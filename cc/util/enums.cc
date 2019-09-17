@@ -34,6 +34,8 @@ pb::EllipticCurveType Enums::SubtleToProto(subtle::EllipticCurveType type) {
     return pb::EllipticCurveType::NIST_P384;
   case subtle::EllipticCurveType::NIST_P521:
     return pb::EllipticCurveType::NIST_P521;
+  case subtle::EllipticCurveType::CURVE25519:
+    return pb::EllipticCurveType::CURVE25519;
   default:
     return pb::EllipticCurveType::UNKNOWN_CURVE;
   }
@@ -48,6 +50,8 @@ subtle::EllipticCurveType Enums::ProtoToSubtle(pb::EllipticCurveType type) {
     return subtle::EllipticCurveType::NIST_P384;
   case pb::EllipticCurveType::NIST_P521:
     return subtle::EllipticCurveType::NIST_P521;
+  case pb::EllipticCurveType::CURVE25519:
+    return subtle::EllipticCurveType::CURVE25519;
   default:
     return subtle::EllipticCurveType::UNKNOWN_CURVE;
   }
