@@ -18,6 +18,7 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -32,8 +33,8 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesGcmKey} keys and produces new instances of {@code
  * AesGcmJce}.
  */
-class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
-  public AesGcmKeyManager() {
+public class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
+  AesGcmKeyManager() {
     super(
         AesGcmKey.class,
         new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
@@ -92,5 +93,9 @@ class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
             .build();
       }
     };
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new AesGcmKeyManager(), newKeyAllowed);
   }
 }

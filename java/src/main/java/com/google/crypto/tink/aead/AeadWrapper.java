@@ -20,6 +20,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -34,7 +35,7 @@ import java.util.logging.Logger;
  * succeed, we try the raw primitives. If any succeeds, we return the ciphertext, otherwise we
  * simply throw a GeneralSecurityException.
  */
-class AeadWrapper implements PrimitiveWrapper<Aead> {
+public class AeadWrapper implements PrimitiveWrapper<Aead> {
   private static final Logger logger = Logger.getLogger(AeadWrapper.class.getName());
 
   private static class WrappedAead implements Aead {
@@ -83,6 +84,8 @@ class AeadWrapper implements PrimitiveWrapper<Aead> {
     }
   }
 
+  AeadWrapper() {}
+
   @Override
   public Aead wrap(final PrimitiveSet<Aead> pset) throws GeneralSecurityException {
     return new WrappedAead(pset);
@@ -91,5 +94,9 @@ class AeadWrapper implements PrimitiveWrapper<Aead> {
   @Override
   public Class<Aead> getPrimitiveClass() {
     return Aead.class;
+  }
+
+  public static void register() throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new AeadWrapper());
   }
 }

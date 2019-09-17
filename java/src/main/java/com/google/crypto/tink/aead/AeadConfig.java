@@ -99,12 +99,12 @@ public final class AeadConfig {
     MacConfig.register();
     Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new AesEaxKeyManager(), /*newKeyAllowed=*/ true);
-    Registry.registerKeyManager(new AesGcmKeyManager(), /*newKeyAllowed=*/ true);
+    AesGcmKeyManager.register(/*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new ChaCha20Poly1305KeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new KmsAeadKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager(), /*newKeyAllowed=*/ true);
     Registry.registerKeyManager(new XChaCha20Poly1305KeyManager(), /*newKeyAllowed=*/ true);
-    Registry.registerPrimitiveWrapper(new AeadWrapper());
+    AeadWrapper.register();
   }
 
   /**
