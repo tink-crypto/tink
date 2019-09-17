@@ -18,6 +18,7 @@ package com.google.crypto.tink.daead;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -34,8 +35,8 @@ import java.security.InvalidKeyException;
  * This key manager generates new {@code AesSivKey} keys and produces new instances of {@code
  * AesSiv}.
  */
-class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
-  public AesSivKeyManager() {
+public class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
+  AesSivKeyManager() {
     super(
         AesSivKey.class,
         new PrimitiveFactory<DeterministicAead, AesSivKey>(DeterministicAead.class) {
@@ -100,5 +101,9 @@ class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
             .build();
       }
     };
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new AesSivKeyManager(), newKeyAllowed);
   }
 }

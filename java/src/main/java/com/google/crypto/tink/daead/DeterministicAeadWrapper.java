@@ -20,6 +20,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ import java.util.logging.Logger;
  * select the right key in the set. If the keys associated with the prefix do not work, the
  * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
-class DeterministicAeadWrapper implements PrimitiveWrapper<DeterministicAead> {
+public class DeterministicAeadWrapper implements PrimitiveWrapper<DeterministicAead> {
   private static final Logger logger = Logger.getLogger(DeterministicAeadWrapper.class.getName());
 
   private static class WrappedDeterministicAead implements DeterministicAead {
@@ -90,6 +91,8 @@ class DeterministicAeadWrapper implements PrimitiveWrapper<DeterministicAead> {
     }
   }
 
+  DeterministicAeadWrapper() {}
+
   @Override
   public DeterministicAead wrap(final PrimitiveSet<DeterministicAead> primitives) {
     return new WrappedDeterministicAead(primitives);
@@ -98,5 +101,9 @@ class DeterministicAeadWrapper implements PrimitiveWrapper<DeterministicAead> {
   @Override
   public Class<DeterministicAead> getPrimitiveClass() {
     return DeterministicAead.class;
+  }
+
+  public static void register() throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
   }
 }

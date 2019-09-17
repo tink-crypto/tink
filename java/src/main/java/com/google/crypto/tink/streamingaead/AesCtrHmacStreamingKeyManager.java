@@ -17,6 +17,7 @@
 package com.google.crypto.tink.streamingaead;
 
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
@@ -35,8 +36,8 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesCtrHmacStreamingKey} keys and produces new instances of
  * {@code AesCtrHmacStreaming}.
  */
-class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStreamingKey> {
-  public AesCtrHmacStreamingKeyManager() {
+public class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStreamingKey> {
+  AesCtrHmacStreamingKeyManager() {
     super(
         AesCtrHmacStreamingKey.class,
         new PrimitiveFactory<StreamingAead, AesCtrHmacStreamingKey>(StreamingAead.class) {
@@ -170,5 +171,9 @@ class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStreamingKe
       default:
         throw new GeneralSecurityException("unknown hash type");
     }
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager(), newKeyAllowed);
   }
 }

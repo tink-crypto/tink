@@ -18,6 +18,7 @@ package com.google.crypto.tink.streamingaead;
 
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import java.security.GeneralSecurityException;
 
@@ -29,7 +30,9 @@ import java.security.GeneralSecurityException;
  * keyset to select the right key for decryption. All keys in a keyset of StreamingAead have type
  * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
-class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead> {
+public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead> {
+  StreamingAeadWrapper() {}
+
   /**
    * @return a StreamingAead primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
@@ -43,5 +46,9 @@ class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead> {
   @Override
   public Class<StreamingAead> getPrimitiveClass() {
     return StreamingAead.class;
+  }
+
+  public static void register() throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
   }
 }

@@ -18,6 +18,7 @@ package com.google.crypto.tink.mac;
 
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.AesCmacKey;
 import com.google.crypto.tink.proto.AesCmacKeyFormat;
 import com.google.crypto.tink.proto.AesCmacParams;
@@ -33,9 +34,9 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesCmacKey} keys and produces new instances of {@code
  * AesCmac}.
  */
-class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
+public class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
 
-  public AesCmacKeyManager() {
+  AesCmacKeyManager() {
     super(
         AesCmacKey.class,
         new PrimitiveFactory<Mac, AesCmacKey>(Mac.class) {
@@ -117,5 +118,9 @@ class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
             .build();
       }
     };
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new AesCmacKeyManager(), newKeyAllowed);
   }
 }

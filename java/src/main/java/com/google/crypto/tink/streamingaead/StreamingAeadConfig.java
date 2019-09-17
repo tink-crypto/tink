@@ -74,8 +74,8 @@ public final class StreamingAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager(), /* newKeyAllowed = */ true);
-    Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager(), /* newKeyAllowed = */ true);
-    Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
+    AesCtrHmacStreamingKeyManager.register(/* newKeyAllowed = */ true);
+    AesGcmHkdfStreamingKeyManager.register(/* newKeyAllowed = */ true);
+    StreamingAeadWrapper.register();
   }
 }

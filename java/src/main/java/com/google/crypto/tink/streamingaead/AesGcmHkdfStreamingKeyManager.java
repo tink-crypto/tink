@@ -17,6 +17,7 @@
 package com.google.crypto.tink.streamingaead;
 
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
@@ -34,8 +35,8 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesGcmHkdfStreamingKey} keys and produces new instances of
  * {@code AesGcmHkdfStreaming}.
  */
-class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStreamingKey> {
-  public AesGcmHkdfStreamingKeyManager() {
+public class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStreamingKey> {
+  AesGcmHkdfStreamingKeyManager() {
     super(
         AesGcmHkdfStreamingKey.class,
         new PrimitiveFactory<StreamingAead, AesGcmHkdfStreamingKey>(StreamingAead.class) {
@@ -125,5 +126,9 @@ class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStreamingKe
           "ciphertext_segment_size must be at least (derived_key_size + NONCE_PREFIX_IN_BYTES + "
               + "TAG_SIZE_IN_BYTES + 2)");
     }
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager(), newKeyAllowed);
   }
 }

@@ -18,6 +18,7 @@ package com.google.crypto.tink.mac;
 
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
@@ -147,5 +148,9 @@ public class HmacKeyManager extends KeyTypeManager<HmacKey> {
             .build();
       }
     };
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new HmacKeyManager(), newKeyAllowed);
   }
 }

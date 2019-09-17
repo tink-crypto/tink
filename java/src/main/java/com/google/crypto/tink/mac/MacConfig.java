@@ -83,9 +83,9 @@ public final class MacConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerKeyManager(new HmacKeyManager(), true);
-    Registry.registerKeyManager(new AesCmacKeyManager(), true);
-    Registry.registerPrimitiveWrapper(new MacWrapper());
+    HmacKeyManager.register(true);
+    AesCmacKeyManager.register(true);
+    MacWrapper.register();
   }
 
   /**

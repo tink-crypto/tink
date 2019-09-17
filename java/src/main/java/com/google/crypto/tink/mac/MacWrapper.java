@@ -20,6 +20,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
@@ -100,6 +101,8 @@ class MacWrapper implements PrimitiveWrapper<Mac> {
     }
   }
 
+  MacWrapper() {}
+
   @Override
   public Mac wrap(final PrimitiveSet<Mac> primitives) throws GeneralSecurityException {
     return new WrappedMac(primitives);
@@ -108,5 +111,9 @@ class MacWrapper implements PrimitiveWrapper<Mac> {
   @Override
   public Class<Mac> getPrimitiveClass() {
     return Mac.class;
+  }
+
+ public static void register() throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new MacWrapper());
   }
 }

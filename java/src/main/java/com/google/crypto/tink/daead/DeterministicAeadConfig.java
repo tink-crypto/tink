@@ -80,7 +80,7 @@ public final class DeterministicAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesSivKeyManager(), /* newKeyAllowed = */ true);
-    Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
+    AesSivKeyManager.register(/* newKeyAllowed = */ true);
+    DeterministicAeadWrapper.register();
   }
 }
