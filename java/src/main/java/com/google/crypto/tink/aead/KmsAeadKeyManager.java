@@ -20,6 +20,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KmsAeadKey;
 import com.google.crypto.tink.proto.KmsAeadKeyFormat;
@@ -32,8 +33,8 @@ import java.security.GeneralSecurityException;
  * This key manager produces new instances of {@code Aead} that forwards encrypt/decrypt requests to
  * a key residing in a remote KMS.
  */
-class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
-  public KmsAeadKeyManager() {
+public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
+  KmsAeadKeyManager() {
     super(
         KmsAeadKey.class,
         new PrimitiveFactory<Aead, KmsAeadKey>(Aead.class) {
@@ -88,5 +89,9 @@ class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
         return KmsAeadKey.newBuilder().setParams(format).setVersion(getVersion()).build();
       }
     };
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new KmsAeadKeyManager(), newKeyAllowed);
   }
 }

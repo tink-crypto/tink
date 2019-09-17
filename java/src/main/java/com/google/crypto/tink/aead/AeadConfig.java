@@ -97,13 +97,13 @@ public final class AeadConfig {
    */
   public static void register() throws GeneralSecurityException {
     MacConfig.register();
-    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), /*newKeyAllowed=*/ true);
-    Registry.registerKeyManager(new AesEaxKeyManager(), /*newKeyAllowed=*/ true);
+    AesCtrHmacAeadKeyManager.register(/*newKeyAllowed=*/ true);
+    AesEaxKeyManager.register(/*newKeyAllowed=*/ true);
     AesGcmKeyManager.register(/*newKeyAllowed=*/ true);
-    Registry.registerKeyManager(new ChaCha20Poly1305KeyManager(), /*newKeyAllowed=*/ true);
-    Registry.registerKeyManager(new KmsAeadKeyManager(), /*newKeyAllowed=*/ true);
-    Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager(), /*newKeyAllowed=*/ true);
-    Registry.registerKeyManager(new XChaCha20Poly1305KeyManager(), /*newKeyAllowed=*/ true);
+    ChaCha20Poly1305KeyManager.register(/*newKeyAllowed=*/ true);
+    KmsAeadKeyManager.register(/*newKeyAllowed=*/ true);
+    KmsEnvelopeAeadKeyManager.register(/*newKeyAllowed=*/ true);
+    XChaCha20Poly1305KeyManager.register(/*newKeyAllowed=*/ true);
     AeadWrapper.register();
   }
 

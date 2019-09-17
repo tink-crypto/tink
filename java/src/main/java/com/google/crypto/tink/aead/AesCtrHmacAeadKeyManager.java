@@ -19,6 +19,7 @@ package com.google.crypto.tink.aead;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
@@ -36,8 +37,8 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@link AesCtrHmacAeadKey} keys and produces new instances of
  * {@link EncryptThenAuthenticate}.
  */
-class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> {
-  public AesCtrHmacAeadKeyManager() {
+public class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> {
+  AesCtrHmacAeadKeyManager() {
     super(
         AesCtrHmacAeadKey.class,
         new PrimitiveFactory<Aead, AesCtrHmacAeadKey>(Aead.class) {
@@ -109,5 +110,9 @@ class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> {
             .build();
       }
     };
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), newKeyAllowed);
   }
 }

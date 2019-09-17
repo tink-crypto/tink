@@ -18,6 +18,7 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
@@ -32,8 +33,8 @@ import java.security.GeneralSecurityException;
  * This instance of {@code KeyManager} generates new {@code XChaCha20Poly1305} keys and produces new
  * instances of {@code XChaCha20Poly1305}.
  */
-class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly1305Key> {
-  public XChaCha20Poly1305KeyManager() {
+public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly1305Key> {
+  XChaCha20Poly1305KeyManager() {
     super(
         XChaCha20Poly1305Key.class,
         new PrimitiveFactory<Aead, XChaCha20Poly1305Key>(Aead.class) {
@@ -98,5 +99,9 @@ class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly1305Key> {
             .build();
       }
     };
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerKeyManager(new XChaCha20Poly1305KeyManager(), newKeyAllowed);
   }
 }
