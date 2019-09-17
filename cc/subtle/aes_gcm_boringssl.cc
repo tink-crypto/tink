@@ -22,6 +22,7 @@
 #include "tink/aead.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -33,19 +34,9 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-static const EVP_AEAD* GetAeadForKeySize(uint32_t size_in_bytes) {
-  switch (size_in_bytes) {
-    case 16:
-      return EVP_aead_aes_128_gcm();
-    case 32:
-      return EVP_aead_aes_256_gcm();
-    default:
-      return nullptr;
-  }
-}
-
 util::Status AesGcmBoringSsl::Init(absl::string_view key_value) {
-  const EVP_AEAD* aead = GetAeadForKeySize(key_value.size());
+  const EVP_AEAD* aead =
+      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key_value.size());
   if (aead == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }

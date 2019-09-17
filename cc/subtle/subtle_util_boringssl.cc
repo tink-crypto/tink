@@ -559,6 +559,19 @@ const EVP_CIPHER* SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
   }
 }
 
+// static
+const EVP_AEAD* SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(
+    uint32_t size_in_bytes) {
+  switch (size_in_bytes) {
+    case 16:
+      return EVP_aead_aes_128_gcm();
+    case 32:
+      return EVP_aead_aes_256_gcm();
+    default:
+      return nullptr;
+  }
+}
+
 namespace boringssl {
 
 util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,

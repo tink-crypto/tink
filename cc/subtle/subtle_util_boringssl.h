@@ -190,6 +190,9 @@ class SubtleUtilBoringSSL {
 
   // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
   static const EVP_CIPHER* GetAesCtrCipherForKeySize(uint32_t size_in_bytes);
+
+  // Returns BoringSSL's AES GCM EVP_AEAD for the key size.
+  static const EVP_AEAD* GetAesGcmAeadForKeySize(uint32_t size_in_bytes);
 };
 
 namespace boringssl {

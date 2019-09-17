@@ -50,17 +50,6 @@ void BigEndianStore32(uint8_t dst[8], uint32_t val) {
 
 }  // namespace
 
-static const EVP_AEAD* GetAeadForKeySize(uint32_t size_in_bytes) {
-  switch (size_in_bytes) {
-    case 16:
-      return EVP_aead_aes_128_gcm();
-    case 32:
-      return EVP_aead_aes_256_gcm();
-    default:
-      return nullptr;
-  }
-}
-
 util::Status Validate(const AesGcmHkdfStreamSegmentDecrypter::Params& params) {
   if (!(params.hkdf_hash == SHA1 || params.hkdf_hash == SHA256 ||
         params.hkdf_hash == SHA512)) {
@@ -141,7 +130,8 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
   key_value_ = hkdf_result.ValueOrDie();
 
   // Initialize ctx_.
-  const EVP_AEAD* aead = GetAeadForKeySize(key_value_.size());
+  const EVP_AEAD* aead =
+      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key_value_.size());
   if (aead == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }

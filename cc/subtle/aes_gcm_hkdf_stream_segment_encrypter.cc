@@ -51,17 +51,6 @@ const int AesGcmHkdfStreamSegmentEncrypter::kNonceSizeInBytes;
 const int AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
 const int AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes;
 
-static const EVP_AEAD* GetAeadForKeySize(uint32_t size_in_bytes) {
-  switch (size_in_bytes) {
-    case 16:
-      return EVP_aead_aes_128_gcm();
-    case 32:
-      return EVP_aead_aes_256_gcm();
-    default:
-      return nullptr;
-  }
-}
-
 util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
   if (params.key_value.size() != 16 && params.key_value.size() != 32) {
     return util::Status(util::error::INVALID_ARGUMENT,
@@ -88,7 +77,8 @@ util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
 
 util::Status AesGcmHkdfStreamSegmentEncrypter::InitCtx(
     absl::string_view key_value) {
-  const EVP_AEAD* aead = GetAeadForKeySize(key_value.size());
+  const EVP_AEAD* aead =
+      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key_value.size());
   if (aead == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }
