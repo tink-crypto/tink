@@ -59,11 +59,17 @@ public final class SharedPrefKeysetWriter implements KeysetWriter {
 
   @Override
   public void write(Keyset keyset) throws IOException {
-    editor.putString(keysetName, Hex.encode(keyset.toByteArray())).apply();
+    boolean success = editor.putString(keysetName, Hex.encode(keyset.toByteArray())).commit();
+    if (!success) {
+      throw new IOException("Failed to write to SharedPreferences");
+    }
   }
 
   @Override
   public void write(EncryptedKeyset keyset) throws IOException {
-    editor.putString(keysetName, Hex.encode(keyset.toByteArray())).apply();
+    boolean success = editor.putString(keysetName, Hex.encode(keyset.toByteArray())).commit();
+    if (!success) {
+      throw new IOException("Failed to write to SharedPreferences");
+    }
   }
 }
