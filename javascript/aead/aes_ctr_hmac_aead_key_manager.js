@@ -26,6 +26,7 @@ const PbHmacKey = goog.require('proto.google.crypto.tink.HmacKey');
 const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const Random = goog.require('tink.subtle.Random');
+const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
 
@@ -183,6 +184,9 @@ AesCtrHmacAeadKeyFactory.MAX_TAG_SIZE_ = new Map(
  * @final
  */
 class AesCtrHmacAeadKeyManager {
+  /**
+   * @private
+   */
   constructor() {
     /**
      * @const @private {!AesCtrHmacAeadKeyFactory}
@@ -330,6 +334,10 @@ class AesCtrHmacAeadKeyManager {
                         .setParams(key.getParams())
                         .setKeySize(key.getKeyValue_asU8().length);
     this.keyFactory_.validateHmacKeyFormat(keyFormat);
+  }
+
+  static register() {
+    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager());
   }
 }
 

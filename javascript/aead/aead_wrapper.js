@@ -19,6 +19,7 @@ const CryptoFormat = goog.require('tink.CryptoFormat');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
+const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
@@ -137,8 +138,9 @@ class WrappedAead {
  * @implements {PrimitiveWrapper<Aead>}
  */
 class AeadWrapper {
-  // The constructor should be @private, but it is not supported by Closure
-  // (see https://github.com/google/closure-compiler/issues/2761).
+  /**
+   * @private
+   */
   constructor() {}
 
   /**
@@ -153,6 +155,10 @@ class AeadWrapper {
    */
   getPrimitiveType() {
     return Aead;
+  }
+
+  static register() {
+    Registry.registerPrimitiveWrapper(new AeadWrapper());
   }
 }
 

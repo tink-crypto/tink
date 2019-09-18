@@ -27,6 +27,7 @@ closure_js_library(
     deps = [
         "//javascript:key_manager",
         "//javascript:primitives",
+        "//javascript:registry",
         "//javascript/exception",
         "//javascript/subtle",
         "//javascript/subtle:aead",
@@ -47,6 +48,7 @@ closure_js_library(
     deps = [
         "//javascript:key_manager",
         "//javascript:primitives",
+        "//javascript:registry",
         "//javascript/exception",
         "//javascript/subtle",
         "//javascript/subtle:aead",
@@ -83,7 +85,6 @@ closure_js_library(
         ":aead_wrapper",
         ":aes_ctr_hmac_aead_key_manager",
         ":aes_gcm_key_manager",
-        "//javascript:registry",
         "@io_bazel_rules_closure//closure/library",
     ],
 )
@@ -98,6 +99,7 @@ closure_js_library(
         "//javascript:primitive_set",
         "//javascript:primitive_wrapper",
         "//javascript:primitives",
+        "//javascript:registry",
         "//javascript/exception",
         "//proto:tink_closure_proto",
         "@io_bazel_rules_closure//closure/library",

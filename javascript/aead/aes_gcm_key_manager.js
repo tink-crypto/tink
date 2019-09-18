@@ -22,6 +22,7 @@ const PbAesGcmKeyFormat = goog.require('proto.google.crypto.tink.AesGcmKeyFormat
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PbMessage = goog.require('jspb.Message');
 const Random = goog.require('tink.subtle.Random');
+const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
 
@@ -111,6 +112,7 @@ class AesGcmKeyFactory {
  * @final
  */
 class AesGcmKeyManager {
+  /** @private */
   constructor() {
     /** @const @private {!AesGcmKeyFactory} */
     this.keyFactory_ = new AesGcmKeyFactory();
@@ -216,6 +218,10 @@ class AesGcmKeyManager {
     }
 
     return deserializedKey;
+  }
+
+  static register() {
+    Registry.registerKeyManager(new AesGcmKeyManager());
   }
 }
 

@@ -17,7 +17,6 @@ goog.module('tink.aead.AeadConfig');
 const AeadWrapper = goog.require('tink.aead.AeadWrapper');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
-const Registry = goog.require('tink.Registry');
 
 
 /**
@@ -39,9 +38,9 @@ class AeadConfig {
    */
   static register() {
     // TODO MacConfig.register() should be here.
-    Registry.registerKeyManager(new AesGcmKeyManager());
-    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager());
-    Registry.registerPrimitiveWrapper(new AeadWrapper());
+    AesGcmKeyManager.register();
+    AesCtrHmacAeadKeyManager.register();
+    AeadWrapper.register();
   }
 }
 
