@@ -34,7 +34,7 @@ import (
 func TestAESGCMKeyTemplates(t *testing.T) {
 	// AES-GCM 128 bit
 	template := aead.AES128GCMKeyTemplate()
-	if err := checkAESGCMKeyTemplate(template, uint32(16)); err != nil {
+	if err := checkAESGCMKeyTemplate(template, uint32(16), tinkpb.OutputPrefixType_TINK); err != nil {
 		t.Errorf("invalid AES-128 GCM key template: %s", err)
 	}
 	if err := testEncryptDecrypt(template, testutil.AESGCMTypeURL); err != nil {
@@ -43,17 +43,29 @@ func TestAESGCMKeyTemplates(t *testing.T) {
 
 	// AES-GCM 256 bit
 	template = aead.AES256GCMKeyTemplate()
-	if err := checkAESGCMKeyTemplate(template, uint32(32)); err != nil {
+	if err := checkAESGCMKeyTemplate(template, uint32(32), tinkpb.OutputPrefixType_TINK); err != nil {
 		t.Errorf("invalid AES-256 GCM key template: %s", err)
+	}
+	if err := testEncryptDecrypt(template, testutil.AESGCMTypeURL); err != nil {
+		t.Errorf("%v", err)
+	}
+
+	// AES-GCM 256 bit No Prefix
+	template = aead.AES256GCMNoPrefixKeyTemplate()
+	if err := checkAESGCMKeyTemplate(template, uint32(32), tinkpb.OutputPrefixType_RAW); err != nil {
+		t.Errorf("invalid AES-256 GCM No Prefix key template: %s", err)
 	}
 	if err := testEncryptDecrypt(template, testutil.AESGCMTypeURL); err != nil {
 		t.Errorf("%v", err)
 	}
 }
 
-func checkAESGCMKeyTemplate(template *tinkpb.KeyTemplate, keySize uint32) error {
+func checkAESGCMKeyTemplate(template *tinkpb.KeyTemplate, keySize uint32, outputPrefixType tinkpb.OutputPrefixType) error {
 	if template.TypeUrl != testutil.AESGCMTypeURL {
 		return fmt.Errorf("incorrect type url")
+	}
+	if template.OutputPrefixType != outputPrefixType {
+		return fmt.Errorf("incorrect output prefix type")
 	}
 	keyFormat := new(gcmpb.AesGcmKeyFormat)
 	err := proto.Unmarshal(template.Value, keyFormat)
