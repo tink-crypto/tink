@@ -60,7 +60,8 @@ RBE_ARGS=(
 )
 readonly RBE_ARGS
 
-# Build all targets, except objc and proto.
+# TODO(b/141297103): reenable python
+# Build all targets, except objc, python, and proto.
 time bazel \
   --bazelrc="tools/remote_build_execution/bazel-rbe.bazelrc" \
   build "${RBE_ARGS[@]}" \
@@ -71,10 +72,11 @@ time bazel \
   -- \
   //... \
   -//objc/... \
-  -//proto/...
+  -//proto/... \
+  -//python/...
 
-
-# Run all the tests except objc.
+# TODO(b/141297103): reenable python
+# Run all the tests except objc and python.
 time bazel \
   --bazelrc="tools/remote_build_execution/bazel-rbe.bazelrc" \
   test "${RBE_ARGS[@]}" \
@@ -87,4 +89,5 @@ time bazel \
   -- \
   //... \
   -//objc/... \
-  -//proto/...
+  -//proto/... \
+  -//python/...

@@ -68,6 +68,12 @@ if [[ "${PLATFORM}" == 'darwin' ]]; then
   DISABLE_GRPC_ON_MAC_OS="-//cc/integration/gcpkms/..."
 fi
 
+# TODO(b/141297103)
+DISABLE_PYTHON_ON_MAC_OS=""
+if [[ "${PLATFORM}" == 'darwin' ]]; then
+  DISABLE_PYTHON_ON_MAC_OS="-//python/..."
+fi
+
 echo "using bazel binary: $(which bazel)"
 bazel version
 
@@ -84,6 +90,7 @@ run_linux_tests() {
   time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
   -- //... \
   ${DISABLE_GRPC_ON_MAC_OS} \
+  ${DISABLE_PYTHON_ON_MAC_OS} \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run all tests, except manual and objc tests.
@@ -91,6 +98,7 @@ run_linux_tests() {
   --strategy=TestRunner=standalone --test_output=all \
   -- //... \
   ${DISABLE_GRPC_ON_MAC_OS} \
+  ${DISABLE_PYTHON_ON_MAC_OS} \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 }
 
