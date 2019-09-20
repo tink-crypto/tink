@@ -139,7 +139,7 @@ class EncryptingStream(io.BufferedIOBase):
 
   ### Internal ###
 
-  # TODO(tanujdhir) remove this function when b/141239409 b/141239470 are fixed.
+  # TODO(b/141344377) Use parent class _checkClosed() instead
   def _check_not_closed(self, msg=None):
     """Internal: raise a ValueError if file is closed."""
     if self.closed:
