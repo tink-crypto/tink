@@ -30,6 +30,8 @@ class FileObjectAdapter(python_file_object_adapter.PythonFileObjectAdapter):
   """Adapts a Python file object for use in C++."""
 
   def __init__(self, file_object: BinaryIO):
+    # Required to fix CLIF "Value invalidated due to capture by std::unique_ptr"
+    super(FileObjectAdapter, self).__init__()
     self._file_object = file_object
 
   def write(self, data: bytes) -> int:
