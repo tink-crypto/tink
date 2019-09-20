@@ -82,23 +82,36 @@
 </tr>
 <tbody>
 <tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/hybrid/EciesAeadHkdfPrivateKeyManager.html" title="class in com.google.crypto.tink.hybrid">EciesAeadHkdfPrivateKeyManager</a></td>
+<td class="colLast">
+<div class="block">This key manager generates new <code>EciesAeadHkdfPrivateKey</code> keys and produces new instances of
+ <code>EciesAeadHkdfHybridDecrypt</code>.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/hybrid/HybridConfig.html" title="class in com.google.crypto.tink.hybrid">HybridConfig</a></td>
 <td class="colLast">
 <div class="block">Static methods and constants for registering with the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="../../../../../com/google/crypto/tink/HybridEncrypt.html" title="interface in com.google.crypto.tink"><code>HybridEncrypt</code></a> and <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink"><code>HybridDecrypt</code></a> key types
  supported in a particular release of Tink.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptConfig.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptConfig</a></td>
 <td class="colLast">Deprecated
 <div class="block"><span class="deprecationComment">use <a href="../../../../../com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><code>Config</code></a> and <a href="../../../../../com/google/crypto/tink/hybrid/HybridConfig.html" title="class in com.google.crypto.tink.hybrid"><code>HybridConfig</code></a></span></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptFactory</a></td>
 <td class="colLast">Deprecated
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(HybridDecrypt.class)</code> after registering the
      <code>HybridDecryptWrapper</code> instead.</span></div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptWrapper</a></td>
+<td class="colLast">
+<div class="block">The implementation of <code>PrimitiveWrapper&lt;HybridDecrypt&gt;</code>.</div>
 </td>
 </tr>
 <tr class="rowColor">
