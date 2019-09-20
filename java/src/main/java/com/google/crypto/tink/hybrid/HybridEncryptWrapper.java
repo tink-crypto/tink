@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 
@@ -53,5 +54,15 @@ class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt> {
   @Override
   public Class<HybridEncrypt> getPrimitiveClass() {
     return HybridEncrypt.class;
+  }
+
+  /**
+   * Register the wrapper within the registry.
+   *
+   * <p>This is required for calls to {@link Keyset.getPrimitive} with a {@link HybridEncrypt}
+   * argument.
+   */
+  public static void register() throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
   }
 }

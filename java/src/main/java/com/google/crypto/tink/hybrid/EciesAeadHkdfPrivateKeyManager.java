@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.PrivateKeyTypeManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
@@ -40,9 +41,9 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EciesAeadHkdfPrivateKey} keys and produces new instances of
  * {@code EciesAeadHkdfHybridDecrypt}.
  */
-class EciesAeadHkdfPrivateKeyManager
+public class EciesAeadHkdfPrivateKeyManager
     extends PrivateKeyTypeManager<EciesAeadHkdfPrivateKey, EciesAeadHkdfPublicKey> {
-  public EciesAeadHkdfPrivateKeyManager() {
+  EciesAeadHkdfPrivateKeyManager() {
     super(
         EciesAeadHkdfPrivateKey.class,
         EciesAeadHkdfPublicKey.class,
@@ -148,5 +149,15 @@ class EciesAeadHkdfPrivateKeyManager
             .build();
       }
     };
+  }
+
+  /**
+   * Registers the {@link EciesAeadHkdfPrivateKeyManager} and the {@link
+   * EciesAeadHkdfPublicKeyManager} with the registry, so that the the EciesAeadHkdfKeys can be used
+   * with Tink.
+   */
+  public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerAsymmetricKeyManagers(
+        new EciesAeadHkdfPrivateKeyManager(), new EciesAeadHkdfPublicKeyManager(), newKeyAllowed);
   }
 }

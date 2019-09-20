@@ -95,11 +95,8 @@ public final class HybridConfig {
    */
   public static void register() throws GeneralSecurityException {
     AeadConfig.register();
-    Registry.registerAsymmetricKeyManagers(
-        new EciesAeadHkdfPrivateKeyManager(),
-        new EciesAeadHkdfPublicKeyManager(),
-        /*newKeyAllowed=*/ true);
-    Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
-    Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());
+    EciesAeadHkdfPrivateKeyManager.registerPair(/*newKeyAllowed=*/true);
+    HybridDecryptWrapper.register();
+    HybridEncryptWrapper.register();
   }
 }

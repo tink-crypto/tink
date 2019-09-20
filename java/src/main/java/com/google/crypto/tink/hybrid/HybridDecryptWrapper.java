@@ -19,6 +19,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  * the keys associated with the prefix do not work, the primitive tries all keys with {@link
  * com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
-class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
+public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
   private static final Logger logger = Logger.getLogger(HybridDecryptWrapper.class.getName());
 
   private static class WrappedHybridDecrypt implements HybridDecrypt {
@@ -73,6 +74,8 @@ class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
     }
   }
 
+  HybridDecryptWrapper() {}
+
   @Override
   public HybridDecrypt wrap(final PrimitiveSet<HybridDecrypt> primitives) {
     return new WrappedHybridDecrypt(primitives);
@@ -81,5 +84,15 @@ class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
   @Override
   public Class<HybridDecrypt> getPrimitiveClass() {
     return HybridDecrypt.class;
+  }
+
+  /**
+   * Register the wrapper within the registry.
+   *
+   * <p>This is required for calls to {@link Keyset.getPrimitive} with a {@link HybridDecrypt}
+   * argument.
+   */
+  public static void register() throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
   }
 }
