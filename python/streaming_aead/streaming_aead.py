@@ -114,10 +114,8 @@ class StreamingAead(object):
         readinto1()
         readline()
         readlines()
-        readall()
         close()
         closed
-        tell()
         isatty()
         flush() (no-op)
         readable()
@@ -128,6 +126,9 @@ class StreamingAead(object):
       Other methods, including write() and seek(), raise
       io.UnsupportedOperation.
       Closing the wrapper also closes the ciphertext_source.
+
+      The wrapper also supports the position() method, which returns the number
+      of plaintext bytes read.
 
     Raises:
       tink.TinkError if the creation fails.
