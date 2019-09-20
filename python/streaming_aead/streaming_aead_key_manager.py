@@ -22,6 +22,7 @@ from typing import Text, BinaryIO
 from tink.python.cc.clif import cc_key_manager
 from tink.python.core import key_manager
 from tink.python.core import tink_error
+from tink.python.streaming_aead import decrypting_stream
 from tink.python.streaming_aead import encrypting_stream
 from tink.python.streaming_aead import streaming_aead
 
@@ -43,8 +44,10 @@ class _StreamingAeadCcToPyWrapper(streaming_aead.StreamingAead):
   @tink_error.use_tink_errors
   def new_decrypting_stream(self, ciphertext_source: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
-    # TODO(tink-dev) implement DecryptingStream
-    return typing.cast(BinaryIO, None)
+    stream = decrypting_stream.DecryptingStream(self._streaming_aead,
+                                                ciphertext_source,
+                                                associated_data)
+    return typing.cast(BinaryIO, stream)
 
 
 def from_cc_registry(
