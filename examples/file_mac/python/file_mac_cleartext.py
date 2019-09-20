@@ -36,6 +36,7 @@ from absl import app
 from absl import flags
 from absl import logging
 import tink
+from tink.core import cleartext_keyset_handle
 
 FLAGS = flags.FLAGS
 
@@ -74,7 +75,8 @@ def main(argv):
   with open(keyset_filename, 'rb') as keyset_file:
     try:
       text = keyset_file.read()
-      keyset = tink.KeysetHandle(tink.JsonKeysetReader(text).read())
+      keyset = cleartext_keyset_handle.CleartextKeysetHandle(
+          tink.JsonKeysetReader(text).read())
     except tink.TinkError as e:
       logging.error('Error reading key: %s', e)
       return 1

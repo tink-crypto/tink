@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests for tink.python.keyset_handle."""
 
 from __future__ import absolute_import
@@ -64,11 +63,20 @@ class BadAead2(aead.Aead):
 
 def _master_key_aead():
   return core.Registry.primitive(
-      core.Registry.new_key_data(aead.aead_key_templates.AES128_EAX),
-      aead.Aead)
+      core.Registry.new_key_data(aead.aead_key_templates.AES128_EAX), aead.Aead)
+
+
+def _keyset_handle(keyset):
+  # CleartextKeysetHandle is encouraged but we want to avoid that dependency
+  # in the test
+  return core.KeysetHandle._create(keyset)
 
 
 class KeysetHandleTest(absltest.TestCase):
+
+  def test_instantiation(self):
+    with self.assertRaisesRegex(core.TinkError, 'cannot be instantiated'):
+      core.KeysetHandle()
 
   def test_generate_new(self):
     keyset_info = core.new_keyset_handle(
@@ -90,8 +98,7 @@ class KeysetHandleTest(absltest.TestCase):
                         handle2.keyset_info().key_info[0].key_id)
 
   def test_write_encrypted(self):
-    handle = core.new_keyset_handle(
-        mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     # Encrypt the keyset with Aead.
     master_key_aead = _master_key_aead()
     output_stream = io.BytesIO()
@@ -104,31 +111,27 @@ class KeysetHandleTest(absltest.TestCase):
         handle.primitive(mac.Mac).compute_mac(b'data'), b'data')
 
   def test_write_raises_error_when_encrypt_failed(self):
-    handle = core.new_keyset_handle(
-        mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     writer = core.BinaryKeysetWriter(io.BytesIO())
     with self.assertRaisesRegex(core.TinkError, 'encrypt failed'):
       handle.write(writer, FaultyAead())
 
   def test_write_raises_error_when_decrypt_not_possible(self):
-    handle = core.new_keyset_handle(
-        mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     writer = core.BinaryKeysetWriter(io.BytesIO())
     with self.assertRaisesRegex(core.TinkError,
                                 'invalid keyset, corrupted key material'):
       handle.write(writer, BadAead1())
 
   def test_write_raises_error_when_decrypt_to_wrong_keyset(self):
-    handle = core.new_keyset_handle(
-        mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     writer = core.BinaryKeysetWriter(io.BytesIO())
     with self.assertRaisesRegex(core.TinkError, 'cannot encrypt keyset:'):
       handle.write(writer, BadAead2())
 
   def test_read_empty_keyset_fails(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      core.read_keyset_handle(
-          core.BinaryKeysetReader(b''), _master_key_aead())
+      core.read_keyset_handle(core.BinaryKeysetReader(b''), _master_key_aead())
 
   def test_public_keyset_handle(self):
     private_handle = core.new_keyset_handle(
@@ -157,7 +160,7 @@ class KeysetHandleTest(absltest.TestCase):
     key.key_id = 1
     key.status = tink_pb2.ENABLED
     keyset.primary_key_id = 1
-    handle = core.KeysetHandle(keyset)
+    handle = _keyset_handle(keyset)
     aead_primitive = handle.primitive(aead.Aead)
     self.assertEqual(
         aead_primitive.decrypt(
@@ -167,7 +170,7 @@ class KeysetHandleTest(absltest.TestCase):
     keyset = tink_pb2.Keyset()
     keyset.key.extend([helper.fake_key(key_id=1, status=tink_pb2.DESTROYED)])
     keyset.primary_key_id = 1
-    handle = core.KeysetHandle(keyset)
+    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError, 'empty keyset'):
       handle.primitive(aead.Aead)
 
@@ -177,9 +180,8 @@ class KeysetHandleTest(absltest.TestCase):
     key.ClearField('key_data')
     keyset.key.extend([key])
     keyset.primary_key_id = 123
-    handle = core.KeysetHandle(keyset)
-    with self.assertRaisesRegex(core.TinkError,
-                                'key 123 has no key data'):
+    handle = _keyset_handle(keyset)
+    with self.assertRaisesRegex(core.TinkError, 'key 123 has no key data'):
       handle.primitive(aead.Aead)
 
   def test_primitive_fails_on_key_with_unknown_prefix(self):
@@ -188,9 +190,8 @@ class KeysetHandleTest(absltest.TestCase):
         helper.fake_key(key_id=12, output_prefix_type=tink_pb2.UNKNOWN_PREFIX)
     ])
     keyset.primary_key_id = 12
-    handle = core.KeysetHandle(keyset)
-    with self.assertRaisesRegex(core.TinkError,
-                                'key 12 has unknown prefix'):
+    handle = _keyset_handle(keyset)
+    with self.assertRaisesRegex(core.TinkError, 'key 12 has unknown prefix'):
       handle.primitive(aead.Aead)
 
   def test_primitive_fails_on_key_with_unknown_status(self):
@@ -198,9 +199,8 @@ class KeysetHandleTest(absltest.TestCase):
     keyset.key.extend(
         [helper.fake_key(key_id=1234, status=tink_pb2.UNKNOWN_STATUS)])
     keyset.primary_key_id = 1234
-    handle = core.KeysetHandle(keyset)
-    with self.assertRaisesRegex(core.TinkError,
-                                'key 1234 has unknown status'):
+    handle = _keyset_handle(keyset)
+    with self.assertRaisesRegex(core.TinkError, 'key 1234 has unknown status'):
       handle.primitive(aead.Aead)
 
   def test_primitive_fails_on_multiple_primary_keys(self):
@@ -209,7 +209,7 @@ class KeysetHandleTest(absltest.TestCase):
         [helper.fake_key(key_id=12345),
          helper.fake_key(key_id=12345)])
     keyset.primary_key_id = 12345
-    handle = core.KeysetHandle(keyset)
+    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError,
                                 'keyset contains multiple primary keys'):
       handle.primitive(aead.Aead)
@@ -223,7 +223,7 @@ class KeysetHandleTest(absltest.TestCase):
     key.key_id = 2
     key.status = tink_pb2.ENABLED
     keyset.primary_key_id = 1
-    handle = core.KeysetHandle(keyset)
+    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError,
                                 'keyset does not contain a valid primary key'):
       handle.primitive(aead.Aead)
@@ -237,13 +237,12 @@ class KeysetHandleTest(absltest.TestCase):
     key.key_id = 1
     key.status = tink_pb2.ENABLED
     keyset.primary_key_id = 1
-    handle = core.KeysetHandle(keyset)
+    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError, 'Wrong primitive class'):
       handle.primitive(mac.Mac)
 
   def test_primitive_wrapped_correctly(self):
-    keydata2 = core.Registry.new_key_data(
-        aead.aead_key_templates.AES128_EAX)
+    keydata2 = core.Registry.new_key_data(aead.aead_key_templates.AES128_EAX)
     keyset = tink_pb2.Keyset()
     key = keyset.key.add()
     key.key_data.CopyFrom(
@@ -257,7 +256,7 @@ class KeysetHandleTest(absltest.TestCase):
     key.key_id = 2
     key.status = tink_pb2.ENABLED
     keyset.primary_key_id = 1
-    handle = core.KeysetHandle(keyset)
+    handle = _keyset_handle(keyset)
     aead_primitive = handle.primitive(aead.Aead)
     aead_primitive2 = core.Registry.primitive(keydata2, aead.Aead)
     self.assertEqual(
@@ -280,7 +279,7 @@ class KeysetHandleTest(absltest.TestCase):
             status=tink_pb2.DESTROYED,
             output_prefix_type=tink_pb2.RAW)
     ])
-    handle = core.KeysetHandle(keyset)
+    handle = _keyset_handle(keyset)
     expected_keyset_info = tink_pb2.KeysetInfo(primary_key_id=2)
     info1 = expected_keyset_info.key_info.add()
     info1.type_url = 't1'

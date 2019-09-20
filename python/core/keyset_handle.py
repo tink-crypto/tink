@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """This module defines KeysetHandle."""
 
 from __future__ import absolute_import
@@ -45,8 +44,49 @@ class KeysetHandle(object):
   keysets.
   """
 
+  def __new__(cls):
+    raise tink_error.TinkError(
+        ('KeysetHandle cannot be instantiated directly.'))
+
   def __init__(self, keyset: tink_pb2.Keyset):
     self._keyset = keyset
+
+  @classmethod
+  def generate_new(cls, key_template: tink_pb2.KeyTemplate) -> 'KeysetHandle':
+    """Return a new KeysetHandle.
+
+    It contains a single fresh key generated according to key_template.
+
+    Args:
+      key_template: A tink_pb2.KeyTemplate object.
+
+    Returns:
+      A new KeysetHandle.
+    """
+    keyset = tink_pb2.Keyset()
+    key_data = registry.Registry.new_key_data(key_template)
+    key_id = _generate_unused_key_id(keyset)
+    key = keyset.key.add()
+    key.key_data.CopyFrom(key_data)
+    key.status = tink_pb2.ENABLED
+    key.key_id = key_id
+    key.output_prefix_type = key_template.output_prefix_type
+    keyset.primary_key_id = key_id
+    return cls._create(keyset)
+
+  @classmethod
+  def read(cls, keyset_reader: reader.KeysetReader,
+           master_key_aead: aead.Aead) -> 'KeysetHandle':
+    """Tries to create a KeysetHandle from an encrypted keyset."""
+    encrypted_keyset = keyset_reader.read_encrypted()
+    _assert_enough_encrypted_key_material(encrypted_keyset)
+    return cls._create(_decrypt(encrypted_keyset, master_key_aead))
+
+  @classmethod
+  def _create(cls, keyset: tink_pb2.Keyset):
+    o = object.__new__(cls)
+    o.__init__(keyset)
+    return o
 
   def keyset_info(self) -> tink_pb2.KeysetInfo:
     """Returns the KeysetInfo that doesn't contain actual key material."""
@@ -68,7 +108,7 @@ class KeysetHandle(object):
           registry.Registry.public_key_data(key.key_data))
       _validate_key(public_key)
     public_keyset.primary_key_id = self._keyset.primary_key_id
-    return KeysetHandle(public_keyset)
+    return self._create(public_keyset)
 
   def primitive(self, primitive_class: Type[P]) -> P:
     """Returns a wrapped primitive from this KeysetHandle.
@@ -96,37 +136,6 @@ class KeysetHandle(object):
         if key.key_id == self._keyset.primary_key_id:
           pset.set_primary(entry)
     return registry.Registry.wrap(pset)
-
-
-def generate_new(key_template: tink_pb2.KeyTemplate) -> KeysetHandle:
-  """Return a new KeysetHandle.
-
-  It contains a single fresh key generated according to key_template.
-
-  Args:
-    key_template: A tink_pb2.KeyTemplate object.
-
-  Returns:
-    A new KeysetHandle.
-  """
-  keyset = tink_pb2.Keyset()
-  key_data = registry.Registry.new_key_data(key_template)
-  key_id = _generate_unused_key_id(keyset)
-  key = keyset.key.add()
-  key.key_data.CopyFrom(key_data)
-  key.status = tink_pb2.ENABLED
-  key.key_id = key_id
-  key.output_prefix_type = key_template.output_prefix_type
-  keyset.primary_key_id = key_id
-  return KeysetHandle(keyset)
-
-
-def read(keyset_reader: reader.KeysetReader,
-         master_key_aead: aead.Aead) -> KeysetHandle:
-  """Tries to create a KeysetHandle from an encrypted keyset."""
-  encrypted_keyset = keyset_reader.read_encrypted()
-  _assert_enough_encrypted_key_material(encrypted_keyset)
-  return KeysetHandle(_decrypt(encrypted_keyset, master_key_aead))
 
 
 def _keyset_info(keyset: tink_pb2.Keyset) -> tink_pb2.KeysetInfo:

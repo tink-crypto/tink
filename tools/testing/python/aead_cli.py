@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """A command-line utility for testing AEAD-primitives.
 
 It requires 5 arguments:
@@ -34,6 +33,7 @@ from absl import flags
 from absl import logging
 import tink
 
+from tink.core import cleartext_keyset_handle
 
 FLAGS = flags.FLAGS
 
@@ -43,6 +43,7 @@ def read_keyset(keyset_filename):
 
   Args:
     keyset_filename: A path to a keyset file
+
   Returns:
     A KeysetHandle of the file's keyset
   Raises:
@@ -51,7 +52,8 @@ def read_keyset(keyset_filename):
   """
   with open(keyset_filename, 'rb') as keyset_file:
     text = keyset_file.read()
-    keyset = tink.KeysetHandle(tink.BinaryKeysetReader(text).read())
+    keyset = cleartext_keyset_handle.CleartextKeysetHandle(
+        tink.BinaryKeysetReader(text).read())
   return keyset
 
 

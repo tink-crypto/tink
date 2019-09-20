@@ -31,9 +31,9 @@ from tink.python.core import tink_error
 KeyManager = key_manager.KeyManager
 PrivateKeyManager = key_manager.PrivateKeyManager
 
-new_keyset_handle = keyset_handle.generate_new
-read_keyset_handle = keyset_handle.read
 KeysetHandle = keyset_handle.KeysetHandle
+new_keyset_handle = KeysetHandle.generate_new
+read_keyset_handle = KeysetHandle.read
 
 KeysetReader = keyset_reader.KeysetReader
 JsonKeysetReader = keyset_reader.JsonKeysetReader
