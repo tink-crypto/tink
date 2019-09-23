@@ -49,7 +49,6 @@ tink_cc_library(
     status.h
   DEPS
     absl::base
-    absl::strings
   PUBLIC
 )
 

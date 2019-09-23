@@ -2,6 +2,7 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])
 
+
 cc_library(
     name = "buffer",
     srcs = ["buffer.cc"],
@@ -61,8 +62,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/strings",
-    ],
+    ]
 )
 
 cc_library(
