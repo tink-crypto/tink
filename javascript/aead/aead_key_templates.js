@@ -14,16 +14,9 @@
 
 goog.module('tink.aead.AeadKeyTemplates');
 
-const AeadConfig = goog.require('tink.aead.AeadConfig');
-const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
-const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
-const PbAesCtrParams = goog.require('proto.google.crypto.tink.AesCtrParams');
-const PbAesGcmKeyFormat = goog.require('proto.google.crypto.tink.AesGcmKeyFormat');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
-const PbHmacParams = goog.require('proto.google.crypto.tink.HmacParams');
+const AesCtrHmacAeadKeyTemplates = goog.require('tink.aead.AesCtrHmacAeadKeyTemplates');
+const AesGcmKeyTemplates = goog.require('tink.aead.AesGcmKeyTemplates');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 
 /**
  * Pre-generated KeyTemplates for Aead keys.
@@ -52,11 +45,7 @@ class AeadKeyTemplates {
    * @return {!PbKeyTemplate}
    */
   static aes128CtrHmacSha256() {
-    return AeadKeyTemplates.newAesCtrHmacSha256KeyTemplate_(
-        /* aesKeySize = */ 16,
-        /* ivSize = */ 16,
-        /* hmacKeySize = */ 32,
-        /* tagSize = */ 16);
+    return AesCtrHmacAeadKeyTemplates.aes128CtrHmacSha256();
   }
 
   /**
@@ -72,11 +61,7 @@ class AeadKeyTemplates {
    * @return {!PbKeyTemplate}
    */
   static aes256CtrHmacSha256() {
-    return AeadKeyTemplates.newAesCtrHmacSha256KeyTemplate_(
-        /* aesKeySize = */ 32,
-        /* ivSize = */ 16,
-        /* hmacKeySize = */ 32,
-        /* tagSize = */ 32);
+    return AesCtrHmacAeadKeyTemplates.aes256CtrHmacSha256();
   }
 
   /**
@@ -88,9 +73,7 @@ class AeadKeyTemplates {
    * @return {!PbKeyTemplate}
    */
   static aes128Gcm() {
-    return AeadKeyTemplates.newAesGcmKeyTemplate_(
-        /* keySize = */ 16,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+    return AesGcmKeyTemplates.aes128Gcm();
   }
 
   /**
@@ -102,9 +85,7 @@ class AeadKeyTemplates {
    * @return {!PbKeyTemplate}
    */
   static aes256Gcm() {
-    return AeadKeyTemplates.newAesGcmKeyTemplate_(
-        /* keySize = */ 32,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+    return AesGcmKeyTemplates.aes256Gcm();
   }
 
   /**
@@ -116,69 +97,7 @@ class AeadKeyTemplates {
    * @return {!PbKeyTemplate}
    */
   static aes256GcmNoPrefix() {
-    return AeadKeyTemplates.newAesGcmKeyTemplate_(
-        /* keySize = */ 32,
-        /* outputPrefixType = */ PbOutputPrefixType.RAW);
-  }
-
-  /**
-   * @private
-   *
-   * @param {number} aesKeySize
-   * @param {number} ivSize
-   * @param {number} hmacKeySize
-   * @param {number} tagSize
-   *
-   * @return {!PbKeyTemplate}
-   */
-  static newAesCtrHmacSha256KeyTemplate_(
-      aesKeySize, ivSize, hmacKeySize, tagSize) {
-    // Define AES CTR key format.
-    const aesCtrKeyFormat = new PbAesCtrKeyFormat()
-                                .setKeySize(aesKeySize)
-                                .setParams(new PbAesCtrParams());
-    aesCtrKeyFormat.getParams().setIvSize(ivSize);
-
-    // Define HMAC key format.
-    const hmacKeyFormat = new PbHmacKeyFormat()
-                              .setKeySize(hmacKeySize)
-                              .setParams(new PbHmacParams());
-    hmacKeyFormat.getParams().setTagSize(tagSize);
-    hmacKeyFormat.getParams().setHash(PbHashType.SHA256);
-
-    // Define AES CTR HMAC AEAD key format.
-    const keyFormat = new PbAesCtrHmacAeadKeyFormat()
-                          .setAesCtrKeyFormat(aesCtrKeyFormat)
-                          .setHmacKeyFormat(hmacKeyFormat);
-
-    // Define key template.
-    const keyTemplate = new PbKeyTemplate()
-                            .setTypeUrl(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)
-                            .setOutputPrefixType(PbOutputPrefixType.TINK)
-                            .setValue(keyFormat.serializeBinary());
-
-    return keyTemplate;
-  }
-
-  /**
-   * @private
-   *
-   * @param {number} keySize
-   * @param {!PbOutputPrefixType} outputPrefixType
-   *
-   * @return {!PbKeyTemplate}
-   */
-  static newAesGcmKeyTemplate_(keySize, outputPrefixType) {
-    // Define AES GCM key format.
-    const keyFormat = new PbAesGcmKeyFormat().setKeySize(keySize);
-
-    // Define key template.
-    const keyTemplate = new PbKeyTemplate()
-                            .setTypeUrl(AeadConfig.AES_GCM_TYPE_URL)
-                            .setOutputPrefixType(outputPrefixType)
-                            .setValue(keyFormat.serializeBinary());
-
-    return keyTemplate;
+    return AesGcmKeyTemplates.aes256GcmNoPrefix();
   }
 }
 
