@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "absl/strings/str_cat.h"
+
 namespace crypto {
 namespace tink {
 namespace subtle {
@@ -35,7 +37,7 @@ std::string EnumToString(EllipticCurveType type) {
   case EllipticCurveType::UNKNOWN_CURVE:
     return "UNKNOWN_CURVE";
   default:
-    return "UNKNOWN_CURVE: " + std::to_string(type);
+    return absl::StrCat("UNKNOWN_CURVE: ", type);
   }
 }
 
@@ -50,7 +52,7 @@ std::string EnumToString(EcPointFormat format) {
   case EcPointFormat::UNKNOWN_FORMAT:
     return "UNKNOWN_FORMAT";
   default:
-    return "UNKNOWN_FORMAT: " + std::to_string(format);
+    return absl::StrCat("UNKNOWN_FORMAT: ", format);
   }
 }
 
@@ -67,7 +69,7 @@ std::string EnumToString(HashType type) {
   case HashType::UNKNOWN_HASH:
     return "UNKNOWN_HASH";
   default:
-    return "UNKNOWN_HASH: " + std::to_string(type);
+    return absl::StrCat("UNKNOWN_HASH: ", type);
   }
 }
 

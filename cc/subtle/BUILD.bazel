@@ -538,6 +538,7 @@ cc_library(
     hdrs = ["common_enums.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    deps = ["@com_google_absl//absl/strings"],
 )
 
 cc_library(
