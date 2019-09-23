@@ -399,6 +399,19 @@ load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
 
 closure_repositories(omit_zlib = True)
 
+#-----------------------------------------------------------------------------
+# Python
+#-----------------------------------------------------------------------------
+
+load("//third_party/py:python_configure.bzl", "python_configure")
+
+python_configure(name = "local_config_python")
+
+new_local_repository(
+    name = "clif",
+    build_file = "third_party/clif.BUILD.bazel",
+    path = "/usr/local",
+)
 
 #-----------------------------------------------------------------------------
 # Remote Build Execution

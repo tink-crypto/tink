@@ -1,0 +1,19 @@
+licenses(["notice"])
+
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+cc_library(
+    name = "clif",
+    srcs = ["clif.cc"],
+    hdrs = ["clif.h"],
+    include_prefix = "tink/python",
+    strip_include_prefix = "/python",
+    deps = [
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@clif//:cpp_runtime",
+        "@com_google_absl//absl/strings",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
