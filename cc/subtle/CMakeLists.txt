@@ -478,6 +478,8 @@ tink_cc_library(
   SRCS
     common_enums.cc
     common_enums.h
+  DEPS
+    absl::strings
 )
 
 tink_cc_library(

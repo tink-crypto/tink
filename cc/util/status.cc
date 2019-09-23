@@ -17,6 +17,8 @@
 #include <sstream>
 
 #include "tink/util/status.h"
+
+#include "absl/strings/str_cat.h"
 // placeholder_google3_status_header, please ignore
 
 using ::std::ostream;
@@ -117,7 +119,7 @@ std::string ErrorCodeString(crypto::tink::util::error::Code error) {
   }
   // Avoid using a "default" in the switch, so that the compiler can
   // give us a warning, but still provide a fallback here.
-  return std::to_string(error);
+  return absl::StrCat(error);
 }
 
 extern ostream& operator<<(ostream& os, crypto::tink::util::error::Code code) {
