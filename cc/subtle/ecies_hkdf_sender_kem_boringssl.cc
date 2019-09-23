@@ -17,11 +17,11 @@
 #include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 
 #include "absl/memory/memory.h"
+#include "openssl/bn.h"
+#include "openssl/curve25519.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/subtle_util_boringssl.h"
-#include "openssl/bn.h"
-
 
 namespace crypto {
 namespace tink {
@@ -39,32 +39,46 @@ std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() {
   return symmetric_key_;
 }
 
-EciesHkdfSenderKemBoringSsl::EciesHkdfSenderKemBoringSsl(
-    subtle::EllipticCurveType curve,
-    const std::string& pubx, const std::string& puby)
-    : curve_(curve), pubx_(pubx), puby_(puby), peer_pub_key_(nullptr) {
+// static
+util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+EciesHkdfSenderKemBoringSsl::New(subtle::EllipticCurveType curve,
+                                 const std::string& pubx, const std::string& puby) {
+  switch (curve) {
+    case EllipticCurveType::NIST_P256:
+    case EllipticCurveType::NIST_P384:
+    case EllipticCurveType::NIST_P521:
+      return EciesHkdfNistPCurveSendKemBoringSsl::New(curve, pubx, puby);
+    case EllipticCurveType::CURVE25519:
+      return EciesHkdfX25519SendKemBoringSsl::New(curve, pubx, puby);
+    default:
+      return util::Status(util::error::UNIMPLEMENTED,
+                          "Unsupported elliptic curve");
+  }
 }
+
+EciesHkdfNistPCurveSendKemBoringSsl::EciesHkdfNistPCurveSendKemBoringSsl(
+    subtle::EllipticCurveType curve, const std::string& pubx, const std::string& puby,
+    EC_POINT* peer_pub_key)
+    : curve_(curve), pubx_(pubx), puby_(puby), peer_pub_key_(peer_pub_key) {}
 
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
-EciesHkdfSenderKemBoringSsl::New(
-    subtle::EllipticCurveType curve,
-    const std::string& pubx, const std::string& puby) {
+EciesHkdfNistPCurveSendKemBoringSsl::New(subtle::EllipticCurveType curve,
+                                         const std::string& pubx,
+                                         const std::string& puby) {
   auto status_or_ec_point =
       SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
   if (!status_or_ec_point.ok()) return status_or_ec_point.status();
-  auto sender_kem =
-      absl::WrapUnique(new EciesHkdfSenderKemBoringSsl(curve, pubx, puby));
-  sender_kem->peer_pub_key_.reset(status_or_ec_point.ValueOrDie());
+  std::unique_ptr<EciesHkdfSenderKemBoringSsl> sender_kem(
+      new EciesHkdfNistPCurveSendKemBoringSsl(curve, pubx, puby,
+                                              status_or_ec_point.ValueOrDie()));
   return std::move(sender_kem);
 }
 
 util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
-EciesHkdfSenderKemBoringSsl::GenerateKey(
-    subtle::HashType hash,
-    absl::string_view hkdf_salt,
-    absl::string_view hkdf_info,
-    uint32_t key_size_in_bytes,
+EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
+    subtle::HashType hash, absl::string_view hkdf_salt,
+    absl::string_view hkdf_info, uint32_t key_size_in_bytes,
     subtle::EcPointFormat point_format) const {
   if (peer_pub_key_.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
@@ -98,6 +112,63 @@ EciesHkdfSenderKemBoringSsl::GenerateKey(
     return status_or_string_shared_secret.status();
   }
   std::string shared_secret(status_or_string_shared_secret.ValueOrDie());
+  auto status_or_string_symmetric_key = Hkdf::ComputeEciesHkdfSymmetricKey(
+      hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
+  if (!status_or_string_symmetric_key.ok()) {
+    return status_or_string_symmetric_key.status();
+  }
+  std::string symmetric_key(status_or_string_symmetric_key.ValueOrDie());
+  auto kem_key = absl::make_unique<KemKey>(kem_bytes, symmetric_key);
+  return std::move(kem_key);
+}
+
+EciesHkdfX25519SendKemBoringSsl::EciesHkdfX25519SendKemBoringSsl(
+    const std::string& peer_public_value) {
+  peer_public_value.copy(reinterpret_cast<char*>(peer_public_value_),
+                         X25519_PUBLIC_VALUE_LEN);
+}
+
+// static
+util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+EciesHkdfX25519SendKemBoringSsl::New(subtle::EllipticCurveType curve,
+                                     const std::string& pubx, const std::string& puby) {
+  if (curve != CURVE25519) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "curve is not CURVE25519");
+  }
+  if (pubx.size() != X25519_PUBLIC_VALUE_LEN) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "pubx has unexpected length");
+  }
+  if (!puby.empty()) {
+    return util::Status(util::error::INVALID_ARGUMENT, "puby is not empty");
+  }
+  std::unique_ptr<EciesHkdfSenderKemBoringSsl> sender_kem(
+      new EciesHkdfX25519SendKemBoringSsl(pubx));
+  return std::move(sender_kem);
+}
+
+util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
+EciesHkdfX25519SendKemBoringSsl::GenerateKey(
+    subtle::HashType hash, absl::string_view hkdf_salt,
+    absl::string_view hkdf_info, uint32_t key_size_in_bytes,
+    subtle::EcPointFormat point_format) const {
+  if (point_format != EcPointFormat::COMPRESSED) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "X25519 only supports compressed elliptic curve points");
+  }
+
+  uint8_t ephemeral_private_key[X25519_PRIVATE_KEY_LEN];
+  uint8_t ephemeral_public_value[X25519_PUBLIC_VALUE_LEN];
+  X25519_keypair(ephemeral_public_value, ephemeral_private_key);
+  std::string kem_bytes(ephemeral_public_value,
+                   &ephemeral_public_value[X25519_PUBLIC_VALUE_LEN]);
+
+  uint8_t shared_key[X25519_SHARED_KEY_LEN];
+  X25519(shared_key, ephemeral_private_key, peer_public_value_);
+  std::string shared_secret(shared_key, &shared_key[X25519_SHARED_KEY_LEN]);
+
   auto status_or_string_symmetric_key = Hkdf::ComputeEciesHkdfSymmetricKey(
       hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
   if (!status_or_string_symmetric_key.ok()) {

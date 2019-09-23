@@ -18,9 +18,10 @@
 #define TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 
 #include "absl/strings/string_view.h"
+#include "openssl/curve25519.h"
+#include "openssl/ec.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/statusor.h"
-#include "openssl/ec.h"
 
 namespace crypto {
 namespace tink {
@@ -47,32 +48,70 @@ class EciesHkdfSenderKemBoringSsl {
 
   // Constructs a sender KEM for the specified curve and recipient's
   // public key point.  The public key's coordinates are big-endian byte array.
-  static
-  crypto::tink::util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
-      New(EllipticCurveType curve,
-          const std::string& pubx,
-          const std::string& puby);
+  static crypto::tink::util::StatusOr<
+      std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+  New(EllipticCurveType curve, const std::string& pubx, const std::string& puby);
+
+  // Generates ephemeral key pairs, computes ECDH's shared secret based on
+  // generated ephemeral key and recipient's public key, then uses HKDF
+  // to derive the symmetric key from the shared secret, 'hkdf_info' and
+  // hkdf_salt.
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
+      HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
+      uint32_t key_size_in_bytes, EcPointFormat point_format) const = 0;
+
+  virtual ~EciesHkdfSenderKemBoringSsl() = default;
+};
+
+// Implementation of EciesHkdfSenderKemBoringSsl for the NIST P-curves.
+class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
+ public:
+  // Constructs a sender KEM for the specified curve and recipient's
+  // public key point.  The public key's coordinates are big-endian byte array.
+  static crypto::tink::util::StatusOr<
+      std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+  New(EllipticCurveType curve, const std::string& pubx, const std::string& puby);
 
   // Generates ephemeral key pairs, computes ECDH's shared secret based on
   // generated ephemeral key and recipient's public key, then uses HKDF
   // to derive the symmetric key from the shared secret, 'hkdf_info' and
   // hkdf_salt.
   crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
-      HashType hash,
-      absl::string_view hkdf_salt,
-      absl::string_view hkdf_info,
-      uint32_t key_size_in_bytes,
-      EcPointFormat point_format) const;
+      HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
+      uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
 
  private:
-  EciesHkdfSenderKemBoringSsl(
-      EllipticCurveType curve,
-      const std::string& pubx, const std::string& puby);
+  EciesHkdfNistPCurveSendKemBoringSsl(EllipticCurveType curve,
+                                      const std::string& pubx, const std::string& puby,
+                                      EC_POINT* peer_pub_key);
 
   EllipticCurveType curve_;
   std::string pubx_;
   std::string puby_;
   bssl::UniquePtr<EC_POINT> peer_pub_key_;
+};
+
+// Implementation of EciesHkdfSenderKemBoringSsl for curve25519.
+class EciesHkdfX25519SendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
+ public:
+  // Constructs a sender KEM for the specified curve and recipient's
+  // public key point.  The public key's coordinates are big-endian byte array.
+  static crypto::tink::util::StatusOr<
+      std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+  New(EllipticCurveType curve, const std::string& pubx, const std::string& puby);
+
+  // Generates ephemeral key pairs, computes ECDH's shared secret based on
+  // generated ephemeral key and recipient's public key, then uses HKDF
+  // to derive the symmetric key from the shared secret, 'hkdf_info' and
+  // hkdf_salt.
+  crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
+      HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
+      uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
+
+ private:
+  explicit EciesHkdfX25519SendKemBoringSsl(const std::string& peer_public_value);
+
+  uint8_t peer_public_value_[X25519_PUBLIC_VALUE_LEN];
 };
 
 }  // namespace subtle

@@ -45,17 +45,35 @@ struct TestVector {
 
 static const std::vector<TestVector> test_vector(
     {{
-         EllipticCurveType::NIST_P256, HashType::SHA256,
-         EcPointFormat::UNCOMPRESSED, "0b0b0b0b", "0b0b0b0b0b0b0b0b", 32,
+         EllipticCurveType::NIST_P256,
+         HashType::SHA256,
+         EcPointFormat::UNCOMPRESSED,
+         "0b0b0b0b",
+         "0b0b0b0b0b0b0b0b",
+         32,
      },
      {
-         EllipticCurveType::NIST_P256, HashType::SHA256,
-         EcPointFormat::COMPRESSED, "0b0b0b0b", "0b0b0b0b0b0b0b0b", 32,
+         EllipticCurveType::NIST_P256,
+         HashType::SHA256,
+         EcPointFormat::COMPRESSED,
+         "0b0b0b0b",
+         "0b0b0b0b0b0b0b0b",
+         32,
+     },
+     {
+         EllipticCurveType::CURVE25519,
+         HashType::SHA256,
+         EcPointFormat::COMPRESSED,
+         "0b0b0b0b",
+         "0b0b0b0b0b0b0b0b",
+         32,
      }});
 
 TEST_F(EciesHkdfSenderKemBoringSslTest, testSenderRecipientBasic) {
   for (const TestVector& test : test_vector) {
-    auto test_key = SubtleUtilBoringSSL::GetNewEcKey(test.curve).ValueOrDie();
+    auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(test.curve);
+    ASSERT_TRUE(status_or_test_key.ok());
+    auto test_key = status_or_test_key.ValueOrDie();
     auto status_or_sender_kem = EciesHkdfSenderKemBoringSsl::New(
         test.curve, test_key.pub_x, test_key.pub_y);
     ASSERT_TRUE(status_or_sender_kem.ok());
@@ -76,6 +94,140 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, testSenderRecipientBasic) {
     EXPECT_EQ(test::HexEncode(kem_key->get_symmetric_key()),
               test::HexEncode(status_or_shared_secret.ValueOrDie()));
   }
+}
+
+TEST_F(EciesHkdfSenderKemBoringSslTest, testNewUnknownCurve) {
+  auto status_or_sender_kem = EciesHkdfSenderKemBoringSsl::New(
+      EllipticCurveType::UNKNOWN_CURVE, "", "");
+  EXPECT_EQ(util::error::UNIMPLEMENTED,
+            status_or_sender_kem.status().error_code());
+}
+
+class EciesHkdfNistPCurveSendKemBoringSslTest : public ::testing::Test {};
+
+TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, testNew) {
+  EllipticCurveType curve = EllipticCurveType::NIST_P256;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  auto status_or_sender_kem = EciesHkdfNistPCurveSendKemBoringSsl::New(
+      curve, test_key.pub_x, test_key.pub_y);
+  ASSERT_TRUE(status_or_sender_kem.ok());
+}
+
+TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, testNewInvalidCurve) {
+  EllipticCurveType curve = EllipticCurveType::NIST_P256;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  auto status_or_sender_kem = EciesHkdfNistPCurveSendKemBoringSsl::New(
+      EllipticCurveType::CURVE25519, test_key.pub_x, test_key.pub_y);
+  EXPECT_EQ(status_or_sender_kem.status().error_code(),
+            util::error::UNIMPLEMENTED);
+}
+
+TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, testGenerateKey) {
+  EllipticCurveType curve = EllipticCurveType::NIST_P256;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  auto status_or_sender_kem = EciesHkdfNistPCurveSendKemBoringSsl::New(
+      curve, test_key.pub_x, test_key.pub_y);
+  ASSERT_TRUE(status_or_sender_kem.ok());
+  auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
+
+  uint32_t key_size_in_bytes = 128;
+  auto status_or_kem_key =
+      sender_kem->GenerateKey(HashType::SHA256, "hkdf_salt", "hkdf_info",
+                              key_size_in_bytes, EcPointFormat::COMPRESSED);
+  ASSERT_TRUE(status_or_kem_key.ok());
+  auto kem_key = std::move(status_or_kem_key.ValueOrDie());
+  EXPECT_FALSE(kem_key->get_kem_bytes().empty());
+  EXPECT_EQ(kem_key->get_symmetric_key().size(), key_size_in_bytes);
+}
+
+class EciesHkdfX25519SendKemBoringSslTest : public ::testing::Test {};
+
+TEST_F(EciesHkdfX25519SendKemBoringSslTest, testNew) {
+  EllipticCurveType curve = EllipticCurveType::CURVE25519;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
+      curve, test_key.pub_x, test_key.pub_y);
+  ASSERT_TRUE(status_or_sender_kem.ok());
+}
+
+TEST_F(EciesHkdfX25519SendKemBoringSslTest, testNewInvalidCurve) {
+  EllipticCurveType curve = EllipticCurveType::CURVE25519;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
+      EllipticCurveType::NIST_P256, test_key.pub_x, test_key.pub_y);
+  EXPECT_EQ(status_or_sender_kem.status().error_code(),
+            util::error::INVALID_ARGUMENT);
+}
+
+TEST_F(EciesHkdfX25519SendKemBoringSslTest, testNewPubxTooLong) {
+  EllipticCurveType curve = EllipticCurveType::CURVE25519;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  test_key.pub_x.resize(test_key.pub_x.size() / 2);
+  auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
+      curve, test_key.pub_x, test_key.pub_y);
+  EXPECT_EQ(status_or_sender_kem.status().error_code(),
+            util::error::INVALID_ARGUMENT);
+}
+
+TEST_F(EciesHkdfX25519SendKemBoringSslTest, testNewPubyNotEmpty) {
+  EllipticCurveType curve = EllipticCurveType::CURVE25519;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  test_key.pub_y = test_key.pub_x;
+  auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
+      curve, test_key.pub_x, test_key.pub_y);
+  EXPECT_EQ(status_or_sender_kem.status().error_code(),
+            util::error::INVALID_ARGUMENT);
+}
+
+TEST_F(EciesHkdfX25519SendKemBoringSslTest, testGenerateKey) {
+  EllipticCurveType curve = EllipticCurveType::CURVE25519;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
+      curve, test_key.pub_x, test_key.pub_y);
+  ASSERT_TRUE(status_or_sender_kem.ok());
+  auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
+
+  uint32_t key_size_in_bytes = 128;
+  auto status_or_kem_key =
+      sender_kem->GenerateKey(HashType::SHA256, "hkdf_salt", "hkdf_info",
+                              key_size_in_bytes, EcPointFormat::COMPRESSED);
+  ASSERT_TRUE(status_or_kem_key.ok());
+  auto kem_key = std::move(status_or_kem_key.ValueOrDie());
+  EXPECT_EQ(kem_key->get_kem_bytes().size(), X25519_PUBLIC_VALUE_LEN);
+  EXPECT_EQ(kem_key->get_symmetric_key().size(), key_size_in_bytes);
+}
+
+TEST_F(EciesHkdfX25519SendKemBoringSslTest, testGenerateKeyUncompressed) {
+  EllipticCurveType curve = EllipticCurveType::CURVE25519;
+  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  ASSERT_TRUE(status_or_test_key.ok());
+  auto test_key = status_or_test_key.ValueOrDie();
+  auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
+      curve, test_key.pub_x, test_key.pub_y);
+  ASSERT_TRUE(status_or_sender_kem.ok());
+  auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
+
+  auto status_or_kem_key =
+      sender_kem->GenerateKey(HashType::SHA256, "hkdf_salt", "hkdf_info", 32,
+                              EcPointFormat::UNCOMPRESSED);
+  EXPECT_EQ(status_or_kem_key.status().error_code(),
+            util::error::INVALID_ARGUMENT);
 }
 
 }  // namespace
