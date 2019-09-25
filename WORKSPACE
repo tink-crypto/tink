@@ -71,17 +71,6 @@ http_archive(
 )
 
 
-# Needed by gRPC.
-http_archive(
-    name = "github_nanopb",
-    urls = [
-        "https://github.com/nanopb/nanopb/archive/f8ac463766281625ad710900479130c7fcb4d63b.tar.gz",
-    ],
-    sha256 = "8bbbb1e78d4ddb0a1919276924ab10d11b631df48b657d960e0c795a25515735",
-    strip_prefix = "nanopb-f8ac463766281625ad710900479130c7fcb4d63b",
-    build_file = "//:third_party/nanopb.BUILD.bazel",
-)
-
 # Needed by googleapis.
 http_archive(
     name = "com_google_api_codegen",
@@ -99,65 +88,21 @@ http_archive(
     strip_prefix = "googleapis-43a324913190da118e1c3c1a89ef6cfc47c5caf3",
 )
 
-# Needed by gRPC.
-http_archive(
-    name = "com_github_cares_cares",
-    build_file = "@com_github_grpc_grpc//third_party:cares/cares.BUILD",
-    url = "https://github.com/c-ares/c-ares/archive/cares-1_15_0.zip",
-    sha256 = "ac95874559aade58b30308f11480359926637a993b8ac585e90fd1bf6c082bc5",
-    strip_prefix = "c-ares-cares-1_15_0",
-)
-
-# Actual gRPC.
+# gRPC.
 http_archive(
     name = "com_github_grpc_grpc",
     urls = [
-        "https://github.com/grpc/grpc/archive/v1.21.3.tar.gz"
+        "https://github.com/grpc/grpc/archive/v1.22.1.tar.gz"
     ],
-    sha256 = "50747c8939c535b1059f19534de263eb9b7570b5347390fb24b0bbce8763e9a4",
-    strip_prefix = "grpc-1.21.3",
+    sha256 = "cce1d4585dd017980d4a407d8c5e9f8fc8c1dbb03f249b99e88a387ebb45a035",
+    strip_prefix = "grpc-1.22.1",
 )
 
-# Binds needed by gRPC.
-bind(
-  name = "libssl",
-  actual = "@boringssl//:ssl",
-)
-
-bind(
-    name = "zlib",
-    actual = "@zlib//:zlib",
-)
-
-bind(
-    name = "nanopb",
-    actual = "@github_nanopb//:nanopb",
-)
-
-bind(
-    name = "protobuf",
-    actual = "@com_google_protobuf//:protobuf",
-)
-
-bind(
-    name = "protobuf_headers",
-    actual = "@com_google_protobuf//:protobuf_headers",
-)
-
-bind(
-    name = "protobuf_clib",
-    actual = "@com_google_protobuf//:protoc_lib",
-)
-
-bind(
-    name = "protocol_compiler",
-    actual = "@com_google_protobuf//:protoc",
-)
-
-bind(
-    name = "cares",
-    actual = "@com_github_cares_cares//:ares",
-)
+# Load grpc_deps.
+# This is a workaround around the missing support for recursive WORKSPACE
+# file loading (https://github.com/bazelbuild/bazel/issues/1943).
+load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+grpc_deps()
 
 http_archive(
     name = "curl",
@@ -188,10 +133,16 @@ http_archive(
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
-    strip_prefix = "protobuf-3.8.0",
-    urls = ["https://github.com/google/protobuf/archive/v3.8.0.zip"],
-    sha256 = "1e622ce4b84b88b6d2cdf1db38d1a634fe2392d74f0b7b74ff98f3a51838ee53",
+    strip_prefix = "protobuf-3.9.1",
+    urls = ["https://github.com/google/protobuf/archive/v3.9.1.zip"],
+    sha256 = "c90d9e13564c0af85fd2912545ee47b57deded6e5a97de80395b6d2d9be64854",
 )
+
+# Load protobuf_deps.
+# This is a workaround around the missing support for recursive WORKSPACE
+# file loading (https://github.com/bazelbuild/bazel/issues/1943).
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+protobuf_deps()
 
 # java_lite_proto_library rules implicitly depend on
 # @com_google_protobuf_javalite//:javalite_toolchain, which is the JavaLite proto
@@ -202,7 +153,6 @@ http_archive(
     urls = ["https://github.com/google/protobuf/archive/384989534b2246d413dbcd750744faab2607b516.zip"],
     sha256 = "79d102c61e2a479a0b7e5fc167bcfaa4832a0c6aad4a75fa7da0480564931bcc",
 )
-
 
 # Needed by gRPC, to build pb.h/pb.cc files from protos that contain services.
 http_archive(
