@@ -2148,6 +2148,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EcdsaSignJce.html#EcdsaSignJce-java.security.interfaces.ECPrivateKey-com.google.crypto.tink.subtle.Enums.HashType-com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding-">EcdsaSignJce(ECPrivateKey, Enums.HashType, EllipticCurves.EcdsaEncoding)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EcdsaSignJce.html" title="class in com.google.crypto.tink.subtle">EcdsaSignJce</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">EcdsaSignKeyManager</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
+<dd>
+<div class="block">This key manager generates new <code>EcdsaPrivateKey</code> keys and produces new instances of <code>EcdsaSignJce</code>.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/subtle/EcdsaVerifyJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">EcdsaVerifyJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">ECDSA verifying with JCE.</div>
@@ -4078,6 +4082,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
@@ -5100,6 +5106,8 @@
 <dd>
 <div class="block">Returns the primitive class object of the primitive managed.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeySignWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KeyTypeEntry.Builder.html#getPrimitiveName--">getPrimitiveName()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a></dt>
@@ -5274,6 +5282,8 @@
 <div class="block">
  Required.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#getPublicKey-com.google.crypto.tink.proto.EcdsaPrivateKey-">getPublicKey(EcdsaPrivateKey)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html#getPublicKey--">getPublicKey()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign.KeyPair</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrivateKeyTypeManager.html#getPublicKeyClass--">getPublicKeyClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a></dt>
@@ -6090,6 +6100,8 @@
 <dd>
 <div class="block"><code>optional uint32 version = 1;</code></div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
@@ -7134,6 +7146,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
@@ -7176,6 +7190,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac">AesCmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -9417,6 +9433,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
@@ -9671,6 +9689,10 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeySignWrapper</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
+<dd>
+<div class="block">The implementation of <code>PrimitiveWrapper&lt;PublicKeySign&gt;</code>.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PublicKeyVerify</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">Interface for public key signing.</div>
@@ -9847,6 +9869,10 @@
 <div class="block">Tries to register with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><code>Catalogue</code></a> and <a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> needed to
  handle Mac key types supported in Tink.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html#register--">register()</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeySignWrapper</a></dt>
+<dd>
+<div class="block">Register the wrapper within the registry.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureConfig.html#register--">register()</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature">SignatureConfig</a></dt>
 <dd>
 <div class="block">Tries to register with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><code>Catalogue</code></a> needed to handle PublicKeySign and PublicKeyVerify key types
@@ -9940,6 +9966,11 @@
 <dd>
 <div class="block">Registers the <a href="com/google/crypto/tink/hybrid/EciesAeadHkdfPrivateKeyManager.html" title="class in com.google.crypto.tink.hybrid"><code>EciesAeadHkdfPrivateKeyManager</code></a> and the <code>EciesAeadHkdfPublicKeyManager</code> with the registry, so that the the EciesAeadHkdfKeys can be used
  with Tink.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#registerPair-boolean-">registerPair(boolean)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
+<dd>
+<div class="block">Registers the <a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature"><code>EcdsaSignKeyManager</code></a> and the <code>EcdsaVerifyKeyManager</code> with the
+ registry, so that the the Ecdsa-Keys can be used with Tink.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#registerPrimitiveWrapper-com.google.crypto.tink.PrimitiveWrapper-">registerPrimitiveWrapper(PrimitiveWrapper&lt;P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
@@ -11626,6 +11657,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#validateKey-com.google.crypto.tink.proto.HmacKey-">validateKey(HmacKey)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#validateKey-com.google.crypto.tink.proto.EcdsaPrivateKey-">validateKey(EcdsaPrivateKey)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#validateKey-com.google.crypto.tink.proto.AesCtrHmacStreamingKey-">validateKey(AesCtrHmacStreamingKey)</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#validateKey-com.google.crypto.tink.proto.AesGcmHkdfStreamingKey-">validateKey(AesGcmHkdfStreamingKey)</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
@@ -12012,6 +12045,8 @@ the order they are declared.</div>
 <div class="block">Looks up the globally registered PrimitiveWrapper for this primitive and wraps the given
  PrimitiveSet with it.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;PublicKeySign&gt;)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeySignWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;StreamingAead&gt;)</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
