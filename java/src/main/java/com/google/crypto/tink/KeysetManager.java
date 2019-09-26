@@ -243,16 +243,20 @@ public final class KeysetManager {
   }
 
   @GuardedBy("this")
+  private synchronized boolean keyIdExists(int keyId) {
+    for (Keyset.Key key : keysetBuilder.getKeyList()) {
+      if (key.getKeyId() == keyId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @GuardedBy("this")
   private synchronized int newKeyId() {
     int keyId = randPositiveInt();
-    while (true) {
-      for (Keyset.Key key : keysetBuilder.getKeyList()) {
-        if (key.getKeyId() == keyId) {
-          keyId = randPositiveInt();
-          continue;
-        }
-      }
-      break;
+    while (keyIdExists(keyId)) {
+      keyId = randPositiveInt();
     }
     return keyId;
   }
