@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
@@ -107,5 +108,14 @@ class Ed25519PrivateKeyManager extends PrivateKeyTypeManager<Ed25519PrivateKey, 
             .build();
       }
     };
+  }
+
+  /**
+   * Registers the {@link Ed25519PrivateKeyManager} and the {@link Ed25519PublicKeyManager} with the
+   * registry, so that the the Ed25519-Keys can be used with Tink.
+   */
+  public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerAsymmetricKeyManagers(
+        new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), newKeyAllowed);
   }
 }

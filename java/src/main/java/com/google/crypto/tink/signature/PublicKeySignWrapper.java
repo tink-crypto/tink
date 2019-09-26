@@ -20,6 +20,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
@@ -31,7 +32,7 @@ import java.security.GeneralSecurityException;
  * uses the primary key in the keyset, and prepends to the signature a certain prefix associated
  * with the primary key.
  */
-class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
+public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
   private static class WrappedPublicKeySign implements PublicKeySign {
     private final PrimitiveSet<PublicKeySign> primitives;
 
@@ -53,6 +54,8 @@ class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
     }
   }
 
+  PublicKeySignWrapper() {}
+
   @Override
   public PublicKeySign wrap(final PrimitiveSet<PublicKeySign> primitives) {
     return new WrappedPublicKeySign(primitives);
@@ -61,5 +64,15 @@ class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
   @Override
   public Class<PublicKeySign> getPrimitiveClass() {
     return PublicKeySign.class;
+  }
+
+  /**
+   * Register the wrapper within the registry.
+   *
+   * <p>This is required for calls to {@link Keyset.getPrimitive} with a {@link PublicKeySign}
+   * argument.
+   */
+  public static void register() throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());
   }
 }

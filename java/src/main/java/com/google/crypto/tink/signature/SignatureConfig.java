@@ -86,19 +86,12 @@ public final class SignatureConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerAsymmetricKeyManagers(
-        new EcdsaSignKeyManager(), new EcdsaVerifyKeyManager(), true);
+    EcdsaSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
+    Ed25519PrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
+    RsaSsaPkcs1SignKeyManager.registerPair(/*newKeyAllowed=*/ true);
+    RsaSsaPssSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
 
-    Registry.registerAsymmetricKeyManagers(
-        new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), true);
-
-    Registry.registerAsymmetricKeyManagers(
-        new RsaSsaPkcs1SignKeyManager(), new RsaSsaPkcs1VerifyKeyManager(), true);
-
-    Registry.registerAsymmetricKeyManagers(
-        new RsaSsaPssSignKeyManager(), new RsaSsaPssVerifyKeyManager(), true);
-
-    Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());
-    Registry.registerPrimitiveWrapper(new PublicKeyVerifyWrapper());
+    PublicKeySignWrapper.register();
+    PublicKeyVerifyWrapper.register();
   }
 }

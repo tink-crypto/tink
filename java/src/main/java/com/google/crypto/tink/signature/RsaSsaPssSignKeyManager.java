@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
@@ -191,5 +192,14 @@ class RsaSsaPssSignKeyManager
             .build();
       }
     };
+  }
+
+  /**
+   * Registers the {@link RsaSsaPssSignKeyManager} and the {@link RsaSsaPssVerifyKeyManager}
+   * with the registry, so that the the RsaSsaPss-Keys can be used with Tink.
+   */
+  public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerAsymmetricKeyManagers(
+        new RsaSsaPssSignKeyManager(), new RsaSsaPssVerifyKeyManager(), newKeyAllowed);
   }
 }

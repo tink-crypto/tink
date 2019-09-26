@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -38,8 +39,8 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances of {@code
  * EcdsaSignJce}.
  */
-class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPublicKey> {
-  public EcdsaSignKeyManager() {
+public class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPublicKey> {
+  EcdsaSignKeyManager() {
     super(
         EcdsaPrivateKey.class,
         EcdsaPublicKey.class,
@@ -130,5 +131,14 @@ class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPu
             .build();
       }
     };
+  }
+
+  /**
+   * Registers the {@link EcdsaSignKeyManager} and the {@link EcdsaVerifyKeyManager} with the
+   * registry, so that the the Ecdsa-Keys can be used with Tink.
+   */
+  public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerAsymmetricKeyManagers(
+        new EcdsaSignKeyManager(), new EcdsaVerifyKeyManager(), newKeyAllowed);
   }
 }

@@ -20,6 +20,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
@@ -99,5 +100,15 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify> {
   @Override
   public Class<PublicKeyVerify> getPrimitiveClass() {
     return PublicKeyVerify.class;
+  }
+
+  /**
+   * Register the wrapper within the registry.
+   *
+   * <p>This is required for calls to {@link Keyset.getPrimitive} with a {@link PublicKeyVerify}
+   * argument.
+   */
+  public static void register() throws GeneralSecurityException {
+    Registry.registerPrimitiveWrapper(new PublicKeyVerifyWrapper());
   }
 }
