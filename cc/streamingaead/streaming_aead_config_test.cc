@@ -39,7 +39,6 @@ namespace {
 using ::crypto::tink::test::DummyStreamingAead;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::testing::Eq;
 
 class StreamingAeadConfigTest : public ::testing::Test {
  protected:

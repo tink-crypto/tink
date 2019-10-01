@@ -39,8 +39,6 @@ namespace {
 using crypto::tink::test::IsOk;
 using crypto::tink::test::StatusIs;
 using subtle::test::ReadFromStream;
-using testing::HasSubstr;
-
 
 static int kBufferSize = 4096;
 

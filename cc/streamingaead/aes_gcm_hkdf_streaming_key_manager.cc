@@ -30,7 +30,6 @@ using ::google::crypto::tink::AesGcmHkdfStreamingKey;
 using ::google::crypto::tink::AesGcmHkdfStreamingKeyFormat;
 using ::google::crypto::tink::AesGcmHkdfStreamingParams;
 using ::google::crypto::tink::HashType;
-using ::google::crypto::tink::KeyData;
 
 namespace {
 
