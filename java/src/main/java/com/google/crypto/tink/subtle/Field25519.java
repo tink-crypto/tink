@@ -213,6 +213,27 @@ final class Field25519 {
   }
 
   /**
+   * Reduce a field element by calling reduceSizeByModularReduction and reduceCoefficients.
+   *
+   * @param input An input array of any length. If the array has 19 elements, it will be used as
+   * temporary buffer and its contents changed.
+   * @param output An output array of size LIMB_CNT. After the call |output[i]| < 2^26 will hold.
+   *
+   */
+  static void reduce(long[] input, long[] output) {
+    long[] tmp;
+    if (input.length == 19) {
+      tmp = input;
+    } else {
+      tmp = new long[19];
+      System.arraycopy(input, 0, tmp, 0, input.length);
+    }
+    reduceSizeByModularReduction(tmp);
+    reduceCoefficients(tmp);
+    System.arraycopy(tmp, 0, output, 0, LIMB_CNT);
+  }
+
+  /**
    * Reduce a long form to a reduced-size form by taking the input mod 2^255 - 19.
    *
    * On entry: |output[i]| < 14*2^54
@@ -306,11 +327,8 @@ final class Field25519 {
   static void mult(long[] output, long[] in, long[] in2) {
     long[] t = new long[19];
     product(t, in, in2);
-    // |t[i]| < 14*2^54
-    reduceSizeByModularReduction(t);
-    reduceCoefficients(t);
     // |t[i]| < 2^26
-    System.arraycopy(t, 0, output, 0, LIMB_CNT);
+    reduce(t, output);
   }
 
   /**
@@ -363,10 +381,7 @@ final class Field25519 {
     squareInner(t, in);
     // |t[i]| < 14*2^54 because the largest product of two limbs will be < 2^(27+27) and SquareInner
     // adds together, at most, 14 of those products.
-    reduceSizeByModularReduction(t);
-    reduceCoefficients(t);
-    // |t[i]| < 2^26
-    System.arraycopy(t, 0, output, 0, LIMB_CNT);
+    reduce(t, output);
   }
 
   /**
