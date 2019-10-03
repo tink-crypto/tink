@@ -59,6 +59,12 @@ final class Ed25519 {
           new long[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
       new long[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0});
 
+  private static final ThreadLocal<WorkingBuffers> workingBuffersThreadLocal = new ThreadLocal<WorkingBuffers>() {
+    @Override protected WorkingBuffers initialValue() {
+      return new WorkingBuffers();
+    }
+  };
+
   /**
    * Projective point representation (X:Y:Z) satisfying x = X/Z, y = Y/Z
    *
@@ -382,7 +388,7 @@ final class Ed25519 {
    * @param cached cached projective point input
    */
   private static void add(PartialXYZT partialXYZT, XYZT extended, CachedXYT cached) {
-    long[] t = new long[LIMB_CNT];
+    long[] t = workingBuffersThreadLocal.get().longBuffer;
 
     // Y1 + X1
     Field25519.sum(partialXYZT.xyz.x, extended.xyz.y, extended.xyz.x);
@@ -429,7 +435,7 @@ final class Ed25519 {
    * @param cached cached projective point input
    */
   private static void sub(PartialXYZT partialXYZT, XYZT extended, CachedXYT cached) {
-    long[] t = new long[LIMB_CNT];
+    long[] t = workingBuffersThreadLocal.get().longBuffer;
 
     // Y1 + X1
     Field25519.sum(partialXYZT.xyz.x, extended.xyz.y, extended.xyz.x);
@@ -476,7 +482,7 @@ final class Ed25519 {
    * the paper, H should be replaced with A+B.
    */
   private static void doubleXYZ(PartialXYZT partialXYZT, XYZ p) {
-    long[] t0 = new long[LIMB_CNT];
+    long[] t0 = workingBuffersThreadLocal.get().longBuffer;
 
     // XX = X1^2
     Field25519.square(partialXYZT.xyz.x, p.x);
@@ -711,8 +717,11 @@ final class Ed25519 {
         break;
       }
     }
+
+    XYZ buf = new XYZ();
     for (; i >= 0; i--) {
-      doubleXYZ(t, new XYZ(t));
+      XYZ.fromPartialXYZT(buf, t);
+      doubleXYZ(t, buf);
       if (aSlide[i] > 0) {
         add(t, XYZT.fromPartialXYZT(u, t), pointAArray[aSlide[i] / 2]);
       } else if (aSlide[i] < 0) {
@@ -1612,5 +1621,9 @@ final class Ed25519 {
       }
     }
     return true;
+  }
+
+  static final private class WorkingBuffers {
+    long[] longBuffer = new long[LIMB_CNT];
   }
 }

@@ -65,6 +65,12 @@ final class Field25519 {
   private static final int[] MASK = {0x3ffffff, 0x1ffffff};
   private static final int[] SHIFT = {26, 25};
 
+  private static ThreadLocal<WorkingBuffers> workingBuffersThreadLocal = new ThreadLocal<WorkingBuffers>() {
+    @Override protected WorkingBuffers initialValue() {
+      return new WorkingBuffers();
+    }
+  };
+
   /**
    * Sums two numbers: output = in1 + in2
    *
@@ -325,7 +331,7 @@ final class Field25519 {
    * |output[i]| < 2^26.
    */
   static void mult(long[] output, long[] in, long[] in2) {
-    long[] t = new long[19];
+    long[] t = workingBuffersThreadLocal.get().longBuffer;
     product(t, in, in2);
     // |t[i]| < 2^26
     reduce(t, output);
@@ -377,7 +383,7 @@ final class Field25519 {
    * storage for 10 limbs) and |out[i]| < 2^26.
    */
   static void square(long[] output, long[] in) {
-    long[] t = new long[19];
+    long[] t = workingBuffersThreadLocal.get().longBuffer;
     squareInner(t, in);
     // |t[i]| < 14*2^54 because the largest product of two limbs will be < 2^(27+27) and SquareInner
     // adds together, at most, 14 of those products.
@@ -608,5 +614,9 @@ final class Field25519 {
     a -= b;
     // a >= 0 iff a >= b.
     return ~(a >> 31);
+  }
+
+  static final private class WorkingBuffers {
+    long[] longBuffer = new long[19];
   }
 }
