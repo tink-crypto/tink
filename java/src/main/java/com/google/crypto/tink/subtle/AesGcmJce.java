@@ -31,6 +31,17 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.0.0
  */
 public final class AesGcmJce implements Aead {
+  private static final ThreadLocal<Cipher> localCipher =
+      new ThreadLocal<Cipher>() {
+        @Override
+        protected Cipher initialValue() {
+          try {
+            return EngineFactory.CIPHER.getInstance("AES/GCM/NoPadding");
+          } catch (GeneralSecurityException ex) {
+            throw new IllegalStateException(ex);
+          }
+        }
+      };
 
   // All instances of this class use a 12 byte IV and a 16 byte tag.
   private static final int IV_SIZE_IN_BYTES = 12;
@@ -41,10 +52,6 @@ public final class AesGcmJce implements Aead {
   public AesGcmJce(final byte[] key) throws GeneralSecurityException {
     Validators.validateAesKeySize(key.length);
     keySpec = new SecretKeySpec(key, "AES");
-  }
-
-  private static Cipher instance() throws GeneralSecurityException {
-    return EngineFactory.CIPHER.getInstance("AES/GCM/NoPadding");
   }
 
   @Override
@@ -62,13 +69,13 @@ public final class AesGcmJce implements Aead {
     byte[] iv = Random.randBytes(IV_SIZE_IN_BYTES);
     System.arraycopy(iv, 0, ciphertext, 0, IV_SIZE_IN_BYTES);
 
-    Cipher cipher = instance();
     AlgorithmParameterSpec params = getParams(iv);
-    cipher.init(Cipher.ENCRYPT_MODE, keySpec, params);
+    localCipher.get().init(Cipher.ENCRYPT_MODE, keySpec, params);
     if (associatedData != null && associatedData.length != 0) {
-      cipher.updateAAD(associatedData);
+      localCipher.get().updateAAD(associatedData);
     }
-    int written = cipher.doFinal(plaintext, 0, plaintext.length, ciphertext, IV_SIZE_IN_BYTES);
+    int written =
+        localCipher.get().doFinal(plaintext, 0, plaintext.length, ciphertext, IV_SIZE_IN_BYTES);
     // For security reasons, AES-GCM encryption must always use tag of TAG_SIZE_IN_BYTES bytes. If
     // so, written must be equal to plaintext.length + TAG_SIZE_IN_BYTES.
 
@@ -95,12 +102,13 @@ public final class AesGcmJce implements Aead {
     }
 
     AlgorithmParameterSpec params = getParams(ciphertext, 0, IV_SIZE_IN_BYTES);
-    Cipher cipher = instance();
-    cipher.init(Cipher.DECRYPT_MODE, keySpec, params);
+    localCipher.get().init(Cipher.DECRYPT_MODE, keySpec, params);
     if (associatedData != null && associatedData.length != 0) {
-      cipher.updateAAD(associatedData);
+      localCipher.get().updateAAD(associatedData);
     }
-    return cipher.doFinal(ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
+    return localCipher
+        .get()
+        .doFinal(ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
   }
 
   private static AlgorithmParameterSpec getParams(final byte[] iv) throws GeneralSecurityException {
