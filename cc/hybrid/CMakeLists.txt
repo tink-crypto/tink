@@ -116,6 +116,7 @@ tink_cc_library(
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
+    tink::proto::xchacha20_poly1305_cc_proto
     absl::memory
 )
 
@@ -303,7 +304,9 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_hybrid_decrypt
     tink::hybrid::ecies_aead_hkdf_hybrid_encrypt
     tink::core::hybrid_decrypt
+    tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
+    tink::aead::xchacha20_poly1305_key_manager
     tink::subtle::random
     tink::subtle::subtle_util_boringssl
     tink::util::enums

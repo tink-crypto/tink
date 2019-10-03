@@ -31,6 +31,7 @@ TEST(EcUtilTest, testFieldSizeInBytes) {
   EXPECT_EQ(384/8, EcUtil::FieldSizeInBytes(EllipticCurveType::NIST_P384));
   EXPECT_EQ((521 + 7)/8,
             EcUtil::FieldSizeInBytes(EllipticCurveType::NIST_P521));
+  EXPECT_EQ((256) / 8, EcUtil::FieldSizeInBytes(EllipticCurveType::CURVE25519));
 
   EXPECT_EQ(0, EcUtil::FieldSizeInBytes(EllipticCurveType::UNKNOWN_CURVE));
 }
@@ -60,6 +61,10 @@ TEST(EcUtilTest, testEncodingSizeInBytes) {
             EcUtil::EncodingSizeInBytes(EllipticCurveType::NIST_P521,
                                         EcPointFormat::COMPRESSED)
             .ValueOrDie());
+  EXPECT_EQ((256) / 8,
+            EcUtil::EncodingSizeInBytes(EllipticCurveType::CURVE25519,
+                                        EcPointFormat::COMPRESSED)
+                .ValueOrDie());
 
   EXPECT_FALSE(EcUtil::EncodingSizeInBytes(EllipticCurveType::NIST_P256,
                                            EcPointFormat::UNKNOWN_FORMAT).ok());

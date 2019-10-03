@@ -32,6 +32,9 @@ namespace subtle {
 
 // static
 uint32_t EcUtil::FieldSizeInBytes(EllipticCurveType curve_type) {
+  if (curve_type == EllipticCurveType::CURVE25519) {
+    return 32;
+  }
   auto ec_group_result = SubtleUtilBoringSSL::GetEcGroup(curve_type);
   if (!ec_group_result.ok()) return 0;
   bssl::UniquePtr<EC_GROUP> ec_group(ec_group_result.ValueOrDie());
@@ -42,6 +45,9 @@ uint32_t EcUtil::FieldSizeInBytes(EllipticCurveType curve_type) {
 crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
     EllipticCurveType curve_type, EcPointFormat point_format) {
   int coordinate_size = FieldSizeInBytes(curve_type);
+  if (curve_type == EllipticCurveType::CURVE25519) {
+    return coordinate_size;
+  }
   if (coordinate_size == 0) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Unsupported elliptic curve type: %s",

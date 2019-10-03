@@ -51,6 +51,7 @@ class EciesAeadHkdfDemHelper {
     UNKNOWN_KEY = 0,
     AES_GCM_KEY,
     AES_CTR_HMAC_AEAD_KEY,
+    XCHACHA20_POLY1305_KEY,
   };
 
   EciesAeadHkdfDemHelper(

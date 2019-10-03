@@ -83,6 +83,42 @@ class HybridKeyTemplates {
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate&
   EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256();
+
+  // Returns a KeyTemplate that generates new instances of
+  // EciesAeadHkdfPrivateKey with the following parameters:
+  //   - KEM: ECDH over curve 25519
+  //   - DEM: AES128-GCM
+  //   - KDF: HKDF-HMAC-SHA256 with an empty salt
+  //   - EC Point Format: Compressed
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate&
+  EciesX25519HkdfHmacSha256Aes128Gcm();
+
+  // Returns a KeyTemplate that generates new instances of
+  // EciesAeadHkdfPrivateKey with the following parameters:
+  //   - KEM: ECDH over curve 25519
+  //   - DEM: AES128-CTR-HMAC-SHA256 with the following parameters:
+  //          * AES key size: 16 bytes
+  //          * AES CTR IV size: 16 bytes
+  //          * HMAC key size: 32 bytes
+  //          * HMAC tag size: 16 bytes
+  //   - KDF: HKDF-HMAC-SHA256 with an empty salt
+  //   - EC Point Format: Compressed
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate&
+  EciesX25519HkdfHmacSha256Aes128CtrHmacSha256();
+
+  // Returns a KeyTemplate that generates new instances of
+  // EciesAeadHkdfPrivateKey with the following parameters:
+  //   - KEM: ECDH over curve 25519
+  //   - DEM: XChaCha20-Poly1305 with the following parameters:
+  //          * XChaCha20 key size: 32 bytes
+  //          * IV size: 24 bytes
+  //   - KDF: HKDF-HMAC-SHA256 with an empty salt
+  //   - EC Point Format: Compressed
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate&
+  EciesX25519HkdfHmacSha256XChaCha20Poly1305();
 };
 
 }  // namespace tink

@@ -100,5 +100,34 @@ HybridKeyTemplates::EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256() {
   return *key_template;
 }
 
+// static
+const KeyTemplate& HybridKeyTemplates::EciesX25519HkdfHmacSha256Aes128Gcm() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::CURVE25519, HashType::SHA256,
+      EcPointFormat::COMPRESSED, AeadKeyTemplates::Aes128Gcm(),
+      /* hkdf_salt= */ "");
+  return *key_template;
+}
+
+// static
+const KeyTemplate&
+HybridKeyTemplates::EciesX25519HkdfHmacSha256Aes128CtrHmacSha256() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::CURVE25519, HashType::SHA256,
+      EcPointFormat::COMPRESSED, AeadKeyTemplates::Aes128CtrHmacSha256(),
+      /* hkdf_salt= */ "");
+  return *key_template;
+}
+
+// static
+const KeyTemplate&
+HybridKeyTemplates::EciesX25519HkdfHmacSha256XChaCha20Poly1305() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::CURVE25519, HashType::SHA256,
+      EcPointFormat::COMPRESSED, AeadKeyTemplates::XChaCha20Poly1305(),
+      /* hkdf_salt= */ "");
+  return *key_template;
+}
+
 }  // namespace tink
 }  // namespace crypto

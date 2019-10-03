@@ -25,6 +25,7 @@
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
+#include "proto/xchacha20_poly1305.pb.h"
 
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
@@ -33,7 +34,8 @@ using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyTemplate;
-
+using google::crypto::tink::XChaCha20Poly1305Key;
+using google::crypto::tink::XChaCha20Poly1305KeyFormat;
 
 namespace crypto {
 namespace tink {
@@ -63,6 +65,15 @@ StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>> EciesAeadHkdfDemHelper::New(
         key_format.aes_ctr_key_format().key_size();
     helper->dem_key_size_in_bytes_ = helper->aes_ctr_key_size_in_bytes_ +
                                      key_format.hmac_key_format().key_size();
+  } else if (dem_type_url ==
+             "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key") {
+    helper->dem_key_type_ = XCHACHA20_POLY1305_KEY;
+    XChaCha20Poly1305KeyFormat key_format;
+    if (!key_format.ParseFromString(dem_key_template.value())) {
+      return Status(util::error::INVALID_ARGUMENT,
+                    "Invalid XChaCha20Poly1305 in DEM key template");
+    }
+    helper->dem_key_size_in_bytes_ = 32;
   } else {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Unsupported DEM key type '%s'.", dem_type_url.c_str());
@@ -106,6 +117,10 @@ bool EciesAeadHkdfDemHelper::ReplaceKeyBytes(
     hmac_key->set_key_value(
         key_bytes.substr(aes_ctr_key_size_in_bytes_,
                          key_bytes.size() - aes_ctr_key_size_in_bytes_));
+    return true;
+  } else if (dem_key_type_ == XCHACHA20_POLY1305_KEY) {
+    XChaCha20Poly1305Key* key = static_cast<XChaCha20Poly1305Key*>(proto);
+    key->set_key_value(key_bytes);
     return true;
   }
   return false;

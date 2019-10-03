@@ -28,10 +28,10 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::EciesAeadHkdfPublicKey;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-
+using google::crypto::tink::EciesAeadHkdfPublicKey;
+using google::crypto::tink::EllipticCurveType;
 
 namespace crypto {
 namespace tink {
@@ -90,10 +90,24 @@ StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
 
 // static
 Status EciesAeadHkdfHybridEncrypt::Validate(const EciesAeadHkdfPublicKey& key) {
-  if (key.x().empty() || key.y().empty() || !key.has_params()) {
-      return Status(util::error::INVALID_ARGUMENT,
-          "Invalid EciesAeadHkdfPublicKey: missing required fields.");
+  if (key.x().empty() || !key.has_params()) {
+    return Status(util::error::INVALID_ARGUMENT,
+                  "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
+
+  if (key.params().has_kem_params() &&
+      key.params().kem_params().curve_type() == EllipticCurveType::CURVE25519) {
+    if (!key.y().empty()) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "Invalid EciesAeadHkdfPublicKey: has unexpected field.");
+    }
+  } else if (key.y().empty()) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "Invalid EciesAeadHkdfPublicKey: missing required fields.");
+  }
+
   return Status::OK;
 }
 

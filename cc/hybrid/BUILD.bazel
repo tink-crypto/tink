@@ -134,6 +134,7 @@ cc_library(
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
+        "//proto:xchacha20_poly1305_cc_proto",
         "@com_google_absl//absl/memory",
     ],
 )
@@ -366,7 +367,9 @@ cc_test(
         ":ecies_aead_hkdf_hybrid_decrypt",
         ":ecies_aead_hkdf_hybrid_encrypt",
         "//cc:hybrid_decrypt",
+        "//cc/aead:aes_ctr_hmac_aead_key_manager",
         "//cc/aead:aes_gcm_key_manager",
+        "//cc/aead:xchacha20_poly1305_key_manager",
         "//cc/subtle:random",
         "//cc/subtle:subtle_util_boringssl",
         "//cc/util:enums",
