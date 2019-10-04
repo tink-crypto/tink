@@ -136,9 +136,8 @@ If you want to contribute, please read [CONTRIBUTING](docs/CONTRIBUTING.md)
 and send us pull requests. You can also report bugs or file feature requests.
 
 If you'd like to talk to the developers or get notified about major product
-updates, you may want to subscribe to our [mailing
-list](https://groups.google.com/forum/#!forum/tink-users). To join, simply send
-an empty email to tink-users+subscribe@googlegroups.com.
+updates, you may want to subscribe to our
+[mailing list](https://groups.google.com/forum/#!forum/tink-users).
 
 ## Maintainers
 
