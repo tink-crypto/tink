@@ -32,6 +32,18 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.0.0
  */
 public final class AesCtrJceCipher implements IndCpaCipher {
+  private static final ThreadLocal<Cipher> localCipher =
+      new ThreadLocal<Cipher>() {
+        @Override
+        protected Cipher initialValue() {
+          try {
+            return EngineFactory.CIPHER.getInstance(CIPHER_ALGORITHM);
+          } catch (GeneralSecurityException ex) {
+            throw new IllegalStateException(ex);
+          }
+        }
+      };
+
   private static final String KEY_ALGORITHM = "AES";
   private static final String CIPHER_ALGORITHM = "AES/CTR/NoPadding";
 
@@ -51,7 +63,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
   public AesCtrJceCipher(final byte[] key, int ivSize) throws GeneralSecurityException {
     Validators.validateAesKeySize(key.length);
     this.keySpec = new SecretKeySpec(key, KEY_ALGORITHM);
-    this.blockSize = EngineFactory.CIPHER.getInstance(CIPHER_ALGORITHM).getBlockSize();
+    this.blockSize = localCipher.get().getBlockSize();
     if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > blockSize) {
       throw new GeneralSecurityException("invalid IV size");
     }
@@ -82,7 +94,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
    * Decrypts the ciphertext with counter mode decryption. The ciphertext format is iv || raw
    * ciphertext.
    *
-   * @param ciphetext the ciphertext to be decrypted.
+   * @param ciphertext the ciphertext to be decrypted.
    * @return the decrypted plaintext.
    */
   @Override
@@ -106,7 +118,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
       final byte[] iv,
       boolean encrypt)
       throws GeneralSecurityException {
-    Cipher cipher = EngineFactory.CIPHER.getInstance(CIPHER_ALGORITHM);
+    Cipher cipher = localCipher.get();
     // The counter is big-endian. The counter is composed of iv and (blockSize - ivSize) of zeros.
     byte[] counter = new byte[blockSize];
     System.arraycopy(iv, 0, counter, 0, ivSize);

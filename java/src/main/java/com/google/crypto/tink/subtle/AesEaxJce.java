@@ -48,6 +48,30 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.0.0
  */
 public final class AesEaxJce implements Aead {
+  private static final ThreadLocal<Cipher> localEcbCipher =
+      new ThreadLocal<Cipher>() {
+        @Override
+        protected Cipher initialValue() {
+          try {
+            return EngineFactory.CIPHER.getInstance("AES/ECB/NOPADDING");
+          } catch (GeneralSecurityException ex) {
+            throw new IllegalStateException(ex);
+          }
+        }
+      };
+
+  private static final ThreadLocal<Cipher> localCtrCipher =
+      new ThreadLocal<Cipher>() {
+        @Override
+        protected Cipher initialValue() {
+          try {
+            return EngineFactory.CIPHER.getInstance("AES/CTR/NOPADDING");
+          } catch (GeneralSecurityException ex) {
+            throw new IllegalStateException(ex);
+          }
+        }
+      };
+
   static final int BLOCK_SIZE_IN_BYTES = 16;
   static final int TAG_SIZE_IN_BYTES = 16;
 
@@ -66,7 +90,7 @@ public final class AesEaxJce implements Aead {
     this.ivSizeInBytes = ivSizeInBytes;
     Validators.validateAesKeySize(key.length);
     keySpec = new SecretKeySpec(key, "AES");
-    Cipher ecb = Cipher.getInstance("AES/ECB/NOPADDING");
+    Cipher ecb = localEcbCipher.get();
     ecb.init(Cipher.ENCRYPT_MODE, keySpec);
     byte[] block = ecb.doFinal(new byte[BLOCK_SIZE_IN_BYTES]);
     b = multiplyByX(block);
@@ -169,7 +193,7 @@ public final class AesEaxJce implements Aead {
     byte[] iv = Random.randBytes(ivSizeInBytes);
     System.arraycopy(iv, 0, ciphertext, 0, ivSizeInBytes);
 
-    Cipher ecb = Cipher.getInstance("AES/ECB/NOPADDING");
+    Cipher ecb = localEcbCipher.get();
     ecb.init(Cipher.ENCRYPT_MODE, keySpec);
     byte[] n = omac(ecb, 0, iv, 0, iv.length);
     byte[] aad = associatedData;
@@ -177,7 +201,7 @@ public final class AesEaxJce implements Aead {
       aad = new byte[0];
     }
     byte[] h = omac(ecb, 1, aad, 0, aad.length);
-    Cipher ctr = Cipher.getInstance("AES/CTR/NOPADDING");
+    Cipher ctr = localCtrCipher.get();
     ctr.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(n));
     ctr.doFinal(plaintext, 0, plaintext.length, ciphertext, ivSizeInBytes);
     byte[] t = omac(ecb, 2, ciphertext, ivSizeInBytes, plaintext.length);
@@ -196,7 +220,7 @@ public final class AesEaxJce implements Aead {
     if (plaintextLength < 0) {
       throw new GeneralSecurityException("ciphertext too short");
     }
-    Cipher ecb = Cipher.getInstance("AES/ECB/NOPADDING");
+    Cipher ecb = localEcbCipher.get();
     ecb.init(Cipher.ENCRYPT_MODE, keySpec);
     byte[] n = omac(ecb, 0, ciphertext, 0, ivSizeInBytes);
     byte[] aad = associatedData;
@@ -213,7 +237,7 @@ public final class AesEaxJce implements Aead {
     if (res != 0) {
       throw new AEADBadTagException("tag mismatch");
     }
-    Cipher ctr = Cipher.getInstance("AES/CTR/NOPADDING");
+    Cipher ctr = localCtrCipher.get();
     ctr.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(n));
     return ctr.doFinal(ciphertext, ivSizeInBytes, plaintextLength);
   }
