@@ -6,9 +6,9 @@ AdMob Rewarded Ads.
 ## Latest Release
 
 The most recent release is
-[1.3.0-rc2](https://github.com/google/tink/releases/tag/v1.3.0-rc2), released
-2019-09-25. API docs can be found
-[here](https://google.github.com/tink/javadoc/apps-rewardedads/1.3.0-rc2).
+[1.3.0-rc1](https://github.com/google/tink/releases/tag/v1.3.0-rc1), released
+2019-07-01. API docs can be found
+[here](https://google.github.com/tink/javadoc/apps-rewardedads/1.3.0-rc1).
 
 The Maven group ID is `com.google.crypto.tink`, and the artifact ID is
 `apps-rewardedads`.
@@ -19,7 +19,7 @@ To add a dependency using Maven:
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>apps-rewardedads</artifactId>
-  <version>1.3.0-rc2</version>
+  <version>1.3.0-rc1</version>
 </dependency>
 ```
 
