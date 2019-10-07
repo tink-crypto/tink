@@ -20,13 +20,19 @@ from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
+
+# Special imports
+import six
+
 from typing import Generic, Type, TypeVar
 
 from tink.python.core import primitive_set
 
+
 P = TypeVar('P')
 
 
+@six.add_metaclass(abc.ABCMeta)
 class PrimitiveWrapper(Generic[P]):
   """Basic interface for wrapping a primitive.
 
@@ -35,8 +41,6 @@ class PrimitiveWrapper(Generic[P]):
   primitive type is added to Tink, the user should define a new PrimitiveWrapper
   and register it by calling registry.registerPrimitiveWrapper().
   """
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def wrap(self, pset: primitive_set.PrimitiveSet) -> P:

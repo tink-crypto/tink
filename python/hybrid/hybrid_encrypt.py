@@ -21,7 +21,11 @@ from __future__ import print_function
 
 import abc
 
+# Special imports
+import six
 
+
+@six.add_metaclass(abc.ABCMeta)
 class HybridEncrypt(object):
   """The interface for hybrid encryption.
 
@@ -53,8 +57,6 @@ class HybridEncrypt(object):
   - use 'context_info' as "CtxInfo"-input for HKDF (if the implementation uses
     HKDF as key derivation function, cf. https://tools.ietf.org/html/rfc5869).
   """
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:

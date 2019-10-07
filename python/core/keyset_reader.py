@@ -20,6 +20,8 @@ from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
+# Special imports
+import six
 
 from typing import Text
 
@@ -29,10 +31,9 @@ from google.protobuf import json_format
 from google.protobuf import message
 
 
+@six.add_metaclass(abc.ABCMeta)
 class KeysetReader(object):
   """Reads a Keyset."""
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def read(self) -> tink_pb2.Keyset:

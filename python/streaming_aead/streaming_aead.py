@@ -17,9 +17,14 @@ from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
+
+# Special imports
+import six
+
 from typing import BinaryIO
 
 
+@six.add_metaclass(abc.ABCMeta)
 class StreamingAead(object):
   """The interface for streaming authenticated encryption with associated data.
 
@@ -29,8 +34,6 @@ class StreamingAead(object):
   so that partial plaintext can be obtained fast by decrypting and
   authenticating just a part of the ciphertext.
   """
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def new_encrypting_stream(self, ciphertext_destination: BinaryIO,

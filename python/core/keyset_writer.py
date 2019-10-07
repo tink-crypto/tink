@@ -22,15 +22,17 @@ from __future__ import print_function
 import abc
 import io
 
+# Special imports
+import six
+
 from google.protobuf import json_format
 from tink.proto import tink_pb2
 from tink.python.core import tink_error
 
 
+@six.add_metaclass(abc.ABCMeta)
 class KeysetWriter(object):
   """Knows how to write keysets to some storage system."""
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def write(self, keyset: tink_pb2.Keyset) -> None:

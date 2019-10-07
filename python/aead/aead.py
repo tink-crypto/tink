@@ -21,7 +21,11 @@ from __future__ import print_function
 
 import abc
 
+# Special imports
+import six
 
+
+@six.add_metaclass(abc.ABCMeta)
 class Aead(object):
   """The interface for authenticated encryption with associated data.
 
@@ -30,8 +34,6 @@ class Aead(object):
   authenticity and integrity of that data, but not its secrecy.
   (see RFC 5116, https://tools.ietf.org/html/rfc5116)
   """
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:

@@ -21,7 +21,11 @@ from __future__ import print_function
 
 import abc
 
+# Special imports
+import six
 
+
+@six.add_metaclass(abc.ABCMeta)
 class DeterministicAead(object):
   """Interface for Deterministic Authenticated Encryption with Associated Data.
 
@@ -45,8 +49,6 @@ class DeterministicAead(object):
   and integrity (the data has not been tampered with) of that data, but not
   its secrecy. (see https://tools.ietf.org/html/rfc5116)
   """
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def encrypt_deterministically(self, plaintext: bytes,
