@@ -152,7 +152,8 @@ public class RegistryTest {
       Aead unused = wrongType.getPrimitive(hmacKey);
       fail("Expected ClassCastException");
     } catch (ClassCastException e) {
-      assertExceptionContains(e, "MacJce cannot be cast to com.google.crypto.tink.Aead");
+      assertExceptionContains(e, "com.google.crypto.tink.Aead");
+      assertExceptionContains(e, "com.google.crypto.tink.subtle.MacJce");
     }
   }
 
