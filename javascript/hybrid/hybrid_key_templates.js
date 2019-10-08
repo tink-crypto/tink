@@ -142,5 +142,11 @@ const createEciesAeadHkdfParams_ = function(
   return params;
 };
 
+goog.exportProperty(
+    HybridKeyTemplates, 'eciesP256HkdfHmacSha256Aes128Gcm',
+    HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm);
+goog.exportProperty(
+    HybridKeyTemplates, 'eciesP256HkdfHmacSha256Aes128CtrHmacSha256',
+    HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128CtrHmacSha256);
 goog.exportSymbol('tink.hybrid.HybridKeyTemplates', HybridKeyTemplates);
 exports = HybridKeyTemplates;
