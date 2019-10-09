@@ -71,5 +71,4 @@ class HybridEncrypt {
   encrypt(plaintext, opt_contextInfo) {}
 }
 
-goog.exportSymbol('tink.HybridEncrypt', HybridEncrypt);
 exports = HybridEncrypt;

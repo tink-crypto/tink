@@ -12,11 +12,26 @@ closure_js_library(
     name = "hybrid",
     exports = [
         ":ecies_aead_hkdf_key_managers",
+        ":exports",
         ":hybrid_config",
         ":hybrid_key_templates",
         ":hybrid_wrappers",
         ":registry_ecies_aead_hkdf_dem_helper",
         ":util_and_validators",
+    ],
+)
+
+closure_js_library(
+    name = "exports",
+    srcs = [
+        "exports.js",
+    ],
+    deps = [
+        ":hybrid_config",
+        ":hybrid_key_templates",
+        ":hybrid_wrappers",
+        ":registry_ecies_aead_hkdf_dem_helper",
+        "@io_bazel_rules_closure//closure/library",
     ],
 )
 

@@ -18,6 +18,22 @@ closure_js_library(
         ":aes_ctr_hmac_aead_key_templates",
         ":aes_gcm_key_manager",
         ":aes_gcm_key_templates",
+        ":exports",
+    ],
+)
+
+closure_js_library(
+    name = "exports",
+    srcs = [
+        "exports.js",
+    ],
+    deps = [
+        ":aead_config",
+        ":aead_key_templates",
+        ":aead_wrapper",
+        ":aes_ctr_hmac_aead_key_manager",
+        ":aes_gcm_key_manager",
+        "@io_bazel_rules_closure//closure/library",
     ],
 )
 

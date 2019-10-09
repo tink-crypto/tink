@@ -53,5 +53,4 @@ AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.KEY_TYPE;
 /** @const {string} */
 AeadConfig.AES_GCM_TYPE_URL = AesGcmKeyManager.KEY_TYPE;
 
-goog.exportSymbol('tink.aead.AeadConfig', AeadConfig);
 exports = AeadConfig;

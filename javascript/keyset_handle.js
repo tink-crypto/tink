@@ -229,5 +229,4 @@ class KeysetHandle {
   }
 }
 
-goog.exportSymbol('tink.KeysetHandle', KeysetHandle);
 exports = KeysetHandle;

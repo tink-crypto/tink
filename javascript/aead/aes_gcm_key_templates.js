@@ -89,12 +89,4 @@ class AesGcmKeyTemplates {
   }
 }
 
-goog.exportProperty(
-    AesGcmKeyTemplates, 'aes128Gcm', AesGcmKeyTemplates.aes128Gcm);
-goog.exportProperty(
-    AesGcmKeyTemplates, 'aes256Gcm', AesGcmKeyTemplates.aes256Gcm);
-goog.exportProperty(
-    AesGcmKeyTemplates, 'aes256GcmNoPrefix',
-    AesGcmKeyTemplates.aes256GcmNoPrefix);
-goog.exportSymbol('tink.aead.AesGcmKeyTemplates', AesGcmKeyTemplates);
 exports = AesGcmKeyTemplates;

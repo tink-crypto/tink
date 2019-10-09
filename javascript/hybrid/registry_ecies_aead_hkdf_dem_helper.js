@@ -184,5 +184,4 @@ class RegistryEciesAeadHkdfDemHelper {
   }
 }
 
-goog.exportSymbol('tink.hybrid.RegistryEciesAeadHkdfDemHelper', RegistryEciesAeadHkdfDemHelper);
 exports = RegistryEciesAeadHkdfDemHelper;
