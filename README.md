@@ -45,8 +45,8 @@ and play with the [`hello world
 examples`](https://github.com/google/tink/tree/master/examples/helloworld).
 
 Tink performs cryptographic tasks via so-called [primitives](docs/PRIMITIVES.md),
-each of which is defined via a corresponding interface that specifies the
-functionality of the primitive. For example, _symmetric key encryption_ is
+each of which is defined via a corresponding interface that specifies
+the functionality of the primitive. For example, _symmetric key encryption_ is
 offered via an [_AEAD-primitive_ (Authenticated Encryption with Associated
 Data)](docs/PRIMITIVES.md#authenticated-encryption-with-associated-data), that
 supports two operations:
@@ -120,7 +120,7 @@ AEAD primitive in Java:
 
 ## Community-driven ports
 
-Out of the box Tink supports a wide range of languages, but it still doesn't
+Out of the box, Tink supports a wide range of languages, but it still doesn't
 support every language. Fortunately, some users like Tink so much that they've
 ported it to their favorite languages! Below you can find notable ports.
 
