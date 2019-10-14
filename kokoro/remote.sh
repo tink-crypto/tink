@@ -21,6 +21,10 @@ set -e
 # Display commands to stderr.
 set -x
 
+# TODO(b/131821833): Re-enable the tests once they work with the newest bazel
+# or we can run them with an older bazel version on RBE.
+exit 0
+
 # Change to repo root
 cd git*/tink
 
