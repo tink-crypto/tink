@@ -1,6 +1,6 @@
---- google/cloud/kms/v1/BUILD.bazel 2019-10-11 02:11:13.000000000 +0200
-+++ google/cloud/kms/v1/BUILD.bazel.2 2019-10-15 11:31:30.717369554 +0200
-@@ -155,3 +155,25 @@
+--- google/cloud/kms/v1/BUILD.bazel
++++ google/cloud/kms/v1/BUILD.bazel
+@@ -155,3 +155,24 @@
          ":kms_go_proto",
      ],
  )
@@ -22,7 +22,6 @@
 +cc_grpc_library(
 +    name = "kms_cc_grpc",
 +    srcs = [":kms_proto"],
-+    generate_mocks = True,
 +    grpc_only = True,
 +    deps = [":kms_cc_proto"],
 +)
