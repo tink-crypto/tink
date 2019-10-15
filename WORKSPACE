@@ -3,6 +3,16 @@ workspace(name="tink")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 #-----------------------------------------------------------------------------
+# Basic rules we need to add to bazel.
+#-----------------------------------------------------------------------------
+http_archive(
+    name = "rules_python",
+    strip_prefix = "rules_python-5aa465d5d91f1d9d90cac10624e3d2faf2057bd5/",
+    url = "https://github.com/bazelbuild/rules_python/archive/5aa465d5d91f1d9d90cac10624e3d2faf2057bd5.zip",
+    sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
+)
+
+#-----------------------------------------------------------------------------
 # Google PKI certs for connecting to GCP KMS
 #-----------------------------------------------------------------------------
 
@@ -71,21 +81,20 @@ http_archive(
 )
 
 
-# Needed by googleapis.
-http_archive(
-    name = "com_google_api_codegen",
-    urls = ["https://github.com/googleapis/gapic-generator/archive/96c3c5a4c8397d4bd29a6abce861547a271383e1.zip"],
-    strip_prefix = "gapic-generator-96c3c5a4c8397d4bd29a6abce861547a271383e1",
-)
-
 # Needed for Cloud KMS API via gRPC.
 http_archive(
     name = "googleapis",
     urls = [
-        "https://github.com/googleapis/googleapis/archive/43a324913190da118e1c3c1a89ef6cfc47c5caf3.zip",
+        "https://github.com/googleapis/googleapis/archive/192d3d8221175f7cc0aa8eeac1d820f47c53da7f.zip",
     ],
-    sha256 = "d1860c5e806c0cf04d6d0806ab6f43f27c9d9a47cd76429f49f8a37750effccf",
-    strip_prefix = "googleapis-43a324913190da118e1c3c1a89ef6cfc47c5caf3",
+    sha256 = "6b5a017082eade41c7efcc4d2f441422e41c0a0c57dd88e19d3ebfb1b8ff4f12",
+    strip_prefix = "googleapis-192d3d8221175f7cc0aa8eeac1d820f47c53da7f",
+)
+
+load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language(
+    name = "com_google_googleapis_imports",
 )
 
 # gRPC.
@@ -149,9 +158,9 @@ protobuf_deps()
 # runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_javalite",
-    strip_prefix = "protobuf-384989534b2246d413dbcd750744faab2607b516",
-    urls = ["https://github.com/google/protobuf/archive/384989534b2246d413dbcd750744faab2607b516.zip"],
-    sha256 = "79d102c61e2a479a0b7e5fc167bcfaa4832a0c6aad4a75fa7da0480564931bcc",
+    strip_prefix = "protobuf-7b64714af67aa967dcf941df61fe5207975966be",
+    urls = ["https://github.com/google/protobuf/archive/7b64714af67aa967dcf941df61fe5207975966be.zip"],
+    sha256 = "311b29b8d0803ab4f89be22ff365266abb6c48fd3483d59b04772a144d7a24a1",
 )
 
 # Needed by gRPC, to build pb.h/pb.cc files from protos that contain services.
