@@ -2,15 +2,6 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])
 
-load("@build_stack_rules_proto//cpp:cpp_grpc_library.bzl", "cpp_grpc_library")
-
-cpp_grpc_library(
-    name = "gcp_kms_service_proto",
-    deps = [
-        "@googleapis//google/cloud/kms/v1:kms_proto",
-    ],
-)
-
 cc_library(
     name = "gcp_kms_aead",
     srcs = ["gcp_kms_aead.cc"],
@@ -18,7 +9,7 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
-        ":gcp_kms_service_proto",
+        "@googleapis//google/cloud/kms/v1:kms_cc_grpc",
         "//cc:aead",
         "//cc/util:errors",
         "//cc/util:status",

@@ -89,12 +89,15 @@ http_archive(
     ],
     sha256 = "6b5a017082eade41c7efcc4d2f441422e41c0a0c57dd88e19d3ebfb1b8ff4f12",
     strip_prefix = "googleapis-192d3d8221175f7cc0aa8eeac1d820f47c53da7f",
+    patches = ["@//third_party:googleapis.patch"],
 )
 
 load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")
 
 switched_rules_by_language(
     name = "com_google_googleapis_imports",
+    cc = True,
+    grpc = True,
 )
 
 # gRPC.
@@ -162,19 +165,6 @@ http_archive(
     urls = ["https://github.com/google/protobuf/archive/7b64714af67aa967dcf941df61fe5207975966be.zip"],
     sha256 = "311b29b8d0803ab4f89be22ff365266abb6c48fd3483d59b04772a144d7a24a1",
 )
-
-# Needed by gRPC, to build pb.h/pb.cc files from protos that contain services.
-http_archive(
-    name = "build_stack_rules_proto",
-    strip_prefix = "rules_proto-f5d6eea6a4528bef3c1d3a44d486b51a214d61c2",
-    urls = [
-        "https://github.com/stackb/rules_proto/archive/f5d6eea6a4528bef3c1d3a44d486b51a214d61c2.tar.gz",
-    ],
-    sha256 = "128c4486b1707db917411c6e448849dd76ea3b8ba704f9e0627d9b01f2ee45fe",
-)
-
-load("@build_stack_rules_proto//cpp:deps.bzl", "cpp_grpc_library")
-cpp_grpc_library()
 
 #-----------------------------------------------------------------------------
 # java
