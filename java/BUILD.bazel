@@ -161,13 +161,11 @@ load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
     name = "tink",
-    doctitle = "Tink Cryptography API",
     deps = full_proto_deps + java_deps + cleartext_deps + subtle_deps,
 )
 
 gen_maven_jar_rules(
     name = "tink-awskms",
-    doctitle = "Tink Cryptography API with AWS KMS",
     deps = [
         "//java/src/main/java/com/google/crypto/tink/integration/awskms",
     ],
@@ -175,7 +173,6 @@ gen_maven_jar_rules(
 
 gen_maven_jar_rules(
     name = "tink-gcpkms",
-    doctitle = "Tink Cryptography API with Google Cloud KMS",
     deps = [
         "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
     ],
@@ -183,7 +180,6 @@ gen_maven_jar_rules(
 
 gen_maven_jar_rules(
     name = "tink-android",
-    doctitle = "Tink Cryptography API for Android",
     deps = lite_proto_deps + android_deps + cleartext_android_deps + subtle_deps,
 )
 

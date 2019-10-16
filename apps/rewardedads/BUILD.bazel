@@ -31,7 +31,6 @@ load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
     name = "maven",
-    doctitle = "Tink Cryptography API for Google Mobile Rewarded Video Ads SSV",
     root_packages = ["com.google.crypto.tink.apps.rewardedads"],
     deps = [":rewardedads"],
 )
