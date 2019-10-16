@@ -65,14 +65,14 @@
     <java.version>1.7</java.version>
 
     <!-- library versions -->
-    <protobuf-lite.version>3.0.1</protobuf-lite.version>
+    <protobuf-javalite.version>3.10.0</protobuf-javalite.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-lite</artifactId>
-      <version>${protobuf-lite.version}</version>
+      <artifactId>protobuf-javalite</artifactId>
+      <version>${protobuf-javalite.version}</version>
     </dependency>
   </dependencies>
 </project>
