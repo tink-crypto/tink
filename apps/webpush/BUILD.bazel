@@ -22,6 +22,7 @@ load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
     name = "maven",
+    doctitle = "Tink Cryptography API for Message Encryption for Web Push (RFC 8291)",
     root_packages = ["com.google.crypto.tink.apps.webpush"],
     deps = [":webpush"],
 )
