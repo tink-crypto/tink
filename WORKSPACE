@@ -274,17 +274,19 @@ http_file(
 http_archive(
     name = "io_bazel_rules_go",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/0.18.6/rules_go-0.18.6.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/0.18.6/rules_go-0.18.6.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.20.0/rules_go-v0.20.0.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.20.0/rules_go-v0.20.0.tar.gz",
     ],
-    sha256 = "f04d2373bcaf8aa09bccb08a98a57e721306c8f6043a2a0ee610fd6853dcde3d",
+    sha256 = "078f2a9569fa9ed846e60805fb5fb167d6f6c4ece48e6d409bf5fb2154eaf0d8",
 )
 
 http_archive(
     name = "bazel_gazelle",
-    strip_prefix = "bazel-gazelle-395b3a1c2f22d8cd63e19c92d4e1556eb3d96dde",
-    urls = ["https://github.com/bazelbuild/bazel-gazelle/archive/395b3a1c2f22d8cd63e19c92d4e1556eb3d96dde.zip"],
-    sha256 = "a40deb9c0cfa2e424ad9b15fe68aa3d259ccb0ef6405dd4fe0506d86d75b8475",
+    urls = [
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.0/bazel-gazelle-v0.19.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.0/bazel-gazelle-v0.19.0.tar.gz",
+    ],
+    sha256 = "41bff2a0b32b02f20c227d234aa25ef3783998e5453f7eade929704dcff7cd4b",
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
@@ -316,6 +318,12 @@ go_repository(
     name = "org_golang_x_oauth2",
     commit = "ef147856a6ddbb60760db74283d2424e98c87bff",
     importpath = "golang.org/x/oauth2",
+)
+
+go_repository(
+    name = "org_golang_x_net",
+    commit = "74dc4d7220e7acc4e100824340f3e66577424772",
+    importpath = "golang.org/x/net",
 )
 
 go_repository(
