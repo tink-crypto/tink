@@ -102,8 +102,8 @@ run_linux_tests() {
 
 run_macos_tests() {
   # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=12.2}"
-  : "${XCODE_VERSION:=10.2}"
+  : "${IOS_SDK_VERSION:=13.0}"
+  : "${XCODE_VERSION:=11.0}"
 
   # Build all the iOS targets.
   time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \

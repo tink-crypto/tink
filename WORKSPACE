@@ -12,6 +12,12 @@ http_archive(
     sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
 )
 
+http_archive(
+    name = "bazel_skylib",
+    url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+    sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
+)
+
 #-----------------------------------------------------------------------------
 # Google PKI certs for connecting to GCP KMS
 #-----------------------------------------------------------------------------
@@ -235,9 +241,9 @@ maven_install(
 
 http_archive(
     name = "build_bazel_rules_apple",
-    strip_prefix = "rules_apple-0.17.0",
-    url = "https://github.com/bazelbuild/rules_apple/archive/0.17.0.zip",
-    sha256 = "5ec8a6dd73ddeec3bf051ea82906dcd369c77f7f6030bc517c82e0e7a84c1cb9",
+    strip_prefix = "rules_apple-0.19.0",
+    url = "https://github.com/bazelbuild/rules_apple/archive/0.19.0.zip",
+    sha256 = "9f9eb6cdd25d7932cb939df24807c2d70772aad7a79f1357e25ced9d0d443cfd",
 )
 
 load(
@@ -260,13 +266,6 @@ load(
 )
 
 apple_support_dependencies()
-
-http_file(
-    name = "xctestrunner",
-    executable = 1,
-    urls = ["https://github.com/google/xctestrunner/releases/download/0.2.6/ios_test_runner.par"],
-    sha256 = "15fc7d09315a230f3d8ee2913eef8699456366e44b37a9266e36b28517003628",
-)
 
 #-----------------------------------------------------------------------------
 # go
