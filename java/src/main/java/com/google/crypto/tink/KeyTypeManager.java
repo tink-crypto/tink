@@ -21,6 +21,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -205,6 +206,26 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
 
     /** Creates a new key from a given format. */
     public abstract KeyT createKey(KeyFormatProtoT keyFormat) throws GeneralSecurityException;
+
+    /**
+     * Derives a new key from a given format, using the given {@param pseudoRandomness}.
+     *
+     * <p>Implementations need to note that the given paramter {@param pseudoRandomness} may only
+     * produce a finite amount of randomness. Hence, proper implementations will first obtain all
+     * the pseudorandom bytes needed; and only after produce the key.
+     *
+     * <p>While {@link validateKeyFormat} is called before this method will be called,
+     * implementations must check the version of the given {@param keyFormat}, as {@link
+     * validateKeyFormat} is also called from {@link createKey}.
+     *
+     * <p>Not every KeyTypeManager needs to implement this; if not implemented a {@link
+     * GeneralSecurityException} will be thrown.
+     */
+    public KeyT deriveKey(KeyFormatProtoT keyFormat, InputStream pseudoRandomness)
+        throws GeneralSecurityException {
+      throw new GeneralSecurityException(
+          "deriveKey not implemented for key of type " + clazz.toString());
+    }
   }
 
   /**

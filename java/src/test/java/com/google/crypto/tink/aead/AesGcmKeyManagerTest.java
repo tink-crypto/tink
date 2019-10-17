@@ -29,6 +29,7 @@ import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
+import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -359,5 +360,76 @@ public class AesGcmKeyManagerTest {
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     assertThat(ciphertext.length)
         .isEqualTo(12 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */);
+  }
+
+  @Test
+  public void testDeriveKey_size32() throws Exception {
+    final int keySize = 32;
+
+    byte[] keyMaterial = Random.randBytes(100);
+    AesGcmKey key =
+        factory.deriveKey(
+            AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
+            new ByteArrayInputStream(keyMaterial));
+    assertThat(key.getKeyValue()).hasSize(keySize);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
+  }
+
+  @Test
+  public void testDeriveKey_size16() throws Exception {
+    final int keySize = 16;
+
+    byte[] keyMaterial = Random.randBytes(100);
+    AesGcmKey key =
+        factory.deriveKey(
+            AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
+            new ByteArrayInputStream(keyMaterial));
+    assertThat(key.getKeyValue()).hasSize(keySize);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
+  }
+
+  @Test
+  public void testDeriveKey_notEnoughKeyMaterial_throws() throws Exception {
+    byte[] keyMaterial = Random.randBytes(31);
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(32).build();
+    try {
+      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testDeriveKey_badVersion_throws() throws Exception {
+    final int keySize = 32;
+
+    byte[] keyMaterial = Random.randBytes(100);
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setVersion(1).setKeySize(keySize).build();
+    try {
+      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testDeriveKey_justEnoughKeyMaterial() throws Exception {
+    final int keySize = 32;
+
+    byte[] keyMaterial = Random.randBytes(32);
+    AesGcmKey key =
+        factory.deriveKey(
+            AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
+            new ByteArrayInputStream(keyMaterial));
+    assertThat(key.getKeyValue()).hasSize(keySize);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
   }
 }
