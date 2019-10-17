@@ -27,6 +27,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.math.BigInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,8 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P256;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA256, format.getParams().getHashType());
@@ -53,7 +55,22 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P256_IEEE_P1363;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
+
+    assertTrue(format.hasParams());
+    assertEquals(HashType.SHA256, format.getParams().getHashType());
+    assertEquals(EllipticCurveType.NIST_P256, format.getParams().getCurve());
+    assertEquals(EcdsaSignatureEncoding.IEEE_P1363, format.getParams().getEncoding());
+  }
+
+  @Test
+  public void testECDSA_P256_IEEE_P1363_WITHOUT_PREFIX() throws Exception {
+    KeyTemplate template = SignatureKeyTemplates.ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX;
+    assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA256, format.getParams().getHashType());
@@ -66,7 +83,8 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P384;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA512, format.getParams().getHashType());
@@ -79,7 +97,8 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P384_IEEE_P1363;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA512, format.getParams().getHashType());
@@ -92,7 +111,8 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.ECDSA_P521_IEEE_P1363;
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA512, format.getParams().getHashType());
@@ -107,11 +127,14 @@ public class SignatureKeyTemplatesTest {
     HashType hashType = HashType.SHA512;
     EllipticCurveType curve = EllipticCurveType.UNKNOWN_CURVE;
     EcdsaSignatureEncoding encoding = EcdsaSignatureEncoding.IEEE_P1363;
-    KeyTemplate template = SignatureKeyTemplates.createEcdsaKeyTemplate(hashType, curve, encoding);
+    OutputPrefixType prefixType = OutputPrefixType.TINK;
+    KeyTemplate template =
+        SignatureKeyTemplates.createEcdsaKeyTemplate(hashType, curve, encoding, prefixType);
     assertEquals(new EcdsaSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
 
-    EcdsaKeyFormat format = EcdsaKeyFormat.parseFrom(template.getValue());
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
     assertEquals(hashType, format.getParams().getHashType());
     assertEquals(curve, format.getParams().getCurve());
     assertEquals(encoding, format.getParams().getEncoding());
@@ -130,7 +153,9 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA256_F4;
     assertEquals(new RsaSsaPkcs1SignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    RsaSsaPkcs1KeyFormat format = RsaSsaPkcs1KeyFormat.parseFrom(template.getValue());
+    RsaSsaPkcs1KeyFormat format =
+        RsaSsaPkcs1KeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA256, format.getParams().getHashType());
@@ -144,7 +169,9 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PKCS1_4096_SHA512_F4;
     assertEquals(new RsaSsaPkcs1SignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    RsaSsaPkcs1KeyFormat format = RsaSsaPkcs1KeyFormat.parseFrom(template.getValue());
+    RsaSsaPkcs1KeyFormat format =
+        RsaSsaPkcs1KeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA512, format.getParams().getHashType());
@@ -158,7 +185,9 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4;
     assertEquals(new RsaSsaPssSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    RsaSsaPssKeyFormat format = RsaSsaPssKeyFormat.parseFrom(template.getValue());
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA256, format.getParams().getSigHash());
@@ -174,7 +203,9 @@ public class SignatureKeyTemplatesTest {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4;
     assertEquals(new RsaSsaPssSignKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    RsaSsaPssKeyFormat format = RsaSsaPssKeyFormat.parseFrom(template.getValue());
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
 
     assertTrue(format.hasParams());
     assertEquals(HashType.SHA512, format.getParams().getSigHash());
