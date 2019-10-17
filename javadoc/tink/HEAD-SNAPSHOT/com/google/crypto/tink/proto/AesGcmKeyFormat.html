@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":9,"i2":10,"i3":9,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":9,"i12":9,"i13":10,"i14":10,"i15":10,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9,"i28":9,"i29":10,"i30":10};
+var methods = {"i0":10,"i1":9,"i2":10,"i3":9,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":9,"i13":9,"i14":10,"i15":10,"i16":10,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9,"i28":9,"i29":9,"i30":10,"i31":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -192,6 +192,10 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormatO
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#KEY_SIZE_FIELD_NUMBER">KEY_SIZE_FIELD_NUMBER</a></span></code>&nbsp;</td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span></code>&nbsp;</td>
+</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="fields.inherited.from.class.com.google.protobuf.GeneratedMessageV3">
@@ -264,99 +268,105 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormatO
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#getVersion--">getVersion</a></span>()</code>
+<div class="block"><code>uint32 version = 3;</code></div>
+</td>
 </tr>
 <tr id="i9" class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#internalGetFieldAccessorTable--">internalGetFieldAccessorTable</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#isInitialized--">isInitialized</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#newBuilder--">newBuilder</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#newBuilder-com.google.crypto.tink.proto.AesGcmKeyFormat-">newBuilder</a></span>(<a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a>&nbsp;prototype)</code>&nbsp;</td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#newBuilderForType--">newBuilderForType</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>protected <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#newBuilderForType-com.google.protobuf.GeneratedMessageV3.BuilderParent-">newBuilderForType</a></span>(com.google.protobuf.GeneratedMessageV3.BuilderParent&nbsp;parent)</code>&nbsp;</td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>protected <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#newInstance-com.google.protobuf.GeneratedMessageV3.UnusedPrivateParameter-">newInstance</a></span>(com.google.protobuf.GeneratedMessageV3.UnusedPrivateParameter&nbsp;unused)</code>&nbsp;</td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>&nbsp;</td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
                   com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-byte:A-">parseFrom</a></span>(byte[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(byte[]&nbsp;data,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-java.nio.ByteBuffer-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-java.nio.ByteBuffer-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-com.google.protobuf.ByteString-">parseFrom</a></span>(com.google.protobuf.ByteString&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(com.google.protobuf.ByteString&nbsp;data,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom</a></span>(com.google.protobuf.CodedInputStream&nbsp;input)</code>&nbsp;</td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(com.google.protobuf.CodedInputStream&nbsp;input,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-java.io.InputStream-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>&nbsp;</td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i28" class="altColor">
+<tr id="i29" class="rowColor">
 <td class="colFirst"><code>static com.google.protobuf.Parser&lt;<a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#parser--">parser</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i29" class="rowColor">
+<tr id="i30" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#toBuilder--">toBuilder</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i30" class="altColor">
+<tr id="i31" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo</a></span>(com.google.protobuf.CodedOutputStream&nbsp;output)</code>&nbsp;</td>
 </tr>
@@ -420,13 +430,26 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormatO
 <a name="KEY_SIZE_FIELD_NUMBER">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>KEY_SIZE_FIELD_NUMBER</h4>
 <pre>public static final&nbsp;int KEY_SIZE_FIELD_NUMBER</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.AesGcmKeyFormat.KEY_SIZE_FIELD_NUMBER">Constant Field Values</a></dd>
+</dl>
+</li>
+</ul>
+<a name="VERSION_FIELD_NUMBER">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>VERSION_FIELD_NUMBER</h4>
+<pre>public static final&nbsp;int VERSION_FIELD_NUMBER</pre>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.AesGcmKeyFormat.VERSION_FIELD_NUMBER">Constant Field Values</a></dd>
 </dl>
 </li>
 </ul>
@@ -499,6 +522,20 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormatO
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormatOrBuilder.html#getKeySize--">getKeySize</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesGcmKeyFormatOrBuilder</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getVersion--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getVersion</h4>
+<pre>public&nbsp;int&nbsp;getVersion()</pre>
+<div class="block"><code>uint32 version = 3;</code></div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormatOrBuilder.html#getVersion--">getVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesGcmKeyFormatOrBuilder</a></code></dd>
 </dl>
 </li>
 </ul>

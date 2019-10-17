@@ -2267,6 +2267,10 @@
 <dd>
 <div class="block"><code>uint32 version = 1;</code></div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html#clearVersion--">clearVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>uint32 version = 3;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesSivKey.Builder.html#clearVersion--">clearVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesSivKey.Builder.html" title="class in com.google.crypto.tink.proto">AesSivKey.Builder</a></dt>
 <dd>
 <div class="block"><code>uint32 version = 1;</code></div>
@@ -2719,6 +2723,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmHkdfStreamingParams.html#DERIVED_KEY_SIZE_FIELD_NUMBER">DERIVED_KEY_SIZE_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmHkdfStreamingParams.html" title="class in com.google.crypto.tink.proto">AesGcmHkdfStreamingParams</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html#deriveKey-KeyFormatProtoT-java.io.InputStream-">deriveKey(KeyFormatProtoT, InputStream)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a></dt>
+<dd>
+<div class="block">Derives a new key from a given format, using the given .</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#destroy-int-">destroy(int)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
 <dd>
 <div class="block">Destroys the key material associated with the <code>keyId</code>.</div>
@@ -8605,6 +8613,18 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKey.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto">AesGcmKey</a></dt>
 <dd>
 <div class="block"><code>uint32 version = 1;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>uint32 version = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKeyFormat.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></dt>
+<dd>
+<div class="block"><code>uint32 version = 3;</code></div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKeyFormatOrBuilder.html#getVersion--">getVersion()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesGcmKeyFormatOrBuilder</a></dt>
+<dd>
+<div class="block"><code>uint32 version = 3;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKeyOrBuilder.html#getVersion--">getVersion()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesGcmKeyOrBuilder</a></dt>
 <dd>
@@ -16269,6 +16289,10 @@
 <dd>
 <div class="block"><code>uint32 version = 1;</code></div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html#setVersion-int-">setVersion(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat.Builder</a></dt>
+<dd>
+<div class="block"><code>uint32 version = 3;</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesSivKey.Builder.html#setVersion-int-">setVersion(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesSivKey.Builder.html" title="class in com.google.crypto.tink.proto">AesSivKey.Builder</a></dt>
 <dd>
 <div class="block"><code>uint32 version = 1;</code></div>
@@ -17079,6 +17103,8 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmHkdfStreamingKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmHkdfStreamingKey.html" title="class in com.google.crypto.tink.proto">AesGcmHkdfStreamingKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto">AesGcmKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesGcmKeyFormat.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto">AesGcmKeyFormat</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesSivKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesSivKey.html" title="class in com.google.crypto.tink.proto">AesSivKey</a></dt>
 <dd>&nbsp;</dd>
