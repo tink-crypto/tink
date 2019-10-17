@@ -29,7 +29,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   rm -f ~/.bazelrc
 
   # TODO(b/131821833) Use the latest version of Bazel.
-  use_bazel.sh 0.28.1
+  use_bazel.sh 0.29.1
 
   if [[ "${PLATFORM}" == 'darwin' ]]; then
     export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
