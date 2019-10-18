@@ -44,11 +44,3 @@ filegroup(
         "ecies_public_keyset2.bin",
     ],
 )
-
-filegroup(
-    name = "wycheproof",
-    testonly = 1,
-    srcs = glob([
-        "wycheproof/*.*",
-    ]),
-)

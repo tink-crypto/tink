@@ -735,9 +735,6 @@ objc_library(
             "Tests/UnitTests/core/TINKKeysetHandleTest.mm",
         ],
     ),
-    hdrs = glob([
-        "Tests/UnitTests/**/*.h",
-    ]),
     deps = [
         ":aead_internal",
         ":testonly",
