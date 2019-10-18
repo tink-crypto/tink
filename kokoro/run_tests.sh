@@ -50,18 +50,6 @@ if [[ -z "${TMP}" ]]; then
   exit 4
 fi
 
-declare -a DISABLE_SANDBOX_ARGS
-DISABLE_SANDBOX_ARGS=(
-  --strategy=GenRule=standalone
-  --strategy=Turbine=standalone
-  --strategy=CppCompile=standalone
-  --strategy=ProtoCompile=standalone
-  --strategy=GenProto=standalone
-  --strategy=GenProtoDescriptorSet=standalone
-  --sandbox_tmpfs_path=${TMP}
-)
-readonly DISABLE_SANDBOX_ARGS
-
 # TODO(b/140615798)
 DISABLE_GRPC_ON_MAC_OS=""
 if [[ "${PLATFORM}" == 'darwin' ]]; then
@@ -85,7 +73,7 @@ go version
 
 run_linux_tests() {
   # Build all targets, except objc.
-  time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
+  time bazel build \
   -- //... \
   ${DISABLE_GRPC_ON_MAC_OS} \
   ${DISABLE_PYTHON_ON_MAC_OS} \
@@ -106,7 +94,7 @@ run_macos_tests() {
   : "${XCODE_VERSION:=11.0}"
 
   # Build all the iOS targets.
-  time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
+  time bazel build \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
@@ -119,7 +107,7 @@ run_macos_tests() {
   //objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run the iOS tests.
-  time bazel test "${DISABLE_SANDBOX_ARGS[@]}" \
+  time bazel test \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
