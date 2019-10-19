@@ -59,6 +59,10 @@ import javax.annotation.concurrent.GuardedBy;
  * my_pref_file_name} preferences file. If the preference file name is null, it uses the default
  * preferences file.
  *
+ * <p>Alternatively, you can provide a custom reader/writer with
+ * {@link AndroidKeysetManager.Builder#withKeysetReader} and {@link AndroidKeysetManager.Builder#withKeysetWriter},
+ * which will be used for managing keyset.
+ *
  * <p>If the keyset is not found or invalid, and a valid {@link KeyTemplate} is set with {@link
  * AndroidKeysetManager.Builder#withKeyTemplate}, a fresh keyset is generated and is written to the
  * {@code my_keyset_name} preference of the {@code my_pref_file_name} shared preferences file.
@@ -107,14 +111,14 @@ public final class AndroidKeysetManager {
   private AndroidKeysetManager(Builder builder) throws GeneralSecurityException, IOException {
     reader = builder.reader;
     if (reader == null) {
-      throw new IllegalArgumentException(
-          "need to specify where to read the keyset from with Builder#withSharedPref");
+      throw new IllegalArgumentException("need to specify where to read the keyset from with " +
+              "Builder#withSharedPref or Builder#withKeysetReader");
     }
 
     writer = builder.writer;
     if (writer == null) {
-      throw new IllegalArgumentException(
-          "need to specify where to write the keyset to with Builder#withSharedPref");
+      throw new IllegalArgumentException("need to specify where to write the keyset to with " +
+              "Builder#withSharedPref or Builder#withKeysetWriter");
     }
 
     if (builder.useKeystore && builder.masterKeyUri == null) {
@@ -154,6 +158,18 @@ public final class AndroidKeysetManager {
       }
       reader = new SharedPrefKeysetReader(context, keysetName, prefFileName);
       writer = new SharedPrefKeysetWriter(context, keysetName, prefFileName);
+      return this;
+    }
+
+    /** Reads the keyset from provided reader. */
+    public Builder withKeysetReader(KeysetReader reader) {
+      this.reader = reader;
+      return this;
+    }
+
+    /** Writes the keyset to provided writer. */
+    public Builder withKeysetWriter(KeysetWriter writer) {
+      this.writer = writer;
       return this;
     }
 
