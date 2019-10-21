@@ -352,9 +352,10 @@ http_archive(
     ],
 )
 
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
-
-closure_repositories(omit_zlib = True)
+load("@io_bazel_rules_closure//closure:repositories.bzl",
+     "rules_closure_dependencies", "rules_closure_toolchains")
+rules_closure_dependencies()
+rules_closure_toolchains()
 
 #-----------------------------------------------------------------------------
 # Python
