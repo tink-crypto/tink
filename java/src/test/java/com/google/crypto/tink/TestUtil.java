@@ -66,6 +66,7 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.MessageLite;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -597,8 +598,10 @@ public class TestUtil {
     assertThat(key.hasKeyData()).isTrue();
     assertThat(key.getKeyData().getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
 
-    HmacKeyFormat hmacKeyFormat = HmacKeyFormat.parseFrom(keyTemplate.getValue());
-    HmacKey hmacKey = HmacKey.parseFrom(key.getKeyData().getValue());
+    HmacKeyFormat hmacKeyFormat =
+        HmacKeyFormat.parseFrom(keyTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    HmacKey hmacKey =
+        HmacKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(hmacKey.getParams()).isEqualTo(hmacKeyFormat.getParams());
     assertThat(hmacKey.getKeyValue().size()).isEqualTo(hmacKeyFormat.getKeySize());
   }

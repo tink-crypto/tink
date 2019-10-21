@@ -28,6 +28,7 @@ import com.google.crypto.tink.subtle.MacJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
@@ -94,7 +95,7 @@ public class HmacKeyManager extends KeyTypeManager<HmacKey> {
 
   @Override
   public HmacKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return HmacKey.parseFrom(byteString);
+    return HmacKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   private static void validateParams(HmacParams params) throws GeneralSecurityException {
@@ -136,7 +137,7 @@ public class HmacKeyManager extends KeyTypeManager<HmacKey> {
       @Override
       public HmacKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return HmacKeyFormat.parseFrom(byteString);
+        return HmacKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

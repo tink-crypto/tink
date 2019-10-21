@@ -28,6 +28,7 @@ import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -52,7 +53,9 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
     demKeyTypeUrl = demTemplate.getTypeUrl();
     if (demKeyTypeUrl.equals(AeadConfig.AES_GCM_TYPE_URL)) {
       try {
-        AesGcmKeyFormat gcmKeyFormat = AesGcmKeyFormat.parseFrom(demTemplate.getValue());
+        AesGcmKeyFormat gcmKeyFormat =
+            AesGcmKeyFormat.parseFrom(
+                demTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
         this.aesGcmKey = (AesGcmKey) Registry.newKey(demTemplate);
         this.symmetricKeySize = gcmKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
@@ -62,7 +65,8 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
     } else if (demKeyTypeUrl.equals(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)) {
       try {
         AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat =
-            AesCtrHmacAeadKeyFormat.parseFrom(demTemplate.getValue());
+            AesCtrHmacAeadKeyFormat.parseFrom(
+                demTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
         this.aesCtrHmacAeadKey = (AesCtrHmacAeadKey) Registry.newKey(demTemplate);
         this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();

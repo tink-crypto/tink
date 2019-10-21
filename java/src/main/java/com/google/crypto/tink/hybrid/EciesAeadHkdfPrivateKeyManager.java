@@ -30,6 +30,7 @@ import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -94,7 +95,7 @@ public class EciesAeadHkdfPrivateKeyManager
   @Override
   public EciesAeadHkdfPrivateKey parseKey(ByteString byteString)
       throws InvalidProtocolBufferException {
-    return EciesAeadHkdfPrivateKey.parseFrom(byteString);
+    return EciesAeadHkdfPrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -119,7 +120,8 @@ public class EciesAeadHkdfPrivateKeyManager
       @Override
       public EciesAeadHkdfKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return EciesAeadHkdfKeyFormat.parseFrom(byteString);
+        return EciesAeadHkdfKeyFormat.parseFrom(
+            byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

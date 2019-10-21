@@ -27,6 +27,7 @@ import com.google.crypto.tink.subtle.AesCmac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -76,7 +77,7 @@ public class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
 
   @Override
   public AesCmacKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesCmacKey.parseFrom(byteString);
+    return AesCmacKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   private static void validateParams(AesCmacParams params) throws GeneralSecurityException {
@@ -106,7 +107,7 @@ public class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
       @Override
       public AesCmacKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesCmacKeyFormat.parseFrom(byteString);
+        return AesCmacKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

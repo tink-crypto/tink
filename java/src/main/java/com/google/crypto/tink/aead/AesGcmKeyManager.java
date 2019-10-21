@@ -26,6 +26,7 @@ import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +71,7 @@ public class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
 
   @Override
   public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesGcmKey.parseFrom(byteString);
+    return AesGcmKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -84,7 +85,7 @@ public class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       @Override
       public AesGcmKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesGcmKeyFormat.parseFrom(byteString);
+        return AesGcmKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

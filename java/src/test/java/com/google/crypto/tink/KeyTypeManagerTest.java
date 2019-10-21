@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +61,7 @@ public final class KeyTypeManagerTest {
 
     @Override
     public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      return AesGcmKey.parseFrom(byteString);
+      return AesGcmKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
     }
   }
 

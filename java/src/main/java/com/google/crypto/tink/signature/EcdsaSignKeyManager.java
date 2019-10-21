@@ -28,6 +28,7 @@ import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -82,7 +83,7 @@ public class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, 
   @Override
   public EcdsaPrivateKey parseKey(ByteString byteString)
       throws InvalidProtocolBufferException {
-    return EcdsaPrivateKey.parseFrom(byteString);
+    return EcdsaPrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -102,7 +103,7 @@ public class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, 
       @Override
       public EcdsaKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return EcdsaKeyFormat.parseFrom(byteString);
+        return EcdsaKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

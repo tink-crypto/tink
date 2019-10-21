@@ -24,6 +24,7 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
@@ -63,7 +64,7 @@ public final class PrivateKeyManagerImplTest {
 
     @Override
     public Ed25519PublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      return Ed25519PublicKey.parseFrom(byteString);
+      return Ed25519PublicKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
     }
   }
 
@@ -98,7 +99,7 @@ public final class PrivateKeyManagerImplTest {
 
     @Override
     public Ed25519PrivateKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      return Ed25519PrivateKey.parseFrom(byteString);
+      return Ed25519PrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
     }
 
     @Override
@@ -125,7 +126,8 @@ public final class PrivateKeyManagerImplTest {
 
     assertThat(keyData.getTypeUrl())
         .isEqualTo("type.googleapis.com/google.crypto.tink.Ed25519PublicKey");
-    Ed25519PublicKey publicKey = Ed25519PublicKey.parseFrom(keyData.getValue());
+    Ed25519PublicKey publicKey =
+        Ed25519PublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(publicKey).isEqualTo(privateKey.getPublicKey());
     assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
   }

@@ -22,6 +22,7 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ExtensionRegistryLite;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -34,7 +35,8 @@ public class MacKeyTemplatesTest {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(32, format.getKeySize());
     assertEquals(16, format.getParams().getTagSize());
@@ -46,7 +48,8 @@ public class MacKeyTemplatesTest {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_256BITTAG;
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(32, format.getKeySize());
     assertEquals(32, format.getParams().getTagSize());
@@ -58,7 +61,8 @@ public class MacKeyTemplatesTest {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA512_256BITTAG;
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(64, format.getKeySize());
     assertEquals(32, format.getParams().getTagSize());
@@ -70,7 +74,8 @@ public class MacKeyTemplatesTest {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA512_512BITTAG;
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(64, format.getKeySize());
     assertEquals(64, format.getParams().getTagSize());
@@ -88,7 +93,8 @@ public class MacKeyTemplatesTest {
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
 
-    HmacKeyFormat format = HmacKeyFormat.parseFrom(template.getValue());
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertEquals(keySize, format.getKeySize());
     assertEquals(tagSize, format.getParams().getTagSize());
     assertEquals(hashType, format.getParams().getHash());

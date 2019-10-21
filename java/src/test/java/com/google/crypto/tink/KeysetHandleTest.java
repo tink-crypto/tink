@@ -39,6 +39,7 @@ import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
@@ -94,7 +95,9 @@ public class KeysetHandleTest {
   public void testGetPublicKeysetHandle() throws Exception {
     KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
     KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
-    EcdsaPrivateKey privateKey = EcdsaPrivateKey.parseFrom(privateKeyData.getValue());
+    EcdsaPrivateKey privateKey =
+        EcdsaPrivateKey.parseFrom(
+            privateKeyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
     assertEquals(1, publicHandle.getKeyset().getKeyCount());
     assertEquals(

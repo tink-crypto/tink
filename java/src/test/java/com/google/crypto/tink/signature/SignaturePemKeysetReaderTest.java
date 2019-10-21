@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.subtle.PemKeyType;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.security.interfaces.ECPublicKey;
@@ -63,7 +64,8 @@ public final class SignaturePemKeysetReaderTest {
     Keyset ks = keysetReader.read();
     Keyset.Key key = ks.getKey(0);
     KeyData keyData = key.getKeyData();
-    RsaSsaPssPublicKey publicKeyProto = RsaSsaPssPublicKey.parseFrom(keyData.getValue());
+    RsaSsaPssPublicKey publicKeyProto =
+        RsaSsaPssPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     RSAPublicKey publicKey =
         (RSAPublicKey)
             PemKeyType.RSA_PSS_2048_SHA256.readKey(new BufferedReader(new StringReader(pem)));
@@ -94,7 +96,8 @@ public final class SignaturePemKeysetReaderTest {
     Keyset ks = keysetReader.read();
     Keyset.Key key = ks.getKey(0);
     KeyData keyData = key.getKeyData();
-    EcdsaPublicKey publicKeyProto = EcdsaPublicKey.parseFrom(keyData.getValue());
+    EcdsaPublicKey publicKeyProto =
+        EcdsaPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     ECPublicKey publicKey =
         (ECPublicKey)
             PemKeyType.ECDSA_P256_SHA256.readKey(new BufferedReader(new StringReader(pem)));
@@ -144,7 +147,8 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(ks.getPrimaryKeyId()).isEqualTo(firstKey.getKeyId());
 
     KeyData keyData = firstKey.getKeyData();
-    RsaSsaPssPublicKey publicKeyProto = RsaSsaPssPublicKey.parseFrom(keyData.getValue());
+    RsaSsaPssPublicKey publicKeyProto =
+        RsaSsaPssPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     RSAPublicKey publicKey =
         (RSAPublicKey)
             PemKeyType.RSA_PSS_2048_SHA256.readKey(new BufferedReader(new StringReader(pem)));
@@ -160,7 +164,8 @@ public final class SignaturePemKeysetReaderTest {
         .isEqualTo(publicKey.getPublicExponent().toByteArray());
 
     keyData = secondKey.getKeyData();
-    publicKeyProto = RsaSsaPssPublicKey.parseFrom(keyData.getValue());
+    publicKeyProto =
+        RsaSsaPssPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(secondKey.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(secondKey.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
     assertThat(keyData.getTypeUrl()).isEqualTo(new RsaSsaPssVerifyKeyManager().getKeyType());
@@ -192,7 +197,8 @@ public final class SignaturePemKeysetReaderTest {
     Keyset ks = keysetReader.read();
     Keyset.Key key = ks.getKey(0);
     KeyData keyData = key.getKeyData();
-    RsaSsaPssPublicKey publicKeyProto = RsaSsaPssPublicKey.parseFrom(keyData.getValue());
+    RsaSsaPssPublicKey publicKeyProto =
+        RsaSsaPssPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     RSAPublicKey publicKey =
         (RSAPublicKey)
             PemKeyType.RSA_PSS_2048_SHA256.readKey(new BufferedReader(new StringReader(pem)));
@@ -240,7 +246,8 @@ public final class SignaturePemKeysetReaderTest {
     Keyset.Key firstKey = ks.getKey(0);
     assertThat(ks.getPrimaryKeyId()).isEqualTo(firstKey.getKeyId());
     KeyData keyData = firstKey.getKeyData();
-    RsaSsaPssPublicKey rsaPublicKeyProto = RsaSsaPssPublicKey.parseFrom(keyData.getValue());
+    RsaSsaPssPublicKey rsaPublicKeyProto =
+        RsaSsaPssPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     RSAPublicKey rsaPublicKey =
         (RSAPublicKey)
             PemKeyType.RSA_PSS_2048_SHA256.readKey(new BufferedReader(new StringReader(rsaPem)));
@@ -258,7 +265,8 @@ public final class SignaturePemKeysetReaderTest {
 
     Keyset.Key secondKey = ks.getKey(1);
     keyData = secondKey.getKeyData();
-    EcdsaPublicKey ecPublicKeyProto = EcdsaPublicKey.parseFrom(keyData.getValue());
+    EcdsaPublicKey ecPublicKeyProto =
+        EcdsaPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     ECPublicKey ecPublicKey =
         (ECPublicKey)
             PemKeyType.ECDSA_P256_SHA256.readKey(new BufferedReader(new StringReader(ecPem)));

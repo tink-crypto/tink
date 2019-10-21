@@ -26,6 +26,7 @@ import com.google.crypto.tink.proto.KmsAeadKey;
 import com.google.crypto.tink.proto.KmsAeadKeyFormat;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -69,7 +70,7 @@ public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
 
   @Override
   public KmsAeadKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return KmsAeadKey.parseFrom(byteString);
+    return KmsAeadKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -81,7 +82,7 @@ public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
       @Override
       public KmsAeadKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return KmsAeadKeyFormat.parseFrom(byteString);
+        return KmsAeadKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

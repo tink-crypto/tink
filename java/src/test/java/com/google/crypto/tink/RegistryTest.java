@@ -47,6 +47,7 @@ import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.MacJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
@@ -787,7 +788,7 @@ public class RegistryTest {
 
     @Override
     public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      return AesGcmKey.parseFrom(byteString);
+      return AesGcmKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
     }
 
     @Override
@@ -804,7 +805,7 @@ public class RegistryTest {
         @Override
         public AesGcmKeyFormat parseKeyFormat(ByteString byteString)
             throws InvalidProtocolBufferException {
-          return AesGcmKeyFormat.parseFrom(byteString);
+          return AesGcmKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
         }
 
         @Override
@@ -981,7 +982,7 @@ public class RegistryTest {
 
     @Override
     public Ed25519PublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      return Ed25519PublicKey.parseFrom(byteString);
+      return Ed25519PublicKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
     }
   }
 
@@ -1034,7 +1035,7 @@ public class RegistryTest {
 
     @Override
     public Ed25519PrivateKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      return Ed25519PrivateKey.parseFrom(byteString);
+      return Ed25519PrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
     }
 
     @Override
@@ -1221,7 +1222,9 @@ public class RegistryTest {
         Registry.getPublicKeyData(
             new TestPrivateKeyTypeManager().getKeyType(), privateKey.toByteString());
     assertThat(publicKeyData.getTypeUrl()).isEqualTo(new TestPublicKeyTypeManager().getKeyType());
-    Ed25519PublicKey publicKey = Ed25519PublicKey.parseFrom(publicKeyData.getValue());
+    Ed25519PublicKey publicKey =
+        Ed25519PublicKey.parseFrom(
+            publicKeyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(publicKey.getKeyValue()).isEqualTo(privateKey.getPublicKey().getKeyValue());
   }
 

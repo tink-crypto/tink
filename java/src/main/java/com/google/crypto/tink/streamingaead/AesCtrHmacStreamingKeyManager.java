@@ -29,6 +29,7 @@ import com.google.crypto.tink.subtle.AesCtrHmacStreaming;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -92,7 +93,7 @@ public class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStre
   @Override
   public AesCtrHmacStreamingKey parseKey(ByteString byteString)
       throws InvalidProtocolBufferException {
-    return AesCtrHmacStreamingKey.parseFrom(byteString);
+    return AesCtrHmacStreamingKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -111,7 +112,8 @@ public class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStre
       @Override
       public AesCtrHmacStreamingKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesCtrHmacStreamingKeyFormat.parseFrom(byteString);
+        return AesCtrHmacStreamingKeyFormat.parseFrom(
+            byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

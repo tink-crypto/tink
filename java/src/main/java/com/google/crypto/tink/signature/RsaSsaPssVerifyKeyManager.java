@@ -25,6 +25,7 @@ import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -75,7 +76,7 @@ class RsaSsaPssVerifyKeyManager extends KeyTypeManager<RsaSsaPssPublicKey> {
 
   @Override
   public RsaSsaPssPublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return RsaSsaPssPublicKey.parseFrom(byteString);
+    return RsaSsaPssPublicKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override

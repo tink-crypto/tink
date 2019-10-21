@@ -24,6 +24,7 @@ import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
@@ -70,7 +71,7 @@ class EcdsaVerifyKeyManager extends KeyTypeManager<EcdsaPublicKey> {
 
   @Override
   public EcdsaPublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return EcdsaPublicKey.parseFrom(byteString);
+    return EcdsaPublicKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override

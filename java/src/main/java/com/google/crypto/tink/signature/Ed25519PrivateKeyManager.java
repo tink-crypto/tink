@@ -26,6 +26,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -69,7 +70,7 @@ class Ed25519PrivateKeyManager extends PrivateKeyTypeManager<Ed25519PrivateKey, 
 
   @Override
   public Ed25519PrivateKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return Ed25519PrivateKey.parseFrom(byteString);
+    return Ed25519PrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -90,7 +91,7 @@ class Ed25519PrivateKeyManager extends PrivateKeyTypeManager<Ed25519PrivateKey, 
       @Override
       public Ed25519KeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return Ed25519KeyFormat.parseFrom(byteString);
+        return Ed25519KeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

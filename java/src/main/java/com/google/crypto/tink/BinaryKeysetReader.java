@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.Keyset;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,11 +65,11 @@ public final class BinaryKeysetReader implements KeysetReader {
 
   @Override
   public Keyset read() throws IOException {
-    return Keyset.parseFrom(inputStream);
+    return Keyset.parseFrom(inputStream, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
   public EncryptedKeyset readEncrypted() throws IOException {
-    return EncryptedKeyset.parseFrom(inputStream);
+    return EncryptedKeyset.parseFrom(inputStream, ExtensionRegistryLite.getEmptyRegistry());
   }
 }

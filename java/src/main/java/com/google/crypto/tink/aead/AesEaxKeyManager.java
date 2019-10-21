@@ -26,6 +26,7 @@ import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -72,7 +73,7 @@ public class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
 
   @Override
   public AesEaxKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesEaxKey.parseFrom(byteString);
+    return AesEaxKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -90,7 +91,7 @@ public class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
       @Override
       public AesEaxKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesEaxKeyFormat.parseFrom(byteString);
+        return AesEaxKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

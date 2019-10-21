@@ -26,6 +26,7 @@ import com.google.crypto.tink.subtle.AesSiv;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -73,7 +74,7 @@ public class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
 
   @Override
   public AesSivKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesSivKey.parseFrom(byteString);
+    return AesSivKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -90,7 +91,7 @@ public class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
       @Override
       public AesSivKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesSivKeyFormat.parseFrom(byteString);
+        return AesSivKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

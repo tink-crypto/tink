@@ -29,6 +29,7 @@ import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -124,7 +125,7 @@ class RsaSsaPkcs1SignKeyManager
   @Override
   public RsaSsaPkcs1PrivateKey parseKey(ByteString byteString)
       throws InvalidProtocolBufferException {
-    return RsaSsaPkcs1PrivateKey.parseFrom(byteString);
+    return RsaSsaPkcs1PrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -148,7 +149,7 @@ class RsaSsaPkcs1SignKeyManager
       @Override
       public RsaSsaPkcs1KeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return RsaSsaPkcs1KeyFormat.parseFrom(byteString);
+        return RsaSsaPkcs1KeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override
