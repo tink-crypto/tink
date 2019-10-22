@@ -1,5 +1,6 @@
 tink_module(subtle)
 
+add_subdirectory(prf)
 
 set(TINK_SUBTLE_PUBLIC_APIS
   common_enums.h
