@@ -36,7 +36,7 @@ class HkdfInputStream : public InputStream {
     stream_status_ = util::OkStatus();
 
     ResizeStringUninitialized(&prk_, EVP_MAX_MD_SIZE);
-    uint64_t prk_len;
+    size_t prk_len;
 
     if (1 != HKDF_extract(
                  reinterpret_cast<uint8_t *>(&prk_[0]), &prk_len, digest_,
