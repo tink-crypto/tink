@@ -83,6 +83,22 @@ class KeysetHandle(object):
     return cls._create(_decrypt(encrypted_keyset, master_key_aead))
 
   @classmethod
+  def read_no_secret(cls, keyset_reader: reader.KeysetReader) -> 'KeysetHandle':
+    """Creates a KeysetHandle from a keyset with no secret key material.
+
+    This can be used to load public keysets or envelope encryption keysets.
+
+    Args:
+      keyset_reader: A core.KeysetReader object.
+
+    Returns:
+      A new KeysetHandle.
+    """
+    keyset = keyset_reader.read()
+    _assert_no_secret_key_material(keyset)
+    return cls._create(keyset)
+
+  @classmethod
   def _create(cls, keyset: tink_pb2.Keyset):
     o = object.__new__(cls)
     o.__init__(keyset)
@@ -97,6 +113,21 @@ class KeysetHandle(object):
     """Serializes, encrypts with master_key_primitive and writes the keyset."""
     encrypted_keyset = _encrypt(self._keyset, master_key_primitive)
     keyset_writer.write_encrypted(encrypted_keyset)
+
+  def write_no_secret(self, keyset_writer: writer.KeysetWriter) -> None:
+    """Writes the underlying keyset to keyset_writer.
+
+    Writes the underlying keyset to keyset_writer only if the keyset does not
+    contain any secret key material.
+    This can be used to persist public keysets or envelope encryption keysets.
+    Users that need to persist keysets with secret material can use
+    CleartextKeysetHandle.
+
+    Args:
+      keyset_writer: A KeysetWriter object.
+    """
+    _assert_no_secret_key_material(self._keyset)
+    keyset_writer.write(self._keyset)
 
   def public_keyset_handle(self) -> 'KeysetHandle':
     """Returns a new KeysetHandle for the corresponding public keys."""
@@ -213,9 +244,9 @@ def _validate_key(key: tink_pb2.Keyset.Key):
 
 def _assert_no_secret_key_material(keyset: tink_pb2.Keyset):
   for key in keyset.key:
-    if (key.key_data.key_material_type == tink_pb2.KeyData.UNKNOWN_KEYMATERIAL
-        or key.key_data.key_material_type == tink_pb2.KeyData.SYMMETRIC or
-        key.key_data.key_material_type == tink_pb2.KeyData.ASYMMETRIC_PRIVATE):
+    if key.key_data.key_material_type in (tink_pb2.KeyData.UNKNOWN_KEYMATERIAL,
+                                          tink_pb2.KeyData.SYMMETRIC,
+                                          tink_pb2.KeyData.ASYMMETRIC_PRIVATE):
       raise tink_error.TinkError('keyset contains secret key material')
 
 

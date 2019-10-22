@@ -97,6 +97,41 @@ class KeysetHandleTest(absltest.TestCase):
     self.assertNotEqual(handle1.keyset_info().key_info[0].key_id,
                         handle2.keyset_info().key_info[0].key_id)
 
+  def test_read_no_secret(self):
+    private_handle = core.new_keyset_handle(
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+    public_handle = private_handle.public_keyset_handle()
+
+    output_stream_pub = io.BytesIO()
+    writer = core.BinaryKeysetWriter(output_stream_pub)
+    writer.write(public_handle._keyset)
+
+    output_stream_priv = io.BytesIO()
+    writer = core.BinaryKeysetWriter(output_stream_priv)
+    writer.write(private_handle._keyset)
+
+    reader = core.BinaryKeysetReader(output_stream_pub.getvalue())
+    core.read_no_secret_keyset_handle(reader)
+
+    with self.assertRaisesRegex(core.TinkError,
+                                'keyset contains secret key material'):
+      reader = core.BinaryKeysetReader(output_stream_priv.getvalue())
+      core.read_no_secret_keyset_handle(reader)
+
+  def test_write_no_secret(self):
+    private_handle = core.new_keyset_handle(
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+    public_handle = private_handle.public_keyset_handle()
+
+    output_stream = io.BytesIO()
+    writer = core.BinaryKeysetWriter(output_stream)
+
+    public_handle.write_no_secret(writer)
+
+    with self.assertRaisesRegex(core.TinkError,
+                                'keyset contains secret key material'):
+      private_handle.write_no_secret(writer)
+
   def test_write_encrypted(self):
     handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     # Encrypt the keyset with Aead.

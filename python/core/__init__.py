@@ -34,6 +34,7 @@ PrivateKeyManager = key_manager.PrivateKeyManager
 KeysetHandle = keyset_handle.KeysetHandle
 new_keyset_handle = KeysetHandle.generate_new
 read_keyset_handle = KeysetHandle.read
+read_no_secret_keyset_handle = KeysetHandle.read_no_secret
 
 KeysetReader = keyset_reader.KeysetReader
 JsonKeysetReader = keyset_reader.JsonKeysetReader
