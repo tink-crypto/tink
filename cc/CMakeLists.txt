@@ -539,6 +539,7 @@ tink_cc_library(
   DEPS
     absl::hash
     absl::flat_hash_map
+    tink::core::input_stream
     tink::proto::tink_cc_proto
     tink::util::status
     tink::util::statusor

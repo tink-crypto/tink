@@ -642,6 +642,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":core/template_util",
+        ":input_stream",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",

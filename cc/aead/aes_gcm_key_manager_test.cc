@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/subtle/aead_test_util.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -32,10 +33,12 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::IstreamInputStream;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::AesGcmKey;
 using ::google::crypto::tink::AesGcmKeyFormat;
 using ::testing::Eq;
+using ::testing::HasSubstr;
 
 TEST(AesGcmKeyManagerTest, Basics) {
   EXPECT_THAT(AesGcmKeyManager().get_version(), Eq(0));
@@ -179,6 +182,59 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
               IsOk());
 }
 
+TEST(AesGcmKeyManagerTest, DeriveShortKey) {
+  AesGcmKeyFormat format;
+  format.set_key_size(16);
+  format.set_version(0);
+
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
+
+  StatusOr<AesGcmKey> key_or =
+      AesGcmKeyManager().DeriveKey(format, &input_stream);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(), Eq("0123456789abcdef"));
+}
+
+TEST(AesGcmKeyManagerTest, DeriveLongKey) {
+  AesGcmKeyFormat format;
+  format.set_key_size(32);
+  format.set_version(0);
+
+  IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
+      "0123456789abcdef0123456789abcdefXXX")};
+
+  StatusOr<AesGcmKey> key_or =
+      AesGcmKeyManager().DeriveKey(format, &input_stream);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+              Eq("0123456789abcdef0123456789abcdef"));
+}
+
+TEST(AesGcmKeyManagerTest, DeriveKeyNotEnoughRandomness) {
+  AesGcmKeyFormat format;
+  format.set_key_size(16);
+  format.set_version(0);
+
+  IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
+      "0123456789")};
+
+  ASSERT_THAT(
+      AesGcmKeyManager().DeriveKey(format, &input_stream).status(),
+      StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(AesGcmKeyManagerTest, DeriveKeyWrongVersion) {
+  AesGcmKeyFormat format;
+  format.set_key_size(16);
+  format.set_version(1);
+
+  IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
+      "0123456789abcdefghijklmnop")};
+
+  ASSERT_THAT(AesGcmKeyManager().DeriveKey(format, &input_stream).status(),
+              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+}
 
 }  // namespace
 }  // namespace tink
