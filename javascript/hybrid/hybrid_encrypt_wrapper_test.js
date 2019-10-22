@@ -103,7 +103,7 @@ class ExceptionText {
  * Function for creating keys for testing purposes.
  *
  * @param {number} keyId
- * @param {PbOutputPrefixType} outputPrefix
+ * @param {!PbOutputPrefixType} outputPrefix
  * @param {boolean} enabled
  *
  * @return {!PbKeysetKey}
@@ -138,7 +138,7 @@ const createDummyPrimitiveSet = function(opt_withPrimary = true) {
 
   const primitiveSet = new PrimitiveSet.PrimitiveSet();
   for (let i = 1; i < numberOfPrimitives; i++) {
-    let /** @type {PbOutputPrefixType} */ outputPrefix;
+    let /** @type {!PbOutputPrefixType} */ outputPrefix;
     switch (i % 3) {
       case 0:
         outputPrefix = PbOutputPrefixType.TINK;

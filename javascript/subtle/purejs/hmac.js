@@ -41,7 +41,7 @@ class Hmac {
     /** @const @private {number} */
     this.tagSize_ = tagSize;
 
-    /** @private {GoogHmac} */
+    /** @private {!GoogHmac} */
     this.hmac_;
 
     switch (hash) {

@@ -123,7 +123,7 @@ class ExceptionText {
  * Function for creating keys for testing purposes.
  *
  * @param {number} keyId
- * @param {PbOutputPrefixType} outputPrefix
+ * @param {!PbOutputPrefixType} outputPrefix
  * @param {boolean} enabled
  *
  * @return {!PbKeysetKey}
