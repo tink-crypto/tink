@@ -5,14 +5,6 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file"
 #-----------------------------------------------------------------------------
 # Basic rules we need to add to bazel.
 #-----------------------------------------------------------------------------
-# Commit from 2019-10-09
-http_archive(
-    name = "rules_python",
-    strip_prefix = "rules_python-5aa465d5d91f1d9d90cac10624e3d2faf2057bd5/",
-    url = "https://github.com/bazelbuild/rules_python/archive/5aa465d5d91f1d9d90cac10624e3d2faf2057bd5.zip",
-    sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
-)
-
 # Release from 2019-10-09
 http_archive(
     name = "bazel_skylib",
@@ -616,10 +608,17 @@ rules_closure_toolchains()
 #-----------------------------------------------------------------------------
 # Python
 #-----------------------------------------------------------------------------
-
 load("//third_party/py:python_configure.bzl", "python_configure")
 
 python_configure(name = "local_config_python")
+
+# Commit from 2019-10-09
+http_archive(
+    name = "rules_python",
+    strip_prefix = "rules_python-5aa465d5d91f1d9d90cac10624e3d2faf2057bd5/",
+    url = "https://github.com/bazelbuild/rules_python/archive/5aa465d5d91f1d9d90cac10624e3d2faf2057bd5.zip",
+    sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
+)
 
 new_local_repository(
     name = "clif",
