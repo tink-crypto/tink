@@ -202,15 +202,6 @@ http_archive(
     sha256 = "553d1bdbde3ff4035747c184486bae2f084c75c3c4cdf5ef31a6aa48bdccaf9b",
 )
 
-# android sdk
-android_sdk_repository(
-    name = "androidsdk",
-    # Tink uses features in Android Keystore that are only supported at this
-    # level or newer.
-    # See https://developer.android.com/training/articles/keystore.html.
-    api_level = 23,  # M
-)
-
 # Release from 2019-08-14
 http_archive(
     name = "rules_jvm_external",
@@ -247,6 +238,26 @@ maven_install(
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],
+)
+
+#-----------------------------------------------------------------------------
+# Android
+#-----------------------------------------------------------------------------
+# android sdk
+android_sdk_repository(
+    name = "androidsdk",
+    # Tink uses features in Android Keystore that are only supported at this
+    # level or newer.
+    # See https://developer.android.com/training/articles/keystore.html.
+    api_level = 23,  # M
+)
+
+# Last release from 2018-08-07.
+http_archive(
+    name = "build_bazel_rules_android",
+    urls = ["https://github.com/bazelbuild/rules_android/archive/v0.1.1.zip"],
+    sha256 = "cd06d15dd8bb59926e4d65f9003bfc20f9da4b2519985c27e190cddc8b7a7806",
+    strip_prefix = "rules_android-0.1.1",
 )
 
 #-----------------------------------------------------------------------------
