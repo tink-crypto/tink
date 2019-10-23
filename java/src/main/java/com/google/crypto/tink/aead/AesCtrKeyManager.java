@@ -27,6 +27,7 @@ import com.google.crypto.tink.subtle.IndCpaCipher;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -80,7 +81,7 @@ public class AesCtrKeyManager extends KeyTypeManager<AesCtrKey> {
 
   @Override
   public AesCtrKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesCtrKey.parseFrom(byteString);
+    return AesCtrKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -95,7 +96,7 @@ public class AesCtrKeyManager extends KeyTypeManager<AesCtrKey> {
       @Override
       public AesCtrKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesCtrKeyFormat.parseFrom(byteString);
+        return AesCtrKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

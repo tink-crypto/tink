@@ -1,0 +1,27 @@
+--- google/cloud/kms/v1/BUILD.bazel
++++ google/cloud/kms/v1/BUILD.bazel
+@@ -155,3 +155,24 @@
+         ":kms_go_proto",
+     ],
+ )
++
++##############################################################################
++# C++
++##############################################################################
++load(
++    "@com_google_googleapis_imports//:imports.bzl",
++    "cc_grpc_library",
++    "cc_proto_library",
++)
++
++cc_proto_library(
++    name = "kms_cc_proto",
++    deps = [":kms_proto"],
++)
++
++cc_grpc_library(
++    name = "kms_cc_grpc",
++    srcs = [":kms_proto"],
++    grpc_only = True,
++    deps = [":kms_cc_proto"],
++)

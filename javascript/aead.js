@@ -58,5 +58,4 @@ class Aead {
   decrypt(ciphertext, opt_associatedData) {}
 }
 
-goog.exportSymbol('tink.Aead', Aead);
 exports = Aead;

@@ -30,6 +30,7 @@ import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.IndCpaCipher;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -76,7 +77,7 @@ public class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> 
 
   @Override
   public AesCtrHmacAeadKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesCtrHmacAeadKey.parseFrom(byteString);
+    return AesCtrHmacAeadKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -94,7 +95,8 @@ public class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> 
       @Override
       public AesCtrHmacAeadKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesCtrHmacAeadKeyFormat.parseFrom(byteString);
+        return AesCtrHmacAeadKeyFormat.parseFrom(
+            byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

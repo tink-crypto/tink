@@ -308,14 +308,14 @@ def _compile(ctx, unit):
     execdir = unit.data.execdir
 
     protoc = _get_offset_path(execdir, unit.compiler.path)
-    imports = ["--proto_path=" + i for i in unit.imports]
+    imports = ["--proto_path=" + i for i in unit.imports.to_list()]
     srcs = [_get_offset_path(execdir, p.path) for p in unit.data.protos]
-    protoc_cmd = [protoc] + list(unit.args) + imports + srcs
-    manifest = [f.short_path for f in unit.outputs]
+    protoc_cmd = [protoc] + unit.args.to_list() + imports + srcs
+    manifest = [f.short_path for f in unit.outputs.to_list()]
 
     transitive_units = depset(transitive = [u.inputs for u in unit.data.transitive_units])
-    inputs = depset(transitive = [unit.inputs, transitive_units]).to_list() + [unit.compiler]
-    outputs = list(unit.outputs)
+    inputs = depset(transitive = [unit.inputs, transitive_units]).to_list()
+    outputs = unit.outputs.to_list()
 
     cmds = [" ".join(protoc_cmd)]
     if execdir != ".":
@@ -366,6 +366,7 @@ cd $(bazel info execution_root)%s && \
         command = " && ".join(cmds),
         inputs = inputs,
         outputs = outputs,
+        tools = [unit.compiler],
     )
 
 def _proto_compile_impl(ctx):

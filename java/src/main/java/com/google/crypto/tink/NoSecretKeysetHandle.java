@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.Keyset;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -39,7 +40,7 @@ public final class NoSecretKeysetHandle {
   public static final KeysetHandle parseFrom(final byte[] serialized)
       throws GeneralSecurityException {
     try {
-      Keyset keyset = Keyset.parseFrom(serialized);
+      Keyset keyset = Keyset.parseFrom(serialized, ExtensionRegistryLite.getEmptyRegistry());
       validate(keyset);
       return KeysetHandle.fromKeyset(keyset);
     } catch (InvalidProtocolBufferException e) {

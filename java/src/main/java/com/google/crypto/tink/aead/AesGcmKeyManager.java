@@ -26,7 +26,10 @@ import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 /**
@@ -68,7 +71,7 @@ public class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
 
   @Override
   public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesGcmKey.parseFrom(byteString);
+    return AesGcmKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -82,7 +85,7 @@ public class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       @Override
       public AesGcmKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesGcmKeyFormat.parseFrom(byteString);
+        return AesGcmKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override
@@ -91,6 +94,26 @@ public class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .setVersion(getVersion())
             .build();
+      }
+
+      @Override
+      public AesGcmKey deriveKey(AesGcmKeyFormat format, InputStream inputStream)
+          throws GeneralSecurityException {
+        Validators.validateVersion(format.getVersion(), getVersion());
+
+        byte[] pseudorandomness = new byte[format.getKeySize()];
+        try {
+          int read = inputStream.read(pseudorandomness);
+          if (read != format.getKeySize()) {
+            throw new GeneralSecurityException("Not enough pseudorandomness given");
+          }
+          return AesGcmKey.newBuilder()
+              .setKeyValue(ByteString.copyFrom(pseudorandomness))
+              .setVersion(getVersion())
+              .build();
+        } catch (IOException e) {
+          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
+        }
       }
     };
   }

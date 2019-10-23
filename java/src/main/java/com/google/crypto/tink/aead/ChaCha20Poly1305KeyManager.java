@@ -26,6 +26,7 @@ import com.google.crypto.tink.subtle.ChaCha20Poly1305;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -72,7 +73,7 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
 
   @Override
   public ChaCha20Poly1305Key parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return ChaCha20Poly1305Key.parseFrom(byteString);
+    return ChaCha20Poly1305Key.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -86,7 +87,8 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
       @Override
       public ChaCha20Poly1305KeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return ChaCha20Poly1305KeyFormat.parseFrom(byteString);
+        return ChaCha20Poly1305KeyFormat.parseFrom(
+            byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

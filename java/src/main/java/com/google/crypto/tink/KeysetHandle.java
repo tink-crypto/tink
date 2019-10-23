@@ -22,6 +22,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -126,7 +127,7 @@ public final class KeysetHandle {
   public static final KeysetHandle readNoSecret(final byte[] serialized)
       throws GeneralSecurityException {
     try {
-      Keyset keyset = Keyset.parseFrom(serialized);
+      Keyset keyset = Keyset.parseFrom(serialized, ExtensionRegistryLite.getEmptyRegistry());
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
     } catch (InvalidProtocolBufferException e) {
@@ -164,7 +165,9 @@ public final class KeysetHandle {
     // Check if we can decrypt, to detect errors
     try {
       final Keyset keyset2 =
-          Keyset.parseFrom(masterKey.decrypt(encryptedKeyset, /* associatedData= */ new byte[0]));
+          Keyset.parseFrom(
+              masterKey.decrypt(encryptedKeyset, /* associatedData= */ new byte[0]),
+              ExtensionRegistryLite.getEmptyRegistry());
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }
@@ -185,7 +188,8 @@ public final class KeysetHandle {
           Keyset.parseFrom(
               masterKey.decrypt(
                   encryptedKeyset.getEncryptedKeyset().toByteArray(),
-                  /* associatedData= */ new byte[0]));
+                  /* associatedData= */ new byte[0]),
+              ExtensionRegistryLite.getEmptyRegistry());
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       assertEnoughKeyMaterial(keyset);
       return keyset;

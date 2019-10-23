@@ -1,0 +1,19 @@
+licenses(["notice"])
+
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
+java_library(
+    name = "streaming_prf",
+    srcs = ["StreamingPrf.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [],
+)
+
+java_library(
+    name = "streaming_prf-android",
+    srcs = ["StreamingPrf.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [],
+)

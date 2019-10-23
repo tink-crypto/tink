@@ -110,12 +110,4 @@ class AesCtrHmacAeadKeyTemplates {
   }
 }
 
-goog.exportProperty(
-    AesCtrHmacAeadKeyTemplates, 'aes128CtrHmacSha256',
-    AesCtrHmacAeadKeyTemplates.aes128CtrHmacSha256);
-goog.exportProperty(
-    AesCtrHmacAeadKeyTemplates, 'aes256CtrHmacSha256',
-    AesCtrHmacAeadKeyTemplates.aes256CtrHmacSha256);
-goog.exportSymbol(
-    'tink.aead.AesCtrHmacAeadKeyTemplates', AesCtrHmacAeadKeyTemplates);
 exports = AesCtrHmacAeadKeyTemplates;

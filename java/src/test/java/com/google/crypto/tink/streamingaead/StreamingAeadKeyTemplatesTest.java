@@ -23,6 +23,7 @@ import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ExtensionRegistryLite;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -35,8 +36,9 @@ public class StreamingAeadKeyTemplatesTest {
     KeyTemplate template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB;
     assertEquals(new AesCtrHmacStreamingKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesCtrHmacStreamingKeyFormat format = AesCtrHmacStreamingKeyFormat.parseFrom(
-        template.getValue());
+    AesCtrHmacStreamingKeyFormat format =
+        AesCtrHmacStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(16,              format.getKeySize());
     assertEquals(16,              format.getParams().getDerivedKeySize());
@@ -51,8 +53,9 @@ public class StreamingAeadKeyTemplatesTest {
     KeyTemplate template = StreamingAeadKeyTemplates.AES256_CTR_HMAC_SHA256_4KB;
     assertEquals(new AesCtrHmacStreamingKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesCtrHmacStreamingKeyFormat format = AesCtrHmacStreamingKeyFormat.parseFrom(
-        template.getValue());
+    AesCtrHmacStreamingKeyFormat format =
+        AesCtrHmacStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(32,              format.getKeySize());
     assertEquals(32,              format.getParams().getDerivedKeySize());
@@ -67,8 +70,9 @@ public class StreamingAeadKeyTemplatesTest {
     KeyTemplate template = StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB;
     assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesGcmHkdfStreamingKeyFormat format = AesGcmHkdfStreamingKeyFormat.parseFrom(
-        template.getValue());
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(16,              format.getKeySize());
     assertEquals(16,              format.getParams().getDerivedKeySize());
@@ -81,8 +85,9 @@ public class StreamingAeadKeyTemplatesTest {
     KeyTemplate template = StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB;
     assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesGcmHkdfStreamingKeyFormat format = AesGcmHkdfStreamingKeyFormat.parseFrom(
-        template.getValue());
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(32,              format.getKeySize());
     assertEquals(32,              format.getParams().getDerivedKeySize());
@@ -105,8 +110,9 @@ public class StreamingAeadKeyTemplatesTest {
         macHashType, tagSize, ciphertextSegmentSize);
     assertEquals(new AesCtrHmacStreamingKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesCtrHmacStreamingKeyFormat format = AesCtrHmacStreamingKeyFormat.parseFrom(
-        template.getValue());
+    AesCtrHmacStreamingKeyFormat format =
+        AesCtrHmacStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(mainKeySize,           format.getKeySize());
     assertEquals(derivedKeySize,        format.getParams().getDerivedKeySize());
@@ -128,8 +134,9 @@ public class StreamingAeadKeyTemplatesTest {
         mainKeySize, hkdfHashType, derivedKeySize, ciphertextSegmentSize);
     assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
-    AesGcmHkdfStreamingKeyFormat format = AesGcmHkdfStreamingKeyFormat.parseFrom(
-        template.getValue());
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(mainKeySize,           format.getKeySize());
     assertEquals(derivedKeySize,        format.getParams().getDerivedKeySize());

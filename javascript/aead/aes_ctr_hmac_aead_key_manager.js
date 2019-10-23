@@ -356,6 +356,4 @@ AesCtrHmacAeadKeyManager.KEY_TYPE =
  */
 AesCtrHmacAeadKeyManager.VERSION_ = 0;
 
-goog.exportSymbol(
-    'tink.aead.AesCtrHmacAeadKeyManager', AesCtrHmacAeadKeyManager);
 exports = AesCtrHmacAeadKeyManager;

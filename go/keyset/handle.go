@@ -120,7 +120,7 @@ func (h *Handle) String() string {
 	if err != nil {
 		return ""
 	}
-	return info.String()
+	return proto.CompactTextString(info)
 }
 
 // Write encrypts and writes the enclosing keyset.
@@ -208,9 +208,9 @@ func (h *Handle) hasSecrets() bool {
 		if k.KeyData.KeyMaterialType == tinkpb.KeyData_ASYMMETRIC_PRIVATE {
 			return true
 		}
-    if k.KeyData.KeyMaterialType == tinkpb.KeyData_SYMMETRIC {
-    	return true
-    }
+		if k.KeyData.KeyMaterialType == tinkpb.KeyData_SYMMETRIC {
+			return true
+		}
 	}
 	return false
 }

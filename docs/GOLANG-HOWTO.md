@@ -249,6 +249,74 @@ resulting ciphertext, which allows for checking the integrity of contextInfo
 (but there are no guarantees in regards to the secrecy or authenticity of
 contextInfo).
 
+#### Preparation
+
+The recipient has to generate a private keyset and share the public keyset with
+the sender.
+
+**Warning**: DO NOT hardcode the private keyset in source code, consider
+encrypting it using Cloud KMS or AWS KMS (see
+[Key Management Systems](KEY-MANAGEMENT.md#key-management-systems)).
+
+```go
+package main
+
+import (
+        "fmt"
+        "log"
+
+        "github.com/golang/protobuf/proto"
+        "github.com/google/tink/go/hybrid"
+        "github.com/google/tink/go/insecurecleartextkeyset"
+        "github.com/google/tink/go/keyset"
+)
+
+func main() {
+        // Generate and persist private key.
+        khPriv, err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        exportedPriv := &keyset.MemReaderWriter{}
+        if err := insecurecleartextkeyset.Write(khPriv, exportedPriv); err != nil {
+          return nil, err
+        }
+
+        ksPriv, err := proto.Marshal(exported.Keyset)
+        if err != nil {
+          return nil, err
+        }
+
+        // TODO: store ksPriv somewhere safe.
+        // DO NOT hardcode the private keyset in source code, consider
+        // encrypting it with using Cloud KMS or AWS KMS.
+
+        // Export and publish public keyset.
+        khPub, err := khPriv.Public()
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        exportedPub := &keyset.MemReaderWriter{}
+        if err = insecurecleartextkeyset.Write(khPub, exportedPub); err != nil {
+          return nil, err
+        }
+
+        ksPub, err := proto.Marshal(exported.Keyset)
+        if err != nil {
+          return nil, err
+        }
+
+        // TODO: share ksPub with the sender.
+}
+```
+
+#### Encryption
+
+After receiving a public keyset from the recipient, the sender can encrypt as
+follows.
+
 ```go
 package main
 
@@ -257,20 +325,13 @@ import (
         "log"
 
         "github.com/google/tink/go/hybrid"
+        "github.com/google/tink/go/insecurecleartextkeyset"
         "github.com/google/tink/go/keyset"
 )
 
 func main() {
-
-        khPriv, err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
-        if err != nil {
-                log.Fatal(err)
-        }
-
-        khPub, err := khPriv.Public()
-        if err != nil {
-                log.Fatal(err)
-        }
+        // TODO: obtain ksPub from the recipient (see the Preparation section).
+        khPub, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(ksPub)))
 
         he, err := hybrid.NewHybridEncrypt(khPub)
         if err != nil {
@@ -282,21 +343,52 @@ func main() {
                 log.Fatal(err)
         }
 
+        fmt.Printf("Cipher text: %s\n", ct)
+
+}
+```
+
+#### Decryption
+
+The recipient uses its private keyset to decrypt as follows.
+
+**Warning**: DO NOT hardcode the private keyset in source code, consider
+encrypting it using Cloud KMS or AWS KMS (see
+[Key Management Systems](KEY-MANAGEMENT.md#key-management-systems)).
+
+```go
+package main
+
+import (
+        "fmt"
+        "log"
+
+        "github.com/google/tink/go/hybrid"
+        "github.com/google/tink/go/insecurecleartextkeyset"
+        "github.com/google/tink/go/keyset"
+)
+
+func main() {
+        // TODO: load ksPriv from storage (see the Preparation section).
+        // DO NOT hardcode the keyset in source code, consider encrypting it
+        // with using Cloud KMS or AWS KMS.
+        khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(ksPriv)))
+
         hd, err := hybrid.NewHybridDecrypt(khPriv)
         if err != nil {
                 log.Fatal(err)
         }
 
+        // TODO: receive the ct from the sender (see the Encryption section).
         pt, err := hd.Decrypt(ct, []byte("context info"))
         if err != nil {
                 log.Fatal(err)
         }
 
-        fmt.Printf("Cipher text: %s\nPlain text: %s\n", ct, pt)
+        fmt.Printf("Plaintext text: %s\n", pt)
 
 }
 ```
-
 
 ### Envelope encryption
 

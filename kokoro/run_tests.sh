@@ -29,7 +29,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   rm -f ~/.bazelrc
 
   # TODO(b/131821833) Use the latest version of Bazel.
-  use_bazel.sh 0.26.1
+  use_bazel.sh 0.29.1
 
   if [[ "${PLATFORM}" == 'darwin' ]]; then
     export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
@@ -49,18 +49,6 @@ if [[ -z "${TMP}" ]]; then
   echo "The TMP environment variable must be set."
   exit 4
 fi
-
-declare -a DISABLE_SANDBOX_ARGS
-DISABLE_SANDBOX_ARGS=(
-  --strategy=GenRule=standalone
-  --strategy=Turbine=standalone
-  --strategy=CppCompile=standalone
-  --strategy=ProtoCompile=standalone
-  --strategy=GenProto=standalone
-  --strategy=GenProtoDescriptorSet=standalone
-  --sandbox_tmpfs_path=${TMP}
-)
-readonly DISABLE_SANDBOX_ARGS
 
 # TODO(b/140615798)
 DISABLE_GRPC_ON_MAC_OS=""
@@ -84,10 +72,8 @@ echo "using go: $(which go)"
 go version
 
 run_linux_tests() {
-  time bazel fetch ...
-
   # Build all targets, except objc.
-  time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
+  time bazel build \
   -- //... \
   ${DISABLE_GRPC_ON_MAC_OS} \
   ${DISABLE_PYTHON_ON_MAC_OS} \
@@ -104,13 +90,11 @@ run_linux_tests() {
 
 run_macos_tests() {
   # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=12.2}"
-  : "${XCODE_VERSION:=10.2}"
-
-  time bazel fetch ...
+  : "${IOS_SDK_VERSION:=13.0}"
+  : "${XCODE_VERSION:=11.0}"
 
   # Build all the iOS targets.
-  time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
+  time bazel build \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
@@ -123,7 +107,7 @@ run_macos_tests() {
   //objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run the iOS tests.
-  time bazel test "${DISABLE_SANDBOX_ARGS[@]}" \
+  time bazel test \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \

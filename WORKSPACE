@@ -1,6 +1,22 @@
-workspace(name="tink")
+workspace(name = "tink")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+
+#-----------------------------------------------------------------------------
+# Basic rules we need to add to bazel.
+#-----------------------------------------------------------------------------
+http_archive(
+    name = "rules_python",
+    strip_prefix = "rules_python-5aa465d5d91f1d9d90cac10624e3d2faf2057bd5/",
+    url = "https://github.com/bazelbuild/rules_python/archive/5aa465d5d91f1d9d90cac10624e3d2faf2057bd5.zip",
+    sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
+)
+
+http_archive(
+    name = "bazel_skylib",
+    url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+    sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
+)
 
 #-----------------------------------------------------------------------------
 # Google PKI certs for connecting to GCP KMS
@@ -10,7 +26,7 @@ http_file(
     name = "google_root_pem",
     executable = 0,
     urls = [
-        "https://pki.goog/roots.pem"
+        "https://pki.goog/roots.pem",
     ],
     sha256 = "7f03c894282e3fc39105466a8ee5055ffd05e79dfd4010360117078afbfa68bd",
 )
@@ -70,29 +86,30 @@ http_archive(
     build_file = "//:third_party/aws_sdk_cpp.BUILD.bazel",
 )
 
-
-# Needed by googleapis.
-http_archive(
-    name = "com_google_api_codegen",
-    urls = ["https://github.com/googleapis/gapic-generator/archive/96c3c5a4c8397d4bd29a6abce861547a271383e1.zip"],
-    strip_prefix = "gapic-generator-96c3c5a4c8397d4bd29a6abce861547a271383e1",
-)
-
 # Needed for Cloud KMS API via gRPC.
 http_archive(
     name = "googleapis",
     urls = [
-        "https://github.com/googleapis/googleapis/archive/43a324913190da118e1c3c1a89ef6cfc47c5caf3.zip",
+        "https://github.com/googleapis/googleapis/archive/192d3d8221175f7cc0aa8eeac1d820f47c53da7f.zip",
     ],
-    sha256 = "d1860c5e806c0cf04d6d0806ab6f43f27c9d9a47cd76429f49f8a37750effccf",
-    strip_prefix = "googleapis-43a324913190da118e1c3c1a89ef6cfc47c5caf3",
+    sha256 = "6b5a017082eade41c7efcc4d2f441422e41c0a0c57dd88e19d3ebfb1b8ff4f12",
+    strip_prefix = "googleapis-192d3d8221175f7cc0aa8eeac1d820f47c53da7f",
+    patches = ["@//third_party:googleapis.patch"],
+)
+
+load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language(
+    name = "com_google_googleapis_imports",
+    cc = True,
+    grpc = True,
 )
 
 # gRPC.
 http_archive(
     name = "com_github_grpc_grpc",
     urls = [
-        "https://github.com/grpc/grpc/archive/v1.22.1.tar.gz"
+        "https://github.com/grpc/grpc/archive/v1.22.1.tar.gz",
     ],
     sha256 = "cce1d4585dd017980d4a407d8c5e9f8fc8c1dbb03f249b99e88a387ebb45a035",
     strip_prefix = "grpc-1.22.1",
@@ -102,6 +119,7 @@ http_archive(
 # This is a workaround around the missing support for recursive WORKSPACE
 # file loading (https://github.com/bazelbuild/bazel/issues/1943).
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+
 grpc_deps()
 
 http_archive(
@@ -142,6 +160,7 @@ http_archive(
 # This is a workaround around the missing support for recursive WORKSPACE
 # file loading (https://github.com/bazelbuild/bazel/issues/1943).
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
 protobuf_deps()
 
 # java_lite_proto_library rules implicitly depend on
@@ -149,23 +168,10 @@ protobuf_deps()
 # runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_javalite",
-    strip_prefix = "protobuf-384989534b2246d413dbcd750744faab2607b516",
-    urls = ["https://github.com/google/protobuf/archive/384989534b2246d413dbcd750744faab2607b516.zip"],
-    sha256 = "79d102c61e2a479a0b7e5fc167bcfaa4832a0c6aad4a75fa7da0480564931bcc",
+    strip_prefix = "protobuf-7b64714af67aa967dcf941df61fe5207975966be",
+    urls = ["https://github.com/google/protobuf/archive/7b64714af67aa967dcf941df61fe5207975966be.zip"],
+    sha256 = "311b29b8d0803ab4f89be22ff365266abb6c48fd3483d59b04772a144d7a24a1",
 )
-
-# Needed by gRPC, to build pb.h/pb.cc files from protos that contain services.
-http_archive(
-    name = "build_stack_rules_proto",
-    strip_prefix = "rules_proto-f5d6eea6a4528bef3c1d3a44d486b51a214d61c2",
-    urls = [
-        "https://github.com/stackb/rules_proto/archive/f5d6eea6a4528bef3c1d3a44d486b51a214d61c2.tar.gz",
-    ],
-    sha256 = "128c4486b1707db917411c6e448849dd76ea3b8ba704f9e0627d9b01f2ee45fe",
-)
-
-load("@build_stack_rules_proto//cpp:deps.bzl", "cpp_grpc_library")
-cpp_grpc_library()
 
 #-----------------------------------------------------------------------------
 # java
@@ -187,10 +193,11 @@ android_sdk_repository(
     # Tink uses features in Android Keystore that are only supported at this
     # level or newer.
     # See https://developer.android.com/training/articles/keystore.html.
-    api_level = 23, # M
+    api_level = 23,  # M
 )
 
 RULES_JVM_EXTERNAL_TAG = "2.7"
+
 RULES_JVM_EXTERNAL_SHA = "f04b1466a00a2845106801e0c5cec96841f49ea4e7d1df88dc8e4bf31523df74"
 
 http_archive(
@@ -204,24 +211,24 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(
     artifacts = [
-      "args4j:args4j:2.33",
-      "com.amazonaws:aws-java-sdk-core:1.11.625",
-      "com.amazonaws:aws-java-sdk-kms:1.11.625",
-      "com.google.auto:auto-common:0.10",
-      "com.google.auto.service:auto-service:1.0-rc6",
-      "com.google.auto.service:auto-service-annotations:1.0-rc6",
-      "com.google.api-client:google-api-client:1.22.0",
-      "com.google.apis:google-api-services-cloudkms:v1-rev89-1.25.0",
-      "com.google.code.findbugs:jsr305:3.0.1",
-      "com.google.errorprone:error_prone_annotations:2.3.3",
-      "com.google.http-client:google-http-client:1.31.0",
-      "com.google.http-client:google-http-client-jackson2:1.31.0",
-      "com.google.oauth-client:google-oauth-client:1.30.1",
-      "com.google.truth:truth:0.42",
-      "org.json:json:20170516",
-      "joda-time:joda-time:2.10.3",
-      "junit:junit:4.12",
-      "org.mockito:mockito-core:2.23.0",
+        "args4j:args4j:2.33",
+        "com.amazonaws:aws-java-sdk-core:1.11.625",
+        "com.amazonaws:aws-java-sdk-kms:1.11.625",
+        "com.google.auto:auto-common:0.10",
+        "com.google.auto.service:auto-service:1.0-rc6",
+        "com.google.auto.service:auto-service-annotations:1.0-rc6",
+        "com.google.api-client:google-api-client:1.22.0",
+        "com.google.apis:google-api-services-cloudkms:v1-rev89-1.25.0",
+        "com.google.code.findbugs:jsr305:3.0.1",
+        "com.google.errorprone:error_prone_annotations:2.3.3",
+        "com.google.http-client:google-http-client:1.31.0",
+        "com.google.http-client:google-http-client-jackson2:1.31.0",
+        "com.google.oauth-client:google-oauth-client:1.30.1",
+        "com.google.truth:truth:0.42",
+        "org.json:json:20170516",
+        "joda-time:joda-time:2.10.3",
+        "junit:junit:4.12",
+        "org.mockito:mockito-core:2.23.0",
     ],
     repositories = [
         "https://jcenter.bintray.com/",
@@ -236,9 +243,9 @@ maven_install(
 
 http_archive(
     name = "build_bazel_rules_apple",
-    strip_prefix = "rules_apple-0.17.0",
-    url = "https://github.com/bazelbuild/rules_apple/archive/0.17.0.zip",
-    sha256 = "5ec8a6dd73ddeec3bf051ea82906dcd369c77f7f6030bc517c82e0e7a84c1cb9",
+    strip_prefix = "rules_apple-0.19.0",
+    url = "https://github.com/bazelbuild/rules_apple/archive/0.19.0.zip",
+    sha256 = "9f9eb6cdd25d7932cb939df24807c2d70772aad7a79f1357e25ced9d0d443cfd",
 )
 
 load(
@@ -262,92 +269,323 @@ load(
 
 apple_support_dependencies()
 
-http_file(
-    name = "xctestrunner",
-    executable = 1,
-    urls = ["https://github.com/google/xctestrunner/releases/download/0.2.6/ios_test_runner.par"],
-    sha256 = "15fc7d09315a230f3d8ee2913eef8699456366e44b37a9266e36b28517003628",
-)
-
 #-----------------------------------------------------------------------------
 # go
 #-----------------------------------------------------------------------------
 http_archive(
     name = "io_bazel_rules_go",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/0.18.6/rules_go-0.18.6.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/0.18.6/rules_go-0.18.6.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.20.0/rules_go-v0.20.0.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.20.0/rules_go-v0.20.0.tar.gz",
     ],
-    sha256 = "f04d2373bcaf8aa09bccb08a98a57e721306c8f6043a2a0ee610fd6853dcde3d",
+    sha256 = "078f2a9569fa9ed846e60805fb5fb167d6f6c4ece48e6d409bf5fb2154eaf0d8",
 )
 
 http_archive(
     name = "bazel_gazelle",
-    strip_prefix = "bazel-gazelle-395b3a1c2f22d8cd63e19c92d4e1556eb3d96dde",
-    urls = ["https://github.com/bazelbuild/bazel-gazelle/archive/395b3a1c2f22d8cd63e19c92d4e1556eb3d96dde.zip"],
-    sha256 = "a40deb9c0cfa2e424ad9b15fe68aa3d259ccb0ef6405dd4fe0506d86d75b8475",
+    urls = [
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.0/bazel-gazelle-v0.19.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.0/bazel-gazelle-v0.19.0.tar.gz",
+    ],
+    sha256 = "41bff2a0b32b02f20c227d234aa25ef3783998e5453f7eade929704dcff7cd4b",
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+
 go_rules_dependencies()
-go_register_toolchains(nogo="@//go:tink_nogo")
+
+go_register_toolchains(nogo = "@//go:tink_nogo")
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+
 gazelle_dependencies()
 
+# How to update go dependencies:
+# 1) Remove all go_repository rules in WORKSPACE.bazel
+# 2) Update the files go.mod and go.sum. This can be done as follows:
+#    2.1) Replacing all versions in go.mod with "latest".
+#    2.2) Run "go mod tidy".
+# 3) Update the WORKSPACE.bazel file by running
+#    bazel run //:gazelle -- update-repos -from_file=go.mod
+# Put the go repository rules in the right place.
+
 go_repository(
-    name = "org_golang_x_crypto",
-    commit = "0e37d006457bf46f9e6692014ba72ef82c33022c",
-    importpath = "golang.org/x/crypto",
+    name = "co_honnef_go_tools",
+    importpath = "honnef.co/go/tools",
+    sum = "h1:LJwr7TCTghdatWv40WobzlKXc9c4s8oGa7QKJUtHhWA=",
+    version = "v0.0.0-20190418001031-e561f6794a2a",
 )
 
 go_repository(
-    name = "org_golang_x_sys",
-    commit = "d0be0721c37eeb5299f245a996a483160fc36940",
-    importpath = "golang.org/x/sys",
+    name = "com_github_aws_aws_sdk_go",
+    importpath = "github.com/aws/aws-sdk-go",
+    sum = "h1:k7Fy6T/uNuLX6zuayU/TJoP7yMgGcJSkZpF7QVjwYpA=",
+    version = "v1.25.16",
 )
 
 go_repository(
-    name = "org_golang_google_api",
-    commit = "3097bf831ede4a24e08a3316254e29ca726383e3",
-    importpath = "google.golang.org/api",
+    name = "com_github_burntsushi_toml",
+    importpath = "github.com/BurntSushi/toml",
+    sum = "h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=",
+    version = "v0.3.1",
 )
 
 go_repository(
-    name = "org_golang_x_oauth2",
-    commit = "ef147856a6ddbb60760db74283d2424e98c87bff",
-    importpath = "golang.org/x/oauth2",
+    name = "com_github_client9_misspell",
+    importpath = "github.com/client9/misspell",
+    sum = "h1:ta993UF76GwbvJcIo3Y68y/M3WxlpEHPWIGDkJYwzJI=",
+    version = "v0.3.4",
+)
+
+go_repository(
+    name = "com_github_davecgh_go_spew",
+    importpath = "github.com/davecgh/go-spew",
+    sum = "h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=",
+    version = "v1.1.0",
+)
+
+go_repository(
+    name = "com_github_golang_glog",
+    importpath = "github.com/golang/glog",
+    sum = "h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=",
+    version = "v0.0.0-20160126235308-23def4e6c14b",
+)
+
+go_repository(
+    name = "com_github_golang_mock",
+    importpath = "github.com/golang/mock",
+    sum = "h1:28o5sBqPkBsMGnC6b4MvE2TzSr5/AT4c/1fLqVGIwlk=",
+    version = "v1.2.0",
+)
+
+go_repository(
+    name = "com_github_golang_protobuf",
+    importpath = "github.com/golang/protobuf",
+    sum = "h1:6nsPYzhq5kReh6QImI3k5qWzO4PEbvbIW2cwSfR/6xs=",
+    version = "v1.3.2",
+)
+
+go_repository(
+    name = "com_github_google_btree",
+    importpath = "github.com/google/btree",
+    sum = "h1:964Od4U6p2jUkFxvCydnIczKteheJEzHRToSGK3Bnlw=",
+    version = "v0.0.0-20180813153112-4030bb1f1f0c",
+)
+
+go_repository(
+    name = "com_github_google_go_cmp",
+    importpath = "github.com/google/go-cmp",
+    sum = "h1:crn/baboCvb5fXaQ0IJ1SGTsTVrWpDsCWC8EGETZijY=",
+    version = "v0.3.0",
+)
+
+go_repository(
+    name = "com_github_google_martian",
+    importpath = "github.com/google/martian",
+    sum = "h1:/CP5g8u/VJHijgedC/Legn3BAbAaWPgecwXBIDzw5no=",
+    version = "v2.1.0+incompatible",
+)
+
+go_repository(
+    name = "com_github_google_pprof",
+    importpath = "github.com/google/pprof",
+    sum = "h1:eqyIo2HjKhKe/mJzTG8n4VqvLXIOEG+SLdDqX7xGtkY=",
+    version = "v0.0.0-20181206194817-3ea8567a2e57",
+)
+
+go_repository(
+    name = "com_github_googleapis_gax_go_v2",
+    importpath = "github.com/googleapis/gax-go/v2",
+    sum = "h1:sjZBwGj9Jlw33ImPtvFviGYvseOtDM7hkSKB7+Tv3SM=",
+    version = "v2.0.5",
+)
+
+go_repository(
+    name = "com_github_hashicorp_golang_lru",
+    importpath = "github.com/hashicorp/golang-lru",
+    sum = "h1:0hERBMJE1eitiLkihrMvRVBYAkpHzc/J3QdDN+dAcgU=",
+    version = "v0.5.1",
+)
+
+go_repository(
+    name = "com_github_jmespath_go_jmespath",
+    importpath = "github.com/jmespath/go-jmespath",
+    sum = "h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=",
+    version = "v0.0.0-20180206201540-c2b33e8439af",
+)
+
+go_repository(
+    name = "com_github_jstemmer_go_junit_report",
+    importpath = "github.com/jstemmer/go-junit-report",
+    sum = "h1:rBMNdlhTLzJjJSDIjNEXX1Pz3Hmwmz91v+zycvx9PJc=",
+    version = "v0.0.0-20190106144839-af01ea7f8024",
+)
+
+go_repository(
+    name = "com_github_pmezard_go_difflib",
+    importpath = "github.com/pmezard/go-difflib",
+    sum = "h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=",
+    version = "v1.0.0",
+)
+
+go_repository(
+    name = "com_github_stretchr_objx",
+    importpath = "github.com/stretchr/objx",
+    sum = "h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=",
+    version = "v0.1.0",
+)
+
+go_repository(
+    name = "com_github_stretchr_testify",
+    importpath = "github.com/stretchr/testify",
+    sum = "h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=",
+    version = "v1.4.0",
 )
 
 go_repository(
     name = "com_google_cloud_go",
-    commit = "777200caa7fb8936aed0f12b1fd79af64cc83ec9",
     importpath = "cloud.google.com/go",
+    sum = "h1:ROfEUZz+Gh5pa62DJWXSaonyu3StP6EA6lPEXPI6mCo=",
+    version = "v0.38.0",
 )
 
 go_repository(
-    name = "com_github_aws_sdk_go",
-    commit = "182cda27d0921b14139ff6d352c09e0cb20e4578",
-    importpath = "github.com/aws/aws-sdk-go",
+    name = "in_gopkg_check_v1",
+    importpath = "gopkg.in/check.v1",
+    sum = "h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=",
+    version = "v0.0.0-20161208181325-20d25e280405",
 )
 
+go_repository(
+    name = "in_gopkg_yaml_v2",
+    importpath = "gopkg.in/yaml.v2",
+    sum = "h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=",
+    version = "v2.2.2",
+)
+
+go_repository(
+    name = "io_opencensus_go",
+    importpath = "go.opencensus.io",
+    sum = "h1:mU6zScU4U1YAFPHEHYk+3JC4SY7JxgkqS10ZOSyksNg=",
+    version = "v0.21.0",
+)
+
+go_repository(
+    name = "org_golang_google_api",
+    importpath = "google.golang.org/api",
+    sum = "h1:n/qM3q0/rV2F0pox7o0CvNhlPvZAo7pLbef122cbLJ0=",
+    version = "v0.11.0",
+)
+
+go_repository(
+    name = "org_golang_google_appengine",
+    importpath = "google.golang.org/appengine",
+    sum = "h1:KxkO13IPW4Lslp2bz+KHP2E3gtFlrIGNThxkZQ3g+4c=",
+    version = "v1.5.0",
+)
+
+go_repository(
+    name = "org_golang_google_genproto",
+    importpath = "google.golang.org/genproto",
+    sum = "h1:nfPFGzJkUDX6uBmpN/pSw7MbOAWegH5QDQuoXFHedLg=",
+    version = "v0.0.0-20190502173448-54afdca5d873",
+)
+
+go_repository(
+    name = "org_golang_google_grpc",
+    importpath = "google.golang.org/grpc",
+    sum = "h1:Hz2g2wirWK7H0qIIhGIqRGTuMwTE8HEKFnDZZ7lm9NU=",
+    version = "v1.20.1",
+)
+
+go_repository(
+    name = "org_golang_x_crypto",
+    importpath = "golang.org/x/crypto",
+    sum = "h1:ObdrDkeb4kJdCP557AjRjq69pTHfNouLtWZG7j9rPN8=",
+    version = "v0.0.0-20191011191535-87dc89f01550",
+)
+
+go_repository(
+    name = "org_golang_x_exp",
+    importpath = "golang.org/x/exp",
+    sum = "h1:c2HOrn5iMezYjSlGPncknSEr/8x5LELb/ilJbXi9DEA=",
+    version = "v0.0.0-20190121172915-509febef88a4",
+)
+
+go_repository(
+    name = "org_golang_x_lint",
+    importpath = "golang.org/x/lint",
+    sum = "h1:QzoH/1pFpZguR8NrRHLcO6jKqfv2zpuSqZLgdm7ZmjI=",
+    version = "v0.0.0-20190409202823-959b441ac422",
+)
+
+go_repository(
+    name = "org_golang_x_net",
+    importpath = "golang.org/x/net",
+    sum = "h1:uOCk1iQW6Vc18bnC13MfzScl+wdKBmM9Y9kU7Z83/lw=",
+    version = "v0.0.0-20190503192946-f4e77d36d62c",
+)
+
+go_repository(
+    name = "org_golang_x_oauth2",
+    importpath = "golang.org/x/oauth2",
+    sum = "h1:SVwTIAaPC2U/AvvLNZ2a7OVsmBpC8L5BlwK1whH3hm0=",
+    version = "v0.0.0-20190604053449-0f29369cfe45",
+)
+
+go_repository(
+    name = "org_golang_x_sync",
+    importpath = "golang.org/x/sync",
+    sum = "h1:8gQV6CLnAEikrhgkHFbMAEhagSSnXWGV915qUMm9mrU=",
+    version = "v0.0.0-20190423024810-112230192c58",
+)
+
+go_repository(
+    name = "org_golang_x_sys",
+    importpath = "golang.org/x/sys",
+    sum = "h1:ag/x1USPSsqHud38I9BAC88qdNLDHHtQ4mlgQIZPPNA=",
+    version = "v0.0.0-20190507160741-ecd444e8653b",
+)
+
+go_repository(
+    name = "org_golang_x_text",
+    importpath = "golang.org/x/text",
+    sum = "h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=",
+    version = "v0.3.2",
+)
+
+go_repository(
+    name = "org_golang_x_time",
+    importpath = "golang.org/x/time",
+    sum = "h1:fqgJT0MGcGpPgpWU7VRdRjuArfcOvC4AoJmILihzhDg=",
+    version = "v0.0.0-20181108054448-85acf8d2951c",
+)
+
+go_repository(
+    name = "org_golang_x_tools",
+    importpath = "golang.org/x/tools",
+    sum = "h1:97SnQk1GYRXJgvwZ8fadnxDOWfKvkNQHH3CtZntPSrM=",
+    version = "v0.0.0-20190506145303-2d16b83fe98c",
+)
 
 #-----------------------------------------------------------------------------
 # Javascript
 #-----------------------------------------------------------------------------
 
+# Last update: 2019-10-18, to latest release.
 http_archive(
     name = "io_bazel_rules_closure",
-    sha256 = "3eff8985b5c6df196ce3a1944468a2c553ec4063f142d0feefe544e0fcdb583c",
-    strip_prefix = "rules_closure-0.9.0",
+    sha256 = "7d206c2383811f378a5ef03f4aacbcf5f47fd8650f6abbc3fa89f3a27dd8b176",
+    strip_prefix = "rules_closure-0.10.0",
     urls = [
-        "https://github.com/bazelbuild/rules_closure/archive/0.9.0.tar.gz",
+        "https://github.com/bazelbuild/rules_closure/archive/0.10.0.tar.gz",
     ],
 )
 
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
-
-closure_repositories(omit_zlib = True)
+load("@io_bazel_rules_closure//closure:repositories.bzl",
+     "rules_closure_dependencies", "rules_closure_toolchains")
+rules_closure_dependencies()
+rules_closure_toolchains()
 
 #-----------------------------------------------------------------------------
 # Python

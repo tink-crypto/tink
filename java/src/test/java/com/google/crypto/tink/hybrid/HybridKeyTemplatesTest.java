@@ -27,6 +27,7 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.nio.charset.Charset;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +43,9 @@ public class HybridKeyTemplatesTest {
     KeyTemplate template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM;
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    EciesAeadHkdfKeyFormat format = EciesAeadHkdfKeyFormat.parseFrom(template.getValue());
+    EciesAeadHkdfKeyFormat format =
+        EciesAeadHkdfKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertTrue(format.hasParams());
     assertTrue(format.getParams().hasKemParams());
@@ -62,7 +65,9 @@ public class HybridKeyTemplatesTest {
     KeyTemplate template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256;
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    EciesAeadHkdfKeyFormat format = EciesAeadHkdfKeyFormat.parseFrom(template.getValue());
+    EciesAeadHkdfKeyFormat format =
+        EciesAeadHkdfKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertTrue(format.hasParams());
     assertTrue(format.getParams().hasKemParams());
@@ -90,7 +95,9 @@ public class HybridKeyTemplatesTest {
         curveType, hashType, ecPointFormat, demKeyTemplate, salt.getBytes(UTF_8));
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    EciesAeadHkdfKeyFormat format = EciesAeadHkdfKeyFormat.parseFrom(template.getValue());
+    EciesAeadHkdfKeyFormat format =
+        EciesAeadHkdfKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertTrue(format.hasParams());
     assertTrue(format.getParams().hasKemParams());

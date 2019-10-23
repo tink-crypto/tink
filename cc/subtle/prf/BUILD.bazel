@@ -1,0 +1,11 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "streaming_prf",
+    hdrs = ["streaming_prf.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = ["//cc:input_stream"],
+)

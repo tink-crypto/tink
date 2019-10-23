@@ -28,6 +28,7 @@ import com.google.crypto.tink.subtle.AesGcmHkdfStreaming;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -80,7 +81,7 @@ public class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStre
   @Override
   public AesGcmHkdfStreamingKey parseKey(ByteString byteString)
       throws InvalidProtocolBufferException {
-    return AesGcmHkdfStreamingKey.parseFrom(byteString);
+    return AesGcmHkdfStreamingKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 
   @Override
@@ -99,7 +100,8 @@ public class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStre
       @Override
       public AesGcmHkdfStreamingKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
-        return AesGcmHkdfStreamingKeyFormat.parseFrom(byteString);
+        return AesGcmHkdfStreamingKeyFormat.parseFrom(
+            byteString, ExtensionRegistryLite.getEmptyRegistry());
       }
 
       @Override

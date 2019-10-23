@@ -84,5 +84,4 @@ class HybridEncryptWrapper {
   }
 }
 
-goog.exportSymbol('tink.hybrid.HybridEncryptWrapper', HybridEncryptWrapper);
 exports = HybridEncryptWrapper;

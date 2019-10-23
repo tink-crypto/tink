@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ExtensionRegistryLite;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -33,8 +34,8 @@ public class DeterministicAeadKeyTemplatesTest {
     KeyTemplate template = DeterministicAeadKeyTemplates.AES256_SIV;
     assertEquals(new AesSivKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesSivKeyFormat format = AesSivKeyFormat.parseFrom(
-        template.getValue());
+    AesSivKeyFormat format =
+        AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(64, format.getKeySize());
   }
@@ -47,7 +48,8 @@ public class DeterministicAeadKeyTemplatesTest {
     KeyTemplate template = DeterministicAeadKeyTemplates.createAesSivKeyTemplate(keySize);
     assertEquals(new AesSivKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesSivKeyFormat format = AesSivKeyFormat.parseFrom(template.getValue());
+    AesSivKeyFormat format =
+        AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertEquals(keySize, format.getKeySize());
   }

@@ -91,5 +91,4 @@ class CleartextKeysetHandle {
   }
 }
 
-goog.exportSymbol('tink.CleartextKeysetHandle', CleartextKeysetHandle);
 exports = CleartextKeysetHandle;

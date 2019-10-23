@@ -20,8 +20,11 @@ from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
+# Special imports
+import six
 
 
+@six.add_metaclass(abc.ABCMeta)
 class PublicKeySign(object):
   """Interface for public key signing.
 
@@ -32,8 +35,6 @@ class PublicKeySign(object):
   adaptive chosen-message attacks. Signing data ensures the authenticity and
   the integrity of that data, but not its secrecy.
   """
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def sign(self, data: bytes) -> bytes:

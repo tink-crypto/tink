@@ -65,5 +65,4 @@ class BinaryKeysetReader {
   }
 }
 
-goog.exportSymbol('tink.BinaryKeysetReader', BinaryKeysetReader);
 exports = BinaryKeysetReader;
