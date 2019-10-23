@@ -33,7 +33,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   # TODO(b/73748835): Workaround on Kokoro.
   rm -f ~/.bazelrc
 
-  use_bazel.sh latest || exit 1
+  use_bazel.sh $(cat .bazelversion)
 fi
 
 echo "Using bazel binary: $(which bazel)"
