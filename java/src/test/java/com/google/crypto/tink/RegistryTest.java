@@ -30,6 +30,7 @@ import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
+import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.HashType;
@@ -50,6 +51,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.junit.Before;
@@ -815,6 +819,21 @@ public class RegistryTest {
               .setVersion(getVersion())
               .build();
         }
+
+        @Override
+        public AesGcmKey deriveKey(AesGcmKeyFormat format, InputStream stream)
+            throws GeneralSecurityException {
+          byte[] pseudorandomness = new byte[format.getKeySize()];
+          try {
+            stream.read(pseudorandomness);
+          } catch (IOException e) {
+            throw new AssertionError("Unexpected IOException", e);
+          }
+          return AesGcmKey.newBuilder()
+              .setKeyValue(ByteString.copyFrom(pseudorandomness))
+              .setVersion(getVersion())
+              .build();
+        }
       };
     }
   }
@@ -932,6 +951,45 @@ public class RegistryTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
+    }
+  }
+
+  @Test
+  public void testDeriveKey_succeeds() throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestKeyTypeManager(), true);
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(16).build();
+    KeyTemplate template = KeyTemplate.newBuilder()
+        .setValue(format.toByteString())
+        .setTypeUrl(new TestKeyTypeManager().getKeyType())
+        .setOutputPrefixType(OutputPrefixType.TINK)
+        .build();
+
+    byte[] keyMaterial = Random.randBytes(100);
+    AesGcmKey key =
+        (AesGcmKey) Registry.deriveKey(template, new ByteArrayInputStream(keyMaterial));
+    for (int i = 0; i < 16; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
+  }
+
+  // Tests that validate is called.
+  @Test
+  public void testDeriveKey_wrongKeySize_validateThrows() throws Exception {
+    Registry.reset();
+    Registry.registerKeyManager(new TestKeyTypeManager(), true);
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(32).build();
+    KeyTemplate template = KeyTemplate.newBuilder()
+        .setValue(format.toByteString())
+        .setTypeUrl(new TestKeyTypeManager().getKeyType())
+        .setOutputPrefixType(OutputPrefixType.TINK)
+        .build();
+    ByteArrayInputStream emptyInput = new ByteArrayInputStream(new byte[0]);
+    try {
+      Registry.deriveKey(template, emptyInput);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "validateKeyFormat");
     }
   }
 
@@ -1311,6 +1369,77 @@ public class RegistryTest {
       // Expected.
       assertExceptionContains(e, "public key manager corresponding to");
     }
+  }
+
+  @Test
+  public void testAsymmetricKeyManagers_deriveKey_withoutKeyFactory() throws Exception {
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
+    KeyTemplate template =
+        KeyTemplate.newBuilder()
+            .setValue(Ed25519KeyFormat.getDefaultInstance().toByteString())
+            .setTypeUrl(new TestPrivateKeyTypeManager().getKeyType())
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+
+    try {
+      Registry.deriveKey(template, new ByteArrayInputStream(new byte[0]));
+      fail();
+    } catch (UnsupportedOperationException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testAsymmetricKeyManagers_deriveKey() throws Exception {
+    TestPrivateKeyTypeManager testPrivateKeyTypeManagerWithDeriveKey =
+        new TestPrivateKeyTypeManager() {
+          @Override
+          public KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
+            return new KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(Ed25519KeyFormat.class) {
+              @Override
+              public void validateKeyFormat(Ed25519KeyFormat format)
+                  throws GeneralSecurityException {}
+
+              @Override
+              public Ed25519KeyFormat parseKeyFormat(ByteString byteString)
+                  throws InvalidProtocolBufferException {
+                return Ed25519KeyFormat.parseFrom(
+                    byteString, ExtensionRegistryLite.getEmptyRegistry());
+              }
+
+              @Override
+              public Ed25519PrivateKey createKey(Ed25519KeyFormat format)
+                  throws GeneralSecurityException {
+                return Ed25519PrivateKey.newBuilder()
+                    .setKeyValue(ByteString.copyFrom("created", UTF_8))
+                    .build();
+              }
+
+              @Override
+              public Ed25519PrivateKey deriveKey(Ed25519KeyFormat format, InputStream inputStream)
+                  throws GeneralSecurityException {
+                return Ed25519PrivateKey.newBuilder()
+                    .setKeyValue(ByteString.copyFrom("derived", UTF_8))
+                    .build();
+              }
+            };
+          }
+        };
+
+    Registry.reset();
+    Registry.registerAsymmetricKeyManagers(
+        testPrivateKeyTypeManagerWithDeriveKey, new TestPublicKeyTypeManager(), true);
+    KeyTemplate template = KeyTemplate.newBuilder()
+        .setValue(Ed25519KeyFormat.getDefaultInstance().toByteString())
+        .setTypeUrl(testPrivateKeyTypeManagerWithDeriveKey.getKeyType())
+        .setOutputPrefixType(OutputPrefixType.TINK)
+        .build();
+
+    Ed25519PrivateKey key =
+        (Ed25519PrivateKey) Registry.deriveKey(template, new ByteArrayInputStream(new byte[0]));
+    assertThat(key.getKeyValue()).isEqualTo(ByteString.copyFrom("derived", UTF_8));
   }
 
   private static class Catalogue1 implements Catalogue<Aead> {

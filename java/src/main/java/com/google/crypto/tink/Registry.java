@@ -21,7 +21,9 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Set;
@@ -75,6 +77,9 @@ public final class Registry {
 
   private static final ConcurrentMap<String, KeyManagerContainer> keyManagerMap =
       new ConcurrentHashMap<>(); // typeUrl -> KeyManager mapping
+
+  private static final ConcurrentMap<String, KeyDeriverContainer> keyDeriverMap =
+      new ConcurrentHashMap<>(); // typeUrl -> deriver (created out of KeyTypeManager).
 
   private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
       new ConcurrentHashMap<>(); // typeUrl -> newKeyAllowed mapping
@@ -235,6 +240,39 @@ public final class Registry {
     };
   }
 
+  private static interface KeyDeriverContainer {
+    MessageLite deriveKey(ByteString serializedKeyFormat, InputStream stream)
+        throws GeneralSecurityException;
+  }
+
+  private static <KeyProtoT extends MessageLite> KeyDeriverContainer createDeriverFor(
+      final KeyTypeManager<KeyProtoT> keyManager) {
+    return new KeyDeriverContainer() {
+      private <KeyFormatProtoT extends MessageLite> MessageLite deriveKeyWithFactory(
+          ByteString serializedKeyFormat,
+          InputStream stream,
+          KeyTypeManager.KeyFactory<KeyFormatProtoT, KeyProtoT> keyFactory)
+          throws GeneralSecurityException {
+        KeyFormatProtoT keyFormat;
+        try {
+          keyFormat = keyFactory.parseKeyFormat(serializedKeyFormat);
+        } catch (InvalidProtocolBufferException e) {
+          throw new GeneralSecurityException("parsing key format failed in deriveKey", e);
+        }
+        keyFactory.validateKeyFormat(keyFormat);
+          return keyFactory.deriveKey(keyFormat, stream);
+      }
+
+      @Override
+      public MessageLite deriveKey(ByteString serializedKeyFormat, InputStream stream)
+          throws GeneralSecurityException {
+        KeyTypeManager.KeyFactory<?, KeyProtoT> keyFactory;
+        keyFactory = keyManager.keyFactory();
+        return deriveKeyWithFactory(serializedKeyFormat, stream, keyFactory);
+      }
+    };
+  }
+
   private static synchronized KeyManagerContainer getKeyManagerContainerOrThrow(String typeUrl)
       throws GeneralSecurityException {
     if (!keyManagerMap.containsKey(typeUrl)) {
@@ -253,6 +291,7 @@ public final class Registry {
    */
   static synchronized void reset() {
     keyManagerMap.clear();
+    keyDeriverMap.clear();
     newKeyAllowedMap.clear();
     catalogueMap.clear();
     primitiveWrapperMap.clear();
@@ -415,6 +454,7 @@ public final class Registry {
     ensureKeyManagerInsertable(typeUrl, manager.getClass(), newKeyAllowed);
     if (!keyManagerMap.containsKey(typeUrl)) {
       keyManagerMap.put(typeUrl, createContainerFor(manager));
+      keyDeriverMap.put(typeUrl, createDeriverFor(manager));
     }
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
   }
@@ -474,10 +514,13 @@ public final class Registry {
       keyManagerMap.put(
           privateTypeUrl,
           createPrivateKeyContainerFor(privateKeyTypeManager, publicKeyTypeManager));
+      keyDeriverMap.put(privateTypeUrl, createDeriverFor(privateKeyTypeManager));
     }
     newKeyAllowedMap.put(privateTypeUrl, newKeyAllowed);
     if (!keyManagerMap.containsKey(publicTypeUrl)) {
       keyManagerMap.put(publicTypeUrl, createContainerFor(publicKeyTypeManager));
+      // We do not allow key derivation for public key types. It doesn't seem like this would make
+      // sense.
     }
     newKeyAllowedMap.put(publicTypeUrl, false);
   }
@@ -675,6 +718,22 @@ public final class Registry {
     } else {
       throw new GeneralSecurityException("newKey-operation not permitted for key type " + typeUrl);
     }
+  }
+
+  /**
+   * Method to derive a key, using the given {@param keyTemplate}, with the randomness as provided
+   * by the second argument.
+   *
+   * <p>This method is on purpose not in the public interface. Calling it twice using different key
+   * templates and the same randomness can completely destroy any security in a system, so we
+   * prevent this by making it accessible only to safe call sites.
+   *
+   * <p>This functions ignores {@code keyTemplate.getOutputPrefix()}.
+   */
+  static synchronized MessageLite deriveKey(KeyTemplate keyTemplate, InputStream randomness)
+      throws GeneralSecurityException {
+    KeyDeriverContainer deriver = keyDeriverMap.get(keyTemplate.getTypeUrl());
+    return deriver.deriveKey(keyTemplate.getValue(), randomness);
   }
 
   /**
