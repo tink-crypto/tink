@@ -42,7 +42,8 @@ std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() {
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
 EciesHkdfSenderKemBoringSsl::New(subtle::EllipticCurveType curve,
-                                 const std::string& pubx, const std::string& puby) {
+                                 const std::string& pubx,
+                                 const std::string& puby) {
   switch (curve) {
     case EllipticCurveType::NIST_P256:
     case EllipticCurveType::NIST_P384:
@@ -57,8 +58,8 @@ EciesHkdfSenderKemBoringSsl::New(subtle::EllipticCurveType curve,
 }
 
 EciesHkdfNistPCurveSendKemBoringSsl::EciesHkdfNistPCurveSendKemBoringSsl(
-    subtle::EllipticCurveType curve, const std::string& pubx, const std::string& puby,
-    EC_POINT* peer_pub_key)
+    subtle::EllipticCurveType curve, const std::string& pubx,
+    const std::string& puby, EC_POINT* peer_pub_key)
     : curve_(curve), pubx_(pubx), puby_(puby), peer_pub_key_(peer_pub_key) {}
 
 // static
@@ -131,7 +132,8 @@ EciesHkdfX25519SendKemBoringSsl::EciesHkdfX25519SendKemBoringSsl(
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
 EciesHkdfX25519SendKemBoringSsl::New(subtle::EllipticCurveType curve,
-                                     const std::string& pubx, const std::string& puby) {
+                                     const std::string& pubx,
+                                     const std::string& puby) {
   if (curve != CURVE25519) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "curve is not CURVE25519");
@@ -163,7 +165,7 @@ EciesHkdfX25519SendKemBoringSsl::GenerateKey(
   uint8_t ephemeral_public_value[X25519_PUBLIC_VALUE_LEN];
   X25519_keypair(ephemeral_public_value, ephemeral_private_key);
   std::string kem_bytes(ephemeral_public_value,
-                   &ephemeral_public_value[X25519_PUBLIC_VALUE_LEN]);
+                        &ephemeral_public_value[X25519_PUBLIC_VALUE_LEN]);
 
   uint8_t shared_key[X25519_SHARED_KEY_LEN];
   X25519(shared_key, ephemeral_private_key, peer_public_value_);

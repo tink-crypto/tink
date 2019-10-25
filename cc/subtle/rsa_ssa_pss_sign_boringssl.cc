@@ -108,7 +108,7 @@ util::StatusOr<std::string> RsaSsaPssSignBoringSsl::Sign(
     return util::Status(util::error::INTERNAL, "Signing failed.");
   }
   return std::string(reinterpret_cast<const char*>(signature.data()),
-                signature_length);
+                     signature_length);
 }
 
 }  // namespace subtle

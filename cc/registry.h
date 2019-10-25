@@ -70,9 +70,9 @@ class Registry {
   // an existing, different catalogue for the specified name.
   template <class ConcreteCatalogue>
   ABSL_DEPRECATED("Catalogues are not supported anymore.")
-  static crypto::tink::util::Status AddCatalogue(
-      const std::string& catalogue_name,
-      std::unique_ptr<ConcreteCatalogue> catalogue) {
+  static crypto::tink::util::Status
+      AddCatalogue(const std::string& catalogue_name,
+                   std::unique_ptr<ConcreteCatalogue> catalogue) {
     return RegistryImpl::GlobalInstance().AddCatalogue(catalogue_name,
                                                        catalogue.release());
   }
@@ -84,8 +84,8 @@ class Registry {
   // failure, 'catalogue' is deleted).
   template <class P>
   ABSL_DEPRECATED("Use AddCatalogue with a unique_ptr input instead.")
-  static crypto::tink::util::Status AddCatalogue(const std::string& catalogue_name,
-                                                 Catalogue<P>* catalogue) {
+  static crypto::tink::util::Status
+      AddCatalogue(const std::string& catalogue_name, Catalogue<P>* catalogue) {
     return AddCatalogue(catalogue_name, absl::WrapUnique(catalogue));
   }
 

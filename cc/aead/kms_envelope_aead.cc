@@ -57,10 +57,9 @@ std::string GetEnvelopeCiphertext(absl::string_view encrypted_dek,
                                   absl::string_view encrypted_plaintext) {
   uint8_t enc_dek_size[kEncryptedDekPrefixSize];
   BigEndianStore32(enc_dek_size, encrypted_dek.size());
-  return absl::StrCat(
-      std::string(reinterpret_cast<const char*>(enc_dek_size),
-                  kEncryptedDekPrefixSize),
-      encrypted_dek, encrypted_plaintext);
+  return absl::StrCat(std::string(reinterpret_cast<const char*>(enc_dek_size),
+                                  kEncryptedDekPrefixSize),
+                      encrypted_dek, encrypted_plaintext);
 }
 
 }  // namespace

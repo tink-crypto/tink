@@ -18,7 +18,7 @@
 //   operation: the actual AEAD-operation, i.e. "encrypt" or "decrypt"
 //   input-file:  name of the file with input (plaintext for encryption, or
 //                or ciphertext for decryption)
-//   associated-data:  a std::string to be used as assciated data
+//   associated-data:  a string to be used as assciated data
 //   output-file:  name of the file for the resulting output
 // TODO(przydatek): consider adding support for other primitives.
 
@@ -69,7 +69,8 @@ std::unique_ptr<crypto::tink::KeysetReader> GetJsonKeysetReader(
 
 // Creates a KeysetHandle that for a keyset read from the given file,
 // which is expected to contain a JSON-formatted keyset.
-std::unique_ptr<crypto::tink::KeysetHandle> ReadKeyset(const std::string& filename) {
+std::unique_ptr<crypto::tink::KeysetHandle> ReadKeyset(
+    const std::string& filename) {
   auto keyset_reader = GetJsonKeysetReader(filename);
   auto keyset_handle_result =
       crypto::tink::CleartextKeysetHandle::Read(std::move(keyset_reader));
@@ -81,7 +82,7 @@ std::unique_ptr<crypto::tink::KeysetHandle> ReadKeyset(const std::string& filena
   return std::move(keyset_handle_result.ValueOrDie());
 }
 
-// Reads the specified file and returns the read content as a std::string.
+// Reads the specified file and returns the read content as a string.
 std::string Read(const std::string& filename) {
   std::clog << "Reading the input...\n";
   std::ifstream input_stream;
@@ -96,7 +97,7 @@ std::string Read(const std::string& filename) {
   return input.str();
 }
 
-// Writes the given std::string to the specified file.
+// Writes the given string to the specified file.
 void Write(const std::string& output, const std::string& filename) {
   std::clog << "Writing the output...\n";
   std::ofstream output_stream(filename,

@@ -102,7 +102,8 @@ TEST(HkdfStreamingPrf, BackupFullStream) {
   crypto::tink::util::StatusOr<int> result = stream->Next(&data);
   ASSERT_THAT(result.status(), IsOk());
   int bytes_read = result.ValueOrDie();
-  std::string first_read = std::string(static_cast<const char*>(data), bytes_read);
+  std::string first_read =
+      std::string(static_cast<const char*>(data), bytes_read);
 
   stream->BackUp(bytes_read);
 
@@ -113,7 +114,8 @@ TEST(HkdfStreamingPrf, BackupFullStream) {
   // will be.
   ASSERT_THAT(result.ValueOrDie(), Ge(bytes_read));
 
-  std::string second_read = std::string(static_cast<const char*>(data), bytes_read);
+  std::string second_read =
+      std::string(static_cast<const char*>(data), bytes_read);
   EXPECT_THAT(first_read, Eq(second_read));
 }
 
@@ -132,7 +134,7 @@ TEST(HkdfStreamingPrf, BackupHalf) {
   int backup_amount = bytes_read / 2;
   std::string first_read =
       std::string(static_cast<const char*>(data) + bytes_read - backup_amount,
-             backup_amount);
+                  backup_amount);
 
   stream->BackUp(backup_amount);
 
@@ -143,7 +145,8 @@ TEST(HkdfStreamingPrf, BackupHalf) {
   // will be.
   ASSERT_THAT(result.ValueOrDie(), Ge(backup_amount));
 
-  std::string second_read = std::string(static_cast<const char*>(data), backup_amount);
+  std::string second_read =
+      std::string(static_cast<const char*>(data), backup_amount);
   EXPECT_THAT(first_read, Eq(second_read));
 }
 
@@ -265,7 +268,8 @@ TEST(HkdfStreamingPrf, ExhaustInput) {
 TEST(HkdfStreamingPrf, TestVector1) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.1
   HashType hash = SHA256;
-  std::string ikm = HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+  std::string ikm =
+      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
   std::string salt = HexDecodeOrDie("000102030405060708090a0b0c");
   std::string info = HexDecodeOrDie("f0f1f2f3f4f5f6f7f8f9");
   std::string expected_result = HexDecodeOrDie(
@@ -283,7 +287,8 @@ TEST(HkdfStreamingPrf, TestVector1) {
 }
 
 crypto::tink::util::StatusOr<std::string> ComputeWithHkdfStreamingPrf(
-    HashType hash, std::string ikm, std::string salt, std::string info, int length) {
+    HashType hash, std::string ikm, std::string salt, std::string info,
+    int length) {
   auto streaming_prf_or = HkdfStreamingPrf::New(hash, ikm, salt);
   if (!streaming_prf_or.status().ok()) {
     return streaming_prf_or.status();
@@ -331,7 +336,8 @@ TEST(HkdfStreamingPrf, TestVector2) {
 TEST(HkdfStreamingPrf, TestVector3) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.3
   HashType hash = SHA256;
-  std::string ikm = HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+  std::string ikm =
+      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
   std::string salt = HexDecodeOrDie("");
   std::string info = HexDecodeOrDie("");
   std::string expected_result = HexDecodeOrDie(
@@ -400,7 +406,8 @@ TEST(HkdfStreamingPrf, TestVector5) {
 TEST(HkdfStreamingPrf, TestVector6) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.6
   HashType hash = SHA1;
-  std::string ikm = HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+  std::string ikm =
+      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
   std::string salt = HexDecodeOrDie("");
   std::string info = HexDecodeOrDie("");
   std::string expected_result = HexDecodeOrDie(
@@ -417,7 +424,8 @@ TEST(HkdfStreamingPrf, TestVector6) {
 TEST(HkdfStreamingPrf, TestVector7) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.7
   HashType hash = SHA1;
-  std::string ikm = HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+  std::string ikm =
+      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
   // Since HMAC anyhow pads, this is the same as an absent salt.
   std::string salt = HexDecodeOrDie("");
   std::string info = HexDecodeOrDie("");

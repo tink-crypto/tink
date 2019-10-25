@@ -44,7 +44,7 @@ namespace {
 // SEQUENCE { r INTEGER, s INTEGER }. In particular, the encoding is: 0x30 ||
 // totalLength || 0x02 || r's length || r || 0x02 || s's length || s.
 crypto::tink::util::StatusOr<std::string> DerToIeee(absl::string_view der,
-                                               const EC_KEY* key) {
+                                                    const EC_KEY* key) {
   size_t field_size_in_bytes =
       (EC_GROUP_get_degree(EC_KEY_get0_group(key)) + 7) / 8;
   bssl::UniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_from_bytes(
@@ -142,7 +142,8 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
 
   if (encoding_ == subtle::EcdsaSignatureEncoding::IEEE_P1363) {
     auto status_or_sig = DerToIeee(
-        std::string(reinterpret_cast<char*>(buffer.data()), sig_length), key_.get());
+        std::string(reinterpret_cast<char*>(buffer.data()), sig_length),
+        key_.get());
     if (!status_or_sig.ok()) {
       return status_or_sig.status();
     }

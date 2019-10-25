@@ -53,8 +53,7 @@ StatusOr<const KmsClient*> KmsClients::LocalGet(absl::string_view key_uri) {
   for (const auto& client : clients_) {
     if (client->DoesSupport(key_uri)) return client.get();
   }
-  return ToStatusF(util::error::NOT_FOUND,
-                   "no KmsClient found for key '%s'.",
+  return ToStatusF(util::error::NOT_FOUND, "no KmsClient found for key '%s'.",
                    std::string(key_uri).c_str());
 }
 

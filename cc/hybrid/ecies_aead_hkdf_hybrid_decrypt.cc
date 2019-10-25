@@ -54,8 +54,7 @@ EciesAeadHkdfHybridDecrypt::New(const EciesAeadHkdfPrivateKey& recipient_key) {
 }
 
 util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
-    absl::string_view ciphertext,
-    absl::string_view context_info) const {
+    absl::string_view ciphertext, absl::string_view context_info) const {
   // Extract KEM-bytes from the ciphertext.
   auto header_size_result = subtle::EcUtil::EncodingSizeInBytes(
       util::Enums::ProtoToSubtle(

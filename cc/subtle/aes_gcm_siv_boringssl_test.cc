@@ -110,7 +110,8 @@ TEST(AesGcmSivBoringSslTest, Modification) {
 }
 
 TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
-  const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  const std::string key(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmSivBoringSsl::New(key).ValueOrDie());
   const std::string message = "Some data to encrypt.";
   // Encryption
@@ -119,7 +120,7 @@ TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
   auto ct0_or_status = cipher->Encrypt(message, aad);
   EXPECT_TRUE(ct0_or_status.ok()) << ct0_or_status.status();
   auto ct0 = ct0_or_status.ValueOrDie();
-  // AAD is a an empty std::string.
+  // AAD is a an empty string.
   auto ct1_or_status = cipher->Encrypt(message, "");
   EXPECT_TRUE(ct1_or_status.ok()) << ct1_or_status.status();
   auto ct1 = ct1_or_status.ValueOrDie();
@@ -140,7 +141,7 @@ TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(message, pt.ValueOrDie());
 
-  // AAD is a an empty std::string.
+  // AAD is a an empty string.
   pt = cipher->Decrypt(ct0, "");
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(message, pt.ValueOrDie());
@@ -164,7 +165,8 @@ TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmSivBoringSslTest, MessageEmptyVersusNullStringView) {
-  const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  const std::string key(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmSivBoringSsl::New(key).ValueOrDie());
   const std::string aad = "Some data to authenticate.";
   const std::string nonce = test::HexDecodeOrDie("00112233445566778899aabb");
@@ -178,7 +180,7 @@ TEST(AesGcmSivBoringSslTest, MessageEmptyVersusNullStringView) {
   auto pt0 = pt0_or_status.ValueOrDie();
   EXPECT_EQ("", pt0);
 
-  // Message is an empty std::string.
+  // Message is an empty string.
   const std::string message1 = "";
   auto ct1_or_status = cipher->Encrypt(message1, aad);
   EXPECT_TRUE(ct1_or_status.ok());

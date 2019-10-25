@@ -46,7 +46,7 @@ size_t FieldElementSizeInBytes(const EC_GROUP *group) {
 
 // static
 util::StatusOr<std::string> SubtleUtilBoringSSL::bn2str(const BIGNUM *bn,
-                                                   size_t len) {
+                                                        size_t len) {
   std::unique_ptr<uint8_t[]> res(new uint8_t[len]);
   if (1 != BN_bn2bin_padded(res.get(), len, bn)) {
     return util::Status(util::error::INTERNAL, "Value too large");
@@ -170,9 +170,10 @@ SubtleUtilBoringSSL::EcKey SubtleUtilBoringSSL::EcKeyFromX25519Key(
   // Curve25519 public key is x, not (x,y).
   ec_key.pub_x =
       std::string(reinterpret_cast<const char *>(x25519_key->public_value),
-             X25519_PUBLIC_VALUE_LEN);
-  ec_key.priv = std::string(reinterpret_cast<const char *>(x25519_key->private_key),
-                       X25519_PRIVATE_KEY_LEN);
+                  X25519_PUBLIC_VALUE_LEN);
+  ec_key.priv =
+      std::string(reinterpret_cast<const char *>(x25519_key->private_key),
+                  X25519_PRIVATE_KEY_LEN);
   return ec_key;
 }
 
@@ -208,9 +209,9 @@ SubtleUtilBoringSSL::GetNewEd25519Key() {
 
   std::unique_ptr<Ed25519Key> key(new Ed25519Key);
   key->public_key = std::string(reinterpret_cast<const char *>(out_public_key),
-                           ED25519_PUBLIC_KEY_LEN);
+                                ED25519_PUBLIC_KEY_LEN);
   std::string tmp = std::string(reinterpret_cast<const char *>(out_private_key),
-                      ED25519_PRIVATE_KEY_LEN);
+                                ED25519_PRIVATE_KEY_LEN);
   // ED25519_keypair appends the public key at the end of the private key. Keep
   // the first 32 bytes that contain the private key and discard the public key.
   key->private_key = tmp.substr(0, 32);
@@ -379,7 +380,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
       return std::string(reinterpret_cast<const char *>(encoded.get()),
-                    1 + 2 * curve_size_in_bytes);
+                         1 + 2 * curve_size_in_bytes);
     }
     case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
       bssl::UniquePtr<BIGNUM> x(BN_new());
@@ -408,7 +409,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
                             "Openssl internal error serializing y coordinate");
       }
       return std::string(reinterpret_cast<const char *>(encoded.get()),
-                    2 * curve_size_in_bytes);
+                         2 * curve_size_in_bytes);
     }
     case EcPointFormat::COMPRESSED: {
       std::unique_ptr<uint8_t[]> encoded(new uint8_t[1 + curve_size_in_bytes]);
@@ -419,7 +420,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
       return std::string(reinterpret_cast<const char *>(encoded.get()),
-                    1 + curve_size_in_bytes);
+                         1 + curve_size_in_bytes);
     }
     default:
       return util::Status(util::error::INTERNAL, "Unsupported point format");

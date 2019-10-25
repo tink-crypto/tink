@@ -43,7 +43,7 @@ namespace {
 // SEQUENCE { r INTEGER, s INTEGER }. In particular, the encoding is: 0x30 ||
 // totalLength || 0x02 || r's length || r || 0x02 || s's length || s.
 crypto::tink::util::StatusOr<std::string> IeeeToDer(absl::string_view ieee,
-                                               const EC_KEY* key) {
+                                                    const EC_KEY* key) {
   size_t field_size_in_bytes =
       (EC_GROUP_get_degree(EC_KEY_get0_group(key)) + 7) / 8;
   if (ieee.size() != field_size_in_bytes * 2) {

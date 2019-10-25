@@ -27,7 +27,8 @@ namespace {
 // Reads the specified 'input_stream' until no more bytes can be read,
 // and puts the read bytes into 'contents'.
 // Returns the status of the last input_stream->Next()-operation.
-util::Status ReadTillEnd(PythonInputStream* input_stream, std::string* contents) {
+util::Status ReadTillEnd(PythonInputStream* input_stream,
+                         std::string* contents) {
   contents->clear();
   const void* buffer;
   auto next_result = input_stream->Next(&buffer);

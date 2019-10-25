@@ -33,8 +33,7 @@ namespace subtle {
 class HmacBoringSsl : public Mac {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<Mac>> New(
-      HashType hash_type,
-      uint32_t tag_size, const std::string& key_value);
+      HashType hash_type, uint32_t tag_size, const std::string& key_value);
 
   // Computes and returns the HMAC for 'data'.
   crypto::tink::util::StatusOr<std::string> ComputeMac(

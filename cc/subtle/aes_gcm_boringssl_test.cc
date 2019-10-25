@@ -85,7 +85,7 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ(message, pt);
   }
-  {  // AAD is a an empty std::string.
+  {  // AAD is a an empty string.
     auto pt_or_status = cipher->Decrypt(ct, "");
     EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
     auto pt = pt_or_status.ValueOrDie();
@@ -100,7 +100,8 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
 }
 
 TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
-  const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  const std::string key(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
   { // AAD is a null string_view.
     const std::string message = "Some data to encrypt.";
@@ -110,7 +111,7 @@ TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
     auto ct = ct_or_status.ValueOrDie();
     TestDecryptWithEmptyAad(cipher.get(), ct, message);
   }
-  {  // AAD is a an empty std::string.
+  {  // AAD is a an empty string.
     const std::string message = "Some data to encrypt.";
     auto ct_or_status = cipher->Encrypt(message, "");
     EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
@@ -127,7 +128,8 @@ TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
-  const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  const std::string key(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
   const std::string aad = "Some data to authenticate.";
   {  // Message is a null string_view.
@@ -140,7 +142,7 @@ TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ("", pt);
   }
-  {  // Message is an empty std::string.
+  {  // Message is an empty string.
     const std::string message = "";
     auto ct_or_status = cipher->Encrypt(message, aad);
     EXPECT_TRUE(ct_or_status.ok());
@@ -162,7 +164,8 @@ TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmBoringSslTest, testBothMessageAndAadEmpty) {
-  const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  const std::string key(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
   {  // Both are null string_view.
     const absl::string_view message;
@@ -175,7 +178,7 @@ TEST(AesGcmBoringSslTest, testBothMessageAndAadEmpty) {
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ("", pt);
   }
-  {  // Both are empty std::string.
+  {  // Both are empty string.
     const std::string message = "";
     const std::string aad = "";
     auto ct_or_status = cipher->Encrypt(message, aad);
@@ -222,7 +225,6 @@ static std::string GetError() {
   std::string reason(ERR_reason_error_string(err));
   return lib + ":" + func + ":" + reason;
 }
-
 
 // Test with test vectors from Wycheproof project.
 bool WycheproofTest(const rapidjson::Document &root) {

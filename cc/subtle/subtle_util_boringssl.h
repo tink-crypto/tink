@@ -110,11 +110,11 @@ class SubtleUtilBoringSSL {
     std::string crt;
   };
 
-  // Returns BoringSSL's BIGNUM constructed from bigendian std::string
+  // Returns BoringSSL's BIGNUM constructed from bigendian string
   // representation.
   static util::StatusOr<bssl::UniquePtr<BIGNUM>> str2bn(absl::string_view s);
 
-  // Returns a std::string of size 'len' that holds BIGNUM 'bn'.
+  // Returns a string of size 'len' that holds BIGNUM 'bn'.
   static util::StatusOr<std::string> bn2str(const BIGNUM *bn, size_t len);
 
   // Returns BoringSSL error strings accumulated in the error queue,
@@ -186,7 +186,7 @@ class SubtleUtilBoringSSL {
   // https://www.keylength.com/en/4/).
   static crypto::tink::util::Status ValidateRsaModulusSize(size_t modulus_size);
 
-  // Return an empty std::string if str.data() is nullptr; otherwise return str.
+  // Return an empty string if str.data() is nullptr; otherwise return str.
   static absl::string_view EnsureNonNull(absl::string_view str);
 
   // Creates a new RSA public and private key pair.

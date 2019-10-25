@@ -36,13 +36,13 @@ class StreamingMac {
  public:
   // Returns an ComputeMacOutputStream, which when closed will return the
   // message authentication code (MAC) of the data put into the stream.
-  virtual util::StatusOr<std::unique_ptr<OutputStreamWithResult<std::string>>>
+  virtual util::StatusOr<std::unique_ptr<OutputStreamWithResult<string>>>
   NewComputeMacOutputStream() const = 0;
 
   // Returns an VerifyMacOutputStream which verifies if 'mac' is a correct
   // message authentication code (MAC) for the data written to it.
   virtual util::StatusOr<std::unique_ptr<OutputStreamWithResult<util::Status>>>
-  NewVerifyMacOutputStream(const std::string& mac_value) const = 0;
+  NewVerifyMacOutputStream(const string& mac_value) const = 0;
 
   virtual ~StreamingMac() {}
 };

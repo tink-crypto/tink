@@ -185,8 +185,7 @@ void AesSivBoringSsl::S2v(const uint8_t* aad, size_t aad_size,
 }
 
 util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
-    absl::string_view plaintext,
-    absl::string_view additional_data) const {
+    absl::string_view plaintext, absl::string_view additional_data) const {
   uint8_t siv[BLOCK_SIZE];
   S2v(reinterpret_cast<const uint8_t*>(additional_data.data()),
       additional_data.size(),
@@ -202,8 +201,7 @@ util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
 }
 
 util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
-    absl::string_view ciphertext,
-    absl::string_view additional_data) const {
+    absl::string_view ciphertext, absl::string_view additional_data) const {
   if (ciphertext.size() < BLOCK_SIZE) {
     return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
   }

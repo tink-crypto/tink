@@ -69,7 +69,8 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::
                                              EC_GROUP* ec_group)
     : curve_(curve), priv_key_value_(priv_key_value), ec_group_(ec_group) {}
 
-util::StatusOr<std::string> EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
+util::StatusOr<std::string>
+EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
     absl::string_view kem_bytes, HashType hash, absl::string_view hkdf_salt,
     absl::string_view hkdf_info, uint32_t key_size_in_bytes,
     EcPointFormat point_format) const {

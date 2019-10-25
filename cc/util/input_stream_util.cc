@@ -38,7 +38,7 @@ crypto::tink::util::StatusOr<std::string> ReadAtMostFromStream(
         std::min(num_bytes - num_bytes_read, next_result.ValueOrDie());
     input_stream->BackUp(next_result.ValueOrDie() - num_bytes_to_copy);
     absl::StrAppend(&result, std::string(reinterpret_cast<const char*>(buffer),
-                                    num_bytes_to_copy));
+                                         num_bytes_to_copy));
     num_bytes_read += num_bytes_to_copy;
   }
   return result;

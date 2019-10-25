@@ -184,8 +184,7 @@ std::string CliUtil::Read(const std::string& filename) {
 }
 
 // static
-void CliUtil::Write(const std::string& output,
-                    const std::string& filename) {
+void CliUtil::Write(const std::string& output, const std::string& filename) {
   std::clog << "Writing the output...\n";
   std::ofstream output_stream(filename,
                               std::ofstream::out | std::ofstream::binary);

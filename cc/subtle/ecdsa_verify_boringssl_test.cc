@@ -165,8 +165,8 @@ bool TestSignatures(const std::string& filename, bool allow_skipping,
       std::string expected = test["result"].GetString();
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
       std::string sig = WycheproofUtil::GetBytes(test["sig"]);
-      std::string id = absl::StrCat(test["tcId"].GetInt(), " ",
-                               test["comment"].GetString());
+      std::string id =
+          absl::StrCat(test["tcId"].GetInt(), " ", test["comment"].GetString());
       auto status = verifier->Verify(sig, msg);
       if (expected == "valid") {
         if (status.ok()) {

@@ -120,15 +120,15 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
 
     {  // RAW key
       std::string ciphertext = DummyHybridEncrypt(hybrid_name_0)
-                              .Encrypt(plaintext, context_info)
-                              .ValueOrDie();
+                                   .Encrypt(plaintext, context_info)
+                                   .ValueOrDie();
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
       EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
     }
 
     {  // No ciphertext prefix.
-      std::string ciphertext =  plaintext + hybrid_name_1;
+      std::string ciphertext = plaintext + hybrid_name_1;
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_FALSE(decrypt_result.ok());
       EXPECT_EQ(util::error::INVALID_ARGUMENT,
@@ -138,9 +138,10 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     }
 
     {  // Correct ciphertext prefix.
-      std::string ciphertext =  prefix_id_1 + DummyHybridEncrypt(hybrid_name_1)
-                                       .Encrypt(plaintext, context_info)
-                                       .ValueOrDie();
+      std::string ciphertext =
+          prefix_id_1 + DummyHybridEncrypt(hybrid_name_1)
+                            .Encrypt(plaintext, context_info)
+                            .ValueOrDie();
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
       EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());

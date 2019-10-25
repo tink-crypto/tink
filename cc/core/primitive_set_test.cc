@@ -190,7 +190,6 @@ TEST_F(PrimitiveSetTest, Basic) {
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
             add_primitive_result.status().error_code());
 
-
   std::string data = "some data";
 
   {  // Check the primary.
@@ -307,7 +306,8 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
     ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
                 IsOk());
 
-    std::string identifier = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
+    std::string identifier =
+        CryptoFormat::get_output_prefix(key_1).ValueOrDie();
     const auto& primitives =
         *(primitive_set.get_primitives(identifier).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
@@ -335,7 +335,8 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
     ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
                 IsOk());
 
-    std::string identifier = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
+    std::string identifier =
+        CryptoFormat::get_output_prefix(key_1).ValueOrDie();
     const auto& primitives =
         *(primitive_set.get_primitives(identifier).ValueOrDie());
     EXPECT_EQ(1, primitives.size());

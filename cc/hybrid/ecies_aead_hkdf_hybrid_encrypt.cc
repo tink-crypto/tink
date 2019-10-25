@@ -59,8 +59,7 @@ EciesAeadHkdfHybridEncrypt::New(const EciesAeadHkdfPublicKey& recipient_key) {
 }
 
 StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
-    absl::string_view plaintext,
-    absl::string_view context_info) const {
+    absl::string_view plaintext, absl::string_view context_info) const {
   // Use KEM to get a symmetric key.
   auto kem_key_result = sender_kem_->GenerateKey(
       util::Enums::ProtoToSubtle(

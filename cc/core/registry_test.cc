@@ -134,9 +134,7 @@ class TestAeadKeyManager : public KeyManager<Aead> {
     return 0;
   }
 
-  const std::string& get_key_type() const override {
-    return key_type_;
-  }
+  const std::string& get_key_type() const override { return key_type_; }
 
   const KeyFactory& get_key_factory() const override {
     return key_factory_;
@@ -265,7 +263,7 @@ TEST_F(RegistryTest, testConcurrentRegistration) {
   verify_b.join();
 
   // Check that there are no extra managers.
-  std::string key_type = key_type_prefix_a + std::to_string(count_a-1);
+  std::string key_type = key_type_prefix_a + std::to_string(count_a - 1);
   auto manager_result = Registry::get_key_manager<Aead>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_EQ(key_type, manager_result.ValueOrDie()->get_key_type());
@@ -343,10 +341,9 @@ class TestAeadCatalogue : public Catalogue<Aead> {
  public:
   TestAeadCatalogue() {}
 
-  util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
-      GetKeyManager(const std::string& type_url,
-                    const std::string& primitive_name,
-                    uint32_t min_version) const override {
+  util::StatusOr<std::unique_ptr<KeyManager<Aead>>> GetKeyManager(
+      const std::string& type_url, const std::string& primitive_name,
+      uint32_t min_version) const override {
     return util::Status(util::error::UNIMPLEMENTED,
                         "This is a test catalogue.");
   }
@@ -772,7 +769,8 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
 
  private:
   static const int kVersion = 0;
-  const std::string kKeyType = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  const std::string kKeyType =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
 TEST_F(RegistryTest, RegisterKeyTypeManager) {

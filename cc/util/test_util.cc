@@ -59,8 +59,8 @@ namespace crypto {
 namespace tink {
 namespace test {
 
-int GetTestFileDescriptor(
-    absl::string_view filename, int size, std::string* file_contents) {
+int GetTestFileDescriptor(absl::string_view filename, int size,
+                          std::string* file_contents) {
   (*file_contents) = subtle::Random::GetRandomBytes(size);
   return GetTestFileDescriptor(filename, *file_contents);
 }
@@ -172,7 +172,7 @@ std::string HexEncode(absl::string_view bytes) {
 }
 
 #if defined(PLATFORM_GOOGLE)
-std::string TmpDir() { return FLAGS_test_tmpdir; }
+string TmpDir() { return FLAGS_test_tmpdir; }
 #else
 std::string TmpDir() {
   // 'bazel test' sets TEST_TMPDIR
@@ -214,35 +214,29 @@ void AddKey(const std::string& key_type, uint32_t key_id,
   AddKeyData(key_data, key_id, output_prefix, key_status, keyset);
 }
 
-void AddTinkKey(
-    const std::string& key_type,
-    uint32_t key_id,
-    const portable_proto::MessageLite& key,
-    google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::crypto::tink::Keyset* keyset) {
+void AddTinkKey(const std::string& key_type, uint32_t key_id,
+                const portable_proto::MessageLite& key,
+                google::crypto::tink::KeyStatusType key_status,
+                google::crypto::tink::KeyData::KeyMaterialType material_type,
+                google::crypto::tink::Keyset* keyset) {
   AddKey(key_type, key_id, key, OutputPrefixType::TINK,
          key_status, material_type, keyset);
 }
 
-void AddLegacyKey(
-    const std::string& key_type,
-    uint32_t key_id,
-    const portable_proto::MessageLite& key,
-    google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::crypto::tink::Keyset* keyset) {
+void AddLegacyKey(const std::string& key_type, uint32_t key_id,
+                  const portable_proto::MessageLite& key,
+                  google::crypto::tink::KeyStatusType key_status,
+                  google::crypto::tink::KeyData::KeyMaterialType material_type,
+                  google::crypto::tink::Keyset* keyset) {
   AddKey(key_type, key_id, key, OutputPrefixType::LEGACY,
          key_status, material_type, keyset);
 }
 
-void AddRawKey(
-    const std::string& key_type,
-    uint32_t key_id,
-    const portable_proto::MessageLite& key,
-    google::crypto::tink::KeyStatusType key_status,
-    google::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::crypto::tink::Keyset* keyset) {
+void AddRawKey(const std::string& key_type, uint32_t key_id,
+               const portable_proto::MessageLite& key,
+               google::crypto::tink::KeyStatusType key_status,
+               google::crypto::tink::KeyData::KeyMaterialType material_type,
+               google::crypto::tink::Keyset* keyset) {
   AddKey(key_type, key_id, key, OutputPrefixType::RAW,
          key_status, material_type, keyset);
 }

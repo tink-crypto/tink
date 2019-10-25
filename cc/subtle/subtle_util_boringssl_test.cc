@@ -143,8 +143,8 @@ TEST(SubtleUtilBoringSSLTest, EcPointDecode) {
 TEST(SubtleUtilBoringSSLTest, Bn2strAndStr2bn) {
   int len = 8;
   std::string bn_str[6] = {"0000000000000000", "0000000000000001",
-                      "1000000000000000", "ffffffffffffffff",
-                      "0fffffffffffffff", "00ffffffffffffff"};
+                           "1000000000000000", "ffffffffffffffff",
+                           "0fffffffffffffff", "00ffffffffffffff"};
   for (const std::string& s : bn_str) {
     auto status_or_bn = SubtleUtilBoringSSL::str2bn(test::HexDecodeOrDie(s));
     EXPECT_TRUE(status_or_bn.ok());
@@ -194,7 +194,8 @@ bool WycheproofTest(const rapidjson::Value& root) {
       std::string comment = test["comment"].GetString();
       std::string pub_bytes = WycheproofUtil::GetBytes(test["public"]);
       std::string priv_bytes = WycheproofUtil::GetBytes(test["private"]);
-      std::string expected_shared_bytes = WycheproofUtil::GetBytes(test["shared"]);
+      std::string expected_shared_bytes =
+          WycheproofUtil::GetBytes(test["shared"]);
       std::string result = test["result"].GetString();
       EcPointFormat format = EcPointFormat::UNCOMPRESSED;
       for (const rapidjson::Value& flag : test["flags"].GetArray()) {
@@ -404,9 +405,9 @@ TEST(CreatesNewEd25519KeyPairTest, BoringSSLPrivateKeySuffix) {
 
   ED25519_keypair(out_public_key, out_private_key);
   std::string pk = std::string(reinterpret_cast<const char*>(out_public_key),
-                     ED25519_PUBLIC_KEY_LEN);
+                               ED25519_PUBLIC_KEY_LEN);
   std::string sk = std::string(reinterpret_cast<const char*>(out_private_key),
-                     ED25519_PRIVATE_KEY_LEN);
+                               ED25519_PRIVATE_KEY_LEN);
   ASSERT_EQ(pk.length(), 32);
   ASSERT_EQ(sk.length(), 64);
   // BoringSSL's ED25519_keypair returns a private key with the last 32-bytes
@@ -563,7 +564,7 @@ TEST_P(ComputeHashSamplesTest, ComputesHash) {
   auto hash_or = boringssl::ComputeHash(data, *hasher);
   ASSERT_THAT(hash_or.status(), IsOk());
   std::string hash(reinterpret_cast<char*>(hash_or.ValueOrDie().data()),
-              hash_or.ValueOrDie().size());
+                   hash_or.ValueOrDie().size());
   EXPECT_THAT(hash, StrEq(expected_hash));
 }
 

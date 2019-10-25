@@ -156,7 +156,8 @@ TEST_F(PublicKeySignSetWrapperTest, testLegacySignatures) {
     // Try verifying on raw PublicKeyVerify-primitive using original data.
     std::unique_ptr<PublicKeyVerify> raw_pk_verify(
         new DummyPublicKeyVerify(signature_name));
-    std::string raw_signature = signature.substr(CryptoFormat::kNonRawPrefixSize);
+    std::string raw_signature =
+        signature.substr(CryptoFormat::kNonRawPrefixSize);
     auto status = raw_pk_verify->Verify(raw_signature, data);
     EXPECT_FALSE(status.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());

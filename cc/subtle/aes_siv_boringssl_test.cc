@@ -63,7 +63,7 @@ TEST(AesSivBoringSslTest, testNullPtrStringView) {
   // Decryption with ct == null should return an appropriate status.
   pt = cipher->DecryptDeterministically(null, "");
   EXPECT_FALSE(pt.ok());
-  // Additional data with an empty std::string view is the same an empty std::string.
+  // Additional data with an empty string view is the same an empty string.
   std::string message("123456789abcdefghijklmnop");
   ct = cipher->EncryptDeterministically(message, null);
   pt = cipher->DecryptDeterministically(ct.ValueOrDie(), "");

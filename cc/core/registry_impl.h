@@ -300,8 +300,9 @@ class RegistryImpl {
   // for type url type_url and parameter new_key_allowed. Otherwise returns
   // an error to be returned to the user.
   crypto::tink::util::Status CheckInsertable(
-      const std::string& type_url, const std::type_index& key_manager_type_index,
-      bool new_key_allowed) const ABSL_SHARED_LOCKS_REQUIRED(maps_mutex_);
+      const std::string& type_url,
+      const std::type_index& key_manager_type_index, bool new_key_allowed) const
+      ABSL_SHARED_LOCKS_REQUIRED(maps_mutex_);
 
   mutable absl::Mutex maps_mutex_;
   std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_

@@ -96,7 +96,6 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
 
   const std::string& get_key_type() const override { return kKeyType; }
 
-
   crypto::tink::util::StatusOr<AesGcmKey> CreateKey(
       const AesGcmKeyFormat& key_format) const override {
     AesGcmKey result;
@@ -105,7 +104,8 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
   }
 
  private:
-  const std::string kKeyType = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  const std::string kKeyType =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
 TEST(KeyManagerImplTest, FactoryNewKeyFromMessage) {
@@ -387,7 +387,8 @@ class ExampleKeyTypeManagerWithoutFactory
 
  private:
   static const int kVersion = 0;
-  const std::string key_type_ = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  const std::string key_type_ =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
 TEST(KeyManagerImplTest, GetPrimitiveWithoutFactoryAead) {

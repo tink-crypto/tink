@@ -53,7 +53,8 @@ std::unique_ptr<InputStream> GetDecryptingStream(
     int pt_segment_size, int header_size, int ct_offset,
     absl::string_view ciphertext, ValidationRefs* refs) {
   // Prepare ciphertext source stream.
-  auto ct_stream = absl::make_unique<std::stringstream>(std::string(ciphertext));
+  auto ct_stream =
+      absl::make_unique<std::stringstream>(std::string(ciphertext));
   std::unique_ptr<InputStream> ct_source(
       absl::make_unique<IstreamInputStream>(std::move(ct_stream)));
   auto seg_dec = absl::make_unique<DummyStreamSegmentDecrypter>(
@@ -144,7 +145,8 @@ TEST_F(StreamingAeadDecryptingStreamTest, InvalidStreamHeader) {
   // Get a decrypting stream.
   ValidationRefs refs;
   auto dec_stream = GetDecryptingStream(pt_segment_size, header_size,
-      /* ct_offset = */ 0, std::string(header_size, 'a'), &refs);
+                                        /* ct_offset = */ 0,
+                                        std::string(header_size, 'a'), &refs);
 
   // First buffer returned by Next();
   const void* buffer;
@@ -202,7 +204,8 @@ TEST_F(StreamingAeadDecryptingStreamTest, OneSegmentPlaintext) {
   EXPECT_TRUE(next_result.ok()) << next_result.status();
   EXPECT_EQ(buffer_size, next_result.ValueOrDie());
   EXPECT_EQ(buffer_size, dec_stream->Position());
-  EXPECT_EQ(pt, std::string(reinterpret_cast<const char*>(buffer), buffer_size));
+  EXPECT_EQ(pt,
+            std::string(reinterpret_cast<const char*>(buffer), buffer_size));
 
   // Try getting another segment.
   next_result = dec_stream->Next(&buffer);
@@ -274,8 +277,8 @@ TEST_F(StreamingAeadDecryptingStreamTest, NextAfterBackUp) {
   EXPECT_EQ(buffer_size, dec_stream->Position());
   EXPECT_EQ(pt.substr(0, buffer_size),
             std::string(reinterpret_cast<const char*>(buffer), buffer_size));
-  std::string decrypted_first_segment(
-      reinterpret_cast<const char*>(buffer), buffer_size);
+  std::string decrypted_first_segment(reinterpret_cast<const char*>(buffer),
+                                      buffer_size);
 
   // Backup part of the first segment, and call Next again.
   int backup_size = buffer_size / 2;
@@ -328,8 +331,8 @@ TEST_F(StreamingAeadDecryptingStreamTest, BackupAndPosition) {
   EXPECT_TRUE(next_result.ok()) << next_result.status();
   EXPECT_EQ(buffer_size, next_result.ValueOrDie());
   EXPECT_EQ(buffer_size, dec_stream->Position());
-  std::string decrypted_first_segment(
-      reinterpret_cast<const char*>(buffer), buffer_size);
+  std::string decrypted_first_segment(reinterpret_cast<const char*>(buffer),
+                                      buffer_size);
 
   // BackUp several times, but in total fewer bytes than returned by Next().
   std::vector<int> backup_sizes = {0, 1, 5, 0, 10, 78, -42, 60, 120, -120};

@@ -53,8 +53,8 @@ class Config {
   static std::unique_ptr<google::crypto::tink::KeyTypeEntry>
   GetTinkKeyTypeEntry(const std::string& catalogue_name,
                       const std::string& primitive_name,
-                      const std::string& key_proto_name, int key_manager_version,
-                      bool new_key_allowed);
+                      const std::string& key_proto_name,
+                      int key_manager_version, bool new_key_allowed);
 
   // Registers a key manager according to the specification in 'entry'.
   template <class P>

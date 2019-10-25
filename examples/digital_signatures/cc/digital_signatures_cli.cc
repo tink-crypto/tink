@@ -90,8 +90,8 @@ void GeneratePrivateKey(const std::string& output_filename) {
 
 // Extracts a public keyset associated with the given private keyset
 // and writes it to the output file.
-void ExtractPublicKey(
-    const std::string& private_keyset_filename, const std::string& output_filename) {
+void ExtractPublicKey(const std::string& private_keyset_filename,
+                      const std::string& output_filename) {
   std::clog << "Extracting a public keyset associated with the private "
             << "keyset from file " << private_keyset_filename << "..."
             << std::endl;
@@ -117,7 +117,8 @@ void ExtractPublicKey(
 
 // Signs the message using the given private keyset
 // and writes the signature to the output file.
-void Sign(const std::string& keyset_filename, const std::string& message_filename,
+void Sign(const std::string& keyset_filename,
+          const std::string& message_filename,
           const std::string& output_filename) {
   auto keyset_handle = Util::ReadKeyset(keyset_filename);
 
@@ -152,8 +153,10 @@ void Sign(const std::string& keyset_filename, const std::string& message_filenam
 
 // Verifies the signature of the message using the given public keyset
 // and writes the result to the output file.
-void Verify(const std::string& keyset_filename, const std::string& message_filename,
-          const std::string& signature_filename, const std::string& output_filename) {
+void Verify(const std::string& keyset_filename,
+            const std::string& message_filename,
+            const std::string& signature_filename,
+            const std::string& output_filename) {
   auto keyset_handle = Util::ReadKeyset(keyset_filename);
 
   auto primitive_result =

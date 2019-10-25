@@ -46,7 +46,8 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
 }
 
 StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
-    const std::string& type_url, const std::string& serialized_private_key) const {
+    const std::string& type_url,
+    const std::string& serialized_private_key) const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {

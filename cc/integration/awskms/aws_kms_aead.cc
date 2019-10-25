@@ -83,8 +83,7 @@ AwsKmsAead::New(absl::string_view key_arn,
 }
 
 StatusOr<std::string> AwsKmsAead::Encrypt(
-    absl::string_view plaintext,
-    absl::string_view associated_data) const {
+    absl::string_view plaintext, absl::string_view associated_data) const {
   Aws::KMS::Model::EncryptRequest req;
   req.SetKeyId(key_arn_.c_str());
   Aws::Utils::ByteBuffer plaintext_buffer(
@@ -110,8 +109,7 @@ StatusOr<std::string> AwsKmsAead::Encrypt(
 }
 
 StatusOr<std::string> AwsKmsAead::Decrypt(
-    absl::string_view ciphertext,
-    absl::string_view associated_data) const {
+    absl::string_view ciphertext, absl::string_view associated_data) const {
   Aws::KMS::Model::DecryptRequest req;
   Aws::Utils::ByteBuffer ciphertext_buffer(
       reinterpret_cast<const unsigned char*>(ciphertext.data()),

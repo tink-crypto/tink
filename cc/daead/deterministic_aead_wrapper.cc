@@ -59,7 +59,8 @@ class  DeterministicAeadSetWrapper : public DeterministicAead {
   std::unique_ptr<PrimitiveSet<DeterministicAead>> daead_set_;
 };
 
-util::StatusOr<std::string> DeterministicAeadSetWrapper::EncryptDeterministically(
+util::StatusOr<std::string>
+DeterministicAeadSetWrapper::EncryptDeterministically(
     absl::string_view plaintext, absl::string_view associated_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
@@ -74,15 +75,16 @@ util::StatusOr<std::string> DeterministicAeadSetWrapper::EncryptDeterministicall
   return key_id + encrypt_result.ValueOrDie();
 }
 
-util::StatusOr<std::string> DeterministicAeadSetWrapper::DecryptDeterministically(
+util::StatusOr<std::string>
+DeterministicAeadSetWrapper::DecryptDeterministically(
     absl::string_view ciphertext, absl::string_view associated_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
   associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id = std::string(
-        ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));
+    const std::string& key_id =
+        std::string(ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));
     auto primitives_result = daead_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
       absl::string_view raw_ciphertext =

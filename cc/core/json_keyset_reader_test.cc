@@ -147,9 +147,8 @@ TEST_F(JsonKeysetReaderTest, testReaderCreation) {
   }
 
   {  // Stream with good keyset.
-    std::unique_ptr<std::istream> good_keyset_stream(
-        new std::stringstream(std::string(good_json_keyset),
-                              std::ios_base::in));
+    std::unique_ptr<std::istream> good_keyset_stream(new std::stringstream(
+        std::string(good_json_keyset), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(good_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
   }
@@ -161,15 +160,14 @@ TEST_F(JsonKeysetReaderTest, testReaderCreation) {
 
   {  // Stream with bad keyset.
     std::unique_ptr<std::istream> bad_keyset_stream(
-        new std::stringstream(std::string(bad_json_keyset),
-                              std::ios_base::in));
+        new std::stringstream(std::string(bad_json_keyset), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(bad_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
   }
 }
 
 TEST_F(JsonKeysetReaderTest, testReadFromString) {
-  {  // Good std::string.
+  {  // Good string.
     auto reader_result = JsonKeysetReader::New(good_json_keyset);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -180,7 +178,7 @@ TEST_F(JsonKeysetReaderTest, testReadFromString) {
               keyset->SerializeAsString());
   }
 
-  {  // Bad std::string.
+  {  // Bad string.
     auto reader_result = JsonKeysetReader::New(bad_json_keyset);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -193,9 +191,8 @@ TEST_F(JsonKeysetReaderTest, testReadFromString) {
 
 TEST_F(JsonKeysetReaderTest, testReadFromStream) {
   {  // Good stream.
-    std::unique_ptr<std::istream> good_keyset_stream(
-        new std::stringstream(std::string(good_json_keyset),
-                              std::ios_base::in));
+    std::unique_ptr<std::istream> good_keyset_stream(new std::stringstream(
+        std::string(good_json_keyset), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(good_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -208,8 +205,7 @@ TEST_F(JsonKeysetReaderTest, testReadFromStream) {
 
   {  // Bad stream.
     std::unique_ptr<std::istream> bad_keyset_stream(
-        new std::stringstream(std::string(bad_json_keyset),
-                              std::ios_base::in));
+        new std::stringstream(std::string(bad_json_keyset), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(bad_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -221,7 +217,7 @@ TEST_F(JsonKeysetReaderTest, testReadFromStream) {
 }
 
 TEST_F(JsonKeysetReaderTest, testReadEncryptedFromString) {
-  {  // Good std::string.
+  {  // Good string.
     auto reader_result =
         JsonKeysetReader::New(good_json_encrypted_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
@@ -233,7 +229,7 @@ TEST_F(JsonKeysetReaderTest, testReadEncryptedFromString) {
               encrypted_keyset->SerializeAsString());
   }
 
-  {  // Bad std::string.
+  {  // Bad string.
     auto reader_result = JsonKeysetReader::New(bad_json_keyset);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -260,10 +256,9 @@ TEST_F(JsonKeysetReaderTest, testReadEncryptedFromStream) {
               encrypted_keyset->SerializeAsString());
   }
 
-  {  // Bad std::string.
+  {  // Bad string.
     std::unique_ptr<std::istream> bad_keyset_stream(
-        new std::stringstream(std::string(bad_json_keyset),
-                              std::ios_base::in));
+        new std::stringstream(std::string(bad_json_keyset), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(bad_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());

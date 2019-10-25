@@ -59,7 +59,6 @@ class HmacKeyManager
 
   const std::string& get_key_type() const override { return key_type_; }
 
-
   crypto::tink::util::Status ValidateKey(
       const google::crypto::tink::HmacKey& key) const override;
 
@@ -72,7 +71,6 @@ class HmacKeyManager
  private:
   crypto::tink::util::Status ValidateParams(
       const google::crypto::tink::HmacParams& params) const;
-
 
   const std::string key_type_ = absl::StrCat(
       kTypeGoogleapisCom, google::crypto::tink::HmacKey().GetTypeName());

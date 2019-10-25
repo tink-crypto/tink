@@ -52,8 +52,7 @@ util::Status WriteToStream(OutputStream* output_stream,
 // Returns a non-OK status only if reading fails for some reason.
 // If the end of stream is reached ('input_stream' returns OUT_OF_RANGE),
 // then this function returns OK.
-util::Status ReadFromStream(InputStream* input_stream,
-                            std::string* output);
+util::Status ReadFromStream(InputStream* input_stream, std::string* output);
 
 // A dummy encrypter that "encrypts" by just appending to the plaintext
 // the current segment number and a marker byte indicating whether

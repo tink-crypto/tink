@@ -50,7 +50,7 @@ using crypto::tink::util::StatusOr;
 static constexpr char kKeyUriPrefix[] = "aws-kms://";
 
 // Returns AWS key ARN contained in 'key_uri'.
-// If 'key_uri' does not refer to an AWS key, returns an empty std::string.
+// If 'key_uri' does not refer to an AWS key, returns an empty string.
 std::string GetKeyArn(absl::string_view key_uri) {
   if (!absl::StartsWithIgnoreCase(key_uri, kKeyUriPrefix)) return "";
   return std::string(key_uri.substr(std::string(kKeyUriPrefix).length()));
@@ -62,8 +62,7 @@ StatusOr<Aws::Client::ClientConfiguration>
     GetAwsClientConfig(absl::string_view key_arn) {
   std::vector<std::string> key_arn_parts = absl::StrSplit(key_arn, ':');
   if (key_arn_parts.size() < 6) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid key ARN '%s'.",
+    return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid key ARN '%s'.",
                      std::string(key_arn).c_str());
   }
   Aws::Client::ClientConfiguration config;
@@ -74,7 +73,7 @@ StatusOr<Aws::Client::ClientConfiguration>
   return config;
 }
 
-// Reads the specified file and returns the content as a std::string.
+// Reads the specified file and returns the content as a string.
 StatusOr<std::string> Read(const std::string& filename) {
   std::ifstream input_stream;
   input_stream.open(filename, std::ifstream::in);
@@ -90,12 +89,12 @@ StatusOr<std::string> Read(const std::string& filename) {
 
 // Extracts a value of 'name' from 'line', where 'line' must be in format:
 // name = some_value
-StatusOr<std::string> GetValue(absl::string_view name,
-                               absl::string_view line) {
+StatusOr<std::string> GetValue(absl::string_view name, absl::string_view line) {
   std::vector<std::string> parts = absl::StrSplit(line, '=');
   if (parts.size() != 2 || absl::StripAsciiWhitespace(parts[0]) != name) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-          "Expected line in format '%s = some_value'.", std::string(name).c_str());
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Expected line in format '%s = some_value'.",
+                     std::string(name).c_str());
   }
   return std::string(absl::StripAsciiWhitespace(parts[1]));
 }
@@ -197,8 +196,7 @@ AwsKmsClient::New(absl::string_view key_uri,
   if (!key_uri.empty()) {
     client->key_arn_ = GetKeyArn(key_uri);
     if (client->key_arn_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Key '%s' not supported",
+      return ToStatusF(util::error::INVALID_ARGUMENT, "Key '%s' not supported",
                        std::string(key_uri).c_str());
     }
     auto config_result = GetAwsClientConfig(client->key_arn_);
@@ -225,8 +223,7 @@ AwsKmsClient::GetAead(absl::string_view key_uri) const {
     if (!key_arn_.empty()) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "This client is bound to '%s', and cannot use key '%s'.",
-                       key_arn_.c_str(),
-                       std::string(key_uri).c_str());
+                       key_arn_.c_str(), std::string(key_uri).c_str());
     } else {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "This client does not support key '%s'.",

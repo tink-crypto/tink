@@ -71,8 +71,8 @@ util::Status PublicKeyVerifySetWrapper::Verify(
     // We're not aware of any schemes that output signatures that small.
     return util::Status(util::error::INVALID_ARGUMENT, "Signature too short.");
   }
-  const std::string& key_id = std::string(
-      signature.substr(0, CryptoFormat::kNonRawPrefixSize));
+  const std::string& key_id =
+      std::string(signature.substr(0, CryptoFormat::kNonRawPrefixSize));
   auto primitives_result = public_key_verify_set_->get_primitives(key_id);
   if (primitives_result.ok()) {
     absl::string_view raw_signature =
