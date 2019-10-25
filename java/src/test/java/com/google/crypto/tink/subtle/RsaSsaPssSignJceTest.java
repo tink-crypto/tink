@@ -37,6 +37,10 @@ public class RsaSsaPssSignJceTest {
 
   @Test
   public void testConstructorExceptions() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out when running under thread sanitizer, so we just skip.
+      return;
+    }
     int keySize = 2048;
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
     keyGen.initialize(keySize);
@@ -83,6 +87,10 @@ public class RsaSsaPssSignJceTest {
 
   @Test
   public void testZeroSaltLength() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out when running under thread sanitizer, so we just skip.
+      return;
+    }
     int keySize = 2048;
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
     keyGen.initialize(keySize);
