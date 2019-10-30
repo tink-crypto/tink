@@ -170,6 +170,20 @@ class SubtleUtilBoringSSL {
   static crypto::tink::util::StatusOr<std::string> ComputeEcdhSharedSecret(
       EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key);
 
+  // Transforms ECDSA IEEE_P1363 signature encoding to DER encoding.
+  //
+  // The IEEE_P1363 signature's format is r || s, where r and s are zero-padded
+  // and have the same size in bytes as the order of the curve. For example, for
+  // NIST P-256 curve, r and s are zero-padded to 32 bytes.
+  //
+  // The DER signature is encoded using ASN.1
+  // (https://tools.ietf.org/html/rfc5480#appendix-A):
+  //   ECDSA-Sig-Value :: = SEQUENCE { r INTEGER, s INTEGER }.
+  // In particular, the encoding is:
+  //   0x30 || totalLength || 0x02 || r's length || r || 0x02 || s's length || s
+  static crypto::tink::util::StatusOr<std::string> EcSignatureIeeeToDer(
+      const EC_GROUP *group, absl::string_view ieee_sig);
+
   // Returns an EVP structure for a hash function.
   // The EVP_MD instances are sigletons owned by BoringSSL.
   static crypto::tink::util::StatusOr<const EVP_MD *> EvpHash(
@@ -180,9 +194,9 @@ class SubtleUtilBoringSSL {
       subtle::HashType sig_hash);
 
   // Validates whether 'modulus_size' is at least 2048-bit.
-  // To reach 128-bit security strength, RSA's modulus must be at least 3072-bit
-  // while 2048-bit RSA key only has 112-bit security. Nevertheless, a 2048-bit
-  // RSA key is considered safe by NIST until 2030 (see
+  // To reach 128-bit security strength, RSA's modulus must be at least
+  // 3072-bit while 2048-bit RSA key only has 112-bit security. Nevertheless,
+  // a 2048-bit RSA key is considered safe by NIST until 2030 (see
   // https://www.keylength.com/en/4/).
   static crypto::tink::util::Status ValidateRsaModulusSize(size_t modulus_size);
 
@@ -205,10 +219,10 @@ class SubtleUtilBoringSSL {
   static util::Status CopyCrtParams(const RsaPrivateKey &key, RSA *rsa);
 
   // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
-  static const EVP_CIPHER* GetAesCtrCipherForKeySize(uint32_t size_in_bytes);
+  static const EVP_CIPHER *GetAesCtrCipherForKeySize(uint32_t size_in_bytes);
 
   // Returns BoringSSL's AES GCM EVP_AEAD for the key size.
-  static const EVP_AEAD* GetAesGcmAeadForKeySize(uint32_t size_in_bytes);
+  static const EVP_AEAD *GetAesGcmAeadForKeySize(uint32_t size_in_bytes);
 };
 
 namespace boringssl {

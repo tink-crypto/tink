@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/subtle_util_boringssl.h"
+
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
@@ -22,7 +23,9 @@
 #include "openssl/cipher.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
+#include "openssl/ecdsa.h"
 #include "openssl/err.h"
+#include "openssl/mem.h"
 #include "openssl/rsa.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/errors.h"
@@ -428,6 +431,43 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
 }
 
 // static
+util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
+    const EC_GROUP *group, absl::string_view ieee_sig) {
+  size_t field_size_in_bytes = (EC_GROUP_get_degree(group) + 7) / 8;
+  if (ieee_sig.size() != field_size_in_bytes * 2) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Signature is not valid.");
+  }
+  bssl::UniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_new());
+  auto status_or_r =
+      SubtleUtilBoringSSL::str2bn(ieee_sig.substr(0, ieee_sig.size() / 2));
+  if (!status_or_r.ok()) {
+    return status_or_r.status();
+  }
+  auto status_or_s = SubtleUtilBoringSSL::str2bn(
+      ieee_sig.substr(ieee_sig.size() / 2, ieee_sig.size() / 2));
+  if (!status_or_s.ok()) {
+    return status_or_s.status();
+  }
+  if (1 != ECDSA_SIG_set0(ecdsa.get(), status_or_r.ValueOrDie().get(),
+                          status_or_s.ValueOrDie().get())) {
+    return util::Status(util::error::INTERNAL, "ECDSA_SIG_set0 error.");
+  }
+  // ECDSA_SIG_set0 takes ownership of s and r's pointers.
+  status_or_r.ValueOrDie().release();
+  status_or_s.ValueOrDie().release();
+  uint8_t *der = nullptr;
+  size_t der_len;
+  if (!ECDSA_SIG_to_bytes(&der, &der_len, ecdsa.get())) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "ECDSA_SIG_to_bytes error");
+  }
+  std::string result = std::string(reinterpret_cast<char *>(der), der_len);
+  OPENSSL_free(der);
+  return result;
+}
+
+// static
 util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
   switch (sig_hash) {
     case HashType::SHA256: /* fall through */
@@ -597,7 +637,7 @@ util::Status SubtleUtilBoringSSL::CopyCrtParams(
 }
 
 // static
-const EVP_CIPHER* SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
+const EVP_CIPHER *SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
     uint32_t size_in_bytes) {
   switch (size_in_bytes) {
     case 16:
@@ -610,7 +650,7 @@ const EVP_CIPHER* SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
 }
 
 // static
-const EVP_AEAD* SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(
+const EVP_AEAD *SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(
     uint32_t size_in_bytes) {
   switch (size_in_bytes) {
     case 16:
