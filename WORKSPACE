@@ -586,6 +586,12 @@ go_repository(
     version = "v0.0.0-20190506145303-2d16b83fe98c",
 )
 
+go_repository(
+    name = "com_github_hashicorp_vault",
+    importpath = "github.com/hashicorp/vault",
+    tag = "v1.2.3",
+)
+
 #-----------------------------------------------------------------------------
 # Javascript
 #-----------------------------------------------------------------------------
