@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/keyset_handle.h"
 
+#include <memory>
 #include <random>
 #include "absl/memory/memory.h"
 #include "tink/aead.h"
@@ -28,6 +29,7 @@ using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyTemplate;
+using google::crypto::tink::KeysetInfo;
 
 
 namespace crypto {
@@ -213,6 +215,20 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
     keyset->set_primary_key_id(key_id);
   }
   return key_id;
+}
+
+KeysetInfo KeysetHandle::GetKeysetInfo() const {
+  auto& keyset = get_keyset();
+  auto keyset_info = absl::make_unique<KeysetInfo>();
+  keyset_info->set_primary_key_id(keyset.primary_key_id());
+  for (const Keyset::Key& key : keyset.key()) {
+    auto* key_info = keyset_info->add_key_info();
+    key_info->set_key_id(key.key_id());
+    key_info->set_type_url(key.key_data().type_url());
+    key_info->set_output_prefix_type(key.output_prefix_type());
+    key_info->set_status(key.status());
+  }
+  return KeysetInfo(*keyset_info);
 }
 
 KeysetHandle::KeysetHandle(Keyset keyset)

@@ -636,6 +636,37 @@ TEST_F(KeysetHandleTest, WriteNoSecretFailForHidden) {
   EXPECT_FALSE(result.ok());
 }
 
+TEST_F(KeysetHandleTest, GetKeysetInfo) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
+            KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key,
+              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+  keyset.set_primary_key_id(42);
+
+  auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
+  auto keyset_info = handle->GetKeysetInfo();
+
+  EXPECT_EQ(keyset.primary_key_id(), keyset_info.primary_key_id());
+  for (int i = 0; i < keyset.key_size(); ++i) {
+    auto key_info = keyset_info.key_info(i);
+    auto key = keyset.key(i);
+    EXPECT_EQ(key.key_data().type_url(), key_info.type_url());
+    EXPECT_EQ(key.status(), key_info.status());
+    EXPECT_EQ(key.key_id(), key_info.key_id());
+    EXPECT_EQ(key.output_prefix_type(), key_info.output_prefix_type());
+  }
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
