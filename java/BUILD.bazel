@@ -65,6 +65,7 @@ subtle_deps = [
     "//java/src/main/java/com/google/crypto/tink/subtle:signature",
     "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
     "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
+    "//java/src/main/java/com/google/crypto/tink/subtle/prf",
 ]
 
 java_deps = [
