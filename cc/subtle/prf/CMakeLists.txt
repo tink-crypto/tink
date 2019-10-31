@@ -24,8 +24,7 @@ tink_cc_library(
 
 tink_cc_test(
   NAME hkdf_streaming_prf_test
-  SRCS
-    hkdf_streaming_prf_test.cc
+  SRCS hkdf_streaming_prf_test.cc
   DEPS
     tink::subtle_prf::hkdf_streaming_prf
     tink::subtle_prf::streaming_prf

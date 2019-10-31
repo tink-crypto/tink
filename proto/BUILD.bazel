@@ -949,6 +949,38 @@ objc_proto_compile(
 )
 
 # -----------------------------------------------
+# Hkdf prf
+# -----------------------------------------------
+proto_library(
+    name = "hkdf_prf_proto",
+    srcs = [
+        "hkdf_prf.proto",
+    ],
+    deps = [":common_proto"],
+)
+
+cc_proto_library(
+    name = "hkdf_prf_cc_proto",
+    deps = [":hkdf_prf_proto"],
+)
+
+java_proto_library(
+    name = "hkdf_prf_java_proto",
+    deps = [":hkdf_prf_proto"],
+)
+
+java_lite_proto_library(
+    name = "hkdf_prf_java_proto_lite",
+    deps = [":hkdf_prf_proto"],
+)
+
+objc_proto_compile(
+    name = "hkdf_prf_objc_pb",
+    protos = ["hkdf_prf.proto"],
+    tags = ["manual"],
+)
+
+# -----------------------------------------------
 # empty
 # -----------------------------------------------
 proto_library(

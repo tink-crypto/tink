@@ -1,0 +1,229 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#include "tink/prf/hkdf_prf_key_manager.h"
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/prf/hkdf_streaming_prf.h"
+#include "tink/util/input_stream_util.h"
+#include "tink/util/test_matchers.h"
+#include "proto/common.pb.h"
+
+namespace crypto {
+namespace tink {
+
+namespace {
+
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::HkdfPrfKey;
+using ::google::crypto::tink::HkdfPrfKeyFormat;
+using ::testing::Eq;
+using ::testing::HasSubstr;
+using ::testing::SizeIs;
+
+TEST(HkdfPrfKeyManagerTest, Basics) {
+  EXPECT_THAT(HkdfPrfKeyManager().get_version(), Eq(0));
+  EXPECT_THAT(HkdfPrfKeyManager().get_key_type(),
+              Eq("type.googleapis.com/google.crypto.tink.HkdfPrfKey"));
+  EXPECT_THAT(HkdfPrfKeyManager().key_material_type(),
+              Eq(google::crypto::tink::KeyData::SYMMETRIC));
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateEmptyKey) {
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(HkdfPrfKey()),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateValid16ByteKey) {
+  HkdfPrfKey key;
+  key.set_version(0);
+  key.set_key_value("0123456789abcdef");
+  key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key), IsOk());
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateValidSha512Key) {
+  HkdfPrfKey key;
+  key.set_version(0);
+  key.set_key_value("0123456789abcdef");
+  key.mutable_params()->set_hash(::google::crypto::tink::SHA512);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key), IsOk());
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateValid17ByteKey) {
+  HkdfPrfKey key;
+  key.set_version(0);
+  key.set_key_value("0123456789abcdefg");
+  key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key), IsOk());
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateValidKeyWithSalt) {
+  HkdfPrfKey key;
+  key.set_version(0);
+  key.set_key_value("0123456789abcdefg");
+  key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  key.mutable_params()->set_salt("12345");
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key), IsOk());
+}
+
+TEST(HkdfPrfKeyManagerTest, InvalidKeySizes15Bytes) {
+  HkdfPrfKey key;
+  key.set_version(0);
+  key.set_key_value("0123456789abcde");
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(HkdfPrfKeyManagerTest, InvalidKeySha1) {
+  HkdfPrfKey key;
+  key.set_version(0);
+  key.set_key_value("0123456789abcdef");
+  key.mutable_params()->set_hash(::google::crypto::tink::SHA1);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(HkdfPrfKeyManagerTest, InvalidKeyVersion) {
+  HkdfPrfKey key;
+  key.set_version(1);
+  key.set_key_value("0123456789abcdef");
+  key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateEmptyKeyFormat) {
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(HkdfPrfKeyFormat()),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateValid16ByteKeyFormat) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateValidSha512KeyFormat) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA512);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateValid17ByteKeyFormat) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateValidKeyFormatWithSalt) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  key_format.mutable_params()->set_salt("abcdef");
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST(HkdfPrfKeyManagerTest, InvalidKeyFormatSha1) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA1);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(HkdfPrfKeyManagerTest, CreateKey) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(16));
+  EXPECT_THAT(key_or.ValueOrDie().params().hash(),
+              Eq(::google::crypto::tink::SHA256));
+  EXPECT_THAT(key_or.ValueOrDie().params().salt(), Eq(""));
+  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+}
+
+TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetSize) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(77);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(77));
+}
+
+TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetHash) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA512);
+  auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().params().hash(),
+              Eq(::google::crypto::tink::SHA512));
+}
+
+TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetSalt) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA512);
+  key_format.mutable_params()->set_salt("saltstring");
+  auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().params().salt(), Eq("saltstring"));
+}
+
+TEST(HkdfPrfKeyManagerTest, CreatePrf) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(16);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  key_format.mutable_params()->set_salt("salt string");
+  auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<StreamingPrf>> prf_or =
+      HkdfPrfKeyManager().GetPrimitive<StreamingPrf>(key_or.ValueOrDie());
+
+  ASSERT_THAT(prf_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<StreamingPrf>> direct_prf =
+      subtle::HkdfStreamingPrf::New(
+          subtle::SHA256, key_or.ValueOrDie().key_value(), "salt string");
+
+  ASSERT_THAT(direct_prf.status(), IsOk());
+
+  std::unique_ptr<InputStream> input =
+      prf_or.ValueOrDie()->ComputePrf("input string");
+  std::unique_ptr<InputStream> direct_input =
+  direct_prf.ValueOrDie()->ComputePrf("input string");
+
+  auto output_or = ReadAtMostFromStream(100, input.get());
+  auto direct_output_or = ReadAtMostFromStream(100, direct_input.get());
+
+  ASSERT_THAT(output_or.status(), IsOk());
+  ASSERT_THAT(direct_output_or.status(), IsOk());
+  EXPECT_THAT(output_or.ValueOrDie(), Eq(direct_output_or.ValueOrDie()));
+}
+
+}  // namespace
+}  // namespace tink
+}  // namespace crypto
