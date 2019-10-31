@@ -648,12 +648,11 @@ public final class Registry {
     return b.toString();
   }
 
-  @SuppressWarnings("unchecked")
   private static <P> KeyManager<P> getKeyManagerInternal(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
     if (primitiveClass == null) {
-      @SuppressWarnings("Unchecked")  // Only called from deprecated functions; unavoidable there.
+      @SuppressWarnings("unchecked")  // Only called from deprecated functions; unavoidable there.
       KeyManager<P> result = (KeyManager<P>) container.getUntypedKeyManager();
       return result;
     }
