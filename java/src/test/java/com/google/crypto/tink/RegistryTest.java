@@ -966,8 +966,11 @@ public class RegistryTest {
         .build();
 
     byte[] keyMaterial = Random.randBytes(100);
+    KeyData keyData =  Registry.deriveKey(template, new ByteArrayInputStream(keyMaterial));
+    assertThat(keyData.getKeyMaterialType()).isEqualTo(new TestKeyTypeManager().keyMaterialType());
+    assertThat(keyData.getTypeUrl()).isEqualTo(new TestKeyTypeManager().getKeyType());
     AesGcmKey key =
-        (AesGcmKey) Registry.deriveKey(template, new ByteArrayInputStream(keyMaterial));
+        AesGcmKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     for (int i = 0; i < 16; ++i) {
       assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
     }
@@ -1437,8 +1440,9 @@ public class RegistryTest {
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
 
+    KeyData keyData =  Registry.deriveKey(template, new ByteArrayInputStream(new byte[0]));
     Ed25519PrivateKey key =
-        (Ed25519PrivateKey) Registry.deriveKey(template, new ByteArrayInputStream(new byte[0]));
+        Ed25519PrivateKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     assertThat(key.getKeyValue()).isEqualTo(ByteString.copyFrom("derived", UTF_8));
   }
 

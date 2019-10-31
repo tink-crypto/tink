@@ -241,7 +241,7 @@ public final class Registry {
   }
 
   private static interface KeyDeriverContainer {
-    MessageLite deriveKey(ByteString serializedKeyFormat, InputStream stream)
+    KeyData deriveKey(ByteString serializedKeyFormat, InputStream stream)
         throws GeneralSecurityException;
   }
 
@@ -260,15 +260,22 @@ public final class Registry {
           throw new GeneralSecurityException("parsing key format failed in deriveKey", e);
         }
         keyFactory.validateKeyFormat(keyFormat);
-          return keyFactory.deriveKey(keyFormat, stream);
+        return keyFactory.deriveKey(keyFormat, stream);
       }
 
       @Override
-      public MessageLite deriveKey(ByteString serializedKeyFormat, InputStream stream)
+      public KeyData deriveKey(ByteString serializedKeyFormat, InputStream stream)
           throws GeneralSecurityException {
         KeyTypeManager.KeyFactory<?, KeyProtoT> keyFactory;
         keyFactory = keyManager.keyFactory();
-        return deriveKeyWithFactory(serializedKeyFormat, stream, keyFactory);
+        MessageLite keyValue = deriveKeyWithFactory(serializedKeyFormat, stream, keyFactory);
+        KeyData keyData =
+            KeyData.newBuilder()
+                .setTypeUrl(keyManager.getKeyType())
+                .setValue(keyValue.toByteString())
+                .setKeyMaterialType(keyManager.keyMaterialType())
+                .build();
+        return keyData;
       }
     };
   }
@@ -730,7 +737,7 @@ public final class Registry {
    *
    * <p>This functions ignores {@code keyTemplate.getOutputPrefix()}.
    */
-  static synchronized MessageLite deriveKey(KeyTemplate keyTemplate, InputStream randomness)
+  static synchronized KeyData deriveKey(KeyTemplate keyTemplate, InputStream randomness)
       throws GeneralSecurityException {
     KeyDeriverContainer deriver = keyDeriverMap.get(keyTemplate.getTypeUrl());
     return deriver.deriveKey(keyTemplate.getValue(), randomness);
