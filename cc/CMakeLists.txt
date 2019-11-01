@@ -846,6 +846,8 @@ tink_cc_test(
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_boringssl
+    tink::util::input_stream_util
+    tink::util::istream_input_stream
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

@@ -1100,6 +1100,8 @@ cc_test(
         ":aead",
         ":core/key_manager_impl",
         "//cc/subtle",
+        "//cc/util:input_stream_util",
+        "//cc/util:istream_input_stream",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_matchers",
