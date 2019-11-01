@@ -10,6 +10,7 @@
 
 1. [Introduction](#introduction)
 2. [Getting started](#getting-started)
+3. [Overview](#overview)
 3. [Current status](#current-status)
 4. [Learn more](#learn-more)
 5. [Contact and mailing list](#contact-and-mailing-list)
@@ -39,10 +40,19 @@ at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
 
 ## Getting started
 
-**TIP** The easiest way to get started with Tink is to install
-[Bazel](https://docs.bazel.build/versions/master/install.html), then build, run
-and play with the [`hello world
-examples`](https://github.com/google/tink/tree/master/examples/helloworld).
+Tink primarily uses [Bazel](https://bazel.build) to manage building and testing
+the project.
+
+The recommended way to get started with Tink is to use
+[Bazelisk](https://github.com/bazelbuild/bazelisk). This tool is developed by
+the Bazel team and makes it easy to ensure usage of a version of Bazel that's
+compatible with the project.
+
+As a starting point, the [`hello world
+examples`](https://github.com/google/tink/tree/master/examples/helloworld)
+demonstrate performing simple tasks using Tink in a variety of languages.
+
+## Overview
 
 Tink performs cryptographic tasks via so-called [primitives](docs/PRIMITIVES.md),
 each of which is defined via a corresponding interface that specifies the
