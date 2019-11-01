@@ -17,6 +17,7 @@ package com.google.crypto.tink.subtle.prf;
 import static java.lang.Math.min;
 
 import com.google.crypto.tink.subtle.EngineFactory;
+import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -26,34 +27,29 @@ import javax.crypto.spec.SecretKeySpec;
 
 /** An implementation of the HKDF pseudorandom function, as given by RFC 5869. */
 public class HkdfStreamingPrf implements StreamingPrf {
-  /** The set of HMAC algorithms accepted by {@code HkdfStreamingPrf}. */
-  public static enum HmacAlgorithm {
-    HMAC_SHA_1("HmacSha1"),
-    HMAC_SHA_256("HmacSha256"),
-    HMAC_SHA_512("HmacSha512");
-
-    HmacAlgorithm(String name) {
-      this.name = name;
-    }
-
-    private final String name;
-
-    /**
-     * Returns the string which we can give to the {@link java.security.Provider} for the specific
-     * hmac algorithm.
-     */
-    public String getMacAlgorithmName() throws GeneralSecurityException {
-      return name;
+  private static String getJavaxHmacName(HashType hashType) throws GeneralSecurityException {
+    switch (hashType) {
+      case SHA1:
+        return "HmacSha1";
+      case SHA256:
+        return "HmacSha256";
+      case SHA384:
+        return "HmacSha384";
+      case SHA512:
+        return "HmacSha512";
+      default:
+        throw new GeneralSecurityException(
+            "No getJavaxHmacName for given hash " + hashType + " known");
     }
   }
 
-  public HkdfStreamingPrf(final HmacAlgorithm hmacAlgo, final byte[] ikm, final byte[] salt) {
-    this.hmacAlgo = hmacAlgo;
+  public HkdfStreamingPrf(final HashType hashType, final byte[] ikm, final byte[] salt) {
+    this.hashType = hashType;
     this.ikm = Arrays.copyOf(ikm, ikm.length);
     this.salt = Arrays.copyOf(salt, salt.length);
   }
 
-  private final HmacAlgorithm hmacAlgo;
+  private final HashType hashType;
   private final byte[] ikm;
   private final byte[] salt;
 
@@ -66,16 +62,16 @@ public class HkdfStreamingPrf implements StreamingPrf {
     // We create the HMac lazily, so we don't have to throw an exception in computePrf.
     private void initialize() throws GeneralSecurityException, IOException {
       try {
-        mac = EngineFactory.MAC.getInstance(hmacAlgo.getMacAlgorithmName());
+        mac = EngineFactory.MAC.getInstance(getJavaxHmacName(hashType));
       } catch (GeneralSecurityException e) {
         throw new IOException("Creating HMac failed", e);
       }
       if (salt == null || salt.length == 0) {
         // According to RFC 5869, Section 2.2 the salt is optional. If no salt is provided
         // then HKDF uses a salt that is an array of zeros of the same length as the hash digest.
-        mac.init(new SecretKeySpec(new byte[mac.getMacLength()], hmacAlgo.getMacAlgorithmName()));
+        mac.init(new SecretKeySpec(new byte[mac.getMacLength()], getJavaxHmacName(hashType)));
       } else {
-        mac.init(new SecretKeySpec(salt, hmacAlgo.getMacAlgorithmName()));
+        mac.init(new SecretKeySpec(salt, getJavaxHmacName(hashType)));
       }
       mac.update(ikm);
       prk = mac.doFinal();
@@ -87,7 +83,7 @@ public class HkdfStreamingPrf implements StreamingPrf {
     // Updates ti to ti+1 as in RFC 5869, section 2.3:
     // T(i+1) = HMAC-Hash(PRK, T(i) | info | 0x<i+1>)
     private void updateBuffer() throws GeneralSecurityException, IOException {
-      mac.init(new SecretKeySpec(prk, hmacAlgo.getMacAlgorithmName()));
+      mac.init(new SecretKeySpec(prk, getJavaxHmacName(hashType)));
       buffer.reset();
       mac.update(buffer);
       mac.update(input);

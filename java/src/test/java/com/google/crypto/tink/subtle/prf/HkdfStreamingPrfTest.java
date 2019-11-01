@@ -16,6 +16,7 @@ package com.google.crypto.tink.subtle.prf;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.crypto.tink.subtle.Random;
@@ -32,10 +33,7 @@ public final class HkdfStreamingPrfTest {
   @Test
   public void testComputePrf_basic() throws Exception {
     HkdfStreamingPrf prf =
-        new HkdfStreamingPrf(
-            HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1,
-            "key0123456".getBytes(UTF_8),
-            "salt".getBytes(UTF_8));
+        new HkdfStreamingPrf(HashType.SHA1, "key0123456".getBytes(UTF_8), "salt".getBytes(UTF_8));
     InputStream input = prf.computePrf("input".getBytes(UTF_8));
     byte[] output = new byte[10];
     assertThat(input.read(output)).isEqualTo(10);
@@ -44,10 +42,7 @@ public final class HkdfStreamingPrfTest {
   @Test
   public void testComputePrf_differentInputDifferentValues() throws Exception {
     HkdfStreamingPrf prf =
-        new HkdfStreamingPrf(
-            HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1,
-            "key0123456".getBytes(UTF_8),
-            "salt".getBytes(UTF_8));
+        new HkdfStreamingPrf(HashType.SHA1, "key0123456".getBytes(UTF_8), "salt".getBytes(UTF_8));
     InputStream input = prf.computePrf("input".getBytes(UTF_8));
     byte[] output = new byte[10];
     assertThat(input.read(output)).isEqualTo(10);
@@ -61,10 +56,7 @@ public final class HkdfStreamingPrfTest {
   @Test
   public void testComputePrf_sameInputSameValue() throws Exception {
     HkdfStreamingPrf prf =
-        new HkdfStreamingPrf(
-            HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1,
-            "key0123456".getBytes(UTF_8),
-            "salt".getBytes(UTF_8));
+        new HkdfStreamingPrf(HashType.SHA1, "key0123456".getBytes(UTF_8), "salt".getBytes(UTF_8));
     InputStream input = prf.computePrf("input".getBytes(UTF_8));
     byte[] output = new byte[10];
     assertThat(input.read(output)).isEqualTo(10);
@@ -78,10 +70,7 @@ public final class HkdfStreamingPrfTest {
   @Test
   public void testComputePrf_sameInputDifferentInterfacesSameValue() throws Exception {
     HkdfStreamingPrf prf =
-        new HkdfStreamingPrf(
-            HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1,
-            "key0123456".getBytes(UTF_8),
-            "salt".getBytes(UTF_8));
+        new HkdfStreamingPrf(HashType.SHA1, "key0123456".getBytes(UTF_8), "salt".getBytes(UTF_8));
     InputStream input = prf.computePrf("input".getBytes(UTF_8));
     byte[] output = new byte[100];
     assertThat(input.read(output)).isEqualTo(100);
@@ -100,10 +89,7 @@ public final class HkdfStreamingPrfTest {
   @Test
   public void testComputePrf_exhaustStream() throws Exception {
     HkdfStreamingPrf prf =
-        new HkdfStreamingPrf(
-            HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_512,
-            "key0123456".getBytes(UTF_8),
-            "salt".getBytes(UTF_8));
+        new HkdfStreamingPrf(HashType.SHA512, "key0123456".getBytes(UTF_8), "salt".getBytes(UTF_8));
     InputStream input = prf.computePrf("input".getBytes(UTF_8));
     final int maxOutputLength = 255 * (512 / 8);
     byte[] output = new byte[maxOutputLength + 50];
@@ -113,7 +99,7 @@ public final class HkdfStreamingPrfTest {
   // https://tools.ietf.org/html/rfc5869#appendix-A.1
   @Test
   public void testComputePrf_rfc589vector1() throws Exception {
-    HkdfStreamingPrf.HmacAlgorithm hash = HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_256;
+    HashType hash = HashType.SHA256;
     byte[] ikm = Hex.decode("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
     byte[] salt = Hex.decode("000102030405060708090a0b0c");
     byte[] info = Hex.decode("f0f1f2f3f4f5f6f7f8f9");
@@ -133,7 +119,7 @@ public final class HkdfStreamingPrfTest {
   // https://tools.ietf.org/html/rfc5869#appendix-A.2
   @Test
   public void testComputePrf_rfc589vector2() throws Exception {
-    HkdfStreamingPrf.HmacAlgorithm hash = HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_256;
+    HashType hash = HashType.SHA256;
     byte[] ikm =
         Hex.decode(
             "000102030405060708090a0b0c0d0e0f"
@@ -174,7 +160,7 @@ public final class HkdfStreamingPrfTest {
   // https://tools.ietf.org/html/rfc5869#appendix-A.3
   @Test
   public void testComputePrf_rfc589vector3() throws Exception {
-    HkdfStreamingPrf.HmacAlgorithm hash = HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_256;
+    HashType hash = HashType.SHA256;
     byte[] ikm = Hex.decode("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
     byte[] salt = Hex.decode("");
     byte[] info = Hex.decode("");
@@ -194,7 +180,7 @@ public final class HkdfStreamingPrfTest {
   // https://tools.ietf.org/html/rfc5869#appendix-A.4
   @Test
   public void testComputePrf_rfc589vector4() throws Exception {
-    HkdfStreamingPrf.HmacAlgorithm hash = HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1;
+    HashType hash = HashType.SHA1;
     byte[] ikm = Hex.decode("0b0b0b0b0b0b0b0b0b0b0b");
     byte[] salt = Hex.decode("000102030405060708090a0b0c");
     byte[] info = Hex.decode("f0f1f2f3f4f5f6f7f8f9");
@@ -214,7 +200,7 @@ public final class HkdfStreamingPrfTest {
   // https://tools.ietf.org/html/rfc5869#appendix-A.5
   @Test
   public void testComputePrf_rfc589vector5() throws Exception {
-    HkdfStreamingPrf.HmacAlgorithm hash = HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1;
+    HashType hash = HashType.SHA1;
     byte[] ikm =
         Hex.decode(
             "000102030405060708090a0b0c0d0e0f"
@@ -255,7 +241,7 @@ public final class HkdfStreamingPrfTest {
   // https://tools.ietf.org/html/rfc5869#appendix-A.6
   @Test
   public void testComputePrf_rfc589vector6() throws Exception {
-    HkdfStreamingPrf.HmacAlgorithm hash = HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1;
+    HashType hash = HashType.SHA1;
     byte[] ikm = Hex.decode("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
     byte[] salt = Hex.decode("");
     byte[] info = Hex.decode("");
@@ -275,7 +261,7 @@ public final class HkdfStreamingPrfTest {
   // https://tools.ietf.org/html/rfc5869#appendix-A.7
   @Test
   public void testComputePrf_rfc589vector7() throws Exception {
-    HkdfStreamingPrf.HmacAlgorithm hash = HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1;
+    HashType hash = HashType.SHA1;
     byte[] ikm = Hex.decode("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
     // Since HMAC anyhow pads, this is the same as an absent salt.
     byte[] salt = Hex.decode("");
@@ -295,7 +281,7 @@ public final class HkdfStreamingPrfTest {
 
   @Test
   public void testComputePrf_compareToHkdfUtil() throws Exception {
-    HkdfStreamingPrf.HmacAlgorithm hash = HkdfStreamingPrf.HmacAlgorithm.HMAC_SHA_1;
+    HashType hash = HashType.SHA1;
     byte[] ikm = Random.randBytes(123);
     byte[] salt = Random.randBytes(234);
     byte[] info = Random.randBytes(345);
@@ -305,7 +291,21 @@ public final class HkdfStreamingPrfTest {
     InputStream input = prf.computePrf(info);
     input.read(result);
 
-    assertThat(Hkdf.computeHkdf(hash.getMacAlgorithmName(), ikm, salt, info, result.length))
-        .isEqualTo(result);
+    assertThat(Hkdf.computeHkdf("HmacSha1", ikm, salt, info, result.length)).isEqualTo(result);
+  }
+
+  @Test
+  public void testComputePrf_compareToHkdfUtilSha384() throws Exception {
+    HashType hash = HashType.SHA384;
+    byte[] ikm = Random.randBytes(123);
+    byte[] salt = Random.randBytes(234);
+    byte[] info = Random.randBytes(345);
+    byte[] result = new byte[456];
+
+    HkdfStreamingPrf prf = new HkdfStreamingPrf(hash, ikm, salt);
+    InputStream input = prf.computePrf(info);
+    input.read(result);
+
+    assertThat(Hkdf.computeHkdf("HmacSha384", ikm, salt, info, result.length)).isEqualTo(result);
   }
 }
