@@ -109,7 +109,8 @@ public final class KeysetHandle {
       Keyset keyset = reader.read();
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (InvalidProtocolBufferException e) {
+    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+      // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
   }
@@ -130,7 +131,8 @@ public final class KeysetHandle {
       Keyset keyset = Keyset.parseFrom(serialized, ExtensionRegistryLite.getEmptyRegistry());
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (InvalidProtocolBufferException e) {
+    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+      // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
   }
@@ -171,7 +173,8 @@ public final class KeysetHandle {
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }
-    } catch (InvalidProtocolBufferException e) {
+    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+      // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
     return EncryptedKeyset.newBuilder()
@@ -193,7 +196,8 @@ public final class KeysetHandle {
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       assertEnoughKeyMaterial(keyset);
       return keyset;
-    } catch (InvalidProtocolBufferException e) {
+    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+      // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
   }
