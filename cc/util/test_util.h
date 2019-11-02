@@ -34,11 +34,12 @@
 #include "tink/kms_client.h"
 #include "tink/mac.h"
 #include "tink/output_stream.h"
-#include "tink/random_access_stream.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/buffer.h"
 #include "tink/util/constants.h"
 #include "tink/util/protobuf_helper.h"
@@ -565,6 +566,29 @@ class DummyMac : public Mac {
 
  private:
   DummyAead dummy_aead_;
+};
+
+// A dummy implementation of Stateful Mac interface.
+// An instance of DummyStatefulMac can be identified by a name specified
+// as a parameter of the constructor.
+// Over the same inputs, the DummyStatefulMac and DummyMac should give the same
+// output; DummyStatefulMac builds and internal_state_ and calls DummyMac.
+class DummyStatefulMac : public subtle::StatefulMac {
+ public:
+  explicit DummyStatefulMac(const std::string& mac_name)
+      : dummy_aead_(absl::StrCat("DummyMac:", mac_name)), buffer_("") {}
+
+  util::Status Update(absl::string_view data) override {
+    absl::StrAppend(&buffer_, data);
+    return util::OkStatus();
+  }
+  util::StatusOr<std::string> Finalize() override {
+    return dummy_aead_.Encrypt("", buffer_);
+  }
+
+ private:
+  DummyAead dummy_aead_;
+  std::string buffer_;
 };
 
 // A dummy implementation of KeysetWriter-interface.

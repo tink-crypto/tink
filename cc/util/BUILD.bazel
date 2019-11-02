@@ -199,6 +199,7 @@ cc_library(
         "//cc/aead:xchacha20_poly1305_key_manager",
         "//cc/subtle:random",
         "//cc/subtle:subtle_util_boringssl",
+        "//cc/subtle/mac:stateful_mac",
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",

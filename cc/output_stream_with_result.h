@@ -1,5 +1,3 @@
-// Copyright 2018 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -25,6 +23,27 @@
 
 namespace crypto {
 namespace tink {
+
+// TODO(tholenst): Forward declare ExtractStatus function,
+// as discussed in cl/269918867.
+namespace internal {
+// Closes the OutputStream and returns the status,
+// for when ResultType is StatusOr<T>
+template <class ResultType>
+auto ExtractStatus(const ResultType& result)
+    -> decltype(std::declval<ResultType>().status()) {
+  return result.status();
+}
+
+// Closes the OutputStream and returns the status,
+// for when ResultType is Status
+template <class ResultType>
+auto ExtractStatus(ResultType result) ->
+    typename std::enable_if<std::is_same<ResultType, util::Status>::value,
+                            util::Status>::type {
+  return result;
+}
+}  // namespace internal
 
 // An abstract OutputStream subclass that acts as a sink for data and returns a
 // result after the stream has been closed.
@@ -77,7 +96,8 @@ class OutputStreamWithResult : public OutputStream {
     }
     result_ = CloseStreamAndComputeResult();
     closed_ = true;
-    return result_.status();
+
+    return internal::ExtractStatus(result_);
   }
 
   // Getting the next OutputStream buffer. See OutputStream for detailed

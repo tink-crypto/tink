@@ -740,6 +740,22 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "streaming_mac_impl",
+    srcs = ["streaming_mac_impl.cc"],
+    hdrs = ["streaming_mac_impl.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:mac",
+        "//cc:streaming_mac",
+        "//cc/subtle/mac:stateful_mac",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1370,6 +1386,22 @@ cc_test(
         "//cc/util:test_util",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "streaming_mac_impl_test",
+    size = "small",
+    srcs = ["streaming_mac_impl_test.cc"],
+    deps = [
+        ":random",
+        ":streaming_mac_impl",
+        ":test_util",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
