@@ -840,6 +840,7 @@ cc_test(
         "//cc/hybrid:ecies_aead_hkdf_public_key_manager",
         "//cc/subtle:aes_gcm_boringssl",
         "//cc/subtle:random",
+        "//cc/util:istream_input_stream",
         "//cc/util:protobuf_helper",
         "//cc/util:status",
         "//cc/util:statusor",

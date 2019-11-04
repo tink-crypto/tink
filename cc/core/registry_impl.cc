@@ -87,6 +87,27 @@ crypto::tink::util::Status RegistryImpl::CheckInsertable(
   return crypto::tink::util::Status::OK;
 }
 
+crypto::tink::util::StatusOr<google::crypto::tink::KeyData>
+RegistryImpl::DeriveKey(const google::crypto::tink::KeyTemplate& key_template,
+                        InputStream* randomness) const {
+  absl::MutexLock lock(&maps_mutex_);
+  auto it = type_url_to_info_.find(key_template.type_url());
+
+  if (it == type_url_to_info_.end()) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::NOT_FOUND,
+        absl::StrCat("No manager for type '", key_template.type_url(),
+                     "' has been registered."));
+  }
+  if (!it->second.key_deriver()) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StrCat("Manager for type '", key_template.type_url(),
+                     "' cannot derive keys."));
+  }
+  return it->second.key_deriver()(key_template.value(), randomness);
+}
+
 void RegistryImpl::Reset() {
   absl::MutexLock lock(&maps_mutex_);
   type_url_to_info_.clear();

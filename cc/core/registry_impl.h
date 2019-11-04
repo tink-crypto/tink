@@ -127,6 +127,10 @@ class RegistryImpl {
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
+  crypto::tink::util::StatusOr<google::crypto::tink::KeyData> DeriveKey(
+      const google::crypto::tink::KeyTemplate& key_template,
+      InputStream* randomness) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
+
   void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
  private:
@@ -180,6 +184,7 @@ class RegistryImpl {
                   KeyProto, KeyFormatProto, List<Primitives...>>>>(
                   key_manager)),
           key_factory_(internal_key_factory_.get()),
+          key_deriver_(CreateDeriverFunctionFor(key_manager)),
           key_type_manager_(absl::WrapUnique(key_manager)) {}
 
     // Takes ownership of the 'private_key_manager', but *not* of the
@@ -208,6 +213,7 @@ class RegistryImpl {
                   List<PrivatePrimitives...>, PublicPrimitivesList>>(
                   private_key_manager, public_key_manager)),
           key_factory_(internal_key_factory_.get()),
+          key_deriver_(CreateDeriverFunctionFor(private_key_manager)),
           key_type_manager_(absl::WrapUnique(private_key_manager)) {}
 
     template <typename P>
@@ -251,6 +257,12 @@ class RegistryImpl {
 
     const KeyFactory& key_factory() const { return *key_factory_; }
 
+    const std::function<crypto::tink::util::StatusOr<
+        google::crypto::tink::KeyData>(absl::string_view, InputStream*)>&
+    key_deriver() const {
+      return key_deriver_;
+    }
+
    private:
     // dynamic std::type_index of the actual key manager class for which this
     // key was inserted.
@@ -271,9 +283,16 @@ class RegistryImpl {
     // Unowned copy of internal_key_factory, always different from
     // nullptr.
     const KeyFactory* key_factory_;
+    // A function to call to derive a key. If the container was constructed with
+    // a KeyTypeManager which has non-void keyformat type, this will forward to
+    // the function DeriveKey of this container. Otherwise, the function is
+    // 'empty', i.e., "key_deriver_" will cast to false when cast to a bool.
+    std::function<crypto::tink::util::StatusOr<google::crypto::tink::KeyData>(
+        absl::string_view, InputStream*)>
+        key_deriver_;
     // The owned pointer in case we use a KeyTypeManager, nullptr if
     // constructed with a KeyManager.
-    std::shared_ptr<void> key_type_manager_;
+    const std::shared_ptr<void> key_type_manager_;
   };
 
   // All information for a given primitive label.

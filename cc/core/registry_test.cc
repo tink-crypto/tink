@@ -35,6 +35,7 @@
 #include "tink/keyset_manager.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -767,6 +768,21 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
     return result;
   }
 
+  crypto::tink::util::StatusOr<AesGcmKey> DeriveKey(
+      const AesGcmKeyFormat& key_format,
+      InputStream* input_stream) const override {
+    // Note: in an actual key type manager we need to do more work, e.g., test
+    // that the generated key is long enough.
+    crypto::tink::util::StatusOr<std::string> randomness =
+        ReadAtMostFromStream(key_format.key_size(), input_stream);
+    if (!randomness.status().ok()) {
+      return randomness.status();
+    }
+    AesGcmKey key;
+    key.set_key_value(randomness.ValueOrDie());
+    return key;
+  }
+
  private:
   static const int kVersion = 0;
   const std::string kKeyType =
@@ -855,6 +871,86 @@ TEST_F(RegistryTest, KeyTypeManagerNewKeyInvalidSize) {
   key_template.set_value(format.SerializeAsString());
 
   EXPECT_THAT(Registry::NewKeyData(key_template).status(), IsOk());
+}
+
+TEST_F(RegistryTest, KeyTypeManagerDeriveKey) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+
+  AesGcmKeyFormat format;
+  format.set_key_size(32);
+  KeyTemplate key_template;
+  key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  key_template.set_value(format.SerializeAsString());
+
+  crypto::tink::util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>(
+          "0123456789012345678901234567890123456789")};
+
+  auto key_data_or =
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, &input_stream);
+  ASSERT_THAT(key_data_or.status(), IsOk());
+  EXPECT_THAT(key_data_or.ValueOrDie().type_url(), Eq(key_template.type_url()));
+  AesGcmKey key;
+  EXPECT_TRUE(key.ParseFromString(key_data_or.ValueOrDie().value()));
+  // 32 byte prefix of above string.
+  EXPECT_THAT(key.key_value(), Eq("01234567890123456789012345678901"));
+}
+
+// The same, but we register the key manager twice. This should catch some of
+// the possible lifetime issues.
+TEST_F(RegistryTest, KeyTypeManagerDeriveKeyRegisterTwice) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+
+  AesGcmKeyFormat format;
+  format.set_key_size(32);
+  KeyTemplate key_template;
+  key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  key_template.set_value(format.SerializeAsString());
+
+  crypto::tink::util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>(
+          "0123456789012345678901234567890123456789")};
+
+  auto key_data_or =
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, &input_stream);
+  ASSERT_THAT(key_data_or.status(), IsOk());
+  EXPECT_THAT(key_data_or.ValueOrDie().type_url(), Eq(key_template.type_url()));
+  AesGcmKey key;
+  EXPECT_TRUE(key.ParseFromString(key_data_or.ValueOrDie().value()));
+  // 32 byte prefix of above string.
+  EXPECT_THAT(key.key_value(), Eq("01234567890123456789012345678901"));
+}
+
+// Tests that if we register a KeyManager instead of a KeyTypeManager, DeriveKey
+// fails properly.
+TEST_F(RegistryTest, KeyManagerDeriveKeyFail) {
+  std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  ASSERT_THAT(Registry::RegisterKeyManager(
+      absl::make_unique<TestAeadKeyManager>(key_type),
+      /* new_key_allowed= */ true), IsOk());
+
+  KeyTemplate key_template;
+  key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+
+  EXPECT_THAT(
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, nullptr).status(),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("cannot derive")));
+}
+
+TEST_F(RegistryTest, KeyManagerDeriveNotRegistered) {
+  KeyTemplate key_template;
+  key_template.set_type_url("some_inexistent_keytype");
+
+  EXPECT_THAT(
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, nullptr).status(),
+      StatusIs(util::error::NOT_FOUND, HasSubstr("No manager")));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerTwiceMoreRestrictive) {
