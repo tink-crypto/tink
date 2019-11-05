@@ -20,19 +20,21 @@ lite_protos = [
 
 # public interfaces
 
+PRIMITIVES_SRCS = [
+    "Aead.java",
+    "DeterministicAead.java",
+    "HybridDecrypt.java",
+    "HybridEncrypt.java",
+    "KeyWrap.java",
+    "Mac.java",
+    "PublicKeySign.java",
+    "PublicKeyVerify.java",
+    "StreamingAead.java",
+]
+
 java_library(
     name = "primitives",
-    srcs = [
-        "Aead.java",
-        "DeterministicAead.java",
-        "HybridDecrypt.java",
-        "HybridEncrypt.java",
-        "KeyWrap.java",
-        "Mac.java",
-        "PublicKeySign.java",
-        "PublicKeyVerify.java",
-        "StreamingAead.java",
-    ],
+    srcs = PRIMITIVES_SRCS,
     javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
 )
@@ -54,14 +56,6 @@ filegroup(
 
 # core, without restricted APIs
 
-filegroup(
-    name = "srcs",
-    srcs = glob(
-        ["*.java"],
-        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS,
-    ) + [":version_java"],
-)
-
 template_rule(
     name = "version_java",
     src = "Version.java.templ",
@@ -72,42 +66,61 @@ template_rule(
 )
 
 java_library(
-    name = "tink",
-    srcs = [":srcs"],
-    javacopts = JAVACOPTS_OSS,
+    name = "core",
+    srcs = glob(
+        ["*.java"],
+        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + PRIMITIVES_SRCS,
+    ) + [":version_java"],
     visibility = ["//visibility:public"],
     deps = full_protos + [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
+        ":primitives",
         "@com_google_code_findbugs_jsr305",
         "@com_google_protobuf//:protobuf_java",
         "@org_json",
     ],
 )
 
-filegroup(
-    name = "android_srcs",
+java_library(
+    name = "tink",
+    deprecation = "Use :core and :primitives instead",
+    visibility = ["//visibility:public"],
+    exports = [
+        ":core",
+        ":primitives",
+    ],
+)
+
+java_library(
+    name = "core-android",
     srcs = glob(
         ["*.java"],
-        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + [
+        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + PRIMITIVES_SRCS + [
             # TextFormat doesn't work with lite protos
             "TextFormatKeysetReaders.java",
             "TextFormatKeysetWriters.java",
         ],
     ) + [":version_java"],
-)
-
-java_library(
-    name = "android",
-    srcs = [":android_srcs"],
     javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = lite_protos + [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
+        ":primitives",
         "@com_google_code_findbugs_jsr305",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@org_json",
+    ],
+)
+
+java_library(
+    name = "android",
+    deprecation = "Use :core-android and :primitives instead",
+    visibility = ["//visibility:public"],
+    exports = [
+        ":core-android",
+        ":primitives",
     ],
 )
 
