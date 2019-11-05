@@ -70,6 +70,9 @@ You can specify the latest snapshot as a project dependency by using the version
 </dependencies>
 ```
 
+### AWS/GCP packages
+*Note:* Since 1.3.0-rc1 the support for AWS/GCP KMS is in separate packages, e.g https://repo1.maven.org/maven2/com/google/crypto/tink/ .To use AWS KMS one should add also add dependency on `tink-awskms` and similarly for `tink-gcpkms` GCP
+
 ### Gradle
 
 You can include Tink in Android projects using [Gradle](https://gradle.org).
