@@ -132,11 +132,6 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
-  NAME tink_supported_deriver_cc_proto
-  SRCS tink_supported_deriver.proto
-)
-
-tink_cc_proto(
   NAME empty_cc_proto
   SRCS empty.proto
 )

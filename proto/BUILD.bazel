@@ -1,13 +1,13 @@
 # gazelle:ignore
 
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])
+
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_proto_library")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("//third_party/rules_protobuf/objc:rules.bzl", "objc_proto_compile")
 load("//tools:objc.bzl", "tink_objc_proto_library")
-
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
-
-licenses(["notice"])
 
 # -----------------------------------------------
 # common
@@ -977,36 +977,6 @@ java_lite_proto_library(
 objc_proto_compile(
     name = "hkdf_prf_objc_pb",
     protos = ["hkdf_prf.proto"],
-    tags = ["manual"],
-)
-
-# ----------------------------------------------------------------------------
-# prf_based_deriver
-# ----------------------------------------------------------------------------
-proto_library(
-    name = "prf_based_deriver_proto",
-    srcs = ["prf_based_deriver.proto"],
-    deps = [":tink_proto"],
-)
-
-cc_proto_library(
-    name = "prf_based_deriver_cc_proto",
-    deps = [":prf_based_deriver_proto"],
-)
-
-java_proto_library(
-    name = "prf_based_deriver_java_proto",
-    deps = [":prf_based_deriver_proto"],
-)
-
-java_lite_proto_library(
-    name = "prf_based_deriver_java_proto_lite",
-    deps = [":prf_based_deriver_proto"],
-)
-
-objc_proto_compile(
-    name = "prf_based_deriver_objc_pb",
-    protos = ["prf_based_deriver.proto"],
     tags = ["manual"],
 )
 
