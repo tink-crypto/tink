@@ -132,8 +132,10 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
-  NAME tink_supported_deriver_cc_proto
-  SRCS tink_supported_deriver.proto
+  NAME prf_based_deriver_cc_proto
+  SRCS prf_based_deriver.proto
+  DEPS
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_proto(
