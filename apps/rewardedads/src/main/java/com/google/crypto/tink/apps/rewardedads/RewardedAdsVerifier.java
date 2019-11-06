@@ -113,7 +113,7 @@ public final class RewardedAdsVerifier {
   /**
    * Verifies that {@code rewardUrl} has a valid signature.
    *
-   * <p>This method assumes that the name of the last two query parameters of {@code rewardUrl} are
+   * <p>This method requires that the name of the last two query parameters of {@code rewardUrl} are
    * {@link #SIGNATURE_PARAM_NAME} and {@link #KEY_ID_PARAM_NAME} in that order.
    */
   public void verify(String rewardUrl) throws GeneralSecurityException {
@@ -125,8 +125,9 @@ public final class RewardedAdsVerifier {
     }
     String queryString = uri.getQuery();
     int i = queryString.indexOf(SIGNATURE_PARAM_NAME);
-    if (i == -1) {
-      throw new GeneralSecurityException("needs a signature query parameter");
+    if (i <= 0 || queryString.charAt(i - 1) != '&') {
+      throw new GeneralSecurityException(
+          "signature and key id must be the last two query parameters");
     }
     byte[] tbsData =
         queryString
@@ -135,14 +136,22 @@ public final class RewardedAdsVerifier {
 
     String sigAndKeyId = queryString.substring(i);
     i = sigAndKeyId.indexOf(KEY_ID_PARAM_NAME);
-    if (i == -1) {
-      throw new GeneralSecurityException("needs a key_id query parameter");
+    if (i == -1 || sigAndKeyId.charAt(i - 1) != '&') {
+      throw new GeneralSecurityException(
+          "signature and key id must be the last two query parameters");
     }
     String sig =
         sigAndKeyId.substring(
             SIGNATURE_PARAM_NAME.length(), i - 1 /* i - 1 instead of i because of & */);
-    long keyId = Long.parseLong(sigAndKeyId.substring(i + KEY_ID_PARAM_NAME.length()));
-    verify(tbsData, keyId, Base64.urlSafeDecode(sig));
+
+    // We don't have to check that keyId is the last parameter, because the long conversion would
+    // fail anyway if there's any trailing data.
+    try {
+      long keyId = Long.parseLong(sigAndKeyId.substring(i + KEY_ID_PARAM_NAME.length()));
+      verify(tbsData, keyId, Base64.urlSafeDecode(sig));
+    } catch (NumberFormatException ex) {
+      throw new GeneralSecurityException("key_id must be a long");
+    }
   }
 
   private void verify(final byte[] tbs, long keyId, final byte[] signature)
