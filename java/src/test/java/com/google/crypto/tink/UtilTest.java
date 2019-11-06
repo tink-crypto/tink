@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -26,6 +26,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;

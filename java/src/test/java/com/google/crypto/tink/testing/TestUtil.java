@@ -14,13 +14,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.testing;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
@@ -106,7 +109,8 @@ public class TestUtil {
   public static final String SERVICE_ACCOUNT_FILE = "testdata/credential.json";
 
   // This AWS KMS CryptoKey is restricted to Google use only and {@code AWS_CREDS}.
-  public static final String AWS_CRYPTO_URI = "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f";
+  public static final String AWS_CRYPTO_URI =
+      "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f";
 
   // This is a credential for the AWS service account with granted access to
   // {@code AWS_CRYPTO_URI}.
@@ -129,12 +133,12 @@ public class TestUtil {
 
   /** @return a {@code Keyset} from a {@code handle}. */
   public static Keyset getKeyset(final KeysetHandle handle) {
-    return handle.getKeyset();
+    return CleartextKeysetHandle.getKeyset(handle);
   }
 
   /** @return a keyset handle from a {@code keyset}. */
   public static KeysetHandle createKeysetHandle(Keyset keyset) throws Exception {
-    return KeysetHandle.fromKeyset(keyset);
+    return CleartextKeysetHandle.parseFrom(keyset.toByteArray());
   }
 
   /** @return a keyset from a list of keys. The first key is primary. */
@@ -553,7 +557,17 @@ public class TestUtil {
    * google.
    */
   public static boolean isTsan() {
-    return false;
+    // Keep synchronized with google3/third_party/tink/copybara/java.bara.sky
+    try {
+      return (Boolean)
+          Class.forName("com.google.devtools.java.sanitizers.Sanitizers")
+              .getMethod("runningWithTsan")
+              .invoke(null);
+    } catch (Exception e) {
+      // if anything goes wrong, we're not really sure and return false (which usually will imply
+      // that the test runs, so we are safe).
+      return false;
+    }
   }
 
   /** Returns whether we should skip a test with some AES key size. */

@@ -16,14 +16,13 @@
 
 package com.google.crypto.tink;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil.DummyAead;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
@@ -39,6 +38,8 @@ import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.testing.TestUtil.DummyAead;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

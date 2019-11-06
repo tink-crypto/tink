@@ -17,7 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;

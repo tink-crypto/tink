@@ -20,7 +20,6 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 

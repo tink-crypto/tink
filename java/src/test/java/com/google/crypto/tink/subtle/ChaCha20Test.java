@@ -21,7 +21,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
-import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import org.junit.Test;

@@ -19,12 +19,12 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.XChaCha20Poly1305;
+import com.google.crypto.tink.testing.TestUtil;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Test;

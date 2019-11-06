@@ -19,7 +19,7 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.WycheproofTestUtil;
+import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -20,8 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TestUtil.BytesMutation;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -34,6 +32,8 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

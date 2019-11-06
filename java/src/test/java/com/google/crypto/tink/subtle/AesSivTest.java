@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.WycheproofTestUtil;
+import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;

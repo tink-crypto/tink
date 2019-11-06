@@ -14,13 +14,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
-
+package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import org.json.JSONArray;
@@ -73,6 +75,19 @@ public class WycheproofTestUtil {
     return md + "WITH" + signatureAlgorithm;
   }
 
+  /**
+   * Reads all bytes from {@code inputStream}.
+   */
+  private static byte[] readAll(InputStream inputStream) throws IOException {
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    byte[] buf = new byte[1024];
+    int count;
+    while ((count = inputStream.read(buf)) != -1) {
+      result.write(buf, 0, count);
+    }
+    return result.toByteArray();
+  }
+
   /** Gets JSONObject from file. */
   public static JSONObject readJson(String path) throws Exception {
     String filePath = path;
@@ -82,7 +97,7 @@ public class WycheproofTestUtil {
     }
 
     JSONObject result =
-        new JSONObject(new String(Util.readAll(new FileInputStream(new File(filePath))), UTF_8));
+        new JSONObject(new String(readAll(new FileInputStream(new File(filePath))), UTF_8));
     String algorithm = result.getString("algorithm");
     String generatorVersion = result.getString("generatorVersion");
     int numTests = result.getInt("numberOfTests");

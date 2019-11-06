@@ -18,8 +18,8 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.crypto.tink.testing.TestUtil;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;

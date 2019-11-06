@@ -15,7 +15,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.proto.Ed25519PrivateKey;

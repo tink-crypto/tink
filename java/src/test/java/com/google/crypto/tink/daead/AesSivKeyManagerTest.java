@@ -20,11 +20,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;

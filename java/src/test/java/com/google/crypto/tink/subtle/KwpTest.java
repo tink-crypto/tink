@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyWrap;
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.WycheproofTestUtil;
+import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;

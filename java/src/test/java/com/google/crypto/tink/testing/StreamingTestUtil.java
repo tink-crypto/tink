@@ -14,12 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.testing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.subtle.Random;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

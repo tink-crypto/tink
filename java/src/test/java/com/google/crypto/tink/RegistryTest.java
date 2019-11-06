@@ -17,11 +17,10 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil.DummyAead;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
@@ -47,6 +46,7 @@ import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.MacJce;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.testing.TestUtil.DummyAead;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
