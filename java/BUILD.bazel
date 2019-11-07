@@ -221,19 +221,7 @@ android_library(
 java_library(
     name = "testutil",
     testonly = 1,
-    srcs = glob([
-        "src/test/**/TestUtil.java",
-    ]),
-    visibility = [
-        "//visibility:public",
-    ],
-    deps = [
-        ":testonly",
-        "@com_google_protobuf_javalite//:protobuf_java_lite",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-        "@maven//:org_json_json",
-    ],
+    exports = ["//java/src/main/java/com/google/crypto/tink/testing:test_util"],
 )
 
 # tests
@@ -250,6 +238,9 @@ java_library(
         ":awskms",
         ":gcpkms",
         ":testonly",
+        "//java/src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//java/src/main/java/com/google/crypto/tink/testing:test_util",
+        "//java/src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_kms",
