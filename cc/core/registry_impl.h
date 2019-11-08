@@ -315,6 +315,12 @@ class RegistryImpl {
   crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*> get_wrapper() const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
+  // Returns the key type info for a given type URL. Since we never replace
+  // key type infos, the pointers will stay valid for the lifetime of the
+  // binary.
+  crypto::tink::util::StatusOr<const KeyTypeInfo*> get_key_type_info(
+      const std::string& type_url) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
+
   // Returns OK if the key manager with the given type index can be inserted
   // for type url type_url and parameter new_key_allowed. Otherwise returns
   // an error to be returned to the user.
@@ -329,6 +335,8 @@ class RegistryImpl {
   // one should /never/ replace any element of the KeyTypeInfo. This is because
   // get_key_type_manager() needs to guarantee that the returned
   // key_type_manager remains valid.
+  // NOTE: We require pointer stability of the value, as get_key_type_info
+  // returns a pointer which needs to stay alive.
   std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_
       ABSL_GUARDED_BY(maps_mutex_);
   // A map from the type_id to the corresponding wrapper. We use a shared_ptr
@@ -513,6 +521,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
   }
 
   if (private_found) {
+    // implies public_found.
     if (!private_it->second.public_key_manager_type_index().has_value()) {
       return crypto::tink::util::Status(
           crypto::tink::util::error::INVALID_ARGUMENT,

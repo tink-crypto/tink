@@ -1431,6 +1431,158 @@ TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithNewKeyType) {
                HasSubstr("impossible to register")));
 }
 
+// The DelegatingKeyTypeManager calls the registry
+class DelegatingKeyTypeManager
+    : public PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat,
+                                   EcdsaPublicKey, List<>> {
+ public:
+  DelegatingKeyTypeManager() : PrivateKeyTypeManager() {}
+
+  void set_registry(RegistryImpl* registry) { registry_ = registry; }
+
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
+  }
+
+  uint32_t get_version() const override { return kVersion; }
+
+  const std::string& get_key_type() const override { return kKeyType; }
+
+  crypto::tink::util::Status ValidateKey(
+      const EcdsaPrivateKey& key) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const EcdsaKeyFormat& key_format) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::StatusOr<EcdsaPrivateKey> CreateKey(
+      const EcdsaKeyFormat& key_format) const override {
+    AesGcmKeyFormat format;
+    KeyTemplate key_template;
+    key_template.set_type_url(
+        "type.googleapis.com/google.crypto.tink.AesGcmKey");
+    key_template.set_value(format.SerializeAsString());
+    auto result = registry_->NewKeyData(key_template);
+    if (!result.ok()) return result.status();
+    // Return a string we can check for.
+    return util::Status(util::error::DEADLINE_EXCEEDED, "CreateKey worked");
+  }
+
+  crypto::tink::util::StatusOr<EcdsaPrivateKey> DeriveKey(
+      const EcdsaKeyFormat& key_format,
+      InputStream* input_stream) const override {
+    AesGcmKeyFormat format;
+    KeyTemplate key_template;
+    key_template.set_type_url(
+        "type.googleapis.com/google.crypto.tink.AesGcmKey");
+    key_template.set_value(format.SerializeAsString());
+
+    auto result = registry_->DeriveKey(key_template, input_stream);
+    if (!result.ok()) return result.status();
+    // Return a string we can check for.
+    return util::Status(util::error::DEADLINE_EXCEEDED, "DeriveKey worked");
+  }
+
+  crypto::tink::util::StatusOr<EcdsaPublicKey> GetPublicKey(
+      const EcdsaPrivateKey& private_key) const override {
+    AesGcmKeyFormat format;
+    KeyTemplate key_template;
+    key_template.set_type_url(
+        "type.googleapis.com/google.crypto.tink.AesGcmKey");
+    key_template.set_value(format.SerializeAsString());
+    auto result = registry_->NewKeyData(key_template);
+    if (!result.ok()) return result.status();
+    // Return a string we can check for.
+    return util::Status(util::error::DEADLINE_EXCEEDED, "GetPublicKey worked");
+  }
+
+ private:
+  RegistryImpl* registry_;
+
+  static const int kVersion = 0;
+  const std::string kKeyType =
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+};
+
+// Check that we can call the registry again from within NewKeyData
+TEST(RegistryImplTest, CanDelegateCreateKey) {
+  RegistryImpl registry_impl;
+  auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
+  delegating_key_manager->set_registry(&registry_impl);
+  auto status =
+      registry_impl
+          .RegisterKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat, List<>>(
+              std::move(delegating_key_manager), true);
+  EXPECT_THAT(status, IsOk());
+  status = registry_impl.RegisterKeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                   List<Aead, AeadVariant>>(
+                  absl::make_unique<ExampleKeyTypeManager>(), true);
+  EXPECT_THAT(status, IsOk());
+
+  EcdsaKeyFormat format;
+  KeyTemplate key_template;
+  key_template.set_type_url(
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
+  key_template.set_value(format.SerializeAsString());
+  EXPECT_THAT(registry_impl.NewKeyData(key_template).status(),
+              StatusIs(util::error::DEADLINE_EXCEEDED,
+                       HasSubstr("CreateKey worked")));
+}
+
+// Check that we can call the registry again from within NewKeyData
+TEST(RegistryImplTest, CanDelegateDeriveKey) {
+  RegistryImpl registry_impl;
+  auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
+  delegating_key_manager->set_registry(&registry_impl);
+  auto status =
+      registry_impl
+          .RegisterKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat, List<>>(
+              std::move(delegating_key_manager), true);
+  EXPECT_THAT(status, IsOk());
+  status = registry_impl.RegisterKeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                   List<Aead, AeadVariant>>(
+                  absl::make_unique<ExampleKeyTypeManager>(), true);
+  EXPECT_THAT(status, IsOk());
+
+  EcdsaKeyFormat format;
+  KeyTemplate key_template;
+  key_template.set_type_url(
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
+  key_template.set_value(format.SerializeAsString());
+  EXPECT_THAT(
+      registry_impl.DeriveKey(key_template, nullptr).status(),
+      StatusIs(util::error::DEADLINE_EXCEEDED, HasSubstr("DeriveKey worked")));
+}
+
+TEST(RegistryImplTest, CanDelegateGetPublicKey) {
+  RegistryImpl registry_impl;
+  auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
+  delegating_key_manager->set_registry(&registry_impl);
+  auto status = registry_impl.RegisterAsymmetricKeyManagers(
+      delegating_key_manager.release(),
+      absl::make_unique<TestPublicKeyTypeManager>().release(), true);
+  EXPECT_THAT(status, IsOk());
+  status = registry_impl.RegisterKeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                   List<Aead, AeadVariant>>(
+                  absl::make_unique<ExampleKeyTypeManager>(), true);
+  EXPECT_THAT(status, IsOk());
+
+  EcdsaPrivateKey private_key;
+  private_key.mutable_public_key()->mutable_params()->set_encoding(
+      EcdsaSignatureEncoding::DER);
+
+  EXPECT_THAT(registry_impl
+                  .GetPublicKeyData(DelegatingKeyTypeManager().get_key_type(),
+                                    private_key.SerializeAsString())
+                  .status(),
+              StatusIs(util::error::DEADLINE_EXCEEDED,
+                       HasSubstr("GetPublicKey worked")));
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

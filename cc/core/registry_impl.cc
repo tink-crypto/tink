@@ -26,36 +26,39 @@ using google::crypto::tink::KeyTemplate;
 namespace crypto {
 namespace tink {
 
-StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
-    const KeyTemplate& key_template) const {
+StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
+    const std::string& type_url) const {
   absl::MutexLock lock(&maps_mutex_);
-  const std::string& type_url = key_template.type_url();
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
     return ToStatusF(util::error::NOT_FOUND,
                      "No manager for type '%s' has been registered.",
                      type_url.c_str());
   }
-  if (!it->second.new_key_allowed()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "KeyManager for type '%s' does not allow "
-                     "for creation of new keys.",
-                     type_url.c_str());
+  return &it->second;
+}
+
+StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
+    const KeyTemplate& key_template) const {
+  auto key_type_info_or = get_key_type_info(key_template.type_url());
+  if (!key_type_info_or.ok()) return key_type_info_or.status();
+  if (!key_type_info_or.ValueOrDie()->new_key_allowed()) {
+    return crypto::tink::util::Status(
+        util::error::INVALID_ARGUMENT,
+        absl::StrCat("KeyManager for type ", key_template.type_url(),
+                     " does not allow for creation of new keys."));
   }
-  return it->second.key_factory().NewKeyData(key_template.value());
+  return key_type_info_or.ValueOrDie()->key_factory().NewKeyData(
+      key_template.value());
 }
 
 StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
     const std::string& type_url,
     const std::string& serialized_private_key) const {
-  absl::MutexLock lock(&maps_mutex_);
-  auto it = type_url_to_info_.find(type_url);
-  if (it == type_url_to_info_.end()) {
-    return ToStatusF(util::error::INTERNAL, "No Key type '%s' registered.",
-                     type_url.c_str());
-  }
-  auto factory =
-      dynamic_cast<const PrivateKeyFactory*>(&it->second.key_factory());
+  auto key_type_info_or = get_key_type_info(type_url);
+  if (!key_type_info_or.ok()) return key_type_info_or.status();
+  auto factory = dynamic_cast<const PrivateKeyFactory*>(
+      &key_type_info_or.ValueOrDie()->key_factory());
   if (factory == nullptr) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "KeyManager for type '%s' does not have "
@@ -90,22 +93,16 @@ crypto::tink::util::Status RegistryImpl::CheckInsertable(
 crypto::tink::util::StatusOr<google::crypto::tink::KeyData>
 RegistryImpl::DeriveKey(const google::crypto::tink::KeyTemplate& key_template,
                         InputStream* randomness) const {
-  absl::MutexLock lock(&maps_mutex_);
-  auto it = type_url_to_info_.find(key_template.type_url());
-
-  if (it == type_url_to_info_.end()) {
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::NOT_FOUND,
-        absl::StrCat("No manager for type '", key_template.type_url(),
-                     "' has been registered."));
-  }
-  if (!it->second.key_deriver()) {
+  auto key_type_info_or = get_key_type_info(key_template.type_url());
+  if (!key_type_info_or.ok()) return key_type_info_or.status();
+  if (!key_type_info_or.ValueOrDie()->key_deriver()) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
         absl::StrCat("Manager for type '", key_template.type_url(),
                      "' cannot derive keys."));
   }
-  return it->second.key_deriver()(key_template.value(), randomness);
+  return key_type_info_or.ValueOrDie()->key_deriver()(key_template.value(),
+                                                      randomness);
 }
 
 void RegistryImpl::Reset() {
