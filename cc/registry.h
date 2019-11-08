@@ -142,11 +142,11 @@ class Registry {
   }
 
   // Returns a key manager for the given type_url (if any found).
-  // Keeps the ownership of the manager.
-  // TODO(przydatek): consider changing return value to
-  //   StatusOr<std::reference_wrapper<KeyManager<P>>>
-  // (cannot return reference directly, as StatusOr does not support it,
-  // see https://goo.gl/x0ymDz)
+  // Keeps the ownership of the manager. Returned key_managers are guaranteed
+  // to stay valid for the lifetime of the binary (with the exception of a user
+  // calling Reset()).
+  // TODO(tholenst): Remove Reset() from the interface, as it could violate this
+  // but should be test only anyhow.
   template <class P>
   static crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
       const std::string& type_url) {

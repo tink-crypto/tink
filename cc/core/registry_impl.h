@@ -324,6 +324,11 @@ class RegistryImpl {
       ABSL_SHARED_LOCKS_REQUIRED(maps_mutex_);
 
   mutable absl::Mutex maps_mutex_;
+  // A map from the type_url to the given KeyTypeInfo. Once emplaced KeyTypeInfo
+  // objects must remain valid throughout the life time of the binary. Hence,
+  // one should /never/ replace any element of the KeyTypeInfo. This is because
+  // get_key_type_manager() needs to guarantee that the returned
+  // key_type_manager remains valid.
   std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_
       ABSL_GUARDED_BY(maps_mutex_);
   // A map from the type_id to the corresponding wrapper. We use a shared_ptr
@@ -481,40 +486,67 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
         "Passed in key managers must have different get_key_type() results.");
   }
 
-  auto it = type_url_to_info_.find(private_type_url);
-  if (it != type_url_to_info_.end()) {
-    if (it->second.public_key_manager_type_index().has_value()) {
-      if (*it->second.public_key_manager_type_index() !=
-          std::type_index(typeid(*public_key_manager))) {
-        return crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT,
-            absl::StrCat("public key manager corresponding to ",
-                         std::type_index(typeid(*private_key_manager)).name(),
-                         " is already registered with ",
-                         it->second.public_key_manager_type_index()->name(),
-                         ", cannot be re-registered with ",
-                         std::type_index(typeid(*private_key_manager)).name()));
-      }
+  auto private_it = type_url_to_info_.find(private_type_url);
+  auto public_it = type_url_to_info_.find(public_type_url);
+  bool private_found = private_it != type_url_to_info_.end();
+  bool public_found = public_it != type_url_to_info_.end();
+
+  if (private_found && !public_found) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StrCat(
+            "Private key manager corresponding to ",
+            std::type_index(typeid(*private_key_manager)).name(),
+            " was previously registered, but key manager corresponding to ",
+            std::type_index(typeid(*public_key_manager)).name(),
+            " was not, so it's impossible to register them jointly"));
+  }
+  if (!private_found && public_found) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StrCat("Key manager corresponding to ",
+                     std::type_index(typeid(*public_key_manager)).name(),
+                     " was previously registered, but private key manager "
+                     "corresponding to ",
+                     std::type_index(typeid(*private_key_manager)).name(),
+                     " was not, so it's impossible to register them jointly"));
+  }
+
+  if (private_found) {
+    if (!private_it->second.public_key_manager_type_index().has_value()) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StrCat("private key manager corresponding to ",
+                       std::type_index(typeid(*private_key_manager)).name(),
+                       " is already registered without public key manager, "
+                       "cannot be re-registered with public key manager. "));
+    }
+    if (*private_it->second.public_key_manager_type_index() !=
+        std::type_index(typeid(*public_key_manager))) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StrCat(
+              "private key manager corresponding to ",
+              std::type_index(typeid(*private_key_manager)).name(),
+              " is already registered with ",
+              private_it->second.public_key_manager_type_index()->name(),
+              ", cannot be re-registered with ",
+              std::type_index(typeid(*public_key_manager)).name()));
     }
   }
 
-  it = type_url_to_info_.find(private_type_url);
-  if (it == type_url_to_info_.end() ||
-      !it->second.public_key_manager_type_index().has_value()) {
+  if (!private_found) {
+    // !public_found must hold.
     type_url_to_info_.emplace(
         std::piecewise_construct, std::forward_as_tuple(private_type_url),
         std::forward_as_tuple(owned_private_key_manager.release(),
                               owned_public_key_manager.get(), new_key_allowed));
-  } else {
-    it->second.set_new_key_allowed(new_key_allowed);
-  }
-
-  it = type_url_to_info_.find(public_type_url);
-  if (it == type_url_to_info_.end()) {
     type_url_to_info_.emplace(
         std::piecewise_construct, std::forward_as_tuple(public_type_url),
         std::forward_as_tuple(owned_public_key_manager.release(),
                               new_key_allowed));
+  } else {
+    private_it->second.set_new_key_allowed(new_key_allowed);
   }
 
   return util::OkStatus();

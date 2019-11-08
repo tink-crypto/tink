@@ -255,13 +255,18 @@ TEST_F(RegistryTest, testConcurrentRegistration) {
   register_a.join();
   register_b.join();
 
-  // Check that the managers were registered.
-  std::thread verify_a(verify_test_managers,
-                       key_type_prefix_a, count_a);
-  std::thread verify_b(verify_test_managers,
-                       key_type_prefix_b, count_b);
+  // Check that the managers were registered. Also, keep registering new
+  // versions while we check.
+  std::thread register_more_a(register_test_managers, key_type_prefix_a,
+                              count_a);
+  std::thread register_more_b(register_test_managers, key_type_prefix_b,
+                              count_b);
+  std::thread verify_a(verify_test_managers, key_type_prefix_a, count_a);
+  std::thread verify_b(verify_test_managers, key_type_prefix_b, count_b);
   verify_a.join();
   verify_b.join();
+  register_more_a.join();
+  register_more_b.join();
 
   // Check that there are no extra managers.
   std::string key_type = key_type_prefix_a + std::to_string(count_a - 1);
@@ -336,6 +341,23 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   auto manager = manager_result.ValueOrDie();
   EXPECT_TRUE(manager->DoesSupport(key_type_1));
+}
+
+// Tests that if we register a key manager once more after a call to
+// get_key_manager, the key manager previously obtained with "get_key_manager()"
+// remains valid.
+TEST_F(RegistryTest, GetKeyManagerRemainsValid) {
+  std::string key_type = AesGcmKeyManager().get_key_type();
+  EXPECT_THAT(Registry::RegisterKeyManager(
+      absl::make_unique<TestAeadKeyManager>(key_type), true), IsOk());
+
+  crypto::tink::util::StatusOr<const KeyManager<Aead>*> key_manager =
+      Registry::get_key_manager<Aead>(key_type);
+  ASSERT_THAT(key_manager.status(), IsOk());
+  EXPECT_THAT(Registry::RegisterKeyManager(
+                  absl::make_unique<TestAeadKeyManager>(key_type), true),
+              IsOk());
+  EXPECT_THAT(key_manager.ValueOrDie()->get_key_type(), Eq(key_type));
 }
 
 class TestAeadCatalogue : public Catalogue<Aead> {
@@ -838,6 +860,24 @@ TEST_F(RegistryTest, KeyTypeManagerNotSupportedPrimitive) {
                        HasSubstr("not among supported primitives")));
 }
 
+// Tests that if we register a key manager once more after a call to
+// get_key_manager, the key manager previously obtained with "get_key_manager()"
+// remains valid.
+TEST_F(RegistryTest, GetKeyManagerRemainsValidForKeyTypeManagers) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+
+  crypto::tink::util::StatusOr<const KeyManager<Aead>*> key_manager =
+      Registry::get_key_manager<Aead>(ExampleKeyTypeManager().get_key_type());
+  ASSERT_THAT(key_manager.status(), IsOk());
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+  EXPECT_THAT(key_manager.ValueOrDie()->get_key_type(),
+              Eq(ExampleKeyTypeManager().get_key_type()));
+}
+
 TEST_F(RegistryTest, KeyTypeManagerNewKey) {
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
@@ -1165,6 +1205,33 @@ TEST_F(RegistryTest, AsymmetricLessRestrictiveGivesError) {
                        HasSubstr("forbidden new key operation")));
 }
 
+// Tests that if we register asymmetric key managers once more after a call to
+// get_key_manager, the key manager previously obtained with "get_key_manager()"
+// remains valid.
+
+TEST_F(RegistryTest, RegisterAsymmetricKeyManagersGetKeyManagerStaysValid) {
+  ASSERT_THAT(Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), true), IsOk());
+
+  crypto::tink::util::StatusOr<const KeyManager<PrivatePrimitiveA>*>
+      private_key_manager = Registry::get_key_manager<PrivatePrimitiveA>(
+          TestPrivateKeyTypeManager().get_key_type());
+  crypto::tink::util::StatusOr<const KeyManager<PublicPrimitiveA>*>
+      public_key_manager = Registry::get_key_manager<PublicPrimitiveA>(
+          TestPublicKeyTypeManager().get_key_type());
+
+  ASSERT_THAT(Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), true), IsOk());
+
+  EXPECT_THAT(private_key_manager.ValueOrDie()->get_key_type(),
+              Eq(TestPrivateKeyTypeManager().get_key_type()));
+  EXPECT_THAT(public_key_manager.ValueOrDie()->get_key_type(),
+              Eq(TestPublicKeyTypeManager().get_key_type()));
+}
+
+
 TEST_F(RegistryTest, AsymmetricPrivateRegisterAlone) {
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
                   absl::make_unique<TestPrivateKeyTypeManager>(), true)
@@ -1172,10 +1239,13 @@ TEST_F(RegistryTest, AsymmetricPrivateRegisterAlone) {
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
                   absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
-  ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
-                  .ok());
+  // Registering the same as asymmetric key managers must fail, because doing so
+  // would mean we invalidate key managers previously obtained with
+  // get_key_manager().
+  ASSERT_FALSE(Registry::RegisterAsymmetricKeyManagers(
+                   absl::make_unique<TestPrivateKeyTypeManager>(),
+                   absl::make_unique<TestPublicKeyTypeManager>(), true)
+                   .ok());
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
                   absl::make_unique<TestPrivateKeyTypeManager>(), true)
                   .ok());
@@ -1358,7 +1428,7 @@ TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithNewKeyType) {
           absl::make_unique<TestPublicKeyTypeManagerWithDifferentKeyType>(),
           true),
       StatusIs(util::error::INVALID_ARGUMENT,
-               HasSubstr("cannot be re-registered")));
+               HasSubstr("impossible to register")));
 }
 
 }  // namespace
