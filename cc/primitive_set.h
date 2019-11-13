@@ -149,11 +149,23 @@ class PrimitiveSet {
   // Returns the entry with the primary primitive.
   const Entry<P>* get_primary() const { return primary_; }
 
+  // Returns all entries currently in this primitive set.
+  const std::vector<Entry<P>*> get_all() const {
+    absl::MutexLock lock(&primitives_mutex_);
+    std::vector<Entry<P>*> result;
+    for (const auto& prefix_and_vector : primitives_) {
+      for (const auto& primitive : prefix_and_vector.second) {
+        result.push_back(primitive.get());
+      }
+    }
+    return result;
+  }
+
  private:
   typedef std::unordered_map<std::string, Primitives>
       CiphertextPrefixToPrimitivesMap;
   Entry<P>* primary_;  // the Entry<P> object is owned by primitives_
-  absl::Mutex primitives_mutex_;
+  mutable absl::Mutex primitives_mutex_;
   CiphertextPrefixToPrimitivesMap primitives_
       ABSL_GUARDED_BY(primitives_mutex_);
 };
