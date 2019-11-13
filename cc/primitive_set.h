@@ -55,13 +55,24 @@ class PrimitiveSet {
   template <class P2>
   class Entry {
    public:
-    Entry(std::unique_ptr<P2> primitive, const std::string& identifier,
-          google::crypto::tink::KeyStatusType status,
-          google::crypto::tink::OutputPrefixType output_prefix_type)
-        : primitive_(std::move(primitive)),
-          identifier_(identifier),
-          status_(status),
-          output_prefix_type_(output_prefix_type) {}
+    static crypto::tink::util::StatusOr<std::unique_ptr<Entry<P>>> New(
+        std::unique_ptr<P> primitive, google::crypto::tink::Keyset::Key key) {
+      if (key.status() != google::crypto::tink::KeyStatusType::ENABLED) {
+        return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+                         "The key must be ENABLED.");
+      }
+      auto identifier_result = CryptoFormat::get_output_prefix(key);
+      if (!identifier_result.ok()) return identifier_result.status();
+      if (primitive == nullptr) {
+        return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+                         "The primitive must be non-null.");
+      }
+      std::string identifier = identifier_result.ValueOrDie();
+      return absl::WrapUnique(new Entry(std::move(primitive), identifier,
+                                        key.status(),
+                                        key.key_id(),
+                                        key.output_prefix_type()));
+    }
 
     P2& get_primitive() const { return *primitive_; }
 
@@ -69,14 +80,26 @@ class PrimitiveSet {
 
     google::crypto::tink::KeyStatusType get_status() const { return status_; }
 
+    uint32_t get_key_id() const { return key_id_; }
+
     google::crypto::tink::OutputPrefixType get_output_prefix_type() const {
       return output_prefix_type_;
     }
 
    private:
+    Entry(std::unique_ptr<P2> primitive, const std::string& identifier,
+          google::crypto::tink::KeyStatusType status, uint32_t key_id,
+          google::crypto::tink::OutputPrefixType output_prefix_type)
+        : primitive_(std::move(primitive)),
+          identifier_(identifier),
+          status_(status),
+          key_id_(key_id),
+          output_prefix_type_(output_prefix_type) {}
+
     std::unique_ptr<P> primitive_;
     std::string identifier_;
     google::crypto::tink::KeyStatusType status_;
+    uint32_t key_id_;
     google::crypto::tink::OutputPrefixType output_prefix_type_;
   };
 
@@ -88,21 +111,12 @@ class PrimitiveSet {
   // Adds 'primitive' to this set for the specified 'key'.
   crypto::tink::util::StatusOr<Entry<P>*> AddPrimitive(
       std::unique_ptr<P> primitive, google::crypto::tink::Keyset::Key key) {
-    if (key.status() != google::crypto::tink::KeyStatusType::ENABLED) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                       "The key must be ENABLED.");
-    }
-    auto identifier_result = CryptoFormat::get_output_prefix(key);
-    if (!identifier_result.ok()) return identifier_result.status();
-    if (primitive == nullptr) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                       "The primitive must be non-null.");
-    }
-    std::string identifier = identifier_result.ValueOrDie();
+    auto entry_or = Entry<P>::New(std::move(primitive), key);
+    if (!entry_or.ok()) return entry_or.status();
+
     absl::MutexLock lock(&primitives_mutex_);
-    primitives_[identifier].push_back(
-        absl::make_unique<Entry<P>>(std::move(primitive), identifier,
-                                    key.status(), key.output_prefix_type()));
+    std::string identifier = entry_or.ValueOrDie()->get_identifier();
+    primitives_[identifier].push_back(std::move(entry_or.ValueOrDie()));
     return primitives_[identifier].back().get();
   }
 

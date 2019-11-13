@@ -208,10 +208,12 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(DummyMac(mac_name_4).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(key_4.key_id(), primitives[0]->get_key_id());
     EXPECT_EQ(OutputPrefixType::RAW, primitives[0]->get_output_prefix_type());
     EXPECT_EQ(DummyMac(mac_name_5).ComputeMac(data).ValueOrDie(),
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[1]->get_status());
+    EXPECT_EQ(key_5.key_id(), primitives[1]->get_key_id());
     EXPECT_EQ(OutputPrefixType::RAW, primitives[1]->get_output_prefix_type());
   }
 
@@ -222,10 +224,12 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(DummyMac(mac_name_1).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(key_1.key_id(), primitives[0]->get_key_id());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
     EXPECT_EQ(DummyMac(mac_name_6).ComputeMac(data).ValueOrDie(),
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[1]->get_status());
+    EXPECT_EQ(key_1.key_id(), primitives[1]->get_key_id());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[1]->get_output_prefix_type());
   }
 
@@ -236,6 +240,7 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(DummyMac(mac_name_3).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(key_3.key_id(), primitives[0]->get_key_id());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
   }
 
@@ -246,6 +251,7 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(DummyMac(mac_name_2).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(key_2.key_id(), primitives[0]->get_key_id());
     EXPECT_EQ(OutputPrefixType::LEGACY,
               primitives[0]->get_output_prefix_type());
   }
