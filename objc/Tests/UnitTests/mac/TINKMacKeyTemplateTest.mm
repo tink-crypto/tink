@@ -24,6 +24,7 @@
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/util/TINKProtoHelpers.h"
 #import "proto/Common.pbobjc.h"
+#import "proto/AesCmac.pbobjc.h"
 #import "proto/Hmac.pbobjc.h"
 #import "proto/Tink.pbobjc.h"
 
@@ -32,7 +33,8 @@
 @interface TINKMacKeyTemplateTest : XCTestCase
 @end
 
-static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.HmacKey";
+static NSString *const kHmacKeyTypeURL = @"type.googleapis.com/google.crypto.tink.HmacKey";
+static NSString *const kAesCmacKeyTypeURL = @"type.googleapis.com/google.crypto.tink.AesCmacKey";
 
 @implementation TINKMacKeyTemplateTest
 
@@ -61,7 +63,7 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.HmacK
   XCTAssertNil(error);
   XCTAssertNotNil(objcKeyTemplate);
 
-  XCTAssertTrue([kTypeURL isEqualToString:objcKeyTemplate.typeURL]);
+  XCTAssertTrue([kHmacKeyTypeURL isEqualToString:objcKeyTemplate.typeURL]);
   XCTAssertEqual(objcKeyTemplate.outputPrefixType, TINKPBOutputPrefixType_Tink);
   error = nil;
   TINKPBHmacKeyFormat *keyFormat =
@@ -86,7 +88,7 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.HmacK
   XCTAssertNil(error);
   XCTAssertNotNil(objcKeyTemplate);
 
-  XCTAssertTrue([kTypeURL isEqualToString:objcKeyTemplate.typeURL]);
+  XCTAssertTrue([kHmacKeyTypeURL isEqualToString:objcKeyTemplate.typeURL]);
   XCTAssertEqual(objcKeyTemplate.outputPrefixType, TINKPBOutputPrefixType_Tink);
   error = nil;
   TINKPBHmacKeyFormat *keyFormat =
@@ -111,7 +113,7 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.HmacK
   XCTAssertNil(error);
   XCTAssertNotNil(objcKeyTemplate);
 
-  XCTAssertTrue([kTypeURL isEqualToString:objcKeyTemplate.typeURL]);
+  XCTAssertTrue([kHmacKeyTypeURL isEqualToString:objcKeyTemplate.typeURL]);
   XCTAssertEqual(objcKeyTemplate.outputPrefixType, TINKPBOutputPrefixType_Tink);
   error = nil;
   TINKPBHmacKeyFormat *keyFormat = [TINKPBHmacKeyFormat parseFromData:objcKeyTemplate.value
@@ -127,8 +129,8 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.HmacK
 - (void)testHmac512BittagSha512 {
   // Get a HmacSha512 key template.
   NSError *error = nil;
-  TINKMacKeyTemplate *keyTemplate = [[TINKMacKeyTemplate alloc] initWithKeyTemplate:TINKHmacSha512
-                                                                              error:&error];
+  TINKMacKeyTemplate *keyTemplate =
+      [[TINKMacKeyTemplate alloc] initWithKeyTemplate:TINKHmacSha512 error:&error];
   XCTAssertNil(error);
   XCTAssertNotNil(keyTemplate);
 
@@ -136,17 +138,41 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.HmacK
   XCTAssertNil(error);
   XCTAssertNotNil(objcKeyTemplate);
 
-  XCTAssertTrue([kTypeURL isEqualToString:objcKeyTemplate.typeURL]);
+  XCTAssertTrue([kHmacKeyTypeURL isEqualToString:objcKeyTemplate.typeURL]);
   XCTAssertEqual(objcKeyTemplate.outputPrefixType, TINKPBOutputPrefixType_Tink);
   error = nil;
-  TINKPBHmacKeyFormat *keyFormat = [TINKPBHmacKeyFormat parseFromData:objcKeyTemplate.value
-                                                                error:&error];
+  TINKPBHmacKeyFormat *keyFormat =
+      [TINKPBHmacKeyFormat parseFromData:objcKeyTemplate.value error:&error];
   XCTAssertNil(error);
   XCTAssertNotNil(keyFormat);
 
   XCTAssertEqual(keyFormat.keySize, 64);
   XCTAssertEqual(keyFormat.params.tagSize, 64);
   XCTAssertEqual(keyFormat.params.hash_p, TINKPBHashType_Sha512);
+}
+
+- (void)testAesCmac {
+  // Get an AesCmac key template.
+  NSError *error = nil;
+  TINKMacKeyTemplate *keyTemplate =
+      [[TINKMacKeyTemplate alloc] initWithKeyTemplate:TINKAesCmac error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyTemplate);
+
+  TINKPBKeyTemplate *objcKeyTemplate = TINKKeyTemplateToObjc(keyTemplate.ccKeyTemplate, &error);
+  XCTAssertNil(error);
+  XCTAssertNotNil(objcKeyTemplate);
+
+  XCTAssertTrue([kAesCmacKeyTypeURL isEqualToString:objcKeyTemplate.typeURL]);
+  XCTAssertEqual(objcKeyTemplate.outputPrefixType, TINKPBOutputPrefixType_Tink);
+  error = nil;
+  TINKPBAesCmacKeyFormat *keyFormat =
+      [TINKPBAesCmacKeyFormat parseFromData:objcKeyTemplate.value error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyFormat);
+
+  XCTAssertEqual(keyFormat.keySize, 32);
+  XCTAssertEqual(keyFormat.params.tagSize, 16);
 }
 
 @end

@@ -56,6 +56,14 @@ typedef NS_ENUM(NSInteger, TINKMacKeyTemplates) {
    *   - OutputPrefixType: TINK
    */
   TINKHmacSha512 = 4,
+
+  /**
+   * AesCmacKey with the following parameters:
+   *   - key size: 32 bytes
+   *   - tag size: 16 bytes
+   *   - OutputPrefixType: TINK
+   */
+  TINKAesCmac = 5,
 };
 
 NS_ASSUME_NONNULL_BEGIN

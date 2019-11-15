@@ -1058,6 +1058,7 @@ objc_proto_compile(
 tink_objc_proto_library(
     name = "all_objc_proto",
     srcs = [
+        ":aes_cmac_objc_pb",
         ":aes_ctr_hmac_aead_objc_pb",
         ":aes_ctr_hmac_streaming_objc_pb",
         ":aes_ctr_objc_pb",
