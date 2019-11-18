@@ -30,7 +30,7 @@ namespace tink {
 
 // Wraps a set of PublicKeyVerify-instances that correspond to a keyset,
 // and combines them into a single PublicKeyVerify-primitive,
-// that for the actual verification uses the instance that maches the
+// that for the actual verification uses the instance that matches the
 // signature prefix.
 class PublicKeyVerifyWrapper : public PrimitiveWrapper<PublicKeyVerify> {
  public:
