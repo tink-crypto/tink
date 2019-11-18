@@ -738,7 +738,12 @@ public final class Registry {
    */
   static synchronized KeyData deriveKey(KeyTemplate keyTemplate, InputStream randomStream)
       throws GeneralSecurityException {
-    KeyDeriverContainer deriver = keyDeriverMap.get(keyTemplate.getTypeUrl());
+    String typeUrl = keyTemplate.getTypeUrl();
+    if (!keyDeriverMap.containsKey(typeUrl)) {
+      throw new GeneralSecurityException(
+          "No keymanager registered or key manager cannot derive keys for " + typeUrl);
+    }
+    KeyDeriverContainer deriver = keyDeriverMap.get(typeUrl);
     return deriver.deriveKey(keyTemplate.getValue(), randomStream);
   }
 
