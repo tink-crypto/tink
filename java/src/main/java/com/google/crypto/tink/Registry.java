@@ -736,10 +736,10 @@ public final class Registry {
    *
    * <p>This functions ignores {@code keyTemplate.getOutputPrefix()}.
    */
-  static synchronized KeyData deriveKey(KeyTemplate keyTemplate, InputStream randomness)
+  static synchronized KeyData deriveKey(KeyTemplate keyTemplate, InputStream randomStream)
       throws GeneralSecurityException {
     KeyDeriverContainer deriver = keyDeriverMap.get(keyTemplate.getTypeUrl());
-    return deriver.deriveKey(keyTemplate.getValue(), randomness);
+    return deriver.deriveKey(keyTemplate.getValue(), randomStream);
   }
 
   /**
