@@ -76,7 +76,10 @@ public final class AesSiv implements DeterministicAead {
 
     byte[] result = cmacForS2V.computeMac(BLOCK_ZERO);
     for (int i = 0; i < s.length - 1; i++) {
-      result = Bytes.xor(AesUtil.dbl(result), cmacForS2V.computeMac(s[i]));
+      byte[] currBlock = s[i];
+      if (currBlock != null) {
+        result = Bytes.xor(AesUtil.dbl(result), cmacForS2V.computeMac(currBlock));
+      }
     }
     byte[] lastBlock = s[s.length - 1];
     if (lastBlock.length >= 16) {

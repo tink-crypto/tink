@@ -110,6 +110,11 @@ public class AesSivTest {
         byte[] rebuiltPlaintext = dead.decryptDeterministically(ciphertext, aad);
         assertEquals(AesUtil.BLOCK_SIZE, ciphertext.length);
         assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
+
+        byte[] nullAadCiphertext = dead.encryptDeterministically(plaintext, null);
+        byte[] nullAadDecryptedText = dead.encryptDeterministically(plaintext, null);
+        assertEquals(AesUtil.BLOCK_SIZE, nullAadCiphertext.length);
+        assertEquals(Hex.encode(nullAadDecryptedText), Hex.encode(nullAadCiphertext));
       }
     }
   }
