@@ -69,32 +69,37 @@ class JsonKeysetWriterTest : public ::testing::Test {
               711, eax_key, KeyStatusType::ENABLED,
               KeyData::SYMMETRIC, &keyset_);
     keyset_.set_primary_key_id(42);
-    std::string json_string = "{"
-           "\"primaryKeyId\": 42,"
-           "\"key\": ["
-           "  {"
-           "    \"keyData\": {"
-           "      \"typeUrl\":"
-           "        \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
-           "      \"keyMaterialType\": \"SYMMETRIC\","
-           "      \"value\": \"" + gcm_key_base64 + "\""
-           "    },"
-           "    \"outputPrefixType\": \"TINK\","
-           "    \"keyId\": 42,"
-           "    \"status\": \"ENABLED\""
-           "  },"
-           "  {"
-           "    \"keyData\": {"
-           "      \"typeUrl\":"
-           "        \"type.googleapis.com/google.crypto.tink.AesEaxKey\","
-           "      \"keyMaterialType\": \"SYMMETRIC\","
-           "      \"value\": \"" + eax_key_base64 + "\""
-           "    },"
-           "    \"outputPrefixType\": \"RAW\","
-           "    \"keyId\": 711,"
-           "    \"status\": \"ENABLED\""
-           "  }"
-           "]}";
+    std::string json_string =
+        "{"
+        "\"primaryKeyId\": 42,"
+        "\"key\": ["
+        "  {"
+        "    \"keyData\": {"
+        "      \"typeUrl\":"
+        "        \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
+        "      \"keyMaterialType\": \"SYMMETRIC\","
+        "      \"value\": \"" +
+        gcm_key_base64 +
+        "\""
+        "    },"
+        "    \"outputPrefixType\": \"TINK\","
+        "    \"keyId\": 42,"
+        "    \"status\": \"ENABLED\""
+        "  },"
+        "  {"
+        "    \"keyData\": {"
+        "      \"typeUrl\":"
+        "        \"type.googleapis.com/google.crypto.tink.AesEaxKey\","
+        "      \"keyMaterialType\": \"SYMMETRIC\","
+        "      \"value\": \"" +
+        eax_key_base64 +
+        "\""
+        "    },"
+        "    \"outputPrefixType\": \"RAW\","
+        "    \"keyId\": 711,"
+        "    \"status\": \"ENABLED\""
+        "  }"
+        "]}";
     ASSERT_FALSE(good_json_keyset_.Parse(json_string.c_str()).HasParseError());
 
     std::string enc_keyset = "some ciphertext with keyset";

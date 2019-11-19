@@ -34,8 +34,9 @@ namespace {
 // Creates a new test file with the specified 'filename', writes 'size' random
 // bytes to the file, and returns an istream for reading from the file.
 // A copy of the bytes written to the file is returned in 'file_contents'.
-std::unique_ptr<std::istream> GetTestIstream(
-    absl::string_view filename, int size, std::string* file_contents) {
+std::unique_ptr<std::istream> GetTestIstream(absl::string_view filename,
+                                             int size,
+                                             std::string* file_contents) {
   std::string full_filename =
       absl::StrCat(crypto::tink::test::TmpDir(), "/", filename);
   (*file_contents) = subtle::Random::GetRandomBytes(size);
@@ -163,9 +164,8 @@ TEST_F(IstreamInputStreamTest, testBackupAndPosition) {
   EXPECT_TRUE(next_result.ok()) << next_result.status();
   EXPECT_EQ(buffer_size, next_result.ValueOrDie());
   EXPECT_EQ(2 * buffer_size, input_stream->Position());
-  EXPECT_EQ(
-      file_contents.substr(buffer_size, buffer_size),
-      std::string(static_cast<const char*>(buffer), buffer_size));
+  EXPECT_EQ(file_contents.substr(buffer_size, buffer_size),
+            std::string(static_cast<const char*>(buffer), buffer_size));
 
   // BackUp a few times, with total over the returned buffer_size.
   total_backup_size = 0;
@@ -182,9 +182,8 @@ TEST_F(IstreamInputStreamTest, testBackupAndPosition) {
   EXPECT_TRUE(next_result.ok()) << next_result.status();
   EXPECT_EQ(buffer_size, next_result.ValueOrDie());
   EXPECT_EQ(2 * buffer_size, input_stream->Position());
-  EXPECT_EQ(
-      file_contents.substr(buffer_size, buffer_size),
-      std::string(static_cast<const char*>(buffer), buffer_size));
+  EXPECT_EQ(file_contents.substr(buffer_size, buffer_size),
+            std::string(static_cast<const char*>(buffer), buffer_size));
 }
 
 }  // namespace

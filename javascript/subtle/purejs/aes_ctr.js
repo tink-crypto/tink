@@ -45,7 +45,7 @@ class AesCtr {
     /** @const @private {number} */
     this.ivSize_ = ivSize;
 
-    /** @const @private {Ctr} */
+    /** @const @private {!Ctr} */
     this.ctr_ = new Ctr(new Aes(Array.from(key)));
   }
 

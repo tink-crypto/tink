@@ -111,7 +111,8 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
                       .ValueOrDie()),
               IsOk());
   std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
-  std::string signature = DummyPublicKeySign("dummy").Sign("message").ValueOrDie();
+  std::string signature =
+      DummyPublicKeySign("dummy").Sign("message").ValueOrDie();
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 

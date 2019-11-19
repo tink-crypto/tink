@@ -252,8 +252,8 @@ tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
   if (keyset_stream_ == nullptr) {
     serialized_keyset = &serialized_keyset_;
   } else {
-    serialized_keyset_from_stream = std::string(
-        std::istreambuf_iterator<char>(*keyset_stream_), {});
+    serialized_keyset_from_stream =
+        std::string(std::istreambuf_iterator<char>(*keyset_stream_), {});
     serialized_keyset = &serialized_keyset_from_stream;
   }
   rapidjson::Document json_doc(rapidjson::kObjectType);
@@ -273,8 +273,8 @@ JsonKeysetReader::ReadEncrypted() {
   if (keyset_stream_ == nullptr) {
     serialized_keyset = &serialized_keyset_;
   } else {
-    serialized_keyset_from_stream = std::string(
-        std::istreambuf_iterator<char>(*keyset_stream_), {});
+    serialized_keyset_from_stream =
+        std::string(std::istreambuf_iterator<char>(*keyset_stream_), {});
     serialized_keyset = &serialized_keyset_from_stream;
   }
   rapidjson::Document json_doc;

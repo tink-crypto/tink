@@ -32,9 +32,8 @@ class ABSL_DEPRECATED("Catalogues are not supported anymore.") Catalogue {
   // and version at least 'min_version' (if any found).
   // Caller owns the returned manager.
   virtual crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<P>>>
-      GetKeyManager(const std::string& type_url,
-                    const std::string& primitive_name,
-                    uint32_t min_version) const = 0;
+  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
+                uint32_t min_version) const = 0;
 
   virtual ~Catalogue() {}
 };

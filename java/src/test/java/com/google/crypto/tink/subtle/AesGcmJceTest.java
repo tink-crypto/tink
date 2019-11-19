@@ -21,9 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TestUtil.BytesMutation;
-import com.google.crypto.tink.WycheproofTestUtil;
+import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.testing.TestUtil.BytesMutation;
+import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -122,7 +122,9 @@ public class AesGcmJceTest {
             String.format(
                 "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
                     + " description = %s",
-                ciphertext, mutation.value, mutation.description));
+                Arrays.toString(ciphertext),
+                Arrays.toString(mutation.value),
+                mutation.description));
       } catch (GeneralSecurityException ex) {
         // This is expected.
         // This could be a AeadBadTagException when the tag verification

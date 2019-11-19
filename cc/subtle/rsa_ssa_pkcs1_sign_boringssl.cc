@@ -104,7 +104,7 @@ util::StatusOr<std::string> RsaSsaPkcs1SignBoringSsl::Sign(
   }
 
   return std::string(reinterpret_cast<const char*>(signature.data()),
-                signature_length);
+                     signature_length);
 }
 
 }  // namespace subtle

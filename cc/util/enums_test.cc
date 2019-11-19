@@ -188,8 +188,9 @@ TEST_F(EnumsTest, testKeyStatusName) {
             std::string(Enums::KeyStatusName(pb::KeyStatusType::DISABLED)));
   EXPECT_EQ("DESTROYED",
             std::string(Enums::KeyStatusName(pb::KeyStatusType::DESTROYED)));
-  EXPECT_EQ("UNKNOWN_STATUS",
-            std::string(Enums::KeyStatusName(pb::KeyStatusType::UNKNOWN_STATUS)));
+  EXPECT_EQ(
+      "UNKNOWN_STATUS",
+      std::string(Enums::KeyStatusName(pb::KeyStatusType::UNKNOWN_STATUS)));
   EXPECT_EQ("UNKNOWN_STATUS",
             std::string(Enums::KeyStatusName((pb::KeyStatusType)42)));
 
@@ -221,8 +222,7 @@ TEST_F(EnumsTest, testHashName) {
   EXPECT_EQ("SHA512", std::string(Enums::HashName(pb::HashType::SHA512)));
   EXPECT_EQ("UNKNOWN_HASH",
             std::string(Enums::HashName(pb::HashType::UNKNOWN_HASH)));
-  EXPECT_EQ("UNKNOWN_HASH",
-            std::string(Enums::HashName((pb::HashType)42)));
+  EXPECT_EQ("UNKNOWN_HASH", std::string(Enums::HashName((pb::HashType)42)));
 
   EXPECT_EQ(pb::HashType::SHA1, Enums::Hash("SHA1"));
   EXPECT_EQ(pb::HashType::SHA256, Enums::Hash("SHA256"));
@@ -247,16 +247,19 @@ TEST_F(EnumsTest, testHashName) {
 TEST_F(EnumsTest, testKeyMaterialName) {
   EXPECT_EQ("SYMMETRIC",
             std::string(Enums::KeyMaterialName(pb::KeyData::SYMMETRIC)));
-  EXPECT_EQ("ASYMMETRIC_PRIVATE",
-            std::string(Enums::KeyMaterialName(pb::KeyData::ASYMMETRIC_PRIVATE)));
-  EXPECT_EQ("ASYMMETRIC_PUBLIC",
-            std::string(Enums::KeyMaterialName(pb::KeyData::ASYMMETRIC_PUBLIC)));
-  EXPECT_EQ("REMOTE",
-            std::string(Enums::KeyMaterialName(pb::KeyData::REMOTE)));
-  EXPECT_EQ("UNKNOWN_KEYMATERIAL",
-            std::string(Enums::KeyMaterialName(pb::KeyData::UNKNOWN_KEYMATERIAL)));
-  EXPECT_EQ("UNKNOWN_KEYMATERIAL",
-            std::string(Enums::KeyMaterialName((pb::KeyData::KeyMaterialType)42)));
+  EXPECT_EQ(
+      "ASYMMETRIC_PRIVATE",
+      std::string(Enums::KeyMaterialName(pb::KeyData::ASYMMETRIC_PRIVATE)));
+  EXPECT_EQ(
+      "ASYMMETRIC_PUBLIC",
+      std::string(Enums::KeyMaterialName(pb::KeyData::ASYMMETRIC_PUBLIC)));
+  EXPECT_EQ("REMOTE", std::string(Enums::KeyMaterialName(pb::KeyData::REMOTE)));
+  EXPECT_EQ(
+      "UNKNOWN_KEYMATERIAL",
+      std::string(Enums::KeyMaterialName(pb::KeyData::UNKNOWN_KEYMATERIAL)));
+  EXPECT_EQ(
+      "UNKNOWN_KEYMATERIAL",
+      std::string(Enums::KeyMaterialName((pb::KeyData::KeyMaterialType)42)));
 
   EXPECT_EQ(pb::KeyData::SYMMETRIC,
             Enums::KeyMaterial("SYMMETRIC"));
@@ -294,11 +297,11 @@ TEST_F(EnumsTest, testOutputPrefixName) {
             std::string(Enums::OutputPrefixName(pb::OutputPrefixType::LEGACY)));
   EXPECT_EQ("RAW",
             std::string(Enums::OutputPrefixName(pb::OutputPrefixType::RAW)));
-  EXPECT_EQ("CRUNCHY",
-            std::string(Enums::OutputPrefixName(pb::OutputPrefixType::CRUNCHY)));
-  EXPECT_EQ("UNKNOWN_PREFIX",
-            std::string(Enums::OutputPrefixName(
-                pb::OutputPrefixType::UNKNOWN_PREFIX)));
+  EXPECT_EQ(
+      "CRUNCHY",
+      std::string(Enums::OutputPrefixName(pb::OutputPrefixType::CRUNCHY)));
+  EXPECT_EQ("UNKNOWN_PREFIX", std::string(Enums::OutputPrefixName(
+                                  pb::OutputPrefixType::UNKNOWN_PREFIX)));
   EXPECT_EQ("UNKNOWN_PREFIX",
             std::string(Enums::OutputPrefixName((pb::OutputPrefixType)42)));
 

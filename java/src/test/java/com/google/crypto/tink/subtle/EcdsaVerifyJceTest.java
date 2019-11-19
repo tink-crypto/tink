@@ -19,11 +19,11 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TestUtil.BytesMutation;
-import com.google.crypto.tink.WycheproofTestUtil;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.testing.TestUtil.BytesMutation;
+import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -33,6 +33,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -220,7 +221,7 @@ public class EcdsaVerifyJceTest {
               String.format(
                   "Invalid signature, should have thrown exception : signature = %s, message = %s, "
                       + " description = %s",
-                  Hex.encode(mutation.value), message, mutation.description));
+                  Hex.encode(mutation.value), Arrays.toString(message), mutation.description));
         } catch (GeneralSecurityException expected) {
           // Expected.
         }

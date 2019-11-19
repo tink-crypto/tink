@@ -274,7 +274,7 @@ testSuite({
   },
 
   async testNewKeyData_newKeyAllowed() {
-    const /** Array<string> */ keyTypes = [];
+    const /** !Array<string> */ keyTypes = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
     }
@@ -292,7 +292,7 @@ testSuite({
   },
 
   async testNewKeyData_newKeyIsAllowedAutomatically() {
-    const /** Array<string> */ keyTypes = [];
+    const /** !Array<string> */ keyTypes = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
     }
@@ -365,8 +365,8 @@ testSuite({
   },
 
   async testNewKey_shouldWork() {
-    const /** Array<string> */ keyTypes = [];
-    const /** Array<Uint8Array> */ newKeyMethodResult = [];
+    const /** !Array<string> */ keyTypes = [];
+    const /** !Array<!Uint8Array> */ newKeyMethodResult = [];
     const keyTypesLength = 10;
 
     // Add some keys to Registry.

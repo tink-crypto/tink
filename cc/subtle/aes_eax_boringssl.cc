@@ -226,8 +226,7 @@ void AesEaxBoringSsl::CtrCrypt(
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
-    absl::string_view plaintext,
-    absl::string_view additional_data) const {
+    absl::string_view plaintext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
   plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
@@ -253,8 +252,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
-    absl::string_view ciphertext,
-    absl::string_view additional_data) const {
+    absl::string_view ciphertext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for additional_data,
   // regardless of whether the size is 0.
   additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);

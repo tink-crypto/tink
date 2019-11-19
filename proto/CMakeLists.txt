@@ -127,6 +127,18 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME hkdf_prf_cc_proto
+  SRCS hkdf_prf.proto
+)
+
+tink_cc_proto(
+  NAME prf_based_deriver_cc_proto
+  SRCS prf_based_deriver.proto
+  DEPS
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_proto(
   NAME empty_cc_proto
   SRCS empty.proto
 )

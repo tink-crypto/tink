@@ -252,7 +252,7 @@ const createPrimitiveSet = function(opt_withPrimary = true) {
 
   const primitiveSet = new PrimitiveSet.PrimitiveSet();
   for (let i = 1; i < numberOfPrimitives; i++) {
-    let /** @type {PbOutputPrefixType} */ outputPrefix;
+    let /** @type {!PbOutputPrefixType} */ outputPrefix;
     switch (i % 3) {
       case 0:
         outputPrefix = PbOutputPrefixType.TINK;

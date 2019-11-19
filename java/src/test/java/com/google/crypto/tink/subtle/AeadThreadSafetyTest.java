@@ -18,7 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.testing.TestUtil;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -16,14 +16,14 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.StreamingTestUtil.PseudorandomReadableByteChannel;
+import com.google.crypto.tink.testing.StreamingTestUtil.PseudorandomReadableByteChannel;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;

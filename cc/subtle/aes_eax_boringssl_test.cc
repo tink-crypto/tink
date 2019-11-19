@@ -147,7 +147,7 @@ TEST(AesEaxBoringSslTest, testEmpty) {
   size_t nonce_size = 12;
   std::string key(test::HexDecodeOrDie("bedcfb5a011ebc84600fcb296c15af0d"));
   std::string nonce(test::HexDecodeOrDie("438a547a94ea88dce46c6c85"));
-  // Expected tag is an empty std::string with an empty tag is encrypted with
+  // Expected tag is an empty string with an empty tag is encrypted with
   // the nonce above;
   std::string tag(test::HexDecodeOrDie("9607977cd7556b1dfedf0c73a35a5197"));
   std::string ciphertext = nonce + tag;

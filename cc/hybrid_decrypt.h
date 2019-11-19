@@ -57,8 +57,7 @@ class HybridDecrypt {
  public:
   // Decrypts 'ciphertext' verifying the integrity of 'context_info'.
   virtual crypto::tink::util::StatusOr<std::string> Decrypt(
-      absl::string_view ciphertext,
-      absl::string_view context_info) const = 0;
+      absl::string_view ciphertext, absl::string_view context_info) const = 0;
 
   virtual ~HybridDecrypt() {}
 };

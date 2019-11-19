@@ -40,8 +40,8 @@ template<class P>
 class CcKeyManager {
  public:
   // Returns a key manager from the registry.
-  static util::StatusOr<std::unique_ptr<CcKeyManager<P>>>
-  GetFromCcRegistry(const std::string& type_url) {
+  static util::StatusOr<std::unique_ptr<CcKeyManager<P>>> GetFromCcRegistry(
+      const std::string& type_url) {
     auto key_manager_result = Registry::get_key_manager<P>(type_url);
     if (!key_manager_result.ok()) {
       return ToStatusF(util::error::FAILED_PRECONDITION,
@@ -89,9 +89,7 @@ class CcKeyManager {
   }
 
   // Returns the type_url identifying the key type handled by this manager.
-  std::string KeyType() {
-    return key_manager_->get_key_type();
-  }
+  std::string KeyType() { return key_manager_->get_key_type(); }
 
  private:
   const KeyManager<P>* key_manager_;

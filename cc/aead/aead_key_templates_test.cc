@@ -210,7 +210,8 @@ TEST(AeadKeyTemplatesTest, testAesGcmSivKeyTemplates) {
 }
 
 TEST(AeadKeyTemplatesTest, testAesCtrHmacAeadKeyTemplates) {
-  std::string type_url = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
 
   {  // Test Aes128CtrHmacSha256().
     // Check that returned template is correct.

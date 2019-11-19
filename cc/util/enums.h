@@ -29,7 +29,7 @@ namespace util {
 
 
 // Helpers for translation of common enums between protocol buffer enums,
-// their std::string representation, and common enums used in subtle.
+// their string representation, and common enums used in subtle.
 class Enums {
  public:
   // EllipticCurveType.

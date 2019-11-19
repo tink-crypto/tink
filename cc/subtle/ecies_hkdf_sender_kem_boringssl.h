@@ -50,7 +50,8 @@ class EciesHkdfSenderKemBoringSsl {
   // public key point.  The public key's coordinates are big-endian byte array.
   static crypto::tink::util::StatusOr<
       std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
-  New(EllipticCurveType curve, const std::string& pubx, const std::string& puby);
+  New(EllipticCurveType curve, const std::string& pubx,
+      const std::string& puby);
 
   // Generates ephemeral key pairs, computes ECDH's shared secret based on
   // generated ephemeral key and recipient's public key, then uses HKDF
@@ -70,7 +71,8 @@ class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
   // public key point.  The public key's coordinates are big-endian byte array.
   static crypto::tink::util::StatusOr<
       std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
-  New(EllipticCurveType curve, const std::string& pubx, const std::string& puby);
+  New(EllipticCurveType curve, const std::string& pubx,
+      const std::string& puby);
 
   // Generates ephemeral key pairs, computes ECDH's shared secret based on
   // generated ephemeral key and recipient's public key, then uses HKDF
@@ -82,7 +84,8 @@ class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
 
  private:
   EciesHkdfNistPCurveSendKemBoringSsl(EllipticCurveType curve,
-                                      const std::string& pubx, const std::string& puby,
+                                      const std::string& pubx,
+                                      const std::string& puby,
                                       EC_POINT* peer_pub_key);
 
   EllipticCurveType curve_;
@@ -98,7 +101,8 @@ class EciesHkdfX25519SendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
   // public key point.  The public key's coordinates are big-endian byte array.
   static crypto::tink::util::StatusOr<
       std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
-  New(EllipticCurveType curve, const std::string& pubx, const std::string& puby);
+  New(EllipticCurveType curve, const std::string& pubx,
+      const std::string& puby);
 
   // Generates ephemeral key pairs, computes ECDH's shared secret based on
   // generated ephemeral key and recipient's public key, then uses HKDF
@@ -109,7 +113,8 @@ class EciesHkdfX25519SendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
       uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
 
  private:
-  explicit EciesHkdfX25519SendKemBoringSsl(const std::string& peer_public_value);
+  explicit EciesHkdfX25519SendKemBoringSsl(
+      const std::string& peer_public_value);
 
   uint8_t peer_public_value_[X25519_PUBLIC_VALUE_LEN];
 };

@@ -19,9 +19,9 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.WycheproofTestUtil;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;

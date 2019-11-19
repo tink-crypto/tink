@@ -49,7 +49,8 @@ using google::crypto::tink::RsaSsaPkcs1KeyFormat;
 using google::crypto::tink::RsaSsaPssKeyFormat;
 
 TEST(SignatureKeyTemplatesTest, KeyTemplatesWithDerEncoding) {
-  std::string type_url = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 
   {  // Test EcdsaP256().
     // Check that returned template is correct.
@@ -129,7 +130,8 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithDerEncoding) {
 }
 
 TEST(SignatureKeyTemplatesTest, KeyTemplatesWithIeeeEncoding) {
-  std::string type_url = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 
   {  // Test EcdsaP256Ieee().
     // Check that returned template is correct.
@@ -350,7 +352,8 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss4096Sha512Sha512F4) {
 }
 
 TEST(SignatureKeyTemplatesTest, KeyTemplatesWithEd25519) {
-  std::string type_url = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
   const KeyTemplate& key_template = SignatureKeyTemplates::Ed25519();
   EXPECT_EQ(type_url, key_template.type_url());
   EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());

@@ -59,8 +59,7 @@ GcpKmsAead::New(absl::string_view key_name,
 }
 
 StatusOr<std::string> GcpKmsAead::Encrypt(
-    absl::string_view plaintext,
-    absl::string_view associated_data) const {
+    absl::string_view plaintext, absl::string_view associated_data) const {
   EncryptRequest req;
   req.set_name(key_name_);
   req.set_plaintext(std::string(plaintext));
@@ -77,8 +76,7 @@ StatusOr<std::string> GcpKmsAead::Encrypt(
 }
 
 StatusOr<std::string> GcpKmsAead::Decrypt(
-    absl::string_view ciphertext,
-    absl::string_view associated_data) const {
+    absl::string_view ciphertext, absl::string_view associated_data) const {
   DecryptRequest req;
   req.set_name(key_name_);
   req.set_ciphertext(std::string(ciphertext));

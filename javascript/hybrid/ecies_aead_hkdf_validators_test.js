@@ -414,8 +414,8 @@ class ExceptionText {
 }
 
 /**
- * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
  *
  * @return {!PbEciesHkdfKemParams}
  */
@@ -445,10 +445,10 @@ const createDemParams = function(opt_keyTemplate) {
 };
 
 /**
- * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
  * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
+ * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
  *
  * @return {!PbEciesAeadHkdfParams}
  */
@@ -464,10 +464,10 @@ const createParams = function(
 };
 
 /**
- * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
  * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
+ * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
  *
  * @return {!Promise<!PbEciesAeadHkdfPrivateKey>}
  */
@@ -500,10 +500,10 @@ const createPrivateKey = async function(
 };
 
 /**
- * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
  * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
+ * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
  *
  * @return {!Promise<!PbEciesAeadHkdfPublicKey>}
  */

@@ -45,9 +45,9 @@ TEST_F(Ed25519SignBoringSslTest, testBasicSign) {
   ED25519_keypair(out_public_key, out_private_key);
 
   std::string public_key(reinterpret_cast<const char *>(out_public_key),
-                    ED25519_PUBLIC_KEY_LEN);
+                         ED25519_PUBLIC_KEY_LEN);
   std::string private_key(reinterpret_cast<const char *>(out_private_key),
-                     ED25519_PRIVATE_KEY_LEN);
+                          ED25519_PRIVATE_KEY_LEN);
 
   // Create a new signer.
   auto signer_result = Ed25519SignBoringSsl::New(private_key);
@@ -109,9 +109,9 @@ TEST_F(Ed25519SignBoringSslTest, testMessageEmptyVersusNullStringView) {
   ED25519_keypair(out_public_key, out_private_key);
 
   std::string public_key(reinterpret_cast<const char *>(out_public_key),
-                    ED25519_PUBLIC_KEY_LEN);
+                         ED25519_PUBLIC_KEY_LEN);
   std::string private_key(reinterpret_cast<const char *>(out_private_key),
-                     ED25519_PRIVATE_KEY_LEN);
+                          ED25519_PRIVATE_KEY_LEN);
 
   // Create a new signer.
   auto signer_result = Ed25519SignBoringSsl::New(private_key);
@@ -131,7 +131,7 @@ TEST_F(Ed25519SignBoringSslTest, testMessageEmptyVersusNullStringView) {
   auto status = verifier->Verify(signature, empty_message);
   EXPECT_TRUE(status.ok()) << status;
 
-  // Message is an empty std::string.
+  // Message is an empty string.
   const std::string message = "";
   signature = signer->Sign(message).ValueOrDie();
   EXPECT_EQ(signature.size(), ED25519_SIGNATURE_LEN);

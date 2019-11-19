@@ -59,8 +59,7 @@ class AeadSetWrapper : public Aead {
 };
 
 util::StatusOr<std::string> AeadSetWrapper::Encrypt(
-    absl::string_view plaintext,
-    absl::string_view associated_data) const {
+    absl::string_view plaintext, absl::string_view associated_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
   plaintext = subtle::SubtleUtilBoringSSL::EnsureNonNull(plaintext);
@@ -74,15 +73,14 @@ util::StatusOr<std::string> AeadSetWrapper::Encrypt(
 }
 
 util::StatusOr<std::string> AeadSetWrapper::Decrypt(
-    absl::string_view ciphertext,
-    absl::string_view associated_data) const {
+    absl::string_view ciphertext, absl::string_view associated_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
   associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id = std::string(
-        ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));
+    const std::string& key_id =
+        std::string(ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));
     auto primitives_result = aead_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
       absl::string_view raw_ciphertext =

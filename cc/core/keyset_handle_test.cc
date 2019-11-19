@@ -75,8 +75,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
 
   {  // Good encrypted keyset.
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext = aead.Encrypt(
-        keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
+    std::string keyset_ciphertext =
+        aead.Encrypt(keyset.SerializeAsString(), /* associated_data= */ "")
+            .ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(BinaryKeysetReader::New(
@@ -90,8 +91,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
 
   {  // AEAD does not match the ciphertext
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext = aead.Encrypt(
-        keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
+    std::string keyset_ciphertext =
+        aead.Encrypt(keyset.SerializeAsString(), /* associated_data= */ "")
+            .ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(BinaryKeysetReader::New(
@@ -104,8 +106,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
 
   {  // Ciphertext does not contain actual keyset.
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext = aead.Encrypt(
-        "not a serialized keyset", /* associated_data= */ "").ValueOrDie();
+    std::string keyset_ciphertext =
+        aead.Encrypt("not a serialized keyset", /* associated_data= */ "")
+            .ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(BinaryKeysetReader::New(
@@ -139,8 +142,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
 
   {  // Good encrypted keyset.
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext = aead.Encrypt(
-        keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
+    std::string keyset_ciphertext =
+        aead.Encrypt(keyset.SerializeAsString(), /* associated_data= */ "")
+            .ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto* keyset_info = encrypted_keyset.mutable_keyset_info();
@@ -169,8 +173,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
 
   {  // AEAD does not match the ciphertext
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext = aead.Encrypt(
-        keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
+    std::string keyset_ciphertext =
+        aead.Encrypt(keyset.SerializeAsString(), /* associated_data= */ "")
+            .ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(JsonKeysetReader::New(
@@ -183,8 +188,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
 
   {  // Ciphertext does not contain actual keyset.
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext = aead.Encrypt(
-        "not a serialized keyset", /* associated_data= */ "").ValueOrDie();
+    std::string keyset_ciphertext =
+        aead.Encrypt("not a serialized keyset", /* associated_data= */ "")
+            .ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(JsonKeysetReader::New(
@@ -628,6 +634,37 @@ TEST_F(KeysetHandleTest, WriteNoSecretFailForHidden) {
       test::DummyKeysetWriter::New(std::move(destination_stream)).ValueOrDie();
   auto result = handle->WriteNoSecret(writer.get());
   EXPECT_FALSE(result.ok());
+}
+
+TEST_F(KeysetHandleTest, GetKeysetInfo) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+  AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
+            KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  for (int i = 0; i < 10; ++i) {
+    AddRawKey(absl::StrCat("more key type", i + 100), i + 100, key,
+              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC, &keyset);
+  }
+  keyset.set_primary_key_id(42);
+
+  auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
+  auto keyset_info = handle->GetKeysetInfo();
+
+  EXPECT_EQ(keyset.primary_key_id(), keyset_info.primary_key_id());
+  for (int i = 0; i < keyset.key_size(); ++i) {
+    auto key_info = keyset_info.key_info(i);
+    auto key = keyset.key(i);
+    EXPECT_EQ(key.key_data().type_url(), key_info.type_url());
+    EXPECT_EQ(key.status(), key_info.status());
+    EXPECT_EQ(key.key_id(), key_info.key_id());
+    EXPECT_EQ(key.output_prefix_type(), key_info.output_prefix_type());
+  }
 }
 
 }  // namespace

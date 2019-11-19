@@ -1,8 +1,17 @@
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
 licenses(["notice"])
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+java_library(
+    name = "prf",
+    javacopts = JAVACOPTS_OSS,
+    exports = [
+        ":hkdf_streaming_prf",
+        ":streaming_prf",
+    ],
+)
 
 java_library(
     name = "streaming_prf",
@@ -12,8 +21,11 @@ java_library(
 )
 
 java_library(
-    name = "streaming_prf-android",
-    srcs = ["StreamingPrf.java"],
+    name = "hkdf_streaming_prf",
+    srcs = ["HkdfStreamingPrf.java"],
     javacopts = JAVACOPTS_OSS,
-    deps = [],
+    deps = [
+        ":streaming_prf",
+        "//java/src/main/java/com/google/crypto/tink/subtle",
+    ],
 )

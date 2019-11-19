@@ -63,7 +63,8 @@ util::Status ReadFromStream(InputStream* input_stream, std::string* output) {
     if (!next_result.ok()) return next_result.status();
     auto read_bytes = next_result.ValueOrDie();
     if (read_bytes > 0) {
-      output->append(std::string(reinterpret_cast<const char*>(buffer), read_bytes));
+      output->append(
+          std::string(reinterpret_cast<const char*>(buffer), read_bytes));
     }
   }
   return util::Status::OK;

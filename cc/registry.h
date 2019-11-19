@@ -70,9 +70,9 @@ class Registry {
   // an existing, different catalogue for the specified name.
   template <class ConcreteCatalogue>
   ABSL_DEPRECATED("Catalogues are not supported anymore.")
-  static crypto::tink::util::Status AddCatalogue(
-      const std::string& catalogue_name,
-      std::unique_ptr<ConcreteCatalogue> catalogue) {
+  static crypto::tink::util::Status
+      AddCatalogue(const std::string& catalogue_name,
+                   std::unique_ptr<ConcreteCatalogue> catalogue) {
     return RegistryImpl::GlobalInstance().AddCatalogue(catalogue_name,
                                                        catalogue.release());
   }
@@ -84,8 +84,8 @@ class Registry {
   // failure, 'catalogue' is deleted).
   template <class P>
   ABSL_DEPRECATED("Use AddCatalogue with a unique_ptr input instead.")
-  static crypto::tink::util::Status AddCatalogue(const std::string& catalogue_name,
-                                                 Catalogue<P>* catalogue) {
+  static crypto::tink::util::Status
+      AddCatalogue(const std::string& catalogue_name, Catalogue<P>* catalogue) {
     return AddCatalogue(catalogue_name, absl::WrapUnique(catalogue));
   }
 
@@ -142,11 +142,11 @@ class Registry {
   }
 
   // Returns a key manager for the given type_url (if any found).
-  // Keeps the ownership of the manager.
-  // TODO(przydatek): consider changing return value to
-  //   StatusOr<std::reference_wrapper<KeyManager<P>>>
-  // (cannot return reference directly, as StatusOr does not support it,
-  // see https://goo.gl/x0ymDz)
+  // Keeps the ownership of the manager. Returned key_managers are guaranteed
+  // to stay valid for the lifetime of the binary (with the exception of a user
+  // calling Reset()).
+  // TODO(tholenst): Remove Reset() from the interface, as it could violate this
+  // but should be test only anyhow.
   template <class P>
   static crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
       const std::string& type_url) {

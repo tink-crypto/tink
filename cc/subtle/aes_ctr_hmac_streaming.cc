@@ -42,16 +42,19 @@ namespace tink {
 namespace subtle {
 
 static std::string NonceForSegment(absl::string_view nonce_prefix,
-                              int64_t segment_number, bool is_last_segment) {
-  return absl::StrCat(nonce_prefix, BigEndian32(segment_number),
-                      is_last_segment ? std::string(1, '\x01') : std::string(1, '\x00'),
-                      std::string(4, '\x00'));
+                                   int64_t segment_number,
+                                   bool is_last_segment) {
+  return absl::StrCat(
+      nonce_prefix, BigEndian32(segment_number),
+      is_last_segment ? std::string(1, '\x01') : std::string(1, '\x00'),
+      std::string(4, '\x00'));
 }
 
 static util::Status DeriveKeys(absl::string_view ikm, HashType hkdf_algo,
                                absl::string_view salt,
                                absl::string_view associated_data, int key_size,
-                               std::string* key_value, std::string* hmac_key_value) {
+                               std::string* key_value,
+                               std::string* hmac_key_value) {
   int derived_key_material_size =
       key_size + AesCtrHmacStreaming::kHmacKeySizeInBytes;
   auto hkdf_result = Hkdf::ComputeHkdf(hkdf_algo, ikm, salt, associated_data,
@@ -129,7 +132,7 @@ AesCtrHmacStreaming::NewSegmentDecrypter(
 
 // AesCtrHmacStreamSegmentEncrypter
 static std::string MakeHeader(absl::string_view salt,
-                         absl::string_view nonce_prefix) {
+                              absl::string_view nonce_prefix) {
   uint8_t header_size =
       static_cast<uint8_t>(1 + salt.size() + nonce_prefix.size());
   return absl::StrCat(std::string(1, header_size), salt, nonce_prefix);
@@ -257,7 +260,7 @@ util::Status AesCtrHmacStreamSegmentDecrypter::Init(
   std::string salt(reinterpret_cast<const char*>(header.data() + 1), key_size_);
   nonce_prefix_ =
       std::string(reinterpret_cast<const char*>(header.data() + 1 + key_size_),
-             AesCtrHmacStreaming::kNoncePrefixSizeInBytes);
+                  AesCtrHmacStreaming::kNoncePrefixSizeInBytes);
 
   std::string hmac_key_value;
   auto status = DeriveKeys(ikm_, hkdf_algo_, salt, associated_data_, key_size_,

@@ -21,6 +21,8 @@
 #include "tink/aead.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
+#include "tink/util/input_stream_util.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -33,6 +35,7 @@ namespace tink {
 namespace internal {
 namespace {
 
+using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::AesGcmKey;
 using ::google::crypto::tink::AesGcmKeyFormat;
@@ -85,17 +88,19 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
     return google::crypto::tink::KeyData::SYMMETRIC;
   }
 
-  MOCK_CONST_METHOD0(get_version, uint32_t());
+  MOCK_METHOD(uint32_t, get_version, (), (const, override));
 
-  // We mock out ValidateKey and ValidateKeyFormat so that we can easily test
-  // proper behavior in case they return an error.
-  MOCK_CONST_METHOD1(ValidateKey,
-                     crypto::tink::util::Status(const AesGcmKey& key));
-  MOCK_CONST_METHOD1(ValidateKeyFormat,
-                     crypto::tink::util::Status(const AesGcmKeyFormat& key));
+  // We mock out ValidateKey, ValidateKeyFormat, and DeriveKey so that we can
+  // easily test proper behavior in case they return an error.
+  MOCK_METHOD(crypto::tink::util::Status, ValidateKey, (const AesGcmKey& key),
+              (const, override));
+  MOCK_METHOD(crypto::tink::util::Status, ValidateKeyFormat,
+              (const AesGcmKeyFormat& key), (const, override));
+  MOCK_METHOD(crypto::tink::util::StatusOr<AesGcmKey>, DeriveKey,
+              (const KeyFormatProto& key_format, InputStream* input_stream),
+              (const, override));
 
   const std::string& get_key_type() const override { return kKeyType; }
-
 
   crypto::tink::util::StatusOr<AesGcmKey> CreateKey(
       const AesGcmKeyFormat& key_format) const override {
@@ -105,7 +110,8 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
   }
 
  private:
-  const std::string kKeyType = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  const std::string kKeyType =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
 TEST(KeyManagerImplTest, FactoryNewKeyFromMessage) {
@@ -197,6 +203,82 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromKeyDataCallsValidate) {
                   .status(),
               StatusIs(util::error::OUT_OF_RANGE,
                        HasSubstr("FactoryNewKeyFromKeyDataCallsValidate")));
+}
+
+TEST(CreateDeriverFunctionForTest, KeyMaterialAndKeyType) {
+  ExampleKeyTypeManager internal_km;
+  EXPECT_CALL(internal_km, DeriveKey(_, _)).
+      WillOnce(Return(AesGcmKey()));
+  auto deriver = CreateDeriverFunctionFor(&internal_km);
+
+  AesGcmKeyFormat key_format;
+  key_format.set_key_size(16);
+  auto key_or = deriver(key_format.SerializeAsString(), nullptr);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_material_type(),
+              Eq(ExampleKeyTypeManager().key_material_type()));
+  EXPECT_THAT(key_or.ValueOrDie().type_url(),
+              Eq(ExampleKeyTypeManager().get_key_type()));
+}
+
+TEST(CreateDeriverFunctionForTest, UseParametersAndReturnValue) {
+  crypto::tink::util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
+  ExampleKeyTypeManager internal_km;
+  AesGcmKeyFormat key_format;
+  key_format.set_key_size(9);
+
+  EXPECT_CALL(internal_km, DeriveKey(_, _))
+      .WillOnce([](const AesGcmKeyFormat& format, InputStream* randomness)
+                    -> crypto::tink::util::StatusOr<AesGcmKey> {
+        auto bytes_or = ReadAtMostFromStream(format.key_size(), randomness);
+        if (!bytes_or.ok()) {
+          return bytes_or.status();
+        }
+        AesGcmKey key;
+        key.set_key_value(bytes_or.ValueOrDie());
+        return key;
+      });
+
+  auto deriver = CreateDeriverFunctionFor(&internal_km);
+  auto key_or = deriver(key_format.SerializeAsString(), &input_stream);
+  AesGcmKey result;
+  result.ParseFromString(key_or.ValueOrDie().value());
+  // Length 9 prefix of the above string.
+  EXPECT_THAT(result.key_value(), Eq("012345678"));
+}
+
+TEST(CreateDeriverFunctionForTest, ValidateKeyFormatIsCalled) {
+  ExampleKeyTypeManager internal_km;
+  EXPECT_CALL(internal_km, ValidateKeyFormat(_))
+      .WillOnce(Return(
+          ToStatusF(util::error::OUT_OF_RANGE,
+                    "CreateDeriverFunctionForTest ValidateKeyFormatIsCalled")));
+  auto deriver = CreateDeriverFunctionFor(&internal_km);
+
+  EXPECT_THAT(
+      deriver(AesGcmKeyFormat().SerializeAsString(), nullptr).status(),
+      StatusIs(
+          util::error::OUT_OF_RANGE,
+          HasSubstr("CreateDeriverFunctionForTest ValidateKeyFormatIsCalled")));
+}
+
+TEST(CreateDeriverFunctionForTest, ValidateKeyIsCalled) {
+  ExampleKeyTypeManager internal_km;
+  EXPECT_CALL(internal_km, DeriveKey(_, _)).
+      WillOnce(Return(AesGcmKey()));
+  EXPECT_CALL(internal_km, ValidateKey(_))
+      .WillOnce(Return(
+          ToStatusF(util::error::OUT_OF_RANGE,
+                    "CreateDeriverFunctionForTest ValidateKeyIsCalled")));
+
+  auto deriver = CreateDeriverFunctionFor(&internal_km);
+
+  EXPECT_THAT(
+      deriver(AesGcmKeyFormat().SerializeAsString(), nullptr).status(),
+      StatusIs(
+          util::error::OUT_OF_RANGE,
+          HasSubstr("CreateDeriverFunctionForTest ValidateKeyIsCalled")));
 }
 
 TEST(KeyManagerImplTest, GetPrimitiveAead) {
@@ -387,7 +469,8 @@ class ExampleKeyTypeManagerWithoutFactory
 
  private:
   static const int kVersion = 0;
-  const std::string key_type_ = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  const std::string key_type_ =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
 TEST(KeyManagerImplTest, GetPrimitiveWithoutFactoryAead) {
@@ -443,6 +526,13 @@ TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromKeyData) {
   EXPECT_THAT(key_manager->get_key_factory()
                   .NewKeyData(key_format.SerializeAsString())
                   .status(),
+              StatusIs(util::error::UNIMPLEMENTED));
+}
+
+TEST(CreateDeriverFunctionForTest, DeriverWithoutFactory) {
+  ExampleKeyTypeManagerWithoutFactory internal_km;
+  auto deriver = CreateDeriverFunctionFor(&internal_km);
+  EXPECT_THAT(deriver("", nullptr).status(),
               StatusIs(util::error::UNIMPLEMENTED));
 }
 

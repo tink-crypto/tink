@@ -56,7 +56,8 @@ static int kBufferSize = 128;
 // Creates an InputStream with the specified contents.
 std::unique_ptr<InputStream> GetInputStream(absl::string_view contents) {
   // Prepare ciphertext source stream.
-  auto string_stream = absl::make_unique<std::stringstream>(std::string(contents));
+  auto string_stream =
+      absl::make_unique<std::stringstream>(std::string(contents));
   std::unique_ptr<InputStream> input_stream(
       absl::make_unique<util::IstreamInputStream>(
           std::move(string_stream), kBufferSize));

@@ -45,7 +45,8 @@ static int kBufferSize = 4096;
 // Creates an InputStream with the specified contents.
 std::unique_ptr<InputStream> GetInputStream(absl::string_view contents) {
   // Prepare ciphertext source stream.
-  auto string_stream = absl::make_unique<std::stringstream>(std::string(contents));
+  auto string_stream =
+      absl::make_unique<std::stringstream>(std::string(contents));
   std::unique_ptr<InputStream> input_stream(
       absl::make_unique<util::IstreamInputStream>(
           std::move(string_stream), kBufferSize));
@@ -54,8 +55,8 @@ std::unique_ptr<InputStream> GetInputStream(absl::string_view contents) {
 
 // Attempts to read 'count' bytes from 'input_stream', and writes the read
 // bytes to 'output'.
-util::Status ReadFromStream(
-    InputStream* input_stream, int count, std::string* output) {
+util::Status ReadFromStream(InputStream* input_stream, int count,
+                            std::string* output) {
   if (input_stream == nullptr || output == nullptr || count < 0) {
     return util::Status(util::error::INTERNAL, "Illegal read from a stream");
   }
@@ -72,7 +73,8 @@ util::Status ReadFromStream(
     auto read_bytes = next_result.ValueOrDie();
     auto used_bytes = std::min(read_bytes, bytes_to_read);
     if (used_bytes > 0) {
-      output->append(std::string(reinterpret_cast<const char*>(buffer), used_bytes));
+      output->append(
+          std::string(reinterpret_cast<const char*>(buffer), used_bytes));
       bytes_to_read -= used_bytes;
       if (bytes_to_read == 0) input_stream->BackUp(read_bytes - used_bytes);
     }
@@ -109,7 +111,7 @@ TEST(SharedInputStreamTest, BasicOperations) {
         EXPECT_EQ(contents, prefix + rest);
         EXPECT_EQ(buffered_stream->Position(), shared_stream->Position());
 
-        // Try reading again, should get an empty std::string.
+        // Try reading again, should get an empty string.
         status = ReadFromStream(shared_stream.get(), &rest);
         EXPECT_THAT(status, IsOk());
         EXPECT_EQ("", rest);
@@ -220,9 +222,8 @@ TEST(SharedInputStreamTest, MultipleBackups) {
     EXPECT_EQ(total_backup_size, next_result.ValueOrDie());
     EXPECT_EQ(next_size, shared_stream->Position());
     EXPECT_EQ(buffered_stream->Position(), shared_stream->Position());
-    EXPECT_EQ(
-        contents.substr(next_size - total_backup_size, total_backup_size),
-        std::string(static_cast<const char*>(buffer), total_backup_size));
+    EXPECT_EQ(contents.substr(next_size - total_backup_size, total_backup_size),
+              std::string(static_cast<const char*>(buffer), total_backup_size));
   }
 }
 

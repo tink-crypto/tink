@@ -61,8 +61,7 @@ class HybridEncryptSetWrapper : public HybridEncrypt {
 };
 
 util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
-    absl::string_view plaintext,
-    absl::string_view context_info) const {
+    absl::string_view plaintext, absl::string_view context_info) const {
   // BoringSSL expects a non-null pointer for plaintext and context_info,
   // regardless of whether the size is 0.
   plaintext = subtle::SubtleUtilBoringSSL::EnsureNonNull(plaintext);

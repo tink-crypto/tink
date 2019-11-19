@@ -168,6 +168,7 @@ tink_cc_library(
     tink::aead::aes_gcm_key_manager
     tink::aead::xchacha20_poly1305_key_manager
     tink::subtle::random
+    tink::subtle_mac::stateful_mac
     tink::subtle::subtle_util_boringssl
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
@@ -194,6 +195,12 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME protobuf_helper
+  SRCS protobuf_helper.h
+  DEPS protobuf::libprotobuf-lite
+)
+
+tink_cc_library(
   NAME test_keyset_handle
   SRCS
     test_keyset_handle.cc
@@ -205,9 +212,14 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME protobuf_helper
-  SRCS protobuf_helper.h
-  DEPS protobuf::libprotobuf-lite
+  NAME input_stream_util
+  SRCS
+    input_stream_util.cc
+    input_stream_util.h
+  DEPS
+    tink::core::input_stream
+    tink::util::statusor
+    absl::strings
 )
 
 # tests
@@ -323,5 +335,16 @@ tink_cc_test(
   DEPS
     tink::util::test_matchers
     tink::util::validation
+    gmock
+)
+
+tink_cc_test(
+  NAME input_stream_util_test
+  SRCS input_stream_util_test.cc
+  DEPS
+    tink::util::input_stream_util
+    tink::util::istream_input_stream
+    tink::util::test_matchers
+    absl::memory
     gmock
 )

@@ -62,10 +62,8 @@ std::unique_ptr<RandomAccessStream> GetRandomAccessStream(
 
 // Returns a ciphertext resulting from encryption of 'pt' with 'aad' as
 // associated data, using 'saead'.
-std::string GetCiphertext(StreamingAead* saead,
-                     absl::string_view pt,
-                     absl::string_view aad,
-                     int ct_offset) {
+std::string GetCiphertext(StreamingAead* saead, absl::string_view pt,
+                          absl::string_view aad, int ct_offset) {
   // Prepare ciphertext destination stream.
   auto ct_stream = absl::make_unique<std::stringstream>();
   // Write ct_offset 'o'-characters for the ciphertext offset.

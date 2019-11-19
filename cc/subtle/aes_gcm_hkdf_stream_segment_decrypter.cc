@@ -122,10 +122,11 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
          AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes);
 
   // Derive symmetric key.
-  auto hkdf_result = Hkdf::ComputeHkdf(
-      hkdf_hash_, ikm_,
-      std::string(reinterpret_cast<const char *>(salt_.data()), derived_key_size_),
-      associated_data_, derived_key_size_);
+  auto hkdf_result =
+      Hkdf::ComputeHkdf(hkdf_hash_, ikm_,
+                        std::string(reinterpret_cast<const char*>(salt_.data()),
+                                    derived_key_size_),
+                        associated_data_, derived_key_size_);
   if (!hkdf_result.ok()) return hkdf_result.status();
   key_value_ = hkdf_result.ValueOrDie();
 

@@ -32,6 +32,7 @@ cc_library(
     hdrs = ["streaming_aead_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":aes_ctr_hmac_streaming_key_manager",
         ":aes_gcm_hkdf_streaming_key_manager",
@@ -265,8 +266,8 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_matchers",
-        "//proto:aes_eax_cc_proto",
         "//proto:aes_ctr_hmac_streaming_cc_proto",
+        "//proto:aes_eax_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",

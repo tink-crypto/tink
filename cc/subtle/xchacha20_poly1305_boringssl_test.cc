@@ -85,7 +85,7 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ(message, pt);
   }
-  {  // AAD is a an empty std::string.
+  {  // AAD is a an empty string.
     auto pt_or_status = cipher->Decrypt(ct, "");
     EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
     auto pt = pt_or_status.ValueOrDie();
@@ -111,7 +111,7 @@ TEST(XChacha20Poly1305BoringSslTest, testAadEmptyVersusNullStringView) {
     auto ct = ct_or_status.ValueOrDie();
     TestDecryptWithEmptyAad(cipher.get(), ct, message);
   }
-  {  // AAD is a an empty std::string.
+  {  // AAD is a an empty string.
     const std::string message = "Some data to encrypt.";
     auto ct_or_status = cipher->Encrypt(message, "");
     EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
@@ -142,7 +142,7 @@ TEST(XChacha20Poly1305BoringSslTest, testMessageEmptyVersusNullStringView) {
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ("", pt);
   }
-  {  // Message is an empty std::string.
+  {  // Message is an empty string.
     const std::string message = "";
     auto ct_or_status = cipher->Encrypt(message, aad);
     EXPECT_TRUE(ct_or_status.ok());
@@ -178,7 +178,7 @@ TEST(XChacha20Poly1305BoringSslTest, testBothMessageAndAadEmpty) {
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ("", pt);
   }
-  {  // Both are empty std::string.
+  {  // Both are empty string.
     const std::string message = "";
     const std::string aad = "";
     auto ct_or_status = cipher->Encrypt(message, aad);

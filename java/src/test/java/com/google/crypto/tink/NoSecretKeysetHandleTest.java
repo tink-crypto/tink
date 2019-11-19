@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.config.TinkConfig;

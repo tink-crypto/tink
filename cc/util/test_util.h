@@ -34,11 +34,12 @@
 #include "tink/kms_client.h"
 #include "tink/mac.h"
 #include "tink/output_stream.h"
-#include "tink/random_access_stream.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/buffer.h"
 #include "tink/util/constants.h"
 #include "tink/util/protobuf_helper.h"
@@ -60,8 +61,8 @@ namespace test {
 // Creates a new test file with the specified 'filename', writes 'size' random
 // bytes to the file, and returns a file descriptor for reading from the file.
 // A copy of the bytes written to the file is returned in 'file_contents'.
-int GetTestFileDescriptor(
-    absl::string_view filename, int size, std::string* file_contents);
+int GetTestFileDescriptor(absl::string_view filename, int size,
+                          std::string* file_contents);
 
 // Creates a new test file with the specified 'filename', with contents from
 // 'file_contents', and returns a file descriptor for reading from the file.
@@ -74,16 +75,16 @@ int GetTestFileDescriptor(absl::string_view filename);
 // Reads the test file specified by 'filename', and returns its contents.
 std::string ReadTestFile(std::string filename);
 
-  // Converts a hexadecimal std::string into a std::string of bytes.
+// Converts a hexadecimal string into a string of bytes.
 // Returns a status if the size of the input is odd or if the input contains
 // characters that are not hexadecimal.
 crypto::tink::util::StatusOr<std::string> HexDecode(absl::string_view hex);
 
-// Converts a hexadecimal std::string into a std::string of bytes.
-// Dies if the input is not a valid hexadecimal std::string.
+// Converts a hexadecimal string into a string of bytes.
+// Dies if the input is not a valid hexadecimal string.
 std::string HexDecodeOrDie(absl::string_view hex);
 
-// Converts a std::string of bytes into a hexadecimal std::string.
+// Converts a string of bytes into a hexadecimal string.
 std::string HexEncode(absl::string_view bytes);
 
 // Returns a temporary directory suitable for temporary testing files.
@@ -197,8 +198,9 @@ class DummyAead : public Aead {
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
       absl::string_view associated_data) const override {
-    std::string prefix = absl::StrCat(aead_name_.size(), ":", associated_data.size(),
-                                 ":", aead_name_, associated_data);
+    std::string prefix =
+        absl::StrCat(aead_name_.size(), ":", associated_data.size(), ":",
+                     aead_name_, associated_data);
     if (!StartsWith(ciphertext, prefix)) {
       return crypto::tink::util::Status(
           crypto::tink::util::error::INVALID_ARGUMENT,
@@ -564,6 +566,29 @@ class DummyMac : public Mac {
 
  private:
   DummyAead dummy_aead_;
+};
+
+// A dummy implementation of Stateful Mac interface.
+// An instance of DummyStatefulMac can be identified by a name specified
+// as a parameter of the constructor.
+// Over the same inputs, the DummyStatefulMac and DummyMac should give the same
+// output; DummyStatefulMac builds and internal_state_ and calls DummyMac.
+class DummyStatefulMac : public subtle::StatefulMac {
+ public:
+  explicit DummyStatefulMac(const std::string& mac_name)
+      : dummy_aead_(absl::StrCat("DummyMac:", mac_name)), buffer_("") {}
+
+  util::Status Update(absl::string_view data) override {
+    absl::StrAppend(&buffer_, data);
+    return util::OkStatus();
+  }
+  util::StatusOr<std::string> Finalize() override {
+    return dummy_aead_.Encrypt("", buffer_);
+  }
+
+ private:
+  DummyAead dummy_aead_;
+  std::string buffer_;
 };
 
 // A dummy implementation of KeysetWriter-interface.

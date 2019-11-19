@@ -9,3 +9,34 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = ["//cc:input_stream"],
 )
+
+cc_library(
+    name = "hkdf_streaming_prf",
+    srcs = ["hkdf_streaming_prf.cc"],
+    hdrs = ["hkdf_streaming_prf.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":streaming_prf",
+        "//cc:input_stream",
+        "//cc/subtle",
+        "//cc/subtle:subtle_util",
+        "//cc/subtle:subtle_util_boringssl",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "hkdf_streaming_prf_test",
+    srcs = ["hkdf_streaming_prf_test.cc"],
+    deps = [
+        ":hkdf_streaming_prf",
+        "//cc/subtle",
+        "//cc/util:input_stream_util",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

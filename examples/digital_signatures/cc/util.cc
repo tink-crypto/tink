@@ -77,9 +77,8 @@ std::unique_ptr<KeysetHandle> Util::ReadKeyset(const std::string& filename) {
 }
 
 // static
-void Util::WriteKeyset(
-    const std::unique_ptr<KeysetHandle>& keyset_handle,
-    const std::string& filename) {
+void Util::WriteKeyset(const std::unique_ptr<KeysetHandle>& keyset_handle,
+                       const std::string& filename) {
   auto keyset_writer = GetBinaryKeysetWriter(filename);
   auto status = CleartextKeysetHandle::Write(keyset_writer.get(),
                                              *keyset_handle);
@@ -115,8 +114,7 @@ std::string Util::Read(const std::string& filename) {
 }
 
 // static
-void Util::Write(const std::string& output,
-                    const std::string& filename) {
+void Util::Write(const std::string& output, const std::string& filename) {
   std::ofstream output_stream(filename,
                               std::ofstream::out | std::ofstream::binary);
   if (!output_stream.is_open()) {

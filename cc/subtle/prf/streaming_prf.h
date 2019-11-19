@@ -15,8 +15,8 @@
 #define TINK_PRF_PRF_H_
 
 #include <memory>
-#include <string_view>
 
+#include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 
 namespace crypto {
@@ -30,6 +30,7 @@ namespace tink {
 // For a formal description of the security properties, see the documentation in
 // the corresponding Java class.
 class StreamingPrf {
+ public:
   // Returns a stream of pseudorandom bytes for this input. Calling Get twice
   // with the same input will return a copy of the same input stream.
   virtual std::unique_ptr<InputStream> ComputePrf(

@@ -1,5 +1,7 @@
 tink_module(subtle)
 
+add_subdirectory(prf)
+add_subdirectory(mac)
 
 set(TINK_SUBTLE_PUBLIC_APIS
   common_enums.h
@@ -648,6 +650,20 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME streaming_mac_impl
+  SRCS
+    streaming_mac_impl.cc
+    streaming_mac_impl.h
+  DEPS
+    absl::memory
+    tink::core::mac
+    tink::core::streaming_mac
+    tink::subtle_mac::stateful_mac
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -1141,4 +1157,17 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+)
+
+tink_cc_test(
+  NAME streaming_mac_impl_test
+  SRCS streaming_mac_impl_test.cc
+  DEPS
+    tink::subtle::streaming_mac_impl
+    tink::subtle::random
+    tink::subtle::test_util
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    tink::util::test_matchers
 )

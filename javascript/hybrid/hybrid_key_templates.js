@@ -86,10 +86,10 @@ class HybridKeyTemplates {
 }
 
 /**
- * @param {PbEllipticCurveType} curveType
- * @param {PbHashType} hkdfHash
- * @param {PbPointFormat} pointFormat
- * @param {PbKeyTemplate} demKeyTemplate
+ * @param {!PbEllipticCurveType} curveType
+ * @param {!PbHashType} hkdfHash
+ * @param {!PbPointFormat} pointFormat
+ * @param {!PbKeyTemplate} demKeyTemplate
  * @param {!Uint8Array} hkdfSalt
  *
  * @return {!PbKeyTemplate}
@@ -113,10 +113,10 @@ const createEciesAeadHkdfKeyTemplate_ = function(
 };
 
 /**
- * @param {PbEllipticCurveType} curveType
- * @param {PbHashType} hkdfHash
- * @param {PbPointFormat} pointFormat
- * @param {PbKeyTemplate} demKeyTemplate
+ * @param {!PbEllipticCurveType} curveType
+ * @param {!PbHashType} hkdfHash
+ * @param {!PbPointFormat} pointFormat
+ * @param {!PbKeyTemplate} demKeyTemplate
  * @param {!Uint8Array} hkdfSalt
  *
  * @return {!PbEciesAeadHkdfParams}

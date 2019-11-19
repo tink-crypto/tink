@@ -54,6 +54,10 @@ class KeysetHandle {
   crypto::tink::util::Status Write(KeysetWriter* writer,
                                    const Aead& master_key_aead);
 
+  // Returns KeysetInfo, a "safe" Keyset that doesn't contain any actual
+  // key material, thus can be used for logging or monitoring.
+  google::crypto::tink::KeysetInfo GetKeysetInfo() const;
+
   // Writes the underlying keyset to |writer| only if the keyset does not
   // contain any secret key material.
   // This can be used to persist public keysets or envelope encryption keysets.

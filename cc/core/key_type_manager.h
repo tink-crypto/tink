@@ -21,6 +21,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "tink/core/template_util.h"
+#include "tink/input_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -43,10 +44,24 @@ class InternalKeyFactory {
  public:
   virtual ~InternalKeyFactory() {}
 
+  // Validates a key format proto.  KeyFormatProtos
+  // on which this function returns a non-ok status will not be passed to
+  // CreateKey or DeriveKey.
   virtual crypto::tink::util::Status ValidateKeyFormat(
       const KeyFormatProto& key_format) const = 0;
+  // Creates a new key. This is expected to be randomized.
   virtual crypto::tink::util::StatusOr<KeyProto> CreateKey(
       const KeyFormatProto& key_format) const = 0;
+  // Creates a new key. Only needs to be overridden if it should be possible to
+  // derive keys of this type. This must be deterministic. Furthermore, in order
+  // to support long term usability of old keys, the KeyFormatProto should be
+  // versioned.
+  virtual crypto::tink::util::StatusOr<KeyProto> DeriveKey(
+      const KeyFormatProto& key_format, InputStream* input_stream) const {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::UNIMPLEMENTED,
+        "Deriving key not implemented for this key type.");
+  }
 };
 
 // Template specialization for when KeyFormatProto = void. The compiler will

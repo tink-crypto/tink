@@ -44,7 +44,8 @@ util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(
   return std::move(cmac);
 }
 
-AesCmacBoringSsl::AesCmacBoringSsl(const std::string& key_value, uint32_t tag_size)
+AesCmacBoringSsl::AesCmacBoringSsl(const std::string& key_value,
+                                   uint32_t tag_size)
     : key_value_(key_value), tag_size_(tag_size) {}
 
 util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(

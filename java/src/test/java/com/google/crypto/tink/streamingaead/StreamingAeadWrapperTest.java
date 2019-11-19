@@ -16,19 +16,19 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
-import com.google.crypto.tink.StreamingTestUtil;
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.testing.StreamingTestUtil;
+import com.google.crypto.tink.testing.TestUtil;
 import java.io.IOException;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -18,6 +18,7 @@
 
 #include <thread>  // NOLINT(build/c++11)
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/crypto_format.h"
 #include "tink/mac.h"
@@ -26,10 +27,11 @@
 #include "proto/tink.pb.h"
 
 using ::crypto::tink::test::DummyMac;
+using ::crypto::tink::test::IsOk;
 using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
-using ::crypto::tink::test::IsOk;
+using ::testing::UnorderedElementsAreArray;
 
 namespace crypto {
 namespace tink {
@@ -190,7 +192,6 @@ TEST_F(PrimitiveSetTest, Basic) {
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
             add_primitive_result.status().error_code());
 
-
   std::string data = "some data";
 
   {  // Check the primary.
@@ -207,10 +208,12 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(DummyMac(mac_name_4).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(key_4.key_id(), primitives[0]->get_key_id());
     EXPECT_EQ(OutputPrefixType::RAW, primitives[0]->get_output_prefix_type());
     EXPECT_EQ(DummyMac(mac_name_5).ComputeMac(data).ValueOrDie(),
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[1]->get_status());
+    EXPECT_EQ(key_5.key_id(), primitives[1]->get_key_id());
     EXPECT_EQ(OutputPrefixType::RAW, primitives[1]->get_output_prefix_type());
   }
 
@@ -221,10 +224,12 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(DummyMac(mac_name_1).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(key_1.key_id(), primitives[0]->get_key_id());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
     EXPECT_EQ(DummyMac(mac_name_6).ComputeMac(data).ValueOrDie(),
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[1]->get_status());
+    EXPECT_EQ(key_1.key_id(), primitives[1]->get_key_id());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[1]->get_output_prefix_type());
   }
 
@@ -235,6 +240,7 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(DummyMac(mac_name_3).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(key_3.key_id(), primitives[0]->get_key_id());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
   }
 
@@ -245,6 +251,7 @@ TEST_F(PrimitiveSetTest, Basic) {
     EXPECT_EQ(DummyMac(mac_name_2).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(key_2.key_id(), primitives[0]->get_key_id());
     EXPECT_EQ(OutputPrefixType::LEGACY,
               primitives[0]->get_output_prefix_type());
   }
@@ -307,7 +314,8 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
     ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
                 IsOk());
 
-    std::string identifier = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
+    std::string identifier =
+        CryptoFormat::get_output_prefix(key_1).ValueOrDie();
     const auto& primitives =
         *(primitive_set.get_primitives(identifier).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
@@ -335,7 +343,8 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
     ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
                 IsOk());
 
-    std::string identifier = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
+    std::string identifier =
+        CryptoFormat::get_output_prefix(key_1).ValueOrDie();
     const auto& primitives =
         *(primitive_set.get_primitives(identifier).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
@@ -364,6 +373,66 @@ TEST_F(PrimitiveSetTest, DisabledKey) {
   auto add_primitive_result =
       primitive_set.AddPrimitive(std::move(mac_1), key_1);
   EXPECT_FALSE(add_primitive_result.ok());
+}
+
+Keyset::Key CreateKey(uint32_t key_id,
+                      google::crypto::tink::OutputPrefixType output_prefix_type,
+                      google::crypto::tink::KeyStatusType key_status) {
+  Keyset::Key key;
+  key.set_output_prefix_type(output_prefix_type);
+  key.set_key_id(key_id);
+  key.set_status(key_status);
+  return key;
+}
+
+TEST_F(PrimitiveSetTest, GetAll) {
+  PrimitiveSet<Mac> pset;
+  EXPECT_THAT(pset.AddPrimitive(absl::make_unique<DummyMac>("MAC1"),
+                                CreateKey(0x01010101, OutputPrefixType::TINK,
+                                          KeyStatusType::ENABLED))
+                  .status(),
+              IsOk());
+
+  EXPECT_THAT(pset.AddPrimitive(absl::make_unique<DummyMac>("MAC2"),
+                                CreateKey(0x02020202, OutputPrefixType::TINK,
+                                          KeyStatusType::ENABLED))
+                  .status(),
+              IsOk());
+  // Add primitive and make it primary.
+  auto entry_or = pset.AddPrimitive(
+      absl::make_unique<DummyMac>("MAC3"),
+      CreateKey(0x02020202, OutputPrefixType::TINK, KeyStatusType::ENABLED));
+  ASSERT_THAT(entry_or.status(), IsOk());
+  EXPECT_THAT(pset.set_primary(entry_or.ValueOrDie()), IsOk());
+
+  EXPECT_THAT(pset.AddPrimitive(absl::make_unique<DummyMac>("MAC4"),
+                                CreateKey(0x02020202, OutputPrefixType::RAW,
+                                          KeyStatusType::ENABLED))
+                  .status(),
+              IsOk());
+
+  EXPECT_THAT(pset.AddPrimitive(absl::make_unique<DummyMac>("MAC5"),
+                                CreateKey(0x01010101, OutputPrefixType::TINK,
+                                          KeyStatusType::ENABLED))
+                  .status(),
+              IsOk());
+
+  std::vector<std::pair<std::string, std::string>> mac_and_id;
+  for (auto* entry : pset.get_all()) {
+    auto mac_or = entry->get_primitive().ComputeMac("");
+    ASSERT_THAT(mac_or.status(), IsOk());
+    mac_and_id.push_back({mac_or.ValueOrDie(), entry->get_identifier()});
+  }
+
+  // In the following id part, the first byte is 1 for Tink.
+  std::vector<std::pair<std::string, std::string>> expected_result = {
+      {"13:0:DummyMac:MAC1", absl::StrCat("\1\1\1\1\1")},
+      {"13:0:DummyMac:MAC2", absl::StrCat("\1\2\2\2\2")},
+      {"13:0:DummyMac:MAC3", absl::StrCat("\1\2\2\2\2")},
+      {"13:0:DummyMac:MAC4", absl::StrCat("")},
+      {"13:0:DummyMac:MAC5", absl::StrCat("\1\1\1\1\1")}};
+
+  EXPECT_THAT(mac_and_id, UnorderedElementsAreArray(expected_result));
 }
 
 }  // namespace

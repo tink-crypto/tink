@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.testing.TestUtil;
 import java.io.File;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;

@@ -1,0 +1,40 @@
+package(
+    default_visibility = ["//tools/build_defs:internal_pkg"],
+)
+
+licenses(["notice"])
+
+cc_library(
+    name = "hkdf_prf_key_manager",
+    hdrs = ["hkdf_prf_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:core/key_type_manager",
+        "//cc/subtle",
+        "//cc/subtle/prf:hkdf_streaming_prf",
+        "//cc/subtle/prf:streaming_prf",
+        "//cc/util:constants",
+        "//cc/util:enums",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:validation",
+        "//proto:common_cc_proto",
+        "//proto:hkdf_prf_cc_proto",
+        "//proto:tink_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "hkdf_prf_key_manager_test",
+    srcs = ["hkdf_prf_key_manager_test.cc"],
+    deps = [
+        ":hkdf_prf_key_manager",
+        "//cc/subtle",
+        "//cc/subtle/prf:hkdf_streaming_prf",
+        "//cc/util:input_stream_util",
+        "//cc/util:test_matchers",
+        "//proto:common_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

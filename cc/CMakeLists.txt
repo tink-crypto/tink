@@ -3,6 +3,7 @@ add_subdirectory(config)
 add_subdirectory(daead)
 add_subdirectory(hybrid)
 add_subdirectory(mac)
+add_subdirectory(prf)
 add_subdirectory(signature)
 add_subdirectory(streamingaead)
 add_subdirectory(subtle)
@@ -539,6 +540,7 @@ tink_cc_library(
   DEPS
     absl::hash
     absl::flat_hash_map
+    tink::core::input_stream
     tink::proto::tink_cc_proto
     tink::util::status
     tink::util::statusor
@@ -634,10 +636,11 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
-    tink::util::test_keyset_handle
+    tink::util::istream_input_stream
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
+    tink::util::test_keyset_handle
     tink::util::test_util
     tink::util::test_matchers
     tink::proto::aes_ctr_hmac_aead_cc_proto
@@ -844,6 +847,8 @@ tink_cc_test(
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_boringssl
+    tink::util::input_stream_util
+    tink::util::istream_input_stream
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

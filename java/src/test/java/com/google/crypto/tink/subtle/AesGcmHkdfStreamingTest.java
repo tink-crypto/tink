@@ -19,9 +19,9 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.StreamingTestUtil;
-import com.google.crypto.tink.StreamingTestUtil.SeekableByteBufferChannel;
-import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.testing.StreamingTestUtil;
+import com.google.crypto.tink.testing.StreamingTestUtil.SeekableByteBufferChannel;
+import com.google.crypto.tink.testing.TestUtil;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import org.junit.Rule;

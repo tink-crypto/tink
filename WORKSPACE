@@ -5,13 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file"
 #-----------------------------------------------------------------------------
 # Basic rules we need to add to bazel.
 #-----------------------------------------------------------------------------
-http_archive(
-    name = "rules_python",
-    strip_prefix = "rules_python-5aa465d5d91f1d9d90cac10624e3d2faf2057bd5/",
-    url = "https://github.com/bazelbuild/rules_python/archive/5aa465d5d91f1d9d90cac10624e3d2faf2057bd5.zip",
-    sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
-)
-
+# Release from 2019-10-09
 http_archive(
     name = "bazel_skylib",
     url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
@@ -34,6 +28,7 @@ http_file(
 #-----------------------------------------------------------------------------
 # wycheproof, for JSON test vectors
 #-----------------------------------------------------------------------------
+# Commit from 2018-07-31
 http_archive(
     name = "wycheproof",
     strip_prefix = "wycheproof-f89f4c53a8845fcefcdb9f14ee9191dbe167e3e3",
@@ -44,6 +39,7 @@ http_archive(
 #-----------------------------------------------------------------------------
 # cc
 #-----------------------------------------------------------------------------
+# LTS release from 2019-08-08
 http_archive(
     name = "com_google_absl",
     strip_prefix = "abseil-cpp-20190808",
@@ -51,6 +47,7 @@ http_archive(
     sha256 = "0b62fc2d00c2b2bc3761a892a17ac3b8af3578bd28535d90b4c914b0a7460d4e",
 )
 
+# Commit from 2018-08-16
 http_archive(
     name = "boringssl",
     strip_prefix = "boringssl-18637c5f37b87e57ebde0c40fe19c1560ec88813",
@@ -59,13 +56,15 @@ http_archive(
 )
 
 # GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
+# Release from 2019-10-03
 http_archive(
     name = "com_google_googletest",
-    strip_prefix = "googletest-eb9225ce361affe561592e0912320b9db84985d0",
-    url = "https://github.com/google/googletest/archive/eb9225ce361affe561592e0912320b9db84985d0.zip",
-    sha256 = "a7db7d1295ce46b93f3d1a90dbbc55a48409c00d19684fcd87823037add88118",
+    strip_prefix = "googletest-1.10.x",
+    url = "https://github.com/google/googletest/archive/v1.10.x.zip",
+    sha256 = "54a139559cc46a68cf79e55d5c22dc9d48e647a66827342520ce0441402430fe",
 )
 
+# Release from 2016-08-25; still the latest release on 2019-10-18
 http_archive(
     name = "rapidjson",
     urls = [
@@ -76,6 +75,7 @@ http_archive(
     build_file = "//:third_party/rapidjson.BUILD.bazel",
 )
 
+# Release from 2018-07-04
 http_archive(
     name = "aws_cpp_sdk",
     # Must be in sync with defines in third_party/aws_sdk_cpp.BUILD.bazel.
@@ -87,6 +87,7 @@ http_archive(
 )
 
 # Needed for Cloud KMS API via gRPC.
+# Commit from 2019-10-11
 http_archive(
     name = "googleapis",
     urls = [
@@ -106,6 +107,7 @@ switched_rules_by_language(
 )
 
 # gRPC.
+# Release from 2019-08-15
 http_archive(
     name = "com_github_grpc_grpc",
     urls = [
@@ -122,6 +124,7 @@ load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
 
+# Release from 2016-05-30
 http_archive(
     name = "curl",
     urls = [
@@ -132,6 +135,7 @@ http_archive(
     build_file = "//:third_party/curl.BUILD.bazel",
 )
 
+# Releaes from 2017-01-15; still most recent release on 2019-10-18
 http_archive(
     name = "zlib",
     urls = [
@@ -149,6 +153,7 @@ http_archive(
 # on @com_google_protobuf//:proto, @com_google_protobuf//:cc_toolchain and
 # @com_google_protobuf//:java_toolchain, respectively.
 # This statement defines the @com_google_protobuf repo.
+# Release from 2019-08-05
 http_archive(
     name = "com_google_protobuf",
     strip_prefix = "protobuf-3.9.1",
@@ -166,6 +171,7 @@ protobuf_deps()
 # java_lite_proto_library rules implicitly depend on
 # @com_google_protobuf_javalite//:javalite_toolchain, which is the JavaLite proto
 # runtime (base classes and common utilities).
+# Commit from 2019-08-23 on the javalite branch.
 http_archive(
     name = "com_google_protobuf_javalite",
     strip_prefix = "protobuf-7b64714af67aa967dcf941df61fe5207975966be",
@@ -178,6 +184,7 @@ http_archive(
 #-----------------------------------------------------------------------------
 
 # Not used by Java Tink, but apparently needed for C++ gRPC library.
+# Commit from 2019-05-02
 http_archive(
     name = "io_grpc_grpc_java",
     strip_prefix = "grpc-java-1.20.0",
@@ -187,24 +194,12 @@ http_archive(
     sha256 = "553d1bdbde3ff4035747c184486bae2f084c75c3c4cdf5ef31a6aa48bdccaf9b",
 )
 
-# android sdk
-android_sdk_repository(
-    name = "androidsdk",
-    # Tink uses features in Android Keystore that are only supported at this
-    # level or newer.
-    # See https://developer.android.com/training/articles/keystore.html.
-    api_level = 23,  # M
-)
-
-RULES_JVM_EXTERNAL_TAG = "2.7"
-
-RULES_JVM_EXTERNAL_SHA = "f04b1466a00a2845106801e0c5cec96841f49ea4e7d1df88dc8e4bf31523df74"
-
+# Release from 2019-08-14
 http_archive(
     name = "rules_jvm_external",
-    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
-    sha256 = RULES_JVM_EXTERNAL_SHA,
-    url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
+    strip_prefix = "rules_jvm_external-2.7",
+    sha256 = "f04b1466a00a2845106801e0c5cec96841f49ea4e7d1df88dc8e4bf31523df74",
+    url = "https://github.com/bazelbuild/rules_jvm_external/archive/2.7.zip",
 )
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
@@ -238,9 +233,30 @@ maven_install(
 )
 
 #-----------------------------------------------------------------------------
+# Android
+#-----------------------------------------------------------------------------
+# android sdk
+android_sdk_repository(
+    name = "androidsdk",
+    # Tink uses features in Android Keystore that are only supported at this
+    # level or newer.
+    # See https://developer.android.com/training/articles/keystore.html.
+    api_level = 23,  # M
+)
+
+# Last release from 2018-08-07.
+http_archive(
+    name = "build_bazel_rules_android",
+    urls = ["https://github.com/bazelbuild/rules_android/archive/v0.1.1.zip"],
+    sha256 = "cd06d15dd8bb59926e4d65f9003bfc20f9da4b2519985c27e190cddc8b7a7806",
+    strip_prefix = "rules_android-0.1.1",
+)
+
+#-----------------------------------------------------------------------------
 # objc
 #-----------------------------------------------------------------------------
 
+# Release from 2019-10-10
 http_archive(
     name = "build_bazel_rules_apple",
     strip_prefix = "rules_apple-0.19.0",
@@ -272,6 +288,7 @@ apple_support_dependencies()
 #-----------------------------------------------------------------------------
 # go
 #-----------------------------------------------------------------------------
+# Release from 2019-10-14
 http_archive(
     name = "io_bazel_rules_go",
     urls = [
@@ -281,6 +298,7 @@ http_archive(
     sha256 = "078f2a9569fa9ed846e60805fb5fb167d6f6c4ece48e6d409bf5fb2154eaf0d8",
 )
 
+# Release from 2019-10-14
 http_archive(
     name = "bazel_gazelle",
     urls = [
@@ -568,6 +586,12 @@ go_repository(
     version = "v0.0.0-20190506145303-2d16b83fe98c",
 )
 
+go_repository(
+    name = "com_github_hashicorp_vault",
+    importpath = "github.com/hashicorp/vault",
+    tag = "v1.2.3",
+)
+
 #-----------------------------------------------------------------------------
 # Javascript
 #-----------------------------------------------------------------------------
@@ -590,10 +614,17 @@ rules_closure_toolchains()
 #-----------------------------------------------------------------------------
 # Python
 #-----------------------------------------------------------------------------
-
 load("//third_party/py:python_configure.bzl", "python_configure")
 
 python_configure(name = "local_config_python")
+
+# Commit from 2019-10-09
+http_archive(
+    name = "rules_python",
+    strip_prefix = "rules_python-5aa465d5d91f1d9d90cac10624e3d2faf2057bd5/",
+    url = "https://github.com/bazelbuild/rules_python/archive/5aa465d5d91f1d9d90cac10624e3d2faf2057bd5.zip",
+    sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
+)
 
 new_local_repository(
     name = "clif",
@@ -604,13 +635,14 @@ new_local_repository(
 #-----------------------------------------------------------------------------
 # Remote Build Execution
 #-----------------------------------------------------------------------------
+# Latest 0.29 package for bazel 0.29.1; updated on 2019-10-31.
 http_archive(
     name = "bazel_toolchains",
-    sha256 = "4598bf5a8b4f5ced82c782899438a7ba695165d47b3bf783ce774e89a8c6e617",
-    strip_prefix = "bazel-toolchains-0.27.0",
+    sha256 = "388da5cc148a43081c30c260ce1167747d8fb0968ee220e4ee1d1b1b8212eaa3",
+    strip_prefix = "bazel-toolchains-0.29.9",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/0.27.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-toolchains/archive/0.27.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/0.29.9.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/0.29.9.tar.gz",
     ],
 )
 

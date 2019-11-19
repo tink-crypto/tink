@@ -56,9 +56,9 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
         int header_size = key_size + /* nonce_prefix_size = */ 7 + 1;
         EXPECT_EQ(header_size, enc->get_header().size());
         EXPECT_EQ(header_size, enc->get_header()[0]);
-        EXPECT_EQ(params.salt, std::string(
-            reinterpret_cast<const char*>(enc->get_header().data() + 1),
-            key_size));
+        EXPECT_EQ(params.salt, std::string(reinterpret_cast<const char*>(
+                                               enc->get_header().data() + 1),
+                                           key_size));
         EXPECT_EQ(ct_segment_size, enc->get_ciphertext_segment_size());
         EXPECT_EQ(ct_segment_size - /* tag_size = */ 16,
                   enc->get_plaintext_segment_size());

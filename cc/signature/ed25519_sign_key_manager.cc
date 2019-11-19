@@ -59,7 +59,8 @@ Ed25519SignKeyManager::PublicKeySignFactory::Create(
     const Ed25519PrivateKey& private_key) const {
   // BoringSSL expects a 64-byte private key which contains the public key as a
   // suffix.
-  std::string sk = private_key.key_value() + private_key.public_key().key_value();
+  std::string sk =
+      private_key.key_value() + private_key.public_key().key_value();
 
   return subtle::Ed25519SignBoringSsl::New(sk);
 }

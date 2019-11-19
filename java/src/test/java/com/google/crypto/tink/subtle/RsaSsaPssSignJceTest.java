@@ -18,8 +18,8 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.crypto.tink.testing.TestUtil;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -37,6 +37,10 @@ public class RsaSsaPssSignJceTest {
 
   @Test
   public void testConstructorExceptions() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out when running under thread sanitizer, so we just skip.
+      return;
+    }
     int keySize = 2048;
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
     keyGen.initialize(keySize);
@@ -83,6 +87,10 @@ public class RsaSsaPssSignJceTest {
 
   @Test
   public void testZeroSaltLength() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out when running under thread sanitizer, so we just skip.
+      return;
+    }
     int keySize = 2048;
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
     keyGen.initialize(keySize);

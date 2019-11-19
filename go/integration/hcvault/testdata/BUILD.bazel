@@ -1,0 +1,12 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])  # keep
+
+filegroup(
+    name = "server_tls_files",
+    testonly = 1,
+    srcs = [
+        "server.crt",
+        "server.key",
+    ],
+)

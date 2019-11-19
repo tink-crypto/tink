@@ -20,9 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingAead;
-import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
-import com.google.crypto.tink.StreamingTestUtil.SeekableByteBufferChannel;
-import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.testing.StreamingTestUtil.ByteBufferChannel;
+import com.google.crypto.tink.testing.StreamingTestUtil.SeekableByteBufferChannel;
+import com.google.crypto.tink.testing.TestUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;

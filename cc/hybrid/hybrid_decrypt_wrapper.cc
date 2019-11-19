@@ -45,15 +45,14 @@ class HybridDecryptSetWrapper : public HybridDecrypt {
 };
 
 util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
-    absl::string_view ciphertext,
-    absl::string_view context_info) const {
+    absl::string_view ciphertext, absl::string_view context_info) const {
   // BoringSSL expects a non-null pointer for context_info,
   // regardless of whether the size is 0.
   context_info = subtle::SubtleUtilBoringSSL::EnsureNonNull(context_info);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id = std::string(ciphertext.substr(0,
-        CryptoFormat::kNonRawPrefixSize));
+    const std::string& key_id =
+        std::string(ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));
     auto primitives_result = hybrid_decrypt_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
       absl::string_view raw_ciphertext =

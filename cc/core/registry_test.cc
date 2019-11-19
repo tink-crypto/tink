@@ -35,6 +35,7 @@
 #include "tink/keyset_manager.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -134,9 +135,7 @@ class TestAeadKeyManager : public KeyManager<Aead> {
     return 0;
   }
 
-  const std::string& get_key_type() const override {
-    return key_type_;
-  }
+  const std::string& get_key_type() const override { return key_type_; }
 
   const KeyFactory& get_key_factory() const override {
     return key_factory_;
@@ -256,16 +255,21 @@ TEST_F(RegistryTest, testConcurrentRegistration) {
   register_a.join();
   register_b.join();
 
-  // Check that the managers were registered.
-  std::thread verify_a(verify_test_managers,
-                       key_type_prefix_a, count_a);
-  std::thread verify_b(verify_test_managers,
-                       key_type_prefix_b, count_b);
+  // Check that the managers were registered. Also, keep registering new
+  // versions while we check.
+  std::thread register_more_a(register_test_managers, key_type_prefix_a,
+                              count_a);
+  std::thread register_more_b(register_test_managers, key_type_prefix_b,
+                              count_b);
+  std::thread verify_a(verify_test_managers, key_type_prefix_a, count_a);
+  std::thread verify_b(verify_test_managers, key_type_prefix_b, count_b);
   verify_a.join();
   verify_b.join();
+  register_more_a.join();
+  register_more_b.join();
 
   // Check that there are no extra managers.
-  std::string key_type = key_type_prefix_a + std::to_string(count_a-1);
+  std::string key_type = key_type_prefix_a + std::to_string(count_a - 1);
   auto manager_result = Registry::get_key_manager<Aead>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_EQ(key_type, manager_result.ValueOrDie()->get_key_type());
@@ -339,14 +343,30 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
   EXPECT_TRUE(manager->DoesSupport(key_type_1));
 }
 
+// Tests that if we register a key manager once more after a call to
+// get_key_manager, the key manager previously obtained with "get_key_manager()"
+// remains valid.
+TEST_F(RegistryTest, GetKeyManagerRemainsValid) {
+  std::string key_type = AesGcmKeyManager().get_key_type();
+  EXPECT_THAT(Registry::RegisterKeyManager(
+      absl::make_unique<TestAeadKeyManager>(key_type), true), IsOk());
+
+  crypto::tink::util::StatusOr<const KeyManager<Aead>*> key_manager =
+      Registry::get_key_manager<Aead>(key_type);
+  ASSERT_THAT(key_manager.status(), IsOk());
+  EXPECT_THAT(Registry::RegisterKeyManager(
+                  absl::make_unique<TestAeadKeyManager>(key_type), true),
+              IsOk());
+  EXPECT_THAT(key_manager.ValueOrDie()->get_key_type(), Eq(key_type));
+}
+
 class TestAeadCatalogue : public Catalogue<Aead> {
  public:
   TestAeadCatalogue() {}
 
-  util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
-      GetKeyManager(const std::string& type_url,
-                    const std::string& primitive_name,
-                    uint32_t min_version) const override {
+  util::StatusOr<std::unique_ptr<KeyManager<Aead>>> GetKeyManager(
+      const std::string& type_url, const std::string& primitive_name,
+      uint32_t min_version) const override {
     return util::Status(util::error::UNIMPLEMENTED,
                         "This is a test catalogue.");
   }
@@ -770,9 +790,25 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
     return result;
   }
 
+  crypto::tink::util::StatusOr<AesGcmKey> DeriveKey(
+      const AesGcmKeyFormat& key_format,
+      InputStream* input_stream) const override {
+    // Note: in an actual key type manager we need to do more work, e.g., test
+    // that the generated key is long enough.
+    crypto::tink::util::StatusOr<std::string> randomness =
+        ReadAtMostFromStream(key_format.key_size(), input_stream);
+    if (!randomness.status().ok()) {
+      return randomness.status();
+    }
+    AesGcmKey key;
+    key.set_key_value(randomness.ValueOrDie());
+    return key;
+  }
+
  private:
   static const int kVersion = 0;
-  const std::string kKeyType = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  const std::string kKeyType =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
 
 TEST_F(RegistryTest, RegisterKeyTypeManager) {
@@ -824,6 +860,24 @@ TEST_F(RegistryTest, KeyTypeManagerNotSupportedPrimitive) {
                        HasSubstr("not among supported primitives")));
 }
 
+// Tests that if we register a key manager once more after a call to
+// get_key_manager, the key manager previously obtained with "get_key_manager()"
+// remains valid.
+TEST_F(RegistryTest, GetKeyManagerRemainsValidForKeyTypeManagers) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+
+  crypto::tink::util::StatusOr<const KeyManager<Aead>*> key_manager =
+      Registry::get_key_manager<Aead>(ExampleKeyTypeManager().get_key_type());
+  ASSERT_THAT(key_manager.status(), IsOk());
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+  EXPECT_THAT(key_manager.ValueOrDie()->get_key_type(),
+              Eq(ExampleKeyTypeManager().get_key_type()));
+}
+
 TEST_F(RegistryTest, KeyTypeManagerNewKey) {
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
@@ -857,6 +911,86 @@ TEST_F(RegistryTest, KeyTypeManagerNewKeyInvalidSize) {
   key_template.set_value(format.SerializeAsString());
 
   EXPECT_THAT(Registry::NewKeyData(key_template).status(), IsOk());
+}
+
+TEST_F(RegistryTest, KeyTypeManagerDeriveKey) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+
+  AesGcmKeyFormat format;
+  format.set_key_size(32);
+  KeyTemplate key_template;
+  key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  key_template.set_value(format.SerializeAsString());
+
+  crypto::tink::util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>(
+          "0123456789012345678901234567890123456789")};
+
+  auto key_data_or =
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, &input_stream);
+  ASSERT_THAT(key_data_or.status(), IsOk());
+  EXPECT_THAT(key_data_or.ValueOrDie().type_url(), Eq(key_template.type_url()));
+  AesGcmKey key;
+  EXPECT_TRUE(key.ParseFromString(key_data_or.ValueOrDie().value()));
+  // 32 byte prefix of above string.
+  EXPECT_THAT(key.key_value(), Eq("01234567890123456789012345678901"));
+}
+
+// The same, but we register the key manager twice. This should catch some of
+// the possible lifetime issues.
+TEST_F(RegistryTest, KeyTypeManagerDeriveKeyRegisterTwice) {
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+
+  AesGcmKeyFormat format;
+  format.set_key_size(32);
+  KeyTemplate key_template;
+  key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  key_template.set_value(format.SerializeAsString());
+
+  crypto::tink::util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>(
+          "0123456789012345678901234567890123456789")};
+
+  auto key_data_or =
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, &input_stream);
+  ASSERT_THAT(key_data_or.status(), IsOk());
+  EXPECT_THAT(key_data_or.ValueOrDie().type_url(), Eq(key_template.type_url()));
+  AesGcmKey key;
+  EXPECT_TRUE(key.ParseFromString(key_data_or.ValueOrDie().value()));
+  // 32 byte prefix of above string.
+  EXPECT_THAT(key.key_value(), Eq("01234567890123456789012345678901"));
+}
+
+// Tests that if we register a KeyManager instead of a KeyTypeManager, DeriveKey
+// fails properly.
+TEST_F(RegistryTest, KeyManagerDeriveKeyFail) {
+  std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  ASSERT_THAT(Registry::RegisterKeyManager(
+      absl::make_unique<TestAeadKeyManager>(key_type),
+      /* new_key_allowed= */ true), IsOk());
+
+  KeyTemplate key_template;
+  key_template.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+
+  EXPECT_THAT(
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, nullptr).status(),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("cannot derive")));
+}
+
+TEST_F(RegistryTest, KeyManagerDeriveNotRegistered) {
+  KeyTemplate key_template;
+  key_template.set_type_url("some_inexistent_keytype");
+
+  EXPECT_THAT(
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, nullptr).status(),
+      StatusIs(util::error::NOT_FOUND, HasSubstr("No manager")));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerTwiceMoreRestrictive) {
@@ -1071,6 +1205,33 @@ TEST_F(RegistryTest, AsymmetricLessRestrictiveGivesError) {
                        HasSubstr("forbidden new key operation")));
 }
 
+// Tests that if we register asymmetric key managers once more after a call to
+// get_key_manager, the key manager previously obtained with "get_key_manager()"
+// remains valid.
+
+TEST_F(RegistryTest, RegisterAsymmetricKeyManagersGetKeyManagerStaysValid) {
+  ASSERT_THAT(Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), true), IsOk());
+
+  crypto::tink::util::StatusOr<const KeyManager<PrivatePrimitiveA>*>
+      private_key_manager = Registry::get_key_manager<PrivatePrimitiveA>(
+          TestPrivateKeyTypeManager().get_key_type());
+  crypto::tink::util::StatusOr<const KeyManager<PublicPrimitiveA>*>
+      public_key_manager = Registry::get_key_manager<PublicPrimitiveA>(
+          TestPublicKeyTypeManager().get_key_type());
+
+  ASSERT_THAT(Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<TestPrivateKeyTypeManager>(),
+      absl::make_unique<TestPublicKeyTypeManager>(), true), IsOk());
+
+  EXPECT_THAT(private_key_manager.ValueOrDie()->get_key_type(),
+              Eq(TestPrivateKeyTypeManager().get_key_type()));
+  EXPECT_THAT(public_key_manager.ValueOrDie()->get_key_type(),
+              Eq(TestPublicKeyTypeManager().get_key_type()));
+}
+
+
 TEST_F(RegistryTest, AsymmetricPrivateRegisterAlone) {
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
                   absl::make_unique<TestPrivateKeyTypeManager>(), true)
@@ -1078,10 +1239,13 @@ TEST_F(RegistryTest, AsymmetricPrivateRegisterAlone) {
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
                   absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
-  ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
-                  .ok());
+  // Registering the same as asymmetric key managers must fail, because doing so
+  // would mean we invalidate key managers previously obtained with
+  // get_key_manager().
+  ASSERT_FALSE(Registry::RegisterAsymmetricKeyManagers(
+                   absl::make_unique<TestPrivateKeyTypeManager>(),
+                   absl::make_unique<TestPublicKeyTypeManager>(), true)
+                   .ok());
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
                   absl::make_unique<TestPrivateKeyTypeManager>(), true)
                   .ok());
@@ -1264,7 +1428,159 @@ TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithNewKeyType) {
           absl::make_unique<TestPublicKeyTypeManagerWithDifferentKeyType>(),
           true),
       StatusIs(util::error::INVALID_ARGUMENT,
-               HasSubstr("cannot be re-registered")));
+               HasSubstr("impossible to register")));
+}
+
+// The DelegatingKeyTypeManager calls the registry
+class DelegatingKeyTypeManager
+    : public PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat,
+                                   EcdsaPublicKey, List<>> {
+ public:
+  DelegatingKeyTypeManager() : PrivateKeyTypeManager() {}
+
+  void set_registry(RegistryImpl* registry) { registry_ = registry; }
+
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
+  }
+
+  uint32_t get_version() const override { return kVersion; }
+
+  const std::string& get_key_type() const override { return kKeyType; }
+
+  crypto::tink::util::Status ValidateKey(
+      const EcdsaPrivateKey& key) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const EcdsaKeyFormat& key_format) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::StatusOr<EcdsaPrivateKey> CreateKey(
+      const EcdsaKeyFormat& key_format) const override {
+    AesGcmKeyFormat format;
+    KeyTemplate key_template;
+    key_template.set_type_url(
+        "type.googleapis.com/google.crypto.tink.AesGcmKey");
+    key_template.set_value(format.SerializeAsString());
+    auto result = registry_->NewKeyData(key_template);
+    if (!result.ok()) return result.status();
+    // Return a string we can check for.
+    return util::Status(util::error::DEADLINE_EXCEEDED, "CreateKey worked");
+  }
+
+  crypto::tink::util::StatusOr<EcdsaPrivateKey> DeriveKey(
+      const EcdsaKeyFormat& key_format,
+      InputStream* input_stream) const override {
+    AesGcmKeyFormat format;
+    KeyTemplate key_template;
+    key_template.set_type_url(
+        "type.googleapis.com/google.crypto.tink.AesGcmKey");
+    key_template.set_value(format.SerializeAsString());
+
+    auto result = registry_->DeriveKey(key_template, input_stream);
+    if (!result.ok()) return result.status();
+    // Return a string we can check for.
+    return util::Status(util::error::DEADLINE_EXCEEDED, "DeriveKey worked");
+  }
+
+  crypto::tink::util::StatusOr<EcdsaPublicKey> GetPublicKey(
+      const EcdsaPrivateKey& private_key) const override {
+    AesGcmKeyFormat format;
+    KeyTemplate key_template;
+    key_template.set_type_url(
+        "type.googleapis.com/google.crypto.tink.AesGcmKey");
+    key_template.set_value(format.SerializeAsString());
+    auto result = registry_->NewKeyData(key_template);
+    if (!result.ok()) return result.status();
+    // Return a string we can check for.
+    return util::Status(util::error::DEADLINE_EXCEEDED, "GetPublicKey worked");
+  }
+
+ private:
+  RegistryImpl* registry_;
+
+  static const int kVersion = 0;
+  const std::string kKeyType =
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+};
+
+// Check that we can call the registry again from within NewKeyData
+TEST(RegistryImplTest, CanDelegateCreateKey) {
+  RegistryImpl registry_impl;
+  auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
+  delegating_key_manager->set_registry(&registry_impl);
+  auto status =
+      registry_impl
+          .RegisterKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat, List<>>(
+              std::move(delegating_key_manager), true);
+  EXPECT_THAT(status, IsOk());
+  status = registry_impl.RegisterKeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                   List<Aead, AeadVariant>>(
+                  absl::make_unique<ExampleKeyTypeManager>(), true);
+  EXPECT_THAT(status, IsOk());
+
+  EcdsaKeyFormat format;
+  KeyTemplate key_template;
+  key_template.set_type_url(
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
+  key_template.set_value(format.SerializeAsString());
+  EXPECT_THAT(registry_impl.NewKeyData(key_template).status(),
+              StatusIs(util::error::DEADLINE_EXCEEDED,
+                       HasSubstr("CreateKey worked")));
+}
+
+// Check that we can call the registry again from within NewKeyData
+TEST(RegistryImplTest, CanDelegateDeriveKey) {
+  RegistryImpl registry_impl;
+  auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
+  delegating_key_manager->set_registry(&registry_impl);
+  auto status =
+      registry_impl
+          .RegisterKeyTypeManager<EcdsaPrivateKey, EcdsaKeyFormat, List<>>(
+              std::move(delegating_key_manager), true);
+  EXPECT_THAT(status, IsOk());
+  status = registry_impl.RegisterKeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                   List<Aead, AeadVariant>>(
+                  absl::make_unique<ExampleKeyTypeManager>(), true);
+  EXPECT_THAT(status, IsOk());
+
+  EcdsaKeyFormat format;
+  KeyTemplate key_template;
+  key_template.set_type_url(
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
+  key_template.set_value(format.SerializeAsString());
+  EXPECT_THAT(
+      registry_impl.DeriveKey(key_template, nullptr).status(),
+      StatusIs(util::error::DEADLINE_EXCEEDED, HasSubstr("DeriveKey worked")));
+}
+
+TEST(RegistryImplTest, CanDelegateGetPublicKey) {
+  RegistryImpl registry_impl;
+  auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
+  delegating_key_manager->set_registry(&registry_impl);
+  auto status = registry_impl.RegisterAsymmetricKeyManagers(
+      delegating_key_manager.release(),
+      absl::make_unique<TestPublicKeyTypeManager>().release(), true);
+  EXPECT_THAT(status, IsOk());
+  status = registry_impl.RegisterKeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                   List<Aead, AeadVariant>>(
+                  absl::make_unique<ExampleKeyTypeManager>(), true);
+  EXPECT_THAT(status, IsOk());
+
+  EcdsaPrivateKey private_key;
+  private_key.mutable_public_key()->mutable_params()->set_encoding(
+      EcdsaSignatureEncoding::DER);
+
+  EXPECT_THAT(registry_impl
+                  .GetPublicKeyData(DelegatingKeyTypeManager().get_key_type(),
+                                    private_key.SerializeAsString())
+                  .status(),
+              StatusIs(util::error::DEADLINE_EXCEEDED,
+                       HasSubstr("GetPublicKey worked")));
 }
 
 }  // namespace

@@ -21,10 +21,6 @@ set -e
 # Display commands to stderr.
 set -x
 
-# TODO(b/131821833): Re-enable the tests once they work with the newest bazel
-# or we can run them with an older bazel version on RBE.
-exit 0
-
 # Change to repo root
 cd git*/tink
 
@@ -33,7 +29,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   # TODO(b/73748835): Workaround on Kokoro.
   rm -f ~/.bazelrc
 
-  use_bazel.sh latest || exit 1
+  use_bazel.sh $(cat .bazelversion)
 fi
 
 echo "Using bazel binary: $(which bazel)"
@@ -71,8 +67,6 @@ time bazel \
   build "${RBE_ARGS[@]}" \
   --config=remote \
   --build_tag_filters=-no_rbe \
-  --incompatible_disable_deprecated_attr_params=false \
-  --incompatible_depset_is_not_iterable=false \
   -- \
   //... \
   -//objc/... \
@@ -88,8 +82,6 @@ time bazel \
   --test_output=errors \
   --test_tag_filters=-no_rbe \
   --jvmopt=-Drbe=1 \
-  --incompatible_disable_deprecated_attr_params=false \
-  --incompatible_depset_is_not_iterable=false \
   -- \
   //... \
   -//objc/... \

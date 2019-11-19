@@ -104,11 +104,11 @@ tink_cc_library(
     tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::input_stream_util
     tink::util::status
     tink::util::statusor
     tink::util::validation
     tink::proto::aes_gcm_cc_proto
-    tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
     absl::base
 )
@@ -326,14 +326,12 @@ tink_cc_test(
   DEPS
     tink::aead::aes_gcm_key_manager
     tink::core::aead
+    tink::subtle::aead_test_util
+    tink::util::istream_input_stream
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::subtle::aead_test_util
-    tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
     gmock
 )
 

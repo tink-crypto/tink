@@ -50,12 +50,8 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
 
 // static
 util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
-    HashType hash,
-    absl::string_view kem_bytes,
-    absl::string_view shared_secret,
-    absl::string_view salt,
-    absl::string_view info,
-    size_t out_len) {
+    HashType hash, absl::string_view kem_bytes, absl::string_view shared_secret,
+    absl::string_view salt, absl::string_view info, size_t out_len) {
   std::string ikm(kem_bytes);
   std::string shared_secret_string(shared_secret);
   ikm.append(shared_secret_string);

@@ -23,9 +23,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TestUtil.BytesMutation;
-import com.google.crypto.tink.WycheproofTestUtil;
+import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.testing.TestUtil.BytesMutation;
+import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
@@ -127,7 +127,7 @@ public class ChaCha20Poly1305Test {
             String.format(
                 "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
                     + " description = %s",
-                Hex.encode(mutation.value), aad, mutation.description));
+                Hex.encode(mutation.value), Arrays.toString(aad), mutation.description));
       } catch (GeneralSecurityException ex) {
         // This is expected.
         // This could be a AeadBadTagException when the tag verification
