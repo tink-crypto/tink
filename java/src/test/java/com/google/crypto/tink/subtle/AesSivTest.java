@@ -110,11 +110,6 @@ public class AesSivTest {
         byte[] rebuiltPlaintext = dead.decryptDeterministically(ciphertext, aad);
         assertEquals(AesUtil.BLOCK_SIZE, ciphertext.length);
         assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
-
-        byte[] nullAadCiphertext = dead.encryptDeterministically(plaintext, null);
-        byte[] nullAadDecryptedText = dead.decryptDeterministically(nullAadCiphertext, null);
-        assertEquals(AesUtil.BLOCK_SIZE, nullAadCiphertext.length);
-        assertEquals(Hex.encode(plaintext), Hex.encode(nullAadDecryptedText));
       }
     }
   }
@@ -143,6 +138,56 @@ public class AesSivTest {
         byte[] aad = new byte[0];
         byte[] rebuiltPlaintext =
             dead.decryptDeterministically(dead.encryptDeterministically(plaintext, aad), aad);
+        assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
+      }
+    }
+  }
+
+  @Test
+  public void testEncryptDecryptWithNullAssociatedData() throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
+      for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
+        byte[] plaintext = Random.randBytes(Random.randInt(1024) + 1);
+        byte[] rebuiltPlaintext =
+            dead.decryptDeterministically(dead.encryptDeterministically(plaintext, null), null);
+        assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
+      }
+    }
+  }
+
+  @Test
+  public void testEncryptDecryptWithNullAndEmptyAssociatedDataEquivalent()
+      throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
+      for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
+        byte[] plaintext = Random.randBytes(Random.randInt(1024) + 1);
+        byte[] emptyAad = new byte[0];
+        byte[] emptyAadCiphertext = dead.encryptDeterministically(plaintext, emptyAad);
+        byte[] emptyAadRebuiltPlaintext =
+                dead.decryptDeterministically(emptyAadCiphertext, emptyAad);
+
+        byte[] nullAadCipherText = dead.encryptDeterministically(plaintext, null);
+        byte[] nullAadRebuiltPlaintext =
+                dead.decryptDeterministically(nullAadCipherText, null);
+        
+        assertEquals(Hex.encode(plaintext), Hex.encode(emptyAadRebuiltPlaintext));
+        assertEquals(Hex.encode(plaintext), Hex.encode(nullAadRebuiltPlaintext));
+        assertEquals(Hex.encode(emptyAadCiphertext), Hex.encode(nullAadCipherText));
+      }
+    }
+  }
+
+  @Test
+  public void testEncryptDecryptWithEmptyPlaintextAndNullAssociatedData()
+      throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
+      for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
+        byte[] plaintext = new byte[0];
+        byte[] rebuiltPlaintext =
+                dead.decryptDeterministically(dead.encryptDeterministically(plaintext, null), null);
         assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
       }
     }
