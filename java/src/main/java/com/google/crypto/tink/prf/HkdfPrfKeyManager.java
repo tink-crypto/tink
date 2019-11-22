@@ -138,4 +138,8 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new HkdfPrfKeyManager(), newKeyAllowed);
   }
+
+  public static String staticKeyType() {
+    return new HkdfPrfKeyManager().getKeyType();
+  }
 }
