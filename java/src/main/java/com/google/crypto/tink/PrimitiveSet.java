@@ -64,16 +64,20 @@ public final class PrimitiveSet<P> {
     private final KeyStatusType status;
     // The output prefix type of the key represented by the primitive.
     private final OutputPrefixType outputPrefixType;
+    // The id of the key.
+    private final int keyId;
 
-    public Entry(
+    Entry(
         P primitive,
         final byte[] identifier,
         KeyStatusType status,
-        OutputPrefixType outputPrefixType) {
+        OutputPrefixType outputPrefixType,
+        int keyId) {
       this.primitive = primitive;
       this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
       this.outputPrefixType = outputPrefixType;
+      this.keyId = keyId;
     }
 
     public P getPrimitive() {
@@ -94,6 +98,10 @@ public final class PrimitiveSet<P> {
       } else {
         return Arrays.copyOf(identifier, identifier.length);
       }
+    }
+
+    public int getKeyId() {
+      return keyId;
     }
   }
 
@@ -173,7 +181,8 @@ public final class PrimitiveSet<P> {
             primitive,
             CryptoFormat.getOutputPrefix(key),
             key.getStatus(),
-            key.getOutputPrefixType());
+            key.getOutputPrefixType(),
+            key.getKeyId());
     List<Entry<P>> list = new ArrayList<Entry<P>>();
     list.add(entry);
     // Cannot use [] as keys in hash map, convert to string.

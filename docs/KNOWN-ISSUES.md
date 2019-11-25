@@ -15,7 +15,7 @@ tickets or emailing the maintainers at `tink-users@googlegroups.com`.
     some issues in old providers that we cannot fix. We recommend use Tink with
     the latest version of Conscrypt, Oracle JDK, OpenJDK or Bouncy Castle. If
     you cannot use the latest version, you might want to avoid using ECDSA
-    (alternative: ED21559) or AES-GCM (alternatives: AES-EAX or
+    (alternative: ED25519) or AES-GCM (alternatives: AES-EAX or
     AES-CTR-HMAC-AEAD).
 
 ## Android

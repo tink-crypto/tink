@@ -49,6 +49,8 @@ CLEARTEXT_KEYSET_HANDLE_SRCS = [
     "CleartextKeysetHandle.java",
 ]
 
+PRIVILEGED_REGISTRY = ["PrivilegedRegistry.java"]
+
 filegroup(
     name = "cleartext_keyset_handle_srcs",
     srcs = CLEARTEXT_KEYSET_HANDLE_SRCS,
@@ -69,7 +71,7 @@ java_library(
     name = "core",
     srcs = glob(
         ["*.java"],
-        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + PRIMITIVES_SRCS,
+        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + PRIMITIVES_SRCS + PRIVILEGED_REGISTRY,
     ) + [":version_java"],
     visibility = ["//visibility:public"],
     deps = full_protos + [
@@ -96,7 +98,7 @@ java_library(
     name = "core-android",
     srcs = glob(
         ["*.java"],
-        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + PRIMITIVES_SRCS + [
+        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + PRIMITIVES_SRCS + PRIVILEGED_REGISTRY + [
             # TextFormat doesn't work with lite protos
             "TextFormatKeysetReaders.java",
             "TextFormatKeysetWriters.java",
@@ -145,5 +147,25 @@ java_library(
     deps = lite_protos + [
         ":android",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
+    ],
+)
+
+java_library(
+    name = "privileged_registry",
+    srcs = ["PrivilegedRegistry.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":core",
+        "//proto:tink_java_proto",
+    ],
+)
+
+java_library(
+    name = "privileged_registry-android",
+    srcs = ["PrivilegedRegistry.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":core-android",
+        "//proto:tink_java_proto_lite",
     ],
 )

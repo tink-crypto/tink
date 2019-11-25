@@ -121,7 +121,7 @@ func main() {
         }
 
         if m.VerifyMAC(mac, []byte("this data needs to be MACed")); err != nil {
-                log.fatal("MAC verification failed")
+                log.Fatal("MAC verification failed")
         }
 
         fmt.Println("MAC verification succeeded.")

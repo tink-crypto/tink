@@ -127,7 +127,7 @@ public class ChaCha20Poly1305Test {
             String.format(
                 "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
                     + " description = %s",
-                Hex.encode(mutation.value), aad, mutation.description));
+                Hex.encode(mutation.value), Arrays.toString(aad), mutation.description));
       } catch (GeneralSecurityException ex) {
         // This is expected.
         // This could be a AeadBadTagException when the tag verification
