@@ -108,8 +108,11 @@ class HkdfPrfKeyManager
     return crypto::tink::util::Status::OK;
   }
 
-  // Tink specific minimum key size.
-  const int kMinKeySizeBytes = 16;
+  // We use a somewhat larger minimum key size than usual, because PRFs might be
+  // used by many users, in which case the security can degrade by a factor
+  // depending on the number of users. (Discussed for example in
+  // https://eprint.iacr.org/2012/159)
+  const int kMinKeySizeBytes = 32;
   const std::string key_type_ = absl::StrCat(
       kTypeGoogleapisCom, google::crypto::tink::HkdfPrfKey().GetTypeName());
 };

@@ -996,6 +996,24 @@ public class RegistryTest {
     }
   }
 
+  @Test
+  public void testDeriveKey_inexistantKeyMananger_throws() throws Exception {
+    Registry.reset();
+    KeyTemplate template =
+        KeyTemplate.newBuilder()
+            .setValue(AesGcmKeyFormat.getDefaultInstance().toByteString())
+            .setTypeUrl(new TestKeyTypeManager().getKeyType())
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+    ByteArrayInputStream emptyInput = new ByteArrayInputStream(new byte[0]);
+    try {
+      Registry.deriveKey(template, emptyInput);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "No keymanager registered");
+    }
+  }
+
   private static class PublicPrimitiveA {}
 
   private static class PublicPrimitiveB {}

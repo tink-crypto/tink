@@ -122,7 +122,9 @@ public class AesGcmJceTest {
             String.format(
                 "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
                     + " description = %s",
-                ciphertext, mutation.value, mutation.description));
+                Arrays.toString(ciphertext),
+                Arrays.toString(mutation.value),
+                mutation.description));
       } catch (GeneralSecurityException ex) {
         // This is expected.
         // This could be a AeadBadTagException when the tag verification

@@ -2,23 +2,29 @@
 
 [Tink](https://github.com/google/tink) performs cryptographic tasks via
 so-called _primitives_, which provide an abstract representation of the provided
-functionality.  Currently Tink supports the following cryptographic operations
-via the corresponding primitives:
+functionality. Tink primitives encompass the following cryptographic operations
+and are supported via the corresponding interfaces:
 
--   authenticated encryption with associated data (primitive: AEAD)
--   *streaming* authenticated encryption with associated data (primitive:
-    StreamingAead)
--   *deterministic* authenticated encryption with associated data (primitive:
-    DeterministicAead)
--   message authentication codes (primitive: MAC),
--   digital signatures (primitives: PublicKeySign and PublicKeyVerify)
--   hybrid encryption (primitives: HybridEncrypt and HybridDecrypt).
+**Primitive**                                        | **Interfaces**
+---------------------------------------------------- | ------------------------------
+Authenticated Encryption with Associated Data (AEAD) | AEAD
+*Streaming* AEAD                                     | StreamingAEAD
+*Deterministic* AEAD                                 | DeterministicAEAD
+Message Authentication Code (MAC)                    | MAC
+Hybrid encryption                                    | HybridEncrypt, HybridDecrypt
+Digital signatures                                   | PublicKeySign, PublicKeyVerify
 
-The tables in the section below summarise the current implementations of
+The interface names above correspond with the Java implementation. Other
+language implementations may have modified interface names due to differing
+naming conventions.
+
+The tables in the section below summarize the current implementations of
 primitives available in the corresponding languages, and the subsequent sections
 describe the main properties of Tink primitives.
 
 ## Supported primitives and their implementations
+
+### Primitives supported by language
 
 **Primitive**      | **Java** | **C++** | **ObjC** | **Go**
 ------------------ | -------- | ------- | -------- | ------
@@ -26,54 +32,58 @@ AEAD               | yes      | yes     | yes      | yes
 Streaming AEAD     | yes      | yes     | no       | no
 Deterministic AEAD | yes      | yes     | yes      | yes
 MAC                | yes      | yes     | yes      | yes
-Digital Signatures | yes      | yes     | yes      | yes
-Hybrid Encryption  | yes      | yes     | yes      | yes
+Digital signatures | yes      | yes     | yes      | yes
+Hybrid encryption  | yes      | yes     | yes      | yes
 
-In development: JavaScript and Python.
+JavaScript and Python are currently under development.
 
-### Java
+### Primitive implementations supported by languege
+
+#### Java
 
 Primitive          | Java Implementations
 ------------------ | ---------------------------------------------------------------------------------
 AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305
 Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
 Deterministic AEAD | AES-SIV
-MAC                | HMAC-SHA2
+MAC                | HMAC-SHA2, AES-CMAC
 Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
 Hybrid Encryption  | ECIES with AEAD and HKDF
 
-### C++
+#### C++
 
 Primitive          | C++ Implementations
------------------- | ----------------------------------------------------------------
-AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305
+------------------ | -----------------------------------------------------------------------------
+AEAD               | AES-GCM, AES-GCM-SIV, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305
 Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2, AES-CMAC
 Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
 Hybrid Encryption  | ECIES with AEAD and HKDF
 
-### Objective-C
+#### Objective-C
 
 Primitive          | Objective-C Implementations
------------------- | -----------------------------------------------------------
+------------------ | ---------------------------------------------------------------
 AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, XCHACHA20-POLY1305
 Deterministic AEAD | AES-SIV
-MAC                | HMAC-SHA2
+MAC                | HMAC-SHA2, AES-CMAC
 Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
 Hybrid Encryption  | ECIES with AEAD and HKDF
 
-### Golang
+#### Go
 
-Primitive          | Golang Implementations
------------------- | ----------------------------------------------------------
-AEAD               | AES-GCM, AES-CTR-HMAC, CHACHA20-PLOY1305, XCHACHA-POLY1305
+Primitive          | Go Implementations
+------------------ | ------------------------------------------------------------------------
+AEAD               | AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-PLOY1305, XCHACHA-POLY1305
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2
 Digital Signatures | ECDSA over NIST curves, Ed25519
 Hybrid Encryption  | ECIES with AEAD and HKDF
 
-## General properties of all primitives:
+---
+
+## General properties of all primitives
 
 - stateless (hence thread-safe)
 - copy-safe (for the parameters)

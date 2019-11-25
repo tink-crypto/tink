@@ -557,17 +557,7 @@ public class TestUtil {
    * google.
    */
   public static boolean isTsan() {
-    // Keep synchronized with google3/third_party/tink/copybara/java.bara.sky
-    try {
-      return (Boolean)
-          Class.forName("com.google.devtools.java.sanitizers.Sanitizers")
-              .getMethod("runningWithTsan")
-              .invoke(null);
-    } catch (Exception e) {
-      // if anything goes wrong, we're not really sure and return false (which usually will imply
-      // that the test runs, so we are safe).
-      return false;
-    }
+    return false;
   }
 
   /** Returns whether we should skip a test with some AES key size. */

@@ -49,10 +49,10 @@ TEST(HkdfPrfKeyManagerTest, ValidateEmptyKey) {
               StatusIs(util::error::INVALID_ARGUMENT));
 }
 
-TEST(HkdfPrfKeyManagerTest, ValidateValid16ByteKey) {
+TEST(HkdfPrfKeyManagerTest, ValidateValid32ByteKey) {
   HkdfPrfKey key;
   key.set_version(0);
-  key.set_key_value("0123456789abcdef");
+  key.set_key_value("01234567890123456789012345678901");
   key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key), IsOk());
 }
@@ -60,15 +60,15 @@ TEST(HkdfPrfKeyManagerTest, ValidateValid16ByteKey) {
 TEST(HkdfPrfKeyManagerTest, ValidateValidSha512Key) {
   HkdfPrfKey key;
   key.set_version(0);
-  key.set_key_value("0123456789abcdef");
+  key.set_key_value("01234567890123456789012345678901");
   key.mutable_params()->set_hash(::google::crypto::tink::SHA512);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key), IsOk());
 }
 
-TEST(HkdfPrfKeyManagerTest, ValidateValid17ByteKey) {
+TEST(HkdfPrfKeyManagerTest, ValidateValid33ByteKey) {
   HkdfPrfKey key;
   key.set_version(0);
-  key.set_key_value("0123456789abcdefg");
+  key.set_key_value("012345678901234567890123456789012");
   key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key), IsOk());
 }
@@ -76,16 +76,16 @@ TEST(HkdfPrfKeyManagerTest, ValidateValid17ByteKey) {
 TEST(HkdfPrfKeyManagerTest, ValidateValidKeyWithSalt) {
   HkdfPrfKey key;
   key.set_version(0);
-  key.set_key_value("0123456789abcdefg");
+  key.set_key_value("01234567890123456789012345678901");
   key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   key.mutable_params()->set_salt("12345");
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key), IsOk());
 }
 
-TEST(HkdfPrfKeyManagerTest, InvalidKeySizes15Bytes) {
+TEST(HkdfPrfKeyManagerTest, InvalidKeySizes31Bytes) {
   HkdfPrfKey key;
   key.set_version(0);
-  key.set_key_value("0123456789abcde");
+  key.set_key_value("0123456789012345678901234567890");
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
               StatusIs(util::error::INVALID_ARGUMENT));
 }
@@ -93,7 +93,7 @@ TEST(HkdfPrfKeyManagerTest, InvalidKeySizes15Bytes) {
 TEST(HkdfPrfKeyManagerTest, InvalidKeySha1) {
   HkdfPrfKey key;
   key.set_version(0);
-  key.set_key_value("0123456789abcdef");
+  key.set_key_value("01234567890123456789012345678901");
   key.mutable_params()->set_hash(::google::crypto::tink::SHA1);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
               StatusIs(util::error::INVALID_ARGUMENT));
@@ -102,7 +102,7 @@ TEST(HkdfPrfKeyManagerTest, InvalidKeySha1) {
 TEST(HkdfPrfKeyManagerTest, InvalidKeyVersion) {
   HkdfPrfKey key;
   key.set_version(1);
-  key.set_key_value("0123456789abcdef");
+  key.set_key_value("01234567890123456789012345678901");
   key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
               StatusIs(util::error::INVALID_ARGUMENT));
@@ -113,30 +113,30 @@ TEST(HkdfPrfKeyManagerTest, ValidateEmptyKeyFormat) {
               StatusIs(util::error::INVALID_ARGUMENT));
 }
 
-TEST(HkdfPrfKeyManagerTest, ValidateValid16ByteKeyFormat) {
+TEST(HkdfPrfKeyManagerTest, ValidateValid32ByteKeyFormat) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
 }
 
 TEST(HkdfPrfKeyManagerTest, ValidateValidSha512KeyFormat) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA512);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
 }
 
-TEST(HkdfPrfKeyManagerTest, ValidateValid17ByteKeyFormat) {
+TEST(HkdfPrfKeyManagerTest, ValidateValid33ByteKeyFormat) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(33);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
 }
 
 TEST(HkdfPrfKeyManagerTest, ValidateValidKeyFormatWithSalt) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   key_format.mutable_params()->set_salt("abcdef");
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
@@ -144,19 +144,27 @@ TEST(HkdfPrfKeyManagerTest, ValidateValidKeyFormatWithSalt) {
 
 TEST(HkdfPrfKeyManagerTest, InvalidKeyFormatSha1) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA1);
+  EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format),
+              StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(HkdfPrfKeyManagerTest, ValidateInvalid31ByteKeyFormat) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(31);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format),
               StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(HkdfPrfKeyManagerTest, CreateKey) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(16));
+  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(32));
   EXPECT_THAT(key_or.ValueOrDie().params().hash(),
               Eq(::google::crypto::tink::SHA256));
   EXPECT_THAT(key_or.ValueOrDie().params().salt(), Eq(""));
@@ -174,7 +182,7 @@ TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetSize) {
 
 TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetHash) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA512);
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
@@ -184,7 +192,7 @@ TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetHash) {
 
 TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetSalt) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA512);
   key_format.mutable_params()->set_salt("saltstring");
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
@@ -194,7 +202,7 @@ TEST(HkdfPrfKeyManagerTest, CreateKeyDifferetSalt) {
 
 TEST(HkdfPrfKeyManagerTest, CreatePrf) {
   HkdfPrfKeyFormat key_format;
-  key_format.set_key_size(16);
+  key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   key_format.mutable_params()->set_salt("salt string");
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);

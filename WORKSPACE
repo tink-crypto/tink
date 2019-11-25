@@ -292,20 +292,20 @@ apple_support_dependencies()
 http_archive(
     name = "io_bazel_rules_go",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.20.0/rules_go-v0.20.0.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.20.0/rules_go-v0.20.0.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.20.2/rules_go-v0.20.2.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.20.2/rules_go-v0.20.2.tar.gz",
     ],
-    sha256 = "078f2a9569fa9ed846e60805fb5fb167d6f6c4ece48e6d409bf5fb2154eaf0d8",
+    sha256 = "b9aa86ec08a292b97ec4591cf578e020b35f98e12173bbd4a921f84f583aebd9",
 )
 
 # Release from 2019-10-14
 http_archive(
     name = "bazel_gazelle",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.0/bazel-gazelle-v0.19.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.0/bazel-gazelle-v0.19.0.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
     ],
-    sha256 = "41bff2a0b32b02f20c227d234aa25ef3783998e5453f7eade929704dcff7cd4b",
+    sha256 = "86c6d481b3f7aedc1d60c1c211c6f76da282ae197c3b3160f54bd3a8f847896f",
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
@@ -337,8 +337,8 @@ go_repository(
 go_repository(
     name = "com_github_aws_aws_sdk_go",
     importpath = "github.com/aws/aws-sdk-go",
-    sum = "h1:k7Fy6T/uNuLX6zuayU/TJoP7yMgGcJSkZpF7QVjwYpA=",
-    version = "v1.25.16",
+    sum = "h1:1xxya3nsUaFlEZuoE5PWsIEd47RoDV/kkOGt0qEuwNw=",
+    version = "v1.25.39",
 )
 
 go_repository(
@@ -491,8 +491,8 @@ go_repository(
 go_repository(
     name = "org_golang_google_api",
     importpath = "google.golang.org/api",
-    sum = "h1:n/qM3q0/rV2F0pox7o0CvNhlPvZAo7pLbef122cbLJ0=",
-    version = "v0.11.0",
+    sum = "h1:uMf5uLi4eQMRrMKhCplNik4U4H8Z6C1br3zOtAa/aDE=",
+    version = "v0.14.0",
 )
 
 go_repository(
@@ -519,8 +519,8 @@ go_repository(
 go_repository(
     name = "org_golang_x_crypto",
     importpath = "golang.org/x/crypto",
-    sum = "h1:ObdrDkeb4kJdCP557AjRjq69pTHfNouLtWZG7j9rPN8=",
-    version = "v0.0.0-20191011191535-87dc89f01550",
+    sum = "h1:9bFeDpN3gTqNanMVqNcoR/pJQuP5uroC3t1D7eXozTE=",
+    version = "v0.0.0-20191119213627-4f8c1d86b1ba",
 )
 
 go_repository(
@@ -606,9 +606,14 @@ http_archive(
     ],
 )
 
-load("@io_bazel_rules_closure//closure:repositories.bzl",
-     "rules_closure_dependencies", "rules_closure_toolchains")
+load(
+    "@io_bazel_rules_closure//closure:repositories.bzl",
+    "rules_closure_dependencies",
+    "rules_closure_toolchains",
+)
+
 rules_closure_dependencies()
+
 rules_closure_toolchains()
 
 #-----------------------------------------------------------------------------
@@ -652,3 +657,4 @@ load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 # Use this as is if you are using the rbe_ubuntu16_04 container,
 # otherwise refer to RBE docs.
 rbe_autoconfig(name = "rbe_default")
+

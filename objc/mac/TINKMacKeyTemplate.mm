@@ -48,6 +48,10 @@
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
           &crypto::tink::MacKeyTemplates::HmacSha512());
       break;
+    case TINKAesCmac:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::MacKeyTemplates::AesCmac());
+      break;
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(
