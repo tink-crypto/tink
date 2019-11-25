@@ -241,6 +241,7 @@ java_library(
         ":gcpkms",
         ":testonly",
         "//java/src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
+        "//java/src/main/java/com/google/crypto/tink/prf:prf_key_templates",
         "//java/src/main/java/com/google/crypto/tink/testing:streaming_test_util",
         "//java/src/main/java/com/google/crypto/tink/testing:test_util",
         "//java/src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
