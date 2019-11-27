@@ -25,6 +25,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/integration/awskms",
         "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
         "//java/src/main/java/com/google/crypto/tink/mac",
+        "//java/src/main/java/com/google/crypto/tink/prf:prf_key_templates",
         "//java/src/main/java/com/google/crypto/tink/signature",
         "//java/src/main/java/com/google/crypto/tink/streamingaead",
         "//java/src/main/java/com/google/crypto/tink/subtle",

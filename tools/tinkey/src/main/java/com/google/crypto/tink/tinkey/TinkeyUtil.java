@@ -31,6 +31,7 @@ import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.prf.PrfKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
@@ -65,6 +66,7 @@ class TinkeyUtil {
         DeterministicAeadKeyTemplates.class,
         HybridKeyTemplates.class,
         MacKeyTemplates.class,
+        PrfKeyTemplates.class,
         SignatureKeyTemplates.class,
         StreamingAeadKeyTemplates.class,
       };

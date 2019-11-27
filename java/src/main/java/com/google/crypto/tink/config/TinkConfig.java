@@ -18,6 +18,7 @@ package com.google.crypto.tink.config;
 
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.proto.RegistryConfig;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
@@ -98,5 +99,6 @@ public final class TinkConfig {
     DeterministicAeadConfig.register();
     HybridConfig.register(); // includes Aead and Mac
     SignatureConfig.register();
+    PrfConfig.register();
   }
 }
