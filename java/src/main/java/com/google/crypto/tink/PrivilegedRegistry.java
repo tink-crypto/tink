@@ -16,6 +16,8 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
@@ -43,4 +45,15 @@ public class PrivilegedRegistry {
       throws GeneralSecurityException {
     return Registry.deriveKey(keyTemplate, randomStream);
   }
+
+  /**
+   * Returns the key proto in the keyData if a corresponding key type manager was registered.
+   * Returns null if the key type was registered with a {@link KeyManager} (and not a {@link
+   * KeyTypeManager}).
+   */
+  public static MessageLite parseKeyData(KeyData keyData)
+      throws GeneralSecurityException, InvalidProtocolBufferException {
+    return Registry.parseKeyData(keyData);
+  }
+
 }
