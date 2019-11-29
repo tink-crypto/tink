@@ -16,6 +16,32 @@ java_library(
     ],
 )
 
+java_library(
+    name = "compare_keysets",
+    testonly = 1,
+    srcs = ["java/com/google/crypto/tink/testing/CompareKeysets.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        "//java/src/main/java/com/google/crypto/tink:privileged_registry",
+        "//proto:tink_java_proto",
+    ],
+)
+
+java_binary(
+    name = "compare_keysets_cli_java",
+    testonly = 1,
+    srcs = ["java/com/google/crypto/tink/testing/CompareKeysetsCli.java"],
+    javacopts = JAVACOPTS_OSS,
+    main_class = "com.google.crypto.tink.testing.CompareKeysetsCli",
+    deps = [
+        ":cli_util",
+        ":compare_keysets",
+        "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//java/src/main/java/com/google/crypto/tink:core",
+        "//java/src/main/java/com/google/crypto/tink/config",
+    ],
+)
+
 java_binary(
     name = "version_cli_java",
     testonly = 1,
@@ -40,11 +66,11 @@ java_binary(
     deps = [
         ":cli_util",
         "//java:testonly",
+        "//java:testutil",
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/aead",
-        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
         "//java/src/main/java/com/google/crypto/tink/integration/awskms",
-        "//java:testutil",
+        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
     ],
 )
 

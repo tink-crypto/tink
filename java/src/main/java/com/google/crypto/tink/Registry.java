@@ -120,6 +120,15 @@ public final class Registry {
      * as first argument with "registerAsymmetricKeyManagers". Null otherwise.
      */
     Class<?> publicKeyManagerClassOrNull();
+
+    /**
+     * Parses a key into a corresponding message lite. Only works if the key type has been
+     * registered with a KeyTypeManager, returns null otherwise.
+     *
+     * <p>Can throw exceptions if validation fails or if parsing fails.
+     */
+    MessageLite parseKey(ByteString serializedKey)
+        throws GeneralSecurityException, InvalidProtocolBufferException;
   }
 
   private static <P> KeyManagerContainer createContainerFor(KeyManager<P> keyManager) {
@@ -154,6 +163,12 @@ public final class Registry {
 
       @Override
       public Class<?> publicKeyManagerClassOrNull() {
+        return null;
+      }
+
+      @Override
+      public MessageLite parseKey(ByteString serializedKey)
+          throws GeneralSecurityException, InvalidProtocolBufferException {
         return null;
       }
     };
@@ -192,6 +207,14 @@ public final class Registry {
       @Override
       public Class<?> publicKeyManagerClassOrNull() {
         return null;
+      }
+
+      @Override
+      public MessageLite parseKey(ByteString serializedKey)
+          throws GeneralSecurityException, InvalidProtocolBufferException {
+        KeyProtoT result = localKeyManager.parseKey(serializedKey);
+        localKeyManager.validateKey(result);
+        return result;
       }
     };
   }
@@ -236,6 +259,14 @@ public final class Registry {
       @Override
       public Class<?> publicKeyManagerClassOrNull() {
         return localPublicKeyManager.getClass();
+      }
+
+      @Override
+      public MessageLite parseKey(ByteString serializedKey)
+          throws GeneralSecurityException, InvalidProtocolBufferException {
+        KeyProtoT result = localPrivateKeyManager.parseKey(serializedKey);
+        localPrivateKeyManager.validateKey(result);
+        return result;
       }
     };
   }
@@ -1008,5 +1039,16 @@ public final class Registry {
           "No wrapper found for " + primitiveSet.getPrimitiveClass().getName());
     }
     return wrapper.wrap(primitiveSet);
+  }
+
+  /**
+   * Returns the key proto in the keyData if a corresponding key type manager was registered.
+   * Returns null if the key type was registered with a {@link KeyManager} (and not a {@link
+   * KeyTypeManager}).
+   */
+  static MessageLite parseKeyData(KeyData keyData)
+      throws GeneralSecurityException, InvalidProtocolBufferException {
+    KeyManagerContainer container = getKeyManagerContainerOrThrow(keyData.getTypeUrl());
+    return container.parseKey(keyData.getValue());
   }
 }
