@@ -1,15 +1,17 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.helloworld"
-        minSdkVersion 19
-        targetSdkVersion 26
+        minSdkVersion 21
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -21,19 +23,21 @@ android {
 
 repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    mavenCentral()
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        // This is already included in protobuf-lite that Tink depends on.
-        exclude group: 'com.google.code.findbugs'
-    })
-    compile 'com.android.support:appcompat-v7:26.+'
-    compile 'com.android.support:design:26.+'
-    testCompile 'junit:junit:4.12'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    // Tink HEAD-SNAPSHOT for Android.
-    compile 'com.google.crypto.tink:tink-android:HEAD-SNAPSHOT'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.0.0'
+
+    implementation("com.google.crypto.tink:tink-android:1.3.0-rc2") {
+        exclude group: 'com.google.protobuf', module: 'protobuf-javalite'
+    }
+
+    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
+    implementation "androidx.core:core-ktx:1.1.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
 }
