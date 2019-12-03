@@ -17,6 +17,7 @@
 package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.BinaryKeysetReader;
+import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.config.TinkConfig;
@@ -45,6 +46,12 @@ public class CliUtil {
       throws GeneralSecurityException, IOException {
     System.out.println("Reading the keyset...");
     return CleartextKeysetHandle.read(BinaryKeysetReader.withFile(new File(filename)));
+  }
+
+  /** Writes a keyset to the specified file. In case of errors throws an exception. */
+  public static void writeKeyset(KeysetHandle handle, String filename) throws IOException {
+    System.out.println("Writing the keyset...");
+    CleartextKeysetHandle.write(handle, BinaryKeysetWriter.withFile(new File(filename)));
   }
 
   /**

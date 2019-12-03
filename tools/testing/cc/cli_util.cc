@@ -158,6 +158,18 @@ std::unique_ptr<KeysetHandle> CliUtil::ReadKeyset(const std::string& filename) {
 }
 
 // static
+void CliUtil::WriteKeyset(const KeysetHandle& keyset_handle,
+                          const std::string& filename) {
+  auto writer = GetBinaryKeysetWriter(filename);
+  auto status = writer->Write(CleartextKeysetHandle::GetKeyset(keyset_handle));
+  if (!status.ok()) {
+    std::clog << "Writing the keyset failed: " << status.error_message()
+              << std::endl;
+    exit(1);
+  }
+}
+
+// static
 void CliUtil::InitTink() {
   std::clog << "Initializing Tink...\n";
   auto status = TinkConfig::Register();
