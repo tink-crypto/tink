@@ -42,43 +42,50 @@ var (
 	errCredCSV = errors.New("malformed credential csv file")
 )
 
-// AWSClient represents a client that connects to the AWS KMS backend.
-type AWSClient struct {
-	keyURI string
-	kms    *kms.KMS
-	region string
+// awsClient represents a client that connects to the AWS KMS backend.
+type awsClient struct {
+	keyURIPrefix string
+	kms          *kms.KMS
 }
 
-var _ registry.KMSClient = (*AWSClient)(nil)
+var _ registry.KMSClient = (*awsClient)(nil)
 
-// NewAWSClient returns a new client to AWS KMS. It does not have an established session.
-func NewAWSClient(URI string) (*AWSClient, error) {
-	if !strings.HasPrefix(strings.ToLower(URI), awsPrefix) {
-		return nil, fmt.Errorf("key URI must start with %s", awsPrefix)
+// NewClient returns a new AWS KMS client which will use default
+// credentials to handle keys with uriPrefix prefix.
+// uriPrefix must have the following format: 'aws-kms://arn:aws:kms:<region>[:path]'.
+func NewClient(uriPrefix string) (registry.KMSClient, error) {
+	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
+		return nil, fmt.Errorf("uriPrefix must start with %s", awsPrefix)
 	}
-	r, err := getRegion(URI)
+	r, err := getRegion(uriPrefix)
 	if err != nil {
 		return nil, err
 	}
-	return &AWSClient{
-		keyURI: URI,
-		region: r,
+
+	session := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(r),
+	}))
+
+	return &awsClient{
+		keyURIPrefix: uriPrefix,
+		kms:          kms.New(session),
 	}, nil
-
 }
 
-// Supported true if this client does support keyURI
-func (g *AWSClient) Supported(keyURI string) bool {
-	if (len(g.keyURI) > 0) && (strings.Compare(strings.ToLower(g.keyURI), strings.ToLower(keyURI)) == 0) {
-		return true
+// NewClientWithCredentials returns a new AWS KMS client which will use given
+// credentials to handle keys with uriPrefix prefix.
+// uriPrefix must have the following format: 'aws-kms://arn:aws:kms:<region>[:path]'.
+func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry.KMSClient, error) {
+	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
+		return nil, fmt.Errorf("uriPrefix must start with %s", awsPrefix)
 	}
-	return ((len(g.keyURI) == 0) && (strings.HasPrefix(strings.ToLower(keyURI), awsPrefix)))
-}
+	r, err := getRegion(uriPrefix)
+	if err != nil {
+		return nil, err
+	}
 
-// LoadCredentials loads the credentials in credentialPath.
-func (g *AWSClient) LoadCredentials(credentialPath string) (*AWSClient, error) {
 	var creds *credentials.Credentials
-	if len(credentialPath) <= 0 {
+	if len(credentialPath) == 0 {
 		return nil, errCred
 	}
 	c, err := extractCredsCSV(credentialPath)
@@ -93,56 +100,28 @@ func (g *AWSClient) LoadCredentials(credentialPath string) (*AWSClient, error) {
 	}
 	session := session.Must(session.NewSession(&aws.Config{
 		Credentials: creds,
-		Region:      aws.String(g.region),
+		Region:      aws.String(r),
 	}))
 
-	g.kms = kms.New(session)
-	return g, nil
+	return &awsClient{
+		keyURIPrefix: uriPrefix,
+		kms:          kms.New(session),
+	}, nil
 }
 
-// LoadDefaultCredentials loads with the default credentials.
-func (g *AWSClient) LoadDefaultCredentials() (*AWSClient, error) {
-	session := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(g.region),
-	}))
-	g.kms = kms.New(session)
-	return g, nil
-}
-
-// WithCredentials retrieves credentials using a provider.
-func (g *AWSClient) WithCredentials(p *credentials.Credentials) (*AWSClient, error) {
-	session := session.Must(session.NewSession(&aws.Config{
-		Region:      aws.String(g.region),
-		Credentials: p,
-	}))
-	g.kms = kms.New(session)
-	return g, nil
+// Supported true if this client does support keyURI
+func (c *awsClient) Supported(keyURI string) bool {
+	return strings.HasPrefix(keyURI, c.keyURIPrefix)
 }
 
 // GetAEAD gets an AEAD backend by keyURI.
-func (g *AWSClient) GetAEAD(keyURI string) (tink.AEAD, error) {
-	if len(g.keyURI) > 0 && strings.Compare(strings.ToLower(g.keyURI), strings.ToLower(keyURI)) != 0 {
-		return nil, fmt.Errorf("this client is bound to %s, cannot load keys bound to %s", g.keyURI, keyURI)
+func (c *awsClient) GetAEAD(keyURI string) (tink.AEAD, error) {
+	if !c.Supported(keyURI) {
+		return nil, errors.New("unsupported keyURI")
 	}
-	uri, err := validateTrimKMSPrefix(g.keyURI, awsPrefix)
-	if err != nil {
-		return nil, err
-	}
-	return NewAWSAEAD(uri, g.kms), nil
-}
 
-func validateKMSPrefix(keyURI, prefix string) bool {
-	if len(keyURI) > 0 && strings.HasPrefix(strings.ToLower(keyURI), awsPrefix) {
-		return true
-	}
-	return false
-}
-
-func validateTrimKMSPrefix(keyURI, prefix string) (string, error) {
-	if !validateKMSPrefix(keyURI, prefix) {
-		return "", fmt.Errorf("key URI must start with %s", prefix)
-	}
-	return strings.TrimPrefix(keyURI, prefix), nil
+	uri := strings.TrimPrefix(keyURI, awsPrefix)
+	return NewAWSAEAD(uri, c.kms), nil
 }
 
 func extractCredsCSV(file string) (*credentials.Value, error) {

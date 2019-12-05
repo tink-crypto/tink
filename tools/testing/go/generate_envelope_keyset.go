@@ -72,11 +72,7 @@ func main() {
 	}
 	switch strings.ToUpper(kms) {
 	case "GCP":
-		gcpclient, err := gcpkms.NewGCPClient(gcpURI)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = gcpclient.LoadCredentials(gcpCredFile)
+		gcpclient, err := gcpkms.NewClientWithCredentials(gcpURI, gcpCredFile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -86,11 +82,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case "AWS":
-		awsclient, err := awskms.NewAWSClient(awsURI)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = awsclient.LoadCredentials(awsCredFile)
+		awsclient, err := awskms.NewClientWithCredentials(awsURI, awsCredFile)
 		if err != nil {
 			log.Fatal(err)
 		}

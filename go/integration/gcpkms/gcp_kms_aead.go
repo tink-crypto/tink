@@ -25,24 +25,24 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// GCPAEAD represents a GCP KMS service to a particular URI.
-type GCPAEAD struct {
+// gcpAEAD represents a GCP KMS service to a particular URI.
+type gcpAEAD struct {
 	keyURI string
 	kms    cloudkms.Service
 }
 
-var _ tink.AEAD = (*GCPAEAD)(nil)
+var _ tink.AEAD = (*gcpAEAD)(nil)
 
-// NewGCPAEAD returns a new GCP KMS service.
-func NewGCPAEAD(keyURI string, kms *cloudkms.Service) *GCPAEAD {
-	return &GCPAEAD{
+// newGCPAEAD returns a new GCP KMS service.
+func newGCPAEAD(keyURI string, kms *cloudkms.Service) tink.AEAD {
+	return &gcpAEAD{
 		keyURI: keyURI,
 		kms:    *kms,
 	}
 }
 
 // Encrypt AEAD encrypts the plaintext data and uses addtionaldata from authentication.
-func (a *GCPAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
+func (a *gcpAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 
 	req := &cloudkms.EncryptRequest{
 		Plaintext:                   base64.URLEncoding.EncodeToString(plaintext),
@@ -57,7 +57,7 @@ func (a *GCPAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 }
 
 // Decrypt AEAD decrypts the data and verified the additional data.
-func (a *GCPAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
+func (a *gcpAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 
 	req := &cloudkms.DecryptRequest{
 		Ciphertext:                  base64.URLEncoding.EncodeToString(ciphertext),

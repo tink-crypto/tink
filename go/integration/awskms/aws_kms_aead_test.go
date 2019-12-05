@@ -57,13 +57,9 @@ func init() {
 
 func setupKMS(t *testing.T, cf string) {
 	t.Helper()
-	g, err := NewAWSClient(keyURI)
+	g, err := NewClientWithCredentials(keyURI, cf)
 	if err != nil {
 		t.Fatalf("error setting up aws client: %v", err)
-	}
-	_, err = g.LoadCredentials(cf)
-	if err != nil {
-		t.Fatalf("error loading credentials : %v", err)
 	}
 	registry.RegisterKMSClient(g)
 }
@@ -140,11 +136,7 @@ func TestBasicAeadWithoutAdditionalData(t *testing.T) {
 // ignore-placeholder5
 
 func TestLoadBadCSVCredential(t *testing.T) {
-	g, err := NewAWSClient(keyURI)
-	if err != nil {
-		t.Fatalf("error setting up aws client: %v", err)
-	}
-	_, err = g.LoadCredentials(badCredFile)
+	_, err := NewClientWithCredentials(keyURI, badCredFile)
 	if err == nil {
 		t.Fatalf("does not reject two-column csv file, expect error : %v", errCredCSV)
 	}

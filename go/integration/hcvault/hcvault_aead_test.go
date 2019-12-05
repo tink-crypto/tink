@@ -45,7 +45,7 @@ func TestVaultAEAD_Encrypt(t *testing.T) {
 	port, stopFunc := newServer(t)
 	defer stopFunc()
 
-	client, err := NewHCVaultClient(
+	client, err := NewClient(
 		fmt.Sprintf("hcvault://localhost:%d/", port),
 		&tls.Config{InsecureSkipVerify: true},
 		token,
@@ -75,7 +75,7 @@ func TestVaultAEAD_Decrypt(t *testing.T) {
 	port, stopFunc := newServer(t)
 	defer stopFunc()
 
-	client, err := NewHCVaultClient(
+	client, err := NewClient(
 		fmt.Sprintf("hcvault://localhost:%d/", port),
 		&tls.Config{InsecureSkipVerify: true},
 		token,

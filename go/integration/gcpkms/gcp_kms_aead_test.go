@@ -51,12 +51,9 @@ func init() {
 
 func setupKMS(t *testing.T) {
 	t.Helper()
-	g, err := NewGCPClient(keyURI)
+	g, err := NewClientWithCredentials(keyURI, credFile)
 	if err != nil {
 		t.Errorf("error setting up gcp client: %v", err)
-	}
-	if _, err = g.LoadCredentials(credFile); err != nil {
-		t.Fatalf("error loading credentials : %v", err)
 	}
 	registry.RegisterKMSClient(g)
 }
@@ -80,6 +77,7 @@ func basicAEADTest(t *testing.T, a tink.AEAD) error {
 	}
 	return nil
 }
+
 func TestBasicAead(t *testing.T) {
 	setupKMS(t)
 	dek := aead.AES128CTRHMACSHA256KeyTemplate()

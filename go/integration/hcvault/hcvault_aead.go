@@ -36,8 +36,8 @@ type vaultAEAD struct {
 
 var _ tink.AEAD = (*vaultAEAD)(nil)
 
-// NewHCVaultAEAD returns a new HashiCorp Vault service.
-func NewHCVaultAEAD(keyURI string, client *api.Logical) tink.AEAD {
+// newHCVaultAEAD returns a new HashiCorp Vault service.
+func newHCVaultAEAD(keyURI string, client *api.Logical) tink.AEAD {
 	return &vaultAEAD{
 		keyURI: keyURI,
 		client: client,
@@ -56,7 +56,7 @@ func (a *vaultAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 	// https://www.vaultproject.io/api/secret/transit/index.html#encrypt-data.
 	req := map[string]interface{}{
 		"plaintext": base64.StdEncoding.EncodeToString(plaintext),
-		"context": base64.StdEncoding.EncodeToString(additionalData),
+		"context":   base64.StdEncoding.EncodeToString(additionalData),
 	}
 	secret, err := a.client.Write(encryptionPath, req)
 	if err != nil {
@@ -78,7 +78,7 @@ func (a *vaultAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 	// https://www.vaultproject.io/api/secret/transit/index.html#decrypt-data.
 	req := map[string]interface{}{
 		"ciphertext": string(ciphertext),
-		"context": base64.StdEncoding.EncodeToString(additionalData),
+		"context":    base64.StdEncoding.EncodeToString(additionalData),
 	}
 	secret, err := a.client.Write(decryptionPath, req)
 	if err != nil {

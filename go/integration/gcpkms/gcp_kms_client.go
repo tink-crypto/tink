@@ -32,8 +32,7 @@
 // )
 //
 // func main() {
-//     gcpclient := gcpkms.NewGCPClient(keyURI)
-//     _, err := gcpclient.LoadCredentials("/mysecurestorage/credentials.json")
+//     gcpclient, err := gcpkms.NewClientWithCredentials(keyURI, "/mysecurestorage/credentials.json")
 //     if err != nil {
 //         //handle error
 //     }
@@ -69,11 +68,11 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"google.golang.org/api/cloudkms/v1"
+	"golang.org/x/oauth2/google"
+	"golang.org/x/oauth2"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/cloudkms/v1"
 )
 
 const (
@@ -84,37 +83,47 @@ var (
 	errCred = errors.New("invalid credential path")
 )
 
-// GCPClient represents a client that connects to the GCP KMS backend.
-type GCPClient struct {
-	keyURI string
-	kms    *cloudkms.Service
+// gcpClient represents a client that connects to the GCP KMS backend.
+type gcpClient struct {
+	keyURIPrefix string
+	kms          *cloudkms.Service
 }
 
-var _ registry.KMSClient = (*GCPClient)(nil)
+var _ registry.KMSClient = (*gcpClient)(nil)
 
-// NewGCPClient returns a new client to GCP KMS. It does not have an established session.
-func NewGCPClient(URI string) (*GCPClient, error) {
-	if !strings.HasPrefix(strings.ToLower(URI), gcpPrefix) {
-		return nil, fmt.Errorf("key URI must start with %s", gcpPrefix)
+// NewClient returns a new GCP KMS client which will use default
+// credentials to handle keys with uriPrefix prefix.
+// uriPrefix must have the following format: 'gcp-kms://[:path]'.
+func NewClient(uriPrefix string) (registry.KMSClient, error) {
+	if !strings.HasPrefix(strings.ToLower(uriPrefix), gcpPrefix) {
+		return nil, fmt.Errorf("uriPrefix must start with %s", gcpPrefix)
 	}
 
-	return &GCPClient{
-		keyURI: URI,
+	ctx := context.Background()
+	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+
+	kmsService, err := cloudkms.New(client)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gcpClient{
+		keyURIPrefix: uriPrefix,
+		kms:          kmsService,
 	}, nil
-
 }
 
-// Supported true if this client does support keyURI
-func (g *GCPClient) Supported(keyURI string) bool {
-	if (len(g.keyURI) > 0) && (strings.Compare(strings.ToLower(g.keyURI), strings.ToLower(keyURI)) == 0) {
-		return true
+// NewClientWithCredentials returns a new GCP KMS client which will use given
+// credentials to handle keys with uriPrefix prefix.
+// uriPrefix must have the following format: 'gcp-kms://[:path]'.
+func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry.KMSClient, error) {
+	if !strings.HasPrefix(strings.ToLower(uriPrefix), gcpPrefix) {
+		return nil, fmt.Errorf("uriPrefix must start with %s", gcpPrefix)
 	}
-	return ((len(g.keyURI) == 0) && (strings.HasPrefix(strings.ToLower(keyURI), gcpPrefix)))
-}
 
-// LoadCredentials loads the credentials in credentialPath. If credentialPath is  null, loads the
-// default credentials.
-func (g *GCPClient) LoadCredentials(credentialPath string) (*GCPClient, error) {
 	ctx := context.Background()
 	if len(credentialPath) <= 0 {
 		return nil, errCred
@@ -132,48 +141,24 @@ func (g *GCPClient) LoadCredentials(credentialPath string) (*GCPClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	g.kms = kmsService
-	return g, nil
+
+	return &gcpClient{
+		keyURIPrefix: uriPrefix,
+		kms:          kmsService,
+	}, nil
 }
 
-// LoadDefaultCredentials loads with the default credentials.
-func (g *GCPClient) LoadDefaultCredentials() (*GCPClient, error) {
-	ctx := context.Background()
-	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
-	if err != nil {
-		return nil, err
-	}
-
-	kmsService, err := cloudkms.New(client)
-	if err != nil {
-		return nil, err
-	}
-	g.kms = kmsService
-	return g, nil
+// Supported true if this client does support keyURI
+func (c *gcpClient) Supported(keyURI string) bool {
+	return strings.HasPrefix(keyURI, c.keyURIPrefix)
 }
 
 // GetAEAD gets an AEAD backend by keyURI.
-func (g *GCPClient) GetAEAD(keyURI string) (tink.AEAD, error) {
-	if len(g.keyURI) > 0 && strings.Compare(strings.ToLower(g.keyURI), strings.ToLower(keyURI)) != 0 {
-		return nil, fmt.Errorf("this client is bound to %s, cannot load keys bound to %s", g.keyURI, keyURI)
+func (c *gcpClient) GetAEAD(keyURI string) (tink.AEAD, error) {
+	if !c.Supported(keyURI) {
+		return nil, errors.New("unsupported keyURI")
 	}
-	uri, err := validateTrimKMSPrefix(g.keyURI, gcpPrefix)
-	if err != nil {
-		return nil, err
-	}
-	return NewGCPAEAD(uri, g.kms), nil
-}
 
-func validateKMSPrefix(keyURI, prefix string) bool {
-	if len(keyURI) > 0 && strings.HasPrefix(strings.ToLower(keyURI), gcpPrefix) {
-		return true
-	}
-	return false
-}
-
-func validateTrimKMSPrefix(keyURI, prefix string) (string, error) {
-	if !validateKMSPrefix(keyURI, prefix) {
-		return "", fmt.Errorf("key URI must start with %s", prefix)
-	}
-	return strings.TrimPrefix(keyURI, prefix), nil
+	uri := strings.TrimPrefix(keyURI, gcpPrefix)
+	return newGCPAEAD(uri, c.kms), nil
 }

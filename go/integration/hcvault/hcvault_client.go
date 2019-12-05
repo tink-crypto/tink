@@ -36,7 +36,7 @@
 // func main() {
 //  tlsConf := getTLSConfig()
 //  token := getVaultToken()
-//  vaultClient, err := hcvault.NewHCVaultClient(keyURI, tlsConf, token)
+//  vaultClient, err := hcvault.NewClient(keyURI, tlsConf, token)
 // 	if err != nil {
 //    // handle error
 // 	}
@@ -68,6 +68,7 @@ package hcvault
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -90,14 +91,14 @@ type vaultClient struct {
 
 var _ registry.KMSClient = (*vaultClient)(nil)
 
-// NewHCVaultClient returns a new client to HashiCorp Vault.
+// NewClient returns a new client to HashiCorp Vault.
 // uriPrefix parameter is a valid URI which must have "hcvault" scheme and
 // vault server address and port. Specific key URIs will be matched against this
 // prefix to determine if the client supports the key or not.
 // tlsCfg represents tls.Config which will be used to communicate with Vault
 // server via HTTPS protocol. If not specified a default tls.Config{} will be
 // used.
-func NewHCVaultClient(uriPrefix string, tlsCfg *tls.Config, token string) (registry.KMSClient, error) {
+func NewClient(uriPrefix string, tlsCfg *tls.Config, token string) (registry.KMSClient, error) {
 	if !strings.HasPrefix(strings.ToLower(uriPrefix), vaultPrefix) {
 		return nil, fmt.Errorf("key URI must start with %s", vaultPrefix)
 	}
@@ -141,8 +142,9 @@ func (c *vaultClient) Supported(keyURI string) bool {
 
 // GetAEAD gets an AEAD backend by keyURI.
 func (c *vaultClient) GetAEAD(keyURI string) (tink.AEAD, error) {
-	if !strings.HasPrefix(keyURI, c.keyURIPrefix) {
-		return nil, fmt.Errorf("this client is bound to %s prefix, cannot load keys bound to %s", c.keyURIPrefix, keyURI)
+	if !c.Supported(keyURI) {
+		return nil, errors.New("unsupported keyURI")
 	}
-	return NewHCVaultAEAD(keyURI, c.client), nil
+
+	return newHCVaultAEAD(keyURI, c.client), nil
 }
