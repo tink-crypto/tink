@@ -345,6 +345,20 @@
  </div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">HybridKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX">ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX</a></span></code>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ 
+   KEM: ECDH over NIST P-256
+   DEM: AES128-GCM
+   KDF: HKDF-HMAC-SHA256 with an empty salt
+   EC Point Format: Compressed
+   OutputPrefixType: RAW
+ </div>
+</td>
+</tr>
 </tbody>
 </table>
 <table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
@@ -356,10 +370,11 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#createEciesAeadHkdfKeyTemplate-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EcPointFormat-com.google.crypto.tink.proto.KeyTemplate-byte:A-">createEciesAeadHkdfKeyTemplate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/EllipticCurveType.html" title="enum in com.google.crypto.tink.proto">EllipticCurveType</a>&nbsp;curve,
+<td class="colLast"><span class="typeNameLabel">HybridKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#createEciesAeadHkdfKeyTemplate-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EcPointFormat-com.google.crypto.tink.proto.KeyTemplate-com.google.crypto.tink.proto.OutputPrefixType-byte:A-">createEciesAeadHkdfKeyTemplate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/EllipticCurveType.html" title="enum in com.google.crypto.tink.proto">EllipticCurveType</a>&nbsp;curve,
                               <a href="../../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType,
                               <a href="../../../../../../com/google/crypto/tink/proto/EcPointFormat.html" title="enum in com.google.crypto.tink.proto">EcPointFormat</a>&nbsp;ecPointFormat,
                               <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;demKeyTemplate,
+                              <a href="../../../../../../com/google/crypto/tink/proto/OutputPrefixType.html" title="enum in com.google.crypto.tink.proto">OutputPrefixType</a>&nbsp;outputPrefixType,
                               byte[]&nbsp;salt)</code>&nbsp;</td>
 </tr>
 </tbody>
@@ -373,10 +388,11 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#createEciesAeadHkdfKeyTemplate-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EcPointFormat-com.google.crypto.tink.proto.KeyTemplate-byte:A-">createEciesAeadHkdfKeyTemplate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/EllipticCurveType.html" title="enum in com.google.crypto.tink.proto">EllipticCurveType</a>&nbsp;curve,
+<td class="colLast"><span class="typeNameLabel">HybridKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#createEciesAeadHkdfKeyTemplate-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EcPointFormat-com.google.crypto.tink.proto.KeyTemplate-com.google.crypto.tink.proto.OutputPrefixType-byte:A-">createEciesAeadHkdfKeyTemplate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/EllipticCurveType.html" title="enum in com.google.crypto.tink.proto">EllipticCurveType</a>&nbsp;curve,
                               <a href="../../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType,
                               <a href="../../../../../../com/google/crypto/tink/proto/EcPointFormat.html" title="enum in com.google.crypto.tink.proto">EcPointFormat</a>&nbsp;ecPointFormat,
                               <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;demKeyTemplate,
+                              <a href="../../../../../../com/google/crypto/tink/proto/OutputPrefixType.html" title="enum in com.google.crypto.tink.proto">OutputPrefixType</a>&nbsp;outputPrefixType,
                               byte[]&nbsp;salt)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
