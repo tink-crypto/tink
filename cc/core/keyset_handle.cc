@@ -186,7 +186,7 @@ util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>>
-KeysetHandle::GetPublicKeysetHandle() {
+KeysetHandle::GetPublicKeysetHandle() const {
   std::unique_ptr<Keyset> public_keyset(new Keyset());
   for (const Keyset::Key& key : get_keyset().key()) {
     auto public_key_result = ExtractPublicKey(key);

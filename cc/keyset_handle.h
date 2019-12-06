@@ -69,7 +69,7 @@ class KeysetHandle {
   // to the private keys from this handle.
   // Returns an error if this handle contains keys that are not private keys.
   crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
-  GetPublicKeysetHandle();
+  GetPublicKeysetHandle() const;
 
   // Creates a wrapped primitive corresponding to this keyset or fails with
   // a non-ok status. Uses the KeyManager and PrimitiveWrapper objects in the
