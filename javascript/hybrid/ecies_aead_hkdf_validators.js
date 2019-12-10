@@ -121,7 +121,7 @@ const validatePublicKey = function(key, publicKeyManagerVersion) {
   }
   validateParams(params);
 
-  if (!key.getX() || !key.getY()) {
+  if (!key.getX().length || !key.getY().length) {
     throw new SecurityException(
         'Invalid public key - missing value of X or Y.');
   }

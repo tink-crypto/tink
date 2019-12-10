@@ -221,7 +221,7 @@ testSuite({
     const invalidPublicKey =
         new PbEciesAeadHkdfPublicKey().setParams(createParams());
 
-    // Both X and Y are set to null.
+    // Both X and Y are set to empty.
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
@@ -229,7 +229,7 @@ testSuite({
       assertEquals(ExceptionText.missingXY(), e.toString());
     }
 
-    // The key with only Y set to null is also invalid.
+    // The key with only Y set to empty is also invalid.
     invalidPublicKey.setX(new Uint8Array(10));
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
@@ -238,9 +238,9 @@ testSuite({
       assertEquals(ExceptionText.missingXY(), e.toString());
     }
 
-    // The key with only X set to null is also invalid.
+    // The key with only X set to empty is also invalid.
     invalidPublicKey.setY(new Uint8Array(10));
-    invalidPublicKey.setX(null);
+    invalidPublicKey.setX(new Uint8Array(0));
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
