@@ -106,24 +106,6 @@ switched_rules_by_language(
     grpc = True,
 )
 
-# gRPC.
-# Release from 2019-08-15
-http_archive(
-    name = "com_github_grpc_grpc",
-    urls = [
-        "https://github.com/grpc/grpc/archive/v1.22.1.tar.gz",
-    ],
-    sha256 = "cce1d4585dd017980d4a407d8c5e9f8fc8c1dbb03f249b99e88a387ebb45a035",
-    strip_prefix = "grpc-1.22.1",
-)
-
-# Load grpc_deps.
-# This is a workaround around the missing support for recursive WORKSPACE
-# file loading (https://github.com/bazelbuild/bazel/issues/1943).
-load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
-
-grpc_deps()
-
 # Release from 2016-05-30
 http_archive(
     name = "curl",
@@ -153,12 +135,12 @@ http_archive(
 # on @com_google_protobuf//:proto, @com_google_protobuf//:cc_toolchain and
 # @com_google_protobuf//:java_toolchain, respectively.
 # This statement defines the @com_google_protobuf repo.
-# Release from 2019-08-05
+# Release from 2019-12-02
 http_archive(
     name = "com_google_protobuf",
-    strip_prefix = "protobuf-3.9.1",
-    urls = ["https://github.com/google/protobuf/archive/v3.9.1.zip"],
-    sha256 = "c90d9e13564c0af85fd2912545ee47b57deded6e5a97de80395b6d2d9be64854",
+    strip_prefix = "protobuf-3.11.1",
+    urls = ["https://github.com/google/protobuf/archive/v3.11.1.zip"],
+    sha256 = "20e55e7dc9ebbb5800072fff25fd56d7c0a168493ef4652e78910566fa6b45f5",
 )
 
 # Load protobuf_deps.
@@ -171,13 +153,17 @@ protobuf_deps()
 # java_lite_proto_library rules implicitly depend on
 # @com_google_protobuf_javalite//:javalite_toolchain, which is the JavaLite proto
 # runtime (base classes and common utilities).
-# Commit from 2019-08-23 on the javalite branch.
+# Commit from 2019-12-03 on the 3.11.x branch.
 http_archive(
     name = "com_google_protobuf_javalite",
-    strip_prefix = "protobuf-7b64714af67aa967dcf941df61fe5207975966be",
-    urls = ["https://github.com/google/protobuf/archive/7b64714af67aa967dcf941df61fe5207975966be.zip"],
-    sha256 = "311b29b8d0803ab4f89be22ff365266abb6c48fd3483d59b04772a144d7a24a1",
+    strip_prefix = "protobuf-0425fa932ce95a32bb9f88b2c09b995e9ff8207b",
+    urls = ["https://github.com/google/protobuf/archive/0425fa932ce95a32bb9f88b2c09b995e9ff8207b.zip"],
+    sha256 = "e60211a40473f6be95b53f64559f82a3b2971672b11710db2fc9081708e25699",
 )
+
+load("@com_google_protobuf_javalite//:protobuf_deps.bzl", javalite_protobuf_deps = "protobuf_deps")
+
+javalite_protobuf_deps()
 
 #-----------------------------------------------------------------------------
 # java
@@ -636,6 +622,32 @@ new_local_repository(
     build_file = "third_party/clif.BUILD.bazel",
     path = "/usr/local",
 )
+
+#-----------------------------------------------------------------------------
+# gRPC
+#-----------------------------------------------------------------------------
+
+# Release from 2019-12-05
+# Using the pre-release version due to https://github.com/grpc/grpc/issues/20511
+http_archive(
+    name = "com_github_grpc_grpc",
+    urls = [
+        "https://github.com/grpc/grpc/archive/v1.26.0-pre1.tar.gz",
+    ],
+    sha256 = "d6af0859d3ae4693b1955e972aa2e590d6f4d44baaa82651467c6beea453e30e",
+    strip_prefix = "grpc-1.26.0-pre1",
+)
+
+# Load grpc_deps.
+# This is a workaround around the missing support for recursive WORKSPACE
+# file loading (https://github.com/bazelbuild/bazel/issues/1943).
+load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+
+grpc_deps()
+
+load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
+
+grpc_extra_deps()
 
 #-----------------------------------------------------------------------------
 # Remote Build Execution

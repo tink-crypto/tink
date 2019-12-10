@@ -65,7 +65,7 @@
     <java.version>1.7</java.version>
 
     <!-- library versions -->
-    <protobuf-javalite.version>3.10.0</protobuf-javalite.version>
+    <protobuf-javalite.version>3.11.1</protobuf-javalite.version>
   </properties>
 
   <dependencies>
