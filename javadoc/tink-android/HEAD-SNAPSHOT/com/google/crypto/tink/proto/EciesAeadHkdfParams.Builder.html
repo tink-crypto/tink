@@ -288,14 +288,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -337,10 +337,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
+ <code>.google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html#hasKemParams--">hasKemParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">EciesAeadHkdfParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the kemParams field is set.</dd>
 </dl>
 </li>
 </ul>
@@ -356,10 +358,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
+ <code>.google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html#getKemParams--">getKemParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">EciesAeadHkdfParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The kemParams.</dd>
 </dl>
 </li>
 </ul>
@@ -375,7 +379,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
+ <code>.google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
 </li>
 </ul>
 <a name="setKemParams-com.google.crypto.tink.proto.EciesHkdfKemParams.Builder-">
@@ -390,7 +394,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
+ <code>.google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
 </li>
 </ul>
 <a name="mergeKemParams-com.google.crypto.tink.proto.EciesHkdfKemParams-">
@@ -405,7 +409,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
+ <code>.google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
 </li>
 </ul>
 <a name="clearKemParams--">
@@ -420,7 +424,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
+ <code>.google.crypto.tink.EciesHkdfKemParams kem_params = 1;</code></div>
 </li>
 </ul>
 <a name="hasDemParams--">
@@ -435,10 +439,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
+ <code>.google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html#hasDemParams--">hasDemParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">EciesAeadHkdfParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the demParams field is set.</dd>
 </dl>
 </li>
 </ul>
@@ -454,10 +460,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
+ <code>.google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html#getDemParams--">getDemParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">EciesAeadHkdfParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The demParams.</dd>
 </dl>
 </li>
 </ul>
@@ -473,7 +481,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
+ <code>.google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
 </li>
 </ul>
 <a name="setDemParams-com.google.crypto.tink.proto.EciesAeadDemParams.Builder-">
@@ -488,7 +496,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
+ <code>.google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
 </li>
 </ul>
 <a name="mergeDemParams-com.google.crypto.tink.proto.EciesAeadDemParams-">
@@ -503,7 +511,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
+ <code>.google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
 </li>
 </ul>
 <a name="clearDemParams--">
@@ -518,7 +526,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
+ <code>.google.crypto.tink.EciesAeadDemParams dem_params = 2;</code></div>
 </li>
 </ul>
 <a name="getEcPointFormatValue--">
@@ -533,10 +541,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
+ <code>.google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html#getEcPointFormatValue--">getEcPointFormatValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">EciesAeadHkdfParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The enum numeric value on the wire for ecPointFormat.</dd>
 </dl>
 </li>
 </ul>
@@ -552,7 +562,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
+ <code>.google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The ecPointFormat to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getEcPointFormat--">
@@ -567,10 +583,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
+ <code>.google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html#getEcPointFormat--">getEcPointFormat</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">EciesAeadHkdfParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The ecPointFormat.</dd>
 </dl>
 </li>
 </ul>
@@ -586,7 +604,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
+ <code>.google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The enum numeric value on the wire for ecPointFormat to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearEcPointFormat--">
@@ -601,7 +625,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPar
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
+ <code>.google.crypto.tink.EcPointFormat ec_point_format = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

@@ -194,14 +194,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesEaxParamsOrBu
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -242,10 +242,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesEaxParamsOrBu
  possible value is 12 or 16 bytes.
  </pre>
 
- <code>optional uint32 iv_size = 1;</code></div>
+ <code>uint32 iv_size = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesEaxParamsOrBuilder.html#getIvSize--">getIvSize</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesEaxParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesEaxParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The ivSize.</dd>
 </dl>
 </li>
 </ul>
@@ -260,7 +262,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesEaxParamsOrBu
  possible value is 12 or 16 bytes.
  </pre>
 
- <code>optional uint32 iv_size = 1;</code></div>
+ <code>uint32 iv_size = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The ivSize to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearIvSize--">
@@ -274,7 +282,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesEaxParamsOrBu
  possible value is 12 or 16 bytes.
  </pre>
 
- <code>optional uint32 iv_size = 1;</code></div>
+ <code>uint32 iv_size = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

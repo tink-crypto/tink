@@ -257,14 +257,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -305,10 +305,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKeyOrBuilder.html#getVersion--">getVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">Ed25519PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The version.</dd>
 </dl>
 </li>
 </ul>
@@ -323,7 +325,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The version to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearVersion--">
@@ -337,7 +345,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getKeyValue--">
@@ -353,10 +365,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  Required.
  </pre>
 
- <code>optional bytes key_value = 2;</code></div>
+ <code>bytes key_value = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKeyOrBuilder.html#getKeyValue--">getKeyValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">Ed25519PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The keyValue.</dd>
 </dl>
 </li>
 </ul>
@@ -373,7 +387,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  Required.
  </pre>
 
- <code>optional bytes key_value = 2;</code></div>
+ <code>bytes key_value = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The keyValue to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearKeyValue--">
@@ -389,7 +409,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  Required.
  </pre>
 
- <code>optional bytes key_value = 2;</code></div>
+ <code>bytes key_value = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="hasPublicKey--">
@@ -403,10 +427,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  The corresponding public key.
  </pre>
 
- <code>optional .google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
+ <code>.google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKeyOrBuilder.html#hasPublicKey--">hasPublicKey</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">Ed25519PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the publicKey field is set.</dd>
 </dl>
 </li>
 </ul>
@@ -421,10 +447,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  The corresponding public key.
  </pre>
 
- <code>optional .google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
+ <code>.google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKeyOrBuilder.html#getPublicKey--">getPublicKey</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">Ed25519PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The publicKey.</dd>
 </dl>
 </li>
 </ul>
@@ -439,7 +467,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  The corresponding public key.
  </pre>
 
- <code>optional .google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
+ <code>.google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
 </li>
 </ul>
 <a name="setPublicKey-com.google.crypto.tink.proto.Ed25519PublicKey.Builder-">
@@ -453,7 +481,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  The corresponding public key.
  </pre>
 
- <code>optional .google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
+ <code>.google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
 </li>
 </ul>
 <a name="mergePublicKey-com.google.crypto.tink.proto.Ed25519PublicKey-">
@@ -467,7 +495,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  The corresponding public key.
  </pre>
 
- <code>optional .google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
+ <code>.google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
 </li>
 </ul>
 <a name="clearPublicKey--">
@@ -481,7 +509,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKe
  The corresponding public key.
  </pre>
 
- <code>optional .google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
+ <code>.google.crypto.tink.Ed25519PublicKey public_key = 3;</code></div>
 </li>
 </ul>
 </li>

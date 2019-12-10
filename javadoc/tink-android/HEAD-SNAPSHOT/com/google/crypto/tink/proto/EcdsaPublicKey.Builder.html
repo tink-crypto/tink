@@ -278,14 +278,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -326,10 +326,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html#getVersion--">getVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">EcdsaPublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The version.</dd>
 </dl>
 </li>
 </ul>
@@ -344,7 +346,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The version to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearVersion--">
@@ -358,7 +366,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="hasParams--">
@@ -372,10 +384,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcdsaParams params = 2;</code></div>
+ <code>.google.crypto.tink.EcdsaParams params = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html#hasParams--">hasParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">EcdsaPublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the params field is set.</dd>
 </dl>
 </li>
 </ul>
@@ -390,10 +404,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcdsaParams params = 2;</code></div>
+ <code>.google.crypto.tink.EcdsaParams params = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html#getParams--">getParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">EcdsaPublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The params.</dd>
 </dl>
 </li>
 </ul>
@@ -408,7 +424,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcdsaParams params = 2;</code></div>
+ <code>.google.crypto.tink.EcdsaParams params = 2;</code></div>
 </li>
 </ul>
 <a name="setParams-com.google.crypto.tink.proto.EcdsaParams.Builder-">
@@ -422,7 +438,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcdsaParams params = 2;</code></div>
+ <code>.google.crypto.tink.EcdsaParams params = 2;</code></div>
 </li>
 </ul>
 <a name="mergeParams-com.google.crypto.tink.proto.EcdsaParams-">
@@ -436,7 +452,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcdsaParams params = 2;</code></div>
+ <code>.google.crypto.tink.EcdsaParams params = 2;</code></div>
 </li>
 </ul>
 <a name="clearParams--">
@@ -450,7 +466,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.EcdsaParams params = 2;</code></div>
+ <code>.google.crypto.tink.EcdsaParams params = 2;</code></div>
 </li>
 </ul>
 <a name="getX--">
@@ -468,10 +484,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional bytes x = 3;</code></div>
+ <code>bytes x = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html#getX--">getX</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">EcdsaPublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The x.</dd>
 </dl>
 </li>
 </ul>
@@ -490,7 +508,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional bytes x = 3;</code></div>
+ <code>bytes x = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The x to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearX--">
@@ -508,7 +532,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional bytes x = 3;</code></div>
+ <code>bytes x = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getY--">
@@ -522,10 +550,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional bytes y = 4;</code></div>
+ <code>bytes y = 4;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html#getY--">getY</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">EcdsaPublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The y.</dd>
 </dl>
 </li>
 </ul>
@@ -540,7 +570,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional bytes y = 4;</code></div>
+ <code>bytes y = 4;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The y to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearY--">
@@ -554,7 +590,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/EcdsaPublicKeyOr
  Required.
  </pre>
 
- <code>optional bytes y = 4;</code></div>
+ <code>bytes y = 4;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

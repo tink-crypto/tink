@@ -267,14 +267,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -315,10 +315,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html#getTypeUrl--">getTypeUrl</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyDataOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The typeUrl.</dd>
 </dl>
 </li>
 </ul>
@@ -333,10 +335,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html#getTypeUrlBytes--">getTypeUrlBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyDataOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for typeUrl.</dd>
 </dl>
 </li>
 </ul>
@@ -351,7 +355,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The typeUrl to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearTypeUrl--">
@@ -365,7 +375,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="setTypeUrlBytes-com.google.protobuf.ByteString-">
@@ -379,7 +393,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The bytes for typeUrl to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getValue--">
@@ -393,10 +413,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional bytes value = 2;</code></div>
+ <code>bytes value = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html#getValue--">getValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyDataOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The value.</dd>
 </dl>
 </li>
 </ul>
@@ -411,7 +433,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional bytes value = 2;</code></div>
+ <code>bytes value = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The value to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearValue--">
@@ -425,7 +453,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional bytes value = 2;</code></div>
+ <code>bytes value = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getKeyMaterialTypeValue--">
@@ -439,10 +471,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
+ <code>.google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html#getKeyMaterialTypeValue--">getKeyMaterialTypeValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyDataOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The enum numeric value on the wire for keyMaterialType.</dd>
 </dl>
 </li>
 </ul>
@@ -457,7 +491,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
+ <code>.google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The keyMaterialType to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getKeyMaterialType--">
@@ -471,10 +511,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
+ <code>.google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html#getKeyMaterialType--">getKeyMaterialType</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyDataOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The keyMaterialType.</dd>
 </dl>
 </li>
 </ul>
@@ -489,7 +531,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
+ <code>.google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The enum numeric value on the wire for keyMaterialType to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearKeyMaterialType--">
@@ -503,7 +551,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyDataOrBuilder
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
+ <code>.google.crypto.tink.KeyData.KeyMaterialType key_material_type = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

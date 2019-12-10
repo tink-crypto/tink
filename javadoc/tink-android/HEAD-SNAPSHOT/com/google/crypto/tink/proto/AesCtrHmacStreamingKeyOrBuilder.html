@@ -138,19 +138,19 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingKeyOrBuilder.html#getParams--">getParams</a></span>()</code>
-<div class="block"><code>optional .google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
+<div class="block"><code>.google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingKeyOrBuilder.html#getVersion--">getVersion</a></span>()</code>
-<div class="block"><code>optional uint32 version = 1;</code></div>
+<div class="block"><code>uint32 version = 1;</code></div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingKeyOrBuilder.html#hasParams--">hasParams</a></span>()</code>
-<div class="block"><code>optional .google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
+<div class="block"><code>.google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
 </td>
 </tr>
 </table>
@@ -182,7 +182,11 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <li class="blockList">
 <h4>getVersion</h4>
 <pre>int&nbsp;getVersion()</pre>
-<div class="block"><code>optional uint32 version = 1;</code></div>
+<div class="block"><code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The version.</dd>
+</dl>
 </li>
 </ul>
 <a name="hasParams--">
@@ -192,7 +196,11 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <li class="blockList">
 <h4>hasParams</h4>
 <pre>boolean&nbsp;hasParams()</pre>
-<div class="block"><code>optional .google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
+<div class="block"><code>.google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the params field is set.</dd>
+</dl>
 </li>
 </ul>
 <a name="getParams--">
@@ -202,7 +210,11 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <li class="blockList">
 <h4>getParams</h4>
 <pre><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a>&nbsp;getParams()</pre>
-<div class="block"><code>optional .google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
+<div class="block"><code>.google.crypto.tink.AesCtrHmacStreamingParams params = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The params.</dd>
+</dl>
 </li>
 </ul>
 <a name="getKeyValue--">
@@ -216,7 +228,11 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
  the main key, aka. "ikm", input key material
  </pre>
 
- <code>optional bytes key_value = 3;</code></div>
+ <code>bytes key_value = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The keyValue.</dd>
+</dl>
 </li>
 </ul>
 </li>

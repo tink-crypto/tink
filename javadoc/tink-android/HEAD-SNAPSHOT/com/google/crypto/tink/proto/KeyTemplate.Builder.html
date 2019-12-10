@@ -260,14 +260,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -308,10 +308,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html#getTypeUrl--">getTypeUrl</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTemplateOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The typeUrl.</dd>
 </dl>
 </li>
 </ul>
@@ -326,10 +328,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html#getTypeUrlBytes--">getTypeUrlBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTemplateOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for typeUrl.</dd>
 </dl>
 </li>
 </ul>
@@ -344,7 +348,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The typeUrl to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearTypeUrl--">
@@ -358,7 +368,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="setTypeUrlBytes-com.google.protobuf.ByteString-">
@@ -372,7 +386,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  Required.
  </pre>
 
- <code>optional string type_url = 1;</code></div>
+ <code>string type_url = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The bytes for typeUrl to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getValue--">
@@ -387,10 +407,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  If missing, it means the key type doesn't require a *KeyFormat proto.
  </pre>
 
- <code>optional bytes value = 2;</code></div>
+ <code>bytes value = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html#getValue--">getValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTemplateOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The value.</dd>
 </dl>
 </li>
 </ul>
@@ -406,7 +428,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  If missing, it means the key type doesn't require a *KeyFormat proto.
  </pre>
 
- <code>optional bytes value = 2;</code></div>
+ <code>bytes value = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The value to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearValue--">
@@ -421,7 +449,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  If missing, it means the key type doesn't require a *KeyFormat proto.
  </pre>
 
- <code>optional bytes value = 2;</code></div>
+ <code>bytes value = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getOutputPrefixTypeValue--">
@@ -436,10 +468,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  If missing, uses OutputPrefixType.TINK.
  </pre>
 
- <code>optional .google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
+ <code>.google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html#getOutputPrefixTypeValue--">getOutputPrefixTypeValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTemplateOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The enum numeric value on the wire for outputPrefixType.</dd>
 </dl>
 </li>
 </ul>
@@ -455,7 +489,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  If missing, uses OutputPrefixType.TINK.
  </pre>
 
- <code>optional .google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
+ <code>.google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The outputPrefixType to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getOutputPrefixType--">
@@ -470,10 +510,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  If missing, uses OutputPrefixType.TINK.
  </pre>
 
- <code>optional .google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
+ <code>.google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html#getOutputPrefixType--">getOutputPrefixType</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTemplateOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The outputPrefixType.</dd>
 </dl>
 </li>
 </ul>
@@ -489,7 +531,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  If missing, uses OutputPrefixType.TINK.
  </pre>
 
- <code>optional .google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
+ <code>.google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The enum numeric value on the wire for outputPrefixType to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearOutputPrefixType--">
@@ -504,7 +552,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTemplateOrBui
  If missing, uses OutputPrefixType.TINK.
  </pre>
 
- <code>optional .google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
+ <code>.google.crypto.tink.OutputPrefixType output_prefix_type = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

@@ -273,14 +273,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -323,10 +323,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType sig_hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType sig_hash = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getSigHashValue--">getSigHashValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The enum numeric value on the wire for sigHash.</dd>
 </dl>
 </li>
 </ul>
@@ -343,7 +345,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType sig_hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType sig_hash = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The sigHash to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getSigHash--">
@@ -359,10 +367,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType sig_hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType sig_hash = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getSigHash--">getSigHash</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The sigHash.</dd>
 </dl>
 </li>
 </ul>
@@ -379,7 +389,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType sig_hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType sig_hash = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The enum numeric value on the wire for sigHash to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearSigHash--">
@@ -395,7 +411,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType sig_hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType sig_hash = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getMgf1HashValue--">
@@ -411,10 +431,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType mgf1_hash = 2;</code></div>
+ <code>.google.crypto.tink.HashType mgf1_hash = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getMgf1HashValue--">getMgf1HashValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The enum numeric value on the wire for mgf1Hash.</dd>
 </dl>
 </li>
 </ul>
@@ -431,7 +453,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType mgf1_hash = 2;</code></div>
+ <code>.google.crypto.tink.HashType mgf1_hash = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The mgf1Hash to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getMgf1Hash--">
@@ -447,10 +475,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType mgf1_hash = 2;</code></div>
+ <code>.google.crypto.tink.HashType mgf1_hash = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getMgf1Hash--">getMgf1Hash</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The mgf1Hash.</dd>
 </dl>
 </li>
 </ul>
@@ -467,7 +497,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType mgf1_hash = 2;</code></div>
+ <code>.google.crypto.tink.HashType mgf1_hash = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The enum numeric value on the wire for mgf1Hash to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearMgf1Hash--">
@@ -483,7 +519,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType mgf1_hash = 2;</code></div>
+ <code>.google.crypto.tink.HashType mgf1_hash = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getSaltLength--">
@@ -498,10 +538,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional int32 salt_length = 3;</code></div>
+ <code>int32 salt_length = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getSaltLength--">getSaltLength</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The saltLength.</dd>
 </dl>
 </li>
 </ul>
@@ -517,7 +559,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional int32 salt_length = 3;</code></div>
+ <code>int32 salt_length = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The saltLength to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearSaltLength--">
@@ -532,7 +580,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssParamsO
  Required.
  </pre>
 
- <code>optional int32 salt_length = 3;</code></div>
+ <code>int32 salt_length = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

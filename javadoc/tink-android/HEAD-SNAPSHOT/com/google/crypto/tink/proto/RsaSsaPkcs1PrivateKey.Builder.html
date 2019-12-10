@@ -362,14 +362,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -410,10 +410,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getVersion--">getVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The version.</dd>
 </dl>
 </li>
 </ul>
@@ -428,7 +430,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The version to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearVersion--">
@@ -442,7 +450,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="hasPublicKey--">
@@ -456,10 +468,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#hasPublicKey--">hasPublicKey</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the publicKey field is set.</dd>
 </dl>
 </li>
 </ul>
@@ -474,10 +488,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getPublicKey--">getPublicKey</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The publicKey.</dd>
 </dl>
 </li>
 </ul>
@@ -492,7 +508,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
 </li>
 </ul>
 <a name="setPublicKey-com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey.Builder-">
@@ -506,7 +522,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
 </li>
 </ul>
 <a name="mergePublicKey-com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey-">
@@ -520,7 +536,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
 </li>
 </ul>
 <a name="clearPublicKey--">
@@ -534,7 +550,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1PublicKey public_key = 2;</code></div>
 </li>
 </ul>
 <a name="getD--">
@@ -550,10 +566,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes d = 3;</code></div>
+ <code>bytes d = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getD--">getD</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The d.</dd>
 </dl>
 </li>
 </ul>
@@ -570,7 +588,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes d = 3;</code></div>
+ <code>bytes d = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The d to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearD--">
@@ -586,7 +610,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes d = 3;</code></div>
+ <code>bytes d = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getP--">
@@ -603,10 +631,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes p = 4;</code></div>
+ <code>bytes p = 4;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getP--">getP</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The p.</dd>
 </dl>
 </li>
 </ul>
@@ -624,7 +654,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes p = 4;</code></div>
+ <code>bytes p = 4;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The p to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearP--">
@@ -641,7 +677,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes p = 4;</code></div>
+ <code>bytes p = 4;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getQ--">
@@ -657,10 +697,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes q = 5;</code></div>
+ <code>bytes q = 5;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getQ--">getQ</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The q.</dd>
 </dl>
 </li>
 </ul>
@@ -677,7 +719,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes q = 5;</code></div>
+ <code>bytes q = 5;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The q to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearQ--">
@@ -693,7 +741,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes q = 5;</code></div>
+ <code>bytes q = 5;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getDp--">
@@ -709,10 +761,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes dp = 6;</code></div>
+ <code>bytes dp = 6;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getDp--">getDp</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The dp.</dd>
 </dl>
 </li>
 </ul>
@@ -729,7 +783,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes dp = 6;</code></div>
+ <code>bytes dp = 6;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The dp to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearDp--">
@@ -745,7 +805,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes dp = 6;</code></div>
+ <code>bytes dp = 6;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getDq--">
@@ -761,10 +825,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes dq = 7;</code></div>
+ <code>bytes dq = 7;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getDq--">getDq</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The dq.</dd>
 </dl>
 </li>
 </ul>
@@ -781,7 +847,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes dq = 7;</code></div>
+ <code>bytes dq = 7;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The dq to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearDq--">
@@ -797,7 +869,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes dq = 7;</code></div>
+ <code>bytes dq = 7;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getCrt--">
@@ -813,10 +889,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes crt = 8;</code></div>
+ <code>bytes crt = 8;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getCrt--">getCrt</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The crt.</dd>
 </dl>
 </li>
 </ul>
@@ -833,7 +911,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes crt = 8;</code></div>
+ <code>bytes crt = 8;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The crt to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearCrt--">
@@ -849,7 +933,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Priva
  Required.
  </pre>
 
- <code>optional bytes crt = 8;</code></div>
+ <code>bytes crt = 8;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

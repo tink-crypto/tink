@@ -285,14 +285,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeysetOrBuilder.
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -334,10 +334,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeysetOrBuilder.
  Required.
  </pre>
 
- <code>optional uint32 primary_key_id = 1;</code></div>
+ <code>uint32 primary_key_id = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeysetOrBuilder.html#getPrimaryKeyId--">getPrimaryKeyId</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeysetOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeysetOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The primaryKeyId.</dd>
 </dl>
 </li>
 </ul>
@@ -353,7 +355,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeysetOrBuilder.
  Required.
  </pre>
 
- <code>optional uint32 primary_key_id = 1;</code></div>
+ <code>uint32 primary_key_id = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The primaryKeyId to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearPrimaryKeyId--">
@@ -368,7 +376,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeysetOrBuilder.
  Required.
  </pre>
 
- <code>optional uint32 primary_key_id = 1;</code></div>
+ <code>uint32 primary_key_id = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getKeyList--">

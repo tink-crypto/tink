@@ -173,7 +173,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/HmacParams.Builder.html" title="class in com.google.crypto.tink.proto">HmacParams.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/HmacParams.Builder.html#clearTagSize--">clearTagSize</a></span>()</code>
-<div class="block"><code>optional uint32 tag_size = 2;</code></div>
+<div class="block"><code>uint32 tag_size = 2;</code></div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -193,7 +193,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/HmacParams.Builder.html#getTagSize--">getTagSize</a></span>()</code>
-<div class="block"><code>optional uint32 tag_size = 2;</code></div>
+<div class="block"><code>uint32 tag_size = 2;</code></div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
@@ -213,7 +213,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/HmacParams.Builder.html" title="class in com.google.crypto.tink.proto">HmacParams.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/HmacParams.Builder.html#setTagSize-int-">setTagSize</a></span>(int&nbsp;value)</code>
-<div class="block"><code>optional uint32 tag_size = 2;</code></div>
+<div class="block"><code>uint32 tag_size = 2;</code></div>
 </td>
 </tr>
 </table>
@@ -222,14 +222,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -270,10 +270,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
  HashType is an enum.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuilder.html#getHashValue--">getHashValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">HmacParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The enum numeric value on the wire for hash.</dd>
 </dl>
 </li>
 </ul>
@@ -288,7 +290,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
  HashType is an enum.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The hash to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getHash--">
@@ -302,10 +310,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
  HashType is an enum.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuilder.html#getHash--">getHash</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">HmacParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The hash.</dd>
 </dl>
 </li>
 </ul>
@@ -320,7 +330,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
  HashType is an enum.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The enum numeric value on the wire for hash to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearHash--">
@@ -334,7 +350,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
  HashType is an enum.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getTagSize--">
@@ -344,10 +364,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
 <li class="blockList">
 <h4>getTagSize</h4>
 <pre>public&nbsp;int&nbsp;getTagSize()</pre>
-<div class="block"><code>optional uint32 tag_size = 2;</code></div>
+<div class="block"><code>uint32 tag_size = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuilder.html#getTagSize--">getTagSize</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">HmacParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The tagSize.</dd>
 </dl>
 </li>
 </ul>
@@ -358,7 +380,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
 <li class="blockList">
 <h4>setTagSize</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/HmacParams.Builder.html" title="class in com.google.crypto.tink.proto">HmacParams.Builder</a>&nbsp;setTagSize(int&nbsp;value)</pre>
-<div class="block"><code>optional uint32 tag_size = 2;</code></div>
+<div class="block"><code>uint32 tag_size = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The tagSize to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearTagSize--">
@@ -368,7 +396,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/HmacParamsOrBuil
 <li class="blockList">
 <h4>clearTagSize</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/HmacParams.Builder.html" title="class in com.google.crypto.tink.proto">HmacParams.Builder</a>&nbsp;clearTagSize()</pre>
-<div class="block"><code>optional uint32 tag_size = 2;</code></div>
+<div class="block"><code>uint32 tag_size = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

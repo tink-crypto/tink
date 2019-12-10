@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":9,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":10};
-var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":42,"i1":42,"i2":42,"i3":41,"i4":42,"i5":42,"i6":42,"i7":42,"i8":42,"i9":42,"i10":41,"i11":41,"i12":41,"i13":41,"i14":41,"i15":41,"i16":41,"i17":41,"i18":41,"i19":41,"i20":41,"i21":41,"i22":41,"i23":41,"i24":41};
+var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -121,8 +121,10 @@ var activeTableTab = "activeTableTab";
 <dd><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a>, com.google.protobuf.MessageLite, com.google.protobuf.MessageLiteOrBuilder</dd>
 </dl>
 <hr>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <br>
-<pre>public final class <span class="typeNameLabel">KeyTypeEntry</span>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public final class <span class="typeNameLabel">KeyTypeEntry</span>
 extends com.google.protobuf.GeneratedMessageLite&lt;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>,<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a>&gt;
 implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></pre>
 <div class="block"><pre>
@@ -153,6 +155,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">
  An entry that describes a key type to be used with Tink library,
  specifying the corresponding primitive, key manager, and deprecation status.</div>
@@ -164,7 +167,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <!--   -->
 </a>
 <h3>Nested classes/interfaces inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite</h3>
-<code>com.google.protobuf.GeneratedMessageLite.DefaultInstanceBasedParser&lt;T extends com.google.protobuf.GeneratedMessageLite&lt;T,?&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableMessageOrBuilder&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.GeneratedExtension&lt;ContainingType extends com.google.protobuf.MessageLite,Type&gt;, com.google.protobuf.GeneratedMessageLite.MergeFromVisitor, com.google.protobuf.GeneratedMessageLite.MethodToInvoke, com.google.protobuf.GeneratedMessageLite.SerializedForm, com.google.protobuf.GeneratedMessageLite.Visitor</code></li>
+<code>com.google.protobuf.GeneratedMessageLite.DefaultInstanceBasedParser&lt;T extends com.google.protobuf.GeneratedMessageLite&lt;T,?&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableMessageOrBuilder&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.GeneratedExtension&lt;ContainingType extends com.google.protobuf.MessageLite,Type&gt;, com.google.protobuf.GeneratedMessageLite.MethodToInvoke, com.google.protobuf.GeneratedMessageLite.SerializedForm</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="nested.classes.inherited.from.class.com.google.protobuf.AbstractMessageLite">
+<!--   -->
+</a>
+<h3>Nested classes/interfaces inherited from class&nbsp;com.google.protobuf.AbstractMessageLite</h3>
+<code>com.google.protobuf.AbstractMessageLite.InternalOneOfEnum</code></li>
 </ul>
 </li>
 </ul>
@@ -182,23 +192,33 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#CATALOGUE_NAME_FIELD_NUMBER">CATALOGUE_NAME_FIELD_NUMBER</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#CATALOGUE_NAME_FIELD_NUMBER">CATALOGUE_NAME_FIELD_NUMBER</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#KEY_MANAGER_VERSION_FIELD_NUMBER">KEY_MANAGER_VERSION_FIELD_NUMBER</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#KEY_MANAGER_VERSION_FIELD_NUMBER">KEY_MANAGER_VERSION_FIELD_NUMBER</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#NEW_KEY_ALLOWED_FIELD_NUMBER">NEW_KEY_ALLOWED_FIELD_NUMBER</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#NEW_KEY_ALLOWED_FIELD_NUMBER">NEW_KEY_ALLOWED_FIELD_NUMBER</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#PRIMITIVE_NAME_FIELD_NUMBER">PRIMITIVE_NAME_FIELD_NUMBER</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#PRIMITIVE_NAME_FIELD_NUMBER">PRIMITIVE_NAME_FIELD_NUMBER</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#TYPE_URL_FIELD_NUMBER">TYPE_URL_FIELD_NUMBER</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#TYPE_URL_FIELD_NUMBER">TYPE_URL_FIELD_NUMBER</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -224,7 +244,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -233,11 +253,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <td class="colFirst"><code>protected <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod</a></span>(com.google.protobuf.GeneratedMessageLite.MethodToInvoke&nbsp;method,
              <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;arg0,
-             <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;arg1)</code>&nbsp;</td>
+             <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;arg1)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getCatalogueName--">getCatalogueName</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">
  Catalogue to be queried for key manager,</div>
 </td>
@@ -245,17 +268,21 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>com.google.protobuf.ByteString</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getCatalogueNameBytes--">getCatalogueNameBytes</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">
  Catalogue to be queried for key manager,</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getDefaultInstance--">getDefaultInstance</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getDefaultInstance--">getDefaultInstance</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getKeyManagerVersion--">getKeyManagerVersion</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">
  Minimum required version of key manager.</div>
 </td>
@@ -263,6 +290,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getNewKeyAllowed--">getNewKeyAllowed</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">
  Can the key manager create new keys?</div>
 </td>
@@ -270,6 +298,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getPrimitiveName--">getPrimitiveName</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">
  E.g.</div>
 </td>
@@ -277,88 +306,122 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>com.google.protobuf.ByteString</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getPrimitiveNameBytes--">getPrimitiveNameBytes</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">
  E.g.</div>
 </td>
 </tr>
 <tr id="i8" class="altColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getSerializedSize--">getSerializedSize</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getTypeUrl--">getTypeUrl</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block">
+ Name of the key type.</div>
+</td>
+</tr>
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code>com.google.protobuf.ByteString</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getTypeUrlBytes--">getTypeUrlBytes</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">
  Name of the key type.</div>
 </td>
 </tr>
 <tr id="i10" class="altColor">
-<td class="colFirst"><code>com.google.protobuf.ByteString</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#getTypeUrlBytes--">getTypeUrlBytes</a></span>()</code>
-<div class="block">
- Name of the key type.</div>
-</td>
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#newBuilder--">newBuilder</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i11" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#newBuilder--">newBuilder</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#newBuilder-com.google.crypto.tink.proto.KeyTypeEntry-">newBuilder</a></span>(<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;prototype)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i12" class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#newBuilder-com.google.crypto.tink.proto.KeyTypeEntry-">newBuilder</a></span>(<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;prototype)</code>&nbsp;</td>
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i13" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
+                  com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i14" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
-                  com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-byte:A-">parseFrom</a></span>(byte[]&nbsp;data)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i15" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-byte:A-">parseFrom</a></span>(byte[]&nbsp;data)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(byte[]&nbsp;data,
+         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(byte[]&nbsp;data,
-         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-java.nio.ByteBuffer-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i17" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-com.google.protobuf.ByteString-">parseFrom</a></span>(com.google.protobuf.ByteString&nbsp;data)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-java.nio.ByteBuffer-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data,
+         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i18" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(com.google.protobuf.ByteString&nbsp;data,
-         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-com.google.protobuf.ByteString-">parseFrom</a></span>(com.google.protobuf.ByteString&nbsp;data)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i19" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom</a></span>(com.google.protobuf.CodedInputStream&nbsp;input)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(com.google.protobuf.ByteString&nbsp;data,
+         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i20" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(com.google.protobuf.CodedInputStream&nbsp;input,
-         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom</a></span>(com.google.protobuf.CodedInputStream&nbsp;input)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i21" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-java.io.InputStream-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(com.google.protobuf.CodedInputStream&nbsp;input,
+         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i22" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
-         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-java.io.InputStream-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i23" class="rowColor">
-<td class="colFirst"><code>static com.google.protobuf.Parser&lt;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parser--">parser</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
+         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i24" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo</a></span>(com.google.protobuf.CodedOutputStream&nbsp;output)</code>&nbsp;</td>
+<td class="colFirst"><code>static com.google.protobuf.Parser&lt;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html#parser--">parser</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -366,14 +429,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite</h3>
-<code>dynamicMethod, dynamicMethod, emptyBooleanList, emptyDoubleList, emptyFloatList, emptyIntList, emptyLongList, emptyProtobufList, equals, getDefaultInstanceForType, getParserForType, hashCode, isInitialized, isInitialized, makeImmutable, makeImmutable, mergeLengthDelimitedField, mergeUnknownFields, mergeVarintField, mutableCopy, mutableCopy, mutableCopy, mutableCopy, mutableCopy, mutableCopy, newBuilderForType, newRepeatedGeneratedExtension, newSingularGeneratedExtension, parseDelimitedFrom, parseDelimitedFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parsePartialFrom, parseUnknownField, toBuilder, toString</code></li>
+<code>createBuilder, createBuilder, dynamicMethod, dynamicMethod, emptyBooleanList, emptyDoubleList, emptyFloatList, emptyIntList, emptyLongList, emptyProtobufList, equals, getDefaultInstanceForType, getParserForType, getSerializedSize, hashCode, isInitialized, isInitialized, makeImmutable, mergeLengthDelimitedField, mergeUnknownFields, mergeVarintField, mutableCopy, mutableCopy, mutableCopy, mutableCopy, mutableCopy, mutableCopy, newBuilderForType, newMessageInfo, newRepeatedGeneratedExtension, newSingularGeneratedExtension, parseDelimitedFrom, parseDelimitedFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parsePartialFrom, parseUnknownField, registerDefaultInstance, toBuilder, toString, writeTo</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite</h3>
-<code>addAll, checkByteStringIsUtf8, toByteArray, toByteString, writeDelimitedTo, writeTo</code></li>
+<code>addAll, addAll, checkByteStringIsUtf8, toByteArray, toByteString, writeDelimitedTo, writeTo</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -410,6 +473,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>PRIMITIVE_NAME_FIELD_NUMBER</h4>
 <pre>public static final&nbsp;int PRIMITIVE_NAME_FIELD_NUMBER</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.KeyTypeEntry.PRIMITIVE_NAME_FIELD_NUMBER">Constant Field Values</a></dd>
@@ -423,6 +487,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>TYPE_URL_FIELD_NUMBER</h4>
 <pre>public static final&nbsp;int TYPE_URL_FIELD_NUMBER</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.KeyTypeEntry.TYPE_URL_FIELD_NUMBER">Constant Field Values</a></dd>
@@ -436,6 +501,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>KEY_MANAGER_VERSION_FIELD_NUMBER</h4>
 <pre>public static final&nbsp;int KEY_MANAGER_VERSION_FIELD_NUMBER</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.KeyTypeEntry.KEY_MANAGER_VERSION_FIELD_NUMBER">Constant Field Values</a></dd>
@@ -449,6 +515,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>NEW_KEY_ALLOWED_FIELD_NUMBER</h4>
 <pre>public static final&nbsp;int NEW_KEY_ALLOWED_FIELD_NUMBER</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.KeyTypeEntry.NEW_KEY_ALLOWED_FIELD_NUMBER">Constant Field Values</a></dd>
@@ -462,6 +529,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>CATALOGUE_NAME_FIELD_NUMBER</h4>
 <pre>public static final&nbsp;int CATALOGUE_NAME_FIELD_NUMBER</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.KeyTypeEntry.CATALOGUE_NAME_FIELD_NUMBER">Constant Field Values</a></dd>
@@ -483,14 +551,17 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getPrimitiveName</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getPrimitiveName()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><pre>
  E.g. “Aead”, “Mac”, ... (case-insensitive)
  </pre>
 
- <code>optional string primitive_name = 1;</code></div>
+ <code>string primitive_name = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getPrimitiveName--">getPrimitiveName</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The primitiveName.</dd>
 </dl>
 </li>
 </ul>
@@ -501,14 +572,17 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getPrimitiveNameBytes</h4>
 <pre>public&nbsp;com.google.protobuf.ByteString&nbsp;getPrimitiveNameBytes()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><pre>
  E.g. “Aead”, “Mac”, ... (case-insensitive)
  </pre>
 
- <code>optional string primitive_name = 1;</code></div>
+ <code>string primitive_name = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getPrimitiveNameBytes--">getPrimitiveNameBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for primitiveName.</dd>
 </dl>
 </li>
 </ul>
@@ -519,14 +593,17 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getTypeUrl</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getTypeUrl()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><pre>
  Name of the key type.
  </pre>
 
- <code>optional string type_url = 2;</code></div>
+ <code>string type_url = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getTypeUrl--">getTypeUrl</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The typeUrl.</dd>
 </dl>
 </li>
 </ul>
@@ -537,14 +614,17 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getTypeUrlBytes</h4>
 <pre>public&nbsp;com.google.protobuf.ByteString&nbsp;getTypeUrlBytes()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><pre>
  Name of the key type.
  </pre>
 
- <code>optional string type_url = 2;</code></div>
+ <code>string type_url = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getTypeUrlBytes--">getTypeUrlBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for typeUrl.</dd>
 </dl>
 </li>
 </ul>
@@ -555,14 +635,17 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getKeyManagerVersion</h4>
 <pre>public&nbsp;int&nbsp;getKeyManagerVersion()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><pre>
  Minimum required version of key manager.
  </pre>
 
- <code>optional uint32 key_manager_version = 3;</code></div>
+ <code>uint32 key_manager_version = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getKeyManagerVersion--">getKeyManagerVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The keyManagerVersion.</dd>
 </dl>
 </li>
 </ul>
@@ -573,14 +656,17 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getNewKeyAllowed</h4>
 <pre>public&nbsp;boolean&nbsp;getNewKeyAllowed()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><pre>
  Can the key manager create new keys?
  </pre>
 
- <code>optional bool new_key_allowed = 4;</code></div>
+ <code>bool new_key_allowed = 4;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getNewKeyAllowed--">getNewKeyAllowed</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The newKeyAllowed.</dd>
 </dl>
 </li>
 </ul>
@@ -591,14 +677,17 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getCatalogueName</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getCatalogueName()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><pre>
  Catalogue to be queried for key manager,
  </pre>
 
- <code>optional string catalogue_name = 5;</code></div>
+ <code>string catalogue_name = 5;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getCatalogueName--">getCatalogueName</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The catalogueName.</dd>
 </dl>
 </li>
 </ul>
@@ -609,43 +698,48 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getCatalogueNameBytes</h4>
 <pre>public&nbsp;com.google.protobuf.ByteString&nbsp;getCatalogueNameBytes()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><pre>
  Catalogue to be queried for key manager,
  </pre>
 
- <code>optional string catalogue_name = 5;</code></div>
+ <code>string catalogue_name = 5;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getCatalogueNameBytes--">getCatalogueNameBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for catalogueName.</dd>
 </dl>
 </li>
 </ul>
-<a name="writeTo-com.google.protobuf.CodedOutputStream-">
+<a name="parseFrom-java.nio.ByteBuffer-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>writeTo</h4>
-<pre>public&nbsp;void&nbsp;writeTo(com.google.protobuf.CodedOutputStream&nbsp;output)
-             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<h4>parseFrom</h4>
+<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data)
+                              throws com.google.protobuf.InvalidProtocolBufferException</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>writeTo</code>&nbsp;in interface&nbsp;<code>com.google.protobuf.MessageLite</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
 </dl>
 </li>
 </ul>
-<a name="getSerializedSize--">
+<a name="parseFrom-java.nio.ByteBuffer-com.google.protobuf.ExtensionRegistryLite-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getSerializedSize</h4>
-<pre>public&nbsp;int&nbsp;getSerializedSize()</pre>
+<h4>parseFrom</h4>
+<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data,
+                                     com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)
+                              throws com.google.protobuf.InvalidProtocolBufferException</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>getSerializedSize</code>&nbsp;in interface&nbsp;<code>com.google.protobuf.MessageLite</code></dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
 </dl>
 </li>
 </ul>
@@ -657,6 +751,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <h4>parseFrom</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(com.google.protobuf.ByteString&nbsp;data)
                               throws com.google.protobuf.InvalidProtocolBufferException</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
@@ -672,6 +767,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(com.google.protobuf.ByteString&nbsp;data,
                                      com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)
                               throws com.google.protobuf.InvalidProtocolBufferException</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
@@ -686,6 +782,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <h4>parseFrom</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(byte[]&nbsp;data)
                               throws com.google.protobuf.InvalidProtocolBufferException</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
@@ -701,6 +798,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(byte[]&nbsp;data,
                                      com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)
                               throws com.google.protobuf.InvalidProtocolBufferException</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
@@ -715,6 +813,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <h4>parseFrom</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)
                               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -730,6 +829,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
                                      com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)
                               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -744,6 +844,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <h4>parseDelimitedFrom</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseDelimitedFrom(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)
                                        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -759,6 +860,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseDelimitedFrom(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
                                               com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)
                                        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -773,6 +875,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <h4>parseFrom</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(com.google.protobuf.CodedInputStream&nbsp;input)
                               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -788,6 +891,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;parseFrom(com.google.protobuf.CodedInputStream&nbsp;input,
                                      com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)
                               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -801,6 +905,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>newBuilder</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a>&nbsp;newBuilder()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 <a name="newBuilder-com.google.crypto.tink.proto.KeyTypeEntry-">
@@ -810,6 +915,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>newBuilder</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a>&nbsp;newBuilder(<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;prototype)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 <a name="dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">
@@ -821,6 +927,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <pre>protected final&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;dynamicMethod(com.google.protobuf.GeneratedMessageLite.MethodToInvoke&nbsp;method,
                                      <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;arg0,
                                      <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;arg1)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>dynamicMethod</code>&nbsp;in class&nbsp;<code>com.google.protobuf.GeneratedMessageLite&lt;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>,<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a>&gt;</code></dd>
@@ -834,6 +941,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>getDefaultInstance</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;getDefaultInstance()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 <a name="parser--">
@@ -843,6 +951,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <li class="blockList">
 <h4>parser</h4>
 <pre>public static&nbsp;com.google.protobuf.Parser&lt;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&gt;&nbsp;parser()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 </li>

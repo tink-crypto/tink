@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":9,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":10};
+var methods = {"i0":10,"i1":10,"i2":9,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -156,7 +156,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
 <!--   -->
 </a>
 <h3>Nested classes/interfaces inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite</h3>
-<code>com.google.protobuf.GeneratedMessageLite.DefaultInstanceBasedParser&lt;T extends com.google.protobuf.GeneratedMessageLite&lt;T,?&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableMessageOrBuilder&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.GeneratedExtension&lt;ContainingType extends com.google.protobuf.MessageLite,Type&gt;, com.google.protobuf.GeneratedMessageLite.MergeFromVisitor, com.google.protobuf.GeneratedMessageLite.MethodToInvoke, com.google.protobuf.GeneratedMessageLite.SerializedForm, com.google.protobuf.GeneratedMessageLite.Visitor</code></li>
+<code>com.google.protobuf.GeneratedMessageLite.DefaultInstanceBasedParser&lt;T extends com.google.protobuf.GeneratedMessageLite&lt;T,?&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.ExtendableMessageOrBuilder&lt;MessageType extends com.google.protobuf.GeneratedMessageLite.ExtendableMessage&lt;MessageType,BuilderType&gt;,BuilderType extends com.google.protobuf.GeneratedMessageLite.ExtendableBuilder&lt;MessageType,BuilderType&gt;&gt;, com.google.protobuf.GeneratedMessageLite.GeneratedExtension&lt;ContainingType extends com.google.protobuf.MessageLite,Type&gt;, com.google.protobuf.GeneratedMessageLite.MethodToInvoke, com.google.protobuf.GeneratedMessageLite.SerializedForm</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="nested.classes.inherited.from.class.com.google.protobuf.AbstractMessageLite">
+<!--   -->
+</a>
+<h3>Nested classes/interfaces inherited from class&nbsp;com.google.protobuf.AbstractMessageLite</h3>
+<code>com.google.protobuf.AbstractMessageLite.InternalOneOfEnum</code></li>
 </ul>
 </li>
 </ul>
@@ -226,7 +233,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#getCiphertextSegmentSize--">getCiphertextSegmentSize</a></span>()</code>
-<div class="block"><code>optional uint32 ciphertext_segment_size = 1;</code></div>
+<div class="block"><code>uint32 ciphertext_segment_size = 1;</code></div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -262,76 +269,77 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
 </td>
 </tr>
 <tr id="i7" class="rowColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#getSerializedSize--">getSerializedSize</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i8" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#hasHmacParams--">hasHmacParams</a></span>()</code>
 <div class="block">
  params for authentication tags</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#newBuilder--">newBuilder</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#newBuilder-com.google.crypto.tink.proto.AesCtrHmacStreamingParams-">newBuilder</a></span>(<a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a>&nbsp;prototype)</code>&nbsp;</td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>&nbsp;</td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
                   com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-byte:A-">parseFrom</a></span>(byte[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(byte[]&nbsp;data,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
+<tr id="i14" class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-java.nio.ByteBuffer-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data)</code>&nbsp;</td>
+</tr>
 <tr id="i15" class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-java.nio.ByteBuffer-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data,
+         com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
+</tr>
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-com.google.protobuf.ByteString-">parseFrom</a></span>(com.google.protobuf.ByteString&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(com.google.protobuf.ByteString&nbsp;data,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom</a></span>(com.google.protobuf.CodedInputStream&nbsp;input)</code>&nbsp;</td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(com.google.protobuf.CodedInputStream&nbsp;input,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-java.io.InputStream-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>&nbsp;</td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input,
          com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)</code>&nbsp;</td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>static com.google.protobuf.Parser&lt;<a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#parser--">parser</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i22" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo</a></span>(com.google.protobuf.CodedOutputStream&nbsp;output)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -339,14 +347,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite</h3>
-<code>dynamicMethod, dynamicMethod, emptyBooleanList, emptyDoubleList, emptyFloatList, emptyIntList, emptyLongList, emptyProtobufList, equals, getDefaultInstanceForType, getParserForType, hashCode, isInitialized, isInitialized, makeImmutable, makeImmutable, mergeLengthDelimitedField, mergeUnknownFields, mergeVarintField, mutableCopy, mutableCopy, mutableCopy, mutableCopy, mutableCopy, mutableCopy, newBuilderForType, newRepeatedGeneratedExtension, newSingularGeneratedExtension, parseDelimitedFrom, parseDelimitedFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parsePartialFrom, parseUnknownField, toBuilder, toString</code></li>
+<code>createBuilder, createBuilder, dynamicMethod, dynamicMethod, emptyBooleanList, emptyDoubleList, emptyFloatList, emptyIntList, emptyLongList, emptyProtobufList, equals, getDefaultInstanceForType, getParserForType, getSerializedSize, hashCode, isInitialized, isInitialized, makeImmutable, mergeLengthDelimitedField, mergeUnknownFields, mergeVarintField, mutableCopy, mutableCopy, mutableCopy, mutableCopy, mutableCopy, mutableCopy, newBuilderForType, newMessageInfo, newRepeatedGeneratedExtension, newSingularGeneratedExtension, parseDelimitedFrom, parseDelimitedFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parseFrom, parsePartialFrom, parseUnknownField, registerDefaultInstance, toBuilder, toString, writeTo</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite</h3>
-<code>addAll, checkByteStringIsUtf8, toByteArray, toByteString, writeDelimitedTo, writeTo</code></li>
+<code>addAll, addAll, checkByteStringIsUtf8, toByteArray, toByteString, writeDelimitedTo, writeTo</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -443,10 +451,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
 <li class="blockList">
 <h4>getCiphertextSegmentSize</h4>
 <pre>public&nbsp;int&nbsp;getCiphertextSegmentSize()</pre>
-<div class="block"><code>optional uint32 ciphertext_segment_size = 1;</code></div>
+<div class="block"><code>uint32 ciphertext_segment_size = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html#getCiphertextSegmentSize--">getCiphertextSegmentSize</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCtrHmacStreamingParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The ciphertextSegmentSize.</dd>
 </dl>
 </li>
 </ul>
@@ -461,10 +471,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
  size of AES-CTR keys derived for each segment
  </pre>
 
- <code>optional uint32 derived_key_size = 2;</code></div>
+ <code>uint32 derived_key_size = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html#getDerivedKeySize--">getDerivedKeySize</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCtrHmacStreamingParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The derivedKeySize.</dd>
 </dl>
 </li>
 </ul>
@@ -479,10 +491,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
  hash function for key derivation via HKDF
  </pre>
 
- <code>optional .google.crypto.tink.HashType hkdf_hash_type = 3;</code></div>
+ <code>.google.crypto.tink.HashType hkdf_hash_type = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html#getHkdfHashTypeValue--">getHkdfHashTypeValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCtrHmacStreamingParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The enum numeric value on the wire for hkdfHashType.</dd>
 </dl>
 </li>
 </ul>
@@ -497,10 +511,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
  hash function for key derivation via HKDF
  </pre>
 
- <code>optional .google.crypto.tink.HashType hkdf_hash_type = 3;</code></div>
+ <code>.google.crypto.tink.HashType hkdf_hash_type = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html#getHkdfHashType--">getHkdfHashType</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCtrHmacStreamingParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The hkdfHashType.</dd>
 </dl>
 </li>
 </ul>
@@ -515,10 +531,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
  params for authentication tags
  </pre>
 
- <code>optional .google.crypto.tink.HmacParams hmac_params = 4;</code></div>
+ <code>.google.crypto.tink.HmacParams hmac_params = 4;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html#hasHmacParams--">hasHmacParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCtrHmacStreamingParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the hmacParams field is set.</dd>
 </dl>
 </li>
 </ul>
@@ -533,39 +551,41 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStream
  params for authentication tags
  </pre>
 
- <code>optional .google.crypto.tink.HmacParams hmac_params = 4;</code></div>
+ <code>.google.crypto.tink.HmacParams hmac_params = 4;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html#getHmacParams--">getHmacParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesCtrHmacStreamingParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The hmacParams.</dd>
 </dl>
 </li>
 </ul>
-<a name="writeTo-com.google.protobuf.CodedOutputStream-">
+<a name="parseFrom-java.nio.ByteBuffer-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>writeTo</h4>
-<pre>public&nbsp;void&nbsp;writeTo(com.google.protobuf.CodedOutputStream&nbsp;output)
-             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<h4>parseFrom</h4>
+<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a>&nbsp;parseFrom(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data)
+                                           throws com.google.protobuf.InvalidProtocolBufferException</pre>
 <dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>writeTo</code>&nbsp;in interface&nbsp;<code>com.google.protobuf.MessageLite</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
 </dl>
 </li>
 </ul>
-<a name="getSerializedSize--">
+<a name="parseFrom-java.nio.ByteBuffer-com.google.protobuf.ExtensionRegistryLite-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getSerializedSize</h4>
-<pre>public&nbsp;int&nbsp;getSerializedSize()</pre>
+<h4>parseFrom</h4>
+<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingParams.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingParams</a>&nbsp;parseFrom(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;data,
+                                                  com.google.protobuf.ExtensionRegistryLite&nbsp;extensionRegistry)
+                                           throws com.google.protobuf.InvalidProtocolBufferException</pre>
 <dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>getSerializedSize</code>&nbsp;in interface&nbsp;<code>com.google.protobuf.MessageLite</code></dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
 </dl>
 </li>
 </ul>

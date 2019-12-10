@@ -204,7 +204,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html#clearConfigName--">clearConfigName</a></span>()</code>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
@@ -216,13 +216,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html#getConfigName--">getConfigName</a></span>()</code>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
 </td>
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>com.google.protobuf.ByteString</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html#getConfigNameBytes--">getConfigNameBytes</a></span>()</code>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
 </td>
 </tr>
 <tr id="i9" class="rowColor">
@@ -252,13 +252,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <tr id="i13" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html#setConfigName-java.lang.String-">setConfigName</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</code>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
 </td>
 </tr>
 <tr id="i14" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html#setConfigNameBytes-com.google.protobuf.ByteString-">setConfigNameBytes</a></span>(com.google.protobuf.ByteString&nbsp;value)</code>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
 </td>
 </tr>
 <tr id="i15" class="rowColor">
@@ -281,14 +281,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -325,10 +325,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <li class="blockList">
 <h4>getConfigName</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getConfigName()</pre>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html#getConfigName--">getConfigName</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html" title="interface in com.google.crypto.tink.proto">RegistryConfigOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The configName.</dd>
 </dl>
 </li>
 </ul>
@@ -339,10 +341,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <li class="blockList">
 <h4>getConfigNameBytes</h4>
 <pre>public&nbsp;com.google.protobuf.ByteString&nbsp;getConfigNameBytes()</pre>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html#getConfigNameBytes--">getConfigNameBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html" title="interface in com.google.crypto.tink.proto">RegistryConfigOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for configName.</dd>
 </dl>
 </li>
 </ul>
@@ -353,7 +357,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <li class="blockList">
 <h4>setConfigName</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a>&nbsp;setConfigName(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The configName to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearConfigName--">
@@ -363,7 +373,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <li class="blockList">
 <h4>clearConfigName</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a>&nbsp;clearConfigName()</pre>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="setConfigNameBytes-com.google.protobuf.ByteString-">
@@ -373,7 +387,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOr
 <li class="blockList">
 <h4>setConfigNameBytes</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a>&nbsp;setConfigNameBytes(com.google.protobuf.ByteString&nbsp;value)</pre>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><code>string config_name = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The bytes for configName to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getEntryList--">

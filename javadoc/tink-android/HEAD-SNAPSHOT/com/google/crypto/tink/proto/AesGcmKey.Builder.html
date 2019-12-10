@@ -170,37 +170,37 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuild
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKey.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html#clearKeyValue--">clearKeyValue</a></span>()</code>
-<div class="block"><code>optional bytes key_value = 3;</code></div>
+<div class="block"><code>bytes key_value = 3;</code></div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKey.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html#clearVersion--">clearVersion</a></span>()</code>
-<div class="block"><code>optional uint32 version = 1;</code></div>
+<div class="block"><code>uint32 version = 1;</code></div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>com.google.protobuf.ByteString</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html#getKeyValue--">getKeyValue</a></span>()</code>
-<div class="block"><code>optional bytes key_value = 3;</code></div>
+<div class="block"><code>bytes key_value = 3;</code></div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html#getVersion--">getVersion</a></span>()</code>
-<div class="block"><code>optional uint32 version = 1;</code></div>
+<div class="block"><code>uint32 version = 1;</code></div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKey.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html#setKeyValue-com.google.protobuf.ByteString-">setKeyValue</a></span>(com.google.protobuf.ByteString&nbsp;value)</code>
-<div class="block"><code>optional bytes key_value = 3;</code></div>
+<div class="block"><code>bytes key_value = 3;</code></div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKey.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html#setVersion-int-">setVersion</a></span>(int&nbsp;value)</code>
-<div class="block"><code>optional uint32 version = 1;</code></div>
+<div class="block"><code>uint32 version = 1;</code></div>
 </td>
 </tr>
 </table>
@@ -209,14 +209,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuild
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -253,10 +253,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuild
 <li class="blockList">
 <h4>getVersion</h4>
 <pre>public&nbsp;int&nbsp;getVersion()</pre>
-<div class="block"><code>optional uint32 version = 1;</code></div>
+<div class="block"><code>uint32 version = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuilder.html#getVersion--">getVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesGcmKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The version.</dd>
 </dl>
 </li>
 </ul>
@@ -267,7 +269,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuild
 <li class="blockList">
 <h4>setVersion</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKey.Builder</a>&nbsp;setVersion(int&nbsp;value)</pre>
-<div class="block"><code>optional uint32 version = 1;</code></div>
+<div class="block"><code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The version to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearVersion--">
@@ -277,7 +285,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuild
 <li class="blockList">
 <h4>clearVersion</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKey.Builder</a>&nbsp;clearVersion()</pre>
-<div class="block"><code>optional uint32 version = 1;</code></div>
+<div class="block"><code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getKeyValue--">
@@ -287,10 +299,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuild
 <li class="blockList">
 <h4>getKeyValue</h4>
 <pre>public&nbsp;com.google.protobuf.ByteString&nbsp;getKeyValue()</pre>
-<div class="block"><code>optional bytes key_value = 3;</code></div>
+<div class="block"><code>bytes key_value = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuilder.html#getKeyValue--">getKeyValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">AesGcmKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The keyValue.</dd>
 </dl>
 </li>
 </ul>
@@ -301,7 +315,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuild
 <li class="blockList">
 <h4>setKeyValue</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKey.Builder</a>&nbsp;setKeyValue(com.google.protobuf.ByteString&nbsp;value)</pre>
-<div class="block"><code>optional bytes key_value = 3;</code></div>
+<div class="block"><code>bytes key_value = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The keyValue to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearKeyValue--">
@@ -311,7 +331,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyOrBuild
 <li class="blockList">
 <h4>clearKeyValue</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.Builder.html" title="class in com.google.crypto.tink.proto">AesGcmKey.Builder</a>&nbsp;clearKeyValue()</pre>
-<div class="block"><code>optional bytes key_value = 3;</code></div>
+<div class="block"><code>bytes key_value = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

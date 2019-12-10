@@ -253,14 +253,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -301,10 +301,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
+ <code>.google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html#hasParams--">hasParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssKeyFormatOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the params field is set.</dd>
 </dl>
 </li>
 </ul>
@@ -319,10 +321,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
+ <code>.google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html#getParams--">getParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssKeyFormatOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The params.</dd>
 </dl>
 </li>
 </ul>
@@ -337,7 +341,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
+ <code>.google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
 </li>
 </ul>
 <a name="setParams-com.google.crypto.tink.proto.RsaSsaPssParams.Builder-">
@@ -351,7 +355,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
+ <code>.google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
 </li>
 </ul>
 <a name="mergeParams-com.google.crypto.tink.proto.RsaSsaPssParams-">
@@ -365,7 +369,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
+ <code>.google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
 </li>
 </ul>
 <a name="clearParams--">
@@ -379,7 +383,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
+ <code>.google.crypto.tink.RsaSsaPssParams params = 1;</code></div>
 </li>
 </ul>
 <a name="getModulusSizeInBits--">
@@ -393,10 +397,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional uint32 modulus_size_in_bits = 2;</code></div>
+ <code>uint32 modulus_size_in_bits = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html#getModulusSizeInBits--">getModulusSizeInBits</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssKeyFormatOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The modulusSizeInBits.</dd>
 </dl>
 </li>
 </ul>
@@ -411,7 +417,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional uint32 modulus_size_in_bits = 2;</code></div>
+ <code>uint32 modulus_size_in_bits = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The modulusSizeInBits to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearModulusSizeInBits--">
@@ -425,7 +437,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional uint32 modulus_size_in_bits = 2;</code></div>
+ <code>uint32 modulus_size_in_bits = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getPublicExponent--">
@@ -439,10 +455,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional bytes public_exponent = 3;</code></div>
+ <code>bytes public_exponent = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html#getPublicExponent--">getPublicExponent</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssKeyFormatOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The publicExponent.</dd>
 </dl>
 </li>
 </ul>
@@ -457,7 +475,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional bytes public_exponent = 3;</code></div>
+ <code>bytes public_exponent = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The publicExponent to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearPublicExponent--">
@@ -471,7 +495,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyForm
  Required.
  </pre>
 
- <code>optional bytes public_exponent = 3;</code></div>
+ <code>bytes public_exponent = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

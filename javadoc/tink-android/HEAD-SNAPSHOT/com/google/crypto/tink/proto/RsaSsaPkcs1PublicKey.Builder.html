@@ -278,14 +278,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -326,10 +326,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html#getVersion--">getVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The version.</dd>
 </dl>
 </li>
 </ul>
@@ -344,7 +346,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The version to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearVersion--">
@@ -358,7 +366,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional uint32 version = 1;</code></div>
+ <code>uint32 version = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="hasParams--">
@@ -372,10 +384,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html#hasParams--">hasParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Whether the params field is set.</dd>
 </dl>
 </li>
 </ul>
@@ -390,10 +404,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html#getParams--">getParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The params.</dd>
 </dl>
 </li>
 </ul>
@@ -408,7 +424,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
 </li>
 </ul>
 <a name="setParams-com.google.crypto.tink.proto.RsaSsaPkcs1Params.Builder-">
@@ -422,7 +438,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
 </li>
 </ul>
 <a name="mergeParams-com.google.crypto.tink.proto.RsaSsaPkcs1Params-">
@@ -436,7 +452,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
 </li>
 </ul>
 <a name="clearParams--">
@@ -450,7 +466,7 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
+ <code>.google.crypto.tink.RsaSsaPkcs1Params params = 2;</code></div>
 </li>
 </ul>
 <a name="getN--">
@@ -465,10 +481,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Unsigned big integer in bigendian representation.
  </pre>
 
- <code>optional bytes n = 3;</code></div>
+ <code>bytes n = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html#getN--">getN</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The n.</dd>
 </dl>
 </li>
 </ul>
@@ -484,7 +502,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Unsigned big integer in bigendian representation.
  </pre>
 
- <code>optional bytes n = 3;</code></div>
+ <code>bytes n = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The n to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearN--">
@@ -499,7 +523,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Unsigned big integer in bigendian representation.
  </pre>
 
- <code>optional bytes n = 3;</code></div>
+ <code>bytes n = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getE--">
@@ -514,10 +542,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Unsigned big integer in bigendian representation.
  </pre>
 
- <code>optional bytes e = 4;</code></div>
+ <code>bytes e = 4;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html#getE--">getE</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKeyOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The e.</dd>
 </dl>
 </li>
 </ul>
@@ -533,7 +563,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Unsigned big integer in bigendian representation.
  </pre>
 
- <code>optional bytes e = 4;</code></div>
+ <code>bytes e = 4;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The e to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearE--">
@@ -548,7 +584,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Publi
  Unsigned big integer in bigendian representation.
  </pre>
 
- <code>optional bytes e = 4;</code></div>
+ <code>bytes e = 4;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

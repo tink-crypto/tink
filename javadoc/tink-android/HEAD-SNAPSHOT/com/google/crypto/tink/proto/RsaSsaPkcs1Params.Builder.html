@@ -209,14 +209,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Param
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -259,10 +259,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Param
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash_type = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash_type = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1ParamsOrBuilder.html#getHashTypeValue--">getHashTypeValue</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1ParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1ParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The enum numeric value on the wire for hashType.</dd>
 </dl>
 </li>
 </ul>
@@ -279,7 +281,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Param
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash_type = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash_type = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The hashType to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getHashType--">
@@ -295,10 +303,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Param
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash_type = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash_type = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1ParamsOrBuilder.html#getHashType--">getHashType</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1ParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1ParamsOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The hashType.</dd>
 </dl>
 </li>
 </ul>
@@ -315,7 +325,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Param
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash_type = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash_type = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The enum numeric value on the wire for hashType to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearHashType--">
@@ -331,7 +347,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1Param
  Required.
  </pre>
 
- <code>optional .google.crypto.tink.HashType hash_type = 1;</code></div>
+ <code>.google.crypto.tink.HashType hash_type = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

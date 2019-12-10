@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
+var methods = {"i0":38,"i1":38,"i2":38,"i3":38,"i4":38};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -107,8 +107,10 @@ var activeTableTab = "activeTableTab";
 <dd><a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.html" title="class in com.google.crypto.tink.proto">RegistryConfig</a>, <a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.Builder.html" title="class in com.google.crypto.tink.proto">RegistryConfig.Builder</a></dd>
 </dl>
 <hr>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <br>
-<pre>public interface <span class="typeNameLabel">RegistryConfigOrBuilder</span>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public interface <span class="typeNameLabel">RegistryConfigOrBuilder</span>
 extends com.google.protobuf.MessageLiteOrBuilder</pre>
 </li>
 </ul>
@@ -123,7 +125,7 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t3" class="tableTab"><span><a href="javascript:show(4);">Abstract Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t3" class="tableTab"><span><a href="javascript:show(4);">Abstract Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -131,30 +133,35 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html#getConfigName--">getConfigName</a></span>()</code>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block"><code>string config_name = 1;</code></div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>com.google.protobuf.ByteString</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html#getConfigNameBytes--">getConfigNameBytes</a></span>()</code>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block"><code>string config_name = 1;</code></div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html#getEntry-int-">getEntry</a></span>(int&nbsp;index)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><code>repeated .google.crypto.tink.KeyTypeEntry entry = 2;</code></div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html#getEntryCount--">getEntryCount</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><code>repeated .google.crypto.tink.KeyTypeEntry entry = 2;</code></div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/RegistryConfigOrBuilder.html#getEntryList--">getEntryList</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><code>repeated .google.crypto.tink.KeyTypeEntry entry = 2;</code></div>
 </td>
 </tr>
@@ -187,7 +194,12 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <li class="blockList">
 <h4>getConfigName</h4>
 <pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getConfigName()</pre>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block"><code>string config_name = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The configName.</dd>
+</dl>
 </li>
 </ul>
 <a name="getConfigNameBytes--">
@@ -197,7 +209,12 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <li class="blockList">
 <h4>getConfigNameBytes</h4>
 <pre>com.google.protobuf.ByteString&nbsp;getConfigNameBytes()</pre>
-<div class="block"><code>optional string config_name = 1;</code></div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block"><code>string config_name = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for configName.</dd>
+</dl>
 </li>
 </ul>
 <a name="getEntryList--">
@@ -207,6 +224,7 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <li class="blockList">
 <h4>getEntryList</h4>
 <pre><a href="https://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&gt;&nbsp;getEntryList()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><code>repeated .google.crypto.tink.KeyTypeEntry entry = 2;</code></div>
 </li>
 </ul>
@@ -217,6 +235,7 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <li class="blockList">
 <h4>getEntry</h4>
 <pre><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a>&nbsp;getEntry(int&nbsp;index)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><code>repeated .google.crypto.tink.KeyTypeEntry entry = 2;</code></div>
 </li>
 </ul>
@@ -227,6 +246,7 @@ extends com.google.protobuf.MessageLiteOrBuilder</pre>
 <li class="blockList">
 <h4>getEntryCount</h4>
 <pre>int&nbsp;getEntryCount()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block"><code>repeated .google.crypto.tink.KeyTypeEntry entry = 2;</code></div>
 </li>
 </ul>

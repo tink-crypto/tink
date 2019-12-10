@@ -322,14 +322,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -370,10 +370,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  E.g. “Aead”, “Mac”, ... (case-insensitive)
  </pre>
 
- <code>optional string primitive_name = 1;</code></div>
+ <code>string primitive_name = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getPrimitiveName--">getPrimitiveName</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The primitiveName.</dd>
 </dl>
 </li>
 </ul>
@@ -388,10 +390,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  E.g. “Aead”, “Mac”, ... (case-insensitive)
  </pre>
 
- <code>optional string primitive_name = 1;</code></div>
+ <code>string primitive_name = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getPrimitiveNameBytes--">getPrimitiveNameBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for primitiveName.</dd>
 </dl>
 </li>
 </ul>
@@ -406,7 +410,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  E.g. “Aead”, “Mac”, ... (case-insensitive)
  </pre>
 
- <code>optional string primitive_name = 1;</code></div>
+ <code>string primitive_name = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The primitiveName to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearPrimitiveName--">
@@ -420,7 +430,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  E.g. “Aead”, “Mac”, ... (case-insensitive)
  </pre>
 
- <code>optional string primitive_name = 1;</code></div>
+ <code>string primitive_name = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="setPrimitiveNameBytes-com.google.protobuf.ByteString-">
@@ -434,7 +448,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  E.g. “Aead”, “Mac”, ... (case-insensitive)
  </pre>
 
- <code>optional string primitive_name = 1;</code></div>
+ <code>string primitive_name = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The bytes for primitiveName to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getTypeUrl--">
@@ -448,10 +468,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Name of the key type.
  </pre>
 
- <code>optional string type_url = 2;</code></div>
+ <code>string type_url = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getTypeUrl--">getTypeUrl</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The typeUrl.</dd>
 </dl>
 </li>
 </ul>
@@ -466,10 +488,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Name of the key type.
  </pre>
 
- <code>optional string type_url = 2;</code></div>
+ <code>string type_url = 2;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getTypeUrlBytes--">getTypeUrlBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for typeUrl.</dd>
 </dl>
 </li>
 </ul>
@@ -484,7 +508,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Name of the key type.
  </pre>
 
- <code>optional string type_url = 2;</code></div>
+ <code>string type_url = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The typeUrl to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearTypeUrl--">
@@ -498,7 +528,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Name of the key type.
  </pre>
 
- <code>optional string type_url = 2;</code></div>
+ <code>string type_url = 2;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="setTypeUrlBytes-com.google.protobuf.ByteString-">
@@ -512,7 +546,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Name of the key type.
  </pre>
 
- <code>optional string type_url = 2;</code></div>
+ <code>string type_url = 2;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The bytes for typeUrl to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getKeyManagerVersion--">
@@ -526,10 +566,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Minimum required version of key manager.
  </pre>
 
- <code>optional uint32 key_manager_version = 3;</code></div>
+ <code>uint32 key_manager_version = 3;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getKeyManagerVersion--">getKeyManagerVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The keyManagerVersion.</dd>
 </dl>
 </li>
 </ul>
@@ -544,7 +586,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Minimum required version of key manager.
  </pre>
 
- <code>optional uint32 key_manager_version = 3;</code></div>
+ <code>uint32 key_manager_version = 3;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The keyManagerVersion to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearKeyManagerVersion--">
@@ -558,7 +606,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Minimum required version of key manager.
  </pre>
 
- <code>optional uint32 key_manager_version = 3;</code></div>
+ <code>uint32 key_manager_version = 3;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getNewKeyAllowed--">
@@ -572,10 +624,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Can the key manager create new keys?
  </pre>
 
- <code>optional bool new_key_allowed = 4;</code></div>
+ <code>bool new_key_allowed = 4;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getNewKeyAllowed--">getNewKeyAllowed</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The newKeyAllowed.</dd>
 </dl>
 </li>
 </ul>
@@ -590,7 +644,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Can the key manager create new keys?
  </pre>
 
- <code>optional bool new_key_allowed = 4;</code></div>
+ <code>bool new_key_allowed = 4;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The newKeyAllowed to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearNewKeyAllowed--">
@@ -604,7 +664,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Can the key manager create new keys?
  </pre>
 
- <code>optional bool new_key_allowed = 4;</code></div>
+ <code>bool new_key_allowed = 4;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="getCatalogueName--">
@@ -618,10 +682,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Catalogue to be queried for key manager,
  </pre>
 
- <code>optional string catalogue_name = 5;</code></div>
+ <code>string catalogue_name = 5;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getCatalogueName--">getCatalogueName</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The catalogueName.</dd>
 </dl>
 </li>
 </ul>
@@ -636,10 +702,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Catalogue to be queried for key manager,
  </pre>
 
- <code>optional string catalogue_name = 5;</code></div>
+ <code>string catalogue_name = 5;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html#getCatalogueNameBytes--">getCatalogueNameBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">KeyTypeEntryOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for catalogueName.</dd>
 </dl>
 </li>
 </ul>
@@ -654,7 +722,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Catalogue to be queried for key manager,
  </pre>
 
- <code>optional string catalogue_name = 5;</code></div>
+ <code>string catalogue_name = 5;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The catalogueName to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearCatalogueName--">
@@ -668,7 +742,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Catalogue to be queried for key manager,
  </pre>
 
- <code>optional string catalogue_name = 5;</code></div>
+ <code>string catalogue_name = 5;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="setCatalogueNameBytes-com.google.protobuf.ByteString-">
@@ -682,7 +760,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KeyTypeEntryOrBu
  Catalogue to be queried for key manager,
  </pre>
 
- <code>optional string catalogue_name = 5;</code></div>
+ <code>string catalogue_name = 5;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The bytes for catalogueName to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>

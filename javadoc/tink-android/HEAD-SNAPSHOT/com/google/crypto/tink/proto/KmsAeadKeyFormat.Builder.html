@@ -204,14 +204,14 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormat
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.GeneratedMessageLite.Builder</h3>
-<code>build, buildPartial, clear, clone, copyOnWrite, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom</code></li>
+<code>build, buildPartial, clear, clone, copyOnWrite, copyOnWriteInternal, getDefaultInstanceForType, internalMergeFrom, isInitialized, mergeFrom, mergeFrom, mergeFrom, mergeFrom</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.com.google.protobuf.AbstractMessageLite.Builder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.protobuf.AbstractMessageLite.Builder</h3>
-<code>addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
+<code>addAll, addAll, mergeDelimitedFrom, mergeDelimitedFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, mergeFrom, newUninitializedMessageException</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -257,10 +257,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormat
  aws-kms://arn:aws:kms:&lt;region&gt;:&lt;account-id&gt;:key/&lt;key-id&gt;
  </pre>
 
- <code>optional string key_uri = 1;</code></div>
+ <code>string key_uri = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormatOrBuilder.html#getKeyUri--">getKeyUri</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">KmsAeadKeyFormatOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The keyUri.</dd>
 </dl>
 </li>
 </ul>
@@ -280,10 +282,12 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormat
  aws-kms://arn:aws:kms:&lt;region&gt;:&lt;account-id&gt;:key/&lt;key-id&gt;
  </pre>
 
- <code>optional string key_uri = 1;</code></div>
+ <code>string key_uri = 1;</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormatOrBuilder.html#getKeyUriBytes--">getKeyUriBytes</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">KmsAeadKeyFormatOrBuilder</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The bytes for keyUri.</dd>
 </dl>
 </li>
 </ul>
@@ -303,7 +307,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormat
  aws-kms://arn:aws:kms:&lt;region&gt;:&lt;account-id&gt;:key/&lt;key-id&gt;
  </pre>
 
- <code>optional string key_uri = 1;</code></div>
+ <code>string key_uri = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The keyUri to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="clearKeyUri--">
@@ -322,7 +332,11 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormat
  aws-kms://arn:aws:kms:&lt;region&gt;:&lt;account-id&gt;:key/&lt;key-id&gt;
  </pre>
 
- <code>optional string key_uri = 1;</code></div>
+ <code>string key_uri = 1;</code></div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 <a name="setKeyUriBytes-com.google.protobuf.ByteString-">
@@ -341,7 +355,13 @@ implements <a href="../../../../../com/google/crypto/tink/proto/KmsAeadKeyFormat
  aws-kms://arn:aws:kms:&lt;region&gt;:&lt;account-id&gt;:key/&lt;key-id&gt;
  </pre>
 
- <code>optional string key_uri = 1;</code></div>
+ <code>string key_uri = 1;</code></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The bytes for keyUri to set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>This builder for chaining.</dd>
+</dl>
 </li>
 </ul>
 </li>
