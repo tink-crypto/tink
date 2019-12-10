@@ -36,7 +36,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:daead",
-        "@com_google_protobuf_javalite//:protobuf_java_lite",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
     ],
 )
 
@@ -49,6 +49,6 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink:android",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:daead",
-        "@com_google_protobuf_javalite//:protobuf_java_lite",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
     ],
 )
