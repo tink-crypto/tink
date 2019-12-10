@@ -74,15 +74,6 @@ testSuite({
     }
   },
 
-  async testConstructorWithNullPublicKey() {
-    try {
-      await EcdsaVerify.newInstance(null, 'SHA-256');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals('CustomError: public key has to be non-null', e.toString());
-    }
-  },
-
   async testConstructorWithInvalidHash() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');

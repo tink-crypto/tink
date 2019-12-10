@@ -54,18 +54,6 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for constructor
-  async testConstructorNullKeyset() {
-    try {
-      new KeysetHandle(null);
-    } catch (e) {
-      assertEquals(
-          'CustomError: Keyset should be non null and must contain at least one key.',
-          e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
   async testConstructorKeysetWithEmptyListOfKeys() {
     const keyset = new PbKeyset().setKeyList([]);
     try {
@@ -150,19 +138,6 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitive method
-
-  async testGetPrimitive_nullKPrimitiveType() {
-    const keyset = createKeyset();
-    const keysetHandle = new KeysetHandle(keyset);
-
-    try {
-      await keysetHandle.getPrimitive(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: primitive type must be non-null', e.toString());
-    }
-  },
 
   async testGetPrimitive_Aead() {
     const keyset = createKeysetAndInitializeRegistry(Aead);

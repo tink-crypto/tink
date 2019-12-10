@@ -89,15 +89,6 @@ testSuite({
 
     try {
       await recipient.decapsulate(
-          kemKeyToken['token'], undefined, pointFormat, hkdfHash, hkdfInfo,
-          hkdfSalt);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
-    }
-
-    try {
-      await recipient.decapsulate(
           kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
@@ -107,25 +98,11 @@ testSuite({
 
 
   async testNewInstance_invalidParameters() {
-    // Test newInstance without key.
-    try {
-      await EciesHkdfKemRecipient.newInstance(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-    }
-
     // Test newInstance with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     try {
       await EciesHkdfKemRecipient.newInstance(publicKey);
-      fail('An exception should be thrown.');
-    } catch (e) {
-    }
-
-    // Test newInstance with CryptoKey instead of JSON key.
-    try {
-      await EciesHkdfKemRecipient.newInstance(keyPair.publicKey);
       fail('An exception should be thrown.');
     } catch (e) {
     }
@@ -165,15 +142,6 @@ testSuite({
   },
 
   async testConstructor_invalidParameters() {
-    // Test constructor without key.
-    try {
-      new EciesHkdfKemRecipient(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Private key has to be non-null.', e.toString());
-    }
-
     // Test public key instead of private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     try {
@@ -182,14 +150,6 @@ testSuite({
     } catch (e) {
       assertEquals(
           'CustomError: Expected crypto key of type: private.', e.toString());
-    }
-
-    // Test that JSON key cannot be used instead of CryptoKey.
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    try {
-      new EciesHkdfKemRecipient(privateKey);
-      fail('An exception should be thrown.');
-    } catch (e) {
     }
   },
 

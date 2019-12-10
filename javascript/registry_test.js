@@ -54,16 +54,6 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for registerPrimitiveWrapper method
-  testRegisterPrimitiveWrapper_emptyManager() {
-    try {
-      Registry.registerPrimitiveWrapper(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: primitive wrapper cannot be null', e.toString());
-    }
-  },
-
   testRegisterPrimitiveWrapper_overwritingWithSameClass() {
     const primitive = 'somePrimitive';
     const primitiveType = 'somePrimitiveType';
@@ -125,16 +115,6 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for registerKeyManager  method
-  testRegisterKeyManager_emptyManager() {
-    try {
-      Registry.registerKeyManager(null);
-    } catch (e) {
-      assertEquals(ExceptionText.nullKeyManager(), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
   testRegisterKeyManager_overwritingAttempt() {
     const keyType = 'someKeyType';
 

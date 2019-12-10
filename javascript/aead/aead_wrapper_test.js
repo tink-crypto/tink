@@ -28,16 +28,6 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  async testNewAeadNullPrimitiveSet() {
-    try {
-      new AeadWrapper().wrap(null);
-    } catch (e) {
-      assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
-      return;
-    }
-    fail('Should throw an exception.');
-  },
-
   async testNewAeadPrimitiveSetWithoutPrimary() {
     const primitiveSet = createPrimitiveSet(/* opt_withPrimary = */ false);
     try {

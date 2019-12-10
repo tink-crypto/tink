@@ -80,9 +80,6 @@ testSuite({
         Array.from(Bytes.fromNumber(number)));
 
     assertThrows(function() {
-      Bytes.fromNumber('blah');  // not a number
-    });
-    assertThrows(function() {
       Bytes.fromNumber(3.14);
     });
     assertThrows(function() {

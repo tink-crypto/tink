@@ -26,16 +26,6 @@ const Random = goog.require('tink.subtle.Random');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  testNewPublicKeySign_nullPrimitiveSet() {
-    try {
-      new PublicKeySignWrapper().wrap(null);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Primitive set has to be non-null.', e.toString());
-    }
-  },
-
   testNewPublicKeySign_primitiveSetWithoutPrimary() {
     const primitiveSet = createDummyPrimitiveSet(/* opt_withPrimary = */ false);
     try {
@@ -50,19 +40,6 @@ testSuite({
     const primitiveSet = createDummyPrimitiveSet();
     const publicKeySign = new PublicKeySignWrapper().wrap(primitiveSet);
     assertTrue(publicKeySign != null && publicKeySign != undefined);
-  },
-
-  async testEncrypt_nullPlaintext() {
-    const primitiveSet = createDummyPrimitiveSet();
-    const publicKeySign = new PublicKeySignWrapper().wrap(primitiveSet);
-
-    try {
-      await publicKeySign.sign(null);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
   },
 
   async testSign_shouldWork() {

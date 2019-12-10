@@ -27,15 +27,6 @@ const Random = goog.require('tink.subtle.Random');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  testNewHybridEncrypt_nullPrimitiveSet() {
-    try {
-      new HybridEncryptWrapper().wrap(null);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
-    }
-  },
-
   testNewHybridEncrypt_primitiveSetWithoutPrimary() {
     const primitiveSet = createDummyPrimitiveSet(/* opt_withPrimary = */ false);
     try {
@@ -50,18 +41,6 @@ testSuite({
     const primitiveSet = createDummyPrimitiveSet();
     const hybridEncrypt = new HybridEncryptWrapper().wrap(primitiveSet);
     assertTrue(hybridEncrypt != null && hybridEncrypt != undefined);
-  },
-
-  async testEncrypt_nullPlaintext() {
-    const primitiveSet = createDummyPrimitiveSet();
-    const hybridEncrypt = new HybridEncryptWrapper().wrap(primitiveSet);
-
-    try {
-      await hybridEncrypt.encrypt(null);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(ExceptionText.nullPlaintext(), e.toString());
-    }
   },
 
   async testEncrypt_shouldWork() {

@@ -68,59 +68,6 @@ testSuite({
     assertEquals(100, results.size);
   },
 
-  async testType() {
-    try {
-      await EncryptThenAuthenticate.newAesCtrHmac(
-          'blah' /* aesKey */, 12 /* ivSize */, 'SHA-256',
-          Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await EncryptThenAuthenticate.newAesCtrHmac(
-          Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
-          'blah' /* hmacKey */, 10 /* tagSize */);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-
-    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
-        Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
-        Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
-    try {
-      await aead.encrypt('blah');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await aead.encrypt(Random.randBytes(20), 'blah');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await aead.decrypt('blah');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await aead.decrypt(Random.randBytes(32), 'blah');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-  },
-
   async testBitFlipCiphertext() {
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',

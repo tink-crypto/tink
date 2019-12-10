@@ -65,13 +65,6 @@ testSuite({
       assertEquals('CustomError: size must be an integer', e.toString());
     }
     try {
-      await sender.encapsulate(
-          undefined, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
-    }
-    try {
       await sender.encapsulate(0, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
@@ -80,25 +73,11 @@ testSuite({
   },
 
   async testNewInstance_invalidParameters() {
-    // Test newInstance without key.
-    try {
-      await EciesHkdfKemSender.newInstance(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-    }
-
     // Test newInstance with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     try {
       await EciesHkdfKemSender.newInstance(privateKey);
-      fail('An exception should be thrown.');
-    } catch (e) {
-    }
-
-    // Test newInstance with CryptoKey instead of JSON key.
-    try {
-      await EciesHkdfKemSender.newInstance(keyPair.publicKey);
       fail('An exception should be thrown.');
     } catch (e) {
     }
@@ -131,30 +110,10 @@ testSuite({
   },
 
   async testConstructor_invalidParameters() {
-    // Test constructor without key.
-    try {
-      new EciesHkdfKemSender(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Recipient public key has to be non-null.',
-          e.toString());
-    }
-
     // Test constructor with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     try {
       new EciesHkdfKemSender(keyPair.privateKey);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Expected Crypto key of type: public.', e.toString());
-    }
-
-    // Test that JSON key cannot be used instead of CryptoKey.
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    try {
-      new EciesHkdfKemSender(publicKey);
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(

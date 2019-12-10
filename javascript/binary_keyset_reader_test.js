@@ -26,15 +26,6 @@ const Random = goog.require('tink.subtle.Random');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  testWithSerializedKeyset_nullSerializedProto() {
-    try {
-      BinaryKeysetReader.withUint8Array(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(ExceptionText.nullKeyset(), e.toString());
-    }
-  },
-
   testRead_invalidSerializedKeysetProto() {
     for (let i = 0; i < 2; i++) {
       // The Uint8Array is not a serialized keyset.

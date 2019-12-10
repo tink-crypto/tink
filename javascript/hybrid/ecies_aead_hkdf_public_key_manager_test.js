@@ -65,7 +65,7 @@ testSuite({
     const manager = new EciesAeadHkdfPublicKeyManager();
 
     try {
-      manager.getKeyFactory().newKey();
+      manager.getKeyFactory().newKey(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(ExceptionText.notSupported(), e.toString());
@@ -76,7 +76,7 @@ testSuite({
     const manager = new EciesAeadHkdfPublicKeyManager();
 
     try {
-      manager.getKeyFactory().newKeyData();
+      manager.getKeyFactory().newKeyData(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(ExceptionText.notSupported(), e.toString());
@@ -183,7 +183,7 @@ testSuite({
 
   async testGetPrimitive_invalidKey() {
     const manager = new EciesAeadHkdfPublicKeyManager();
-    const key = (await createKey()).setX(null);
+    const key = (await createKey()).setX('');
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);

@@ -20,7 +20,6 @@ const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const DemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const EciesAeadHkdfHybridDecrypt = goog.require('tink.subtle.EciesAeadHkdfHybridDecrypt');
 const EciesAeadHkdfHybridEncrypt = goog.require('tink.subtle.EciesAeadHkdfHybridEncrypt');
-const EciesHkdfKemRecipient = goog.require('tink.subtle.EciesHkdfKemRecipient');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
@@ -46,60 +45,6 @@ testSuite({
     TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
   },
 
-  async testConstructor_nullParameters() {
-    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    const recipient = new EciesHkdfKemRecipient(keyPair.privateKey);
-    const hkdfHash = 'SHA-256';
-    const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
-    const demHelper = new DemHelper(AeadKeyTemplates.aes128CtrHmacSha256());
-
-    try {
-      new EciesAeadHkdfHybridDecrypt(
-          null, recipient, hkdfHash, pointFormat, demHelper);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Recipient private key has to be non-null.',
-          e.toString());
-    }
-
-    try {
-      new EciesAeadHkdfHybridDecrypt(
-          privateKey, null, hkdfHash, pointFormat, demHelper);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: KEM recipient has to be non-null.', e.toString());
-    }
-
-    try {
-      new EciesAeadHkdfHybridDecrypt(
-          privateKey, recipient, null, pointFormat, demHelper);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: HKDF hash algorithm has to be non-null.', e.toString());
-    }
-
-    try {
-      new EciesAeadHkdfHybridDecrypt(
-          privateKey, recipient, hkdfHash, null, demHelper);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Point format has to be non-null.', e.toString());
-    }
-
-    try {
-      new EciesAeadHkdfHybridDecrypt(
-          privateKey, recipient, hkdfHash, pointFormat, null);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals('CustomError: DEM helper has to be non-null.', e.toString());
-    }
-  },
-
   async testNewInstance_shouldWork() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
@@ -110,46 +55,6 @@ testSuite({
 
     await EciesAeadHkdfHybridDecrypt.newInstance(
         privateKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
-  },
-
-  async testNewInstance_nullParameters() {
-    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    const hkdfHash = 'SHA-256';
-    const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
-    const demHelper = new DemHelper(AeadKeyTemplates.aes128CtrHmacSha256());
-
-    try {
-      await EciesAeadHkdfHybridDecrypt.newInstance(
-          null, hkdfHash, pointFormat, demHelper);
-    } catch (e) {
-      assertEquals(
-          'CustomError: Recipient private key has to be non-null.',
-          e.toString());
-    }
-
-    try {
-      await EciesAeadHkdfHybridDecrypt.newInstance(
-          privateKey, null, pointFormat, demHelper);
-    } catch (e) {
-      assertEquals(
-          'CustomError: HKDF hash algorithm has to be non-null.', e.toString());
-    }
-
-    try {
-      await EciesAeadHkdfHybridDecrypt.newInstance(
-          privateKey, hkdfHash, null, demHelper);
-    } catch (e) {
-      assertEquals(
-          'CustomError: Point format has to be non-null.', e.toString());
-    }
-
-    try {
-      await EciesAeadHkdfHybridDecrypt.newInstance(
-          privateKey, hkdfHash, pointFormat, null);
-    } catch (e) {
-      assertEquals('CustomError: DEM helper has to be non-null.', e.toString());
-    }
   },
 
   async testDecrypt_shortCiphertext_shouldNotWork() {

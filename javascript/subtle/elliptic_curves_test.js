@@ -274,30 +274,6 @@ testSuite({
             EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
   },
 
-  testPointEncode_unknownPointFormat() {
-    const format = 10;
-
-    const curveType = EllipticCurves.CurveType.P256;
-    const curveTypeString = EllipticCurves.curveToString(curveType);
-    const x = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
-    const y = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
-    const point = /** @type {!webCrypto.JsonWebKey} */ ({
-      'kty': 'EC',
-      'crv': curveTypeString,
-      'x': Bytes.toBase64(x),
-      'y': Bytes.toBase64(y),
-      'ext': true,
-      'key_ops': ['deriveKey', 'deriveBits'],
-    });
-
-    try {
-      EllipticCurves.pointEncode(point['crv'], format, point);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals('CustomError: invalid format', e.toString());
-    }
-  },
-
   testPointDecode_wrongPointSize() {
     const point = new Uint8Array(10);
     const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -313,19 +289,6 @@ testSuite({
       } catch (e) {
         assertEquals('CustomError: invalid point', e.toString());
       }
-    }
-  },
-
-  testPointDecode_unknownPointFormat() {
-    const point = new Uint8Array(10);
-    const format = 10;
-    const curve = EllipticCurves.curveToString(EllipticCurves.CurveType.P256);
-
-    try {
-      EllipticCurves.pointDecode(curve, format, point);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals('CustomError: invalid format', e.toString());
     }
   },
 

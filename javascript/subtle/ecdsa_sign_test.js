@@ -103,15 +103,6 @@ testSuite({
     assertEquals(100, signatures.size);
   },
 
-  async testConstructorWithNullPrivateKey() {
-    try {
-      await EcdsaSign.newInstance(null, 'SHA-256');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals('CustomError: private key has to be non-null', e.toString());
-    }
-  },
-
   async testConstructorWithInvalidHash() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');

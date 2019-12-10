@@ -56,7 +56,7 @@ testSuite({
     const manager = new EcdsaPublicKeyManager();
 
     try {
-      manager.getKeyFactory().newKey();
+      manager.getKeyFactory().newKey(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(ExceptionText.notSupported(), e.toString());
@@ -67,7 +67,7 @@ testSuite({
     const manager = new EcdsaPublicKeyManager();
 
     try {
-      manager.getKeyFactory().newKeyData();
+      manager.getKeyFactory().newKeyData(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(ExceptionText.notSupported(), e.toString());
@@ -196,22 +196,22 @@ testSuite({
     const manager = new EcdsaPublicKeyManager();
     const key = await createKey();
     const x = key.getX();
-    key.setX(null);
+    key.setX(new Uint8Array(0));
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingXY(), e.toString());
+      assertEquals(ExceptionText.webCryptoError(), e.toString());
     }
 
     key.setX(x);
-    key.setY(null);
+    key.setY(new Uint8Array(0));
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingXY(), e.toString());
+      assertEquals(ExceptionText.webCryptoError(), e.toString());
     }
   },
 
@@ -339,6 +339,13 @@ class ExceptionText {
   /** @return {string} */
   static invalidSerializedKey() {
     return 'CustomError: Input cannot be parsed as ' + KEY_TYPE + ' key-proto.';
+  }
+
+  /** @return {string} */
+  static webCryptoError() {
+    return userAgent.GECKO ?
+        'DataError: Data provided to an operation does not meet requirements' :
+        'DataError';
   }
 }
 

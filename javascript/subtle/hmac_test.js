@@ -139,14 +139,6 @@ testSuite({
     }
 
     try {
-      await Hmac.newInstance('SHA-512', Random.randBytes(16), undefined);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: invalid tag size, must be an integer', e.toString());
-    }
-
-    try {
       await Hmac.newInstance('SHA-512', Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
     } catch (e) {
@@ -154,68 +146,6 @@ testSuite({
           'CustomError: invalid tag size, must be an integer', e.toString());
     }
   },
-
-  async testType() {
-    try {
-      await Hmac.newInstance('SHA-1', 'blah', 10);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await Hmac.newInstance('SHA-1', 123, 10);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-
-    const hmac = await Hmac.newInstance('SHA-1', Random.randBytes(16), 10);
-    try {
-      await hmac.computeMac('blah');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await hmac.computeMac('123');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await hmac.verifyMac('blah', Random.randBytes(20));
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await hmac.verifyMac(123, Random.randBytes(20));
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await hmac.verifyMac(Random.randBytes(20), 'blah');
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await hmac.verifyMac(Random.randBytes(20), 123);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-  },
-
 
   async testModify() {
     const key = Random.randBytes(16);

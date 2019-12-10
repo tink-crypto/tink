@@ -84,46 +84,6 @@ testSuite({
     assertEquals(100, results.size);
   },
 
-  async testType() {
-    try {
-      await AesGcm.newInstance('blah');
-      fail('expected AesGcm.newInstance to fail');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-
-    const aead = await AesGcm.newInstance(Random.randBytes(16));
-    try {
-      await aead.encrypt('blah');
-      fail('expected aead.encrypt to fail');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await aead.encrypt(Random.randBytes(20), 'blah');
-      fail('expected aead.encrypt to fail');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await aead.decrypt('blah');
-      fail('expected aead.decrypt to fail');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-    try {
-      await aead.decrypt(Random.randBytes(32), 'blah');
-      fail('expected aead.decrypt to fail');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-  },
-
   async testBitFlipCiphertext() {
     const aead = await AesGcm.newInstance(Random.randBytes(16));
     const plaintext = Random.randBytes(8);

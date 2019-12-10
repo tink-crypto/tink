@@ -21,16 +21,6 @@ const testSuite = goog.require('goog.testing.testSuite');
 const {createKeyset} = goog.require('tink.testUtils');
 
 testSuite({
-  testWrite_nullProto() {
-    try {
-      const writer = new BinaryKeysetWriter();
-      writer.write(null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals('CustomError: keyset has to be non-null.', e.toString());
-    }
-  },
-
   testGetSerializedKeySet() {
     const dummyKeyset = createKeyset();
 

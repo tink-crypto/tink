@@ -30,15 +30,6 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  async testNewHybridDecrypt_nullPrimitiveSet() {
-    try {
-      new HybridDecryptWrapper().wrap(null);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
-    }
-  },
-
   async testDecrypt_invalidCiphertext() {
     const primitiveSets = createDummyPrimitiveSets();
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
@@ -180,16 +171,16 @@ testSuite({
     }
   },
 
-  async testDecrypt_withNullCiphertext() {
+  async testDecrypt_withEmptyCiphertext() {
     const primitiveSets = createDummyPrimitiveSets();
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
     const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
 
     try {
-      await hybridDecrypt.decrypt(null);
+      await hybridDecrypt.decrypt(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.nullCiphertext(), e.toString());
+      assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
     }
   },
 });

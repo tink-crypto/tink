@@ -308,16 +308,6 @@ testSuite({
     }
   },
 
-  async testValidatePrivateKey_missingPrivateKeyValue() {
-    const invalidPrivateKey = (await createPrivateKey()).setKeyValue(null);
-    try {
-      EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(ExceptionText.missingPrivateKeyValue(), e.toString());
-    }
-  },
-
   async testValidatePrivateKey_shouldWork() {
     const privateKey = await createPrivateKey();
     EciesAeadHkdfValidators.validatePrivateKey(privateKey, 0, 0);

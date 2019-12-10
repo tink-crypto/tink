@@ -28,42 +28,12 @@ const Random = goog.require('tink.subtle.Random');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  async testNewPublicKeyVerify_nullPrimitiveSet() {
-    try {
-      new PublicKeyVerifyWrapper().wrap(null);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Primitive set has to be non-null.', e.toString());
-    }
-  },
-
-  async testVerify_withNullSignature() {
+  async testVerify_withEmptySignature() {
     const primitiveSets = createDummyPrimitiveSets();
     const primitiveSet = primitiveSets['publicPrimitiveSet'];
     const publicKeyVerify = new PublicKeyVerifyWrapper().wrap(primitiveSet);
-
-    try {
-      await publicKeyVerify.verify(null, Random.randBytes(10));
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-  },
-
-  async testVerify_withNullData() {
-    const primitiveSets = createDummyPrimitiveSets();
-    const primitiveSet = primitiveSets['publicPrimitiveSet'];
-    const publicKeyVerify = new PublicKeyVerifyWrapper().wrap(primitiveSet);
-
-    try {
-      await publicKeyVerify.verify(Random.randBytes(10), null);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
+    assertFalse(
+        await publicKeyVerify.verify(new Uint8Array(0), Random.randBytes(10)));
   },
 
   async testVerify_shouldWork() {

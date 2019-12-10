@@ -57,19 +57,6 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  testAddPrimitiveNullKey() {
-    const primitive = new DummyAead1();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
-
-    try {
-      primitiveSet.addPrimitive(primitive, null);
-    } catch (e) {
-      assertEquals(ExceptionText.addingNullKey(), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
   testAddPrimitiveMultipleTimesShouldWork() {
     const key = createKey();
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
@@ -201,17 +188,6 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for setPrimary and getPrimary methods
-  testSetPrimaryToNull() {
-    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
-    try {
-      primitiveSet.setPrimary(null);
-    } catch (e) {
-      assertEquals(ExceptionText.setPrimaryToNull(), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
   testSetPrimaryToNonholdedEntry() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     const entry = new PrimitiveSet.Entry(

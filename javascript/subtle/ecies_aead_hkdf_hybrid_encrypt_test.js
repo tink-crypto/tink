@@ -55,51 +55,6 @@ testSuite({
         publicKey, hkdfHash, pointFormat, demHelper);
   },
 
-  async testNewInstance_nullParameters() {
-    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    const hkdfHash = 'SHA-256';
-    const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
-    const demHelper = new RegistryEciesAeadHkdfDemHelper(
-        AeadKeyTemplates.aes128CtrHmacSha256());
-
-    try {
-      await EciesAeadHkdfHybridEncrypt.newInstance(
-          null, hkdfHash, pointFormat, demHelper);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Recipient public key has to be non-null.',
-          e.toString());
-    }
-
-    try {
-      await EciesAeadHkdfHybridEncrypt.newInstance(
-          publicKey, null, pointFormat, demHelper);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: HMAC algorithm has to be non-null.', e.toString());
-    }
-
-    try {
-      await EciesAeadHkdfHybridEncrypt.newInstance(
-          publicKey, hkdfHash, null, demHelper);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Point format has to be non-null.', e.toString());
-    }
-
-    try {
-      await EciesAeadHkdfHybridEncrypt.newInstance(
-          publicKey, hkdfHash, pointFormat, null);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals('CustomError: DEM helper has to be non-null.', e.toString());
-    }
-  },
-
   async testEncrypt_differentArguments() {
     const hkdfSalt = new Uint8Array(0);
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;

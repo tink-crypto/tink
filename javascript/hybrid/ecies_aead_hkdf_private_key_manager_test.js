@@ -68,14 +68,14 @@ testSuite({
     TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
   },
 
-  async testNewKey_nullKeyFormat() {
+  async testNewKey_emptyKeyFormat() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
     try {
-      await manager.getKeyFactory().newKey(null);
+      await manager.getKeyFactory().newKey(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.nullKeyFormat(), e.toString());
+      assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
     }
   },
 

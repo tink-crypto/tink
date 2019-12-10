@@ -64,30 +64,6 @@ testSuite({
     } catch (e) {
       assertEquals('CustomError: size too large', e.toString());
     }
-
-    try {
-      await Hkdf.compute(1, 'SHA-256', 'blah', info);  // wrong type
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-
-    try {
-      await Hkdf.compute(1, 'SHA-256', ikm, 'blah');  // wrong type
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
-
-    try {
-      await Hkdf.compute(1, 'SHA-256', ikm, info, 'blah');  // size too large
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: input must be a non null Uint8Array', e.toString());
-    }
   },
 
   async testConstructor_nonIntegerOutputSize() {
@@ -95,13 +71,6 @@ testSuite({
     const info = Random.randBytes(16);
     try {
       await Hkdf.compute(NaN, 'SHA-256', ikm, info);
-      fail('Should throw an exception.');
-    } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
-    }
-
-    try {
-      await Hkdf.compute(undefined, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals('CustomError: size must be an integer', e.toString());
