@@ -203,6 +203,7 @@ class Registry {
   static reset() {
     Registry.typeToManagerMap_.clear();
     Registry.typeToNewKeyAllowedMap_.clear();
+    Registry.primitiveTypeToWrapper_.clear();
   }
 
   /**
