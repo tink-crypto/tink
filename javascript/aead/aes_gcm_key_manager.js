@@ -112,7 +112,7 @@ class AesGcmKeyFactory {
  * @final
  */
 class AesGcmKeyManager {
-  /** @private */
+  /** @package Visible for testing. */
   constructor() {
     /** @const @private {!AesGcmKeyFactory} */
     this.keyFactory_ = new AesGcmKeyFactory();

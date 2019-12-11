@@ -138,9 +138,7 @@ class WrappedAead {
  * @implements {PrimitiveWrapper<Aead>}
  */
 class AeadWrapper {
-  /**
-   * @private
-   */
+  /** @package Visible for testing. */
   constructor() {}
 
   /**

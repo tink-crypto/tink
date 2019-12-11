@@ -157,7 +157,7 @@ class KeysetHandle {
       throw new InvalidArgumentsException('primitive type must be non-null');
     }
     const primitiveSet =
-        await this.getPrimitiveSet_(primitiveType, opt_customKeyManager);
+        await this.getPrimitiveSet(primitiveType, opt_customKeyManager);
     return Registry.wrap(primitiveSet);
   }
 
@@ -169,14 +169,14 @@ class KeysetHandle {
    * by the customKeyManager.
    *
    * @template P
-   * @private
+   * @package Visible for testing.
    *
    * @param {!Object} primitiveType
    * @param {?KeyManager.KeyManager<P>=} opt_customKeyManager
    *
    * @return {!Promise.<!PrimitiveSet.PrimitiveSet<P>>}
    */
-  async getPrimitiveSet_(primitiveType, opt_customKeyManager) {
+  async getPrimitiveSet(primitiveType, opt_customKeyManager) {
     const primitiveSet = new PrimitiveSet.PrimitiveSet(primitiveType);
     const keys = this.keyset_.getKeyList();
     const keysLength = keys.length;

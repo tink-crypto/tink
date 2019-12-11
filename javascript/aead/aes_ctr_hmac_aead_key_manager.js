@@ -184,9 +184,6 @@ AesCtrHmacAeadKeyFactory.MAX_TAG_SIZE_ = new Map(
  * @final
  */
 class AesCtrHmacAeadKeyManager {
-  /**
-   * @private
-   */
   constructor() {
     /**
      * @const @private {!AesCtrHmacAeadKeyFactory}

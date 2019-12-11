@@ -391,7 +391,7 @@ testSuite({
   },
 
   /////////////////////////////////////////////////////////////////////////////
-  // tests for getPrimitiveSet_ method
+  // tests for getPrimitiveSet method
 
   async testGetPrimitiveSet_primaryKeyIsTheEnabledKeyWithGivenId() {
     const id = 1;
@@ -416,7 +416,7 @@ testSuite({
     Registry.registerKeyManager(
         new DummyKeyManager(disabledUrl, disabledUrl + 'primitive', Aead));
 
-    const primitiveSet = await keysetHandle.getPrimitiveSet_(Aead);
+    const primitiveSet = await keysetHandle.getPrimitiveSet(Aead);
     const primary = primitiveSet.getPrimary();
 
     // Result of getPrimitive is string which is the same as typeUrl +
@@ -446,7 +446,7 @@ testSuite({
         new DummyKeyManager(enabledUrl, enabledUrl + 'primitive', Aead));
 
     // Get primitives and get all raw primitives.
-    const primitiveSet = await keysetHandle.getPrimitiveSet_(Aead);
+    const primitiveSet = await keysetHandle.getPrimitiveSet(Aead);
     const rawPrimitives = primitiveSet.getRawPrimitives();
 
     // Should return all enabled RAW primitives and nothing else (disabled
@@ -482,7 +482,7 @@ testSuite({
     const customKeyManager =
         new DummyKeyManager(keyTypeUrl, customPrimitive, Aead);
     const primitiveSet =
-        await keysetHandle.getPrimitiveSet_(Aead, customKeyManager);
+        await keysetHandle.getPrimitiveSet(Aead, customKeyManager);
 
     // Primary should be the entry corresponding to the keyTypeUrl and thus
     // getPrimitive should return customPrimitive.
