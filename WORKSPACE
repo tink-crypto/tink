@@ -274,7 +274,7 @@ apple_support_dependencies()
 #-----------------------------------------------------------------------------
 # go
 #-----------------------------------------------------------------------------
-# Release from 2019-10-14
+# Release from 2019-10-31
 http_archive(
     name = "io_bazel_rules_go",
     urls = [
@@ -284,7 +284,7 @@ http_archive(
     sha256 = "b9aa86ec08a292b97ec4591cf578e020b35f98e12173bbd4a921f84f583aebd9",
 )
 
-# Release from 2019-10-14
+# Release from 2019-11-07
 http_archive(
     name = "bazel_gazelle",
     urls = [
