@@ -31,7 +31,7 @@ class PythonInputStream : public InputStream {
   // Constructs an InputStream that will read from the PythonFileObjectAdapter
   // specified via 'adapter', using a buffer of the specified size, if any
   // (if 'buffer_size' <= 0, a reasonable default will be used).
-  explicit PythonInputStream(std::unique_ptr<PythonFileObjectAdapter> adapter,
+  explicit PythonInputStream(std::shared_ptr<PythonFileObjectAdapter> adapter,
                              int buffer_size = 0);
 
   ~PythonInputStream() override;
@@ -44,7 +44,7 @@ class PythonInputStream : public InputStream {
 
  private:
   util::Status status_;
-  std::unique_ptr<PythonFileObjectAdapter> adapter_;
+  std::shared_ptr<PythonFileObjectAdapter> adapter_;
   std::string buffer_;
   int64_t position_;  // current position in the file object (from the
                       // beginning)

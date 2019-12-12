@@ -38,7 +38,7 @@ namespace tink {
 // is not taken, and the value is not copied.
 util::StatusOr<std::unique_ptr<OutputStreamAdapter>> NewCcEncryptingStream(
     StreamingAead* streaming_aead, const absl::string_view aad,
-    std::unique_ptr<PythonFileObjectAdapter> ciphertext_destination);
+    std::shared_ptr<PythonFileObjectAdapter> ciphertext_destination);
 
 // Wrapper function for StreamingAead.NewDecryptingStream
 //
@@ -49,7 +49,7 @@ util::StatusOr<std::unique_ptr<OutputStreamAdapter>> NewCcEncryptingStream(
 // is not taken, and the value is not copied.
 util::StatusOr<std::unique_ptr<InputStreamAdapter>> NewCcDecryptingStream(
     StreamingAead* streaming_aead, const absl::string_view aad,
-    std::unique_ptr<PythonFileObjectAdapter> ciphertext_source);
+    std::shared_ptr<PythonFileObjectAdapter> ciphertext_source);
 
 }  // namespace tink
 }  // namespace crypto

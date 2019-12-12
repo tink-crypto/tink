@@ -39,9 +39,9 @@ bool is_eof(const util::Status& status) {
 }  // namespace
 
 PythonInputStream::PythonInputStream(
-    std::unique_ptr<PythonFileObjectAdapter> adapter, int buffer_size) {
+    std::shared_ptr<PythonFileObjectAdapter> adapter, int buffer_size) {
   if (buffer_size <= 0) buffer_size = 128 * 1024;  // 128 KB
-  adapter_ = std::move(adapter);
+  adapter_ = adapter;
   count_in_buffer_ = 0;
   count_backedup_ = 0;
   position_ = 0;

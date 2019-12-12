@@ -31,7 +31,7 @@ class PythonOutputStream : public OutputStream {
   // Constructs an OutputStream that will write to the PythonFileObjectAdapter
   // specified via 'adapter', using a buffer of the specified size, if any
   // (if 'buffer_size' <= 0, a reasonable default will be used).
-  explicit PythonOutputStream(std::unique_ptr<PythonFileObjectAdapter> adapter,
+  explicit PythonOutputStream(std::shared_ptr<PythonFileObjectAdapter> adapter,
                               int buffer_size = 0);
 
   ~PythonOutputStream() override;
@@ -46,7 +46,7 @@ class PythonOutputStream : public OutputStream {
 
  private:
   util::Status status_;
-  std::unique_ptr<PythonFileObjectAdapter> adapter_;
+  std::shared_ptr<PythonFileObjectAdapter> adapter_;
   std::string buffer_;
   bool is_first_call_;
   int64_t position_;  // current position in the underlying stream (from the

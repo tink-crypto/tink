@@ -30,9 +30,9 @@ namespace crypto {
 namespace tink {
 
 PythonOutputStream::PythonOutputStream(
-    std::unique_ptr<PythonFileObjectAdapter> adapter, int buffer_size) {
+    std::shared_ptr<PythonFileObjectAdapter> adapter, int buffer_size) {
   if (buffer_size <= 0) buffer_size = 128 * 1024;  // 128 KB
-  adapter_ = std::move(adapter);
+  adapter_ = adapter;
   subtle::ResizeStringUninitialized(&buffer_, buffer_size);
   is_first_call_ = true;
   position_ = 0;
