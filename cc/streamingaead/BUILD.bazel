@@ -52,6 +52,7 @@ cc_library(
     hdrs = ["streaming_aead_key_templates.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         "//proto:aes_ctr_hmac_streaming_cc_proto",
         "//proto:aes_gcm_hkdf_streaming_cc_proto",

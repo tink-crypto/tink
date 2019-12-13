@@ -31,6 +31,7 @@ cc_library(
     hdrs = ["prf_config.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":hkdf_prf_key_manager",
         "//cc:registry",
@@ -45,6 +46,7 @@ cc_library(
     hdrs = ["prf_key_templates.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":hkdf_prf_key_manager",
         "//proto:hkdf_prf_cc_proto",

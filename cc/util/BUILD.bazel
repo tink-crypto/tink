@@ -8,6 +8,7 @@ cc_library(
     hdrs = ["buffer.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":status",
         ":statusor",
@@ -96,6 +97,7 @@ cc_library(
     hdrs = ["file_input_stream.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":errors",
         ":status",
@@ -111,6 +113,7 @@ cc_library(
     hdrs = ["file_output_stream.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":errors",
         ":status",
@@ -126,6 +129,7 @@ cc_library(
     hdrs = ["file_random_access_stream.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":buffer",
         ":errors",
@@ -142,6 +146,7 @@ cc_library(
     hdrs = ["istream_input_stream.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":errors",
         ":status",
@@ -157,6 +162,7 @@ cc_library(
     hdrs = ["ostream_output_stream.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":errors",
         ":status",
