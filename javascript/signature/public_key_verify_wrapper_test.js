@@ -156,8 +156,9 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
 const createDummyPrimitiveSets = function(opt_withPrimary = true) {
   const numberOfPrimitives = 5;
 
-  const publicPrimitiveSet = new PrimitiveSet.PrimitiveSet();
-  const privatePrimitiveSet = new PrimitiveSet.PrimitiveSet();
+  const publicPrimitiveSet =
+      new PrimitiveSet.PrimitiveSet(DummyPublicKeyVerify);
+  const privatePrimitiveSet = new PrimitiveSet.PrimitiveSet(DummyPublicKeySign);
   for (let i = 1; i < numberOfPrimitives; i++) {
     let /** @type {!PbOutputPrefixType} */ outputPrefix;
     switch (i % 3) {

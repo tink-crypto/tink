@@ -114,7 +114,7 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
 const createDummyPrimitiveSet = function(opt_withPrimary = true) {
   const numberOfPrimitives = 5;
 
-  const primitiveSet = new PrimitiveSet.PrimitiveSet();
+  const primitiveSet = new PrimitiveSet.PrimitiveSet(DummyPublicKeySign);
   for (let i = 1; i < numberOfPrimitives; i++) {
     let /** @type {!PbOutputPrefixType} */ outputPrefix;
     switch (i % 3) {

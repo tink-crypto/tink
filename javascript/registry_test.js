@@ -408,7 +408,7 @@ testSuite({
     const keyData = new PbKeyData().setTypeUrl(keyDataType);
 
     try {
-      await Registry.getPrimitive(null, keyData, anotherType);
+      await Registry.getPrimitive(Aead, keyData, anotherType);
     } catch (e) {
       assertEquals(
           ExceptionText.keyTypesAreNotMatching(keyDataType, anotherType),
@@ -421,7 +421,7 @@ testSuite({
   async testGetPrimitive_withoutDefiningKeyType() {
     // Get primitive from key proto without key type.
     try {
-      await Registry.getPrimitive(null, new PbMessage);
+      await Registry.getPrimitive(Aead, new PbMessage);
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(ExceptionText.keyTypeNotDefined(), e.toString());
@@ -433,7 +433,7 @@ testSuite({
     const keyData = new PbKeyData().setTypeUrl(keyDataType);
 
     try {
-      await Registry.getPrimitive(null, keyData);
+      await Registry.getPrimitive(Aead, keyData);
     } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(keyDataType), e.toString());

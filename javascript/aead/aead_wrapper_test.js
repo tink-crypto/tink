@@ -240,7 +240,7 @@ const createKey = function(keyId, outputPrefix, enabled) {
 const createPrimitiveSet = function(opt_withPrimary = true) {
   const numberOfPrimitives = 5;
 
-  const primitiveSet = new PrimitiveSet.PrimitiveSet();
+  const primitiveSet = new PrimitiveSet.PrimitiveSet(DummyAead);
   for (let i = 1; i < numberOfPrimitives; i++) {
     let /** @type {!PbOutputPrefixType} */ outputPrefix;
     switch (i % 3) {

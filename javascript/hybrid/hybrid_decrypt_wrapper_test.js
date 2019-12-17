@@ -239,8 +239,8 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
 const createDummyPrimitiveSets = function(opt_withPrimary = true) {
   const numberOfPrimitives = 5;
 
-  const encryptPrimitiveSet = new PrimitiveSet.PrimitiveSet();
-  const decryptPrimitiveSet = new PrimitiveSet.PrimitiveSet();
+  const encryptPrimitiveSet = new PrimitiveSet.PrimitiveSet(DummyHybridEncrypt);
+  const decryptPrimitiveSet = new PrimitiveSet.PrimitiveSet(DummyHybridDecrypt);
   for (let i = 1; i < numberOfPrimitives; i++) {
     let /** @type {!PbOutputPrefixType} */ outputPrefix;
     switch (i % 3) {
