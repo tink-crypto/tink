@@ -38,6 +38,7 @@ const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const testSuite = goog.require('goog.testing.testSuite');
@@ -55,26 +56,33 @@ testSuite({
   /////////////////////////////////////////////////////////////////////////////
   // tests for registerPrimitiveWrapper method
   testRegisterPrimitiveWrapper_overwritingWithSameClass() {
-    const primitive = 'somePrimitive';
-    const primitiveType = 'somePrimitiveType';
-    Registry.registerPrimitiveWrapper(
-        new DummyPrimitiveWrapper1(primitive, primitiveType));
-    Registry.registerPrimitiveWrapper(
-        new DummyPrimitiveWrapper1(primitive, primitiveType));
+    Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
+        new DummyPrimitive1Impl1(), DummyPrimitive1));
+    Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
+        new DummyPrimitive1Impl2(), DummyPrimitive1));
   },
 
   testRegisterPrimitiveWrapper_overwritingWithDifferentClass() {
-    const primitive = 'somePrimitive';
-    const primitiveType = 'somePrimitiveType';
-    Registry.registerPrimitiveWrapper(
-        new DummyPrimitiveWrapper1(primitive, primitiveType));
+    /** @implements {PrimitiveWrapper<DummyPrimitive1>} */
+    class DummyPrimitiveWrapper1Alternative {
+      /** @override */
+      wrap() {
+        throw new Error();
+      }
+      /** @override */
+      getPrimitiveType() {
+        return DummyPrimitive1;
+      }
+    }
+    Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
+        new DummyPrimitive1Impl1(), DummyPrimitive1));
     try {
       Registry.registerPrimitiveWrapper(
-          new DummyPrimitiveWrapper2(primitive, primitiveType));
+          new DummyPrimitiveWrapper1Alternative());
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'CustomError: primitive wrapper for type ' + primitiveType +
+          'CustomError: primitive wrapper for type ' + DummyPrimitive1 +
               ' has already been registered and cannot be overwritten',
           e.toString());
     }
@@ -83,32 +91,26 @@ testSuite({
   /////////////////////////////////////////////////////////////////////////////
   // tests for wrap method
   testWrap_shouldWork() {
-    const primitive = 'somePrimitive';
-    const primitiveType = 'somePrimitiveType';
-    const numberOfKeyManagers = 10;
+    const p1 = new DummyPrimitive1Impl1();
+    const p2 = new DummyPrimitive2Impl();
+    Registry.registerPrimitiveWrapper(
+        new DummyPrimitiveWrapper1(p1, DummyPrimitive1));
+    Registry.registerPrimitiveWrapper(
+        new DummyPrimitiveWrapper2(p2, DummyPrimitive2));
 
-    for (let i = 0; i < numberOfKeyManagers; i++) {
-      Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
-          primitive + i.toString(), primitiveType + i.toString()));
-    }
-
-    let result;
-    for (let i = 0; i < numberOfKeyManagers; i++) {
-      result = Registry.wrap(
-          new PrimitiveSet.PrimitiveSet(primitiveType + i.toString()));
-      assertObjectEquals(primitive + i.toString(), result);
-    }
+    assertEquals(
+        p1, Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive1)));
+    assertEquals(
+        p2, Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive2)));
   },
 
   testWrap_notRegisteredPrimitiveType() {
-    const primitiveType = 'does not exist';
-
     try {
-      Registry.wrap(new PrimitiveSet.PrimitiveSet(primitiveType));
+      Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive1));
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'CustomError: no primitive wrapper found for type ' + primitiveType,
+          'CustomError: no primitive wrapper found for type ' + DummyPrimitive1,
           e.toString());
     }
   },
@@ -740,16 +742,51 @@ class DummyKeyFactory {
   }
 }
 
+// Primitive abstract types for testing purposes.
+/** @record */
+class DummyPrimitive1 {
+  /** @return {number} */
+  operation1() {}
+}
+/** @record */
+class DummyPrimitive2 {
+  /** @return {string} */
+  operation2() {}
+}
+
+// Primitive implementations for testing purposes.
+/** @implements {DummyPrimitive1} */
+class DummyPrimitive1Impl1 {
+  /** @override */
+  operation1() {
+    return 1;
+  }
+}
+/** @implements {DummyPrimitive1} */
+class DummyPrimitive1Impl2 {
+  /** @override */
+  operation1() {
+    return 2;
+  }
+}
+/** @implements {DummyPrimitive2} */
+class DummyPrimitive2Impl {
+  /** @override */
+  operation2() {
+    return 'dummy';
+  }
+}
+
 const DEFAULT_PRIMITIVE_TYPE = Aead;
 
 /**
  * @final
- * @implements {KeyManager.KeyManager<string>}
+ * @implements {KeyManager.KeyManager<!DummyPrimitive1>}
  */
 class DummyKeyManager1 {
   /**
    * @param {string} keyType
-   * @param {?string=} opt_primitive
+   * @param {?DummyPrimitive1=} opt_primitive
    * @param {?Object=} opt_primitiveType
    */
   constructor(keyType, opt_primitive, opt_primitiveType) {
@@ -759,10 +796,10 @@ class DummyKeyManager1 {
     this.KEY_TYPE_ = keyType;
 
     if (!opt_primitive) {
-      opt_primitive = keyType;
+      opt_primitive = new DummyPrimitive1Impl1();
     }
     /**
-     * @private @const {string}
+     * @private @const {!DummyPrimitive1}
      */
     this.PRIMITIVE_ = opt_primitive;
     /**
@@ -817,12 +854,12 @@ class DummyKeyManager1 {
 
 /**
  * @final
- * @implements {KeyManager.KeyManager<string>}
+ * @implements {KeyManager.KeyManager<!DummyPrimitive2>}
  */
 class DummyKeyManager2 {
   /**
    * @param {string} keyType
-   * @param {string=} opt_primitive
+   * @param {!DummyPrimitive2=} opt_primitive
    * @param {?Object=} opt_primitiveType
    */
   constructor(keyType, opt_primitive, opt_primitiveType) {
@@ -832,10 +869,10 @@ class DummyKeyManager2 {
     this.KEY_TYPE_ = keyType;
 
     if (!opt_primitive) {
-      opt_primitive = keyType;
+      opt_primitive = new DummyPrimitive2Impl();
     }
     /**
-     * @private @const {string}
+     * @private @const {!DummyPrimitive2}
      */
     this.PRIMITIVE_ = opt_primitive;
     /**
@@ -943,16 +980,16 @@ class DummyKeyManagerForNewKeyTests {
 // PrimitiveWrapper classes for testing purposes
 /**
  * @final
- * @implements {PrimitiveWrapper<string>}
+ * @implements {PrimitiveWrapper<DummyPrimitive1>}
  */
 class DummyPrimitiveWrapper1 {
   /**
-   * @param {string} primitive
+   * @param {!DummyPrimitive1} primitive
    * @param {!Object} primitiveType
    */
   constructor(primitive, primitiveType) {
     /**
-     * @private @const {string}
+     * @private @const {!DummyPrimitive1}
      */
     this.PRIMITIVE_ = primitive;
 
@@ -980,16 +1017,16 @@ class DummyPrimitiveWrapper1 {
 // PrimitiveWrapper classes for testing purposes
 /**
  * @final
- * @implements {PrimitiveWrapper<string>}
+ * @implements {PrimitiveWrapper<DummyPrimitive2>}
  */
 class DummyPrimitiveWrapper2 {
   /**
-   * @param {string} primitive
+   * @param {!DummyPrimitive2} primitive
    * @param {!Object} primitiveType
    */
   constructor(primitive, primitiveType) {
     /**
-     * @private @const {string}
+     * @private @const {!DummyPrimitive2}
      */
     this.PRIMITIVE_ = primitive;
 

@@ -411,17 +411,17 @@ testSuite({
 
     const keysetHandle = new KeysetHandle(keyset);
 
+    const primitive = new DummyAead(new Uint8Array(Random.randBytes(10)));
     Registry.registerKeyManager(
-        new DummyKeyManager(primaryUrl, primaryUrl + 'primitive', Aead));
-    Registry.registerKeyManager(
-        new DummyKeyManager(disabledUrl, disabledUrl + 'primitive', Aead));
+        new DummyKeyManager(primaryUrl, primitive, Aead));
+    Registry.registerKeyManager(new DummyKeyManager(
+        disabledUrl, new DummyAead(new Uint8Array(Random.randBytes(10))),
+        Aead));
 
     const primitiveSet = await keysetHandle.getPrimitiveSet(Aead);
     const primary = primitiveSet.getPrimary();
 
-    // Result of getPrimitive is string which is the same as typeUrl +
-    // 'primitive'.
-    assertEquals(primaryUrl + 'primitive', primary.getPrimitive());
+    assertEquals(primitive, primary.getPrimitive());
   },
 
   async testGetPrimitiveSet_disabledKeysShouldBeIgnored() {
@@ -442,8 +442,9 @@ testSuite({
     const keysetHandle = new KeysetHandle(keyset);
 
     // Register KeyManager (the key manager for enabled keys should be enough).
+    const primitive = new DummyAead(new Uint8Array(Random.randBytes(10)));
     Registry.registerKeyManager(
-        new DummyKeyManager(enabledUrl, enabledUrl + 'primitive', Aead));
+        new DummyKeyManager(enabledUrl, primitive, Aead));
 
     // Get primitives and get all raw primitives.
     const primitiveSet = await keysetHandle.getPrimitiveSet(Aead);
@@ -453,10 +454,9 @@ testSuite({
     // primitives should not be added into primitive set).
     assertEquals(enabledRawKeysCount, rawPrimitives.length);
 
-    // Test that it returns the correct RAW primitives by using getPrimitive
-    // which is set to the string same as typeUrl + 'primitive'.
+    // Test that it returns the correct RAW primitives by using getPrimitive.
     for (let i = 0; i < enabledRawKeysCount; ++i) {
-      assertEquals(enabledUrl + 'primitive', rawPrimitives[i].getPrimitive());
+      assertEquals(primitive, rawPrimitives[i].getPrimitive());
     }
   },
 
@@ -474,11 +474,12 @@ testSuite({
     const keysetHandle = new KeysetHandle(keyset);
 
     // Register key manager for the given keyType.
+    const primitive = new DummyAead(new Uint8Array(Random.randBytes(10)));
     Registry.registerKeyManager(
-        new DummyKeyManager(keyTypeUrl, keyTypeUrl + 'primitive', Aead));
+        new DummyKeyManager(keyTypeUrl, primitive, Aead));
 
     // Use getPrimitives with custom key manager for the keyType.
-    const customPrimitive = 'type_url_corresponding_to_custom_key_manager';
+    const customPrimitive = new DummyAead(new Uint8Array(Random.randBytes(10)));
     const customKeyManager =
         new DummyKeyManager(keyTypeUrl, customPrimitive, Aead);
     const primitiveSet =
@@ -751,12 +752,13 @@ class DummyKeyFactory {
 
 /**
  * @final
- * @implements {KeyManager.KeyManager<!Object>}
+ * @implements {KeyManager.KeyManager<T>}
+ * @template T
  */
 class DummyKeyManager {
   /**
    * @param {string} keyType
-   * @param {!Object} primitive
+   * @param {T} primitive
    * @param {!Object} primitiveType
    */
   constructor(keyType, primitive, primitiveType) {
@@ -766,7 +768,7 @@ class DummyKeyManager {
     this.KEY_TYPE_ = keyType;
 
     /**
-     * @private @const {!Object}
+     * @private @const {T}
      */
     this.PRIMITIVE_ = primitive;
 
