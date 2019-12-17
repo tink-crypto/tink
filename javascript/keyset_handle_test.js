@@ -18,7 +18,9 @@ goog.setTestOnly('tink.KeysetHandleTest');
 const Aead = goog.require('tink.Aead');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
+const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
 const Bytes = goog.require('tink.subtle.Bytes');
+const CleartextKeysetHandle = goog.require('tink.CleartextKeysetHandle');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
 const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
@@ -86,8 +88,14 @@ testSuite({
   /////////////////////////////////////////////////////////////////////////////
   // tests for read method
   async testRead() {
+    const keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
+    const keysetHandle = await KeysetHandle.generateNew(keyTemplate);
+    const serializedKeyset =
+        CleartextKeysetHandle.serializeToBinary(keysetHandle);
+    const keysetReader = new BinaryKeysetReader(serializedKeyset);
+    const aead = await keysetHandle.getPrimitive(Aead);
     try {
-      await KeysetHandle.read(null, null);
+      await KeysetHandle.read(keysetReader, aead);
     } catch (e) {
       assertEquals(
           'CustomError: KeysetHandle -- read: Not implemented yet.',
@@ -122,11 +130,13 @@ testSuite({
   /////////////////////////////////////////////////////////////////////////////
   // tests for write method
   async testWrite() {
-    const keyset = createKeyset();
+    const keyset = createKeysetAndInitializeRegistry(Aead);
     const keysetHandle = new KeysetHandle(keyset);
+    const keysetWriter = new BinaryKeysetWriter();
+    const aead = await keysetHandle.getPrimitive(Aead);
 
     try {
-      await keysetHandle.write(null, null);
+      await keysetHandle.write(keysetWriter, aead);
     } catch (e) {
       assertEquals(
           'CustomError: KeysetHandle -- write: Not implemented yet.',

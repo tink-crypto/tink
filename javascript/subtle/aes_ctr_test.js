@@ -49,10 +49,9 @@ testSuite({
   async testProbabilisticEncryption() {
     const cipher = await AesCtr.newInstance(Random.randBytes(16), 16);
     const msg = Random.randBytes(20);
-    const aad = Random.randBytes(20);
     const results = new Set();
     for (let i = 0; i < 100; i++) {
-      const ciphertext = await cipher.encrypt(msg, aad);
+      const ciphertext = await cipher.encrypt(msg);
       results.add(Bytes.toHex(ciphertext));
     }
     assertEquals(100, results.size);
