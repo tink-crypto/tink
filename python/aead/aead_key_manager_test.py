@@ -124,7 +124,7 @@ class AeadKeyManagerTest(absltest.TestCase):
         self.key_manager_eax.new_key_data(
             self.new_aes_eax_key_template(12, 16)))
     with self.assertRaisesRegex(tink_error.TinkError, 'Ciphertext too short'):
-      primitive.decrypt(b'invalid ciphertext', 'ad')
+      primitive.decrypt(b'invalid ciphertext', b'ad')
 
 
 if __name__ == '__main__':

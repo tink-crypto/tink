@@ -25,6 +25,11 @@ from tink.python.core import tink_error
 from tink.python.streaming_aead import decrypting_stream
 from tink.util import error as clif_error
 
+# Using malformed UTF-8 sequences to ensure there is no accidental decoding.
+B_X80 = b'\x80'
+B_SOMETHING_ = b'somethin' + B_X80
+B_AAD_ = b'aa' + B_X80
+
 
 class FakeInputStreamAdapter(object):
 
@@ -71,45 +76,45 @@ class DecryptingStreamTest(absltest.TestCase):
     f.readable = mock.Mock(return_value=False)
 
     with self.assertRaisesRegex(ValueError, 'readable'):
-      get_decrypting_stream(f, b'aad')
+      get_decrypting_stream(f, B_AAD_)
 
   def test_read(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
-    self.assertEqual(ds.read(9), b'something')
+    self.assertEqual(ds.read(9), B_SOMETHING_)
 
   def test_read1(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertEqual(ds.read1(9), b'some')
 
   def test_readinto(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
     b = bytearray(9)
     self.assertEqual(ds.readinto(b), 9)
-    self.assertEqual(bytes(b), b'something')
+    self.assertEqual(bytes(b), B_SOMETHING_)
 
   def test_readinto1(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
     b = bytearray(9)
     self.assertEqual(ds.readinto1(b), 4)
     self.assertEqual(bytes(b[:4]), b'some')
 
   def test_read_until_eof(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
-    self.assertEqual(ds.read(), b'something')
+    self.assertEqual(ds.read(), B_SOMETHING_)
 
   def test_read_eof_reached(self):
     f = io.BytesIO()
-    ds = get_decrypting_stream(f, b'aad')
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertEqual(ds.read(), b'')
 
@@ -117,13 +122,13 @@ class DecryptingStreamTest(absltest.TestCase):
     f = mock.Mock()
     f.read = mock.Mock(return_value=None)
     f.readable = mock.Mock(return_value=True)
-    ds = get_decrypting_stream(f, b'aad')
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertRaises(io.BlockingIOError, ds.read, 5)
 
   def test_unsupported_operation(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
     with self.assertRaises(io.UnsupportedOperation):
       ds.seek(0, 0)
@@ -137,8 +142,8 @@ class DecryptingStreamTest(absltest.TestCase):
     self.assertRaises(io.UnsupportedOperation, ds.detach)
 
   def test_closed(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertFalse(ds.closed)
     self.assertFalse(f.closed)
@@ -148,8 +153,8 @@ class DecryptingStreamTest(absltest.TestCase):
     ds.close()
 
   def test_closed_methods_raise(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
     ds.close()
     self.assertRaisesRegex(ValueError, 'closed', ds.read)
@@ -159,8 +164,8 @@ class DecryptingStreamTest(absltest.TestCase):
     self.assertRaisesRegex(ValueError, 'closed', ds.isatty)
 
   def test_position(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertEqual(ds.position(), 0)
     ds.read(4)
@@ -171,8 +176,8 @@ class DecryptingStreamTest(absltest.TestCase):
     self.assertEqual(ds.position(), 8)
 
   def test_inquiries(self):
-    f = io.BytesIO(b'something')
-    ds = get_decrypting_stream(f, b'aad')
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertTrue(ds.readable())
     self.assertFalse(ds.writable())
@@ -180,35 +185,35 @@ class DecryptingStreamTest(absltest.TestCase):
     self.assertFalse(ds.isatty())
 
   def test_context_manager(self):
-    f = io.BytesIO(b'something')
+    f = io.BytesIO(B_SOMETHING_)
 
-    with get_decrypting_stream(f, b'aad') as ds:
-      self.assertEqual(ds.read(), b'something')
+    with get_decrypting_stream(f, B_AAD_) as ds:
+      self.assertEqual(ds.read(), B_SOMETHING_)
     self.assertTrue(ds.closed)
 
   def test_readline(self):
     f = io.BytesIO(b'hello\nworld\n')
-    ds = get_decrypting_stream(f, b'aad')
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertEqual(ds.readline(), b'hello\n')
     self.assertEqual(ds.readline(), b'world\n')
 
   def test_readline_with_size(self):
     f = io.BytesIO(b'hello\nworld\n')
-    ds = get_decrypting_stream(f, b'aad')
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertEqual(ds.readline(4), b'hell')
     self.assertEqual(ds.readline(4), b'o\n')
 
   def test_readlines(self):
     f = io.BytesIO(b'hello\nworld\n')
-    ds = get_decrypting_stream(f, b'aad')
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertEqual(ds.readlines(), [b'hello\n', b'world\n'])
 
   def test_readlines_with_hint(self):
     f = io.BytesIO(b'hello\nworld\n!!!\n')
-    ds = get_decrypting_stream(f, b'aad')
+    ds = get_decrypting_stream(f, B_AAD_)
 
     self.assertEqual(ds.readlines(10), [b'hello\n', b'world\n'])
 
@@ -216,7 +221,7 @@ class DecryptingStreamTest(absltest.TestCase):
     f = io.BytesIO(b'hello\nworld\n')
 
     result = []
-    for line in get_decrypting_stream(f, b'aad'):
+    for line in get_decrypting_stream(f, B_AAD_):
       result.append(line)
 
     self.assertEqual(result, [b'hello\n', b'world\n'])
@@ -231,11 +236,11 @@ class DecryptingStreamTest(absltest.TestCase):
     file_1 = io.BytesIO(b'something')
     file_2 = io.BytesIO(b'something')
 
-    with get_decrypting_stream(file_1, b'aad') as ds:
+    with get_decrypting_stream(file_1, B_AAD_) as ds:
       with io.TextIOWrapper(ds) as wrapper:
         data_1 = wrapper.read()
 
-    with get_decrypting_stream(file_2, b'aad') as ds:
+    with get_decrypting_stream(file_2, B_AAD_) as ds:
       data_2 = ds.read()
 
     self.assertEqual(len(data_1), len(data_2))

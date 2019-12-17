@@ -28,6 +28,9 @@ from tink.python.streaming_aead import streaming_aead
 from tink.python.streaming_aead import streaming_aead_key_manager
 from tink.python.streaming_aead import streaming_aead_key_templates
 
+# Using malformed UTF-8 sequences to ensure there is no accidental decoding.
+B_X80 = b'\x80'
+
 
 class TestBytesObject(io.BytesIO):
   """A BytesIO object that does not close."""
@@ -111,8 +114,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     saead_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB))
-    plaintext = b'plaintext'
-    aad = b'associated_data'
+    plaintext = b'plaintext' + B_X80
+    aad = b'associated_data' + B_X80
 
     # Encrypt
     ct_destination = TestBytesObject()
@@ -129,8 +132,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     saead_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB))
-    plaintext = b'plaintext'
-    aad = b'associated_data'
+    plaintext = b'plaintext' + B_X80
+    aad = b'associated_data' + B_X80
 
     # Encrypt
     ct_destination = TestBytesObject()

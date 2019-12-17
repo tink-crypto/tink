@@ -94,10 +94,10 @@ class PublicKeyVerifyKeyManagerTest(absltest.TestCase):
     signature = signer.sign(data)
 
     with self.assertRaisesRegex(tink_error.TinkError, 'Signature is not valid'):
-      verifier.verify(signature, 'wrongdata')
+      verifier.verify(signature, b'wrongdata')
 
     with self.assertRaisesRegex(tink_error.TinkError, 'Signature is not valid'):
-      verifier.verify('wrongsignature', data)
+      verifier.verify(b'wrongsignature', data)
 
 
 if __name__ == '__main__':

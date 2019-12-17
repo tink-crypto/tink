@@ -24,6 +24,11 @@ from tink.python import tink_config
 from tink.python.streaming_aead import streaming_aead_key_manager
 from tink.python.streaming_aead import streaming_aead_key_templates
 
+# Using malformed UTF-8 sequences to ensure there is no accidental decoding.
+B_X80 = b'\x80'
+B_AAD_ = b'aa' + B_X80
+B_TEST_AAD_ = b'test aa' + B_X80
+
 
 def setUpModule():
   tink_config.register()
@@ -55,8 +60,8 @@ class StreamingAeadTest(absltest.TestCase):
 
     # Use the primitive to get an encrypting stream.
     with TestBytesObject() as f:
-      with primitive.new_encrypting_stream(f, b'aad') as es:
-        es.write(b'some data')
+      with primitive.new_encrypting_stream(f, B_AAD_) as es:
+        es.write(b'some data' + B_X80)
 
       ciphertext = f.getvalue()
       self.assertNotEmpty(ciphertext)
@@ -68,11 +73,11 @@ class StreamingAeadTest(absltest.TestCase):
     f1 = TestBytesObject()
     f2 = TestBytesObject()
 
-    with primitive.new_encrypting_stream(f1, b'aad') as es:
-      es.write(b'some data')
+    with primitive.new_encrypting_stream(f1, B_AAD_) as es:
+      es.write(b'some data' + B_X80)
 
-    with primitive.new_encrypting_stream(f2, b'another aad') as es:
-      es.write(b'some other data')
+    with primitive.new_encrypting_stream(f2, b'another aad' + B_X80) as es:
+      es.write(b'some other data' + B_X80)
 
     self.assertNotEmpty(f1.getvalue())
     self.assertNotEmpty(f2.getvalue())
@@ -89,12 +94,11 @@ class StreamingAeadTest(absltest.TestCase):
     file_1 = TestBytesObject()
     file_2 = TestBytesObject()
 
-    with primitive.new_encrypting_stream(file_1, b'aad') as es:
+    with primitive.new_encrypting_stream(file_1, B_AAD_) as es:
       with io.TextIOWrapper(es) as wrapper:
-        # Need to specify this is a unicode string for Python 2 (b/141106504).
-        wrapper.write(u'some data')
+        wrapper.write(b'some data'.decode('utf-8'))
 
-    with primitive.new_encrypting_stream(file_2, b'aad') as es:
+    with primitive.new_encrypting_stream(file_2, B_AAD_) as es:
       es.write(b'some data')
 
     self.assertEqual(len(file_1.getvalue()), len(file_2.getvalue()))
@@ -104,14 +108,14 @@ class StreamingAeadTest(absltest.TestCase):
 
     f = TestBytesObject()
 
-    original_plaintext = b'some data'
+    original_plaintext = b'some data' + B_X80
 
-    with primitive.new_encrypting_stream(f, b'test aad') as es:
+    with primitive.new_encrypting_stream(f, B_TEST_AAD_) as es:
       es.write(original_plaintext)
 
     f.seek(0)
 
-    with primitive.new_decrypting_stream(f, b'test aad') as ds:
+    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
       read_plaintext = ds.read()
 
     self.assertEqual(read_plaintext, original_plaintext)
@@ -121,15 +125,14 @@ class StreamingAeadTest(absltest.TestCase):
     primitive = self.get_primitive()
     f = TestBytesObject()
 
-    # Mark this as unicode for Python 2 (b/141106504)
-    original_plaintext = u'One-line string.'
-    with primitive.new_encrypting_stream(f, b'test aad') as es:
+    original_plaintext = b'One-line string.'.decode('utf-8')
+    with primitive.new_encrypting_stream(f, B_TEST_AAD_) as es:
       with io.TextIOWrapper(es) as wrapper:
         wrapper.write(original_plaintext)
 
     f.seek(0)
 
-    with primitive.new_decrypting_stream(f, b'test aad') as ds:
+    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
       with io.TextIOWrapper(ds) as wrapper:
         read_plaintext = wrapper.read()
 
@@ -143,11 +146,11 @@ class StreamingAeadTest(absltest.TestCase):
     data
     on multiple lines.'''
 
-    with primitive.new_encrypting_stream(f, b'test aad') as es:
+    with primitive.new_encrypting_stream(f, B_TEST_AAD_) as es:
       es.write(original_plaintext.encode('utf-8'))
 
     f.seek(0)
-    with primitive.new_decrypting_stream(f, b'test aad') as ds:
+    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
       with io.TextIOWrapper(ds) as wrapper:
         data = wrapper.read()
 
@@ -157,17 +160,16 @@ class StreamingAeadTest(absltest.TestCase):
     """Encrypt with TextIOWrapper, then decrypt direct bytes."""
     primitive = self.get_primitive()
     f = TestBytesObject()
-    # Mark this as unicode for Python 2 (b/141106504)
-    original_plaintext = u'''some
+    original_plaintext = b'''some
     data
-    on multiple lines.'''
+    on multiple lines.'''.decode('utf-8')
 
-    with primitive.new_encrypting_stream(f, b'test aad') as es:
+    with primitive.new_encrypting_stream(f, B_TEST_AAD_) as es:
       with io.TextIOWrapper(es) as wrapper:
         wrapper.write(original_plaintext)
 
     f.seek(0)
-    with primitive.new_decrypting_stream(f, b'test aad') as ds:
+    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
       data = ds.read().decode('utf-8')
 
     self.assertEqual(data, original_plaintext)
@@ -176,17 +178,16 @@ class StreamingAeadTest(absltest.TestCase):
     """Use TextIOWrapper for both encryption and decryption."""
     primitive = self.get_primitive()
     f = TestBytesObject()
-    # Mark this as unicode for Python 2 (b/141106504)
-    original_plaintext = u'''some
+    original_plaintext = b'''some
     data
-    on multiple lines.'''
+    on multiple lines.'''.decode('utf-8')
 
-    with primitive.new_encrypting_stream(f, b'test aad') as es:
+    with primitive.new_encrypting_stream(f, B_TEST_AAD_) as es:
       with io.TextIOWrapper(es) as wrapper:
         wrapper.write(original_plaintext)
 
     f.seek(0)
-    with primitive.new_decrypting_stream(f, b'test aad') as ds:
+    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
       with io.TextIOWrapper(ds) as wrapper:
         data = wrapper.read()
 

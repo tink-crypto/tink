@@ -25,6 +25,11 @@ import mock
 
 from tink.python.streaming_aead import encrypting_stream
 
+# Using malformed UTF-8 sequences to ensure there is no accidental decoding.
+B_X80 = b'\x80'
+B_AAD_ = b'aa' + B_X80
+B_ASSOC_ = b'asso' + B_X80
+
 
 def fake_get_output_stream_adapter(self, cc_primitive, aad, destination):
   del cc_primitive, aad, self  # unused
@@ -58,18 +63,18 @@ class EncryptingStreamTest(absltest.TestCase):
     f = mock.Mock()
     f.writable = mock.Mock(return_value=False)
     with self.assertRaisesRegex(ValueError, 'writable'):
-      get_encrypting_stream(f, b'aad')
+      get_encrypting_stream(f, B_AAD_)
 
   def test_write(self):
     f = TestBytesObject()
-    with get_encrypting_stream(f, b'aad') as es:
-      es.write(b'Hello world!')
+    with get_encrypting_stream(f, B_AAD_) as es:
+      es.write(b'Hello world!' + B_X80)
 
-    self.assertEqual(b'Hello world!', f.getvalue())
+    self.assertEqual(b'Hello world!' + B_X80, f.getvalue())
 
   @absltest.skipIf(sys.version_info[0] == 2, 'Python 2 strings are bytes')
   def test_write_non_bytes(self):
-    with io.BytesIO() as f, get_encrypting_stream(f, b'aad') as es:
+    with io.BytesIO() as f, get_encrypting_stream(f, B_AAD_) as es:
       with self.assertRaisesRegex(TypeError, 'bytes-like object is required'):
         es.write('This is a string, not a bytes object')
 
@@ -83,25 +88,24 @@ class EncryptingStreamTest(absltest.TestCase):
     file_1 = TestBytesObject()
     file_2 = TestBytesObject()
 
-    with get_encrypting_stream(file_1, b'aad') as es:
+    with get_encrypting_stream(file_1, B_AAD_) as es:
       with io.TextIOWrapper(es) as wrapper:
-        # Need to specify this is a unicode string for Python 2.
-        wrapper.write(u'some data')
+        wrapper.write(b'some data'.decode('utf-8'))
 
-    with get_encrypting_stream(file_2, b'aad') as es:
+    with get_encrypting_stream(file_2, B_AAD_) as es:
       es.write(b'some data')
 
     self.assertEqual(len(file_1.getvalue()), len(file_2.getvalue()))
 
   def test_flush(self):
-    with io.BytesIO() as f, get_encrypting_stream(f, b'assoc') as es:
-      es.write(b'Hello world!')
+    with io.BytesIO() as f, get_encrypting_stream(f, B_ASSOC_) as es:
+      es.write(b'Hello world!' + B_X80)
       es.flush()
 
   def test_closed(self):
     f = io.BytesIO()
-    es = get_encrypting_stream(f, b'assoc')
-    es.write(b'Hello world!')
+    es = get_encrypting_stream(f, B_ASSOC_)
+    es.write(b'Hello world!' + B_X80)
     es.close()
 
     self.assertTrue(es.closed)
@@ -109,12 +113,12 @@ class EncryptingStreamTest(absltest.TestCase):
 
   def test_closed_methods_raise(self):
     f = io.BytesIO()
-    es = get_encrypting_stream(f, b'assoc')
-    es.write(b'Hello world!')
+    es = get_encrypting_stream(f, B_ASSOC_)
+    es.write(b'Hello world!' + B_X80)
     es.close()
 
     with self.assertRaisesRegex(ValueError, 'closed'):
-      es.write(b'Goodbye world.')
+      es.write(b'Goodbye world.' + B_X80)
     with self.assertRaisesRegex(ValueError, 'closed'):
       with es:
         pass
@@ -122,7 +126,7 @@ class EncryptingStreamTest(absltest.TestCase):
       es.flush()
 
   def test_unsupported_operation(self):
-    with io.BytesIO() as f, get_encrypting_stream(f, b'assoc') as es:
+    with io.BytesIO() as f, get_encrypting_stream(f, B_ASSOC_) as es:
       with self.assertRaisesRegex(io.UnsupportedOperation, 'seek'):
         es.seek(0, 2)
       with self.assertRaisesRegex(io.UnsupportedOperation, 'truncate'):
@@ -131,22 +135,22 @@ class EncryptingStreamTest(absltest.TestCase):
         es.read(-1)
 
   def test_inquiries(self):
-    with io.BytesIO() as f, get_encrypting_stream(f, b'assoc') as es:
+    with io.BytesIO() as f, get_encrypting_stream(f, B_ASSOC_) as es:
       self.assertTrue(es.writable())
       self.assertFalse(es.readable())
       self.assertFalse(es.seekable())
 
   def test_position(self):
     with io.BytesIO() as f:
-      with get_encrypting_stream(f, b'assoc') as es:
-        es.write(b'Hello world!')
+      with get_encrypting_stream(f, B_ASSOC_) as es:
+        es.write(b'Hello world' + B_X80)
         self.assertEqual(es.position(), 12)
 
   def test_position_works_closed(self):
     with io.BytesIO() as f:
-      es = get_encrypting_stream(f, b'assoc')
+      es = get_encrypting_stream(f, B_ASSOC_)
 
-      es.write(b'Hello world!')
+      es.write(b'Hello world' + B_X80)
       es.close()
 
       self.assertTrue(es.closed)
@@ -162,9 +166,9 @@ class EncryptingStreamTest(absltest.TestCase):
         return n
 
     with OnlyWritesFirstFiveBytes() as f:
-      with get_encrypting_stream(f, b'assoc') as es:
+      with get_encrypting_stream(f, B_ASSOC_) as es:
         with self.assertRaisesRegex(io.BlockingIOError, 'could not complete'):
-          es.write(b'Hello world!')
+          es.write(b'Hello world!' + B_X80)
 
   def test_context_manager_exception_close(self):
     """Tests that exceptional exits do not trigger normal file closure.
@@ -175,8 +179,8 @@ class EncryptingStreamTest(absltest.TestCase):
     """
     f = io.BytesIO()
     with self.assertRaisesRegex(ValueError, 'raised inside'):
-      with get_encrypting_stream(f, b'assoc') as es:
-        es.write(b'some message')
+      with get_encrypting_stream(f, B_ASSOC_) as es:
+        es.write(b'some message' + B_X80)
         raise ValueError('Error raised inside context manager')
 
     self.assertFalse(f.closed)
