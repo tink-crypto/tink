@@ -1,0 +1,18 @@
+load("@rules_python//python:defs.bzl", "py_test")
+load("@tink_py_deps//:requirements.bzl", "requirement")
+
+py_library(
+    name = "gcp_kms_client",
+    srcs = ["gcp_kms_client.py"],
+    deps = [
+    ]
+)
+
+py_test(
+    name = "gcp_kms_client_test",
+    srcs = ["gcp_kms_client_test.py"],
+    deps = [
+        ":gcp_kms_client",
+        requirement("absl-py")
+    ]
+)

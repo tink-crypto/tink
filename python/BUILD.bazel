@@ -1,0 +1,2 @@
+# This file is left intentionally blank for Bazel to be able to refer to the
+# dependencies in requirements.txt

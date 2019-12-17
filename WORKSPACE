@@ -623,6 +623,17 @@ new_local_repository(
     path = "/usr/local",
 )
 
+# Pip imports
+load("@rules_python//python:pip.bzl", "pip_import")
+
+pip_import(
+   name = "tink_py_deps",
+   requirements = "//python:requirements.txt",
+)
+
+load("@tink_py_deps//:requirements.bzl", "pip_install")
+pip_install()
+
 #-----------------------------------------------------------------------------
 # gRPC
 #-----------------------------------------------------------------------------
