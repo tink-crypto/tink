@@ -30,6 +30,7 @@ const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
+const asserts = goog.require('goog.asserts');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
 
@@ -57,7 +58,8 @@ testSuite({
         continue;
       }
       const key = await createKey(curve);
-      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key.getPublicKey());
+      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(
+          asserts.assert(key.getPublicKey()));
 
       // Test the returned jwk.
       const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
@@ -66,10 +68,10 @@ testSuite({
       assertEquals('EC', jwk['kty']);
       assertEquals(curveTypeString, jwk['crv']);
       assertObjectEquals(
-          key.getPublicKey().getX_asU8(),
+          asserts.assert(key.getPublicKey()).getX_asU8(),
           Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
       assertObjectEquals(
-          key.getPublicKey().getY_asU8(),
+          asserts.assert(key.getPublicKey()).getY_asU8(),
           Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
       assertObjectEquals(undefined, jwk['d']);
       assertTrue(jwk['ext']);
@@ -86,11 +88,12 @@ testSuite({
       }
       const key = await createKey(curve);
       // Add leading zeros to x and y value of key.
-      const x = key.getPublicKey().getX();
-      const y = key.getPublicKey().getY();
+      const x = key.getPublicKey().getX_asU8();
+      const y = key.getPublicKey().getY_asU8();
       key.getPublicKey().setX(Bytes.concat(new Uint8Array([0, 0, 0, 0, 0]), x));
       key.getPublicKey().setY(Bytes.concat(new Uint8Array([0, 0, 0]), y));
-      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key.getPublicKey());
+      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(
+          asserts.assert(key.getPublicKey()));
 
       // Test the returned jwk.
       const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
@@ -110,10 +113,11 @@ testSuite({
   async testGetJsonWebKeyFromProto_publicKey_leadingNonzero() {
     const curve = PbEllipticCurveType.NIST_P256;
     const key = await createKey(curve);
-    const x = key.getPublicKey().getX();
-    key.getPublicKey().setX(Bytes.concat(new Uint8Array([1, 0]), x));
+    const publicKey = asserts.assert(key.getPublicKey());
+    const x = publicKey.getX_asU8();
+    publicKey.setX(Bytes.concat(new Uint8Array([1, 0]), x));
     try {
-      EciesAeadHkdfUtil.getJsonWebKeyFromProto(key.getPublicKey());
+      EciesAeadHkdfUtil.getJsonWebKeyFromProto(publicKey);
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(

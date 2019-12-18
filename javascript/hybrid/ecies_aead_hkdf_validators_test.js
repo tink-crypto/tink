@@ -31,6 +31,7 @@ const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
+const asserts = goog.require('goog.asserts');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
 
@@ -501,5 +502,5 @@ const createPublicKey = async function(
     opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat) {
   const key = await createPrivateKey(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat);
-  return key.getPublicKey();
+  return asserts.assert(key.getPublicKey());
 };

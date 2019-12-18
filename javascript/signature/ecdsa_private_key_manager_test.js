@@ -31,6 +31,7 @@ const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
+const asserts = goog.require('goog.asserts');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
 
@@ -284,8 +285,11 @@ testSuite({
     const manager = new EcdsaPrivateKeyManager();
     const version = manager.getVersion() + 1;
     const keyFormat = createKeyFormat();
-    const key =
-        (await manager.getKeyFactory().newKey(keyFormat)).setVersion(version);
+    const key = asserts
+                    .assertInstanceof(
+                        await manager.getKeyFactory().newKey(keyFormat),
+                        PbEcdsaPrivateKey)
+                    .setVersion(version);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -297,7 +301,8 @@ testSuite({
   async testGetPrimitive_invalidParams() {
     const manager = new EcdsaPrivateKeyManager();
     const keyFormat = createKeyFormat();
-    const key = await manager.getKeyFactory().newKey(keyFormat);
+    const key = asserts.assertInstanceof(
+        await manager.getKeyFactory().newKey(keyFormat), PbEcdsaPrivateKey);
 
     // Unknown encoding.
     key.getPublicKey().getParams().setEncoding(
@@ -377,14 +382,17 @@ testSuite({
     const publicKeyManager = new EcdsaPublicKeyManager();
 
     for (let keyFormat of keyFormats) {
-      const key = await privateKeyManager.getKeyFactory().newKey(keyFormat);
+      const key = asserts.assertInstanceof(
+          await privateKeyManager.getKeyFactory().newKey(keyFormat),
+          PbEcdsaPrivateKey);
 
       const /** !PublicKeyVerify */ publicKeyVerify =
-          await publicKeyManager.getPrimitive(
-              PUBLIC_KEY_MANAGER_PRIMITIVE, key.getPublicKey());
+          asserts.assert(await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE,
+              asserts.assert(key.getPublicKey())));
       const /** !PublicKeySign */ publicKeySign =
-          await privateKeyManager.getPrimitive(
-              PRIVATE_KEY_MANAGER_PRIMITIVE, key);
+          asserts.assert(await privateKeyManager.getPrimitive(
+              PRIVATE_KEY_MANAGER_PRIMITIVE, key));
 
       const data = Random.randBytes(10);
       const signature = await publicKeySign.sign(data);
@@ -408,11 +416,11 @@ testSuite({
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
 
       const /** !PublicKeyVerify */ publicKeyVerify =
-          await publicKeyManager.getPrimitive(
-              PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData);
+          asserts.assert(await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData));
       const /** !PublicKeySign */ publicKeySign =
-          await privateKeyManager.getPrimitive(
-              PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
+          asserts.assert(await privateKeyManager.getPrimitive(
+              PRIVATE_KEY_MANAGER_PRIMITIVE, keyData));
 
       const data = Random.randBytes(10);
       const signature = await publicKeySign.sign(data);
@@ -516,9 +524,9 @@ class ExceptionText {
 }
 
 /**
- * @param {?PbEllipticCurveType} curveType
- * @param {?PbHashType} hashType
- * @param {?PbEcdsaSignatureEncoding} encoding
+ * @param {!PbEllipticCurveType} curveType
+ * @param {!PbHashType} hashType
+ * @param {!PbEcdsaSignatureEncoding} encoding
  *
  * @return {!PbEcdsaParams}
  */
@@ -531,9 +539,9 @@ const createParams = function(curveType, hashType, encoding) {
 };
 
 /**
- * @param {?PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {?PbHashType=} opt_hashType (default: SHA256)
- * @param {?PbEcdsaSignatureEncoding=} opt_encodingType (default: DER)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEcdsaSignatureEncoding=} opt_encodingType (default: DER)
  *
  * @return {!PbEcdsaKeyFormat}
  */

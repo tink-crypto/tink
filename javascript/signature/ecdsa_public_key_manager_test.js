@@ -350,9 +350,9 @@ class ExceptionText {
 }
 
 /**
- * @param {?PbEllipticCurveType} curveType
- * @param {?PbHashType} hashType
- * @param {?PbEcdsaSignatureEncoding} encoding
+ * @param {!PbEllipticCurveType} curveType
+ * @param {!PbHashType} hashType
+ * @param {!PbEcdsaSignatureEncoding} encoding
  *
  * @return {!PbEcdsaParams}
  */
@@ -366,9 +366,9 @@ const createParams = function(curveType, hashType, encoding) {
 
 
 /**
- * @param {?PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {?PbHashType=} opt_hashType (default: SHA256)
- * @param {?PbEcdsaSignatureEncoding=} opt_encoding (default: DER)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEcdsaSignatureEncoding=} opt_encoding (default: DER)
  *
  * @return {!Promise<!PbEcdsaPublicKey>}
  */
@@ -406,9 +406,9 @@ const createKeyDataFromKey = function(key) {
 };
 
 /**
- * @param {?PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {?PbHashType=} opt_hashType (default: SHA256)
- * @param {?PbEcdsaSignatureEncoding=} opt_encoding (default: DER)
+ * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {!PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbEcdsaSignatureEncoding=} opt_encoding (default: DER)
  *
  * @return {!Promise<!PbKeyData>}
  */

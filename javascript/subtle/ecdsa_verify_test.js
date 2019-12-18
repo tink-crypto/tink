@@ -20,6 +20,7 @@ const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
 const EcdsaVerify = goog.require('tink.subtle.EcdsaVerify');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Environment = goog.require('tink.subtle.Environment');
+const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
 const TestCase = goog.require('goog.testing.TestCase');
 const Validators = goog.require('tink.subtle.Validators');
@@ -184,7 +185,7 @@ testSuite({
  * Runs the test with test vector given as an input and returns either empty
  * string or a text describing the failure.
  *
- * @param {!EcdsaVerify} verifier
+ * @param {!PublicKeyVerify} verifier
  * @param {!Object} test - JSON object with test data
  * @return {!Promise<string>}
  */

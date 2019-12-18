@@ -110,7 +110,7 @@ testSuite({
 
   testFromByteString() {
     assertObjectEquals(
-        'empty string', new Uint8Array(), Bytes.fromByteString(''));
+        'empty string', new Uint8Array(0), Bytes.fromByteString(''));
 
     let arr = new Uint8Array(
         [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]);
@@ -121,7 +121,7 @@ testSuite({
   },
 
   testToByteString() {
-    assertEquals('empty string', '', Bytes.toByteString(new Uint8Array()));
+    assertEquals('empty string', '', Bytes.toByteString(new Uint8Array(0)));
 
     let arr = new Uint8Array(
         [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]);

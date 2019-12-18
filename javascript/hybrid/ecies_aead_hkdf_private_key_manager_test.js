@@ -37,6 +37,7 @@ const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
+const asserts = goog.require('goog.asserts');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
 
@@ -285,8 +286,11 @@ testSuite({
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const version = manager.getVersion() + 1;
     const keyFormat = createKeyFormat();
-    const key =
-        (await manager.getKeyFactory().newKey(keyFormat)).setVersion(version);
+    const key = asserts
+                    .assertInstanceof(
+                        await manager.getKeyFactory().newKey(keyFormat),
+                        PbEciesAeadHkdfPrivateKey)
+                    .setVersion(version);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -299,7 +303,9 @@ testSuite({
   async testGetPrimitive_invalidParams() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const keyFormat = createKeyFormat();
-    const key = await manager.getKeyFactory().newKey(keyFormat);
+    const key = asserts.assertInstanceof(
+        await manager.getKeyFactory().newKey(keyFormat),
+        PbEciesAeadHkdfPrivateKey);
 
     // missing KEM params
     key.getPublicKey().getParams().setKemParams(null);
@@ -350,14 +356,17 @@ testSuite({
     const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
 
     for (let keyFormat of keyFormats) {
-      const key = await privateKeyManager.getKeyFactory().newKey(keyFormat);
+      const key = asserts.assertInstanceof(
+          await privateKeyManager.getKeyFactory().newKey(keyFormat),
+          PbEciesAeadHkdfPrivateKey);
 
-      const /** HybridEncrypt */ hybridEncrypt =
-          await publicKeyManager.getPrimitive(
-              PUBLIC_KEY_MANAGER_PRIMITIVE, key.getPublicKey());
-      const /** HybridDecrypt */ hybridDecrypt =
-          await privateKeyManager.getPrimitive(
-              PRIVATE_KEY_MANAGER_PRIMITIVE, key);
+      const /** !HybridEncrypt */ hybridEncrypt =
+          asserts.assert(await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE,
+              asserts.assert(key.getPublicKey())));
+      const /** !HybridDecrypt */ hybridDecrypt =
+          asserts.assert(await privateKeyManager.getPrimitive(
+              PRIVATE_KEY_MANAGER_PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await hybridEncrypt.encrypt(plaintext);
@@ -380,12 +389,12 @@ testSuite({
           privateKeyManager.getKeyFactory());
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
 
-      const /** HybridEncrypt */ hybridEncrypt =
-          await publicKeyManager.getPrimitive(
-              PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData);
-      const /** HybridDecrypt */ hybridDecrypt =
-          await privateKeyManager.getPrimitive(
-              PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
+      const /** !HybridEncrypt */ hybridEncrypt =
+          asserts.assert(await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData));
+      const /** !HybridDecrypt */ hybridDecrypt =
+          asserts.assert(await privateKeyManager.getPrimitive(
+              PRIVATE_KEY_MANAGER_PRIMITIVE, keyData));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await hybridEncrypt.encrypt(plaintext);

@@ -28,7 +28,7 @@ const userAgent = goog.require('goog.userAgent');
  * @param {*} exception A thrown exception.
  */
 function assertCryptoError(exception) {
-  const message = exception.toString();
+  const message = String(exception);
   assertTrue(
       message.startsWith('CustomError: OperationError') ||
       // Edge uses a nonstandard error message.

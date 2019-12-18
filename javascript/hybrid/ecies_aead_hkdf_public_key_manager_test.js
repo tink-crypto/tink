@@ -36,6 +36,7 @@ const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
+const asserts = goog.require('goog.asserts');
 const testSuite = goog.require('goog.testing.testSuite');
 const userAgent = goog.require('goog.userAgent');
 
@@ -237,8 +238,8 @@ testSuite({
     const keys = await createTestSetOfKeys();
 
     for (let key of keys) {
-      const /** HybridEncrypt */ primitive =
-          await manager.getPrimitive(PRIMITIVE, key);
+      const /** !HybridEncrypt */ primitive =
+          asserts.assert(await manager.getPrimitive(PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await primitive.encrypt(plaintext);
@@ -252,8 +253,8 @@ testSuite({
     const keyDatas = await createTestSetOfKeyDatas();
 
     for (let key of keyDatas) {
-      const /** HybridEncrypt */ primitive =
-          await manager.getPrimitive(PRIMITIVE, key);
+      const /** !HybridEncrypt */ primitive =
+          asserts.assert(await manager.getPrimitive(PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await primitive.encrypt(plaintext);
@@ -478,7 +479,7 @@ const createTestSetOfKeys = async function() {
       [AeadKeyTemplates.aes128CtrHmacSha256(), AeadKeyTemplates.aes256Gcm()];
   const pointFormats = [PbPointFormat.UNCOMPRESSED];
 
-  const /** Array<!PbEciesAeadHkdfPublicKey> */ keys = [];
+  const /** !Array<!PbEciesAeadHkdfPublicKey> */ keys = [];
   for (let curve of curveTypes) {
     for (let hkdfHash of hashTypes) {
       for (let keyTemplate of keyTemplates) {
@@ -499,7 +500,7 @@ const createTestSetOfKeys = async function() {
 const createTestSetOfKeyDatas = async function() {
   const keys = await createTestSetOfKeys();
 
-  const /** Array<!PbKeyData> */ keyDatas = [];
+  const /** !Array<!PbKeyData> */ keyDatas = [];
   for (let key of keys) {
     const keyData = await createKeyDataFromKey(key);
     keyDatas.push(keyData);

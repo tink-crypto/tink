@@ -569,7 +569,7 @@ testSuite({
  * @param {!PbOutputPrefixType} outputPrefix
  * @param {string} keyTypeUrl
  * @param {boolean} enabled
- * @param {?PbKeyMaterialType=} opt_keyMaterialType (default: SYMMETRIC)
+ * @param {!PbKeyMaterialType=} opt_keyMaterialType (default: SYMMETRIC)
  *
  * @return {!PbKeyset.Key}
  */
@@ -604,7 +604,7 @@ const createKey = function(
  * keyType added to the Keyset.
  *
  * @param {!Object} primitiveType
- * @param {?number=} opt_numberOfKeys
+ * @param {number=} opt_numberOfKeys
  *
  * @return {!PbKeyset}
  */
