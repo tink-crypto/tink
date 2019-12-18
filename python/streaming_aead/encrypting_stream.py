@@ -179,7 +179,7 @@ class EncryptingStream(io.BufferedIOBase):
       # We deliberately don't close the file here, since we don't know if the
       # user was really done writing or if there was an error.
       self.flush()
-    except:  # pylint: disable=bare-except
+    except Exception:  # pylint: disable=broad-except
       pass
 
   ### Inquiries ###
