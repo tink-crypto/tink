@@ -21,9 +21,9 @@ from absl.testing import absltest
 # TODO(b/141106504) Replace this with unittest.mock
 import mock
 
+from tink.python.cc.clif import status as error
 from tink.python.core import tink_error
 from tink.python.streaming_aead import decrypting_stream
-from tink.util import error as clif_error
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -43,7 +43,7 @@ class FakeInputStreamAdapter(object):
         size = 100
       return self._adapter.read(size)
     except EOFError:
-      raise clif_error.StatusNotOk(11, 'EOF')
+      raise error.StatusNotOk(11, 'EOF')
 
   def read1(self, size=-1):
     del size  # unused
