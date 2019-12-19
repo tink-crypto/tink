@@ -201,7 +201,7 @@ class DummyAead : public Aead {
     std::string prefix =
         absl::StrCat(aead_name_.size(), ":", associated_data.size(), ":",
                      aead_name_, associated_data);
-    if (!StartsWith(ciphertext, prefix)) {
+    if (!absl::StartsWith(ciphertext, prefix)) {
       return crypto::tink::util::Status(
           crypto::tink::util::error::INVALID_ARGUMENT,
           "Dummy operation failed.");
@@ -626,7 +626,7 @@ class DummyKmsClient : public KmsClient {
 
   bool DoesSupport(absl::string_view key_uri) const override {
     if (key_uri.empty()) return false;
-    if (key_uri_.empty()) return StartsWith(key_uri, uri_prefix_);
+    if (key_uri_.empty()) return absl::StartsWith(key_uri, uri_prefix_);
     return key_uri == key_uri_;
   }
 
