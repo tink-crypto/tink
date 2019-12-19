@@ -28,13 +28,19 @@ http_file(
 #-----------------------------------------------------------------------------
 # wycheproof, for JSON test vectors
 #-----------------------------------------------------------------------------
-# Commit from 2018-07-31
+# Commit from 2019-12-17
 http_archive(
     name = "wycheproof",
-    strip_prefix = "wycheproof-f89f4c53a8845fcefcdb9f14ee9191dbe167e3e3",
-    url = "https://github.com/google/wycheproof/archive/f89f4c53a8845fcefcdb9f14ee9191dbe167e3e3.zip",
-    sha256 = "b44bb0339ad149e6cdab1337445cf52440cbfc79684203a3db1c094d9ef8daea",
+    strip_prefix = "wycheproof-d8ed1ba95ac4c551db67f410c06131c3bc00a97c",
+    url = "https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip",
+    sha256 = "eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545",
 )
+
+# Note: We have to story a copy of the wycheproof test vectors within tink,
+# because there is currently no general method for a Go program to locate
+# testdata stored in another module. When updating the wycheproof dependency
+# above, also update the test vector files stored here to keep them in sync:
+#       tink/third_party/wycheproof/testvectors
 
 #-----------------------------------------------------------------------------
 # cc
