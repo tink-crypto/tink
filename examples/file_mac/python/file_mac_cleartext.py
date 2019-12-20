@@ -26,7 +26,7 @@ matched or not. If not, it will just print the hexadecimal MAC of the data file.
 
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import google_type_annotations
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 import binascii

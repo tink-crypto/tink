@@ -17,7 +17,7 @@ OutputStream/InputStream to interact with a Python file-like object.
 
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import google_type_annotations
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 import io

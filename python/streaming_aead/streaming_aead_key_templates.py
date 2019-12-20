@@ -23,7 +23,7 @@ handle = keyset_handle.KeysetHandle(
 
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import google_type_annotations
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 from tink.proto import aes_ctr_hmac_streaming_pb2

@@ -16,7 +16,7 @@ It reads the ciphertext from a given other file-like object, and decrypts it.
 
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import google_type_annotations
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 import errno
