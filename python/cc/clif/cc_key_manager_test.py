@@ -29,8 +29,8 @@ from tink.proto import tink_pb2
 from tink.python.aead import aead_key_templates
 from tink.python.cc.clif import cc_key_manager
 from tink.python.cc.clif import cc_tink_config
-from tink.python.cc.clif import status as error
 from tink.python.hybrid import hybrid_key_templates
+from tink.util import error
 
 
 def setUpModule():
@@ -321,10 +321,10 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
     signature = signer.sign(data)
 
     with self.assertRaisesRegex(error.StatusNotOk, 'Signature is not valid'):
-      verifier.verify(signature, b'wrongdata')
+      verifier.verify(signature, 'wrongdata')
 
     with self.assertRaisesRegex(error.StatusNotOk, 'Signature is not valid'):
-      verifier.verify(b'wrongsignature', data)
+      verifier.verify('wrongsignature', data)
 
 
 if __name__ == '__main__':

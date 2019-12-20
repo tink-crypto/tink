@@ -12,24 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module defines basic exceptions in Tink."""
+from "tink/python/util/clif.h" import *  # StatusOr
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-from tink.util import error as clif_error
-
-
-def use_tink_errors(func):
-  """Transforms StatusNotOk errors into TinkErrors."""
-  def wrapper(*args):
-    try:
-      return func(*args)
-    except clif_error.StatusNotOk as e:
-      raise TinkError(e)
-  return wrapper
-
-
-class TinkError(Exception):
-  """Common exception in Tink."""
+from "tink/cc/hybrid_encrypt.h":
+  namespace `crypto::tink`:
+    class HybridEncrypt:
+      def `Encrypt` as encrypt(self, plaintext: bytes, context_info: bytes)
+        -> StatusOr<bytes>

@@ -1,0 +1,133 @@
+# Copyright 2019 Google LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from "tink/proto/tink_pyclif.h" import *  # KeyTemplate, KeyData
+from "tink/python/util/clif.h" import *  # StatusOr
+from "tink/cc/python/aead.h" import *  # Aead
+from "tink/cc/python/deterministic_aead.h" import *  # DeterministicAead
+from "tink/cc/python/hybrid_decrypt.h" import *  # HybridDecrypt
+from "tink/cc/python/streaming_aead.h" import *  # StreamingAead
+from "tink/cc/python/hybrid_encrypt.h" import *  # HybridEncrypt
+from "tink/cc/python/mac.h" import *  # Mac
+from "tink/cc/python/public_key_sign.h" import *  # PublicKeySign
+from "tink/cc/python/public_key_verify.h" import *  # PublicKeyVerify
+
+from tink.cc.python.aead import Aead
+from tink.cc.python.deterministic_aead import DeterministicAead
+from tink.cc.python.streaming_aead import StreamingAead
+from tink.cc.python.hybrid_decrypt import HybridDecrypt
+from tink.cc.python.hybrid_encrypt import HybridEncrypt
+from tink.cc.python.mac import Mac
+
+from "tink/python/cc/cc_key_manager.h":
+  namespace `crypto::tink`:
+    # Key Manager for AEAD (authenticated encryption with associated data).
+    class `CcKeyManager<Aead>` as AeadKeyManager:
+      @classmethod
+      def `GetFromCcRegistry`as from_cc_registry(cls, type_url: str)
+      -> StatusOr<AeadKeyManager>
+
+      def `GetPrimitive` as primitive(self, key_data:KeyData)
+        -> StatusOr<Aead>
+      def `KeyType` as key_type(self) -> str
+      def `NewKeyData` as new_key_data(self, key_template:KeyTemplate)
+        -> StatusOr<KeyData>
+
+    # Key Manager for Deterministic AEAD.
+    class `CcKeyManager<DeterministicAead>` as DeterministicAeadKeyManager:
+      @classmethod
+      def `GetFromCcRegistry`as from_cc_registry(cls, type_url: str)
+      -> StatusOr<DeterministicAeadKeyManager>
+
+      def `GetPrimitive` as primitive(self, key_data:KeyData)
+        -> StatusOr<DeterministicAead>
+      def `KeyType` as key_type(self) -> str
+      def `NewKeyData` as new_key_data(self, key_template:KeyTemplate)
+        -> StatusOr<KeyData>
+
+    # Key Manager for Streaming AEAD.
+    class `CcKeyManager<StreamingAead>` as StreamingAeadKeyManager:
+      @classmethod
+      def `GetFromCcRegistry`as from_cc_registry(cls, type_url: str)
+      -> StatusOr<StreamingAeadKeyManager>
+
+      def `GetPrimitive` as primitive(self, key_data:KeyData)
+        -> StatusOr<StreamingAead>
+      def `KeyType` as key_type(self) -> str
+      def `NewKeyData` as new_key_data(self, key_template:KeyTemplate)
+        -> StatusOr<KeyData>
+
+    # Key Manager for HybridDecrypt.
+    class `CcKeyManager<HybridDecrypt>` as HybridDecryptKeyManager:
+      @classmethod
+      def `GetFromCcRegistry`as from_cc_registry(cls, type_url: str)
+      -> StatusOr<HybridDecryptKeyManager>
+
+      def `GetPrimitive` as primitive(self, key_data:KeyData)
+        -> StatusOr<HybridDecrypt>
+      def `KeyType` as key_type(self) -> str
+      def `NewKeyData` as new_key_data(self, key_template:KeyTemplate)
+        -> StatusOr<KeyData>
+      def `GetPublicKeyData` as public_key_data(self, key_data:KeyData)
+        -> StatusOr<KeyData>
+
+    # Key Manager for HybridEncrypt.
+    class `CcKeyManager<HybridEncrypt>` as HybridEncryptKeyManager:
+      @classmethod
+      def `GetFromCcRegistry`as from_cc_registry(cls, type_url: str)
+      -> StatusOr<HybridEncryptKeyManager>
+
+      def `GetPrimitive` as primitive(self, key_data:KeyData)
+        -> StatusOr<HybridEncrypt>
+      def `KeyType` as key_type(self) -> str
+      def `NewKeyData` as new_key_data(self, key_template:KeyTemplate)
+        -> StatusOr<KeyData>
+
+    # Key Manager for MAC (message authentication code).
+    class `CcKeyManager<Mac>` as MacKeyManager:
+      @classmethod
+      def `GetFromCcRegistry`as from_cc_registry(cls, type_url: str)
+      -> StatusOr<MacKeyManager>
+
+      def `GetPrimitive` as primitive(self, key_data:KeyData)
+        -> StatusOr<Mac>
+      def `KeyType` as key_type(self) -> str
+      def `NewKeyData` as new_key_data(self, key_template:KeyTemplate)
+        -> StatusOr<KeyData>
+
+    # Key Manager for Public Key signing.
+    class `CcKeyManager<PublicKeySign>` as PublicKeySignKeyManager:
+      @classmethod
+      def `GetFromCcRegistry`as from_cc_registry(cls, type_url: str)
+      -> StatusOr<PublicKeySignKeyManager>
+
+      def `GetPrimitive` as primitive(self, key_data: KeyData)
+        -> StatusOr<PublicKeySign>
+      def `KeyType` as key_type(self) -> str
+      def `NewKeyData` as new_key_data(self, key_template: KeyTemplate)
+        -> StatusOr<KeyData>
+      def `GetPublicKeyData` as public_key_data(self, key_data:KeyData)
+        -> StatusOr<KeyData>
+
+    # Key Manager for Public Key verification.
+    class `CcKeyManager<PublicKeyVerify>` as PublicKeyVerifyKeyManager:
+      @classmethod
+      def `GetFromCcRegistry`as from_cc_registry(cls, type_url: str)
+      -> StatusOr<PublicKeyVerifyKeyManager>
+
+      def `GetPrimitive` as primitive(self, key_data: KeyData)
+        -> StatusOr<PublicKeyVerify>
+      def `KeyType` as key_type(self) -> str
+      def `NewKeyData` as new_key_data(self, key_template: KeyTemplate)
+        -> StatusOr<KeyData>

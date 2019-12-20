@@ -31,13 +31,25 @@ namespace google {
 
 namespace util = crypto::tink::util;
 
-void ImportStatusModule();
+// Use a macro so this path can be set from the commandline when building.
+#ifndef TINK_PYTHON_CC_CLIF_STATUS_MODULE_IMPORT_PATH
+#define TINK_PYTHON_CC_CLIF_STATUS_MODULE_IMPORT_PATH \
+  google3.third_party.tink.python.cc.clif.status
+#endif
+
+// The import path will need to change if this is ever open sourced, so
+// providing a helper function makes that a single point change.
+constexpr char kStatusModuleImportPath[] = PYBIND11_TOSTRING(
+    TINK_PYTHON_CC_CLIF_STATUS_MODULE_IMPORT_PATH);
+
+// Imports the status module.
+inline void ImportStatusModule() { module::import(kStatusModuleImportPath); }
 
 // Wrapper type to signal to the type_caster that a non-ok status should not
 // be converted into an object rather than a thrown exception.
 template <typename StatusType>
 struct NoThrowStatus {
-  explicit NoThrowStatus(StatusType status_in)
+  NoThrowStatus(StatusType status_in)
       : status(std::forward<StatusType>(status_in)) {}
   StatusType status;
 };
