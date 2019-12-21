@@ -31,16 +31,18 @@ EciesHkdfSenderKemBoringSsl::KemKey::KemKey(const std::string& kem_bytes,
                                             const std::string& symmetric_key)
     : kem_bytes_(kem_bytes), symmetric_key_(symmetric_key) {}
 
-std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_kem_bytes() {
+const std::string&
+EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_kem_bytes() const {
   return kem_bytes_;
 }
 
-std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() {
+const std::string&
+EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() const {
   return symmetric_key_;
 }
 
 // static
-util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
 EciesHkdfSenderKemBoringSsl::New(subtle::EllipticCurveType curve,
                                  const std::string& pubx,
                                  const std::string& puby) {
@@ -63,20 +65,20 @@ EciesHkdfNistPCurveSendKemBoringSsl::EciesHkdfNistPCurveSendKemBoringSsl(
     : curve_(curve), pubx_(pubx), puby_(puby), peer_pub_key_(peer_pub_key) {}
 
 // static
-util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
 EciesHkdfNistPCurveSendKemBoringSsl::New(subtle::EllipticCurveType curve,
                                          const std::string& pubx,
                                          const std::string& puby) {
   auto status_or_ec_point =
       SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
   if (!status_or_ec_point.ok()) return status_or_ec_point.status();
-  std::unique_ptr<EciesHkdfSenderKemBoringSsl> sender_kem(
+  std::unique_ptr<const EciesHkdfSenderKemBoringSsl> sender_kem(
       new EciesHkdfNistPCurveSendKemBoringSsl(curve, pubx, puby,
                                               status_or_ec_point.ValueOrDie()));
   return std::move(sender_kem);
 }
 
-util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
+util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl::KemKey>>
 EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
     subtle::HashType hash, absl::string_view hkdf_salt,
     absl::string_view hkdf_info, uint32_t key_size_in_bytes,
@@ -119,7 +121,7 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
     return status_or_string_symmetric_key.status();
   }
   std::string symmetric_key(status_or_string_symmetric_key.ValueOrDie());
-  auto kem_key = absl::make_unique<KemKey>(kem_bytes, symmetric_key);
+  auto kem_key = absl::make_unique<const KemKey>(kem_bytes, symmetric_key);
   return std::move(kem_key);
 }
 
@@ -130,7 +132,7 @@ EciesHkdfX25519SendKemBoringSsl::EciesHkdfX25519SendKemBoringSsl(
 }
 
 // static
-util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
 EciesHkdfX25519SendKemBoringSsl::New(subtle::EllipticCurveType curve,
                                      const std::string& pubx,
                                      const std::string& puby) {
@@ -145,12 +147,12 @@ EciesHkdfX25519SendKemBoringSsl::New(subtle::EllipticCurveType curve,
   if (!puby.empty()) {
     return util::Status(util::error::INVALID_ARGUMENT, "puby is not empty");
   }
-  std::unique_ptr<EciesHkdfSenderKemBoringSsl> sender_kem(
+  std::unique_ptr<const EciesHkdfSenderKemBoringSsl> sender_kem(
       new EciesHkdfX25519SendKemBoringSsl(pubx));
   return std::move(sender_kem);
 }
 
-util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
+util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl::KemKey>>
 EciesHkdfX25519SendKemBoringSsl::GenerateKey(
     subtle::HashType hash, absl::string_view hkdf_salt,
     absl::string_view hkdf_info, uint32_t key_size_in_bytes,
@@ -177,7 +179,7 @@ EciesHkdfX25519SendKemBoringSsl::GenerateKey(
     return status_or_string_symmetric_key.status();
   }
   std::string symmetric_key(status_or_string_symmetric_key.ValueOrDie());
-  auto kem_key = absl::make_unique<KemKey>(kem_bytes, symmetric_key);
+  auto kem_key = absl::make_unique<const KemKey>(kem_bytes, symmetric_key);
   return std::move(kem_key);
 }
 

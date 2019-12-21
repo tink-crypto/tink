@@ -41,8 +41,8 @@ namespace crypto {
 namespace tink {
 
 // static
-StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>> EciesAeadHkdfDemHelper::New(
-    const KeyTemplate& dem_key_template) {
+StatusOr<std::unique_ptr<const EciesAeadHkdfDemHelper>>
+EciesAeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
   auto helper = absl::WrapUnique(new EciesAeadHkdfDemHelper(dem_key_template));
   std::string dem_type_url = dem_key_template.type_url();
   if (dem_type_url == "type.googleapis.com/google.crypto.tink.AesGcmKey") {
@@ -85,7 +85,7 @@ StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>> EciesAeadHkdfDemHelper::New(
                      dem_type_url.c_str());
   }
   helper->dem_key_manager_ = key_manager_result.ValueOrDie();
-  return std::move(helper);
+  return std::unique_ptr<const EciesAeadHkdfDemHelper>(helper.release());
 }
 
 StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(

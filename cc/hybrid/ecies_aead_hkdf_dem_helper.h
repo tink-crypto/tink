@@ -32,11 +32,12 @@ namespace tink {
 class EciesAeadHkdfDemHelper {
  public:
   // Constructs a new helper for the specified DEM key template.
-  static crypto::tink::util::StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>>
+  static
+  crypto::tink::util::StatusOr<std::unique_ptr<const EciesAeadHkdfDemHelper>>
       New(const google::crypto::tink::KeyTemplate& dem_key_template);
 
   // Returns the size of the DEM-key in bytes.
-  uint32_t dem_key_size_in_bytes() {
+  uint32_t dem_key_size_in_bytes() const {
     return dem_key_size_in_bytes_;
   }
 
@@ -54,7 +55,7 @@ class EciesAeadHkdfDemHelper {
     XCHACHA20_POLY1305_KEY,
   };
 
-  EciesAeadHkdfDemHelper(
+  explicit EciesAeadHkdfDemHelper(
       const google::crypto::tink::KeyTemplate& dem_key_template)
       : dem_key_template_(dem_key_template) {}
 

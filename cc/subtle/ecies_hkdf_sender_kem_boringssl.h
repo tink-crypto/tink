@@ -37,9 +37,9 @@ class EciesHkdfSenderKemBoringSsl {
     KemKey() {}
     explicit KemKey(const std::string& kem_bytes,
                     const std::string& symmetric_key);
-    std::string get_kem_bytes();
 
-    std::string get_symmetric_key();
+    const std::string& get_kem_bytes() const;
+    const std::string& get_symmetric_key() const;
 
    private:
     std::string kem_bytes_;
@@ -49,7 +49,7 @@ class EciesHkdfSenderKemBoringSsl {
   // Constructs a sender KEM for the specified curve and recipient's
   // public key point.  The public key's coordinates are big-endian byte array.
   static crypto::tink::util::StatusOr<
-      std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+      std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
   New(EllipticCurveType curve, const std::string& pubx,
       const std::string& puby);
 
@@ -57,7 +57,8 @@ class EciesHkdfSenderKemBoringSsl {
   // generated ephemeral key and recipient's public key, then uses HKDF
   // to derive the symmetric key from the shared secret, 'hkdf_info' and
   // hkdf_salt.
-  virtual crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
+  virtual
+      crypto::tink::util::StatusOr<std::unique_ptr<const KemKey>> GenerateKey(
       HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
       uint32_t key_size_in_bytes, EcPointFormat point_format) const = 0;
 
@@ -70,7 +71,7 @@ class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
   // Constructs a sender KEM for the specified curve and recipient's
   // public key point.  The public key's coordinates are big-endian byte array.
   static crypto::tink::util::StatusOr<
-      std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+      std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
   New(EllipticCurveType curve, const std::string& pubx,
       const std::string& puby);
 
@@ -78,7 +79,7 @@ class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
   // generated ephemeral key and recipient's public key, then uses HKDF
   // to derive the symmetric key from the shared secret, 'hkdf_info' and
   // hkdf_salt.
-  crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
+  crypto::tink::util::StatusOr<std::unique_ptr<const KemKey>> GenerateKey(
       HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
       uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
 
@@ -100,7 +101,7 @@ class EciesHkdfX25519SendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
   // Constructs a sender KEM for the specified curve and recipient's
   // public key point.  The public key's coordinates are big-endian byte array.
   static crypto::tink::util::StatusOr<
-      std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+      std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
   New(EllipticCurveType curve, const std::string& pubx,
       const std::string& puby);
 
@@ -108,7 +109,7 @@ class EciesHkdfX25519SendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
   // generated ephemeral key and recipient's public key, then uses HKDF
   // to derive the symmetric key from the shared secret, 'hkdf_info' and
   // hkdf_salt.
-  crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
+  crypto::tink::util::StatusOr<std::unique_ptr<const KemKey>> GenerateKey(
       HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
       uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
 

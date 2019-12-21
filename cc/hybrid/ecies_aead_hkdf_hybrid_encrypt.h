@@ -51,14 +51,14 @@ class EciesAeadHkdfHybridEncrypt : public HybridEncrypt {
 
   EciesAeadHkdfHybridEncrypt(
       const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key,
-      std::unique_ptr<subtle::EciesHkdfSenderKemBoringSsl> sender_kem,
-      std::unique_ptr<EciesAeadHkdfDemHelper> dem_helper)
+      std::unique_ptr<const subtle::EciesHkdfSenderKemBoringSsl> sender_kem,
+      std::unique_ptr<const EciesAeadHkdfDemHelper> dem_helper)
       : recipient_key_(recipient_key), sender_kem_(std::move(sender_kem)),
         dem_helper_(std::move(dem_helper)) {}
 
   google::crypto::tink::EciesAeadHkdfPublicKey recipient_key_;
-  std::unique_ptr<subtle::EciesHkdfSenderKemBoringSsl> sender_kem_;
-  std::unique_ptr<EciesAeadHkdfDemHelper> dem_helper_;
+  std::unique_ptr<const subtle::EciesHkdfSenderKemBoringSsl> sender_kem_;
+  std::unique_ptr<const EciesAeadHkdfDemHelper> dem_helper_;
 };
 
 }  // namespace tink
