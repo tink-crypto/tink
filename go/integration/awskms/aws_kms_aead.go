@@ -24,6 +24,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/tink"
@@ -32,7 +33,7 @@ import (
 // AWSAEAD represents a AWS KMS service to a particular URI.
 type AWSAEAD struct {
 	keyURI string
-	kms    *kms.KMS
+	kms    kmsiface.KMSAPI
 }
 
 var (
@@ -41,7 +42,7 @@ var (
 )
 
 // NewAWSAEAD returns a new AWS KMS service.
-func NewAWSAEAD(keyURI string, kms *kms.KMS) *AWSAEAD {
+func NewAWSAEAD(keyURI string, kms kmsiface.KMSAPI) *AWSAEAD {
 	return &AWSAEAD{
 		keyURI: keyURI,
 		kms:    kms,
@@ -83,11 +84,11 @@ func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 		}
 	}
 	resp, err := a.kms.Decrypt(req)
-	if strings.Compare(*resp.KeyId, a.keyURI) != 0 {
-		return nil, errors.New("decryption failed: wrong key id")
-	}
 	if err != nil {
 		return nil, err
+	}
+	if strings.Compare(*resp.KeyId, a.keyURI) != 0 {
+		return nil, errors.New("decryption failed: wrong key id")
 	}
 	return resp.Plaintext, nil
 }

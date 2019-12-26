@@ -25,6 +25,8 @@ import (
 	"flag"
 	// context is used to cancel outstanding requests
 	// TEST_SRCDIR to read the roots.pem
+	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
@@ -142,5 +144,23 @@ func TestLoadBadCSVCredential(t *testing.T) {
 	}
 	if err != errCredCSV {
 		t.Fatalf("expect error : %v, got: %v", errCredCSV, err)
+	}
+}
+
+type mockKMSClient struct {
+	kmsiface.KMSAPI
+}
+
+func (c *mockKMSClient) Decrypt(*kms.DecryptInput) (*kms.DecryptOutput, error) {
+	return nil, errors.New("mock error")
+}
+
+func TestKMSDecryptFailureWithoutPanic(t *testing.T) {
+	mockSvc := &mockKMSClient{}
+
+	a := NewAWSAEAD("", mockSvc)
+	_, err := a.Decrypt([]byte{}, nil)
+	if err == nil {
+		t.Fatalf("expect error instead of panic")
 	}
 }
