@@ -19,9 +19,9 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/cryptofmt"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -41,8 +41,8 @@ func NewVerifierWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.V
 	return ret, nil
 }
 
-// verifierSet is an Signer implementation that uses the
-// underlying primitive set for signing.
+// verifierSet is a Verifier implementation that uses the
+// underlying primitive set for verifying.
 type verifierSet struct {
 	ps *primitiveset.PrimitiveSet
 }
