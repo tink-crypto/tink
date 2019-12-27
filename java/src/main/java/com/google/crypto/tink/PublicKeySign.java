@@ -37,7 +37,7 @@ public interface PublicKeySign {
   /**
    * Computes the signature for {@code data}.
    *
-   * @return the signature of {$code data}
+   * @return the signature of {@code data}
    */
   byte[] sign(final byte[] data) throws GeneralSecurityException;
 }
