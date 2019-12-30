@@ -54,10 +54,12 @@ material.
 Tink/Tinkey can encrypt or decrypt keysets with master keys residing in remote
 KMSes. Currently, the following KMSes are supported:
 
--   Google Cloud KMS
--   Amazon KMS
--   Android Keystore
--   Apple iOS KeyChain (planned)
+-   [Google Cloud KMS](https://cloud.google.com/kms/)
+-   [AWS KMS](https://aws.amazon.com/kms/)
+-   [Android Keystore](https://developer.android.com/training/articles/keystore)
+
+On iOS, Tink can also directly load or store keysets in
+[iOS KeyChain](https://developer.apple.com/documentation/security/keychain_services).
 
 You can easily add support for in-house key management systems, without having
 to change anything in Tink/Tinkey. For example, when Tink/Tinkey is deployed at
