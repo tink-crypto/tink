@@ -115,12 +115,16 @@ class TinkeyUtil {
       String credentialPath,
       KeyTemplate keyTemplate)
       throws GeneralSecurityException, IOException {
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetHandle handle = KeysetManager.withEmptyKeyset().rotate(keyTemplate).getKeysetHandle();
 
     writeKeyset(handle, outputStream, outFormat, masterKeyUri, credentialPath);
   }
 
   /** Manipulates a key within a keyset. */
+  @SuppressWarnings("GuardedBy")
   public static void manipulateKey(
       CommandType type,
       OutputStream outputStream,
@@ -136,24 +140,35 @@ class TinkeyUtil {
             getKeysetHandle(inputStream, inFormat, masterKeyUri, credentialPath));
     switch (type) {
       case DELETE_KEY:
+        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
+        // held
         manager = manager.delete(keyId);
         break;
       case DESTROY_KEY:
+        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
+        // held
         manager = manager.destroy(keyId);
         break;
       case DISABLE_KEY:
+        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
+        // held
         manager = manager.disable(keyId);
         break;
       case ENABLE_KEY:
+        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
+        // held
         manager = manager.enable(keyId);
         break;
       case PROMOTE_KEY:
+        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
+        // held
         manager = manager.setPrimary(keyId);
         break;
       default:
         throw new GeneralSecurityException("invalid command");
     }
 
+    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     writeKeyset(manager.getKeysetHandle(), outputStream, outFormat, masterKeyUri, credentialPath);
   }
 
@@ -161,6 +176,7 @@ class TinkeyUtil {
    * Creates and adds a new key to an existing keyset. The new key becomes the primary key if {@code
    * type} is {@link CommandType#ROTATE}.
    */
+  @SuppressWarnings("GuardedBy")
   public static void createKey(
       CommandType type,
       OutputStream outputStream,
@@ -176,15 +192,20 @@ class TinkeyUtil {
             getKeysetHandle(inputStream, inFormat, masterKeyUri, credentialPath));
     switch (type) {
       case ADD_KEY:
+        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
+        // held
         manager = manager.add(keyTemplate);
         break;
       case ROTATE_KEYSET:
+        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
+        // held
         manager = manager.rotate(keyTemplate);
         break;
       default:
         throw new GeneralSecurityException("invalid command");
     }
 
+    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     writeKeyset(manager.getKeysetHandle(), outputStream, outFormat, masterKeyUri, credentialPath);
   }
 

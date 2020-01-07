@@ -56,7 +56,12 @@ public class CleartextKeysetHandleTest {
   public void testRead() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     Keyset keyset1 = manager.getKeysetHandle().getKeyset();
 
     KeysetHandle handle1 =
@@ -76,6 +81,9 @@ public class CleartextKeysetHandleTest {
   public void testWrite() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetHandle handle = KeysetManager.withEmptyKeyset().rotate(template).getKeysetHandle();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
@@ -90,7 +98,12 @@ public class CleartextKeysetHandleTest {
   public void testReadInvalidKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     byte[] proto = keyset.toByteArray();

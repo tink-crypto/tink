@@ -99,6 +99,9 @@ public class JsonKeysetReaderTest {
   @Test
   public void testRead_multipleKeys_shouldWork() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetHandle handle1 =
         KeysetManager.withEmptyKeyset()
             .rotate(template)
@@ -289,6 +292,9 @@ public class JsonKeysetReaderTest {
     Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetHandle handle1 =
         KeysetManager.withEmptyKeyset()
             .rotate(template)

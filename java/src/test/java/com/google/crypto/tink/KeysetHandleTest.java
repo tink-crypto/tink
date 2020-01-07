@@ -122,6 +122,9 @@ public class KeysetHandleTest {
   /** Tests that when encryption failed an exception is thrown. */
   @Test
   public void testEncryptFailed() throws Exception {
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetHandle handle =
         KeysetManager.withEmptyKeyset()
             .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)

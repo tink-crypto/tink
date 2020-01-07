@@ -64,6 +64,7 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
     this.associatedData = associatedData.clone();
   }
 
+  @SuppressWarnings("GuardedBy")
   @Override
   @GuardedBy("this")
   public synchronized int read(ByteBuffer dst) throws IOException {
@@ -86,6 +87,8 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
           if (retValue > 0) {
             // Found a matching channel
             matchingChannel = attemptedChannel;
+            // TODO(b/145386688): This access should be guarded by 'this.ciphertextChannel'; instead
+            // found: 'this'
             ciphertextChannel.disableRewinding();
           } else if (retValue == 0) {
             // Not clear whether the channel could be matched: it might be
@@ -93,6 +96,8 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
             // to check the header, or maybe the header was checked, but there
             // were no actual encrypted bytes in the channel yet.
             // Should try again.
+            // TODO(b/145386688): This access should be guarded by 'this.ciphertextChannel'; instead
+            // found: 'this'
             ciphertextChannel.rewind();
             attemptedMatching = false;
           }
@@ -102,10 +107,14 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
           // IOException is thrown e.g. when MAC is incorrect, but also in case
           // of I/O failures.
           // TODO(b/66098906): Use a subclass of IOException.
+          // TODO(b/145386688): This access should be guarded by 'this.ciphertextChannel'; instead
+          // found: 'this'
           ciphertextChannel.rewind();
           continue;
         } catch (GeneralSecurityException e) {
           // Try another key.
+          // TODO(b/145386688): This access should be guarded by 'this.ciphertextChannel'; instead
+          // found: 'this'
           ciphertextChannel.rewind();
           continue;
         }
@@ -114,15 +123,21 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
     }
   }
 
+  @SuppressWarnings("GuardedBy")
   @Override
   @GuardedBy("this")
   public synchronized void close() throws IOException {
+    // TODO(b/145386688): This access should be guarded by 'this.ciphertextChannel'; instead found:
+    // 'this'
     ciphertextChannel.close();
   }
 
+  @SuppressWarnings("GuardedBy")
   @Override
   @GuardedBy("this")
   public synchronized boolean isOpen() {
+    // TODO(b/145386688): This access should be guarded by 'this.ciphertextChannel'; instead found:
+    // 'this'
     return ciphertextChannel.isOpen();
   }
 }

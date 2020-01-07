@@ -69,6 +69,9 @@ public class JsonKeysetWriterTest {
   @Test
   public void testWrite_multipleKeys_shouldWork() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetHandle handle1 =
         KeysetManager.withEmptyKeyset()
             .rotate(template)
@@ -105,6 +108,9 @@ public class JsonKeysetWriterTest {
   public void testWriteEncrypted_multipleKeys_shouldWork() throws Exception {
     // Encrypt the keyset with an AeadKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    @SuppressWarnings("GuardedBy")
+    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
+    // is not currently held
     KeysetHandle handle1 =
         KeysetManager.withEmptyKeyset()
             .rotate(template)
