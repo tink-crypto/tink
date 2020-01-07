@@ -109,6 +109,20 @@ func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry
 	}, nil
 }
 
+// NewClientWithKMS returns a new AWS KMS client with user created KMS client.
+// Client is responsible for keeping the region consistency between key URI and KMS client.
+// uriPrefix must have the following format: 'aws-kms://arn:aws:kms:<region>[:path]'.
+func NewClientWithKMS(uriPrefix string, kms *kms.KMS) (registry.KMSClient, error) {
+	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
+		return nil, fmt.Errorf("uriPrefix must start with %s", awsPrefix)
+	}
+
+	return &awsClient{
+		keyURIPrefix: uriPrefix,
+		kms:          kms,
+	}, nil
+}
+
 // Supported true if this client does support keyURI
 func (c *awsClient) Supported(keyURI string) bool {
 	return strings.HasPrefix(keyURI, c.keyURIPrefix)
