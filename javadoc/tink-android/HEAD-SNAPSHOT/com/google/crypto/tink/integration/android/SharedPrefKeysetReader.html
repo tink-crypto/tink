@@ -108,14 +108,14 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>com.google.crypto.tink.KeysetReader</dd>
+<dd><a href="../../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public final class <span class="typeNameLabel">SharedPrefKeysetReader</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
-implements com.google.crypto.tink.KeysetReader</pre>
-<div class="block">A <code>KeysetReader</code> that can read keysets from private shared preferences on Android.</div>
+implements <a href="../../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></pre>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that can read keysets from private shared preferences on Android.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.0.0</dd>
@@ -141,7 +141,7 @@ implements com.google.crypto.tink.KeysetReader</pre>
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/SharedPrefKeysetReader.html#SharedPrefKeysetReader-android.content.Context-java.lang.String-java.lang.String-">SharedPrefKeysetReader</a></span>(<a href="https://developer.android.com/reference/android/content/Context.html?is-external=true" title="class or interface in android.content">Context</a>&nbsp;context,
                       <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keysetName,
                       <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;prefFilename)</code>
-<div class="block">Creates a <code>KeysetReader</code> that reads and hex-decodes keysets from the preference
+<div class="block">Creates a <a href="../../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that reads and hex-decodes keysets from the preference
  name <code>keysetName</code> in the private shared preferences file <code>prefFilename</code>.</div>
 </td>
 </tr>
@@ -161,12 +161,16 @@ implements com.google.crypto.tink.KeysetReader</pre>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto">Keyset</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/SharedPrefKeysetReader.html#read--">read</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>com.google.crypto.tink.proto.Keyset</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/SharedPrefKeysetReader.html#read--">read</a></span>()</code>
+<div class="block">Tries to read and return a cleartext <code>Keyset</code>.</div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/proto/EncryptedKeyset.html" title="class in com.google.crypto.tink.proto">EncryptedKeyset</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/SharedPrefKeysetReader.html#readEncrypted--">readEncrypted</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>com.google.crypto.tink.proto.EncryptedKeyset</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/SharedPrefKeysetReader.html#readEncrypted--">readEncrypted</a></span>()</code>
+<div class="block">Tries to read and return an <code>EncryptedKeyset</code>.</div>
+</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -200,7 +204,7 @@ implements com.google.crypto.tink.KeysetReader</pre>
                               <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keysetName,
                               <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;prefFilename)
                        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
-<div class="block">Creates a <code>KeysetReader</code> that reads and hex-decodes keysets from the preference
+<div class="block">Creates a <a href="../../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that reads and hex-decodes keysets from the preference
  name <code>keysetName</code> in the private shared preferences file <code>prefFilename</code>.
 
 <p>If <code>prefFilename</code> is null, uses the default shared preferences file.</div>
@@ -225,11 +229,15 @@ implements com.google.crypto.tink.KeysetReader</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>read</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto">Keyset</a>&nbsp;read()
-            throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<pre>public&nbsp;com.google.crypto.tink.proto.Keyset&nbsp;read()
+                                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../../com/google/crypto/tink/KeysetReader.html#read--">KeysetReader</a></code></span></div>
+<div class="block">Tries to read and return a cleartext <code>Keyset</code>.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>read</code>&nbsp;in interface&nbsp;<code>com.google.crypto.tink.KeysetReader</code></dd>
+<dd><code><a href="../../../../../../com/google/crypto/tink/KeysetReader.html#read--">read</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the Keyset</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
@@ -241,11 +249,15 @@ implements com.google.crypto.tink.KeysetReader</pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>readEncrypted</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/proto/EncryptedKeyset.html" title="class in com.google.crypto.tink.proto">EncryptedKeyset</a>&nbsp;readEncrypted()
-                              throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<pre>public&nbsp;com.google.crypto.tink.proto.EncryptedKeyset&nbsp;readEncrypted()
+                                                           throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../../com/google/crypto/tink/KeysetReader.html#readEncrypted--">KeysetReader</a></code></span></div>
+<div class="block">Tries to read and return an <code>EncryptedKeyset</code>.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>readEncrypted</code>&nbsp;in interface&nbsp;<code>com.google.crypto.tink.KeysetReader</code></dd>
+<dd><code><a href="../../../../../../com/google/crypto/tink/KeysetReader.html#readEncrypted--">readEncrypted</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the EncryptedKeyset</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>

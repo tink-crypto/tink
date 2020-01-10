@@ -110,7 +110,7 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">AndroidKeysetManager</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">A wrapper of <code>KeysetManager</code> that supports reading/writing <a href="../../../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> to/from private shared preferences on Android.
+<div class="block">A wrapper of <a href="../../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><code>KeysetManager</code></a> that supports reading/writing <code>Keyset</code> to/from private shared preferences on Android.
 
  <h3>Warning</h3>
 
@@ -131,7 +131,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  <p>This will read a keyset stored in the <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> preferences file. If the preference file name is null, it uses the default
  preferences file.
 
- <p>If the keyset is not found or invalid, and a valid <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, a fresh keyset is generated and is written to the
+ <p>If the keyset is not found or invalid, and a valid <code>KeyTemplate</code> is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, a fresh keyset is generated and is written to the
  <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> shared preferences file.
 
  <p>On Android M or newer and if a master key URI is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withMasterKeyUri-java.lang.String-"><code>AndroidKeysetManager.Builder.withMasterKeyUri(java.lang.String)</code></a>, the keyset is encrypted with a master key
@@ -146,7 +146,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  cleartext in private preferences which, thanks to the security of the Android framework, no other
  apps can read or write.
 
- <p>The resulting manager supports all operations supported by <code>KeysetManager</code>. For example
+ <p>The resulting manager supports all operations supported by <a href="../../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><code>KeysetManager</code></a>. For example
  to rotate the keyset, one can do:
 
  <pre><code>
@@ -200,7 +200,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-">add</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-">add</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
 </td>
 </tr>
@@ -229,7 +229,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code>com.google.crypto.tink.KeysetHandle</code></td>
+<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#getKeysetHandle--">getKeysetHandle</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i6" class="altColor">
@@ -242,7 +242,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#rotate-com.google.crypto.tink.proto.KeyTemplate-">rotate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#rotate-com.google.crypto.tink.proto.KeyTemplate-">rotate</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
  primary key.</div>
 </td>
@@ -281,11 +281,11 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>getKeysetHandle</h4>
-<pre>public&nbsp;com.google.crypto.tink.KeysetHandle&nbsp;getKeysetHandle()
-                                                    throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;getKeysetHandle()
+                             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>KeysetHandle</code> of the managed keyset</dd>
+<dd>a <a href="../../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> of the managed keyset</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
@@ -297,7 +297,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>rotate</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;rotate(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
+<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;rotate(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)
                             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
  primary key.</div>
@@ -313,7 +313,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>add</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;add(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
+<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;add(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)
                          throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
 <dl>
