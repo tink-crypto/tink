@@ -23,7 +23,7 @@ def _java_single_jar(ctx):
     source_jars = []
     for dep in ctx.attr.deps:
         inputs = depset(transitive = [inputs, dep[JavaInfo].transitive_runtime_deps])
-        source_jars += dep[JavaInfo].source_jars
+        source_jars += dep[JavaInfo].transitive_source_jars.to_list()
 
     compress = ""
     if ctx.attr.compress == "preserve":
