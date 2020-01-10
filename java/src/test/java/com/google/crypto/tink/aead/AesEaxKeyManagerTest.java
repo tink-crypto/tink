@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.AesEaxParams;
@@ -42,7 +43,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class AesEaxKeyManagerTest {
   private final AesEaxKeyManager manager = new AesEaxKeyManager();
-  private final AesEaxKeyManager.KeyFactory<AesEaxKeyFormat, AesEaxKey> factory =
+  private final KeyTypeManager.KeyFactory<AesEaxKeyFormat, AesEaxKey> factory =
       manager.keyFactory();
 
   @Test

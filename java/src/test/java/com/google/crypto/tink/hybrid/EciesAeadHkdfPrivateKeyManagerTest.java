@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.EcPointFormat;
@@ -56,9 +57,8 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   }
 
   private final EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
-  private final EciesAeadHkdfPrivateKeyManager.KeyFactory<
-          EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey>
-      factory = manager.keyFactory();
+  private final KeyTypeManager.KeyFactory<EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey> factory =
+      manager.keyFactory();
 
   @Test
   public void basics() throws Exception {

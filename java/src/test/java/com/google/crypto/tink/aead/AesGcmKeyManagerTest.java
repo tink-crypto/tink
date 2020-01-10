@@ -21,6 +21,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -41,7 +42,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class AesGcmKeyManagerTest {
   private final AesGcmKeyManager manager = new AesGcmKeyManager();
-  private final AesGcmKeyManager.KeyFactory<AesGcmKeyFormat, AesGcmKey> factory =
+  private final KeyTypeManager.KeyFactory<AesGcmKeyFormat, AesGcmKey> factory =
       manager.keyFactory();
 
   @Test

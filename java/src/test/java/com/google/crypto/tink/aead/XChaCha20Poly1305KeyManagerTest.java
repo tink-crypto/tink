@@ -19,6 +19,7 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
@@ -35,8 +36,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class XChaCha20Poly1305KeyManagerTest {
   private final XChaCha20Poly1305KeyManager manager = new XChaCha20Poly1305KeyManager();
-  private final XChaCha20Poly1305KeyManager.KeyFactory<
-          XChaCha20Poly1305KeyFormat, XChaCha20Poly1305Key>
+  private final KeyTypeManager.KeyFactory<XChaCha20Poly1305KeyFormat, XChaCha20Poly1305Key>
       factory = manager.keyFactory();
 
   @Test

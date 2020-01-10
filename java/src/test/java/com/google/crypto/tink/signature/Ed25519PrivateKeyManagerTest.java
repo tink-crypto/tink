@@ -19,6 +19,7 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.Ed25519KeyFormat;
@@ -40,7 +41,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class Ed25519PrivateKeyManagerTest {
   private final Ed25519PrivateKeyManager manager = new Ed25519PrivateKeyManager();
-  private final Ed25519PrivateKeyManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> factory =
+  private final KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> factory =
       manager.keyFactory();
 
   @Test

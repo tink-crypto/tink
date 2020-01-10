@@ -19,6 +19,7 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -39,7 +40,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class EcdsaSignKeyManagerTest {
   private final EcdsaSignKeyManager manager = new EcdsaSignKeyManager();
-  private final EcdsaSignKeyManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> factory =
+  private final KeyTypeManager.KeyFactory<EcdsaKeyFormat, EcdsaPrivateKey> factory =
       manager.keyFactory();
 
   private static EcdsaKeyFormat createKeyFormat(

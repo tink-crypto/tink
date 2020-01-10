@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.HashType;
@@ -49,8 +50,8 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class RsaSsaPssSignKeyManagerTest {
   private final RsaSsaPssSignKeyManager manager = new RsaSsaPssSignKeyManager();
-  private final RsaSsaPssSignKeyManager.KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey>
-      factory = manager.keyFactory();
+  private final KeyTypeManager.KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey> factory =
+      manager.keyFactory();
 
   private static RsaSsaPssKeyFormat createKeyFormat(
       HashType sigHash,

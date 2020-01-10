@@ -19,6 +19,7 @@ package com.google.crypto.tink.streamingaead;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
@@ -39,8 +40,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class AesCtrHmacStreamingKeyManagerTest {
   private final AesCtrHmacStreamingKeyManager manager = new AesCtrHmacStreamingKeyManager();
-  private final AesCtrHmacStreamingKeyManager.KeyFactory<
-          AesCtrHmacStreamingKeyFormat, AesCtrHmacStreamingKey>
+  private final KeyTypeManager.KeyFactory<AesCtrHmacStreamingKeyFormat, AesCtrHmacStreamingKey>
       factory = manager.keyFactory();
 
   // Returns an HmacParams.Builder with valid parameters

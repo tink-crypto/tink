@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.HashType;
@@ -40,8 +41,8 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class RsaSsaPssVerifyKeyManagerTest {
   private final RsaSsaPssSignKeyManager signManager = new RsaSsaPssSignKeyManager();
-  private final RsaSsaPssSignKeyManager.KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey>
-      factory = signManager.keyFactory();
+  private final KeyTypeManager.KeyFactory<RsaSsaPssKeyFormat, RsaSsaPssPrivateKey> factory =
+      signManager.keyFactory();
 
   private final RsaSsaPssVerifyKeyManager verifyManager = new RsaSsaPssVerifyKeyManager();
 

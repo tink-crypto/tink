@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
@@ -42,8 +43,8 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class AesCtrHmacAeadKeyManagerTest {
   private final AesCtrHmacAeadKeyManager manager = new AesCtrHmacAeadKeyManager();
-  private final AesCtrHmacAeadKeyManager.KeyFactory<AesCtrHmacAeadKeyFormat, AesCtrHmacAeadKey>
-      factory = manager.keyFactory();
+  private final KeyTypeManager.KeyFactory<AesCtrHmacAeadKeyFormat, AesCtrHmacAeadKey> factory =
+      manager.keyFactory();
 
   @Test
   public void basics() throws Exception {

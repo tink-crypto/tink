@@ -19,6 +19,7 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
@@ -38,7 +39,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class AesCtrKeyManagerTest {
   private final AesCtrKeyManager manager = new AesCtrKeyManager();
-  private final AesCtrKeyManager.KeyFactory<AesCtrKeyFormat, AesCtrKey> factory =
+  private final KeyTypeManager.KeyFactory<AesCtrKeyFormat, AesCtrKey> factory =
       manager.keyFactory();
 
   @Test
