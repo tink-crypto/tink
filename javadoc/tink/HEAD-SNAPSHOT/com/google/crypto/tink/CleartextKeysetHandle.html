@@ -48,8 +48,8 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?com/google/crypto/tink/CleartextKeysetHandle.html" target="_top">Frames</a></li>
@@ -115,7 +115,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  <h3>WARNING</h3>
 
  <p>Reading or writing cleartext keysets is a bad practice, usage of this API should be
- restricted. Users can read encrypted keysets using <code>KeysetHandle.read(com.google.crypto.tink.KeysetReader, com.google.crypto.tink.Aead)</code>.</div>
+ restricted. Users can read encrypted keysets using <a href="../../../../com/google/crypto/tink/KeysetHandle.html#read-com.google.crypto.tink.KeysetReader-com.google.crypto.tink.Aead-"><code>KeysetHandle.read(com.google.crypto.tink.KeysetReader, com.google.crypto.tink.Aead)</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.0.0</dd>
@@ -156,11 +156,11 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto">Keyset</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#getKeyset-com.google.crypto.tink.KeysetHandle-">getKeyset</a></span>(com.google.crypto.tink.KeysetHandle&nbsp;keysetHandle)</code>&nbsp;</td>
+<td class="colFirst"><code>static com.google.crypto.tink.proto.Keyset</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#getKeyset-com.google.crypto.tink.KeysetHandle-">getKeyset</a></span>(<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>static com.google.crypto.tink.KeysetHandle</code></td>
+<td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#parseFrom-byte:A-">parseFrom</a></span>(byte[]&nbsp;serialized)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
 <div class="block"><span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#read-com.google.crypto.tink.KeysetReader-"><code>read(com.google.crypto.tink.KeysetReader)</code></a> instead</span></div>
@@ -168,14 +168,14 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code>static com.google.crypto.tink.KeysetHandle</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#read-com.google.crypto.tink.KeysetReader-">read</a></span>(com.google.crypto.tink.KeysetReader&nbsp;reader)</code>&nbsp;</td>
+<td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#read-com.google.crypto.tink.KeysetReader-">read</a></span>(<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader)</code>&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#write-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeysetWriter-">write</a></span>(com.google.crypto.tink.KeysetHandle&nbsp;handle,
-     com.google.crypto.tink.KeysetWriter&nbsp;keysetWriter)</code>
-<div class="block">Serializes and writes the <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> managed by <code>handle</code> to <code>keysetWriter</code>.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#write-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeysetWriter-">write</a></span>(<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;handle,
+     <a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter)</code>
+<div class="block">Serializes and writes the <code>Keyset</code> managed by <code>handle</code> to <code>keysetWriter</code>.</div>
 </td>
 </tr>
 </table>
@@ -224,12 +224,12 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>parseFrom</h4>
 <pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
-public static final&nbsp;com.google.crypto.tink.KeysetHandle&nbsp;parseFrom(byte[]&nbsp;serialized)
-                                                                       throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;parseFrom(byte[]&nbsp;serialized)
+                                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html#read-com.google.crypto.tink.KeysetReader-"><code>read(com.google.crypto.tink.KeysetReader)</code></a> instead</span></div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a new <code>KeysetHandle</code> from <code>serialized</code> that is a serialized <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a></dd>
+<dd>a new <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from <code>serialized</code> that is a serialized <code>Keyset</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
@@ -241,12 +241,12 @@ public static final&nbsp;com.google.crypto.tink.KeysetHandle&nbsp;parseFrom(byte
 <ul class="blockList">
 <li class="blockList">
 <h4>read</h4>
-<pre>public static&nbsp;com.google.crypto.tink.KeysetHandle&nbsp;read(com.google.crypto.tink.KeysetReader&nbsp;reader)
-                                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
-                                                       <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;read(<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader)
+                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a new <code>KeysetHandle</code> from a <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> read with <code>reader</code>.</dd>
+<dd>a new <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from a <code>Keyset</code> read with <code>reader</code>.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -259,7 +259,7 @@ public static final&nbsp;com.google.crypto.tink.KeysetHandle&nbsp;parseFrom(byte
 <ul class="blockList">
 <li class="blockList">
 <h4>getKeyset</h4>
-<pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto">Keyset</a>&nbsp;getKeyset(com.google.crypto.tink.KeysetHandle&nbsp;keysetHandle)</pre>
+<pre>public static&nbsp;com.google.crypto.tink.proto.Keyset&nbsp;getKeyset(<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the keyset underlying this <code>keysetHandle</code>.</dd>
@@ -272,10 +272,10 @@ public static final&nbsp;com.google.crypto.tink.KeysetHandle&nbsp;parseFrom(byte
 <ul class="blockListLast">
 <li class="blockList">
 <h4>write</h4>
-<pre>public static&nbsp;void&nbsp;write(com.google.crypto.tink.KeysetHandle&nbsp;handle,
-                         com.google.crypto.tink.KeysetWriter&nbsp;keysetWriter)
+<pre>public static&nbsp;void&nbsp;write(<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;handle,
+                         <a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter)
                   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
-<div class="block">Serializes and writes the <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> managed by <code>handle</code> to <code>keysetWriter</code>.</div>
+<div class="block">Serializes and writes the <code>Keyset</code> managed by <code>handle</code> to <code>keysetWriter</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -310,8 +310,8 @@ public static final&nbsp;com.google.crypto.tink.KeysetHandle&nbsp;parseFrom(byte
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?com/google/crypto/tink/CleartextKeysetHandle.html" target="_top">Frames</a></li>

@@ -107,7 +107,7 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive</a></span>(com.google.crypto.tink.KeysetHandle&nbsp;keysetHandle)</code>
+<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(HybridDecrypt.class)</code> after registering the
      <code>HybridDecryptWrapper</code> instead.</span></div>
@@ -116,8 +116,8 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive</a></span>(com.google.crypto.tink.KeysetHandle&nbsp;keysetHandle,
-            com.google.crypto.tink.KeyManager&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;keyManager)</code>
+<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle,
+            <a href="../../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;keyManager)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(keyManager, HybridDecrypt.class)</code> after
      registering the <code>HybridDecryptWrapper</code> instead.</span></div>
@@ -126,7 +126,7 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(com.google.crypto.tink.PrimitiveSet&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;primitives)</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">HybridDecryptWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;primitives)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>
@@ -152,8 +152,8 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive</a></span>(com.google.crypto.tink.KeysetHandle&nbsp;keysetHandle,
-            com.google.crypto.tink.KeyManager&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;keyManager)</code>
+<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle,
+            <a href="../../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;keyManager)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(keyManager, HybridDecrypt.class)</code> after
      registering the <code>HybridDecryptWrapper</code> instead.</span></div>
@@ -162,7 +162,7 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(com.google.crypto.tink.PrimitiveSet&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;primitives)</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">HybridDecryptWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;primitives)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>
