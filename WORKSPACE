@@ -214,7 +214,7 @@ maven_install(
         "com.google.truth:truth:0.42",
         "org.json:json:20170516",
         "joda-time:joda-time:2.10.3",
-        "junit:junit:4.12",
+        "junit:junit:4.13",
         "org.mockito:mockito-core:2.23.0",
     ],
     repositories = [
