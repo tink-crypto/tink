@@ -24,6 +24,7 @@
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -57,6 +58,30 @@ StatusOr<HmacKey> HmacKeyManager::CreateKey(
   *(hmac_key.mutable_params()) = hmac_key_format.params();
   hmac_key.set_key_value(
       subtle::Random::GetRandomBytes(hmac_key_format.key_size()));
+  return hmac_key;
+}
+
+StatusOr<HmacKey> HmacKeyManager::DeriveKey(
+    const HmacKeyFormat& hmac_key_format, InputStream* input_stream) const {
+  crypto::tink::util::Status status =
+      ValidateVersion(hmac_key_format.version(), get_version());
+  if (!status.ok()) return status;
+
+  crypto::tink::util::StatusOr<std::string> randomness =
+      ReadAtMostFromStream(hmac_key_format.key_size(), input_stream);
+  if (!randomness.status().ok()) {
+    return randomness.status();
+  }
+  if (randomness.ValueOrDie().size() != hmac_key_format.key_size()) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT,
+        "Could not get enough pseudorandomness from input stream");
+  }
+
+  HmacKey hmac_key;
+  hmac_key.set_version(get_version());
+  *(hmac_key.mutable_params()) = hmac_key_format.params();
+  hmac_key.set_key_value(randomness.ValueOrDie());
   return hmac_key;
 }
 

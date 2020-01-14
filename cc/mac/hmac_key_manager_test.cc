@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/mac.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -29,11 +30,15 @@ namespace crypto {
 namespace tink {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::IstreamInputStream;
+using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::HmacKey;
 using ::google::crypto::tink::HmacKeyFormat;
 using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
+using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::SizeIs;
 
@@ -207,6 +212,56 @@ TEST(HmacKeyManagerTest, ValidateKeyShortKey) {
 
   EXPECT_THAT(HmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
+
+TEST(HmacKeyManagerTest, DeriveKey) {
+  HmacKeyFormat format;
+  format.set_key_size(23);
+  format.set_version(0);
+  format.mutable_params()->set_hash(HashType::SHA256);
+  format.mutable_params()->set_tag_size(10);
+
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
+
+  StatusOr<HmacKey> key_or =
+      HmacKeyManager().DeriveKey(format, &input_stream);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(), Eq("0123456789abcdefghijklm"));
+  EXPECT_THAT(key_or.ValueOrDie().params().hash(), Eq(format.params().hash()));
+  EXPECT_THAT(key_or.ValueOrDie().params().tag_size(),
+              Eq(format.params().tag_size()));
+}
+
+TEST(HmacKeyManagerTest, DeriveKeyNotEnoughRandomness) {
+  HmacKeyFormat format;
+  format.set_key_size(17);
+  format.set_version(0);
+  format.mutable_params()->set_hash(HashType::SHA256);
+  format.mutable_params()->set_tag_size(10);
+
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef")};
+
+  ASSERT_THAT(
+      HmacKeyManager().DeriveKey(format, &input_stream).status(),
+      StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(HmacKeyManagerTest, DeriveKeyWrongVersion) {
+  HmacKeyFormat format;
+  format.set_key_size(16);
+  format.set_version(1);
+  format.mutable_params()->set_hash(HashType::SHA256);
+  format.mutable_params()->set_tag_size(10);
+
+  IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
+      "0123456789abcdef")};
+
+  ASSERT_THAT(
+      HmacKeyManager().DeriveKey(format, &input_stream).status(),
+              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+}
+
 
 TEST(HmacKeyManagerTest, GetPrimitive) {
   HmacKeyFormat key_format;

@@ -40,4 +40,5 @@ message HmacKey {
 message HmacKeyFormat {
   HmacParams params = 1;
   uint32 key_size = 2;
+  uint32 version = 3;
 }

@@ -30,6 +30,8 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -61,8 +63,6 @@ public class HmacKeyManager extends KeyTypeManager<HmacKey> {
         });
   }
 
-  private static final int VERSION = 0;
-  
   /** Minimum key size in bytes. */
   private static final int MIN_KEY_SIZE_IN_BYTES = 16;
 
@@ -76,7 +76,7 @@ public class HmacKeyManager extends KeyTypeManager<HmacKey> {
 
   @Override
   public int getVersion() {
-    return VERSION;
+    return 0;
   }
 
   @Override
@@ -86,7 +86,7 @@ public class HmacKeyManager extends KeyTypeManager<HmacKey> {
 
   @Override
   public void validateKey(HmacKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), VERSION);
+    Validators.validateVersion(key.getVersion(), getVersion());
     if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("key too short");
     }
@@ -143,10 +143,30 @@ public class HmacKeyManager extends KeyTypeManager<HmacKey> {
       @Override
       public HmacKey createKey(HmacKeyFormat format) throws GeneralSecurityException {
         return HmacKey.newBuilder()
-            .setVersion(VERSION)
+            .setVersion(getVersion())
             .setParams(format.getParams())
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .build();
+      }
+
+      @Override
+      public HmacKey deriveKey(HmacKeyFormat format, InputStream inputStream)
+          throws GeneralSecurityException {
+        Validators.validateVersion(format.getVersion(), getVersion());
+        byte[] pseudorandomness = new byte[format.getKeySize()];
+        try {
+          int read = inputStream.read(pseudorandomness);
+          if (read != format.getKeySize()) {
+            throw new GeneralSecurityException("Not enough pseudorandomness given");
+          }
+          return HmacKey.newBuilder()
+            .setVersion(getVersion())
+            .setParams(format.getParams())
+            .setKeyValue(ByteString.copyFrom(pseudorandomness))
+            .build();
+        } catch (IOException e) {
+          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
+        }
       }
     };
   }

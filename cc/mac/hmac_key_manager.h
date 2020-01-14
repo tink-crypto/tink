@@ -68,6 +68,10 @@ class HmacKeyManager
   crypto::tink::util::StatusOr<google::crypto::tink::HmacKey> CreateKey(
       const google::crypto::tink::HmacKeyFormat& key_format) const override;
 
+  crypto::tink::util::StatusOr<google::crypto::tink::HmacKey> DeriveKey(
+      const google::crypto::tink::HmacKeyFormat& key_format,
+      InputStream* input_stream) const override;
+
  private:
   crypto::tink::util::Status ValidateParams(
       const google::crypto::tink::HmacParams& params) const;
