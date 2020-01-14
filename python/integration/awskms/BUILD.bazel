@@ -1,0 +1,50 @@
+load("@rules_python//python:defs.bzl", "py_test")
+load("@tink_py_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "aws_kms_client",
+    srcs = ["aws_kms_client.py"],
+    deps = [
+        ":aws_kms_aead",
+        "//python/aead:aead",
+        "//python/core:tink_error",
+        requirement("boto3")
+    ]
+)
+
+py_test(
+    name = "aws_kms_client_test",
+    srcs = ["aws_kms_client_test.py"],
+    data = [
+        "//testdata:credentials"
+    ],
+    deps = [
+        ":aws_kms_client",
+        requirement("absl-py")
+    ]
+)
+
+py_library(
+    name = "aws_kms_aead",
+    srcs = ["aws_kms_aead.py"],
+    deps = [
+        "//python/aead:aead",
+        "//python/core:tink_error",
+        requirement("boto3")
+    ]
+)
+
+py_test(
+    name = "aws_kms_aead_test",
+    srcs = ["aws_kms_aead_test.py"],
+    data = [
+        "//testdata:credentials"
+    ],
+    deps = [
+        ":aws_kms_client",
+        ":aws_kms_aead",
+        requirement("absl-py")
+    ]
+)
