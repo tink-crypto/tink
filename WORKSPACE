@@ -135,6 +135,45 @@ http_archive(
 )
 
 #-----------------------------------------------------------------------------
+# Python
+#-----------------------------------------------------------------------------
+
+load("//third_party/py:python_configure.bzl", "python_configure")
+python_configure(name = "local_config_python")
+
+# NOTE: "rules_python" must be loaded before the proto-imports, as proto uses
+#       an older version which is incompatible with our Python implementation.
+# Commit from 2019-11-15
+http_archive(
+    name = "rules_python",
+    strip_prefix = "rules_python-94677401bc56ed5d756f50b441a6a5c7f735a6d4",
+    url = "https://github.com/bazelbuild/rules_python/archive/94677401bc56ed5d756f50b441a6a5c7f735a6d4.zip",
+    sha256 = "de39bc4d6605e6d395faf5e07516c64c8d833404ee3eb132b5ff1161f9617dec"
+)
+
+load("@rules_python//python:repositories.bzl", "py_repositories")
+py_repositories()
+
+# Pip imports
+# TODO(kste): Add Python2 compatible imports.
+load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
+pip_repositories()
+
+new_local_repository(
+    name = "clif",
+    build_file = "third_party/clif.BUILD.bazel",
+    path = "/usr/local",
+)
+
+pip3_import(
+   name = "tink_py_deps",
+   requirements = "//python:requirements.txt",
+)
+
+load("@tink_py_deps//:requirements.bzl", "pip_install")
+pip_install()
+
+#-----------------------------------------------------------------------------
 # proto
 #-----------------------------------------------------------------------------
 # proto_library, cc_proto_library and java_proto_library rules implicitly depend
@@ -608,37 +647,6 @@ rules_closure_dependencies()
 
 rules_closure_toolchains()
 
-#-----------------------------------------------------------------------------
-# Python
-#-----------------------------------------------------------------------------
-load("//third_party/py:python_configure.bzl", "python_configure")
-
-python_configure(name = "local_config_python")
-
-# Commit from 2019-10-09
-http_archive(
-    name = "rules_python",
-    strip_prefix = "rules_python-5aa465d5d91f1d9d90cac10624e3d2faf2057bd5/",
-    url = "https://github.com/bazelbuild/rules_python/archive/5aa465d5d91f1d9d90cac10624e3d2faf2057bd5.zip",
-    sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
-)
-
-new_local_repository(
-    name = "clif",
-    build_file = "third_party/clif.BUILD.bazel",
-    path = "/usr/local",
-)
-
-# Pip imports
-load("@rules_python//python:pip.bzl", "pip_import")
-
-pip_import(
-   name = "tink_py_deps",
-   requirements = "//python:requirements.txt",
-)
-
-load("@tink_py_deps//:requirements.bzl", "pip_install")
-pip_install()
 
 #-----------------------------------------------------------------------------
 # gRPC

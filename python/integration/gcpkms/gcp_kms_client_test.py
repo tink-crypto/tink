@@ -13,18 +13,35 @@
 # limitations under the License.
 
 """Tests for tink.python.integration.gcp_kms_client."""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
 from absl.testing import absltest
+
+from tink.python.integration.gcpkms.gcp_kms_client import GcpKmsClient
+
+CREDENTIAL_PATH = os.environ['TEST_SRCDIR'] + '/tink/testdata/credential.json'
 
 
 class GcpKmsClientTest(absltest.TestCase):
 
-  def test_dummy(self):
-    self.assertEqual(b'0', b'0')
+  def test_client_generation(self):
+    gcp_client = GcpKmsClient('', CREDENTIAL_PATH)
+    self.assertNotEqual(gcp_client, None)
+
+  def test_client_not_bound(self):
+    gcp_key1 = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
+    gcp_key2 = 'gcp-kms://projects/otherProject/.../cryptoKeys/key2'
+    non_gcp_key = 'aws-kms://arn:aws:kms:us-west-2:acc:other/key3'
+
+    gcp_client = GcpKmsClient('', CREDENTIAL_PATH)
+
+    self.assertEqual(gcp_client.does_support(gcp_key1), True)
+    self.assertEqual(gcp_client.does_support(gcp_key2), True)
+    self.assertEqual(gcp_client.does_support(non_gcp_key), False)
 
 if __name__ == '__main__':
   absltest.main()

@@ -1,0 +1,9 @@
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_test")
+
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "tink_error",
+    srcs = ["tink_error.py"],
+)

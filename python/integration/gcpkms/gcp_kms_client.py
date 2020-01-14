@@ -12,20 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A client for Google Cloud KMS."""
+"""A client for Google Cloud KMS.
+
+Currently works only in Python3 (see Bug 146480447)
+"""
 
 from __future__ import absolute_import
 from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+from typing import Text
+from google.auth import default
+from google.cloud import kms_v1
+from google.oauth2 import service_account
+
 from tink.python.aead import aead
+from tink.python.integration.gcpkms.gcp_kms_aead import GcpKmsAead
+
+GCP_KEYURI_PREFIX = "gcp-kms://"
 
 
 class GcpKmsClient(object):
   """Basic GCP client for AEAD."""
 
-  def __init__(self, key_uri: string, credentials_path: string):
+  def __init__(self, key_uri: Text, credentials_path: Text):
     """Creates a new GcpKmsClient that is bound to the key specified in 'key_uri'.
 
     Uses the specifed credentials when communicating with the KMS. Either of
@@ -35,36 +46,51 @@ class GcpKmsClient(object):
     If 'credential_path' is empty, then default credentials will be used.
 
     Args:
-      key_uri: string, URI of the key the client should be bound to.
-      credentials_path: string, Path to the file with the access credentials.
-    """
-    self.key_uri = key_uri
-    self.credentials_path = credentials_path
+      key_uri: Text, URI of the key the client should be bound to.
+      credentials_path: Text, Path to the file with the access credentials.
 
-  def does_support(self, key_uri: string) -> bool:
+    Raises:
+      FileNotFoundError: If the path to the credentials is invalid.
+    """
+
+    if not key_uri:
+      self.key_uri = GCP_KEYURI_PREFIX
+    elif key_uri.startswith(GCP_KEYURI_PREFIX):
+      self.key_uri = key_uri
+    else:
+      # TODO(kste): Change to tink_error when its moved to pybind11
+      raise ValueError
+
+    if not credentials_path:
+      # Use GCP KMS client with default credentials
+      credentials = default()
+    else:
+      credentials = service_account.Credentials.from_service_account_file(
+          filename=credentials_path
+      )
+
+    self.client = kms_v1.KeyManagementServiceClient(credentials=credentials)
+
+  def does_support(self, key_uri: Text) -> bool:
     """Returns true iff this client supports KMS key specified in 'key_uri'.
 
     Args:
-      key_uri: string, URI of the key to be checked.
+      key_uri: Text, URI of the key to be checked.
 
-    Return:
+    Returns:
       A boolean value which is true if the key is supported and false otherwise.
     """
-    if not key_uri:
-      return False
+    return key_uri.startswith(self.key_uri)
 
-    return True
-
-  def get_aead(self, key_uri: string) -> aead.Aead:
+  def get_aead(self, key_uri: Text) -> aead.Aead:
     """Returns an Aead-primitive backed by KMS key specified by 'key_uri'.
 
     Args:
-      key_uri: string, URI of the key which should be used.
+      key_uri: Text, URI of the key which should be used.
 
     Returns:
       The AEAD object...
     """
 
-    if not key_uri:
-      return None
-    return None
+    key_name = key_uri[len(GCP_KEYURI_PREFIX):]
+    return GcpKmsAead(key_name, self.client)
