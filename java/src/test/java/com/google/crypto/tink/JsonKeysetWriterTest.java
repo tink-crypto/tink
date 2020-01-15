@@ -22,6 +22,7 @@ import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Random;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -120,4 +121,24 @@ public class JsonKeysetWriterTest {
 
     testWriteEncrypted_shouldWork(handle1);
   }
+
+  @Test
+  public void testWrite_writesNegativeId() throws Exception {
+    int magicKeyId = -19230912;
+    Keyset unmodified =
+        CleartextKeysetHandle.getKeyset(
+            KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG));
+    Keyset modified =
+        Keyset.newBuilder(unmodified)
+            .setPrimaryKeyId(magicKeyId)
+            .setKey(0, Keyset.Key.newBuilder(unmodified.getKey(0)).setKeyId(magicKeyId).build())
+            .build();
+    KeysetHandle modifiedHandle = CleartextKeysetHandle.parseFrom(modified.toByteArray());
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    CleartextKeysetHandle.write(modifiedHandle, JsonKeysetWriter.withOutputStream(outputStream));
+    assertThat(outputStream.toString()).contains("\"primaryKeyId\": -19230912");
+    assertThat(outputStream.toString()).contains("\"keyId\": -19230912");
+  }
+
 }

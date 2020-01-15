@@ -23,6 +23,7 @@ import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Random;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,19 +42,22 @@ import org.junit.runners.JUnit4;
 public class JsonKeysetReaderTest {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  private static final String JSON_KEYSET =
-      "{"
-          + "\"primaryKeyId\": 547623039,"
-          + "\"key\": [{"
-          + "\"keyData\": {"
-          + "\"typeUrl\": \"type.googleapis.com/google.crypto.tink.HmacKey\","
-          + "\"keyMaterialType\": \"SYMMETRIC\","
-          + "\"value\": \"EgQIAxAQGiBYhMkitTWFVefTIBg6kpvac+bwFOGSkENGmU+1EYgocg==\""
-          + "},"
-          + "\"outputPrefixType\": \"TINK\","
-          + "\"keyId\": 547623039,"
-          + "\"status\": \"ENABLED\""
-          + "}]}";
+  private static String createJsonKeysetWithId(String id) {
+    return "{"
+        + ("\"primaryKeyId\": " + id + ",")
+        + "\"key\": [{"
+        + "\"keyData\": {"
+        + "\"typeUrl\": \"type.googleapis.com/google.crypto.tink.HmacKey\","
+        + "\"keyMaterialType\": \"SYMMETRIC\","
+        + "\"value\": \"EgQIAxAQGiBYhMkitTWFVefTIBg6kpvac+bwFOGSkENGmU+1EYgocg==\""
+        + "},"
+        + "\"outputPrefixType\": \"TINK\","
+        + ("\"keyId\": " + id + ",")
+        + "\"status\": \"ENABLED\""
+        + "}]}";
+  }
+
+  private static final String JSON_KEYSET = createJsonKeysetWithId("547623039");
 
   private static final String URL_SAFE_JSON_KEYSET =
       "{"
@@ -339,5 +343,19 @@ public class JsonKeysetReaderTest {
         KeysetHandle.read(JsonKeysetReader.withBytes(outputStream.toByteArray()), masterKey);
 
     assertKeysetHandle(handle1, handle2);
+  }
+
+  @Test
+  public void testReadKeyset_negativeKeyId_works() throws Exception {
+    JSONObject json = new JSONObject(createJsonKeysetWithId("-21"));
+    Keyset keyset = JsonKeysetReader.withJsonObject(json).read();
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(-21);
+  }
+
+  @Test
+  public void testReadKeyset_hugeKeyId_throws() throws Exception {
+    JSONObject json = new JSONObject(createJsonKeysetWithId("4294967275")); // 2^32 - 21
+    Keyset keyset = JsonKeysetReader.withJsonObject(json).read();
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(-21);
   }
 }
