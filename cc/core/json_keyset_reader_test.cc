@@ -20,82 +20,81 @@
 #include <istream>
 #include <sstream>
 
-#include "absl/strings/escaping.h"
-#include "tink/util/protobuf_helper.h"
-#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
+#include "absl/strings/escaping.h"
+#include "absl/strings/substitute.h"
+#include "tink/util/protobuf_helper.h"
+#include "tink/util/test_matchers.h"
+#include "tink/util/test_util.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-
 namespace crypto {
 namespace tink {
 
-using crypto::tink::test::AddRawKey;
-using crypto::tink::test::AddTinkKey;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::test::IsOk;
 
-using google::crypto::tink::AesEaxKey;
-using google::crypto::tink::AesGcmKey;
-using google::crypto::tink::EncryptedKeyset;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
+using ::google::crypto::tink::AesEaxKey;
+using ::google::crypto::tink::AesGcmKey;
+using ::google::crypto::tink::EncryptedKeyset;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
+using ::testing::Eq;
+using ::testing::Not;
 
 namespace {
 
 class JsonKeysetReaderTest : public ::testing::Test {
  protected:
   void SetUp() {
-    AesGcmKey gcm_key;
-    gcm_key.set_key_value("some gcm key value");
-    gcm_key.set_version(0);
-    std::string gcm_key_base64;
-    absl::Base64Escape(gcm_key.SerializeAsString(), &gcm_key_base64);
+    gcm_key_.set_key_value("some gcm key value");
+    gcm_key_.set_version(0);
 
-    AesEaxKey eax_key;
-    eax_key.set_key_value("some eax key value");
-    eax_key.set_version(0);
-    eax_key.mutable_params()->set_iv_size(16);
-    std::string eax_key_base64;
-    absl::Base64Escape(eax_key.SerializeAsString(), &eax_key_base64);
+    eax_key_.set_key_value("some eax key value");
+    eax_key_.set_version(0);
+    eax_key_.mutable_params()->set_iv_size(16);
 
-    AddTinkKey("type.googleapis.com/google.crypto.tink.AesGcmKey",
-               42, gcm_key, KeyStatusType::ENABLED,
-               KeyData::SYMMETRIC, &keyset_);
-    AddRawKey("type.googleapis.com/google.crypto.tink.AesEaxKey",
-              711, eax_key, KeyStatusType::ENABLED,
-              KeyData::SYMMETRIC, &keyset_);
+    AddTinkKey("type.googleapis.com/google.crypto.tink.AesGcmKey", 42, gcm_key_,
+               KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset_);
+    AddRawKey("type.googleapis.com/google.crypto.tink.AesEaxKey", 711, eax_key_,
+              KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset_);
     keyset_.set_primary_key_id(42);
-    good_json_keyset = "{"
-           "\"primaryKeyId\": 42,"
-           "\"key\": ["
-           "  {"
-           "    \"keyData\": {"
-           "      \"typeUrl\":"
-           "        \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
-           "      \"keyMaterialType\": \"SYMMETRIC\","
-           "      \"value\": \"" + gcm_key_base64 + "\""
-           "    },"
-           "    \"outputPrefixType\": \"TINK\","
-           "    \"keyId\": 42,"
-           "    \"status\": \"ENABLED\""
-           "  },"
-           "  {"
-           "    \"keyData\": {"
-           "      \"typeUrl\":"
-           "        \"type.googleapis.com/google.crypto.tink.AesEaxKey\","
-           "      \"keyMaterialType\": \"SYMMETRIC\","
-           "      \"value\": \"" + eax_key_base64 + "\""
-           "    },"
-           "    \"outputPrefixType\": \"RAW\","
-           "    \"keyId\": 711,"
-           "    \"status\": \"ENABLED\""
-           "  }"
-           "]}";
+    good_json_keyset_ = absl::Substitute(
+        R"(
+      {
+         "primaryKeyId":42,
+         "key":[
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value": "$0"
+               },
+               "outputPrefixType":"TINK",
+               "keyId":42,
+               "status":"ENABLED"
+            },
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesEaxKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value":"$1"
+               },
+               "outputPrefixType":"RAW",
+               "keyId":711,
+               "status":"ENABLED"
+            }
+         ]
+      })",
+        absl::Base64Escape(gcm_key_.SerializeAsString()),
+        absl::Base64Escape(eax_key_.SerializeAsString()));
 
-    bad_json_keyset = "some weird string";
+    bad_json_keyset_ = "some weird string";
 
     std::string enc_keyset = "some ciphertext with keyset";
     encrypted_keyset_.set_encrypted_keyset(enc_keyset);
@@ -108,29 +107,35 @@ class JsonKeysetReaderTest : public ::testing::Test {
     key_info->set_key_id(42);
     key_info->set_output_prefix_type(OutputPrefixType::TINK);
     key_info->set_status(KeyStatusType::ENABLED);
-    good_json_encrypted_keyset_ = "{"
-           "\"encryptedKeyset\": \"" + enc_keyset_base64 + "\", "
-           "\"keysetInfo\": {"
-           "  \"primaryKeyId\": 42,"
-           "  \"keyInfo\": ["
-           "    {"
-           "      \"typeUrl\":"
-           "        \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
-           "      \"outputPrefixType\": \"TINK\","
-           "      \"keyId\": 42,"
-           "      \"status\": \"ENABLED\""
-           "    }"
-           "  ]"
-           "}}";
+    good_json_encrypted_keyset_ =
+        "{"
+        "\"encryptedKeyset\": \"" +
+        enc_keyset_base64 +
+        "\", "
+        "\"keysetInfo\": {"
+        "  \"primaryKeyId\": 42,"
+        "  \"keyInfo\": ["
+        "    {"
+        "      \"typeUrl\":"
+        "        \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
+        "      \"outputPrefixType\": \"TINK\","
+        "      \"keyId\": 42,"
+        "      \"status\": \"ENABLED\""
+        "    }"
+        "  ]"
+        "}}";
   }
 
   EncryptedKeyset encrypted_keyset_;
   Keyset keyset_;
-  std::string bad_json_keyset;
-  std::string good_json_keyset;
+  std::string bad_json_keyset_;
+  std::string good_json_keyset_;
   std::string good_json_encrypted_keyset_;
-};
 
+  // Some prepopulated keys.
+  AesGcmKey gcm_key_;
+  AesEaxKey eax_key_;
+};
 
 TEST_F(JsonKeysetReaderTest, testReaderCreation) {
   {  // Input stream is null.
@@ -142,25 +147,25 @@ TEST_F(JsonKeysetReaderTest, testReaderCreation) {
   }
 
   {  // Good serialized keyset.
-    auto reader_result = JsonKeysetReader::New(good_json_keyset);
+    auto reader_result = JsonKeysetReader::New(good_json_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
   }
 
   {  // Stream with good keyset.
     std::unique_ptr<std::istream> good_keyset_stream(new std::stringstream(
-        std::string(good_json_keyset), std::ios_base::in));
+        std::string(good_json_keyset_), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(good_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
   }
 
   {  // Bad serialized keyset.
-    auto reader_result = JsonKeysetReader::New(bad_json_keyset);
+    auto reader_result = JsonKeysetReader::New(bad_json_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
   }
 
   {  // Stream with bad keyset.
-    std::unique_ptr<std::istream> bad_keyset_stream(
-        new std::stringstream(std::string(bad_json_keyset), std::ios_base::in));
+    std::unique_ptr<std::istream> bad_keyset_stream(new std::stringstream(
+        std::string(bad_json_keyset_), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(bad_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
   }
@@ -168,58 +173,53 @@ TEST_F(JsonKeysetReaderTest, testReaderCreation) {
 
 TEST_F(JsonKeysetReaderTest, testReadFromString) {
   {  // Good string.
-    auto reader_result = JsonKeysetReader::New(good_json_keyset);
+    auto reader_result = JsonKeysetReader::New(good_json_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_result = reader->Read();
     EXPECT_TRUE(read_result.ok()) << read_result.status();
     auto keyset = std::move(read_result.ValueOrDie());
-    EXPECT_EQ(keyset_.SerializeAsString(),
-              keyset->SerializeAsString());
+    EXPECT_EQ(keyset_.SerializeAsString(), keyset->SerializeAsString());
   }
 
   {  // Bad string.
-    auto reader_result = JsonKeysetReader::New(bad_json_keyset);
+    auto reader_result = JsonKeysetReader::New(bad_json_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_result = reader->Read();
     EXPECT_FALSE(read_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              read_result.status().error_code());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, read_result.status().error_code());
   }
 }
 
 TEST_F(JsonKeysetReaderTest, testReadFromStream) {
   {  // Good stream.
     std::unique_ptr<std::istream> good_keyset_stream(new std::stringstream(
-        std::string(good_json_keyset), std::ios_base::in));
+        std::string(good_json_keyset_), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(good_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_result = reader->Read();
     EXPECT_TRUE(read_result.ok()) << read_result.status();
     auto keyset = std::move(read_result.ValueOrDie());
-    EXPECT_EQ(keyset_.SerializeAsString(),
-              keyset->SerializeAsString());
+    EXPECT_EQ(keyset_.SerializeAsString(), keyset->SerializeAsString());
   }
 
   {  // Bad stream.
-    std::unique_ptr<std::istream> bad_keyset_stream(
-        new std::stringstream(std::string(bad_json_keyset), std::ios_base::in));
+    std::unique_ptr<std::istream> bad_keyset_stream(new std::stringstream(
+        std::string(bad_json_keyset_), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(bad_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_result = reader->Read();
     EXPECT_FALSE(read_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              read_result.status().error_code());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, read_result.status().error_code());
   }
 }
 
 TEST_F(JsonKeysetReaderTest, testReadEncryptedFromString) {
   {  // Good string.
-    auto reader_result =
-        JsonKeysetReader::New(good_json_encrypted_keyset_);
+    auto reader_result = JsonKeysetReader::New(good_json_encrypted_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_encrypted_result = reader->ReadEncrypted();
@@ -230,7 +230,7 @@ TEST_F(JsonKeysetReaderTest, testReadEncryptedFromString) {
   }
 
   {  // Bad string.
-    auto reader_result = JsonKeysetReader::New(bad_json_keyset);
+    auto reader_result = JsonKeysetReader::New(bad_json_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_encrypted_result = reader->ReadEncrypted();
@@ -257,8 +257,8 @@ TEST_F(JsonKeysetReaderTest, testReadEncryptedFromStream) {
   }
 
   {  // Bad string.
-    std::unique_ptr<std::istream> bad_keyset_stream(
-        new std::stringstream(std::string(bad_json_keyset), std::ios_base::in));
+    std::unique_ptr<std::istream> bad_keyset_stream(new std::stringstream(
+        std::string(bad_json_keyset_), std::ios_base::in));
     auto reader_result = JsonKeysetReader::New(std::move(bad_keyset_stream));
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -267,6 +267,84 @@ TEST_F(JsonKeysetReaderTest, testReadEncryptedFromStream) {
     EXPECT_EQ(util::error::INVALID_ARGUMENT,
               read_encrypted_result.status().error_code());
   }
+}
+
+TEST_F(JsonKeysetReaderTest, ReadLargeKeyId) {
+  std::string json_serialization =
+      absl::Substitute(R"(
+      {
+         "primaryKeyId": 4294967275,
+         "key":[
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value": "$0"
+               },
+               "outputPrefixType":"TINK",
+               "keyId": 4294967275,
+               "status":"ENABLED"
+            },
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesEaxKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value":"$1"
+               },
+               "outputPrefixType":"RAW",
+               "keyId":711,
+               "status":"ENABLED"
+            }
+         ]
+      })",
+                       absl::Base64Escape(gcm_key_.SerializeAsString()),
+                       absl::Base64Escape(eax_key_.SerializeAsString()));
+  auto reader_result = JsonKeysetReader::New(json_serialization);
+  ASSERT_THAT(reader_result.status(), IsOk());
+  auto reader = std::move(reader_result.ValueOrDie());
+  auto read_result = reader->Read();
+  ASSERT_THAT(read_result.status(), IsOk());
+  auto keyset = std::move(read_result.ValueOrDie());
+  EXPECT_THAT(keyset->primary_key_id(), Eq(4294967275));
+}
+
+TEST_F(JsonKeysetReaderTest, ReadNegativeKeyId) {
+  std::string json_serialization =
+      absl::Substitute(R"(
+      {
+         "primaryKeyId": -21,
+         "key":[
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value": "$0"
+               },
+               "outputPrefixType":"TINK",
+               "keyId": -21,
+               "status":"ENABLED"
+            },
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesEaxKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value":"$1"
+               },
+               "outputPrefixType":"RAW",
+               "keyId":711,
+               "status":"ENABLED"
+            }
+         ]
+      })",
+                       absl::Base64Escape(gcm_key_.SerializeAsString()),
+                       absl::Base64Escape(eax_key_.SerializeAsString()));
+  auto reader_result = JsonKeysetReader::New(json_serialization);
+  ASSERT_THAT(reader_result.status(), IsOk());
+  auto reader = std::move(reader_result.ValueOrDie());
+  auto read_result = reader->Read();
+  // TODO(b/144348283): We should accept this, as Java can generate keysets with
+  // negative ids.
+  EXPECT_THAT(read_result.status(), Not(IsOk()));
 }
 
 }  // namespace

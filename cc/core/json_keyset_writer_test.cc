@@ -19,13 +19,15 @@
 #include <ostream>
 #include <sstream>
 
+#include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/substitute.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/error/en.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
@@ -33,73 +35,64 @@
 namespace crypto {
 namespace tink {
 
-using crypto::tink::test::AddRawKey;
-using crypto::tink::test::AddTinkKey;
-
-using google::crypto::tink::AesEaxKey;
-using google::crypto::tink::AesGcmKey;
-using google::crypto::tink::EncryptedKeyset;
-using google::crypto::tink::KeyData;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::AesEaxKey;
+using ::google::crypto::tink::AesGcmKey;
+using ::google::crypto::tink::EncryptedKeyset;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::OutputPrefixType;
+using ::testing::HasSubstr;
 
 namespace {
 
 class JsonKeysetWriterTest : public ::testing::Test {
  protected:
-  void SetUp() {
-    AesGcmKey gcm_key;
-    gcm_key.set_key_value("some gcm key value");
-    gcm_key.set_version(0);
-    std::string gcm_key_base64;
-    absl::Base64Escape(gcm_key.SerializeAsString(), &gcm_key_base64);
+  void SetUp() override {
+    gcm_key_.set_key_value("some gcm key value");
+    gcm_key_.set_version(0);
 
-    AesEaxKey eax_key;
-    eax_key.set_key_value("some eax key value");
-    eax_key.set_version(0);
-    eax_key.mutable_params()->set_iv_size(16);
-    std::string eax_key_base64;
-    absl::Base64Escape(eax_key.SerializeAsString(), &eax_key_base64);
+    eax_key_.set_key_value("some eax key value");
+    eax_key_.set_version(0);
+    eax_key_.mutable_params()->set_iv_size(16);
 
-    AddTinkKey("type.googleapis.com/google.crypto.tink.AesGcmKey",
-               42, gcm_key, KeyStatusType::ENABLED,
-               KeyData::SYMMETRIC, &keyset_);
-    AddRawKey("type.googleapis.com/google.crypto.tink.AesEaxKey",
-              711, eax_key, KeyStatusType::ENABLED,
-              KeyData::SYMMETRIC, &keyset_);
+    AddTinkKey("type.googleapis.com/google.crypto.tink.AesGcmKey", 42, gcm_key_,
+               KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset_);
+    AddRawKey("type.googleapis.com/google.crypto.tink.AesEaxKey", 711, eax_key_,
+              KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset_);
     keyset_.set_primary_key_id(42);
     std::string json_string =
-        "{"
-        "\"primaryKeyId\": 42,"
-        "\"key\": ["
-        "  {"
-        "    \"keyData\": {"
-        "      \"typeUrl\":"
-        "        \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
-        "      \"keyMaterialType\": \"SYMMETRIC\","
-        "      \"value\": \"" +
-        gcm_key_base64 +
-        "\""
-        "    },"
-        "    \"outputPrefixType\": \"TINK\","
-        "    \"keyId\": 42,"
-        "    \"status\": \"ENABLED\""
-        "  },"
-        "  {"
-        "    \"keyData\": {"
-        "      \"typeUrl\":"
-        "        \"type.googleapis.com/google.crypto.tink.AesEaxKey\","
-        "      \"keyMaterialType\": \"SYMMETRIC\","
-        "      \"value\": \"" +
-        eax_key_base64 +
-        "\""
-        "    },"
-        "    \"outputPrefixType\": \"RAW\","
-        "    \"keyId\": 711,"
-        "    \"status\": \"ENABLED\""
-        "  }"
-        "]}";
+        absl::Substitute(R"(
+      {
+         "primaryKeyId":42,
+         "key":[
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value": "$0"
+               },
+               "outputPrefixType":"TINK",
+               "keyId":42,
+               "status":"ENABLED"
+            },
+            {
+               "keyData":{
+                  "typeUrl":"type.googleapis.com/google.crypto.tink.AesEaxKey",
+                  "keyMaterialType":"SYMMETRIC",
+                  "value":"$1"
+               },
+               "outputPrefixType":"RAW",
+               "keyId":711,
+               "status":"ENABLED"
+            }
+         ]
+      })",
+                         absl::Base64Escape(gcm_key_.SerializeAsString()),
+                         absl::Base64Escape(eax_key_.SerializeAsString()));
     ASSERT_FALSE(good_json_keyset_.Parse(json_string.c_str()).HasParseError());
 
     std::string enc_keyset = "some ciphertext with keyset";
@@ -136,6 +129,8 @@ class JsonKeysetWriterTest : public ::testing::Test {
   rapidjson::Document good_json_keyset_;
   rapidjson::Document good_json_encrypted_keyset_;
   std::string good_json_encrypted_keyset_string_;
+  AesGcmKey gcm_key_;
+  AesEaxKey eax_key_;
 };
 
 TEST_F(JsonKeysetWriterTest, testWriterCreation) {
@@ -242,6 +237,22 @@ TEST_F(JsonKeysetWriterTest, testDestinationStreamErrors) {
     EXPECT_FALSE(status.ok()) << status;
     EXPECT_EQ(util::error::UNKNOWN, status.error_code());
   }
+}
+
+TEST_F(JsonKeysetWriterTest, WriteLargeKeyId) {
+  Keyset keyset;
+  AddTinkKey("type.googleapis.com/google.crypto.tink.AesGcmKey", 4123456789,
+             gcm_key_, KeyStatusType::ENABLED, KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(4123456789);  // 4123456789 > 2^31
+
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
+  ASSERT_THAT(writer_result.status(), IsOk());
+  auto writer = std::move(writer_result.ValueOrDie());
+  ASSERT_THAT(writer->Write(keyset), IsOk());
+  EXPECT_THAT(buffer.str(), HasSubstr("\"primaryKeyId\": 4123456789"));
+  EXPECT_THAT(buffer.str(), HasSubstr("\"keyId\": 4123456789"));
 }
 
 }  // namespace

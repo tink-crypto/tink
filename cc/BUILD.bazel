@@ -1,9 +1,9 @@
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("//tools:common.bzl", "template_rule")
+
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])
-
-load("//:tink_version.bzl", "TINK_VERSION_LABEL")
-load("//tools:common.bzl", "template_rule")
 
 # public libraries
 
@@ -902,6 +902,7 @@ cc_test(
     deps = [
         ":json_keyset_reader",
         "//cc/util:protobuf_helper",
+        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "//proto:aes_eax_cc_proto",
         "//proto:aes_gcm_cc_proto",
@@ -920,6 +921,7 @@ cc_test(
         ":json_keyset_reader",
         ":json_keyset_writer",
         "//cc/util:protobuf_helper",
+        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "//proto:aes_eax_cc_proto",
         "//proto:aes_gcm_cc_proto",

@@ -684,6 +684,7 @@ tink_cc_test(
   DEPS
     tink::core::json_keyset_reader
     tink::util::protobuf_helper
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
@@ -698,6 +699,7 @@ tink_cc_test(
     tink::core::json_keyset_reader
     tink::core::json_keyset_writer
     tink::util::protobuf_helper
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
