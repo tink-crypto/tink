@@ -627,13 +627,13 @@ go_repository(
 # Javascript
 #-----------------------------------------------------------------------------
 
-# Last update: 2019-10-18, to latest release.
+# Last update: 2020-01-16
 http_archive(
     name = "io_bazel_rules_closure",
-    sha256 = "7d206c2383811f378a5ef03f4aacbcf5f47fd8650f6abbc3fa89f3a27dd8b176",
-    strip_prefix = "rules_closure-0.10.0",
+    sha256 = "c43d45de819061c6a4d846cf36b0ca88894cfe3c83e4d0241e0353fb278b6c4d",
+    strip_prefix = "rules_closure-db4683a2a1836ac8e265804ca5fa31852395185b",
     urls = [
-        "https://github.com/bazelbuild/rules_closure/archive/0.10.0.tar.gz",
+        "http://github.com/bazelbuild/rules_closure/archive/db4683a2a1836ac8e265804ca5fa31852395185b.zip",
     ],
 )
 
