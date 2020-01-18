@@ -629,9 +629,9 @@ public class KeysetManagerTest {
   }
 
   @Test
+  @SuppressWarnings("GuardedBy")
   public void testAddNewKey_onePrimary() throws Exception {
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    @SuppressWarnings("GuardedBy")
     // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
     // held
     int keyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
