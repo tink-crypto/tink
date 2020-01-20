@@ -13,11 +13,11 @@
 ################################################################################
 
 
-ROOT_DIR="$TEST_SRCDIR/tink"
-CC_MAC_CLI="$ROOT_DIR/tools/testing/cc/mac_cli_cc"
-GO_MAC_CLI="$ROOT_DIR/tools/testing/go/mac_cli_go"
-JAVA_MAC_CLI="$ROOT_DIR/tools/testing/mac_cli_java"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+ROOT_DIR="$TEST_SRCDIR/tools"
+CC_MAC_CLI="$ROOT_DIR/testing/cc/mac_cli_cc"
+GO_MAC_CLI="$ROOT_DIR/testing/go/mac_cli_go"
+JAVA_MAC_CLI="$ROOT_DIR/testing/mac_cli_java"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 source $TEST_UTIL || exit 1
 

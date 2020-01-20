@@ -154,6 +154,7 @@ java_library(
     name = "privileged_registry",
     srcs = ["PrivilegedRegistry.java"],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
     deps = [
         ":core",
         "//proto:tink_java_proto",
@@ -165,6 +166,7 @@ java_library(
     name = "privileged_registry-android",
     srcs = ["PrivilegedRegistry.java"],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
     deps = [
         ":core-android",
         "//proto:tink_java_proto_lite",

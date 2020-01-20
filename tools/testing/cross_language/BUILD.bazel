@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
@@ -17,8 +17,8 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//tools/testing/cc:keyset_reader_writer_cli",
-        "//tools/tinkey",
+        "//testing/cc:keyset_reader_writer_cli",
+        "//tinkey",
     ],
 )
 
@@ -30,9 +30,9 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//:tink_version",
-        "//tools/testing:version_cli_java",
-        "//tools/testing/cc:version_cli_cc",
+        "@tink_base//:tink_version",
+        "//testing:version_cli_java",
+        "//testing/cc:version_cli_cc",
     ],
 )
 
@@ -44,15 +44,15 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//tools/testing:aead_cli_java",
-        "//tools/testing/cc:aead_cli_cc",
-        "//tools/testing/go:aead_cli_go",
-        "//tools/testing/go:generate_envelope_keyset",
-        "//tools/tinkey",
-        "//testdata:credentials",
+        "//testing:aead_cli_java",
+        "//testing/cc:aead_cli_cc",
+        "//testing/go:aead_cli_go",
+        "//testing/go:generate_envelope_keyset",
+        "//tinkey",
+        "@tink_base//testdata:credentials",
     ],
     args = select({
-      "//tools/remote_build_execution:rbe": ["--no_external_tests"],
+      "//remote_build_execution:rbe": ["--no_external_tests"],
       "//conditions:default": [],
     }),
 )
@@ -65,10 +65,10 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//tools/testing:deterministic_aead_cli_java",
-        "//tools/testing/cc:deterministic_aead_cli_cc",
-        "//tools/testing/go:deterministic_aead_cli_go",
-        "//tools/tinkey",
+        "//testing:deterministic_aead_cli_java",
+        "//testing/cc:deterministic_aead_cli_cc",
+        "//testing/go:deterministic_aead_cli_go",
+        "//tinkey",
     ],
 )
 
@@ -80,9 +80,9 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//tools/testing:streaming_aead_cli_java",
-        "//tools/testing/cc:streaming_aead_cli_cc",
-        "//tools/tinkey",
+        "//testing:streaming_aead_cli_java",
+        "//testing/cc:streaming_aead_cli_cc",
+        "//tinkey",
     ],
 )
 
@@ -94,10 +94,10 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//tools/testing:mac_cli_java",
-        "//tools/testing/cc:mac_cli_cc",
-        "//tools/testing/go:mac_cli_go",
-        "//tools/tinkey",
+        "//testing:mac_cli_java",
+        "//testing/cc:mac_cli_cc",
+        "//testing/go:mac_cli_go",
+        "//tinkey",
     ],
 )
 
@@ -109,13 +109,13 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//tools/testing:hybrid_decrypt_cli_java",
-        "//tools/testing:hybrid_encrypt_cli_java",
-        "//tools/testing/cc:hybrid_decrypt_cli_cc",
-        "//tools/testing/cc:hybrid_encrypt_cli_cc",
-        "//tools/testing/go:hybrid_encrypt_cli_go",
-        "//tools/testing/go:hybrid_decrypt_cli_go",
-        "//tools/tinkey",
+        "//testing:hybrid_decrypt_cli_java",
+        "//testing:hybrid_encrypt_cli_java",
+        "//testing/cc:hybrid_decrypt_cli_cc",
+        "//testing/cc:hybrid_encrypt_cli_cc",
+        "//testing/go:hybrid_encrypt_cli_go",
+        "//testing/go:hybrid_decrypt_cli_go",
+        "//tinkey",
     ],
 )
 
@@ -128,12 +128,12 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//tools/testing:public_key_sign_cli_java",
-        "//tools/testing:public_key_verify_cli_java",
-        "//tools/testing/cc:public_key_sign_cli_cc",
-        "//tools/testing/cc:public_key_verify_cli_cc",
-        "//tools/testing/go:public_key_sign_cli_go",
-        "//tools/testing/go:public_key_verify_cli_go",
-        "//tools/tinkey",
+        "//testing:public_key_sign_cli_java",
+        "//testing:public_key_verify_cli_java",
+        "//testing/cc:public_key_sign_cli_cc",
+        "//testing/cc:public_key_verify_cli_cc",
+        "//testing/go:public_key_sign_cli_go",
+        "//testing/go:public_key_verify_cli_go",
+        "//tinkey",
     ],
 )

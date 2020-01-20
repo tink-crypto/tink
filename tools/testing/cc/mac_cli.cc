@@ -21,7 +21,7 @@
 #include "tink/mac.h"
 #include "tink/mac/mac_factory.h"
 #include "tink/util/status.h"
-#include "tools/testing/cc/cli_util.h"
+#include "testing/cc/cli_util.h"
 
 using crypto::tink::MacFactory;
 using crypto::tink::KeysetHandle;

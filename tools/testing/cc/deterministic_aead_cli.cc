@@ -21,7 +21,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/daead/deterministic_aead_factory.h"
 #include "tink/util/status.h"
-#include "tools/testing/cc/cli_util.h"
+#include "testing/cc/cli_util.h"
 
 using crypto::tink::DeterministicAeadFactory;
 using crypto::tink::KeysetHandle;

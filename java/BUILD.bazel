@@ -126,11 +126,29 @@ java_library(
     ],
 )
 
+java_library(
+    name = "cleartext_keyset_handle",
+    visibility = ["//visibility:public"],
+    exports = cleartext_deps,
+)
+
+java_library(
+    name = "subtle",
+    visibility = ["//visibility:public"],
+    exports = subtle_deps,
+)
+
 # like :java, but for Android
 android_library(
     name = "android",
     visibility = ["//visibility:public"],
     exports = android_deps,
+)
+
+java_library(
+    name = "cleartext_keyset_handle_android",
+    visibility = ["//visibility:public"],
+    exports = cleartext_android_deps,
 )
 
 # RESTRICTED
@@ -143,21 +161,6 @@ java_library(
 java_library(
     name = "protos_android",
     exports = lite_proto_deps,
-)
-
-java_library(
-    name = "cleartext_keyset_handle",
-    exports = cleartext_deps,
-)
-
-java_library(
-    name = "cleartext_keyset_handle_android",
-    exports = cleartext_android_deps,
-)
-
-java_library(
-    name = "subtle",
-    exports = subtle_deps,
 )
 
 # Maven jars
@@ -223,6 +226,7 @@ android_library(
 java_library(
     name = "testutil",
     testonly = 1,
+    visibility = ["//visibility:public"],
     exports = ["//java/src/main/java/com/google/crypto/tink/testing:test_util"],
 )
 

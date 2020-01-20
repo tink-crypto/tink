@@ -20,7 +20,7 @@
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/util/status.h"
-#include "tools/testing/cc/cli_util.h"
+#include "testing/cc/cli_util.h"
 
 using crypto::tink::KeysetReader;
 using crypto::tink::KeysetWriter;

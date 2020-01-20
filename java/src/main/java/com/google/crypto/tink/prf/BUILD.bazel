@@ -24,6 +24,7 @@ java_library(
     name = "prf_key_templates",
     srcs = ["PrfKeyTemplates.java"],
     javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
     deps = [
         ":hkdf_prf_key_manager",
         "//proto:common_java_proto",

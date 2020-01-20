@@ -13,14 +13,14 @@
 ################################################################################
 
 
-ROOT_DIR="$TEST_SRCDIR/tink"
-CC_SIGN_CLI="$ROOT_DIR/tools/testing/cc/public_key_sign_cli_cc"
-CC_VERIFY_CLI="$ROOT_DIR/tools/testing/cc/public_key_verify_cli_cc"
-JAVA_SIGN_CLI="$ROOT_DIR/tools/testing/public_key_sign_cli_java"
-JAVA_VERIFY_CLI="$ROOT_DIR/tools/testing/public_key_verify_cli_java"
-GO_SIGN_CLI="$ROOT_DIR/tools/testing/go/public_key_sign_cli_go"
-GO_VERIFY_CLI="$ROOT_DIR/tools/testing/go/public_key_verify_cli_go"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+ROOT_DIR="$TEST_SRCDIR/tools"
+CC_SIGN_CLI="$ROOT_DIR/testing/cc/public_key_sign_cli_cc"
+CC_VERIFY_CLI="$ROOT_DIR/testing/cc/public_key_verify_cli_cc"
+JAVA_SIGN_CLI="$ROOT_DIR/testing/public_key_sign_cli_java"
+JAVA_VERIFY_CLI="$ROOT_DIR/testing/public_key_verify_cli_java"
+GO_SIGN_CLI="$ROOT_DIR/testing/go/public_key_sign_cli_go"
+GO_VERIFY_CLI="$ROOT_DIR/testing/go/public_key_verify_cli_go"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 source $TEST_UTIL || exit 1
 

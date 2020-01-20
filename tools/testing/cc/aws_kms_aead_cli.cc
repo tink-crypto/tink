@@ -27,7 +27,7 @@
 #include "tink/integration/awskms/aws_kms_client.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tools/testing/cc/cli_util.h"
+#include "testing/cc/cli_util.h"
 
 using crypto::tink::Aead;
 using crypto::tink::integration::awskms::AwsKmsAead;

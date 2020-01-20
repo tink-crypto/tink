@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
@@ -10,8 +10,8 @@ cc_library(
     hdrs = [
         "aws_crypto.h",
     ],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    include_prefix = "tink/integration/awskms",
+    visibility = ["//visibility:public"],
     deps = [
         "@aws_cpp_sdk//:aws_sdk_core",
         "@boringssl//:crypto",
@@ -24,13 +24,13 @@ cc_library(
     name = "aws_kms_aead",
     srcs = ["aws_kms_aead.cc"],
     hdrs = ["aws_kms_aead.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    include_prefix = "tink/integration/awskms",
+    visibility = ["//visibility:public"],
     deps = [
-        "//cc:aead",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//:aead",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
     ],
     alwayslink = 1,
@@ -40,20 +40,20 @@ cc_library(
     name = "aws_kms_client",
     srcs = ["aws_kms_client.cc"],
     hdrs = ["aws_kms_client.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":aws_crypto",
         ":aws_kms_aead",
-        "//cc:kms_client",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//:kms_client",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
     ],
     alwayslink = 1,
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
+    include_prefix = "tink/integration/awskms",
 )
 
 # tests
@@ -65,9 +65,9 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aws_kms_aead",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
         "@com_google_googletest//:gtest_main",
     ],
@@ -78,12 +78,12 @@ cc_test(
     size = "medium",
     srcs = ["aws_kms_client_test.cc"],
     copts = ["-Iexternal/gtest/include"],
-    data = ["//testdata:credentials"],
+    data = ["@tink_base//testdata:credentials"],
     deps = [
         ":aws_kms_client",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
         "@com_google_googletest//:gtest_main",
     ],

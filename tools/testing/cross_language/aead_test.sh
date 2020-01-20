@@ -13,13 +13,13 @@
 ################################################################################
 
 
-ROOT_DIR="$TEST_SRCDIR/tink"
-CC_AEAD_CLI="$ROOT_DIR/tools/testing/cc/aead_cli_cc"
+ROOT_DIR="$TEST_SRCDIR/tools"
+CC_AEAD_CLI="$ROOT_DIR/testing/cc/aead_cli_cc"
 PY2_AEAD_CLI="" # placeholder, please ignore
 PY3_AEAD_CLI="" # placeholder, please ignore
-GO_AEAD_CLI="$ROOT_DIR/tools/testing/go/aead_cli_go"
-JAVA_AEAD_CLI="$ROOT_DIR/tools/testing/aead_cli_java"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+GO_AEAD_CLI="$ROOT_DIR/testing/go/aead_cli_go"
+JAVA_AEAD_CLI="$ROOT_DIR/testing/aead_cli_java"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 RUN_EXTERNAL_TESTS=true
 
 # TODO(b/136245485): Update this script to use go/gbash.

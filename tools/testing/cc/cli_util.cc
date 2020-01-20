@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tools/testing/cc/cli_util.h"
+#include "testing/cc/cli_util.h"
 
 #include <iostream>
 #include <fstream>

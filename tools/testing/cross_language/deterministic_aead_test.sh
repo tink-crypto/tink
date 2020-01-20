@@ -13,11 +13,11 @@
 ################################################################################
 
 
-ROOT_DIR="$TEST_SRCDIR/tink"
-CC_DAEAD_CLI="$ROOT_DIR/tools/testing/cc/deterministic_aead_cli_cc"
-JAVA_DAEAD_CLI="$ROOT_DIR/tools/testing/deterministic_aead_cli_java"
-GO_DAEAD_CLI="$ROOT_DIR/tools/testing/go/deterministic_aead_cli_go"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+ROOT_DIR="$TEST_SRCDIR/tools"
+CC_DAEAD_CLI="$ROOT_DIR/testing/cc/deterministic_aead_cli_cc"
+JAVA_DAEAD_CLI="$ROOT_DIR/testing/deterministic_aead_cli_java"
+GO_DAEAD_CLI="$ROOT_DIR/testing/go/deterministic_aead_cli_go"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 KEY_TEMPLATES=(AES256_SIV)
 

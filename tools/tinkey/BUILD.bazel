@@ -1,8 +1,8 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+load("//build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 java_library(
     name = "libtinkey",
@@ -16,20 +16,20 @@ java_library(
     ),
     javacopts = JAVACOPTS_OSS,
     deps = [
-        "//java/src/main/java/com/google/crypto/tink",
-        "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/aead",
-        "//java/src/main/java/com/google/crypto/tink/daead",
-        "//java/src/main/java/com/google/crypto/tink/hybrid",
-        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
-        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
-        "//java/src/main/java/com/google/crypto/tink/mac",
-        "//java/src/main/java/com/google/crypto/tink/prf:prf_key_templates",
-        "//java/src/main/java/com/google/crypto/tink/signature",
-        "//java/src/main/java/com/google/crypto/tink/streamingaead",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//proto:tink_java_proto",
+        "@tink_base//java:awskms",
+        "@tink_base//java:cleartext_keyset_handle",
+        "@tink_base//java:gcpkms",
+        "@tink_base//java:subtle",
+        "@tink_base//java/src/main/java/com/google/crypto/tink",
+        "@tink_base//java/src/main/java/com/google/crypto/tink:primitives",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/aead",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/daead",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/hybrid",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/mac",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/prf:prf_key_templates",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/signature",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/streamingaead",
+        "@tink_base//proto:tink_java_proto",
         "@com_google_protobuf_javalite//:protobuf_javalite",
         "@maven//:args4j_args4j",
     ],
@@ -42,17 +42,17 @@ java_binary(
     ],
     javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.tinkey.Tinkey",
-    visibility = ["//tools/testing:__subpackages__"],
+    visibility = ["//testing:__subpackages__"],
     deps = [
         ":libtinkey",
-        "//java/src/main/java/com/google/crypto/tink/config",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/config",
         "@maven//:args4j_args4j",
     ],
 )
 
 # tests
 
-load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
+load("//:gen_java_test_rules.bzl", "gen_java_test_rules")
 
 java_library(
     name = "generator_test",
@@ -62,8 +62,8 @@ java_library(
     ]),
     deps = [
         ":libtinkey",
-        "//java:testonly",
-        "//java:testutil",
+        "@tink_base//java:testonly",
+        "@tink_base//java:testutil",
         "@com_google_protobuf_javalite//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
@@ -72,7 +72,7 @@ java_library(
 
 gen_java_test_rules(
     data = [
-        "//testdata:credentials",
+        "@tink_base//testdata:credentials",
     ],
     test_files = glob([
         "src/test/**/*Test.java",

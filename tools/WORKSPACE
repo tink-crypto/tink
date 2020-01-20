@@ -1,18 +1,27 @@
-workspace(name = "tink_base")
+workspace(name = "tools")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+local_repository(
+    name = "tink_base",
+    path = "..",
+)
+
+local_repository(
+    name = "tink_cc",
+    path = "../cc",
+)
+
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
-
 tink_base_deps()
 
 load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
-
 tink_base_deps_init()
 
-# ----- Python
-load("@tink_py_deps//:requirements.bzl", "pip_install")
+load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
+tink_cc_deps()
 
-pip_install()
+load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
+tink_cc_deps_init()
+
 
 # Go initialization does not work via tink_base_deps_init for some reason.
 # All of the Go-stuff below will be eventually moved to go/WORKSPACE.

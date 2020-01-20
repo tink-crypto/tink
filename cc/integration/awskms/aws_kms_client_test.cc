@@ -38,7 +38,7 @@ TEST(AwsKmsClientTest, testBasic) {
   std::string aws_key2 = "aws-kms://arn:aws:kms:us-west-2:acc:other/key2";
   std::string non_aws_key = "gcp-kms:://some/gcp/key";
   std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
-                           "/tink/testdata/aws_credentials_cc.txt";
+                           "/tink_base/testdata/aws_credentials_cc.txt";
 
   {  // A client not bound to any particular key.
     auto client_result = AwsKmsClient::New("", creds_file);

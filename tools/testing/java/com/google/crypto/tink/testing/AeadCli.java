@@ -46,11 +46,13 @@ public class AeadCli {
     String associatedDataFile = args[3];
     String outputFilename = args[4];
 
-    KmsClient gcpKmsClient = new GcpKmsClient().withCredentials(TestUtil.SERVICE_ACCOUNT_FILE);
+    KmsClient gcpKmsClient = new GcpKmsClient().withCredentials(
+        "../tink_base/" + TestUtil.SERVICE_ACCOUNT_FILE);
     KmsClients.add(gcpKmsClient);
     AeadConfig.register();
 
-    KmsClient awsKmsClient = new AwsKmsClient(TestUtil.AWS_CRYPTO_URI).withCredentials(TestUtil.AWS_CREDS);
+    KmsClient awsKmsClient = new AwsKmsClient(TestUtil.AWS_CRYPTO_URI).withCredentials(
+        "../tink_base/" + TestUtil.AWS_CREDS);
     KmsClients.add(awsKmsClient);
     AeadConfig.register();
 

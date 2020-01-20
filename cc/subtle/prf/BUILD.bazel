@@ -1,27 +1,25 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
 cc_library(
     name = "streaming_prf",
     hdrs = ["streaming_prf.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
-    deps = ["//cc:input_stream"],
+    include_prefix = "tink/subtle/prf",
+    deps = ["//:input_stream"],
 )
 
 cc_library(
     name = "hkdf_streaming_prf",
     srcs = ["hkdf_streaming_prf.cc"],
     hdrs = ["hkdf_streaming_prf.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    include_prefix = "tink/subtle/prf",
     deps = [
         ":streaming_prf",
-        "//cc:input_stream",
-        "//cc/subtle",
-        "//cc/subtle:subtle_util",
-        "//cc/subtle:subtle_util_boringssl",
+        "//:input_stream",
+        "//subtle",
+        "//subtle:subtle_util",
+        "//subtle:subtle_util_boringssl",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -33,10 +31,10 @@ cc_test(
     srcs = ["hkdf_streaming_prf_test.cc"],
     deps = [
         ":hkdf_streaming_prf",
-        "//cc/subtle",
-        "//cc/util:input_stream_util",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
+        "//subtle",
+        "//util:input_stream_util",
+        "//util:test_matchers",
+        "//util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
