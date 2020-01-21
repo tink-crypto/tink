@@ -28,8 +28,8 @@ go_library(
         "//go/subtle/random:go_default_library",
         "//go/tink:go_default_library",
         "//proto:tink_go_proto",
-        "@com_github_golang_protobuf//proto:go_default_library",
         "@com_github_golang_protobuf//jsonpb:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )
 
@@ -37,8 +37,8 @@ go_test(
     name = "go_default_test",
     srcs = [
         "binary_io_test.go",
-        "json_io_test.go",
         "handle_test.go",
+        "json_io_test.go",
         "manager_test.go",
         "validation_test.go",
     ],
@@ -49,6 +49,7 @@ go_test(
         "//go/subtle/random:go_default_library",
         "//go/testkeyset:go_default_library",
         "//go/testutil:go_default_library",
+        "//proto:common_go_proto",
         "//proto:tink_go_proto",
         "@com_github_golang_protobuf//proto:go_default_library",
     ],
