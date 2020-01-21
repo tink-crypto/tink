@@ -134,7 +134,13 @@ class AwsKmsClient(object):
 
     Returns:
       An AEAD primitive which uses the specified key.
+
+    Raises:
+      ValueError: If the key_uri is not supported.
     """
+
+    if not self.does_support(key_uri):
+      raise ValueError('Key URI not supported.')
 
     key_name = key_uri[len(AWS_KEYURI_PREFIX):]
     return AwsKmsAead(key_name, self.client)
