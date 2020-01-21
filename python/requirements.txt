@@ -16,3 +16,4 @@ google-api-core
 google-auth
 google-cloud-kms
 grpc-google-iam-v1
+boto3
