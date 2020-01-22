@@ -42,9 +42,9 @@ cc_library(
     include_prefix = "tink/util",
     deps = [
         "//subtle:common_enums",
-        "//:common_cc_proto",
-        "//:ecdsa_cc_proto",
-        "//:tink_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:ecdsa_cc_proto",
+        "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -80,7 +80,7 @@ cc_library(
     deps = [
         ":errors",
         ":status",
-        "//:tink_cc_proto",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -193,14 +193,14 @@ cc_library(
         "//subtle:random",
         "//subtle:subtle_util_boringssl",
         "//subtle/mac:stateful_mac",
-        "//:aes_ctr_hmac_aead_cc_proto",
-        "//:aes_gcm_cc_proto",
-        "//:common_cc_proto",
-        "//:ecdsa_cc_proto",
-        "//:ecies_aead_hkdf_cc_proto",
-        "//:ed25519_cc_proto",
-        "//:tink_cc_proto",
-        "//:xchacha20_poly1305_cc_proto",
+        "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:ecdsa_cc_proto",
+        "//proto:ecies_aead_hkdf_cc_proto",
+        "//proto:ed25519_cc_proto",
+        "//proto:tink_cc_proto",
+        "//proto:xchacha20_poly1305_cc_proto",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -237,7 +237,7 @@ cc_library(
     include_prefix = "tink/util",
     deps = [
         "//:keyset_handle",
-        "//:tink_cc_proto",
+        "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",
     ],
 )
@@ -295,7 +295,7 @@ cc_test(
     deps = [
         ":enums",
         "//subtle:common_enums",
-        "//:common_cc_proto",
+        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -385,8 +385,8 @@ cc_test(
     deps = [
         ":test_util",
         "//subtle:random",
-        "//:aes_gcm_cc_proto",
-        "//:tink_cc_proto",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

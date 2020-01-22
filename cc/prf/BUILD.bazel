@@ -18,9 +18,9 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "//util:validation",
-        "//:common_cc_proto",
-        "//:hkdf_prf_cc_proto",
-        "//:tink_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:hkdf_prf_cc_proto",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -34,7 +34,7 @@ cc_library(
         ":hkdf_prf_key_manager",
         "//:registry",
         "//util:status",
-        "//:tink_cc_proto",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -46,8 +46,8 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":hkdf_prf_key_manager",
-        "//:hkdf_prf_cc_proto",
-        "//:tink_cc_proto",
+        "//proto:hkdf_prf_cc_proto",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -60,7 +60,7 @@ cc_test(
         "//subtle/prf:hkdf_streaming_prf",
         "//util:input_stream_util",
         "//util:test_matchers",
-        "//:common_cc_proto",
+        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

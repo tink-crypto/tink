@@ -16,7 +16,7 @@ cc_library(
         "//signature:signature_config",
         "//streamingaead:streaming_aead_config",
         "//util:status",
-        "//:config_cc_proto",
+        "//proto:config_cc_proto",
         "@com_google_absl//absl/base:core_headers",
     ],
 )
@@ -27,7 +27,7 @@ cc_library(
     hdrs = ["config_util.h"],
     include_prefix = "tink/config",
     deps = [
-        "//:config_cc_proto",
+        "//proto:config_cc_proto",
     ],
 )
 
