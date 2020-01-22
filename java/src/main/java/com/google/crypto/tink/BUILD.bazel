@@ -1,10 +1,10 @@
 licenses(["notice"])
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
-load("//:tink_version.bzl", "TINK_VERSION_LABEL")
-load("//tools:common.bzl", "template_rule")
+load("@tink_base//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("@tink_base//tools:common.bzl", "template_rule")
 
 full_protos = [
     "//proto:common_java_proto",
@@ -75,12 +75,12 @@ java_library(
     ) + [":version_java"],
     visibility = ["//visibility:public"],
     deps = full_protos + [
-        "//java/src/main/java/com/google/crypto/tink/annotations",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/annotations",
+        "//src/main/java/com/google/crypto/tink/subtle",
         ":primitives",
-        "@com_google_code_findbugs_jsr305",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@com_google_protobuf//:protobuf_java",
-        "@org_json",
+        "@maven//:org_json_json",
     ],
 )
 
@@ -107,12 +107,12 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = lite_protos + [
-        "//java/src/main/java/com/google/crypto/tink/annotations",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/annotations",
+        "//src/main/java/com/google/crypto/tink/subtle",
         ":primitives",
-        "@com_google_code_findbugs_jsr305",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@com_google_protobuf_javalite//:protobuf_javalite",
-        "@org_json",
+        "@maven//:org_json_json",
     ],
 )
 

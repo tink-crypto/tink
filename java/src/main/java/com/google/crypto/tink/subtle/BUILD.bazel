@@ -1,6 +1,6 @@
 licenses(["notice"])
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
@@ -56,8 +56,8 @@ java_library(
     deps = [
         ":mac",
         ":subtle",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/annotations",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/annotations",
     ],
 )
 
@@ -72,7 +72,7 @@ java_library(
     deps = [
         ":mac",
         ":subtle",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink:primitives",
     ],
 )
 
@@ -88,9 +88,9 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
-        "@com_google_errorprone_error_prone_annotations",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/annotations",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/annotations",
     ],
 )
 
@@ -114,7 +114,7 @@ java_library(
     deps = [
         ":subtle",
         ":x25519",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink:primitives",
     ],
 )
 
@@ -133,7 +133,7 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink:primitives",
     ],
 )
 
@@ -158,8 +158,8 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "@com_google_code_findbugs_jsr305",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -172,8 +172,8 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "@com_google_code_findbugs_jsr305",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -189,6 +189,6 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
-        "//java/src/main/java/com/google/crypto/tink/annotations",
+        "//src/main/java/com/google/crypto/tink/annotations",
     ],
 )

@@ -2,7 +2,7 @@ load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 licenses(["notice"])
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 java_library(
     name = "prf",
@@ -26,6 +26,6 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":streaming_prf",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle",
     ],
 )

@@ -20,16 +20,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "common_java_proto",
-    deps = [":common_proto"],
-)
-
-java_lite_proto_library(
-    name = "common_java_proto_lite",
-    deps = [":common_proto"],
-)
-
 closure_proto_library(
     name = "common_closure_proto",
     deps = [":common_proto"],
@@ -59,17 +49,6 @@ proto_library(
     deps = [
         ":common_proto",
     ],
-)
-
-java_proto_library(
-    name = "tink_java_proto",
-    deps = [":tink_proto"],
-    visibility = ["//visibility:public"],
-)
-
-java_lite_proto_library(
-    name = "tink_java_proto_lite",
-    deps = [":tink_proto"],
 )
 
 closure_proto_library(
@@ -110,16 +89,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "config_java_proto",
-    deps = [":config_proto"],
-)
-
-java_lite_proto_library(
-    name = "config_java_proto_lite",
-    deps = [":config_proto"],
-)
-
 go_proto_library(
     name = "config_go_proto",
     importpath = "github.com/google/tink/proto/config_go_proto",
@@ -141,16 +110,6 @@ proto_library(
     srcs = [
         "aes_siv.proto",
     ],
-)
-
-java_proto_library(
-    name = "aes_siv_java_proto",
-    deps = [":aes_siv_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_siv_java_proto_lite",
-    deps = [":aes_siv_proto"],
 )
 
 go_proto_library(
@@ -177,16 +136,6 @@ proto_library(
     deps = [
         ":common_proto",
     ],
-)
-
-java_proto_library(
-    name = "rsa_ssa_pkcs1_java_proto",
-    deps = [":rsa_ssa_pkcs1_proto"],
-)
-
-java_lite_proto_library(
-    name = "rsa_ssa_pkcs1_java_proto_lite",
-    deps = [":rsa_ssa_pkcs1_proto"],
 )
 
 go_proto_library(
@@ -217,16 +166,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "rsa_ssa_pss_java_proto",
-    deps = [":rsa_ssa_pss_proto"],
-)
-
-java_lite_proto_library(
-    name = "rsa_ssa_pss_java_proto_lite",
-    deps = [":rsa_ssa_pss_proto"],
-)
-
 go_proto_library(
     name = "rsa_ssa_pss_go_proto",
     importpath = "github.com/google/tink/proto/rsa_ssa_pss_go_proto",
@@ -253,16 +192,6 @@ proto_library(
     deps = [
         ":common_proto",
     ],
-)
-
-java_proto_library(
-    name = "ecdsa_java_proto",
-    deps = [":ecdsa_proto"],
-)
-
-java_lite_proto_library(
-    name = "ecdsa_java_proto_lite",
-    deps = [":ecdsa_proto"],
 )
 
 closure_proto_library(
@@ -295,16 +224,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "ed25519_java_proto",
-    deps = [":ed25519_proto"],
-)
-
-java_lite_proto_library(
-    name = "ed25519_java_proto_lite",
-    deps = [":ed25519_proto"],
-)
-
 go_proto_library(
     name = "ed25519_go_proto",
     importpath = "github.com/google/tink/proto/ed25519_go_proto",
@@ -326,16 +245,6 @@ proto_library(
     srcs = [
         "aes_cmac.proto",
     ],
-)
-
-java_proto_library(
-    name = "aes_cmac_java_proto",
-    deps = [":aes_cmac_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_cmac_java_proto_lite",
-    deps = [":aes_cmac_proto"],
 )
 
 closure_proto_library(
@@ -369,16 +278,6 @@ proto_library(
     deps = [":common_proto"],
 )
 
-java_proto_library(
-    name = "hmac_java_proto",
-    deps = [":hmac_proto"],
-)
-
-java_lite_proto_library(
-    name = "hmac_java_proto_lite",
-    deps = [":hmac_proto"],
-)
-
 closure_proto_library(
     name = "hmac_closure_proto",
     deps = [":hmac_proto"],
@@ -407,16 +306,6 @@ proto_library(
     srcs = [
         "aes_ctr.proto",
     ],
-)
-
-java_proto_library(
-    name = "aes_ctr_java_proto",
-    deps = [":aes_ctr_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_ctr_java_proto_lite",
-    deps = [":aes_ctr_proto"],
 )
 
 closure_proto_library(
@@ -449,16 +338,6 @@ proto_library(
         ":aes_ctr_proto",
         ":hmac_proto",
     ],
-)
-
-java_proto_library(
-    name = "aes_ctr_hmac_aead_java_proto",
-    deps = [":aes_ctr_hmac_aead_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_ctr_hmac_aead_java_proto_lite",
-    deps = [":aes_ctr_hmac_aead_proto"],
 )
 
 closure_proto_library(
@@ -497,16 +376,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "aes_gcm_java_proto",
-    deps = [":aes_gcm_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_gcm_java_proto_lite",
-    deps = [":aes_gcm_proto"],
-)
-
 closure_proto_library(
     name = "aes_gcm_closure_proto",
     deps = [":aes_gcm_proto"],
@@ -533,16 +402,6 @@ proto_library(
     srcs = [
         "aes_gcm_siv.proto",
     ],
-)
-
-java_proto_library(
-    name = "aes_gcm_siv_java_proto",
-    deps = [":aes_gcm_siv_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_gcm_siv_java_proto_lite",
-    deps = [":aes_gcm_siv_proto"],
 )
 
 closure_proto_library(
@@ -575,16 +434,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "aes_ctr_hmac_streaming_java_proto",
-    deps = [":aes_ctr_hmac_streaming_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_ctr_hmac_streaming_java_proto_lite",
-    deps = [":aes_ctr_hmac_streaming_proto"],
-)
-
 go_proto_library(
     name = "aes_ctr_hmac_streaming_go_proto",
     importpath = "github.com/google/tink/proto/aes_ctr_hmac_streaming_proto",
@@ -615,16 +464,6 @@ proto_library(
     deps = [":common_proto"],
 )
 
-java_proto_library(
-    name = "aes_gcm_hkdf_streaming_java_proto",
-    deps = [":aes_gcm_hkdf_streaming_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_gcm_hkdf_streaming_java_proto_lite",
-    deps = [":aes_gcm_hkdf_streaming_proto"],
-)
-
 go_proto_library(
     name = "aes_gcm_hkdf_streaming_go_proto",
     importpath = "github.com/google/tink/proto/aes_gcm_hkdf_streaming_proto",
@@ -652,16 +491,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "aes_eax_java_proto",
-    deps = [":aes_eax_proto"],
-)
-
-java_lite_proto_library(
-    name = "aes_eax_java_proto_lite",
-    deps = [":aes_eax_proto"],
-)
-
 go_proto_library(
     name = "aes_eax_go_proto",
     importpath = "github.com/google/tink/proto/aes_eax_proto",
@@ -683,16 +512,6 @@ proto_library(
     srcs = [
         "chacha20_poly1305.proto",
     ],
-)
-
-java_proto_library(
-    name = "chacha20_poly1305_java_proto",
-    deps = [":chacha20_poly1305_proto"],
-)
-
-java_lite_proto_library(
-    name = "chacha20_poly1305_java_proto_lite",
-    deps = [":chacha20_poly1305_proto"],
 )
 
 go_proto_library(
@@ -718,16 +537,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "kms_aead_java_proto",
-    deps = [":kms_aead_proto"],
-)
-
-java_lite_proto_library(
-    name = "kms_aead_java_proto_lite",
-    deps = [":kms_aead_proto"],
-)
-
 go_proto_library(
     name = "kms_aead_go_proto",
     importpath = "github.com/google/tink/proto/kms_aead_go_proto",
@@ -750,16 +559,6 @@ proto_library(
         "kms_envelope.proto",
     ],
     deps = [":tink_proto"],
-)
-
-java_proto_library(
-    name = "kms_envelope_java_proto",
-    deps = [":kms_envelope_proto"],
-)
-
-java_lite_proto_library(
-    name = "kms_envelope_java_proto_lite",
-    deps = [":kms_envelope_proto"],
 )
 
 go_proto_library(
@@ -791,16 +590,6 @@ proto_library(
         ":common_proto",
         ":tink_proto",
     ],
-)
-
-java_proto_library(
-    name = "ecies_aead_hkdf_java_proto",
-    deps = [":ecies_aead_hkdf_proto"],
-)
-
-java_lite_proto_library(
-    name = "ecies_aead_hkdf_java_proto_lite",
-    deps = [":ecies_aead_hkdf_proto"],
 )
 
 closure_proto_library(
@@ -839,16 +628,6 @@ proto_library(
     ],
 )
 
-java_proto_library(
-    name = "xchacha20_poly1305_java_proto",
-    deps = [":xchacha20_poly1305_proto"],
-)
-
-java_lite_proto_library(
-    name = "xchacha20_poly1305_java_proto_lite",
-    deps = [":xchacha20_poly1305_proto"],
-)
-
 go_proto_library(
     name = "xchacha20_poly1305_go_proto",
     importpath = "github.com/google/tink/proto/xchacha20_poly1305_go_proto",
@@ -873,16 +652,6 @@ proto_library(
     deps = [":common_proto"],
 )
 
-java_proto_library(
-    name = "hkdf_prf_java_proto",
-    deps = [":hkdf_prf_proto"],
-)
-
-java_lite_proto_library(
-    name = "hkdf_prf_java_proto_lite",
-    deps = [":hkdf_prf_proto"],
-)
-
 objc_proto_compile(
     name = "hkdf_prf_objc_pb",
     protos = ["hkdf_prf.proto"],
@@ -897,16 +666,6 @@ proto_library(
     name = "prf_based_deriver_proto",
     srcs = ["prf_based_deriver.proto"],
     deps = [":tink_proto"],
-)
-
-java_proto_library(
-    name = "prf_based_deriver_java_proto",
-    deps = [":prf_based_deriver_proto"],
-)
-
-java_lite_proto_library(
-    name = "prf_based_deriver_java_proto_lite",
-    deps = [":prf_based_deriver_proto"],
 )
 
 objc_proto_compile(
@@ -924,16 +683,6 @@ proto_library(
     srcs = [
         "empty.proto",
     ],
-)
-
-java_proto_library(
-    name = "empty_java_proto",
-    deps = [":empty_proto"],
-)
-
-java_lite_proto_library(
-    name = "empty_java_proto_lite",
-    deps = [":empty_proto"],
 )
 
 closure_proto_library(

@@ -1,5 +1,5 @@
 """
-Initialiation of dependencies of C++ Tink.
+Initialization of dependencies of C++ Tink.
 """
 
 load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")
