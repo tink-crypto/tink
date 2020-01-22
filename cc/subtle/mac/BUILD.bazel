@@ -1,14 +1,13 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
 cc_library(
     name = "stateful_mac",
     hdrs = ["stateful_mac.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    include_prefix = "tink/subtle/mac",
     deps = [
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:status",
+        "//util:statusor",
     ],
 )

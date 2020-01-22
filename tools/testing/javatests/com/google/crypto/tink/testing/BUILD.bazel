@@ -1,16 +1,16 @@
 licenses(["notice"])
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 java_test(
     name = "CompareKeysetsTest",
     size = "small",
     srcs = ["CompareKeysetsTest.java"],
     deps = [
-        "//java/src/main/java/com/google/crypto/tink/aead",
-        "//java/src/main/java/com/google/crypto/tink/testing:test_util",
-        "//proto:tink_java_proto",
-        "//tools/testing:compare_keysets",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/aead",
+        "@tink_base//java/src/main/java/com/google/crypto/tink/testing:test_util",
+        "@tink_base//proto:tink_java_proto",
+        "//testing:compare_keysets",
         "@maven//:junit_junit",
     ],
 )

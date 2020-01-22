@@ -40,9 +40,9 @@ const (
 
 var (
 	// lint placeholder header, please ignore
-	credFile    = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/credentials_aws.csv"
-	badCredFile = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/bad_access_keys_aws.csv"
-	credINIFile = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/credentials_aws.cred"
+	credFile    = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.csv"
+	badCredFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/bad_access_keys_aws.csv"
+	credINIFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.cred"
 	// lint placeholder footer, please ignore
 )
 

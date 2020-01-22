@@ -16,10 +16,10 @@
 #############################################################################
 ##### Tests for installing and using Tink in a non-Bazel project.
 
-ROOT_DIR="$TEST_SRCDIR/tink"
+ROOT_DIR="$TEST_SRCDIR/examples"
 TARGET_DIR="$TEST_TMPDIR/my_project"
-HELLO_WORLD_SRC="$ROOT_DIR/examples/helloworld/cc/hello_world.cc"
-KEYSET_FILE="$ROOT_DIR/examples/helloworld/cc/aes128_gcm_test_keyset_json.txt"
+HELLO_WORLD_SRC="$ROOT_DIR/helloworld/cc/hello_world.cc"
+KEYSET_FILE="$ROOT_DIR/helloworld/cc/aes128_gcm_test_keyset_json.txt"
 LIBTINK_SO_FILE="cc/libtink.so"
 TINK_HEADERS_TAR_FILE="cc/tink_headers.tar"
 TINK_DEPS_HEADERS_TAR_FILE="cc/tink_deps_headers.tar"

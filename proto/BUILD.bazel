@@ -13,15 +13,11 @@ licenses(["notice"])
 # common
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "common_proto",
     srcs = [
         "common.proto",
     ],
-)
-
-cc_proto_library(
-    name = "common_cc_proto",
-    deps = [":common_proto"],
 )
 
 java_proto_library(
@@ -55,6 +51,7 @@ objc_proto_compile(
 # tink
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "tink_proto",
     srcs = [
         "tink.proto",
@@ -64,14 +61,10 @@ proto_library(
     ],
 )
 
-cc_proto_library(
-    name = "tink_cc_proto",
-    deps = [":tink_proto"],
-)
-
 java_proto_library(
     name = "tink_java_proto",
     deps = [":tink_proto"],
+    visibility = ["//visibility:public"],
 )
 
 java_lite_proto_library(
@@ -88,6 +81,7 @@ go_proto_library(
     name = "tink_go_proto",
     importpath = "github.com/google/tink/proto/tink_go_proto",
     proto = ":tink_proto",
+    visibility = ["//visibility:public"],
     deps = [":common_go_proto"],
 )
 
@@ -109,15 +103,11 @@ filegroup(
 # config
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "config_proto",
     srcs = [
         "config.proto",
     ],
-)
-
-cc_proto_library(
-    name = "config_cc_proto",
-    deps = [":config_proto"],
 )
 
 java_proto_library(
@@ -146,15 +136,11 @@ objc_proto_compile(
 # aes-siv
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_siv_proto",
     srcs = [
         "aes_siv.proto",
     ],
-)
-
-cc_proto_library(
-    name = "aes_siv_cc_proto",
-    deps = [":aes_siv_proto"],
 )
 
 java_proto_library(
@@ -183,6 +169,7 @@ objc_proto_compile(
 # rsa_ssa_pkcs1
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "rsa_ssa_pkcs1_proto",
     srcs = [
         "rsa_ssa_pkcs1.proto",
@@ -190,11 +177,6 @@ proto_library(
     deps = [
         ":common_proto",
     ],
-)
-
-cc_proto_library(
-    name = "rsa_ssa_pkcs1_cc_proto",
-    deps = [":rsa_ssa_pkcs1_proto"],
 )
 
 java_proto_library(
@@ -225,6 +207,7 @@ objc_proto_compile(
 # rsa_ssa_pss
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "rsa_ssa_pss_proto",
     srcs = [
         "rsa_ssa_pss.proto",
@@ -232,11 +215,6 @@ proto_library(
     deps = [
         ":common_proto",
     ],
-)
-
-cc_proto_library(
-    name = "rsa_ssa_pss_cc_proto",
-    deps = [":rsa_ssa_pss_proto"],
 )
 
 java_proto_library(
@@ -267,6 +245,7 @@ objc_proto_compile(
 # ecdsa
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "ecdsa_proto",
     srcs = [
         "ecdsa.proto",
@@ -274,11 +253,6 @@ proto_library(
     deps = [
         ":common_proto",
     ],
-)
-
-cc_proto_library(
-    name = "ecdsa_cc_proto",
-    deps = [":ecdsa_proto"],
 )
 
 java_proto_library(
@@ -314,15 +288,11 @@ objc_proto_compile(
 # ed25519
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "ed25519_proto",
     srcs = [
         "ed25519.proto",
     ],
-)
-
-cc_proto_library(
-    name = "ed25519_cc_proto",
-    deps = [":ed25519_proto"],
 )
 
 java_proto_library(
@@ -351,16 +321,11 @@ objc_proto_compile(
 # aes_cmac
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_cmac_proto",
     srcs = [
         "aes_cmac.proto",
     ],
-    deps = [],
-)
-
-cc_proto_library(
-    name = "aes_cmac_cc_proto",
-    deps = [":aes_cmac_proto"],
 )
 
 java_proto_library(
@@ -396,16 +361,12 @@ objc_proto_compile(
 # hmac
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "hmac_proto",
     srcs = [
         "hmac.proto",
     ],
     deps = [":common_proto"],
-)
-
-cc_proto_library(
-    name = "hmac_cc_proto",
-    deps = [":hmac_proto"],
 )
 
 java_proto_library(
@@ -441,15 +402,11 @@ objc_proto_compile(
 # aes_ctr
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_ctr_proto",
     srcs = [
         "aes_ctr.proto",
     ],
-)
-
-cc_proto_library(
-    name = "aes_ctr_cc_proto",
-    deps = [":aes_ctr_proto"],
 )
 
 java_proto_library(
@@ -483,6 +440,7 @@ objc_proto_compile(
 # aes_ctr_hmac_aead
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_ctr_hmac_aead_proto",
     srcs = [
         "aes_ctr_hmac_aead.proto",
@@ -491,11 +449,6 @@ proto_library(
         ":aes_ctr_proto",
         ":hmac_proto",
     ],
-)
-
-cc_proto_library(
-    name = "aes_ctr_hmac_aead_cc_proto",
-    deps = [":aes_ctr_hmac_aead_proto"],
 )
 
 java_proto_library(
@@ -537,15 +490,11 @@ objc_proto_compile(
 # aes_gcm
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_gcm_proto",
     srcs = [
         "aes_gcm.proto",
     ],
-)
-
-cc_proto_library(
-    name = "aes_gcm_cc_proto",
-    deps = [":aes_gcm_proto"],
 )
 
 java_proto_library(
@@ -579,15 +528,11 @@ objc_proto_compile(
 # aes_gcm_siv
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_gcm_siv_proto",
     srcs = [
         "aes_gcm_siv.proto",
     ],
-)
-
-cc_proto_library(
-    name = "aes_gcm_siv_cc_proto",
-    deps = [":aes_gcm_siv_proto"],
 )
 
 java_proto_library(
@@ -621,17 +566,13 @@ objc_proto_compile(
 # aes_ctr_hmac_streaming
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_ctr_hmac_streaming_proto",
     srcs = ["aes_ctr_hmac_streaming.proto"],
     deps = [
         ":common_proto",
         ":hmac_proto",
     ],
-)
-
-cc_proto_library(
-    name = "aes_ctr_hmac_streaming_cc_proto",
-    deps = [":aes_ctr_hmac_streaming_proto"],
 )
 
 java_proto_library(
@@ -668,14 +609,10 @@ objc_proto_compile(
 # aes_gcm_hkdf_streaming
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_gcm_hkdf_streaming_proto",
     srcs = ["aes_gcm_hkdf_streaming.proto"],
     deps = [":common_proto"],
-)
-
-cc_proto_library(
-    name = "aes_gcm_hkdf_streaming_cc_proto",
-    deps = [":aes_gcm_hkdf_streaming_proto"],
 )
 
 java_proto_library(
@@ -708,15 +645,11 @@ objc_proto_compile(
 # aes_eax
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "aes_eax_proto",
     srcs = [
         "aes_eax.proto",
     ],
-)
-
-cc_proto_library(
-    name = "aes_eax_cc_proto",
-    deps = [":aes_eax_proto"],
 )
 
 java_proto_library(
@@ -745,15 +678,11 @@ objc_proto_compile(
 # chacha20_poly1305
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "chacha20_poly1305_proto",
     srcs = [
         "chacha20_poly1305.proto",
     ],
-)
-
-cc_proto_library(
-    name = "chacha20_poly1305_cc_proto",
-    deps = [":chacha20_poly1305_proto"],
 )
 
 java_proto_library(
@@ -782,15 +711,11 @@ objc_proto_compile(
 # kms_aead
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "kms_aead_proto",
     srcs = [
         "kms_aead.proto",
     ],
-)
-
-cc_proto_library(
-    name = "kms_aead_cc_proto",
-    deps = [":kms_aead_proto"],
 )
 
 java_proto_library(
@@ -819,16 +744,12 @@ objc_proto_compile(
 # kms_envelope
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "kms_envelope_proto",
     srcs = [
         "kms_envelope.proto",
     ],
     deps = [":tink_proto"],
-)
-
-cc_proto_library(
-    name = "kms_envelope_cc_proto",
-    deps = [":kms_envelope_proto"],
 )
 
 java_proto_library(
@@ -861,6 +782,7 @@ objc_proto_compile(
 # ecies_aead_hkdf
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "ecies_aead_hkdf_proto",
     srcs = [
         "ecies_aead_hkdf.proto",
@@ -869,11 +791,6 @@ proto_library(
         ":common_proto",
         ":tink_proto",
     ],
-)
-
-cc_proto_library(
-    name = "ecies_aead_hkdf_cc_proto",
-    deps = [":ecies_aead_hkdf_proto"],
 )
 
 java_proto_library(
@@ -915,15 +832,11 @@ objc_proto_compile(
 # XChacha20 with Poly1305
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "xchacha20_poly1305_proto",
     srcs = [
         "xchacha20_poly1305.proto",
     ],
-)
-
-cc_proto_library(
-    name = "xchacha20_poly1305_cc_proto",
-    deps = [":xchacha20_poly1305_proto"],
 )
 
 java_proto_library(
@@ -952,16 +865,12 @@ objc_proto_compile(
 # Hkdf prf
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "hkdf_prf_proto",
     srcs = [
         "hkdf_prf.proto",
     ],
     deps = [":common_proto"],
-)
-
-cc_proto_library(
-    name = "hkdf_prf_cc_proto",
-    deps = [":hkdf_prf_proto"],
 )
 
 java_proto_library(
@@ -984,14 +893,10 @@ objc_proto_compile(
 # prf_based_deriver
 # ----------------------------------------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "prf_based_deriver_proto",
     srcs = ["prf_based_deriver.proto"],
     deps = [":tink_proto"],
-)
-
-cc_proto_library(
-    name = "prf_based_deriver_cc_proto",
-    deps = [":prf_based_deriver_proto"],
 )
 
 java_proto_library(
@@ -1014,15 +919,11 @@ objc_proto_compile(
 # empty
 # -----------------------------------------------
 proto_library(
+    visibility = ["//visibility:public"],
     name = "empty_proto",
     srcs = [
         "empty.proto",
     ],
-)
-
-cc_proto_library(
-    name = "empty_cc_proto",
-    deps = [":empty_proto"],
 )
 
 java_proto_library(

@@ -20,7 +20,7 @@
 #include "tink/public_key_sign.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
-#include "tools/testing/cc/cli_util.h"
+#include "testing/cc/cli_util.h"
 
 using crypto::tink::KeysetHandle;
 

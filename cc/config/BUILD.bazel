@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
@@ -6,18 +6,17 @@ cc_library(
     name = "tink_config",
     srcs = ["tink_config.cc"],
     hdrs = ["tink_config.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    include_prefix = "tink/config",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc:config",
-        "//cc:key_manager",
-        "//cc/daead:deterministic_aead_config",
-        "//cc/hybrid:hybrid_config",
-        "//cc/signature:signature_config",
-        "//cc/streamingaead:streaming_aead_config",
-        "//cc/util:status",
-        "//proto:config_cc_proto",
+        "//:config",
+        "//:key_manager",
+        "//daead:deterministic_aead_config",
+        "//hybrid:hybrid_config",
+        "//signature:signature_config",
+        "//streamingaead:streaming_aead_config",
+        "//util:status",
+        "//:config_cc_proto",
         "@com_google_absl//absl/base:core_headers",
     ],
 )
@@ -26,10 +25,9 @@ cc_library(
     name = "config_util",
     srcs = ["config_util.cc"],
     hdrs = ["config_util.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    include_prefix = "tink/config",
     deps = [
-        "//proto:config_cc_proto",
+        "//:config_cc_proto",
     ],
 )
 
@@ -42,17 +40,17 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":tink_config",
-        "//cc:aead",
-        "//cc:config",
-        "//cc:deterministic_aead",
-        "//cc:hybrid_decrypt",
-        "//cc:hybrid_encrypt",
-        "//cc:mac",
-        "//cc:registry",
-        "//cc:streaming_aead",
-        "//cc/aead:aes_gcm_key_manager",
-        "//cc/util:status",
-        "//cc/util:test_matchers",
+        "//:aead",
+        "//:config",
+        "//:deterministic_aead",
+        "//:hybrid_decrypt",
+        "//:hybrid_encrypt",
+        "//:mac",
+        "//:registry",
+        "//:streaming_aead",
+        "//aead:aes_gcm_key_manager",
+        "//util:status",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )

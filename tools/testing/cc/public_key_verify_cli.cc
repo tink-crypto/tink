@@ -18,7 +18,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/signature/public_key_verify_factory.h"
 #include "tink/util/status.h"
-#include "tools/testing/cc/cli_util.h"
+#include "testing/cc/cli_util.h"
 
 using crypto::tink::PublicKeyVerifyFactory;
 using crypto::tink::KeysetHandle;

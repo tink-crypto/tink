@@ -60,30 +60,72 @@ RBE_ARGS=(
 )
 readonly RBE_ARGS
 
-# TODO(b/141297103): reenable python
-# Build all targets, except objc, python, and proto.
-time bazel \
-  --bazelrc="tools/remote_build_execution/bazel-rbe.bazelrc" \
+RBE_BAZELRC="$PWD/tools/remote_build_execution/bazel-rbe.bazelrc"
+echo "RBE_BAZELRC: $RBE_BAZELRC"
+
+# TODO(b/141297103): enable Python
+# TODO(b/143102587): enable Javascript
+
+# Build and test C++.
+cd cc/
+time bazel --bazelrc="$RBE_BAZELRC" \
   build "${RBE_ARGS[@]}" \
   --config=remote \
   --build_tag_filters=-no_rbe \
-  -- \
-  //... \
-  -//objc/... \
-  -//proto/... \
-  -//python/...
+  -- ...
 
-# TODO(b/141297103): reenable python
-# Run all the tests except objc and python.
-time bazel \
-  --bazelrc="tools/remote_build_execution/bazel-rbe.bazelrc" \
+time bazel --bazelrc="$RBE_BAZELRC" \
   test "${RBE_ARGS[@]}" \
   --config=remote \
   --test_output=errors \
   --test_tag_filters=-no_rbe \
   --jvmopt=-Drbe=1 \
-  -- \
-  //... \
-  -//objc/... \
-  -//proto/... \
-  -//python/...
+  -- ...
+
+# Build and test Java.
+cd ../java
+time bazel --bazelrc="$RBE_BAZELRC" \
+  build "${RBE_ARGS[@]}" \
+  --config=remote \
+  --build_tag_filters=-no_rbe \
+  -- ...
+
+time bazel --bazelrc="$RBE_BAZELRC" \
+  test "${RBE_ARGS[@]}" \
+  --config=remote \
+  --test_output=errors \
+  --test_tag_filters=-no_rbe \
+  --jvmopt=-Drbe=1 \
+  -- ...
+
+# Build and test Go.
+cd ../go
+time bazel --bazelrc="$RBE_BAZELRC" \
+  build "${RBE_ARGS[@]}" \
+  --config=remote \
+  --build_tag_filters=-no_rbe \
+  -- ...
+
+time bazel --bazelrc="$RBE_BAZELRC" \
+  test "${RBE_ARGS[@]}" \
+  --config=remote \
+  --test_output=errors \
+  --test_tag_filters=-no_rbe \
+  --jvmopt=-Drbe=1 \
+  -- ...
+
+# Build tools and run cross-language tests.
+cd ../tools
+time bazel --bazelrc="$RBE_BAZELRC" \
+  build "${RBE_ARGS[@]}" \
+  --config=remote \
+  --build_tag_filters=-no_rbe \
+  -- ...
+
+time bazel --bazelrc="$RBE_BAZELRC" \
+  test "${RBE_ARGS[@]}" \
+  --config=remote \
+  --test_output=errors \
+  --test_tag_filters=-no_rbe \
+  --jvmopt=-Drbe=1 \
+  -- ...

@@ -12,13 +12,14 @@
 # limitations under the License.
 ################################################################################
 
-ROOT_DIR="$TEST_SRCDIR/tink"
-GCP_KMS_AEAD_CLI="$ROOT_DIR/tools/testing/cc/gcp_kms_aead_cli"
-GCP_KEY_NAME_FILE="$ROOT_DIR/testdata/gcp_key_name.txt"
-CREDENTIALS_GCP_JSON_FILE="$ROOT_DIR/testdata/credential.json"
-BAD_GCP_KEY_NAME_FILE="$ROOT_DIR/testdata/bad_gcp_key_name.txt"
-BAD_CREDENTIALS_GCP_JSON_FILE="$ROOT_DIR/testdata/bad_gcp_credentials.json"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+ROOT_DIR="$TEST_SRCDIR/tools"
+GCP_KMS_AEAD_CLI="$ROOT_DIR/testing/cc/gcp_kms_aead_cli"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
+BASE_DIR="$TEST_SRCDIR/tink_base"
+GCP_KEY_NAME_FILE="$BASE_DIR/testdata/gcp_key_name.txt"
+CREDENTIALS_GCP_JSON_FILE="$BASE_DIR/testdata/credential.json"
+BAD_GCP_KEY_NAME_FILE="$BASE_DIR/testdata/bad_gcp_key_name.txt"
+BAD_CREDENTIALS_GCP_JSON_FILE="$BASE_DIR/testdata/bad_gcp_credentials.json"
 associated_data="some associated data"
 
 # Roots for GRPC

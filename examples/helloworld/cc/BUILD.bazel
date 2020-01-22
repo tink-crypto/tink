@@ -15,10 +15,10 @@ cc_binary(
     name = "hello_world",
     srcs = ["hello_world.cc"],
     deps = [
-        "//cc",
-        "//cc:cleartext_keyset_handle",
-        "//cc/config:tink_config",
-        "//cc/util:status",
+        "@tink_cc",
+        "@tink_cc//:cleartext_keyset_handle",
+        "@tink_cc//config:tink_config",
+        "@tink_cc//util:status",
     ],
 )
 
@@ -34,20 +34,21 @@ sh_test(
     ],
 )
 
-sh_test(
-    name = "non_bazel_build_test",
-    size = "small",
-    srcs = [
-        "non_bazel_build_test.sh",
-    ],
-    data = [
-        ":hello_world_files",
-        "//cc:libtink.so",
-        "//cc:tink_deps_headers",
-        "//cc:tink_headers",
-    ],
-    tags = [
-        "local",  # This tests needs g++.
-        "no_rbe",
-    ],
-)
+# TODO(przydatek): re-enable after WORKSPACE-split is done.
+# sh_test(
+#     name = "non_bazel_build_test",
+#     size = "small",
+#     srcs = [
+#         "non_bazel_build_test.sh",
+#     ],
+#     data = [
+#         ":hello_world_files",
+#         "//cc:libtink.so",
+#         "//cc:tink_deps_headers",
+#         "//cc:tink_headers",
+#     ],
+#     tags = [
+#         "local",  # This tests needs g++.
+#         "no_rbe",
+#     ],
+# )

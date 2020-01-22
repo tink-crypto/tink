@@ -13,10 +13,10 @@
 ################################################################################
 
 
-ROOT_DIR="$TEST_SRCDIR/tink"
-CC_AEAD_CLI="$ROOT_DIR/tools/testing/cc/streaming_aead_cli_cc"
-JAVA_AEAD_CLI="$ROOT_DIR/tools/testing/streaming_aead_cli_java"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+ROOT_DIR="$TEST_SRCDIR/tools"
+CC_AEAD_CLI="$ROOT_DIR/testing/cc/streaming_aead_cli_cc"
+JAVA_AEAD_CLI="$ROOT_DIR/testing/streaming_aead_cli_java"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 source $TEST_UTIL || exit 1
 

@@ -1,9 +1,139 @@
-load("//:tink_version.bzl", "TINK_VERSION_LABEL")
-load("//tools:common.bzl", "template_rule")
+load("@tink_base//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("@tink_base//tools:common.bzl", "template_rule")
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
+
+# cc protos
+
+cc_proto_library(
+    name = "common_cc_proto",
+    deps = ["@tink_base//proto:common_proto"],
+)
+
+cc_proto_library(
+    name = "config_cc_proto",
+    deps = ["@tink_base//proto:config_proto"],
+)
+
+cc_proto_library(
+    name = "tink_cc_proto",
+    deps = ["@tink_base//proto:tink_proto"],
+)
+
+cc_proto_library(
+    name = "aes_gcm_siv_cc_proto",
+    deps = ["@tink_base//proto:aes_gcm_siv_proto"],
+)
+
+cc_proto_library(
+    name = "aes_siv_cc_proto",
+    deps = ["@tink_base//proto:aes_siv_proto"],
+)
+
+cc_proto_library(
+    name = "hmac_cc_proto",
+    deps = ["@tink_base//proto:hmac_proto"],
+)
+
+cc_proto_library(
+    name = "kms_envelope_cc_proto",
+    deps = ["@tink_base//proto:kms_envelope_proto"],
+)
+
+cc_proto_library(
+    name = "empty_cc_proto",
+    deps = ["@tink_base//proto:empty_proto"],
+)
+
+cc_proto_library(
+    name = "kms_aead_cc_proto",
+    deps = ["@tink_base//proto:kms_aead_proto"],
+)
+
+cc_proto_library(
+    name = "aes_eax_cc_proto",
+    deps = ["@tink_base//proto:aes_eax_proto"],
+)
+
+cc_proto_library(
+    name = "aes_gcm_cc_proto",
+    deps = ["@tink_base//proto:aes_gcm_proto"],
+)
+
+cc_proto_library(
+    name = "aes_ctr_cc_proto",
+    deps = ["@tink_base//proto:aes_ctr_proto"],
+)
+
+cc_proto_library(
+    name = "aes_ctr_hmac_aead_cc_proto",
+    deps = ["@tink_base//proto:aes_ctr_hmac_aead_proto"],
+)
+
+cc_proto_library(
+    name = "aes_cmac_cc_proto",
+    deps = ["@tink_base//proto:aes_cmac_proto"],
+)
+
+cc_proto_library(
+    name = "xchacha20_poly1305_cc_proto",
+    deps = ["@tink_base//proto:xchacha20_poly1305_proto"],
+)
+
+cc_proto_library(
+    name = "rsa_ssa_pkcs1_cc_proto",
+    deps = ["@tink_base//proto:rsa_ssa_pkcs1_proto"],
+)
+
+cc_proto_library(
+    name = "rsa_ssa_pss_cc_proto",
+    deps = ["@tink_base//proto:rsa_ssa_pss_proto"],
+)
+
+cc_proto_library(
+    name = "ecdsa_cc_proto",
+    deps = ["@tink_base//proto:ecdsa_proto"],
+)
+
+cc_proto_library(
+    name = "ed25519_cc_proto",
+    deps = ["@tink_base//proto:ed25519_proto"],
+)
+
+cc_proto_library(
+    name = "ecies_aead_hkdf_cc_proto",
+    deps = ["@tink_base//proto:ecies_aead_hkdf_proto"],
+)
+
+cc_proto_library(
+    name = "hkdf_prf_cc_proto",
+    deps = ["@tink_base//proto:hkdf_prf_proto"],
+)
+
+cc_proto_library(
+    name = "prf_based_deriver_cc_proto",
+    deps = ["@tink_base//proto:prf_based_deriver_proto"],
+)
+
+cc_proto_library(
+    name = "aes_gcm_hkdf_streaming_cc_proto",
+    deps = ["@tink_base//proto:aes_gcm_hkdf_streaming_proto"],
+)
+
+cc_proto_library(
+    name = "aes_ctr_hmac_streaming_cc_proto",
+    deps = ["@tink_base//proto:aes_ctr_hmac_streaming_proto"],
+)
+
+filegroup(
+    name = "public_cc_protos",
+    srcs = [
+        ":config_cc_proto",
+        ":tink_cc_proto",
+    ],
+)
 
 # public libraries
 
@@ -85,32 +215,32 @@ PUBLIC_API_DEPS = [
     ":registry",
     ":registry_impl",
     ":version",
-    "//cc/aead:aead_config",
-    "//cc/aead:aead_factory",
-    "//cc/aead:aead_key_templates",
-    "//cc/config:tink_config",
-    "//cc/daead:deterministic_aead_config",
-    "//cc/daead:deterministic_aead_factory",
-    "//cc/daead:deterministic_aead_key_templates",
-    "//cc/hybrid:hybrid_config",
-    "//cc/hybrid:hybrid_decrypt_factory",
-    "//cc/hybrid:hybrid_encrypt_factory",
-    "//cc/hybrid:hybrid_key_templates",
-    "//cc/mac:mac_config",
-    "//cc/mac:mac_factory",
-    "//cc/mac:mac_key_templates",
-    "//cc/signature:public_key_sign_factory",
-    "//cc/signature:public_key_verify_factory",
-    "//cc/signature:signature_config",
-    "//cc/signature:signature_key_templates",
-    "//cc/streamingaead:streaming_aead_config",
-    "//cc/streamingaead:streaming_aead_key_templates",
-    "//cc/util:buffer",
-    "//cc/util:errors",
-    "//cc/util:protobuf_helper",
-    "//cc/util:status",
-    "//cc/util:statusor",
-    "//cc/util:validation",
+    "//aead:aead_config",
+    "//aead:aead_factory",
+    "//aead:aead_key_templates",
+    "//config:tink_config",
+    "//daead:deterministic_aead_config",
+    "//daead:deterministic_aead_factory",
+    "//daead:deterministic_aead_key_templates",
+    "//hybrid:hybrid_config",
+    "//hybrid:hybrid_decrypt_factory",
+    "//hybrid:hybrid_encrypt_factory",
+    "//hybrid:hybrid_key_templates",
+    "//mac:mac_config",
+    "//mac:mac_factory",
+    "//mac:mac_key_templates",
+    "//signature:public_key_sign_factory",
+    "//signature:public_key_verify_factory",
+    "//signature:signature_config",
+    "//signature:signature_key_templates",
+    "//streamingaead:streaming_aead_config",
+    "//streamingaead:streaming_aead_key_templates",
+    "//util:buffer",
+    "//util:errors",
+    "//util:protobuf_helper",
+    "//util:status",
+    "//util:statusor",
+    "//util:validation",
     "@com_google_absl//absl/base:core_headers",
     "@com_google_absl//absl/memory",
     "@com_google_absl//absl/strings",
@@ -118,10 +248,9 @@ PUBLIC_API_DEPS = [
 ]
 
 cc_library(
-    name = "cc",
+    name = "tink_cc",
     hdrs = PUBLIC_APIS,
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = PUBLIC_API_DEPS,
 )
@@ -130,11 +259,10 @@ cc_library(
     name = "input_stream",
     hdrs = ["input_stream.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:status",
+        "//util:statusor",
     ],
 )
 
@@ -142,11 +270,10 @@ cc_library(
     name = "output_stream",
     hdrs = ["output_stream.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:status",
+        "//util:statusor",
     ],
 )
 
@@ -154,12 +281,11 @@ cc_library(
     name = "random_access_stream",
     hdrs = ["random_access_stream.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:buffer",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:buffer",
+        "//util:status",
+        "//util:statusor",
     ],
 )
 
@@ -167,12 +293,11 @@ cc_library(
     name = "output_stream_with_result",
     hdrs = ["output_stream_with_result.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":output_stream",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:status",
+        "//util:statusor",
     ],
 )
 
@@ -180,10 +305,9 @@ cc_library(
     name = "aead",
     hdrs = ["aead.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:statusor",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -192,10 +316,9 @@ cc_library(
     name = "deterministic_aead",
     hdrs = ["deterministic_aead.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:statusor",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -204,13 +327,12 @@ cc_library(
     name = "streaming_aead",
     hdrs = ["streaming_aead.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":input_stream",
         ":output_stream",
         ":random_access_stream",
-        "//cc/util:statusor",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -219,12 +341,11 @@ cc_library(
     name = "streaming_mac",
     hdrs = ["streaming_mac.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":output_stream_with_result",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:status",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -233,10 +354,9 @@ cc_library(
     name = "hybrid_decrypt",
     hdrs = ["hybrid_decrypt.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:statusor",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -245,10 +365,9 @@ cc_library(
     name = "hybrid_encrypt",
     hdrs = ["hybrid_encrypt.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:statusor",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -257,11 +376,10 @@ cc_library(
     name = "mac",
     hdrs = ["mac.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:status",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -270,10 +388,9 @@ cc_library(
     name = "public_key_sign",
     hdrs = ["public_key_sign.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:statusor",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -282,10 +399,9 @@ cc_library(
     name = "public_key_verify",
     hdrs = ["public_key_verify.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:status",
+        "//util:status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -294,11 +410,10 @@ cc_library(
     name = "keyset_reader",
     hdrs = ["keyset_reader.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:statusor",
+        ":tink_cc_proto",
     ],
 )
 
@@ -306,11 +421,10 @@ cc_library(
     name = "keyset_writer",
     hdrs = ["keyset_writer.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:status",
-        "//proto:tink_cc_proto",
+        "//util:status",
+        ":tink_cc_proto",
     ],
 )
 
@@ -319,13 +433,12 @@ cc_library(
     srcs = ["core/binary_keyset_reader.cc"],
     hdrs = ["binary_keyset_reader.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
-        "//cc/util:errors",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:errors",
+        "//util:statusor",
+        ":tink_cc_proto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_protobuf//:protobuf_lite",
@@ -337,15 +450,14 @@ cc_library(
     srcs = ["core/binary_keyset_writer.cc"],
     hdrs = ["binary_keyset_writer.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_writer",
-        "//cc/util:errors",
-        "//cc/util:protobuf_helper",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:status",
+        "//util:statusor",
+        ":tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -355,15 +467,14 @@ cc_library(
     srcs = ["core/json_keyset_reader.cc"],
     hdrs = ["json_keyset_reader.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
-        "//cc/util:enums",
-        "//cc/util:errors",
-        "//cc/util:protobuf_helper",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:statusor",
+        ":tink_cc_proto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@rapidjson",
@@ -375,16 +486,15 @@ cc_library(
     srcs = ["core/json_keyset_writer.cc"],
     hdrs = ["json_keyset_writer.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_writer",
-        "//cc/util:enums",
-        "//cc/util:errors",
-        "//cc/util:protobuf_helper",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:status",
+        "//util:statusor",
+        ":tink_cc_proto",
         "@com_google_absl//absl/strings",
         "@rapidjson",
     ],
@@ -394,10 +504,9 @@ cc_library(
     name = "catalogue",
     hdrs = ["catalogue.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":key_manager",
-        "//cc/util:statusor",
+        "//util:statusor",
         "@com_google_absl//absl/base:core_headers",
     ],
 )
@@ -407,21 +516,20 @@ cc_library(
     srcs = ["core/config.cc"],
     hdrs = ["config.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":catalogue",
         ":key_manager",
         ":registry",
-        "//cc/aead:aead_config",
-        "//cc/daead:deterministic_aead_config",
-        "//cc/hybrid:hybrid_config",
-        "//cc/mac:mac_config",
-        "//cc/signature:signature_config",
-        "//cc/streamingaead:streaming_aead_config",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//proto:config_cc_proto",
+        "//aead:aead_config",
+        "//daead:deterministic_aead_config",
+        "//hybrid:hybrid_config",
+        "//mac:mac_config",
+        "//signature:signature_config",
+        "//streamingaead:streaming_aead_config",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
+        ":config_cc_proto",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -431,11 +539,10 @@ cc_library(
     srcs = ["core/crypto_format.cc"],
     hdrs = ["crypto_format.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
-        "//cc/util:errors",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:errors",
+        "//util:statusor",
+        ":tink_cc_proto",
     ],
 )
 
@@ -444,12 +551,11 @@ cc_library(
     srcs = ["primitive_set.h"],
     hdrs = ["primitive_set.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":crypto_format",
-        "//cc/util:errors",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:errors",
+        "//util:statusor",
+        ":tink_cc_proto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/synchronization",
     ],
@@ -459,10 +565,9 @@ cc_library(
     name = "primitive_wrapper",
     hdrs = ["primitive_wrapper.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":primitive_set",
-        "//cc/util:statusor",
+        "//util:statusor",
     ],
 )
 
@@ -470,11 +575,10 @@ cc_library(
     name = "registry",
     hdrs = ["registry.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":registry_impl",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:status",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -484,7 +588,6 @@ cc_library(
     srcs = ["core/registry_impl.cc"],
     hdrs = ["core/registry_impl.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":catalogue",
         ":core/key_manager_impl",
@@ -494,12 +597,12 @@ cc_library(
         ":key_manager",
         ":primitive_set",
         ":primitive_wrapper",
-        "//cc/util:errors",
-        "//cc/util:protobuf_helper",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//cc/util:validation",
-        "//proto:tink_cc_proto",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        ":tink_cc_proto",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
@@ -520,7 +623,6 @@ cc_library(
     srcs = ["core/version.cc"],
     hdrs = [":version_h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
 )
 
 cc_library(
@@ -528,7 +630,6 @@ cc_library(
     srcs = ["core/keyset_handle.cc"],
     hdrs = ["keyset_handle.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":aead",
@@ -537,8 +638,8 @@ cc_library(
         ":keyset_writer",
         ":primitive_set",
         ":registry",
-        "//cc/util:errors",
-        "//proto:tink_cc_proto",
+        "//util:errors",
+        ":tink_cc_proto",
         "@com_google_absl//absl/memory",
     ],
 )
@@ -548,13 +649,13 @@ cc_library(
     srcs = ["core/cleartext_keyset_handle.cc"],
     hdrs = ["cleartext_keyset_handle.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
+        ":tink_cc_proto",
     ],
 )
 
@@ -563,13 +664,12 @@ cc_library(
     srcs = ["core/key_manager.cc"],
     hdrs = ["key_manager.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
-        "//cc/util:errors",
-        "//cc/util:protobuf_helper",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:status",
+        "//util:statusor",
+        ":tink_cc_proto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
@@ -580,18 +680,17 @@ cc_library(
     srcs = ["core/keyset_manager.cc"],
     hdrs = ["keyset_manager.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
         ":keyset_reader",
         ":registry",
-        "//cc/util:enums",
-        "//cc/util:errors",
-        "//cc/util:protobuf_helper",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:status",
+        "//util:statusor",
+        ":tink_cc_proto",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/synchronization",
@@ -602,10 +701,9 @@ cc_library(
     name = "kms_client",
     hdrs = ["kms_client.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":aead",
-        "//cc/util:statusor",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -615,12 +713,11 @@ cc_library(
     srcs = ["core/kms_clients.cc"],
     hdrs = ["kms_clients.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":kms_client",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
@@ -631,7 +728,6 @@ cc_library(
     name = "core/template_util",
     hdrs = ["core/template_util.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = ["@com_google_absl//absl/meta:type_traits"],
 )
 
@@ -639,13 +735,12 @@ cc_library(
     name = "core/key_type_manager",
     hdrs = ["core/key_type_manager.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":core/template_util",
         ":input_stream",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+        ":tink_cc_proto",
         "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
@@ -654,13 +749,12 @@ cc_library(
     name = "core/key_manager_impl",
     hdrs = ["core/key_manager_impl.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":core/key_type_manager",
         ":key_manager",
-        "//cc/util:constants",
-        "//cc/util:status",
-        "//proto:tink_cc_proto",
+        "//util:constants",
+        "//util:status",
+        ":tink_cc_proto",
         "@com_google_absl//absl/base:core_headers",
     ],
 )
@@ -669,10 +763,9 @@ cc_library(
     name = "core/private_key_type_manager",
     hdrs = ["core/private_key_type_manager.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":core/key_type_manager",
-        "//cc/util:statusor",
+        "//util:statusor",
     ],
 )
 
@@ -680,12 +773,11 @@ cc_library(
     name = "core/private_key_manager_impl",
     hdrs = ["core/private_key_manager_impl.h"],
     include_prefix = "tink",
-    strip_include_prefix = "/cc",
     deps = [
         ":core/key_manager_impl",
         ":core/private_key_type_manager",
         ":key_manager",
-        "//cc/util:validation",
+        "//util:validation",
     ],
 )
 
@@ -740,84 +832,85 @@ cc_binary(
     ],
 )
 
+# TODO(przydatek): fix and re-enable the genrules below.
 # Header files needed for building without Bazel with the above libtink.so
-genrule(
-    name = "tink_headers",
-    srcs = [
-        "//cc",
-        "//proto:public_cc_protos",
-    ],
-    outs = [
-        "tink_headers.tar",
-    ],
-    # The commands below collect all Tink headers in two steps:
-    #  * First a tar-archive with all "regular" .h-files is created.
-    #  * Then .h-files generated for Tink protos are added to the tar-archive.
-    cmd = select({
-        ":linux_x86_64": "tar -cv -f $@ --dereference --transform \"s/^cc/tink/\" " +
-                         "    --show-transformed-names `find cc/ -name \"*.h\"`; " +
-                         "tar -rv -f $@ -C $(GENDIR) --dereference " +
-                         "    `cd $(GENDIR); find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`",
-        ":mac_x86_64": "tar -cv -f $@ --dereference -s \"/^cc/tink/p\" " +
-                       "    `find cc/ -name \"*.h\"`; " +
-                       "tar -rv -f $@ -C $(GENDIR) --dereference " +
-                       "    `cd $(GENDIR); find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`",
-    }),
-    local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
-)
-
-genrule(
-    name = "tink_deps_headers",
-    srcs = [
-        "@com_google_absl//absl/strings",
-        "@com_google_protobuf//:cc_wkt_protos",
-    ],
-    outs = [
-        "tink_deps_headers.tar",
-    ],
-    # The command below collects headers of Tink dependencies in two steps:
-    #  * First a tar-archive with all Abseil .h and .inc-files is created.
-    #  * Then .h and .inc files of Protobuf library are added to the tar-archive.
-    cmd = "tar -cv -f $@ -C external/com_google_absl --dereference " +
-          "    `cd external/com_google_absl; find absl/ -name \"*.h\" -or -name \"*.inc\"`; " +
-          "tar -rv -f $@ -C external/com_google_protobuf/src --dereference " +
-          "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\" -or -name \"*.inc\"`",
-    local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
-    tags = [
-        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
-    ],
-)
-
-# Tink binary snapshot.
-genrule(
-    name = "tink_bin_snapshot",
-    srcs = [
-        ":tink_deps_headers",
-        ":tink_headers",
-        ":libtink.so",
-    ],
-    outs = [
-        "tink_bin_snapshot.tar.gz",
-    ],
-    # The command below packages the header files and the binary library
-    # into a single compressed tar-archive.
-    cmd = select({
-        ":linux_x86_64": "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
-                         "    --transform \"s/^cc/tink_bin_snapshot/\"" +
-                         "    -C $(GENDIR) cc/tink_headers.tar cc/tink_deps_headers.tar;" +
-                         "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
-                         "    --transform \"s/^cc/tink_bin_snapshot/\"" +
-                         "    -C $(BINDIR) cc/libtink.so;" +
-                         "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
-        ":mac_x86_64": "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
-                       "    -s  \"/^cc/tink_bin_snapshot/p\"" +
-                       "    -C $(GENDIR) cc/tink_headers.tar cc/tink_deps_headers.tar;" +
-                       "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
-                       "    -s \"/^cc/tink_bin_snapshot/p\"" +
-                       "    -C $(BINDIR) cc/libtink.so;" +
-                       "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
-    }),
-)
+# genrule(
+#     name = "tink_headers",
+#     srcs = [
+#         "//cc",
+#         "//proto:public_cc_protos",
+#     ],
+#     outs = [
+#         "tink_headers.tar",
+#     ],
+#     # The commands below collect all Tink headers in two steps:
+#     #  * First a tar-archive with all "regular" .h-files is created.
+#     #  * Then .h-files generated for Tink protos are added to the tar-archive.
+#     cmd = select({
+#         ":linux_x86_64": "tar -cv -f $@ --dereference --transform \"s/^cc/tink/\" " +
+#                          "    --show-transformed-names `find cc/ -name \"*.h\"`; " +
+#                          "tar -rv -f $@ -C $(GENDIR) --dereference " +
+#                          "    `cd $(GENDIR); find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`",
+#         ":mac_x86_64": "tar -cv -f $@ --dereference -s \"/^cc/tink/p\" " +
+#                        "    `find cc/ -name \"*.h\"`; " +
+#                        "tar -rv -f $@ -C $(GENDIR) --dereference " +
+#                        "    `cd $(GENDIR); find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`",
+#     }),
+#     local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
+# )
+#
+# genrule(
+#     name = "tink_deps_headers",
+#     srcs = [
+#         "@com_google_absl//absl/strings",
+#         "@com_google_protobuf//:cc_wkt_protos",
+#     ],
+#     outs = [
+#         "tink_deps_headers.tar",
+#     ],
+#     # The command below collects headers of Tink dependencies in two steps:
+#     #  * First a tar-archive with all Abseil .h and .inc-files is created.
+#     #  * Then .h and .inc files of Protobuf library are added to the tar-archive.
+#     cmd = "tar -cv -f $@ -C external/com_google_absl --dereference " +
+#           "    `cd external/com_google_absl; find absl/ -name \"*.h\" -or -name \"*.inc\"`; " +
+#           "tar -rv -f $@ -C external/com_google_protobuf/src --dereference " +
+#           "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\" -or -name \"*.inc\"`",
+#     local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
+#     tags = [
+#         "manual",  # Does not run on OSX yet.  TODO(b/78299422)
+#     ],
+# )
+#
+# # Tink binary snapshot.
+# genrule(
+#     name = "tink_bin_snapshot",
+#     srcs = [
+#         ":tink_deps_headers",
+#         ":tink_headers",
+#         ":libtink.so",
+#     ],
+#     outs = [
+#         "tink_bin_snapshot.tar.gz",
+#     ],
+#     # The command below packages the header files and the binary library
+#     # into a single compressed tar-archive.
+#     cmd = select({
+#         ":linux_x86_64": "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+#                          "    --transform \"s/^cc/tink_bin_snapshot/\"" +
+#                          "    -C $(GENDIR) cc/tink_headers.tar cc/tink_deps_headers.tar;" +
+#                          "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+#                          "    --transform \"s/^cc/tink_bin_snapshot/\"" +
+#                          "    -C $(BINDIR) cc/libtink.so;" +
+#                          "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
+#         ":mac_x86_64": "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+#                        "    -s  \"/^cc/tink_bin_snapshot/p\"" +
+#                        "    -C $(GENDIR) cc/tink_headers.tar cc/tink_deps_headers.tar;" +
+#                        "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+#                        "    -s \"/^cc/tink_bin_snapshot/p\"" +
+#                        "    -C $(BINDIR) cc/libtink.so;" +
+#                        "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
+#     }),
+# )
 
 # tests
 
@@ -834,24 +927,24 @@ cc_test(
         ":crypto_format",
         ":keyset_manager",
         ":registry",
-        "//cc/aead:aead_wrapper",
-        "//cc/aead:aes_gcm_key_manager",
-        "//cc/hybrid:ecies_aead_hkdf_private_key_manager",
-        "//cc/hybrid:ecies_aead_hkdf_public_key_manager",
-        "//cc/subtle:aes_gcm_boringssl",
-        "//cc/subtle:random",
-        "//cc/util:istream_input_stream",
-        "//cc/util:protobuf_helper",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//cc/util:test_keyset_handle",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
-        "//proto:aes_ctr_hmac_aead_cc_proto",
-        "//proto:aes_gcm_cc_proto",
-        "//proto:common_cc_proto",
-        "//proto:ecdsa_cc_proto",
-        "//proto:tink_cc_proto",
+        "//aead:aead_wrapper",
+        "//aead:aes_gcm_key_manager",
+        "//hybrid:ecies_aead_hkdf_private_key_manager",
+        "//hybrid:ecies_aead_hkdf_public_key_manager",
+        "//subtle:aes_gcm_boringssl",
+        "//subtle:random",
+        "//util:istream_input_stream",
+        "//util:protobuf_helper",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_keyset_handle",
+        "//util:test_matchers",
+        "//util:test_util",
+        ":aes_ctr_hmac_aead_cc_proto",
+        ":aes_gcm_cc_proto",
+        ":common_cc_proto",
+        ":ecdsa_cc_proto",
+        ":tink_cc_proto",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
@@ -875,8 +968,8 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":binary_keyset_reader",
-        "//cc/util:test_util",
-        "//proto:tink_cc_proto",
+        "//util:test_util",
+        ":tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -888,8 +981,8 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":binary_keyset_writer",
-        "//cc/util:test_util",
-        "//proto:tink_cc_proto",
+        "//util:test_util",
+        ":tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -901,12 +994,12 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":json_keyset_reader",
-        "//cc/util:protobuf_helper",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
-        "//proto:aes_eax_cc_proto",
-        "//proto:aes_gcm_cc_proto",
-        "//proto:tink_cc_proto",
+        "//util:protobuf_helper",
+        "//util:test_matchers",
+        "//util:test_util",
+        ":aes_eax_cc_proto",
+        ":aes_gcm_cc_proto",
+        ":tink_cc_proto",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -920,12 +1013,12 @@ cc_test(
     deps = [
         ":json_keyset_reader",
         ":json_keyset_writer",
-        "//cc/util:protobuf_helper",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
-        "//proto:aes_eax_cc_proto",
-        "//proto:aes_gcm_cc_proto",
-        "//proto:tink_cc_proto",
+        "//util:protobuf_helper",
+        "//util:test_matchers",
+        "//util:test_util",
+        ":aes_eax_cc_proto",
+        ":aes_gcm_cc_proto",
+        ":tink_cc_proto",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@rapidjson",
@@ -940,7 +1033,7 @@ cc_test(
     deps = [
         ":config",
         ":mac",
-        "//proto:config_cc_proto",
+        ":config_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -952,7 +1045,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":crypto_format",
-        "//proto:tink_cc_proto",
+        ":tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -970,18 +1063,18 @@ cc_test(
         ":json_keyset_reader",
         ":json_keyset_writer",
         ":keyset_handle",
-        "//cc",
-        "//cc/aead:aead_key_templates",
-        "//cc/aead:aead_wrapper",
-        "//cc/aead:aes_gcm_key_manager",
-        "//cc/config:tink_config",
-        "//cc/signature:ecdsa_sign_key_manager",
-        "//cc/signature:signature_key_templates",
-        "//cc/util:protobuf_helper",
-        "//cc/util:test_keyset_handle",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
-        "//proto:tink_cc_proto",
+        ":tink_cc",
+        "//aead:aead_key_templates",
+        "//aead:aead_wrapper",
+        "//aead:aes_gcm_key_manager",
+        "//config:tink_config",
+        "//signature:ecdsa_sign_key_manager",
+        "//signature:signature_key_templates",
+        "//util:protobuf_helper",
+        "//util:test_keyset_handle",
+        "//util:test_matchers",
+        "//util:test_util",
+        ":tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -993,9 +1086,9 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":key_manager",
-        "//cc/util:status",
-        "//cc/util:test_matchers",
-        "//proto:empty_cc_proto",
+        "//util:status",
+        "//util:test_matchers",
+        ":empty_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1009,12 +1102,12 @@ cc_test(
         ":config",
         ":keyset_handle",
         ":keyset_manager",
-        "//cc/aead:aead_config",
-        "//cc/aead:aes_gcm_key_manager",
-        "//cc/util:test_keyset_handle",
-        "//cc/util:test_util",
-        "//proto:aes_gcm_cc_proto",
-        "//proto:tink_cc_proto",
+        "//aead:aead_config",
+        "//aead:aes_gcm_key_manager",
+        "//util:test_keyset_handle",
+        "//util:test_util",
+        ":aes_gcm_cc_proto",
+        ":tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1029,9 +1122,9 @@ cc_test(
         ":cleartext_keyset_handle",
         ":keyset_handle",
         ":keyset_reader",
-        "//cc/util:test_keyset_handle",
-        "//cc/util:test_util",
-        "//proto:tink_cc_proto",
+        "//util:test_keyset_handle",
+        "//util:test_util",
+        ":tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1045,10 +1138,10 @@ cc_test(
         ":crypto_format",
         ":mac",
         ":primitive_set",
-        "//cc/util:protobuf_helper",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
-        "//proto:tink_cc_proto",
+        "//util:protobuf_helper",
+        "//util:test_matchers",
+        "//util:test_util",
+        ":tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1062,10 +1155,10 @@ cc_test(
         ":aead",
         ":kms_client",
         ":kms_clients",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1086,12 +1179,12 @@ cc_test(
     deps = [
         ":aead",
         ":core/key_type_manager",
-        "//cc/subtle",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//cc/util:test_matchers",
-        "//cc/util:validation",
-        "//proto:aes_gcm_cc_proto",
+        "//subtle",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:validation",
+        ":aes_gcm_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1102,15 +1195,15 @@ cc_test(
     deps = [
         ":aead",
         ":core/key_manager_impl",
-        "//cc/subtle",
-        "//cc/util:input_stream_util",
-        "//cc/util:istream_input_stream",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
-        "//cc/util:validation",
-        "//proto:aes_gcm_cc_proto",
+        "//subtle",
+        "//util:input_stream_util",
+        "//util:istream_input_stream",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "//util:validation",
+        ":aes_gcm_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1123,13 +1216,13 @@ cc_test(
         ":core/private_key_manager_impl",
         ":core/private_key_type_manager",
         ":registry",
-        "//cc/subtle",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//cc/util:test_matchers",
-        "//cc/util:test_util",
-        "//cc/util:validation",
-        "//proto:ecdsa_cc_proto",
+        "//subtle",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "//util:validation",
+        ":ecdsa_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -13,11 +13,11 @@
 ################################################################################
 
 
-ROOT_DIR="$TEST_SRCDIR/tink"
-VERSION_FILE="$ROOT_DIR/tink_version.bzl"
-CC_VERSION_CLI="$ROOT_DIR/tools/testing/cc/version_cli_cc"
-JAVA_VERSION_CLI="$ROOT_DIR/tools/testing/version_cli_java"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+VERSION_FILE="$TEST_SRCDIR/tink_base/tink_version.bzl"
+ROOT_DIR="$TEST_SRCDIR/tools"
+CC_VERSION_CLI="$ROOT_DIR/testing/cc/version_cli_cc"
+JAVA_VERSION_CLI="$ROOT_DIR/testing/version_cli_java"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 source $TEST_UTIL || exit 1
 

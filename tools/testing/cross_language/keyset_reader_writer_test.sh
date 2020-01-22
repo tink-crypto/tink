@@ -13,10 +13,10 @@
 ################################################################################
 
 
-ROOT_DIR="$TEST_SRCDIR/tink"
-CC_KEYSET_RW_CLI="$ROOT_DIR/tools/testing/cc/keyset_reader_writer_cli"
-JAVA_KEYSET_RW_CLI="$ROOT_DIR/tools/tinkey/tinkey"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+ROOT_DIR="$TEST_SRCDIR/tools"
+CC_KEYSET_RW_CLI="$ROOT_DIR/testing/cc/keyset_reader_writer_cli"
+JAVA_KEYSET_RW_CLI="$ROOT_DIR/tinkey/tinkey"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 source $TEST_UTIL || exit 1
 

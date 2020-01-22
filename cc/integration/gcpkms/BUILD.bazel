@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
@@ -6,14 +6,14 @@ cc_library(
     name = "gcp_kms_aead",
     srcs = ["gcp_kms_aead.cc"],
     hdrs = ["gcp_kms_aead.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    include_prefix = "tink/integration/gcpkms",
+    visibility = ["//visibility:public"],
     deps = [
         "@googleapis//google/cloud/kms/v1:kms_cc_grpc",
-        "//cc:aead",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//:aead",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
     ],
 )
@@ -22,14 +22,14 @@ cc_library(
     name = "gcp_kms_client",
     srcs = ["gcp_kms_client.cc"],
     hdrs = ["gcp_kms_client.h"],
-    include_prefix = "tink",
-    strip_include_prefix = "/cc",
+    include_prefix = "tink/integration/gcpkms",
+    visibility = ["//visibility:public"],
     deps = [
         ":gcp_kms_aead",
-        "//cc:kms_client",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//:kms_client",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
@@ -44,9 +44,9 @@ cc_test(
     srcs = ["gcp_kms_aead_test.cc"],
     deps = [
         ":gcp_kms_aead",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -55,12 +55,12 @@ cc_test(
     name = "gcp_kms_client_test",
     size = "medium",
     srcs = ["gcp_kms_client_test.cc"],
-    data = ["//testdata:credentials"],
+    data = ["@tink_base//testdata:credentials"],
     deps = [
         ":gcp_kms_client",
-        "//cc/util:errors",
-        "//cc/util:status",
-        "//cc/util:statusor",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -36,7 +36,7 @@ const (
 
 var (
 	// lint placeholder header, please ignore
-	credFile = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "testdata/credential.json"
+	credFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credential.json"
 	// lint placeholder footer, please ignore
 )
 

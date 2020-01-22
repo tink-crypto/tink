@@ -36,7 +36,7 @@ TEST(GcpKmsClientTest, ClientNotBoundToAKey) {
   std::string gcp_key2 = "gcp-kms://projects/otherProject/.../cryptoKeys/key2";
   std::string non_gcp_key = "aws-kms://arn:aws:kms:us-west-2:acc:other/key3";
   std::string creds_file =
-      std::string(getenv("TEST_SRCDIR")) + "/tink/testdata/credential.json";
+      std::string(getenv("TEST_SRCDIR")) + "/tink_base/testdata/credential.json";
 
   auto client_result = GcpKmsClient::New("", creds_file);
   EXPECT_TRUE(client_result.ok()) << client_result.status();
@@ -51,7 +51,7 @@ TEST(GcpKmsClientTest, ClientBoundToASpecificKey) {
   std::string gcp_key2 = "gcp-kms://projects/otherProject/.../cryptoKeys/key2";
   std::string non_gcp_key = "aws-kms://arn:aws:kms:us-west-2:acc:other/key3";
   std::string creds_file =
-      std::string(getenv("TEST_SRCDIR")) + "/tink/testdata/credential.json";
+      std::string(getenv("TEST_SRCDIR")) + "/tink_base/testdata/credential.json";
 
   auto client_result = GcpKmsClient::New(gcp_key1, creds_file);
   EXPECT_TRUE(client_result.ok()) << client_result.status();

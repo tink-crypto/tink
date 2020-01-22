@@ -37,11 +37,11 @@ import (
 	"github.com/google/tink/go/testkeyset"
 )
 
-const (
+var (
 	gcpURI      = "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key"
-	gcpCredFile = "testdata/credential.json"
+	gcpCredFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credential.json"
 	awsURI      = "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	awsCredFile = "testdata/credentials_aws.csv"
+	awsCredFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.csv"
 )
 
 func init() {

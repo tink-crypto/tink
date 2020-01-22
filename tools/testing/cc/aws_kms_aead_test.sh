@@ -12,14 +12,14 @@
 # limitations under the License.
 ################################################################################
 
-
-ROOT_DIR="$TEST_SRCDIR/tink"
-AWS_KMS_AEAD_CLI="$ROOT_DIR/tools/testing/cc/aws_kms_aead_cli"
-AWS_KEY_ARN_FILE="$ROOT_DIR/testdata/aws_key_arn.txt"
-CREDENTIALS_AWS_CSV_FILE="$ROOT_DIR/testdata/aws_credentials_cc.txt"
-BAD_AWS_KEY_ARN_FILE="$ROOT_DIR/testdata/bad_aws_key_arn.txt"
-BAD_CREDENTIALS_AWS_CSV_FILE="$ROOT_DIR/testdata/bad_aws_credentials_cc.txt"
-TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
+ROOT_DIR="$TEST_SRCDIR/tools"
+AWS_KMS_AEAD_CLI="$ROOT_DIR/testing/cc/aws_kms_aead_cli"
+TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
+BASE_DIR="$TEST_SRCDIR/tink_base"
+AWS_KEY_ARN_FILE="$BASE_DIR/testdata/aws_key_arn.txt"
+CREDENTIALS_AWS_CSV_FILE="$BASE_DIR/testdata/aws_credentials_cc.txt"
+BAD_AWS_KEY_ARN_FILE="$BASE_DIR/testdata/bad_aws_key_arn.txt"
+BAD_CREDENTIALS_AWS_CSV_FILE="$BASE_DIR/testdata/bad_aws_credentials_cc.txt"
 associated_data="some associated data"
 
 source $TEST_UTIL || exit 1

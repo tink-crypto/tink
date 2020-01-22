@@ -53,13 +53,7 @@ fi
 # TODO(b/140615798)
 DISABLE_GRPC_ON_MAC_OS=""
 if [[ "${PLATFORM}" == 'darwin' ]]; then
-  DISABLE_GRPC_ON_MAC_OS="-//cc/integration/gcpkms/..."
-fi
-
-# TODO(b/141297103)
-DISABLE_PYTHON_ON_MAC_OS=""
-if [[ "${PLATFORM}" == 'darwin' ]]; then
-  DISABLE_PYTHON_ON_MAC_OS="-//python/..."
+  DISABLE_GRPC_ON_MAC_OS="-//integration/gcpkms/..."
 fi
 
 echo "using bazel binary: $(which bazel)"
@@ -71,21 +65,47 @@ java -version
 echo "using go: $(which go)"
 go version
 
+# TODO(b/141297103): add Python build and tests.
 run_linux_tests() {
-  # Build all targets, except objc.
-  time bazel build \
-  -- //... \
-  ${DISABLE_GRPC_ON_MAC_OS} \
-  ${DISABLE_PYTHON_ON_MAC_OS} \
-  -//objc/... || ( ls -l ; df -h / ; exit 1 )
-
-  # Run all tests, except manual and objc tests.
+  # ------------------- C++
+  cd cc/
+  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
   time bazel test \
-  --strategy=TestRunner=standalone --test_output=all \
-  -- //... \
-  ${DISABLE_GRPC_ON_MAC_OS} \
-  ${DISABLE_PYTHON_ON_MAC_OS} \
-  -//objc/... || ( ls -l ; df -h / ; exit 1 )
+      --strategy=TestRunner=standalone --test_output=all \
+      -- ... \
+      ${DISABLE_GRPC_ON_MAC_OS} \
+      || ( ls -l ; df -h / ; exit 1 )
+
+  # ------------------- Java
+  cd ../java
+  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
+  time bazel test \
+      --strategy=TestRunner=standalone --test_output=all \
+      -- ... || ( ls -l ; df -h / ; exit 1 )
+
+  # ------------------- Go
+  cd ../go
+  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
+  time bazel test \
+      --strategy=TestRunner=standalone --test_output=all \
+      -- ... || ( ls -l ; df -h / ; exit 1 )
+
+  # ------------------- examples
+  cd ../examples
+  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
+  time bazel test \
+      --strategy=TestRunner=standalone --test_output=all \
+      -- ... || ( ls -l ; df -h / ; exit 1 )
+
+  # ------------------- tools and cross-language tests
+  cd ../tools
+  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
+  time bazel test \
+      --strategy=TestRunner=standalone --test_output=all \
+      -- ... || ( ls -l ; df -h / ; exit 1 )
+
+  # --- return to the root directory
+  cd ..
 }
 
 run_macos_tests() {
@@ -93,7 +113,8 @@ run_macos_tests() {
   : "${IOS_SDK_VERSION:=13.0}"
   : "${XCODE_VERSION:=11.0}"
 
-  # Build all the iOS targets.
+  # --- Build all the iOS targets.
+  cd objc
   time bazel build \
   --compilation_mode=dbg \
   --dynamic_mode=off \
@@ -106,7 +127,7 @@ run_macos_tests() {
   --test_output=all \
   //objc/... || ( ls -l ; df -h / ; exit 1 )
 
-  # Run the iOS tests.
+  # --- Run the iOS tests.
   time bazel test \
   --compilation_mode=dbg \
   --dynamic_mode=off \
@@ -117,11 +138,16 @@ run_macos_tests() {
   --xcode_version="${XCODE_VERSION}" \
   --verbose_failures \
   --test_output=all \
-  //objc:TinkTests || ( ls -l ; df -h / ; exit 1 )
+  :TinkTests || ( ls -l ; df -h / ; exit 1 )
+
+  # --- return to the root directory
+  cd ..
 }
 
 run_linux_tests
 
 if [[ "${PLATFORM}" == 'darwin' ]]; then
-  run_macos_tests
+  # TODO(przydatek): re-enable after ObjC WORKSPACE is added.
+  # run_macos_tests
+  echo "*** ObjC tests not enabled yet."
 fi
