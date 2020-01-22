@@ -90,10 +90,14 @@ public final class JsonKeysetWriter implements KeysetWriter {
       throw new IOException(e);
     }
   }
+  
+  private long toUnsignedLong(int x) {
+    return ((long) x) & 0xffffffffL;
+  }
 
   private JSONObject toJson(Keyset keyset) throws JSONException {
     JSONObject json = new JSONObject();
-    json.put("primaryKeyId", keyset.getPrimaryKeyId());
+    json.put("primaryKeyId", toUnsignedLong(keyset.getPrimaryKeyId()));
     JSONArray keys = new JSONArray();
     for (Key key : keyset.getKeyList()) {
       keys.put(toJson(key));
@@ -106,7 +110,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
     return new JSONObject()
         .put("keyData", toJson(key.getKeyData()))
         .put("status", key.getStatus().name())
-        .put("keyId", key.getKeyId())
+        .put("keyId", toUnsignedLong(key.getKeyId()))
         .put("outputPrefixType", key.getOutputPrefixType().name());
   }
 
@@ -125,7 +129,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
 
   private JSONObject toJson(KeysetInfo keysetInfo) throws JSONException {
     JSONObject json = new JSONObject();
-    json.put("primaryKeyId", keysetInfo.getPrimaryKeyId());
+    json.put("primaryKeyId", toUnsignedLong(keysetInfo.getPrimaryKeyId()));
     JSONArray keyInfos = new JSONArray();
     for (KeyInfo keyInfo : keysetInfo.getKeyInfoList()) {
       keyInfos.put(toJson(keyInfo));

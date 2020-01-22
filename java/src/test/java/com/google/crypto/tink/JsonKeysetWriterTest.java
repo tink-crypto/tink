@@ -123,7 +123,7 @@ public class JsonKeysetWriterTest {
   }
 
   @Test
-  public void testWrite_writesNegativeId() throws Exception {
+  public void testWrite_writesNegativeIdAsPositive() throws Exception {
     int magicKeyId = -19230912;
     Keyset unmodified =
         CleartextKeysetHandle.getKeyset(
@@ -137,8 +137,8 @@ public class JsonKeysetWriterTest {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     CleartextKeysetHandle.write(modifiedHandle, JsonKeysetWriter.withOutputStream(outputStream));
-    assertThat(outputStream.toString()).contains("\"primaryKeyId\": -19230912");
-    assertThat(outputStream.toString()).contains("\"keyId\": -19230912");
+    assertThat(outputStream.toString()).contains("\"primaryKeyId\": 4275736384");
+    assertThat(outputStream.toString()).contains("\"keyId\": 4275736384");
   }
 
 }
