@@ -7,9 +7,9 @@ java_test(
     size = "small",
     srcs = ["CompareKeysetsTest.java"],
     deps = [
-        "@tink_base//java/src/main/java/com/google/crypto/tink/aead",
-        "@tink_base//java/src/main/java/com/google/crypto/tink/testing:test_util",
-        "@tink_base//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@tink_java//proto:tink_java_proto",
         "//testing:compare_keysets",
         "@maven//:junit_junit",
     ],

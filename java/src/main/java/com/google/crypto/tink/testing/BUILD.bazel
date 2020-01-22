@@ -4,7 +4,7 @@ licenses(["notice"])
 
 package(
     default_testonly = 1,
-    default_visibility = ["//tools/build_defs:internal_pkg"],
+    default_visibility = ["//:__subpackages__"],
 )
 
 java_library(
@@ -13,15 +13,15 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = [
-        "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
-        "//java/src/main/java/com/google/crypto/tink:core",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/aead",
-        "//java/src/main/java/com/google/crypto/tink/daead",
-        "//java/src/main/java/com/google/crypto/tink/hybrid",
-        "//java/src/main/java/com/google/crypto/tink/mac",
-        "//java/src/main/java/com/google/crypto/tink/streamingaead",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:core",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/aead",
+        "//src/main/java/com/google/crypto/tink/daead",
+        "//src/main/java/com/google/crypto/tink/hybrid",
+        "//src/main/java/com/google/crypto/tink/mac",
+        "//src/main/java/com/google/crypto/tink/streamingaead",
+        "//src/main/java/com/google/crypto/tink/subtle",
         "//proto:aes_ctr_hmac_aead_java_proto",
         "//proto:aes_ctr_hmac_streaming_java_proto",
         "//proto:aes_ctr_java_proto",
@@ -48,15 +48,15 @@ java_library(
     srcs = ["TestUtil.java"],
     javacopts = JAVACOPTS_OSS,
     deps = [
-        "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
-        "//java/src/main/java/com/google/crypto/tink:core-android",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/aead:android",
-        "//java/src/main/java/com/google/crypto/tink/daead:android",
-        "//java/src/main/java/com/google/crypto/tink/hybrid:android",
-        "//java/src/main/java/com/google/crypto/tink/mac:android",
-        "//java/src/main/java/com/google/crypto/tink/streamingaead:android",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
+        "//src/main/java/com/google/crypto/tink:core-android",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/aead:android",
+        "//src/main/java/com/google/crypto/tink/daead:android",
+        "//src/main/java/com/google/crypto/tink/hybrid:android",
+        "//src/main/java/com/google/crypto/tink/mac:android",
+        "//src/main/java/com/google/crypto/tink/streamingaead:android",
+        "//src/main/java/com/google/crypto/tink/subtle",
         "//proto:aes_ctr_hmac_aead_java_proto_lite",
         "//proto:aes_ctr_hmac_streaming_java_proto_lite",
         "//proto:aes_ctr_java_proto_lite",
@@ -84,8 +84,8 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":test_util",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/subtle",
         "@maven//:junit_junit",
     ],
 )
@@ -96,8 +96,8 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":test_util-android",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/subtle",
         "@maven//:junit_junit",
     ],
 )
@@ -108,8 +108,8 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":test_util",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "@org_json",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@maven//:org_json_json",
     ],
 )
 
@@ -119,7 +119,7 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":test_util-android",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "@org_json",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@maven//:org_json_json",
     ],
 )

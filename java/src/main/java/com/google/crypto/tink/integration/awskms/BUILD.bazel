@@ -1,6 +1,6 @@
 licenses(["notice"])
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
@@ -25,8 +25,8 @@ java_library(
         ":auto_service_plugin",
     ],
     deps = [
-        "//java/src/main/java/com/google/crypto/tink",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink",
+        "//src/main/java/com/google/crypto/tink/subtle",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_kms",
         "@maven//:com_google_auto_service_auto_service_annotations",

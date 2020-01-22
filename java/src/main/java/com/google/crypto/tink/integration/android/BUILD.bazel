@@ -2,7 +2,7 @@ load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
@@ -33,11 +33,11 @@ android_library(
     visibility = ["//visibility:public"],
     deps = [
         ":protos",
-        "//java/src/main/java/com/google/crypto/tink:android",
-        "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:aead",
-        "@com_google_code_findbugs_jsr305",
+        "//src/main/java/com/google/crypto/tink:android",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:aead",
+        "@maven//:com_google_code_findbugs_jsr305",
         "@com_google_protobuf_javalite//:protobuf_javalite",
     ],
 )

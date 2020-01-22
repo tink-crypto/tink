@@ -1,6 +1,6 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
@@ -57,49 +57,49 @@ lite_proto_deps = [
 ]
 
 subtle_deps = [
-    "//java/src/main/java/com/google/crypto/tink:primitives",
-    "//java/src/main/java/com/google/crypto/tink/subtle",
-    "//java/src/main/java/com/google/crypto/tink/subtle:aead",
-    "//java/src/main/java/com/google/crypto/tink/subtle:daead",
-    "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
-    "//java/src/main/java/com/google/crypto/tink/subtle:keywrap",
-    "//java/src/main/java/com/google/crypto/tink/subtle:mac",
-    "//java/src/main/java/com/google/crypto/tink/subtle:signature",
-    "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
-    "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
-    "//java/src/main/java/com/google/crypto/tink/subtle/prf",
+    "//src/main/java/com/google/crypto/tink:primitives",
+    "//src/main/java/com/google/crypto/tink/subtle",
+    "//src/main/java/com/google/crypto/tink/subtle:aead",
+    "//src/main/java/com/google/crypto/tink/subtle:daead",
+    "//src/main/java/com/google/crypto/tink/subtle:hybrid",
+    "//src/main/java/com/google/crypto/tink/subtle:keywrap",
+    "//src/main/java/com/google/crypto/tink/subtle:mac",
+    "//src/main/java/com/google/crypto/tink/subtle:signature",
+    "//src/main/java/com/google/crypto/tink/subtle:streaming",
+    "//src/main/java/com/google/crypto/tink/subtle:x25519",
+    "//src/main/java/com/google/crypto/tink/subtle/prf",
 ]
 
 java_deps = [
-    "//java/src/main/java/com/google/crypto/tink",
-    "//java/src/main/java/com/google/crypto/tink/aead",
-    "//java/src/main/java/com/google/crypto/tink/config",
-    "//java/src/main/java/com/google/crypto/tink/daead",
-    "//java/src/main/java/com/google/crypto/tink/hybrid",
-    "//java/src/main/java/com/google/crypto/tink/mac",
-    "//java/src/main/java/com/google/crypto/tink/signature",
-    "//java/src/main/java/com/google/crypto/tink/streamingaead",
-    "//java/src/main/java/com/google/crypto/tink/util",
+    "//src/main/java/com/google/crypto/tink",
+    "//src/main/java/com/google/crypto/tink/aead",
+    "//src/main/java/com/google/crypto/tink/config",
+    "//src/main/java/com/google/crypto/tink/daead",
+    "//src/main/java/com/google/crypto/tink/hybrid",
+    "//src/main/java/com/google/crypto/tink/mac",
+    "//src/main/java/com/google/crypto/tink/signature",
+    "//src/main/java/com/google/crypto/tink/streamingaead",
+    "//src/main/java/com/google/crypto/tink/util",
 ]
 
 android_deps = [
-    "//java/src/main/java/com/google/crypto/tink:android",
-    "//java/src/main/java/com/google/crypto/tink/aead:android",
-    "//java/src/main/java/com/google/crypto/tink/config:android",
-    "//java/src/main/java/com/google/crypto/tink/daead:android",
-    "//java/src/main/java/com/google/crypto/tink/hybrid:android",
-    "//java/src/main/java/com/google/crypto/tink/integration/android",
-    "//java/src/main/java/com/google/crypto/tink/mac:android",
-    "//java/src/main/java/com/google/crypto/tink/signature:android",
-    "//java/src/main/java/com/google/crypto/tink/streamingaead:android",
+    "//src/main/java/com/google/crypto/tink:android",
+    "//src/main/java/com/google/crypto/tink/aead:android",
+    "//src/main/java/com/google/crypto/tink/config:android",
+    "//src/main/java/com/google/crypto/tink/daead:android",
+    "//src/main/java/com/google/crypto/tink/hybrid:android",
+    "//src/main/java/com/google/crypto/tink/integration/android",
+    "//src/main/java/com/google/crypto/tink/mac:android",
+    "//src/main/java/com/google/crypto/tink/signature:android",
+    "//src/main/java/com/google/crypto/tink/streamingaead:android",
 ]
 
 cleartext_deps = [
-    "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+    "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
 ]
 
 cleartext_android_deps = [
-    "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
+    "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
 ]
 
 # PUBLIC
@@ -114,7 +114,7 @@ java_library(
     name = "awskms",
     visibility = ["//visibility:public"],
     exports = [
-        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
+        "//src/main/java/com/google/crypto/tink/integration/awskms",
     ],
 )
 
@@ -122,7 +122,7 @@ java_library(
     name = "gcpkms",
     visibility = ["//visibility:public"],
     exports = [
-        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
+        "//src/main/java/com/google/crypto/tink/integration/gcpkms",
     ],
 )
 
@@ -177,7 +177,7 @@ gen_maven_jar_rules(
     name = "tink-awskms",
     doctitle = "Tink Cryptography API with AWS KMS",
     deps = [
-        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
+        "//src/main/java/com/google/crypto/tink/integration/awskms",
     ],
 )
 
@@ -185,7 +185,7 @@ gen_maven_jar_rules(
     name = "tink-gcpkms",
     doctitle = "Tink Cryptography API with Google Cloud KMS",
     deps = [
-        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
+        "//src/main/java/com/google/crypto/tink/integration/gcpkms",
     ],
 )
 
@@ -227,7 +227,7 @@ java_library(
     name = "testutil",
     testonly = 1,
     visibility = ["//visibility:public"],
-    exports = ["//java/src/main/java/com/google/crypto/tink/testing:test_util"],
+    exports = ["//src/main/java/com/google/crypto/tink/testing:test_util"],
 )
 
 # tests
@@ -244,11 +244,11 @@ java_library(
         ":awskms",
         ":gcpkms",
         ":testonly",
-        "//java/src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
-        "//java/src/main/java/com/google/crypto/tink/prf:prf_key_templates",
-        "//java/src/main/java/com/google/crypto/tink/testing:streaming_test_util",
-        "//java/src/main/java/com/google/crypto/tink/testing:test_util",
-        "//java/src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@com_google_protobuf_javalite//:protobuf_javalite",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_kms",
@@ -265,8 +265,8 @@ java_library(
 # Don't hesitate to increase the length when writing legitimately longer tests.
 gen_java_test_rules(
     data = [
-        "//testdata:credentials",
-        "//testdata:ecies_keysets",
+        "@tink_base//testdata:credentials",
+        "@tink_base//testdata:ecies_keysets",
         "@wycheproof//testvectors:all",
     ],
     default_test_size = "small",

@@ -2,17 +2,17 @@ load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 licenses(["notice"])
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 java_library(
     name = "hkdf_prf_key_manager",
     srcs = ["HkdfPrfKeyManager.java"],
     javacopts = JAVACOPTS_OSS,
     deps = [
-        "//java/src/main/java/com/google/crypto/tink:core",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
-        "//java/src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
+        "//src/main/java/com/google/crypto/tink:core",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
         "//proto:common_java_proto",
         "//proto:hkdf_prf_java_proto",
         "//proto:tink_java_proto",
@@ -45,10 +45,10 @@ java_library(
     srcs = ["HkdfPrfKeyManager.java"],
     javacopts = JAVACOPTS_OSS,
     deps = [
-        "//java/src/main/java/com/google/crypto/tink:core-android",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
-        "//java/src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
+        "//src/main/java/com/google/crypto/tink:core-android",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
         "//proto:common_java_proto_lite",
         "//proto:hkdf_prf_java_proto_lite",
         "//proto:tink_java_proto_lite",

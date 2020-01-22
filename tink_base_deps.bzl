@@ -29,51 +29,6 @@ def tink_base_deps():
         sha256 = "de39bc4d6605e6d395faf5e07516c64c8d833404ee3eb132b5ff1161f9617dec",
     )
 
-    # ----- Java and Android
-    # java_lite_proto_library rules implicitly depend on
-    # @com_google_protobuf_javalite//:javalite_toolchain, which is the JavaLite proto
-    # runtime (base classes and common utilities).
-    # Commit from 2019-12-03 on the 3.11.x branch.
-    http_archive(
-        name = "com_google_protobuf_javalite",
-        strip_prefix = "protobuf-0425fa932ce95a32bb9f88b2c09b995e9ff8207b",
-        urls = ["https://github.com/google/protobuf/archive/0425fa932ce95a32bb9f88b2c09b995e9ff8207b.zip"],
-        sha256 = "e60211a40473f6be95b53f64559f82a3b2971672b11710db2fc9081708e25699",
-    )
-
-    # Release from 2019-08-14
-    http_archive(
-        name = "rules_jvm_external",
-        strip_prefix = "rules_jvm_external-2.7",
-        sha256 = "f04b1466a00a2845106801e0c5cec96841f49ea4e7d1df88dc8e4bf31523df74",
-        url = "https://github.com/bazelbuild/rules_jvm_external/archive/2.7.zip",
-    )
-
-    # android sdk
-    native.android_sdk_repository(
-        name = "androidsdk",
-        # Tink uses features in Android Keystore that are only supported at this
-        # level or newer.
-        # See https://developer.android.com/training/articles/keystore.html.
-        api_level = 23,  # M
-    )
-
-    # Last release from 2018-08-07.
-    http_archive(
-        name = "build_bazel_rules_android",
-        urls = ["https://github.com/bazelbuild/rules_android/archive/v0.1.1.zip"],
-        sha256 = "cd06d15dd8bb59926e4d65f9003bfc20f9da4b2519985c27e190cddc8b7a7806",
-        strip_prefix = "rules_android-0.1.1",
-    )
-
-    # Commit from 2019-12-17
-    http_archive(
-        name = "wycheproof",
-        strip_prefix = "wycheproof-d8ed1ba95ac4c551db67f410c06131c3bc00a97c",
-        url = "https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip",
-        sha256 = "eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545",
-    )
-
     # ----- Go
     # Release from 2019-10-31
     http_archive(
@@ -152,4 +107,12 @@ def tink_base_deps():
                 "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/0.29.9.tar.gz",
                 "https://github.com/bazelbuild/bazel-toolchains/archive/0.29.9.tar.gz",
             ],
+        )
+    if not native.existing_rule("wycheproof"):
+        # Commit from 2019-12-17
+        http_archive(
+            name = "wycheproof",
+            strip_prefix = "wycheproof-d8ed1ba95ac4c551db67f410c06131c3bc00a97c",
+            url = "https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip",
+            sha256 = "eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545",
         )

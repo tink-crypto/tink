@@ -13,9 +13,9 @@ java_binary(
         "@maven//:org_json_json",
     ],
     deps = [
-        "@tink_base//java",
-        "@tink_base//java:cleartext_keyset_handle",
-        "@tink_base//java:subtle",
+        "@tink_java//:java",
+        "@tink_java//:cleartext_keyset_handle",
+        "@tink_java//:subtle",
         "@maven//:args4j_args4j",
     ],
 )

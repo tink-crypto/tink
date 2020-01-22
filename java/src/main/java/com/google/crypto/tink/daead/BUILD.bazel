@@ -1,6 +1,6 @@
 licenses(["notice"])
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
@@ -33,9 +33,9 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = full_protos + [
-        "//java/src/main/java/com/google/crypto/tink",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:daead",
+        "//src/main/java/com/google/crypto/tink",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:daead",
         "@com_google_protobuf_javalite//:protobuf_javalite",
     ],
 )
@@ -46,9 +46,9 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = lite_protos + [
-        "//java/src/main/java/com/google/crypto/tink:android",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:daead",
+        "//src/main/java/com/google/crypto/tink:android",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:daead",
         "@com_google_protobuf_javalite//:protobuf_javalite",
     ],
 )
