@@ -28,8 +28,8 @@ source ./kokoro/run_tests.sh
 
 # Run all manual tests.
 time bazel test \
---strategy=TestRunner=standalone \
---test_timeout 10000 \
---test_output=all \
-//java:src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest \
-//java:src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest
+  --strategy=TestRunner=standalone \
+  --test_timeout 10000 \
+  --test_output=all \
+  //java:src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest \
+  //java:src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest

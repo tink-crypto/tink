@@ -30,12 +30,15 @@ source ./kokoro/run_tests.sh
 go get github.com/google/tink/go/...
 
 # Run all manual tests.
-time bazel test \
---strategy=TestRunner=standalone \
---test_timeout 10000 \
---test_output=all \
-//java:src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest \
-//java:src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest
+(
+  cd java
+  time bazel test \
+    --strategy=TestRunner=standalone \
+    --test_timeout 10000 \
+    --test_output=all \
+    //:src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest \
+    //:src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest
+)
 
 # On Linux, run all Maven tests and upload snapshot jars
 if [[ $PLATFORM == 'linux' ]]; then
