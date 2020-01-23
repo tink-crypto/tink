@@ -89,4 +89,11 @@ const (
 	ED25519VerifierKeyVersion = 0
 	// ED25519VerifierTypeURL is the type URL of ED25519 public keys.
 	ED25519VerifierTypeURL = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey"
+
+	// Streaming AEAD
+
+	// AESGCMHKDFKeyVersion is the maximum version of AES-GCM-HKDF keys that Tink supports.
+	AESGCMHKDFKeyVersion = 0
+	// AESGCMHKDFTypeURL is the type URL of AES-GCM-HKDF keys that Tink supports.
+	AESGCMHKDFTypeURL = "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey"
 )

@@ -30,17 +30,17 @@ import (
 )
 
 const (
-	// nonceSizeinBytes is the size of the IVs for GCM.
+	// nonceSizeInBytes is the size of the IVs for GCM.
 	nonceSizeInBytes = 12
 
-	// noncePrefixInBytes is the nonce has the format nonce_prefix || ctr || last_block.
+	// NoncePrefixInBytes is the nonce has the format nonce_prefix || ctr || last_block.
 	// The nonce_prefix is constant for the whole file.
 	// The ctr is a 32 bit ctr, the last_block is 1 if this is the
 	// last block of the file and 0 otherwise.
-	noncePrefixInBytes = 7
+	NoncePrefixInBytes = 7
 
-	// tagSizeInBytes is the size of the tags of each ciphertext segment.
-	tagSizeInBytes = 16
+	// TagSizeInBytes is the size of the tags of each ciphertext segment.
+	TagSizeInBytes = 16
 )
 
 var _ tink.StreamingAEAD = &AESGCMHKDF{}
@@ -89,8 +89,8 @@ func NewAESGCMHKDF(
 	if err := aead.ValidateAESKeySize(uint32(keySizeInBytes)); err != nil {
 		return nil, err
 	}
-	headerLen := 1 + keySizeInBytes + noncePrefixInBytes
-	if ciphertextSegmentSize <= firstSegmentOffset+headerLen+tagSizeInBytes {
+	headerLen := 1 + keySizeInBytes + NoncePrefixInBytes
+	if ciphertextSegmentSize <= firstSegmentOffset+headerLen+TagSizeInBytes {
 		return nil, errors.New("ciphertextSegmentSize too small")
 	}
 
@@ -103,13 +103,13 @@ func NewAESGCMHKDF(
 		keySizeInBytes:               keySizeInBytes,
 		ciphertextSegmentSize:        ciphertextSegmentSize,
 		firstCiphertextSegmentOffset: firstSegmentOffset + headerLen,
-		plaintextSegmentSize:         ciphertextSegmentSize - tagSizeInBytes,
+		plaintextSegmentSize:         ciphertextSegmentSize - TagSizeInBytes,
 	}, nil
 }
 
 // HeaderLength returns a length of the encryption header.
 func (a *AESGCMHKDF) HeaderLength() int {
-	return 1 + a.keySizeInBytes + noncePrefixInBytes
+	return 1 + a.keySizeInBytes + NoncePrefixInBytes
 }
 
 // deriveKey returns a key derived from the given main key using salt and aad parameters.
@@ -140,7 +140,7 @@ type aesGCMHKDFWriter struct {
 // and has to be passed in as parameter for decryption.
 func (a *AESGCMHKDF) NewEncryptingWriter(w io.Writer, aad []byte) (io.WriteCloser, error) {
 	salt := random.GetRandomBytes(uint32(a.keySizeInBytes))
-	noncePrefix := random.GetRandomBytes(noncePrefixInBytes)
+	noncePrefix := random.GetRandomBytes(NoncePrefixInBytes)
 
 	dkey, err := a.deriveKey(salt, aad)
 	if err != nil {
@@ -250,7 +250,7 @@ func (a *AESGCMHKDF) NewDecryptingReader(r io.Reader, aad []byte) (io.Reader, er
 		return nil, fmt.Errorf("cannot read salt: %v", err)
 	}
 
-	noncePrefix := make([]byte, noncePrefixInBytes)
+	noncePrefix := make([]byte, NoncePrefixInBytes)
 	if _, err := io.ReadFull(r, noncePrefix); err != nil {
 		return nil, fmt.Errorf("cannot read noncePrefix: %v", err)
 	}
@@ -329,7 +329,7 @@ func newCipher(key []byte) (cipher.AEAD, error) {
 	if err != nil {
 		return nil, err
 	}
-	ret, err := cipher.NewGCMWithTagSize(aesCipher, tagSizeInBytes)
+	ret, err := cipher.NewGCMWithTagSize(aesCipher, TagSizeInBytes)
 	if err != nil {
 		return nil, err
 	}

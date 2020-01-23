@@ -466,7 +466,7 @@ proto_library(
 
 go_proto_library(
     name = "aes_gcm_hkdf_streaming_go_proto",
-    importpath = "github.com/google/tink/proto/aes_gcm_hkdf_streaming_proto",
+    importpath = "github.com/google/tink/proto/aes_gcm_hkdf_streaming_go_proto",
     proto = ":aes_gcm_hkdf_streaming_proto",
     deps = [":common_go_proto"],
 )

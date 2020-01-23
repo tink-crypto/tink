@@ -21,17 +21,18 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"golang.org/x/crypto/ed25519"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/subtle"
 	subtlehybrid "github.com/google/tink/go/subtle/hybrid"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
-	"golang.org/x/crypto/ed25519"
 
 	subtedaead "github.com/google/tink/go/subtle/daead"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	gcmhkdfpb "github.com/google/tink/proto/aes_gcm_hkdf_streaming_go_proto"
 	aspb "github.com/google/tink/proto/aes_siv_go_proto"
 	commonpb "github.com/google/tink/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
@@ -153,6 +154,17 @@ func NewTestHMACKeyset(tagSize uint32,
 	primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
 	keyData := NewHMACKeyData(commonpb.HashType_SHA256, tagSize)
 	return NewTestKeyset(keyData, primaryOutputPrefixType)
+}
+
+// NewTestAESGCMHKDFKeyset creates a new Keyset containing an AESGCMHKDFKey.
+func NewTestAESGCMHKDFKeyset() *tinkpb.Keyset {
+	const (
+		keySize               = 16
+		derivedKeySize        = 16
+		ciphertextSegmentSize = 4096
+	)
+	keyData := NewAESGCMHKDFKeyData(keySize, derivedKeySize, commonpb.HashType_SHA256, ciphertextSegmentSize)
+	return NewTestKeyset(keyData, tinkpb.OutputPrefixType_RAW)
 }
 
 // NewTestKeyset creates a new test Keyset.
@@ -310,6 +322,55 @@ func NewSerializedAESGCMKey(keySize uint32) []byte {
 func NewAESGCMKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
 	return &gcmpb.AesGcmKeyFormat{
 		KeySize: keySize,
+	}
+}
+
+// NewAESGCMHKDFKey creates a randomly generated AESGCMHKDFKey.
+func NewAESGCMHKDFKey(
+	keyVersion uint32,
+	keySize uint32,
+	derivedKeySize uint32,
+	hkdfHashType commonpb.HashType,
+	ciphertextSegmentSize uint32,
+) *gcmhkdfpb.AesGcmHkdfStreamingKey {
+	keyValue := random.GetRandomBytes(keySize)
+	return &gcmhkdfpb.AesGcmHkdfStreamingKey{
+		Version:  keyVersion,
+		KeyValue: keyValue,
+		Params: &gcmhkdfpb.AesGcmHkdfStreamingParams{
+			CiphertextSegmentSize: ciphertextSegmentSize,
+			DerivedKeySize:        derivedKeySize,
+			HkdfHashType:          hkdfHashType,
+		},
+	}
+}
+
+// NewAESGCMHKDFKeyData creates a KeyData containing a randomly generated AESGCMHKDFKey.
+func NewAESGCMHKDFKeyData(
+	keySize uint32,
+	derivedKeySize uint32,
+	hkdfHashType commonpb.HashType,
+	ciphertextSegmentSize uint32,
+) *tinkpb.KeyData {
+	key := NewAESGCMHKDFKey(AESGCMHKDFKeyVersion, keySize, derivedKeySize, hkdfHashType, ciphertextSegmentSize)
+	serializedKey, _ := proto.Marshal(key)
+	return NewKeyData(AESGCMHKDFTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
+}
+
+// NewAESGCMHKDFKeyFormat returns a new AESGCMHKDFKeyFormat.
+func NewAESGCMHKDFKeyFormat(
+	keySize uint32,
+	derivedKeySize uint32,
+	hkdfHashType commonpb.HashType,
+	ciphertextSegmentSize uint32,
+) *gcmhkdfpb.AesGcmHkdfStreamingKeyFormat {
+	return &gcmhkdfpb.AesGcmHkdfStreamingKeyFormat{
+		KeySize: keySize,
+		Params: &gcmhkdfpb.AesGcmHkdfStreamingParams{
+			CiphertextSegmentSize: ciphertextSegmentSize,
+			DerivedKeySize:        derivedKeySize,
+			HkdfHashType:          hkdfHashType,
+		},
 	}
 }
 
