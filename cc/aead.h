@@ -29,6 +29,8 @@ namespace tink {
 // chosen ciphertext attacks.  Encryption with associated data ensures
 // authenticity and integrity of that data, but not its secrecy.
 // (see RFC 5116, https://tools.ietf.org/html/rfc5116)
+//
+// Implementations are expected to be thread safe.
 class Aead {
  public:
   // Encrypts 'plaintext' with 'associated_data' as associated data,
