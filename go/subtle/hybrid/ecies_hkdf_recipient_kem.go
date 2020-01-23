@@ -14,6 +14,8 @@
 
 package hybrid
 
+import "github.com/google/tink/go/subtle"
+
 // ECIESHKDFRecipientKem represents a HKDF-based KEM (key encapsulation mechanism)
 // for ECIES recipient.
 type ECIESHKDFRecipientKem struct {
@@ -32,5 +34,5 @@ func (s *ECIESHKDFRecipientKem) decapsulate(kem []byte, hashAlg string, salt []b
 	}
 	i := append(kem, secret...)
 
-	return computeHKDF(hashAlg, i, salt, info, keySize)
+	return subtle.ComputeHKDF(hashAlg, i, salt, info, keySize)
 }

@@ -14,6 +14,8 @@
 
 package hybrid
 
+import "github.com/google/tink/go/subtle"
+
 // KEMKey represents a KEM managed key.
 type KEMKey struct {
 	Kem, SymmetricKey []byte
@@ -44,7 +46,7 @@ func (s *ECIESHKDFSenderKem) encapsulate(hashAlg string, salt []byte, info []byt
 	}
 	i := append(sdata, secret...)
 
-	sKey, err := computeHKDF(hashAlg, i, salt, info, keySize)
+	sKey, err := subtle.ComputeHKDF(hashAlg, i, salt, info, keySize)
 	if err != nil {
 		return nil, err
 	}

@@ -13,6 +13,7 @@ go_library(
         "hybrid_encrypt.go",
         "mac.go",
         "signer.go",
+        "streamingaead.go",
         "verifier.go",
     ],
     importpath = "github.com/google/tink/go/tink",

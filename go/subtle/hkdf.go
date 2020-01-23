@@ -12,15 +12,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package hybrid provides subtle implementations of the HKDF and EC primitives.
-package hybrid
+package subtle
 
 import (
 	"errors"
 	"fmt"
 	"io"
 
-	"github.com/google/tink/go/subtle"
 	"golang.org/x/crypto/hkdf"
 )
 
@@ -38,7 +36,7 @@ var maxTagSizeInBytes = map[string]uint32{
 
 var errHKDFInvalidInput = errors.New("HKDF: invalid input")
 
-// ValidateHKDFParams validates parameters of HKDF constructor.
+// validateHKDFParams validates parameters of HKDF constructor.
 func validateHKDFParams(hash string, keySize uint32, tagSize uint32) error {
 	// validate tag size
 	maxTagSize, found := maxTagSizeInBytes[hash]
@@ -54,20 +52,20 @@ func validateHKDFParams(hash string, keySize uint32, tagSize uint32) error {
 	return nil
 }
 
-// computeHKDF extracts a pseudorandom key.
-func computeHKDF(hashAlg string, key []byte, salt []byte, info []byte, tagSize uint32) ([]byte, error) {
+// ComputeHKDF extracts a pseudorandom key.
+func ComputeHKDF(hashAlg string, key []byte, salt []byte, info []byte, tagSize uint32) ([]byte, error) {
 	keySize := uint32(len(key))
 	if err := validateHKDFParams(hashAlg, keySize, tagSize); err != nil {
 		return nil, fmt.Errorf("hkdf: %s", err)
 	}
-	hashFunc := subtle.GetHashFunc(hashAlg)
-	if len(salt) == 0 {
-		salt = make([]byte, tagSize)
-	}
-
+	hashFunc := GetHashFunc(hashAlg)
 	if hashFunc == nil {
 		return nil, fmt.Errorf("hkdf: invalid hash algorithm")
 	}
+	if len(salt) == 0 {
+		salt = make([]byte, hashFunc().Size())
+	}
+
 	result := make([]byte, tagSize)
 	kdf := hkdf.New(hashFunc, key, salt, info)
 	n, err := io.ReadFull(kdf, result)
