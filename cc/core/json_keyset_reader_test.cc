@@ -342,8 +342,6 @@ TEST_F(JsonKeysetReaderTest, ReadNegativeKeyId) {
   ASSERT_THAT(reader_result.status(), IsOk());
   auto reader = std::move(reader_result.ValueOrDie());
   auto read_result = reader->Read();
-  // TODO(b/144348283): We should accept this, as Java can generate keysets with
-  // negative ids.
   EXPECT_THAT(read_result.status(), Not(IsOk()));
 }
 

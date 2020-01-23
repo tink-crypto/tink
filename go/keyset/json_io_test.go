@@ -187,7 +187,6 @@ func TestJSONReaderNegativeIds(t *testing.T) {
 	r := keyset.NewJSONReader(bytes.NewBufferString(jsonKeyset))
 
 	_, err := r.Read()
-	// TODO(b/144348283): We should allow negative key ids, as Java can produce them.
 	if err == nil {
 		t.Fatalf("Expected failure due to negative key id")
 	}
