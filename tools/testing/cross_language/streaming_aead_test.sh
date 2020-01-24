@@ -16,6 +16,7 @@
 ROOT_DIR="$TEST_SRCDIR/tools"
 CC_AEAD_CLI="$ROOT_DIR/testing/cc/streaming_aead_cli_cc"
 JAVA_AEAD_CLI="$ROOT_DIR/testing/streaming_aead_cli_java"
+GO_AEAD_CLI="$ROOT_DIR/testing/go/streaming_aead_cli_go"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 source $TEST_UTIL || exit 1
@@ -68,7 +69,14 @@ streaming_aead_basic_test() {
 
 #############################################################################
 ##### Run the actual tests.
-KEY_TEMPLATES=(AES128_GCM_HKDF_4KB AES256_GCM_HKDF_4KB AES128_CTR_HMAC_SHA256_4KB AES256_CTR_HMAC_SHA256_4KB)
+KEY_TEMPLATES=(AES128_GCM_HKDF_4KB AES256_GCM_HKDF_4KB)
+ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI)
+DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI)
+
+streaming_aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
+
+KEY_TEMPLATES=(AES128_CTR_HMAC_SHA256_4KB AES256_CTR_HMAC_SHA256_4KB)
 ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI)
 DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI)
+
 streaming_aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"

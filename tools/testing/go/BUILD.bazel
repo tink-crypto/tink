@@ -20,6 +20,19 @@ go_binary(
 )
 
 go_binary(
+    name = "streaming_aead_cli_go",
+    testonly = 1,  # keep
+    srcs = ["streaming_aead_cli.go"],
+    out = "streaming_aead_cli_go",
+    deps = [
+        "@tink_base//go/streamingaead:go_default_library",
+        "@tink_base//go/core/registry:go_default_library",
+        "@tink_base//go/keyset:go_default_library",
+        "@tink_base//go/testkeyset:go_default_library",
+    ],
+)
+
+go_binary(
     name = "mac_cli_go",
     testonly = 1,  # keep
     srcs = ["mac_cli.go"],

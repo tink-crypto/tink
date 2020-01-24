@@ -82,6 +82,7 @@ sh_test(
         ":test_lib",
         "//testing:streaming_aead_cli_java",
         "//testing/cc:streaming_aead_cli_cc",
+        "//testing/go:streaming_aead_cli_go",
         "//tinkey",
     ],
 )
