@@ -702,85 +702,109 @@ cc_binary(
     ],
 )
 
-# TODO(przydatek): fix and re-enable the genrules below.
 # Header files needed for building without Bazel with the above libtink.so
-# genrule(
-#     name = "tink_headers",
-#     srcs = [
-#         "//cc",
-#         "//proto:public_cc_protos",
-#     ],
-#     outs = [
-#         "tink_headers.tar",
-#     ],
-#     # The commands below collect all Tink headers in two steps:
-#     #  * First a tar-archive with all "regular" .h-files is created.
-#     #  * Then .h-files generated for Tink protos are added to the tar-archive.
-#     cmd = select({
-#         ":linux_x86_64": "tar -cv -f $@ --dereference --transform \"s/^cc/tink/\" " +
-#                          "    --show-transformed-names `find cc/ -name \"*.h\"`; " +
-#                          "tar -rv -f $@ -C $(GENDIR) --dereference " +
-#                          "    `cd $(GENDIR); find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`",
-#         ":mac_x86_64": "tar -cv -f $@ --dereference -s \"/^cc/tink/p\" " +
-#                        "    `find cc/ -name \"*.h\"`; " +
-#                        "tar -rv -f $@ -C $(GENDIR) --dereference " +
-#                        "    `cd $(GENDIR); find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`",
-#     }),
-#     local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
-# )
-#
-# genrule(
-#     name = "tink_deps_headers",
-#     srcs = [
-#         "@com_google_absl//absl/strings",
-#         "@com_google_protobuf//:cc_wkt_protos",
-#     ],
-#     outs = [
-#         "tink_deps_headers.tar",
-#     ],
-#     # The command below collects headers of Tink dependencies in two steps:
-#     #  * First a tar-archive with all Abseil .h and .inc-files is created.
-#     #  * Then .h and .inc files of Protobuf library are added to the tar-archive.
-#     cmd = "tar -cv -f $@ -C external/com_google_absl --dereference " +
-#           "    `cd external/com_google_absl; find absl/ -name \"*.h\" -or -name \"*.inc\"`; " +
-#           "tar -rv -f $@ -C external/com_google_protobuf/src --dereference " +
-#           "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\" -or -name \"*.inc\"`",
-#     local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
-#     tags = [
-#         "manual",  # Does not run on OSX yet.  TODO(b/78299422)
-#     ],
-# )
-#
-# # Tink binary snapshot.
-# genrule(
-#     name = "tink_bin_snapshot",
-#     srcs = [
-#         ":tink_deps_headers",
-#         ":tink_headers",
-#         ":libtink.so",
-#     ],
-#     outs = [
-#         "tink_bin_snapshot.tar.gz",
-#     ],
-#     # The command below packages the header files and the binary library
-#     # into a single compressed tar-archive.
-#     cmd = select({
-#         ":linux_x86_64": "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
-#                          "    --transform \"s/^cc/tink_bin_snapshot/\"" +
-#                          "    -C $(GENDIR) cc/tink_headers.tar cc/tink_deps_headers.tar;" +
-#                          "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
-#                          "    --transform \"s/^cc/tink_bin_snapshot/\"" +
-#                          "    -C $(BINDIR) cc/libtink.so;" +
-#                          "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
-#         ":mac_x86_64": "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
-#                        "    -s  \"/^cc/tink_bin_snapshot/p\"" +
-#                        "    -C $(GENDIR) cc/tink_headers.tar cc/tink_deps_headers.tar;" +
-#                        "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
-#                        "    -s \"/^cc/tink_bin_snapshot/p\"" +
-#                        "    -C $(BINDIR) cc/libtink.so;" +
-#                        "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
-#     }),
-# )
+genrule(
+    name = "tink_headers",
+    srcs = [
+        ":tink_cc",
+        "//proto:public_cc_protos",
+    ],
+    outs = ["tink_headers.tar"],
+    visibility = ["//visibility:public"],
+    # The commands below collect all Tink headers in two steps:
+    #
+    #  * First a tar-archive with all "regular" .h-files is created.
+    #  * Then .h-files generated for Tink protos are added to the tar-archive.
+    #
+    # Notes:
+    #
+    #  * The paths for finding the headers differ depending on whether
+    #    the command is running directly in "tink_cc" workspace
+    #    (i.e. SRCDIR == "tink_cc"), or is using "tink_cc" as a dependency,
+    #    hence the "if"-command below.
+    #  * When `find`-ing the headers, we must filter out ("-prune") paths
+    #    that contain Bazel's generated/aux files.
+    #
+    # TODO(przydatek): test on Mac OS.
+    cmd = select({
+        ":linux_x86_64":
+            "CURRDIR=`pwd`; SRCDIR=`basename $$CURRDIR`; " +
+            "if [ \"$$SRCDIR\"  != \"tink_cc\" ]; then " +
+            "  cd external/tink_cc; " +
+            "fi; " +
+            "tar -cv -f tmp.tar --dereference --transform \"s/^\./tink/\" " +
+            "    --show-transformed-names " +
+            "    `find -L ./ -not \( -path \"./bazel-*\" -prune \) " +
+            "    -not \( -path ./external -prune \) -name '*.h'`;" +
+            "PBDIR=$(GENDIR)/external/tink_base;" +
+            "tar -rv -f tmp.tar -C $$PBDIR --dereference " +
+            "    `cd $$PBDIR; find proto/ -name \"*.pb.h\" -or -name \"*.inc\"`;" +
+            "mv tmp.tar $$CURRDIR/$@",
+        ":mac_x86_64":
+            "echo 'not implemented yet' > $@",
+    }),
+    tags = [
+        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
+    ],
+    local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
+)
+
+genrule(
+    name = "tink_deps_headers",
+    srcs = [
+        "@com_google_absl//absl/strings",
+        "@com_google_protobuf//:cc_wkt_protos",
+    ],
+    outs = ["tink_deps_headers.tar"],
+    visibility = ["//visibility:public"],
+    # The command below collects headers of Tink dependencies in two steps:
+    #  * First a tar-archive with all Abseil .h and .inc-files is created.
+    #  * Then .h and .inc files of Protobuf library are added to the tar-archive.
+    cmd = "tar -cv -f $@ -C external/com_google_absl --dereference " +
+          "    `cd external/com_google_absl; find absl/ -name \"*.h\" -or -name \"*.inc\"`; " +
+          "tar -rv -f $@ -C external/com_google_protobuf/src --dereference " +
+          "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\" -or -name \"*.inc\"`",
+    local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
+    tags = [
+        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
+    ],
+)
+
+
+# Tink binary snapshot.
+genrule(
+    name = "tink_bin_snapshot",
+    srcs = [
+        ":tink_deps_headers",
+        ":tink_headers",
+        ":libtink.so",
+    ],
+    outs = ["tink_bin_snapshot.tar.gz"],
+    visibility = ["//visibility:public"],
+    # The command below packages the header files and the binary library
+    # into a single compressed tar-archive.
+    cmd = select({
+        ":linux_x86_64":
+            "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+            "    --transform \"s/^./tink_bin_snapshot/\"" +
+            "    -C $(GENDIR) ./tink_headers.tar ./tink_deps_headers.tar;" +
+            "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+            "    --transform \"s/^./tink_bin_snapshot/\"" +
+            "    -C $(BINDIR) ./libtink.so;" +
+            "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
+        ":mac_x86_64":
+            "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+            "    -s  \"/^./tink_bin_snapshot/p\"" +
+            "    -C $(GENDIR) ./tink_headers.tar ./tink_deps_headers.tar;" +
+            "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+            "    -s \"/^./tink_bin_snapshot/p\"" +
+            "    -C $(BINDIR) ./libtink.so;" +
+            "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
+    }),
+    tags = [
+        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
+    ],
+)
 
 # tests
 
