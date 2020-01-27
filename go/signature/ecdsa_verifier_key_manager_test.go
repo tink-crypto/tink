@@ -21,7 +21,7 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	commonpb "github.com/google/tink/proto/common_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
 )
 
 func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {

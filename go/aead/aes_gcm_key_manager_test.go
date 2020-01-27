@@ -24,8 +24,8 @@ import (
 	subteAEAD "github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
-	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 var keySizes = []uint32{16, 32}

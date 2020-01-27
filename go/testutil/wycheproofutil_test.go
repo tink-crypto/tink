@@ -17,6 +17,7 @@ package testutil_test
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/google/tink/go/testutil"
@@ -43,8 +44,7 @@ func TestWycheproofParsing(t *testing.T) {
 		testutil.WycheproofSuite
 		TestGroups []*AeadGroup `json:"testGroups"`
 	}
-
-	bytes, err := ioutil.ReadFile("../../third_party/wycheproof/testvectors/aes_gcm_test.json")
+	bytes, err := ioutil.ReadFile(os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/aes_gcm_test.json")
 	if err != nil {
 		t.Fatal(err)
 	}

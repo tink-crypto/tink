@@ -22,9 +22,9 @@ import (
 	"os"
 	"testing"
 
-	"golang.org/x/crypto/chacha20poly1305"
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
+	"golang.org/x/crypto/chacha20poly1305"
 )
 
 func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
@@ -197,7 +197,7 @@ func TestChaCha20Poly1305RandomNonce(t *testing.T) {
 }
 
 func TestChaCha20Poly1305WycheproofVectors(t *testing.T) {
-	f, err := os.Open("../../../third_party/wycheproof/testvectors/chacha20_poly1305_test.json")
+	f, err := os.Open(os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/chacha20_poly1305_test.json")
 	if err != nil {
 		t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
 	}

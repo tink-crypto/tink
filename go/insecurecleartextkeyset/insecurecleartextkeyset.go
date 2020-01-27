@@ -24,7 +24,7 @@ import (
 
 	"github.com/google/tink/go/internal"
 	"github.com/google/tink/go/keyset"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 var (

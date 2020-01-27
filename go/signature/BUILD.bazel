@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 licenses(["notice"])  # keep
 
@@ -20,13 +20,13 @@ go_library(
     importpath = "github.com/google/tink/go/signature",
     visibility = ["//visibility:public"],
     deps = [
-        "//go/core/cryptofmt:go_default_library",
-        "//go/core/primitiveset:go_default_library",
-        "//go/core/registry:go_default_library",
-        "//go/keyset:go_default_library",
-        "//go/subtle:go_default_library",
-        "//go/subtle/signature:go_default_library",
-        "//go/tink:go_default_library",
+        "//core/cryptofmt:go_default_library",
+        "//core/primitiveset:go_default_library",
+        "//core/registry:go_default_library",
+        "//keyset:go_default_library",
+        "//subtle:go_default_library",
+        "//subtle/signature:go_default_library",
+        "//tink:go_default_library",
         "//proto:common_go_proto",
         "//proto:ecdsa_go_proto",
         "//proto:ed25519_go_proto",
@@ -49,13 +49,13 @@ go_test(
     ],
     embed = [":go_default_library"],
     deps = [
-        "//go/core/cryptofmt:go_default_library",
-        "//go/core/registry:go_default_library",
-        "//go/subtle/random:go_default_library",
-        "//go/subtle/signature:go_default_library",
-        "//go/testkeyset:go_default_library",
-        "//go/testutil:go_default_library",
-        "//go/tink:go_default_library",
+        "//core/cryptofmt:go_default_library",
+        "//core/registry:go_default_library",
+        "//subtle/random:go_default_library",
+        "//subtle/signature:go_default_library",
+        "//testkeyset:go_default_library",
+        "//testutil:go_default_library",
+        "//tink:go_default_library",
         "//proto:common_go_proto",
         "//proto:ecdsa_go_proto",
         "//proto:ed25519_go_proto",

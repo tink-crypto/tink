@@ -15,6 +15,11 @@ local_repository(
     path = "../java",
 )
 
+local_repository(
+    name = "tink_go",
+    path = "../go",
+)
+
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
 tink_base_deps()
 
@@ -33,8 +38,11 @@ tink_java_deps()
 load("@tink_java//:tink_java_deps_init.bzl", "tink_java_deps_init")
 tink_java_deps_init()
 
-# Go initialization does not work via tink_base_deps_init for some reason.
-# All of the Go-stuff below will be eventually moved to go/WORKSPACE.
+load("@tink_go//:tink_go_deps.bzl", "tink_go_deps")
+tink_go_deps()
+
+# Go initialization does not work via tink_go_deps_init for some reason.
+# All of the Go-init stuff is for now just copied from Go-WORKSPACE.
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()

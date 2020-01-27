@@ -14,7 +14,7 @@
 
 package keyset
 
-import tinkpb "github.com/google/tink/proto/tink_go_proto"
+import tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 
 // Writer knows how to write a Keyset or an EncryptedKeyset to some source.
 type Writer interface {

@@ -23,10 +23,10 @@ import (
 	"github.com/google/tink/go/core/registry"
 	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/testutil"
-	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	hmacpb "github.com/google/tink/proto/hmac_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestRegisterKeyManager(t *testing.T) {

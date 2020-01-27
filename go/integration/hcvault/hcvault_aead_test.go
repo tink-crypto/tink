@@ -36,8 +36,8 @@ const (
 
 var (
 	// lint placeholder header, please ignore
-	vaultKey  = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "go/integration/hcvault/testdata/server.key"
-	vaultCert = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "go/integration/hcvault/testdata/server.crt"
+	vaultKey  = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/integration/hcvault/testdata/server.key"
+	vaultCert = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/integration/hcvault/testdata/server.crt"
 	// lint placeholder footer, please ignore
 )
 

@@ -24,8 +24,8 @@ import (
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 
-	cppb "github.com/google/tink/proto/chacha20_poly1305_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	cppb "github.com/google/tink/go/proto/chacha20_poly1305_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 const (

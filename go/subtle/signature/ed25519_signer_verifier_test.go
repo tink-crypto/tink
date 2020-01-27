@@ -183,7 +183,7 @@ type testcaseED25519 struct {
 
 func TestVectorsED25519(t *testing.T) {
 	// signing tests are same between ecdsa and ed25519
-	f, err := os.Open("../../../third_party/wycheproof/testvectors/eddsa_test.json")
+	f, err := os.Open(os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/eddsa_test.json")
 	if err != nil {
 		t.Fatalf("cannot open file: %s", err)
 	}

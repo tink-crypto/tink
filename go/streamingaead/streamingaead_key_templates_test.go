@@ -21,9 +21,9 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/streamingaead"
 	"github.com/google/tink/go/testutil"
-	gcmhkdfpb "github.com/google/tink/proto/aes_gcm_hkdf_streaming_go_proto"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestAESGCMHKDFKeyTemplates(t *testing.T) {

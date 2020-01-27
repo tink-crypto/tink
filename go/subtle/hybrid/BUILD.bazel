@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
@@ -14,14 +14,15 @@ go_library(
     ],
     importpath = "github.com/google/tink/go/subtle/hybrid",
     deps = [
-        "//go/subtle:go_default_library",
-        "//go/tink:go_default_library",
+        "//subtle:go_default_library",
+        "//tink:go_default_library",
     ],
 )
 
 go_test(
     name = "go_default_test",
     srcs = ["elliptic_curves_test.go"],
-    data = ["//third_party/wycheproof:testvectors"],
+    data = ["@wycheproof//testvectors:all"],
+
     embed = [":go_default_library"],
 )

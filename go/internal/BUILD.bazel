@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 licenses(["notice"])  # keep
 
@@ -9,8 +9,8 @@ go_library(
     srcs = ["internal.go"],
     importpath = "github.com/google/tink/go/internal",
     visibility = [
-        "//go/insecurecleartextkeyset:__pkg__",
-        "//go/keyset:__pkg__",
-        "//go/testkeyset:__pkg__",
+        "//insecurecleartextkeyset:__pkg__",
+        "//keyset:__pkg__",
+        "//testkeyset:__pkg__",
     ],
 )

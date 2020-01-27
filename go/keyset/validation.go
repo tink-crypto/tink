@@ -17,7 +17,7 @@ package keyset
 import (
 	"fmt"
 
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 // ValidateKeyVersion checks whether the given version is valid. The version is valid

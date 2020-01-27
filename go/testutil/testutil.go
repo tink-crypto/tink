@@ -31,15 +31,15 @@ import (
 	"github.com/google/tink/go/tink"
 
 	subtedaead "github.com/google/tink/go/subtle/daead"
-	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
-	gcmhkdfpb "github.com/google/tink/proto/aes_gcm_hkdf_streaming_go_proto"
-	aspb "github.com/google/tink/proto/aes_siv_go_proto"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
-	eciespb "github.com/google/tink/proto/ecies_aead_hkdf_go_proto"
-	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
-	hmacpb "github.com/google/tink/proto/hmac_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
+	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
+	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
+	eciespb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"
+	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"
+	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 // DummyAEADKeyManager is a dummy implementation of the KeyManager interface.

@@ -23,8 +23,8 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestED25519SignerGetPrimitiveBasic(t *testing.T) {

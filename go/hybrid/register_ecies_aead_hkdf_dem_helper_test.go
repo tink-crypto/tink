@@ -23,7 +23,7 @@ import (
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 var (

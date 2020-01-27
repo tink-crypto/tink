@@ -26,7 +26,7 @@ import (
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestAESSIVKeyTemplate(t *testing.T) {

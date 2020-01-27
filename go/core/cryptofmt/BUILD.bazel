@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 licenses(["notice"])  # keep
 

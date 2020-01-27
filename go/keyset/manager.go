@@ -19,7 +19,7 @@ import (
 
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 // Manager manages a Keyset-proto, with convenience methods that rotate, disable, enable or destroy keys.

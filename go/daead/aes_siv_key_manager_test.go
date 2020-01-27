@@ -25,8 +25,8 @@ import (
 	"github.com/google/tink/go/testutil"
 
 	subtedaead "github.com/google/tink/go/subtle/daead"
-	aspb "github.com/google/tink/proto/aes_siv_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestAESSIVPrimitive(t *testing.T) {

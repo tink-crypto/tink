@@ -22,7 +22,7 @@ import (
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/testutil"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func createKeyset() []*tinkpb.Keyset_Key {

@@ -33,7 +33,7 @@ import (
 	"github.com/google/tink/go/integration/gcpkms"
 	"github.com/google/tink/go/keyset"
 
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 // lint placeholder header, please ignore

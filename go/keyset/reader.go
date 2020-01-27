@@ -14,7 +14,7 @@
 
 package keyset
 
-import tinkpb "github.com/google/tink/proto/tink_go_proto"
+import tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 
 // Reader knows how to read a Keyset or an EncryptedKeyset from some source.
 // In order to turn a Reader into a KeysetHandle for use, callers must use

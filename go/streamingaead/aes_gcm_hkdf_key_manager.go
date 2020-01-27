@@ -24,9 +24,9 @@ import (
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle/streamingaead"
-	ghpb "github.com/google/tink/proto/aes_gcm_hkdf_streaming_go_proto"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	ghpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 const (

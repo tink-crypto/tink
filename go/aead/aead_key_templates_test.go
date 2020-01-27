@@ -25,10 +25,10 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
-	ctrhmacpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
-	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_aead_go_proto"
+	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestAESGCMKeyTemplates(t *testing.T) {

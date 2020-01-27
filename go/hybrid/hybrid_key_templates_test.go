@@ -21,9 +21,9 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	eciespb "github.com/google/tink/proto/ecies_aead_hkdf_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	eciespb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestECIESHKDFAES128GCMKeyTemplate(t *testing.T) {

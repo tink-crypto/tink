@@ -22,8 +22,8 @@ import (
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/registry"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
-	ed25519pb "github.com/google/tink/proto/ed25519_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 const (

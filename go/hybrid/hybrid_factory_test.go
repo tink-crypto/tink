@@ -23,8 +23,8 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestHybridFactoryTest(t *testing.T) {

@@ -23,9 +23,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/subtle/random"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
-	"github.com/google/tink/go/subtle"
 )
 
 func TestSignVerify(t *testing.T) {
@@ -117,14 +117,14 @@ func TestWycheproofVectors(t *testing.T) {
 		Filename string
 		Encoding string
 	}{
-		{"../../../third_party/wycheproof/testvectors/ecdsa_test.json", "DER"},
-		{"../../../third_party/wycheproof/testvectors/ecdsa_secp256r1_sha256_p1363_test.json", "IEEE_P1363"},
-		{"../../../third_party/wycheproof/testvectors/ecdsa_secp384r1_sha512_p1363_test.json", "IEEE_P1363"},
-		{"../../../third_party/wycheproof/testvectors/ecdsa_secp521r1_sha512_p1363_test.json", "IEEE_P1363"},
+		{"ecdsa_test.json", "DER"},
+		{"ecdsa_secp256r1_sha256_p1363_test.json", "IEEE_P1363"},
+		{"ecdsa_secp384r1_sha512_p1363_test.json", "IEEE_P1363"},
+		{"ecdsa_secp521r1_sha512_p1363_test.json", "IEEE_P1363"},
 	}
-
+	path := os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/"
 	for _, v := range vectors {
-		wycheproofTest(t, v.Filename, v.Encoding)
+		wycheproofTest(t, path+v.Filename, v.Encoding)
 	}
 }
 

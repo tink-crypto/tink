@@ -14,7 +14,7 @@
 
 package daead
 
-import tinkpb "github.com/google/tink/proto/tink_go_proto"
+import tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 
 // AESSIVKeyTemplate is a KeyTemplate that generates a AES-SIV key.
 func AESSIVKeyTemplate() *tinkpb.KeyTemplate {

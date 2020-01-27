@@ -26,8 +26,8 @@ import (
 	"github.com/google/tink/go/testutil"
 
 	subteaead "github.com/google/tink/go/subtle/aead"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
-	xcppb "github.com/google/tink/proto/xchacha20_poly1305_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
+	xcppb "github.com/google/tink/go/proto/xchacha20_poly1305_go_proto"
 )
 
 func TestXChaCha20Poly1305GetPrimitive(t *testing.T) {

@@ -1,11 +1,8 @@
-# gazelle:ignore
-
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_proto_library")
-load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("//third_party/rules_protobuf/objc:rules.bzl", "objc_proto_compile")
 load("//tools:objc.bzl", "tink_objc_proto_library")
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
@@ -23,12 +20,6 @@ proto_library(
 closure_proto_library(
     name = "common_closure_proto",
     deps = [":common_proto"],
-)
-
-go_proto_library(
-    name = "common_go_proto",
-    importpath = "github.com/google/tink/proto/common_go_proto",
-    proto = ":common_proto",
 )
 
 objc_proto_compile(
@@ -56,14 +47,6 @@ closure_proto_library(
     deps = [":tink_proto"],
 )
 
-go_proto_library(
-    name = "tink_go_proto",
-    importpath = "github.com/google/tink/proto/tink_go_proto",
-    proto = ":tink_proto",
-    visibility = ["//visibility:public"],
-    deps = [":common_go_proto"],
-)
-
 objc_proto_compile(
     name = "tink_objc_pb",
     protos = ["tink.proto"],
@@ -89,12 +72,6 @@ proto_library(
     ],
 )
 
-go_proto_library(
-    name = "config_go_proto",
-    importpath = "github.com/google/tink/proto/config_go_proto",
-    proto = ":config_proto",
-)
-
 objc_proto_compile(
     name = "config_objc_pb",
     protos = ["config.proto"],
@@ -110,12 +87,6 @@ proto_library(
     srcs = [
         "aes_siv.proto",
     ],
-)
-
-go_proto_library(
-    name = "aes_siv_go_proto",
-    importpath = "github.com/google/tink/proto/aes_siv_go_proto",
-    proto = ":aes_siv_proto",
 )
 
 objc_proto_compile(
@@ -138,13 +109,6 @@ proto_library(
     ],
 )
 
-go_proto_library(
-    name = "rsa_ssa_pkcs1_go_proto",
-    importpath = "github.com/google/tink/proto/rsa_ssa_pkcs1_go_proto",
-    proto = ":rsa_ssa_pkcs1_proto",
-    deps = [":common_go_proto"],
-)
-
 objc_proto_compile(
     name = "rsa_ssa_pkcs1_objc_pb",
     protos = ["rsa_ssa_pkcs1.proto"],
@@ -164,13 +128,6 @@ proto_library(
     deps = [
         ":common_proto",
     ],
-)
-
-go_proto_library(
-    name = "rsa_ssa_pss_go_proto",
-    importpath = "github.com/google/tink/proto/rsa_ssa_pss_go_proto",
-    proto = ":rsa_ssa_pss_proto",
-    deps = [":common_go_proto"],
 )
 
 objc_proto_compile(
@@ -199,13 +156,6 @@ closure_proto_library(
     deps = [":ecdsa_proto"],
 )
 
-go_proto_library(
-    name = "ecdsa_go_proto",
-    importpath = "github.com/google/tink/proto/ecdsa_go_proto",
-    proto = ":ecdsa_proto",
-    deps = [":common_go_proto"],
-)
-
 objc_proto_compile(
     name = "ecdsa_objc_pb",
     protos = ["ecdsa.proto"],
@@ -222,12 +172,6 @@ proto_library(
     srcs = [
         "ed25519.proto",
     ],
-)
-
-go_proto_library(
-    name = "ed25519_go_proto",
-    importpath = "github.com/google/tink/proto/ed25519_go_proto",
-    proto = ":ed25519_proto",
 )
 
 objc_proto_compile(
@@ -250,13 +194,6 @@ proto_library(
 closure_proto_library(
     name = "aes_cmac_closure_proto",
     deps = [":aes_cmac_proto"],
-)
-
-go_proto_library(
-    name = "aes_cmac_go_proto",
-    importpath = "github.com/google/tink/proto/aes_cmac_go_proto",
-    proto = ":aes_cmac_proto",
-    deps = [],
 )
 
 objc_proto_compile(
@@ -283,13 +220,6 @@ closure_proto_library(
     deps = [":hmac_proto"],
 )
 
-go_proto_library(
-    name = "hmac_go_proto",
-    importpath = "github.com/google/tink/proto/hmac_go_proto",
-    proto = ":hmac_proto",
-    deps = [":common_go_proto"],
-)
-
 objc_proto_compile(
     name = "hmac_objc_pb",
     protos = ["hmac.proto"],
@@ -311,12 +241,6 @@ proto_library(
 closure_proto_library(
     name = "aes_ctr_closure_proto",
     deps = [":aes_ctr_proto"],
-)
-
-go_proto_library(
-    name = "aes_ctr_go_proto",
-    importpath = "github.com/google/tink/proto/aes_ctr_go_proto",
-    proto = ":aes_ctr_proto",
 )
 
 objc_proto_compile(
@@ -345,16 +269,6 @@ closure_proto_library(
     deps = [":aes_ctr_hmac_aead_proto"],
 )
 
-go_proto_library(
-    name = "aes_ctr_hmac_aead_go_proto",
-    importpath = "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto",
-    proto = ":aes_ctr_hmac_aead_proto",
-    deps = [
-        ":aes_ctr_go_proto",
-        ":hmac_go_proto",
-    ],
-)
-
 objc_proto_compile(
     name = "aes_ctr_hmac_aead_objc_pb",
     protos = ["aes_ctr_hmac_aead.proto"],
@@ -381,12 +295,6 @@ closure_proto_library(
     deps = [":aes_gcm_proto"],
 )
 
-go_proto_library(
-    name = "aes_gcm_go_proto",
-    importpath = "github.com/google/tink/proto/aes_gcm_go_proto",
-    proto = ":aes_gcm_proto",
-)
-
 objc_proto_compile(
     name = "aes_gcm_objc_pb",
     protos = ["aes_gcm.proto"],
@@ -409,12 +317,6 @@ closure_proto_library(
     deps = [":aes_gcm_siv_proto"],
 )
 
-go_proto_library(
-    name = "aes_gcm_siv_go_proto",
-    importpath = "github.com/google/tink/proto/aes_gcm_siv_go_proto",
-    proto = ":aes_gcm_siv_proto",
-)
-
 objc_proto_compile(
     name = "aes_gcm_siv_objc_pb",
     protos = ["aes_gcm_siv.proto"],
@@ -431,16 +333,6 @@ proto_library(
     deps = [
         ":common_proto",
         ":hmac_proto",
-    ],
-)
-
-go_proto_library(
-    name = "aes_ctr_hmac_streaming_go_proto",
-    importpath = "github.com/google/tink/proto/aes_ctr_hmac_streaming_proto",
-    proto = ":aes_ctr_hmac_streaming_proto",
-    deps = [
-        ":common_go_proto",
-        ":hmac_go_proto",
     ],
 )
 
@@ -464,13 +356,6 @@ proto_library(
     deps = [":common_proto"],
 )
 
-go_proto_library(
-    name = "aes_gcm_hkdf_streaming_go_proto",
-    importpath = "github.com/google/tink/proto/aes_gcm_hkdf_streaming_go_proto",
-    proto = ":aes_gcm_hkdf_streaming_proto",
-    deps = [":common_go_proto"],
-)
-
 objc_proto_compile(
     name = "aes_gcm_hkdf_streaming_objc_pb",
     protos = ["aes_gcm_hkdf_streaming.proto"],
@@ -491,12 +376,6 @@ proto_library(
     ],
 )
 
-go_proto_library(
-    name = "aes_eax_go_proto",
-    importpath = "github.com/google/tink/proto/aes_eax_proto",
-    proto = ":aes_eax_proto",
-)
-
 objc_proto_compile(
     name = "aes_eax_objc_pb",
     protos = ["aes_eax.proto"],
@@ -512,12 +391,6 @@ proto_library(
     srcs = [
         "chacha20_poly1305.proto",
     ],
-)
-
-go_proto_library(
-    name = "chacha20_poly1305_go_proto",
-    importpath = "github.com/google/tink/proto/chacha20_poly1305_go_proto",
-    proto = ":chacha20_poly1305_proto",
 )
 
 objc_proto_compile(
@@ -537,12 +410,6 @@ proto_library(
     ],
 )
 
-go_proto_library(
-    name = "kms_aead_go_proto",
-    importpath = "github.com/google/tink/proto/kms_aead_go_proto",
-    proto = ":kms_aead_proto",
-)
-
 objc_proto_compile(
     name = "kms_aead_objc_pb",
     protos = ["kms_aead.proto"],
@@ -559,13 +426,6 @@ proto_library(
         "kms_envelope.proto",
     ],
     deps = [":tink_proto"],
-)
-
-go_proto_library(
-    name = "kms_envelope_go_proto",
-    importpath = "github.com/google/tink/proto/kms_envelope_go_proto",
-    proto = ":kms_envelope_proto",
-    deps = [":tink_go_proto"],
 )
 
 objc_proto_compile(
@@ -597,16 +457,6 @@ closure_proto_library(
     deps = [":ecies_aead_hkdf_proto"],
 )
 
-go_proto_library(
-    name = "ecies_aead_hkdf_go_proto",
-    importpath = "github.com/google/tink/proto/ecies_aead_hkdf_go_proto",
-    proto = ":ecies_aead_hkdf_proto",
-    deps = [
-        ":common_go_proto",
-        ":tink_go_proto",
-    ],
-)
-
 objc_proto_compile(
     name = "ecies_aead_hkdf_objc_pb",
     protos = ["ecies_aead_hkdf.proto"],
@@ -626,12 +476,6 @@ proto_library(
     srcs = [
         "xchacha20_poly1305.proto",
     ],
-)
-
-go_proto_library(
-    name = "xchacha20_poly1305_go_proto",
-    importpath = "github.com/google/tink/proto/xchacha20_poly1305_go_proto",
-    proto = ":xchacha20_poly1305_proto",
 )
 
 objc_proto_compile(
@@ -688,12 +532,6 @@ proto_library(
 closure_proto_library(
     name = "empty_closure_proto",
     deps = [":empty_proto"],
-)
-
-go_proto_library(
-    name = "empty_go_proto",
-    importpath = "github.com/google/tink/proto/empty_go_proto",
-    proto = ":empty_proto",
 )
 
 objc_proto_compile(

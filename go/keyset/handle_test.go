@@ -25,7 +25,7 @@ import (
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestNewHandle(t *testing.T) {

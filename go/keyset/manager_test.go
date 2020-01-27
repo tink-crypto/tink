@@ -22,7 +22,7 @@ import (
 
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testutil"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestKeysetManagerBasic(t *testing.T) {

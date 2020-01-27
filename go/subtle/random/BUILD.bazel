@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 

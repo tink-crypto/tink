@@ -22,8 +22,8 @@ package ecies_aead_hkdf_go_proto
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	common_go_proto "github.com/google/tink/proto/common_go_proto"
-	tink_go_proto "github.com/google/tink/proto/tink_go_proto"
+	common_go_proto "github.com/google/tink/go/proto/common_go_proto"
+	tink_go_proto "github.com/google/tink/go/proto/tink_go_proto"
 	math "math"
 )
 

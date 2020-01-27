@@ -24,11 +24,11 @@ import (
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
-	ctrpb "github.com/google/tink/proto/aes_ctr_go_proto"
-	aeadpb "github.com/google/tink/proto/aes_ctr_hmac_aead_go_proto"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	hmacpb "github.com/google/tink/proto/hmac_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	ctrpb "github.com/google/tink/go/proto/aes_ctr_go_proto"
+	aeadpb "github.com/google/tink/go/proto/aes_ctr_hmac_aead_go_proto"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 const (

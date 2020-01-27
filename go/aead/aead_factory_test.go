@@ -28,7 +28,7 @@ import (
 	"github.com/google/tink/go/tink"
 
 	subtleAEAD "github.com/google/tink/go/subtle/aead"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestFactoryMultipleKeys(t *testing.T) {
