@@ -18,7 +18,7 @@ package com.google.crypto.tink.integration.awskms;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
