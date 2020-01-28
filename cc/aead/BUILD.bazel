@@ -251,6 +251,19 @@ cc_library(
     ],
 )
 
+
+cc_library(
+    name = "mock_aead",
+    hdrs = ["mock_aead.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "//:aead",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
 # tests
 
 cc_test(

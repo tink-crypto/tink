@@ -234,6 +234,14 @@ tink_cc_library(
     tink::proto::kms_envelope_cc_proto
 )
 
+tink_cc_library(
+  NAME mock_aead
+  SRCS mock_aead.h
+  DEPS
+    tink::core::aead
+    gmock
+)
+
 # tests
 
 tink_cc_test(
