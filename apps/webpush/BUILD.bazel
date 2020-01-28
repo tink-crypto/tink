@@ -2,7 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+load("@tink_java//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 java_library(
     name = "webpush",
@@ -11,14 +11,14 @@ java_library(
     ]),
     javacopts = JAVACOPTS_OSS,
     deps = [
-        "//java",
-        "//java:subtle",
+        "@tink_java//:java",
+        "@tink_java//:subtle",
     ],
 )
 
 # Maven Jars
 
-load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
+load("@tink_java//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
     name = "maven",
@@ -29,7 +29,7 @@ gen_maven_jar_rules(
 
 # Tests
 
-load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
+load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
 
 java_library(
     name = "generator_test",
@@ -39,7 +39,7 @@ java_library(
     ]),
     deps = [
         ":webpush",
-        "//java:testonly",
+        "@tink_java//:testonly",
         "@maven//:junit_junit",
     ],
 )
