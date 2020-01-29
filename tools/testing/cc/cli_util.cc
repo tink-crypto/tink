@@ -33,6 +33,8 @@
 #include "tink/output_stream.h"
 #include "tink/config/tink_config.h"
 #include "tink/util/status.h"
+#include "tink/integration/gcpkms/gcp_kms_client.h"
+#include "tink/kms_clients.h"
 
 using crypto::tink::BinaryKeysetReader;
 using crypto::tink::BinaryKeysetWriter;
@@ -44,8 +46,10 @@ using crypto::tink::JsonKeysetWriter;
 using crypto::tink::KeysetHandle;
 using crypto::tink::KeysetReader;
 using crypto::tink::KeysetWriter;
+using crypto::tink::KmsClients;
 using crypto::tink::OutputStream;
 using crypto::tink::TinkConfig;
+using crypto::tink::integration::gcpkms::GcpKmsClient;
 
 namespace {
 
@@ -178,6 +182,15 @@ void CliUtil::InitTink() {
               << status.error_message() << std::endl;
     exit(1);
   }
+
+  std::string creds_file = std::string(getenv("TEST_SRCDIR")) + "/tink_base/testdata/credential.json";
+  auto client_result = GcpKmsClient::New("", creds_file);
+  if (!client_result.ok()) {
+    std::clog << "Connecting to GCP client failed: " << status.error_message()
+              << std::endl;
+    exit(1);
+  }
+  KmsClients::Add(std::move(client_result.ValueOrDie()));
 }
 
 // static

@@ -87,9 +87,9 @@ util::StatusOr<std::string> KmsEnvelopeAead::Encrypt(
   if (!dek_result.ok()) return dek_result.status();
   auto dek = std::move(dek_result.ValueOrDie());
 
-  // Wrap DEK with remote.
+  // Wrap DEK key values with remote.
   auto dek_encrypt_result = remote_aead_->Encrypt(
-      dek->SerializeAsString(), kEmptyAssociatedData);
+      dek->value(), kEmptyAssociatedData);
   if (!dek_encrypt_result.ok()) return dek_encrypt_result.status();
 
   // Encrypt plaintext using DEK.
@@ -131,10 +131,9 @@ util::StatusOr<std::string> KmsEnvelopeAead::Decrypt(
 
   // Create AEAD from DEK.
   google::crypto::tink::KeyData dek;
-  if (!dek.ParseFromString(dek_decrypt_result.ValueOrDie())) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "invalid ciphertext");
-  }
+  dek.set_type_url(dek_template_.type_url());
+  dek.set_value(dek_decrypt_result.ValueOrDie());
+  dek.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
 
   // Encrypt plaintext using DEK.
   auto aead_result = Registry::GetPrimitive<Aead>(dek);

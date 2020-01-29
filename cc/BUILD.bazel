@@ -583,6 +583,7 @@ cc_library(
     srcs = ["core/kms_clients.cc"],
     hdrs = ["kms_clients.h"],
     include_prefix = "tink",
+    visibility = ["//visibility:public"],
     deps = [
         ":kms_client",
         "//util:errors",

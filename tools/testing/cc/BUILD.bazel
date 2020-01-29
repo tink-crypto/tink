@@ -6,14 +6,18 @@ cc_library(
     name = "cli_util",
     srcs = ["cli_util.cc"],
     hdrs = ["cli_util.h"],
+    data = ["@tink_base//testdata:credentials"],
+    testonly = 1,
     deps = [
         "@tink_cc",
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:cleartext_keyset_handle",
         "@tink_cc//:json_keyset_reader",
         "@tink_cc//:json_keyset_writer",
+        "@tink_cc//:kms_clients",
         "@tink_cc//config:tink_config",
         "@tink_cc//util:status",
+        "@tink_cc//integration/gcpkms:gcp_kms_client",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
@@ -21,6 +25,7 @@ cc_library(
 
 cc_binary(
     name = "aws_kms_aead_cli",
+    testonly = 1,
     srcs = ["aws_kms_aead_cli.cc"],
     deps = [
         ":cli_util",
@@ -34,6 +39,7 @@ cc_binary(
 
 cc_binary(
     name = "gcp_kms_aead_cli",
+    testonly = 1,
     srcs = ["gcp_kms_aead_cli.cc"],
     deps = [
         ":cli_util",
@@ -45,6 +51,7 @@ cc_binary(
 
 cc_binary(
     name = "keyset_reader_writer_cli",
+    testonly = 1,
     srcs = ["keyset_reader_writer_cli.cc"],
     deps = [
         ":cli_util",
@@ -62,6 +69,7 @@ cc_binary(
 
 cc_binary(
     name = "aead_cli_cc",
+    testonly = 1,
     srcs = ["aead_cli.cc"],
     deps = [
         ":cli_util",
@@ -71,6 +79,7 @@ cc_binary(
 
 cc_binary(
     name = "deterministic_aead_cli_cc",
+    testonly = 1,
     srcs = ["deterministic_aead_cli.cc"],
     deps = [
         ":cli_util",
@@ -80,6 +89,7 @@ cc_binary(
 
 cc_binary(
     name = "streaming_aead_cli_cc",
+    testonly = 1,
     srcs = ["streaming_aead_cli.cc"],
     deps = [
         ":cli_util",
@@ -93,6 +103,7 @@ cc_binary(
 cc_binary(
     name = "mac_cli_cc",
     srcs = ["mac_cli.cc"],
+    testonly = 1,
     deps = [
         ":cli_util",
         "@tink_cc",
@@ -101,6 +112,7 @@ cc_binary(
 
 cc_binary(
     name = "hybrid_encrypt_cli_cc",
+    testonly = 1,
     srcs = ["hybrid_encrypt_cli.cc"],
     deps = [
         ":cli_util",
@@ -110,6 +122,7 @@ cc_binary(
 
 cc_binary(
     name = "hybrid_decrypt_cli_cc",
+    testonly = 1,
     srcs = ["hybrid_decrypt_cli.cc"],
     deps = [
         ":cli_util",
@@ -119,6 +132,7 @@ cc_binary(
 
 cc_binary(
     name = "public_key_sign_cli_cc",
+    testonly = 1,
     srcs = ["public_key_sign_cli.cc"],
     deps = [
         ":cli_util",
@@ -128,6 +142,7 @@ cc_binary(
 
 cc_binary(
     name = "public_key_verify_cli_cc",
+    testonly = 1,
     srcs = ["public_key_verify_cli.cc"],
     deps = [
         ":cli_util",

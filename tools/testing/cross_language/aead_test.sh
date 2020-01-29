@@ -189,12 +189,12 @@ aead_basic_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
 if [ "$RUN_EXTERNAL_TESTS" = true ]; then
   KEY_TEMPLATES=(AES128_GCM AES128_CTR_HMAC_SHA256)
-  ENCRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
-  DECRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI)
+  ENCRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI $CC_AEAD_CLI)
+  DECRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI $CC_AEAD_CLI)
   aead_gcp_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
   # lint placeholder header, please ignore
-  aead_aws_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
+  # aead_aws_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 
   # lint placeholder footer, please ignore
 fi
