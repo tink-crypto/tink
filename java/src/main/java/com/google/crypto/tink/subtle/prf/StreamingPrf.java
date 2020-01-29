@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.subtle.prf;
 
+import com.google.errorprone.annotations.Immutable;
 import java.io.InputStream;
 
 /**
@@ -42,6 +43,7 @@ import java.io.InputStream;
  *   }
  * }</pre>
  */
+@Immutable
 public interface StreamingPrf {
   /**
    * Returns an {@link InputStream} which is indistinguishable from a stream returning random bytes

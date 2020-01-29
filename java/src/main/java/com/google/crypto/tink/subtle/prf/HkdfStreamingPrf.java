@@ -18,6 +18,7 @@ import static java.lang.Math.min;
 
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.errorprone.annotations.Immutable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import javax.crypto.spec.SecretKeySpec;
 
 /** An implementation of the HKDF pseudorandom function, as given by RFC 5869. */
+@Immutable
 public class HkdfStreamingPrf implements StreamingPrf {
   private static String getJavaxHmacName(HashType hashType) throws GeneralSecurityException {
     switch (hashType) {
@@ -50,7 +52,13 @@ public class HkdfStreamingPrf implements StreamingPrf {
   }
 
   private final HashType hashType;
+
+  // Manual inspection shows that this is never mutated (and copied on construction)
+  @SuppressWarnings("Immutable")
   private final byte[] ikm;
+
+  // Manual inspection shows that this is never mutated (and copied on construction)
+  @SuppressWarnings("Immutable")
   private final byte[] salt;
 
   private class HkdfInputStream extends InputStream {
