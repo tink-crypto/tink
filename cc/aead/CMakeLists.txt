@@ -210,6 +210,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::tink_cc_proto
     absl::strings
+    absl::base
 )
 
 tink_cc_library(
@@ -411,6 +412,7 @@ tink_cc_test(
   NAME kms_envelope_aead_test
   SRCS kms_envelope_aead_test.cc
   DEPS
+    absl::base
     absl::memory
     absl::strings
     tink::aead::aead_config
