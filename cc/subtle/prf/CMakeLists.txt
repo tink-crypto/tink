@@ -7,6 +7,19 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME streaming_prf_wrapper
+  SRCS
+    streaming_prf_wrapper.cc
+    streaming_prf_wrapper.h
+  DEPS
+    tink::subtle_prf::streaming_prf
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_library(
   NAME hkdf_streaming_prf
   SRCS
     hkdf_streaming_prf.cc
@@ -33,4 +46,18 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     gmock
+)
+
+tink_cc_test(
+  NAME streaming_prf_wrapper_test
+  SRCS streaming_prf_wrapper_test.cc
+  DEPS
+    tink::subtle_prf::streaming_prf_wrapper
+    tink::proto::tink_cc_proto
+    tink::util::input_stream_util
+    tink::util::istream_input_stream
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
+    absl::strings
 )
