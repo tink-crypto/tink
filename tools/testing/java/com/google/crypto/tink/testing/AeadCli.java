@@ -21,9 +21,8 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
-
 import com.google.crypto.tink.integration.awskms.AwsKmsClient;
+import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 
 /**
  * A command-line utility for testing Aead-primitives. It requires 5 arguments: keyset-file: name of
@@ -46,13 +45,10 @@ public class AeadCli {
     String associatedDataFile = args[3];
     String outputFilename = args[4];
 
-        KmsClient gcpKmsClient = new GcpKmsClient().withCredentials(
-        "../tink_base/" + TestUtil.SERVICE_ACCOUNT_FILE);
+    KmsClient gcpKmsClient = new GcpKmsClient().withCredentials("../tink_base/" + TestUtil.SERVICE_ACCOUNT_FILE);
     KmsClients.add(gcpKmsClient);
-    AeadConfig.register();
-
-    KmsClient awsKmsClient = new AwsKmsClient(TestUtil.AWS_CRYPTO_URI).withCredentials(
-        "../tink_base/" + TestUtil.AWS_CREDS);
+    KmsClient awsKmsClient =
+        new AwsKmsClient(TestUtil.AWS_CRYPTO_URI).withCredentials("../tink_base/" + TestUtil.AWS_CREDS);
     KmsClients.add(awsKmsClient);
     AeadConfig.register();
 

@@ -30,9 +30,9 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "@tink_base//:tink_version",
         "//testing:version_cli_java",
         "//testing/cc:version_cli_cc",
+        "@tink_base//:tink_version",
     ],
 )
 
@@ -47,14 +47,29 @@ sh_test(
         "//testing:aead_cli_java",
         "//testing/cc:aead_cli_cc",
         "//testing/go:aead_cli_go",
+        "//tinkey",
+        "@tink_base//testdata:credentials",
+    ],
+)
+
+sh_test(
+    name = "aead_envelope_test",
+    size = "medium",
+    srcs = [
+        "aead_envelope_test.sh",
+    ],
+    args = select({
+        "//remote_build_execution:rbe": ["--no_external_tests"],
+        "//conditions:default": [],
+    }),
+    data = [
+        ":test_lib",
+        "//testing:aead_cli_java",
+        "//testing/go:aead_cli_go",
         "//testing/go:generate_envelope_keyset",
         "//tinkey",
         "@tink_base//testdata:credentials",
     ],
-    args = select({
-      "//remote_build_execution:rbe": ["--no_external_tests"],
-      "//conditions:default": [],
-    }),
 )
 
 sh_test(
@@ -114,8 +129,8 @@ sh_test(
         "//testing:hybrid_encrypt_cli_java",
         "//testing/cc:hybrid_decrypt_cli_cc",
         "//testing/cc:hybrid_encrypt_cli_cc",
-        "//testing/go:hybrid_encrypt_cli_go",
         "//testing/go:hybrid_decrypt_cli_go",
+        "//testing/go:hybrid_encrypt_cli_go",
         "//tinkey",
     ],
 )
