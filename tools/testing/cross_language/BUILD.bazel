@@ -58,10 +58,7 @@ sh_test(
     srcs = [
         "aead_envelope_test.sh",
     ],
-    args = select({
-        "//remote_build_execution:rbe": ["--no_external_tests"],
-        "//conditions:default": [],
-    }),
+    tags = ["no_rbe"],
     data = [
         ":test_lib",
         "//testing:aead_cli_java",

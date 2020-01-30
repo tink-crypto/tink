@@ -19,13 +19,6 @@ JAVA_AEAD_CLI="$ROOT_DIR/testing/aead_cli_java"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 # TODO(b/136245485): Update this script to use go/gbash.
-# Envelope encryption tests require external resources cannot run on neither
-# Kokoro/RBE nor TAP/Forge. They can run only on Kokoro non-RBE.
-# If the --no_external_tests flag is specified, no tests are run, this script
-# simply exits.
-if [ "$1" == "--no_external_tests" ]; then
-  exit 0
-fi
 
 source $TEST_UTIL || exit 1
 
