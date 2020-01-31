@@ -41,7 +41,8 @@ go get github.com/google/tink/go/...
 )
 
 # On Linux, run all Maven tests and upload snapshot jars
-if [[ $PLATFORM == 'linux' ]]; then
-  ./maven/publish-snapshot.sh
-  ./maven/test-snapshot.sh
-fi
+# TODO(b/148672827): Disable until deployment script is updated.
+#if [[ $PLATFORM == 'linux' ]]; then
+#  ./maven/publish-snapshot.sh
+#  ./maven/test-snapshot.sh
+#fi
