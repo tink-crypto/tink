@@ -16,22 +16,24 @@
 
 #include "testing/cc/cli_util.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
-#include "tink/keyset_reader.h"
-#include "tink/keyset_writer.h"
+#include "tink/config.h"
+#include "tink/config/tink_config.h"
+#include "tink/input_stream.h"
+#include "tink/integration/gcpkms/gcp_kms_client.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
-#include "tink/config.h"
-#include "tink/input_stream.h"
 #include "tink/keyset_handle.h"
+#include "tink/keyset_reader.h"
+#include "tink/keyset_writer.h"
+#include "tink/kms_clients.h"
 #include "tink/output_stream.h"
-#include "tink/config/tink_config.h"
 #include "tink/util/status.h"
 
 using crypto::tink::BinaryKeysetReader;
@@ -44,19 +46,21 @@ using crypto::tink::JsonKeysetWriter;
 using crypto::tink::KeysetHandle;
 using crypto::tink::KeysetReader;
 using crypto::tink::KeysetWriter;
+using crypto::tink::KmsClients;
 using crypto::tink::OutputStream;
 using crypto::tink::TinkConfig;
+using crypto::tink::integration::gcpkms::GcpKmsClient;
+using crypto::tink::util::Status;
 
 namespace {
 
 // Writes 'contents' of the specified 'size' to 'output_stream'.
 // In case of errors writes a log message and aborts.
-void WriteToStream(OutputStream* output_stream,
-                   const void* contents,
+void WriteToStream(OutputStream* output_stream, const void* contents,
                    int size) {
   if (output_stream == nullptr) {
-      std::clog << "'output_stream' must be non-null" << std::endl;
-      exit(1);
+    std::clog << "'output_stream' must be non-null" << std::endl;
+    exit(1);
   }
   void* buffer;
   int pos = 0;
@@ -66,8 +70,8 @@ void WriteToStream(OutputStream* output_stream,
   while (remaining > 0) {
     auto next_result = output_stream->Next(&buffer);
     if (!next_result.ok()) {
-      std::clog << "Error writing to a stream: "
-                << next_result.status() << std::endl;
+      std::clog << "Error writing to a stream: " << next_result.status()
+                << std::endl;
       exit(1);
     }
     available_space = next_result.ValueOrDie();
@@ -174,10 +178,33 @@ void CliUtil::InitTink() {
   std::clog << "Initializing Tink...\n";
   auto status = TinkConfig::Register();
   if (!status.ok()) {
-    std::clog << "Initialization of Tink failed: "
-              << status.error_message() << std::endl;
+    std::clog << "Initialization of Tink failed: " << status.error_message()
+              << std::endl;
     exit(1);
   }
+
+  Status result = InitGcp();
+  if (!result.ok()) {
+    std::clog << result.error_message() << std::endl;
+  }
+}
+
+// static
+Status CliUtil::InitGcp() {
+  std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
+                           "/tink_base/testdata/credential.json";
+  auto client_result = GcpKmsClient::New("", creds_file);
+  if (!client_result.ok()) {
+    return Status(crypto::tink::util::error::INTERNAL,
+                        "Failed to connect to GCP client.");
+  }
+  auto client_add_result =
+      KmsClients::Add(std::move(client_result.ValueOrDie()));
+  if (!client_add_result.ok()) {
+    return Status(crypto::tink::util::error::INTERNAL,
+                        "Failed to add KMS client.");
+  }
+  return Status::OK;
 }
 
 // static
@@ -210,11 +237,11 @@ void CliUtil::Write(const std::string& output, const std::string& filename) {
 
 // static
 void CliUtil::CopyStream(InputStream* input_stream,
-                          OutputStream* output_stream) {
+                         OutputStream* output_stream) {
   if (input_stream == nullptr || output_stream == nullptr) {
-      std::clog << "'input_stream' and 'output_stream' must be non-null"
-                << std::endl;
-      exit(1);
+    std::clog << "'input_stream' and 'output_stream' must be non-null"
+              << std::endl;
+    exit(1);
   }
   const void* in_buffer;
   while (true) {
@@ -230,8 +257,8 @@ void CliUtil::CopyStream(InputStream* input_stream,
       return;
     }
     if (!next_result.ok()) {
-      std::clog << "Error reading from a stream: "
-                << next_result.status() << std::endl;
+      std::clog << "Error reading from a stream: " << next_result.status()
+                << std::endl;
       exit(1);
     }
     auto read_bytes = next_result.ValueOrDie();

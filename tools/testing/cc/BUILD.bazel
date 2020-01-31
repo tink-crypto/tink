@@ -1,4 +1,7 @@
-package(default_visibility = ["//:__subpackages__"])
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
 
 licenses(["notice"])
 
@@ -6,16 +9,19 @@ cc_library(
     name = "cli_util",
     srcs = ["cli_util.cc"],
     hdrs = ["cli_util.h"],
+    data = ["@tink_base//testdata:credentials"],
     deps = [
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
         "@tink_cc",
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:cleartext_keyset_handle",
         "@tink_cc//:json_keyset_reader",
         "@tink_cc//:json_keyset_writer",
+        "@tink_cc//:kms_clients",
         "@tink_cc//config:tink_config",
+        "@tink_cc//integration/gcpkms:gcp_kms_client",
         "@tink_cc//util:status",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -24,11 +30,11 @@ cc_binary(
     srcs = ["aws_kms_aead_cli.cc"],
     deps = [
         ":cli_util",
+        "@aws_cpp_sdk//:aws_sdk_core",
         "@tink_cc",
         "@tink_cc//integration/awskms:aws_crypto",
         "@tink_cc//integration/awskms:aws_kms_aead",
         "@tink_cc//integration/awskms:aws_kms_client",
-        "@aws_cpp_sdk//:aws_sdk_core",
     ],
 )
 
@@ -143,8 +149,8 @@ sh_test(
     ],
     data = [
         ":aws_kms_aead_cli",
-        "@tink_base//testdata:credentials",
         "//testing/cross_language:test_lib",
+        "@tink_base//testdata:credentials",
     ],
     tags = ["no_rbe"],
 )
@@ -157,9 +163,9 @@ sh_test(
     ],
     data = [
         ":gcp_kms_aead_cli",
-        "@tink_base//testdata:credentials",
         "//testing/cross_language:test_lib",
         "@google_root_pem//file",
+        "@tink_base//testdata:credentials",
     ],
     tags = ["no_rbe"],
 )

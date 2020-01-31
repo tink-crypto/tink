@@ -61,6 +61,10 @@ class CliUtil {
   // In case of errors writes a log message and aborts.
   static void InitTink();
 
+  // Initializes a GCP client.
+  // In case of errors writes a log message.
+  static crypto::tink::util::Status InitGcp();
+
   // Reads the specified file and returns the contents as a string.
   // In case of errors writes a log message and aborts.
   static std::string Read(const std::string& filename);
