@@ -14,6 +14,7 @@
 
 
 ROOT_DIR="$TEST_SRCDIR/tools"
+CC_AEAD_CLI="$ROOT_DIR/testing/cc/aead_cli_cc"
 GO_AEAD_CLI="$ROOT_DIR/testing/go/aead_cli_go"
 JAVA_AEAD_CLI="$ROOT_DIR/testing/aead_cli_java"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"

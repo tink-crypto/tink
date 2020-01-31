@@ -62,6 +62,7 @@ sh_test(
     data = [
         ":test_lib",
         "//testing:aead_cli_java",
+        "//testing/cc:aead_cli_cc",
         "//testing/go:aead_cli_go",
         "//testing/go:generate_envelope_keyset",
         "//tinkey",
