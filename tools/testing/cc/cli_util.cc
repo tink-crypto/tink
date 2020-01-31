@@ -26,6 +26,7 @@
 #include "tink/config.h"
 #include "tink/config/tink_config.h"
 #include "tink/input_stream.h"
+#include "tink/integration/awskms/aws_kms_client.h"
 #include "tink/integration/gcpkms/gcp_kms_client.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
@@ -49,6 +50,7 @@ using crypto::tink::KeysetWriter;
 using crypto::tink::KmsClients;
 using crypto::tink::OutputStream;
 using crypto::tink::TinkConfig;
+using crypto::tink::integration::awskms::AwsKmsClient;
 using crypto::tink::integration::gcpkms::GcpKmsClient;
 using crypto::tink::util::Status;
 
@@ -183,9 +185,14 @@ void CliUtil::InitTink() {
     exit(1);
   }
 
-  Status result = InitGcp();
-  if (!result.ok()) {
-    std::clog << result.error_message() << std::endl;
+  Status gcp_result = InitGcp();
+  if (!gcp_result.ok()) {
+    std::clog << gcp_result.error_message() << std::endl;
+  }
+
+  Status aws_result = InitAws();
+  if (!aws_result.ok()) {
+    std::clog << aws_result.error_message() << std::endl;
   }
 }
 
@@ -197,6 +204,24 @@ Status CliUtil::InitGcp() {
   if (!client_result.ok()) {
     return Status(crypto::tink::util::error::INTERNAL,
                         "Failed to connect to GCP client.");
+  }
+  auto client_add_result =
+      KmsClients::Add(std::move(client_result.ValueOrDie()));
+  if (!client_add_result.ok()) {
+    return Status(crypto::tink::util::error::INTERNAL,
+                        "Failed to add KMS client.");
+  }
+  return Status::OK;
+}
+
+// static
+Status CliUtil::InitAws() {
+  std::string creds_file = std::string(getenv("TEST_SRCDIR")) +
+                           "/tink_base/testdata/aws_credentials_cc.txt";
+  auto client_result = AwsKmsClient::New("", creds_file);
+  if (!client_result.ok()) {
+    return Status(crypto::tink::util::error::INTERNAL,
+                        "Failed to connect to AWS client.");
   }
   auto client_add_result =
       KmsClients::Add(std::move(client_result.ValueOrDie()));

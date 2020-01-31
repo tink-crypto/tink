@@ -62,8 +62,10 @@ class CliUtil {
   static void InitTink();
 
   // Initializes a GCP client.
-  // In case of errors writes a log message.
   static crypto::tink::util::Status InitGcp();
+
+  // Initializes an AWS client.
+  static crypto::tink::util::Status InitAws();
 
   // Reads the specified file and returns the contents as a string.
   // In case of errors writes a log message and aborts.
