@@ -58,7 +58,6 @@ sh_test(
     srcs = [
         "aead_envelope_test.sh",
     ],
-    tags = ["no_rbe"],
     data = [
         ":test_lib",
         "//testing:aead_cli_java",
@@ -66,8 +65,10 @@ sh_test(
         "//testing/go:aead_cli_go",
         "//testing/go:generate_envelope_keyset",
         "//tinkey",
+        "@google_root_pem//file",
         "@tink_base//testdata:credentials",
     ],
+    tags = ["no_rbe"],
 )
 
 sh_test(

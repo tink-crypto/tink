@@ -21,6 +21,10 @@ TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 # TODO(b/136245485): Update this script to use go/gbash.
 
+# Roots for GRPC
+# (https://github.com/grpc/grpc/blob/master/doc/environment_variables.md)
+export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="$TEST_SRCDIR/google_root_pem/file/downloaded"
+
 source $TEST_UTIL || exit 1
 
 #############################################################################
