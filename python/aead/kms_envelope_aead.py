@@ -57,8 +57,8 @@ class KmsEnvelopeAead(aead.Aead):
     # Encrypt plaintext
     ciphertext = dek_aead.encrypt(plaintext, associated_data)
 
-    # Wrap DEK with remote
-    encrypted_dek = self.remote_aead.encrypt(dek.SerializeToString(), b'')
+    # Wrap DEK key values with remote
+    encrypted_dek = self.remote_aead.encrypt(dek.value, b'')
 
     # Construct ciphertext, DEK length encoded as big endian
     enc_dek_len = struct.pack('>I', len(encrypted_dek))
@@ -83,7 +83,9 @@ class KmsEnvelopeAead(aead.Aead):
 
     # Get AEAD primitive based on DEK
     dek = tink_pb2.KeyData()
-    dek.ParseFromString(dek_bytes)
+    dek.type_url = self.key_template.type_url
+    dek.value = dek_bytes
+    dek.key_material_type = tink_pb2.KeyData.KeyMaterialType.SYMMETRIC
     dek_aead = core.Registry.primitive(dek, aead.Aead)
 
     # Extract ciphertext payload and decrypt
