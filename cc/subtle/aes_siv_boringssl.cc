@@ -208,7 +208,8 @@ util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
   size_t plaintext_size = ciphertext.size() - BLOCK_SIZE;
   std::vector<uint8_t> pt(plaintext_size);
   const uint8_t *siv = reinterpret_cast<const uint8_t*>(&ciphertext[0]);
-  const uint8_t *ct = reinterpret_cast<const uint8_t*>(&ciphertext[BLOCK_SIZE]);
+  const uint8_t* ct =
+      reinterpret_cast<const uint8_t*>(&ciphertext[0]) + BLOCK_SIZE;
   CtrCrypt(siv, ct, pt.data(), plaintext_size);
 
   uint8_t s2v[BLOCK_SIZE];
