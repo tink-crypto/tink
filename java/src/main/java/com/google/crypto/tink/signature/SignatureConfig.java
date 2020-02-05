@@ -44,10 +44,6 @@ public final class SignatureConfig {
       new Ed25519PublicKeyManager().getKeyType();
   public static final String ED25519_PRIVATE_KEY_TYPE_URL =
       new Ed25519PrivateKeyManager().getKeyType();
-  public static final String RSA_PKCS1_PRIVATE_KEY_TYPE_URL =
-      new RsaSsaPkcs1SignKeyManager().getKeyType();
-  public static final String RSA_PKCS1_PUBLIC_KEY_TYPE_URL =
-      new RsaSsaPkcs1VerifyKeyManager().getKeyType();
 
   /** @deprecated */
   @Deprecated
