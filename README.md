@@ -162,6 +162,7 @@ Tink is maintained by (A-Z):
 -   Quan Nguyen
 -   Bartosz Przydatek
 -   Enzo Puig
+-   Sophie Schmieg
 -   Veronika Slívová
 -   Paula Vidas
 -   Jürg Wullschleger
