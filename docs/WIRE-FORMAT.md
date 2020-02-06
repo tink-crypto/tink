@@ -122,6 +122,22 @@ IV || ciphertext.
 AES-GCM-HKDF uses a nonce prefix of 7 bytes to get 12 byte IVs for the segment
 encryption. The key derived is the same size as the input key material.
 
+#### Envelope Encryption
+
+Envelope encryption encrypts the data with a data encryption key `DEK` using
+Tink's AEAD primitives. In addition the `DEK` is encrypted with an external
+provider (e.g. GCP) and prepended to the `ciphertext`. The format for envelope
+encryption is as follows:
+
+```
+DEK length || encrypted DEK || ciphertext
+```
+
+The `DEK length` is 4 bytes, storing the length of the `encrypted DEK` as a
+32-bit big endian integer. The format of the `encrypted DEK` depends on the
+external provider which was used for encrypting the `DEK`. The `ciphertext` will
+have the exact same format as the AEAD primitive corresponding to the `DEK`.
+
 ### MAC
 
 Tink follows the corresponding RFCs.
