@@ -458,6 +458,7 @@ cc_library(
     deps = [
         ":common_enums",
         ":random",
+        ":subtle_util",
         ":subtle_util_boringssl",
         "//:aead",
         "//util:errors",

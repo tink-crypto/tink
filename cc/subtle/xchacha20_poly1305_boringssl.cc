@@ -16,6 +16,7 @@
 
 #include "tink/subtle/xchacha20_poly1305_boringssl.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,7 @@
 #include "openssl/evp.h"
 #include "tink/aead.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -79,16 +81,17 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
   size_t ciphertext_size = nonce.size() + plaintext.size() + TAG_SIZE;
 
   // Write the nonce in the output buffer.
-  std::vector<uint8_t> ct(ciphertext_size + 1);
-  memcpy(&ct[0], reinterpret_cast<const uint8_t*>(nonce.data()), nonce.size());
+  std::string ct = nonce;
+  ResizeStringUninitialized(&ct, ciphertext_size);
   size_t written = nonce.size();
 
   // Encrypt the plaintext and store it after the nonce.
   size_t out_len = 0;
   int ret = EVP_AEAD_CTX_seal(
-      ctx.get(), &ct[written], &out_len, ciphertext_size - written,
-      reinterpret_cast<const uint8_t*>(nonce.data()), nonce.size(),
-      reinterpret_cast<const uint8_t*>(plaintext.data()), plaintext.size(),
+      ctx.get(), reinterpret_cast<uint8_t*>(&ct[written]), &out_len,
+      ciphertext_size - written, reinterpret_cast<const uint8_t*>(nonce.data()),
+      nonce.size(), reinterpret_cast<const uint8_t*>(plaintext.data()),
+      plaintext.size(),
       reinterpret_cast<const uint8_t*>(additional_data.data()),
       additional_data.size());
   if (ret != 1) {
@@ -100,7 +103,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
   if (written != ciphertext_size) {
     return util::Status(util::error::INTERNAL, "Incorrect ciphertext size");
   }
-  return std::string(reinterpret_cast<const char*>(&ct[0]), written);
+  return ct;
 }
 
 util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
@@ -121,8 +124,9 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
                         "could not initialize EVP_AEAD_CTX");
   }
 
+  std::string out;
   size_t out_size = ciphertext.size() - NONCE_SIZE - TAG_SIZE;
-  std::vector<uint8_t> out(out_size + 1);
+  ResizeStringUninitialized(&out, out_size);
 
   absl::string_view nonce = ciphertext.substr(0, NONCE_SIZE);
   absl::string_view encrypted =
@@ -130,7 +134,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
 
   size_t len = 0;
   int ret = EVP_AEAD_CTX_open(
-      ctx.get(), &out[0], &len, out_size,
+      ctx.get(), reinterpret_cast<uint8_t*>(&out[0]), &len, out_size,
       reinterpret_cast<const uint8_t*>(nonce.data()), nonce.size(),
       reinterpret_cast<const uint8_t*>(encrypted.data()), encrypted.size(),
       reinterpret_cast<const uint8_t*>(additional_data.data()),
@@ -143,7 +147,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
     return util::Status(util::error::INTERNAL, "Incorrect output size");
   }
 
-  return std::string(reinterpret_cast<const char*>(&out[0]), out_size);
+  return out;
 }
 
 }  // namespace subtle

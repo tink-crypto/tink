@@ -434,6 +434,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::random
+    tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::core::aead
     tink::util::errors
