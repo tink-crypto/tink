@@ -158,6 +158,7 @@ Tink is maintained by (A-Z):
 -   Tanuj Dhir
 -   Thai Duong
 -   Thomas Holenstein
+-   Stefan Kölbl
 -   Charles Lee
 -   Quan Nguyen
 -   Bartosz Przydatek
