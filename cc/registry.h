@@ -51,10 +51,6 @@ class Registry {
  public:
   // Returns a catalogue with the given name (if any found).
   // Keeps the ownership of the catalogue.
-  // TODO(przydatek): consider changing return value to
-  //   StatusOr<std::reference_wrapper<KeyManager<P>>>
-  // (cannot return reference directly, as StatusOr does not support it,
-  // see https://goo.gl/x0ymDz)
   template <class P>
   ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
