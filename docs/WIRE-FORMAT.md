@@ -172,9 +172,9 @@ where kem is the full kem as bytes.
 ### Digital Signatures
 
 Depending on the corresponding field in the key, the format of a digital
-signature is either `IEEE_P1363 ASN.1` format and `DER` format for ECDSA.
+signature is either `IEEE P1363` format and `ASN.1 DER` format for ECDSA.
 
-The IEEE_P1363 signature's format is `r || s`, where `r` and `s` are zero-padded
+The `IEEE P1363` signature's format is `r || s`, where `r` and `s` are zero-padded
 and have the same size in bytes as the order of the curve. For example, for
 `NIST P-256` curve, `r` and `s` are zero-padded to 32 bytes.
 
@@ -192,4 +192,4 @@ In particular, the encoding is:
 ```
 
 Tink follows the best practices for signature verification as outlined by
-[bitcoin](https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki)
+[bitcoin](https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki).
