@@ -114,8 +114,8 @@ run_linux_tests() {
 
 run_macos_tests() {
   # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=13.0}"
-  : "${XCODE_VERSION:=11.0}"
+  : "${IOS_SDK_VERSION:=13.2}"
+  : "${XCODE_VERSION:=11.3}"
 
   # --- Build all the iOS targets.
   cd objc
