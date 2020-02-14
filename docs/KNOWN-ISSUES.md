@@ -52,3 +52,15 @@ tickets or emailing the maintainers at `tink-users@googlegroups.com`.
     [transaction
     malleability](https://en.bitcoin.it/wiki/Transaction_malleability). In that
     case you want to use ED25519 signatures which are non-malleable.
+
+## Envelope encryption - Benign malleability
+
+*   Envelope encryption uses a third-party provider (e.g. GCP, AWS) to encrypt
+    the *data encryption key (DEK)*. It is possible to modify certain parts of
+    the *encrypted DEK* without detection when using *KmsEnvelopeAead* with
+    *AwsKmsAead* or *GcpKmsAead* as the remote provider. This is due to some
+    metadata being included (for instance version numbers) which is not
+    authenticated and modifications are not detected by the provider. Note that
+    this violates the CCA2 property for this interface, although the ciphertext
+    will still decrypt to the correct DEK. When using this interface one should
+    not rely on that for each DEK there only exists a single *encrypted DEK*.
