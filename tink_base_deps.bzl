@@ -9,26 +9,6 @@ def tink_base_deps():
 
     """
 
-    #-----------------------------------------------------------------------------
-    # Per-language deps, to be moved to language-specific modules.
-    #-----------------------------------------------------------------------------
-    # ----- Python
-    native.new_local_repository(
-        name = "clif",
-        build_file = "third_party/clif.BUILD.bazel",
-        path = "/usr/local",
-    )
-
-    # NOTE: "rules_python" must be loaded before the proto-imports, as proto uses
-    #       an older version which is incompatible with our Python implementation.
-    # Commit from 2019-11-15
-    http_archive(
-        name = "rules_python",
-        strip_prefix = "rules_python-94677401bc56ed5d756f50b441a6a5c7f735a6d4",
-        url = "https://github.com/bazelbuild/rules_python/archive/94677401bc56ed5d756f50b441a6a5c7f735a6d4.zip",
-        sha256 = "de39bc4d6605e6d395faf5e07516c64c8d833404ee3eb132b5ff1161f9617dec",
-    )
-
     # ----- Go
     # Release from 2019-10-31
     http_archive(

@@ -18,7 +18,7 @@ java_library(
     srcs = ["StreamingPrf.java"],
     javacopts = JAVACOPTS_OSS,
     deps = [
-        "@com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -29,6 +29,6 @@ java_library(
     deps = [
         ":streaming_prf",
         "//src/main/java/com/google/crypto/tink/subtle",
-        "@com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
