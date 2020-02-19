@@ -55,6 +55,21 @@ class StreamingAeadKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(32, key_format.params.derived_key_size)
     self.assertEqual(4096, key_format.params.ciphertext_segment_size)
 
+  def test_aes256_gcm_hkdf_1mb(self):
+    template = streaming_aead_key_templates.AES256_GCM_HKDF_1MB
+    self.assertEqual(
+        'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey',
+        template.type_url)
+    self.assertEqual(tink_pb2.RAW, template.output_prefix_type)
+    key_format = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKeyFormat()
+    key_format.ParseFromString(template.value)
+
+    self.assertEqual(32, key_format.key_size)
+    self.assertEqual(common_pb2.HashType.SHA256,
+                     key_format.params.hkdf_hash_type)
+    self.assertEqual(32, key_format.params.derived_key_size)
+    self.assertEqual(1048576, key_format.params.ciphertext_segment_size)
+
   def test_aes128_ctr_hmac_sha256_4kb(self):
     template = streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB
     self.assertEqual(

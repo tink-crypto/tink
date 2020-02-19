@@ -16,13 +16,13 @@
 
 #include "tink/streamingaead/streaming_aead_key_templates.h"
 
-#include "proto/aes_gcm_hkdf_streaming.pb.h"
 #include "proto/aes_ctr_hmac_streaming.pb.h"
+#include "proto/aes_gcm_hkdf_streaming.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::AesGcmHkdfStreamingKeyFormat;
 using google::crypto::tink::AesCtrHmacStreamingKeyFormat;
+using google::crypto::tink::AesGcmHkdfStreamingKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
@@ -32,7 +32,8 @@ namespace tink {
 
 namespace {
 
-KeyTemplate* NewAesGcmHkdfStreamingKeyTemplate(int ikm_size_in_bytes) {
+KeyTemplate* NewAesGcmHkdfStreamingKeyTemplate(int ikm_size_in_bytes,
+                                               int segment_size_in_bytes) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey");
@@ -40,7 +41,7 @@ KeyTemplate* NewAesGcmHkdfStreamingKeyTemplate(int ikm_size_in_bytes) {
   AesGcmHkdfStreamingKeyFormat key_format;
   key_format.set_key_size(ikm_size_in_bytes);
   auto params = key_format.mutable_params();
-  params->set_ciphertext_segment_size(4096);
+  params->set_ciphertext_segment_size(segment_size_in_bytes);
   params->set_derived_key_size(ikm_size_in_bytes);
   params->set_hkdf_hash_type(HashType::SHA256);
   key_format.SerializeToString(key_template->mutable_value());
@@ -69,15 +70,22 @@ KeyTemplate* NewAesCtrHmacStreamingKeyTemplate(int ikm_size_in_bytes) {
 
 // static
 const KeyTemplate& StreamingAeadKeyTemplates::Aes128GcmHkdf4KB() {
-  static const KeyTemplate* key_template =
-      NewAesGcmHkdfStreamingKeyTemplate(/* ikm_size_in_bytes= */ 16);
+  static const KeyTemplate* key_template = NewAesGcmHkdfStreamingKeyTemplate(
+      /* ikm_size_in_bytes= */ 16, /* segment_size_in_bytes= */ 4096);
   return *key_template;
 }
 
 // static
 const KeyTemplate& StreamingAeadKeyTemplates::Aes256GcmHkdf4KB() {
-  static const KeyTemplate* key_template =
-      NewAesGcmHkdfStreamingKeyTemplate(/* ikm_size_in_bytes= */ 32);
+  static const KeyTemplate* key_template = NewAesGcmHkdfStreamingKeyTemplate(
+      /* ikm_size_in_bytes= */ 32, /* segment_size_in_bytes= */ 4096);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& StreamingAeadKeyTemplates::Aes256GcmHkdf1MB() {
+  static const KeyTemplate* key_template = NewAesGcmHkdfStreamingKeyTemplate(
+      /* ikm_size_in_bytes= */ 32, /* segment_size_in_bytes= */ 1048576);
   return *key_template;
 }
 

@@ -88,6 +88,12 @@ AES256_GCM_HKDF_4KB = create_aes_gcm_hkdf_streaming_key_template(
     derived_key_size=32,
     ciphertext_segment_size=4096)
 
+AES256_GCM_HKDF_1MB = create_aes_gcm_hkdf_streaming_key_template(
+    aes_key_size=32,
+    hash_type=common_pb2.HashType.SHA256,
+    derived_key_size=32,
+    ciphertext_segment_size=1048576)
+
 AES128_CTR_HMAC_SHA256_4KB = create_aes_ctr_hmac_streaming_key_template(
     aes_key_size=16,
     hkdf_hash_type=common_pb2.HashType.SHA256,

@@ -102,6 +102,20 @@ public final class StreamingAeadKeyTemplates {
       createAesGcmHkdfStreamingKeyTemplate(32, HashType.SHA256, 32, 4096);
 
   /**
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesGcmHkdfStreamingKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Size of the main key: 32 bytes
+   *   <li>HKDF algo: HMAC-SHA256
+   *   <li>Size of AES-GCM derived keys: 32 bytes
+   *   <li>Ciphertext segment size: 1048576 bytes (1 MB)
+   * </ul>
+   */
+  public static final KeyTemplate AES256_GCM_HKDF_1MB =
+      createAesGcmHkdfStreamingKeyTemplate(32, HashType.SHA256, 32, 1048576);
+
+  /**
    * @return a {@link KeyTemplate} containing a {@link AesCtrHmacStreamingKeyFormat} with some
    *     specified parameters.
    */

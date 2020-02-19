@@ -28,19 +28,28 @@ import (
 
 func TestAESGCMHKDFKeyTemplates(t *testing.T) {
 	tcs := []struct {
-		name    string
-		tmpl    *tinkpb.KeyTemplate
-		keySize uint32
+		name                  string
+		tmpl                  *tinkpb.KeyTemplate
+		keySize               uint32
+		ciphertextSegmentSize uint32
 	}{
 		{
-			name:    "AES128GCMHKDF4KBKeyTemplate",
-			tmpl:    streamingaead.AES128GCMHKDF4KBKeyTemplate(),
-			keySize: 16,
+			name:                  "AES128GCMHKDF4KBKeyTemplate",
+			tmpl:                  streamingaead.AES128GCMHKDF4KBKeyTemplate(),
+			keySize:               16,
+			ciphertextSegmentSize: 4096,
 		},
 		{
-			name:    "AES256GCMHKDF4KBKeyTemplate",
-			tmpl:    streamingaead.AES256GCMHKDF4KBKeyTemplate(),
-			keySize: 32,
+			name:                  "AES256GCMHKDF4KBKeyTemplate",
+			tmpl:                  streamingaead.AES256GCMHKDF4KBKeyTemplate(),
+			keySize:               32,
+			ciphertextSegmentSize: 4096,
+		},
+		{
+			name:                  "AES256GCMHKDF1MBKeyTemplate",
+			tmpl:                  streamingaead.AES256GCMHKDF1MBKeyTemplate(),
+			keySize:               32,
+			ciphertextSegmentSize: 1048576,
 		},
 	}
 	for _, tc := range tcs {
@@ -49,7 +58,7 @@ func TestAESGCMHKDFKeyTemplates(t *testing.T) {
 				tc.tmpl,
 				tc.keySize,
 				commonpb.HashType_SHA256,
-				4096,
+				tc.ciphertextSegmentSize,
 				tinkpb.OutputPrefixType_RAW,
 			)
 			if err != nil {

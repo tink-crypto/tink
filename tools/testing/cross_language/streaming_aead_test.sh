@@ -69,7 +69,7 @@ streaming_aead_basic_test() {
 
 #############################################################################
 ##### Run the actual tests.
-KEY_TEMPLATES=(AES128_GCM_HKDF_4KB AES256_GCM_HKDF_4KB)
+KEY_TEMPLATES=(AES128_GCM_HKDF_4KB AES256_GCM_HKDF_4KB AES256_GCM_HKDF_1MB)
 ENCRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI)
 DECRYPT_CLIS=($CC_AEAD_CLI $JAVA_AEAD_CLI $GO_AEAD_CLI)
 

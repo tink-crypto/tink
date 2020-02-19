@@ -54,6 +54,15 @@ class StreamingAeadKeyTemplates {
   static const google::crypto::tink::KeyTemplate& Aes256GcmHkdf4KB();
 
   // Returns a KeyTemplate that generates new instances of
+  // AesGcmHkdfStreamingKey with the following parameters:
+  //   - main key (ikm) size: 32 bytes
+  //   - HKDF algorithm: HMAC-SHA256
+  //   - size of derived AES-GCM keys: 32 bytes
+  //   - ciphertext segment size: 1048576 bytes (1 MB)
+  //   - OutputPrefixType: RAW
+  static const google::crypto::tink::KeyTemplate& Aes256GcmHkdf1MB();
+
+  // Returns a KeyTemplate that generates new instances of
   // AesCtrHmacStreamingKey with the following parameters:
   //   - main key (ikm) size: 16 bytes
   //   - HKDF algorithm: HMAC-SHA256
@@ -63,7 +72,7 @@ class StreamingAeadKeyTemplates {
   //   - ciphertext segment size: 4096 bytes
   //   - OutputPrefixType: RAW
   static const google::crypto::tink::KeyTemplate&
-      Aes128CtrHmacSha256Segment4KB();
+  Aes128CtrHmacSha256Segment4KB();
 
   // Returns a KeyTemplate that generates new instances of
   // AesCtrHmacStreamingKey with the following parameters:
@@ -75,7 +84,7 @@ class StreamingAeadKeyTemplates {
   //   - ciphertext segment size: 4096 bytes
   //   - OutputPrefixType: RAW
   static const google::crypto::tink::KeyTemplate&
-      Aes256CtrHmacSha256Segment4KB();
+  Aes256CtrHmacSha256Segment4KB();
 };
 
 }  // namespace tink

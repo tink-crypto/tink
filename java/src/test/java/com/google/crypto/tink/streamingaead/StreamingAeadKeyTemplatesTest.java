@@ -96,6 +96,21 @@ public class StreamingAeadKeyTemplatesTest {
   }
 
   @Test
+  public void testAES256_GCM_HKDF_1MB() throws Exception {
+    KeyTemplate template = StreamingAeadKeyTemplates.AES256_GCM_HKDF_1MB;
+    assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertEquals(32,              format.getKeySize());
+    assertEquals(32,              format.getParams().getDerivedKeySize());
+    assertEquals(HashType.SHA256, format.getParams().getHkdfHashType());
+    assertEquals(1048576,         format.getParams().getCiphertextSegmentSize());
+  }
+
+  @Test
   public void testCreateAesCtrHmacStreamingKeyTemplate() throws Exception {
     // Intentionally using "weird" or invalid values for parameters,
     // to test that the function correctly puts them in the resulting template.
