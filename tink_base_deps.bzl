@@ -30,17 +30,6 @@ def tink_base_deps():
         sha256 = "86c6d481b3f7aedc1d60c1c211c6f76da282ae197c3b3160f54bd3a8f847896f",
     )
 
-    # ----- Javascript
-    # Last update: 2020-01-16
-    http_archive(
-        name = "io_bazel_rules_closure",
-        sha256 = "c43d45de819061c6a4d846cf36b0ca88894cfe3c83e4d0241e0353fb278b6c4d",
-        strip_prefix = "rules_closure-db4683a2a1836ac8e265804ca5fa31852395185b",
-        urls = [
-            "http://github.com/bazelbuild/rules_closure/archive/db4683a2a1836ac8e265804ca5fa31852395185b.zip",
-        ],
-    )
-
     #-----------------------------------------------------------------------------
     # Actual tink base deps.
     #-----------------------------------------------------------------------------

@@ -1,4 +1,3 @@
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_proto_library")
 load("//third_party/rules_protobuf/objc:rules.bzl", "objc_proto_compile")
 load("//tools:objc.bzl", "tink_objc_proto_library")
 
@@ -15,11 +14,6 @@ proto_library(
     srcs = [
         "common.proto",
     ],
-)
-
-closure_proto_library(
-    name = "common_closure_proto",
-    deps = [":common_proto"],
 )
 
 objc_proto_compile(
@@ -40,11 +34,6 @@ proto_library(
     deps = [
         ":common_proto",
     ],
-)
-
-closure_proto_library(
-    name = "tink_closure_proto",
-    deps = [":tink_proto"],
 )
 
 objc_proto_compile(
@@ -151,11 +140,6 @@ proto_library(
     ],
 )
 
-closure_proto_library(
-    name = "ecdsa_closure_proto",
-    deps = [":ecdsa_proto"],
-)
-
 objc_proto_compile(
     name = "ecdsa_objc_pb",
     protos = ["ecdsa.proto"],
@@ -191,11 +175,6 @@ proto_library(
     ],
 )
 
-closure_proto_library(
-    name = "aes_cmac_closure_proto",
-    deps = [":aes_cmac_proto"],
-)
-
 objc_proto_compile(
     name = "aes_cmac_objc_pb",
     protos = ["aes_cmac.proto"],
@@ -215,11 +194,6 @@ proto_library(
     deps = [":common_proto"],
 )
 
-closure_proto_library(
-    name = "hmac_closure_proto",
-    deps = [":hmac_proto"],
-)
-
 objc_proto_compile(
     name = "hmac_objc_pb",
     protos = ["hmac.proto"],
@@ -236,11 +210,6 @@ proto_library(
     srcs = [
         "aes_ctr.proto",
     ],
-)
-
-closure_proto_library(
-    name = "aes_ctr_closure_proto",
-    deps = [":aes_ctr_proto"],
 )
 
 objc_proto_compile(
@@ -264,11 +233,6 @@ proto_library(
     ],
 )
 
-closure_proto_library(
-    name = "aes_ctr_hmac_aead_closure_proto",
-    deps = [":aes_ctr_hmac_aead_proto"],
-)
-
 objc_proto_compile(
     name = "aes_ctr_hmac_aead_objc_pb",
     protos = ["aes_ctr_hmac_aead.proto"],
@@ -290,11 +254,6 @@ proto_library(
     ],
 )
 
-closure_proto_library(
-    name = "aes_gcm_closure_proto",
-    deps = [":aes_gcm_proto"],
-)
-
 objc_proto_compile(
     name = "aes_gcm_objc_pb",
     protos = ["aes_gcm.proto"],
@@ -310,11 +269,6 @@ proto_library(
     srcs = [
         "aes_gcm_siv.proto",
     ],
-)
-
-closure_proto_library(
-    name = "aes_gcm_siv_closure_proto",
-    deps = [":aes_gcm_siv_proto"],
 )
 
 objc_proto_compile(
@@ -452,11 +406,6 @@ proto_library(
     ],
 )
 
-closure_proto_library(
-    name = "ecies_aead_hkdf_closure_proto",
-    deps = [":ecies_aead_hkdf_proto"],
-)
-
 objc_proto_compile(
     name = "ecies_aead_hkdf_objc_pb",
     protos = ["ecies_aead_hkdf.proto"],
@@ -527,11 +476,6 @@ proto_library(
     srcs = [
         "empty.proto",
     ],
-)
-
-closure_proto_library(
-    name = "empty_closure_proto",
-    deps = [":empty_proto"],
 )
 
 objc_proto_compile(
