@@ -292,13 +292,13 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static notSupported() {
-    return 'CustomError: This operation is not supported for public keys. ' +
+    return 'SecurityException: This operation is not supported for public keys. ' +
         'Use EciesAeadHkdfPrivateKeyManager to generate new keys.';
   }
 
   /** @return {string} */
   static unsupportedPrimitive() {
-    return 'CustomError: Requested primitive type which is not supported by ' +
+    return 'SecurityException: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
@@ -307,7 +307,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyType(opt_requestedKeyType) {
-    const prefix = 'CustomError: Key type';
+    const prefix = 'SecurityException: Key type';
     const suffix =
         'is not supported. This key manager supports ' + KEY_TYPE + '.';
     if (opt_requestedKeyType) {
@@ -319,23 +319,23 @@ class ExceptionText {
 
   /** @return {string} */
   static versionOutOfBounds() {
-    return 'CustomError: Version is out of bound, must be between 0 and ' +
+    return 'SecurityException: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
   /** @return {string} */
   static missingParams() {
-    return 'CustomError: Invalid public key - missing key params.';
+    return 'SecurityException: Invalid public key - missing key params.';
   }
 
   /** @return {string} */
   static unknownPointFormat() {
-    return 'CustomError: Invalid key params - unknown EC point format.';
+    return 'SecurityException: Invalid key params - unknown EC point format.';
   }
 
   /** @return {string} */
   static missingKemParams() {
-    return 'CustomError: Invalid params - missing KEM params.';
+    return 'SecurityException: Invalid params - missing KEM params.';
   }
 
   /**
@@ -343,18 +343,19 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyTemplate(templateTypeUrl) {
-    return 'CustomError: Invalid DEM params - ' + templateTypeUrl +
+    return 'SecurityException: Invalid DEM params - ' + templateTypeUrl +
         ' template is not supported by ECIES AEAD HKDF.';
   }
 
   /** @return {string} */
   static missingXY() {
-    return 'CustomError: Invalid public key - missing value of X or Y.';
+    return 'SecurityException: Invalid public key - missing value of X or Y.';
   }
 
   /** @return {string} */
   static invalidSerializedKey() {
-    return 'CustomError: Input cannot be parsed as ' + KEY_TYPE + ' key-proto.';
+    return 'SecurityException: Input cannot be parsed as ' + KEY_TYPE +
+        ' key-proto.';
   }
 }
 

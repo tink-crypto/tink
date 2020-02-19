@@ -62,13 +62,15 @@ testSuite({
       await sender.encapsulate(NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
+      assertEquals(
+          'InvalidArgumentsException: size must be an integer', e.toString());
     }
     try {
       await sender.encapsulate(0, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals('CustomError: size must be positive', e.toString());
+      assertEquals(
+          'InvalidArgumentsException: size must be positive', e.toString());
     }
   },
 
@@ -117,7 +119,8 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'CustomError: Expected Crypto key of type: public.', e.toString());
+          'SecurityException: Expected Crypto key of type: public.',
+          e.toString());
     }
   },
 });

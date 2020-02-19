@@ -166,7 +166,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedTypeUrl(typeUrl) {
-    return 'CustomError: Key type URL ' + typeUrl + ' is not supported.';
+    return 'SecurityException: Key type URL ' + typeUrl + ' is not supported.';
   }
 
   /**
@@ -174,7 +174,7 @@ class ExceptionText {
    * @return {string}
    */
   static invalidKeyFormat(keyType) {
-    return 'CustomError: Could not parse the given Uint8Array as ' +
+    return 'SecurityException: Could not parse the given Uint8Array as ' +
         'a serialized proto of ' + keyType + '.';
   }
 
@@ -184,7 +184,7 @@ class ExceptionText {
    * @return {string}
    */
   static invalidKeyLength(expectedKeyLength, actualKeyLength) {
-    return 'CustomError: Key is not of the correct length, expected length: ' +
+    return 'SecurityException: Key is not of the correct length, expected length: ' +
         expectedKeyLength + ', but got key of length: ' + actualKeyLength + '.';
   }
 }

@@ -63,7 +63,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'CustomError: invalid IV length, must be at least 12 and at most 16',
+          'SecurityException: invalid IV length, must be at least 12 and at most 16',
           e.toString());
     }
     try {
@@ -71,7 +71,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'CustomError: invalid IV length, must be at least 12 and at most 16',
+          'SecurityException: invalid IV length, must be at least 12 and at most 16',
           e.toString());
     }
     try {
@@ -79,7 +79,9 @@ testSuite({
           Random.randBytes(24), 12);  // 192-bit keys not supported
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: unsupported AES key size: 24', e.toString());
+      assertEquals(
+          'InvalidArgumentsException: unsupported AES key size: 24',
+          e.toString());
     }
   },
 
@@ -89,7 +91,8 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'CustomError: invalid IV length, must be an integer', e.toString());
+          'SecurityException: invalid IV length, must be an integer',
+          e.toString());
     }
 
     try {
@@ -97,7 +100,8 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'CustomError: invalid IV length, must be an integer', e.toString());
+          'SecurityException: invalid IV length, must be an integer',
+          e.toString());
     }
 
     try {
@@ -105,7 +109,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'CustomError: invalid IV length, must be at least 12 and at most 16',
+          'SecurityException: invalid IV length, must be at least 12 and at most 16',
           e.toString());
     }
   },

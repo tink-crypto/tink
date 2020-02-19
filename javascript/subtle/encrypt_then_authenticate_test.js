@@ -83,7 +83,7 @@ testSuite({
           await aead.decrypt(c1, aad);
           fail('Should throw an exception.');
         } catch (e) {
-          assertEquals('CustomError: invalid MAC', e.toString());
+          assertEquals('SecurityException: invalid MAC', e.toString());
         }
       }
     }
@@ -104,7 +104,7 @@ testSuite({
           await aead.decrypt(ciphertext, aad1);
           fail('Should throw an exception.');
         } catch (e) {
-          assertEquals('CustomError: invalid MAC', e.toString());
+          assertEquals('SecurityException: invalid MAC', e.toString());
         }
       }
     }
@@ -124,9 +124,9 @@ testSuite({
         fail('Should throw an exception.');
       } catch (e) {
         if (c1.length < 32) {
-          assertEquals('CustomError: ciphertext too short', e.toString());
+          assertEquals('SecurityException: ciphertext too short', e.toString());
         } else {
-          assertEquals('CustomError: invalid MAC', e.toString());
+          assertEquals('SecurityException: invalid MAC', e.toString());
         }
       }
     }

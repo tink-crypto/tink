@@ -118,7 +118,8 @@ testSuite({
       manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
-          'CustomError: Expected AesCtrHmacAeadKeyFormat-proto', e.toString());
+          'SecurityException: Expected AesCtrHmacAeadKeyFormat-proto',
+          e.toString());
       return;
     }
     fail('An exception should be thrown.');
@@ -133,7 +134,7 @@ testSuite({
       manager.getKeyFactory().newKey(serializedKeyFormat);
     } catch (e) {
       assertEquals(
-          'CustomError: Could not parse the given Uint8Array as a serialized' +
+          'SecurityException: Could not parse the given Uint8Array as a serialized' +
               ' proto of ' + KEY_TYPE,
           e.toString());
       return;
@@ -153,7 +154,8 @@ testSuite({
       manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
-          'CustomError: unsupported AES key size: ' + keySize, e.toString());
+          'InvalidArgumentsException: unsupported AES key size: ' + keySize,
+          e.toString());
       return;
     }
     fail('An exception should be thrown.');
@@ -172,7 +174,7 @@ testSuite({
         manager.getKeyFactory().newKey(keyFormat);
       } catch (e) {
         assertEquals(
-            'CustomError: Invalid AES CTR HMAC key format: IV size is ' +
+            'SecurityException: Invalid AES CTR HMAC key format: IV size is ' +
                 'out of range: ' + ivSizeOutOfRange[i],
             e.toString());
         continue;
@@ -194,7 +196,7 @@ testSuite({
       manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
-          'CustomError: Invalid AES CTR HMAC key format: HMAC key is' +
+          'SecurityException: Invalid AES CTR HMAC key format: HMAC key is' +
               ' too small: ' + keySize,
           e.toString());
       return;
@@ -211,7 +213,7 @@ testSuite({
     try {
       manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
-      assertEquals('CustomError: Unknown hash type.', e.toString());
+      assertEquals('SecurityException: Unknown hash type.', e.toString());
       return;
     }
     fail('An exception should be thrown.');
@@ -228,7 +230,7 @@ testSuite({
       manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
-          'CustomError: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
+          'SecurityException: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
               ' is too small.',
           e.toString());
       return;
@@ -255,7 +257,7 @@ testSuite({
         manager.getKeyFactory().newKey(keyFormat);
       } catch (e) {
         assertEquals(
-            'CustomError: Invalid HMAC params: tag size ' +
+            'SecurityException: Invalid HMAC params: tag size ' +
                 tagSizes[i]['tagSize'] + ' is out of range.',
             e.toString());
         continue;
@@ -342,7 +344,7 @@ testSuite({
         aeadKeyManager.getKeyFactory().newKeyData(serializedKeyFormats[i]);
       } catch (e) {
         assertEquals(
-            'CustomError: Could not parse the given Uint8Array as a ' +
+            'SecurityException: Could not parse the given Uint8Array as a ' +
                 'serialized proto of ' + KEY_TYPE,
             e.toString());
         continue;
@@ -385,9 +387,9 @@ testSuite({
       await aeadKeyManager.getPrimitive(Aead, keyData);
     } catch (e) {
       assertEquals(
-          'CustomError: Key type ' + keyData.getTypeUrl() +
-          ' is not supported. This key manager supports ' +
-          KEY_TYPE + '.', e.toString());
+          'SecurityException: Key type ' + keyData.getTypeUrl() +
+              ' is not supported. This key manager supports ' + KEY_TYPE + '.',
+          e.toString());
       return;
     }
     fail('An exception should be thrown');
@@ -401,8 +403,9 @@ testSuite({
       await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
-          'CustomError: Given key type is not supported. ' +
-          'This key manager supports ' + KEY_TYPE + '.', e.toString());
+          'SecurityException: Given key type is not supported. ' +
+              'This key manager supports ' + KEY_TYPE + '.',
+          e.toString());
       return;
     }
     fail('An exception should be thrown');
@@ -419,7 +422,7 @@ testSuite({
       await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
-          'CustomError: Version is out of bound, must be between 0 ' +
+          'SecurityException: Version is out of bound, must be between 0 ' +
               'and ' + VERSION + '.',
           e.toString());
       return;
@@ -438,7 +441,8 @@ testSuite({
       await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
-          'CustomError: unsupported AES key size: ' + keySize, e.toString());
+          'InvalidArgumentsException: unsupported AES key size: ' + keySize,
+          e.toString());
       return;
     }
     fail('An exception should be thrown');
@@ -456,7 +460,7 @@ testSuite({
         await manager.getPrimitive(Aead, key);
       } catch (e) {
         assertEquals(
-            'CustomError: Invalid AES CTR HMAC key format: IV size is ' +
+            'SecurityException: Invalid AES CTR HMAC key format: IV size is ' +
                 'out of range: ' + ivSizeOutOfRange[i],
             e.toString());
         continue;
@@ -476,7 +480,7 @@ testSuite({
       await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
-          'CustomError: Invalid AES CTR HMAC key format: HMAC key is' +
+          'SecurityException: Invalid AES CTR HMAC key format: HMAC key is' +
               ' too small: ' + keySize,
           e.toString());
       return;
@@ -493,7 +497,7 @@ testSuite({
     try {
       await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
-      assertEquals('CustomError: Unknown hash type.', e.toString());
+      assertEquals('SecurityException: Unknown hash type.', e.toString());
       return;
     }
     fail('An exception should be thrown');
@@ -510,7 +514,7 @@ testSuite({
       await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
-          'CustomError: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
+          'SecurityException: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
               ' is too small.',
           e.toString());
       return;
@@ -536,7 +540,7 @@ testSuite({
         await manager.getPrimitive(Aead, key);
       } catch (e) {
         assertEquals(
-            'CustomError: Invalid HMAC params: tag size ' +
+            'SecurityException: Invalid HMAC params: tag size ' +
                 tagSizes[i]['tagSize'] + ' is out of range.',
             e.toString());
         continue;
@@ -581,7 +585,7 @@ testSuite({
       await manager.getPrimitive(Mac, keyData);
     } catch (e) {
       assertEquals(
-          'CustomError: Requested primitive type which is not ' +
+          'SecurityException: Requested primitive type which is not ' +
               'supported by this key manager.',
           e.toString());
       return;

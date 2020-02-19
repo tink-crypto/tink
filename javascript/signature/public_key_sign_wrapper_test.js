@@ -32,7 +32,8 @@ testSuite({
       new PublicKeySignWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: Primary has to be non-null.', e.toString());
+      assertEquals(
+          'SecurityException: Primary has to be non-null.', e.toString());
     }
   },
 
@@ -65,15 +66,15 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static nullPrimitiveSet() {
-    return 'CustomError: Primitive set has to be non-null.';
+    return 'SecurityException: Primitive set has to be non-null.';
   }
   /** @return {string} */
   static primitiveSetWithoutPrimary() {
-    return 'CustomError: Primary has to be non-null.';
+    return 'SecurityException: Primary has to be non-null.';
   }
   /** @return {string} */
   static nullPlaintext() {
-    return 'CustomError: Plaintext has to be non-null.';
+    return 'SecurityException: Plaintext has to be non-null.';
   }
 }
 

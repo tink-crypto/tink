@@ -62,7 +62,7 @@ testSuite({
       new KeysetHandle(keyset);
     } catch (e) {
       assertEquals(
-          'CustomError: Keyset should be non null and must contain at least one key.',
+          'SecurityException: Keyset should be non null and must contain at least one key.',
           e.toString());
       return;
     }
@@ -98,7 +98,7 @@ testSuite({
       await KeysetHandle.read(keysetReader, aead);
     } catch (e) {
       assertEquals(
-          'CustomError: KeysetHandle -- read: Not implemented yet.',
+          'SecurityException: KeysetHandle -- read: Not implemented yet.',
           e.toString());
       return;
     }
@@ -139,7 +139,7 @@ testSuite({
       await keysetHandle.write(keysetWriter, aead);
     } catch (e) {
       assertEquals(
-          'CustomError: KeysetHandle -- write: Not implemented yet.',
+          'SecurityException: KeysetHandle -- write: Not implemented yet.',
           e.toString());
       return;
     }
@@ -236,7 +236,7 @@ testSuite({
       fail('An exception should be thrown here.');
     } catch (e) {
       assertEquals(
-          'CustomError: Decryption failed for the given ciphertext.',
+          'SecurityException: Decryption failed for the given ciphertext.',
           e.toString());
     }
 
@@ -356,7 +356,7 @@ testSuite({
       fail('An exception should be thrown here.');
     } catch (e) {
       assertEquals(
-          'CustomError: Decryption failed for the given ciphertext.',
+          'SecurityException: Decryption failed for the given ciphertext.',
           e.toString());
     }
 
@@ -394,7 +394,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'CustomError: Requested primitive type which is not supported by ' +
+          'SecurityException: Requested primitive type which is not supported by ' +
               'this key manager.',
           e.toString());
     }
@@ -536,7 +536,8 @@ testSuite({
         fail('An exception should be thrown.');
       } catch (e) {
         assertEquals(
-            'CustomError: Keyset contains secret key material.', e.toString());
+            'SecurityException: Keyset contains secret key material.',
+            e.toString());
       }
     }
   },

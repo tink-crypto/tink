@@ -287,7 +287,7 @@ testSuite({
         EllipticCurves.pointDecode(curveTypeString, format, point);
         fail('Should throw an exception.');
       } catch (e) {
-        assertEquals('CustomError: invalid point', e.toString());
+        assertEquals('InvalidArgumentsException: invalid point', e.toString());
       }
     }
   },
@@ -343,7 +343,8 @@ testSuite({
         EllipticCurves.ecdsaDer2Ieee(
             Bytes.fromHex(test), 1 /* ieeeLength, ignored */);
       } catch (e) {
-        assertEquals('CustomError: invalid DER signature', e.toString());
+        assertEquals(
+            'InvalidArgumentsException: invalid DER signature', e.toString());
       }
     }
   },

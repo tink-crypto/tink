@@ -40,7 +40,8 @@ testSuite({
     try {
       CryptoFormat.getOutputPrefix(key);
     } catch (e) {
-      assertEquals('CustomError: Unsupported key prefix type.', e.toString());
+      assertEquals(
+          'SecurityException: Unsupported key prefix type.', e.toString());
       return;
     }
     fail('An exception should be thrown.');
@@ -57,7 +58,8 @@ testSuite({
       try {
         CryptoFormat.getOutputPrefix(key);
       } catch (e) {
-        assertEquals('CustomError: Number has to be unsigned 32-bit integer.',
+        assertEquals(
+            'InvalidArgumentsException: Number has to be unsigned 32-bit integer.',
             e.toString());
         continue;
       }

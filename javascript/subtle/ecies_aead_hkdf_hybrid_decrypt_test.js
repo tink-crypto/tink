@@ -82,7 +82,7 @@ testSuite({
       await hybridDecrypt.decrypt(ciphertext.slice(0, curveEncodingSize - 1));
       fail('Should throw an exception');
     } catch (e) {
-      assertEquals('CustomError: Ciphertext is too short.', e.toString());
+      assertEquals('SecurityException: Ciphertext is too short.', e.toString());
     }
   },
 
