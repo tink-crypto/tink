@@ -97,15 +97,15 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static notImplemented() {
-    return 'SecurityException: Not implemented yet.';
+    return 'CustomError: Not implemented yet.';
   }
   /** @return {string} */
   static nullKeyset() {
-    return 'SecurityException: Serialized keyset has to be non-null.';
+    return 'CustomError: Serialized keyset has to be non-null.';
   }
   /** @return {string} */
   static invalidSerialization() {
-    return 'SecurityException: Could not parse the given serialized proto as ' +
+    return 'CustomError: Could not parse the given serialized proto as ' +
         'a keyset proto.';
   }
 }

@@ -36,8 +36,7 @@ testSuite({
           'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'InvalidArgumentsException: blah is not supported', e.toString());
+      assertEquals('CustomError: blah is not supported', e.toString());
     }
 
     try {
@@ -46,7 +45,7 @@ testSuite({
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
       assertEquals(
-          'SecurityException: key too short, must be at least 16 bytes',
+          'CustomError: key too short, must be at least 16 bytes',
           e.toString());
     }
 
@@ -56,7 +55,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'InvalidArgumentsException: tag too short, must be at least 10 bytes',
+          'CustomError: tag too short, must be at least 10 bytes',
           e.toString());
     }
     try {
@@ -65,7 +64,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'InvalidArgumentsException: tag too long, must not be larger than 20 bytes',
+          'CustomError: tag too long, must not be larger than 20 bytes',
           e.toString());
     }
 
@@ -75,7 +74,7 @@ testSuite({
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
       assertEquals(
-          'SecurityException: key too short, must be at least 16 bytes',
+          'CustomError: key too short, must be at least 16 bytes',
           e.toString());
     }
 
@@ -85,7 +84,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'InvalidArgumentsException: tag too short, must be at least 10 bytes',
+          'CustomError: tag too short, must be at least 10 bytes',
           e.toString());
     }
 
@@ -95,7 +94,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'InvalidArgumentsException: tag too long, must not be larger than 32 bytes',
+          'CustomError: tag too long, must not be larger than 32 bytes',
           e.toString());
     }
 
@@ -105,7 +104,7 @@ testSuite({
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
       assertEquals(
-          'SecurityException: key too short, must be at least 16 bytes',
+          'CustomError: key too short, must be at least 16 bytes',
           e.toString());
     }
 
@@ -115,7 +114,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'InvalidArgumentsException: tag too short, must be at least 10 bytes',
+          'CustomError: tag too short, must be at least 10 bytes',
           e.toString());
     }
 
@@ -125,7 +124,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'InvalidArgumentsException: tag too long, must not be larger than 64 bytes',
+          'CustomError: tag too long, must not be larger than 64 bytes',
           e.toString());
     }
   },
@@ -136,8 +135,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'InvalidArgumentsException: invalid tag size, must be an integer',
-          e.toString());
+          'CustomError: invalid tag size, must be an integer', e.toString());
     }
 
     try {
@@ -145,8 +143,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'InvalidArgumentsException: invalid tag size, must be an integer',
-          e.toString());
+          'CustomError: invalid tag size, must be an integer', e.toString());
     }
   },
 

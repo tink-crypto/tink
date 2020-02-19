@@ -177,7 +177,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
+          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
     }
 
@@ -187,7 +187,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256',
+          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
     }
   },
@@ -280,13 +280,13 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static notSupported() {
-    return 'SecurityException: This operation is not supported for public keys. ' +
+    return 'CustomError: This operation is not supported for public keys. ' +
         'Use EcdsaPrivateKeyManager to generate new keys.';
   }
 
   /** @return {string} */
   static unsupportedPrimitive() {
-    return 'SecurityException: Requested primitive type which is not supported by ' +
+    return 'CustomError: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
@@ -295,7 +295,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyType(opt_requestedKeyType) {
-    const prefix = 'SecurityException: Key type';
+    const prefix = 'CustomError: Key type';
     const suffix =
         'is not supported. This key manager supports ' + KEY_TYPE + '.';
     if (opt_requestedKeyType) {
@@ -307,39 +307,38 @@ class ExceptionText {
 
   /** @return {string} */
   static versionOutOfBounds() {
-    return 'SecurityException: Version is out of bound, must be between 0 and ' +
+    return 'CustomError: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
   /** @return {string} */
   static unknownEncoding() {
-    return 'SecurityException: Invalid public key - missing signature encoding.';
+    return 'CustomError: Invalid public key - missing signature encoding.';
   }
 
   /** @return {string} */
   static unknownHash() {
-    return 'SecurityException: Unknown hash type.';
+    return 'CustomError: Unknown hash type.';
   }
 
   /** @return {string} */
   static unknownCurve() {
-    return 'SecurityException: Unknown curve type.';
+    return 'CustomError: Unknown curve type.';
   }
 
   /** @return {string} */
   static missingParams() {
-    return 'SecurityException: Invalid public key - missing params.';
+    return 'CustomError: Invalid public key - missing params.';
   }
 
   /** @return {string} */
   static missingXY() {
-    return 'SecurityException: Invalid public key - missing value of X or Y.';
+    return 'CustomError: Invalid public key - missing value of X or Y.';
   }
 
   /** @return {string} */
   static invalidSerializedKey() {
-    return 'SecurityException: Input cannot be parsed as ' + KEY_TYPE +
-        ' key-proto.';
+    return 'CustomError: Input cannot be parsed as ' + KEY_TYPE + ' key-proto.';
   }
 
   /** @return {string} */

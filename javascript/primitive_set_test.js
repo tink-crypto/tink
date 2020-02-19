@@ -266,33 +266,33 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static unknownPrefixType() {
-    return 'SecurityException: Unsupported key prefix type.';
+    return 'CustomError: Unsupported key prefix type.';
   }
 
   /** @return {string} */
   static addingNullPrimitive() {
-    return 'SecurityException: Primitive has to be non null.';
+    return 'CustomError: Primitive has to be non null.';
   }
 
   /** @return {string} */
   static addingNullKey() {
-    return 'SecurityException: Key has to be non null.';
+    return 'CustomError: Key has to be non null.';
   }
 
   /** @return {string} */
   static setPrimaryToNull() {
-    return 'SecurityException: Primary cannot be set to null.';
+    return 'CustomError: Primary cannot be set to null.';
   }
 
   /** @return {string} */
   static setPrimaryToMissingEntry() {
-    return 'SecurityException: Primary cannot be set to an entry which is ' +
+    return 'CustomError: Primary cannot be set to an entry which is ' +
         'not held by this primitive set.';
   }
 
   /** @return {string} */
   static setPrimaryToDisabled() {
-    return 'SecurityException: Primary has to be enabled.';
+    return 'CustomError: Primary has to be enabled.';
   }
 }
 

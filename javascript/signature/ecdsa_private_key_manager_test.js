@@ -138,7 +138,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
+          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
     }
 
@@ -148,7 +148,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256',
+          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
     }
   },
@@ -341,7 +341,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
+          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
     }
 
@@ -351,7 +351,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256',
+          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
     }
   },
@@ -455,25 +455,24 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static nullKeyFormat() {
-    return 'SecurityException: Key format has to be non-null.';
+    return 'CustomError: Key format has to be non-null.';
   }
 
   /** @return {string} */
   static invalidSerializedKeyFormat() {
-    return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
+    return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
   }
 
   /** @return {string} */
   static unsupportedPrimitive() {
-    return 'SecurityException: Requested primitive type which is not supported by ' +
+    return 'CustomError: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
   /** @return {string} */
   static unsupportedKeyFormat() {
-    return 'SecurityException: Expected ' + PRIVATE_KEY_TYPE +
-        ' key format proto.';
+    return 'CustomError: Expected ' + PRIVATE_KEY_TYPE + ' key format proto.';
   }
 
   /**
@@ -481,7 +480,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyType(opt_requestedKeyType) {
-    const prefix = 'SecurityException: Key type';
+    const prefix = 'CustomError: Key type';
     const suffix =
         'is not supported. This key manager supports ' + PRIVATE_KEY_TYPE + '.';
     if (opt_requestedKeyType) {
@@ -493,33 +492,33 @@ class ExceptionText {
 
   /** @return {string} */
   static unknownEncoding() {
-    return 'SecurityException: Invalid public key - missing signature encoding.';
+    return 'CustomError: Invalid public key - missing signature encoding.';
   }
 
   /** @return {string} */
   static unknownHash() {
-    return 'SecurityException: Unknown hash type.';
+    return 'CustomError: Unknown hash type.';
   }
 
   /** @return {string} */
   static unknownCurve() {
-    return 'SecurityException: Unknown curve type.';
+    return 'CustomError: Unknown curve type.';
   }
 
   /** @return {string} */
   static versionOutOfBounds() {
-    return 'SecurityException: Version is out of bound, must be between 0 and ' +
+    return 'CustomError: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
   /** @return {string} */
   static invalidKeyFormatMissingParams() {
-    return 'SecurityException: Invalid key format - missing params.';
+    return 'CustomError: Invalid key format - missing params.';
   }
 
   /** @return {string} */
   static invalidSerializedKey() {
-    return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
+    return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key-proto.';
   }
 }

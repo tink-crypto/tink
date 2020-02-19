@@ -14,14 +14,17 @@
 
 goog.module('tink.exception.UnsupportedException');
 
+const Error = goog.require('goog.debug.Error');
+
 /**
  * Exception used when the client requests an unimplemented feature.
+ *
+ * @extends {Error}
  */
 class UnsupportedException extends Error {
   /** @param {*=} opt_msg The custom error message. */
   constructor(opt_msg) {
     super(opt_msg);
-    this.name = 'UnsupportedException';
   }
 }
 exports = UnsupportedException;

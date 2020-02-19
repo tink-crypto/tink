@@ -84,8 +84,7 @@ testSuite({
           kemKeyToken['token'], NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          'InvalidArgumentsException: size must be an integer', e.toString());
+      assertEquals('CustomError: size must be an integer', e.toString());
     }
 
     try {
@@ -93,8 +92,7 @@ testSuite({
           kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          'InvalidArgumentsException: size must be an integer', e.toString());
+      assertEquals('CustomError: size must be an integer', e.toString());
     }
   },
 
@@ -151,8 +149,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: Expected crypto key of type: private.',
-          e.toString());
+          'CustomError: Expected crypto key of type: private.', e.toString());
     }
   },
 

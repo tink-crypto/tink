@@ -28,16 +28,14 @@ testSuite({
       await Hkdf.compute(0, 'SHA-256', ikm, info);  // 0 output size
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'InvalidArgumentsException: size must be positive', e.toString());
+      assertEquals('CustomError: size must be positive', e.toString());
     }
 
     try {
       await Hkdf.compute(-1, 'SHA-256', ikm, info);  // negative output size
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'InvalidArgumentsException: size must be positive', e.toString());
+      assertEquals('CustomError: size must be positive', e.toString());
     }
 
     try {
@@ -46,7 +44,7 @@ testSuite({
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('InvalidArgumentsException: size too large', e.toString());
+      assertEquals('CustomError: size too large', e.toString());
     }
 
     try {
@@ -55,7 +53,7 @@ testSuite({
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('InvalidArgumentsException: size too large', e.toString());
+      assertEquals('CustomError: size too large', e.toString());
     }
 
     try {
@@ -64,7 +62,7 @@ testSuite({
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('InvalidArgumentsException: size too large', e.toString());
+      assertEquals('CustomError: size too large', e.toString());
     }
   },
 
@@ -75,16 +73,14 @@ testSuite({
       await Hkdf.compute(NaN, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'InvalidArgumentsException: size must be an integer', e.toString());
+      assertEquals('CustomError: size must be an integer', e.toString());
     }
 
     try {
       await Hkdf.compute(1.5, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'InvalidArgumentsException: size must be an integer', e.toString());
+      assertEquals('CustomError: size must be an integer', e.toString());
     }
   },
 

@@ -31,7 +31,7 @@ testSuite({
   testParseFromLightweightEmptyKeyset() {
     const keysetJspbArray = new PbKeyset().toArray();
     assertEquals(
-        'SecurityException: ' +
+        'CustomError: ' +
             'Keyset should be non null and must contain at least one key.',
         assertThrows(() => {
           CleartextKeysetHandle.fromJspbArray(keysetJspbArray);

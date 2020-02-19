@@ -121,7 +121,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: Number needs more bytes to be represented.',
+          'CustomError: Number needs more bytes to be represented.',
           e.toString());
     }
   },

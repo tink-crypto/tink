@@ -111,7 +111,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-256 (because curve is P-256) but ' +
+          'CustomError: expected SHA-256 (because curve is P-256) but ' +
               'got SHA-1',
           e.toString());
     }
@@ -123,7 +123,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
+          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
           e.toString());
     }
 
@@ -134,7 +134,7 @@ testSuite({
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
-          'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256',
+          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
           e.toString());
     }
   },
@@ -147,7 +147,7 @@ testSuite({
       await EcdsaSign.newInstance(jwk, 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('SecurityException: unsupported curve: blah', e.toString());
+      assertEquals('CustomError: unsupported curve: blah', e.toString());
     }
   },
 });

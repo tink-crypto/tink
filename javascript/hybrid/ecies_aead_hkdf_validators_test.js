@@ -332,42 +332,42 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static missingFormatParams() {
-    return 'SecurityException: Invalid key format - missing key params.';
+    return 'CustomError: Invalid key format - missing key params.';
   }
 
   /** @return {string} */
   static missingKeyParams() {
-    return 'SecurityException: Invalid public key - missing key params.';
+    return 'CustomError: Invalid public key - missing key params.';
   }
 
   /** @return {string} */
   static unknownPointFormat() {
-    return 'SecurityException: Invalid key params - unknown EC point format.';
+    return 'CustomError: Invalid key params - unknown EC point format.';
   }
 
   /** @return {string} */
   static missingKemParams() {
-    return 'SecurityException: Invalid params - missing KEM params.';
+    return 'CustomError: Invalid params - missing KEM params.';
   }
 
   /** @return {string} */
   static unknownHashType() {
-    return 'SecurityException: Invalid KEM params - unknown hash type.';
+    return 'CustomError: Invalid KEM params - unknown hash type.';
   }
 
   /** @return {string} */
   static unknownCurveType() {
-    return 'SecurityException: Invalid KEM params - unknown curve type.';
+    return 'CustomError: Invalid KEM params - unknown curve type.';
   }
 
   /** @return {string} */
   static missingDemParams() {
-    return 'SecurityException: Invalid params - missing DEM params.';
+    return 'CustomError: Invalid params - missing DEM params.';
   }
 
   /** @return {string} */
   static missingAeadTemplate() {
-    return 'SecurityException: Invalid DEM params - missing AEAD key template.';
+    return 'CustomError: Invalid DEM params - missing AEAD key template.';
   }
 
   /**
@@ -375,23 +375,23 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyTemplate(templateTypeUrl) {
-    return 'SecurityException: Invalid DEM params - ' + templateTypeUrl +
+    return 'CustomError: Invalid DEM params - ' + templateTypeUrl +
         ' template is not supported by ECIES AEAD HKDF.';
   }
 
   /** @return {string} */
   static missingXY() {
-    return 'SecurityException: Invalid public key - missing value of X or Y.';
+    return 'CustomError: Invalid public key - missing value of X or Y.';
   }
 
   /** @return {string} */
   static missingPublicKey() {
-    return 'SecurityException: Invalid private key - missing public key information.';
+    return 'CustomError: Invalid private key - missing public key information.';
   }
 
   /** @return {string} */
   static missingPrivateKeyValue() {
-    return 'SecurityException: Invalid private key - missing private key value.';
+    return 'CustomError: Invalid private key - missing private key value.';
   }
 
   /**
@@ -399,7 +399,7 @@ class ExceptionText {
    * @return {string}
    */
   static versionOutOfBounds(version) {
-    return 'SecurityException: Version is out of bound, must be between 0 and ' +
+    return 'CustomError: Version is out of bound, must be between 0 and ' +
         version + '.';
   }
 }

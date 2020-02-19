@@ -189,15 +189,15 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static nullPrimitiveSet() {
-    return 'SecurityException: Primitive set has to be non-null.';
+    return 'CustomError: Primitive set has to be non-null.';
   }
   /** @return {string} */
   static cannotBeDecrypted() {
-    return 'SecurityException: Decryption failed for the given ciphertext.';
+    return 'CustomError: Decryption failed for the given ciphertext.';
   }
   /** @return {string} */
   static nullCiphertext() {
-    return 'SecurityException: Ciphertext has to be non-null.';
+    return 'CustomError: Ciphertext has to be non-null.';
   }
 }
 

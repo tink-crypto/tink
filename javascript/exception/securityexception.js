@@ -14,14 +14,17 @@
 
 goog.module('tink.exception.SecurityException');
 
+const Error = goog.require('goog.debug.Error');
+
 /**
  * The base class for all security exceptions.
+ *
+ * @extends {Error}
  */
 class SecurityException extends Error {
   /** @param {*=} opt_msg The custom error message. */
   constructor(opt_msg) {
     super(opt_msg);
-    this.name = 'SecurityException';
   }
 }
 

@@ -269,7 +269,7 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static unsupportedPrimitive() {
-    return 'SecurityException: Requested primitive type which is not supported ' +
+    return 'CustomError: Requested primitive type which is not supported ' +
         'by this key manager.';
   }
 
@@ -278,14 +278,14 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeySize(keySize) {
-    return 'InvalidArgumentsException: unsupported AES key size: ' + keySize;
+    return 'CustomError: unsupported AES key size: ' + keySize;
   }
 
   /**
    * @return {string}
    */
   static versionOutOfBounds() {
-    return 'SecurityException: Version is out of bound, must be between 0 and ' +
+    return 'CustomError: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
@@ -294,7 +294,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyType(opt_unsupportedKeyType) {
-    const prefix = 'SecurityException: Key type';
+    const prefix = 'CustomError: Key type';
     const suffix =
         'is not supported. This key manager supports ' + KEY_TYPE + '.';
 
@@ -309,12 +309,12 @@ class ExceptionText {
    * @return {string}
    */
   static invalidSerializedKey() {
-    return 'SecurityException: Could not parse the input as a serialized proto of ' +
+    return 'CustomError: Could not parse the input as a serialized proto of ' +
         KEY_TYPE + ' key.';
   }
 
   static invalidSerializedKeyFormat() {
-    return 'SecurityException: Could not parse the input as a serialized proto of ' +
+    return 'CustomError: Could not parse the input as a serialized proto of ' +
         KEY_TYPE + ' key format.';
   }
 
@@ -322,7 +322,7 @@ class ExceptionText {
    * @return {string}
    */
   static invalidKeyFormat() {
-    return 'SecurityException: Expected AesGcmKeyFormat-proto';
+    return 'CustomError: Expected AesGcmKeyFormat-proto';
   }
 }
 

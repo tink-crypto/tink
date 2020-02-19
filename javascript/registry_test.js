@@ -82,7 +82,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: primitive wrapper for type ' + DummyPrimitive1 +
+          'CustomError: primitive wrapper for type ' + DummyPrimitive1 +
               ' has already been registered and cannot be overwritten',
           e.toString());
     }
@@ -110,8 +110,7 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
-          'SecurityException: no primitive wrapper found for type ' +
-              DummyPrimitive1,
+          'CustomError: no primitive wrapper found for type ' + DummyPrimitive1,
           e.toString());
     }
   },
@@ -549,7 +548,7 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static notImplemented() {
-    return 'SecurityException: Not implemented yet.';
+    return 'CustomError: Not implemented yet.';
   }
 
   /**
@@ -558,7 +557,7 @@ class ExceptionText {
    * @return {string}
    */
   static newKeyForbidden(keyType) {
-    return 'SecurityException: New key operation is forbidden for key type: ' +
+    return 'CustomError: New key operation is forbidden for key type: ' +
         keyType + '.';
   }
 
@@ -568,7 +567,7 @@ class ExceptionText {
    * @return {string}
    */
   static notRegisteredKeyType(keyType) {
-    return 'SecurityException: Key manager for key type ' + keyType +
+    return 'CustomError: Key manager for key type ' + keyType +
         ' has not been registered.';
   }
 
@@ -576,14 +575,14 @@ class ExceptionText {
    * @return {string}
    */
   static nullKeyManager() {
-    return 'SecurityException: Key manager cannot be null.';
+    return 'CustomError: Key manager cannot be null.';
   }
 
   /**
    * @return {string}
    */
   static undefinedKeyType() {
-    return 'SecurityException: Key type has to be defined.';
+    return 'CustomError: Key type has to be defined.';
   }
 
   /**
@@ -592,7 +591,7 @@ class ExceptionText {
    * @return {string}
    */
   static keyManagerOverwrittingAttempt(keyType) {
-    return 'SecurityException: Key manager for key type ' + keyType +
+    return 'CustomError: Key manager for key type ' + keyType +
         ' has already been registered and cannot be overwritten.';
   }
 
@@ -602,8 +601,8 @@ class ExceptionText {
    * @return {string}
    */
   static notSupportedKey(givenKeyType) {
-    return 'SecurityException: The provided key manager does not support ' +
-        'key type ' + givenKeyType + '.';
+    return 'CustomError: The provided key manager does not support '
+          + 'key type ' + givenKeyType + '.';
   }
 
   /**
@@ -612,7 +611,7 @@ class ExceptionText {
    * @return {string}
    */
   static prohibitedChangeToLessRestricted(keyType) {
-    return 'SecurityException: Key manager for key type ' + keyType +
+    return 'CustomError: Key manager for key type ' + keyType +
         ' has already been registered with forbidden new key operation.';
   }
 
@@ -623,18 +622,18 @@ class ExceptionText {
    * @return {string}
    */
   static keyTypesAreNotMatching(keyTypeFromKeyData, keyTypeParam) {
-    return 'SecurityException: Key type is ' + keyTypeParam +
+    return 'CustomError: Key type is ' + keyTypeParam +
         ', but it is expected to be ' + keyTypeFromKeyData + ' or undefined.';
   }
 
   /** @return {string} */
   static keyTypeNotDefined() {
-    return 'SecurityException: Key type has to be specified.';
+    return 'CustomError: Key type has to be specified.';
   }
 
   /** @return {string} */
   static nullKeysetHandle() {
-    return 'SecurityException: Keyset handle has to be non-null.';
+    return 'CustomError: Keyset handle has to be non-null.';
   }
 
   /**
@@ -650,7 +649,7 @@ class ExceptionText {
    * @return {string}
    */
   static notPrivateKeyFactory(typeUrl) {
-    return 'SecurityException: Key manager for key type ' + typeUrl +
+    return 'CustomError: Key manager for key type ' + typeUrl +
         ' does not have a private key factory.';
   }
 
@@ -659,8 +658,7 @@ class ExceptionText {
    * @return {string}
    */
   static couldNotParse(typeUrl) {
-    return 'SecurityException: Input cannot be parsed as ' + typeUrl +
-        ' key-proto.';
+    return 'CustomError: Input cannot be parsed as ' + typeUrl + ' key-proto.';
   }
 }
 

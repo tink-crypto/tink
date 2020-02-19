@@ -30,10 +30,10 @@ const userAgent = goog.require('goog.userAgent');
 function assertCryptoError(exception) {
   const message = String(exception);
   assertTrue(
-      message.startsWith('SecurityException: OperationError') ||
+      message.startsWith('CustomError: OperationError') ||
       // Edge uses a nonstandard error message.
       message ===
-          'SecurityException: Error: ' +
+          'CustomError: Error: ' +
               'Could not complete the operation due to error 8070000b.');
 }
 
@@ -134,7 +134,7 @@ testSuite({
         fail('expected aead.decrypt to fail');
       } catch (e) {
         if (c1.length < 12 /* iv */ + 16 /* tag */) {
-          assertEquals('SecurityException: ciphertext too short', e.toString());
+          assertEquals('CustomError: ciphertext too short', e.toString());
         } else {
           assertCryptoError(e);
         }

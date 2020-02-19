@@ -429,25 +429,24 @@ testSuite({
 class ExceptionText {
   /** @return {string} */
   static nullKeyFormat() {
-    return 'SecurityException: Key format has to be non-null.';
+    return 'CustomError: Key format has to be non-null.';
   }
 
   /** @return {string} */
   static invalidSerializedKeyFormat() {
-    return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
+    return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
   }
 
   /** @return {string} */
   static unsupportedPrimitive() {
-    return 'SecurityException: Requested primitive type which is not supported by ' +
+    return 'CustomError: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
   /** @return {string} */
   static unsupportedKeyFormat() {
-    return 'SecurityException: Expected ' + PRIVATE_KEY_TYPE +
-        ' key format proto.';
+    return 'CustomError: Expected ' + PRIVATE_KEY_TYPE + ' key format proto.';
   }
 
   /**
@@ -455,7 +454,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyType(opt_requestedKeyType) {
-    const prefix = 'SecurityException: Key type';
+    const prefix = 'CustomError: Key type';
     const suffix =
         'is not supported. This key manager supports ' + PRIVATE_KEY_TYPE + '.';
     if (opt_requestedKeyType) {
@@ -467,23 +466,23 @@ class ExceptionText {
 
   /** @return {string} */
   static versionOutOfBounds() {
-    return 'SecurityException: Version is out of bound, must be between 0 and ' +
+    return 'CustomError: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
   /** @return {string} */
   static invalidKeyFormatMissingParams() {
-    return 'SecurityException: Invalid key format - missing key params.';
+    return 'CustomError: Invalid key format - missing key params.';
   }
 
   /** @return {string} */
   static unknownPointFormat() {
-    return 'SecurityException: Invalid key params - unknown EC point format.';
+    return 'CustomError: Invalid key params - unknown EC point format.';
   }
 
   /** @return {string} */
   static missingKemParams() {
-    return 'SecurityException: Invalid params - missing KEM params.';
+    return 'CustomError: Invalid params - missing KEM params.';
   }
 
   /**
@@ -491,13 +490,13 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyTemplate(templateTypeUrl) {
-    return 'SecurityException: Invalid DEM params - ' + templateTypeUrl +
+    return 'CustomError: Invalid DEM params - ' + templateTypeUrl +
         ' template is not supported by ECIES AEAD HKDF.';
   }
 
   /** @return {string} */
   static invalidSerializedKey() {
-    return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
+    return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key-proto.';
   }
 }
