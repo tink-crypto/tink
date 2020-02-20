@@ -20,7 +20,6 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
 const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 /**
  * Asserts that an exception is the result of a Web Crypto error.
@@ -29,12 +28,7 @@ const userAgent = goog.require('goog.userAgent');
  */
 function assertCryptoError(exception) {
   const message = String(exception);
-  assertTrue(
-      message.startsWith('CustomError: OperationError') ||
-      // Edge uses a nonstandard error message.
-      message ===
-          'CustomError: Error: ' +
-              'Could not complete the operation due to error 8070000b.');
+  assertTrue(message.startsWith('CustomError: OperationError'));
 }
 
 testSuite({
@@ -50,8 +44,7 @@ testSuite({
 
   async testBasic() {
     const aead = await AesGcm.newInstance(Random.randBytes(16));
-    const minLength = userAgent.EDGE ? 1 : 0;  // b/120299887
-    for (let i = minLength; i < 100; i++) {
+    for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(i);
       let ciphertext = await aead.encrypt(msg);
       let plaintext = await aead.decrypt(ciphertext);
@@ -635,9 +628,6 @@ testSuite({
         ];
     for (let i = 0; i < NIST_TEST_VECTORS.length; i++) {
       const testVector = NIST_TEST_VECTORS[i];
-      if (userAgent.EDGE && !testVector['PT']) {
-        continue;  // b/120299887
-      }
       const aead = await AesGcm.newInstance(Bytes.fromHex(testVector['Key']));
       const ciphertext = Bytes.fromHex(
           testVector['IV'] + testVector['CT'] + testVector['Tag']);

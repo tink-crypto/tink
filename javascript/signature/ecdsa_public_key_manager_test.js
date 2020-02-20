@@ -30,17 +30,12 @@ const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
 const VERSION = 0;
 const PRIMITIVE = PublicKeyVerify;
 
 testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
   setUp() {
     // Use a generous promise timeout for running continuously.
     TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
@@ -202,7 +197,7 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.webCryptoError(), e.toString());
+      assertContains(e.toString(), ExceptionText.webCryptoErrors());
     }
 
     key.setX(x);
@@ -211,7 +206,7 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.webCryptoError(), e.toString());
+      assertContains(e.toString(), ExceptionText.webCryptoErrors());
     }
   },
 
@@ -341,11 +336,13 @@ class ExceptionText {
     return 'CustomError: Input cannot be parsed as ' + KEY_TYPE + ' key-proto.';
   }
 
-  /** @return {string} */
-  static webCryptoError() {
-    return userAgent.GECKO ?
-        'DataError: Data provided to an operation does not meet requirements' :
-        'DataError';
+  /** @return {!Array<string>} */
+  static webCryptoErrors() {
+    return [
+      'DataError',
+      // Firefox
+      'DataError: Data provided to an operation does not meet requirements',
+    ];
   }
 }
 

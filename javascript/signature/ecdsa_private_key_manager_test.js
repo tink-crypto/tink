@@ -33,7 +33,6 @@ const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
 const asserts = goog.require('goog.asserts');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 const PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey';
@@ -46,10 +45,6 @@ const PUBLIC_KEY_MATERIAL_TYPE = PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC;
 const PUBLIC_KEY_MANAGER_PRIMITIVE = PublicKeyVerify;
 
 testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
   setUp() {
     // Use a generous promise timeout for running continuously.
     TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s

@@ -38,7 +38,6 @@ const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
 const asserts = goog.require('goog.asserts');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 const KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
@@ -46,10 +45,6 @@ const VERSION = 0;
 const PRIMITIVE = HybridEncrypt;
 
 testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
   setUp() {
     AeadConfig.register();
     // Use a generous promise timeout for running continuously.

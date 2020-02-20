@@ -19,21 +19,14 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
 const EcdsaVerify = goog.require('tink.subtle.EcdsaVerify');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const Environment = goog.require('tink.subtle.Environment');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
 const TestCase = goog.require('goog.testing.TestCase');
 const Validators = goog.require('tink.subtle.Validators');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 const wycheproofEcdsaTestVectors = goog.require('tink.subtle.wycheproofEcdsaTestVectors');
 
 testSuite({
-  shouldRunTests() {
-    return Environment.IS_WEBCRYPTO_AVAILABLE &&
-        !userAgent.EDGE;  // b/120286783
-  },
-
   setUp() {
     // Use a generous promise timeout for running continuously.
     TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s

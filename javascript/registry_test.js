@@ -42,7 +42,6 @@ const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 ////////////////////////////////////////////////////////////////////////////////
 // tests
@@ -485,10 +484,6 @@ testSuite({
   },
 
   testGetPublicKeyData: {
-    shouldRunTests() {
-      return !userAgent.EDGE;  // b/120286783
-    },
-
     testNotPrivateKeyFactory() {
       AeadConfig.register();
       const notPrivateTypeUrl = AeadConfig.AES_GCM_TYPE_URL;

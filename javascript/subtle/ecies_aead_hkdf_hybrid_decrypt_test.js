@@ -25,14 +25,8 @@ const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 testSuite({
-  shouldRunTests() {
-    // https://msdn.microsoft.com/en-us/library/mt801195(v=vs.85).aspx
-    return !userAgent.EDGE;  // b/120286783
-  },
-
   setUp() {
     AeadConfig.register();
     // Use a generous promise timeout for running continuously.

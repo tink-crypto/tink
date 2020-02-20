@@ -32,13 +32,8 @@ const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
 const asserts = goog.require('goog.asserts');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
   setUp() {
     // Use a generous promise timeout for running continuously.
     TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s

@@ -20,15 +20,9 @@ const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 
 testSuite({
-  shouldRunTests() {
-    // https://msdn.microsoft.com/en-us/library/mt801195(v=vs.85).aspx
-    return !userAgent.EDGE;  // b/120286783
-  },
-
   async testEncapsulate_alwaysGenerateRandomKey() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
