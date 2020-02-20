@@ -22,6 +22,7 @@
 #include "openssl/bn.h"
 #include "openssl/cipher.h"
 #include "openssl/curve25519.h"
+#include "openssl/digest.h"
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"
 #include "openssl/err.h"
@@ -229,6 +230,8 @@ util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
       return EVP_sha1();
     case HashType::SHA256:
       return EVP_sha256();
+    case HashType::SHA384:
+      return EVP_sha384();
     case HashType::SHA512:
       return EVP_sha512();
     default:
@@ -471,6 +474,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
 util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
   switch (sig_hash) {
     case HashType::SHA256: /* fall through */
+    case HashType::SHA384:
     case HashType::SHA512:
       return util::Status::OK;
     case HashType::SHA1:

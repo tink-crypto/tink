@@ -80,12 +80,11 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, ValidateKeyFormat) {
               IsOk());
 }
 
-TEST(RsaSsaPkcs1SignKeyManagerTest, ValidateKeyFormatSha384Disallowed) {
+TEST(RsaSsaPkcs1SignKeyManagerTest, ValidateKeyFormatSha384Allowed) {
   RsaSsaPkcs1KeyFormat key_format = ValidKeyFormat();
   key_format.mutable_params()->set_hash_type(HashType::SHA384);
-  // TODO(b/140410067): Check if SHA384 should be allowed.
   EXPECT_THAT(RsaSsaPkcs1SignKeyManager().ValidateKeyFormat(key_format),
-              Not(IsOk()));
+              IsOk());
 }
 
 TEST(RsaSsaPkcs1SignKeyManagerTest, ValidateKeyFormatSha512Allowed) {

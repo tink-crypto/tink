@@ -246,7 +246,7 @@ TEST(RsaSsaPssSignKeyManagerTest, GetPublicKey) {
               Eq(key_or.ValueOrDie().public_key().e()));
 }
 
-TEST(EcdsaSignKeyManagerTest, Create) {
+TEST(RsaSsaPssSignKeyManagerTest, Create) {
   RsaSsaPssKeyFormat key_format =
       CreateKeyFormat(HashType::SHA256, HashType::SHA256, 32, 3072, RSA_F4);
   StatusOr<RsaSsaPssPrivateKey> key_or =
@@ -272,7 +272,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
               IsOk());
 }
 
-TEST(EcdsaSignKeyManagerTest, CreateWrongKey) {
+TEST(RsaSsaPssSignKeyManagerTest, CreateWrongKey) {
   RsaSsaPssKeyFormat key_format =
       CreateKeyFormat(HashType::SHA256, HashType::SHA256, 32, 3072, RSA_F4);
   StatusOr<RsaSsaPssPrivateKey> key_or =
