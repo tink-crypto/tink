@@ -9,8 +9,8 @@ hacking guide](JAVA-HACKING.md).
 ## Setup instructions
 
 The most recent release is
-[1.3.0-rc3](https://github.com/google/tink/releases/tag/v1.3.0-rc3), released
-2019-12-19.
+[1.3.0-rc4](https://github.com/google/tink/releases/tag/v1.3.0-rc4), released
+2020-02-19.
 
 In addition to the versioned releases, snapshots of Tink are regurlarly built
 using the master branch of the Tink GitHub repository.
@@ -35,7 +35,7 @@ following configuration:
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink</artifactId>
-    <version>1.3.0-rc3</version>
+    <version>1.3.0-rc4</version>
   </dependency>
 </dependencies>
 ```
@@ -79,7 +79,7 @@ following configuration:
 
 ```
 dependencies {
-  compile 'com.google.crypto.tink:tink-android:1.3.0-rc3'
+  compile 'com.google.crypto.tink:tink-android:1.3.0-rc4'
 }
 ```
 
@@ -99,10 +99,10 @@ dependencies {
 ## API documentation
 
 *   Java:
-    *   [1.3.0-rc3](https://google.github.com/tink/javadoc/tink/1.3.0-rc3)
+    *   [1.3.0-rc4](https://google.github.com/tink/javadoc/tink/1.3.0-rc4)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.3.0-rc3](https://google.github.com/tink/javadoc/tink-android/1.3.0-rc3)
+    *   [1.3.0-rc4](https://google.github.com/tink/javadoc/tink-android/1.3.0-rc4)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important warnings
