@@ -40,7 +40,8 @@ class _HybridDecryptCcToPyWrapper(hybrid_decrypt.HybridDecrypt):
 
 
 def from_cc_registry(
-    type_url: Text) -> key_manager.KeyManager[hybrid_decrypt.HybridDecrypt]:
+    type_url: Text
+) -> key_manager.PrivateKeyManager[hybrid_decrypt.HybridDecrypt]:
   return key_manager.PrivateKeyManagerCcToPyWrapper(
       cc_key_manager.HybridDecryptKeyManager.from_cc_registry(type_url),
       hybrid_decrypt.HybridDecrypt, _HybridDecryptCcToPyWrapper)
