@@ -26,6 +26,26 @@ cc_library(
 )
 
 cc_library(
+    name = "secret_data_internal",
+    srcs = ["secret_data_internal.cc"],
+    hdrs = ["secret_data_internal.h"],
+    include_prefix = "tink/util",
+    deps = [
+        "@com_google_absl//absl/base:core_headers",
+    ],
+)
+
+cc_library(
+    name = "secret_data",
+    hdrs = ["secret_data.h"],
+    include_prefix = "tink/util",
+    deps = [
+        ":secret_data_internal",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "errors",
     srcs = ["errors.cc"],
     hdrs = ["errors.h"],
@@ -41,10 +61,10 @@ cc_library(
     hdrs = ["enums.h"],
     include_prefix = "tink/util",
     deps = [
-        "//subtle:common_enums",
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
+        "//subtle:common_enums",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -190,9 +210,6 @@ cc_library(
         "//aead:aes_ctr_hmac_aead_key_manager",
         "//aead:aes_gcm_key_manager",
         "//aead:xchacha20_poly1305_key_manager",
-        "//subtle:random",
-        "//subtle:subtle_util_boringssl",
-        "//subtle/mac:stateful_mac",
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
@@ -201,6 +218,9 @@ cc_library(
         "//proto:ed25519_cc_proto",
         "//proto:tink_cc_proto",
         "//proto:xchacha20_poly1305_cc_proto",
+        "//subtle:random",
+        "//subtle:subtle_util_boringssl",
+        "//subtle/mac:stateful_mac",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -294,8 +314,8 @@ cc_test(
     linkopts = ["-lpthread"],
     deps = [
         ":enums",
-        "//subtle:common_enums",
         "//proto:common_cc_proto",
+        "//subtle:common_enums",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -384,9 +404,9 @@ cc_test(
     srcs = ["test_util_test.cc"],
     deps = [
         ":test_util",
-        "//subtle:random",
         "//proto:aes_gcm_cc_proto",
         "//proto:tink_cc_proto",
+        "//subtle:random",
         "@com_google_googletest//:gtest_main",
     ],
 )
