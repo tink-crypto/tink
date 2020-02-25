@@ -22,7 +22,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
-	subtleMac "github.com/google/tink/go/subtle/mac"
+	subtleMac "github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/testutil"

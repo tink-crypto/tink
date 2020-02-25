@@ -20,8 +20,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/subtle/mac"
+	"github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/subtle/random"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
@@ -38,9 +37,6 @@ var errInvalidHMACKeyFormat = errors.New("hmac_key_manager: invalid key format")
 
 // hmacKeyManager generates new HMAC keys and produces new instances of HMAC.
 type hmacKeyManager struct{}
-
-// Assert that hmacKeyManager implements the KeyManager interface.
-var _ registry.KeyManager = (*hmacKeyManager)(nil)
 
 // newHMACKeyManager returns a new hmacKeyManager.
 func newHMACKeyManager() *hmacKeyManager {
@@ -60,7 +56,7 @@ func (km *hmacKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 		return nil, err
 	}
 	hash := commonpb.HashType_name[int32(key.Params.Hash)]
-	hmac, err := mac.NewHMAC(hash, key.KeyValue, key.Params.TagSize)
+	hmac, err := subtle.NewHMAC(hash, key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +121,7 @@ func (km *hmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
 	}
 	keySize := uint32(len(key.KeyValue))
 	hash := commonpb.HashType_name[int32(key.Params.Hash)]
-	return mac.ValidateHMACParams(hash, keySize, key.Params.TagSize)
+	return subtle.ValidateHMACParams(hash, keySize, key.Params.TagSize)
 }
 
 // validateKeyFormat validates the given HMACKeyFormat
@@ -134,5 +130,5 @@ func (km *hmacKeyManager) validateKeyFormat(format *hmacpb.HmacKeyFormat) error 
 		return fmt.Errorf("null HMAC params")
 	}
 	hash := commonpb.HashType_name[int32(format.Params.Hash)]
-	return mac.ValidateHMACParams(hash, format.KeySize, format.Params.TagSize)
+	return subtle.ValidateHMACParams(hash, format.KeySize, format.Params.TagSize)
 }

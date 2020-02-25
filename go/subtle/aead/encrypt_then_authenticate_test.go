@@ -19,8 +19,8 @@ import (
 	"encoding/hex"
 	"testing"
 
+	subtleMac "github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/subtle/aead"
-	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
@@ -31,7 +31,7 @@ func createAEADWithKeys(encryptionKey []byte, ivSize int, hashAlgo string, macKe
 		return nil, err
 	}
 
-	mac, err := mac.NewHMAC(hashAlgo, macKey, uint32(tagSize))
+	mac, err := subtleMac.NewHMAC(hashAlgo, macKey, uint32(tagSize))
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func createAEAD(keySize, ivSize int, hashAlgo string, macKeySize int, tagSize in
 	}
 
 	macKey := random.GetRandomBytes(uint32(macKeySize))
-	mac, err := mac.NewHMAC(hashAlgo, macKey, uint32(tagSize))
+	mac, err := subtleMac.NewHMAC(hashAlgo, macKey, uint32(tagSize))
 	if err != nil {
 		return nil, err
 	}

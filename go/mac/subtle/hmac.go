@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package mac provides subtle implementations of the MAC primitive.
-package mac
+// Package subtle provides subtle implementations of the MAC primitive.
+package subtle
 
 import (
 	"crypto/hmac"

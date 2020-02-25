@@ -18,9 +18,9 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/cryptofmt"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/tink"
 )
 
@@ -44,9 +44,6 @@ type primitiveSet struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-// Asserts that primitiveSet implements the Mac interface.
-var _ tink.MAC = (*primitiveSet)(nil)
-
 func newPrimitiveSet(ps *primitiveset.PrimitiveSet) *primitiveSet {
 	ret := new(primitiveSet)
 	ret.ps = ps
@@ -62,7 +59,7 @@ func (m *primitiveSet) ComputeMAC(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ret := make([]byte, 0, len(primary.Prefix) + len(mac))
+	ret := make([]byte, 0, len(primary.Prefix)+len(mac))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, mac...)
 	return ret, nil
