@@ -22,7 +22,6 @@ import (
 	"hash"
 
 	"github.com/google/tink/go/subtle"
-	"github.com/google/tink/go/tink"
 )
 
 const (
@@ -48,9 +47,6 @@ type HMAC struct {
 	Key      []byte
 	TagSize  uint32
 }
-
-// This makes sure that HMAC implements the tink.MAC interface
-var _ tink.MAC = (*HMAC)(nil)
 
 // NewHMAC creates a new instance of HMAC with the specified key and tag size.
 func NewHMAC(hashAlg string, key []byte, tagSize uint32) (*HMAC, error) {
