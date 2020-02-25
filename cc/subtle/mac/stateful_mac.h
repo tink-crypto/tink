@@ -12,11 +12,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+// The interface for stateful message authentication codes.
+//
+// WARNING: implementations of this interface are thread-compatible,
+// but not thread-safe. Therefore, a streaming mac implemented with this
+// interface is required to additionally enforce thread safety.
+//
+// This interface supports the implementation of both streaming
+// and non-streaming MACs. It does not enforce thread-safety in order to avoid
+// an unnecessary performance overhead for non-streaming MAC implementations.
+
 #ifndef TINK_SUBTLE_MAC_STATEFUL_MAC_H_
 #define TINK_SUBTLE_MAC_STATEFUL_MAC_H_
 
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "absl/strings/string_view.h"
 
 namespace crypto {
 namespace tink {

@@ -60,6 +60,7 @@ TEST_F(HmacBoringSslTest, testBasic) {
     EXPECT_TRUE(res.ok()) << res.status().ToString();
     std::string tag = res.ValueOrDie();
     EXPECT_EQ(tag_size, tag.size());
+    EXPECT_EQ(tag, test::HexDecodeOrDie("9ccdca5b7fffb690df396e4ac49b9cd4"));
     auto status = hmac->VerifyMac(tag, data);
     EXPECT_TRUE(status.ok()) << "tag:" << test::HexEncode(tag)
                              << " status:" << status.ToString();
@@ -70,6 +71,7 @@ TEST_F(HmacBoringSslTest, testBasic) {
     EXPECT_TRUE(res.ok()) << res.status().ToString();
     std::string tag = res.ValueOrDie();
     EXPECT_EQ(tag_size, tag.size());
+    EXPECT_EQ(tag, test::HexDecodeOrDie("5433122f77bcf8a4d9b874b4149823ef"));
     auto status = hmac->VerifyMac(tag, data);
     EXPECT_TRUE(status.ok()) << "tag:" << test::HexEncode(tag)
                              << " status:" << status.ToString();

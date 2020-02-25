@@ -6,4 +6,5 @@ tink_cc_library(
   DEPS
     tink::util::status
     tink::util::statusor
+    absl::strings
 )
