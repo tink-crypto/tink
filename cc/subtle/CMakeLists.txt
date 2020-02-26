@@ -32,6 +32,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::base
     absl::strings
   PUBLIC
 )

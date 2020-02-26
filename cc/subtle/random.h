@@ -28,6 +28,9 @@ class Random {
  public:
   // Returns a random string of desired length.
   static std::string GetRandomBytes(size_t length);
+  static uint32_t GetRandomUInt32();
+  static uint16_t GetRandomUInt16();
+  static uint8_t GetRandomUInt8();
 };
 
 }  // namespace subtle
