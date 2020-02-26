@@ -15,8 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/random.h"
+
+#include <cstring>
 #include <string>
-#include "absl/base/internal/endian.h"
+
 #include "openssl/rand.h"
 
 namespace crypto {
@@ -36,13 +38,17 @@ std::string Random::GetRandomBytes(size_t length) {
 uint32_t Random::GetRandomUInt32() {
   uint8_t buf[sizeof(uint32_t)];
   RAND_bytes(buf, sizeof(uint32_t));
-  return absl::little_endian::Load32(buf);
+  uint32_t result;
+  std::memcpy(&result, buf, sizeof(uint32_t));
+  return result;
 }
 
 uint16_t Random::GetRandomUInt16() {
   uint8_t buf[sizeof(uint16_t)];
   RAND_bytes(buf, sizeof(uint16_t));
-  return absl::little_endian::Load16(buf);
+  uint16_t result;
+  std::memcpy(&result, buf, sizeof(uint16_t));
+  return result;
 }
 
 uint8_t Random::GetRandomUInt8() {

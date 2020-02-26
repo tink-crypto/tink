@@ -447,7 +447,6 @@ cc_library(
     include_prefix = "tink/subtle",
     deps = [
         "@boringssl//:crypto",
-        "@com_google_absl//absl/base:endian",
     ],
 )
 

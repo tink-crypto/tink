@@ -1052,7 +1052,9 @@ tink_cc_test(
 tink_cc_test(
   NAME random_test
   SRCS random_test.cc
-  DEPS tink::subtle::random
+  DEPS
+    tink::subtle::random
+    gmock
 )
 
 tink_cc_test(
