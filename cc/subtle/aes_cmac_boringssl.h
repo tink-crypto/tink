@@ -22,6 +22,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -32,7 +33,7 @@ namespace subtle {
 class AesCmacBoringSsl : public Mac {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<Mac>> New(
-      const std::string& key_value, uint32_t tag_size);
+      util::SecretData key, uint32_t tag_size);
 
   // Computes and returns the CMAC for 'data'.
   crypto::tink::util::StatusOr<std::string> ComputeMac(
@@ -55,9 +56,9 @@ class AesCmacBoringSsl : public Mac {
   static const size_t kBigKeySize = 32;
   static const size_t kMaxTagSize = 16;
 
-  AesCmacBoringSsl(const std::string& key_value, uint32_t tag_size);
+  AesCmacBoringSsl(util::SecretData key_value, uint32_t tag_size);
 
-  const std::string key_value_;
+  const util::SecretData key_value_;
   const uint32_t tag_size_;
 };
 

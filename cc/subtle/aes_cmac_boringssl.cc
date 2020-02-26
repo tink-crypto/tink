@@ -32,21 +32,20 @@ namespace tink {
 namespace subtle {
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(
-    const std::string& key_value, uint32_t tag_size) {
-  if (key_value.size() != kSmallKeySize && key_value.size() != kBigKeySize) {
+util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(util::SecretData key,
+                                                           uint32_t tag_size) {
+  if (key.size() != kSmallKeySize && key.size() != kBigKeySize) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }
   if (tag_size > kMaxTagSize) {
     return util::Status(util::error::INTERNAL, "invalid tag size");
   }
-  std::unique_ptr<Mac> cmac(new AesCmacBoringSsl(key_value, tag_size));
-  return std::move(cmac);
+  return std::unique_ptr<Mac>(new AesCmacBoringSsl(std::move(key), tag_size));
 }
 
-AesCmacBoringSsl::AesCmacBoringSsl(const std::string& key_value,
+AesCmacBoringSsl::AesCmacBoringSsl(util::SecretData key_value,
                                    uint32_t tag_size)
-    : key_value_(key_value), tag_size_(tag_size) {}
+    : key_value_(std::move(key_value)), tag_size_(tag_size) {}
 
 util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
     absl::string_view data) const {
@@ -88,11 +87,10 @@ util::Status AesCmacBoringSsl::VerifyMac(absl::string_view mac,
   for (uint32_t i = 0; i < tag_size_; i++) {
     diff |= buf[i] ^ static_cast<uint8_t>(mac[i]);
   }
-  if (diff == 0) {
-    return util::Status::OK;
-  } else {
+  if (diff != 0) {
     return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
   }
+  return util::OkStatus();
 }
 
 }  // namespace subtle

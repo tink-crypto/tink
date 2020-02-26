@@ -150,6 +150,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::core::mac
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -748,6 +749,7 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::aes_cmac_boringssl
     tink::core::mac
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util

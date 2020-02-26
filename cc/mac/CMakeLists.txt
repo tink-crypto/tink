@@ -76,6 +76,7 @@ tink_cc_library(
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation

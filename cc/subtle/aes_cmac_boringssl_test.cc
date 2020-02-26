@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -34,7 +35,7 @@ constexpr uint32_t kTagSize = 16;
 constexpr uint32_t kSmallTagSize = 10;
 
 TEST(AesCmacBoringSslTest, Basic) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);
   EXPECT_TRUE(cmac_result.ok()) << cmac_result.status();
@@ -62,7 +63,7 @@ TEST(AesCmacBoringSslTest, Basic) {
 }
 
 TEST(AesCmacBoringSslTest, Modification) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);
   EXPECT_TRUE(cmac_result.ok()) << cmac_result.status();
@@ -82,7 +83,7 @@ TEST(AesCmacBoringSslTest, Modification) {
 }
 
 TEST(AesCmacBoringSslTest, Truncation) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);
   EXPECT_TRUE(cmac_result.ok()) << cmac_result.status();
@@ -100,7 +101,7 @@ TEST(AesCmacBoringSslTest, Truncation) {
 }
 
 TEST(AesCmacBoringSslTest, BasicSmallTag) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kSmallTagSize);
   EXPECT_TRUE(cmac_result.ok()) << cmac_result.status();
@@ -128,7 +129,7 @@ TEST(AesCmacBoringSslTest, BasicSmallTag) {
 }
 
 TEST(AesCmacBoringSslTest, ModificationSmallTag) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kSmallTagSize);
   EXPECT_TRUE(cmac_result.ok()) << cmac_result.status();
@@ -148,7 +149,7 @@ TEST(AesCmacBoringSslTest, ModificationSmallTag) {
 }
 
 TEST(AesCmacBoringSslTest, TruncationOrAdditionSmallTag) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kSmallTagSize);
   EXPECT_TRUE(cmac_result.ok()) << cmac_result.status();
@@ -173,7 +174,7 @@ TEST(AesCmacBoringSslTest, TruncationOrAdditionSmallTag) {
 
 TEST(AesCmacBoringSslTest, InvalidKeySizes) {
   for (int keysize = 0; keysize < 65; keysize++) {
-    std::string key(keysize, 'x');
+    util::SecretData key(keysize, 'x');
     auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);
     if (keysize == 16 || keysize == 32) {
       EXPECT_TRUE(cmac_result.ok());
@@ -185,7 +186,7 @@ TEST(AesCmacBoringSslTest, InvalidKeySizes) {
 
 TEST(AesCmacBoringSslTest, InvalidTagSizes) {
   for (int tagsize = 0; tagsize < 65; tagsize++) {
-    std::string key(32, 'x');
+    util::SecretData key(32, 'x');
     auto cmac_result = AesCmacBoringSsl::New(key, tagsize);
     if (tagsize <= 16) {
       EXPECT_TRUE(cmac_result.ok());
@@ -200,9 +201,10 @@ class AesCmacBoringSslTestVectorTest
  public:
   // Utility to simplify testing with test vectors.
   // Arguments and result are hexadecimal.
-  bool CmacVerifyHex(const std::string &key_hex, const std::string &tag_hex,
-                     const std::string &data_hex) {
-    std::string key = test::HexDecodeOrDie(key_hex);
+  bool CmacVerifyHex(absl::string_view key_hex, absl::string_view tag_hex,
+                     absl::string_view data_hex) {
+    util::SecretData key =
+        util::SecretDataFromStringView(test::HexDecodeOrDie(key_hex));
     std::string tag = test::HexDecodeOrDie(tag_hex);
     std::string data = test::HexDecodeOrDie(data_hex);
     auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);

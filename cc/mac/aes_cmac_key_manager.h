@@ -26,6 +26,7 @@
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -43,8 +44,9 @@ class AesCmacKeyManager
   class MacFactory : public PrimitiveFactory<Mac> {
     crypto::tink::util::StatusOr<std::unique_ptr<Mac>> Create(
         const google::crypto::tink::AesCmacKey& key) const override {
-      return subtle::AesCmacBoringSsl::New(key.key_value(),
-                                           key.params().tag_size());
+      return subtle::AesCmacBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()),
+          key.params().tag_size());
     }
   };
 
