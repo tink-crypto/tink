@@ -747,6 +747,20 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "pem_parser_boringssl",
+    srcs = ["pem_parser_boringssl.cc"],
+    hdrs = ["pem_parser_boringssl.h"],
+    include_prefix = "tink/subtle",
+    deps = [
+        ":subtle_util_boringssl",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1432,6 +1446,23 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "pem_parser_boringssl_test",
+    size = "small",
+    srcs = ["pem_parser_boringssl_test.cc"],
+    deps = [
+        ":pem_parser_boringssl",
+        ":subtle_util_boringssl",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

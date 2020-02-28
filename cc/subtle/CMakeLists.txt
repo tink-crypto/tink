@@ -695,6 +695,21 @@ tink_cc_library(
       tink::util::statusor
 )
 
+tink_cc_library(
+  NAME pem_parser_boringssl
+  SRCS
+    pem_parser_boringssl.cc
+    pem_parser_boringssl.h
+  DEPS
+    absl::memory
+    absl::strings
+    crypto
+    tink::subtle::subtle_util_boringssl
+    tink::subtle_mac::stateful_mac
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -1206,7 +1221,6 @@ tink_cc_test(
     tink::util::test_matchers
 )
 
-
 tink_cc_test(
   NAME stateful_hmac_boringssl_test
   SRCS stateful_hmac_boringssl_test.cc
@@ -1233,4 +1247,18 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_util
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME pem_parser_boringssl_test
+  SRCS pem_parser_boringssl_test.cc
+  DEPS
+    tink::subtle::pem_parser_boringssl
+    tink::subtle::subtle_util_boringssl
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    tink::util::test_matchers
+    absl::strings
+    crypto
 )

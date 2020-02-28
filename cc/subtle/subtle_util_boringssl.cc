@@ -30,6 +30,7 @@
 #include "openssl/rsa.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {
@@ -51,6 +52,9 @@ size_t FieldElementSizeInBytes(const EC_GROUP *group) {
 // static
 util::StatusOr<std::string> SubtleUtilBoringSSL::bn2str(const BIGNUM *bn,
                                                         size_t len) {
+  if (bn == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
+  }
   std::unique_ptr<uint8_t[]> res(new uint8_t[len]);
   if (1 != BN_bn2bin_padded(res.get(), len, bn)) {
     return util::Status(util::error::INTERNAL, "Value too large");
