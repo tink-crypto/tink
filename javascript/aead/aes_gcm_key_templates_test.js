@@ -20,11 +20,8 @@ const AesGcmKeyTemplates = goog.require('tink.aead.AesGcmKeyTemplates');
 const PbAesGcmKeyFormat = goog.require('proto.google.crypto.tink.AesGcmKeyFormat');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-
-  testAes128Gcm() {
+describe('aes gcm key templates test', function() {
+  it('aes128 gcm', function() {
     // The created key should have the following parameters.
     const expectedKeySize = 16;
     const expectedOutputPrefix = PbOutputPrefixType.TINK;
@@ -34,19 +31,19 @@ testSuite({
 
     const keyTemplate = AesGcmKeyTemplates.aes128Gcm();
 
-    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
-    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+    expect(keyTemplate.getTypeUrl()).toBe(expectedTypeUrl);
+    expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test key size value in key format.
     const keyFormat =
         PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
-    assertEquals(expectedKeySize, keyFormat.getKeySize());
+    expect(keyFormat.getKeySize()).toBe(expectedKeySize);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
-  },
+  });
 
-  testAes256Gcm() {
+  it('aes256 gcm', function() {
     // The created key should have the following parameters.
     const expectedKeySize = 32;
     const expectedOutputPrefix = PbOutputPrefixType.TINK;
@@ -56,19 +53,19 @@ testSuite({
 
     const keyTemplate = AesGcmKeyTemplates.aes256Gcm();
 
-    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
-    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+    expect(keyTemplate.getTypeUrl()).toBe(expectedTypeUrl);
+    expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test key size value in key format.
     const keyFormat =
         PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
-    assertEquals(expectedKeySize, keyFormat.getKeySize());
+    expect(keyFormat.getKeySize()).toBe(expectedKeySize);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
-  },
+  });
 
-  testAes256GcmNoPrefix() {
+  it('aes256 gcm no prefix', function() {
     // The created key should have the following parameters.
     const expectedKeySize = 32;
     const expectedOutputPrefix = PbOutputPrefixType.RAW;
@@ -78,15 +75,15 @@ testSuite({
 
     const keyTemplate = AesGcmKeyTemplates.aes256GcmNoPrefix();
 
-    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
-    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+    expect(keyTemplate.getTypeUrl()).toBe(expectedTypeUrl);
+    expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test key size value in key format.
     const keyFormat =
         PbAesGcmKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
-    assertEquals(expectedKeySize, keyFormat.getKeySize());
+    expect(keyFormat.getKeySize()).toBe(expectedKeySize);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
-  }
+  });
 });

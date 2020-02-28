@@ -16,11 +16,10 @@ goog.module('tink.ProtoTest');
 goog.setTestOnly('tink.ProtoTest');
 
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const testSuite = goog.require('goog.testing.testSuite');
 
-testSuite({
-  testField() {
+describe('proto test', function() {
+  it('field', function() {
     const keyset = new PbKeyset().setPrimaryKeyId(1);
-    assertEquals(1, keyset.getPrimaryKeyId());
-  },
+    expect(keyset.getPrimaryKeyId()).toBe(1);
+  });
 });

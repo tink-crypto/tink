@@ -25,42 +25,39 @@ const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixTy
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-  async testNewAeadPrimitiveSetWithoutPrimary() {
+describe('aead wrapper test', function() {
+  it('new aead primitive set without primary', async function() {
     const primitiveSet = createPrimitiveSet(/* opt_withPrimary = */ false);
     try {
       new AeadWrapper().wrap(primitiveSet);
     } catch (e) {
-      assertEquals(ExceptionText.primitiveSetWithoutPrimary(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.primitiveSetWithoutPrimary());
       return;
     }
     fail('Should throw an exception.');
-  },
+  });
 
-  async testNewAeadPrimitiveShouldWork() {
+  it('new aead primitive should work', async function() {
     const primitiveSet = createPrimitiveSet();
     const aead = new AeadWrapper().wrap(primitiveSet);
-    assertTrue(aead != null && aead != undefined);
-  },
+    expect(aead != null && aead != undefined).toBe(true);
+  });
 
-  async testEncrypt() {
+  it('encrypt', async function() {
     const primitiveSet = createPrimitiveSet();
     const aead = new AeadWrapper().wrap(primitiveSet);
 
     const plaintext = new Uint8Array([0, 1, 2, 3]);
 
     const ciphertext = await aead.encrypt(plaintext);
-    assertTrue(ciphertext != null);
+    expect(ciphertext != null).toBe(true);
 
     // Ciphertext should begin with primary key output prefix.
-    assertObjectEquals(
-        primitiveSet.getPrimary().getIdentifier(),
-        ciphertext.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE));
-  },
+    expect(ciphertext.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE))
+        .toEqual(primitiveSet.getPrimary().getIdentifier());
+  });
 
-  async testDecryptBadCiphertext() {
+  it('decrypt bad ciphertext', async function() {
     const primitiveSet = createPrimitiveSet();
     const aead = new AeadWrapper().wrap(primitiveSet);
 
@@ -69,13 +66,13 @@ testSuite({
     try {
       await aead.decrypt(ciphertext);
     } catch (e) {
-      assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
       return;
     }
     fail('Should throw an exception');
-  },
+  });
 
-  async testDecryptWithCiphertextEncryptedByPrimaryKey() {
+  it('decrypt with ciphertext encrypted by primary key', async function() {
     const primitiveSet = createPrimitiveSet();
     const aead = new AeadWrapper().wrap(primitiveSet);
 
@@ -84,10 +81,10 @@ testSuite({
     const ciphertext = await aead.encrypt(plaintext);
     const decryptResult = await aead.decrypt(ciphertext);
 
-    assertObjectEquals(plaintext, decryptResult);
-  },
+    expect(decryptResult).toEqual(plaintext);
+  });
 
-  async testDecryptCiphertextEncryptedByNonPrimaryKey() {
+  it('decrypt ciphertext encrypted by non primary key', async function() {
     const primitiveSet = createPrimitiveSet();
     const aead = new AeadWrapper().wrap(primitiveSet);
 
@@ -109,10 +106,10 @@ testSuite({
     // primary and that the decryption corresponds to the plaintext.
     const decryptResult = await aead2.decrypt(ciphertext);
 
-    assertObjectEquals(plaintext, decryptResult);
-  },
+    expect(decryptResult).toEqual(plaintext);
+  });
 
-  async testDecryptCiphertextRawPrimitive() {
+  it('decrypt ciphertext raw primitive', async function() {
     const primitiveSet = createPrimitiveSet();
     // Create a RAW primitive and add it to primitiveSet.
     const keyId = 0xFFFFFFFF;
@@ -131,10 +128,10 @@ testSuite({
     // Try to decrypt the ciphertext by aead and check that the result
     // corresponds to the plaintext.
     const decryptResult = await aead.decrypt(ciphertext);
-    assertObjectEquals(plaintext, decryptResult);
-  },
+    expect(decryptResult).toEqual(plaintext);
+  });
 
-  async testDecryptCiphertextDisabledPrimitive() {
+  it('decrypt ciphertext disabled primitive', async function() {
     const primitiveSet = createPrimitiveSet();
 
     // Create a primitive with disabled key and add it to primitiveSet.
@@ -155,13 +152,13 @@ testSuite({
     try {
       await aead.decrypt(ciphertext);
     } catch (e) {
-      assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testEncryptDecrypt_AssociatedDataShouldBePassed() {
+  it('encrypt decrypt,  associated data should be passed', async function() {
     const primitiveSet = createPrimitiveSet();
     const aead = new AeadWrapper().wrap(primitiveSet);
     const plaintext = new Uint8Array([0, 1, 2, 3, 4, 5, 6]);
@@ -172,13 +169,13 @@ testSuite({
     const ciphertext = await aead.encrypt(plaintext, aad);
     const ciphertextAad =
         ciphertext.slice(ciphertext.length - aad.length, ciphertext.length);
-    assertObjectEquals(aad, ciphertextAad);
+    expect(ciphertextAad).toEqual(aad);
 
     // Decrypt the ciphertext with aad. It is possible only if aad was passed
     // correctly.
     const decryptedCiphertext = await aead.decrypt(ciphertext, aad);
-    assertObjectEquals(plaintext, decryptedCiphertext);
-  },
+    expect(decryptedCiphertext).toEqual(plaintext);
+  });
 });
 
 /**

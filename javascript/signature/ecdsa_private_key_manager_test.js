@@ -30,9 +30,7 @@ const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const TestCase = goog.require('goog.testing.TestCase');
 const asserts = goog.require('goog.asserts');
-const testSuite = goog.require('goog.testing.testSuite');
 
 const PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey';
@@ -44,19 +42,19 @@ const PUBLIC_KEY_TYPE = 'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
 const PUBLIC_KEY_MATERIAL_TYPE = PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC;
 const PUBLIC_KEY_MANAGER_PRIMITIVE = PublicKeyVerify;
 
-testSuite({
-  setUp() {
+describe('ecdsa private key manager test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testNewKey_invalidSerializedKeyFormat() {
+  it('new key, invalid serialized key format', async function() {
     const invalidSerializedKeyFormat = new Uint8Array(0);
     const manager = new EcdsaPrivateKeyManager();
 
@@ -64,11 +62,11 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidSerializedKeyFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
     }
-  },
+  });
 
-  async testNewKey_unsupportedKeyFormatProto() {
+  it('new key, unsupported key format proto', async function() {
     const unsupportedKeyFormatProto = new PbEcdsaParams();
     const manager = new EcdsaPrivateKeyManager();
 
@@ -76,11 +74,11 @@ testSuite({
       await manager.getKeyFactory().newKey(unsupportedKeyFormatProto);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedKeyFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedKeyFormat());
     }
-  },
+  });
 
-  async testNewKey_invalidFormat_missingParams() {
+  it('new key, invalid format, missing params', async function() {
     const invalidFormat = new PbEcdsaKeyFormat();
     const manager = new EcdsaPrivateKeyManager();
 
@@ -88,11 +86,11 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.invalidKeyFormatMissingParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidKeyFormatMissingParams());
     }
-  },
+  });
 
-  async testNewKey_invalidFormat_invalidParams() {
+  it('new key, invalid format, invalid params', async function() {
     const manager = new EcdsaPrivateKeyManager();
 
     // Unknown encoding.
@@ -103,7 +101,7 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownEncoding(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownEncoding());
     }
     invalidFormat.getParams().setEncoding(PbEcdsaSignatureEncoding.DER);
 
@@ -113,7 +111,7 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownHash(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownHash());
     }
     invalidFormat.getParams().setHashType(PbHashType.SHA256);
 
@@ -123,7 +121,7 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownCurve(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownCurve());
     }
 
     // Bad hash + curve combinations.
@@ -132,9 +130,9 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
 
     invalidFormat.getParams().setCurve(PbEllipticCurveType.NIST_P521);
@@ -142,13 +140,13 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256');
     }
-  },
+  });
 
-  async testNewKey_viaKeyFormat() {
+  it('new key, via key format', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const manager = new EcdsaPrivateKeyManager();
 
@@ -156,13 +154,13 @@ testSuite({
       const key = /** @type{!PbEcdsaPrivateKey} */ (
           await manager.getKeyFactory().newKey(keyFormat));
 
-      assertObjectEquals(keyFormat.getParams(), key.getPublicKey().getParams());
+      expect(key.getPublicKey().getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
-  },
+  });
 
-  async testNewKeyData_invalidSerializedKeyFormat() {
+  it('new key data, invalid serialized key format', async function() {
     const serializedKeyFormats = [new Uint8Array(1), new Uint8Array(0)];
     const manager = new EcdsaPrivateKeyManager();
 
@@ -174,13 +172,13 @@ testSuite({
             'An exception should be thrown for the string: ' +
             serializedKeyFormats[i]);
       } catch (e) {
-        assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
+        expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
         continue;
       }
     }
-  },
+  });
 
-  async testNewKeyData_fromValidKeyFormat() {
+  it('new key data, from valid key format', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const manager = new EcdsaPrivateKeyManager();
 
@@ -189,17 +187,17 @@ testSuite({
       const keyData = /** @type{!PbKeyData} */ (
           await manager.getKeyFactory().newKeyData(serializedKeyFormat));
 
-      assertEquals(PRIVATE_KEY_TYPE, keyData.getTypeUrl());
-      assertEquals(PRIVATE_KEY_MATERIAL_TYPE, keyData.getKeyMaterialType());
+      expect(keyData.getTypeUrl()).toBe(PRIVATE_KEY_TYPE);
+      expect(keyData.getKeyMaterialType()).toBe(PRIVATE_KEY_MATERIAL_TYPE);
 
       const key = PbEcdsaPrivateKey.deserializeBinary(keyData.getValue());
-      assertObjectEquals(keyFormat.getParams(), key.getPublicKey().getParams());
+      expect(key.getPublicKey().getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
-  },
+  });
 
-  testGetPublicKeyData_invalidPrivateKeySerialization() {
+  it('get public key data, invalid private key serialization', function() {
     const manager = new EcdsaPrivateKeyManager();
 
     const privateKey = new Uint8Array([0, 1]);  // not a serialized private key
@@ -208,11 +206,11 @@ testSuite({
           manager.getKeyFactory());
       factory.getPublicKeyData(privateKey);
     } catch (e) {
-      assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
     }
-  },
+  });
 
-  async testGetPublicKeyData_shouldWork() {
+  it('get public key data, should work', async function() {
     const keyFormat = createKeyFormat();
     const manager = new EcdsaPrivateKeyManager();
 
@@ -223,19 +221,19 @@ testSuite({
     const publicKeyData =
         factory.getPublicKeyData(privateKey.serializeBinary());
 
-    assertEquals(PUBLIC_KEY_TYPE, publicKeyData.getTypeUrl());
-    assertEquals(PUBLIC_KEY_MATERIAL_TYPE, publicKeyData.getKeyMaterialType());
+    expect(publicKeyData.getTypeUrl()).toBe(PUBLIC_KEY_TYPE);
+    expect(publicKeyData.getKeyMaterialType()).toBe(PUBLIC_KEY_MATERIAL_TYPE);
     const publicKey =
         PbEcdsaPublicKey.deserializeBinary(publicKeyData.getValue());
-    assertObjectEquals(
-        privateKey.getPublicKey().getVersion(), publicKey.getVersion());
-    assertObjectEquals(
-        privateKey.getPublicKey().getParams(), publicKey.getParams());
-    assertObjectEquals(privateKey.getPublicKey().getX(), publicKey.getX());
-    assertObjectEquals(privateKey.getPublicKey().getY(), publicKey.getY());
-  },
+    expect(publicKey.getVersion())
+        .toEqual(privateKey.getPublicKey().getVersion());
+    expect(publicKey.getParams())
+        .toEqual(privateKey.getPublicKey().getParams());
+    expect(publicKey.getX()).toEqual(privateKey.getPublicKey().getX());
+    expect(publicKey.getY()).toEqual(privateKey.getPublicKey().getY());
+  });
 
-  async testGetPrimitive_unsupportedPrimitiveType() {
+  it('get primitive, unsupported primitive type', async function() {
     const manager = new EcdsaPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const key = await manager.getKeyFactory().newKey(keyFormat);
@@ -244,11 +242,11 @@ testSuite({
       await manager.getPrimitive(PublicKeyVerify, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedPrimitive());
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedKeyDataType() {
+  it('get primitive, unsupported key data type', async function() {
     const manager = new EcdsaPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const keyData =
@@ -259,12 +257,12 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.unsupportedKeyType(keyData.getTypeUrl()));
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedKeyType() {
+  it('get primitive, unsupported key type', async function() {
     const manager = new EcdsaPrivateKeyManager();
     let key = new PbEcdsaPublicKey();
 
@@ -272,11 +270,11 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedKeyType());
     }
-  },
+  });
 
-  async testGetPrimitive_highVersion() {
+  it('get primitive, high version', async function() {
     const manager = new EcdsaPrivateKeyManager();
     const version = manager.getVersion() + 1;
     const keyFormat = createKeyFormat();
@@ -289,11 +287,11 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.versionOutOfBounds());
     }
-  },
+  });
 
-  async testGetPrimitive_invalidParams() {
+  it('get primitive, invalid params', async function() {
     const manager = new EcdsaPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const key = asserts.assertInstanceof(
@@ -306,7 +304,7 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownEncoding(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownEncoding());
     }
     key.getPublicKey().getParams().setEncoding(PbEcdsaSignatureEncoding.DER);
 
@@ -316,7 +314,7 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownHash(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownHash());
     }
     key.getPublicKey().getParams().setHashType(PbHashType.SHA256);
 
@@ -326,7 +324,7 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownCurve(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownCurve());
     }
 
     // Bad hash + curve combinations.
@@ -335,9 +333,9 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
 
     key.getPublicKey().getParams().setCurve(PbEllipticCurveType.NIST_P521);
@@ -345,13 +343,13 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256');
     }
-  },
+  });
 
-  async testGetPrimitive_invalidSerializedKey() {
+  it('get primitive, invalid serialized key', async function() {
     const manager = new EcdsaPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const keyData =
@@ -366,12 +364,12 @@ testSuite({
         await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
       } catch (e) {
-        assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
+        expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
       }
     }
-  },
+  });
 
-  async testGetPrimitive_fromKey() {
+  it('get primitive, from key', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const privateKeyManager = new EcdsaPrivateKeyManager();
     const publicKeyManager = new EcdsaPublicKeyManager();
@@ -393,11 +391,11 @@ testSuite({
       const signature = await publicKeySign.sign(data);
       const isValid = await publicKeyVerify.verify(signature, data);
 
-      assertTrue(isValid);
+      expect(isValid).toBe(true);
     }
-  },
+  });
 
-  async testGetPrimitive_fromKeyData() {
+  it('get primitive, from key data', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const privateKeyManager = new EcdsaPrivateKeyManager();
     const publicKeyManager = new EcdsaPublicKeyManager();
@@ -421,29 +419,29 @@ testSuite({
       const signature = await publicKeySign.sign(data);
       const isValid = await publicKeyVerify.verify(signature, data);
 
-      assertTrue(isValid);
+      expect(isValid).toBe(true);
     }
-  },
+  });
 
-  testDoesSupport() {
+  it('does support', function() {
     const manager = new EcdsaPrivateKeyManager();
-    assertTrue(manager.doesSupport(PRIVATE_KEY_TYPE));
-  },
+    expect(manager.doesSupport(PRIVATE_KEY_TYPE)).toBe(true);
+  });
 
-  testGetKeyType() {
+  it('get key type', function() {
     const manager = new EcdsaPrivateKeyManager();
-    assertEquals(PRIVATE_KEY_TYPE, manager.getKeyType());
-  },
+    expect(manager.getKeyType()).toBe(PRIVATE_KEY_TYPE);
+  });
 
-  testGetPrimitiveType() {
+  it('get primitive type', function() {
     const manager = new EcdsaPrivateKeyManager();
-    assertEquals(PRIVATE_KEY_MANAGER_PRIMITIVE, manager.getPrimitiveType());
-  },
+    expect(manager.getPrimitiveType()).toBe(PRIVATE_KEY_MANAGER_PRIMITIVE);
+  });
 
-  testGetVersion() {
+  it('get version', function() {
     const manager = new EcdsaPrivateKeyManager();
-    assertEquals(VERSION, manager.getVersion());
-  },
+    expect(manager.getVersion()).toBe(VERSION);
+  });
 });
 
 // Helper classes and functions

@@ -21,22 +21,20 @@ const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-  setUp() {
+describe('registry ecies aead hkdf dem helper test', function() {
+  beforeEach(function() {
     AeadConfig.register();
-  },
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
-  },
+  });
 
   //////////////////////////////////////////////////////////////////////////////
   // Tests for constructor
   //////////////////////////////////////////////////////////////////////////////
 
-  testConstructor_unsupportedKeyType() {
+  it('constructor, unsupported key type', function() {
     const template = AeadKeyTemplates.aes128CtrHmacSha256().setTypeUrl(
         'some_unsupported_type_url');
 
@@ -44,13 +42,12 @@ testSuite({
       new RegistryEciesAeadHkdfDemHelper(template);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.unsupportedTypeUrl(template.getTypeUrl()),
-          e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.unsupportedTypeUrl(template.getTypeUrl()));
     }
-  },
+  });
 
-  testConstructor_invalidKeyFormats() {
+  it('constructor, invalid key formats', function() {
     // Some valid AES-GCM and AES-CTR-HMAC key templates.
     const templates =
         [AeadKeyTemplates.aes128CtrHmacSha256(), AeadKeyTemplates.aes128Gcm()];
@@ -66,55 +63,54 @@ testSuite({
           new RegistryEciesAeadHkdfDemHelper(template);
           fail('An exception should be thrown.');
         } catch (e) {
-          assertEquals(
-              ExceptionText.invalidKeyFormat(template.getTypeUrl()),
-              e.toString());
+          expect(e.toString())
+              .toBe(ExceptionText.invalidKeyFormat(template.getTypeUrl()));
         }
       }
     }
-  },
+  });
 
-  testConstructor_aes128CtrHmacSha256KeyTemplate() {
+  it('constructor, aes128 ctr hmac sha256 key template', function() {
     const template = AeadKeyTemplates.aes128CtrHmacSha256();
     const helper = new RegistryEciesAeadHkdfDemHelper(template);
 
     // Expected size is a sum of AES CTR key length and HMAC key length.
     const expectedSize = 16 + 32;
-    assertEquals(expectedSize, helper.getDemKeySizeInBytes());
-  },
+    expect(helper.getDemKeySizeInBytes()).toBe(expectedSize);
+  });
 
-  testConstructor_aes256CtrHmacSha256KeyTemplate() {
+  it('constructor, aes256 ctr hmac sha256 key template', function() {
     const template = AeadKeyTemplates.aes256CtrHmacSha256();
     const helper = new RegistryEciesAeadHkdfDemHelper(template);
 
     // Expected size is a sum of AES CTR key length and HMAC key length.
     const expectedSize = 32 + 32;
-    assertEquals(expectedSize, helper.getDemKeySizeInBytes());
-  },
+    expect(helper.getDemKeySizeInBytes()).toBe(expectedSize);
+  });
 
-  testConstructor_aes128Gcm() {
+  it('constructor, aes128 gcm', function() {
     const template = AeadKeyTemplates.aes128Gcm();
     const helper = new RegistryEciesAeadHkdfDemHelper(template);
 
     // Expected size is equal to the size of key.
     const expectedSize = 16;
-    assertEquals(expectedSize, helper.getDemKeySizeInBytes());
-  },
+    expect(helper.getDemKeySizeInBytes()).toBe(expectedSize);
+  });
 
-  testConstructor_aes256Gcm() {
+  it('constructor, aes256 gcm', function() {
     const template = AeadKeyTemplates.aes256Gcm();
     const helper = new RegistryEciesAeadHkdfDemHelper(template);
 
     // Expected size is equal to the size of key.
     const expectedSize = 32;
-    assertEquals(expectedSize, helper.getDemKeySizeInBytes());
-  },
+    expect(helper.getDemKeySizeInBytes()).toBe(expectedSize);
+  });
 
   //////////////////////////////////////////////////////////////////////////////
   // Tests for getAead method
   //////////////////////////////////////////////////////////////////////////////
 
-  async testGetAead_invalidKeyLength() {
+  it('get aead, invalid key length', async function() {
     const template = AeadKeyTemplates.aes128CtrHmacSha256();
     // Expected size is a sum of AES CTR key length and HMAC key length.
     const expectedKeyLength = 16 + 32;
@@ -125,13 +121,12 @@ testSuite({
       await helper.getAead(new Uint8Array(keyLength));
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.invalidKeyLength(expectedKeyLength, keyLength),
-          e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.invalidKeyLength(expectedKeyLength, keyLength));
     }
-  },
+  });
 
-  async testGetAead_differentTemplates() {
+  it('get aead, different templates', async function() {
     const templates = [
       AeadKeyTemplates.aes128CtrHmacSha256(), AeadKeyTemplates.aes128Gcm(),
       AeadKeyTemplates.aes256CtrHmacSha256(), AeadKeyTemplates.aes256Gcm()
@@ -146,7 +141,7 @@ testSuite({
 
       // Get Aead from helper.
       const aead = await helper.getAead(demKey);
-      assertTrue(aead != null);
+      expect(aead != null).toBe(true);
 
       // Test the Aead instance.
       const plaintext = Random.randBytes(10);
@@ -154,9 +149,9 @@ testSuite({
       const ciphertext = await aead.encrypt(plaintext, aad);
       const decryptedCiphertext = await aead.decrypt(ciphertext, aad);
 
-      assertObjectEquals(plaintext, decryptedCiphertext);
+      expect(decryptedCiphertext).toEqual(plaintext);
     }
-  },
+  });
 });
 
 // Helper classes and functions

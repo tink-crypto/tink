@@ -18,32 +18,29 @@ goog.setTestOnly('tink.aead.AeadKeyTemplatesTest');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-
-  testAes128CtrHmacSha256() {
+describe('aead key templates test', function() {
+  it('aes128 ctr hmac sha256', function() {
     const keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
-    assertTrue(keyTemplate instanceof PbKeyTemplate);
-  },
+    expect(keyTemplate instanceof PbKeyTemplate).toBe(true);
+  });
 
-  testAes256CtrHmacSha256() {
+  it('aes256 ctr hmac sha256', function() {
     const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
-    assertTrue(keyTemplate instanceof PbKeyTemplate);
-  },
+    expect(keyTemplate instanceof PbKeyTemplate).toBe(true);
+  });
 
-  testAes128Gcm() {
+  it('aes128 gcm', function() {
     const keyTemplate = AeadKeyTemplates.aes128Gcm();
-    assertTrue(keyTemplate instanceof PbKeyTemplate);
-  },
+    expect(keyTemplate instanceof PbKeyTemplate).toBe(true);
+  });
 
-  testAes256Gcm() {
+  it('aes256 gcm', function() {
     const keyTemplate = AeadKeyTemplates.aes256Gcm();
-    assertTrue(keyTemplate instanceof PbKeyTemplate);
-  },
+    expect(keyTemplate instanceof PbKeyTemplate).toBe(true);
+  });
 
-  testAes256GcmNoPrefix() {
+  it('aes256 gcm no prefix', function() {
     const keyTemplate = AeadKeyTemplates.aes256GcmNoPrefix();
-    assertTrue(keyTemplate instanceof PbKeyTemplate);
-  }
+    expect(keyTemplate instanceof PbKeyTemplate).toBe(true);
+  });
 });

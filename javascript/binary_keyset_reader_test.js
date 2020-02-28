@@ -23,10 +23,8 @@ const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Random = goog.require('tink.subtle.Random');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-  testRead_invalidSerializedKeysetProto() {
+describe('binary keyset reader test', function() {
+  it('read, invalid serialized keyset proto', function() {
     for (let i = 0; i < 2; i++) {
       // The Uint8Array is not a serialized keyset.
       const reader = BinaryKeysetReader.withUint8Array(new Uint8Array(i));
@@ -35,12 +33,12 @@ testSuite({
         reader.read();
         fail('An exception should be thrown.');
       } catch (e) {
-        assertEquals(ExceptionText.invalidSerialization(), e.toString());
+        expect(e.toString()).toBe(ExceptionText.invalidSerialization());
       }
     }
-  },
+  });
 
-  testRead() {
+  it('read', function() {
     // Create keyset proto and serialize it.
     const keyset = new PbKeyset();
     // The for cycle starts from 1 as setting any proto value to 0 sets it to
@@ -71,19 +69,19 @@ testSuite({
     const keysetFromReader = reader.read();
 
     // Test that it returns the same object as was created.
-    assertObjectEquals(keyset, keysetFromReader);
-  },
+    expect(keysetFromReader).toEqual(keyset);
+  });
 
-  testReadEncrypted_notImplementedYet() {
+  it('read encrypted, not implemented yet', function() {
     const reader = BinaryKeysetReader.withUint8Array(new Uint8Array(10));
 
     try {
       reader.readEncrypted();
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.notImplemented(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.notImplemented());
     }
-  },
+  });
 });
 
 ////////////////////////////////////////////////////////////////////////////////

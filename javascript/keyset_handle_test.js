@@ -35,59 +35,57 @@ const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixTy
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
 const {createKeyset} = goog.require('tink.testUtils');
 
-testSuite({
-  setUp() {
+describe('keyset handle test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
 
     HybridConfig.register();
-  },
+  });
 
-  async tearDown() {
-    await Registry.reset();
+  afterEach(function() {
+    Registry.reset();
 
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for constructor
-  async testConstructorKeysetWithEmptyListOfKeys() {
+  it('constructor keyset with empty list of keys', async function() {
     const keyset = new PbKeyset().setKeyList([]);
     try {
       new KeysetHandle(keyset);
     } catch (e) {
-      assertEquals(
-          'CustomError: Keyset should be non null and must contain at least one key.',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: Keyset should be non null and must contain at least one key.');
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testConstructorShouldWork() {
+  it('constructor should work', async function() {
     const keyset = createKeyset();
     new KeysetHandle(keyset);
-  },
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getKeyset method
 
-  async testGetKeyset() {
+  it('get keyset', async function() {
     const keyset = createKeyset();
     const keysetHandle = new KeysetHandle(keyset);
 
     const result = keysetHandle.getKeyset();
-    assertObjectEquals(keyset, result);
-  },
+    expect(result).toEqual(keyset);
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for read method
-  async testRead() {
+  it('read', async function() {
     const keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
     const keysetHandle = await KeysetHandle.generateNew(keyTemplate);
     const serializedKeyset =
@@ -97,39 +95,38 @@ testSuite({
     try {
       await KeysetHandle.read(keysetReader, aead);
     } catch (e) {
-      assertEquals(
-          'CustomError: KeysetHandle -- read: Not implemented yet.',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: KeysetHandle -- read: Not implemented yet.');
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for generateNew method
-  async testGenerateNew() {
+  it('generate new', async function() {
     const keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
     const keysetHandle = await KeysetHandle.generateNew(keyTemplate);
     const keyset = keysetHandle.getKeyset();
-    assertEquals(keyset.getKeyList().length, 1);
+    expect(1).toBe(keyset.getKeyList().length);
 
     const key = keyset.getKeyList()[0];
-    assertEquals(key.getKeyId(), keyset.getPrimaryKeyId());
-    assertEquals(key.getOutputPrefixType(), keyTemplate.getOutputPrefixType());
-    assertEquals(key.getStatus(), PbKeyStatusType.ENABLED);
+    expect(keyset.getPrimaryKeyId()).toBe(key.getKeyId());
+    expect(keyTemplate.getOutputPrefixType()).toBe(key.getOutputPrefixType());
+    expect(PbKeyStatusType.ENABLED).toBe(key.getStatus());
 
     const keyData = key.getKeyData();
-    assertEquals(keyData.getTypeUrl(), keyTemplate.getTypeUrl());
+    expect(keyTemplate.getTypeUrl()).toBe(keyData.getTypeUrl());
 
     const aead = await keysetHandle.getPrimitive(Aead);
     const plaintext = Random.randBytes(20);
     const ciphertext = await aead.encrypt(plaintext);
-    assertObjectEquals(plaintext, await aead.decrypt(ciphertext));
-  },
+    expect(await aead.decrypt(ciphertext)).toEqual(plaintext);
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for write method
-  async testWrite() {
+  it('write', async function() {
     const keyset = createKeysetAndInitializeRegistry(Aead);
     const keysetHandle = new KeysetHandle(keyset);
     const keysetWriter = new BinaryKeysetWriter();
@@ -138,18 +135,17 @@ testSuite({
     try {
       await keysetHandle.write(keysetWriter, aead);
     } catch (e) {
-      assertEquals(
-          'CustomError: KeysetHandle -- write: Not implemented yet.',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: KeysetHandle -- write: Not implemented yet.');
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitive method
 
-  async testGetPrimitive_Aead() {
+  it('get primitive,  aead', async function() {
     const keyset = createKeysetAndInitializeRegistry(Aead);
     const keysetHandle = new KeysetHandle(keyset);
 
@@ -160,10 +156,10 @@ testSuite({
     const ciphertext = await aead.encrypt(plaintext);
     const decryptedText = await aead.decrypt(ciphertext);
 
-    assertObjectEquals(plaintext, decryptedText);
-  },
+    expect(decryptedText).toEqual(plaintext);
+  });
 
-  async testGetPrimitive_HybridEncrypt() {
+  it('get primitive,  hybrid encrypt', async function() {
     const keyset = createKeysetAndInitializeRegistry(HybridEncrypt);
     const keysetHandle = new KeysetHandle(keyset);
 
@@ -173,17 +169,16 @@ testSuite({
     const ciphertext = await hybridEncrypt.encrypt(plaintext);
     // DummyHybridEncrypt just appends a ciphertext suffix to the plaintext.
     // Since the primary key id is 1, the ciphertext prefix should also be 1.
-    assertObjectEquals(
-        Bytes.concat(
+    expect(ciphertext)
+        .toEqual(Bytes.concat(
             new Uint8Array([
               0, 0, 0, 0, 1
             ]) /* prefix which is 1-byte version + 4-byte primary key id*/,
             plaintext,
-            new Uint8Array([1]) /* suffix which is 1-byte primary key id */),
-        ciphertext);
-  },
+            new Uint8Array([1]) /* suffix which is 1-byte primary key id */));
+  });
 
-  async testGetPrimitive_HybridDecrypt() {
+  it('get primitive,  hybrid decrypt', async function() {
     const decryptKeysetHandle =
         new KeysetHandle(createKeysetAndInitializeRegistry(HybridDecrypt));
     const hybridDecrypt = await decryptKeysetHandle.getPrimitive(HybridDecrypt);
@@ -196,10 +191,10 @@ testSuite({
     const ciphertext = await hybridEncrypt.encrypt(plaintext);
     const decrypted = await hybridDecrypt.decrypt(ciphertext);
 
-    assertObjectEquals(plaintext, decrypted);
-  },
+    expect(decrypted).toEqual(plaintext);
+  });
 
-  async testGetPrimitive_Aead_customKeyManager() {
+  it('get primitive,  aead, custom key manager', async function() {
     const keyset = new PbKeyset();
 
     // Add a new key with a new key type associated to custom key manager
@@ -235,9 +230,8 @@ testSuite({
       await aeadFromRegistry.decrypt(ciphertext);
       fail('An exception should be thrown here.');
     } catch (e) {
-      assertEquals(
-          'CustomError: Decryption failed for the given ciphertext.',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: Decryption failed for the given ciphertext.');
     }
 
     // Check that the primitive returned by getPrimitive with customKeyManager
@@ -245,10 +239,10 @@ testSuite({
     const aeadFromCustomKeyManager =
         await keysetHandle.getPrimitive(Aead, customKeyManager);
     const decryptedText = await aeadFromCustomKeyManager.decrypt(ciphertext);
-    assertObjectEquals(plaintext, decryptedText);
-  },
+    expect(decryptedText).toEqual(plaintext);
+  });
 
-  async testGetPrimitive_HybridEncrypt_customKeyManager() {
+  it('get primitive,  hybrid encrypt, custom key manager', async function() {
     const keyset = new PbKeyset();
 
     // Add a new key with a new key type associated to custom key manager
@@ -284,7 +278,7 @@ testSuite({
     // customKeyManager.
     const hybridFromRegistry = await keysetHandle.getPrimitive(HybridEncrypt);
     const ciphertext2 = await hybridFromRegistry.encrypt(plaintext);
-    assertObjectNotEquals(ciphertext, ciphertext2);
+    expect(ciphertext2).not.toEqual(ciphertext);
 
     // Check that the primitive returned by getPrimitive with customKeyManager
     // is the same as customHybridEncrypt.
@@ -292,10 +286,10 @@ testSuite({
         await keysetHandle.getPrimitive(HybridEncrypt, customKeyManager);
     const ciphertext3 =
         await hybridEncryptFromCustomKeyManager.encrypt(plaintext);
-    assertObjectEquals(ciphertext, ciphertext3);
-  },
+    expect(ciphertext3).toEqual(ciphertext);
+  });
 
-  async testGetPrimitive_HybridDecrypt_customKeyManager() {
+  it('get primitive,  hybrid decrypt, custom key manager', async function() {
     // Both private and public keys have the same key id.
     const keyId = 0xFFFFFFFF;
 
@@ -355,9 +349,8 @@ testSuite({
       await hybridDecryptFromRegistry.decrypt(ciphertext);
       fail('An exception should be thrown here.');
     } catch (e) {
-      assertEquals(
-          'CustomError: Decryption failed for the given ciphertext.',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: Decryption failed for the given ciphertext.');
     }
 
     // Create a custom private key manager with the correct ciphertext suffix.
@@ -370,71 +363,74 @@ testSuite({
     const customHybridDecrypt = await privateKeysetHandle.getPrimitive(
         HybridDecrypt, customHybridDecryptKeyManager);
     const decrypted = await customHybridDecrypt.decrypt(ciphertext);
-    assertObjectEquals(plaintext, decrypted);
-  },
+    expect(decrypted).toEqual(plaintext);
+  });
 
-  async testGetPrimitive_keysetContainsKeyCorrespondingToDifferentPrimitive() {
-    const keyset = createKeysetAndInitializeRegistry(Aead);
+  it('get primitive, keyset contains key corresponding to different primitive',
+     async function() {
+       const keyset = createKeysetAndInitializeRegistry(Aead);
 
-    // Add new key with new key type url to the keyset and register a key
-    // manager providing Mac primitives with this key.
-    const macKeyTypeUrl = 'mac_key_type_1';
-    const macKeyId = 0xFFFFFFFF;
-    const macKey = createKey(
-        macKeyId, PbOutputPrefixType.TINK, macKeyTypeUrl, /* enabled = */ true);
-    keyset.addKey(macKey);
-    const primitive = new DummyAead(new Uint8Array([0xFF]));
-    Registry.registerKeyManager(
-        new DummyKeyManager(macKeyTypeUrl, primitive, Mac));
+       // Add new key with new key type url to the keyset and register a key
+       // manager providing Mac primitives with this key.
+       const macKeyTypeUrl = 'mac_key_type_1';
+       const macKeyId = 0xFFFFFFFF;
+       const macKey = createKey(
+           macKeyId, PbOutputPrefixType.TINK, macKeyTypeUrl,
+           /* enabled = */ true);
+       keyset.addKey(macKey);
+       const primitive = new DummyAead(new Uint8Array([0xFF]));
+       Registry.registerKeyManager(
+           new DummyKeyManager(macKeyTypeUrl, primitive, Mac));
 
-    const keysetHandle = new KeysetHandle(keyset);
+       const keysetHandle = new KeysetHandle(keyset);
 
-    try {
-      await keysetHandle.getPrimitive(Aead);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Requested primitive type which is not supported by ' +
-              'this key manager.',
-          e.toString());
-    }
-  },
+       try {
+         await keysetHandle.getPrimitive(Aead);
+         fail('An exception should be thrown.');
+       } catch (e) {
+         expect(e.toString())
+             .toBe(
+                 'CustomError: Requested primitive type which is not supported by ' +
+                 'this key manager.');
+       }
+     });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitiveSet method
 
-  async testGetPrimitiveSet_primaryKeyIsTheEnabledKeyWithGivenId() {
-    const id = 1;
-    const primaryUrl = 'key_type_url_for_primary_key';
-    const disabledUrl = 'key_type_url_for_disabled_key';
+  it('get primitive set, primary key is the enabled key with given id',
+     async function() {
+       const id = 1;
+       const primaryUrl = 'key_type_url_for_primary_key';
+       const disabledUrl = 'key_type_url_for_disabled_key';
 
-    const keyset = new PbKeyset();
-    keyset.addKey(createKey(
-        id, PbOutputPrefixType.TINK, disabledUrl, /* enabled = */ false));
-    keyset.addKey(createKey(
-        id, PbOutputPrefixType.LEGACY, disabledUrl, /* enabled = */ false));
-    keyset.addKey(createKey(
-        id, PbOutputPrefixType.RAW, disabledUrl, /* enabled = */ false));
-    keyset.addKey(createKey(
-        id, PbOutputPrefixType.TINK, primaryUrl, /* enabled = */ true));
-    keyset.setPrimaryKeyId(id);
+       const keyset = new PbKeyset();
+       keyset.addKey(createKey(
+           id, PbOutputPrefixType.TINK, disabledUrl, /* enabled = */ false));
+       keyset.addKey(createKey(
+           id, PbOutputPrefixType.LEGACY, disabledUrl, /* enabled = */ false));
+       keyset.addKey(createKey(
+           id, PbOutputPrefixType.RAW, disabledUrl, /* enabled = */ false));
+       keyset.addKey(createKey(
+           id, PbOutputPrefixType.TINK, primaryUrl, /* enabled = */ true));
+       keyset.setPrimaryKeyId(id);
 
-    const keysetHandle = new KeysetHandle(keyset);
+       const keysetHandle = new KeysetHandle(keyset);
 
-    const primitive = new DummyAead(new Uint8Array(Random.randBytes(10)));
-    Registry.registerKeyManager(
-        new DummyKeyManager(primaryUrl, primitive, Aead));
-    Registry.registerKeyManager(new DummyKeyManager(
-        disabledUrl, new DummyAead(new Uint8Array(Random.randBytes(10))),
-        Aead));
+       const primitive = new DummyAead(new Uint8Array(Random.randBytes(10)));
+       Registry.registerKeyManager(
+           new DummyKeyManager(primaryUrl, primitive, Aead));
+       Registry.registerKeyManager(new DummyKeyManager(
+           disabledUrl, new DummyAead(new Uint8Array(Random.randBytes(10))),
+           Aead));
 
-    const primitiveSet = await keysetHandle.getPrimitiveSet(Aead);
-    const primary = primitiveSet.getPrimary();
+       const primitiveSet = await keysetHandle.getPrimitiveSet(Aead);
+       const primary = primitiveSet.getPrimary();
 
-    assertEquals(primitive, primary.getPrimitive());
-  },
+       expect(primary.getPrimitive()).toBe(primitive);
+     });
 
-  async testGetPrimitiveSet_disabledKeysShouldBeIgnored() {
+  it('get primitive set, disabled keys should be ignored', async function() {
     const enabledRawKeysCount = 10;
     const enabledUrl = 'enabled_key_type_url';
     const disabledUrl = 'disabled_key_type_url';
@@ -462,15 +458,15 @@ testSuite({
 
     // Should return all enabled RAW primitives and nothing else (disabled
     // primitives should not be added into primitive set).
-    assertEquals(enabledRawKeysCount, rawPrimitives.length);
+    expect(rawPrimitives.length).toBe(enabledRawKeysCount);
 
     // Test that it returns the correct RAW primitives by using getPrimitive.
     for (let i = 0; i < enabledRawKeysCount; ++i) {
-      assertEquals(primitive, rawPrimitives[i].getPrimitive());
+      expect(rawPrimitives[i].getPrimitive()).toBe(primitive);
     }
-  },
+  });
 
-  async testGetPrimitiveSet_withCustomKeyManager() {
+  it('get primitive set, with custom key manager', async function() {
     // Create keyset handle.
     const keyTypeUrl = 'some_key_type_url';
     const keyId = 1;
@@ -498,13 +494,13 @@ testSuite({
     // Primary should be the entry corresponding to the keyTypeUrl and thus
     // getPrimitive should return customPrimitive.
     const primary = primitiveSet.getPrimary();
-    assertEquals(customPrimitive, primary.getPrimitive());
-  },
+    expect(primary.getPrimitive()).toBe(customPrimitive);
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for readNoSecret method
 
-  testReadNoSecret_keysetContainingSecretKeyMaterial() {
+  it('read no secret, keyset containing secret key material', function() {
     const secretKeyMaterialTypes = [
       PbKeyMaterialType.SYMMETRIC, PbKeyMaterialType.ASYMMETRIC_PRIVATE,
       PbKeyMaterialType.UNKNOWN_KEYMATERIAL
@@ -535,13 +531,13 @@ testSuite({
         KeysetHandle.readNoSecret(reader);
         fail('An exception should be thrown.');
       } catch (e) {
-        assertEquals(
-            'CustomError: Keyset contains secret key material.', e.toString());
+        expect(e.toString())
+            .toBe('CustomError: Keyset contains secret key material.');
       }
     }
-  },
+  });
 
-  testReadNoSecret_shouldWork() {
+  it('read no secret, should work', function() {
     // Create a public keyset.
     const keyset = new PbKeyset();
     for (let i = 0; i < 3; i++) {
@@ -558,8 +554,8 @@ testSuite({
     const reader = BinaryKeysetReader.withUint8Array(keyset.serializeBinary());
     const keysetHandle = KeysetHandle.readNoSecret(reader);
 
-    assertObjectEquals(keyset, keysetHandle.getKeyset());
-  },
+    expect(keysetHandle.getKeyset()).toEqual(keyset);
+  });
 });
 
 /**

@@ -18,25 +18,24 @@ goog.setTestOnly('tink.subtle.HmacTest');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Hmac = goog.require('tink.subtle.Hmac');
 const Random = goog.require('tink.subtle.Random');
-const testSuite = goog.require('goog.testing.testSuite');
 
-testSuite({
-  async testBasic() {
+describe('hmac test', function() {
+  it('basic', async function() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(4);
     const hmac = await Hmac.newInstance('SHA-1', key, 10);
     const tag = await hmac.computeMac(msg);
-    assertEquals(10, tag.length);
-    assertTrue(await hmac.verifyMac(tag, msg));
-  },
+    expect(tag.length).toBe(10);
+    expect(await hmac.verifyMac(tag, msg)).toBe(true);
+  });
 
-  async testConstructor() {
+  it('constructor', async function() {
     try {
       await Hmac.newInstance(
           'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: blah is not supported', e.toString());
+      expect(e.toString()).toBe('CustomError: blah is not supported');
     }
 
     try {
@@ -44,9 +43,8 @@ testSuite({
           'SHA-1', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
-      assertEquals(
-          'CustomError: key too short, must be at least 16 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: key too short, must be at least 16 bytes');
     }
 
     try {
@@ -54,18 +52,16 @@ testSuite({
           'SHA-1', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: tag too short, must be at least 10 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: tag too short, must be at least 10 bytes');
     }
     try {
       await Hmac.newInstance(
           'SHA-1', Random.randBytes(16), 21);  // tag size too long
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: tag too long, must not be larger than 20 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: tag too long, must not be larger than 20 bytes');
     }
 
     try {
@@ -73,9 +69,8 @@ testSuite({
           'SHA-256', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
-      assertEquals(
-          'CustomError: key too short, must be at least 16 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: key too short, must be at least 16 bytes');
     }
 
     try {
@@ -83,9 +78,8 @@ testSuite({
           'SHA-256', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: tag too short, must be at least 10 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: tag too short, must be at least 10 bytes');
     }
 
     try {
@@ -93,9 +87,8 @@ testSuite({
           'SHA-256', Random.randBytes(16), 33);  // tag size too long
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: tag too long, must not be larger than 32 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: tag too long, must not be larger than 32 bytes');
     }
 
     try {
@@ -103,9 +96,8 @@ testSuite({
           'SHA-512', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
-      assertEquals(
-          'CustomError: key too short, must be at least 16 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: key too short, must be at least 16 bytes');
     }
 
     try {
@@ -113,9 +105,8 @@ testSuite({
           'SHA-512', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: tag too short, must be at least 10 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: tag too short, must be at least 10 bytes');
     }
 
     try {
@@ -123,31 +114,30 @@ testSuite({
           'SHA-512', Random.randBytes(16), 65);  // tag size too long
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: tag too long, must not be larger than 64 bytes',
-          e.toString());
+      expect(e.toString())
+          .toBe('CustomError: tag too long, must not be larger than 64 bytes');
     }
-  },
+  });
 
-  async testConstructor_invalidTagSizes() {
+  it('constructor, invalid tag sizes', async function() {
     try {
       await Hmac.newInstance('SHA-512', Random.randBytes(16), NaN);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: invalid tag size, must be an integer', e.toString());
+      expect(e.toString())
+          .toBe('CustomError: invalid tag size, must be an integer');
     }
 
     try {
       await Hmac.newInstance('SHA-512', Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: invalid tag size, must be an integer', e.toString());
+      expect(e.toString())
+          .toBe('CustomError: invalid tag size, must be an integer');
     }
-  },
+  });
 
-  async testModify() {
+  it('modify', async function() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(8);
     const hmac = await Hmac.newInstance('SHA-1', key, 20);
@@ -157,18 +147,18 @@ testSuite({
     for (let i = 0; i < tag.length; i++) {
       const tag1 = new Uint8Array(tag);
       tag1[i] = tag[i] ^ 0xff;
-      assertFalse(await hmac.verifyMac(tag1, msg));
+      expect(await hmac.verifyMac(tag1, msg)).toBe(false);
     }
 
     // Modify msg.
     for (let i = 0; i < msg.length; i++) {
       const msg1 = new Uint8Array(msg);
       msg1[i] = msg1[i] ^ 0xff;
-      assertFalse(await hmac.verifyMac(tag, msg1));
+      expect(await hmac.verifyMac(tag, msg1)).toBe(false);
     }
-  },
+  });
 
-  async testWithTestVectors() {
+  it('with test vectors', async function() {
     // Test data from
     // http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#testing.
     const NIST_TEST_VECTORS = [
@@ -218,7 +208,7 @@ testSuite({
       const message = Bytes.fromHex(testVector['message']);
       const tag = Bytes.fromHex(testVector['tag']);
       const hmac = await Hmac.newInstance(testVector['algo'], key, tag.length);
-      assertTrue(await hmac.verifyMac(tag, message));
+      expect(await hmac.verifyMac(tag, message)).toBe(true);
     }
-  },
+  });
 });

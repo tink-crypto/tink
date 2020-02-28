@@ -24,39 +24,36 @@ const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixTy
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-  testNewHybridEncrypt_primitiveSetWithoutPrimary() {
+describe('hybrid encrypt wrapper test', function() {
+  it('new hybrid encrypt, primitive set without primary', function() {
     const primitiveSet = createDummyPrimitiveSet(/* opt_withPrimary = */ false);
     try {
       new HybridEncryptWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(ExceptionText.primitiveSetWithoutPrimary(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.primitiveSetWithoutPrimary());
     }
-  },
+  });
 
-  testNewHybridEncrypt_shouldWork() {
+  it('new hybrid encrypt, should work', function() {
     const primitiveSet = createDummyPrimitiveSet();
     const hybridEncrypt = new HybridEncryptWrapper().wrap(primitiveSet);
-    assertTrue(hybridEncrypt != null && hybridEncrypt != undefined);
-  },
+    expect(hybridEncrypt != null && hybridEncrypt != undefined).toBe(true);
+  });
 
-  async testEncrypt_shouldWork() {
+  it('encrypt, should work', async function() {
     const primitiveSet = createDummyPrimitiveSet();
     const hybridEncrypt = new HybridEncryptWrapper().wrap(primitiveSet);
 
     const plaintext = Random.randBytes(10);
 
     const ciphertext = await hybridEncrypt.encrypt(plaintext);
-    assertTrue(ciphertext != null);
+    expect(ciphertext != null).toBe(true);
 
     // Ciphertext should begin with primary key output prefix.
-    assertObjectEquals(
-        primitiveSet.getPrimary().getIdentifier(),
-        ciphertext.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE));
-  },
+    expect(ciphertext.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE))
+        .toEqual(primitiveSet.getPrimary().getIdentifier());
+  });
 });
 
 /**

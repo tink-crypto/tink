@@ -21,11 +21,8 @@ const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrH
 const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-
-  testAes128CtrHmacSha256() {
+describe('aes ctr hmac aead key templates test', function() {
+  it('aes128 ctr hmac sha256', function() {
     // Expects function to create key with following parameters.
     const expectedAesKeySize = 16;
     const expectedIvSize = 16;
@@ -40,8 +37,8 @@ testSuite({
 
     const keyTemplate = AesCtrHmacAeadKeyTemplates.aes128CtrHmacSha256();
 
-    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
-    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+    expect(keyTemplate.getTypeUrl()).toBe(expectedTypeUrl);
+    expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test values in key format.
     const keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
@@ -49,20 +46,20 @@ testSuite({
 
     // Test AesCtrKeyFormat.
     const aesCtrKeyFormat = keyFormat.getAesCtrKeyFormat();
-    assertEquals(expectedAesKeySize, aesCtrKeyFormat.getKeySize());
-    assertEquals(expectedIvSize, aesCtrKeyFormat.getParams().getIvSize());
+    expect(aesCtrKeyFormat.getKeySize()).toBe(expectedAesKeySize);
+    expect(aesCtrKeyFormat.getParams().getIvSize()).toBe(expectedIvSize);
 
     // Test HmacKeyFormat.
     const hmacKeyFormat = keyFormat.getHmacKeyFormat();
-    assertEquals(expectedHmacKeySize, hmacKeyFormat.getKeySize());
-    assertEquals(expectedTagSize, hmacKeyFormat.getParams().getTagSize());
-    assertEquals(expectedHashFunction, hmacKeyFormat.getParams().getHash());
+    expect(hmacKeyFormat.getKeySize()).toBe(expectedHmacKeySize);
+    expect(hmacKeyFormat.getParams().getTagSize()).toBe(expectedTagSize);
+    expect(hmacKeyFormat.getParams().getHash()).toBe(expectedHashFunction);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
-  },
+  });
 
-  testAes256CtrHmacSha256() {
+  it('aes256 ctr hmac sha256', function() {
     // Expects function to create key with following parameters.
     const expectedAesKeySize = 32;
     const expectedIvSize = 16;
@@ -77,8 +74,8 @@ testSuite({
 
     const keyTemplate = AesCtrHmacAeadKeyTemplates.aes256CtrHmacSha256();
 
-    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
-    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+    expect(keyTemplate.getTypeUrl()).toBe(expectedTypeUrl);
+    expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test values in key format.
     const keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
@@ -86,16 +83,16 @@ testSuite({
 
     // Test AesCtrKeyFormat.
     const aesCtrKeyFormat = keyFormat.getAesCtrKeyFormat();
-    assertEquals(expectedAesKeySize, aesCtrKeyFormat.getKeySize());
-    assertEquals(expectedIvSize, aesCtrKeyFormat.getParams().getIvSize());
+    expect(aesCtrKeyFormat.getKeySize()).toBe(expectedAesKeySize);
+    expect(aesCtrKeyFormat.getParams().getIvSize()).toBe(expectedIvSize);
 
     // Test HmacKeyFormat.
     const hmacKeyFormat = keyFormat.getHmacKeyFormat();
-    assertEquals(expectedHmacKeySize, hmacKeyFormat.getKeySize());
-    assertEquals(expectedTagSize, hmacKeyFormat.getParams().getTagSize());
-    assertEquals(expectedHashFunction, hmacKeyFormat.getParams().getHash());
+    expect(hmacKeyFormat.getKeySize()).toBe(expectedHmacKeySize);
+    expect(hmacKeyFormat.getParams().getTagSize()).toBe(expectedTagSize);
+    expect(hmacKeyFormat.getParams().getHash()).toBe(expectedHashFunction);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
-  },
+  });
 });

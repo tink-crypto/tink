@@ -19,11 +19,10 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
-const testSuite = goog.require('goog.testing.testSuite');
 
 
-testSuite({
-  async testEncapsulate_alwaysGenerateRandomKey() {
+describe('ecies hkdf kem sender test', function() {
+  it('encapsulate, always generate random key', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const sender = await EciesHkdfKemSender.newInstance(publicKey);
@@ -40,11 +39,11 @@ testSuite({
       keys.add(Bytes.toHex(kemKeyToken['key']));
       tokens.add(Bytes.toHex(kemKeyToken['token']));
     }
-    assertEquals(20, keys.size);
-    assertEquals(20, tokens.size);
-  },
+    expect(keys.size).toBe(20);
+    expect(tokens.size).toBe(20);
+  });
 
-  async testEncapsulate_nonIntegerKeySize() {
+  it('encapsulate, non integer key size', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const sender = await EciesHkdfKemSender.newInstance(publicKey);
@@ -56,17 +55,17 @@ testSuite({
       await sender.encapsulate(NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
+      expect(e.toString()).toBe('CustomError: size must be an integer');
     }
     try {
       await sender.encapsulate(0, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals('CustomError: size must be positive', e.toString());
+      expect(e.toString()).toBe('CustomError: size must be positive');
     }
-  },
+  });
 
-  async testNewInstance_invalidParameters() {
+  it('new instance, invalid parameters', async function() {
     // Test newInstance with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
@@ -75,9 +74,9 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
     }
-  },
+  });
 
-  async testNewInstance_invalidPublicKey() {
+  it('new instance, invalid public key', async function() {
     for (let crv of Object.keys(EllipticCurves.CurveType)) {
       const curve = EllipticCurves.CurveType[crv];
       const crvString = EllipticCurves.curveToString(curve);
@@ -101,17 +100,17 @@ testSuite({
       } catch (e) {
       }
     }
-  },
+  });
 
-  async testConstructor_invalidParameters() {
+  it('constructor, invalid parameters', async function() {
     // Test constructor with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     try {
       new EciesHkdfKemSender(keyPair.privateKey);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          'CustomError: Expected Crypto key of type: public.', e.toString());
+      expect(e.toString())
+          .toBe('CustomError: Expected Crypto key of type: public.');
     }
-  },
+  });
 });

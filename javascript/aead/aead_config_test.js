@@ -29,45 +29,42 @@ const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixTy
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-  setUp() {
+describe('aead config test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  testConstants() {
-    assertEquals(PRIMITIVE_NAME, AeadConfig.PRIMITIVE_NAME);
+  it('constants', function() {
+    expect(AeadConfig.PRIMITIVE_NAME).toBe(PRIMITIVE_NAME);
 
-    assertEquals(
-        AES_CTR_HMAC_AEAD_KEY_TYPE, AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
-    assertEquals(AES_GCM_KEY_TYPE, AeadConfig.AES_GCM_TYPE_URL);
-  },
+    expect(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)
+        .toBe(AES_CTR_HMAC_AEAD_KEY_TYPE);
+    expect(AeadConfig.AES_GCM_TYPE_URL).toBe(AES_GCM_KEY_TYPE);
+  });
 
-  testRegister_correspondingKeyManagersWereRegistered() {
+  it('register, corresponding key managers were registered', function() {
     AeadConfig.register();
 
     // Test that the corresponding key managers were registered.
     const aesCtrHmacKeyManager =
         Registry.getKeyManager(AES_CTR_HMAC_AEAD_KEY_TYPE);
-    assertTrue(aesCtrHmacKeyManager instanceof AesCtrHmacAeadKeyManager);
+    expect(aesCtrHmacKeyManager instanceof AesCtrHmacAeadKeyManager).toBe(true);
 
     const aesGcmKeyManager = Registry.getKeyManager(AES_GCM_KEY_TYPE);
-    assertTrue(aesGcmKeyManager instanceof AesGcmKeyManager);
+    expect(aesGcmKeyManager instanceof AesGcmKeyManager).toBe(true);
 
     // TODO add tests for other key types here, whenever they are available in
     // Tink.
-  },
+  });
 
-  async testRegister_predefinedTemplatesShouldWork() {
+  it('register, predefined templates should work', async function() {
     AeadConfig.register();
     let templates = [
       AeadKeyTemplates.aes128Gcm(), AeadKeyTemplates.aes256Gcm(),
@@ -90,9 +87,9 @@ testSuite({
       const ciphertext = await aead.encrypt(plaintext, aad);
       const decryptedCiphertext = await aead.decrypt(ciphertext, aad);
 
-      assertObjectEquals(plaintext, decryptedCiphertext);
+      expect(decryptedCiphertext).toEqual(plaintext);
     }
-  },
+  });
 });
 
 // Constants used in tests.

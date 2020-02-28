@@ -29,35 +29,33 @@ const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurve
 const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
-const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
 const asserts = goog.require('goog.asserts');
-const testSuite = goog.require('goog.testing.testSuite');
 
 
-testSuite({
-  setUp() {
+describe('ecies aead hkdf validators test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  testValidateParams_missingKemParams() {
+  it('validate params, missing kem params', function() {
     const invalidParams = createParams().setKemParams(null);
 
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingKemParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
-  },
+  });
 
-  testValidateParams_invalidKemParams_unknownHashType() {
+  it('validate params, invalid kem params, unknown hash type', function() {
     const invalidParams = createParams();
     invalidParams.getKemParams().setHkdfHashType(PbHashType.UNKNOWN_HASH);
 
@@ -65,11 +63,11 @@ testSuite({
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownHashType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownHashType());
     }
-  },
+  });
 
-  testValidateParams_invalidKemParams_unknownCurveType() {
+  it('validate params, invalid kem params, unknown curve type', function() {
     const invalidParams = createParams();
     invalidParams.getKemParams().setCurveType(
         PbEllipticCurveType.UNKNOWN_CURVE);
@@ -78,22 +76,22 @@ testSuite({
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownCurveType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownCurveType());
     }
-  },
+  });
 
-  testValidateParams_missingDemParams() {
+  it('validate params, missing dem params', function() {
     const invalidParams = createParams().setDemParams(null);
 
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingDemParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingDemParams());
     }
-  },
+  });
 
-  testValidateParams_invalidDemParams_missingAeadTemplate() {
+  it('validate params, invalid dem params, missing aead template', function() {
     const invalidParams = createParams();
     invalidParams.getDemParams().setAeadDem(null);
 
@@ -101,26 +99,26 @@ testSuite({
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingAeadTemplate(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingAeadTemplate());
     }
-  },
+  });
 
-  testValidateParams_invalidDemParams_unsupportedAeadTemplate() {
-    const unsupportedTypeUrl = 'UNSUPPORTED_KEY_TYPE_URL';
-    const invalidParams = createParams();
-    invalidParams.getDemParams().getAeadDem().setTypeUrl(unsupportedTypeUrl);
+  it('validate params, invalid dem params, unsupported aead template',
+     function() {
+       const unsupportedTypeUrl = 'UNSUPPORTED_KEY_TYPE_URL';
+       const invalidParams = createParams();
+       invalidParams.getDemParams().getAeadDem().setTypeUrl(unsupportedTypeUrl);
 
-    try {
-      EciesAeadHkdfValidators.validateParams(invalidParams);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          ExceptionText.unsupportedKeyTemplate(unsupportedTypeUrl),
-          e.toString());
-    }
-  },
+       try {
+         EciesAeadHkdfValidators.validateParams(invalidParams);
+         fail('An exception should be thrown.');
+       } catch (e) {
+         expect(e.toString())
+             .toBe(ExceptionText.unsupportedKeyTemplate(unsupportedTypeUrl));
+       }
+     });
 
-  testValidateParams_unknownPointFormat() {
+  it('validate params, unknown point format', function() {
     const invalidParams =
         createParams().setEcPointFormat(PbPointFormat.UNKNOWN_FORMAT);
 
@@ -128,11 +126,11 @@ testSuite({
       EciesAeadHkdfValidators.validateParams(invalidParams);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownPointFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownPointFormat());
     }
-  },
+  });
 
-  testValidateParams_differentValidValues() {
+  it('validate params, different valid values', function() {
     const curves = Object.keys(PbEllipticCurveType);
     const hashTypes = Object.keys(PbHashType);
     const keyTemplates =
@@ -163,20 +161,20 @@ testSuite({
         }
       }
     }
-  },
+  });
 
-  testValidateKeyFormat_missingParams() {
+  it('validate key format, missing params', function() {
     const invalidKeyFormat = new PbEciesAeadHkdfKeyFormat();
 
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingFormatParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingFormatParams());
     }
-  },
+  });
 
-  testValidateKeyFormat_invalidParams() {
+  it('validate key format, invalid params', function() {
     const invalidKeyFormat =
         new PbEciesAeadHkdfKeyFormat().setParams(createParams());
 
@@ -187,7 +185,7 @@ testSuite({
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingDemParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingDemParams());
     }
     invalidKeyFormat.getParams().setDemParams(createDemParams());
 
@@ -198,22 +196,22 @@ testSuite({
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownHashType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownHashType());
     }
-  },
+  });
 
-  testValidatePublicKey_missingParams() {
+  it('validate public key, missing params', function() {
     const invalidPublicKey = new PbEciesAeadHkdfPublicKey();
 
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingKeyParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingKeyParams());
     }
-  },
+  });
 
-  testValidatePublicKey_missingValuesXY() {
+  it('validate public key, missing values x y', function() {
     const invalidPublicKey =
         new PbEciesAeadHkdfPublicKey().setParams(createParams());
 
@@ -222,7 +220,7 @@ testSuite({
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingXY(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingXY());
     }
 
     // The key with only Y set to empty is also invalid.
@@ -231,7 +229,7 @@ testSuite({
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingXY(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingXY());
     }
 
     // The key with only X set to empty is also invalid.
@@ -241,11 +239,11 @@ testSuite({
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingXY(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingXY());
     }
-  },
+  });
 
-  async testValidatePublicKey_invalidParams() {
+  it('validate public key, invalid params', async function() {
     const invalidPublicKey = await createPublicKey();
 
     // Check that also params were checked.
@@ -255,7 +253,7 @@ testSuite({
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingDemParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingDemParams());
     }
     invalidPublicKey.getParams().setDemParams(createDemParams());
 
@@ -266,11 +264,11 @@ testSuite({
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownHashType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownHashType());
     }
-  },
+  });
 
-  async testValidatePublicKey_versionOutOfBounds() {
+  it('validate public key, version out of bounds', async function() {
     const managerVersion = 0;
     const invalidPublicKey = (await createPublicKey()).setVersion(1);
     try {
@@ -278,38 +276,38 @@ testSuite({
           invalidPublicKey, managerVersion);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.versionOutOfBounds(managerVersion), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.versionOutOfBounds(managerVersion));
     }
-  },
+  });
 
-  async testValidatePrivateKey_missingPublicKey() {
+  it('validate private key, missing public key', async function() {
     const invalidPrivateKey = (await createPrivateKey()).setPublicKey(null);
     try {
       EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingPublicKey(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingPublicKey());
     }
-  },
+  });
 
-  async testValidatePrivateKey_invalidPublicKey() {
+  it('validate private key, invalid public key', async function() {
     const invalidPrivateKey = await createPrivateKey();
     invalidPrivateKey.getPublicKey().setParams(null);
     try {
       EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingKeyParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingKeyParams());
     }
-  },
+  });
 
-  async testValidatePrivateKey_shouldWork() {
+  it('validate private key, should work', async function() {
     const privateKey = await createPrivateKey();
     EciesAeadHkdfValidators.validatePrivateKey(privateKey, 0, 0);
-  },
+  });
 
-  async testValidatePrivateKey_versionOutOfBounds() {
+  it('validate private key, version out of bounds', async function() {
     const managerVersion = 0;
     const invalidPrivateKey = (await createPrivateKey()).setVersion(1);
     try {
@@ -317,10 +315,10 @@ testSuite({
           invalidPrivateKey, managerVersion, managerVersion);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.versionOutOfBounds(managerVersion), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.versionOutOfBounds(managerVersion));
     }
-  },
+  });
 });
 
 // Helper classes and functions

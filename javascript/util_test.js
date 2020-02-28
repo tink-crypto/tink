@@ -25,76 +25,74 @@ const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixTy
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Util = goog.require('tink.Util');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
 ////////////////////////////////////////////////////////////////////////////////
 // tests
 ////////////////////////////////////////////////////////////////////////////////
 
-testSuite({
+describe('util test', function() {
   // tests for validateKey method
-  async testValidateKeyMissingKeyData() {
+  it('validate key missing key data', async function() {
     const key = createKey().setKeyData(null);
 
     try {
       await Util.validateKey(key);
     } catch (e) {
-      assertEquals(
-          ExceptionText.InvalidKeyMissingKeyData(key.getKeyId()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.InvalidKeyMissingKeyData(key.getKeyId()));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testValidateKeyUnknownPrefix() {
+  it('validate key unknown prefix', async function() {
     const key =
         createKey().setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
 
     try {
       await Util.validateKey(key);
     } catch (e) {
-      assertEquals(
-          ExceptionText.InvalidKeyUnknownPrefix(key.getKeyId()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.InvalidKeyUnknownPrefix(key.getKeyId()));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testValidateKeyUnknownStatus() {
+  it('validate key unknown status', async function() {
     const key = createKey().setStatus(PbKeyStatusType.UNKNOWN_STATUS);
 
     try {
       await Util.validateKey(key);
     } catch (e) {
-      assertEquals(
-          ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testValidateKeyValidKeys() {
+  it('validate key valid keys', async function() {
     await Util.validateKey(createKey());
     await Util.validateKey(
         createKey(/* opt_keyId = */ 0xAABBCCDD, /* opt_enabled = */ true));
     await Util.validateKey(
         createKey(/* opt_keyId = */ 0xABCDABCD, /* opt_enabled = */ false));
-  },
+  });
 
   // tests for validateKeyset method
-  async testValidateKeysetWithoutKeys() {
+  it('validate keyset without keys', async function() {
     const keyset = new PbKeyset();
 
     try {
       await Util.validateKeyset(keyset);
     } catch (e) {
-      assertEquals(ExceptionText.InvalidKeysetMissingKeys(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.InvalidKeysetMissingKeys());
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testValidateKeysetDisabledPrimary() {
+  it('validate keyset disabled primary', async function() {
     const keyset = createKeyset();
     keyset.addKey(
         createKey(/* opt_id = */ 0xFFFFFFFF, /* opt_enabled = */ false));
@@ -103,13 +101,13 @@ testSuite({
     try {
       await Util.validateKeyset(keyset);
     } catch (e) {
-      assertEquals(ExceptionText.InvalidKeysetDisabledPrimary(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.InvalidKeysetDisabledPrimary());
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testValidateKeysetMultiplePrimaries() {
+  it('validate keyset multiple primaries', async function() {
     const keyset = createKeyset();
     const key =
         createKey(/* opt_id = */ 0xFFFFFFFF, /* opt_enabled = */ true);
@@ -120,14 +118,13 @@ testSuite({
     try {
       await Util.validateKeyset(keyset);
     } catch (e) {
-      assertEquals(
-          ExceptionText.InvalidKeysetMultiplePrimaries(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.InvalidKeysetMultiplePrimaries());
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testValidateKeysetWithInvalidKey() {
+  it('validate keyset with invalid key', async function() {
     const keyset = createKeyset();
     const key =
         createKey(4294967295, true).setStatus(PbKeyStatusType.UNKNOWN_STATUS);
@@ -136,50 +133,44 @@ testSuite({
     try {
       await Util.validateKeyset(keyset);
     } catch (e) {
-      assertEquals(
-          ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testValidateKeysetWithValidKeyset() {
+  it('validate keyset with valid keyset', async function() {
     const keyset = createKeyset();
 
     await Util.validateKeyset(keyset);
-  },
+  });
 
   // tests for protoToSubtle methods
-  testCurveTypeProtoToSubtle() {
-    assertEquals(
-        EllipticCurves.CurveType.P256,
-        Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P256));
-    assertEquals(
-        EllipticCurves.CurveType.P384,
-        Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P384));
-    assertEquals(
-        EllipticCurves.CurveType.P521,
-        Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P521));
-  },
+  it('curve type proto to subtle', function() {
+    expect(Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P256))
+        .toBe(EllipticCurves.CurveType.P256);
+    expect(Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P384))
+        .toBe(EllipticCurves.CurveType.P384);
+    expect(Util.curveTypeProtoToSubtle(PbEllipticCurveType.NIST_P521))
+        .toBe(EllipticCurves.CurveType.P521);
+  });
 
-  testPointFormatProtoToSubtle() {
-    assertEquals(
-        EllipticCurves.PointFormatType.UNCOMPRESSED,
-        Util.pointFormatProtoToSubtle(PbPointFormat.UNCOMPRESSED));
-    assertEquals(
-        EllipticCurves.PointFormatType.COMPRESSED,
-        Util.pointFormatProtoToSubtle(PbPointFormat.COMPRESSED));
-    assertEquals(
-        EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
-        Util.pointFormatProtoToSubtle(
-            PbPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
-  },
+  it('point format proto to subtle', function() {
+    expect(Util.pointFormatProtoToSubtle(PbPointFormat.UNCOMPRESSED))
+        .toBe(EllipticCurves.PointFormatType.UNCOMPRESSED);
+    expect(Util.pointFormatProtoToSubtle(PbPointFormat.COMPRESSED))
+        .toBe(EllipticCurves.PointFormatType.COMPRESSED);
+    expect(Util.pointFormatProtoToSubtle(
+               PbPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED))
+        .toBe(EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED);
+  });
 
-  testHashTypeProtoToString() {
-    assertEquals('SHA-1', Util.hashTypeProtoToString(PbHashType.SHA1));
-    assertEquals('SHA-256', Util.hashTypeProtoToString(PbHashType.SHA256));
-    assertEquals('SHA-512', Util.hashTypeProtoToString(PbHashType.SHA512));
-  },
+  it('hash type proto to string', function() {
+    expect(Util.hashTypeProtoToString(PbHashType.SHA1)).toBe('SHA-1');
+    expect(Util.hashTypeProtoToString(PbHashType.SHA256)).toBe('SHA-256');
+    expect(Util.hashTypeProtoToString(PbHashType.SHA512)).toBe('SHA-512');
+  });
 });
 
 

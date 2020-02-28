@@ -18,22 +18,19 @@ goog.setTestOnly('tink.subtle.AesCtrTest');
 const AesCtr = goog.require('tink.subtle.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
 
-testSuite({
-
-  setUp() {
+describe('aes ctr test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the timeout.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testBasic() {
+  it('basic', async function() {
     // Set longer time for promiseTimout as the test sometimes takes longer than
     // 1 second in Firefox.
     const key = Random.randBytes(16);
@@ -42,11 +39,11 @@ testSuite({
       const cipher = await AesCtr.newInstance(key, 16);
       let ciphertext = await cipher.encrypt(msg);
       let plaintext = await cipher.decrypt(ciphertext);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+      expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
     }
-  },
+  });
 
-  async testProbabilisticEncryption() {
+  it('probabilistic encryption', async function() {
     const cipher = await AesCtr.newInstance(Random.randBytes(16), 16);
     const msg = Random.randBytes(20);
     const results = new Set();
@@ -54,63 +51,63 @@ testSuite({
       const ciphertext = await cipher.encrypt(msg);
       results.add(Bytes.toHex(ciphertext));
     }
-    assertEquals(100, results.size);
-  },
+    expect(results.size).toBe(100);
+  });
 
-  async testConstructor() {
+  it('constructor', async function() {
     try {
       await AesCtr.newInstance(Random.randBytes(16), 11);  // IV size too short
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: invalid IV length, must be at least 12 and at most 16',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: invalid IV length, must be at least 12 and at most 16');
     }
     try {
       await AesCtr.newInstance(Random.randBytes(16), 17);  // IV size too long
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: invalid IV length, must be at least 12 and at most 16',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: invalid IV length, must be at least 12 and at most 16');
     }
     try {
       await AesCtr.newInstance(
           Random.randBytes(24), 12);  // 192-bit keys not supported
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: unsupported AES key size: 24', e.toString());
+      expect(e.toString()).toBe('CustomError: unsupported AES key size: 24');
     }
-  },
+  });
 
-  async testConstructor_invalidIvSizes() {
+  it('constructor, invalid iv sizes', async function() {
     try {
       await AesCtr.newInstance(Random.randBytes(16), NaN);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: invalid IV length, must be an integer', e.toString());
+      expect(e.toString())
+          .toBe('CustomError: invalid IV length, must be an integer');
     }
 
     try {
       await AesCtr.newInstance(Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: invalid IV length, must be an integer', e.toString());
+      expect(e.toString())
+          .toBe('CustomError: invalid IV length, must be an integer');
     }
 
     try {
       await AesCtr.newInstance(Random.randBytes(16), 0);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: invalid IV length, must be at least 12 and at most 16',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: invalid IV length, must be at least 12 and at most 16');
     }
-  },
+  });
 
-  async testWithTestVectors() {
+  it('with test vectors', async function() {
     // Test data from NIST SP 800-38A pp 55.
     const NIST_TEST_VECTORS = [
       {
@@ -132,7 +129,7 @@ testSuite({
       const ciphertext = Bytes.fromHex(testVector['ciphertext']);
       const aesctr = await AesCtr.newInstance(key, iv.length);
       const plaintext = await aesctr.decrypt(Bytes.concat(iv, ciphertext));
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+      expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
     }
-  },
+  });
 });

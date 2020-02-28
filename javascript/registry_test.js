@@ -41,55 +41,55 @@ const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
-const testSuite = goog.require('goog.testing.testSuite');
 
 ////////////////////////////////////////////////////////////////////////////////
 // tests
 ////////////////////////////////////////////////////////////////////////////////
 
-testSuite({
-  async tearDown() {
+describe('registry test', function() {
+  afterEach(function() {
     Registry.reset();
-  },
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for registerPrimitiveWrapper method
-  testRegisterPrimitiveWrapper_overwritingWithSameClass() {
+  it('register primitive wrapper, overwriting with same class', function() {
     Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
         new DummyPrimitive1Impl1(), DummyPrimitive1));
     Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
         new DummyPrimitive1Impl2(), DummyPrimitive1));
-  },
+  });
 
-  testRegisterPrimitiveWrapper_overwritingWithDifferentClass() {
-    /** @implements {PrimitiveWrapper<DummyPrimitive1>} */
-    class DummyPrimitiveWrapper1Alternative {
-      /** @override */
-      wrap() {
-        throw new Error();
-      }
-      /** @override */
-      getPrimitiveType() {
-        return DummyPrimitive1;
-      }
-    }
-    Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
-        new DummyPrimitive1Impl1(), DummyPrimitive1));
-    try {
-      Registry.registerPrimitiveWrapper(
-          new DummyPrimitiveWrapper1Alternative());
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: primitive wrapper for type ' + DummyPrimitive1 +
-              ' has already been registered and cannot be overwritten',
-          e.toString());
-    }
-  },
+  it('register primitive wrapper, overwriting with different class',
+     function() {
+       /** @implements {PrimitiveWrapper<DummyPrimitive1>} */
+       class DummyPrimitiveWrapper1Alternative {
+         /** @override */
+         wrap() {
+           throw new Error();
+         }
+         /** @override */
+         getPrimitiveType() {
+           return DummyPrimitive1;
+         }
+       }
+       Registry.registerPrimitiveWrapper(new DummyPrimitiveWrapper1(
+           new DummyPrimitive1Impl1(), DummyPrimitive1));
+       try {
+         Registry.registerPrimitiveWrapper(
+             new DummyPrimitiveWrapper1Alternative());
+         fail('An exception should be thrown.');
+       } catch (e) {
+         expect(e.toString())
+             .toBe(
+                 'CustomError: primitive wrapper for type ' + DummyPrimitive1 +
+                 ' has already been registered and cannot be overwritten');
+       }
+     });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for wrap method
-  testWrap_shouldWork() {
+  it('wrap, should work', function() {
     const p1 = new DummyPrimitive1Impl1();
     const p2 = new DummyPrimitive2Impl();
     Registry.registerPrimitiveWrapper(
@@ -97,92 +97,89 @@ testSuite({
     Registry.registerPrimitiveWrapper(
         new DummyPrimitiveWrapper2(p2, DummyPrimitive2));
 
-    assertEquals(
-        p1, Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive1)));
-    assertEquals(
-        p2, Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive2)));
-  },
+    expect(Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive1)))
+        .toBe(p1);
+    expect(Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive2)))
+        .toBe(p2);
+  });
 
-  testWrap_notRegisteredPrimitiveType() {
-    try {
+  it('wrap, not registered primitive type', function() {
+    expect(() => {
       Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive1));
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: no primitive wrapper found for type ' + DummyPrimitive1,
-          e.toString());
-    }
-  },
+    }).toThrowError('no primitive wrapper found for type ' +
+              DummyPrimitive1);
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for registerKeyManager  method
-  testRegisterKeyManager_overwritingAttempt() {
+  it('register key manager, overwriting attempt', function() {
     const keyType = 'someKeyType';
 
     try {
       Registry.registerKeyManager(new DummyKeyManager1(keyType));
       Registry.registerKeyManager(new DummyKeyManager2(keyType));
     } catch (e) {
-      assertEquals(
-          ExceptionText.keyManagerOverwrittingAttempt(keyType), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.keyManagerOverwrittingAttempt(keyType));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
   // Testing newKeyAllowed behavior -- should hold the most restrictive setting.
-  async testRegisterKeyManager_moreRestrictiveNewKeyAllowed() {
-    const keyType = 'someTypeUrl';
-    const keyManager1 = new DummyKeyManager1(keyType);
-    const keyTemplate = new PbKeyTemplate().setTypeUrl(keyType);
+  it('register key manager, more restrictive new key allowed',
+     async function() {
+       const keyType = 'someTypeUrl';
+       const keyManager1 = new DummyKeyManager1(keyType);
+       const keyTemplate = new PbKeyTemplate().setTypeUrl(keyType);
 
-    //Register the key manager with new_key_allowed and test that it is possible
-    //to create a new key data.
-    Registry.registerKeyManager(keyManager1);
-    await Registry.newKeyData(keyTemplate);
+       // Register the key manager with new_key_allowed and test that it is
+       // possible to create a new key data.
+       Registry.registerKeyManager(keyManager1);
+       await Registry.newKeyData(keyTemplate);
 
-    //Restrict the key manager and test that new key data cannot be created.
-    Registry.registerKeyManager(keyManager1, false);
-    try {
-      await Registry.newKeyData(keyTemplate);
-    } catch (e) {
-      assertEquals(ExceptionText.newKeyForbidden(keyType), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
+       // Restrict the key manager and test that new key data cannot be created.
+       Registry.registerKeyManager(keyManager1, false);
+       try {
+         await Registry.newKeyData(keyTemplate);
+       } catch (e) {
+         expect(e.toString()).toBe(ExceptionText.newKeyForbidden(keyType));
+         return;
+       }
+       fail('An exception should be thrown.');
+     });
 
-  async testRegisterKeyManager_lessRestrictiveNewKeyAllowed() {
-    const keyType = 'someTypeUrl';
-    const keyManager1 = new DummyKeyManager1(keyType);
-    const keyTemplate = new PbKeyTemplate().setTypeUrl(keyType);
+  it('register key manager, less restrictive new key allowed',
+     async function() {
+       const keyType = 'someTypeUrl';
+       const keyManager1 = new DummyKeyManager1(keyType);
+       const keyTemplate = new PbKeyTemplate().setTypeUrl(keyType);
 
-    Registry.registerKeyManager(keyManager1, false);
+       Registry.registerKeyManager(keyManager1, false);
 
-    // Re-registering key manager with less restrictive setting should not be
-    // possible and the restriction has to be still true (i.e. new key data
-    // cannot be created).
-    try {
-      Registry.registerKeyManager(keyManager1);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          ExceptionText.prohibitedChangeToLessRestricted(
-              keyManager1.getKeyType()),
-          e.toString());
-    }
-    try {
-      await Registry.newKeyData(keyTemplate);
-    } catch (e) {
-      assertEquals(ExceptionText.newKeyForbidden(keyType), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
+       // Re-registering key manager with less restrictive setting should not be
+       // possible and the restriction has to be still true (i.e. new key data
+       // cannot be created).
+       try {
+         Registry.registerKeyManager(keyManager1);
+         fail('An exception should be thrown.');
+       } catch (e) {
+         expect(e.toString())
+             .toBe(ExceptionText.prohibitedChangeToLessRestricted(
+                 keyManager1.getKeyType()));
+       }
+       try {
+         await Registry.newKeyData(keyTemplate);
+       } catch (e) {
+         expect(e.toString()).toBe(ExceptionText.newKeyForbidden(keyType));
+         return;
+       }
+       fail('An exception should be thrown.');
+     });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getKeyManager method
-  testGetKeyManager_shouldWork() {
+  it('get key manager, should work', function() {
     const numberOfKeyManagers = 10;
     let keyManagers1 = [];
     let keyManagers2 = [];
@@ -198,29 +195,28 @@ testSuite({
     let result;
     for (let i = 0; i < numberOfKeyManagers; i++) {
       result = Registry.getKeyManager(keyManagers1[i].getKeyType());
-      assertObjectEquals(keyManagers1[i], result);
+      expect(result).toEqual(keyManagers1[i]);
 
       result = Registry.getKeyManager(keyManagers2[i].getKeyType());
-      assertObjectEquals(keyManagers2[i], result);
+      expect(result).toEqual(keyManagers2[i]);
     }
-  },
+  });
 
-  testGetKeyManager_notRegisteredKeyType() {
+  it('get key manager, not registered key type', function() {
     const keyType = 'some_key_type';
 
     try {
       Registry.getKeyManager(keyType);
     } catch (e) {
-      assertEquals(
-          ExceptionText.notRegisteredKeyType(keyType), e.toString());
+      expect(e.toString()).toBe(ExceptionText.notRegisteredKeyType(keyType));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for newKeyData method
-  async testNewKeyData_noManagerForGivenKeyType() {
+  it('new key data, no manager for given key type', async function() {
     const keyManager1 = new DummyKeyManager1('someKeyType');
     const differentKeyType = 'otherKeyType';
     const keyTemplate = new PbKeyTemplate().setTypeUrl(differentKeyType);
@@ -229,15 +225,14 @@ testSuite({
     try {
       await Registry.newKeyData(keyTemplate);
     } catch (e) {
-      assertEquals(
-          ExceptionText.notRegisteredKeyType(differentKeyType),
-          e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.notRegisteredKeyType(differentKeyType));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testNewKeyData_newKeyDisallowed() {
+  it('new key data, new key disallowed', async function() {
     const keyManager1 = new DummyKeyManager1('someKeyType');
     const keyTemplate =
         new PbKeyTemplate().setTypeUrl(keyManager1.getKeyType());
@@ -246,15 +241,14 @@ testSuite({
     try {
       await Registry.newKeyData(keyTemplate);
     } catch (e) {
-      assertEquals(
-          ExceptionText.newKeyForbidden(keyManager1.getKeyType()),
-          e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.newKeyForbidden(keyManager1.getKeyType()));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testNewKeyData_newKeyAllowed() {
+  it('new key data, new key allowed', async function() {
     const /** !Array<string> */ keyTypes = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
@@ -268,11 +262,11 @@ testSuite({
     for (let i = 0; i < keyTypesLength; i++) {
       const keyTemplate = new PbKeyTemplate().setTypeUrl(keyTypes[i]);
       const result = await Registry.newKeyData(keyTemplate);
-      assertEquals(keyTypes[i], result.getTypeUrl());
+      expect(result.getTypeUrl()).toBe(keyTypes[i]);
     }
-  },
+  });
 
-  async testNewKeyData_newKeyIsAllowedAutomatically() {
+  it('new key data, new key is allowed automatically', async function() {
     const /** !Array<string> */ keyTypes = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
@@ -286,11 +280,11 @@ testSuite({
     for (let i = 0; i < keyTypesLength; i++) {
       const keyTemplate = new PbKeyTemplate().setTypeUrl(keyTypes[i]);
       const result = await Registry.newKeyData(keyTemplate);
-      assertEquals(keyTypes[i], result.getTypeUrl());
+      expect(result.getTypeUrl()).toBe(keyTypes[i]);
     }
-  },
+  });
 
-  async testNewKeyData_withAesCtrHmacAeadKey() {
+  it('new key data, with aes ctr hmac aead key', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
@@ -301,23 +295,20 @@ testSuite({
         PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
     // Check AES CTR key.
-    assertEquals(
-        key.getAesCtrKey().getKeyValue().length,
-        keyFormat.getAesCtrKeyFormat().getKeySize());
-    assertObjectEquals(
-        key.getAesCtrKey().getParams(),
-        keyFormat.getAesCtrKeyFormat().getParams());
+    expect(keyFormat.getAesCtrKeyFormat().getKeySize())
+        .toBe(key.getAesCtrKey().getKeyValue().length);
+    expect(keyFormat.getAesCtrKeyFormat().getParams())
+        .toEqual(key.getAesCtrKey().getParams());
     // Check HMAC key.
-    assertEquals(
-        key.getHmacKey().getKeyValue().length,
-        keyFormat.getHmacKeyFormat().getKeySize());
-    assertObjectEquals(
-        key.getHmacKey().getParams(), keyFormat.getHmacKeyFormat().getParams());
-  },
+    expect(keyFormat.getHmacKeyFormat().getKeySize())
+        .toBe(key.getHmacKey().getKeyValue().length);
+    expect(keyFormat.getHmacKeyFormat().getParams())
+        .toEqual(key.getHmacKey().getParams());
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for newKey method
-  async testNewKey_noManagerForGivenKeyType() {
+  it('new key, no manager for given key type', async function() {
     const notRegisteredKeyType = 'not_registered_key_type';
     const keyTemplate = new PbKeyTemplate().setTypeUrl(notRegisteredKeyType);
 
@@ -325,13 +316,12 @@ testSuite({
       await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.notRegisteredKeyType(notRegisteredKeyType),
-          e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.notRegisteredKeyType(notRegisteredKeyType));
     }
-  },
+  });
 
-  async testNewKey_newKeyDisallowed() {
+  it('new key, new key disallowed', async function() {
     const keyManager = new DummyKeyManagerForNewKeyTests('someKeyType');
     const keyTemplate = new PbKeyTemplate().setTypeUrl(keyManager.getKeyType());
     Registry.registerKeyManager(keyManager, /* opt_newKeyAllowed = */ false);
@@ -340,12 +330,12 @@ testSuite({
       await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.newKeyForbidden(keyManager.getKeyType()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.newKeyForbidden(keyManager.getKeyType()));
     }
-  },
+  });
 
-  async testNewKey_shouldWork() {
+  it('new key, should work', async function() {
     const /** !Array<string> */ keyTypes = [];
     const /** !Array<!Uint8Array> */ newKeyMethodResult = [];
     const keyTypesLength = 10;
@@ -370,11 +360,11 @@ testSuite({
 
       // The new key method of DummyKeyFactory returns an AesCtrKey which
       // KeyValue is set to corresponding value in newKeyMethodResult.
-      assertEquals(newKeyMethodResult[i], key.getKeyValue());
+      expect(key.getKeyValue()).toBe(newKeyMethodResult[i]);
     }
-  },
+  });
 
-  async testNewKey_withAesCtrHmacAeadKey() {
+  it('new key, with aes ctr hmac aead key', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
@@ -386,24 +376,20 @@ testSuite({
     const keyFormat =
         PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
     // Check AES CTR key.
-    assertEquals(
-        key.getAesCtrKey().getKeyValue().length,
-        keyFormat.getAesCtrKeyFormat().getKeySize());
-    assertObjectEquals(
-        key.getAesCtrKey().getParams(),
-        keyFormat.getAesCtrKeyFormat().getParams());
+    expect(keyFormat.getAesCtrKeyFormat().getKeySize())
+        .toBe(key.getAesCtrKey().getKeyValue().length);
+    expect(keyFormat.getAesCtrKeyFormat().getParams())
+        .toEqual(key.getAesCtrKey().getParams());
     // Check HMAC key.
-    assertEquals(
-        key.getHmacKey().getKeyValue().length,
-        keyFormat.getHmacKeyFormat().getKeySize());
-    assertObjectEquals(
-        key.getHmacKey().getParams(), keyFormat.getHmacKeyFormat().getParams());
-  },
-
+    expect(keyFormat.getHmacKeyFormat().getKeySize())
+        .toBe(key.getHmacKey().getKeyValue().length);
+    expect(keyFormat.getHmacKeyFormat().getParams())
+        .toEqual(key.getHmacKey().getParams());
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitive method
-  async testGetPrimitive_differentKeyTypes() {
+  it('get primitive, different key types', async function() {
     const keyDataType = 'key_data_key_type_url';
     const anotherType = 'another_key_type_url';
     const keyData = new PbKeyData().setTypeUrl(keyDataType);
@@ -411,39 +397,38 @@ testSuite({
     try {
       await Registry.getPrimitive(Aead, keyData, anotherType);
     } catch (e) {
-      assertEquals(
-          ExceptionText.keyTypesAreNotMatching(keyDataType, anotherType),
-          e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.keyTypesAreNotMatching(keyDataType, anotherType));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testGetPrimitive_withoutDefiningKeyType() {
+  it('get primitive, without defining key type', async function() {
     // Get primitive from key proto without key type.
     try {
       await Registry.getPrimitive(Aead, new PbMessage);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.keyTypeNotDefined(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.keyTypeNotDefined());
     }
-  },
+  });
 
-  async testGetPrimitive_missingKeyManager() {
+  it('get primitive, missing key manager', async function() {
     const keyDataType = 'key_data_key_type_url';
     const keyData = new PbKeyData().setTypeUrl(keyDataType);
 
     try {
       await Registry.getPrimitive(Aead, keyData);
     } catch (e) {
-      assertEquals(
-          ExceptionText.notRegisteredKeyType(keyDataType), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.notRegisteredKeyType(keyDataType));
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testGetPrimitive_fromAesCtrHmacAeadKeyData() {
+  it('get primitive, from aes ctr hmac aead key data', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
@@ -451,10 +436,10 @@ testSuite({
 
     const primitive =
         await Registry.getPrimitive(manager.getPrimitiveType(), keyData);
-    assertTrue(primitive instanceof EncryptThenAuthenticate);
-  },
+    expect(primitive instanceof EncryptThenAuthenticate).toBe(true);
+  });
 
-  async testGetPrimitive_fromAesCtrHmacAeadKey() {
+  it('get primitive, from aes ctr hmac aead key', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
@@ -463,10 +448,10 @@ testSuite({
 
     const primitive = await Registry.getPrimitive(
         manager.getPrimitiveType(), key, keyData.getTypeUrl());
-    assertTrue(primitive instanceof EncryptThenAuthenticate);
-  },
+    expect(primitive instanceof EncryptThenAuthenticate).toBe(true);
+  });
 
-  async testGetPrimitive_macFromAesCtrHmacAeadKey() {
+  it('get primitive, mac from aes ctr hmac aead key', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
@@ -476,39 +461,38 @@ testSuite({
     try {
       await Registry.getPrimitive(Mac, key, keyData.getTypeUrl());
     } catch (e) {
-      assertTrue(
-          e.toString().includes(ExceptionText.getPrimitiveBadPrimitive()));
+      expect(e.toString().includes(ExceptionText.getPrimitiveBadPrimitive()))
+          .toBe(true);
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  testGetPublicKeyData: {
-    testNotPrivateKeyFactory() {
+  describe('get public key data', function() {
+    it('not private key factory', function() {
       AeadConfig.register();
       const notPrivateTypeUrl = AeadConfig.AES_GCM_TYPE_URL;
       try {
         Registry.getPublicKeyData(notPrivateTypeUrl, new Uint8Array(8));
         fail('An exception should be thrown.');
       } catch (e) {
-        assertEquals(
-            ExceptionText.notPrivateKeyFactory(notPrivateTypeUrl),
-            e.toString());
+        expect(e.toString())
+            .toBe(ExceptionText.notPrivateKeyFactory(notPrivateTypeUrl));
       }
-    },
+    });
 
-    testInvalidPrivateKeyProtoSerialization() {
+    it('invalid private key proto serialization', function() {
       HybridConfig.register();
       const typeUrl = HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE;
       try {
         Registry.getPublicKeyData(typeUrl, new Uint8Array(10));
         fail('An exception should be thrown.');
       } catch (e) {
-        assertEquals(ExceptionText.couldNotParse(typeUrl), e.toString());
+        expect(e.toString()).toBe(ExceptionText.couldNotParse(typeUrl));
       }
-    },
+    });
 
-    async testShouldWork() {
+    it('should work', async function() {
       HybridConfig.register();
       const privateKeyData = await Registry.newKeyData(
           HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
@@ -517,19 +501,17 @@ testSuite({
 
       const publicKeyData = Registry.getPublicKeyData(
           privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
-      assertEquals(
-          publicKeyData.getTypeUrl(),
-          HybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
-      assertEquals(
-          publicKeyData.getKeyMaterialType(),
-          PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
+      expect(HybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE)
+          .toBe(publicKeyData.getTypeUrl());
+      expect(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
+          .toBe(publicKeyData.getKeyMaterialType());
 
       const expectedPublicKey = privateKey.getPublicKey();
       const publicKey = PbEciesAeadHkdfPublicKey.deserializeBinary(
           publicKeyData.getValue_asU8());
-      assertObjectEquals(expectedPublicKey, publicKey);
-    },
-  },
+      expect(publicKey).toEqual(expectedPublicKey);
+    });
+  });
 });
 
 ////////////////////////////////////////////////////////////////////////////////

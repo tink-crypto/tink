@@ -24,18 +24,17 @@ const PbAesGcmKey = goog.require('proto.google.crypto.tink.AesGcmKey');
 const PbAesGcmKeyFormat = goog.require('proto.google.crypto.tink.AesGcmKeyFormat');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const Random = goog.require('tink.subtle.Random');
-const testSuite = goog.require('goog.testing.testSuite');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
 const VERSION = 0;
 const PRIMITIVE = Aead;
 
-testSuite({
+describe('aes gcm key manager test', function() {
   /////////////////////////////////////////////////////////////////////////////
   // tests for newKey method
 
   // newKey method -- key formats
-  testNewKey_invalidKeyFormat() {
+  it('new key, invalid key format', function() {
     const keyFormat = new PbAesCtrKeyFormat();
     const manager = new AesGcmKeyManager();
 
@@ -43,11 +42,11 @@ testSuite({
       manager.getKeyFactory().newKey(keyFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.invalidKeyFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidKeyFormat());
     }
-  },
+  });
 
-  testNewKey_invalidSerializedKeyFormat() {
+  it('new key, invalid serialized key format', function() {
     const keyFormat = new Uint8Array(0);
     const manager = new AesGcmKeyManager();
 
@@ -55,12 +54,11 @@ testSuite({
       manager.getKeyFactory().newKey(keyFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
     }
-  },
+  });
 
-
-  testNewKey_unsupportedKeySizes() {
+  it('new key, unsupported key sizes', function() {
     const manager = new AesGcmKeyManager();
 
     for (let keySize = 0; keySize < 40; keySize++) {
@@ -74,12 +72,12 @@ testSuite({
         manager.getKeyFactory().newKey(keyFormat);
         fail('An exception should be thrown.');
       } catch (e) {
-        assertEquals(ExceptionText.unsupportedKeySize(keySize), e.toString());
+        expect(e.toString()).toBe(ExceptionText.unsupportedKeySize(keySize));
       }
     }
-  },
+  });
 
-  testNewKey_viaFormatProto() {
+  it('new key, via format proto', function() {
     const manager = new AesGcmKeyManager();
 
     const keyFormat = createTestKeyFormat();
@@ -87,10 +85,10 @@ testSuite({
     const key =
         /** @type {!PbAesGcmKey}*/ (manager.getKeyFactory().newKey(keyFormat));
 
-    assertEquals(keyFormat.getKeySize(), key.getKeyValue().length);
-  },
+    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+  });
 
-  testNewKey_viaSerializedFormatProto() {
+  it('new key, via serialized format proto', function() {
     const manager = new AesGcmKeyManager();
 
     const keyFormat = createTestKeyFormat();
@@ -99,32 +97,32 @@ testSuite({
     const key = /** @type {!PbAesGcmKey} */ (
         manager.getKeyFactory().newKey(serializedKeyFormat));
 
-    assertEquals(keyFormat.getKeySize(), key.getKeyValue().length);
-  },
+    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for NewKeyData method
 
-  testNewKeyData_shouldWork() {
+  it('new key data, should work', function() {
     const keyFormat = createTestKeyFormat();
     const serializedKeyFormat = keyFormat.serializeBinary();
     const manager = new AesGcmKeyManager();
 
     const keyData = manager.getKeyFactory().newKeyData(serializedKeyFormat);
 
-    assertEquals(KEY_TYPE, keyData.getTypeUrl());
-    assertEquals(
-        PbKeyData.KeyMaterialType.SYMMETRIC, keyData.getKeyMaterialType());
+    expect(keyData.getTypeUrl()).toBe(KEY_TYPE);
+    expect(keyData.getKeyMaterialType())
+        .toBe(PbKeyData.KeyMaterialType.SYMMETRIC);
 
     const key = PbAesGcmKey.deserializeBinary(keyData.getValue());
 
-    assertEquals(keyFormat.getKeySize(), key.getKeyValue().length);
-  },
+    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitive method
 
-  async testGetPrimitive_unsupportedKeyDataType() {
+  it('get primitive, unsupported key data type', async function() {
     const manager = new AesGcmKeyManager();
     const keyData = createTestKeyData().setTypeUrl('bad_type_url');
 
@@ -132,12 +130,12 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown');
     } catch (e) {
-      assertEquals(
-          ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.unsupportedKeyType(keyData.getTypeUrl()));
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedKeyType() {
+  it('get primitive, unsupported key type', async function() {
     const manager = new AesGcmKeyManager();
     const key = new PbAesCtrKey();
 
@@ -145,11 +143,11 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedKeyType());
     }
-  },
+  });
 
-  async testGetPrimitive_badVersion() {
+  it('get primitive, bad version', async function() {
     const version = 1;
     const manager = new AesGcmKeyManager();
     const key = createTestKey().setVersion(version);
@@ -158,11 +156,11 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown');
     } catch (e) {
-      assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.versionOutOfBounds());
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedKeySizes() {
+  it('get primitive, unsupported key sizes', async function() {
     const manager = new AesGcmKeyManager();
 
     for (let keySize = 0; keySize < 40; keySize++) {
@@ -176,12 +174,12 @@ testSuite({
         await manager.getPrimitive(PRIMITIVE, key);
         fail('An exception should be thrown');
       } catch (e) {
-        assertEquals(ExceptionText.unsupportedKeySize(keySize), e.toString());
+        expect(e.toString()).toBe(ExceptionText.unsupportedKeySize(keySize));
       }
     }
-  },
+  });
 
-  async testGetPrimitive_badSerialization() {
+  it('get primitive, bad serialization', async function() {
     const manager = new AesGcmKeyManager();
     const keyData = createTestKeyData().setValue(new Uint8Array([]));
 
@@ -189,11 +187,11 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown');
     } catch (e) {
-      assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedPrimitive() {
+  it('get primitive, unsupported primitive', async function() {
     const manager = new AesGcmKeyManager();
     const keyData = createTestKeyData();
 
@@ -201,13 +199,12 @@ testSuite({
       await manager.getPrimitive(Mac, keyData);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedPrimitive());
     }
-  },
-
+  });
 
   // Tests for getting primitive from valid key/keyData.
-  async testGetPrimitive_fromKey() {
+  it('get primitive, from key', async function() {
     const manager = new AesGcmKeyManager();
     const key = createTestKey();
 
@@ -220,10 +217,10 @@ testSuite({
     const ciphertext = await primitive.encrypt(plaintext, aad);
     const decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 
-    assertObjectEquals(plaintext, decryptedCiphertext);
-  },
+    expect(decryptedCiphertext).toEqual(plaintext);
+  });
 
-  async testGetPrimitive_fromKeyData() {
+  it('get primitive, from key data', async function() {
     const manager = new AesGcmKeyManager();
     const keyData = createTestKeyData();
 
@@ -237,30 +234,31 @@ testSuite({
     const ciphertext = await primitive.encrypt(plaintext, aad);
     const decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 
-    assertObjectEquals(plaintext, decryptedCiphertext);
-  },
+    expect(decryptedCiphertext).toEqual(plaintext);
+  });
+
   /////////////////////////////////////////////////////////////////////////////
   // tests for getVersion, getKeyType and doesSupport methods
 
-  testGetVersion_shouldBeZero() {
+  it('get version, should be zero', function() {
     const manager = new AesGcmKeyManager();
-    assertEquals(0, manager.getVersion());
-  },
+    expect(manager.getVersion()).toBe(0);
+  });
 
-  testGetKeyType_shouldBeAesGcmKeyType() {
+  it('get key type, should be aes gcm key type', function() {
     const manager = new AesGcmKeyManager();
-    assertEquals(KEY_TYPE, manager.getKeyType());
-  },
+    expect(manager.getKeyType()).toBe(KEY_TYPE);
+  });
 
-  testDoesSupport_shouldSupportAesGcmKeyType() {
+  it('does support, should support aes gcm key type', function() {
     const manager = new AesGcmKeyManager();
-    assertTrue(manager.doesSupport(KEY_TYPE));
-  },
+    expect(manager.doesSupport(KEY_TYPE)).toBe(true);
+  });
 
-  testGetPrimitiveType_shouldBeAead() {
+  it('get primitive type, should be aead', function() {
     const manager = new AesGcmKeyManager();
-    assertEquals(PRIMITIVE, manager.getPrimitiveType());
-  },
+    expect(manager.getPrimitiveType()).toBe(PRIMITIVE);
+  });
 });
 
 /////////////////////////////////////////////////////////////////////////////

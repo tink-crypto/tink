@@ -22,23 +22,21 @@ const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
 
-testSuite({
-  setUp() {
+describe('ecies aead hkdf hybrid encrypt test', function() {
+  beforeEach(function() {
     AeadConfig.register();
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
     // Reset the timeout.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testNewInstance_shouldWork() {
+  it('new instance, should work', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const hkdfHash = 'SHA-256';
@@ -48,9 +46,9 @@ testSuite({
 
     await EciesAeadHkdfHybridEncrypt.newInstance(
         publicKey, hkdfHash, pointFormat, demHelper);
-  },
+  });
 
-  async testEncrypt_differentArguments() {
+  it('encrypt, different arguments', async function() {
     const hkdfSalt = new Uint8Array(0);
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const demHelper = new RegistryEciesAeadHkdfDemHelper(
@@ -73,8 +71,8 @@ testSuite({
         const plaintext = Random.randBytes(15);
         const ciphertext = await hybridEncrypt.encrypt(plaintext);
 
-        assertObjectNotEquals(plaintext, ciphertext);
+        expect(ciphertext).not.toEqual(plaintext);
       }
     }
-  },
+  });
 });

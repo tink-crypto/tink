@@ -18,21 +18,19 @@ goog.setTestOnly('tink.subtle.EcdsaSignTest');
 const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
 
-testSuite({
-  setUp() {
+describe('ecdsa sign test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testSign() {
+  it('sign', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await EcdsaSign.newInstance(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
@@ -47,11 +45,11 @@ testSuite({
             },
           },
           keyPair.publicKey, signature, data);
-      assertTrue(isValid);
+      expect(isValid).toBe(true);
     }
-  },
+  });
 
-  async testSignWithDerEncoding() {
+  it('sign with der encoding', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await EcdsaSign.newInstance(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256',
@@ -68,7 +66,7 @@ testSuite({
             },
           },
           keyPair.publicKey, signature, data);
-      assertFalse(isValid);
+      expect(isValid).toBe(false);
       // Convert the signature to IEEE encoding.
       signature = EllipticCurves.ecdsaDer2Ieee(signature, 64);
       isValid = await window.crypto.subtle.verify(
@@ -79,11 +77,11 @@ testSuite({
             },
           },
           keyPair.publicKey, signature, data);
-      assertTrue(isValid);
+      expect(isValid).toBe(true);
     }
-  },
+  });
 
-  async testSignAlwaysGenerateNewSignatures() {
+  it('sign always generate new signatures', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await EcdsaSign.newInstance(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
@@ -93,20 +91,20 @@ testSuite({
       const signature = await signer.sign(data);
       signatures.add(signature);
     }
-    assertEquals(100, signatures.size);
-  },
+    expect(signatures.size).toBe(100);
+  });
 
-  async testConstructorWithInvalidHash() {
+  it('constructor with invalid hash', async function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
       await EcdsaSign.newInstance(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-1');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-256 (because curve is P-256) but ' +
-              'got SHA-1',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: expected SHA-256 (because curve is P-256) but ' +
+              'got SHA-1');
     }
 
     try {
@@ -115,9 +113,9 @@ testSuite({
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
 
     try {
@@ -126,13 +124,13 @@ testSuite({
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256');
     }
-  },
+  });
 
-  async testConstructorWithInvalidCurve() {
+  it('constructor with invalid curve', async function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
       const jwk = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
@@ -140,7 +138,7 @@ testSuite({
       await EcdsaSign.newInstance(jwk, 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: unsupported curve: blah', e.toString());
+      expect(e.toString()).toBe('CustomError: unsupported curve: blah');
     }
-  },
+  });
 });
