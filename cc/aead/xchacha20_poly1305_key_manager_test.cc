@@ -20,7 +20,6 @@
 #include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/subtle/aead_test_util.h"
-#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -123,8 +122,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateAead) {
   ASSERT_THAT(aead_or.status(), IsOk());
 
   StatusOr<std::unique_ptr<Aead>> direct_aead_or =
-      subtle::XChacha20Poly1305BoringSsl::New(
-          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
+      subtle::XChacha20Poly1305BoringSsl::New(key_or.ValueOrDie().key_value());
   ASSERT_THAT(direct_aead_or.status(), IsOk());
 
   ASSERT_THAT(

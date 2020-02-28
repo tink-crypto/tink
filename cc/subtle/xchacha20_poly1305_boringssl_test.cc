@@ -32,7 +32,7 @@ namespace subtle {
 namespace {
 
 TEST(XChacha20Poly1305BoringSslTest, testBasic) {
-  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
+  std::string key(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
   auto res = XChacha20Poly1305BoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
@@ -49,7 +49,7 @@ TEST(XChacha20Poly1305BoringSslTest, testBasic) {
 }
 
 TEST(XChacha20Poly1305BoringSslTest, testModification) {
-  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
+  std::string key(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
   std::string message = "Some data to encrypt.";
@@ -100,9 +100,8 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
 }
 
 TEST(XChacha20Poly1305BoringSslTest, testAadEmptyVersusNullStringView) {
-  const util::SecretData key =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(
-          "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+  const std::string key(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
   {  // AAD is a null string_view.
     const std::string message = "Some data to encrypt.";
@@ -129,9 +128,8 @@ TEST(XChacha20Poly1305BoringSslTest, testAadEmptyVersusNullStringView) {
 }
 
 TEST(XChacha20Poly1305BoringSslTest, testMessageEmptyVersusNullStringView) {
-  const util::SecretData key =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(
-          "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+  const std::string key(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
   const std::string aad = "Some data to authenticate.";
   {  // Message is a null string_view.
@@ -166,9 +164,8 @@ TEST(XChacha20Poly1305BoringSslTest, testMessageEmptyVersusNullStringView) {
 }
 
 TEST(XChacha20Poly1305BoringSslTest, testBothMessageAndAadEmpty) {
-  const util::SecretData key =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(
-          "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+  const std::string key(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
   {  // Both are null string_view.
     const absl::string_view message;
@@ -208,10 +205,13 @@ TEST(XChacha20Poly1305BoringSslTest, testInvalidKeySizes) {
     if (keysize == 32) {
       continue;
     }
-    util::SecretData key(keysize, 'x');
+    std::string key(keysize, 'x');
     auto cipher = XChacha20Poly1305BoringSsl::New(key);
     EXPECT_FALSE(cipher.ok());
   }
+  absl::string_view null_string_view;
+  auto nokeycipher = XChacha20Poly1305BoringSsl::New(null_string_view);
+  EXPECT_FALSE(nokeycipher.ok());
 }
 
 }  // namespace
