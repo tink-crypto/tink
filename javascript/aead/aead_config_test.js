@@ -21,13 +21,9 @@ const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('aead config test', function() {
   beforeEach(function() {

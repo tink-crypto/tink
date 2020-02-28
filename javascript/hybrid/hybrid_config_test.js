@@ -22,13 +22,9 @@ const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('hybrid config test', function() {
   beforeEach(function() {

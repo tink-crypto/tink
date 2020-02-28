@@ -15,14 +15,7 @@
 goog.module('tink.aead.AesCtrHmacAeadKeyTemplates');
 
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
-const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
-const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
-const PbAesCtrParams = goog.require('proto.google.crypto.tink.AesCtrParams');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
-const PbHmacParams = goog.require('proto.google.crypto.tink.HmacParams');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const {PbAesCtrHmacAeadKeyFormat, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyTemplate, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * Pre-generated KeyTemplates for AES CTR HMAC AEAD keys.

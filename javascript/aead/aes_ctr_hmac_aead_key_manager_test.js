@@ -18,17 +18,8 @@ goog.setTestOnly('tink.aead.AesCtrHmacAeadKeyManagerTest');
 const Aead = goog.require('tink.Aead');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const Mac = goog.require('tink.Mac');
-const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
-const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
-const PbAesCtrKey = goog.require('proto.google.crypto.tink.AesCtrKey');
-const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
-const PbAesCtrParams = goog.require('proto.google.crypto.tink.AesCtrParams');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbHmacKey = goog.require('proto.google.crypto.tink.HmacKey');
-const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
-const PbHmacParams = goog.require('proto.google.crypto.tink.HmacParams');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const Random = goog.require('tink.subtle.Random');
+const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData} = goog.require('google3.third_party.tink.javascript.proto');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
 const VERSION = 0;

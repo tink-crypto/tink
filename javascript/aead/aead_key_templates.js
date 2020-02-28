@@ -16,7 +16,7 @@ goog.module('tink.aead.AeadKeyTemplates');
 
 const AesCtrHmacAeadKeyTemplates = goog.require('tink.aead.AesCtrHmacAeadKeyTemplates');
 const AesGcmKeyTemplates = goog.require('tink.aead.AesGcmKeyTemplates');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
+const {PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * Pre-generated KeyTemplates for Aead keys.

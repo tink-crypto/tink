@@ -17,7 +17,7 @@ goog.setTestOnly();
 
 const CleartextKeysetHandle = goog.require('tink.CleartextKeysetHandle');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const {PbKeyset} = goog.require('google3.third_party.tink.javascript.proto');
 const {createKeyset} = goog.require('tink.testUtils');
 
 describe('cleartext keyset handle test', function() {

@@ -18,17 +18,13 @@ goog.setTestOnly('tink.signature.SignatureConfigTest');
 const EcdsaPrivateKeyManager = goog.require('tink.signature.EcdsaPrivateKeyManager');
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SignatureConfig = goog.require('tink.signature.SignatureConfig');
 const SignatureKeyTemplates = goog.require('tink.signature.SignatureKeyTemplates');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('signature config test', function() {
   beforeEach(function() {

@@ -16,14 +16,8 @@ goog.module('tink.UtilTest');
 goog.setTestOnly('tink.UtilTest');
 
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Util = goog.require('tink.Util');
+const {PbEllipticCurveType, PbHashType, PbKeyData, PbKeyStatusType, PbKeyset, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.proto');
 
 ////////////////////////////////////////////////////////////////////////////////
 // tests

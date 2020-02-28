@@ -16,8 +16,7 @@ goog.module('tink.CryptoFormatTest');
 goog.setTestOnly('tink.CryptoFormatTest');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const PbKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const {PbKeysetKey: PbKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('crypto format test', function() {
   it('constants', async function() {

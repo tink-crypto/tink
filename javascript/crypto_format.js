@@ -15,9 +15,8 @@
 goog.module('tink.CryptoFormat');
 
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * Constants and methods that deal with the format of the outputs handled by

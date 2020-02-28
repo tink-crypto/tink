@@ -14,8 +14,8 @@
 
 goog.module('tink.KeyManager');
 
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PbMessage = goog.require('jspb.Message');
+const {PbKeyData} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * An auxiliary container for methods that generate new keys.

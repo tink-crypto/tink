@@ -19,15 +19,10 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Mac = goog.require('tink.Mac');
-const PbEcdsaParams = goog.require('proto.google.crypto.tink.EcdsaParams');
-const PbEcdsaPublicKey = goog.require('proto.google.crypto.tink.EcdsaPublicKey');
-const PbEcdsaSignatureEncoding = goog.require('proto.google.crypto.tink.EcdsaSignatureEncoding');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Registry = goog.require('tink.Registry');
 const Util = goog.require('tink.Util');
+const {PbEcdsaParams, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.proto');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
 const VERSION = 0;

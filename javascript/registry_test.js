@@ -24,23 +24,12 @@ const HybridConfig = goog.require('tink.hybrid.HybridConfig');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
 const KeyManager = goog.require('tink.KeyManager');
 const Mac = goog.require('tink.Mac');
-const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
-const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
-const PbAesCtrKey = goog.require('proto.google.crypto.tink.AesCtrKey');
-const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
-const PbAesCtrParams = goog.require('proto.google.crypto.tink.AesCtrParams');
-const PbEciesAeadHkdfPrivateKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPrivateKey');
-const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
-const PbHmacParams = goog.require('proto.google.crypto.tink.HmacParams');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyData, PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.proto');
 
 ////////////////////////////////////////////////////////////////////////////////
 // tests

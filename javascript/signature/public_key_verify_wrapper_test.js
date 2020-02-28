@@ -16,15 +16,13 @@ goog.module('tink.signature.PublicKeyVerifyWrapperTest');
 goog.setTestOnly('tink.signature.PublicKeyVerifyWrapperTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const PublicKeyVerifyWrapper = goog.require('tink.signature.PublicKeyVerifyWrapper');
 const Random = goog.require('tink.subtle.Random');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('public key verify wrapper test', function() {
   it('verify, with empty signature', async function() {

@@ -16,12 +16,8 @@ goog.module('tink.signature.SignatureKeyTemplatesTest');
 goog.setTestOnly('tink.signature.SignatureKeyTemplatesTest');
 
 const EcdsaPrivateKeyManager = goog.require('tink.signature.EcdsaPrivateKeyManager');
-const PbEcdsaKeyFormat = goog.require('proto.google.crypto.tink.EcdsaKeyFormat');
-const PbEcdsaSignatureEncoding = goog.require('proto.google.crypto.tink.EcdsaSignatureEncoding');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const SignatureKeyTemplates = goog.require('tink.signature.SignatureKeyTemplates');
+const {PbEcdsaKeyFormat, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('signature key templates test', function() {
   it('ecdsa p256', function() {

@@ -19,15 +19,12 @@ const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsE
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetReader = goog.require('tink.KeysetReader');
 const KeysetWriter = goog.require('tink.KeysetWriter');
-const PbKeyMaterialType = goog.require('proto.google.crypto.tink.KeyData.KeyMaterialType');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Util = goog.require('tink.Util');
+const {PbKeyMaterialType, PbKeyStatusType, PbKeyTemplate, PbKeyset} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * Keyset handle provide abstracted access to Keysets, to limit the exposure of

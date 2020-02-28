@@ -16,10 +16,10 @@ goog.module('tink.hybrid.HybridDecryptWrapper');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const HybridDecrypt = goog.require('tink.HybridDecrypt');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * @implements {HybridDecrypt}

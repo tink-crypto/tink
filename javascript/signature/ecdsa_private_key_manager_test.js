@@ -18,18 +18,11 @@ goog.setTestOnly('tink.signature.EcdsaPrivateKeyManagerTest');
 const EcdsaPrivateKeyManager = goog.require('tink.signature.EcdsaPrivateKeyManager');
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
 const KeyManager = goog.require('tink.KeyManager');
-const PbEcdsaKeyFormat = goog.require('proto.google.crypto.tink.EcdsaKeyFormat');
-const PbEcdsaParams = goog.require('proto.google.crypto.tink.EcdsaParams');
-const PbEcdsaPrivateKey = goog.require('proto.google.crypto.tink.EcdsaPrivateKey');
-const PbEcdsaPublicKey = goog.require('proto.google.crypto.tink.EcdsaPublicKey');
-const PbEcdsaSignatureEncoding = goog.require('proto.google.crypto.tink.EcdsaSignatureEncoding');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
+const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.proto');
 const {assertExists, assertInstanceof} = goog.require('tink.testUtils');
 
 const PRIVATE_KEY_TYPE =

@@ -16,13 +16,11 @@ goog.module('tink.signature.PublicKeySignWrapperTest');
 goog.setTestOnly('tink.signature.PublicKeySignWrapperTest');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper');
 const Random = goog.require('tink.subtle.Random');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('public key sign wrapper test', function() {
   it('new public key sign, primitive set without primary', function() {

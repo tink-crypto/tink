@@ -17,11 +17,9 @@ goog.setTestOnly('tink.PrimitiveSetTest');
 
 const Aead = goog.require('tink.Aead');
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('primitive set test', function() {
   /////////////////////////////////////////////////////////////////////////////

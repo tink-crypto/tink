@@ -18,11 +18,9 @@ goog.setTestOnly('tink.hybrid.HybridEncryptWrapperTest');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('hybrid encrypt wrapper test', function() {
   it('new hybrid encrypt, primitive set without primary', function() {

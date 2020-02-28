@@ -18,11 +18,7 @@ goog.setTestOnly('tink.hybrid.HybridKeyTemplatesTest');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
-const PbEciesAeadHkdfKeyFormat = goog.require('proto.google.crypto.tink.EciesAeadHkdfKeyFormat');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
+const {PbEciesAeadHkdfKeyFormat, PbEllipticCurveType, PbHashType, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('hybrid key templates test', function() {
   it('ecies p256 hkdf hmac sha256 aes128 gcm', function() {

@@ -15,9 +15,7 @@
 goog.module('tink.aead.AesGcmKeyTemplates');
 
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
-const PbAesGcmKeyFormat = goog.require('proto.google.crypto.tink.AesGcmKeyFormat');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const {PbAesGcmKeyFormat, PbKeyTemplate, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * Pre-generated KeyTemplates for AES GCM keys.

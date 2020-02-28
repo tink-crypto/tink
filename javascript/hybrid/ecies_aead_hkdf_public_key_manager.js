@@ -19,14 +19,11 @@ const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const KeyManager = goog.require('tink.KeyManager');
-const PbEciesAeadHkdfParams = goog.require('proto.google.crypto.tink.EciesAeadHkdfParams');
-const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Util = goog.require('tink.Util');
+const {PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * @implements {KeyManager.KeyFactory}

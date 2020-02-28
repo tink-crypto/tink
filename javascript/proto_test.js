@@ -15,7 +15,7 @@
 goog.module('tink.ProtoTest');
 goog.setTestOnly('tink.ProtoTest');
 
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const {PbKeyset} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('proto test', function() {
   it('field', function() {

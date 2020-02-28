@@ -20,12 +20,10 @@ const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 describe('hybrid decrypt wrapper test', function() {
   it('decrypt, invalid ciphertext', async function() {

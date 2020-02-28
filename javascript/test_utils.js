@@ -15,10 +15,7 @@
 goog.module('tink.testUtils');
 goog.setTestOnly();
 
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const {PbKeyData, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * Returns its input type-narrowed not to be null or undefined. Throws a failed

@@ -27,14 +27,10 @@ const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const Mac = goog.require('tink.Mac');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyMaterialType = goog.require('proto.google.crypto.tink.KeyData.KeyMaterialType');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyData, PbKeyMaterialType, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
 const {createKeyset} = goog.require('tink.testUtils');
 
 describe('keyset handle test', function() {

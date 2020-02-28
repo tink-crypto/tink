@@ -19,17 +19,8 @@ const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const PbEciesAeadDemParams = goog.require('proto.google.crypto.tink.EciesAeadDemParams');
-const PbEciesAeadHkdfKeyFormat = goog.require('proto.google.crypto.tink.EciesAeadHkdfKeyFormat');
-const PbEciesAeadHkdfParams = goog.require('proto.google.crypto.tink.EciesAeadHkdfParams');
-const PbEciesAeadHkdfPrivateKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPrivateKey');
-const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
-const PbEciesHkdfKemParams = goog.require('proto.google.crypto.tink.EciesHkdfKemParams');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Util = goog.require('tink.Util');
+const {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.proto');
 const {assertExists} = goog.require('tink.testUtils');
 
 
