@@ -27,6 +27,7 @@
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -43,7 +44,8 @@ class XChaCha20Poly1305KeyManager
   class AeadFactory : public PrimitiveFactory<Aead> {
     crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
         const google::crypto::tink::XChaCha20Poly1305Key& key) const override {
-      return subtle::XChacha20Poly1305BoringSsl::New(key.key_value());
+      return subtle::XChacha20Poly1305BoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()));
     }
   };
 

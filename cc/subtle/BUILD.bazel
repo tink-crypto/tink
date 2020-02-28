@@ -463,6 +463,7 @@ cc_library(
         ":subtle_util_boringssl",
         "//:aead",
         "//util:errors",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
@@ -1277,6 +1278,7 @@ cc_test(
     deps = [
         ":xchacha20_poly1305_boringssl",
         "//:aead",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_util",

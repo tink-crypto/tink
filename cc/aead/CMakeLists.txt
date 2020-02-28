@@ -173,6 +173,7 @@ tink_cc_library(
     tink::subtle::xchacha20_poly1305_boringssl
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -384,6 +385,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::key_manager_impl
     tink::subtle::aead_test_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
