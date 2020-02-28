@@ -19,11 +19,11 @@
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-namespace pb = google::crypto::tink;
-
 namespace crypto {
 namespace tink {
 namespace util {
+
+namespace pb = google::crypto::tink;
 
 // static
 pb::EllipticCurveType Enums::SubtleToProto(subtle::EllipticCurveType type) {
