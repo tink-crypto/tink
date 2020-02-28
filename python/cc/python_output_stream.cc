@@ -21,7 +21,6 @@
 #include "absl/strings/string_view.h"
 #include "tink/output_stream.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/python/cc/python_file_object_adapter.h"

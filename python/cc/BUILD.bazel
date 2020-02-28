@@ -8,7 +8,6 @@ cc_library(
     include_prefix = "tink/",
     deps = [
         "//cc",
-        "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
@@ -37,7 +36,6 @@ cc_library(
         ":python_file_object_adapter",
         "//cc:output_stream",
         "//cc/subtle:subtle_util",
-        "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
         "@com_google_absl//absl/base:core_headers",
@@ -145,7 +143,6 @@ cc_library(
         ":python_file_object_adapter",
         "//cc:input_stream",
         "//cc/subtle:subtle_util",
-        "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
         "@com_google_absl//absl/base:core_headers",

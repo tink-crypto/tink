@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "tink/key_manager.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -44,9 +43,9 @@ class CcKeyManager {
       const std::string& type_url) {
     auto key_manager_result = Registry::get_key_manager<P>(type_url);
     if (!key_manager_result.ok()) {
-      return ToStatusF(util::error::FAILED_PRECONDITION,
-                       "No manager for key type '%s' found in the registry.",
-                       type_url.c_str());
+      return util::Status(util::error::FAILED_PRECONDITION,
+                          absl::StrCat("No manager for key type '", type_url,
+                                       "' found in the registry."));
     }
     return absl::make_unique<CcKeyManager<P>>(
         key_manager_result.ValueOrDie());
@@ -65,9 +64,9 @@ class CcKeyManager {
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
       NewKeyData(const google::crypto::tink::KeyTemplate& key_template) {
     if (key_manager_->get_key_type() != key_template.type_url()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Key type '%s' is not supported by this manager.",
-                       key_template.type_url().c_str());
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          absl::StrCat("Key type '", key_template.type_url(),
+                                       "' is not supported by this manager."));
     }
     return key_manager_->get_key_factory().NewKeyData(key_template.value());
   }
@@ -79,10 +78,11 @@ class CcKeyManager {
     const PrivateKeyFactory* factory = dynamic_cast<const PrivateKeyFactory*>(
         &key_manager_->get_key_factory());
     if (factory == nullptr) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "KeyManager for type '%s' does not have "
-                       "a PrivateKeyFactory.",
-                       key_manager_->get_key_type().c_str());
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          absl::StrCat("KeyManager for type '",
+                                       key_manager_->get_key_type().c_str(),
+                                       "' does not have "
+                                       "a PrivateKeyFactory."));
     }
     auto result = factory->GetPublicKeyData(private_key_data.value());
     return result;
