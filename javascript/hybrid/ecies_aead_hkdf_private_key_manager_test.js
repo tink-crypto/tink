@@ -36,7 +36,7 @@ const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const asserts = goog.require('goog.asserts');
+const {assertExists, assertInstanceof} = goog.require('tink.testUtils');
 
 const PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';
@@ -279,10 +279,9 @@ describe('ecies aead hkdf private key manager test', function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const version = manager.getVersion() + 1;
     const keyFormat = createKeyFormat();
-    const key = asserts
-                    .assertInstanceof(
-                        await manager.getKeyFactory().newKey(keyFormat),
-                        PbEciesAeadHkdfPrivateKey)
+    const key = assertInstanceof(
+                    await manager.getKeyFactory().newKey(keyFormat),
+                    PbEciesAeadHkdfPrivateKey)
                     .setVersion(version);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
@@ -295,7 +294,7 @@ describe('ecies aead hkdf private key manager test', function() {
   it('get primitive, invalid params', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const keyFormat = createKeyFormat();
-    const key = asserts.assertInstanceof(
+    const key = assertInstanceof(
         await manager.getKeyFactory().newKey(keyFormat),
         PbEciesAeadHkdfPrivateKey);
 
@@ -348,16 +347,15 @@ describe('ecies aead hkdf private key manager test', function() {
     const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
 
     for (let keyFormat of keyFormats) {
-      const key = asserts.assertInstanceof(
+      const key = assertInstanceof(
           await privateKeyManager.getKeyFactory().newKey(keyFormat),
           PbEciesAeadHkdfPrivateKey);
 
       const /** !HybridEncrypt */ hybridEncrypt =
-          asserts.assert(await publicKeyManager.getPrimitive(
-              PUBLIC_KEY_MANAGER_PRIMITIVE,
-              asserts.assert(key.getPublicKey())));
+          assertExists(await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE, assertExists(key.getPublicKey())));
       const /** !HybridDecrypt */ hybridDecrypt =
-          asserts.assert(await privateKeyManager.getPrimitive(
+          assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
@@ -382,10 +380,10 @@ describe('ecies aead hkdf private key manager test', function() {
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
 
       const /** !HybridEncrypt */ hybridEncrypt =
-          asserts.assert(await publicKeyManager.getPrimitive(
+          assertExists(await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData));
       const /** !HybridDecrypt */ hybridDecrypt =
-          asserts.assert(await privateKeyManager.getPrimitive(
+          assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, keyData));
 
       const plaintext = Random.randBytes(10);

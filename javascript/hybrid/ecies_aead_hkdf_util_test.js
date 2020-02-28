@@ -29,7 +29,7 @@ const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Util = goog.require('tink.Util');
-const asserts = goog.require('goog.asserts');
+const {assertExists} = goog.require('tink.testUtils');
 
 describe('ecies aead hkdf util test', function() {
   beforeEach(function() {
@@ -52,7 +52,7 @@ describe('ecies aead hkdf util test', function() {
       }
       const key = await createKey(curve);
       const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(
-          asserts.assert(key.getPublicKey()));
+          assertExists(key.getPublicKey()));
 
       // Test the returned jwk.
       const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
@@ -61,9 +61,9 @@ describe('ecies aead hkdf util test', function() {
       expect(jwk['kty']).toBe('EC');
       expect(jwk['crv']).toBe(curveTypeString);
       expect(Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true))
-          .toEqual(asserts.assert(key.getPublicKey()).getX_asU8());
+          .toEqual(assertExists(key.getPublicKey()).getX_asU8());
       expect(Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true))
-          .toEqual(asserts.assert(key.getPublicKey()).getY_asU8());
+          .toEqual(assertExists(key.getPublicKey()).getY_asU8());
       expect(jwk['d']).toEqual(undefined);
       expect(jwk['ext']).toBe(true);
     }
@@ -86,7 +86,7 @@ describe('ecies aead hkdf util test', function() {
              Bytes.concat(new Uint8Array([0, 0, 0, 0, 0]), x));
          key.getPublicKey().setY(Bytes.concat(new Uint8Array([0, 0, 0]), y));
          const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(
-             asserts.assert(key.getPublicKey()));
+             assertExists(key.getPublicKey()));
 
          // Test the returned jwk.
          const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
@@ -107,7 +107,7 @@ describe('ecies aead hkdf util test', function() {
      async function() {
        const curve = PbEllipticCurveType.NIST_P256;
        const key = await createKey(curve);
-       const publicKey = asserts.assert(key.getPublicKey());
+       const publicKey = assertExists(key.getPublicKey());
        const x = publicKey.getX_asU8();
        publicKey.setX(Bytes.concat(new Uint8Array([1, 0]), x));
        try {

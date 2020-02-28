@@ -35,7 +35,7 @@ const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const Util = goog.require('tink.Util');
-const asserts = goog.require('goog.asserts');
+const {assertExists} = goog.require('tink.testUtils');
 
 const KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
@@ -232,7 +232,7 @@ describe('ecies aead hkdf public key manager test', function() {
 
     for (let key of keys) {
       const /** !HybridEncrypt */ primitive =
-          asserts.assert(await manager.getPrimitive(PRIMITIVE, key));
+          assertExists(await manager.getPrimitive(PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await primitive.encrypt(plaintext);
@@ -247,7 +247,7 @@ describe('ecies aead hkdf public key manager test', function() {
 
     for (let key of keyDatas) {
       const /** !HybridEncrypt */ primitive =
-          asserts.assert(await manager.getPrimitive(PRIMITIVE, key));
+          assertExists(await manager.getPrimitive(PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await primitive.encrypt(plaintext);

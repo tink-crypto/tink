@@ -30,7 +30,7 @@ const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const asserts = goog.require('goog.asserts');
+const {assertExists, assertInstanceof} = goog.require('tink.testUtils');
 
 const PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey';
@@ -278,11 +278,10 @@ describe('ecdsa private key manager test', function() {
     const manager = new EcdsaPrivateKeyManager();
     const version = manager.getVersion() + 1;
     const keyFormat = createKeyFormat();
-    const key = asserts
-                    .assertInstanceof(
-                        await manager.getKeyFactory().newKey(keyFormat),
-                        PbEcdsaPrivateKey)
-                    .setVersion(version);
+    const key =
+        assertInstanceof(
+            await manager.getKeyFactory().newKey(keyFormat), PbEcdsaPrivateKey)
+            .setVersion(version);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -294,7 +293,7 @@ describe('ecdsa private key manager test', function() {
   it('get primitive, invalid params', async function() {
     const manager = new EcdsaPrivateKeyManager();
     const keyFormat = createKeyFormat();
-    const key = asserts.assertInstanceof(
+    const key = assertInstanceof(
         await manager.getKeyFactory().newKey(keyFormat), PbEcdsaPrivateKey);
 
     // Unknown encoding.
@@ -375,16 +374,15 @@ describe('ecdsa private key manager test', function() {
     const publicKeyManager = new EcdsaPublicKeyManager();
 
     for (let keyFormat of keyFormats) {
-      const key = asserts.assertInstanceof(
+      const key = assertInstanceof(
           await privateKeyManager.getKeyFactory().newKey(keyFormat),
           PbEcdsaPrivateKey);
 
       const /** !PublicKeyVerify */ publicKeyVerify =
-          asserts.assert(await publicKeyManager.getPrimitive(
-              PUBLIC_KEY_MANAGER_PRIMITIVE,
-              asserts.assert(key.getPublicKey())));
+          assertExists(await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE, assertExists(key.getPublicKey())));
       const /** !PublicKeySign */ publicKeySign =
-          asserts.assert(await privateKeyManager.getPrimitive(
+          assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, key));
 
       const data = Random.randBytes(10);
@@ -409,10 +407,10 @@ describe('ecdsa private key manager test', function() {
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
 
       const /** !PublicKeyVerify */ publicKeyVerify =
-          asserts.assert(await publicKeyManager.getPrimitive(
+          assertExists(await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData));
       const /** !PublicKeySign */ publicKeySign =
-          asserts.assert(await privateKeyManager.getPrimitive(
+          assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, keyData));
 
       const data = Random.randBytes(10);

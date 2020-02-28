@@ -30,7 +30,7 @@ const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Util = goog.require('tink.Util');
-const asserts = goog.require('goog.asserts');
+const {assertExists} = goog.require('tink.testUtils');
 
 
 describe('ecies aead hkdf validators test', function() {
@@ -495,5 +495,5 @@ const createPublicKey = async function(
     opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat) {
   const key = await createPrivateKey(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat);
-  return asserts.assert(key.getPublicKey());
+  return assertExists(key.getPublicKey());
 };
