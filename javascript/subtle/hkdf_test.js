@@ -27,14 +27,16 @@ describe('hkdf test', function() {
       await Hkdf.compute(0, 'SHA-256', ikm, info);  // 0 output size
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size must be positive');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be positive');
     }
 
     try {
       await Hkdf.compute(-1, 'SHA-256', ikm, info);  // negative output size
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size must be positive');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be positive');
     }
 
     try {
@@ -43,7 +45,7 @@ describe('hkdf test', function() {
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size too large');
+      expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
 
     try {
@@ -52,7 +54,7 @@ describe('hkdf test', function() {
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size too large');
+      expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
 
     try {
@@ -61,7 +63,7 @@ describe('hkdf test', function() {
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size too large');
+      expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
   });
 
@@ -72,14 +74,16 @@ describe('hkdf test', function() {
       await Hkdf.compute(NaN, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size must be an integer');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
 
     try {
       await Hkdf.compute(1.5, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size must be an integer');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
   });
 

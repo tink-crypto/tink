@@ -270,7 +270,7 @@ describe('elliptic curves test', function() {
         EllipticCurves.pointDecode(curveTypeString, format, point);
         fail('Should throw an exception.');
       } catch (e) {
-        expect(e.toString()).toBe('CustomError: invalid point');
+        expect(e.toString()).toBe('InvalidArgumentsException: invalid point');
       }
     }
   });
@@ -326,7 +326,8 @@ describe('elliptic curves test', function() {
         EllipticCurves.ecdsaDer2Ieee(
             Bytes.fromHex(test), 1 /* ieeeLength, ignored */);
       } catch (e) {
-        expect(e.toString()).toBe('CustomError: invalid DER signature');
+        expect(e.toString())
+            .toBe('InvalidArgumentsException: invalid DER signature');
       }
     }
   });

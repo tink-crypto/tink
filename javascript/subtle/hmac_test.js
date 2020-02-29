@@ -35,7 +35,8 @@ describe('hmac test', function() {
           'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: blah is not supported');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: blah is not supported');
     }
 
     try {
@@ -44,7 +45,7 @@ describe('hmac test', function() {
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: key too short, must be at least 16 bytes');
+          .toBe('SecurityException: key too short, must be at least 16 bytes');
     }
 
     try {
@@ -53,7 +54,8 @@ describe('hmac test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: tag too short, must be at least 10 bytes');
+          .toBe(
+              'InvalidArgumentsException: tag too short, must be at least 10 bytes');
     }
     try {
       await Hmac.newInstance(
@@ -61,7 +63,8 @@ describe('hmac test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: tag too long, must not be larger than 20 bytes');
+          .toBe(
+              'InvalidArgumentsException: tag too long, must not be larger than 20 bytes');
     }
 
     try {
@@ -70,7 +73,7 @@ describe('hmac test', function() {
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: key too short, must be at least 16 bytes');
+          .toBe('SecurityException: key too short, must be at least 16 bytes');
     }
 
     try {
@@ -79,7 +82,8 @@ describe('hmac test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: tag too short, must be at least 10 bytes');
+          .toBe(
+              'InvalidArgumentsException: tag too short, must be at least 10 bytes');
     }
 
     try {
@@ -88,7 +92,8 @@ describe('hmac test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: tag too long, must not be larger than 32 bytes');
+          .toBe(
+              'InvalidArgumentsException: tag too long, must not be larger than 32 bytes');
     }
 
     try {
@@ -97,7 +102,7 @@ describe('hmac test', function() {
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: key too short, must be at least 16 bytes');
+          .toBe('SecurityException: key too short, must be at least 16 bytes');
     }
 
     try {
@@ -106,7 +111,8 @@ describe('hmac test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: tag too short, must be at least 10 bytes');
+          .toBe(
+              'InvalidArgumentsException: tag too short, must be at least 10 bytes');
     }
 
     try {
@@ -115,7 +121,8 @@ describe('hmac test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: tag too long, must not be larger than 64 bytes');
+          .toBe(
+              'InvalidArgumentsException: tag too long, must not be larger than 64 bytes');
     }
   });
 
@@ -125,7 +132,8 @@ describe('hmac test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: invalid tag size, must be an integer');
+          .toBe(
+              'InvalidArgumentsException: invalid tag size, must be an integer');
     }
 
     try {
@@ -133,7 +141,8 @@ describe('hmac test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: invalid tag size, must be an integer');
+          .toBe(
+              'InvalidArgumentsException: invalid tag size, must be an integer');
     }
   });
 

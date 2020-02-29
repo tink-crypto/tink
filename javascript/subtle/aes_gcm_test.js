@@ -26,7 +26,7 @@ const Random = goog.require('tink.subtle.Random');
  */
 function assertCryptoError(exception) {
   const message = String(exception);
-  expect(message.startsWith('CustomError: OperationError')).toBe(true);
+  expect(message.startsWith('SecurityException: OperationError')).toBe(true);
 }
 
 describe('aes gcm test', function() {
@@ -125,7 +125,7 @@ describe('aes gcm test', function() {
         fail('expected aead.decrypt to fail');
       } catch (e) {
         if (c1.length < 12 /* iv */ + 16 /* tag */) {
-          expect(e.toString()).toBe('CustomError: ciphertext too short');
+          expect(e.toString()).toBe('SecurityException: ciphertext too short');
         } else {
           assertCryptoError(e);
         }

@@ -14,17 +14,14 @@
 
 goog.module('tink.exception.InvalidArgumentsException');
 
-const Error = goog.require('goog.debug.Error');
-
 /**
  * Exception used when a function receives an invalid argument.
- *
- * @extends {Error}
  */
 class InvalidArgumentsException extends Error {
   /** @param {*=} opt_msg The custom error message. */
   constructor(opt_msg) {
     super(opt_msg);
+    this.name = 'InvalidArgumentsException';
   }
 }
 

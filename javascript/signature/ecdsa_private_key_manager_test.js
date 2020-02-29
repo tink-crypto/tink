@@ -125,7 +125,7 @@ describe('ecdsa private key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
+              'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
 
     invalidFormat.getParams().setCurve(PbEllipticCurveType.NIST_P521);
@@ -135,7 +135,7 @@ describe('ecdsa private key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256');
+              'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256');
     }
   });
 
@@ -327,7 +327,7 @@ describe('ecdsa private key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
+              'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
 
     key.getPublicKey().getParams().setCurve(PbEllipticCurveType.NIST_P521);
@@ -337,7 +337,7 @@ describe('ecdsa private key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256');
+              'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256');
     }
   });
 
@@ -439,24 +439,25 @@ describe('ecdsa private key manager test', function() {
 class ExceptionText {
   /** @return {string} */
   static nullKeyFormat() {
-    return 'CustomError: Key format has to be non-null.';
+    return 'SecurityException: Key format has to be non-null.';
   }
 
   /** @return {string} */
   static invalidSerializedKeyFormat() {
-    return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
+    return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
   }
 
   /** @return {string} */
   static unsupportedPrimitive() {
-    return 'CustomError: Requested primitive type which is not supported by ' +
+    return 'SecurityException: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
   /** @return {string} */
   static unsupportedKeyFormat() {
-    return 'CustomError: Expected ' + PRIVATE_KEY_TYPE + ' key format proto.';
+    return 'SecurityException: Expected ' + PRIVATE_KEY_TYPE +
+        ' key format proto.';
   }
 
   /**
@@ -464,7 +465,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyType(opt_requestedKeyType) {
-    const prefix = 'CustomError: Key type';
+    const prefix = 'SecurityException: Key type';
     const suffix =
         'is not supported. This key manager supports ' + PRIVATE_KEY_TYPE + '.';
     if (opt_requestedKeyType) {
@@ -476,33 +477,33 @@ class ExceptionText {
 
   /** @return {string} */
   static unknownEncoding() {
-    return 'CustomError: Invalid public key - missing signature encoding.';
+    return 'SecurityException: Invalid public key - missing signature encoding.';
   }
 
   /** @return {string} */
   static unknownHash() {
-    return 'CustomError: Unknown hash type.';
+    return 'SecurityException: Unknown hash type.';
   }
 
   /** @return {string} */
   static unknownCurve() {
-    return 'CustomError: Unknown curve type.';
+    return 'SecurityException: Unknown curve type.';
   }
 
   /** @return {string} */
   static versionOutOfBounds() {
-    return 'CustomError: Version is out of bound, must be between 0 and ' +
+    return 'SecurityException: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
   /** @return {string} */
   static invalidKeyFormatMissingParams() {
-    return 'CustomError: Invalid key format - missing params.';
+    return 'SecurityException: Invalid key format - missing params.';
   }
 
   /** @return {string} */
   static invalidSerializedKey() {
-    return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
+    return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key-proto.';
   }
 }

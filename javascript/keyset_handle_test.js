@@ -57,7 +57,7 @@ describe('keyset handle test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Keyset should be non null and must contain at least one key.');
+              'SecurityException: Keyset should be non null and must contain at least one key.');
       return;
     }
     fail('An exception should be thrown.');
@@ -92,7 +92,8 @@ describe('keyset handle test', function() {
       await KeysetHandle.read(keysetReader, aead);
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: KeysetHandle -- read: Not implemented yet.');
+          .toBe(
+              'SecurityException: KeysetHandle -- read: Not implemented yet.');
       return;
     }
     fail('An exception should be thrown.');
@@ -132,7 +133,8 @@ describe('keyset handle test', function() {
       await keysetHandle.write(keysetWriter, aead);
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: KeysetHandle -- write: Not implemented yet.');
+          .toBe(
+              'SecurityException: KeysetHandle -- write: Not implemented yet.');
       return;
     }
     fail('An exception should be thrown.');
@@ -227,7 +229,8 @@ describe('keyset handle test', function() {
       fail('An exception should be thrown here.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: Decryption failed for the given ciphertext.');
+          .toBe(
+              'SecurityException: Decryption failed for the given ciphertext.');
     }
 
     // Check that the primitive returned by getPrimitive with customKeyManager
@@ -346,7 +349,8 @@ describe('keyset handle test', function() {
       fail('An exception should be thrown here.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: Decryption failed for the given ciphertext.');
+          .toBe(
+              'SecurityException: Decryption failed for the given ciphertext.');
     }
 
     // Create a custom private key manager with the correct ciphertext suffix.
@@ -386,7 +390,7 @@ describe('keyset handle test', function() {
        } catch (e) {
          expect(e.toString())
              .toBe(
-                 'CustomError: Requested primitive type which is not supported by ' +
+                 'SecurityException: Requested primitive type which is not supported by ' +
                  'this key manager.');
        }
      });
@@ -528,7 +532,7 @@ describe('keyset handle test', function() {
         fail('An exception should be thrown.');
       } catch (e) {
         expect(e.toString())
-            .toBe('CustomError: Keyset contains secret key material.');
+            .toBe('SecurityException: Keyset contains secret key material.');
       }
     }
   });

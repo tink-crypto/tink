@@ -61,7 +61,7 @@ describe('aes ctr test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: invalid IV length, must be at least 12 and at most 16');
+              'SecurityException: invalid IV length, must be at least 12 and at most 16');
     }
     try {
       await AesCtr.newInstance(Random.randBytes(16), 17);  // IV size too long
@@ -69,14 +69,15 @@ describe('aes ctr test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: invalid IV length, must be at least 12 and at most 16');
+              'SecurityException: invalid IV length, must be at least 12 and at most 16');
     }
     try {
       await AesCtr.newInstance(
           Random.randBytes(24), 12);  // 192-bit keys not supported
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: unsupported AES key size: 24');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: unsupported AES key size: 24');
     }
   });
 
@@ -86,7 +87,7 @@ describe('aes ctr test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: invalid IV length, must be an integer');
+          .toBe('SecurityException: invalid IV length, must be an integer');
     }
 
     try {
@@ -94,7 +95,7 @@ describe('aes ctr test', function() {
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: invalid IV length, must be an integer');
+          .toBe('SecurityException: invalid IV length, must be an integer');
     }
 
     try {
@@ -103,7 +104,7 @@ describe('aes ctr test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: invalid IV length, must be at least 12 and at most 16');
+              'SecurityException: invalid IV length, must be at least 12 and at most 16');
     }
   });
 

@@ -180,7 +180,7 @@ class ExceptionText {
    * @return {string}
    */
   static InvalidKeyMissingKeyData(keyId) {
-    return 'CustomError: Key data are missing for key ' + keyId + '.';
+    return 'SecurityException: Key data are missing for key ' + keyId + '.';
   }
   /**
    * @param {number} keyId
@@ -188,7 +188,8 @@ class ExceptionText {
    * @return {string}
    */
   static InvalidKeyUnknownPrefix(keyId) {
-    return 'CustomError: Key ' + keyId + ' has unknown output prefix type.';
+    return 'SecurityException: Key ' + keyId +
+        ' has unknown output prefix type.';
   }
   /**
    * @param {number} keyId
@@ -196,23 +197,23 @@ class ExceptionText {
    * @return {string}
    */
   static InvalidKeyUnknownStatus(keyId) {
-    return 'CustomError: Key ' + keyId + ' has unknown status.';
+    return 'SecurityException: Key ' + keyId + ' has unknown status.';
   }
 
   // Exceptions for invalid keysets.
   /** @return {string} */
   static InvalidKeysetMissingKeys() {
-    return 'CustomError: Keyset should be non null and ' +
+    return 'SecurityException: Keyset should be non null and ' +
         'must contain at least one key.';
   }
   /** @return {string} */
   static InvalidKeysetDisabledPrimary() {
-    return 'CustomError: Primary key has to be in the keyset and ' +
+    return 'SecurityException: Primary key has to be in the keyset and ' +
         'has to be enabled.';
   }
   /** @return {string} */
   static InvalidKeysetMultiplePrimaries() {
-    return 'CustomError: Primary key has to be unique.';
+    return 'SecurityException: Primary key has to be unique.';
   }
 }
 

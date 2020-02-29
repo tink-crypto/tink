@@ -183,17 +183,17 @@ describe('aead wrapper test', function() {
 class ExceptionText {
   /** @return {string} */
   static nullPrimitiveSet() {
-    return 'CustomError: Primitive set has to be non-null.';
+    return 'SecurityException: Primitive set has to be non-null.';
   }
 
   /** @return {string} */
   static primitiveSetWithoutPrimary() {
-    return 'CustomError: Primary has to be non-null.';
+    return 'SecurityException: Primary has to be non-null.';
   }
 
   /** @return {string} */
   static cannotBeDecrypted() {
-    return 'CustomError: Decryption failed for the given ciphertext.';
+    return 'SecurityException: Decryption failed for the given ciphertext.';
   }
 }
 

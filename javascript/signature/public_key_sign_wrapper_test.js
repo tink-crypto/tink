@@ -29,7 +29,8 @@ describe('public key sign wrapper test', function() {
       new PublicKeySignWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: Primary has to be non-null.');
+      expect(e.toString())
+          .toBe('SecurityException: Primary has to be non-null.');
     }
   });
 

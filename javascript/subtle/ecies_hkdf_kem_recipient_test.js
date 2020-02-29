@@ -76,7 +76,8 @@ describe('ecies hkdf kem recipient test', function() {
           kemKeyToken['token'], NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size must be an integer');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
 
     try {
@@ -84,7 +85,8 @@ describe('ecies hkdf kem recipient test', function() {
           kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size must be an integer');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
   });
 
@@ -140,7 +142,7 @@ describe('ecies hkdf kem recipient test', function() {
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: Expected crypto key of type: private.');
+          .toBe('SecurityException: Expected crypto key of type: private.');
     }
   });
 

@@ -81,7 +81,7 @@ describe('encrypt then authenticate test', function() {
           await aead.decrypt(c1, aad);
           fail('Should throw an exception.');
         } catch (e) {
-          expect(e.toString()).toBe('CustomError: invalid MAC');
+          expect(e.toString()).toBe('SecurityException: invalid MAC');
         }
       }
     }
@@ -102,7 +102,7 @@ describe('encrypt then authenticate test', function() {
           await aead.decrypt(ciphertext, aad1);
           fail('Should throw an exception.');
         } catch (e) {
-          expect(e.toString()).toBe('CustomError: invalid MAC');
+          expect(e.toString()).toBe('SecurityException: invalid MAC');
         }
       }
     }
@@ -122,9 +122,9 @@ describe('encrypt then authenticate test', function() {
         fail('Should throw an exception.');
       } catch (e) {
         if (c1.length < 32) {
-          expect(e.toString()).toBe('CustomError: ciphertext too short');
+          expect(e.toString()).toBe('SecurityException: ciphertext too short');
         } else {
-          expect(e.toString()).toBe('CustomError: invalid MAC');
+          expect(e.toString()).toBe('SecurityException: invalid MAC');
         }
       }
     }

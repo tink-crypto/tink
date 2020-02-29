@@ -55,13 +55,15 @@ describe('ecies hkdf kem sender test', function() {
       await sender.encapsulate(NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size must be an integer');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
     try {
       await sender.encapsulate(0, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: size must be positive');
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be positive');
     }
   });
 
@@ -110,7 +112,7 @@ describe('ecies hkdf kem sender test', function() {
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: Expected Crypto key of type: public.');
+          .toBe('SecurityException: Expected Crypto key of type: public.');
     }
   });
 });

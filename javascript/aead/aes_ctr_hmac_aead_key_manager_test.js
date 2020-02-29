@@ -107,7 +107,7 @@ describe('aes ctr hmac aead key manager test', function() {
       manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: Expected AesCtrHmacAeadKeyFormat-proto');
+          .toBe('SecurityException: Expected AesCtrHmacAeadKeyFormat-proto');
       return;
     }
     fail('An exception should be thrown.');
@@ -123,7 +123,7 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Could not parse the given Uint8Array as a serialized' +
+              'SecurityException: Could not parse the given Uint8Array as a serialized' +
               ' proto of ' + KEY_TYPE);
       return;
     }
@@ -142,7 +142,9 @@ describe('aes ctr hmac aead key manager test', function() {
       manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: unsupported AES key size: ' + keySize);
+          .toBe(
+              'InvalidArgumentsException: unsupported AES key size: ' +
+              keySize);
       return;
     }
     fail('An exception should be thrown.');
@@ -162,7 +164,7 @@ describe('aes ctr hmac aead key manager test', function() {
       } catch (e) {
         expect(e.toString())
             .toBe(
-                'CustomError: Invalid AES CTR HMAC key format: IV size is ' +
+                'SecurityException: Invalid AES CTR HMAC key format: IV size is ' +
                 'out of range: ' + ivSizeOutOfRange[i]);
         continue;
       }
@@ -183,7 +185,7 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Invalid AES CTR HMAC key format: HMAC key is' +
+              'SecurityException: Invalid AES CTR HMAC key format: HMAC key is' +
               ' too small: ' + keySize);
       return;
     }
@@ -199,7 +201,7 @@ describe('aes ctr hmac aead key manager test', function() {
     try {
       manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: Unknown hash type.');
+      expect(e.toString()).toBe('SecurityException: Unknown hash type.');
       return;
     }
     fail('An exception should be thrown.');
@@ -217,8 +219,8 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
-              ' is too small.');
+              'SecurityException: Invalid HMAC params: tag size ' +
+              SMALL_TAG_SIZE + ' is too small.');
       return;
     }
     fail('An exception should be thrown.');
@@ -244,7 +246,7 @@ describe('aes ctr hmac aead key manager test', function() {
       } catch (e) {
         expect(e.toString())
             .toBe(
-                'CustomError: Invalid HMAC params: tag size ' +
+                'SecurityException: Invalid HMAC params: tag size ' +
                 tagSizes[i]['tagSize'] + ' is out of range.');
         continue;
       }
@@ -319,7 +321,7 @@ describe('aes ctr hmac aead key manager test', function() {
       } catch (e) {
         expect(e.toString())
             .toBe(
-                'CustomError: Could not parse the given Uint8Array as a ' +
+                'SecurityException: Could not parse the given Uint8Array as a ' +
                 'serialized proto of ' + KEY_TYPE);
         continue;
       }
@@ -360,7 +362,7 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Key type ' + keyData.getTypeUrl() +
+              'SecurityException: Key type ' + keyData.getTypeUrl() +
               ' is not supported. This key manager supports ' + KEY_TYPE + '.');
       return;
     }
@@ -376,7 +378,7 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Given key type is not supported. ' +
+              'SecurityException: Given key type is not supported. ' +
               'This key manager supports ' + KEY_TYPE + '.');
       return;
     }
@@ -395,7 +397,7 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Version is out of bound, must be between 0 ' +
+              'SecurityException: Version is out of bound, must be between 0 ' +
               'and ' + VERSION + '.');
       return;
     }
@@ -413,7 +415,9 @@ describe('aes ctr hmac aead key manager test', function() {
       await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       expect(e.toString())
-          .toBe('CustomError: unsupported AES key size: ' + keySize);
+          .toBe(
+              'InvalidArgumentsException: unsupported AES key size: ' +
+              keySize);
       return;
     }
     fail('An exception should be thrown');
@@ -432,7 +436,7 @@ describe('aes ctr hmac aead key manager test', function() {
       } catch (e) {
         expect(e.toString())
             .toBe(
-                'CustomError: Invalid AES CTR HMAC key format: IV size is ' +
+                'SecurityException: Invalid AES CTR HMAC key format: IV size is ' +
                 'out of range: ' + ivSizeOutOfRange[i]);
         continue;
       }
@@ -452,7 +456,7 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Invalid AES CTR HMAC key format: HMAC key is' +
+              'SecurityException: Invalid AES CTR HMAC key format: HMAC key is' +
               ' too small: ' + keySize);
       return;
     }
@@ -468,7 +472,7 @@ describe('aes ctr hmac aead key manager test', function() {
     try {
       await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: Unknown hash type.');
+      expect(e.toString()).toBe('SecurityException: Unknown hash type.');
       return;
     }
     fail('An exception should be thrown');
@@ -486,8 +490,8 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
-              ' is too small.');
+              'SecurityException: Invalid HMAC params: tag size ' +
+              SMALL_TAG_SIZE + ' is too small.');
       return;
     }
     fail('An exception should be thrown');
@@ -512,7 +516,7 @@ describe('aes ctr hmac aead key manager test', function() {
       } catch (e) {
         expect(e.toString())
             .toBe(
-                'CustomError: Invalid HMAC params: tag size ' +
+                'SecurityException: Invalid HMAC params: tag size ' +
                 tagSizes[i]['tagSize'] + ' is out of range.');
         continue;
       }
@@ -557,7 +561,7 @@ describe('aes ctr hmac aead key manager test', function() {
     } catch (e) {
       expect(e.toString())
           .toBe(
-              'CustomError: Requested primitive type which is not ' +
+              'SecurityException: Requested primitive type which is not ' +
               'supported by this key manager.');
       return;
     }

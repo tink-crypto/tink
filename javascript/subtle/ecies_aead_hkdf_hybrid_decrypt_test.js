@@ -74,7 +74,7 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
       await hybridDecrypt.decrypt(ciphertext.slice(0, curveEncodingSize - 1));
       fail('Should throw an exception');
     } catch (e) {
-      expect(e.toString()).toBe('CustomError: Ciphertext is too short.');
+      expect(e.toString()).toBe('SecurityException: Ciphertext is too short.');
     }
   });
 

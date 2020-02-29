@@ -107,7 +107,8 @@ describe('ecies aead hkdf util test', function() {
          fail('An exception should be thrown.');
        } catch (e) {
          expect(e.toString())
-             .toBe('CustomError: Number needs more bytes to be represented.');
+             .toBe(
+                 'SecurityException: Number needs more bytes to be represented.');
        }
      });
 
