@@ -17,11 +17,10 @@ goog.module('tink.signature.EcdsaPublicKeyManager');
 const EcdsaUtil = goog.require('tink.signature.EcdsaUtil');
 const EcdsaVerify = goog.require('tink.subtle.EcdsaVerify');
 const KeyManager = goog.require('tink.KeyManager');
-const PbMessage = goog.require('jspb.Message');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Util = goog.require('tink.Util');
-const {PbEcdsaParams, PbEcdsaPublicKey, PbKeyData} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbEcdsaParams, PbEcdsaPublicKey, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * @implements {KeyManager.KeyFactory}

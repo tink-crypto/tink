@@ -24,12 +24,11 @@ const HybridConfig = goog.require('tink.hybrid.HybridConfig');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
 const KeyManager = goog.require('tink.KeyManager');
 const Mac = goog.require('tink.Mac');
-const PbMessage = goog.require('jspb.Message');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
-const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyData, PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.proto');
 
 ////////////////////////////////////////////////////////////////////////////////
 // tests

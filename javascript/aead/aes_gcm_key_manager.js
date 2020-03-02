@@ -17,12 +17,11 @@ goog.module('tink.aead.AesGcmKeyManager');
 const Aead = goog.require('tink.Aead');
 const AesGcm = goog.require('tink.subtle.AesGcm');
 const KeyManager = goog.require('tink.KeyManager');
-const PbMessage = goog.require('jspb.Message');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
-const {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * @final

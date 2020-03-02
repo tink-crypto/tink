@@ -22,11 +22,10 @@ const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidator
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const KeyManager = goog.require('tink.KeyManager');
-const PbMessage = goog.require('jspb.Message');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Util = goog.require('tink.Util');
-const {PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.proto');
 
 /**
  * @implements {KeyManager.PrivateKeyFactory}
