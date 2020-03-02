@@ -19,6 +19,34 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME cord_aead
+  SRCS cord_aead.h
+  DEPS
+    tink::util::statusor
+    absl::strings
+    absl::cord
+)
+
+tink_cc_library(
+  NAME cord_aead_wrapper
+  SRCS
+    cord_aead_wrapper.cc
+    cord_aead_wrapper.h
+  DEPS
+    absl::strings
+    absl::cord
+    tink::aead::cord_aead
+    tink::core::crypto_format
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::core::registry
+    tink::subtle::subtle_util_boringssl
+    tink::util::status
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
   NAME aead_config
   SRCS
     aead_config.cc

@@ -22,6 +22,37 @@ cc_library(
 )
 
 cc_library(
+    name = "cord_aead_wrapper",
+    srcs = ["cord_aead_wrapper.cc"],
+    hdrs = ["cord_aead_wrapper.h"],
+    include_prefix = "tink/aead",
+    deps = [
+        "//aead:cord_aead",
+        "//:crypto_format",
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//:registry",
+        "//proto:tink_cc_proto",
+        "//subtle:subtle_util_boringssl",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "cord_aead",
+    hdrs = ["cord_aead.h"],
+    include_prefix = "tink/aead",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:cord",
+    ],
+)
+
+cc_library(
     name = "aead_config",
     srcs = ["aead_config.cc"],
     hdrs = ["aead_config.h"],

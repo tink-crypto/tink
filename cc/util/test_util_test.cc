@@ -42,6 +42,35 @@ TEST(AsKeyDataTest, Basic) {
   EXPECT_THAT(deserialized_key.key_value(), Eq(key.key_value()));
 }
 
+TEST(DummyTests, Aead) {
+  EXPECT_THAT(DummyAead("dummy").Encrypt("foo", "bar").ValueOrDie(),
+              Eq("5:3:dummybarfoo"));
+}
+
+TEST(DummyTests, AeadCord) {
+  absl::Cord plaintext;
+  plaintext.Append("foo");
+  absl::Cord aad;
+  aad.Append("bar");
+
+  EXPECT_THAT(DummyCordAead("dummy").Encrypt(plaintext, aad).ValueOrDie(),
+              Eq("5:3:dummybarfoo"));
+}
+
+TEST(DummyTests, AeadCordMultipleChunks) {
+  absl::Cord plaintext;
+  plaintext.Append("f");
+  plaintext.Append("o");
+  plaintext.Append("o");
+  absl::Cord aad;
+  aad.Append("b");
+  aad.Append("a");
+  aad.Append("r");
+
+  EXPECT_THAT(DummyCordAead("dummy").Encrypt(plaintext, aad).ValueOrDie(),
+              Eq("5:3:dummybarfoo"));
+}
+
 }  // namespace
 
 }  // namespace test

@@ -182,6 +182,7 @@ tink_cc_library(
     absl::core_headers
     absl::memory
     absl::strings
+    absl::cord
     absl::synchronization
 )
 
@@ -325,6 +326,7 @@ tink_cc_test(
     tink::util::test_util
     tink::subtle::random
     absl::strings
+    absl::cord
     gmock
 )
 

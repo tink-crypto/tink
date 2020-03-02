@@ -207,6 +207,7 @@ cc_library(
         "//:public_key_verify",
         "//:random_access_stream",
         "//:streaming_aead",
+        "//aead:cord_aead",
         "//aead:aes_ctr_hmac_aead_key_manager",
         "//aead:aes_gcm_key_manager",
         "//aead:xchacha20_poly1305_key_manager",
@@ -224,6 +225,7 @@ cc_library(
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:cord",
         "@com_google_absl//absl/synchronization",
     ],
 )
