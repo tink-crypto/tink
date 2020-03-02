@@ -18,13 +18,12 @@
 
 #include <string>
 
-#include "gtest/gtest.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
+#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -38,8 +37,7 @@ class HmacBoringSslTest : public ::testing::Test {
   bool HmacVerifyHex(HashType hash, uint32_t tag_size,
                      const std::string &key_hex, const std::string &tag_hex,
                      const std::string &data_hex) {
-    util::SecretData key =
-        util::SecretDataFromStringView(test::HexDecodeOrDie(key_hex));
+    std::string key = test::HexDecodeOrDie(key_hex);
     std::string tag = test::HexDecodeOrDie(tag_hex);
     std::string data = test::HexDecodeOrDie(data_hex);
     auto hmac_result = HmacBoringSsl::New(hash, tag_size, key);
@@ -51,8 +49,7 @@ class HmacBoringSslTest : public ::testing::Test {
 };
 
 TEST_F(HmacBoringSslTest, testBasic) {
-  util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   size_t tag_size = 16;
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, tag_size, key);
   EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
@@ -82,8 +79,7 @@ TEST_F(HmacBoringSslTest, testBasic) {
 }
 
 TEST_F(HmacBoringSslTest, testModification) {
-  util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, 16, key);
   EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
   auto hmac = std::move(hmac_result.ValueOrDie());
@@ -102,8 +98,7 @@ TEST_F(HmacBoringSslTest, testModification) {
 }
 
 TEST_F(HmacBoringSslTest, testTruncation) {
-  util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, 20, key);
   EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
   auto hmac = std::move(hmac_result.ValueOrDie());
@@ -123,7 +118,7 @@ TEST_F(HmacBoringSslTest, testInvalidKeySizes) {
   size_t tag_size = 16;
 
   for (int keysize = 0; keysize < 65; keysize++) {
-    util::SecretData key(keysize, 'x');
+    std::string key(keysize, 'x');
     auto hmac_result = HmacBoringSsl::New(HashType::SHA1, tag_size, key);
     if (keysize >= 16) {
       EXPECT_TRUE(hmac_result.ok());

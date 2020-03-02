@@ -88,15 +88,15 @@ constexpr TestVector test_vectors[] = {
 };
 
 util::StatusOr<std::unique_ptr<Aead>> createAead2(
-    util::SecretData encryption_key, int iv_size, util::SecretData mac_key,
-    uint8_t tag_size, HashType hash_type) {
+    util::SecretData encryption_key, int iv_size, const std::string& mac_key,
+    int tag_size, HashType hash_type) {
   auto ind_cipher_res =
       AesCtrBoringSsl::New(std::move(encryption_key), iv_size);
   if (!ind_cipher_res.ok()) {
     return ind_cipher_res.status();
   }
 
-  auto mac_res = HmacBoringSsl::New(hash_type, tag_size, std::move(mac_key));
+  auto mac_res = HmacBoringSsl::New(hash_type, tag_size, mac_key);
   if (!mac_res.ok()) {
     return mac_res.status();
   }
@@ -115,21 +115,19 @@ util::StatusOr<std::unique_ptr<Aead>> createAead(int encryption_key_size,
                                                  HashType hash_type) {
   util::SecretData encryption_key =
       Random::GetRandomKeyBytes(encryption_key_size);
-  util::SecretData mac_key = Random::GetRandomKeyBytes(mac_key_size);
-  return createAead2(std::move(encryption_key), iv_size, std::move(mac_key),
-                     tag_size, hash_type);
+  std::string mac_key(Random::GetRandomBytes(mac_key_size));
+  return createAead2(encryption_key, iv_size, mac_key, tag_size, hash_type);
 }
 
 TEST(AesGcmBoringSslTest, testRfcVectors) {
   for (const TestVector& test : test_vectors) {
-    util::SecretData mac_key =
-        util::SecretDataFromStringView(test::HexDecodeOrDie(test.mac_key));
+    std::string mac_key = test::HexDecodeOrDie(test.mac_key);
     util::SecretData enc_key =
         util::SecretDataFromStringView(test::HexDecodeOrDie(test.enc_key));
     std::string ct = test::HexDecodeOrDie(test.ciphertext);
     std::string aad = test::HexDecodeOrDie(test.aad);
-    auto res = createAead2(std::move(enc_key), test.iv_size, std::move(mac_key),
-                           test.tag_size, test.hash_type);
+    auto res = createAead2(enc_key, test.iv_size, mac_key, test.tag_size,
+                           test.hash_type);
     EXPECT_TRUE(res.ok()) << res.status();
     auto cipher = std::move(res.ValueOrDie());
     auto pt = cipher->Decrypt(ct, aad);

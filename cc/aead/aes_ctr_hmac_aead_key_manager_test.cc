@@ -198,8 +198,7 @@ TEST(AesCtrHmacAeadKeyManagerTest, CreateAead) {
 
   auto direct_hmac_or = subtle::HmacBoringSsl::New(
       util::Enums::ProtoToSubtle(key.hmac_key().params().hash()),
-      key.hmac_key().params().tag_size(),
-      util::SecretDataFromStringView(key.hmac_key().key_value()));
+      key.hmac_key().params().tag_size(), key.hmac_key().key_value());
   ASSERT_THAT(direct_hmac_or.status(), IsOk());
 
   auto direct_aead_or = subtle::EncryptThenAuthenticate::New(
