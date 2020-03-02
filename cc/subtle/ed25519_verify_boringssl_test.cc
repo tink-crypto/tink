@@ -26,6 +26,7 @@
 #include "tink/subtle/ed25519_sign_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/subtle/wycheproof_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -46,8 +47,8 @@ TEST_F(Ed25519VerifyBoringSslTest, testBasicSign) {
 
   std::string public_key(reinterpret_cast<const char*>(out_public_key),
                          ED25519_PUBLIC_KEY_LEN);
-  std::string private_key(reinterpret_cast<const char*>(out_private_key),
-                          ED25519_PRIVATE_KEY_LEN);
+  util::SecretData private_key(out_private_key,
+                               out_private_key + ED25519_PRIVATE_KEY_LEN);
 
   // Create a new signer.
   auto signer_result = Ed25519SignBoringSsl::New(private_key);
@@ -98,8 +99,8 @@ TEST_F(Ed25519VerifyBoringSslTest, testMessageEmptyVersusNullStringView) {
 
   std::string public_key(reinterpret_cast<const char*>(out_public_key),
                          ED25519_PUBLIC_KEY_LEN);
-  std::string private_key(reinterpret_cast<const char*>(out_private_key),
-                          ED25519_PRIVATE_KEY_LEN);
+  util::SecretData private_key(out_private_key,
+                               out_private_key + ED25519_PRIVATE_KEY_LEN);
 
   // Create a new signer.
   auto signer_result = Ed25519SignBoringSsl::New(private_key);

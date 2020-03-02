@@ -19,9 +19,8 @@
 
 #include <memory>
 
-#include "absl/strings/string_view.h"
-#include "openssl/curve25519.h"
 #include "tink/public_key_sign.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -31,18 +30,16 @@ namespace subtle {
 class Ed25519SignBoringSsl : public PublicKeySign {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>> New(
-      absl::string_view private_key);
+      util::SecretData private_key);
 
   // Computes the signature for 'data'.
   crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const override;
 
-  ~Ed25519SignBoringSsl() override = default;
-
  private:
-  const std::string private_key_;
+  explicit Ed25519SignBoringSsl(util::SecretData private_key);
 
-  explicit Ed25519SignBoringSsl(absl::string_view private_key);
+  const util::SecretData private_key_;
 };
 
 }  // namespace subtle

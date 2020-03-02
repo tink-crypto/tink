@@ -24,6 +24,7 @@
 #include "tink/signature/ed25519_sign_key_manager.h"
 #include "tink/subtle/ed25519_sign_boringssl.h"
 #include "tink/util/enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -95,8 +96,9 @@ TEST(Ed25519SignKeyManagerTest, Create) {
   Ed25519PublicKey public_key =
       Ed25519SignKeyManager().GetPublicKey(private_key).ValueOrDie();
 
-  auto direct_signer_or = subtle::Ed25519SignBoringSsl::New(
-      absl::StrCat(private_key.key_value(), public_key.key_value()));
+  auto direct_signer_or =
+      subtle::Ed25519SignBoringSsl::New(util::SecretDataFromStringView(
+          absl::StrCat(private_key.key_value(), public_key.key_value())));
   ASSERT_THAT(direct_signer_or.status(), IsOk());
 
   auto verifier_or =
@@ -117,8 +119,9 @@ TEST(Ed25519SignKeyManagerTest, CreateDifferentPrivateKey) {
                                     .GetPublicKey(CreateValidPrivateKey())
                                     .ValueOrDie();
 
-  auto direct_signer_or = subtle::Ed25519SignBoringSsl::New(absl::StrCat(
-      private_key.key_value(), private_key.public_key().key_value()));
+  auto direct_signer_or = subtle::Ed25519SignBoringSsl::New(
+      util::SecretDataFromStringView(absl::StrCat(
+          private_key.key_value(), private_key.public_key().key_value())));
   ASSERT_THAT(direct_signer_or.status(), IsOk());
 
   auto verifier_or =
