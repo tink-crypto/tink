@@ -22,10 +22,6 @@
 #include "tink/input_stream.h"
 #include "tink/subtle/random.h"
 #include "tink/util/istream_input_stream.h"
-#include "tink/util/test_matchers.h"
-
-using crypto::tink::test::IsOk;
-using crypto::tink::test::StatusIs;
 
 namespace crypto {
 namespace tink {
@@ -44,7 +40,7 @@ TEST(InputStreamAdapterTest, BasicRead) {
   std::string data = subtle::Random::GetRandomBytes(10);
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(10);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data);
 }
 
@@ -52,23 +48,23 @@ TEST(InputStreamAdapterTest, ReadEOFError) {
   std::string data = subtle::Random::GetRandomBytes(10);
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(10);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data);
   read_result = adapter->Read(10);
-  EXPECT_THAT(read_result.status(), StatusIs(util::error::OUT_OF_RANGE));
+  EXPECT_EQ(read_result.status().error_code(), util::error::OUT_OF_RANGE);
 }
 
 TEST(InputStreamAdapterTest, MultipleRead) {
   std::string data = subtle::Random::GetRandomBytes(15);
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(5);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data.substr(0, 5));
   read_result = adapter->Read(5);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data.substr(5, 5));
   read_result = adapter->Read(5);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data.substr(10, 5));
 }
 
@@ -76,7 +72,7 @@ TEST(InputStreamAdapterTest, BasicRead1) {
   std::string data = subtle::Random::GetRandomBytes(10);
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read1(10);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data);
 }
 
@@ -86,7 +82,7 @@ TEST(InputStreamAdapterTest, MultipleNext) {
   std::string data = subtle::Random::GetRandomBytes(40);
   auto adapter = GetInputStreamAdapter(10, data);
   auto read_result = adapter->Read(35);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data.substr(0, 35));
 }
 
@@ -94,7 +90,7 @@ TEST(InputStreamAdapterTest, ReadUntilEOF) {
   std::string data = subtle::Random::GetRandomBytes(35);
   auto adapter = GetInputStreamAdapter(10, data);
   auto read_result = adapter->Read(-1);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data);
 }
 
@@ -102,7 +98,7 @@ TEST(InputStreamAdapterTest, ReadLessThanAvailable) {
   std::string data = subtle::Random::GetRandomBytes(20);
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(10);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data.substr(0, 10));
 }
 
@@ -110,7 +106,7 @@ TEST(InputStreamAdapterTest, ReadMoreThanAvailable) {
   std::string data = subtle::Random::GetRandomBytes(20);
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(30);
-  ASSERT_THAT(read_result.status(), IsOk());
+  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data);
 }
 

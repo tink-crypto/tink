@@ -17,12 +17,12 @@
 #include <algorithm>
 #include <sstream>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/output_stream.h"
 #include "tink/subtle/random.h"
 #include "tink/util/ostream_output_stream.h"
-#include "tink/util/test_matchers.h"
 
 namespace crypto {
 namespace tink {
@@ -42,9 +42,9 @@ TEST(OutputStreamAdapterTest, Basic) {
   std::stringbuf* buffer_ref;
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   auto write_result = adapter->Write("something");
-  ASSERT_THAT(write_result.status(), test::IsOk());
+  ASSERT_TRUE(write_result.status().ok());
   EXPECT_EQ(write_result.ValueOrDie(), 9);
-  EXPECT_THAT(adapter->Close(), test::IsOk());
+  EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), "something");
 }
 
@@ -52,25 +52,25 @@ TEST(OutputStreamAdapterTest, MultipleWrite) {
   std::stringbuf* buffer_ref;
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   auto write_result = adapter->Write("something");
-  ASSERT_THAT(write_result.status(), test::IsOk());
+  ASSERT_TRUE(write_result.status().ok());
   EXPECT_EQ(write_result.ValueOrDie(), 9);
   write_result = adapter->Write("123");
-  ASSERT_THAT(write_result.status(), test::IsOk());
+  ASSERT_TRUE(write_result.status().ok());
   EXPECT_EQ(write_result.ValueOrDie(), 3);
   write_result = adapter->Write("456");
-  ASSERT_THAT(write_result.status(), test::IsOk());
+  ASSERT_TRUE(write_result.status().ok());
   EXPECT_EQ(write_result.ValueOrDie(), 3);
-  EXPECT_THAT(adapter->Close(), test::IsOk());
+  EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), "something123456");
 }
 
 TEST(OutputStreamAdapterTest, WriteAfterClose) {
   std::stringbuf* buffer_ref;
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
-  ASSERT_THAT(adapter->Close(), test::IsOk());
-  EXPECT_THAT(adapter->Write("something").status(),
-              test::StatusIs(util::error::FAILED_PRECONDITION,
-                             testing::HasSubstr("Stream closed")));
+  ASSERT_TRUE(adapter->Close().ok());
+  auto status = adapter->Write("something").status();
+  EXPECT_EQ(status.error_code(), util::error::FAILED_PRECONDITION);
+  EXPECT_THAT(status.error_message(), testing::HasSubstr("Stream closed"));
 }
 
 // In this test size of the OstreamOutputStream buffer is smaller than the
@@ -80,9 +80,9 @@ TEST(OutputStreamAdapterTest, MultipleNext) {
   auto adapter = GetOutputStreamAdapter(10, &buffer_ref);
   std::string data = subtle::Random::GetRandomBytes(35);
   auto write_result = adapter->Write(data);
-  ASSERT_THAT(write_result.status(), test::IsOk());
+  ASSERT_TRUE(write_result.status().ok());
   EXPECT_EQ(write_result.ValueOrDie(), 35);
-  EXPECT_THAT(adapter->Close(), test::IsOk());
+  EXPECT_TRUE(adapter->Close().ok());
   EXPECT_EQ(buffer_ref->str(), data);
 }
 

@@ -84,7 +84,6 @@ cc_test(
         "//cc:output_stream",
         "//cc/subtle:random",
         "//cc/util:ostream_output_stream",
-        "//cc/util:test_matchers",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
@@ -127,7 +126,6 @@ cc_test(
     deps = [
         ":cc_streaming_aead_wrappers",
         ":test_util",
-        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
@@ -188,7 +186,6 @@ cc_test(
         "//cc:input_stream",
         "//cc/subtle:random",
         "//cc/util:istream_input_stream",
-        "//cc/util:test_matchers",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
