@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "absl/memory/memory.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
@@ -40,9 +41,7 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> Ed25519SignBoringSsl::New(
                         "The only valid size is %d.",
                         private_key.size(), ED25519_PRIVATE_KEY_LEN));
   }
-
-  return std::unique_ptr<PublicKeySign>(
-      new Ed25519SignBoringSsl(std::move(private_key)));
+  return {absl::WrapUnique(new Ed25519SignBoringSsl(std::move(private_key)))};
 }
 
 Ed25519SignBoringSsl::Ed25519SignBoringSsl(util::SecretData private_key)

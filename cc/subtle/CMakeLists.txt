@@ -108,6 +108,7 @@ tink_cc_library(
     tink::util::secret_data
     tink::util::statusor
     crypto
+    absl::memory
     absl::strings
     absl::str_format
 )
@@ -156,6 +157,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::memory
     absl::strings
 )
 
@@ -419,6 +421,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::memory
     absl::strings
 )
 

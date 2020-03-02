@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "absl/memory/memory.h"
 #include "openssl/cmac.h"
 #include "openssl/err.h"
 #include "tink/mac.h"
@@ -40,7 +41,7 @@ util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(util::SecretData key,
   if (tag_size > kMaxTagSize) {
     return util::Status(util::error::INTERNAL, "invalid tag size");
   }
-  return std::unique_ptr<Mac>(new AesCmacBoringSsl(std::move(key), tag_size));
+  return {absl::WrapUnique(new AesCmacBoringSsl(std::move(key), tag_size))};
 }
 
 AesCmacBoringSsl::AesCmacBoringSsl(util::SecretData key_value,

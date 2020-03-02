@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "absl/memory/memory.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/subtle/ind_cpa_cipher.h"
@@ -43,8 +44,8 @@ util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
   if (iv_size < kMinIvSizeInBytes || iv_size > kBlockSize) {
     return util::Status(util::error::INTERNAL, "invalid iv size");
   }
-  return std::unique_ptr<IndCpaCipher>(
-      new AesCtrBoringSsl(std::move(key), iv_size, cipher));
+  return {
+      absl::WrapUnique(new AesCtrBoringSsl(std::move(key), iv_size, cipher))};
 }
 
 util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
