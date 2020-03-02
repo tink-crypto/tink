@@ -57,6 +57,15 @@ uint8_t Random::GetRandomUInt8() {
   return result;
 }
 
+util::SecretData Random::GetRandomKeyBytes(size_t length) {
+  util::SecretData buf(length, 0);
+  // BoringSSL documentation says that it always returns 1; while
+  // OpenSSL documentation says that it returns 1 on success, 0 otherwise. We
+  // use BoringSSL, so we don't check the return value.
+  RAND_bytes(buf.data(), buf.size());
+  return buf;
+}
+
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

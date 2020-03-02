@@ -16,8 +16,13 @@
 
 #include "tink/subtle/random.h"
 
+#include <set>
+#include <string>
+#include <vector>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/util/secret_data.h"
 
 namespace crypto {
 namespace tink {
@@ -26,17 +31,22 @@ namespace {
 
 using ::testing::Gt;
 using ::testing::Lt;
-
+using ::testing::SizeIs;
 
 TEST(RandomTest, testBasic) {
   int numTests = 32;
   std::set<std::string> rand_strings;
   for (int i = 0; i < numTests; i++) {
     std::string s = Random::GetRandomBytes(16);
-    EXPECT_EQ(16, s.length());
+    EXPECT_THAT(s, SizeIs(16));
     rand_strings.insert(s);
   }
-  EXPECT_EQ(numTests, rand_strings.size());
+  EXPECT_THAT(rand_strings, SizeIs(numTests));
+}
+
+TEST(RandomTest, KeyBytesTest) {
+  util::SecretData key = Random::GetRandomKeyBytes(16);
+  EXPECT_THAT(key, SizeIs(16));
 }
 
 TEST(RandomTest, UInt8Test) {

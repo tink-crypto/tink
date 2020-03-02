@@ -29,6 +29,7 @@ tink_cc_library(
     tink::core::mac
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -426,6 +427,7 @@ tink_cc_library(
     random.cc
     random.h
   DEPS
+    tink::util::secret_data
     crypto
 )
 
@@ -1074,6 +1076,7 @@ tink_cc_test(
   SRCS random_test.cc
   DEPS
     tink::subtle::random
+    tink::util::secret_data
     gmock
 )
 

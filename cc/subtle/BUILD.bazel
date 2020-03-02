@@ -30,6 +30,7 @@ cc_library(
         "//:mac",
         "//:public_key_sign",
         "//:public_key_verify",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
@@ -448,6 +449,7 @@ cc_library(
     hdrs = ["random.h"],
     include_prefix = "tink/subtle",
     deps = [
+        "//util:secret_data",
         "@boringssl//:crypto",
     ],
 )
@@ -1236,6 +1238,7 @@ cc_test(
     linkopts = ["-pthread"],
     deps = [
         ":random",
+        "//util:secret_data",
         "@com_google_googletest//:gtest_main",
     ],
 )
