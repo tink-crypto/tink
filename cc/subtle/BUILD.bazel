@@ -1242,10 +1242,10 @@ cc_test(
     size = "small",
     srcs = ["random_test.cc"],
     copts = ["-Iexternal/gtest/include"],
-    linkopts = ["-pthread"],
     deps = [
         ":random",
         "//util:secret_data",
+        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -22,6 +22,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_set.h"
 #include "tink/util/secret_data.h"
 
 namespace crypto {
@@ -35,7 +36,7 @@ using ::testing::SizeIs;
 
 TEST(RandomTest, testBasic) {
   int numTests = 32;
-  std::set<std::string> rand_strings;
+  absl::flat_hash_set<std::string> rand_strings;
   for (int i = 0; i < numTests; i++) {
     std::string s = Random::GetRandomBytes(16);
     EXPECT_THAT(s, SizeIs(16));
@@ -47,6 +48,33 @@ TEST(RandomTest, testBasic) {
 TEST(RandomTest, KeyBytesTest) {
   util::SecretData key = Random::GetRandomKeyBytes(16);
   EXPECT_THAT(key, SizeIs(16));
+}
+
+TEST(RandomTest, KeyBytesUniqueTest) {
+  int numTests = 32;
+  absl::flat_hash_set<util::SecretData> rand_strings;
+  for (int i = 0; i < numTests; i++) {
+    rand_strings.insert(Random::GetRandomKeyBytes(16));
+  }
+  EXPECT_THAT(rand_strings, SizeIs(numTests));
+}
+
+TEST(RandomTest, KeyBytesStatisticsTest) {
+  constexpr int kByteLength = 32;
+  std::vector<int> bit_counts(8 * kByteLength);
+  const int kTests = 10000;
+  for (int i = 0; i < kTests; ++i) {
+    util::SecretData random = Random::GetRandomKeyBytes(kByteLength);
+    for (int bit = 0; bit < 8 * kByteLength; ++bit) {
+      if (random[bit / 8] & (1 << (bit % 8))) {
+        ++bit_counts[bit];
+      }
+    }
+  }
+  for (int i = 0; i < 8 * kByteLength; ++i) {
+    EXPECT_THAT(bit_counts[i], Gt(kTests * 0.4)) << i;
+    EXPECT_THAT(bit_counts[i], Lt(kTests * 0.6)) << i;
+  }
 }
 
 TEST(RandomTest, UInt8Test) {

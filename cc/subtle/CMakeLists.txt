@@ -1084,6 +1084,7 @@ tink_cc_test(
   DEPS
     tink::subtle::random
     tink::util::secret_data
+    absl::flat_hash_set
     gmock
 )
 
