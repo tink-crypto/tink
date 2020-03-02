@@ -25,6 +25,7 @@
 #include "tink/subtle/encrypt_then_authenticate.h"
 #include "tink/subtle/hmac_boringssl.h"
 #include "tink/util/enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -191,7 +192,8 @@ TEST(AesCtrHmacAeadKeyManagerTest, CreateAead) {
   ASSERT_THAT(aead_or.status(), IsOk());
 
   auto direct_aes_ctr_or = subtle::AesCtrBoringSsl::New(
-      key.aes_ctr_key().key_value(), key.aes_ctr_key().params().iv_size());
+      util::SecretDataFromStringView(key.aes_ctr_key().key_value()),
+      key.aes_ctr_key().params().iv_size());
   ASSERT_THAT(direct_aes_ctr_or.status(), IsOk());
 
   auto direct_hmac_or = subtle::HmacBoringSsl::New(

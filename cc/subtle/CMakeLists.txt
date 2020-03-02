@@ -415,6 +415,7 @@ tink_cc_library(
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -896,9 +897,11 @@ tink_cc_test(
     tink::subtle::random
     tink::core::aead
     tink::core::mac
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
+    absl::strings
 )
 
 tink_cc_test(
@@ -907,6 +910,7 @@ tink_cc_test(
   DEPS
     tink::subtle::aes_ctr_boringssl
     tink::subtle::random
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util

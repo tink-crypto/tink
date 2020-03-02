@@ -31,6 +31,7 @@
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -80,7 +81,7 @@ StatusOr<AesCtrHmacAeadKey> AesCtrHmacAeadKeyManager::CreateKey(
 StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::AeadFactory::Create(
     const AesCtrHmacAeadKey& key) const {
   auto aes_ctr_result = subtle::AesCtrBoringSsl::New(
-      key.aes_ctr_key().key_value(),
+      util::SecretDataFromStringView(key.aes_ctr_key().key_value()),
       key.aes_ctr_key().params().iv_size());
   if (!aes_ctr_result.ok()) return aes_ctr_result.status();
 

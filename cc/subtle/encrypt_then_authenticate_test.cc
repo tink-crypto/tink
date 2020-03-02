@@ -19,14 +19,16 @@
 #include <string>
 #include <vector>
 
+#include "gtest/gtest.h"
+#include "absl/strings/string_view.h"
 #include "tink/subtle/aes_ctr_boringssl.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hmac_boringssl.h"
 #include "tink/subtle/random.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -39,15 +41,16 @@ namespace {
 // plaintexts. However, the tests are still valueable to ensure that we correcly
 // compute HMAC over ciphertext and aad.
 struct TestVector {
-  std::string mac_key;
-  std::string enc_key;
-  std::string ciphertext;
-  std::string aad;
+  absl::string_view mac_key;
+  absl::string_view enc_key;
+  absl::string_view ciphertext;
+  absl::string_view aad;
   HashType hash_type;
   int iv_size;
   int tag_size;
 };
-static const std::vector<TestVector> test_vectors({
+
+constexpr TestVector test_vectors[] = {
     {"000102030405060708090a0b0c0d0e0f", "101112131415161718191a1b1c1d1e1f",
      "1af38c2dc2b96ffdd86694092341bc04"
      "c80edfa32ddf39d5ef00c0b468834279"
@@ -82,12 +85,13 @@ static const std::vector<TestVector> test_vectors({
      "69706c65206f66204175677573746520"
      "4b6572636b686f666673",
      HashType::SHA512, 16, 32},
-});
+};
 
-static util::StatusOr<std::unique_ptr<Aead>> createAead2(
-    const std::string& encryption_key, uint8_t iv_size,
-    const std::string& mac_key, uint8_t tag_size, HashType hash_type) {
-  auto ind_cipher_res = AesCtrBoringSsl::New(encryption_key, iv_size);
+util::StatusOr<std::unique_ptr<Aead>> createAead2(
+    util::SecretData encryption_key, int iv_size, const std::string& mac_key,
+    int tag_size, HashType hash_type) {
+  auto ind_cipher_res =
+      AesCtrBoringSsl::New(std::move(encryption_key), iv_size);
   if (!ind_cipher_res.ok()) {
     return ind_cipher_res.status();
   }
@@ -105,10 +109,12 @@ static util::StatusOr<std::unique_ptr<Aead>> createAead2(
   return std::move(cipher_res.ValueOrDie());
 }
 
-static util::StatusOr<std::unique_ptr<Aead>> createAead(
-    uint8_t encryption_key_size, uint8_t iv_size, uint8_t mac_key_size,
-    uint8_t tag_size, HashType hash_type) {
-  std::string encryption_key(Random::GetRandomBytes(encryption_key_size));
+util::StatusOr<std::unique_ptr<Aead>> createAead(int encryption_key_size,
+                                                 int iv_size, int mac_key_size,
+                                                 int tag_size,
+                                                 HashType hash_type) {
+  util::SecretData encryption_key =
+      Random::GetRandomKeyBytes(encryption_key_size);
   std::string mac_key(Random::GetRandomBytes(mac_key_size));
   return createAead2(encryption_key, iv_size, mac_key, tag_size, hash_type);
 }
@@ -116,7 +122,8 @@ static util::StatusOr<std::unique_ptr<Aead>> createAead(
 TEST(AesGcmBoringSslTest, testRfcVectors) {
   for (const TestVector& test : test_vectors) {
     std::string mac_key = test::HexDecodeOrDie(test.mac_key);
-    std::string enc_key = test::HexDecodeOrDie(test.enc_key);
+    util::SecretData enc_key =
+        util::SecretDataFromStringView(test::HexDecodeOrDie(test.enc_key));
     std::string ct = test::HexDecodeOrDie(test.ciphertext);
     std::string aad = test::HexDecodeOrDie(test.aad);
     auto res = createAead2(enc_key, test.iv_size, mac_key, test.tag_size,

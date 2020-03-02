@@ -19,11 +19,12 @@
 #include <string>
 #include <vector>
 
+#include "gtest/gtest.h"
 #include "tink/subtle/random.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -31,7 +32,8 @@ namespace subtle {
 namespace {
 
 TEST(AesCtrBoringSslTest, testEncryptDecrypt) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   int iv_size = 12;
   auto res = AesCtrBoringSsl::New(key, iv_size);
   EXPECT_TRUE(res.ok()) << res.status();
@@ -46,7 +48,8 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt) {
 }
 
 TEST(AesCtrBoringSslTest, testEncryptDecrypt_randomMessage) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   int iv_size = 12;
   auto res = AesCtrBoringSsl::New(key, iv_size);
   EXPECT_TRUE(res.ok()) << res.status();
@@ -64,7 +67,7 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt_randomMessage) {
 
 TEST(AesCtrBoringSslTest, testEncryptDecrypt_randomKey_randomMessage) {
   for (int i = 0; i < 256; i++) {
-    std::string key(Random::GetRandomBytes(16));
+    util::SecretData key = Random::GetRandomKeyBytes(16);
     int iv_size = 12;
     auto res = AesCtrBoringSsl::New(key, iv_size);
     EXPECT_TRUE(res.ok()) << res.status();
@@ -80,7 +83,8 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt_randomKey_randomMessage) {
 }
 
 TEST(AesCtrBoringSslTest, testEncryptDecrypt_invalidIvSize) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   int iv_size = 11;
   auto res1 = AesCtrBoringSsl::New(key, iv_size);
   EXPECT_FALSE(res1.ok()) << res1.status();
@@ -92,7 +96,8 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt_invalidIvSize) {
 
 TEST(AesCtrBoringSslTest, testNistTestVector) {
   // NIST SP 800-38A pp 55.
-  std::string key(test::HexDecodeOrDie("2b7e151628aed2a6abf7158809cf4f3c"));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("2b7e151628aed2a6abf7158809cf4f3c"));
   std::string ciphertext(test::HexDecodeOrDie(
       "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff874d6191b620e3261bef6864990db6ce"));
   std::string message(test::HexDecodeOrDie("6bc1bee22e409f96e93d7e117393172a"));
@@ -106,7 +111,7 @@ TEST(AesCtrBoringSslTest, testNistTestVector) {
 }
 
 TEST(AesCtrBoringSslTest, testMultipleEncrypt) {
-  std::string key(Random::GetRandomBytes(16));
+  util::SecretData key = Random::GetRandomKeyBytes(16);
   int iv_size = 12;
   auto res = AesCtrBoringSsl::New(key, iv_size);
   EXPECT_TRUE(res.ok()) << res.status();

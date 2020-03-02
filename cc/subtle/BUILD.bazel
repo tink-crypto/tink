@@ -436,6 +436,7 @@ cc_library(
         ":subtle_util",
         ":subtle_util_boringssl",
         "//util:errors",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
@@ -997,9 +998,11 @@ cc_test(
         ":random",
         "//:aead",
         "//:mac",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_util",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1012,6 +1015,7 @@ cc_test(
     deps = [
         ":aes_ctr_boringssl",
         ":random",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_util",
