@@ -33,21 +33,3 @@ sh_test(
         ":hello_world_files",
     ],
 )
-
-sh_test(
-    name = "non_bazel_build_test",
-    size = "small",
-    srcs = [
-        "non_bazel_build_test.sh",
-    ],
-    data = [
-        ":hello_world_files",
-        "@tink_cc//:libtink.so",
-        "@tink_cc//:tink_deps_headers",
-        "@tink_cc//:tink_headers",
-    ],
-    tags = [
-        "local",  # This tests needs g++.
-        "no_rbe",
-    ],
-)

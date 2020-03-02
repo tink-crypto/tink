@@ -52,10 +52,8 @@ fi
 
 # TODO(b/140615798)
 DISABLE_GRPC_ON_MAC_OS=""
-DISABLE_NONBAZEL_ON_MAC_OS=""
 if [[ "${PLATFORM}" == 'darwin' ]]; then
   DISABLE_GRPC_ON_MAC_OS="-//integration/gcpkms/..."
-  DISABLE_NON_BAZEL_ON_MAC_OS="-//helloworld/cc:non_bazel_build_test"
 fi
 
 echo "using bazel binary: $(which bazel)"
@@ -98,7 +96,6 @@ run_linux_tests() {
   time bazel test \
       --strategy=TestRunner=standalone --test_output=all \
       -- ... \
-      ${DISABLE_NON_BAZEL_ON_MAC_OS} \
       || ( ls -l ; df -h / ; exit 1 )
 
   # ------------------- tools and cross-language tests

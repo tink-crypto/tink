@@ -53,41 +53,6 @@ build your project:
     $ cmake -DCMAKE_GENERATOR=Ninja ..
     $ ninja
 
-## Stand-alone libtink.so
-
-Alternatively, you may build `libtink.so` on Linux and Darwin systems. This
-feature is disabled by default, and is currently not supported on Windows. You
-can enable it at configure time:
-
-    $ ls
-    tink/
-    $ mkdir tink-build && cd tink-build
-    $ cmake ../tink -DTINK_BUILD_SHARED_LIB=ON
-    $ make package
-
-We recommend using Ninja in this case too:
-
-    $ cmake ../tink -DTINK_BUILD_SHARED_LIB=ON -DCMAKE_GENERATOR=Ninja
-    $ ninja package
-
-This produces a `.tar.gz` archive containing `libtink.so`, all Tink headers and
-some extra support headers. This is a stand-alone build that you can integrate
-in your own process.
-
-WARNING: Setting `TINK_BUILD_SHARED_LIB` to `ON` is not recommended in
-combination with the in-tree dependency approach, as this option causes several
-`install` targets to be created, which will pollute your own install.
-
-## libtink.so CMake config
-
-Building `libtink.so` also writes a CMake config to the build directory,
-`TinkConfig.cmake`. You can use it with `find_package` in `CONFIG` mode to
-import the `tink` target in your project without embedding all of Tink internal
-targets in your CMake build. In this case you have to provide your own system
-for building and keeping `libtink.so` up to date.
-
-NOTE: We currently only export `libtink.so` as `tink`. We are working on a way
-to provide `tink::static` too.
 
 # Developing Tink with CMake
 
@@ -98,7 +63,7 @@ enable tests and build the shared library as well:
     $ ls
     tink/
     $ mkdir tink-build && cd tink-build
-    $ cmake ../tink -DTINK_BUILD_SHARED_LIB=ON -DTINK_BUILD_TESTS=ON -DCMAKE_GENERATOR=Ninja
+    $ cmake ../tink -DTINK_BUILD_TESTS=ON -DCMAKE_GENERATOR=Ninja
     $ ninja
     $ CTEST_OUTPUT_ON_FAILURE=1 ninja test
     $ ninja package
