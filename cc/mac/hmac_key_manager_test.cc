@@ -21,6 +21,7 @@
 #include "tink/core/key_manager_impl.h"
 #include "tink/mac.h"
 #include "tink/util/istream_input_stream.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -275,8 +276,8 @@ TEST(HmacKeyManagerTest, GetPrimitive) {
   ASSERT_THAT(mac_value_or.status(), IsOk());
 
   auto direct_mac_or = subtle::HmacBoringSsl::New(
-      util::Enums::ProtoToSubtle(key.params().hash()),
-      key.params().tag_size(), key.key_value());
+      util::Enums::ProtoToSubtle(key.params().hash()), key.params().tag_size(),
+      util::SecretDataFromStringView(key.key_value()));
   ASSERT_THAT(direct_mac_or.status(), IsOk());
   EXPECT_THAT(direct_mac_or.ValueOrDie()->VerifyMac(mac_value_or.ValueOrDie(),
                                                     "some plaintext"), IsOk());
