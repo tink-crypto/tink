@@ -447,6 +447,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::core::aead
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -1125,6 +1126,7 @@ tink_cc_test(
   DEPS
     tink::subtle::xchacha20_poly1305_boringssl
     tink::core::aead
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
