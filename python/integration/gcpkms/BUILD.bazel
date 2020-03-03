@@ -1,0 +1,83 @@
+load("@rules_python//python:defs.bzl", "py_test")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "gcp_kms_client",
+    srcs = ["gcp_kms_client.py"],
+    deps = [
+        ":gcp_kms_aead",
+        "//aead:aead_primitive",
+        "//core:tink_error",
+        requirement("grpc-google-iam-v1"),
+        requirement("idna"),
+        requirement("certifi"),
+        requirement("chardet"),
+        requirement("urllib3"),
+        requirement("requests"),
+        requirement("pytz"),
+        requirement("grpcio"),
+        requirement("cachetools"),
+        requirement("rsa"),
+        requirement("pyasn1"),
+        requirement("pyasn1-modules"),
+        requirement("protobuf"),
+        requirement("googleapis-common-protos"),
+        requirement("google-api-core"),
+        requirement("google-cloud-kms"),
+        requirement("google-auth"),
+    ]
+)
+
+py_test(
+    name = "gcp_kms_client_test",
+    srcs = ["gcp_kms_client_test.py"],
+    legacy_create_init = 0,
+    data = [
+        "@tink_base//testdata:credentials"
+    ],
+    deps = [
+        ":gcp_kms_client",
+        requirement("absl-py"),
+    ]
+)
+
+py_library(
+    name = "gcp_kms_aead",
+    srcs = ["gcp_kms_aead.py"],
+    deps = [
+        "//aead:aead_primitive",
+        "//core:tink_error",
+        requirement("grpc-google-iam-v1"),
+        requirement("idna"),
+        requirement("certifi"),
+        requirement("chardet"),
+        requirement("urllib3"),
+        requirement("requests"),
+        requirement("pytz"),
+        requirement("grpcio"),
+        requirement("cachetools"),
+        requirement("rsa"),
+        requirement("pyasn1"),
+        requirement("pyasn1-modules"),
+        requirement("protobuf"),
+        requirement("googleapis-common-protos"),
+        requirement("google-api-core"),
+        requirement("google-cloud-kms"),
+    ]
+)
+
+py_test(
+    name = "gcp_kms_aead_test",
+    srcs = ["gcp_kms_aead_test.py"],
+    legacy_create_init = 0,
+    data = [
+        "@tink_base//testdata:credentials"
+    ],
+    deps = [
+        ":gcp_kms_client",
+        ":gcp_kms_aead",
+        requirement("absl-py"),
+    ]
+)

@@ -1,5 +1,3 @@
-# Copyright 2019 Google LLC.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,13 +10,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""GCP KMS package."""
+"""StreamingAead package."""
 from __future__ import absolute_import
 from __future__ import division
+# Placeholder for import for type annotations
 from __future__ import print_function
 
-from integration.gcpkms import gcp_kms_aead
-from integration.gcpkms import gcp_kms_client
+from integration.awskms import aws_kms_aead
+from integration.awskms import aws_kms_client
 
-GcpKmsAead = gcp_kms_client.GcpKmsAead
-GcpKmsClient = gcp_kms_client.GcpKmsClient
+AwsKmsAead = aws_kms_aead.AwsKmsAead
+AwsKmsClient = aws_kms_client.AwsKmsClient

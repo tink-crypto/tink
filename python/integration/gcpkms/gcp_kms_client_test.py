@@ -23,7 +23,8 @@ from absl.testing import absltest
 
 from integration.gcpkms.gcp_kms_client import GcpKmsClient
 
-CREDENTIAL_PATH = os.environ['TEST_SRCDIR'] + '/tink/testdata/credential.json'
+CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
+                               'tink_base/testdata/credential.json')
 
 
 class GcpKmsClientTest(absltest.TestCase):
