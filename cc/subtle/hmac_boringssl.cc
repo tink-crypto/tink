@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "absl/memory/memory.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -35,8 +36,9 @@ namespace tink {
 namespace subtle {
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
-    HashType hash_type, uint32_t tag_size, const std::string& key_value) {
+util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(HashType hash_type,
+                                                        uint32_t tag_size,
+                                                        util::SecretData key) {
   util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
   if (!res.ok()) {
     return res.status();
@@ -48,16 +50,15 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
     // If this fails then something is wrong with the key manager.
     return util::Status(util::error::INTERNAL, "invalid tag size");
   }
-  if (key_value.size() < MIN_KEY_SIZE) {
+  if (key.size() < kMinKeySize) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }
-  std::unique_ptr<Mac> hmac(new HmacBoringSsl(md, tag_size, key_value));
-  return std::move(hmac);
+  return {absl::WrapUnique(new HmacBoringSsl(md, tag_size, std::move(key)))};
 }
 
 HmacBoringSsl::HmacBoringSsl(const EVP_MD* md, uint32_t tag_size,
-                             const std::string& key_value)
-    : md_(md), tag_size_(tag_size), key_value_(key_value) {}
+                             util::SecretData key)
+    : md_(md), tag_size_(tag_size), key_(std::move(key)) {}
 
 util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     absl::string_view data) const {
@@ -67,7 +68,7 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
 
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
-  const uint8_t* res = HMAC(md_, key_value_.data(), key_value_.size(),
+  const uint8_t* res = HMAC(md_, key_.data(), key_.size(),
                             reinterpret_cast<const uint8_t*>(data.data()),
                             data.size(), buf, &out_len);
   if (res == nullptr) {
@@ -92,7 +93,7 @@ util::Status HmacBoringSsl::VerifyMac(
   }
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
-  const uint8_t* res = HMAC(md_, key_value_.data(), key_value_.size(),
+  const uint8_t* res = HMAC(md_, key_.data(), key_.size(),
                             reinterpret_cast<const uint8_t*>(data.data()),
                             data.size(), buf, &out_len);
   if (res == nullptr) {
@@ -103,11 +104,10 @@ util::Status HmacBoringSsl::VerifyMac(
   for (uint32_t i = 0; i < tag_size_; i++) {
     diff |= buf[i] ^ static_cast<uint8_t>(mac[i]);
   }
-  if (diff == 0) {
-    return util::Status::OK;
-  } else {
+  if (diff != 0) {
     return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
   }
+  return util::Status::OK;
 }
 
 }  // namespace subtle
