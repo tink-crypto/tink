@@ -102,7 +102,7 @@ void Corrupt(ContainerType* container) {
 // Test we can correctly parse an RSA public key.
 TEST_F(PemParserTest, ReadRsaPublicKey) {
   auto key_statusor = PemParser::ParseRsaPublicKey(
-      absl::string_view(pem_rsa_pub_key_.data(), pem_rsa_prv_key_.size()));
+      absl::string_view(pem_rsa_pub_key_.data(), pem_rsa_pub_key_.size()));
   ASSERT_TRUE(key_statusor.ok()) << SubtleUtilBoringSSL::GetErrors();
 
   // Verify exponent and modulus are correctly set.
