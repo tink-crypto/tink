@@ -24,7 +24,7 @@ from tink.python import daead
 from tink.python import hybrid
 from tink.python import mac
 from tink.python import signature
-from tink.python.aead import aead_key_manager
+from aead import aead_key_manager
 from tink.python.cc.clif import cc_tink_config
 from tink.python.daead import deterministic_aead_key_manager
 from tink.python.hybrid import hybrid_decrypt_key_manager

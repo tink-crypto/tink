@@ -21,7 +21,7 @@ import os
 
 from absl.testing import absltest
 
-from tink.python.integration.gcpkms.gcp_kms_client import GcpKmsClient
+from integration.gcpkms.gcp_kms_client import GcpKmsClient
 
 CREDENTIAL_PATH = os.environ['TEST_SRCDIR'] + '/tink/testdata/credential.json'
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'

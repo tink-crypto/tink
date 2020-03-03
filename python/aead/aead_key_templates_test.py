@@ -24,7 +24,7 @@ from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
-from tink.python.aead import aead_key_templates
+from aead import aead_key_templates
 
 
 class AeadKeyTemplatesTest(absltest.TestCase):

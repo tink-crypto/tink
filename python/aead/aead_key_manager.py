@@ -22,7 +22,7 @@ from __future__ import print_function
 from typing import Text
 
 from tink.cc.python import aead as cc_aead
-from tink.python.aead import aead
+from aead import aead
 from tink.python.cc.clif import cc_key_manager
 from tink.python.core import key_manager
 from tink.python.core import tink_error

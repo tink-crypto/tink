@@ -90,6 +90,13 @@ run_linux_tests() {
       --strategy=TestRunner=standalone --test_output=all \
       -- ... || ( ls -l ; df -h / ; exit 1 )
 
+  # ------------------- Python
+  cd ../python
+  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
+  time bazel test \
+      --strategy=TestRunner=standalone --test_output=all \
+      -- ... || ( ls -l ; df -h / ; exit 1 )
+
   # ------------------- examples
   cd ../examples
   time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )

@@ -28,8 +28,8 @@ import boto3
 import configparser
 from typing import Text
 
-from tink.python.aead import aead
-from tink.python.integration.awskms.aws_kms_aead import AwsKmsAead
+from aead import aead
+from integration.awskms.aws_kms_aead import AwsKmsAead
 
 AWS_KEYURI_PREFIX = 'aws-kms://'
 AWS_KMS_BOTO = 'kms'

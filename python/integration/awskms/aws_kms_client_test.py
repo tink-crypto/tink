@@ -20,7 +20,7 @@ import os
 
 from absl.testing import absltest
 
-from tink.python.integration.awskms.aws_kms_client import AwsKmsClient
+from integration.awskms.aws_kms_client import AwsKmsClient
 
 CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
                                'tink/testdata/aws_credentials_cc.txt')

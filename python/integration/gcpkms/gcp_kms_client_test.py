@@ -21,7 +21,7 @@ import os
 
 from absl.testing import absltest
 
-from tink.python.integration.gcpkms.gcp_kms_client import GcpKmsClient
+from integration.gcpkms.gcp_kms_client import GcpKmsClient
 
 CREDENTIAL_PATH = os.environ['TEST_SRCDIR'] + '/tink/testdata/credential.json'
 

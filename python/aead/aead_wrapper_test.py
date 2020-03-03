@@ -20,8 +20,8 @@ from __future__ import print_function
 
 from absl.testing import absltest
 from tink.proto import tink_pb2
-from tink.python.aead import aead
-from tink.python.aead import aead_wrapper
+from aead import aead
+from aead import aead_wrapper
 from tink.python.core import primitive_set
 from tink.python.core import tink_error
 from tink.python.testing import helper

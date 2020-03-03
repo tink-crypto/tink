@@ -26,7 +26,7 @@ from tink.proto import ecdsa_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import tink_pb2
-from tink.python.aead import aead_key_templates
+from aead import aead_key_templates
 from tink.python.cc.clif import cc_key_manager
 from tink.python.cc.clif import cc_tink_config
 from tink.python.cc.clif import status as error

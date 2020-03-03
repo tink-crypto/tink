@@ -15,7 +15,6 @@
 #include "tink/python/cc/cc_streaming_aead_wrappers.h"
 
 #include "gtest/gtest.h"
-#include "tink/util/test_util.h"
 #include "tink/python/cc/test_util.h"
 
 namespace crypto {

@@ -452,6 +452,7 @@ cc_library(
     srcs = ["random.cc"],
     hdrs = ["random.h"],
     include_prefix = "tink/subtle",
+    visibility = ["//visibility:public"],
     deps = [
         "//util:secret_data",
         "@boringssl//:crypto",
@@ -526,6 +527,7 @@ cc_library(
     srcs = ["subtle_util.cc"],
     hdrs = ["subtle_util.h"],
     include_prefix = "tink/subtle",
+    visibility = ["//visibility:public"],
 )
 
 cc_library(

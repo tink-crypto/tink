@@ -18,10 +18,10 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from tink.python.aead import aead
-from tink.python.aead import aead_key_manager
-from tink.python.aead import aead_key_templates
-from tink.python.aead import aead_wrapper
+from aead import aead
+from aead import aead_key_manager
+from aead import aead_key_templates
+from aead import aead_wrapper
 
 
 Aead = aead.Aead
