@@ -18,16 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from tink.python.cc.clif import status as error
-
-KNOWN_STATUS_NOT_OK_TYPES = (error.StatusNotOk,)
-
-
-def register_status_not_ok_type(status_not_ok_type):
-  global KNOWN_STATUS_NOT_OK_TYPES
-  if status_not_ok_type not in KNOWN_STATUS_NOT_OK_TYPES:
-    assert issubclass(status_not_ok_type, Exception)
-    KNOWN_STATUS_NOT_OK_TYPES += (status_not_ok_type,)
+from tink.python.cc.clif import status
 
 
 def use_tink_errors(func):
@@ -35,7 +26,7 @@ def use_tink_errors(func):
   def wrapper(*args):
     try:
       return func(*args)
-    except KNOWN_STATUS_NOT_OK_TYPES as e:
+    except status.StatusNotOk as e:
       raise TinkError(e)
   return wrapper
 
