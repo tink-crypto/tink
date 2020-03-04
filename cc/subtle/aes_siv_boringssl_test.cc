@@ -19,11 +19,12 @@
 #include <string>
 #include <vector>
 
+#include "gtest/gtest.h"
 #include "tink/subtle/wycheproof_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -31,7 +32,7 @@ namespace subtle {
 namespace {
 
 TEST(AesSivBoringSslTest, testEncryptDecrypt) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -47,7 +48,7 @@ TEST(AesSivBoringSslTest, testEncryptDecrypt) {
 }
 
 TEST(AesSivBoringSslTest, testNullPtrStringView) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -77,14 +78,15 @@ TEST(AesSivBoringSslTest, testNullPtrStringView) {
 
 // Only 64 byte key sizes are supported.
 TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
-  std::string keymaterial(test::HexDecodeOrDie(
-      "198371900187498172316311acf81d238ff7619873a61983d619c87b63a1987f"
-      "987131819803719b847126381cd763871638aa71638176328761287361231321"
-      "812731321de508761437195ff231765aa4913219873ac6918639816312130011"
-      "abc900bba11400187984719827431246bbab1231eb4145215ff7141436616beb"
-      "9817298148712fed3aab61000ff123313e"));
+  util::SecretData keymaterial =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(
+          "198371900187498172316311acf81d238ff7619873a61983d619c87b63a1987f"
+          "987131819803719b847126381cd763871638aa71638176328761287361231321"
+          "812731321de508761437195ff231765aa4913219873ac6918639816312130011"
+          "abc900bba11400187984719827431246bbab1231eb4145215ff7141436616beb"
+          "9817298148712fed3aab61000ff123313e"));
   for (int keysize = 0; keysize <= keymaterial.size(); ++keysize){
-    std::string key = std::string(keymaterial, 0, keysize);
+    util::SecretData key(&keymaterial[0], &keymaterial[keysize]);
     auto cipher = AesSivBoringSsl::New(key);
     if (keysize == 64) {
       EXPECT_TRUE(cipher.ok());
@@ -96,7 +98,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
 
 // Checks a range of message sizes.
 TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -123,7 +125,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
 
 // Checks a range of aad sizes.
 TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -141,7 +143,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
 }
 
 TEST(AesSivBoringSslTest, testDecryptModification) {
-  std::string key(test::HexDecodeOrDie(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -177,7 +179,8 @@ void WycheproofTest(const rapidjson::Document &root) {
     }
     for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
       std::string comment = test["comment"].GetString();
-      std::string key = WycheproofUtil::GetBytes(test["key"]);
+      util::SecretData key =
+          util::SecretDataFromStringView(WycheproofUtil::GetBytes(test["key"]));
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
       std::string ct = WycheproofUtil::GetBytes(test["ct"]);
       std::string aad = WycheproofUtil::GetBytes(test["aad"]);

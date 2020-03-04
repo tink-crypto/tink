@@ -20,10 +20,12 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
+#include "absl/types/span.h"
+#include "openssl/aes.h"
 #include "tink/deterministic_aead.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "openssl/aes.h"
 
 namespace crypto {
 namespace tink {
@@ -53,8 +55,8 @@ namespace subtle {
 // implies that keys must be 64 bytes (2*256 bits) long.
 class AesSivBoringSsl : public DeterministicAead {
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>>
-  New(absl::string_view key_value);
+  static crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>> New(
+      const util::SecretData& key);
 
   crypto::tink::util::StatusOr<std::string> EncryptDeterministically(
       absl::string_view plaintext,
@@ -64,54 +66,60 @@ class AesSivBoringSsl : public DeterministicAead {
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
 
-  virtual ~AesSivBoringSsl() {}
-
   static bool IsValidKeySizeInBytes(size_t size) {
     return size == 64;
   }
 
  private:
-  static const size_t BLOCK_SIZE = 16;
+  static constexpr size_t kBlockSize = 16;
 
-  AesSivBoringSsl() {}
+  AesSivBoringSsl(util::SecretUniquePtr<AES_KEY> k1,
+                  util::SecretUniquePtr<AES_KEY> k2)
+      : k1_(std::move(k1)),
+        k2_(std::move(k2)),
+        cmac_k1_(ComputeCmacK1()),
+        cmac_k2_(ComputeCmacK2()) {}
 
-  // Sets the key and precomputes the sub keys of an instance.
-  // This method must be used only in New().
-  bool SetKey(absl::string_view key_value);
+  // Precomputes cmac_k1
+  util::SecretData ComputeCmacK1() const;
+  // Precomputes cmac_k2
+  util::SecretData ComputeCmacK2() const;
 
   // Encrypts (or decrypts) the bytes in in using an SIV and
   // writes the result to out.
-  void CtrCrypt(const uint8_t siv[BLOCK_SIZE],
-                const uint8_t *in, uint8_t *out,
-                size_t size) const;
+  void CtrCrypt(const uint8_t siv[kBlockSize], absl::Span<const uint8_t> in,
+                uint8_t* out) const;
+
   // Encrypts a single block using k2_.
   // This is used for CMACs.
-
-  void EncryptBlock(const uint8_t in[BLOCK_SIZE],
-                    uint8_t out[BLOCK_SIZE]) const;
+  void EncryptBlock(const uint8_t in[kBlockSize],
+                    uint8_t out[kBlockSize]) const;
 
   // Computes a CMAC of some data.
-  void Cmac(const uint8_t* data, size_t size,
-            uint8_t mac[BLOCK_SIZE]) const;
+  void Cmac(absl::Span<const uint8_t> data, uint8_t mac[kBlockSize]) const;
 
   // Computes CMAC(XorEnd(data, last)), where XorEnd
   // xors the bytes in last to the last bytes in data.
   // The size of the data must be at least 16 bytes.
-  void CmacLong(const uint8_t* data, size_t size,
-                const uint8_t last[BLOCK_SIZE],
-                uint8_t mac[BLOCK_SIZE]) const;
+  void CmacLong(absl::Span<const uint8_t> data, const uint8_t last[kBlockSize],
+                uint8_t mac[kBlockSize]) const;
 
   // Multiplying an element in GF(2^128) by its generator.
   // This functions is incorrectly named "doubling" in section 2.3 of RFC 5297.
-  static void MultiplyByX(uint8_t block[BLOCK_SIZE]);
+  static void MultiplyByX(uint8_t block[kBlockSize]);
 
-  void S2v(const uint8_t* aad, size_t aad_size,
-           const uint8_t* msg, size_t msg_size,
-           uint8_t siv[BLOCK_SIZE]) const;
-  AES_KEY k1_;
-  AES_KEY k2_;
-  uint8_t cmac_k1_[BLOCK_SIZE];
-  uint8_t cmac_k2_[BLOCK_SIZE];
+  // Xors a block
+  // res = x ^ y
+  static void XorBlock(const uint8_t x[kBlockSize], const uint8_t y[kBlockSize],
+                       uint8_t res[kBlockSize]);
+
+  void S2v(absl::Span<const uint8_t> aad, absl::Span<const uint8_t> msg,
+           uint8_t siv[kBlockSize]) const;
+
+  const util::SecretUniquePtr<AES_KEY> k1_;
+  const util::SecretUniquePtr<AES_KEY> k2_;
+  const util::SecretData cmac_k1_;
+  const util::SecretData cmac_k2_;
 };
 
 }  // namespace subtle

@@ -12,6 +12,7 @@ tink_cc_library(
     tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -88,6 +89,7 @@ tink_cc_test(
   DEPS
     tink::daead::aes_siv_key_manager
     tink::core::deterministic_aead
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::aes_siv_cc_proto

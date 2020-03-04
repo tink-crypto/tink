@@ -467,10 +467,13 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::core::deterministic_aead
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
+    absl::memory
     absl::strings
+    absl::types::span
 )
 
 tink_cc_library(
@@ -934,6 +937,7 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::wycheproof_util
     tink::core::deterministic_aead
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
