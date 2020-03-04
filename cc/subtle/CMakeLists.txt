@@ -472,8 +472,8 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::span
     absl::strings
-    absl::types::span
 )
 
 tink_cc_library(
