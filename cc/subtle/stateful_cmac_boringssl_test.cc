@@ -141,7 +141,7 @@ TEST_F(StatefulCmacBoringSslTest, testInvalidKeySizes) {
       EXPECT_THAT(cmac_result.status(), IsOk());
     } else {
       EXPECT_THAT(cmac_result.status(),
-                  StatusIs(util::error::INTERNAL,
+                  StatusIs(util::error::INVALID_ARGUMENT,
                            HasSubstr("invalid key size")));
     }
   }

@@ -140,10 +140,10 @@ crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxBoringSsl::New(
     absl::string_view key_value,
     size_t nonce_size_in_bytes) {
   if (!IsValidKeySize(key_value.size())) {
-    return util::Status(util::error::INTERNAL, "Invalid key");
+    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
   }
   if (!IsValidNonceSize(nonce_size_in_bytes)) {
-    return util::Status(util::error::INTERNAL, "Invalid nonce size");
+    return util::Status(util::error::INVALID_ARGUMENT, "Invalid nonce size");
   }
   std::unique_ptr<AesEaxBoringSsl> aead(
       new AesEaxBoringSsl(key_value, nonce_size_in_bytes));
@@ -259,7 +259,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
 
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + TAG_SIZE) {
-    return util::Status(util::error::INTERNAL, "Ciphertext too short");
+    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
   }
   size_t out_size = ct_size - TAG_SIZE - nonce_size_;
   absl::string_view nonce = ciphertext.substr(0, nonce_size_);
@@ -275,7 +275,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
   XorBlock(mac, H, mac);
   const uint8_t *sig = reinterpret_cast<const uint8_t*>(tag.data());
   if (!EqualBlocks(mac, sig)) {
-    return util::Status(util::error::INTERNAL, "Tag mismatch");
+    return util::Status(util::error::INVALID_ARGUMENT, "Tag mismatch");
   }
   std::string res(out_size, '\0');
   CtrCrypt(N, reinterpret_cast<const uint8_t*>(encrypted.data()),

@@ -36,10 +36,10 @@ namespace subtle {
 util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(util::SecretData key,
                                                            uint32_t tag_size) {
   if (key.size() != kSmallKeySize && key.size() != kBigKeySize) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
   }
   if (tag_size > kMaxTagSize) {
-    return util::Status(util::error::INTERNAL, "invalid tag size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid tag size");
   }
   return {absl::WrapUnique(new AesCmacBoringSsl(std::move(key), tag_size))};
 }

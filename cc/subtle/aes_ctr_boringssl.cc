@@ -39,10 +39,10 @@ util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
   const EVP_CIPHER* cipher =
       SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(key.size());
   if (cipher == nullptr) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
   }
   if (iv_size < kMinIvSizeInBytes || iv_size > kBlockSize) {
-    return util::Status(util::error::INTERNAL, "invalid iv size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid iv size");
   }
   return {
       absl::WrapUnique(new AesCtrBoringSsl(std::move(key), iv_size, cipher))};
@@ -90,7 +90,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
 util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
     absl::string_view ciphertext) const {
   if (ciphertext.size() < iv_size_) {
-    return util::Status(util::error::INTERNAL, "ciphertext too short");
+    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
   }
 
   bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());

@@ -166,9 +166,9 @@ TEST_F(StatefulHmacBoringSslTest, testInvalidKeySizes) {
     if (keysize >= 16) {
       EXPECT_THAT(hmac_result.status(), IsOk());
     } else {
-      EXPECT_THAT(
-          hmac_result.status(),
-          StatusIs(util::error::INTERNAL, HasSubstr("invalid key size")));
+      EXPECT_THAT(hmac_result.status(),
+                  StatusIs(util::error::INVALID_ARGUMENT,
+                           HasSubstr("invalid key size")));
     }
   }
 }

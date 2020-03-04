@@ -48,10 +48,10 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(HashType hash_type,
     // The key manager is responsible to security policies.
     // The checks here just ensure the preconditions of the primitive.
     // If this fails then something is wrong with the key manager.
-    return util::Status(util::error::INTERNAL, "invalid tag size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid tag size");
   }
   if (key.size() < kMinKeySize) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
   }
   return {absl::WrapUnique(new HmacBoringSsl(md, tag_size, std::move(key)))};
 }

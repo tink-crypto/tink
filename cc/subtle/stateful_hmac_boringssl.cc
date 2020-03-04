@@ -33,10 +33,10 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
     // The key manager is responsible to security policies.
     // The checks here just ensure the preconditions of the primitive.
     // If this fails then something is wrong with the key manager.
-    return util::Status(util::error::INTERNAL, "invalid tag size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid tag size");
   }
   if (key_value.size() < kMinKeySize) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
   }
 
   // Create and initialize the HMAC context

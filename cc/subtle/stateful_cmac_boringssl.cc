@@ -33,10 +33,10 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
       cipher = EVP_aes_256_cbc();
       break;
     default:
-      return util::Status(util::error::INTERNAL, "invalid key size");
+      return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
   }
   if (tag_size > kMaxTagSize) {
-    return util::Status(util::error::INTERNAL, "invalid tag size");
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid tag size");
   }
 
   // Create and initialize the CMAC context
