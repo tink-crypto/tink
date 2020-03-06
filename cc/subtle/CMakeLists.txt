@@ -391,9 +391,9 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
-    absl::algorithm::container
+    absl::algorithm_container
     absl::base
-    absl::base::config
+    absl::config
     absl::memory
     absl::span
     absl::strings
