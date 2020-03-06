@@ -17,7 +17,7 @@ goog.module('tink.Util');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const SecurityException = goog.require('tink.exception.SecurityException');
-const {PbEllipticCurveType, PbHashType, PbKeyStatusType, PbKeyset, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbEllipticCurveType, PbHashType, PbKeyStatusType, PbKeyset, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Validates the given key and throws SecurityException if it is invalid.

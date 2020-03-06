@@ -25,7 +25,7 @@ const Mac = goog.require('tink.Mac');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const Util = goog.require('tink.Util');
-const {PbAesCtrKey, PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbAesCtrKey, PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 const {assertExists} = goog.require('tink.testUtils');
 
 const KEY_TYPE =

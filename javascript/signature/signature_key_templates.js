@@ -15,7 +15,7 @@
 goog.module('tink.signature.SignatureKeyTemplates');
 
 const SignatureConfig = goog.require('tink.signature.SignatureConfig');
-const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Pre-generated KeyTemplates for keys for digital signatures.

@@ -17,7 +17,7 @@ goog.setTestOnly('tink.aead.AesGcmKeyTemplatesTest');
 
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const AesGcmKeyTemplates = goog.require('tink.aead.AesGcmKeyTemplates');
-const {PbAesGcmKeyFormat, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbAesGcmKeyFormat, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('aes gcm key templates test', function() {
   it('aes128 gcm', function() {

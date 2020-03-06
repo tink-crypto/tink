@@ -24,7 +24,7 @@ const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Util = goog.require('tink.Util');
-const {PbKeyMaterialType, PbKeyStatusType, PbKeyTemplate, PbKeyset} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyMaterialType, PbKeyStatusType, PbKeyTemplate, PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Keyset handle provide abstracted access to Keysets, to limit the exposure of

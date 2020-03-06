@@ -15,7 +15,7 @@
 goog.module('tink.testUtils');
 goog.setTestOnly();
 
-const {PbKeyData, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyData, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Returns its input type-narrowed not to be null or undefined. Throws a failed

@@ -21,7 +21,7 @@ const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
-const {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * @final

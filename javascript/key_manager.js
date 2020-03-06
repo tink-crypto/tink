@@ -14,7 +14,7 @@
 
 goog.module('tink.KeyManager');
 
-const {PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * An auxiliary container for methods that generate new keys.

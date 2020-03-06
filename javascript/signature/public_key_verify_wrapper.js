@@ -20,7 +20,7 @@ const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
-const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * @implements {PublicKeyVerify}

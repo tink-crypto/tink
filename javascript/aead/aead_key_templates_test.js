@@ -16,7 +16,7 @@ goog.module('tink.aead.AeadKeyTemplatesTest');
 goog.setTestOnly('tink.aead.AeadKeyTemplatesTest');
 
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const {PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('aead key templates test', function() {
   it('aes128 ctr hmac sha256', function() {

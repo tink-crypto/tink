@@ -24,7 +24,7 @@ const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('hybrid config test', function() {
   beforeEach(function() {

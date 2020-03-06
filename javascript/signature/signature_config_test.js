@@ -24,7 +24,7 @@ const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SignatureConfig = goog.require('tink.signature.SignatureConfig');
 const SignatureKeyTemplates = goog.require('tink.signature.SignatureKeyTemplates');
-const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('signature config test', function() {
   beforeEach(function() {

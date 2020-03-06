@@ -19,7 +19,7 @@ const AeadConfig = goog.require('tink.aead.AeadConfig');
 const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
-const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 
 /**

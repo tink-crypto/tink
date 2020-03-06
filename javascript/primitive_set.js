@@ -16,7 +16,7 @@ goog.module('tink.PrimitiveSet');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const SecurityException = goog.require('tink.exception.SecurityException');
-const {PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Auxiliary class for PrimitiveSet

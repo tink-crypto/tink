@@ -16,7 +16,7 @@ goog.module('tink.hybrid.HybridKeyTemplates');
 
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
-const {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Pre-generated KeyTemplates for keys for hybrid encryption.

@@ -19,7 +19,7 @@ const Aead = goog.require('tink.Aead');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const Mac = goog.require('tink.Mac');
 const Random = goog.require('tink.subtle.Random');
-const {PbAesCtrKey, PbAesCtrKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbAesCtrKey, PbAesCtrKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
 const VERSION = 0;

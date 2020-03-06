@@ -16,7 +16,7 @@ goog.module('tink.hybrid.EciesAeadHkdfUtil');
 
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Util = goog.require('tink.Util');
-const {PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 // This file contains only functions which are useful for implementation of
 // private and public ECIES AEAD HKDF key manager.

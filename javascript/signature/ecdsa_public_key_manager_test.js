@@ -22,7 +22,7 @@ const Mac = goog.require('tink.Mac');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Registry = goog.require('tink.Registry');
 const Util = goog.require('tink.Util');
-const {PbEcdsaParams, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbEcdsaParams, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
 const VERSION = 0;

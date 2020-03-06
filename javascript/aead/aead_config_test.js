@@ -23,7 +23,7 @@ const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('aead config test', function() {
   beforeEach(function() {

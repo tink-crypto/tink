@@ -14,7 +14,7 @@
 
 goog.module('tink.KeysetReader');
 
-const {PbEncryptedKeyset, PbKeyset} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbEncryptedKeyset, PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * KeysetReader knows how to read a keyset or an encrypted keyset from some

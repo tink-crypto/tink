@@ -22,7 +22,7 @@ const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper')
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const PublicKeyVerifyWrapper = goog.require('tink.signature.PublicKeyVerifyWrapper');
 const Random = goog.require('tink.subtle.Random');
-const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.proto');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('public key verify wrapper test', function() {
   it('verify, with empty signature', async function() {
