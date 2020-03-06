@@ -383,12 +383,19 @@ tink_cc_library(
     aes_eax_boringssl.h
   DEPS
     tink::subtle::random
+    tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::core::aead
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
+    absl::algorithm::container
+    absl::base
+    absl::base::config
+    absl::memory
+    absl::span
     absl::strings
 )
 
@@ -891,6 +898,7 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::wycheproof_util
     tink::core::aead
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util

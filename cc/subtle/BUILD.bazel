@@ -402,13 +402,20 @@ cc_library(
     include_prefix = "tink/subtle",
     deps = [
         ":random",
+        ":subtle_util",
         ":subtle_util_boringssl",
         "//:aead",
         "//util:errors",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:config",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -990,6 +997,7 @@ cc_test(
         ":common_enums",
         ":wycheproof_util",
         "//:aead",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_util",
