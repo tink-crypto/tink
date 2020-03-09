@@ -137,9 +137,11 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
+    absl::algorithm_container
     absl::strings
 )
 
@@ -773,6 +775,7 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::hkdf
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util

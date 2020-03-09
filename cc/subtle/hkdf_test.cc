@@ -15,11 +15,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/hkdf.h"
+
+#include "gtest/gtest.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -91,13 +93,26 @@ static const std::vector<TestVector> test_vector(
 
 TEST_F(HkdfTest, testBasic) {
   for (const TestVector& test : test_vector) {
+    auto hkdf_or =
+        Hkdf::ComputeHkdf(test.hash_type, test::HexDecodeOrDie(test.ikm_hex),
+                          test::HexDecodeOrDie(test.salt_hex),
+                          test::HexDecodeOrDie(test.info_hex), test.out_len);
+    ASSERT_TRUE(hkdf_or.ok());
+    EXPECT_EQ(test::HexEncode(hkdf_or.ValueOrDie()), test.out_key_hex);
+  }
+}
+
+TEST_F(HkdfTest, testBasicSecretData) {
+  for (const TestVector& test : test_vector) {
+    auto hkdf_or = Hkdf::ComputeHkdf(
+        test.hash_type,
+        util::SecretDataFromStringView(test::HexDecodeOrDie(test.ikm_hex)),
+        test::HexDecodeOrDie(test.salt_hex),
+        test::HexDecodeOrDie(test.info_hex), test.out_len);
+    ASSERT_TRUE(hkdf_or.ok());
     EXPECT_EQ(
-        test.out_key_hex,
-        test::HexEncode(Hkdf::ComputeHkdf(
-                            test.hash_type, test::HexDecodeOrDie(test.ikm_hex),
-                            test::HexDecodeOrDie(test.salt_hex),
-                            test::HexDecodeOrDie(test.info_hex), test.out_len)
-                            .ValueOrDie()));
+        test::HexEncode(util::SecretDataAsStringView(hkdf_or.ValueOrDie())),
+        test.out_key_hex);
   }
 }
 
@@ -111,6 +126,37 @@ TEST_F(HkdfTest, testLongOutput) {
   EXPECT_EQ(status_or_string.status().error_message(),
             "BoringSSL's HKDF failed");
 }
+
+TEST_F(HkdfTest, ComputeEciesHkdfBasic) {
+  for (const TestVector& test : test_vector) {
+    std::string ikm = test::HexDecodeOrDie(test.ikm_hex);
+    std::string kem_bytes = ikm.substr(0, ikm.size() / 2);
+    std::string shared_secret = ikm.substr(ikm.size() / 2);
+    auto hkdf_or = Hkdf::ComputeEciesHkdfSymmetricKey(
+        test.hash_type, kem_bytes, shared_secret,
+        test::HexDecodeOrDie(test.salt_hex),
+        test::HexDecodeOrDie(test.info_hex), test.out_len);
+    ASSERT_TRUE(hkdf_or.ok());
+    EXPECT_EQ(test::HexEncode(hkdf_or.ValueOrDie()), test.out_key_hex);
+  }
+}
+
+TEST_F(HkdfTest, ComputeEciesHkdfSecretData) {
+  for (const TestVector& test : test_vector) {
+    std::string ikm = test::HexDecodeOrDie(test.ikm_hex);
+    util::SecretData kem_bytes(ikm.begin(), ikm.begin() + ikm.size() / 2);
+    util::SecretData shared_secret(ikm.begin() + ikm.size() / 2, ikm.end());
+    auto hkdf_or = Hkdf::ComputeEciesHkdfSymmetricKey(
+        test.hash_type, kem_bytes, shared_secret,
+        test::HexDecodeOrDie(test.salt_hex),
+        test::HexDecodeOrDie(test.info_hex), test.out_len);
+    ASSERT_TRUE(hkdf_or.ok());
+    EXPECT_EQ(
+        test::HexEncode(util::SecretDataAsStringView(hkdf_or.ValueOrDie())),
+        test.out_key_hex);
+  }
+}
+
 }  // namespace
 }  // namespace subtle
 }  // namespace tink
