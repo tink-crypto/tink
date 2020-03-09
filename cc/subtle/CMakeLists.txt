@@ -685,7 +685,7 @@ tink_cc_library(
     absl::memory
     tink::core::mac
     tink::core::streaming_mac
-    tink::subtle_mac::stateful_mac
+    tink::subtle::mac::stateful_mac
     tink::util::status
     tink::util::statusor
 )
@@ -699,7 +699,7 @@ tink_cc_library(
       tink::subtle::common_enums
       tink::subtle::subtle_util_boringssl
       crypto
-      tink::subtle_mac::stateful_mac
+      tink::subtle::mac::stateful_mac
       tink::util::status
       tink::util::statusor
 )
@@ -713,7 +713,7 @@ tink_cc_library(
       tink::subtle::common_enums
       tink::subtle::subtle_util_boringssl
       crypto
-      tink::subtle_mac::stateful_mac
+      tink::subtle::mac::stateful_mac
       tink::util::status
       tink::util::statusor
 )
@@ -728,7 +728,7 @@ tink_cc_library(
     absl::strings
     crypto
     tink::subtle::subtle_util_boringssl
-    tink::subtle_mac::stateful_mac
+    tink::subtle::mac::stateful_mac
     tink::util::status
     tink::util::statusor
 )

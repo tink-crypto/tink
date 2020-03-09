@@ -168,7 +168,7 @@ tink_cc_library(
     tink::aead::aes_gcm_key_manager
     tink::aead::xchacha20_poly1305_key_manager
     tink::subtle::random
-    tink::subtle_mac::stateful_mac
+    tink::subtle::mac::stateful_mac
     tink::subtle::subtle_util_boringssl
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
