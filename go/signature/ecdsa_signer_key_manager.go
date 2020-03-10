@@ -21,8 +21,8 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/subtle"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
