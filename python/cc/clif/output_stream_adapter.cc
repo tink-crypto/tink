@@ -17,7 +17,6 @@
 #include "tink/python/cc/output_stream_adapter.h"
 
 #include "third_party/pybind11/include/pybind11/pybind11.h"
-#include "third_party/pybind11_abseil/absl_casters.h"
 #include "tink/python/cc/clif/status_casters.h"
 
 namespace crypto {
