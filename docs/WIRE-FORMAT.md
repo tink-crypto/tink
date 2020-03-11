@@ -144,6 +144,15 @@ Tink follows the corresponding RFCs.
 
 ### Hybrid Encryption
 
+Hybrid Encryption uses a Key Encryption Message (KEM) and a Data Encryption
+Message (DEM). The general format is
+
+```
+KEM || DEM,
+```
+
+with the key type knowing how many bytes to parse for the KEM.
+
 #### KEM
 
 Depending on the key type, Tink uses compressed and uncompressed elliptic curve
