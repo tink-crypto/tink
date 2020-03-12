@@ -27,8 +27,8 @@
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/streaming_aead.h"
-#include "tink/python/cc/clif/import_helper.h"
-#include "tink/python/cc/clif/status_casters.h"
+#include "tink/python/cc/pybind/import_helper.h"
+#include "tink/python/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {

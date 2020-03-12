@@ -14,27 +14,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/cc/output_stream_adapter.h"
+#include "tink/python/cc/input_stream_adapter.h"
 
 #include "third_party/pybind11/include/pybind11/pybind11.h"
-#include "tink/python/cc/clif/status_casters.h"
+#include "tink/python/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {
 
-PYBIND11_MODULE(output_stream_adapter, m) {
+PYBIND11_MODULE(input_stream_adapter, m) {
   namespace py = pybind11;
 
   // TODO(b/146492561): Reduce the number of complicated lambdas.
-  py::class_<OutputStreamAdapter>(m, "OutputStreamAdapter")
+  py::class_<InputStreamAdapter>(m, "InputStreamAdapter")
       .def(
-          "write",
-          [](OutputStreamAdapter* self,
-             const py::bytes& data) -> util::StatusOr<int64_t> {
-            return self->Write(std::string(data));
-          },
-          py::arg("data"))
-      .def("close", &OutputStreamAdapter::Close);
+          "read1",
+          [](InputStreamAdapter *self, int64_t size)
+              -> util::StatusOr<py::bytes> { return self->Read1(size); },
+          py::arg("size"))
+      .def(
+          "read",
+          [](InputStreamAdapter *self, int64_t size)
+              -> util::StatusOr<py::bytes> { return self->Read(size); },
+          py::arg("size"));
 }
 
 }  // namespace tink

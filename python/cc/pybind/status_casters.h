@@ -30,8 +30,8 @@
 // Adapted for tink: rwgk@
 // TODO(b/146426040): Remove this code when OSS absl::Status, StatusOr
 //                    are available.
-#ifndef TINK_PYTHON_CC_CLIF_STATUS_CASTERS_H_
-#define TINK_PYTHON_CC_CLIF_STATUS_CASTERS_H_
+#ifndef TINK_PYTHON_CC_PYBIND_STATUS_CASTERS_H_
+#define TINK_PYTHON_CC_PYBIND_STATUS_CASTERS_H_
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -41,7 +41,7 @@
 
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/cc/clif/status_utils.h"
+#include "tink/python/cc/pybind/status_utils.h"
 
 namespace pybind11 {
 namespace detail {
@@ -147,4 +147,4 @@ struct type_caster<util::StatusOr<PayloadType>> {
 }  // namespace detail
 }  // namespace pybind11
 
-#endif  // TINK_PYTHON_CC_CLIF_STATUS_CASTERS_H_
+#endif  // TINK_PYTHON_CC_PYBIND_STATUS_CASTERS_H_

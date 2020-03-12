@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python wrapper of the CLIF-wrapped C++ Public Key Verify key manager."""
+"""Python wrapper of the pybind-wrapped C++ Public Key Verify key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,14 +22,14 @@ from __future__ import print_function
 from typing import Text
 
 from tink.cc.python import public_key_verify as cc_public_key_verify
-from tink.python.cc.clif import cc_key_manager
+from tink.python.cc.pybind import cc_key_manager
 from tink.python.core import key_manager
 from tink.python.core import tink_error
 from tink.python.signature import public_key_verify
 
 
 class _PublicKeyVerifyCcToPyWrapper(public_key_verify.PublicKeyVerify):
-  """Transforms cliffed C++ PublicKeyVerify into a Python primitive."""
+  """Transforms pybind C++ PublicKeyVerify into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_public_key_verify.PublicKeyVerify):
     self._public_key_verify = cc_primitive

@@ -14,26 +14,18 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/cc/clif/status_utils.h"
+#ifndef TINK_PYTHON_CC_PYBIND_IMPORT_HELPER_H_
+#define TINK_PYTHON_CC_PYBIND_IMPORT_HELPER_H_
 
-#include <pybind11/pybind11.h>
+namespace crypto {
+namespace tink {
 
-#include "tink/python/cc/clif/import_helper.h"
+// relative_import_path is relative to the tink directory, e.g.,
+// "python.cc.pybind.cc_key_manager". The absolute import path to the
+// tink directory is determined via a define in import_helper.cc.
+void ImportTinkPythonModule(const char* relative_import_path);
 
-namespace pybind11 {
-namespace google {
+}  // namespace tink
+}  // namespace crypto
 
-void ImportStatusModule() {
-  // This function is called each time a Status object is passed from
-  // C++ to Python or vice versa. While it is safe to call module::import
-  // on an already-imported module, this is a super simple optimization
-  // certain to cut out any overhead.
-  static bool imported_already = false;
-  if (!imported_already) {
-    crypto::tink::ImportTinkPythonModule("python.cc.clif.status");
-    imported_already = true;
-  }
-}
-
-}  // namespace google
-}  // namespace pybind11
+#endif  // TINK_PYTHON_CC_PYBIND_IMPORT_HELPER_H_

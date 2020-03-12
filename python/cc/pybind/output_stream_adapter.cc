@@ -14,18 +14,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PYTHON_CC_CLIF_IMPORT_HELPER_H_
-#define TINK_PYTHON_CC_CLIF_IMPORT_HELPER_H_
+#include "tink/python/cc/output_stream_adapter.h"
+
+#include "third_party/pybind11/include/pybind11/pybind11.h"
+#include "tink/python/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {
 
-// relative_import_path is relative to the tink directory, e.g.,
-// "python.cc.clif.cc_key_manager". The absolute import path to the
-// tink directory is determined via a define in import_helper.cc.
-void ImportTinkPythonModule(const char* relative_import_path);
+PYBIND11_MODULE(output_stream_adapter, m) {
+  namespace py = pybind11;
+
+  // TODO(b/146492561): Reduce the number of complicated lambdas.
+  py::class_<OutputStreamAdapter>(m, "OutputStreamAdapter")
+      .def(
+          "write",
+          [](OutputStreamAdapter* self,
+             const py::bytes& data) -> util::StatusOr<int64_t> {
+            return self->Write(std::string(data));
+          },
+          py::arg("data"))
+      .def("close", &OutputStreamAdapter::Close);
+}
 
 }  // namespace tink
 }  // namespace crypto
-
-#endif  // TINK_PYTHON_CC_CLIF_IMPORT_HELPER_H_

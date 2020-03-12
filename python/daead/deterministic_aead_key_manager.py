@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python wrapper of the CLIF-wrapped C++ Deterministic AEAD key manager."""
+"""Python wrapper of the pybind-wrapped C++ Deterministic AEAD key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -21,14 +21,14 @@ from __future__ import print_function
 
 from typing import Text
 
-from tink.python.cc.clif import cc_key_manager
+from tink.python.cc.pybind import cc_key_manager
 from tink.python.core import key_manager
 from tink.python.core import tink_error
 from tink.python.daead import deterministic_aead
 
 
 class _DeterministicAeadCcToPyWrapper(deterministic_aead.DeterministicAead):
-  """Transforms cliffed C++ DeterministicAead into a Python primitive."""
+  """Transforms pybind C++ DeterministicAead into a Python primitive."""
 
   def __init__(self, cc_deterministic_aead):
     self._deterministic_aead = cc_deterministic_aead

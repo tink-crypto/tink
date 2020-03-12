@@ -18,7 +18,7 @@
 
 #include "third_party/pybind11/include/pybind11/pybind11.h"
 #include "tink/util/statusor.h"
-#include "tink/python/cc/clif/status_casters.h"
+#include "tink/python/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {

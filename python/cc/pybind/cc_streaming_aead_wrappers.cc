@@ -17,8 +17,8 @@
 #include "tink/python/cc/cc_streaming_aead_wrappers.h"
 
 #include "third_party/pybind11/include/pybind11/pybind11.h"
-#include "tink/python/cc/clif/import_helper.h"
-#include "tink/python/cc/clif/status_casters.h"
+#include "tink/python/cc/pybind/import_helper.h"
+#include "tink/python/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {
@@ -26,9 +26,9 @@ namespace tink {
 PYBIND11_MODULE(cc_streaming_aead_wrappers, m) {
   namespace py = pybind11;
 
-  ImportTinkPythonModule("python.cc.clif.input_stream_adapter");
-  ImportTinkPythonModule("python.cc.clif.output_stream_adapter");
-  ImportTinkPythonModule("python.cc.clif.python_file_object_adapter");
+  ImportTinkPythonModule("python.cc.pybind.input_stream_adapter");
+  ImportTinkPythonModule("python.cc.pybind.output_stream_adapter");
+  ImportTinkPythonModule("python.cc.pybind.python_file_object_adapter");
 
   // TODO(b/146492561): Reduce the number of complicated lambdas.
   m.def(

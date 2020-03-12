@@ -19,8 +19,8 @@ from __future__ import division
 from __future__ import print_function
 
 from google3.testing.pybase import googletest
-from tink.python.cc.clif import status
-from tink.python.cc.clif import status_example
+from tink.python.cc.pybind import status
+from tink.python.cc.pybind import status_example
 
 
 class UtilStatusTest(googletest.TestCase):

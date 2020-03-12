@@ -23,7 +23,7 @@ from typing import Text
 
 
 from tink.cc.python import hybrid_encrypt as cc_hybrid_encrypt
-from tink.python.cc.clif import cc_key_manager
+from tink.python.cc.pybind import cc_key_manager
 from tink.python.core import key_manager
 from tink.python.core import tink_error
 from tink.python.hybrid import hybrid_encrypt

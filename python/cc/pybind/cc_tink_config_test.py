@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for tink.python.cc.clif.cc_tink_config."""
+"""Tests for tink.python.cc.pybind.cc_tink_config."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from tink.python.cc.clif import cc_tink_config
+from tink.python.cc.pybind import cc_tink_config
 
 
 class CcTinkConfigTest(absltest.TestCase):

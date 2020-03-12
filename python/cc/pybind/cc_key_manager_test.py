@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for tink.python.cc.clif.py_key_manager."""
+"""Tests for tink.python.cc.pybind.py_key_manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -27,9 +27,9 @@ from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import tink_pb2
 from aead import aead_key_templates
-from tink.python.cc.clif import cc_key_manager
-from tink.python.cc.clif import cc_tink_config
-from tink.python.cc.clif import status as error
+from tink.python.cc.pybind import cc_key_manager
+from tink.python.cc.pybind import cc_tink_config
+from tink.python.cc.pybind import status as error
 from tink.python.hybrid import hybrid_key_templates
 
 

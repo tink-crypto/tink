@@ -17,7 +17,7 @@
 #include "tink/python/cc/python_file_object_adapter.h"
 
 #include "third_party/pybind11/include/pybind11/pybind11.h"
-#include "tink/python/cc/clif/status_casters.h"
+#include "tink/python/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {

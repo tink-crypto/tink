@@ -16,8 +16,8 @@
 
 // Utility classes functions for util::Status objects.
 // These are needed by both the status module and casters.
-#ifndef TINK_PYTHON_CC_CLIF_STATUS_UTILS_H_
-#define TINK_PYTHON_CC_CLIF_STATUS_UTILS_H_
+#ifndef TINK_PYTHON_CC_PYBIND_STATUS_UTILS_H_
+#define TINK_PYTHON_CC_PYBIND_STATUS_UTILS_H_
 
 #include <pybind11/pybind11.h>
 
@@ -100,4 +100,4 @@ class StatusNotOk : public std::exception {
 }  // namespace google
 }  // namespace pybind11
 
-#endif  // TINK_PYTHON_CC_CLIF_STATUS_UTILS_H_
+#endif  // TINK_PYTHON_CC_PYBIND_STATUS_UTILS_H_

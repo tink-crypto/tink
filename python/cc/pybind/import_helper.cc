@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/cc/clif/import_helper.h"
+#include "tink/python/cc/pybind/import_helper.h"
 
 #include <pybind11/pybind11.h>
 

@@ -21,7 +21,7 @@
 #include <stdexcept>
 
 #include "tink/util/status.h"
-#include "tink/python/cc/clif/status_utils.h"
+#include "tink/python/cc/pybind/status_utils.h"
 
 namespace pybind11 {
 namespace google {
