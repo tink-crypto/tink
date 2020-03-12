@@ -19,7 +19,6 @@
 #include <memory>
 
 #include "third_party/pybind11/include/pybind11/pybind11.h"
-#include "third_party/pybind11_protobuf/proto_casters.h"
 #include "tink/aead.h"
 #include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
@@ -48,10 +47,10 @@ std::unique_ptr<pybind11::class_<CcKeyManager<PrimitiveType>>> WrapCcKeyManager(
   cls->def_static("from_cc_registry",
                   &CcKeyManager<PrimitiveType>::GetFromCcRegistry);
   cls->def("primitive", &CcKeyManager<PrimitiveType>::GetPrimitive,
-           py::arg("key_data"));
+           py::arg("serialized_key_data"));
   cls->def("key_type", &CcKeyManager<PrimitiveType>::KeyType);
   cls->def("new_key_data", &CcKeyManager<PrimitiveType>::NewKeyData,
-           py::arg("key_template"));
+           py::arg("serialized_key_template"));
   return std::move(cls);
 }
 

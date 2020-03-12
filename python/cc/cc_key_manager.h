@@ -20,11 +20,13 @@
 #include <algorithm>
 #include <vector>
 
+#include "third_party/pybind11/include/pybind11/pybind11.h"
 #include "tink/key_manager.h"
+#include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
-#include "tink/registry.h"
+#include "proto/tink.proto.h"
 
 namespace crypto {
 namespace tink {
@@ -56,25 +58,34 @@ class CcKeyManager {
 
   // Constructs an instance of P for the given 'key_data'.
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const google::crypto::tink::KeyData& key_data) {
+      const std::string& serialized_key_data) {
+    google::crypto::tink::KeyData key_data;
+    key_data.ParseFromString(serialized_key_data);
     return key_manager_->GetPrimitive(key_data);
   }
 
   // Creates a new random key, based on the specified 'key_format'.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-      NewKeyData(const google::crypto::tink::KeyTemplate& key_template) {
+  crypto::tink::util::StatusOr<pybind11::bytes> NewKeyData(
+      const std::string& serialized_key_template) {
+    google::crypto::tink::KeyTemplate key_template;
+    key_template.ParseFromString(serialized_key_template);
     if (key_manager_->get_key_type() != key_template.type_url()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           absl::StrCat("Key type '", key_template.type_url(),
                                        "' is not supported by this manager."));
     }
-    return key_manager_->get_key_factory().NewKeyData(key_template.value());
+
+    auto key_data =
+        key_manager_->get_key_factory().NewKeyData(key_template.value());
+    if (!key_data.ok()) {
+      return key_data.status();
+    }
+    return pybind11::bytes(key_data.ValueOrDie()->SerializeAsString());
   }
 
   // Returns public key data extracted from the given private_key_data.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  GetPublicKeyData(
-      const google::crypto::tink::KeyData& private_key_data) const {
+  crypto::tink::util::StatusOr<pybind11::bytes>
+  GetPublicKeyData(const std::string& serialized_private_key_data) const {
     const PrivateKeyFactory* factory = dynamic_cast<const PrivateKeyFactory*>(
         &key_manager_->get_key_factory());
     if (factory == nullptr) {
@@ -84,8 +95,14 @@ class CcKeyManager {
                                        "' does not have "
                                        "a PrivateKeyFactory."));
     }
+
+    google::crypto::tink::KeyData private_key_data;
+    private_key_data.ParseFromString(serialized_private_key_data);
     auto result = factory->GetPublicKeyData(private_key_data.value());
-    return result;
+    if (!result.ok()) {
+      return result.status();
+    }
+    return pybind11::bytes(result.ValueOrDie()->SerializeAsString());
   }
 
   // Returns the type_url identifying the key type handled by this manager.
