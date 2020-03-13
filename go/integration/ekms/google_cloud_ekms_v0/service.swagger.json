@@ -1,0 +1,216 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "google_cloud_ekms_v0/service.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v0/{key_path}:unwrap": {
+      "post": {
+        "summary": "Unwraps a wrapped IKEK and returns the plaintext.",
+        "operationId": "Unwrap",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v0UnwrapResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "key_path",
+            "description": "Required. A unique, External-KMS-defined resource identifier for\nthe key.\ne.g. `accounts/customer-id/keys/key1`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v0UnwrapRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GCPExternalKeyManagementService"
+        ]
+      }
+    },
+    "/v0/{key_path}:wrap": {
+      "post": {
+        "summary": "Wraps a plaintext IKEK with the EKEK named in the Request.",
+        "operationId": "Wrap",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v0WrapResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "key_path",
+            "description": "Required. A unique, External-KMS-defined resource identifier for\nthe key.\ne.g. `accounts/customer-id/keys/key1`.\nIf the corresponding key does not exist, the key can optionally be\ncreated.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v0WrapRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GCPExternalKeyManagementService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "AccessReasonContextReason": {
+      "type": "string",
+      "enum": [
+        "REASON_UNSPECIFIED",
+        "CUSTOMER_INITIATED_SUPPORT",
+        "GOOGLE_INITIATED_SERVICE",
+        "THIRD_PARTY_DATA_REQUEST",
+        "GOOGLE_INITIATED_REVIEW",
+        "CUSTOMER_INITIATED_ACCESS",
+        "GOOGLE_INITIATED_SYSTEM_OPERATION"
+      ],
+      "default": "REASON_UNSPECIFIED",
+      "description": " - REASON_UNSPECIFIED: No reason is available for the access.\n - CUSTOMER_INITIATED_SUPPORT: Existing Access Transparency Types, please refer to public documentation\nof Justification Reason Codes in\nhttps://cloud.google.com/logging/docs/audit/reading-access-transparency-logs#justification-reason-codes\n - CUSTOMER_INITIATED_ACCESS: Customer uses their own account or grants IAM permission to some partner\nof theirs to perform any access to their own data which is authorized by\ntheir own IAM policy.\n - GOOGLE_INITIATED_SYSTEM_OPERATION: Google accesses data to help optimize the data’s structure or quality for\nfuture uses by the customer. This includes but is not limited to accesses\nfor the purposes of indexing, structuring, precomputation, hashing,\nsharding and caching."
+    },
+    "v0AccessReasonContext": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/definitions/AccessReasonContextReason",
+          "description": "required."
+        }
+      }
+    },
+    "v0RequestContext": {
+      "type": "object",
+      "properties": {
+        "full_resource_name": {
+          "type": "string",
+          "description": "The full resource name for the GCP resource being directly wrapped by\nthe EKEK (i.e. the Cloud KMS CryptoKey resource)\nSee cloud.google.com/apis/design/resource_names#full_resource_name\nFor a Cloud KMS CryptoKey resource, this includes the Cloud KMS\nLocation associated with the resource."
+        },
+        "relative_resource_name": {
+          "type": "string",
+          "description": "The relative resource name for the GCP resource being directly wrapped by\nthe EKEK (i.e. the Cloud KMS CryptoKey resource)\nSee cloud.google.com/apis/design/resource_names#relative_resource_name\nThis is a substring of the RequestContext's full_resource_name."
+        },
+        "access_reason_context": {
+          "$ref": "#/definitions/v0AccessReasonContext",
+          "description": "Optional. Request that has an empty AccessReasonContext is a\nvalid request. This can happen:\n* If customer does not enable key justification on their key\n  or the partner endpoint is not whitelisted to receive justification.\n* If customer enables key justification, then this may have been due to a\n  Google transient error or a bug that needs Google to take a look into."
+        },
+        "is_key_health_check": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "Required. Whether the request is a key health check that contains a\ncanonical plaintext or its encryption instead of customer data."
+        }
+      },
+      "description": "More context provided by during [Wrap][] and [Unwrap][] operations."
+    },
+    "v0UnwrapRequest": {
+      "type": "object",
+      "properties": {
+        "key_path": {
+          "type": "string",
+          "description": "Required. A unique, External-KMS-defined resource identifier for\nthe key.\ne.g. `accounts/customer-id/keys/key1`."
+        },
+        "wrapped_blob": {
+          "type": "string",
+          "format": "byte",
+          "description": "Required. The wrapped data originally returned in\n[WrapResponse.wrapped_blob][]."
+        },
+        "additional_context": {
+          "$ref": "#/definitions/v0RequestContext",
+          "description": "For future use."
+        },
+        "additional_authenticated_data": {
+          "type": "string",
+          "format": "byte",
+          "description": "Optional data that must match the data originally supplied in\n[WrapRequest.additional_authenticated_data][]."
+        },
+        "key_uri_prefix": {
+          "type": "string",
+          "description": "Optional data that, if specified, defines the full key URI together with\nthe `key_path` field. The key uri is `key_uri_prefix/key_path`. That is,\n`key_uri_prefix` is equal to `scheme | host | /v0/` where `|` is\nconcatenation."
+        }
+      },
+      "description": "Unwrap a blob that was previously returned in the WrapResponse."
+    },
+    "v0UnwrapResponse": {
+      "type": "object",
+      "properties": {
+        "plaintext": {
+          "type": "string",
+          "format": "byte",
+          "description": "The decrypted data originally supplied in [WrapRequest.plaintext][]."
+        },
+        "allowed_cache_duration": {
+          "type": "string",
+          "description": "A maximum duration the unwrapped key is allowed to be cached by the\ncaller.\nMust be positive."
+        }
+      },
+      "description": "Response message for  [GCPExternalKeyManagementService.Unwrap][]."
+    },
+    "v0WrapRequest": {
+      "type": "object",
+      "properties": {
+        "key_path": {
+          "type": "string",
+          "description": "Required. A unique, External-KMS-defined resource identifier for\nthe key.\ne.g. `accounts/customer-id/keys/key1`.\nIf the corresponding key does not exist, the key can optionally be\ncreated."
+        },
+        "plaintext": {
+          "type": "string",
+          "format": "byte",
+          "description": "Required. The data to be wrapped. Must be no larger than 64KiB."
+        },
+        "additional_context": {
+          "$ref": "#/definitions/v0RequestContext"
+        },
+        "additional_authenticated_data": {
+          "type": "string",
+          "format": "byte",
+          "description": "Optional data that, if specified, must also be provided during\ndecryption through [UnwrapRequest.additional_authenticated_data][].\nThe AAD must be no larger than 64KiB."
+        },
+        "key_uri_prefix": {
+          "type": "string",
+          "description": "Optional data that, if specified, defines the full key URI together with\nthe `key_path` field. The key uri is `key_uri_prefix/key_path`. That is,\n`key_uri_prefix` is equal to `scheme | host | /v0/` where `|` is\nconcatenation."
+        }
+      },
+      "description": "Wrap a key with an External-KMS-defined AEAD scheme."
+    },
+    "v0WrapResponse": {
+      "type": "object",
+      "properties": {
+        "wrapped_blob": {
+          "type": "string",
+          "format": "byte",
+          "description": "The wrapped blob."
+        }
+      },
+      "description": "Response message for [GCPExternalKeyManagementService.Wrap][]."
+    }
+  }
+}

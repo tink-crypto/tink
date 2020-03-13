@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package google.cloud.ekms.v0;
+
+import "google/protobuf/duration.proto";
+
+// Google Cloud Platform External Key Management Service
+//
+// Performs operations on cryptographic keys. Implements a REST
+// model with the following objects:
+//
+// * [Domain][]
+// * [Key][]
+
+// Wrap a key with an External-KMS-defined AEAD scheme.
+message WrapRequest {
+    // Required. A unique, External-KMS-defined resource identifier for
+    // the key.
+    // e.g. `accounts/customer-id/keys/key1`.
+    // If the corresponding key does not exist, the key can optionally be
+    // created.
+    string key_path = 1;
+
+    // Required. The data to be wrapped. Must be no larger than 64KiB.
+    bytes plaintext = 2;
+
+    RequestContext additional_context = 3;
+
+    // Optional data that, if specified, must also be provided during
+    // decryption through [UnwrapRequest.additional_authenticated_data][].
+    // The AAD must be no larger than 64KiB.
+    bytes additional_authenticated_data = 4;
+
+    // Optional data that, if specified, defines the full key URI together with
+    // the `key_path` field. The key uri is `key_uri_prefix/key_path`. That is,
+    // `key_uri_prefix` is equal to `scheme | host | /v0/` where `|` is
+    // concatenation.
+    string key_uri_prefix = 5;
+}
+
+// Response message for [GCPExternalKeyManagementService.Wrap][].
+message WrapResponse {
+    // The wrapped blob.
+    bytes wrapped_blob = 1;
+}
+
+// Unwrap a blob that was previously returned in the WrapResponse.
+message UnwrapRequest {
+    // Required. A unique, External-KMS-defined resource identifier for
+    // the key.
+    // e.g. `accounts/customer-id/keys/key1`.
+    string key_path = 1;
+
+    // Required. The wrapped data originally returned in
+    // [WrapResponse.wrapped_blob][].
+    bytes wrapped_blob = 2;
+
+    // For future use.
+    RequestContext additional_context = 3;
+
+    // Optional data that must match the data originally supplied in
+    // [WrapRequest.additional_authenticated_data][].
+    bytes additional_authenticated_data = 4;
+
+    // Optional data that, if specified, defines the full key URI together with
+    // the `key_path` field. The key uri is `key_uri_prefix/key_path`. That is,
+    // `key_uri_prefix` is equal to `scheme | host | /v0/` where `|` is
+    // concatenation.
+    string key_uri_prefix = 5;
+}
+
+// Response message for  [GCPExternalKeyManagementService.Unwrap][].
+message UnwrapResponse {
+    // The decrypted data originally supplied in [WrapRequest.plaintext][].
+    bytes plaintext = 1;
+
+    // A maximum duration the unwrapped key is allowed to be cached by the
+    // caller.
+    // Must be positive.
+    google.protobuf.Duration allowed_cache_duration = 2;
+}
+
+// More context provided by during [Wrap][] and [Unwrap][] operations.
+message RequestContext {
+    // The full resource name for the GCP resource being directly wrapped by
+    // the EKEK (i.e. the Cloud KMS CryptoKey resource)
+    // See cloud.google.com/apis/design/resource_names#full_resource_name
+    // For a Cloud KMS CryptoKey resource, this includes the Cloud KMS
+    // Location associated with the resource.
+    string full_resource_name = 1;
+
+    // The relative resource name for the GCP resource being directly wrapped by
+    // the EKEK (i.e. the Cloud KMS CryptoKey resource)
+    // See cloud.google.com/apis/design/resource_names#relative_resource_name
+    // This is a substring of the RequestContext's full_resource_name.
+    string relative_resource_name = 2;
+
+    // Optional. Request that has an empty AccessReasonContext is a
+    // valid request. This can happen:
+    // * If customer does not enable key justification on their key
+    //   or the partner endpoint is not whitelisted to receive justification.
+    // * If customer enables key justification, then this may have been due to a
+    //   Google transient error or a bug that needs Google to take a look into.
+    AccessReasonContext access_reason_context = 3;
+
+    // Required. Whether the request is a key health check that contains a
+    // canonical plaintext or its encryption instead of customer data.
+    bool is_key_health_check = 4;
+}
+
+message AccessReasonContext {
+    enum Reason {
+        // No reason is available for the access.
+        REASON_UNSPECIFIED = 0;
+        // Existing Access Transparency Types, please refer to public documentation
+        // of Justification Reason Codes in
+        // https://cloud.google.com/logging/docs/audit/reading-access-transparency-logs#justification-reason-codes
+        CUSTOMER_INITIATED_SUPPORT = 1;
+        GOOGLE_INITIATED_SERVICE = 2;
+        THIRD_PARTY_DATA_REQUEST = 3;
+        GOOGLE_INITIATED_REVIEW = 4;
+        // Customer uses their own account or grants IAM permission to some partner
+        // of theirs to perform any access to their own data which is authorized by
+        // their own IAM policy.
+        CUSTOMER_INITIATED_ACCESS = 5;
+        // Google accesses data to help optimize the data’s structure or quality for
+        // future uses by the customer. This includes but is not limited to accesses
+        // for the purposes of indexing, structuring, precomputation, hashing,
+        // sharding and caching.
+        GOOGLE_INITIATED_SYSTEM_OPERATION = 6;
+    }
+    // required.
+    Reason reason = 1;
+}
