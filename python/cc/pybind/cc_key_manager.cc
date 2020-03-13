@@ -41,7 +41,7 @@ std::unique_ptr<pybind11::class_<CcKeyManager<PrimitiveType>>> WrapCcKeyManager(
     const char* py_class_docstring, const char* primitive_module_name) {
   namespace py = pybind11;
   ImportTinkPythonModule(
-      (std::string("cc.python.") + primitive_module_name).c_str());
+      (std::string("python.cc.pybind.") + primitive_module_name).c_str());
   auto cls = std::make_unique<py::class_<CcKeyManager<PrimitiveType>>>(
       m, py_class_name, py_class_docstring);
   cls->def_static("from_cc_registry",

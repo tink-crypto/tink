@@ -20,8 +20,8 @@ from __future__ import print_function
 
 from typing import Text
 
-from tink.cc.python import mac as cc_mac
 from tink.python.cc.pybind import cc_key_manager
+from tink.python.cc.pybind import mac as cc_mac
 from tink.python.core import key_manager
 from tink.python.core import tink_error
 from tink.python.mac import mac

@@ -21,8 +21,8 @@ from __future__ import print_function
 
 from typing import Text
 
-from tink.cc.python import public_key_verify as cc_public_key_verify
 from tink.python.cc.pybind import cc_key_manager
+from tink.python.cc.pybind import public_key_verify as cc_public_key_verify
 from tink.python.core import key_manager
 from tink.python.core import tink_error
 from tink.python.signature import public_key_verify

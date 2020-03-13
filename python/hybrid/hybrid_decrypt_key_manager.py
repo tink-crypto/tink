@@ -21,8 +21,8 @@ from __future__ import print_function
 
 from typing import Text
 
-from tink.cc.python import hybrid_decrypt as cc_hybrid_decrypt
 from tink.python.cc.pybind import cc_key_manager
+from tink.python.cc.pybind import hybrid_decrypt as cc_hybrid_decrypt
 from tink.python.core import key_manager
 from tink.python.core import tink_error
 from tink.python.hybrid import hybrid_decrypt
