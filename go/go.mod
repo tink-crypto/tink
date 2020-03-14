@@ -3,9 +3,12 @@ module github.com/google/tink/go
 go 1.12
 
 require (
+	github.com/ThalesIgnite/crypto11 v1.2.1
 	github.com/ThalesIgnite/gose v0.7.3
 	github.com/aws/aws-sdk-go v1.25.39
+	github.com/davecgh/go-spew v1.1.1
 	github.com/golang/protobuf v1.3.2
+	github.com/google/uuid v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway v1.14.2
 	github.com/stretchr/testify v1.4.0 // indirect
 	golang.org/x/crypto v0.0.0-20191119213627-4f8c1d86b1ba
