@@ -1,0 +1,13 @@
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])  # keep
+
+filegroup(
+    name = "secrets",
+    testonly = 1,
+    srcs = [
+        "secret-clear.txt",
+        "secret-hsm-cipher.txt",
+        "secret-wrapped-cipher.txt",
+    ],
+)
