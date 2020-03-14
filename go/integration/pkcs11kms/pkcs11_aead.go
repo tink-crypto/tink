@@ -7,6 +7,7 @@ import (
 	"github.com/ThalesIgnite/crypto11"
 	"github.com/ThalesIgnite/gose"
 	"github.com/ThalesIgnite/gose/jose"
+	"github.com/google/tink/go/tink"
 	"io"
 )
 
@@ -15,6 +16,8 @@ type pkcs11AEAD struct {
 	jwee gose.JweEncryptor
 	jwed gose.JweDecryptor
 }
+
+var _ tink.AEAD = (*pkcs11AEAD)(nil)
 
 func newPkcs11AEAD(ctx *crypto11.Context, keyURI string, autogen bool) (p *pkcs11AEAD, err error) {
 

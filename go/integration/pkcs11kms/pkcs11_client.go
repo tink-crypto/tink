@@ -3,6 +3,7 @@ package pkcs11kms
 import (
 	"context"
 	"github.com/ThalesIgnite/crypto11"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 	"strings"
 )
@@ -16,6 +17,8 @@ type pkcs11Client struct {
 	cfg     *crypto11.Config
 	autogen bool
 }
+
+var _ registry.KMSClient = (*pkcs11Client)(nil)
 
 func NewClient(ctx context.Context, cfg *crypto11.Config, autogen bool) *pkcs11Client {
 	return &pkcs11Client{
