@@ -25,7 +25,6 @@
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "proto/tink.pb.h"
 #include "proto/tink.proto.h"
 
 namespace crypto {
