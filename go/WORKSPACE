@@ -30,6 +30,22 @@ load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 gazelle_dependencies()
 
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rules_proto",
+    sha256 = "602e7161d9195e50246177e7c55b2f39950a9cf7366f74ed5f22fd45750cd208",
+    strip_prefix = "rules_proto-97d8af4dc474595af3900dd85cb3a29ad28cc313",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/97d8af4dc474595af3900dd85cb3a29ad28cc313.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/97d8af4dc474595af3900dd85cb3a29ad28cc313.tar.gz",
+    ],
+)
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+rules_proto_dependencies()
+rules_proto_toolchains()
+
 # How to update go dependencies:
 # 1) Remove all go_repository rules in WORKSPACE.bazel
 # 2) Update the files go.mod and go.sum. This can be done as follows:
@@ -264,4 +280,43 @@ go_repository(
     name = "com_github_hashicorp_vault",
     importpath = "github.com/hashicorp/vault",
     tag = "v1.2.3",
+)
+go_repository(
+    name = "com_github_google_uuid",
+    importpath = "github.com/google/uuid",
+    tag = "v1.0.0",
+)
+go_repository(
+    name = "com_github_sirupsen_logrus",
+    importpath = "github.com/sirupsen/logrus",
+    tag = "v1.2.0"
+)
+go_repository(
+    name = "com_github_thalesignite_crypto11",
+    importpath = "github.com/ThalesIgnite/crypto11",
+    tag = "v1.2.1",
+)
+go_repository(
+    name = "com_github_thalesignite_gose",
+    importpath = "github.com/ThalesIgnite/gose",
+    tag = "v0.7.3",
+)
+
+go_repository(
+    name = "com_github_thales_e_security_pool",
+    importpath = "github.com/Thales-e-security/pool",
+    tag = "v0.0.1",
+)
+
+go_repository(
+    name = "com_github_miekg_pkcs11",
+    importpath = "github.com/miekg/pkcs11",
+    sum = "h1:eVB9ELsoq5ouItQBr5Tj334bhPJG/MX+m7rTchmzVUQ=",
+    version = "v1.0.3-0.20190429190417-a667d056470f"
+)
+
+go_repository(
+    name = "com_github_pkg_errors",
+    importpath = "github.com/pkg/errors",
+    tag = "v0.8.1",
 )
