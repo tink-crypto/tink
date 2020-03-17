@@ -12,8 +12,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef EXAMPLES_DIGITAL_SIGNATURES_CC_UTIL_H_
-#define EXAMPLES_DIGITAL_SIGNATURES_CC_UTIL_H_
+#ifndef EXAMPLES_CC_DIGITAL_SIGNATURES_UTIL_H_
+#define EXAMPLES_CC_DIGITAL_SIGNATURES_UTIL_H_
 
 #include <iostream>
 #include <fstream>
@@ -57,4 +57,4 @@ class Util {
   static void Write(const std::string& output, const std::string& filename);
 };
 
-#endif  // EXAMPLES_DIGITAL_SIGNATURES_CC_UTIL_H_
+#endif  // EXAMPLES_CC_DIGITAL_SIGNATURES_UTIL_H_

@@ -47,7 +47,7 @@
 
 #include <iostream>
 
-#include "digital_signatures/cc/util.h"
+#include "digital_signatures/util.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"

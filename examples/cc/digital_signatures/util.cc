@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "digital_signatures/cc/util.h"
+#include "digital_signatures/util.h"
 
 #include <iostream>
 #include <fstream>

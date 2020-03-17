@@ -16,15 +16,15 @@ file can directly depend on Tink.
 
 ```shell
 git clone https://github.com/google/tink
-cd tink
+cd tink/examples/cc
 bazel build ...
 echo "a message" > message.txt
-./bazel-bin/examples/digital_signatures/cc/digital_signatures_cli gen-private-key private_keyset.bin
-./bazel-bin/examples/digital_signatures/cc/digital_signatures_cli get-public-key private_keyset.bin \
+./bazel-bin/digital_signatures/digital_signatures_cli gen-private-key private_keyset.bin
+./bazel-bin/digital_signatures/digital_signatures_cli get-public-key private_keyset.bin \
     public_keyset.bin
-./bazel-bin/examples/digital_signatures/cc/digital_signatures_cli sign private_keyset.bin \
+./bazel-bin/digital_signatures/digital_signatures_cli sign private_keyset.bin \
     message.txt signature.bin
-./bazel-bin/examples/digital_signatures/cc/digital_signatures_cli verify public_keyset.bin \
+./bazel-bin/digital_signatures/digital_signatures_cli verify public_keyset.bin \
     message.txt signature.bin result.txt
 cat result.txt
 ```
