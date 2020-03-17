@@ -52,7 +52,7 @@ NoThrowStatus<StatusType> DoNotThrowStatus(StatusType status) {
 template <typename StatusType, typename... Args>
 std::function<NoThrowStatus<StatusType>(Args...)> DoNotThrowStatus(
     std::function<StatusType(Args...)> f) {
-  return [f = std::move(f)](Args... args) {
+  return [f](Args... args) {
     return NoThrowStatus<StatusType>(
         std::forward<StatusType>(f(std::forward<Args>(args)...)));
   };

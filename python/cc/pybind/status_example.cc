@@ -96,7 +96,7 @@ util::StatusOr<const IntValue*> ReturnPtrStatusOr(int value) {
 }
 
 util::StatusOr<std::unique_ptr<IntValue>> ReturnUniquePtrStatusOr(int value) {
-  return std::make_unique<IntValue>(value);
+  return absl::make_unique<IntValue>(value);
 }
 
 util::StatusOr<std::string> ReturnAlphaBetaGammaEncoded() {
