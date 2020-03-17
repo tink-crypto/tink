@@ -68,52 +68,58 @@ go version
 # TODO(b/141297103): add Python build and tests.
 run_linux_tests() {
   # ------------------- C++
-  cd cc/
+  pushd cc/
   time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
   time bazel test \
       --strategy=TestRunner=standalone --test_output=all \
       -- ... \
       ${DISABLE_GRPC_ON_MAC_OS} \
       || ( ls -l ; df -h / ; exit 1 )
-
+  popd
   # ------------------- Java
-  cd ../java
+  pushd java
   time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
   time bazel test \
       --strategy=TestRunner=standalone --test_output=all \
       -- ... || ( ls -l ; df -h / ; exit 1 )
-
+  popd
   # ------------------- Go
-  cd ../go
+  pushd go
   time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
   time bazel test \
       --strategy=TestRunner=standalone --test_output=all \
       -- ... || ( ls -l ; df -h / ; exit 1 )
-
+  popd
   # ------------------- Python
-  cd ../python
+  pushd python
   time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
   time bazel test \
       --strategy=TestRunner=standalone --test_output=all \
       -- ... || ( ls -l ; df -h / ; exit 1 )
-
+  popd
   # ------------------- examples
-  cd ../examples
+  pushd examples
+  time bazel build -- helloworld/...  || ( ls -l ; df -h / ; exit 1 )
+  time bazel test \
+      --strategy=TestRunner=standalone --test_output=all \
+      -- helloworld/... \
+      || ( ls -l ; df -h / ; exit 1 )
+  popd
+  # ------------------- examples/cc
+  pushd examples/cc
   time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
   time bazel test \
       --strategy=TestRunner=standalone --test_output=all \
       -- ... \
       || ( ls -l ; df -h / ; exit 1 )
-
+  popd
   # ------------------- tools and cross-language tests
-  cd ../tools
+  pushd tools
   time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
   time bazel test \
       --strategy=TestRunner=standalone --test_output=all \
       -- ... || ( ls -l ; df -h / ; exit 1 )
-
-  # --- return to the root directory
-  cd ..
+  popd
 }
 
 run_macos_tests() {
