@@ -94,6 +94,7 @@ tink_cc_library(
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -236,6 +237,7 @@ tink_cc_test(
     tink::subtle::test_util
     tink::util::istream_input_stream
     tink::util::ostream_output_stream
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
