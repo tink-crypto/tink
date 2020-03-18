@@ -16,6 +16,7 @@
 
 #include <pybind11/pybind11.h>
 
+#include "absl/memory/memory.h"
 #include "tink/util/status.h"
 #include "tink/python/cc/pybind/status_casters.h"
 #include "third_party/pybind11/include/pybind11/detail/common.h"

@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "absl/memory/memory.h"
 #include "third_party/pybind11/include/pybind11/pybind11.h"
 #include "tink/aead.h"
 #include "tink/deterministic_aead.h"
