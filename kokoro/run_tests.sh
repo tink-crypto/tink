@@ -99,10 +99,10 @@ run_linux_tests() {
   popd
   # ------------------- examples
   pushd examples
-  time bazel build -- helloworld/...  || ( ls -l ; df -h / ; exit 1 )
+  time bazel build -- ...  || ( ls -l ; df -h / ; exit 1 )
   time bazel test \
       --strategy=TestRunner=standalone --test_output=all \
-      -- helloworld/... \
+      -- ... \
       || ( ls -l ; df -h / ; exit 1 )
   popd
   # ------------------- examples/cc
