@@ -23,95 +23,49 @@ set -x
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
-# Only in Kokoro environments.
-if [[ -n "${KOKORO_ROOT}" ]]; then
-  # TODO(b/73748835): Workaround on Kokoro.
-  rm -f ~/.bazelrc
-
-  # TODO(b/131821833) Use the latest version of Bazel.
-  use_bazel.sh $(cat .bazelversion)
-
-  if [[ "${PLATFORM}" == 'darwin' ]]; then
-    export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-    export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
-  fi
-fi
-
-# Verify required environment variables.
-
-# Required for building Java binaries.
-if [[ -z "${ANDROID_HOME}" ]]; then
-  echo "The ANDROID_HOME environment variable must be set."
-  exit 4
-fi
-
-if [[ -z "${TMP}" ]]; then
-  echo "The TMP environment variable must be set."
-  exit 4
-fi
-
-# TODO(b/140615798)
+# TODO(b/140615798): Remove once fixed.
 DISABLE_GRPC_ON_MAC_OS=""
 if [[ "${PLATFORM}" == 'darwin' ]]; then
   DISABLE_GRPC_ON_MAC_OS="-//integration/gcpkms/..."
 fi
+readonly DISABLE_GRPC_ON_MAC_OS
 
-echo "using bazel binary: $(which bazel)"
-bazel version
+fail_with_debug_output() {
+  ls -l
+  df -h /
+  exit 1
+}
 
-echo "using java binary: $(which java)"
-java -version
-
-echo "using go: $(which go)"
-go version
-
-# TODO(b/141297103): add Python build and tests.
 run_linux_tests() {
-  # ------------------- C++
-  pushd cc/
-  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
-  time bazel test \
-      --strategy=TestRunner=standalone --test_output=all \
-      -- ... \
-      ${DISABLE_GRPC_ON_MAC_OS} \
-      || ( ls -l ; df -h / ; exit 1 )
-  popd
-  # ------------------- Java
-  pushd java
-  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
-  time bazel test \
-      --strategy=TestRunner=standalone --test_output=all \
-      -- ... || ( ls -l ; df -h / ; exit 1 )
-  popd
-  # ------------------- Go
-  pushd go
-  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
-  time bazel test \
-      --strategy=TestRunner=standalone --test_output=all \
-      -- ... || ( ls -l ; df -h / ; exit 1 )
-  popd
-  # ------------------- Python
-  pushd python
-  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
-  time bazel test \
-      --strategy=TestRunner=standalone --test_output=all \
-      -- ... || ( ls -l ; df -h / ; exit 1 )
-  popd
-  # ------------------- examples/cc
-  pushd examples/cc
-  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
-  time bazel test \
-      --strategy=TestRunner=standalone --test_output=all \
-      -- ... \
-      || ( ls -l ; df -h / ; exit 1 )
-  popd
-  # ------------------- tools and cross-language tests
-  pushd tools
-  time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )
-  time bazel test \
-      --strategy=TestRunner=standalone --test_output=all \
-      -- ... || ( ls -l ; df -h / ; exit 1 )
-  popd
+  local workspace_dir="$1"
+
+  local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
+  readonly TEST_FLAGS
+  (
+    cd ${workspace_dir}
+    time bazel build -- ... || fail_with_debug_output
+    time bazel test "${TEST_FLAGS[@]}" -- ... || fail_with_debug_output
+  )
+}
+
+run_all_linux_tests() {
+  # TODO(b/140615798): Remove the customized test once the issue is fixed.
+  #run_linux_tests "cc"
+  local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
+  readonly TEST_FLAGS
+  (
+    cd cc
+    time bazel build -- ... || fail_with_debug_output
+    time bazel test "${TEST_FLAGS[@]}" -- ... ${DISABLE_GRPC_ON_MAC_OS} \
+        || fail_with_debug_output
+  )
+  run_linux_tests "java"
+  run_linux_tests "go"
+  run_linux_tests "python"
+  run_linux_tests "examples/cc"
+  #run_linux_tests "examples/java_src"
+  run_linux_tests "tools"
+  run_linux_tests "apps"
 }
 
 run_macos_tests() {
@@ -119,41 +73,70 @@ run_macos_tests() {
   : "${IOS_SDK_VERSION:=13.2}"
   : "${XCODE_VERSION:=11.3}"
 
-  # --- Build all the iOS targets.
-  cd objc
-  time bazel build \
-  --compilation_mode=dbg \
-  --dynamic_mode=off \
-  --cpu=ios_x86_64 \
-  --ios_cpu=x86_64 \
-  --experimental_enable_objc_cc_deps \
-  --ios_sdk_version="${IOS_SDK_VERSION}" \
-  --xcode_version="${XCODE_VERSION}" \
-  --verbose_failures \
-  --test_output=all \
-  //objc/... || ( ls -l ; df -h / ; exit 1 )
+  local -a BAZEL_FLAGS=(
+    --compilation_mode=dbg --dynamic_mode=off --cpu=ios_x86_64
+    --ios_cpu=x86_64 --experimental_enable_objc_cc_deps
+    --ios_sdk_version="${IOS_SDK_VERSION}"
+    --xcode_version="${XCODE_VERSION}" --verbose_failures
+    --test_output=all
+  )
+  readonly BAZEL_FLAGS
 
-  # --- Run the iOS tests.
-  time bazel test \
-  --compilation_mode=dbg \
-  --dynamic_mode=off \
-  --cpu=ios_x86_64 \
-  --ios_cpu=x86_64 \
-  --experimental_enable_objc_cc_deps \
-  --ios_sdk_version="${IOS_SDK_VERSION}" \
-  --xcode_version="${XCODE_VERSION}" \
-  --verbose_failures \
-  --test_output=all \
-  :TinkTests || ( ls -l ; df -h / ; exit 1 )
+  (
+    cd objc
 
-  # --- return to the root directory
-  cd ..
+    # Build the iOS targets.
+    time bazel build "${BAZEL_FLAGS[@]}" ... || fail_with_debug_output
+
+    # Run the iOS tests.
+    time bazel test "${BAZEL_FLAGS[@]}" :TinkTests || fail_with_debug_output
+  )
 }
 
-run_linux_tests
+main() {
+  # Only in Kokoro environments.
+  if [[ -n "${KOKORO_ROOT}" ]]; then
+    # TODO(b/73748835): Workaround on Kokoro.
+    rm -f ~/.bazelrc
 
-if [[ "${PLATFORM}" == 'darwin' ]]; then
-  # TODO(przydatek): re-enable after ObjC WORKSPACE is added.
-  # run_macos_tests
-  echo "*** ObjC tests not enabled yet."
-fi
+    # TODO(b/131821833) Use the latest version of Bazel.
+    use_bazel.sh $(cat .bazelversion)
+
+    if [[ "${PLATFORM}" == 'darwin' ]]; then
+      export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+      export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+    fi
+  fi
+
+  # Verify required environment variables.
+
+  # Required for building Java binaries.
+  if [[ -z "${ANDROID_HOME}" ]]; then
+    echo "The ANDROID_HOME environment variable must be set."
+    exit 4
+  fi
+
+  if [[ -z "${TMP}" ]]; then
+    echo "The TMP environment variable must be set."
+    exit 4
+  fi
+
+  echo "using bazel binary: $(which bazel)"
+  bazel version
+
+  echo "using java binary: $(which java)"
+  java -version
+
+  echo "using go: $(which go)"
+  go version
+
+  run_all_linux_tests
+
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
+    # TODO(przydatek): re-enable after ObjC WORKSPACE is added.
+    # run_macos_tests
+    echo "*** ObjC tests not enabled yet."
+  fi
+}
+
+main "$@"
