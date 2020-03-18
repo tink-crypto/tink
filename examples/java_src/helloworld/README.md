@@ -21,7 +21,7 @@ and has to add Tink as a dependency using Bazel's maven\_jar rule.
 
 ```shell
 git clone https://github.com/google/tink
-cd tink/examples/helloworld/java
+cd tink/examples/java_src/
 mvn package
 echo foo > foo.txt
 mvn exec:java -Dexec.args="encrypt --keyset test.cfg --in foo.txt --out bar.encrypted"
@@ -33,10 +33,10 @@ cat foo2.txt
 
 ```shell
 git clone https://github.com/google/tink
-cd tink
-bazel build //examples/helloworld/java/...
+cd tink/examples/java_src
+bazel build ...
 echo foo > foo.txt
-./bazel-bin/examples/helloworld/java/helloworld encrypt --keyset test.cfg --in foo.txt --out bar.encrypted
-./bazel-bin/examples/helloworld/java/helloworld decrypt --keyset test.cfg --in bar.encrypted --out foo2.txt
+./bazel-bin/helloworld/helloworld encrypt --keyset test.cfg --in foo.txt --out bar.encrypted
+./bazel-bin/helloworld/helloworld decrypt --keyset test.cfg --in bar.encrypted --out foo2.txt
 cat foo2.txt
 ```
