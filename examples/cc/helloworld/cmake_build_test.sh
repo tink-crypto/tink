@@ -25,7 +25,7 @@ set -ue
 
 # XDG_CACHE_HOME must be set for a successful build of BoringSSL.
 export XDG_CACHE_HOME="$TEST_TMPDIR/cache"
-TEST_DATA_DIR="$TEST_SRCDIR/tink/examples/helloworld/cc"
+TEST_DATA_DIR="$TEST_SRCDIR/tink/examples/cc/helloworld"
 CMAKE_LISTS_FILE="$TEST_DATA_DIR/CMakeLists_for_CMakeBuildTest.txt"
 HELLO_WORLD_SRC="$TEST_DATA_DIR/hello_world.cc"
 KEYSET_FILE="$TEST_DATA_DIR/aes128_gcm_test_keyset_json.txt"

@@ -97,14 +97,6 @@ run_linux_tests() {
       --strategy=TestRunner=standalone --test_output=all \
       -- ... || ( ls -l ; df -h / ; exit 1 )
   popd
-  # ------------------- examples
-  pushd examples
-  time bazel build -- ...  || ( ls -l ; df -h / ; exit 1 )
-  time bazel test \
-      --strategy=TestRunner=standalone --test_output=all \
-      -- ... \
-      || ( ls -l ; df -h / ; exit 1 )
-  popd
   # ------------------- examples/cc
   pushd examples/cc
   time bazel build -- ... || ( ls -l ; df -h / ; exit 1 )

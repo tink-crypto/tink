@@ -16,10 +16,10 @@
 #############################################################################
 ##### Tests for hello_world binary.
 
-ROOT_DIR="$TEST_SRCDIR/examples"
-HELLO_WORLD_CLI="$ROOT_DIR/helloworld/cc/hello_world"
+ROOT_DIR="$TEST_SRCDIR/examples_cc"
+HELLO_WORLD_CLI="$ROOT_DIR/helloworld/hello_world"
 
-KEYSET_FILE="$ROOT_DIR/helloworld/cc/aes128_gcm_test_keyset_json.txt"
+KEYSET_FILE="$ROOT_DIR/helloworld/aes128_gcm_test_keyset_json.txt"
 PLAINTEXT_FILE="$TEST_TMPDIR/example_plaintext.txt"
 CIPHERTEXT_FILE="$TEST_TMPDIR/ciphertext.bin"
 DECRYPTED_FILE="$TEST_TMPDIR/decrypted.txt"
