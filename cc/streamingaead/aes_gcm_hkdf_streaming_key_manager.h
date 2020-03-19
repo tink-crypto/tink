@@ -28,6 +28,7 @@
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_gcm_hkdf_streaming.pb.h"
@@ -46,13 +47,15 @@ class AesGcmHkdfStreamingKeyManager
     crypto::tink::util::StatusOr<std::unique_ptr<StreamingAead>> Create(
         const google::crypto::tink::AesGcmHkdfStreamingKey& key)
         const override {
-      auto streaming_result = crypto::tink::subtle::AesGcmHkdfStreaming::New(
-          key.key_value(),
-          crypto::tink::util::Enums::ProtoToSubtle(
-              key.params().hkdf_hash_type()),
-          key.params().derived_key_size(),
-          key.params().ciphertext_segment_size(),
-          /* ciphertext_offset = */ 0);
+      subtle::AesGcmHkdfStreaming::Params params;
+      params.ikm = util::SecretDataFromStringView(key.key_value());
+      params.hkdf_hash = crypto::tink::util::Enums::ProtoToSubtle(
+          key.params().hkdf_hash_type());
+      params.derived_key_size = key.params().derived_key_size();
+      params.ciphertext_segment_size = key.params().ciphertext_segment_size();
+      params.ciphertext_offset = 0;
+      auto streaming_result =
+          subtle::AesGcmHkdfStreaming::New(std::move(params));
       if (!streaming_result.ok()) return streaming_result.status();
       return {std::move(streaming_result.ValueOrDie())};
     }

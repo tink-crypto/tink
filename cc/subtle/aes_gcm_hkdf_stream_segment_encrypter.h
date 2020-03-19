@@ -17,12 +17,13 @@
 #ifndef TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_ENCRYPTER_H_
 #define TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_ENCRYPTER_H_
 
+#include <memory>
+#include <string>
 #include <vector>
 
-#include "absl/strings/string_view.h"
 #include "openssl/aead.h"
 #include "tink/subtle/stream_segment_encrypter.h"
-#include "tink/util/status.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -57,7 +58,7 @@ namespace subtle {
 class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
  public:
   // The size of the IVs for GCM.
-  static const int kNonceSizeInBytes = 12;
+  static constexpr int kNonceSizeInBytes = 12;
 
   // The nonce has the format nonce_prefix || ctr || last_block, where:
   //  - nonce_prefix is a constant of kNoncePrefixSizeInBytes bytes
@@ -65,21 +66,21 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
   //  - ctr is a 32 bit counter
   //  - last_block is a byte equal to 1 for the last block of the file
   //    and 0 otherwise.
-  static const int kNoncePrefixSizeInBytes = 7;
+  static constexpr int kNoncePrefixSizeInBytes = 7;
 
   // The size of the tags of each ciphertext segment.
-  static const int kTagSizeInBytes = 16;
+  static constexpr int kTagSizeInBytes = 16;
 
   struct Params {
-    std::string key_value;
+    util::SecretData key;
     std::string salt;
     int ciphertext_offset;
     int ciphertext_segment_size;
   };
 
   // A factory.
-  static util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
-      New(const Params& params);
+  static util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> New(
+      Params params);
 
   // Overridden methods of StreamSegmentEncrypter.
   util::Status EncryptSegment(
@@ -100,7 +101,6 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
   int get_ciphertext_offset() const override {
     return ciphertext_offset_;
   }
-  ~AesGcmHkdfStreamSegmentEncrypter() override {}
 
  protected:
   void IncSegmentNumber() override {
@@ -108,16 +108,16 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
   }
 
  private:
-  AesGcmHkdfStreamSegmentEncrypter() : segment_number_(0) {}
-  util::Status InitCtx(absl::string_view key_value);
+  AesGcmHkdfStreamSegmentEncrypter(bssl::UniquePtr<EVP_AEAD_CTX> ctx,
+                                   const Params& params);
 
-  std::vector<uint8_t> header_;
-  std::string nonce_prefix_;
-  int64_t segment_number_;
-  int ciphertext_segment_size_;
-  int ciphertext_offset_;
+  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
+  const std::string nonce_prefix_;
+  const std::vector<uint8_t> header_;
+  const int ciphertext_segment_size_;
+  const int ciphertext_offset_;
 
-  bssl::ScopedEVP_AEAD_CTX ctx_;
+  int64_t segment_number_ = 0;
 };
 
 }  // namespace subtle
