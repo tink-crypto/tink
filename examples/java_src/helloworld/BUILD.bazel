@@ -1,3 +1,5 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
@@ -13,9 +15,14 @@ java_binary(
         "@maven//:org_json_json",
     ],
     deps = [
-        "@tink_java//:java",
-        "@tink_java//:cleartext_keyset_handle",
-        "@tink_java//:subtle",
         "@maven//:args4j_args4j",
+        "@tink_java//:cleartext_keyset_handle",
+        "@tink_java//:java",
+        "@tink_java//:subtle",
     ],
+)
+
+build_test(
+    name = "helloworld_buildtest",
+    targets = [":helloworld"],
 )
