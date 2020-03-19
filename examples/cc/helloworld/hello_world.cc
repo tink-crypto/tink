@@ -20,7 +20,6 @@
 //                or ciphertext for decryption)
 //   associated-data:  a string to be used as assciated data
 //   output-file:  name of the file for the resulting output
-// TODO(przydatek): consider adding support for other primitives.
 
 #include <iostream>
 #include <fstream>

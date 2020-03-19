@@ -3,8 +3,7 @@
 #############################################################################
 #### Tests for digital_signatures_cli binary.
 
-ROOT_DIR="$TEST_SRCDIR/examples_cc"
-SIGNATURE_CLI="$ROOT_DIR/digital_signatures/digital_signatures_cli"
+SIGNATURE_CLI="$1"
 
 PRIVATE_KEYSET_FILE="$TEST_TMPDIR/private_keyset.bin"
 PUBLIC_KEYSET_FILE="$TEST_TMPDIR/public_keyset.bin"

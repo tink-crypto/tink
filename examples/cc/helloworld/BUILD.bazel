@@ -2,14 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-filegroup(
-    name = "hello_world_files",
-    srcs = [
-        "aes128_gcm_test_keyset_json.txt",
-        "hello_world.cc",
-        "CMakeLists_for_CMakeBuildTest.txt",
-    ],
-)
+exports_files(["aes128_gcm_test_keyset_json.txt"])
 
 cc_binary(
     name = "hello_world",
@@ -28,8 +21,12 @@ sh_test(
     srcs = [
         "hello_world_test.sh",
     ],
+    args = [
+        "$(rootpath :hello_world)",
+        "$(rootpath :aes128_gcm_test_keyset_json.txt)",
+    ],
     data = [
+        ":aes128_gcm_test_keyset_json.txt",
         ":hello_world",
-        ":hello_world_files",
     ],
 )

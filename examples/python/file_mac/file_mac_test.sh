@@ -17,10 +17,9 @@ set -euo pipefail
 #############################################################################
 ##### Tests for file_mac python example.
 
-ROOT_DIR="$TEST_SRCDIR/tink_base/examples/python"
-FILE_MAC_CLI="$ROOT_DIR/file_mac/file_mac_cleartext"
+FILE_MAC_CLI="$1"
+KEYSET_FILE="$2"
 
-KEYSET_FILE="$ROOT_DIR/file_mac/hmac_sha256_256bittag_test_keyset.json"
 DATA_FILE="$TEST_TMPDIR/example_data.txt"
 EXPECTED_MAC_FILE="$TEST_TMPDIR/expected_mac.txt"
 

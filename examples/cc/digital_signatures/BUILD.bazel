@@ -33,5 +33,8 @@ sh_test(
     name = "digital_signatures_cli_test",
     size = "small",
     srcs = ["digital_signatures_cli_test.sh"],
+    args = [
+        "$(rootpath :digital_signatures_cli)",
+    ],
     data = [":digital_signatures_cli"],
 )
