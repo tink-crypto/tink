@@ -58,14 +58,14 @@ class PrimitiveSet {
     static crypto::tink::util::StatusOr<std::unique_ptr<Entry<P>>> New(
         std::unique_ptr<P> primitive, google::crypto::tink::Keyset::Key key) {
       if (key.status() != google::crypto::tink::KeyStatusType::ENABLED) {
-        return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                         "The key must be ENABLED.");
+        return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+                            "The key must be ENABLED.");
       }
       auto identifier_result = CryptoFormat::get_output_prefix(key);
       if (!identifier_result.ok()) return identifier_result.status();
       if (primitive == nullptr) {
-        return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                         "The primitive must be non-null.");
+        return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+                            "The primitive must be non-null.");
       }
       std::string identifier = identifier_result.ValueOrDie();
       return absl::WrapUnique(new Entry(std::move(primitive), identifier,
@@ -142,18 +142,18 @@ class PrimitiveSet {
   // Sets the given 'primary' as the primary primitive of this set.
   crypto::tink::util::Status set_primary(Entry<P>* primary) {
     if (!primary) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                       "The primary primitive must be non-null.");
+      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+                          "The primary primitive must be non-null.");
     }
     if (primary->get_status() != google::crypto::tink::KeyStatusType::ENABLED) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                       "Primary has to be enabled.");
+      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+                          "Primary has to be enabled.");
     }
     auto entries_result = get_primitives(primary->get_identifier());
     if (!entries_result.ok()) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                       "Primary cannot be set to an entry which is "
-                       "not held by this primitive set.");
+      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+                          "Primary cannot be set to an entry which is "
+                          "not held by this primitive set.");
     }
 
     primary_ = primary;

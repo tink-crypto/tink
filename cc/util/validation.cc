@@ -57,8 +57,8 @@ util::Status ValidateKey(const Keyset::Key& key) {
 
 util::Status ValidateKeyset(const Keyset& keyset) {
   if (keyset.key_size() < 1) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "A valid keyset must contain at least one key.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "A valid keyset must contain at least one key.");
   }
 
   uint32_t primary_key_id = keyset.primary_key_id();
@@ -83,8 +83,8 @@ util::Status ValidateKeyset(const Keyset& keyset) {
     if (key.status() == KeyStatusType::ENABLED &&
         key.key_id() == primary_key_id) {
       if (has_primary_key) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
-                         "keyset contains multiple primary keys");
+        return util::Status(util::error::INVALID_ARGUMENT,
+                            "keyset contains multiple primary keys");
       }
       has_primary_key = true;
     }
@@ -95,16 +95,16 @@ util::Status ValidateKeyset(const Keyset& keyset) {
   }
 
   if (enabled_keys == 0) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "keyset must contain at least one ENABLED key");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "keyset must contain at least one ENABLED key");
   }
 
   // A public key can be used for verification without being set as the primary
   // key. Therefore, it is okay to have a keyset that contains public but
   // doesn't have a primary key set.
   if (!has_primary_key && !contains_only_public_key_material) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "keyset doesn't contain a valid primary key");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "keyset doesn't contain a valid primary key");
   }
 
   return util::Status::OK;
