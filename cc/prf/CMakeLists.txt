@@ -8,8 +8,8 @@ tink_cc_library(
     tink::core::input_stream
     tink::core::key_type_manager
     tink::subtle::subtle
-    tink::subtle_prf::hkdf_streaming_prf
-    tink::subtle_prf::streaming_prf
+    tink::subtle::prf::hkdf_streaming_prf
+    tink::subtle::prf::streaming_prf
     tink::util::constants
     tink::util::enums
     tink::util::status
@@ -48,8 +48,8 @@ tink_cc_test(
   SRCS hkdf_prf_key_manager_test.cc
   DEPS
     tink::prf::hkdf_prf_key_manager
-    tink::subtle_prf::hkdf_streaming_prf
-    tink::subtle_prf::streaming_prf
+    tink::subtle::prf::hkdf_streaming_prf
+    tink::subtle::prf::streaming_prf
     tink::subtle::subtle
     tink::util::input_stream_util
     tink::util::test_matchers

@@ -24,9 +24,9 @@ from absl.testing import absltest
 from tink.proto import aes_gcm_pb2
 from tink.python import core
 from tink.python import tink_config
-from tink.python.aead import aead
-from tink.python.aead import aead_key_templates
-from tink.python.aead import kms_envelope_aead
+from aead import aead
+from aead import aead_key_templates
+from aead import kms_envelope_aead
 from tink.python.core import tink_error
 
 

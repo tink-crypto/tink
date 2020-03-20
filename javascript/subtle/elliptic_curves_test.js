@@ -17,40 +17,31 @@ goog.setTestOnly('tink.subtle.EllipticCurvesTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const Environment = goog.require('tink.subtle.Environment');
 const Random = goog.require('tink.subtle.Random');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 const wycheproofEcdhTestVectors = goog.require('tink.subtle.wycheproofEcdhTestVectors');
 
-testSuite({
-  shouldRunTests() {
-    return Environment.IS_WEBCRYPTO_AVAILABLE &&
-        !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('elliptic curves test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testcomputeEcdhSharedSecret() {
+  it('compute ecdh shared secret', async function() {
     const aliceKeyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const bobKeyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const sharedSecret1 = await EllipticCurves.computeEcdhSharedSecret(
         aliceKeyPair.privateKey, bobKeyPair.publicKey);
     const sharedSecret2 = await EllipticCurves.computeEcdhSharedSecret(
         bobKeyPair.privateKey, aliceKeyPair.publicKey);
-    assertEquals(Bytes.toHex(sharedSecret1), Bytes.toHex(sharedSecret2));
-  },
+    expect(Bytes.toHex(sharedSecret2)).toBe(Bytes.toHex(sharedSecret1));
+  });
 
-  async testWycheproof_wycheproofWebcrypto() {
+  it('wycheproof, wycheproof webcrypto', async function() {
     for (let testGroup of wycheproofEcdhTestVectors['testGroups']) {
       let errors = '';
       for (let test of testGroup['tests']) {
@@ -60,37 +51,37 @@ testSuite({
         fail(errors);
       }
     }
-  },
+  });
 
   // Test that both ECDH public and private key are defined in the result.
-  async testGenerateKeyPairECDH() {
+  it('generate key pair e c d h', async function() {
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
       const curveTypeString =
           EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
-      assertTrue(keyPair.privateKey != null);
-      assertTrue(keyPair.publicKey != null);
+      expect(keyPair.privateKey != null).toBe(true);
+      expect(keyPair.publicKey != null).toBe(true);
     }
-  },
+  });
 
   // Test that both ECDSA public and private key are defined in the result.
-  async testGenerateKeyPairECDSA() {
+  it('generate key pair e c d s a', async function() {
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
       const curveTypeString =
           EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
-      assertTrue(keyPair.privateKey != null);
-      assertTrue(keyPair.publicKey != null);
+      expect(keyPair.privateKey != null).toBe(true);
+      expect(keyPair.publicKey != null).toBe(true);
     }
-  },
+  });
 
   // Test that when ECDH crypto key is exported and imported it gives the same
   // key as the original one.
-  async testImportExportCryptoKeyECDH() {
+  it('import export crypto key e c d h', async function() {
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
       const curveTypeString =
@@ -102,19 +93,19 @@ testSuite({
       const publicCryptoKey = await EllipticCurves.exportCryptoKey(publicKey);
       const importedPublicKey =
           await EllipticCurves.importPublicKey('ECDH', publicCryptoKey);
-      assertObjectEquals(publicKey, importedPublicKey);
+      expect(importedPublicKey).toEqual(publicKey);
 
       const privateKey = keyPair.privateKey;
       const privateCryptoKey = await EllipticCurves.exportCryptoKey(privateKey);
       const importedPrivateKey =
           await EllipticCurves.importPrivateKey('ECDH', privateCryptoKey);
-      assertObjectEquals(privateKey, importedPrivateKey);
+      expect(importedPrivateKey).toEqual(privateKey);
     }
-  },
+  });
 
   // Test that when ECDSA crypto key is exported and imported it gives the same
   // key as the original one.
-  async testImportExportCryptoKeyECDSA() {
+  it('import export crypto key e c d s a', async function() {
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
       const curveTypeString =
@@ -126,19 +117,19 @@ testSuite({
       const publicCryptoKey = await EllipticCurves.exportCryptoKey(publicKey);
       const importedPublicKey =
           await EllipticCurves.importPublicKey('ECDSA', publicCryptoKey);
-      assertObjectEquals(publicKey, importedPublicKey);
+      expect(importedPublicKey).toEqual(publicKey);
 
       const privateKey = keyPair.privateKey;
       const privateCryptoKey = await EllipticCurves.exportCryptoKey(privateKey);
       const importedPrivateKey =
           await EllipticCurves.importPrivateKey('ECDSA', privateCryptoKey);
-      assertObjectEquals(privateKey, importedPrivateKey);
+      expect(importedPrivateKey).toEqual(privateKey);
     }
-  },
+  });
 
   // Test that when JSON ECDH web key is imported and exported it gives the same
   // key as the original one.
-  async testImportExportJsonKeyECDH() {
+  it('import export json key e c d h', async function() {
     for (let testKey of TEST_KEYS) {
       const jwk = /** @type{!webCrypto.JsonWebKey} */ ({
         'kty': 'EC',
@@ -159,13 +150,13 @@ testSuite({
       }
 
       const exportedKey = await EllipticCurves.exportCryptoKey(importedKey);
-      assertObjectEquals(jwk, exportedKey);
+      expect(exportedKey).toEqual(jwk);
     }
-  },
+  });
 
   // Test that when JSON ECDSA web key is imported and exported it gives the
   // same key as the original one.
-  async testImportExportJsonKeyECDSA() {
+  it('import export json key e c d s a', async function() {
     for (let testKey of TEST_KEYS) {
       const jwk = /** @type{!webCrypto.JsonWebKey} */ ({
         'kty': 'EC',
@@ -186,95 +177,87 @@ testSuite({
       }
 
       const exportedKey = await EllipticCurves.exportCryptoKey(importedKey);
-      assertObjectEquals(jwk, exportedKey);
+      expect(exportedKey).toEqual(jwk);
     }
-  },
+  });
 
-  testCurveToString() {
-    assertEquals(
-        'P-256', EllipticCurves.curveToString(EllipticCurves.CurveType.P256));
-    assertEquals(
-        'P-384', EllipticCurves.curveToString(EllipticCurves.CurveType.P384));
-    assertEquals(
-        'P-521', EllipticCurves.curveToString(EllipticCurves.CurveType.P521));
-  },
+  it('curve to string', function() {
+    expect(EllipticCurves.curveToString(EllipticCurves.CurveType.P256))
+        .toBe('P-256');
+    expect(EllipticCurves.curveToString(EllipticCurves.CurveType.P384))
+        .toBe('P-384');
+    expect(EllipticCurves.curveToString(EllipticCurves.CurveType.P521))
+        .toBe('P-521');
+  });
 
-  testCurveFromString() {
-    assertEquals(
-        EllipticCurves.CurveType.P256, EllipticCurves.curveFromString('P-256'));
-    assertEquals(
-        EllipticCurves.CurveType.P384, EllipticCurves.curveFromString('P-384'));
-    assertEquals(
-        EllipticCurves.CurveType.P521, EllipticCurves.curveFromString('P-521'));
-  },
+  it('curve from string', function() {
+    expect(EllipticCurves.curveFromString('P-256'))
+        .toBe(EllipticCurves.CurveType.P256);
+    expect(EllipticCurves.curveFromString('P-384'))
+        .toBe(EllipticCurves.CurveType.P384);
+    expect(EllipticCurves.curveFromString('P-521'))
+        .toBe(EllipticCurves.CurveType.P521);
+  });
 
-  testFieldSizeInBytes() {
-    assertEquals(
-        256 / 8,
-        EllipticCurves.fieldSizeInBytes(EllipticCurves.CurveType.P256));
-    assertEquals(
-        384 / 8,
-        EllipticCurves.fieldSizeInBytes(EllipticCurves.CurveType.P384));
-    assertEquals(
-        (521 + 7) / 8,
-        EllipticCurves.fieldSizeInBytes(EllipticCurves.CurveType.P521));
-  },
+  it('field size in bytes', function() {
+    expect(EllipticCurves.fieldSizeInBytes(EllipticCurves.CurveType.P256))
+        .toBe(256 / 8);
+    expect(EllipticCurves.fieldSizeInBytes(EllipticCurves.CurveType.P384))
+        .toBe(384 / 8);
+    expect(EllipticCurves.fieldSizeInBytes(EllipticCurves.CurveType.P521))
+        .toBe((521 + 7) / 8);
+  });
 
-  testEncodingSizeInBytes_uncompressedPointFormatType() {
-    assertEquals(
-        2 * (256 / 8) + 1,
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P256,
-            EllipticCurves.PointFormatType.UNCOMPRESSED));
-    assertEquals(
-        2 * (384 / 8) + 1,
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P384,
-            EllipticCurves.PointFormatType.UNCOMPRESSED));
-    assertEquals(
-        2 * ((521 + 7) / 8) + 1,
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P521,
-            EllipticCurves.PointFormatType.UNCOMPRESSED));
-  },
+  it('encoding size in bytes, uncompressed point format type', function() {
+    expect(EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P256,
+               EllipticCurves.PointFormatType.UNCOMPRESSED))
+        .toBe(2 * (256 / 8) + 1);
+    expect(EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P384,
+               EllipticCurves.PointFormatType.UNCOMPRESSED))
+        .toBe(2 * (384 / 8) + 1);
+    expect(EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P521,
+               EllipticCurves.PointFormatType.UNCOMPRESSED))
+        .toBe(2 * ((521 + 7) / 8) + 1);
+  });
 
-  testEncodingSizeInBytes_compressedPointFormatType() {
-    assertEquals(
-        (256 / 8) + 1,
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P256,
-            EllipticCurves.PointFormatType.COMPRESSED));
-    assertEquals(
-        (384 / 8) + 1,
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P384,
-            EllipticCurves.PointFormatType.COMPRESSED));
-    assertEquals(
-        ((521 + 7) / 8) + 1,
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P521,
-            EllipticCurves.PointFormatType.COMPRESSED));
-  },
+  it('encoding size in bytes, compressed point format type', function() {
+    expect(EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P256,
+               EllipticCurves.PointFormatType.COMPRESSED))
+        .toBe((256 / 8) + 1);
+    expect(EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P384,
+               EllipticCurves.PointFormatType.COMPRESSED))
+        .toBe((384 / 8) + 1);
+    expect(EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P521,
+               EllipticCurves.PointFormatType.COMPRESSED))
+        .toBe(((521 + 7) / 8) + 1);
+  });
 
-  testEncodingSizeInBytes_crunchyUncompressedPointFormatType() {
-    assertEquals(
-        2 * (256 / 8),
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P256,
-            EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
-    assertEquals(
-        2 * (384 / 8),
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P384,
-            EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
-    assertEquals(
-        2 * ((521 + 7) / 8),
-        EllipticCurves.encodingSizeInBytes(
-            EllipticCurves.CurveType.P521,
-            EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
-  },
+  it('encoding size in bytes, crunchy uncompressed point format type',
+     function() {
+       expect(
+           EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P256,
+               EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED))
+           .toBe(2 * (256 / 8));
+       expect(
+           EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P384,
+               EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED))
+           .toBe(2 * (384 / 8));
+       expect(
+           EllipticCurves.encodingSizeInBytes(
+               EllipticCurves.CurveType.P521,
+               EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED))
+           .toBe(2 * ((521 + 7) / 8));
+     });
 
-  testPointDecode_wrongPointSize() {
+  it('point decode, wrong point size', function() {
     const point = new Uint8Array(10);
     const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
 
@@ -287,12 +270,12 @@ testSuite({
         EllipticCurves.pointDecode(curveTypeString, format, point);
         fail('Should throw an exception.');
       } catch (e) {
-        assertEquals('CustomError: invalid point', e.toString());
+        expect(e.toString()).toBe('InvalidArgumentsException: invalid point');
       }
     }
-  },
+  });
 
-  testPointDecode_unknownCurve() {
+  it('point decode, unknown curve', function() {
     const point = new Uint8Array(10);
     const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const curve = 'some-unknown-curve';
@@ -301,11 +284,11 @@ testSuite({
       EllipticCurves.pointDecode(curve, format, point);
       fail('Should throw an exception.');
     } catch (e) {
-      assertTrue(e.toString().includes('unknown curve'));
+      expect(e.toString().includes('unknown curve')).toBe(true);
     }
-  },
+  });
 
-  testPointEncodeDecode() {
+  it('point encode decode', function() {
     const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
     for (let curve of Object.keys(EllipticCurves.CurveType)) {
       const curveType = EllipticCurves.CurveType[curve];
@@ -326,39 +309,41 @@ testSuite({
       const decodedPoint =
           EllipticCurves.pointDecode(curveTypeString, format, encodedPoint);
 
-      assertObjectEquals(point, decodedPoint);
+      expect(decodedPoint).toEqual(point);
     }
-  },
+  });
 
-  testEcdsaDer2Ieee() {
+  it('ecdsa der2 ieee', function() {
     for (let test of ECDSA_IEEE_DER_TEST_VECTORS) {
-      assertObjectEquals(
-          test.ieee, EllipticCurves.ecdsaDer2Ieee(test.der, test.ieee.length));
+      expect(EllipticCurves.ecdsaDer2Ieee(test.der, test.ieee.length))
+          .toEqual(test.ieee);
     }
-  },
+  });
 
-  testEcdsaDer2IeeeWithInvalidSignatures() {
+  it('ecdsa der2 ieee with invalid signatures', function() {
     for (let test of INVALID_DER_ECDSA_SIGNATURES) {
       try {
         EllipticCurves.ecdsaDer2Ieee(
             Bytes.fromHex(test), 1 /* ieeeLength, ignored */);
       } catch (e) {
-        assertEquals('CustomError: invalid DER signature', e.toString());
+        expect(e.toString())
+            .toBe('InvalidArgumentsException: invalid DER signature');
       }
     }
-  },
+  });
 
-  testEcdsaIeee2Der() {
+  it('ecdsa ieee2 der', function() {
     for (let test of ECDSA_IEEE_DER_TEST_VECTORS) {
-      assertObjectEquals(test.der, EllipticCurves.ecdsaIeee2Der(test.ieee));
+      expect(EllipticCurves.ecdsaIeee2Der(test.ieee)).toEqual(test.der);
     }
-  },
+  });
 
-  testIsValidDerEcdsaSignature() {
+  it('is valid der ecdsa signature', function() {
     for (let test of INVALID_DER_ECDSA_SIGNATURES) {
-      assertFalse(EllipticCurves.isValidDerEcdsaSignature(Bytes.fromHex(test)));
+      expect(EllipticCurves.isValidDerEcdsaSignature(Bytes.fromHex(test)))
+          .toBe(false);
     }
-  },
+  });
 });
 
 /**

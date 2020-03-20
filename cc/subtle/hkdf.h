@@ -19,6 +19,7 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -26,11 +27,15 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
+// TODO(wiktorg) delete non-SecretData variant once all clients are migrated
 class Hkdf {
  public:
   // Computes hkdf according to RFC5869.
   static crypto::tink::util::StatusOr<std::string> ComputeHkdf(
       HashType hash, absl::string_view ikm, absl::string_view salt,
+      absl::string_view info, size_t out_len);
+  static crypto::tink::util::StatusOr<util::SecretData> ComputeHkdf(
+      HashType hash, const util::SecretData& ikm, absl::string_view salt,
       absl::string_view info, size_t out_len);
 
   // Computes symmetric key for ECIES with HKDF from the provided parameters.
@@ -41,6 +46,11 @@ class Hkdf {
       HashType hash, absl::string_view kem_bytes,
       absl::string_view shared_secret, absl::string_view salt,
       absl::string_view info, size_t out_len);
+  static crypto::tink::util::StatusOr<util::SecretData>
+  ComputeEciesHkdfSymmetricKey(HashType hash, const util::SecretData& kem_bytes,
+                               const util::SecretData& shared_secret,
+                               absl::string_view salt, absl::string_view info,
+                               size_t out_len);
 };
 }  // namespace subtle
 }  // namespace tink

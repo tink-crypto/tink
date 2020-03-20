@@ -19,6 +19,34 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME cord_aead
+  SRCS cord_aead.h
+  DEPS
+    tink::util::statusor
+    absl::strings
+    absl::cord
+)
+
+tink_cc_library(
+  NAME cord_aead_wrapper
+  SRCS
+    cord_aead_wrapper.cc
+    cord_aead_wrapper.h
+  DEPS
+    absl::strings
+    absl::cord
+    tink::aead::cord_aead
+    tink::core::crypto_format
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::core::registry
+    tink::subtle::subtle_util_boringssl
+    tink::util::status
+    tink::util::statusor
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
   NAME aead_config
   SRCS
     aead_config.cc
@@ -84,6 +112,7 @@ tink_cc_library(
     tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -153,6 +182,7 @@ tink_cc_library(
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -173,6 +203,7 @@ tink_cc_library(
     tink::subtle::xchacha20_poly1305_boringssl
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -318,6 +349,7 @@ tink_cc_test(
   DEPS
     tink::aead::aes_eax_key_manager
     tink::core::aead
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -371,6 +403,7 @@ tink_cc_test(
     tink::subtle::aead_test_util
     tink::subtle::aes_ctr_boringssl
     tink::util::enums
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -384,6 +417,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::key_manager_impl
     tink::subtle::aead_test_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

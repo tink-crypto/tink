@@ -17,18 +17,11 @@ goog.module('tink.aead.AesCtrHmacAeadKeyManager');
 const Aead = goog.require('tink.Aead');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const KeyManager = goog.require('tink.KeyManager');
-const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
-const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
-const PbAesCtrKey = goog.require('proto.google.crypto.tink.AesCtrKey');
-const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbHmacKey = goog.require('proto.google.crypto.tink.HmacKey');
-const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
+const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbHashType, PbHmacKey, PbHmacKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * @final

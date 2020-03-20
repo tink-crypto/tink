@@ -17,18 +17,14 @@ goog.setTestOnly('tink.PrimitiveSetTest');
 
 const Aead = goog.require('tink.Aead');
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
+describe('primitive set test', function() {
   /////////////////////////////////////////////////////////////////////////////
   // tests for addPrimitive method
-  testAddPrimitiveUnknownCryptoFormat() {
+  it('add primitive unknown crypto format', function() {
     const primitive = new DummyAead1();
     const key =
         createKey().setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
@@ -37,13 +33,13 @@ testSuite({
     try {
       primitiveSet.addPrimitive(primitive, key);
     } catch (e) {
-      assertEquals(ExceptionText.unknownPrefixType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownPrefixType());
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  testAddPrimitiveNullPrimitive() {
+  it('add primitive null primitive', function() {
     const primitive = null;
     const key = createKey();
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
@@ -51,13 +47,13 @@ testSuite({
     try {
       primitiveSet.addPrimitive(primitive, key);
     } catch (e) {
-      assertEquals(ExceptionText.addingNullPrimitive(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.addingNullPrimitive());
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  testAddPrimitiveMultipleTimesShouldWork() {
+  it('add primitive multiple times should work', function() {
     const key = createKey();
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
@@ -70,17 +66,16 @@ testSuite({
       }
       const result = primitiveSet.addPrimitive(primitive, key);
 
-      assertObjectEquals(primitive, result.getPrimitive());
-      assertEquals(key.getStatus(), result.getKeyStatus());
-      assertEquals(key.getOutputPrefixType(), result.getOutputPrefixType());
-      assertObjectEquals(
-          CryptoFormat.getOutputPrefix(key), result.getIdentifier());
+      expect(result.getPrimitive()).toEqual(primitive);
+      expect(result.getKeyStatus()).toBe(key.getStatus());
+      expect(result.getOutputPrefixType()).toBe(key.getOutputPrefixType());
+      expect(result.getIdentifier()).toEqual(CryptoFormat.getOutputPrefix(key));
     }
-  },
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitives method
-  testGetPrimitivesWhichWereNotAdded() {
+  it('get primitives which were not added', function() {
     // Fill in the structure with some primitives.
     const numberOfAddedPrimitives = 12;
     const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
@@ -89,10 +84,10 @@ testSuite({
     const identifier = CryptoFormat.getOutputPrefix(key);
     const result = primitiveSet.getPrimitives(identifier);
 
-    assertObjectEquals([], result);
-  },
+    expect(result).toEqual([]);
+  });
 
-  testGetPrimitivesDifferentIdentifiers() {
+  it('get primitives different identifiers', function() {
     // Fill in the structure with some primitives.
     const n = 100;
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
@@ -123,11 +118,11 @@ testSuite({
       const expectedResult = [added[i].entry];
       const result = primitiveSet.getPrimitives(identifier);
 
-      assertObjectEquals(expectedResult, result);
+      expect(result).toEqual(expectedResult);
     }
-  },
+  });
 
-  testGetPrimitivesSameIdentifiers() {
+  it('get primitives same identifiers', function() {
     // Fill in the structure with some primitives.
     const numberOfAddedPrimitives = 50;
     const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
@@ -157,19 +152,19 @@ testSuite({
         CryptoFormat.getOutputPrefix(createKey(keyId, legacyKeyType));
     const result = primitiveSet.getPrimitives(identifier);
 
-    assertObjectEquals(expectedResult, result);
-  },
+    expect(result).toEqual(expectedResult);
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getRawPrimitives method
-  testGetRawPrimitives() {
+  it('get raw primitives', function() {
     const numberOfAddedPrimitives = 20;
     const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
 
     // No RAW primitives were added.
     let expectedResult = [];
     let result = primitiveSet.getRawPrimitives();
-    assertObjectEquals(expectedResult, result);
+    expect(result).toEqual(expectedResult);
 
     // Add RAW primitives and check the result again after each adding.
     let key = createKey().setOutputPrefixType(PbOutputPrefixType.RAW);
@@ -177,18 +172,18 @@ testSuite({
     let addResult = primitiveSet.addPrimitive(new DummyAead1(), key);
     expectedResult.push(addResult);
     result = primitiveSet.getRawPrimitives();
-    assertObjectEquals(expectedResult, result);
+    expect(result).toEqual(expectedResult);
 
     key.setStatus(PbKeyStatusType.DISABLED);
     addResult = primitiveSet.addPrimitive(new DummyAead2(), key);
     expectedResult.push(addResult);
     result = primitiveSet.getRawPrimitives();
-    assertObjectEquals(expectedResult, result);
-  },
+    expect(result).toEqual(expectedResult);
+  });
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for setPrimary and getPrimary methods
-  testSetPrimaryToNonholdedEntry() {
+  it('set primary to nonholded entry', function() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     const entry = new PrimitiveSet.Entry(
         new DummyAead1(), new Uint8Array(10), PbKeyStatusType.ENABLED,
@@ -197,13 +192,13 @@ testSuite({
     try {
       primitiveSet.setPrimary(entry);
     } catch (e) {
-      assertEquals(ExceptionText.setPrimaryToMissingEntry(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.setPrimaryToMissingEntry());
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  testSetPrimaryToEntryWithDisabledKeyStatus() {
+  it('set primary to entry with disabled key status', function() {
     const key = createKey(/* opt_keyId = */ 0x12345678,
         /* opt_legacy = */ false, /* opt_enabled = */ false);
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
@@ -213,36 +208,36 @@ testSuite({
     try {
       primitiveSet.setPrimary(primary);
     } catch (e) {
-      assertEquals(ExceptionText.setPrimaryToDisabled(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.setPrimaryToDisabled());
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  testSetAndGetPrimary() {
+  it('set and get primary', function() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
-    assertEquals(null, primitiveSet.getPrimary());
+    expect(primitiveSet.getPrimary()).toBe(null);
 
     const key1 = createKey(/* opt_keyId = */ 0xBBBCCC);
 
     const result = primitiveSet.addPrimitive(new DummyAead1(), key1);
     // Check that primary remains unset, set it to newly added and verify that
     // it was set.
-    assertEquals(null, primitiveSet.getPrimary());
+    expect(primitiveSet.getPrimary()).toBe(null);
     primitiveSet.setPrimary(result);
-    assertObjectEquals(result, primitiveSet.getPrimary());
+    expect(primitiveSet.getPrimary()).toEqual(result);
 
     const key2 = createKey(/* opt_keyId = */ 0xAAABBB);
     // Add new primitive, check that it does not change primary.
     const result2 = primitiveSet.addPrimitive(new DummyAead2(), key2);
-    assertObjectEquals(result, primitiveSet.getPrimary());
+    expect(primitiveSet.getPrimary()).toEqual(result);
 
     // Change the primary and verify the change.
     primitiveSet.setPrimary(result2);
-    assertObjectEquals(result2, primitiveSet.getPrimary());
-  },
+    expect(primitiveSet.getPrimary()).toEqual(result2);
+  });
 
-  testSetPrimary_rawPrimitives() {
+  it('set primary, raw primitives', function() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
     for (let i = 0; i < 3; i++) {
       const key = createKey(i).setOutputPrefixType(PbOutputPrefixType.RAW);
@@ -253,46 +248,45 @@ testSuite({
     const primaryEntry =
         primitiveSet.addPrimitive(new DummyAead1(), primaryKey);
     primitiveSet.setPrimary(primaryEntry);
-  },
+  });
 
-  testGetPrimaryType() {
+  it('get primary type', function() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
-    assertObjectEquals(Aead, primitiveSet.getPrimitiveType());
-  },
-
+    expect(primitiveSet.getPrimitiveType()).toEqual(Aead);
+  });
 });
 
 // Helper classes and functions used for testing purposes.
 class ExceptionText {
   /** @return {string} */
   static unknownPrefixType() {
-    return 'CustomError: Unsupported key prefix type.';
+    return 'SecurityException: Unsupported key prefix type.';
   }
 
   /** @return {string} */
   static addingNullPrimitive() {
-    return 'CustomError: Primitive has to be non null.';
+    return 'SecurityException: Primitive has to be non null.';
   }
 
   /** @return {string} */
   static addingNullKey() {
-    return 'CustomError: Key has to be non null.';
+    return 'SecurityException: Key has to be non null.';
   }
 
   /** @return {string} */
   static setPrimaryToNull() {
-    return 'CustomError: Primary cannot be set to null.';
+    return 'SecurityException: Primary cannot be set to null.';
   }
 
   /** @return {string} */
   static setPrimaryToMissingEntry() {
-    return 'CustomError: Primary cannot be set to an entry which is ' +
+    return 'SecurityException: Primary cannot be set to an entry which is ' +
         'not held by this primitive set.';
   }
 
   /** @return {string} */
   static setPrimaryToDisabled() {
-    return 'CustomError: Primary has to be enabled.';
+    return 'SecurityException: Primary has to be enabled.';
   }
 }
 

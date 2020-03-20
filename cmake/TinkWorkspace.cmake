@@ -44,8 +44,8 @@ http_archive(
 
 http_archive(
   NAME com_google_absl
-  URL https://github.com/abseil/abseil-cpp/archive/20190808.zip
-  SHA256 0b62fc2d00c2b2bc3761a892a17ac3b8af3578bd28535d90b4c914b0a7460d4e
+  URL https://github.com/abseil/abseil-cpp/archive/3c814105108680997d0821077694f663693b5382.zip
+  SHA256 4bdb45ca33f5b437d5ccfabea8c26cfe9570031d7bddeabebd5df51800535cb5
 )
 
 http_archive(

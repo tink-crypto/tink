@@ -36,8 +36,8 @@ go get github.com/google/tink/go/...
     --strategy=TestRunner=standalone \
     --test_timeout 10000 \
     --test_output=all \
-    //:src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest \
-    //:src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest
+    //src/test:java/com/google/crypto/tink/subtle/AesGcmJceTest \
+    //src/test:java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest
 )
 
 # On Linux, run all Maven tests and upload snapshot jars

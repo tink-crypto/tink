@@ -16,23 +16,20 @@ goog.module('tink.CryptoFormatTest');
 goog.setTestOnly('tink.CryptoFormatTest');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const PbKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const {PbKeysetKey: PbKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-const testSuite = goog.require('goog.testing.testSuite');
+describe('crypto format test', function() {
+  it('constants', async function() {
+    expect(CryptoFormat.RAW_PREFIX_SIZE).toBe(0);
+    expect(CryptoFormat.NON_RAW_PREFIX_SIZE).toBe(5);
+    expect(CryptoFormat.LEGACY_PREFIX_SIZE).toBe(5);
+    expect(CryptoFormat.TINK_PREFIX_SIZE).toBe(5);
 
-testSuite({
-  async testConstants() {
-    assertEquals(0, CryptoFormat.RAW_PREFIX_SIZE);
-    assertEquals(5, CryptoFormat.NON_RAW_PREFIX_SIZE);
-    assertEquals(5, CryptoFormat.LEGACY_PREFIX_SIZE);
-    assertEquals(5, CryptoFormat.TINK_PREFIX_SIZE);
+    expect(CryptoFormat.LEGACY_START_BYTE).toBe(0x00);
+    expect(CryptoFormat.TINK_START_BYTE).toBe(0x01);
+  });
 
-    assertEquals(0x00, CryptoFormat.LEGACY_START_BYTE);
-    assertEquals(0x01, CryptoFormat.TINK_START_BYTE);
-  },
-
-  async testGetOutputPrefixUnknownPrefixType() {
+  it('get output prefix unknown prefix type', async function() {
     let key = new PbKey()
                   .setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX)
                   .setKeyId(2864434397);
@@ -40,13 +37,14 @@ testSuite({
     try {
       CryptoFormat.getOutputPrefix(key);
     } catch (e) {
-      assertEquals('CustomError: Unsupported key prefix type.', e.toString());
+      expect(e.toString())
+          .toBe('SecurityException: Unsupported key prefix type.');
       return;
     }
     fail('An exception should be thrown.');
-  },
+  });
 
-  async testGetOutputPrefixInvalidKeyId() {
+  it('get output prefix invalid key id', async function() {
     // Key id has to be an unsigned 32-bit integer.
     const invalidKeyIds = [0.2, -10, 2**32];
     let key = new PbKey().setOutputPrefixType(PbOutputPrefixType.TINK);
@@ -57,15 +55,16 @@ testSuite({
       try {
         CryptoFormat.getOutputPrefix(key);
       } catch (e) {
-        assertEquals('CustomError: Number has to be unsigned 32-bit integer.',
-            e.toString());
+        expect(e.toString())
+            .toBe(
+                'InvalidArgumentsException: Number has to be unsigned 32-bit integer.');
         continue;
       }
       fail('An exception should be thrown for i: ' + i + '.');
     }
-  },
+  });
 
-  async testGetOutputPrefixTink() {
+  it('get output prefix tink', async function() {
     let key = new PbKey()
                   .setOutputPrefixType(PbOutputPrefixType.TINK)
                   .setKeyId(2864434397);
@@ -73,10 +72,10 @@ testSuite({
         new Uint8Array([CryptoFormat.TINK_START_BYTE, 0xAA, 0xBB, 0xCC, 0xDD]);
 
     const actualResult = CryptoFormat.getOutputPrefix(key);
-    assertObjectEquals(expectedResult, actualResult);
-  },
+    expect(actualResult).toEqual(expectedResult);
+  });
 
-  async testGetOutputPrefixLegacy() {
+  it('get output prefix legacy', async function() {
     let key = new PbKey()
                   .setOutputPrefixType(PbOutputPrefixType.LEGACY)
                   .setKeyId(16909060);
@@ -84,16 +83,16 @@ testSuite({
         [CryptoFormat.LEGACY_START_BYTE, 0x01, 0x02, 0x03, 0x04]);
 
     const actualResult = CryptoFormat.getOutputPrefix(key);
-    assertObjectEquals(expectedResult, actualResult);
-  },
+    expect(actualResult).toEqual(expectedResult);
+  });
 
-  async testGetOutputPrefixRaw() {
+  it('get output prefix raw', async function() {
     let key = new PbKey()
                   .setOutputPrefixType(PbOutputPrefixType.RAW)
                   .setKeyId(370491921);
     const expectedResult = new Uint8Array(0);
 
     const actualResult = CryptoFormat.getOutputPrefix(key);
-    assertObjectEquals(expectedResult, actualResult);
-  },
+    expect(actualResult).toEqual(expectedResult);
+  });
 });

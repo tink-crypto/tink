@@ -20,28 +20,20 @@ const EciesHkdfKemRecipient = goog.require('tink.subtle.EciesHkdfKemRecipient');
 const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 
-testSuite({
-  shouldRunTests() {
-    // https://msdn.microsoft.com/en-us/library/mt801195(v=vs.85).aspx
-    return !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('ecies hkdf kem recipient test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testEncapDecap() {
+  it('encap decap', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
@@ -60,12 +52,12 @@ testSuite({
           kemKeyToken['token'], keySizeInBytes, pointFormat, hkdfHash, hkdfInfo,
           hkdfSalt);
 
-      assertEquals(keySizeInBytes, kemKeyToken['key'].length);
-      assertEquals(Bytes.toHex(key), Bytes.toHex(kemKeyToken['key']));
+      expect(kemKeyToken['key'].length).toBe(keySizeInBytes);
+      expect(Bytes.toHex(kemKeyToken['key'])).toBe(Bytes.toHex(key));
     }
-  },
+  });
 
-  async testDecap_nonIntegerKeySize() {
+  it('decap, non integer key size', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
@@ -84,7 +76,8 @@ testSuite({
           kemKeyToken['token'], NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
 
     try {
@@ -92,12 +85,12 @@ testSuite({
           kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
-  },
+  });
 
-
-  async testNewInstance_invalidParameters() {
+  it('new instance, invalid parameters', async function() {
     // Test newInstance with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
@@ -106,9 +99,9 @@ testSuite({
       fail('An exception should be thrown.');
     } catch (e) {
     }
-  },
+  });
 
-  async testNewInstance_invalidPrivateKey() {
+  it('new instance, invalid private key', async function() {
     for (let testVector of TEST_VECTORS) {
       const ellipticCurveString = EllipticCurves.curveToString(testVector.crv);
       const privateJwk = EllipticCurves.pointDecode(
@@ -137,23 +130,23 @@ testSuite({
       }
       // If there was no exception, the output should be still correct (x value
       // should be ignored during the computation).
-      assertEquals(testVector.expectedOutput, Bytes.toHex(output));
+      expect(Bytes.toHex(output)).toBe(testVector.expectedOutput);
     }
-  },
+  });
 
-  async testConstructor_invalidParameters() {
+  it('constructor, invalid parameters', async function() {
     // Test public key instead of private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     try {
       new EciesHkdfKemRecipient(keyPair.publicKey);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          'CustomError: Expected crypto key of type: private.', e.toString());
+      expect(e.toString())
+          .toBe('SecurityException: Expected crypto key of type: private.');
     }
-  },
+  });
 
-  async testEncapDecap_differentParams() {
+  it('encap decap, different params', async function() {
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
     for (let curve of curveTypes) {
@@ -180,13 +173,13 @@ testSuite({
             kemKeyToken['token'], keySizeInBytes, pointFormat, hashType,
             hkdfInfo, hkdfSalt);
 
-        assertEquals(keySizeInBytes, kemKeyToken['key'].length);
-        assertEquals(Bytes.toHex(key), Bytes.toHex(kemKeyToken['key']));
+        expect(kemKeyToken['key'].length).toBe(keySizeInBytes);
+        expect(Bytes.toHex(kemKeyToken['key'])).toBe(Bytes.toHex(key));
       }
     }
-  },
+  });
 
-  async testEncapDecap_modifiedToken() {
+  it('encap decap, modified token', async function() {
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
     for (let crvId of curveTypes) {
@@ -216,9 +209,9 @@ testSuite({
         }
       }
     }
-  },
+  });
 
-  async testDecapsulate_testVectorsGeneratedByJava() {
+  it('decapsulate, test vectors generated by java', async function() {
     for (let testVector of TEST_VECTORS) {
       const ellipticCurveString = EllipticCurves.curveToString(testVector.crv);
       const privateJwk = EllipticCurves.pointDecode(
@@ -232,9 +225,9 @@ testSuite({
       const output = await recipient.decapsulate(
           Bytes.fromHex(testVector.token), testVector.outputLength,
           testVector.pointFormat, testVector.hashType, hkdfInfo, salt);
-      assertEquals(testVector.expectedOutput, Bytes.toHex(output));
+      expect(Bytes.toHex(output)).toBe(testVector.expectedOutput);
     }
-  },
+  });
 });
 
 

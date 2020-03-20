@@ -16,8 +16,10 @@
 
 #include "tink/subtle/ed25519_sign_boringssl.h"
 
-#include <cstring>
+#include <algorithm>
+#include <iterator>
 
+#include "absl/memory/memory.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
@@ -31,27 +33,26 @@ namespace subtle {
 
 // static
 util::StatusOr<std::unique_ptr<PublicKeySign>> Ed25519SignBoringSsl::New(
-    absl::string_view private_key) {
-  if (private_key.length() != ED25519_PRIVATE_KEY_LEN) {
+    util::SecretData private_key) {
+  if (private_key.size() != ED25519_PRIVATE_KEY_LEN) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
         absl::StrFormat("Invalid ED25519 private key size (%d). "
                         "The only valid size is %d.",
-                        private_key.length(), ED25519_PRIVATE_KEY_LEN));
+                        private_key.size(), ED25519_PRIVATE_KEY_LEN));
   }
-  std::unique_ptr<PublicKeySign> sign(new Ed25519SignBoringSsl(private_key));
-  return std::move(sign);
+  return {absl::WrapUnique(new Ed25519SignBoringSsl(std::move(private_key)))};
 }
 
-Ed25519SignBoringSsl::Ed25519SignBoringSsl(absl::string_view private_key)
-    : private_key_(private_key) {}
+Ed25519SignBoringSsl::Ed25519SignBoringSsl(util::SecretData private_key)
+    : private_key_(std::move(private_key)) {}
 
 util::StatusOr<std::string> Ed25519SignBoringSsl::Sign(
     absl::string_view data) const {
   data = SubtleUtilBoringSSL::EnsureNonNull(data);
 
   uint8_t out_sig[ED25519_SIGNATURE_LEN];
-  std::memset(reinterpret_cast<void *>(&out_sig), 0, ED25519_SIGNATURE_LEN);
+  std::fill(std::begin(out_sig), std::end(out_sig), 0);
 
   if (ED25519_sign(
           out_sig, reinterpret_cast<const uint8_t *>(data.data()), data.size(),

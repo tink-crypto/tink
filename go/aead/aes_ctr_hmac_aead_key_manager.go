@@ -19,10 +19,10 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/subtle/aead"
-	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	ctrpb "github.com/google/tink/go/proto/aes_ctr_go_proto"
 	aeadpb "github.com/google/tink/go/proto/aes_ctr_hmac_aead_go_proto"
@@ -73,7 +73,7 @@ func (km *aesCTRHMACAEADKeyManager) Primitive(serializedKey []byte) (interface{}
 	}
 
 	hmacKey := key.HmacKey
-	hmac, err := mac.NewHMAC(hmacKey.Params.Hash.String(), hmacKey.KeyValue, hmacKey.Params.TagSize)
+	hmac, err := subtle.NewHMAC(hmacKey.Params.Hash.String(), hmacKey.KeyValue, hmacKey.Params.TagSize)
 	if err != nil {
 		return nil, fmt.Errorf("aes_ctr_hmac_aead_key_manager: cannot create mac primitive, error: %v", err)
 	}

@@ -1,0 +1,65 @@
+load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
+
+licenses(["notice"])
+
+java_library(
+    name = "generator_test",
+    testonly = 1,
+    srcs = glob([
+        "**/*.java",
+    ]),
+    deps = [
+        "//:awskms",
+        "//:gcpkms",
+        "//:testonly",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@maven//:com_amazonaws_aws_java_sdk_core",
+        "@maven//:com_amazonaws_aws_java_sdk_kms",
+        "@maven//:com_google_api_client_google_api_client",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+        "@maven//:org_mockito_mockito_core",
+    ],
+)
+
+# Anything in test_files will be a small sized test unless specified in an explicit category.
+# Don't hesitate to increase the length when writing legitimately longer tests.
+gen_java_test_rules(
+    data = [
+        "@tink_base//testdata:credentials",
+        "@tink_base//testdata:ecies_keysets",
+        "@wycheproof//testvectors:all",
+    ],
+    default_test_size = "small",
+    # these tests are excluded when testing with bazel test ... or on Kokoro
+    manual_tests = [
+        "java/com/google/crypto/tink/subtle/AesGcmJceTest",
+        "java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest",
+        # b/112019120
+        "java/com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJceTest",
+    ],
+    medium_tests = [
+        "java/com/google/crypto/tink/subtle/AesCtrHmacStreamingTest",
+        "java/com/google/crypto/tink/subtle/AesGcmJceTest",
+        "java/com/google/crypto/tink/hybrid/EciesAeadHkdfHybridDecryptTest",
+    ],
+    no_rbe_tests = [
+        "java/com/google/crypto/tink/aead/KmsAeadKeyManagerTest",
+        "java/com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManagerTest",
+    ],
+    test_files = glob(
+        [
+            "**/*Test.java",
+        ],
+    ),
+    deps = [
+        ":generator_test",
+    ],
+)

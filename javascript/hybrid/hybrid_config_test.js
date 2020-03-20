@@ -22,62 +22,51 @@ const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('hybrid config test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  testConstants() {
-    assertEquals(ENCRYPT_PRIMITIVE_NAME, HybridConfig.ENCRYPT_PRIMITIVE_NAME);
-    assertEquals(DECRYPT_PRIMITIVE_NAME, HybridConfig.DECRYPT_PRIMITIVE_NAME);
+  it('constants', function() {
+    expect(HybridConfig.ENCRYPT_PRIMITIVE_NAME).toBe(ENCRYPT_PRIMITIVE_NAME);
+    expect(HybridConfig.DECRYPT_PRIMITIVE_NAME).toBe(DECRYPT_PRIMITIVE_NAME);
 
-    assertEquals(
-        ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE,
-        HybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
-    assertEquals(
-        ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE,
-        HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE);
-  },
+    expect(HybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE)
+        .toBe(ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
+    expect(HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE)
+        .toBe(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE);
+  });
 
-  testRegister_correctKeyManagersWereRegistered() {
+  it('register, correct key managers were registered', function() {
     HybridConfig.register();
 
     // Test that the corresponding key managers were registered.
     const publicKeyManager =
         Registry.getKeyManager(ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
-    assertTrue(publicKeyManager instanceof EciesAeadHkdfPublicKeyManager);
+    expect(publicKeyManager instanceof EciesAeadHkdfPublicKeyManager)
+        .toBe(true);
 
     const privateKeyManager =
         Registry.getKeyManager(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE);
-    assertTrue(privateKeyManager instanceof EciesAeadHkdfPrivateKeyManager);
-  },
+    expect(privateKeyManager instanceof EciesAeadHkdfPrivateKeyManager)
+        .toBe(true);
+  });
 
   // Check that everything was registered correctly and thus new keys may be
   // generated using the predefined key templates and then they may be used for
   // encryption and decryption.
-  async testRegister_predefinedTemplatesShouldWork() {
+  it('register, predefined templates should work', async function() {
     HybridConfig.register();
     let templates = [
       HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm(),
@@ -109,9 +98,9 @@ testSuite({
       const decryptedCiphertext =
           await hybridDecrypt.decrypt(ciphertext, contextInfo);
 
-      assertObjectEquals(plaintext, decryptedCiphertext);
+      expect(decryptedCiphertext).toEqual(plaintext);
     }
-  },
+  });
 });
 
 // Constants used in tests.

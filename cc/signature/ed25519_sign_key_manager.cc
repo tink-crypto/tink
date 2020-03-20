@@ -17,6 +17,7 @@
 #include "tink/signature/ed25519_sign_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/ed25519_verify_key_manager.h"
@@ -25,6 +26,7 @@
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -33,10 +35,10 @@
 namespace crypto {
 namespace tink {
 
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
-using google::crypto::tink::Ed25519KeyFormat;
-using google::crypto::tink::Ed25519PrivateKey;
+using ::crypto::tink::util::Status;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::Ed25519KeyFormat;
+using ::google::crypto::tink::Ed25519PrivateKey;
 
 StatusOr<Ed25519PrivateKey> Ed25519SignKeyManager::CreateKey(
     const Ed25519KeyFormat& key_format) const {
@@ -59,8 +61,8 @@ Ed25519SignKeyManager::PublicKeySignFactory::Create(
     const Ed25519PrivateKey& private_key) const {
   // BoringSSL expects a 64-byte private key which contains the public key as a
   // suffix.
-  std::string sk =
-      private_key.key_value() + private_key.public_key().key_value();
+  util::SecretData sk = util::SecretDataFromStringView(absl::StrCat(
+      private_key.key_value(), private_key.public_key().key_value()));
 
   return subtle::Ed25519SignBoringSsl::New(sk);
 }

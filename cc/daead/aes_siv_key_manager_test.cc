@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/deterministic_aead.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -140,8 +141,8 @@ TEST(AesSivKeyManagerTest, GetPrimitive) {
       AesSivKeyManager().GetPrimitive<DeterministicAead>(key_or.ValueOrDie());
   ASSERT_THAT(daead_or.status(), IsOk());
 
-  auto direct_daead_or =
-      subtle::AesSivBoringSsl::New(key_or.ValueOrDie().key_value());
+  auto direct_daead_or = subtle::AesSivBoringSsl::New(
+      util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(direct_daead_or.status(), IsOk());
 
   auto encryption_or =

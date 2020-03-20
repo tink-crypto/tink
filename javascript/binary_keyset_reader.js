@@ -15,8 +15,8 @@
 goog.module('tink.BinaryKeysetReader');
 
 const KeysetReader = goog.require('tink.KeysetReader');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * BinaryKeysetReader knows how to read a keyset or an encrypted keyset

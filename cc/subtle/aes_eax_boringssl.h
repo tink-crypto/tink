@@ -17,14 +17,17 @@
 #ifndef TINK_SUBTLE_AES_EAX_BORINGSSL_H_
 #define TINK_SUBTLE_AES_EAX_BORINGSSL_H_
 
+#include <array>
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "tink/aead.h"
-#include "tink/util/status.h"
-#include "tink/util/statusor.h"
+#include "absl/types/span.h"
 #include "openssl/aes.h"
 #include "openssl/evp.h"
+#include "tink/aead.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -37,7 +40,7 @@ class AesEaxBoringSsl : public Aead {
   // Currently supported nonce sizes are 12 and 16 bytes.
   // The tag size is fixed to 16 bytes.
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
-      absl::string_view key_value, size_t nonce_size_in_bytes);
+      const util::SecretData& key, size_t nonce_size_in_bytes);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
@@ -47,14 +50,22 @@ class AesEaxBoringSsl : public Aead {
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
 
-  virtual ~AesEaxBoringSsl() {}
-
  private:
-  static const int TAG_SIZE = 16;
-  static const int BLOCK_SIZE = 16;
+  static constexpr int kTagSize = 16;
+  static constexpr int kBlockSize = 16;
 
-  AesEaxBoringSsl() = delete;
-  AesEaxBoringSsl(absl::string_view key_value, size_t nonce_size);
+  using Block = std::array<uint8_t, kBlockSize>;
+
+  AesEaxBoringSsl(util::SecretUniquePtr<AES_KEY> aeskey, size_t nonce_size)
+      : aeskey_(std::move(aeskey)),
+        nonce_size_(nonce_size),
+        B_(ComputeB()),
+        P_(ComputeP()) {}
+
+  // Precomputes block B. Requires aeskey_ to be initialized.
+  util::SecretData ComputeB() const;
+  // Precomputes block P. Requires aeskey_ and B_ to be initialized.
+  util::SecretData ComputeP() const;
 
   // Returns whether key_size_in_bytes is a supported key size.
   static bool IsValidKeySize(size_t key_size_in_bytes);
@@ -62,50 +73,45 @@ class AesEaxBoringSsl : public Aead {
   // Returns whether nonce_size_in_bytes is a supported size for the nonce.
   static bool IsValidNonceSize(size_t nonce_size_in_bytes);
 
-  // Encrypts a single block with AES.
-  void EncryptBlock(const uint8_t in[BLOCK_SIZE],
-                    uint8_t out[BLOCK_SIZE]) const;
+  // XORs block x with block y.
+  // Result is: y = x ^ y
+  static void XorBlock(const uint8_t x[kBlockSize], Block* y);
 
-  // Pads a partial data block of size 0 <= len <= BLOCK_SIZE.
-  void Pad(const uint8_t* data, int len,
-           uint8_t padded_block[BLOCK_SIZE]) const;
+  // Multiplies in by X and stores result in out.
+  static void MultiplyByX(const uint8_t in[kBlockSize],
+                          uint8_t out[kBlockSize]);
+
+  // Constant-time block equality
+  static bool EqualBlocks(const uint8_t x[kBlockSize],
+                          const uint8_t y[kBlockSize]);
+
+  // Encrypts a single block with AES.
+  void EncryptBlock(Block* block) const;
+  void EncryptBlock(util::SecretData* block) const;
+
+  // Pads a partial data block of size 0 <= len <= kBlockSize.
+  Block Pad(absl::Span<const uint8_t> data) const;
 
   // Computes a Omac over blob.
   // tag is either 0, 1 or 2, depending over which value (nonce, aad, message)
   // the Omac is computed.
-  // mac is the return value of the function.
-  void Omac(
-      absl::string_view blob,
-      int tag,
-      uint8_t mac[BLOCK_SIZE]) const;
+  Block Omac(absl::string_view blob, int tag) const;
 
   // This is the same function as above with the difference that the blob
   // is represented by a pointer and its length.
-  void Omac(const uint8_t* data, size_t len, int tag, uint8_t mac[BLOCK_SIZE])
-      const;
+  Block Omac(absl::Span<const uint8_t> data, int tag) const;
 
   // Encrypts or decrypts some data using CTR mode. N are 16 bytes, which
   // are the result of an OMAC computation over the nonce.
-  // in are the bytes that are encrypted or decrypted. result is the
-  // encrypted rsp. decrypted value. size determines the size of in and result.
-  void CtrCrypt(
-      const uint8_t N[BLOCK_SIZE],
-      const uint8_t *in,
-      uint8_t *result,
-      size_t size) const;
+  // in are the bytes that are encrypted or decrypted. out is the encrypted rsp.
+  // decrypted value. size determines the size of in and result.
+  void CtrCrypt(const Block& N, absl::Span<const uint8_t> in,
+                uint8_t* out) const;
 
-  // TODO(bleichen): This class is immutable. But it seems difficult to
-  //   declare these members const, because the constructor is not trivial.
-  AES_KEY aeskey_;
-  uint8_t B_[BLOCK_SIZE];
-  uint8_t P_[BLOCK_SIZE];
-  const std::string key_;
+  const util::SecretUniquePtr<AES_KEY> aeskey_;
   const size_t nonce_size_;
-  // Set by the constructor to true if the initialization was successful.
-  // New() is the only method that needs to check is_initialized_, since
-  // New() will never return an AesEaxBoringssl instance that is not
-  // initialized.
-  bool is_initialized_;
+  const util::SecretData B_;
+  const util::SecretData P_;
 };
 
 }  // namespace subtle

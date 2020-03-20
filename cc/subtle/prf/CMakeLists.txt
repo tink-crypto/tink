@@ -1,4 +1,4 @@
-tink_module(subtle_prf)
+tink_module(subtle::prf)
 
 tink_cc_library(
   NAME streaming_prf
@@ -12,7 +12,7 @@ tink_cc_library(
     streaming_prf_wrapper.cc
     streaming_prf_wrapper.h
   DEPS
-    tink::subtle_prf::streaming_prf
+    tink::subtle::prf::streaming_prf
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::util::statusor
@@ -25,7 +25,7 @@ tink_cc_library(
     hkdf_streaming_prf.cc
     hkdf_streaming_prf.h
   DEPS
-    tink::subtle_prf::streaming_prf
+    tink::subtle::prf::streaming_prf
     crypto
     tink::core::input_stream
     tink::subtle::subtle
@@ -39,8 +39,8 @@ tink_cc_test(
   NAME hkdf_streaming_prf_test
   SRCS hkdf_streaming_prf_test.cc
   DEPS
-    tink::subtle_prf::hkdf_streaming_prf
-    tink::subtle_prf::streaming_prf
+    tink::subtle::prf::hkdf_streaming_prf
+    tink::subtle::prf::streaming_prf
     tink::subtle::subtle
     tink::util::input_stream_util
     tink::util::test_matchers
@@ -52,7 +52,7 @@ tink_cc_test(
   NAME streaming_prf_wrapper_test
   SRCS streaming_prf_wrapper_test.cc
   DEPS
-    tink::subtle_prf::streaming_prf_wrapper
+    tink::subtle::prf::streaming_prf_wrapper
     tink::proto::tink_cc_proto
     tink::util::input_stream_util
     tink::util::istream_input_stream

@@ -23,8 +23,8 @@ import errno
 import io
 from typing import BinaryIO
 
-from tink.python.cc.clif import cc_streaming_aead_wrappers
-from tink.python.cc.clif import status as error
+from tink.python.cc.pybind import cc_streaming_aead_wrappers
+from tink.python.cc.pybind import status as error
 from tink.python.core import tink_error
 from tink.python.util import file_object_adapter
 

@@ -22,7 +22,7 @@ import struct
 
 from tink.proto import tink_pb2
 from tink.python import core
-from tink.python.aead import aead
+from aead import aead
 from tink.python.core import tink_error
 
 # Defines in how many bytes the DEK length will be encoded.

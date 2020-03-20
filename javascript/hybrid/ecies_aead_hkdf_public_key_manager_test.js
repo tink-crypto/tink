@@ -22,69 +22,53 @@ const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPub
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const Mac = goog.require('tink.Mac');
-const PbAesCtrKey = goog.require('proto.google.crypto.tink.AesCtrKey');
-const PbEciesAeadDemParams = goog.require('proto.google.crypto.tink.EciesAeadDemParams');
-const PbEciesAeadHkdfParams = goog.require('proto.google.crypto.tink.EciesAeadHkdfParams');
-const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
-const PbEciesHkdfKemParams = goog.require('proto.google.crypto.tink.EciesHkdfKemParams');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
-const asserts = goog.require('goog.asserts');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
+const {PbAesCtrKey, PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const {assertExists} = goog.require('tink.testUtils');
 
 const KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
 const VERSION = 0;
 const PRIMITIVE = HybridEncrypt;
 
-testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('ecies aead hkdf public key manager test', function() {
+  beforeEach(function() {
     AeadConfig.register();
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  testNewKey() {
+  it('new key', function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
 
     try {
       manager.getKeyFactory().newKey(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.notSupported(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.notSupported());
     }
-  },
+  });
 
-  testNewKeyData() {
+  it('new key data', function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
 
     try {
       manager.getKeyFactory().newKeyData(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.notSupported(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.notSupported());
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedPrimitiveType() {
+  it('get primitive, unsupported primitive type', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     const key = await createKey();
 
@@ -92,11 +76,11 @@ testSuite({
       await manager.getPrimitive(Mac, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedPrimitive());
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedKeyDataType() {
+  it('get primitive, unsupported key data type', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     const keyData =
         (await createKeyData()).setTypeUrl('unsupported_key_type_url');
@@ -105,12 +89,12 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.unsupportedKeyType(keyData.getTypeUrl()));
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedKeyType() {
+  it('get primitive, unsupported key type', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     let key = new PbAesCtrKey();
 
@@ -118,11 +102,11 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedKeyType());
     }
-  },
+  });
 
-  async testGetPrimitive_highVersion() {
+  it('get primitive, high version', async function() {
     const version = 1;
     const manager = new EciesAeadHkdfPublicKeyManager();
     const key = (await createKey()).setVersion(version);
@@ -131,11 +115,11 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.versionOutOfBounds());
     }
-  },
+  });
 
-  async testGetPrimitive_missingParams() {
+  it('get primitive, missing params', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     const key = (await createKey()).setParams(null);
 
@@ -143,11 +127,11 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingParams());
     }
-  },
+  });
 
-  async testGetPrimitive_invalidParams() {
+  it('get primitive, invalid params', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     const key = await createKey();
 
@@ -157,7 +141,7 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownPointFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownPointFormat());
     }
     key.getParams().setEcPointFormat(PbPointFormat.UNCOMPRESSED);
 
@@ -167,7 +151,7 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingKemParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
     key.getParams().setKemParams(createKemParams());
 
@@ -178,11 +162,11 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedKeyTemplate(typeUrl), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedKeyTemplate(typeUrl));
     }
-  },
+  });
 
-  async testGetPrimitive_invalidKey() {
+  it('get primitive, invalid key', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     const key = (await createKey()).setX('');
 
@@ -190,7 +174,7 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingXY(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingXY());
     }
     key.getParams().setEcPointFormat(PbPointFormat.UNCOMPRESSED);
 
@@ -200,7 +184,7 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingKemParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
     key.getParams().setKemParams(createKemParams());
 
@@ -211,11 +195,11 @@ testSuite({
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedKeyTemplate(typeUrl), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedKeyTemplate(typeUrl));
     }
-  },
+  });
 
-  async testGetPrimitive_invalidSerializedKey() {
+  it('get primitive, invalid serialized key', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     const keyData = await createKeyData();
 
@@ -227,78 +211,78 @@ testSuite({
         await manager.getPrimitive(PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
       } catch (e) {
-        assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
+        expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
       }
     }
-  },
+  });
 
   // tests for getting primitive from valid key/keyData
-  async testGetPrimitive_fromKey() {
+  it('get primitive, from key', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     const keys = await createTestSetOfKeys();
 
     for (let key of keys) {
       const /** !HybridEncrypt */ primitive =
-          asserts.assert(await manager.getPrimitive(PRIMITIVE, key));
+          assertExists(await manager.getPrimitive(PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await primitive.encrypt(plaintext);
 
-      assertObjectNotEquals(plaintext, ciphertext);
+      expect(ciphertext).not.toEqual(plaintext);
     }
-  },
+  });
 
-  async testGetPrimitive_fromKeyData() {
+  it('get primitive, from key data', async function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
     const keyDatas = await createTestSetOfKeyDatas();
 
     for (let key of keyDatas) {
       const /** !HybridEncrypt */ primitive =
-          asserts.assert(await manager.getPrimitive(PRIMITIVE, key));
+          assertExists(await manager.getPrimitive(PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await primitive.encrypt(plaintext);
 
-      assertObjectNotEquals(plaintext, ciphertext);
+      expect(ciphertext).not.toEqual(plaintext);
     }
-  },
+  });
 
-  testDoesSupport() {
+  it('does support', function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
 
-    assertTrue(manager.doesSupport(KEY_TYPE));
-  },
+    expect(manager.doesSupport(KEY_TYPE)).toBe(true);
+  });
 
-  testGetKeyType() {
+  it('get key type', function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
 
-    assertEquals(KEY_TYPE, manager.getKeyType());
-  },
+    expect(manager.getKeyType()).toBe(KEY_TYPE);
+  });
 
-  testGetPrimitiveType() {
+  it('get primitive type', function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
 
-    assertEquals(PRIMITIVE, manager.getPrimitiveType());
-  },
+    expect(manager.getPrimitiveType()).toBe(PRIMITIVE);
+  });
 
-  testGetVersion() {
+  it('get version', function() {
     const manager = new EciesAeadHkdfPublicKeyManager();
 
-    assertEquals(VERSION, manager.getVersion());
-  },
+    expect(manager.getVersion()).toBe(VERSION);
+  });
 });
 
 // Helper classes and functions
 class ExceptionText {
   /** @return {string} */
   static notSupported() {
-    return 'CustomError: This operation is not supported for public keys. ' +
+    return 'SecurityException: This operation is not supported for public keys. ' +
         'Use EciesAeadHkdfPrivateKeyManager to generate new keys.';
   }
 
   /** @return {string} */
   static unsupportedPrimitive() {
-    return 'CustomError: Requested primitive type which is not supported by ' +
+    return 'SecurityException: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
@@ -307,7 +291,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyType(opt_requestedKeyType) {
-    const prefix = 'CustomError: Key type';
+    const prefix = 'SecurityException: Key type';
     const suffix =
         'is not supported. This key manager supports ' + KEY_TYPE + '.';
     if (opt_requestedKeyType) {
@@ -319,23 +303,23 @@ class ExceptionText {
 
   /** @return {string} */
   static versionOutOfBounds() {
-    return 'CustomError: Version is out of bound, must be between 0 and ' +
+    return 'SecurityException: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
   /** @return {string} */
   static missingParams() {
-    return 'CustomError: Invalid public key - missing key params.';
+    return 'SecurityException: Invalid public key - missing key params.';
   }
 
   /** @return {string} */
   static unknownPointFormat() {
-    return 'CustomError: Invalid key params - unknown EC point format.';
+    return 'SecurityException: Invalid key params - unknown EC point format.';
   }
 
   /** @return {string} */
   static missingKemParams() {
-    return 'CustomError: Invalid params - missing KEM params.';
+    return 'SecurityException: Invalid params - missing KEM params.';
   }
 
   /**
@@ -343,18 +327,19 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyTemplate(templateTypeUrl) {
-    return 'CustomError: Invalid DEM params - ' + templateTypeUrl +
+    return 'SecurityException: Invalid DEM params - ' + templateTypeUrl +
         ' template is not supported by ECIES AEAD HKDF.';
   }
 
   /** @return {string} */
   static missingXY() {
-    return 'CustomError: Invalid public key - missing value of X or Y.';
+    return 'SecurityException: Invalid public key - missing value of X or Y.';
   }
 
   /** @return {string} */
   static invalidSerializedKey() {
-    return 'CustomError: Input cannot be parsed as ' + KEY_TYPE + ' key-proto.';
+    return 'SecurityException: Input cannot be parsed as ' + KEY_TYPE +
+        ' key-proto.';
   }
 }
 

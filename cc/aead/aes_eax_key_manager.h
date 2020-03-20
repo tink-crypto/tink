@@ -25,6 +25,7 @@
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -40,8 +41,9 @@ class AesEaxKeyManager
   class AeadFactory : public PrimitiveFactory<Aead> {
     crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
         const google::crypto::tink::AesEaxKey& key) const override {
-      return subtle::AesEaxBoringSsl::New(key.key_value(),
-                                          key.params().iv_size());
+      return subtle::AesEaxBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()),
+          key.params().iv_size());
     }
   };
 

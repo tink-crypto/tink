@@ -17,126 +17,135 @@ goog.setTestOnly('tink.subtle.BytesTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
-const testSuite = goog.require('goog.testing.testSuite');
 
-testSuite({
-  testConcat: function() {
+describe('bytes test', function() {
+  it('concat', function() {
     let ba1 = new Uint8Array(0);
     let ba2 = new Uint8Array(0);
     let ba3 = new Uint8Array(0);
     let result = Bytes.concat(ba1, ba2, ba3);
-    assertEquals(0, result.length);
+    expect(result.length).toBe(0);
 
     ba1 = Random.randBytes(10);
     result = Bytes.concat(ba1, ba2, ba3);
-    assertEquals(ba1.length, result.length);
-    assertEquals(Bytes.toHex(ba1), Bytes.toHex(result));
+    expect(result.length).toBe(ba1.length);
+    expect(Bytes.toHex(result)).toBe(Bytes.toHex(ba1));
 
     result = Bytes.concat(ba2, ba1, ba3);
-    assertEquals(ba1.length, result.length);
-    assertEquals(Bytes.toHex(ba1), Bytes.toHex(result));
+    expect(result.length).toBe(ba1.length);
+    expect(Bytes.toHex(result)).toBe(Bytes.toHex(ba1));
 
     result = Bytes.concat(ba3, ba2, ba1);
-    assertEquals(ba1.length, result.length);
-    assertEquals(Bytes.toHex(ba1), Bytes.toHex(result));
+    expect(result.length).toBe(ba1.length);
+    expect(Bytes.toHex(result)).toBe(Bytes.toHex(ba1));
 
     ba2 = Random.randBytes(11);
     result = Bytes.concat(ba1, ba2, ba3);
-    assertEquals(ba1.length + ba2.length, result.length);
-    assertEquals(Bytes.toHex(ba1) + Bytes.toHex(ba2), Bytes.toHex(result));
+    expect(result.length).toBe(ba1.length + ba2.length);
+    expect(Bytes.toHex(result)).toBe(Bytes.toHex(ba1) + Bytes.toHex(ba2));
 
     result = Bytes.concat(ba1, ba3, ba2);
-    assertEquals(ba1.length + ba2.length, result.length);
-    assertEquals(Bytes.toHex(ba1) + Bytes.toHex(ba2), Bytes.toHex(result));
+    expect(result.length).toBe(ba1.length + ba2.length);
+    expect(Bytes.toHex(result)).toBe(Bytes.toHex(ba1) + Bytes.toHex(ba2));
 
     result = Bytes.concat(ba3, ba1, ba2);
-    assertEquals(ba1.length + ba2.length, result.length);
-    assertEquals(Bytes.toHex(ba1) + Bytes.toHex(ba2), Bytes.toHex(result));
+    expect(result.length).toBe(ba1.length + ba2.length);
+    expect(Bytes.toHex(result)).toBe(Bytes.toHex(ba1) + Bytes.toHex(ba2));
 
     ba3 = Random.randBytes(12);
     result = Bytes.concat(ba1, ba2, ba3);
-    assertEquals(ba1.length + ba2.length + ba3.length, result.length);
-    assertEquals(
-        Bytes.toHex(ba1) + Bytes.toHex(ba2) + Bytes.toHex(ba3),
-        Bytes.toHex(result));
-  },
+    expect(result.length).toBe(ba1.length + ba2.length + ba3.length);
+    expect(Bytes.toHex(result))
+        .toBe(Bytes.toHex(ba1) + Bytes.toHex(ba2) + Bytes.toHex(ba3));
+  });
 
-  testFromNumber: function() {
+  it('from number', function() {
     let number = 0;
-    assertArrayEquals(
-        [0, 0, 0, 0, 0, 0, 0, 0], Array.from(Bytes.fromNumber(number)));
+    expect(Array.from(Bytes.fromNumber(number))).toEqual([
+      0, 0, 0, 0, 0, 0, 0, 0
+    ]);
     number = 1;
-    assertArrayEquals(
-        [0, 0, 0, 0, 0, 0, 0, 1], Array.from(Bytes.fromNumber(number)));
+    expect(Array.from(Bytes.fromNumber(number))).toEqual([
+      0, 0, 0, 0, 0, 0, 0, 1
+    ]);
     number = 4294967296;  // 2^32
-    assertArrayEquals(
-        [0, 0, 0, 1, 0, 0, 0, 0], Array.from(Bytes.fromNumber(number)));
+    expect(Array.from(Bytes.fromNumber(number))).toEqual([
+      0, 0, 0, 1, 0, 0, 0, 0
+    ]);
     number = 4294967297;  // 2^32 + 1
-    assertArrayEquals(
-        [0, 0, 0, 1, 0, 0, 0, 1], Array.from(Bytes.fromNumber(number)));
+    expect(Array.from(Bytes.fromNumber(number))).toEqual([
+      0, 0, 0, 1, 0, 0, 0, 1
+    ]);
     number = Number.MAX_SAFE_INTEGER; // 2^53 - 1
-    assertArrayEquals(
-        [0, 31, 255, 255, 255, 255, 255, 255],
-        Array.from(Bytes.fromNumber(number)));
+    expect(Array.from(Bytes.fromNumber(number))).toEqual([
+      0, 31, 255, 255, 255, 255, 255, 255
+    ]);
 
-    assertThrows(function() {
+    expect(function() {
       Bytes.fromNumber(3.14);
-    });
-    assertThrows(function() {
+    }).toThrow();
+    expect(function() {
       Bytes.fromNumber(-1);
-    });
-    assertThrows(function() {
+    }).toThrow();
+    expect(function() {
       Bytes.fromNumber(Number.MAX_SAFE_INTEGER + 1);
-    });
-  },
+    }).toThrow();
+  });
 
-  testToBase64_removeAllPadding() {
+  it('to base64, remove all padding', function() {
     for (let i = 0; i < 10; i++) {
       const array = new Uint8Array(i);
       const base64Representation = Bytes.toBase64(array, true);
-      assertNotEquals(
-          '=', base64Representation[base64Representation.length - 1]);
+      expect(base64Representation[base64Representation.length - 1])
+          .not.toBe('=');
     }
-  },
+  });
 
-  testToBase64_fromBase64() {
+  it('to base64, from base64', function() {
     for (let i = 0; i < 100; i++) {
       const array = Random.randBytes(i);
       const base64Representation = Bytes.toBase64(array, true);
       const arrayRepresentation = Bytes.fromBase64(base64Representation, true);
-      assertObjectEquals(array, arrayRepresentation);
+      expect(arrayRepresentation).toEqual(array);
     }
-  },
+  });
 
-  testFromByteString() {
-    assertObjectEquals(
-        'empty string', new Uint8Array(0), Bytes.fromByteString(''));
-
-    let arr = new Uint8Array(
-        [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]);
-    assertObjectEquals('ASCII', arr, Bytes.fromByteString('Hello, world'));
-
-    arr = new Uint8Array([83, 99, 104, 246, 110]);
-    assertObjectEquals('Latin', arr, Bytes.fromByteString('Sch\u00f6n'));
-  },
-
-  testToByteString() {
-    assertEquals('empty string', '', Bytes.toByteString(new Uint8Array(0)));
+  it('from byte string', function() {
+    expect(Bytes.fromByteString(''))
+        .withContext('empty string')
+        .toEqual(new Uint8Array(0));
 
     let arr = new Uint8Array(
         [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]);
-    assertEquals('ASCII', 'Hello, world', Bytes.toByteString(arr));
+    expect(Bytes.fromByteString('Hello, world'))
+        .withContext('ASCII')
+        .toEqual(arr);
 
     arr = new Uint8Array([83, 99, 104, 246, 110]);
-    assertEquals('Latin', 'Sch\u00f6n', Bytes.toByteString(arr));
-  },
+    expect(Bytes.fromByteString('Sch\u00f6n'))
+        .withContext('Latin')
+        .toEqual(arr);
+  });
 
-  testToString_fromString() {
+  it('to byte string', function() {
+    expect(Bytes.toByteString(new Uint8Array(0)))
+        .withContext('empty string')
+        .toBe('');
+
+    let arr = new Uint8Array(
+        [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]);
+    expect(Bytes.toByteString(arr)).withContext('ASCII').toBe('Hello, world');
+
+    arr = new Uint8Array([83, 99, 104, 246, 110]);
+    expect(Bytes.toByteString(arr)).withContext('Latin').toBe('Sch\u00f6n');
+  });
+
+  it('to string, from string', function() {
     for (let i = 0; i < 100; i++) {
       const array = Random.randBytes(i);
       const str = Bytes.toByteString(array);
       const arrayRepresentation = Bytes.fromByteString(str);
-      assertObjectEquals(array, arrayRepresentation);
+      expect(arrayRepresentation).toEqual(array);
     }
-  },
+  });
 });

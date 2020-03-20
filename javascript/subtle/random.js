@@ -33,10 +33,7 @@ const randBytes = function(n) {
     throw new InvalidArgumentsException('n must be a nonnegative integer');
   }
   const result = new Uint8Array(n);
-  if (n) {  // Edge can't handle an empty array
-    const crypto = goog.global['crypto'] || goog.global['msCrypto'];
-    crypto.getRandomValues(result);
-  }
+  crypto.getRandomValues(result);
   return result;
 };
 

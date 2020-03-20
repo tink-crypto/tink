@@ -168,7 +168,7 @@ tink_cc_library(
     tink::aead::aes_gcm_key_manager
     tink::aead::xchacha20_poly1305_key_manager
     tink::subtle::random
-    tink::subtle_mac::stateful_mac
+    tink::subtle::mac::stateful_mac
     tink::subtle::subtle_util_boringssl
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
@@ -182,6 +182,7 @@ tink_cc_library(
     absl::core_headers
     absl::memory
     absl::strings
+    absl::cord
     absl::synchronization
 )
 
@@ -325,6 +326,7 @@ tink_cc_test(
     tink::util::test_util
     tink::subtle::random
     absl::strings
+    absl::cord
     gmock
 )
 
@@ -347,4 +349,22 @@ tink_cc_test(
     tink::util::test_matchers
     absl::memory
     gmock
+)
+
+tink_cc_library(
+  NAME secret_data_internal
+  SRCS
+    secret_data_internal.cc
+    secret_data_internal.h
+  DEPS
+    absl::base
+)
+
+tink_cc_library(
+  NAME secret_data
+  SRCS
+    secret_data.h
+  DEPS
+    tink::util::secret_data_internal
+    absl::strings
 )

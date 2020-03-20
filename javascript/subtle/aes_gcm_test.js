@@ -18,9 +18,6 @@ goog.setTestOnly('tink.subtle.AesGcmTest');
 const AesGcm = goog.require('tink.subtle.AesGcm');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
 /**
  * Asserts that an exception is the result of a Web Crypto error.
@@ -29,50 +26,44 @@ const userAgent = goog.require('goog.userAgent');
  */
 function assertCryptoError(exception) {
   const message = String(exception);
-  assertTrue(
-      message.startsWith('CustomError: OperationError') ||
-      // Edge uses a nonstandard error message.
-      message ===
-          'CustomError: Error: ' +
-              'Could not complete the operation due to error 8070000b.');
+  expect(message.startsWith('SecurityException: OperationError')).toBe(true);
 }
 
-testSuite({
-  setUp() {
+describe('aes gcm test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the timeout.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testBasic() {
+  it('basic', async function() {
     const aead = await AesGcm.newInstance(Random.randBytes(16));
-    const minLength = userAgent.EDGE ? 1 : 0;  // b/120299887
-    for (let i = minLength; i < 100; i++) {
+    for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(i);
       let ciphertext = await aead.encrypt(msg);
       let plaintext = await aead.decrypt(ciphertext);
-      assertEquals(12 /* iv */ + msg.length + 16 /* tag */, ciphertext.length);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+      expect(ciphertext.length).toBe(12 /* iv */ + msg.length + 16 /* tag */);
+      expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
 
       let aad = null;
       ciphertext = await aead.encrypt(msg, aad);
       plaintext = await aead.decrypt(ciphertext, aad);
-      assertEquals(12 /* iv */ + msg.length + 16 /* tag */, ciphertext.length);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+      expect(ciphertext.length).toBe(12 /* iv */ + msg.length + 16 /* tag */);
+      expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
 
       aad = Random.randBytes(20);
       ciphertext = await aead.encrypt(msg, aad);
       plaintext = await aead.decrypt(ciphertext, aad);
-      assertEquals(12 /* iv */ + msg.length + 16 /* tag */, ciphertext.length);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+      expect(ciphertext.length).toBe(12 /* iv */ + msg.length + 16 /* tag */);
+      expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
     }
-  },
+  });
 
-  async testProbabilisticEncryption() {
+  it('probabilistic encryption', async function() {
     const aead = await AesGcm.newInstance(Random.randBytes(16));
     const msg = Random.randBytes(20);
     const aad = Random.randBytes(20);
@@ -81,10 +72,10 @@ testSuite({
       const ciphertext = await aead.encrypt(msg, aad);
       results.add(Bytes.toHex(ciphertext));
     }
-    assertEquals(100, results.size);
-  },
+    expect(results.size).toBe(100);
+  });
 
-  async testBitFlipCiphertext() {
+  it('bit flip ciphertext', async function() {
     const aead = await AesGcm.newInstance(Random.randBytes(16));
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
@@ -101,9 +92,9 @@ testSuite({
         }
       }
     }
-  },
+  });
 
-  async testBitFlipAad() {
+  it('bit flip aad', async function() {
     const aead = await AesGcm.newInstance(Random.randBytes(16));
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
@@ -120,9 +111,9 @@ testSuite({
         }
       }
     }
-  },
+  });
 
-  async testTruncation() {
+  it('truncation', async function() {
     const aead = await AesGcm.newInstance(Random.randBytes(16));
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
@@ -134,15 +125,15 @@ testSuite({
         fail('expected aead.decrypt to fail');
       } catch (e) {
         if (c1.length < 12 /* iv */ + 16 /* tag */) {
-          assertEquals('CustomError: ciphertext too short', e.toString());
+          expect(e.toString()).toBe('SecurityException: ciphertext too short');
         } else {
           assertCryptoError(e);
         }
       }
     }
-  },
+  });
 
-  async testWithNistTestVectors() {
+  it('with nist test vectors', async function() {
     // Download from
     // https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/CAVP-TESTING-BLOCK-CIPHER-MODES.
     const NIST_TEST_VECTORS =
@@ -635,19 +626,16 @@ testSuite({
         ];
     for (let i = 0; i < NIST_TEST_VECTORS.length; i++) {
       const testVector = NIST_TEST_VECTORS[i];
-      if (userAgent.EDGE && !testVector['PT']) {
-        continue;  // b/120299887
-      }
       const aead = await AesGcm.newInstance(Bytes.fromHex(testVector['Key']));
       const ciphertext = Bytes.fromHex(
           testVector['IV'] + testVector['CT'] + testVector['Tag']);
       const aad = Bytes.fromHex(testVector['AAD']);
       try {
         const plaintext = await aead.decrypt(ciphertext, aad);
-        assertEquals(Bytes.toHex(plaintext), testVector['PT']);
+        expect(testVector['PT']).toBe(Bytes.toHex(plaintext));
       } catch (e) {
         fail(e);
       }
     }
-  },
+  });
 });

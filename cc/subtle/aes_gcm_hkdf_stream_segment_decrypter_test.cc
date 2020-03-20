@@ -30,26 +30,22 @@
 #include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
-
 namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
 
-util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>>
-GetEncrypter(absl::string_view ikm,
-             HashType hkdf_hash,
-             int derived_key_size,
-             int ciphertext_offset,
-             int ciphertext_segment_size,
-             absl::string_view associated_data) {
+util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> GetEncrypter(
+    const util::SecretData& ikm, HashType hkdf_hash, int derived_key_size,
+    int ciphertext_offset, int ciphertext_segment_size,
+    absl::string_view associated_data) {
   AesGcmHkdfStreamSegmentEncrypter::Params params;
   params.salt = Random::GetRandomBytes(derived_key_size);
   auto hkdf_result = Hkdf::ComputeHkdf(
       hkdf_hash, ikm, params.salt, associated_data,
       derived_key_size);
   if (!hkdf_result.ok()) return hkdf_result.status();
-  params.key_value = hkdf_result.ValueOrDie();
+  params.key = hkdf_result.ValueOrDie();
   params.ciphertext_offset = ciphertext_offset;
   params.ciphertext_segment_size = ciphertext_segment_size;
   return AesGcmHkdfStreamSegmentEncrypter::New(params);
@@ -74,7 +70,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
 
               // Construct a decrypter.
               AesGcmHkdfStreamSegmentDecrypter::Params params;
-              params.ikm = Random::GetRandomBytes(ikm_size);
+              params.ikm = Random::GetRandomKeyBytes(ikm_size);
               params.hkdf_hash = hkdf_hash;
               params.derived_key_size = derived_key_size;
               params.ciphertext_offset = ciphertext_offset;
@@ -159,7 +155,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongDerivedKeySize) {
             ", hkdf_hash = ", EnumToString(hkdf_hash),
             ", ciphertext_segment_size = ", ct_segment_size));
         AesGcmHkdfStreamSegmentDecrypter::Params params;
-        params.ikm = Random::GetRandomBytes(derived_key_size);
+        params.ikm = Random::GetRandomKeyBytes(derived_key_size);
         params.hkdf_hash = hkdf_hash;
         params.derived_key_size = derived_key_size;
         params.ciphertext_offset = 0;
@@ -184,7 +180,8 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongIkmSize) {
             ", hkdf_hash = ", EnumToString(hkdf_hash),
             ", ikm_size_delta = ", ikm_size_delta));
         AesGcmHkdfStreamSegmentDecrypter::Params params;
-        params.ikm = Random::GetRandomBytes(derived_key_size + ikm_size_delta);
+        params.ikm =
+            Random::GetRandomKeyBytes(derived_key_size + ikm_size_delta);
         params.hkdf_hash = hkdf_hash;
         params.derived_key_size = derived_key_size;
         params.ciphertext_offset = 0;
@@ -209,7 +206,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongCiphertextOffset) {
             ", hkdf_hash = ", EnumToString(hkdf_hash),
             ", ciphertext_offset = ", ciphertext_offset));
         AesGcmHkdfStreamSegmentDecrypter::Params params;
-        params.ikm = Random::GetRandomBytes(derived_key_size);
+        params.ikm = Random::GetRandomKeyBytes(derived_key_size);
         params.hkdf_hash = hkdf_hash;
         params.derived_key_size = derived_key_size;
         params.ciphertext_offset = ciphertext_offset;
@@ -242,7 +239,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongCiphertextSegmentSize) {
               ", ciphertext_offset = ", ciphertext_offset,
               ", ciphertext_segment_size = ", ct_segment_size));
           AesGcmHkdfStreamSegmentDecrypter::Params params;
-          params.ikm = Random::GetRandomBytes(derived_key_size);
+          params.ikm = Random::GetRandomKeyBytes(derived_key_size);
           params.hkdf_hash = hkdf_hash;
           params.derived_key_size = derived_key_size;
           params.ciphertext_offset = ciphertext_offset;

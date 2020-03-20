@@ -20,17 +20,13 @@ const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-  async testDecrypt_invalidCiphertext() {
+describe('hybrid decrypt wrapper test', function() {
+  it('decrypt, invalid ciphertext', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
     const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
@@ -42,11 +38,11 @@ testSuite({
       await hybridDecrypt.decrypt(ciphertext);
       fail('Should throw an exception');
     } catch (e) {
-      assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
     }
-  },
+  });
 
-  async testDecrypt_shouldWork() {
+  it('decrypt, should work', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const plaintext = Random.randBytes(10);
     // As keys are just dummy keys which do not contain key data, the same key
@@ -82,10 +78,10 @@ testSuite({
     const decryptedCiphertext = await hybridDecrypt.decrypt(ciphertext);
 
     // Test that the result is the original plaintext.
-    assertObjectEquals(plaintext, decryptedCiphertext);
-  },
+    expect(decryptedCiphertext).toEqual(plaintext);
+  });
 
-  async testDecrypt_ciphertextEncryptedByRawPrimitive() {
+  it('decrypt, ciphertext encrypted by raw primitive', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const plaintext = Random.randBytes(10);
     // As keys are just dummy keys which do not contain key data, the same key
@@ -107,10 +103,10 @@ testSuite({
     const decryptedCiphertext = await hybridDecrypt.decrypt(ciphertext);
 
     // Test that the result is the original plaintext.
-    assertObjectEquals(plaintext, decryptedCiphertext);
-  },
+    expect(decryptedCiphertext).toEqual(plaintext);
+  });
 
-  async testDecrypt_withContextInfo() {
+  it('decrypt, with context info', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const plaintext = Random.randBytes(10);
     const contextInfo = Random.randBytes(10);
@@ -138,16 +134,16 @@ testSuite({
       await hybridDecrypt.decrypt(ciphertext);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
     }
     const decryptedCiphertext =
         await hybridDecrypt.decrypt(ciphertext, contextInfo);
 
     // Test that the result is the original plaintext.
-    assertObjectEquals(plaintext, decryptedCiphertext);
-  },
+    expect(decryptedCiphertext).toEqual(plaintext);
+  });
 
-  async testDecrypt_withDisabledPrimitive() {
+  it('decrypt, with disabled primitive', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const plaintext = Random.randBytes(10);
     const key = createDummyKeysetKey(
@@ -167,11 +163,11 @@ testSuite({
       await hybridDecrypt.decrypt(ciphertext);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
     }
-  },
+  });
 
-  async testDecrypt_withEmptyCiphertext() {
+  it('decrypt, with empty ciphertext', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const decryptPrimitiveSet = primitiveSets['decryptPrimitiveSet'];
     const hybridDecrypt = new HybridDecryptWrapper().wrap(decryptPrimitiveSet);
@@ -180,24 +176,24 @@ testSuite({
       await hybridDecrypt.decrypt(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.cannotBeDecrypted(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.cannotBeDecrypted());
     }
-  },
+  });
 });
 
 /** @final */
 class ExceptionText {
   /** @return {string} */
   static nullPrimitiveSet() {
-    return 'CustomError: Primitive set has to be non-null.';
+    return 'SecurityException: Primitive set has to be non-null.';
   }
   /** @return {string} */
   static cannotBeDecrypted() {
-    return 'CustomError: Decryption failed for the given ciphertext.';
+    return 'SecurityException: Decryption failed for the given ciphertext.';
   }
   /** @return {string} */
   static nullCiphertext() {
-    return 'CustomError: Ciphertext has to be non-null.';
+    return 'SecurityException: Ciphertext has to be non-null.';
   }
 }
 

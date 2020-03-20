@@ -45,7 +45,7 @@ util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
     std::unique_ptr<IndCpaCipher> ind_cpa_cipher, std::unique_ptr<Mac> mac,
     uint8_t tag_size) {
   if (tag_size < MIN_TAG_SIZE_IN_BYTES) {
-    return util::Status(util::error::INTERNAL, "tag size too small");
+    return util::Status(util::error::INVALID_ARGUMENT, "tag size too small");
   }
   std::unique_ptr<Aead> aead(new EncryptThenAuthenticate(
       std::move(ind_cpa_cipher), std::move(mac), tag_size));
@@ -85,7 +85,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
   additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
 
   if (ciphertext.size() < tag_size_) {
-    return util::Status(util::error::INTERNAL, "ciphertext too short");
+    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
   }
 
   std::string payload = std::string(ciphertext.data(), ciphertext.size())

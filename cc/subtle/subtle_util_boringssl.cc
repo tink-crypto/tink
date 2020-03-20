@@ -22,6 +22,7 @@
 #include "openssl/bn.h"
 #include "openssl/cipher.h"
 #include "openssl/curve25519.h"
+#include "openssl/digest.h"
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"
 #include "openssl/err.h"
@@ -29,6 +30,7 @@
 #include "openssl/rsa.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {
@@ -50,6 +52,9 @@ size_t FieldElementSizeInBytes(const EC_GROUP *group) {
 // static
 util::StatusOr<std::string> SubtleUtilBoringSSL::bn2str(const BIGNUM *bn,
                                                         size_t len) {
+  if (bn == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
+  }
   std::unique_ptr<uint8_t[]> res(new uint8_t[len]);
   if (1 != BN_bn2bin_padded(res.get(), len, bn)) {
     return util::Status(util::error::INTERNAL, "Value too large");
@@ -229,6 +234,8 @@ util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
       return EVP_sha1();
     case HashType::SHA256:
       return EVP_sha256();
+    case HashType::SHA384:
+      return EVP_sha384();
     case HashType::SHA512:
       return EVP_sha512();
     default:
@@ -418,7 +425,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
       std::unique_ptr<uint8_t[]> encoded(new uint8_t[1 + curve_size_in_bytes]);
       size_t size = EC_POINT_point2oct(
           group.get(), point, POINT_CONVERSION_COMPRESSED, encoded.get(),
-          1 + 2 * curve_size_in_bytes, nullptr);
+          1 + curve_size_in_bytes, nullptr);
       if (size != 1 + curve_size_in_bytes) {
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
@@ -471,6 +478,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
 util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
   switch (sig_hash) {
     case HashType::SHA256: /* fall through */
+    case HashType::SHA384:
     case HashType::SHA512:
       return util::Status::OK;
     case HashType::SHA1:

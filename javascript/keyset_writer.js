@@ -14,8 +14,7 @@
 
 goog.module('tink.KeysetWriter');
 
-const PbEncryptedKeyset = goog.require('proto.google.crypto.tink.EncryptedKeyset');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const {PbEncryptedKeyset, PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * KeysetWriter knows how to write a keyset or an encrypted keyset to some

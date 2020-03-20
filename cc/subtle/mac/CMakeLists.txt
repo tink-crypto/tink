@@ -1,4 +1,4 @@
-tink_module(subtle_mac)
+tink_module(subtle::mac)
 
 tink_cc_library(
   NAME stateful_mac
@@ -6,4 +6,5 @@ tink_cc_library(
   DEPS
     tink::util::status
     tink::util::statusor
+    absl::strings
 )

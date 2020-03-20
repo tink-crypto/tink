@@ -16,27 +16,25 @@ goog.module('tink.signature.PublicKeyVerifyWrapperTest');
 goog.setTestOnly('tink.signature.PublicKeyVerifyWrapperTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const PublicKeyVerifyWrapper = goog.require('tink.signature.PublicKeyVerifyWrapper');
 const Random = goog.require('tink.subtle.Random');
-const testSuite = goog.require('goog.testing.testSuite');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-testSuite({
-  async testVerify_withEmptySignature() {
+describe('public key verify wrapper test', function() {
+  it('verify, with empty signature', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const primitiveSet = primitiveSets['publicPrimitiveSet'];
     const publicKeyVerify = new PublicKeyVerifyWrapper().wrap(primitiveSet);
-    assertFalse(
-        await publicKeyVerify.verify(new Uint8Array(0), Random.randBytes(10)));
-  },
+    expect(
+        await publicKeyVerify.verify(new Uint8Array(0), Random.randBytes(10)))
+        .toBe(false);
+  });
 
-  async testVerify_shouldWork() {
+  it('verify, should work', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const data = Random.randBytes(10);
     // As keys are just dummy keys which do not contain key data, the same key
@@ -72,10 +70,10 @@ testSuite({
         new PublicKeyVerifyWrapper().wrap(publicPrimitiveSet);
 
     const isValid = await publicKeyVerify.verify(signature, data);
-    assertTrue(isValid);
-  },
+    expect(isValid).toBe(true);
+  });
 
-  async testVerify_rawPrimitive() {
+  it('verify, raw primitive', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const data = Random.randBytes(10);
     const key = createDummyKeysetKey(
@@ -94,10 +92,10 @@ testSuite({
     const publicKeyVerify = new PublicKeyVerifyWrapper().wrap(primitiveSet);
 
     const isValid = await publicKeyVerify.verify(signature, data);
-    assertTrue(isValid);
-  },
+    expect(isValid).toBe(true);
+  });
 
-  async testVerify_withDisabledPrimitive() {
+  it('verify, with disabled primitive', async function() {
     const primitiveSets = createDummyPrimitiveSets();
     const data = Random.randBytes(10);
     const key = createDummyKeysetKey(
@@ -114,8 +112,8 @@ testSuite({
     const publicKeyVerify = new PublicKeyVerifyWrapper().wrap(primitiveSet);
 
     const isValid = await publicKeyVerify.verify(signature, data);
-    assertFalse(isValid);
-  },
+    expect(isValid).toBe(false);
+  });
 });
 
 /**

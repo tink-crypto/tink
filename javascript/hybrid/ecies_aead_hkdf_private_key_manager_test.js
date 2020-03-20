@@ -22,24 +22,10 @@ const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPub
 const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const KeyManager = goog.require('tink.KeyManager');
-const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
-const PbEciesAeadDemParams = goog.require('proto.google.crypto.tink.EciesAeadDemParams');
-const PbEciesAeadHkdfKeyFormat = goog.require('proto.google.crypto.tink.EciesAeadHkdfKeyFormat');
-const PbEciesAeadHkdfParams = goog.require('proto.google.crypto.tink.EciesAeadHkdfParams');
-const PbEciesAeadHkdfPrivateKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPrivateKey');
-const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
-const PbEciesHkdfKemParams = goog.require('proto.google.crypto.tink.EciesHkdfKemParams');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const TestCase = goog.require('goog.testing.TestCase');
-const asserts = goog.require('goog.asserts');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
+const {PbAesCtrKeyFormat, PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const {assertExists, assertInstanceof} = goog.require('tink.testUtils');
 
 const PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';
@@ -52,35 +38,31 @@ const PUBLIC_KEY_TYPE =
 const PUBLIC_KEY_MATERIAL_TYPE = PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC;
 const PUBLIC_KEY_MANAGER_PRIMITIVE = HybridEncrypt;
 
-testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('ecies aead hkdf private key manager test', function() {
+  beforeEach(function() {
     AeadConfig.register();
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testNewKey_emptyKeyFormat() {
+  it('new key, empty key format', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
     try {
       await manager.getKeyFactory().newKey(new Uint8Array(0));
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
     }
-  },
+  });
 
-  async testNewKey_invalidSerializedKeyFormat() {
+  it('new key, invalid serialized key format', async function() {
     const invalidSerializedKeyFormat = new Uint8Array(0);
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
@@ -88,11 +70,11 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidSerializedKeyFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
     }
-  },
+  });
 
-  async testNewKey_unsupportedKeyFormatProto() {
+  it('new key, unsupported key format proto', async function() {
     const unsupportedKeyFormatProto = new PbAesCtrKeyFormat();
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
@@ -100,11 +82,11 @@ testSuite({
       await manager.getKeyFactory().newKey(unsupportedKeyFormatProto);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedKeyFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedKeyFormat());
     }
-  },
+  });
 
-  async testNewKey_invalidFormat_missingParams() {
+  it('new key, invalid format, missing params', async function() {
     const invalidFormat = new PbEciesAeadHkdfKeyFormat();
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
@@ -112,11 +94,11 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.invalidKeyFormatMissingParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidKeyFormatMissingParams());
     }
-  },
+  });
 
-  async testNewKey_invalidFormat_invalidParams() {
+  it('new key, invalid format, invalid params', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
     // unknown point format
@@ -126,7 +108,7 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unknownPointFormat(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unknownPointFormat());
     }
     invalidFormat.getParams().setEcPointFormat(PbPointFormat.UNCOMPRESSED);
 
@@ -136,7 +118,7 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingKemParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
     invalidFormat.getParams().setKemParams(createKemParams());
 
@@ -148,12 +130,12 @@ testSuite({
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.unsupportedKeyTemplate(templateTypeUrl), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.unsupportedKeyTemplate(templateTypeUrl));
     }
-  },
+  });
 
-  async testNewKey_viaKeyFormat() {
+  it('new key, via key format', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
@@ -161,13 +143,13 @@ testSuite({
       const key = /** @type{!PbEciesAeadHkdfPrivateKey} */ (
           await manager.getKeyFactory().newKey(keyFormat));
 
-      assertObjectEquals(keyFormat.getParams(), key.getPublicKey().getParams());
+      expect(key.getPublicKey().getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
-  },
+  });
 
-  async testNewKeyData_invalidSerializedKeyFormat() {
+  it('new key data, invalid serialized key format', async function() {
     const serializedKeyFormats = [new Uint8Array(1), new Uint8Array(0)];
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
@@ -179,13 +161,13 @@ testSuite({
             'An exception should be thrown for the string: ' +
             serializedKeyFormats[i]);
       } catch (e) {
-        assertEquals(ExceptionText.invalidSerializedKeyFormat(), e.toString());
+        expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
         continue;
       }
     }
-  },
+  });
 
-  async testNewKeyData_fromValidKeyFormat() {
+  it('new key data, from valid key format', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
@@ -194,18 +176,18 @@ testSuite({
       const keyData = /** @type{!PbKeyData} */ (
           await manager.getKeyFactory().newKeyData(serializedKeyFormat));
 
-      assertEquals(PRIVATE_KEY_TYPE, keyData.getTypeUrl());
-      assertEquals(PRIVATE_KEY_MATERIAL_TYPE, keyData.getKeyMaterialType());
+      expect(keyData.getTypeUrl()).toBe(PRIVATE_KEY_TYPE);
+      expect(keyData.getKeyMaterialType()).toBe(PRIVATE_KEY_MATERIAL_TYPE);
 
       const key =
           PbEciesAeadHkdfPrivateKey.deserializeBinary(keyData.getValue());
-      assertObjectEquals(keyFormat.getParams(), key.getPublicKey().getParams());
+      expect(key.getPublicKey().getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
-  },
+  });
 
-  testGetPublicKeyData_invalidPrivateKeySerialization() {
+  it('get public key data, invalid private key serialization', function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
     const privateKey = new Uint8Array([0, 1]);  // not a serialized private key
@@ -214,11 +196,11 @@ testSuite({
           manager.getKeyFactory());
       factory.getPublicKeyData(privateKey);
     } catch (e) {
-      assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
     }
-  },
+  });
 
-  async testGetPublicKeyData_shouldWork() {
+  it('get public key data, should work', async function() {
     const keyFormat = createKeyFormat();
     const manager = new EciesAeadHkdfPrivateKeyManager();
 
@@ -229,19 +211,19 @@ testSuite({
     const publicKeyData =
         factory.getPublicKeyData(privateKey.serializeBinary());
 
-    assertEquals(PUBLIC_KEY_TYPE, publicKeyData.getTypeUrl());
-    assertEquals(PUBLIC_KEY_MATERIAL_TYPE, publicKeyData.getKeyMaterialType());
+    expect(publicKeyData.getTypeUrl()).toBe(PUBLIC_KEY_TYPE);
+    expect(publicKeyData.getKeyMaterialType()).toBe(PUBLIC_KEY_MATERIAL_TYPE);
     const publicKey =
         PbEciesAeadHkdfPublicKey.deserializeBinary(publicKeyData.getValue());
-    assertObjectEquals(
-        privateKey.getPublicKey().getVersion(), publicKey.getVersion());
-    assertObjectEquals(
-        privateKey.getPublicKey().getParams(), publicKey.getParams());
-    assertObjectEquals(privateKey.getPublicKey().getX(), publicKey.getX());
-    assertObjectEquals(privateKey.getPublicKey().getY(), publicKey.getY());
-  },
+    expect(publicKey.getVersion())
+        .toEqual(privateKey.getPublicKey().getVersion());
+    expect(publicKey.getParams())
+        .toEqual(privateKey.getPublicKey().getParams());
+    expect(publicKey.getX()).toEqual(privateKey.getPublicKey().getX());
+    expect(publicKey.getY()).toEqual(privateKey.getPublicKey().getY());
+  });
 
-  async testGetPrimitive_unsupportedPrimitiveType() {
+  it('get primitive, unsupported primitive type', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const key = await manager.getKeyFactory().newKey(keyFormat);
@@ -250,11 +232,11 @@ testSuite({
       await manager.getPrimitive(HybridEncrypt, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedPrimitive());
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedKeyDataType() {
+  it('get primitive, unsupported key data type', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const keyData =
@@ -265,12 +247,12 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.unsupportedKeyType(keyData.getTypeUrl()));
     }
-  },
+  });
 
-  async testGetPrimitive_unsupportedKeyType() {
+  it('get primitive, unsupported key type', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     let key = new PbEciesAeadHkdfPublicKey();
 
@@ -278,32 +260,30 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.unsupportedKeyType());
     }
-  },
+  });
 
-  async testGetPrimitive_highVersion() {
+  it('get primitive, high version', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const version = manager.getVersion() + 1;
     const keyFormat = createKeyFormat();
-    const key = asserts
-                    .assertInstanceof(
-                        await manager.getKeyFactory().newKey(keyFormat),
-                        PbEciesAeadHkdfPrivateKey)
+    const key = assertInstanceof(
+                    await manager.getKeyFactory().newKey(keyFormat),
+                    PbEciesAeadHkdfPrivateKey)
                     .setVersion(version);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.versionOutOfBounds());
     }
-  },
+  });
 
-
-  async testGetPrimitive_invalidParams() {
+  it('get primitive, invalid params', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const keyFormat = createKeyFormat();
-    const key = asserts.assertInstanceof(
+    const key = assertInstanceof(
         await manager.getKeyFactory().newKey(keyFormat),
         PbEciesAeadHkdfPrivateKey);
 
@@ -313,7 +293,7 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(ExceptionText.missingKemParams(), e.toString());
+      expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
     key.getPublicKey().getParams().setKemParams(createKemParams());
 
@@ -325,12 +305,12 @@ testSuite({
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
-      assertEquals(
-          ExceptionText.unsupportedKeyTemplate(templateTypeUrl), e.toString());
+      expect(e.toString())
+          .toBe(ExceptionText.unsupportedKeyTemplate(templateTypeUrl));
     }
-  },
+  });
 
-  async testGetPrimitive_invalidSerializedKey() {
+  it('get primitive, invalid serialized key', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     const keyFormat = createKeyFormat();
     const keyData =
@@ -345,38 +325,37 @@ testSuite({
         await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
       } catch (e) {
-        assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
+        expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
       }
     }
-  },
+  });
 
-  async testGetPrimitive_fromKey() {
+  it('get primitive, from key', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const privateKeyManager = new EciesAeadHkdfPrivateKeyManager();
     const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
 
     for (let keyFormat of keyFormats) {
-      const key = asserts.assertInstanceof(
+      const key = assertInstanceof(
           await privateKeyManager.getKeyFactory().newKey(keyFormat),
           PbEciesAeadHkdfPrivateKey);
 
       const /** !HybridEncrypt */ hybridEncrypt =
-          asserts.assert(await publicKeyManager.getPrimitive(
-              PUBLIC_KEY_MANAGER_PRIMITIVE,
-              asserts.assert(key.getPublicKey())));
+          assertExists(await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE, assertExists(key.getPublicKey())));
       const /** !HybridDecrypt */ hybridDecrypt =
-          asserts.assert(await privateKeyManager.getPrimitive(
+          assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, key));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await hybridEncrypt.encrypt(plaintext);
       const decryptedCiphertext = await hybridDecrypt.decrypt(ciphertext);
 
-      assertObjectEquals(plaintext, decryptedCiphertext);
+      expect(decryptedCiphertext).toEqual(plaintext);
     }
-  },
+  });
 
-  async testGetPrimitive_fromKeyData() {
+  it('get primitive, from key data', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const privateKeyManager = new EciesAeadHkdfPrivateKeyManager();
     const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
@@ -390,63 +369,64 @@ testSuite({
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
 
       const /** !HybridEncrypt */ hybridEncrypt =
-          asserts.assert(await publicKeyManager.getPrimitive(
+          assertExists(await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData));
       const /** !HybridDecrypt */ hybridDecrypt =
-          asserts.assert(await privateKeyManager.getPrimitive(
+          assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, keyData));
 
       const plaintext = Random.randBytes(10);
       const ciphertext = await hybridEncrypt.encrypt(plaintext);
       const decryptedCiphertext = await hybridDecrypt.decrypt(ciphertext);
 
-      assertObjectEquals(plaintext, decryptedCiphertext);
+      expect(decryptedCiphertext).toEqual(plaintext);
     }
-  },
+  });
 
-  testDoesSupport() {
+  it('does support', function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
-    assertTrue(manager.doesSupport(PRIVATE_KEY_TYPE));
-  },
+    expect(manager.doesSupport(PRIVATE_KEY_TYPE)).toBe(true);
+  });
 
-  testGetKeyType() {
+  it('get key type', function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
-    assertEquals(PRIVATE_KEY_TYPE, manager.getKeyType());
-  },
+    expect(manager.getKeyType()).toBe(PRIVATE_KEY_TYPE);
+  });
 
-  testGetPrimitiveType() {
+  it('get primitive type', function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
-    assertEquals(PRIVATE_KEY_MANAGER_PRIMITIVE, manager.getPrimitiveType());
-  },
+    expect(manager.getPrimitiveType()).toBe(PRIVATE_KEY_MANAGER_PRIMITIVE);
+  });
 
-  testGetVersion() {
+  it('get version', function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
-    assertEquals(VERSION, manager.getVersion());
-  },
+    expect(manager.getVersion()).toBe(VERSION);
+  });
 });
 
 // Helper classes and functions
 class ExceptionText {
   /** @return {string} */
   static nullKeyFormat() {
-    return 'CustomError: Key format has to be non-null.';
+    return 'SecurityException: Key format has to be non-null.';
   }
 
   /** @return {string} */
   static invalidSerializedKeyFormat() {
-    return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
+    return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
   }
 
   /** @return {string} */
   static unsupportedPrimitive() {
-    return 'CustomError: Requested primitive type which is not supported by ' +
+    return 'SecurityException: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
   /** @return {string} */
   static unsupportedKeyFormat() {
-    return 'CustomError: Expected ' + PRIVATE_KEY_TYPE + ' key format proto.';
+    return 'SecurityException: Expected ' + PRIVATE_KEY_TYPE +
+        ' key format proto.';
   }
 
   /**
@@ -454,7 +434,7 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyType(opt_requestedKeyType) {
-    const prefix = 'CustomError: Key type';
+    const prefix = 'SecurityException: Key type';
     const suffix =
         'is not supported. This key manager supports ' + PRIVATE_KEY_TYPE + '.';
     if (opt_requestedKeyType) {
@@ -466,23 +446,23 @@ class ExceptionText {
 
   /** @return {string} */
   static versionOutOfBounds() {
-    return 'CustomError: Version is out of bound, must be between 0 and ' +
+    return 'SecurityException: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
   /** @return {string} */
   static invalidKeyFormatMissingParams() {
-    return 'CustomError: Invalid key format - missing key params.';
+    return 'SecurityException: Invalid key format - missing key params.';
   }
 
   /** @return {string} */
   static unknownPointFormat() {
-    return 'CustomError: Invalid key params - unknown EC point format.';
+    return 'SecurityException: Invalid key params - unknown EC point format.';
   }
 
   /** @return {string} */
   static missingKemParams() {
-    return 'CustomError: Invalid params - missing KEM params.';
+    return 'SecurityException: Invalid params - missing KEM params.';
   }
 
   /**
@@ -490,13 +470,13 @@ class ExceptionText {
    * @return {string}
    */
   static unsupportedKeyTemplate(templateTypeUrl) {
-    return 'CustomError: Invalid DEM params - ' + templateTypeUrl +
+    return 'SecurityException: Invalid DEM params - ' + templateTypeUrl +
         ' template is not supported by ECIES AEAD HKDF.';
   }
 
   /** @return {string} */
   static invalidSerializedKey() {
-    return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
+    return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key-proto.';
   }
 }

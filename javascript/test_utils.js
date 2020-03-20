@@ -15,10 +15,45 @@
 goog.module('tink.testUtils');
 goog.setTestOnly();
 
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const {PbKeyData, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+
+/**
+ * Returns its input type-narrowed not to be null or undefined. Throws a failed
+ * test assertion if it's null or undefined at runtime.
+ *
+ * @param {T} value
+ * @return {R}
+ * @template T
+ * @template R :=
+ *     mapunion(T, (V) =>
+ *         cond(eq(V, 'null'),
+ *             none(),
+ *             cond(eq(V, 'undefined'),
+ *                 none(),
+ *                 V)))
+ *  =:
+ */
+const assertExists = function(value) {
+  expect(value).toBeDefined();
+  expect(value).not.toBeNull();
+  return value;
+};
+
+/**
+ * Returns its input type-narrowed to a particular type. Throws a failed test
+ * assertion if it isn't that type at runtime.
+ *
+ * @param {*} value
+ * @param {function(new:T, ...)} type
+ * @return {T}
+ * @template T
+ */
+const assertInstanceof = function(value, type) {
+  expect(value instanceof type)
+      .withContext(`${value} should be an instance of ${type}`)
+      .toBe(true);
+  return value;
+};
 
 /**
  * Creates a key for testing purposes. Generates a new key with id, output
@@ -79,6 +114,8 @@ const createKeyset = function(keysetSize = 20) {
 };
 
 exports = {
+  assertExists,
+  assertInstanceof,
   createKey,
   createKeyset,
 };

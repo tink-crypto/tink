@@ -1,5 +1,5 @@
 load("@rules_python//python:defs.bzl", "py_test")
-load("@tink_py_deps//:requirements.bzl", "requirement")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -8,8 +8,8 @@ py_library(
     srcs = ["gcp_kms_client.py"],
     deps = [
         ":gcp_kms_aead",
-        "//python/aead:aead",
-        "//python/core:tink_error",
+        "//aead:aead_primitive",
+        "//core:tink_error",
         requirement("grpc-google-iam-v1"),
         requirement("idna"),
         requirement("certifi"),
@@ -35,11 +35,11 @@ py_test(
     srcs = ["gcp_kms_client_test.py"],
     legacy_create_init = 0,
     data = [
-        "//testdata:credentials"
+        "@tink_base//testdata:credentials"
     ],
     deps = [
         ":gcp_kms_client",
-        requirement("absl-py")
+        requirement("absl-py"),
     ]
 )
 
@@ -47,8 +47,8 @@ py_library(
     name = "gcp_kms_aead",
     srcs = ["gcp_kms_aead.py"],
     deps = [
-        "//python/aead:aead",
-        "//python/core:tink_error",
+        "//aead:aead_primitive",
+        "//core:tink_error",
         requirement("grpc-google-iam-v1"),
         requirement("idna"),
         requirement("certifi"),
@@ -73,11 +73,11 @@ py_test(
     srcs = ["gcp_kms_aead_test.py"],
     legacy_create_init = 0,
     data = [
-        "//testdata:credentials"
+        "@tink_base//testdata:credentials"
     ],
     deps = [
         ":gcp_kms_client",
         ":gcp_kms_aead",
-        requirement("absl-py")
+        requirement("absl-py"),
     ]
 )

@@ -18,16 +18,10 @@ goog.setTestOnly('tink.hybrid.HybridKeyTemplatesTest');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
-const PbEciesAeadHkdfKeyFormat = goog.require('proto.google.crypto.tink.EciesAeadHkdfKeyFormat');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
+const {PbEciesAeadHkdfKeyFormat, PbEllipticCurveType, PbHashType, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-const testSuite = goog.require('goog.testing.testSuite');
-
-testSuite({
-  testEciesP256HkdfHmacSha256Aes128Gcm() {
+describe('hybrid key templates test', function() {
+  it('ecies p256 hkdf hmac sha256 aes128 gcm', function() {
     // Expects function to create a key with following parameters.
     const expectedCurve = PbEllipticCurveType.NIST_P256;
     const expectedHkdfHashFunction = PbHashType.SHA256;
@@ -41,29 +35,29 @@ testSuite({
 
     const keyTemplate = HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm();
 
-    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
-    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+    expect(keyTemplate.getTypeUrl()).toBe(expectedTypeUrl);
+    expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test values in key format.
     const keyFormat =
         PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
-    assertEquals(expectedPointFormat, params.getEcPointFormat());
+    expect(params.getEcPointFormat()).toBe(expectedPointFormat);
 
     // Test KEM params.
     const kemParams = params.getKemParams();
-    assertEquals(expectedCurve, kemParams.getCurveType());
-    assertEquals(expectedHkdfHashFunction, kemParams.getHkdfHashType());
+    expect(kemParams.getCurveType()).toBe(expectedCurve);
+    expect(kemParams.getHkdfHashType()).toBe(expectedHkdfHashFunction);
 
     // Test DEM params.
     const demParams = params.getDemParams();
-    assertObjectEquals(expectedAeadTemplate, demParams.getAeadDem());
+    expect(demParams.getAeadDem()).toEqual(expectedAeadTemplate);
 
     // Test that the template works with EciesAeadHkdfPrivateKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
-  },
+  });
 
-  testEciesP256HkdfHmacSha256Aes128CtrHmacSha256() {
+  it('ecies p256 hkdf hmac sha256 aes128 ctr hmac sha256', function() {
     // Expects function to create a key with following parameters.
     const expectedCurve = PbEllipticCurveType.NIST_P256;
     const expectedHkdfHashFunction = PbHashType.SHA256;
@@ -78,25 +72,25 @@ testSuite({
     const keyTemplate =
         HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128CtrHmacSha256();
 
-    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
-    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+    expect(keyTemplate.getTypeUrl()).toBe(expectedTypeUrl);
+    expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test values in key format.
     const keyFormat =
         PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
-    assertEquals(expectedPointFormat, params.getEcPointFormat());
+    expect(params.getEcPointFormat()).toBe(expectedPointFormat);
 
     // Test KEM params.
     const kemParams = params.getKemParams();
-    assertEquals(expectedCurve, kemParams.getCurveType());
-    assertEquals(expectedHkdfHashFunction, kemParams.getHkdfHashType());
+    expect(kemParams.getCurveType()).toBe(expectedCurve);
+    expect(kemParams.getHkdfHashType()).toBe(expectedHkdfHashFunction);
 
     // Test DEM params.
     const demParams = params.getDemParams();
-    assertObjectEquals(expectedAeadTemplate, demParams.getAeadDem());
+    expect(demParams.getAeadDem()).toEqual(expectedAeadTemplate);
 
     // Test that the template works with EciesAeadHkdfPrivateKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
-  },
+  });
 });

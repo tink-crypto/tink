@@ -76,6 +76,7 @@ tink_cc_library(
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -99,6 +100,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::input_stream_util
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -199,6 +201,7 @@ tink_cc_test(
     tink::core::key_manager_impl
     tink::core::mac
     tink::util::istream_input_stream
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

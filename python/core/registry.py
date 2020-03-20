@@ -146,7 +146,7 @@ class Registry(object):
           'KeyManager for type {} does not allow for creation of new keys.'
           .format(key_template.type_url))
 
-    return km_module.native_key_data(key_mgr.new_key_data(key_template))
+    return key_mgr.new_key_data(key_template)
 
   @classmethod
   def public_key_data(cls,
@@ -160,7 +160,7 @@ class Registry(object):
       raise tink_error.TinkError(
           'manager for key type {} is not a PrivateKeyManager'
           .format(private_key_data.type_url))
-    return km_module.native_key_data(key_mgr.public_key_data(private_key_data))
+    return key_mgr.public_key_data(private_key_data)
 
   @classmethod
   def register_primitive_wrapper(

@@ -16,13 +16,8 @@ goog.module('tink.Util');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbEllipticCurveType, PbHashType, PbKeyStatusType, PbKeyset, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Validates the given key and throws SecurityException if it is invalid.

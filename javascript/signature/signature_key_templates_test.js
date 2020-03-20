@@ -16,16 +16,11 @@ goog.module('tink.signature.SignatureKeyTemplatesTest');
 goog.setTestOnly('tink.signature.SignatureKeyTemplatesTest');
 
 const EcdsaPrivateKeyManager = goog.require('tink.signature.EcdsaPrivateKeyManager');
-const PbEcdsaKeyFormat = goog.require('proto.google.crypto.tink.EcdsaKeyFormat');
-const PbEcdsaSignatureEncoding = goog.require('proto.google.crypto.tink.EcdsaSignatureEncoding');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const SignatureKeyTemplates = goog.require('tink.signature.SignatureKeyTemplates');
-const testSuite = goog.require('goog.testing.testSuite');
+const {PbEcdsaKeyFormat, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-testSuite({
-  testEcdsaP256() {
+describe('signature key templates test', function() {
+  it('ecdsa p256', function() {
     // Expects function to create a key with following parameters.
     const expectedCurve = PbEllipticCurveType.NIST_P256;
     const expectedHashFunction = PbHashType.SHA256;
@@ -38,20 +33,20 @@ testSuite({
 
     const keyTemplate = SignatureKeyTemplates.ecdsaP256();
 
-    assertEquals(expectedTypeUrl, keyTemplate.getTypeUrl());
-    assertEquals(expectedOutputPrefix, keyTemplate.getOutputPrefixType());
+    expect(keyTemplate.getTypeUrl()).toBe(expectedTypeUrl);
+    expect(keyTemplate.getOutputPrefixType()).toBe(expectedOutputPrefix);
 
     // Test values in key format.
     const keyFormat =
         PbEcdsaKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
-    assertEquals(expectedEncoding, params.getEncoding());
+    expect(params.getEncoding()).toBe(expectedEncoding);
 
     // Test key params.
-    assertEquals(expectedCurve, params.getCurve());
-    assertEquals(expectedHashFunction, params.getHashType());
+    expect(params.getCurve()).toBe(expectedCurve);
+    expect(params.getHashType()).toBe(expectedHashFunction);
 
     // Test that the template works with EcdsaPrivateKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
-  },
+  });
 });

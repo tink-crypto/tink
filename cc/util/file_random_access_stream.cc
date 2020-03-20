@@ -55,20 +55,19 @@ FileRandomAccessStream::FileRandomAccessStream(int file_descriptor) {
 Status FileRandomAccessStream::PRead(int64_t position, int count,
                                      Buffer* dest_buffer) {
   if (dest_buffer == nullptr) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "dest_buffer must be non-null");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "dest_buffer must be non-null");
   }
   if (count <= 0) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "count must be positive");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "count must be positive");
   }
   if (count > dest_buffer->allocated_size()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "buffer too small");
+    return util::Status(util::error::INVALID_ARGUMENT, "buffer too small");
   }
   if (position < 0) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "position cannot be negative");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "position cannot be negative");
   }
   crypto::tink::util::Status status = dest_buffer->set_size(count);
   if (!status.ok()) return status;

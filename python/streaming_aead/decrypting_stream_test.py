@@ -21,7 +21,7 @@ from absl.testing import absltest
 # TODO(b/141106504) Replace this with unittest.mock
 import mock
 
-from tink.python.cc.clif import status as error
+from tink.python.cc.pybind import status as error
 from tink.python.core import tink_error
 from tink.python.streaming_aead import decrypting_stream
 

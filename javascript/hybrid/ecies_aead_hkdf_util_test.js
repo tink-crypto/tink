@@ -19,37 +19,22 @@ const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const PbEciesAeadDemParams = goog.require('proto.google.crypto.tink.EciesAeadDemParams');
-const PbEciesAeadHkdfParams = goog.require('proto.google.crypto.tink.EciesAeadHkdfParams');
-const PbEciesAeadHkdfPrivateKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPrivateKey');
-const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
-const PbEciesHkdfKemParams = goog.require('proto.google.crypto.tink.EciesHkdfKemParams');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
-const TestCase = goog.require('goog.testing.TestCase');
 const Util = goog.require('tink.Util');
-const asserts = goog.require('goog.asserts');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
+const {PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const {assertExists} = goog.require('tink.testUtils');
 
-testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('ecies aead hkdf util test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testGetJsonWebKeyFromProto_publicKey() {
+  it('get json web key from proto, public key', async function() {
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
@@ -59,74 +44,75 @@ testSuite({
       }
       const key = await createKey(curve);
       const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(
-          asserts.assert(key.getPublicKey()));
+          assertExists(key.getPublicKey()));
 
       // Test the returned jwk.
       const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
       const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
 
-      assertEquals('EC', jwk['kty']);
-      assertEquals(curveTypeString, jwk['crv']);
-      assertObjectEquals(
-          asserts.assert(key.getPublicKey()).getX_asU8(),
-          Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
-      assertObjectEquals(
-          asserts.assert(key.getPublicKey()).getY_asU8(),
-          Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
-      assertObjectEquals(undefined, jwk['d']);
-      assertTrue(jwk['ext']);
+      expect(jwk['kty']).toBe('EC');
+      expect(jwk['crv']).toBe(curveTypeString);
+      expect(Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true))
+          .toEqual(assertExists(key.getPublicKey()).getX_asU8());
+      expect(Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true))
+          .toEqual(assertExists(key.getPublicKey()).getY_asU8());
+      expect(jwk['d']).toEqual(undefined);
+      expect(jwk['ext']).toBe(true);
     }
-  },
+  });
 
-  async testGetJsonWebKeyFromProto_publicKey_withLeadingZeros() {
-    const curves = Object.keys(PbEllipticCurveType);
-    for (let curveId of curves) {
-      const curve = PbEllipticCurveType[curveId];
-      if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
-          curve === PbEllipticCurveType.CURVE25519) {
-        continue;
-      }
-      const key = await createKey(curve);
-      // Add leading zeros to x and y value of key.
-      const x = key.getPublicKey().getX_asU8();
-      const y = key.getPublicKey().getY_asU8();
-      key.getPublicKey().setX(Bytes.concat(new Uint8Array([0, 0, 0, 0, 0]), x));
-      key.getPublicKey().setY(Bytes.concat(new Uint8Array([0, 0, 0]), y));
-      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(
-          asserts.assert(key.getPublicKey()));
+  it('get json web key from proto, public key, with leading zeros',
+     async function() {
+       const curves = Object.keys(PbEllipticCurveType);
+       for (let curveId of curves) {
+         const curve = PbEllipticCurveType[curveId];
+         if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
+             curve === PbEllipticCurveType.CURVE25519) {
+           continue;
+         }
+         const key = await createKey(curve);
+         // Add leading zeros to x and y value of key.
+         const x = key.getPublicKey().getX_asU8();
+         const y = key.getPublicKey().getY_asU8();
+         key.getPublicKey().setX(
+             Bytes.concat(new Uint8Array([0, 0, 0, 0, 0]), x));
+         key.getPublicKey().setY(Bytes.concat(new Uint8Array([0, 0, 0]), y));
+         const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(
+             assertExists(key.getPublicKey()));
 
-      // Test the returned jwk.
-      const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
-      const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
+         // Test the returned jwk.
+         const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
+         const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
 
-      assertEquals('EC', jwk['kty']);
-      assertEquals(curveTypeString, jwk['crv']);
-      assertObjectEquals(
-          x, Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
-      assertObjectEquals(
-          y, Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
-      assertObjectEquals(undefined, jwk['d']);
-      assertTrue(jwk['ext']);
-    }
-  },
+         expect(jwk['kty']).toBe('EC');
+         expect(jwk['crv']).toBe(curveTypeString);
+         expect(Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true))
+             .toEqual(x);
+         expect(Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true))
+             .toEqual(y);
+         expect(jwk['d']).toEqual(undefined);
+         expect(jwk['ext']).toBe(true);
+       }
+     });
 
-  async testGetJsonWebKeyFromProto_publicKey_leadingNonzero() {
-    const curve = PbEllipticCurveType.NIST_P256;
-    const key = await createKey(curve);
-    const publicKey = asserts.assert(key.getPublicKey());
-    const x = publicKey.getX_asU8();
-    publicKey.setX(Bytes.concat(new Uint8Array([1, 0]), x));
-    try {
-      EciesAeadHkdfUtil.getJsonWebKeyFromProto(publicKey);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          'CustomError: Number needs more bytes to be represented.',
-          e.toString());
-    }
-  },
+  it('get json web key from proto, public key, leading nonzero',
+     async function() {
+       const curve = PbEllipticCurveType.NIST_P256;
+       const key = await createKey(curve);
+       const publicKey = assertExists(key.getPublicKey());
+       const x = publicKey.getX_asU8();
+       publicKey.setX(Bytes.concat(new Uint8Array([1, 0]), x));
+       try {
+         EciesAeadHkdfUtil.getJsonWebKeyFromProto(publicKey);
+         fail('An exception should be thrown.');
+       } catch (e) {
+         expect(e.toString())
+             .toBe(
+                 'SecurityException: Number needs more bytes to be represented.');
+       }
+     });
 
-  async testGetJsonWebKeyFromProto_privateKey() {
+  it('get json web key from proto, private key', async function() {
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
       const curve = PbEllipticCurveType[curveId];
@@ -141,51 +127,47 @@ testSuite({
       const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
       const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
 
-      assertEquals('EC', jwk['kty']);
-      assertEquals(curveTypeString, jwk['crv']);
-      assertObjectEquals(
-          key.getPublicKey().getX_asU8(),
-          Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
-      assertObjectEquals(
-          key.getPublicKey().getY_asU8(),
-          Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
-      assertObjectEquals(
-          key.getKeyValue_asU8(),
-          Bytes.fromBase64(jwk['d'], /* opt_webSafe = */ true));
-      assertTrue(jwk['ext']);
+      expect(jwk['kty']).toBe('EC');
+      expect(jwk['crv']).toBe(curveTypeString);
+      expect(Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true))
+          .toEqual(key.getPublicKey().getX_asU8());
+      expect(Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true))
+          .toEqual(key.getPublicKey().getY_asU8());
+      expect(Bytes.fromBase64(jwk['d'], /* opt_webSafe = */ true))
+          .toEqual(key.getKeyValue_asU8());
+      expect(jwk['ext']).toBe(true);
     }
-  },
+  });
 
-  async testGetJsonWebKeyFromProto_privateKey_leadingZeros() {
-    const curves = Object.keys(PbEllipticCurveType);
-    for (let curveId of curves) {
-      const curve = PbEllipticCurveType[curveId];
-      if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
-          curve === PbEllipticCurveType.CURVE25519) {
-        continue;
-      }
-      const key = await createKey(curve);
-      const d = key.getKeyValue_asU8();
-      key.setKeyValue(Bytes.concat(new Uint8Array([0, 0, 0]), d));
-      const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key);
+  it('get json web key from proto, private key, leading zeros',
+     async function() {
+       const curves = Object.keys(PbEllipticCurveType);
+       for (let curveId of curves) {
+         const curve = PbEllipticCurveType[curveId];
+         if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
+             curve === PbEllipticCurveType.CURVE25519) {
+           continue;
+         }
+         const key = await createKey(curve);
+         const d = key.getKeyValue_asU8();
+         key.setKeyValue(Bytes.concat(new Uint8Array([0, 0, 0]), d));
+         const jwk = EciesAeadHkdfUtil.getJsonWebKeyFromProto(key);
 
-      // Test the returned jwk.
-      const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
-      const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
+         // Test the returned jwk.
+         const curveTypeSubtle = Util.curveTypeProtoToSubtle(curve);
+         const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
 
-      assertEquals('EC', jwk['kty']);
-      assertEquals(curveTypeString, jwk['crv']);
-      assertObjectEquals(
-          key.getPublicKey().getX_asU8(),
-          Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true));
-      assertObjectEquals(
-          key.getPublicKey().getY_asU8(),
-          Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true));
-      assertObjectEquals(
-          d, Bytes.fromBase64(jwk['d'], /* opt_webSafe = */ true));
-      assertTrue(jwk['ext']);
-    }
-  },
+         expect(jwk['kty']).toBe('EC');
+         expect(jwk['crv']).toBe(curveTypeString);
+         expect(Bytes.fromBase64(jwk['x'], /* opt_webSafe = */ true))
+             .toEqual(key.getPublicKey().getX_asU8());
+         expect(Bytes.fromBase64(jwk['y'], /* opt_webSafe = */ true))
+             .toEqual(key.getPublicKey().getY_asU8());
+         expect(Bytes.fromBase64(jwk['d'], /* opt_webSafe = */ true))
+             .toEqual(d);
+         expect(jwk['ext']).toBe(true);
+       }
+     });
 });
 
 /**

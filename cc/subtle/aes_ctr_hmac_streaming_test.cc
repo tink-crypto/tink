@@ -42,7 +42,7 @@ namespace {
 
 AesCtrHmacStreaming::Params ValidParams() {
   AesCtrHmacStreaming::Params params;
-  params.ikm = Random::GetRandomBytes(32);
+  params.ikm = Random::GetRandomKeyBytes(32);
   params.hkdf_algo = SHA256;
   params.key_size = 32;
   params.ciphertext_segment_size = 256;
@@ -71,7 +71,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, Basic) {
 
                 // Construct the parameters.
                 AesCtrHmacStreaming::Params params;
-                params.ikm = Random::GetRandomBytes(ikm_size);
+                params.ikm = Random::GetRandomKeyBytes(ikm_size);
                 params.hkdf_algo = hkdf_algo;
                 params.key_size = key_size;
                 params.ciphertext_segment_size = ciphertext_segment_size;
@@ -170,7 +170,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, Basic) {
 
                 // Construct the parameters.
                 AesCtrHmacStreaming::Params params;
-                params.ikm = Random::GetRandomBytes(ikm_size);
+                params.ikm = Random::GetRandomKeyBytes(ikm_size);
                 params.hkdf_algo = hkdf_algo;
                 params.key_size = key_size;
                 params.ciphertext_segment_size = ciphertext_segment_size;
@@ -366,7 +366,7 @@ TEST(AesCtrHmacStreamingTest, Basic) {
 
                   // Create AesCtrHmacStreaming.
                   AesCtrHmacStreaming::Params params;
-                  params.ikm = Random::GetRandomBytes(ikm_size);
+                  params.ikm = Random::GetRandomKeyBytes(ikm_size);
                   params.hkdf_algo = hkdf_algo;
                   params.key_size = key_size;
                   params.ciphertext_segment_size = ciphertext_segment_size;
@@ -402,7 +402,7 @@ TEST(ValidateTest, ValidParams) {
 
 TEST(ValidateTest, WrongIkm) {
   AesCtrHmacStreaming::Params params = ValidParams();
-  params.ikm = Random::GetRandomBytes(16);
+  params.ikm = Random::GetRandomKeyBytes(16);
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
               StatusIs(util::error::INVALID_ARGUMENT,
                        HasSubstr("key material too small")));
@@ -418,7 +418,7 @@ TEST(ValidateTest, WrongHkdfAlgo) {
 
 TEST(ValidateTest, WrongKeySize) {
   AesCtrHmacStreaming::Params params = ValidParams();
-  params.ikm = Random::GetRandomBytes(64);
+  params.ikm = Random::GetRandomKeyBytes(64);
   params.key_size = 64;
   ASSERT_THAT(
       AesCtrHmacStreaming::New(params).status(),

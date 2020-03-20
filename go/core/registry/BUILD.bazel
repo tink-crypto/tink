@@ -15,8 +15,8 @@ go_library(
     importpath = "github.com/google/tink/go/core/registry",
     visibility = ["//visibility:public"],
     deps = [
-        "//tink:go_default_library",
         "//proto:tink_go_proto",
+        "//tink:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )
@@ -29,12 +29,12 @@ go_test(
         "//aead:go_default_library",
         "//core/registry:go_default_library",
         "//mac:go_default_library",
-        "//subtle/mac:go_default_library",
-        "//testutil:go_default_library",
+        "//mac/subtle:go_default_library",
         "//proto:aes_gcm_go_proto",
         "//proto:common_go_proto",
         "//proto:hmac_go_proto",
         "//proto:tink_go_proto",
+        "//testutil:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )
