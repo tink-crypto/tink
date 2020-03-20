@@ -446,6 +446,7 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::registry
     tink::util::errors
+    tink::util::keyset_util
     tink::proto::tink_cc_proto
     absl::memory
 )

@@ -19,6 +19,7 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/statusor.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
@@ -26,7 +27,6 @@
 namespace crypto {
 namespace tink {
 namespace util {
-
 
 // Helpers for translation of common enums between protocol buffer enums,
 // their string representation, and common enums used in subtle.
@@ -52,6 +52,11 @@ class Enums {
 
   static crypto::tink::subtle::HashType ProtoToSubtle(
       google::crypto::tink::HashType type);
+
+  // Returns the length in bytes of the given hash type `hash_type`. Returns
+  // INVALID_ARGUMENT if the algorithm is unsupported.
+  static util::StatusOr<int> HashLength(
+      google::crypto::tink::HashType hash_type);
 
   // EcdsaSignatureEncoding.
   static google::crypto::tink::EcdsaSignatureEncoding SubtleToProto(

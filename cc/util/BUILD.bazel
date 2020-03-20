@@ -61,6 +61,7 @@ cc_library(
     hdrs = ["enums.h"],
     include_prefix = "tink/util",
     deps = [
+        ":statusor",
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
@@ -273,6 +274,16 @@ cc_library(
         ":statusor",
         "//:input_stream",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "keyset_util",
+    srcs = ["keyset_util.cc"],
+    hdrs = ["keyset_util.h"],
+    include_prefix = "tink/util",
+    deps = [
+        "//proto:tink_cc_proto",
     ],
 )
 

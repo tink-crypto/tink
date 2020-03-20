@@ -16,13 +16,14 @@
 #include "tink/keyset_handle.h"
 
 #include <memory>
-#include <random>
+
 #include "absl/memory/memory.h"
 #include "tink/aead.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/registry.h"
 #include "tink/util/errors.h"
+#include "tink/util/keyset_util.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;
@@ -58,27 +59,6 @@ Decrypt(const EncryptedKeyset& enc_keyset, const Aead& master_key_aead) {
         "Could not parse the decrypted data as a Keyset-proto.");
   }
   return std::move(keyset);
-}
-
-uint32_t NewKeyId() {
-  std::random_device rd;
-  std::minstd_rand0 gen(rd());
-  std::uniform_int_distribution<uint32_t> dist;
-  return dist(gen);
-}
-
-uint32_t GenerateUnusedKeyId(const Keyset& keyset) {
-  while (true) {
-    uint32_t key_id = NewKeyId();
-    bool already_exists = false;
-    for (auto& key : keyset.key()) {
-      if (key.key_id() == key_id) {
-        already_exists = true;
-        break;
-      }
-    }
-    if (!already_exists) return key_id;
-  }
 }
 
 util::Status ValidateNoSecret(const Keyset& keyset) {

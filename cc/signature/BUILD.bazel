@@ -323,6 +323,32 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "signature_pem_keyset_reader",
+    srcs = ["signature_pem_keyset_reader.cc"],
+    hdrs = ["signature_pem_keyset_reader.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":rsa_ssa_pkcs1_sign_key_manager",
+        ":rsa_ssa_pkcs1_verify_key_manager",
+        ":rsa_ssa_pss_sign_key_manager",
+        ":rsa_ssa_pss_verify_key_manager",
+        "//:keyset_reader",
+        "//proto:common_cc_proto",
+        "//proto:rsa_ssa_pkcs1_cc_proto",
+        "//proto:rsa_ssa_pss_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle:pem_parser_boringssl",
+        "//subtle:subtle_util_boringssl",
+        "//util:enums",
+        "//util:keyset_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -636,6 +662,31 @@ cc_test(
         "//proto:tink_cc_proto",
         "//subtle:subtle_util_boringssl",
         "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "signature_pem_keyset_reader_test",
+    size = "small",
+    srcs = ["signature_pem_keyset_reader_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":signature_pem_keyset_reader",
+        ":signature_config",
+        "//:keyset_handle",
+        "//:keyset_reader",
+        "//proto:common_cc_proto",
+        "//proto:rsa_ssa_pss_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle:pem_parser_boringssl",
+        "//subtle:subtle_util_boringssl",
+        "//util:enums",
+        "//util:keyset_util",
+        "//util:status",
+        "//util:test_matchers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -50,7 +50,21 @@ MATCHER_P(StatusIs, code,
 // error_message() matches 'message_macher'.
 MATCHER_P2(StatusIs, code, message_matcher, "") {
   return (arg.CanonicalCode() == code) &&
-      testing::Matches(message_matcher)(arg.error_message());
+         testing::Matches(message_matcher)(arg.error_message());
+}
+
+// Matches a Keyset::Key with `key`.
+MATCHER_P(EqualsKey, key, "is equals to the expected key") {
+  if (arg.key_id() == key.key_id() && arg.status() == key.status() &&
+         arg.output_prefix_type() == key.output_prefix_type() &&
+         arg.key_data().type_url() == key.key_data().type_url() &&
+         arg.key_data().key_material_type() ==
+             key.key_data().key_material_type() &&
+         arg.key_data().value() == key.key_data().value()) {
+    return true;
+  }
+  *result_listener << arg.DebugString();
+  return false;
 }
 
 }  // namespace test

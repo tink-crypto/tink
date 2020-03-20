@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/util/enums.h"
+
+#include "absl/strings/str_cat.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
@@ -28,92 +30,92 @@ namespace pb = google::crypto::tink;
 // static
 pb::EllipticCurveType Enums::SubtleToProto(subtle::EllipticCurveType type) {
   switch (type) {
-  case subtle::EllipticCurveType::NIST_P256:
-    return pb::EllipticCurveType::NIST_P256;
-  case subtle::EllipticCurveType::NIST_P384:
-    return pb::EllipticCurveType::NIST_P384;
-  case subtle::EllipticCurveType::NIST_P521:
-    return pb::EllipticCurveType::NIST_P521;
-  case subtle::EllipticCurveType::CURVE25519:
-    return pb::EllipticCurveType::CURVE25519;
-  default:
-    return pb::EllipticCurveType::UNKNOWN_CURVE;
+    case subtle::EllipticCurveType::NIST_P256:
+      return pb::EllipticCurveType::NIST_P256;
+    case subtle::EllipticCurveType::NIST_P384:
+      return pb::EllipticCurveType::NIST_P384;
+    case subtle::EllipticCurveType::NIST_P521:
+      return pb::EllipticCurveType::NIST_P521;
+    case subtle::EllipticCurveType::CURVE25519:
+      return pb::EllipticCurveType::CURVE25519;
+    default:
+      return pb::EllipticCurveType::UNKNOWN_CURVE;
   }
 }
 
 // static
 subtle::EllipticCurveType Enums::ProtoToSubtle(pb::EllipticCurveType type) {
   switch (type) {
-  case pb::EllipticCurveType::NIST_P256:
-    return subtle::EllipticCurveType::NIST_P256;
-  case pb::EllipticCurveType::NIST_P384:
-    return subtle::EllipticCurveType::NIST_P384;
-  case pb::EllipticCurveType::NIST_P521:
-    return subtle::EllipticCurveType::NIST_P521;
-  case pb::EllipticCurveType::CURVE25519:
-    return subtle::EllipticCurveType::CURVE25519;
-  default:
-    return subtle::EllipticCurveType::UNKNOWN_CURVE;
+    case pb::EllipticCurveType::NIST_P256:
+      return subtle::EllipticCurveType::NIST_P256;
+    case pb::EllipticCurveType::NIST_P384:
+      return subtle::EllipticCurveType::NIST_P384;
+    case pb::EllipticCurveType::NIST_P521:
+      return subtle::EllipticCurveType::NIST_P521;
+    case pb::EllipticCurveType::CURVE25519:
+      return subtle::EllipticCurveType::CURVE25519;
+    default:
+      return subtle::EllipticCurveType::UNKNOWN_CURVE;
   }
 }
 
 // static
 pb::EcPointFormat Enums::SubtleToProto(subtle::EcPointFormat format) {
   switch (format) {
-  case subtle::EcPointFormat::UNCOMPRESSED:
-    return pb::EcPointFormat::UNCOMPRESSED;
-  case subtle::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
-    return pb::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
-  case subtle::EcPointFormat::COMPRESSED:
-    return pb::EcPointFormat::COMPRESSED;
-  default:
-    return pb::EcPointFormat::UNKNOWN_FORMAT;
+    case subtle::EcPointFormat::UNCOMPRESSED:
+      return pb::EcPointFormat::UNCOMPRESSED;
+    case subtle::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+      return pb::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
+    case subtle::EcPointFormat::COMPRESSED:
+      return pb::EcPointFormat::COMPRESSED;
+    default:
+      return pb::EcPointFormat::UNKNOWN_FORMAT;
   }
 }
 
 // static
 subtle::EcPointFormat Enums::ProtoToSubtle(pb::EcPointFormat format) {
   switch (format) {
-  case pb::EcPointFormat::UNCOMPRESSED:
-    return subtle::EcPointFormat::UNCOMPRESSED;
-  case pb::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
-    return subtle::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
-  case pb::EcPointFormat::COMPRESSED:
-    return subtle::EcPointFormat::COMPRESSED;
-  default:
-    return subtle::EcPointFormat::UNKNOWN_FORMAT;
+    case pb::EcPointFormat::UNCOMPRESSED:
+      return subtle::EcPointFormat::UNCOMPRESSED;
+    case pb::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+      return subtle::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
+    case pb::EcPointFormat::COMPRESSED:
+      return subtle::EcPointFormat::COMPRESSED;
+    default:
+      return subtle::EcPointFormat::UNKNOWN_FORMAT;
   }
 }
 
 // static
 pb::HashType Enums::SubtleToProto(subtle::HashType type) {
   switch (type) {
-  case subtle::HashType::SHA1:
-    return pb::HashType::SHA1;
-  case subtle::HashType::SHA256:
-    return pb::HashType::SHA256;
-  case subtle::HashType::SHA384:
-    return pb::HashType::SHA384;
-  case subtle::HashType::SHA512:
-    return pb::HashType::SHA512;
-  default:
-    return pb::HashType::UNKNOWN_HASH;
+    case subtle::HashType::SHA1:
+      return pb::HashType::SHA1;
+    case subtle::HashType::SHA256:
+      return pb::HashType::SHA256;
+    case subtle::HashType::SHA384:
+      return pb::HashType::SHA384;
+    case subtle::HashType::SHA512:
+      return pb::HashType::SHA512;
+    default:
+      return pb::HashType::UNKNOWN_HASH;
   }
 }
 
 // static
 subtle::HashType Enums::ProtoToSubtle(pb::HashType type) {
   switch (type) {
-  case pb::HashType::SHA1:
-    return subtle::HashType::SHA1;
-  case pb::HashType::SHA256:
-    return subtle::HashType::SHA256;
-  case pb::HashType::SHA384:
-    return subtle::HashType::SHA384;
-  case pb::HashType::SHA512:
-    return subtle::HashType::SHA512;
-  default:
-    return subtle::HashType::UNKNOWN_HASH;
+    case pb::HashType::SHA1:
+      return subtle::HashType::SHA1;
+    case pb::HashType::SHA256:
+      return subtle::HashType::SHA256;
+    case pb::HashType::SHA384:
+      return subtle::HashType::SHA384;
+    case pb::HashType::SHA512:
+      return subtle::HashType::SHA512;
+    default:
+      return subtle::HashType::UNKNOWN_HASH;
   }
 }
 
@@ -170,6 +172,22 @@ const char* Enums::HashName(pb::HashType hash_type) {
       return "SHA512";
     default:
       return "UNKNOWN_HASH";
+  }
+}
+
+// static
+util::StatusOr<int> Enums::HashLength(pb::HashType hash_type) {
+  switch (hash_type) {
+    case pb::HashType::SHA256:
+      return 32;
+    case pb::HashType::SHA384:
+      return 48;
+    case pb::HashType::SHA512:
+      return 64;
+    default:
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          absl::StrCat("Unsupported hashing algorithm ",
+                                       util::Enums::HashName(hash_type)));
   }
 }
 

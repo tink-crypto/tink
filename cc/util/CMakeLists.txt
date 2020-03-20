@@ -39,6 +39,7 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
+    tink::util::statusor
     absl::strings
 )
 
@@ -221,6 +222,15 @@ tink_cc_library(
     tink::core::input_stream
     tink::util::statusor
     absl::strings
+)
+
+tink_cc_library(
+  NAME keyset_util
+  SRCS
+    keyset_util.cc
+    keyset_util.h
+  DEPS
+    tink::proto::tink_cc_proto
 )
 
 # tests
