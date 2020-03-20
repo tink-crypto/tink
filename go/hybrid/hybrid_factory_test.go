@@ -95,7 +95,7 @@ func TestHybridFactoryTest(t *testing.T) {
 			t.Error(err)
 		}
 		if !bytes.Equal(pt, gotpt) {
-			t.Error("expected pt:", pt, " not equal to decrypted pt:", gotpt)
+			t.Error(err)
 		}
 	}
 }
