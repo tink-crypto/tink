@@ -36,7 +36,6 @@ namespace subtle {
 // (https://eprint.iacr.org/2015/189.pdf)
 class NonceBasedStreamingAead : public StreamingAead {
  public:
-  // -----------------------
   // Methods of StreamingAead-interface implemented by this class.
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
   NewEncryptingStream(
@@ -55,7 +54,6 @@ class NonceBasedStreamingAead : public StreamingAead {
       absl::string_view associated_data) override;
 
  protected:
-  // -----------------------
   // Methods to be implemented by a subclass of this class.
 
   // Returns a new StreamSegmentEncrypter that uses `associated_data` for AEAD.

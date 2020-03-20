@@ -22,9 +22,11 @@
 
 using crypto::tink::util::Enums;
 
-namespace pb = google::crypto::tink;
 
 namespace crypto {
+
+namespace pb = google::crypto::tink;
+
 namespace tink {
 namespace {
 

@@ -23,7 +23,7 @@ from absl import logging
 
 from typing import Type
 
-from tink.python.aead import aead
+from aead import aead
 from tink.python.core import crypto_format
 from tink.python.core import primitive_set
 from tink.python.core import primitive_wrapper

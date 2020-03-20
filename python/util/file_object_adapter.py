@@ -23,7 +23,7 @@ from __future__ import print_function
 import io
 from typing import BinaryIO
 
-from tink.python.cc.clif import python_file_object_adapter
+from tink.python.cc.pybind import python_file_object_adapter
 
 
 class FileObjectAdapter(python_file_object_adapter.PythonFileObjectAdapter):

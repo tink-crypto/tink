@@ -16,15 +16,7 @@ goog.module('tink.hybrid.HybridKeyTemplates');
 
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
-const PbEciesAeadDemParams = goog.require('proto.google.crypto.tink.EciesAeadDemParams');
-const PbEciesAeadHkdfKeyFormat = goog.require('proto.google.crypto.tink.EciesAeadHkdfKeyFormat');
-const PbEciesAeadHkdfParams = goog.require('proto.google.crypto.tink.EciesAeadHkdfParams');
-const PbEciesHkdfKemParams = goog.require('proto.google.crypto.tink.EciesHkdfKemParams');
-const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
-const PbHashType = goog.require('proto.google.crypto.tink.HashType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
-const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
+const {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Pre-generated KeyTemplates for keys for hybrid encryption.

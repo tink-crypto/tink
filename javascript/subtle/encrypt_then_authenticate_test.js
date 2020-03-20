@@ -18,21 +18,19 @@ goog.setTestOnly('tink.subtle.EncryptThenAuthenticateTest');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const Random = goog.require('tink.subtle.Random');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
 
-testSuite({
-  setUp() {
+describe('encrypt then authenticate test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testBasic() {
+  it('basic', async function() {
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
@@ -40,21 +38,21 @@ testSuite({
       const msg = Random.randBytes(20);
       let ciphertext = await aead.encrypt(msg);
       let plaintext = await aead.decrypt(ciphertext);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+      expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
 
       let aad = null;
       ciphertext = await aead.encrypt(msg, aad);
       plaintext = await aead.decrypt(ciphertext, aad);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+      expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
 
       aad = Random.randBytes(20);
       ciphertext = await aead.encrypt(msg, aad);
       plaintext = await aead.decrypt(ciphertext, aad);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+      expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
     }
-  },
+  });
 
-  async testProbabilisticEncryption() {
+  it('probabilistic encryption', async function() {
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
@@ -65,10 +63,10 @@ testSuite({
       const ciphertext = await aead.encrypt(msg, aad);
       results.add(Bytes.toHex(ciphertext));
     }
-    assertEquals(100, results.size);
-  },
+    expect(results.size).toBe(100);
+  });
 
-  async testBitFlipCiphertext() {
+  it('bit flip ciphertext', async function() {
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
@@ -83,13 +81,13 @@ testSuite({
           await aead.decrypt(c1, aad);
           fail('Should throw an exception.');
         } catch (e) {
-          assertEquals('CustomError: invalid MAC', e.toString());
+          expect(e.toString()).toBe('SecurityException: invalid MAC');
         }
       }
     }
-  },
+  });
 
-  async testBitFlipAad() {
+  it('bit flip aad', async function() {
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
@@ -104,13 +102,13 @@ testSuite({
           await aead.decrypt(ciphertext, aad1);
           fail('Should throw an exception.');
         } catch (e) {
-          assertEquals('CustomError: invalid MAC', e.toString());
+          expect(e.toString()).toBe('SecurityException: invalid MAC');
         }
       }
     }
-  },
+  });
 
-  async testTruncation() {
+  it('truncation', async function() {
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
@@ -124,15 +122,15 @@ testSuite({
         fail('Should throw an exception.');
       } catch (e) {
         if (c1.length < 32) {
-          assertEquals('CustomError: ciphertext too short', e.toString());
+          expect(e.toString()).toBe('SecurityException: ciphertext too short');
         } else {
-          assertEquals('CustomError: invalid MAC', e.toString());
+          expect(e.toString()).toBe('SecurityException: invalid MAC');
         }
       }
     }
-  },
+  });
 
-  async testWithRfcTestVectors() {
+  it('with rfc test vectors', async function() {
     // Test data from
     // https://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05. As we
     // use CTR while RFC uses CBC mode, it's not possible to compare plaintexts.
@@ -198,5 +196,5 @@ testSuite({
         fail(e);
       }
     }
-  },
+  });
 });

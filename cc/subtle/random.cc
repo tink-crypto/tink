@@ -15,7 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/random.h"
+
+#include <cstring>
 #include <string>
+
 #include "openssl/rand.h"
 
 namespace crypto {
@@ -30,6 +33,37 @@ std::string Random::GetRandomBytes(size_t length) {
   // use BoringSSL, so we don't check the return value.
   RAND_bytes(buf.get(), length);
   return std::string(reinterpret_cast<const char *>(buf.get()), length);
+}
+
+uint32_t Random::GetRandomUInt32() {
+  uint8_t buf[sizeof(uint32_t)];
+  RAND_bytes(buf, sizeof(uint32_t));
+  uint32_t result;
+  std::memcpy(&result, buf, sizeof(uint32_t));
+  return result;
+}
+
+uint16_t Random::GetRandomUInt16() {
+  uint8_t buf[sizeof(uint16_t)];
+  RAND_bytes(buf, sizeof(uint16_t));
+  uint16_t result;
+  std::memcpy(&result, buf, sizeof(uint16_t));
+  return result;
+}
+
+uint8_t Random::GetRandomUInt8() {
+  uint8_t result;
+  RAND_bytes(&result, 1);
+  return result;
+}
+
+util::SecretData Random::GetRandomKeyBytes(size_t length) {
+  util::SecretData buf(length, 0);
+  // BoringSSL documentation says that it always returns 1; while
+  // OpenSSL documentation says that it returns 1 on success, 0 otherwise. We
+  // use BoringSSL, so we don't check the return value.
+  RAND_bytes(buf.data(), buf.size());
+  return buf;
 }
 
 }  // namespace subtle

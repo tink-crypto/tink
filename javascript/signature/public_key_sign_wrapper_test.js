@@ -16,46 +16,43 @@ goog.module('tink.signature.PublicKeySignWrapperTest');
 goog.setTestOnly('tink.signature.PublicKeySignWrapperTest');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper');
 const Random = goog.require('tink.subtle.Random');
-const testSuite = goog.require('goog.testing.testSuite');
+const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-testSuite({
-  testNewPublicKeySign_primitiveSetWithoutPrimary() {
+describe('public key sign wrapper test', function() {
+  it('new public key sign, primitive set without primary', function() {
     const primitiveSet = createDummyPrimitiveSet(/* opt_withPrimary = */ false);
     try {
       new PublicKeySignWrapper().wrap(primitiveSet);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: Primary has to be non-null.', e.toString());
+      expect(e.toString())
+          .toBe('SecurityException: Primary has to be non-null.');
     }
-  },
+  });
 
-  testNewPublicKeySign_shouldWork() {
+  it('new public key sign, should work', function() {
     const primitiveSet = createDummyPrimitiveSet();
     const publicKeySign = new PublicKeySignWrapper().wrap(primitiveSet);
-    assertTrue(publicKeySign != null && publicKeySign != undefined);
-  },
+    expect(publicKeySign != null && publicKeySign != undefined).toBe(true);
+  });
 
-  async testSign_shouldWork() {
+  it('sign, should work', async function() {
     const primitiveSet = createDummyPrimitiveSet();
     const publicKeySign = new PublicKeySignWrapper().wrap(primitiveSet);
 
     const data = Random.randBytes(10);
 
     const signature = await publicKeySign.sign(data);
-    assertTrue(signature != null);
+    expect(signature != null).toBe(true);
 
     // Signature should begin with primary key output prefix.
-    assertObjectEquals(
-        primitiveSet.getPrimary().getIdentifier(),
-        signature.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE));
-  },
+    expect(signature.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE))
+        .toEqual(primitiveSet.getPrimary().getIdentifier());
+  });
 });
 
 /**

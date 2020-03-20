@@ -17,13 +17,15 @@
 #ifndef TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_DECRYPTER_H_
 #define TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_DECRYPTER_H_
 
+#include <cstdint>
+#include <memory>
+#include <string>
 #include <vector>
 
-#include "absl/strings/string_view.h"
 #include "openssl/aead.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/stream_segment_decrypter.h"
-#include "tink/util/status.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -59,7 +61,7 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
  public:
   // All sizes are in bytes.
   struct Params {
-    std::string ikm;
+    util::SecretData ikm;
     HashType hkdf_hash;
     int derived_key_size;
     int ciphertext_offset;
@@ -68,8 +70,8 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
   };
 
   // A factory.
-  static util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>
-      New(const Params& params);
+  static util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>> New(
+      Params params);
 
   // Overridden methods of StreamSegmentDecrypter.
   util::Status Init(const std::vector<uint8_t>& header) override;
@@ -92,28 +94,24 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
   int get_ciphertext_offset() const override {
     return ciphertext_offset_;
   }
-  ~AesGcmHkdfStreamSegmentDecrypter() override {}
-  util::Status InitCtx(absl::string_view key_value);
-
 
  private:
-  AesGcmHkdfStreamSegmentDecrypter() {}
+  explicit AesGcmHkdfStreamSegmentDecrypter(Params params);
 
   // Parameters set upon decrypter creation.
   // All sizes are in bytes.
-  std::string ikm_;
+  util::SecretData ikm_;
   HashType hkdf_hash_;
   int header_size_;
   int ciphertext_segment_size_;
   int ciphertext_offset_;
   int derived_key_size_;
   std::string associated_data_;
-  bool is_initialized_;
+  bool is_initialized_ = false;
 
   // Parameters set when initializing with data from stream header.
   std::vector<uint8_t> salt_;
   std::vector<uint8_t> nonce_prefix_;
-  std::string key_value_;
   bssl::ScopedEVP_AEAD_CTX ctx_;
 };
 

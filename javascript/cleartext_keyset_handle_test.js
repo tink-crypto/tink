@@ -17,58 +17,57 @@ goog.setTestOnly();
 
 const CleartextKeysetHandle = goog.require('tink.CleartextKeysetHandle');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const testSuite = goog.require('goog.testing.testSuite');
+const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 const {createKeyset} = goog.require('tink.testUtils');
 
-testSuite({
-  testParseFromLightweightShouldWork() {
-    assertTrue(
+describe('cleartext keyset handle test', function() {
+  it('parse from lightweight should work', function() {
+    expect(
         CleartextKeysetHandle.fromJspbArray(createKeyset().toArray()) instanceof
-        KeysetHandle);
-  },
+        KeysetHandle)
+        .toBe(true);
+  });
 
-  testParseFromLightweightEmptyKeyset() {
+  it('parse from lightweight empty keyset', function() {
     const keysetJspbArray = new PbKeyset().toArray();
-    assertEquals(
-        'CustomError: ' +
-            'Keyset should be non null and must contain at least one key.',
-        assertThrows(() => {
-          CleartextKeysetHandle.fromJspbArray(keysetJspbArray);
-        }).toString());
-  },
+    expect(() => {
+      CleartextKeysetHandle.fromJspbArray(keysetJspbArray);
+    })
+        .toThrowError(
+            'Keyset should be non null and must contain at least one key.');
+  });
 
-  testDeserializeFromJspb() {
+  it('deserialize from jspb', function() {
     const keyset1 = createKeyset();
     const keysetHandle =
         CleartextKeysetHandle.deserializeFromJspb(keyset1.serialize());
     const keyset2 = keysetHandle.getKeyset();
-    assertEquals(keyset1.getPrimaryKeyId(), keyset2.getPrimaryKeyId());
-    assertObjectEquals(keyset2.getKeyList(), keyset2.getKeyList());
-  },
+    expect(keyset2.getPrimaryKeyId()).toBe(keyset1.getPrimaryKeyId());
+    expect(keyset2.getKeyList()).toEqual(keyset2.getKeyList());
+  });
 
-  testSerializeToJspb() {
+  it('serialize to jspb', function() {
     const keyset = createKeyset();
     const keysetHandle = new KeysetHandle(keyset);
 
     const keysetString = CleartextKeysetHandle.serializeToJspb(keysetHandle);
-    assertEquals(keysetString, keyset.serialize());
-  },
+    expect(keyset.serialize()).toBe(keysetString);
+  });
 
-  testDeserializeFromBinary() {
+  it('deserialize from binary', function() {
     const keyset1 = createKeyset();
     const keysetHandle =
         CleartextKeysetHandle.deserializeFromBinary(keyset1.serializeBinary());
     const keyset2 = keysetHandle.getKeyset();
-    assertEquals(keyset1.getPrimaryKeyId(), keyset2.getPrimaryKeyId());
-    assertObjectEquals(keyset2.getKeyList(), keyset2.getKeyList());
-  },
+    expect(keyset2.getPrimaryKeyId()).toBe(keyset1.getPrimaryKeyId());
+    expect(keyset2.getKeyList()).toEqual(keyset2.getKeyList());
+  });
 
-  testSerializeToBinary() {
+  it('serialize to binary', function() {
     const keyset = createKeyset();
     const keysetHandle = new KeysetHandle(keyset);
 
     const keysetBinary = CleartextKeysetHandle.serializeToBinary(keysetHandle);
-    assertObjectEquals(keysetBinary, keyset.serializeBinary());
-  },
+    expect(keyset.serializeBinary()).toEqual(keysetBinary);
+  });
 });

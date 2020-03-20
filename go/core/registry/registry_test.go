@@ -19,9 +19,9 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/core/registry"
-	subtleMac "github.com/google/tink/go/subtle/mac"
+	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -123,7 +123,7 @@ func TestPrimitiveFromKeyData(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *subtleMac.HMAC = p.(*subtleMac.HMAC)
+	var _ *subtle.HMAC = p.(*subtle.HMAC)
 	// unregistered url
 	keyData.TypeUrl = "some url"
 	if _, err := registry.PrimitiveFromKeyData(keyData); err == nil {
@@ -148,7 +148,7 @@ func TestPrimitive(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *subtleMac.HMAC = p.(*subtleMac.HMAC)
+	var _ *subtle.HMAC = p.(*subtle.HMAC)
 	// unregistered url
 	if _, err := registry.Primitive("some url", serializedKey); err == nil {
 		t.Errorf("expect an error when typeURL has not been registered")

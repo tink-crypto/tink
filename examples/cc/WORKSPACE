@@ -1,0 +1,44 @@
+workspace(name = "examples_cc")
+
+# We use local_repository below because we are in the same github repo as Tink
+# is. To make this work in a separate directory, instead we would load
+# http_archive with
+# load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+# and then do the replacements below.
+
+# For local usage, replace with
+#
+# http_archive(
+#     name = "tink_base",
+#     urls = ["https://github.com/google/tink/archive/master.zip"],
+#     strip_prefix = "tink-master/",
+# )
+local_repository(
+    name = "tink_base",
+    path = "../..",
+)
+
+# For local usage, replace with
+#
+# http_archive(
+#     name = "tink_cc",
+#     urls = ["https://github.com/google/tink/archive/master.zip"],
+#     strip_prefix = "tink-master/cc",
+# )
+local_repository(
+    name = "tink_cc",
+    path = "../../cc",
+)
+
+load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
+tink_base_deps()
+
+load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
+tink_base_deps_init()
+
+load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
+tink_cc_deps()
+
+load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
+tink_cc_deps_init()
+

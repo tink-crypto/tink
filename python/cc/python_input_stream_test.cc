@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/subtle/random.h"
-#include "tink/util/test_util.h"
 #include "tink/python/cc/test_util.h"
 
 namespace crypto {

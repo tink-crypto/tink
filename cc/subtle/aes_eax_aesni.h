@@ -22,11 +22,14 @@
 
 #include <xmmintrin.h>
 
+#include <array>
 #include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 #include "tink/aead.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -42,7 +45,7 @@ namespace subtle {
 class AesEaxAesni : public Aead {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
-      absl::string_view key_value, size_t nonce_size_in_bytes);
+      const util::SecretData& key, size_t nonce_size_in_bytes);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
@@ -52,35 +55,27 @@ class AesEaxAesni : public Aead {
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
 
-  ~AesEaxAesni() {}
-
  protected:
   // The tag size is fixed for this implementation.
   // Using the full 128-bits of the tag allows an efficient verification.
-  static const size_t TAG_SIZE = 16;
-  static const size_t BLOCK_SIZE = 16;
+  static const size_t kTagSize = 16;
+  static const size_t kBlockSize = 16;
 
-  virtual bool RawEncrypt(
-    absl::string_view nonce,
-    absl::string_view in,
-    absl::string_view additional_data,
-    uint8_t *ciphertext,
-    size_t ciphertext_size) const;
+  virtual bool RawEncrypt(absl::string_view nonce, absl::string_view in,
+                          absl::string_view additional_data,
+                          absl::Span<uint8_t> ciphertext) const;
 
-  virtual bool RawDecrypt(
-    absl::string_view nonce,
-    absl::string_view in,
-    absl::string_view additional_data,
-    uint8_t *plaintext,
-    size_t plaintext_size) const;
+  virtual bool RawDecrypt(absl::string_view nonce, absl::string_view in,
+                          absl::string_view additional_data,
+                          absl::Span<uint8_t> plaintext) const;
 
  private:
-  AesEaxAesni() {}
+  explicit AesEaxAesni(size_t nonce_size) : nonce_size_(nonce_size) {}
 
   // AesEaxAesni instances are immutable objects.
   // Therefore, the only place where SetKey should be called is in the
   // construction, i.e. in New().
-  bool SetKey(absl::string_view key_value, size_t nonce_size_in_bytes);
+  bool SetKey(const util::SecretData& key);
 
   // Encrypt a single block.
   __m128i EncryptBlock(const __m128i block) const;
@@ -110,14 +105,20 @@ class AesEaxAesni : public Aead {
   // Computes an OMAC.
   __m128i OMAC(absl::string_view blob, int tag) const;
 
-  static const int kMaxRounds = 14;  // maximal number of rounds
-  static const int kMaxRoundKeys = kMaxRounds + 1;  // max number of round keys
-  __m128i round_key_[kMaxRoundKeys];
-  __m128i round_dec_key_[kMaxRoundKeys];
-  __m128i B_;  // Used for padding
-  __m128i P_;  // Used for padding
+  static constexpr int kMaxRounds = 14;  // maximal number of rounds
+  static constexpr int kMaxRoundKeys =
+      kMaxRounds + 1;  // max number of round keys
+  using RoundKeys = std::array<__m128i, kMaxRoundKeys>;
+  util::SecretUniquePtr<RoundKeys> round_key_ =
+      util::MakeSecretUniquePtr<RoundKeys>();
+  util::SecretUniquePtr<RoundKeys> round_dec_key_ =
+      util::MakeSecretUniquePtr<RoundKeys>();
+  util::SecretUniquePtr<__m128i> B_ =
+      util::MakeSecretUniquePtr<__m128i>();  // Used for padding
+  util::SecretUniquePtr<__m128i> P_ =
+      util::MakeSecretUniquePtr<__m128i>();  // Used for padding
   int rounds_;
-  size_t nonce_size_;
+  const size_t nonce_size_;
 };
 
 }  // namespace subtle

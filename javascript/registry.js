@@ -15,12 +15,10 @@
 goog.module('tink.Registry');
 
 const KeyManager = goog.require('tink.KeyManager');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbMessage = goog.require('jspb.Message');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Registry for KeyManagers.

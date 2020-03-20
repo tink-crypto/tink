@@ -15,8 +15,6 @@
 goog.module('tink.subtle.Hmac');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const Environment = goog.require('tink.subtle.Environment');
-const HmacPureJs = goog.require('tink.subtle.purejs.Hmac');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const Mac = goog.require('tink.Mac');
 const Validators = goog.require('tink.subtle.Validators');
@@ -95,15 +93,11 @@ class Hmac {
 
     // TODO(b/115974209): Add check that key.length > 16.
 
-    if (Environment.IS_WEBCRYPTO_AVAILABLE) {
-      const cryptoKey = await self.crypto.subtle.importKey(
-          'raw', key,
-          {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8},
-          false, ['sign', 'verify']);
-      return new Hmac(hash, cryptoKey, tagSize);
-    }
-
-    return new HmacPureJs(hash, key, tagSize);
+    const cryptoKey = await self.crypto.subtle.importKey(
+        'raw', key,
+        {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8},
+        false, ['sign', 'verify']);
+    return new Hmac(hash, cryptoKey, tagSize);
   }
 
   /**

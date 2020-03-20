@@ -15,8 +15,6 @@
 #include "tink/python/cc/cc_streaming_aead_wrappers.h"
 
 #include "gtest/gtest.h"
-#include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 #include "tink/python/cc/test_util.h"
 
 namespace crypto {
@@ -24,7 +22,6 @@ namespace tink {
 namespace {
 
 using crypto::tink::test::DummyStreamingAead;
-using crypto::tink::test::IsOk;
 
 TEST(CcStreamingAeadWrappersTest, BasicNewCcEncryptingStream) {
   DummyStreamingAead dummy_saead = DummyStreamingAead("Some streaming AEAD");
@@ -34,7 +31,7 @@ TEST(CcStreamingAeadWrappersTest, BasicNewCcEncryptingStream) {
   auto result =
       NewCcEncryptingStream(&dummy_saead, "associated data", std::move(output));
 
-  EXPECT_THAT(result.status(), IsOk());
+  EXPECT_TRUE(result.status().ok());
 }
 
 TEST(CcStreamingAeadWrappersTest, BasicNewCcDecryptingStream) {
@@ -45,7 +42,7 @@ TEST(CcStreamingAeadWrappersTest, BasicNewCcDecryptingStream) {
   auto result =
       NewCcDecryptingStream(&dummy_saead, "associated data", std::move(input));
 
-  EXPECT_THAT(result.status(), IsOk());
+  EXPECT_TRUE(result.status().ok());
 }
 
 }  // namespace

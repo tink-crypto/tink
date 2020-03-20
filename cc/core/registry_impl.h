@@ -579,7 +579,7 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
             typeid(*static_cast<PrimitiveWrapper<P>*>(it->second.get()))) !=
         std::type_index(
             typeid(*static_cast<PrimitiveWrapper<P>*>(entry.get())))) {
-      return ToStatusF(
+      return util::Status(
           crypto::tink::util::error::ALREADY_EXISTS,
           "A wrapper named for this primitive has already been added.");
     }

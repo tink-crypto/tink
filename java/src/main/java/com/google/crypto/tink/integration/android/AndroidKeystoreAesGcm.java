@@ -21,6 +21,7 @@ import android.os.Build.VERSION_CODES;
 import com.google.crypto.tink.Aead;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -46,6 +47,9 @@ public final class AndroidKeystoreAesGcm implements Aead {
     KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
     keyStore.load(null /* param */);
     key = (SecretKey) keyStore.getKey(keyId, null /* password */);
+    if (key == null) {
+      throw new InvalidKeyException("Keystore cannot load the key with ID: " + keyId);
+    }
   }
 
   @Override

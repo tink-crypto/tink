@@ -17,6 +17,7 @@
 #ifndef TINK_UTIL_STATUSOR_H_
 #define TINK_UTIL_STATUSOR_H_
 
+#include <cstdlib>
 #include <iostream>
 #include <utility>
 
@@ -77,7 +78,7 @@ class StatusOr {
     if (!ok()) {
       std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
       std::cerr << status() << std::endl;
-      exit(1);
+      std::_Exit(1);
     }
     return value_;
   }
@@ -85,7 +86,7 @@ class StatusOr {
     if (!ok()) {
       std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
       std::cerr << status() << std::endl;
-      exit(1);
+      std::_Exit(1);
     }
     return value_;
   }
@@ -93,7 +94,7 @@ class StatusOr {
     if (!ok()) {
       std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
       std::cerr << status() << std::endl;
-      exit(1);
+      std::_Exit(1);
     }
     return std::move(value_);
   }
@@ -101,7 +102,7 @@ class StatusOr {
     if (!ok()) {
       std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
       std::cerr << status() << std::endl;
-      exit(1);
+      std::_Exit(1);
     }
     return std::move(value_);
   }
@@ -127,7 +128,7 @@ inline StatusOr<T>::StatusOr(
   if (status.ok()) {
     std::cerr << "::crypto::tink::util::OkStatus() "
               << "is not a valid argument to StatusOr\n";
-    exit(1);
+    std::_Exit(1);
   }
 }
 

@@ -17,11 +17,10 @@ goog.setTestOnly('tink.BinaryKeysetWriterTest');
 
 const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
 const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
-const testSuite = goog.require('goog.testing.testSuite');
 const {createKeyset} = goog.require('tink.testUtils');
 
-testSuite({
-  testGetSerializedKeySet() {
+describe('binary keyset writer test', function() {
+  it('get serialized key set', function() {
     const dummyKeyset = createKeyset();
 
     // Write the keyset.
@@ -33,6 +32,6 @@ testSuite({
     const keysetFromReader = reader.read();
 
     // Test that it returns the same object as was created.
-    assertObjectEquals(dummyKeyset, keysetFromReader);
-  },
+    expect(keysetFromReader).toEqual(dummyKeyset);
+  });
 });

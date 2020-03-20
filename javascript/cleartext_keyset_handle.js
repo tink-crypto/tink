@@ -17,7 +17,7 @@ goog.module('tink.CleartextKeysetHandle');
 const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
 const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /** @type {!BinaryKeysetWriter} */
 const binaryKeysetWriter = new BinaryKeysetWriter();

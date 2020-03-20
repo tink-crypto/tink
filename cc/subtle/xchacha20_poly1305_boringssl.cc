@@ -38,30 +38,29 @@ static const bool IsValidKeySize(uint32_t size_in_bytes) {
   return size_in_bytes == 32;
 }
 
-XChacha20Poly1305BoringSsl::XChacha20Poly1305BoringSsl(
-    absl::string_view key_value, const EVP_AEAD* aead)
-    : key_(key_value), aead_(aead) {}
+XChacha20Poly1305BoringSsl::XChacha20Poly1305BoringSsl(util::SecretData key,
+                                                       const EVP_AEAD* aead)
+    : key_(std::move(key)), aead_(aead) {}
 
 util::StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305BoringSsl::New(
-    absl::string_view key_value) {
-  if (!IsValidKeySize(key_value.size())) {
-    return util::Status(util::error::INTERNAL, "Invalid key size");
+    util::SecretData key) {
+  if (!IsValidKeySize(key.size())) {
+    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
   }
 
   const EVP_AEAD* cipher = EVP_aead_xchacha20_poly1305();
   if (cipher == nullptr) {
     return util::Status(util::error::INTERNAL, "Failed to get EVP_AEAD");
   }
-
-  std::unique_ptr<Aead> aead(new XChacha20Poly1305BoringSsl(key_value, cipher));
-  return std::move(aead);
+  return std::unique_ptr<Aead>(
+      new XChacha20Poly1305BoringSsl(std::move(key), cipher));
 }
 
 util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
     absl::string_view plaintext, absl::string_view additional_data) const {
   bssl::UniquePtr<EVP_AEAD_CTX> ctx(
       EVP_AEAD_CTX_new(aead_, reinterpret_cast<const uint8_t*>(key_.data()),
-                       key_.size(), TAG_SIZE));
+                       key_.size(), kTagSize));
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_AEAD_CTX");
@@ -72,13 +71,13 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
   plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
   additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
 
-  const std::string nonce = Random::GetRandomBytes(NONCE_SIZE);
-  if (nonce.size() != NONCE_SIZE) {
+  const std::string nonce = Random::GetRandomBytes(kNonceSize);
+  if (nonce.size() != kNonceSize) {
     return util::Status(util::error::INTERNAL,
                         "Failed to get enough random bytes for nonce");
   }
 
-  size_t ciphertext_size = nonce.size() + plaintext.size() + TAG_SIZE;
+  size_t ciphertext_size = nonce.size() + plaintext.size() + kTagSize;
 
   // Write the nonce in the output buffer.
   std::string ct = nonce;
@@ -112,25 +111,25 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
   // regardless of whether the size is 0.
   additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
 
-  if (ciphertext.size() < NONCE_SIZE + TAG_SIZE) {
-    return util::Status(util::error::INTERNAL, "Ciphertext too short");
+  if (ciphertext.size() < kNonceSize + kTagSize) {
+    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
   }
 
   bssl::UniquePtr<EVP_AEAD_CTX> ctx(
       EVP_AEAD_CTX_new(aead_, reinterpret_cast<const uint8_t*>(key_.data()),
-                       key_.size(), TAG_SIZE));
+                       key_.size(), kTagSize));
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_AEAD_CTX");
   }
 
   std::string out;
-  size_t out_size = ciphertext.size() - NONCE_SIZE - TAG_SIZE;
+  size_t out_size = ciphertext.size() - kNonceSize - kTagSize;
   ResizeStringUninitialized(&out, out_size);
 
-  absl::string_view nonce = ciphertext.substr(0, NONCE_SIZE);
+  absl::string_view nonce = ciphertext.substr(0, kNonceSize);
   absl::string_view encrypted =
-      ciphertext.substr(NONCE_SIZE, out_size + TAG_SIZE);
+      ciphertext.substr(kNonceSize, out_size + kTagSize);
 
   size_t len = 0;
   int ret = EVP_AEAD_CTX_open(

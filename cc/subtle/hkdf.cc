@@ -16,19 +16,39 @@
 
 #include "tink/subtle/hkdf.h"
 
-#include "tink/subtle/subtle_util_boringssl.h"
-#include "tink/subtle/common_enums.h"
-#include "tink/util/status.h"
-#include "tink/util/statusor.h"
+#include "absl/algorithm/container.h"
+#include "absl/strings/str_cat.h"
 #include "openssl/evp.h"
 #include "openssl/hkdf.h"
-
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 
 // static
+util::StatusOr<util::SecretData> Hkdf::ComputeHkdf(HashType hash,
+                                                   const util::SecretData &ikm,
+                                                   absl::string_view salt,
+                                                   absl::string_view info,
+                                                   size_t out_len) {
+  auto status_or_evp_md = SubtleUtilBoringSSL::EvpHash(hash);
+  if (!status_or_evp_md.ok()) {
+    return status_or_evp_md.status();
+  }
+  util::SecretData out_key(out_len);
+  if (1 != HKDF(out_key.data(), out_len, status_or_evp_md.ValueOrDie(),
+                ikm.data(), ikm.size(),
+                reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
+                reinterpret_cast<const uint8_t *>(info.data()), info.size())) {
+    return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
+  }
+  return out_key;
+}
+
 util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
                                               absl::string_view ikm,
                                               absl::string_view salt,
@@ -38,23 +58,32 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
   if (!status_or_evp_md.ok()) {
     return status_or_evp_md.status();
   }
-  std::unique_ptr<uint8_t[]> out_key(new uint8_t[out_len]);
-  if (1 != HKDF(out_key.get(), out_len, status_or_evp_md.ValueOrDie(),
+  std::string out_key(out_len, '\0');
+  if (1 != HKDF(reinterpret_cast<uint8_t *>(&out_key[0]), out_len,
+                status_or_evp_md.ValueOrDie(),
                 reinterpret_cast<const uint8_t *>(ikm.data()), ikm.size(),
                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
                 reinterpret_cast<const uint8_t *>(info.data()), info.size())) {
     return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
   }
-  return std::string(reinterpret_cast<const char *>(out_key.get()), out_len);
+  return out_key;
 }
 
 // static
 util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
     HashType hash, absl::string_view kem_bytes, absl::string_view shared_secret,
     absl::string_view salt, absl::string_view info, size_t out_len) {
-  std::string ikm(kem_bytes);
-  std::string shared_secret_string(shared_secret);
-  ikm.append(shared_secret_string);
+  return Hkdf::ComputeHkdf(hash, absl::StrCat(kem_bytes, shared_secret), salt,
+                           info, out_len);
+}
+
+util::StatusOr<util::SecretData> Hkdf::ComputeEciesHkdfSymmetricKey(
+    HashType hash, const util::SecretData &kem_bytes,
+    const util::SecretData &shared_secret, absl::string_view salt,
+    absl::string_view info, size_t out_len) {
+  util::SecretData ikm(kem_bytes.size() + shared_secret.size());
+  absl::c_copy(kem_bytes, ikm.begin());
+  absl::c_copy(shared_secret, ikm.begin() + kem_bytes.size());
   return Hkdf::ComputeHkdf(hash, ikm, salt, info, out_len);
 }
 

@@ -102,6 +102,10 @@ function(tink_cc_library)
             "TINK_MODULE not defined, perhaps you are missing a tink_module() statement?")
   endif()
 
+  # We replace :: with __ in targets, because :: may not appear in target names.
+  # However, the module name should still span multiple name spaces.
+  STRING(REPLACE "::" "__" _ESCAPED_TINK_MODULE ${TINK_MODULE})
+
   set(_is_headers_only_lib true)
   foreach(_src_file ${tink_cc_library_SRCS})
     if(${_src_file} MATCHES "\\.cc$")
@@ -111,9 +115,9 @@ function(tink_cc_library)
   endforeach()
 
   if (tink_cc_library_PUBLIC)
-    set(_target_name "tink_${TINK_MODULE}_${tink_cc_library_NAME}")
+    set(_target_name "tink_${_ESCAPED_TINK_MODULE}_${tink_cc_library_NAME}")
   else()
-    set(_target_name "tink_internal_${TINK_MODULE}_${tink_cc_library_NAME}")
+    set(_target_name "tink_internal_${_ESCAPED_TINK_MODULE}_${tink_cc_library_NAME}")
   endif()
 
   if(NOT _is_headers_only_lib)
@@ -166,7 +170,11 @@ function(tink_cc_test)
     message(FATAL_ERROR "TINK_MODULE not defined")
   endif()
 
-  set(_target_name "tink_test_${TINK_MODULE}_${tink_cc_test_NAME}")
+  # We replace :: with __ in targets, because :: may not appear in target names.
+  # However, the module name should still span multiple name spaces.
+  STRING(REPLACE "::" "__" _ESCAPED_TINK_MODULE ${TINK_MODULE})
+
+  set(_target_name "tink_test_${_ESCAPED_TINK_MODULE}_${tink_cc_test_NAME}")
 
   add_executable(${_target_name}
     ${tink_cc_test_SRCS}

@@ -1,0 +1,89 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#include "tink/subtle/stateful_cmac_boringssl.h"
+
+#include "openssl/base.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/status.h"
+
+namespace crypto {
+namespace tink {
+namespace subtle {
+
+util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
+    uint32_t tag_size, const std::string& key_value) {
+  const EVP_CIPHER* cipher;
+  switch (key_value.size()) {
+    case 16:
+      cipher = EVP_aes_128_cbc();
+      break;
+    case 32:
+      cipher = EVP_aes_256_cbc();
+      break;
+    default:
+      return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+  }
+  if (tag_size > kMaxTagSize) {
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid tag size");
+  }
+
+  // Create and initialize the CMAC context
+  bssl::UniquePtr<CMAC_CTX> ctx(CMAC_CTX_new());
+
+  // Initialize the CMAC
+  if (!CMAC_Init(ctx.get(), key_value.data(), key_value.size(), cipher,
+                 nullptr /* engine */)) {
+    return util::Status(util::error::FAILED_PRECONDITION,
+                        "CMAC initialization failed");
+  }
+
+  return std::unique_ptr<StatefulMac>(
+      new StatefulCmacBoringSsl(tag_size, key_value, std::move(ctx)));
+}
+
+StatefulCmacBoringSsl::StatefulCmacBoringSsl(uint32_t tag_size,
+                                             const std::string& key_value,
+                                             bssl::UniquePtr<CMAC_CTX> ctx)
+    : cmac_context_(std::move(ctx)),
+      tag_size_(tag_size),
+      key_value_(key_value) {}
+
+util::Status StatefulCmacBoringSsl::Update(absl::string_view data) {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+
+  if (!CMAC_Update(cmac_context_.get(),
+                   reinterpret_cast<const uint8_t*>(data.data()),
+                   data.size())) {
+    return util::Status(util::error::INTERNAL,
+                        "Inputs to CMAC Update invalid");
+  }
+  return util::OkStatus();
+}
+
+util::StatusOr<std::string> StatefulCmacBoringSsl::Finalize() {
+  uint8_t buf[EVP_MAX_MD_SIZE];
+  size_t out_len;
+
+  if (!CMAC_Final(cmac_context_.get(), buf, &out_len)) {
+    return util::Status(util::error::INTERNAL, "CMAC finalization failed");
+  }
+  return std::string(reinterpret_cast<char*>(buf), tag_size_);
+}
+
+}  // namespace subtle
+}  // namespace tink
+}  // namespace crypto

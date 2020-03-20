@@ -17,6 +17,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from tink.python.integration.gcpkms import gcp_kms_client
+from integration.gcpkms import gcp_kms_aead
+from integration.gcpkms import gcp_kms_client
 
-gcp_client = gcp_kms_client.GcpKmsClient
+GcpKmsAead = gcp_kms_client.GcpKmsAead
+GcpKmsClient = gcp_kms_client.GcpKmsClient

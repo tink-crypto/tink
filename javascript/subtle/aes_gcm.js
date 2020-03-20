@@ -80,8 +80,7 @@ class AesGcm {
       'iv': iv,
       'tagLength': TAG_SIZE_IN_BITS,
     };
-    // Edge can't handle an empty array
-    if (opt_associatedData != null && opt_associatedData.length) {
+    if (opt_associatedData) {
       alg['additionalData'] = opt_associatedData;
     }
     const ciphertext =
@@ -107,8 +106,7 @@ class AesGcm {
       'iv': iv,
       'tagLength': TAG_SIZE_IN_BITS,
     };
-    // Edge can't handle an empty array
-    if (opt_associatedData != null && opt_associatedData.length) {
+    if (opt_associatedData) {
       alg['additionalData'] = opt_associatedData;
     }
     try {

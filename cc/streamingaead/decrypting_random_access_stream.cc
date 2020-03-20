@@ -58,20 +58,19 @@ util::Status DecryptingRandomAccessStream::PRead(
     crypto::tink::util::Buffer* dest_buffer) {
   {  // "fast-track": quickly proceed if matching has been attempted/found.
     if (dest_buffer == nullptr) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "dest_buffer must be non-null");
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "dest_buffer must be non-null");
     }
     if (count < 0) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "count cannot be negative");
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "count cannot be negative");
     }
     if (count > dest_buffer->allocated_size()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "buffer too small");
+      return util::Status(util::error::INVALID_ARGUMENT, "buffer too small");
     }
     if (position < 0) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "position cannot be negative");
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "position cannot be negative");
     }
     absl::ReaderMutexLock lock(&matching_mutex_);
     if (matching_stream_ != nullptr) {

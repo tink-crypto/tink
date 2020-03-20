@@ -28,7 +28,7 @@ from __future__ import print_function
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
-from tink.python.aead import aead_key_templates
+from aead import aead_key_templates
 
 
 def create_ecies_aead_hkdf_key_template(

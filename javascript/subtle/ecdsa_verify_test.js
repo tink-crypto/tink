@@ -19,32 +19,23 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
 const EcdsaVerify = goog.require('tink.subtle.EcdsaVerify');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const Environment = goog.require('tink.subtle.Environment');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
-const TestCase = goog.require('goog.testing.TestCase');
 const Validators = goog.require('tink.subtle.Validators');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 const wycheproofEcdsaTestVectors = goog.require('tink.subtle.wycheproofEcdsaTestVectors');
 
-testSuite({
-  shouldRunTests() {
-    return Environment.IS_WEBCRYPTO_AVAILABLE &&
-        !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('ecdsa verify test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testVerify() {
+  it('verify', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await EcdsaSign.newInstance(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
@@ -53,11 +44,11 @@ testSuite({
     for (let i = 0; i < 100; i++) {
       const data = Random.randBytes(i);
       const signature = await signer.sign(data);
-      assertTrue(await verifier.verify(signature, data));
+      expect(await verifier.verify(signature, data)).toBe(true);
     }
-  },
+  });
 
-  async testVerifyWithDerEncoding() {
+  it('verify with der encoding', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await EcdsaSign.newInstance(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256',
@@ -70,21 +61,21 @@ testSuite({
     for (let i = 0; i < 100; i++) {
       const data = Random.randBytes(i);
       const signature = await signer.sign(data);
-      assertFalse(await verifier.verify(signature, data));
-      assertTrue(await verifierDer.verify(signature, data));
+      expect(await verifier.verify(signature, data)).toBe(false);
+      expect(await verifierDer.verify(signature, data)).toBe(true);
     }
-  },
+  });
 
-  async testConstructorWithInvalidHash() {
+  it('constructor with invalid hash', async function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
       await EcdsaVerify.newInstance(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-1');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-256 (because curve is P-256) but got SHA-1',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'SecurityException: expected SHA-256 (because curve is P-256) but got SHA-1');
     }
 
     try {
@@ -93,9 +84,9 @@ testSuite({
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
 
     try {
@@ -104,13 +95,13 @@ testSuite({
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals(
-          'CustomError: expected SHA-512 (because curve is P-521) but got SHA-256',
-          e.toString());
+      expect(e.toString())
+          .toBe(
+              'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256');
     }
-  },
+  });
 
-  async testConstructorWithInvalidCurve() {
+  it('constructor with invalid curve', async function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
       const jwk = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
@@ -118,11 +109,11 @@ testSuite({
       await EcdsaVerify.newInstance(jwk, 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: unsupported curve: blah', e.toString());
+      expect(e.toString()).toBe('SecurityException: unsupported curve: blah');
     }
-  },
+  });
 
-  async testVerifyModifiedSignature() {
+  it('verify modified signature', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await EcdsaSign.newInstance(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
@@ -135,12 +126,12 @@ testSuite({
       for (let j = 0; j < 8; j++) {
         const s1 = new Uint8Array(signature);
         s1[i] = (s1[i] ^ (1 << j));
-        assertFalse(await verifier.verify(s1, data));
+        expect(await verifier.verify(s1, data)).toBe(false);
       }
     }
-  },
+  });
 
-  async testVerifyModifiedData() {
+  it('verify modified data', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await EcdsaSign.newInstance(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
@@ -153,12 +144,12 @@ testSuite({
       for (let j = 0; j < 8; j++) {
         const data1 = new Uint8Array(data);
         data1[i] = (data1[i] ^ (1 << j));
-        assertFalse(await verifier.verify(signature, data1));
+        expect(await verifier.verify(signature, data1)).toBe(false);
       }
     }
-  },
+  });
 
-  async testWycheproof() {
+  it('wycheproof', async function() {
     for (let testGroup of wycheproofEcdsaTestVectors['testGroups']) {
       try {
         Validators.validateEcdsaParams(
@@ -177,8 +168,7 @@ testSuite({
         fail(errors);
       }
     }
-  },
-
+  });
 });
 
 /**

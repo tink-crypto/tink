@@ -26,6 +26,7 @@
 #include "tink/subtle/ed25519_verify_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -46,8 +47,9 @@ TEST_F(Ed25519SignBoringSslTest, testBasicSign) {
 
   std::string public_key(reinterpret_cast<const char *>(out_public_key),
                          ED25519_PUBLIC_KEY_LEN);
-  std::string private_key(reinterpret_cast<const char *>(out_private_key),
-                          ED25519_PRIVATE_KEY_LEN);
+  util::SecretData private_key =
+      util::SecretDataFromStringView(absl::string_view(
+          reinterpret_cast<char *>(out_private_key), ED25519_PRIVATE_KEY_LEN));
 
   // Create a new signer.
   auto signer_result = Ed25519SignBoringSsl::New(private_key);
@@ -87,16 +89,12 @@ TEST_F(Ed25519SignBoringSslTest, testBasicSign) {
 }
 
 TEST_F(Ed25519SignBoringSslTest, testInvalidPrivateKeys) {
-  // Null private key.
-  const absl::string_view null_private_key;
-  EXPECT_FALSE(Ed25519SignBoringSsl::New(null_private_key).ok());
-
   for (int keysize = 0; keysize < 128; keysize++) {
     if (keysize == ED25519_PRIVATE_KEY_LEN) {
       // Valid key size.
       continue;
     }
-    std::string key(keysize, 'x');
+    util::SecretData key(keysize, 'x');
     EXPECT_FALSE(Ed25519SignBoringSsl::New(key).ok());
   }
 }
@@ -110,8 +108,9 @@ TEST_F(Ed25519SignBoringSslTest, testMessageEmptyVersusNullStringView) {
 
   std::string public_key(reinterpret_cast<const char *>(out_public_key),
                          ED25519_PUBLIC_KEY_LEN);
-  std::string private_key(reinterpret_cast<const char *>(out_private_key),
-                          ED25519_PRIVATE_KEY_LEN);
+  util::SecretData private_key =
+      util::SecretDataFromStringView(absl::string_view(
+          reinterpret_cast<char *>(out_private_key), ED25519_PRIVATE_KEY_LEN));
 
   // Create a new signer.
   auto signer_result = Ed25519SignBoringSsl::New(private_key);
@@ -146,17 +145,17 @@ TEST_F(Ed25519SignBoringSslTest, testMessageEmptyVersusNullStringView) {
   EXPECT_TRUE(status.ok()) << status;
 }
 
-typedef struct testVector {
+struct TestVector {
   std::string public_key;
   std::string private_key;
   std::string expected_signature;
   std::string message;
-} testVector;
+};
 
 TEST_F(Ed25519SignBoringSslTest, testWithTestVectors) {
   // These test vectors are taken from:
   // https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-02#section-6.
-  testVector Ed25519Vectors[] = {
+  TestVector ed25519_vectors[] = {
       {
           /*TEST 1*/
           /*public_key= */ test::HexDecodeOrDie(
@@ -283,10 +282,11 @@ TEST_F(Ed25519SignBoringSslTest, testWithTestVectors) {
       },
   };
 
-  for (const testVector v : Ed25519Vectors) {
+  for (const TestVector &v : ed25519_vectors) {
     // Add the public as a suffix to the private key. This is needed by the
     // boringssl API.
-    std::string private_key = absl::StrCat(v.private_key, v.public_key);
+    util::SecretData private_key = util::SecretDataFromStringView(
+        absl::StrCat(v.private_key, v.public_key));
 
     // Create a new signer.
     auto signer_result = Ed25519SignBoringSsl::New(private_key);

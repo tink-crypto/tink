@@ -15,12 +15,12 @@
 goog.module('tink.signature.PublicKeyVerifyWrapper');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
+const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * @implements {PublicKeyVerify}

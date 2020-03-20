@@ -151,6 +151,16 @@ public class AeadThreadSafetyTest {
     IndCpaCipher cipher = new AesCtrJceCipher(key, ivSize);
     SecretKeySpec keySpec = new SecretKeySpec(macKey, "HMAC");
     Mac mac = new MacJce("HMACSHA256", keySpec, macSize);
+
+    // TODO(b/148134669): Remove the following line.
+    // There is a potential (but unlikely) race in java.security.Provider. Since AesCtrHmac
+    // encryption creates a cipher for the first time in
+    // http://google3/third_party/tink/java/src/main/java/com/google/crypto/tink/subtle/AesCtrJceCipher.java?l=128&rcl=272896379
+    // if we do this multithreaded, there is a potential for a race in case we call encrypt
+    // for the first time at the same time in multiple threads. To get around this, we first encrypt
+    // an empty plaintext here.
+    cipher.encrypt(new byte[0]);
+
     Aead aesCtrHmac = new EncryptThenAuthenticate(cipher, mac, macSize);
     testEncryptionDecryption(aesCtrHmac, 5, 128, 20);
   }

@@ -64,12 +64,11 @@ StatusOr<std::shared_ptr<ChannelCredentials>> GetCredentials(
     absl::string_view credentials_path) {
   if (credentials_path.empty()) {
     auto creds = grpc::GoogleDefaultCredentials();
-    if (creds != nullptr) {
-      return creds;
-    } else {
+    if (creds == nullptr) {
       return Status(util::error::INTERNAL,
                     "Could not read default credentials");
     }
+    return creds;
   }
 
   // Try reading credentials from a file.

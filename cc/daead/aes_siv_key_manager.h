@@ -27,6 +27,7 @@
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -43,7 +44,8 @@ class AesSivKeyManager
   class DeterministicAeadFactory : public PrimitiveFactory<DeterministicAead> {
     crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>> Create(
         const google::crypto::tink::AesSivKey& key) const override {
-      return subtle::AesSivBoringSsl::New(key.key_value());
+      return subtle::AesSivBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()));
     }
   };
 

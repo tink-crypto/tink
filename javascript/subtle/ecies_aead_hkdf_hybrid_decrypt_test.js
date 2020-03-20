@@ -23,29 +23,21 @@ const EciesAeadHkdfHybridEncrypt = goog.require('tink.subtle.EciesAeadHkdfHybrid
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
 
-testSuite({
-  shouldRunTests() {
-    // https://msdn.microsoft.com/en-us/library/mt801195(v=vs.85).aspx
-    return !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('ecies aead hkdf hybrid decrypt test', function() {
+  beforeEach(function() {
     AeadConfig.register();
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  async testNewInstance_shouldWork() {
+  it('new instance, should work', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const hkdfSalt = new Uint8Array(0);
@@ -55,9 +47,9 @@ testSuite({
 
     await EciesAeadHkdfHybridDecrypt.newInstance(
         privateKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
-  },
+  });
 
-  async testDecrypt_shortCiphertext_shouldNotWork() {
+  it('decrypt, short ciphertext, should not work', async function() {
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const demHelper = new DemHelper(AeadKeyTemplates.aes128CtrHmacSha256());
     const hkdfHash = 'SHA-512';
@@ -82,34 +74,37 @@ testSuite({
       await hybridDecrypt.decrypt(ciphertext.slice(0, curveEncodingSize - 1));
       fail('Should throw an exception');
     } catch (e) {
-      assertEquals('CustomError: Ciphertext is too short.', e.toString());
+      expect(e.toString()).toBe('SecurityException: Ciphertext is too short.');
     }
-  },
+  });
 
-  async testDecrypt_differentDemHelpersFromOneTemplate_shouldWork() {
-    const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
-    const hkdfHash = 'SHA-256';
-    const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
+  it('decrypt, different dem helpers from one template, should work',
+     async function() {
+       const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
+       const privateKey =
+           await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+       const publicKey =
+           await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+       const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
+       const hkdfHash = 'SHA-256';
+       const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
 
-    const demHelperEncrypt = new DemHelper(keyTemplate);
-    const hybridEncrypt = await EciesAeadHkdfHybridEncrypt.newInstance(
-        publicKey, hkdfHash, pointFormat, demHelperEncrypt);
+       const demHelperEncrypt = new DemHelper(keyTemplate);
+       const hybridEncrypt = await EciesAeadHkdfHybridEncrypt.newInstance(
+           publicKey, hkdfHash, pointFormat, demHelperEncrypt);
 
-    const demHelperDecrypt = new DemHelper(keyTemplate);
-    const hybridDecrypt = await EciesAeadHkdfHybridDecrypt.newInstance(
-        privateKey, hkdfHash, pointFormat, demHelperDecrypt);
+       const demHelperDecrypt = new DemHelper(keyTemplate);
+       const hybridDecrypt = await EciesAeadHkdfHybridDecrypt.newInstance(
+           privateKey, hkdfHash, pointFormat, demHelperDecrypt);
 
-    const plaintext = Random.randBytes(15);
+       const plaintext = Random.randBytes(15);
 
-    const ciphertext = await hybridEncrypt.encrypt(plaintext);
-    const decryptedCipher = await hybridDecrypt.decrypt(ciphertext);
-    assertObjectEquals(plaintext, decryptedCipher);
-  },
+       const ciphertext = await hybridEncrypt.encrypt(plaintext);
+       const decryptedCipher = await hybridDecrypt.decrypt(ciphertext);
+       expect(decryptedCipher).toEqual(plaintext);
+     });
 
-  async testDecrypt_differentPamarameters_shouldWork() {
+  it('decrypt, different pamarameters, should work', async function() {
     const repetitions = 5;
     const hkdfSalt = new Uint8Array(0);
 
@@ -143,9 +138,9 @@ testSuite({
           const decryptedCiphertext =
               await hybridDecrypt.decrypt(ciphertext, contextInfo);
 
-          assertObjectEquals(plaintext, decryptedCiphertext);
+          expect(decryptedCiphertext).toEqual(plaintext);
         }
       }
     }
-  },
+  });
 });

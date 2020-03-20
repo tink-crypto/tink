@@ -9,7 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Python wrapper of the CLIF-wrapped C++ Streaming AEAD key manager."""
+"""Python wrapper of the pybind-wrapped C++ Streaming AEAD key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -19,7 +19,7 @@ from __future__ import print_function
 import typing
 from typing import Text, BinaryIO
 
-from tink.python.cc.clif import cc_key_manager
+from tink.python.cc.pybind import cc_key_manager
 from tink.python.core import key_manager
 from tink.python.core import tink_error
 from tink.python.streaming_aead import decrypting_stream
@@ -28,7 +28,7 @@ from tink.python.streaming_aead import streaming_aead
 
 
 class _StreamingAeadCcToPyWrapper(streaming_aead.StreamingAead):
-  """Transforms cliffed C++ StreamingAead into a Python primitive."""
+  """Transforms pybind C++ StreamingAead into a Python primitive."""
 
   def __init__(self, cc_streaming_aead):
     self._streaming_aead = cc_streaming_aead

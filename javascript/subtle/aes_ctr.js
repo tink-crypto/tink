@@ -14,9 +14,7 @@
 
 goog.module('tink.subtle.AesCtr');
 
-const AesCtrPureJs = goog.require('tink.subtle.purejs.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
-const Environment = goog.require('tink.subtle.Environment');
 const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
 const Random = goog.require('tink.subtle.Random');
 const SecurityException = goog.require('tink.exception.SecurityException');
@@ -75,18 +73,11 @@ class AesCtr {
     Validators.requireUint8Array(key);
     Validators.validateAesKeySize(key.length);
 
-    if (Environment.IS_WEBCRYPTO_AVAILABLE) {
-      try {
-        const cryptoKey = await self.crypto.subtle.importKey(
-            'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
-            ['encrypt', 'decrypt']);
+    const cryptoKey = await self.crypto.subtle.importKey(
+        'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
+        ['encrypt', 'decrypt']);
 
-        return new AesCtr(cryptoKey, ivSize);
-      } catch (error) {
-        // CTR might be unsupported in this browser. Fall back to Pure JS.
-      }
-    }
-    return new AesCtrPureJs(key, ivSize);
+    return new AesCtr(cryptoKey, ivSize);
   }
 
   /**

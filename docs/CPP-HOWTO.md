@@ -5,161 +5,20 @@ This document contains instructions and C++ code snippets for common tasks in
 
 ## Setup instructions
 
-### Bazel
+Tink can be built using [Bazel](https://www.bazel.build) or
+[CMake](http://cmake.org). Using any other build system is currently not
+supported. This implies that you need to build your binary from scratch.
 
-Tink is built using [Bazel](https://www.bazel.build).
+### Bazel
 
 Using Tink in projects built with Bazel is straighforward and is the recommended
 approach. For an example, see [this project which specifies Tink as a dependency
 in a Bazel WORKSPACE file](https://github.com/thaidn/tink-examples).
 
-#### Caveats
+### CMake
 
-Tink has a number of library dependencies specified in the "cc" section of the
-[Bazel WORKSPACE file](https://github.com/google/tink/blob/master/WORKSPACE).
-
-Any project using Tink should either:
-
- * explicitly depend on the same versions of these libraries
- * not depend directly on these libraries at all (i.e. have only the indirect
-   dependence via Tink).
-
-### Precompiled library
-
-There are projects where using Bazel is not an option. For such situations, we
-offer a precompiled library that can be used with other build tools.
-
-#### Supported platforms
-
-*   Linux x86_64
-*   macOS x86_64, 10.12.6 (Sierra) or newer
-
-**Warning:** The use of Tink without Bazel is at experimental stage, so the
-instructions given below might not work in some environments.
-
-#### Using the precompiled library
-
-1.  Download and extract the Tink library.
-
-    ```sh
-    OS="linux" # Change to "darwin" for macOS
-    TARGET_DIR="/usr/local"
-
-    curl -L \
-    "https://storage.googleapis.com/tink/releases/libtink-${OS}-x86_64-1.2.0-rc2.tar.gz" \
-    | sudo tar -xz -C ${TARGET_DIR}
-    ```
-
-    The tar command extracts the Tink library into the `lib` subdirectory of
-    `TARGET_DIR`. For example, specifying `/usr/local` as `TARGET_DIR` causes tar to
-    extract the Tink library into `/usr/local/lib`.
-
-    If you'd prefer to extract the library into a different directory, adjust
-    `TARGET_DIR` accordingly.
-
-1.  On Linux, if you specified a system directory as the `TARGET_DIR` (for
-    example, `/usr/local`), then run `ldconfig` to configure the linker.
-
-    ```sh
-    sudo ldconfig
-    ```
-
-    If you set `TARGET_DIR` to a non-system directory (for example, `~/mydir`),
-    then you must append the extraction directory (for example, `~/mydir/lib`)
-    to two environment variables:
-
-    ```sh
-    export LIBRARY_PATH=${LIBRARY_PATH}:${TARGET_DIR}/lib
-    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TARGET_DIR}/lib
-    ```
-
-#### Compiling the library from source
-
-#### Prerequisites
-
-To install Tink from the source code, the following prerequisites must be installed:
-
- * [git](https://git-scm.com/) - to download the source of Tink
- * [Bazel](https://www.bazel.build) - to build the Tink library
-
-**Note:** You need to use Bazel to build the library, but you will be able to
-use the resultant build artifacts in a non-Bazel project.
-
-#### Step-by-step instructions to build and use `libtink.so`
-
-1.  Clone Tink from GitHub.
-
-    ```sh
-    git clone https://github.com/google/tink/
-    ```
-
-1.  Build the library and header file bundles.
-
-    ```sh
-    cd tink
-    bazel build -c opt cc:libtink.so
-    bazel build cc:tink_headers cc:tink_deps_headers
-    ```
-
-1.  Prepare the installation target directory.
-
-    ```sh
-    TARGET_DIR="/usr/local"
-    mkdir -p ${TARGET_DIR}/lib ${TARGET_DIR}/include
-    ```
-
-1.  Install the libary and header file bundles.
-
-    ```sh
-    sudo cp bazel-bin/cc/libtink.so ${TARGET_DIR}/lib/
-    sudo tar xfv bazel-genfiles/cc/tink_headers.tar -C ${TARGET_DIR}/include/
-    sudo tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C ${TARGET_DIR}/include/
-    ```
-
-1.  On Linux, if you specified a system directory as the `TARGET_DIR` (for
-    example, `/usr/local`), then run `ldconfig` to configure the linker.
-
-    ```sh
-    sudo ldconfig
-    ```
-
-    If you set `TARGET_DIR` to a non-system directory (for example, `~/mydir`),
-    then you must append the extraction directory (for example, `~/mydir/lib`)
-    to two environment variables:
-
-    ```sh
-    export LIBRARY_PATH=${LIBRARY_PATH}:${TARGET_DIR}/lib
-    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TARGET_DIR}/lib
-
-    ```
-
-### Validate your installation
-
-To validate the installation, compile and run
-[`hello_world.cc`](https://github.com/google/tink/tree/master/examples/helloworld/cc/hello_world.cc).
-
-1. Download the source code and a test cryptographic key. Also, create some plaintext to encrypt.
-
-   ```sh
-   cd /tmp
-   GITHUB_URL=https://raw.githubusercontent.com/google/tink/master/examples/helloworld/cc/
-   curl ${GITHUB_URL}/hello_world.cc -O ${GITHUB_URL}/aes128_gcm_test_keyset_json.txt -O
-   echo "some message to be encrypted" > plaintext.txt
-   ```
-
-1. Compile the source code.
-
-   ```sh
-   g++ -std=c++11 -I${TARGET_DIR}/include/ -L${TARGET_DIR}/lib/ hello_world.cc -ltink -o hello_world
-   ```
-
-1. Use the `hello_world` application to encrypt and decrypt the plaintext data.
-
-   ```sh
-   ./hello_world aes128_gcm_test_keyset_json.txt encrypt plaintext.txt "associated data" ciphertext.bin
-   ./hello_world aes128_gcm_test_keyset_json.txt decrypt ciphertext.bin "associated data" decrypted.txt
-   cat decrypted.txt
-   ```
+Using Tink with CMake is suported, see [CMAKE-HOWTO](CMAKE-HOWTO.md) for for a
+detailed description.
 
 ## Initializing Tink
 

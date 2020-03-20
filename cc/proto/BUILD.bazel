@@ -17,6 +17,7 @@ cc_proto_library(
 cc_proto_library(
     name = "tink_cc_proto",
     deps = ["@tink_base//proto:tink_proto"],
+    visibility = ["//visibility:public"],
 )
 
 cc_proto_library(

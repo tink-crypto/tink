@@ -24,7 +24,7 @@ from typing import Type, TypeVar
 
 from google.protobuf import message
 from tink.proto import tink_pb2
-from tink.python.aead import aead
+from aead import aead
 from tink.python.core import keyset_reader as reader
 from tink.python.core import keyset_writer as writer
 from tink.python.core import primitive_set

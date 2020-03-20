@@ -21,11 +21,13 @@
 #include <string>
 
 #include "absl/base/thread_annotations.h"
+#include "absl/strings/cord.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/aead.h"
+#include "tink/aead/cord_aead.h"
 #include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
@@ -212,6 +214,43 @@ class DummyAead : public Aead {
 
  private:
   std::string aead_name_;
+};
+
+// A dummy implementation of CordAead-interface.
+// An instance of DummyCordAead can be identified by a name specified
+// as a parameter of the constructor.
+class DummyCordAead : public CordAead {
+ public:
+  explicit DummyCordAead(absl::string_view aead_name) : aead_(aead_name) {}
+
+  // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
+  // with the name of this DummyCordAead.
+  crypto::tink::util::StatusOr<absl::Cord> Encrypt(
+      absl::Cord plaintext, absl::Cord associated_data) const override {
+    auto ciphertext =
+        aead_.Encrypt(plaintext.Flatten(), associated_data.Flatten());
+
+    if (!ciphertext.ok()) return ciphertext.status();
+
+    absl::Cord ciphertext_cord;
+    ciphertext_cord.Append(ciphertext.ValueOrDie());
+    return ciphertext_cord;
+  }
+
+  crypto::tink::util::StatusOr<absl::Cord> Decrypt(
+      absl::Cord ciphertext, absl::Cord associated_data) const override {
+    auto plaintext =
+        aead_.Decrypt(ciphertext.Flatten(), associated_data.Flatten());
+
+    if (!plaintext.ok()) return plaintext.status();
+
+    absl::Cord plaintext_cord;
+    plaintext_cord.Append(plaintext.ValueOrDie());
+    return plaintext_cord;
+  }
+
+ private:
+  DummyAead aead_;
 };
 
 // A dummy implementation of DeterministicAead-interface.

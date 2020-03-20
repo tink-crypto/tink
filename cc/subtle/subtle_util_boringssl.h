@@ -39,7 +39,7 @@ class SubtleUtilBoringSSL {
     EllipticCurveType curve;
     std::string pub_x;  // affine coordinates in bigendian representation
     std::string pub_y;
-    std::string priv;  // big integer in bigendian represnetation
+    std::string priv;  // big integer in bigendian representation
   };
 
   struct X25519Key {

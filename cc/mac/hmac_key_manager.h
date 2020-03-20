@@ -27,6 +27,7 @@
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/hmac.pb.h"
@@ -44,7 +45,8 @@ class HmacKeyManager
         const google::crypto::tink::HmacKey& hmac_key) const override {
       return subtle::HmacBoringSsl::New(
           util::Enums::ProtoToSubtle(hmac_key.params().hash()),
-          hmac_key.params().tag_size(), hmac_key.key_value());
+          hmac_key.params().tag_size(),
+          util::SecretDataFromStringView(hmac_key.key_value()));
     }
   };
 

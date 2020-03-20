@@ -18,62 +18,49 @@ goog.setTestOnly('tink.signature.SignatureConfigTest');
 const EcdsaPrivateKeyManager = goog.require('tink.signature.EcdsaPrivateKeyManager');
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
-const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
-const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PublicKeySign = goog.require('tink.PublicKeySign');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const SignatureConfig = goog.require('tink.signature.SignatureConfig');
 const SignatureKeyTemplates = goog.require('tink.signature.SignatureKeyTemplates');
-const TestCase = goog.require('goog.testing.TestCase');
-const testSuite = goog.require('goog.testing.testSuite');
-const userAgent = goog.require('goog.userAgent');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
-testSuite({
-  shouldRunTests() {
-    return !userAgent.EDGE;  // b/120286783
-  },
-
-  setUp() {
+describe('signature config test', function() {
+  beforeEach(function() {
     // Use a generous promise timeout for running continuously.
-    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 1000;  // 1000s
+  });
 
-  tearDown() {
+  afterEach(function() {
     Registry.reset();
     // Reset the promise timeout to default value.
-    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-  },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;  // 1s
+  });
 
-  testConstants() {
-    assertEquals(VERIFY_PRIMITIVE_NAME, SignatureConfig.VERIFY_PRIMITIVE_NAME);
-    assertEquals(SIGN_PRIMITIVE_NAME, SignatureConfig.SIGN_PRIMITIVE_NAME);
+  it('constants', function() {
+    expect(SignatureConfig.VERIFY_PRIMITIVE_NAME).toBe(VERIFY_PRIMITIVE_NAME);
+    expect(SignatureConfig.SIGN_PRIMITIVE_NAME).toBe(SIGN_PRIMITIVE_NAME);
 
-    assertEquals(ECDSA_PUBLIC_KEY_TYPE, SignatureConfig.ECDSA_PUBLIC_KEY_TYPE);
-    assertEquals(
-        ECDSA_PRIVATE_KEY_TYPE, SignatureConfig.ECDSA_PRIVATE_KEY_TYPE);
-  },
+    expect(SignatureConfig.ECDSA_PUBLIC_KEY_TYPE).toBe(ECDSA_PUBLIC_KEY_TYPE);
+    expect(SignatureConfig.ECDSA_PRIVATE_KEY_TYPE).toBe(ECDSA_PRIVATE_KEY_TYPE);
+  });
 
-
-  testRegister_correctKeyManagersWereRegistered() {
+  it('register, correct key managers were registered', function() {
     SignatureConfig.register();
 
     // Test that the corresponding key managers were registered.
     const publicKeyManager = Registry.getKeyManager(ECDSA_PUBLIC_KEY_TYPE);
-    assertTrue(publicKeyManager instanceof EcdsaPublicKeyManager);
+    expect(publicKeyManager instanceof EcdsaPublicKeyManager).toBe(true);
 
     const privateKeyManager = Registry.getKeyManager(ECDSA_PRIVATE_KEY_TYPE);
-    assertTrue(privateKeyManager instanceof EcdsaPrivateKeyManager);
-  },
+    expect(privateKeyManager instanceof EcdsaPrivateKeyManager).toBe(true);
+  });
 
   // Check that everything was registered correctly and thus new keys may be
   // generated using the predefined key templates and then they may be used for
   // encryption and decryption.
-  async testRegister_predefinedTemplatesShouldWork() {
+  it('register, predefined templates should work', async function() {
     SignatureConfig.register();
     let templates = [
       SignatureKeyTemplates.ecdsaP256(),
@@ -108,9 +95,9 @@ testSuite({
       const signature = await publicKeySign.sign(data);
       const isValid = await publicKeyVerify.verify(signature, data);
 
-      assertTrue(isValid);
+      expect(isValid).toBe(true);
     }
-  },
+  });
 });
 
 // Constants used in tests.

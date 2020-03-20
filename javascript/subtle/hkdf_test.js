@@ -18,24 +18,25 @@ goog.setTestOnly('tink.subtle.HkdfTest');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Hkdf = goog.require('tink.subtle.Hkdf');
 const Random = goog.require('tink.subtle.Random');
-const testSuite = goog.require('goog.testing.testSuite');
 
-testSuite({
-  async testConstructor() {
+describe('hkdf test', function() {
+  it('constructor', async function() {
     const ikm = Random.randBytes(16);
     const info = Random.randBytes(16);
     try {
       await Hkdf.compute(0, 'SHA-256', ikm, info);  // 0 output size
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: size must be positive', e.toString());
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be positive');
     }
 
     try {
       await Hkdf.compute(-1, 'SHA-256', ikm, info);  // negative output size
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: size must be positive', e.toString());
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be positive');
     }
 
     try {
@@ -44,7 +45,7 @@ testSuite({
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: size too large', e.toString());
+      expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
 
     try {
@@ -53,7 +54,7 @@ testSuite({
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: size too large', e.toString());
+      expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
 
     try {
@@ -62,29 +63,31 @@ testSuite({
           info);  // size too large
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: size too large', e.toString());
+      expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
-  },
+  });
 
-  async testConstructor_nonIntegerOutputSize() {
+  it('constructor, non integer output size', async function() {
     const ikm = Random.randBytes(16);
     const info = Random.randBytes(16);
     try {
       await Hkdf.compute(NaN, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
 
     try {
       await Hkdf.compute(1.5, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
     } catch (e) {
-      assertEquals('CustomError: size must be an integer', e.toString());
+      expect(e.toString())
+          .toBe('InvalidArgumentsException: size must be an integer');
     }
-  },
+  });
 
-  async testWithTestVectors() {
+  it('with test vectors', async function() {
     // Test cases are specified in Appendix A of RFC 5869.
     const TEST_VECTORS = [
       {
@@ -186,7 +189,7 @@ testSuite({
       const info = Bytes.fromHex(testVector['info']);
       const hkdf = await Hkdf.compute(
           testVector['outputSize'], testVector['hash'], ikm, info, salt);
-      assertEquals(Bytes.toHex(hkdf), testVector['output']);
+      expect(testVector['output']).toBe(Bytes.toHex(hkdf));
     }
-  },
+  });
 });

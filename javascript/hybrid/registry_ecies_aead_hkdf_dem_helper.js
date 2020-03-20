@@ -17,13 +17,9 @@ goog.module('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const Aead = goog.require('tink.Aead');
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper');
-const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
-const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
-const PbAesGcmKey = goog.require('proto.google.crypto.tink.AesGcmKey');
-const PbAesGcmKeyFormat = goog.require('proto.google.crypto.tink.AesGcmKeyFormat');
-const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 
 /**
