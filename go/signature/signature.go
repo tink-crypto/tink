@@ -35,28 +35,17 @@
 //           // handle the error
 //       }
 //
-//       s, err := signature.NewSigner(kh)
-//	     if err != nil {
-//		     // handle error
-//       }
+//       s := signature.NewSigner(kh)
 //
 //       a , err := s.Sign([]byte("this data needs to be signed"))
 //       if err != nil {
-//           // handle the error
+//           // handle error
 //       }
 //
-//       pubkh, err := kh.Public()
-//	     if err != nil {
-//           // handle the error
-//       }
-//
-//       v, err := signature.NewVerifier(pubkh)
-//	     if err != nil {
-//           // handle the error
-//       }
+//       v := signature.NewVerifier(kh)
 //
 //       if err := v.Verify(a, []byte("this data needs to be signed")); err != nil {
-//           // handle the error
+//           // handle error
 //       }
 //   }
 package signature
