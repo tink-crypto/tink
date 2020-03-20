@@ -1,0 +1,28 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+java_binary(
+    name = "helloworld",
+    srcs = glob([
+        "src/main/**/*.java",
+    ]),
+    main_class = "com.helloworld.HelloWorld",
+    runtime_deps = [
+        "@com_google_protobuf//:protobuf_java",
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "@maven//:args4j_args4j",
+        "@tink_java//:cleartext_keyset_handle",
+        "@tink_java//:java",
+        "@tink_java//:subtle",
+    ],
+)
+
+build_test(
+    name = "helloworld_buildtest",
+    targets = [":helloworld"],
+)

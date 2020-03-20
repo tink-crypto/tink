@@ -164,8 +164,8 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromMessageCallsValidate) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
   EXPECT_CALL(internal_km, ValidateKeyFormat(_))
-      .WillOnce(Return(ToStatusF(util::error::OUT_OF_RANGE,
-                                 "FactoryNewKeyFromMessageCallsValidate")));
+      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+                                    "FactoryNewKeyFromMessageCallsValidate")));
   EXPECT_THAT(key_manager->get_key_factory().NewKey(key_format).status(),
               StatusIs(util::error::OUT_OF_RANGE,
                        HasSubstr("FactoryNewKeyFromMessageCallsValidate")));
@@ -179,8 +179,9 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromStringViewCallsValidate) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
   EXPECT_CALL(internal_km, ValidateKeyFormat(_))
-      .WillOnce(Return(ToStatusF(util::error::OUT_OF_RANGE,
-                                 "FactoryNewKeyFromStringViewCallsValidate")));
+      .WillOnce(
+          Return(util::Status(util::error::OUT_OF_RANGE,
+                              "FactoryNewKeyFromStringViewCallsValidate")));
   EXPECT_THAT(key_manager->get_key_factory()
                   .NewKey(key_format.SerializeAsString())
                   .status(),
@@ -196,8 +197,8 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromKeyDataCallsValidate) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
   EXPECT_CALL(internal_km, ValidateKeyFormat(_))
-      .WillOnce(Return(ToStatusF(util::error::OUT_OF_RANGE,
-                                 "FactoryNewKeyFromKeyDataCallsValidate")));
+      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+                                    "FactoryNewKeyFromKeyDataCallsValidate")));
   EXPECT_THAT(key_manager->get_key_factory()
                   .NewKeyData(key_format.SerializeAsString())
                   .status(),
@@ -251,9 +252,9 @@ TEST(CreateDeriverFunctionForTest, UseParametersAndReturnValue) {
 TEST(CreateDeriverFunctionForTest, ValidateKeyFormatIsCalled) {
   ExampleKeyTypeManager internal_km;
   EXPECT_CALL(internal_km, ValidateKeyFormat(_))
-      .WillOnce(Return(
-          ToStatusF(util::error::OUT_OF_RANGE,
-                    "CreateDeriverFunctionForTest ValidateKeyFormatIsCalled")));
+      .WillOnce(Return(util::Status(
+          util::error::OUT_OF_RANGE,
+          "CreateDeriverFunctionForTest ValidateKeyFormatIsCalled")));
   auto deriver = CreateDeriverFunctionFor(&internal_km);
 
   EXPECT_THAT(
@@ -269,8 +270,8 @@ TEST(CreateDeriverFunctionForTest, ValidateKeyIsCalled) {
       WillOnce(Return(AesGcmKey()));
   EXPECT_CALL(internal_km, ValidateKey(_))
       .WillOnce(Return(
-          ToStatusF(util::error::OUT_OF_RANGE,
-                    "CreateDeriverFunctionForTest ValidateKeyIsCalled")));
+          util::Status(util::error::OUT_OF_RANGE,
+                       "CreateDeriverFunctionForTest ValidateKeyIsCalled")));
 
   auto deriver = CreateDeriverFunctionFor(&internal_km);
 
@@ -375,9 +376,8 @@ TEST(KeyManagerImplTest, GetPrimitiveCallsValidate) {
   key.ParseFromString(key_data.value());
 
   EXPECT_CALL(internal_km, ValidateKey(_))
-      .WillOnce(
-          Return(ToStatusF(util::error::OUT_OF_RANGE,
-                           "GetPrimitiveCallsValidate")));
+      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+                                    "GetPrimitiveCallsValidate")));
   EXPECT_THAT(key_manager->GetPrimitive(key_data).status(),
               StatusIs(util::error::OUT_OF_RANGE,
                        HasSubstr("GetPrimitiveCallsValidate")));
@@ -398,9 +398,8 @@ TEST(KeyManagerImplTest, GetPrimitiveFromKeyCallsValidate) {
   key.ParseFromString(key_data.value());
 
   EXPECT_CALL(internal_km, ValidateKey(_))
-      .WillOnce(Return(
-          ToStatusF(util::error::OUT_OF_RANGE,
-                    "GetPrimitiveFromKeyCallsValidate")));
+      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+                                    "GetPrimitiveFromKeyCallsValidate")));
   EXPECT_THAT(key_manager->GetPrimitive(key).status(),
               StatusIs(util::error::OUT_OF_RANGE,
                        HasSubstr("GetPrimitiveFromKeyCallsValidate")));

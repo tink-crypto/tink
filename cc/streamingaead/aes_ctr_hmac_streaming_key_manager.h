@@ -25,6 +25,7 @@
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_ctr_hmac_streaming.pb.h"
@@ -44,7 +45,7 @@ class AesCtrHmacStreamingKeyManager
         const google::crypto::tink::AesCtrHmacStreamingKey& key)
         const override {
           subtle::AesCtrHmacStreaming::Params params;
-          params.ikm = key.key_value();
+          params.ikm = util::SecretDataFromStringView(key.key_value());
           params.hkdf_algo = crypto::tink::util::Enums::ProtoToSubtle(
               key.params().hkdf_hash_type());
           params.key_size = key.params().derived_key_size();

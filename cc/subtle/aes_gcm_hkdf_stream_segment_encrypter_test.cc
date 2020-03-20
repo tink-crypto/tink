@@ -19,18 +19,21 @@
 #include <string>
 #include <vector>
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
+
+using ::testing::HasSubstr;
 
 TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
   for (int key_size : {16, 32}) {
@@ -43,7 +46,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
 
         // Construct an encrypter.
         AesGcmHkdfStreamSegmentEncrypter::Params params;
-        params.key_value = Random::GetRandomBytes(key_size);
+        params.key = Random::GetRandomKeyBytes(key_size);
         params.salt = Random::GetRandomBytes(key_size);
         params.ciphertext_offset = ciphertext_offset;
         params.ciphertext_segment_size = ct_segment_size;
@@ -83,13 +86,11 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
         std::vector<uint8_t> pt(enc->get_plaintext_segment_size() + 1, 'p');
         auto status = enc->EncryptSegment(pt, true, nullptr);
         EXPECT_FALSE(status.ok());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "plaintext too long",
-                            status.error_message());
+        EXPECT_THAT(status.error_message(), HasSubstr("plaintext too long"));
         pt.resize(enc->get_plaintext_segment_size());
         status = enc->EncryptSegment(pt, true, nullptr);
         EXPECT_FALSE(status.ok());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be non-null",
-                            status.error_message());
+        EXPECT_THAT(status.error_message(), HasSubstr("must be non-null"));
       }
     }
   }
@@ -104,15 +105,15 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongKeySize) {
                ", ciphertext_offset = ", ciphertext_offset,
                ", ciphertext_segment_size = ", ct_segment_size));
         AesGcmHkdfStreamSegmentEncrypter::Params params;
-        params.key_value = Random::GetRandomBytes(key_size);
+        params.key = Random::GetRandomKeyBytes(key_size);
         params.salt = Random::GetRandomBytes(key_size);
         params.ciphertext_offset = ciphertext_offset;
         params.ciphertext_segment_size = ct_segment_size;
         auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
         EXPECT_FALSE(result.ok());
         EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-        EXPECT_PRED_FORMAT2(testing::IsSubstring, "must have 16 or 32 bytes",
-                            result.status().error_message());
+        EXPECT_THAT(result.status().error_message(),
+                    HasSubstr("must have 16 or 32 bytes"));
       }
     }
   }
@@ -125,15 +126,15 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongSaltSize) {
           "key_size = ", key_size,
           ", salt_size = ", key_size + salt_size_delta));
       AesGcmHkdfStreamSegmentEncrypter::Params params;
-      params.key_value = Random::GetRandomBytes(key_size);
+      params.key = Random::GetRandomKeyBytes(key_size);
       params.salt = Random::GetRandomBytes(key_size + salt_size_delta);
       params.ciphertext_offset = 0;
       params.ciphertext_segment_size = 128;
       auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
       EXPECT_FALSE(result.ok());
       EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-      EXPECT_PRED_FORMAT2(testing::IsSubstring, "same size as key_value",
-                          result.status().error_message());
+      EXPECT_THAT(result.status().error_message(),
+                  HasSubstr("same size as the key"));
     }
   }
 }
@@ -145,15 +146,15 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextOffset) {
           "key_size = ", key_size,
           ", ciphertext_offset = ", ciphertext_offset));
       AesGcmHkdfStreamSegmentEncrypter::Params params;
-      params.key_value = Random::GetRandomBytes(key_size);
+      params.key = Random::GetRandomKeyBytes(key_size);
       params.salt = Random::GetRandomBytes(key_size);
       params.ciphertext_offset = ciphertext_offset;
       params.ciphertext_segment_size = 128;
       auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
       EXPECT_FALSE(result.ok());
       EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-      EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be non-negative",
-                          result.status().error_message());
+      EXPECT_THAT(result.status().error_message(),
+                  HasSubstr("must be non-negative"));
     }
   }
 }
@@ -173,7 +174,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextSegmentSize) {
             ", ciphertext_offset = ", ciphertext_offset,
             ", ciphertext_segment_size = ", ct_segment_size));
         AesGcmHkdfStreamSegmentEncrypter::Params params;
-        params.key_value = Random::GetRandomBytes(key_size);
+        params.key = Random::GetRandomKeyBytes(key_size);
         params.salt = Random::GetRandomBytes(key_size);
         params.ciphertext_offset = ciphertext_offset;
         params.ciphertext_segment_size = ct_segment_size;
@@ -182,8 +183,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextSegmentSize) {
           EXPECT_FALSE(result.ok());
           EXPECT_EQ(util::error::INVALID_ARGUMENT,
                     result.status().error_code());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
-                              result.status().error_message());
+          EXPECT_THAT(result.status().error_message(), HasSubstr("too small"));
         } else {
           EXPECT_TRUE(result.ok()) << result.status();
         }
