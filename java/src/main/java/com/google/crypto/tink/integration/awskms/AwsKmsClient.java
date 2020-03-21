@@ -110,28 +110,29 @@ public final class AwsKmsClient implements KmsClient {
   }
 
   /** Loads AWS credentials from a provider. */
-  public KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
-      throws GeneralSecurityException {
-    try {
-      String[] tokens = this.keyUri.split(":");
-      this.client =
-          AWSKMSClientBuilder.standard()
-              .withCredentials(provider)
-              .withRegion(Regions.fromName(tokens[4]))
-              .build();
+    public KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
+        throws GeneralSecurityException {
+      this.provider = provider;
       return this;
-    } catch (AmazonServiceException e) {
-      throw new GeneralSecurityException("cannot load credentials from provider", e);
     }
-  }
-
-  @Override
-  public Aead getAead(String uri) throws GeneralSecurityException {
-    if (this.keyUri != null && !this.keyUri.equals(uri)) {
-      throw new GeneralSecurityException(
-          String.format(
-              "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
+    @Override
+    public Aead getAead(String uri) throws GeneralSecurityException {
+      if (this.keyUri != null && !this.keyUri.equals(uri)) {
+        throw new GeneralSecurityException(
+            String.format(
+                "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
+      }
+    try {
+      String keyUri = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri);
+      String[] tokens = keyUri.split(":");
+      AWSKMS client =
+            AWSKMSClientBuilder.standard()
+                .withCredentials(provider)
+                .withRegion(Regions.fromName(tokens[4]))
+                .build();
+        return new AwsKmsAead(client, keyUri);
+      } catch (AmazonServiceException e) {
+        throw new GeneralSecurityException("cannot load credentials from provider", e);
+      }
     }
-    return new AwsKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
-  }
 }
