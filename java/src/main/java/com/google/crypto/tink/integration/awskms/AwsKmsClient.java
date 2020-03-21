@@ -123,17 +123,18 @@ public final class AwsKmsClient implements KmsClient {
             String.format(
                 "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
       }
-    try {
-      String keyUri = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri);
-      String[] tokens = keyUri.split(":");
-      AWSKMS client =
-            AWSKMSClientBuilder.standard()
-                .withCredentials(provider)
-                .withRegion(Regions.fromName(tokens[4]))
-                .build();
-        return new AwsKmsAead(client, keyUri);
-      } catch (AmazonServiceException e) {
-        throw new GeneralSecurityException("cannot load credentials from provider", e);
-      }
+
+      try {
+        String keyUri = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri);
+        String[] tokens = keyUri.split(":");
+        AWSKMS client =
+              AWSKMSClientBuilder.standard()
+                  .withCredentials(provider)
+                  .withRegion(Regions.fromName(tokens[4]))
+                  .build();
+          return new AwsKmsAead(client, keyUri);
+        } catch (AmazonServiceException e) {
+          throw new GeneralSecurityException("cannot load credentials from provider", e);
+        }
     }
 }
