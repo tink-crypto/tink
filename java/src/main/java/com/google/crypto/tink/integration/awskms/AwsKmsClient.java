@@ -41,6 +41,7 @@ public final class AwsKmsClient implements KmsClient {
 
   private AWSKMS client;
   private String keyUri;
+  private AWSCredentialsProvider provider;
 
   /** Constructs a generic AwsKmsClient that is not bound to any specific key. */
   public AwsKmsClient() {}
