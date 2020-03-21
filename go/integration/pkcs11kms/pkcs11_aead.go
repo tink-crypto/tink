@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"crypto/cipher"
 	"fmt"
+	"github.com/google/tink/go/tink"
+	"io"
+
 	"github.com/ThalesIgnite/crypto11"
 	"github.com/ThalesIgnite/gose"
 	"github.com/ThalesIgnite/gose/jose"
-	"github.com/google/tink/go/tink"
-	"io"
 )
 
 type pkcs11AEAD struct {

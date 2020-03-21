@@ -3,13 +3,14 @@ package pkcs11kms
 import (
 	"context"
 	"fmt"
-	"github.com/ThalesIgnite/crypto11"
 	"github.com/google/tink/go/tink"
 	"github.com/google/uuid"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/ThalesIgnite/crypto11"
 )
 
 var (

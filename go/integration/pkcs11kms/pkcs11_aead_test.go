@@ -2,10 +2,11 @@ package pkcs11kms
 
 import (
 	"fmt"
-	"github.com/ThalesIgnite/crypto11"
-	"github.com/ThalesIgnite/gose"
 	"reflect"
 	"testing"
+
+	"github.com/ThalesIgnite/crypto11"
+	"github.com/ThalesIgnite/gose"
 )
 
 func Test_newPcks11AEAD(t *testing.T) {

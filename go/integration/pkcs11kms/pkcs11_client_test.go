@@ -2,9 +2,10 @@ package pkcs11kms
 
 import (
 	"context"
-	"github.com/ThalesIgnite/crypto11"
 	"reflect"
 	"testing"
+
+	"github.com/ThalesIgnite/crypto11"
 )
 
 func TestNewClient(t *testing.T) {

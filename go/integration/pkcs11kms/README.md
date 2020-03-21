@@ -29,7 +29,7 @@ HSM Keys are:
 - The AEAD handle will be accessible as long as the session is open
 - Good for "remove the HSM" use cases that will close all access to the AEAD even to tink
 
-The keyURI for a HSM key is `pkcs11://ee2c5de3-335c-428b-8168-5daf299e97f3`  where `ee2c5de3-335c-428b-8168-5daf299e97f3` is the key ID (not label) in the device to use.  To have the key auto created if it doesnt' exist yet, simply proved the "autogen" bool to the client.
+The keyURI for a HSM key is `pkcs11://ee2c5de3-335c-428b-8168-5daf299e97f3`  where `ee2c5de3-335c-428b-8168-5daf299e97f3` is the key ID (not label) in the device to use.  To have the key auto created if it doesnt' exist yet, simply provide the "autogen" bool to the client.
 
 
 ### Wrapped

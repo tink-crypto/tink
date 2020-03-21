@@ -28,6 +28,7 @@ func parseKeyURI(keyURI string) (k *Key, err error) {
 			k.wrappedBlob = []byte(blob)
 
 		}
+	} else {
 
 	}
 	return

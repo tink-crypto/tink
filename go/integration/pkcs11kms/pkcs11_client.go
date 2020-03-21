@@ -2,10 +2,11 @@ package pkcs11kms
 
 import (
 	"context"
-	"github.com/ThalesIgnite/crypto11"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 	"strings"
+
+	"github.com/ThalesIgnite/crypto11"
 )
 
 const (
