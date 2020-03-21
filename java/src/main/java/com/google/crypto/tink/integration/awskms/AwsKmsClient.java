@@ -115,6 +115,7 @@ public final class AwsKmsClient implements KmsClient {
       this.provider = provider;
       return this;
     }
+
     @Override
     public Aead getAead(String uri) throws GeneralSecurityException {
       if (this.keyUri != null && !this.keyUri.equals(uri)) {
