@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python wrapper of the CLIF-wrapped C++ Hybrid En- and Decryption key manager."""
+"""Python wrapper of the pybind-wrapped C++ Hybrid En- and Decryption key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -21,15 +21,15 @@ from __future__ import print_function
 
 from typing import Text
 
-from tink.cc.python import hybrid_decrypt as cc_hybrid_decrypt
-from tink.python.cc.clif import cc_key_manager
+from tink.python.cc.pybind import cc_key_manager
+from tink.python.cc.pybind import hybrid_decrypt as cc_hybrid_decrypt
 from tink.python.core import key_manager
 from tink.python.core import tink_error
 from tink.python.hybrid import hybrid_decrypt
 
 
 class _HybridDecryptCcToPyWrapper(hybrid_decrypt.HybridDecrypt):
-  """Transforms cliffed C++ HybridDecrypt primitive into a Python primitive."""
+  """Transforms pybind C++ HybridDecrypt primitive into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_hybrid_decrypt.HybridDecrypt):
     self._hybrid_decrypt = cc_primitive

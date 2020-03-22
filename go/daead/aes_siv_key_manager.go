@@ -18,8 +18,8 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/daead"
 	"github.com/google/tink/go/subtle/random"
 

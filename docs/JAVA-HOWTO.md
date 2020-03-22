@@ -9,8 +9,8 @@ hacking guide](JAVA-HACKING.md).
 ## Setup instructions
 
 The most recent release is
-[1.3.0-rc4](https://github.com/google/tink/releases/tag/v1.3.0-rc4), released
-2020-02-19.
+[1.3.0](https://github.com/google/tink/releases/tag/v1.3.0), released
+2020-03-11.
 
 In addition to the versioned releases, snapshots of Tink are regurlarly built
 using the master branch of the Tink GitHub repository.
@@ -35,7 +35,7 @@ following configuration:
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink</artifactId>
-    <version>1.3.0-rc4</version>
+    <version>1.3.0</version>
   </dependency>
 </dependencies>
 ```
@@ -70,6 +70,32 @@ You can specify the latest snapshot as a project dependency by using the version
 </dependencies>
 ```
 
+### AWS/GCP integration
+
+Since 1.3.0-rc1 the support for AWS/GCP KMS has been moved to a separate
+package. To use AWS KMS, one should also add dependency on `tink-awskms`, and
+similarly `tink-gcpkms` for GCP KMS.
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.google.crypto.tink</groupId>
+    <artifactId>tink-awskms</artifactId>
+    <version>1.3.0</version>
+  </dependency>
+</dependencies>
+```
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.google.crypto.tink</groupId>
+    <artifactId>tink-gcpkms</artifactId>
+    <version>1.3.0</version>
+  </dependency>
+</dependencies>
+```
+
 ### Gradle
 
 You can include Tink in Android projects using [Gradle](https://gradle.org).
@@ -79,7 +105,7 @@ following configuration:
 
 ```
 dependencies {
-  compile 'com.google.crypto.tink:tink-android:1.3.0-rc4'
+  compile 'com.google.crypto.tink:tink-android:1.3.0'
 }
 ```
 
@@ -99,10 +125,10 @@ dependencies {
 ## API documentation
 
 *   Java:
-    *   [1.3.0-rc4](https://google.github.com/tink/javadoc/tink/1.3.0-rc4)
+    *   [1.3.0](https://google.github.com/tink/javadoc/tink/1.3.0)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.3.0-rc4](https://google.github.com/tink/javadoc/tink-android/1.3.0-rc4)
+    *   [1.3.0](https://google.github.com/tink/javadoc/tink-android/1.3.0)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important warnings

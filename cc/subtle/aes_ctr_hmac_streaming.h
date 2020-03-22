@@ -24,6 +24,7 @@
 #include "tink/subtle/nonce_based_streaming_aead.h"
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/stream_segment_encrypter.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -57,7 +58,7 @@ namespace subtle {
 class AesCtrHmacStreaming : public NonceBasedStreamingAead {
  public:
   struct Params {
-    std::string ikm;
+    util::SecretData ikm;
     HashType hkdf_algo;
     int key_size;
     int ciphertext_segment_size;
@@ -67,7 +68,7 @@ class AesCtrHmacStreaming : public NonceBasedStreamingAead {
   };
 
   // The size of the nonce for AES-CTR.
-  static const int kNonceSizeInBytes = 16;
+  static constexpr int kNonceSizeInBytes = 16;
 
   // The nonce has the format nonce_prefix || ctr || last_block || 0 0 0 0,
   // where:
@@ -76,14 +77,12 @@ class AesCtrHmacStreaming : public NonceBasedStreamingAead {
   //  - ctr is a big endian 32 bit counter
   //  - last_block is a byte equal to 1 for the last block of the file
   //    and 0 otherwise.
-  static const int kNoncePrefixSizeInBytes = 7;
+  static constexpr int kNoncePrefixSizeInBytes = 7;
 
-  static const int kHmacKeySizeInBytes = 32;
+  static constexpr int kHmacKeySizeInBytes = 32;
 
   static util::StatusOr<std::unique_ptr<AesCtrHmacStreaming>> New(
       const Params& params);
-
-  ~AesCtrHmacStreaming() override {}
 
  protected:
   util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> NewSegmentEncrypter(
@@ -118,20 +117,19 @@ class AesCtrHmacStreamSegmentEncrypter : public StreamSegmentEncrypter {
     return ciphertext_segment_size_;
   }
   int get_ciphertext_offset() const override { return ciphertext_offset_; }
-  ~AesCtrHmacStreamSegmentEncrypter() override {}
 
  protected:
   void IncSegmentNumber() override { segment_number_++; }
 
  private:
-  AesCtrHmacStreamSegmentEncrypter(absl::string_view key_value,
+  AesCtrHmacStreamSegmentEncrypter(util::SecretData key_value,
                                    absl::string_view header,
                                    absl::string_view nonce_prefix,
                                    int ciphertext_segment_size,
                                    int ciphertext_offset, int tag_size,
                                    const EVP_CIPHER* cipher,
                                    std::unique_ptr<Mac> mac)
-      : key_value_(key_value),
+      : key_value_(std::move(key_value)),
         header_(header.begin(), header.end()),
         nonce_prefix_(nonce_prefix),
         ciphertext_segment_size_(ciphertext_segment_size),
@@ -141,7 +139,7 @@ class AesCtrHmacStreamSegmentEncrypter : public StreamSegmentEncrypter {
         mac_(std::move(mac)),
         segment_number_(0) {}
 
-  const std::string key_value_;
+  const util::SecretData key_value_;
   const std::vector<uint8_t> header_;
   const std::string nonce_prefix_;
   const int ciphertext_segment_size_;
@@ -179,13 +177,13 @@ class AesCtrHmacStreamSegmentDecrypter : public StreamSegmentDecrypter {
   ~AesCtrHmacStreamSegmentDecrypter() override {}
 
  private:
-  AesCtrHmacStreamSegmentDecrypter(absl::string_view ikm, HashType hkdf_algo,
+  AesCtrHmacStreamSegmentDecrypter(util::SecretData ikm, HashType hkdf_algo,
                                    int key_size,
                                    absl::string_view associated_data,
                                    int ciphertext_segment_size,
                                    int ciphertext_offset, HashType tag_algo,
                                    int tag_size)
-      : ikm_(ikm),
+      : ikm_(std::move(ikm)),
         hkdf_algo_(hkdf_algo),
         key_size_(key_size),
         associated_data_(associated_data),
@@ -196,7 +194,7 @@ class AesCtrHmacStreamSegmentDecrypter : public StreamSegmentDecrypter {
         is_initialized_(false) {}
 
   // Parameters set upon decrypter creation.
-  const std::string ikm_;
+  const util::SecretData ikm_;
   const HashType hkdf_algo_;
   const int key_size_;
   const std::string associated_data_;
@@ -207,7 +205,7 @@ class AesCtrHmacStreamSegmentDecrypter : public StreamSegmentDecrypter {
   bool is_initialized_;
 
   // Parameters set when initializing with data from stream header.
-  std::string key_value_;
+  util::SecretData key_value_;
   std::string nonce_prefix_;
   const EVP_CIPHER* cipher_;
   std::unique_ptr<Mac> mac_;

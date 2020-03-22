@@ -171,8 +171,8 @@ TEST(PrivateKeyManagerImplTest, GetPublicKeyDataValidatePrivateKey) {
   ExamplePrivateKeyTypeManager private_km;
   TestPublicKeyTypeManager public_km;
   EXPECT_CALL(private_km, ValidateKey)
-      .WillOnce(Return(ToStatusF(util::error::OUT_OF_RANGE,
-                                 "GetPublicKeyDataValidatePrivateKey")));
+      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+                                    "GetPublicKeyDataValidatePrivateKey")));
 
   std::unique_ptr<KeyManager<PrivatePrimitive>> key_manager =
       MakePrivateKeyManager<PrivatePrimitive>(&private_km, &public_km);

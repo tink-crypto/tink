@@ -49,8 +49,8 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
 crypto::tink::util::Status CleartextKeysetHandle::Write(
     KeysetWriter* writer, const KeysetHandle& keyset_handle) {
   if (!writer) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Error KeysetWriter cannot be null");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Error KeysetWriter cannot be null");
   }
   return writer->Write(keyset_handle.get_keyset());
 }

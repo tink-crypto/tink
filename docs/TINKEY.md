@@ -18,11 +18,11 @@ git clone https://github.com/google/tink.git
 -   Build
 
 ```shell
-cd tink
-bazel build tools/tinkey/...
+cd tink/tools
+bazel build tinkey
 ```
 
-The binary is located at `bazel-bin/tools/tinkey/tinkey`.
+The binary is located at `bazel-bin/tinkey/tinkey`.
 
 ## Usage
 

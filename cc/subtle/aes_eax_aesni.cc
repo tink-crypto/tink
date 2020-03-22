@@ -25,11 +25,14 @@
 #include <wmmintrin.h>  // AES_NI instructions.
 #include <xmmintrin.h>  // Datatype _mm128i
 
-#include <string>
-#include <vector>
+#include <algorithm>
+#include <array>
 #include <memory>
+#include <string>
 
+#include "absl/algorithm/container.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 
 namespace crypto {
@@ -134,19 +137,19 @@ inline __m128i MultiplyByX(__m128i value) {
 // a register and set the remaining bytes to 0. The efficiency of this function
 // is not critical.
 __m128i LoadPartialBlock(const uint8_t* block, size_t block_size) {
-  uint8_t tmp[16];
-  memset(tmp, 0, 16);
-  memmove(tmp, block, block_size);
-  return _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp));
+  std::array<uint8_t, 16> tmp;
+  tmp.fill(0);
+  std::copy_n(block, block_size, tmp.begin());
+  return _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp.data()));
 }
 
 // Store the block_size least significant bytes from value in
 // block[0] .. block[block_size - 1]. The efficiency of this procedure is not
 // critical.
 void StorePartialBlock(uint8_t* block, size_t block_size, __m128i value) {
-  uint8_t tmp[16];
-  _mm_storeu_si128(reinterpret_cast<__m128i*>(tmp), value);
-  memmove(block, tmp, block_size);
+  std::array<uint8_t, 16> tmp;
+  _mm_storeu_si128(reinterpret_cast<__m128i*>(tmp.data()), value);
+  std::copy_n(tmp.begin(), block_size, block);
 }
 
 static const uint8_t kRoundConstant[11] =
@@ -217,49 +220,54 @@ void Aes256KeyExpansion(const uint8_t* key, __m128i *round_key) {
   }
 }
 
+bool IsValidNonceSize(size_t nonce_size) {
+  return nonce_size == 12 || nonce_size == 16;
+}
+
+bool IsValidKeySize(size_t key_size) {
+  return key_size == 16 || key_size == 32;
+}
+
 }  // namespace
 
 crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxAesni::New(
-    absl::string_view key_value,
-    size_t nonce_size_in_bytes) {
-  std::unique_ptr<AesEaxAesni> eax(new AesEaxAesni());
-  if (!eax->SetKey(key_value, nonce_size_in_bytes)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "Invalid key size or nonce size");
+    const util::SecretData& key, size_t nonce_size_in_bytes) {
+  if (!IsValidKeySize(key.size())) {
+    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
+  }
+  if (!IsValidNonceSize(nonce_size_in_bytes)) {
+    return util::Status(util::error::INVALID_ARGUMENT, "Invalid nonce size");
+  }
+  auto eax = absl::WrapUnique(new AesEaxAesni(nonce_size_in_bytes));
+  if (!eax->SetKey(key)) {
+    return util::Status(util::error::INTERNAL, "Setting AES key failed");
   }
   return {std::move(eax)};
 }
 
-bool AesEaxAesni::SetKey(
-    absl::string_view key_value,
-    size_t nonce_size_in_bytes) {
-  if (nonce_size_in_bytes != 12 && nonce_size_in_bytes != 16) {
-    return false;
-  }
-  nonce_size_ = nonce_size_in_bytes;
-  size_t key_size = key_value.size();
-  const uint8_t* key = reinterpret_cast<const uint8_t*>(key_value.data());
+bool AesEaxAesni::SetKey(const util::SecretData& key) {
+  size_t key_size = key.size();
   if (key_size == 16) {
     rounds_ = 10;
-    Aes128KeyExpansion(key, round_key_);
+    Aes128KeyExpansion(key.data(), round_key_->data());
   } else if (key_size == 32) {
     rounds_ = 14;
-    Aes256KeyExpansion(key, round_key_);
+    Aes256KeyExpansion(key.data(), round_key_->data());
   } else {
     return false;
   }
   // Determine the round keys for decryption.
-  round_dec_key_[0] = round_key_[rounds_];
-  round_dec_key_[rounds_] = round_key_[0];
+  (*round_dec_key_)[0] = (*round_key_)[rounds_];
+  (*round_dec_key_)[rounds_] = (*round_key_)[0];
   for (int i = 1; i < rounds_; i++) {
-     round_dec_key_[i] = _mm_aesimc_si128(round_key_[rounds_ - i]);
+    (*round_dec_key_)[i] = _mm_aesimc_si128((*round_key_)[rounds_ - i]);
   }
 
   // Derive the paddings from the key.
   __m128i zero = _mm_setzero_si128();
   __m128i zero_encrypted = EncryptBlock(zero);
-  B_ = MultiplyByX(zero_encrypted);
-  P_ = MultiplyByX(B_);
+  *B_ = MultiplyByX(zero_encrypted);
+  *P_ = MultiplyByX(*B_);
   return true;
 }
 
@@ -272,60 +280,60 @@ inline void AesEaxAesni::Encrypt3Decrypt1(
     __m128i* out1,
     __m128i* out2,
     __m128i* out_dec) const {
-  __m128i first_round = round_key_[0];
+  __m128i first_round = (*round_key_)[0];
   __m128i tmp0 = _mm_xor_si128(in0, first_round);
   __m128i tmp1 = _mm_xor_si128(in1, first_round);
   __m128i tmp2 = _mm_xor_si128(in2, first_round);
-  __m128i tmp3 = _mm_xor_si128(in_dec, round_dec_key_[0]);
+  __m128i tmp3 = _mm_xor_si128(in_dec, (*round_dec_key_)[0]);
   for (int i = 1; i < rounds_; i++){
-    __m128i round_key = round_key_[i];
+    __m128i round_key = (*round_key_)[i];
     tmp0 = _mm_aesenc_si128(tmp0, round_key);
     tmp1 = _mm_aesenc_si128(tmp1, round_key);
     tmp2 = _mm_aesenc_si128(tmp2, round_key);
-    tmp3 = _mm_aesdec_si128(tmp3, round_dec_key_[i]);
+    tmp3 = _mm_aesdec_si128(tmp3, (*round_dec_key_)[i]);
   }
-  __m128i last_round = round_key_[rounds_];
+  __m128i last_round = (*round_key_)[rounds_];
   *out0 = _mm_aesenclast_si128(tmp0, last_round);
   *out1 = _mm_aesenclast_si128(tmp1, last_round);
   *out2 = _mm_aesenclast_si128(tmp2, last_round);
-  *out_dec = _mm_aesdeclast_si128(tmp3, round_dec_key_[rounds_]);
+  *out_dec = _mm_aesdeclast_si128(tmp3, (*round_dec_key_)[rounds_]);
 }
 
 inline __m128i AesEaxAesni::EncryptBlock(__m128i block) const {
-  __m128i tmp = _mm_xor_si128(block, round_key_[0]);
+  __m128i tmp = _mm_xor_si128(block, (*round_key_)[0]);
   for (int i = 1; i < rounds_; i++){
-    tmp = _mm_aesenc_si128(tmp, round_key_[i]);
+    tmp = _mm_aesenc_si128(tmp, (*round_key_)[i]);
   }
-  return _mm_aesenclast_si128(tmp, round_key_[rounds_]);
+  return _mm_aesenclast_si128(tmp, (*round_key_)[rounds_]);
 }
 
 inline void AesEaxAesni::Encrypt2Blocks(
     const __m128i in0, const __m128i in1, __m128i *out0, __m128i *out1) const {
-  __m128i tmp0 = _mm_xor_si128(in0, round_key_[0]);
-  __m128i tmp1 = _mm_xor_si128(in1, round_key_[0]);
+  __m128i tmp0 = _mm_xor_si128(in0, (*round_key_)[0]);
+  __m128i tmp1 = _mm_xor_si128(in1, (*round_key_)[0]);
   for (int i = 1; i < rounds_; i++){
-    __m128i round_key = round_key_[i];
+    __m128i round_key = (*round_key_)[i];
     tmp0 = _mm_aesenc_si128(tmp0, round_key);
     tmp1 = _mm_aesenc_si128(tmp1, round_key);
   }
-  __m128i last_round = round_key_[rounds_];
+  __m128i last_round = (*round_key_)[rounds_];
   *out0 = _mm_aesenclast_si128(tmp0, last_round);
   *out1 = _mm_aesenclast_si128(tmp1, last_round);
 }
 
 __m128i AesEaxAesni::Pad(const uint8_t* data, int len) const {
-  // CHECK(0 <= len && len <= BLOCK_SIZE);
+  // CHECK(0 <= len && len <= kBlockSize);
   // TODO(bleichen): Is there a better way to load n bytes into a register
-  uint8_t tmp[BLOCK_SIZE];
-  memset(tmp, 0, BLOCK_SIZE);
-  memmove(tmp, data, len);
-  if (len == BLOCK_SIZE) {
-    __m128i block = _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp));
-    return _mm_xor_si128(block, B_);
+  std::array<uint8_t, kBlockSize> tmp;
+  tmp.fill(0);
+  std::copy_n(data, len, tmp.begin());
+  if (len == kBlockSize) {
+    __m128i block = _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp.data()));
+    return _mm_xor_si128(block, *B_);
   } else {
     tmp[len] = 0x80;
-    __m128i block = _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp));
-    return _mm_xor_si128(block, P_);
+    __m128i block = _mm_loadu_si128(reinterpret_cast<__m128i*>(tmp.data()));
+    return _mm_xor_si128(block, *P_);
   }
 }
 
@@ -334,29 +342,26 @@ __m128i AesEaxAesni::OMAC(absl::string_view blob, int tag) const {
   size_t len = blob.size();
   __m128i state = _mm_set_epi32(tag << 24, 0, 0, 0);
   if (len == 0) {
-    state = _mm_xor_si128(state, B_);
+    state = _mm_xor_si128(state, *B_);
   } else {
     state = EncryptBlock(state);
     size_t idx = 0;
-    while (len - idx > BLOCK_SIZE) {
+    while (len - idx > kBlockSize) {
       __m128i in = _mm_loadu_si128((__m128i*) (data + idx));
       state = _mm_xor_si128(in, state);
       state = EncryptBlock(state);
-      idx += BLOCK_SIZE;
+      idx += kBlockSize;
     }
     state = _mm_xor_si128(state, Pad(data + idx, len - idx));
   }
   return EncryptBlock(state);
 }
 
-bool AesEaxAesni::RawEncrypt(
-    absl::string_view nonce,
-    absl::string_view in,
-    absl::string_view additional_data,
-    uint8_t *ciphertext,
-    size_t ciphertext_size) const {
+bool AesEaxAesni::RawEncrypt(absl::string_view nonce, absl::string_view in,
+                             absl::string_view additional_data,
+                             absl::Span<uint8_t> ciphertext) const {
   // Sanity check
-  if (in.size() + TAG_SIZE != ciphertext_size) {
+  if (in.size() + kTagSize != ciphertext.size()) {
     return false;
   }
   const uint8_t* plaintext = reinterpret_cast<const uint8_t*>(in.data());
@@ -375,10 +380,10 @@ bool AesEaxAesni::RawEncrypt(
   // Initialize mac with the header of the input for the MAC.
   __m128i mac = _mm_set_epi32(0x2000000, 0, 0, 0);
 
-  uint8_t* out = ciphertext;
+  uint8_t* out = ciphertext.data();
   size_t idx = 0;
   __m128i key_stream;
-  while (idx + BLOCK_SIZE < in.size()) {
+  while (idx + kBlockSize < in.size()) {
     __m128i ctr_big_endian = Reverse(ctr);
     // Get the key stream for one message block and compute
     // the MAC for the previous ciphertext block or header.
@@ -388,9 +393,9 @@ bool AesEaxAesni::RawEncrypt(
     mac = _mm_xor_si128(mac, ct);
     ctr = Increment(ctr);
     _mm_storeu_si128(reinterpret_cast<__m128i*>(out), ct);
-    plaintext += BLOCK_SIZE;
-    out += BLOCK_SIZE;
-    idx += BLOCK_SIZE;
+    plaintext += kBlockSize;
+    out += kBlockSize;
+    idx += kBlockSize;
   }
 
   // Last block
@@ -406,21 +411,18 @@ bool AesEaxAesni::RawEncrypt(
     mac = _mm_xor_si128(mac, padded_last_block);
   } else {
     // Special code for plaintexts of size 0.
-    mac = _mm_xor_si128(mac, B_);
+    mac = _mm_xor_si128(mac, *B_);
   }
   mac = EncryptBlock(mac);
   __m128i tag = _mm_xor_si128(mac, N);
   tag = _mm_xor_si128(tag, H);
-  StorePartialBlock(out, TAG_SIZE, tag);
+  StorePartialBlock(out, kTagSize, tag);
   return true;
 }
 
-bool AesEaxAesni::RawDecrypt(
-    absl::string_view nonce,
-    absl::string_view in,
-    absl::string_view additional_data,
-    uint8_t *plaintext,
-    size_t plaintext_size) const {
+bool AesEaxAesni::RawDecrypt(absl::string_view nonce, absl::string_view in,
+                             absl::string_view additional_data,
+                             absl::Span<uint8_t> plaintext) const {
   __m128i N = OMAC(nonce, 0);
   __m128i H = OMAC(additional_data, 1);
 
@@ -428,16 +430,16 @@ bool AesEaxAesni::RawDecrypt(
   const size_t ciphertext_size = in.size();
 
   // Sanity checks: RawDecrypt should always be called with valid sizes.
-  if (ciphertext_size < TAG_SIZE) {
+  if (ciphertext_size < kTagSize) {
     return false;
   }
-  if (ciphertext_size - TAG_SIZE != plaintext_size) {
+  if (ciphertext_size - kTagSize != plaintext.size()) {
     return false;
   }
 
   // Get the tag from the ciphertext.
   const __m128i tag = _mm_loadu_si128(
-      reinterpret_cast<const __m128i*>(&ciphertext[plaintext_size]));
+      reinterpret_cast<const __m128i*>(&ciphertext[plaintext.size()]));
 
   // A CBC-MAC is reversible. This allows to pipeline the MAC verification
   // by recomputing the MAC for the first half of the ciphertext and
@@ -447,17 +449,17 @@ bool AesEaxAesni::RawDecrypt(
   mac_backward = _mm_xor_si128(mac_backward, H);
 
   // Special case code for empty messages of size 0.
-  if (plaintext_size == 0) {
-    mac_forward = _mm_xor_si128(mac_forward, B_);
+  if (plaintext.empty()) {
+    mac_forward = _mm_xor_si128(mac_forward, *B_);
     mac_forward = EncryptBlock(mac_forward);
     return EqualBlocks(mac_forward, mac_backward);
   }
 
-  const size_t last_block = (plaintext_size - 1) / BLOCK_SIZE;
-  const size_t last_block_size = ((plaintext_size - 1) % BLOCK_SIZE) + 1;
+  const size_t last_block = (plaintext.size() - 1) / kBlockSize;
+  const size_t last_block_size = ((plaintext.size() - 1) % kBlockSize) + 1;
   const __m128i* ciphertext_blocks =
       reinterpret_cast<const __m128i*>(ciphertext);
-  __m128i* plaintext_blocks = reinterpret_cast<__m128i*>(plaintext);
+  __m128i* plaintext_blocks = reinterpret_cast<__m128i*>(plaintext.data());
   __m128i ctr_forward = Reverse(N);
   __m128i ctr_backward = Add(ctr_forward, last_block);
   __m128i unused = _mm_setzero_si128();
@@ -466,13 +468,13 @@ bool AesEaxAesni::RawDecrypt(
   Encrypt3Decrypt1(
       Reverse(ctr_backward), mac_forward, unused, mac_backward,
       &stream_backward, &mac_forward, &unused, &mac_backward);
-  __m128i ct = LoadPartialBlock(
-      &ciphertext[plaintext_size - last_block_size], last_block_size);
+  __m128i ct = LoadPartialBlock(&ciphertext[plaintext.size() - last_block_size],
+                                last_block_size);
   __m128i pt = _mm_xor_si128(ct, stream_backward);
-  StorePartialBlock(
-      &plaintext[plaintext_size - last_block_size], last_block_size, pt);
+  StorePartialBlock(&plaintext[plaintext.size() - last_block_size],
+                    last_block_size, pt);
   __m128i padded_last_block =
-      Pad(&ciphertext[plaintext_size - last_block_size], last_block_size);
+      Pad(&ciphertext[plaintext.size() - last_block_size], last_block_size);
   mac_backward = _mm_xor_si128(mac_backward, padded_last_block);
   const size_t mid_block = last_block / 2;
   // Decrypts two blocks concurrently as long as there are at least two
@@ -508,12 +510,11 @@ bool AesEaxAesni::RawDecrypt(
     __m128i pt = _mm_xor_si128(ct, stream_forward);
     _mm_storeu_si128(&plaintext_blocks[mid_block], pt);
   }
-  if (EqualBlocks(mac_forward, mac_backward)) {
-    return true;
-  } else {
-    memset(plaintext, 0, plaintext_size);
+  if (!EqualBlocks(mac_forward, mac_backward)) {
+    absl::c_fill(plaintext, 0);
     return false;
   }
+  return true;
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
@@ -523,21 +524,22 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
   plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
   additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
 
-  if (SIZE_MAX - nonce_size_ - TAG_SIZE <= plaintext.size()) {
+  if (SIZE_MAX - nonce_size_ - kTagSize <= plaintext.size()) {
     return util::Status(util::error::INVALID_ARGUMENT, "Plaintext too long");
   }
-  size_t ciphertext_size = plaintext.size() + nonce_size_ + TAG_SIZE;
-  std::string ciphertext(ciphertext_size, '\0');
+  size_t ciphertext_size = plaintext.size() + nonce_size_ + kTagSize;
+  std::string ciphertext;
+  ResizeStringUninitialized(&ciphertext, ciphertext_size);
   const std::string nonce = Random::GetRandomBytes(nonce_size_);
-  memmove(&ciphertext[0], nonce.data(), nonce_size_);
-  bool result = RawEncrypt(nonce, plaintext, additional_data,
-                           reinterpret_cast<uint8_t*>(&ciphertext[nonce_size_]),
-                           ciphertext_size - nonce_size_);
-  if (result) {
-    return std::move(ciphertext);
-  } else {
+  absl::c_copy(nonce, ciphertext.begin());
+  bool result = RawEncrypt(
+      nonce, plaintext, additional_data,
+      absl::MakeSpan(reinterpret_cast<uint8_t*>(&ciphertext[nonce_size_]),
+                     ciphertext_size - nonce_size_));
+  if (!result) {
     return util::Status(util::error::INTERNAL, "Encryption failed");
   }
+  return ciphertext;
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
@@ -547,21 +549,22 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
   additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
 
   size_t ct_size = ciphertext.size();
-  if (ct_size < nonce_size_ + TAG_SIZE) {
+  if (ct_size < nonce_size_ + kTagSize) {
     return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
   }
-  size_t out_size = ct_size - TAG_SIZE - nonce_size_;
+  size_t out_size = ct_size - kTagSize - nonce_size_;
   absl::string_view nonce = ciphertext.substr(0, nonce_size_);
   absl::string_view encrypted =
       ciphertext.substr(nonce_size_, ct_size - nonce_size_);
-  std::string res(out_size, '\0');
-  bool result = RawDecrypt(nonce, encrypted, additional_data,
-                           reinterpret_cast<uint8_t*>(&res[0]), out_size);
+  std::string res;
+  ResizeStringUninitialized(&res, out_size);
+  bool result = RawDecrypt(
+      nonce, encrypted, additional_data,
+      absl::MakeSpan(reinterpret_cast<uint8_t*>(&res[0]), res.size()));
   if (!result) {
     return util::Status(util::error::INTERNAL, "Decryption failed");
-  } else {
-    return std::move(res);
   }
+  return res;
 }
 
 }  // namespace subtle

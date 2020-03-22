@@ -28,11 +28,12 @@
 #include "tink/subtle/test_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "proto/aes_eax.pb.h"
 #include "proto/aes_ctr_hmac_streaming.pb.h"
+#include "proto/aes_eax.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
@@ -113,7 +114,7 @@ TEST(AesCtrHmacStreamingKeyManagerTest, GetPrimitive) {
   ASSERT_THAT(streaming_aead_from_manager_result.status(), IsOk());
 
   subtle::AesCtrHmacStreaming::Params params;
-  params.ikm = "16 bytes of key ";
+  params.ikm = util::SecretDataFromStringView("16 bytes of key ");
   params.hkdf_algo = subtle::HashType::SHA256;;
   params.key_size = 16;
   params.ciphertext_segment_size = 1024;

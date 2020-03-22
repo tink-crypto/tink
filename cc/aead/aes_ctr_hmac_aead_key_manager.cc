@@ -111,8 +111,8 @@ Status AesCtrHmacAeadKeyManager::ValidateKey(
   }
   if (aes_ctr_key.params().iv_size() < kMinIvSizeInBytes ||
       aes_ctr_key.params().iv_size() > 16) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid AesCtrHmacAeadKey: IV size out of range.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Invalid AesCtrHmacAeadKey: IV size out of range.");
   }
   return HmacKeyManager().ValidateKey(key.hmac_key());
 }
@@ -127,14 +127,15 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
   }
   if (aes_ctr_key_format.params().iv_size() < kMinIvSizeInBytes ||
       aes_ctr_key_format.params().iv_size() > 16) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid AesCtrHmacAeadKeyFormat: IV size out of range.");
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "Invalid AesCtrHmacAeadKeyFormat: IV size out of range.");
   }
 
   // Validate HmacKeyFormat.
   auto hmac_key_format = key_format.hmac_key_format();
   if (hmac_key_format.key_size() < kMinKeySizeInBytes) {
-    return ToStatusF(
+    return util::Status(
         util::error::INVALID_ARGUMENT,
         "Invalid AesCtrHmacAeadKeyFormat: HMAC key_size is too small.");
   }

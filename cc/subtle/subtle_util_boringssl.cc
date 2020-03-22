@@ -425,7 +425,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
       std::unique_ptr<uint8_t[]> encoded(new uint8_t[1 + curve_size_in_bytes]);
       size_t size = EC_POINT_point2oct(
           group.get(), point, POINT_CONVERSION_COMPRESSED, encoded.get(),
-          1 + 2 * curve_size_in_bytes, nullptr);
+          1 + curve_size_in_bytes, nullptr);
       if (size != 1 + curve_size_in_bytes) {
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }

@@ -75,7 +75,7 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 
 Primitive          | Go Implementations
 ------------------ | ------------------------------------------------------------------------
-AEAD               | AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-PLOY1305, XCHACHA-POLY1305
+AEAD               | AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2
 Digital Signatures | ECDSA over NIST curves, Ed25519

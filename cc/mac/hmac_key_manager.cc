@@ -112,8 +112,8 @@ Status HmacKeyManager::ValidateKey(const HmacKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().size() < kMinKeySizeInBytes) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Invalid HmacKey: key_value is too short.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Invalid HmacKey: key_value is too short.");
   }
   return ValidateParams(key.params());
 }
@@ -122,8 +122,8 @@ Status HmacKeyManager::ValidateKey(const HmacKey& key) const {
 Status HmacKeyManager::ValidateKeyFormat(
     const HmacKeyFormat& key_format) const {
   if (key_format.key_size() < kMinKeySizeInBytes) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Invalid HmacKeyFormat: key_size is too small.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Invalid HmacKeyFormat: key_size is too small.");
   }
   return ValidateParams(key_format.params());
 }

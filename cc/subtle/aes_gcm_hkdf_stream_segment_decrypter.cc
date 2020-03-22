@@ -16,24 +16,24 @@
 
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_decrypter.h"
 
+#include <cstdint>
+#include <cstring>
 #include <limits>
-#include <string>
-#include <vector>
+#include <utility>
 
+#include "absl/algorithm/container.h"
+#include "absl/base/config.h"
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/span.h"
+#include "openssl/aead.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
-#include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/subtle_util_boringssl.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
-#include "tink/util/statusor.h"
-#include "openssl/aead.h"
-#include "openssl/err.h"
-
 
 namespace crypto {
 namespace tink {
@@ -41,14 +41,19 @@ namespace subtle {
 
 namespace {
 
-void BigEndianStore32(uint8_t dst[8], uint32_t val) {
-  dst[0] = (val >> 24) & 0xff;
-  dst[1] = (val >> 16) & 0xff;
-  dst[2] = (val >> 8) & 0xff;
-  dst[3] = val & 0xff;
+uint32_t ByteSwap(uint32_t val) {
+  return ((val & 0xff000000) >> 24) | ((val & 0x00ff0000) >> 8) |
+         ((val & 0x0000ff00) << 8) | ((val & 0x000000ff) << 24);
 }
 
-}  // namespace
+void BigEndianStore32(uint8_t dst[4], uint32_t val) {
+#if defined(ABSL_IS_LITTLE_ENDIAN)
+  val = ByteSwap(val);
+#elif !defined(ABSL_IS_BIG_ENDIAN)
+#error Unknown endianness
+#endif
+  std::memcpy(dst, &val, sizeof(val));
+}
 
 util::Status Validate(const AesGcmHkdfStreamSegmentDecrypter::Params& params) {
   if (!(params.hkdf_hash == SHA1 || params.hkdf_hash == SHA256 ||
@@ -70,33 +75,33 @@ util::Status Validate(const AesGcmHkdfStreamSegmentDecrypter::Params& params) {
                     AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
   if (params.ciphertext_segment_size <=
       params.ciphertext_offset + header_size +
-      AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
+          AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext_segment_size too small");
   }
   return util::OkStatus();
 }
 
+}  // namespace
+
+AesGcmHkdfStreamSegmentDecrypter::AesGcmHkdfStreamSegmentDecrypter(
+    Params params)
+    : ikm_(std::move(params.ikm)),
+      hkdf_hash_(params.hkdf_hash),
+      header_size_(1 + params.derived_key_size +
+                   AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes),
+      ciphertext_segment_size_(params.ciphertext_segment_size),
+      ciphertext_offset_(params.ciphertext_offset),
+      derived_key_size_(params.derived_key_size),
+      associated_data_(std::move(params.associated_data)) {}
+
 // static
 util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>
-    AesGcmHkdfStreamSegmentDecrypter::New(const Params& params) {
+AesGcmHkdfStreamSegmentDecrypter::New(Params params) {
   auto status = Validate(params);
   if (!status.ok()) return status;
-
-  std::unique_ptr<AesGcmHkdfStreamSegmentDecrypter>
-      decrypter(new AesGcmHkdfStreamSegmentDecrypter());
-  decrypter->ikm_ = params.ikm;
-  decrypter->hkdf_hash_ = params.hkdf_hash;
-  int header_size = 1 + params.derived_key_size +
-                    AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
-  decrypter->header_size_ = header_size;
-  decrypter->ciphertext_offset_ = params.ciphertext_offset;
-  decrypter->ciphertext_segment_size_ = params.ciphertext_segment_size;
-  decrypter->derived_key_size_ = params.derived_key_size;
-  decrypter->associated_data_ = params.associated_data;
-  decrypter->is_initialized_ = false;
-
-  return {std::move(decrypter)};
+  return {absl::WrapUnique(
+      new AesGcmHkdfStreamSegmentDecrypter(std::move(params)))};
 }
 
 util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
@@ -117,29 +122,29 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
   salt_.resize(derived_key_size_);
   nonce_prefix_.resize(
       AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes);
-  memcpy(salt_.data(), header.data() + 1, derived_key_size_);
-  memcpy(nonce_prefix_.data(), header.data() + 1 + derived_key_size_,
-         AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes);
+  absl::c_copy(absl::MakeSpan(header).subspan(1, derived_key_size_),
+               salt_.begin());
+  absl::c_copy(absl::MakeSpan(header).subspan(
+                   1 + derived_key_size_,
+                   AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes),
+               nonce_prefix_.begin());
 
   // Derive symmetric key.
-  auto hkdf_result =
-      Hkdf::ComputeHkdf(hkdf_hash_, ikm_,
-                        std::string(reinterpret_cast<const char*>(salt_.data()),
-                                    derived_key_size_),
-                        associated_data_, derived_key_size_);
+  auto hkdf_result = Hkdf::ComputeHkdf(
+      hkdf_hash_, ikm_,
+      absl::string_view(reinterpret_cast<const char*>(salt_.data()),
+                        derived_key_size_),
+      associated_data_, derived_key_size_);
   if (!hkdf_result.ok()) return hkdf_result.status();
-  key_value_ = hkdf_result.ValueOrDie();
+  util::SecretData key = std::move(hkdf_result).ValueOrDie();
 
   // Initialize ctx_.
   const EVP_AEAD* aead =
-      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key_value_.size());
+      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key.size());
   if (aead == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }
-  if (EVP_AEAD_CTX_init(ctx_.get(),
-                        aead,
-                        reinterpret_cast<const uint8_t*>(key_value_.data()),
-                        key_value_.size(),
+  if (EVP_AEAD_CTX_init(ctx_.get(), aead, key.data(), key.size(),
                         AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes,
                         nullptr) != 1) {
     return util::Status(util::error::INTERNAL,
@@ -185,8 +190,7 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
 
   // Construct IV.
   std::vector<uint8_t> iv(AesGcmHkdfStreamSegmentEncrypter::kNonceSizeInBytes);
-  memcpy(iv.data(), nonce_prefix_.data(),
-         AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes);
+  absl::c_copy(nonce_prefix_, iv.begin());
   BigEndianStore32(
       iv.data() + AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes,
       static_cast<uint32_t>(segment_number));
@@ -203,6 +207,9 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
     return util::Status(util::error::INTERNAL,
                         absl::StrCat("Decryption failed: ",
                                      SubtleUtilBoringSSL::GetErrors()));
+  }
+  if (out_len != plaintext_buffer->size()) {
+    return util::Status(util::error::INTERNAL, "incorrect plaintext size");
   }
   return util::OkStatus();
 }
