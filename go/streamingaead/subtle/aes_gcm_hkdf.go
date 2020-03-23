@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package streamingaead provides subtle implementations of the streaming AEAD primitive.
-package streamingaead
+// Package subtle provides subtle implementations of the Streaming AEAD primitive.
+package subtle
 
 import (
 	"crypto/aes"
@@ -26,7 +26,6 @@ import (
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
-	"github.com/google/tink/go/tink"
 )
 
 const (
@@ -42,8 +41,6 @@ const (
 	// TagSizeInBytes is the size of the tags of each ciphertext segment.
 	TagSizeInBytes = 16
 )
-
-var _ tink.StreamingAEAD = &AESGCMHKDF{}
 
 // AESGCMHKDF implements streaming encryption using AES-GCM with HKDF as key derivation function.
 //

@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package streamingaead_test
+package subtle_test
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/google/tink/go/subtle/streamingaead"
+	"github.com/google/tink/go/streamingaead/subtle"
 )
 
 func TestEncryptDecrypt(t *testing.T) {
@@ -205,7 +205,7 @@ func TestEncryptDecrypt(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			cipher, err := streamingaead.NewAESGCMHKDF(ikm, "SHA256", tc.keySizeInBytes, tc.segmentSize, tc.firstSegmentOffset)
+			cipher, err := subtle.NewAESGCMHKDF(ikm, "SHA256", tc.keySizeInBytes, tc.segmentSize, tc.firstSegmentOffset)
 			if err != nil {
 				t.Errorf("Cannot create a cipher: %v", err)
 			}
@@ -240,7 +240,7 @@ func TestModifiedCiphertext(t *testing.T) {
 		chunkSize          = 128
 	)
 
-	cipher, err := streamingaead.NewAESGCMHKDF(ikm, "SHA256", keySizeInBytes, segmentSize, firstSegmentOffset)
+	cipher, err := subtle.NewAESGCMHKDF(ikm, "SHA256", keySizeInBytes, segmentSize, firstSegmentOffset)
 	if err != nil {
 		t.Errorf("Cannot create a cipher: %v", err)
 	}
@@ -320,7 +320,7 @@ func TestModifiedCiphertext(t *testing.T) {
 
 // encrypt generates a random plaintext of size plaintextSize and encrypts it using the cipher.
 // Upon success this function returns the actual plaintext and ciphertext bytes.
-func encrypt(cipher *streamingaead.AESGCMHKDF, aad []byte, plaintextSize int) ([]byte, []byte, error) {
+func encrypt(cipher *subtle.AESGCMHKDF, aad []byte, plaintextSize int) ([]byte, []byte, error) {
 	pt := make([]byte, plaintextSize)
 	for i := range pt {
 		pt[i] = byte(i % 253)
@@ -345,7 +345,7 @@ func encrypt(cipher *streamingaead.AESGCMHKDF, aad []byte, plaintextSize int) ([
 }
 
 // decrypt decrypts ciphertext ct using the cipher and validates that it's the same as the original plaintext pt.
-func decrypt(cipher *streamingaead.AESGCMHKDF, aad, pt, ct []byte, chunkSize int) error {
+func decrypt(cipher *subtle.AESGCMHKDF, aad, pt, ct []byte, chunkSize int) error {
 	r, err := cipher.NewDecryptingReader(bytes.NewBuffer(ct), aad)
 	if err != nil {
 		return fmt.Errorf("cannot create an encrypt reader: %v", err)

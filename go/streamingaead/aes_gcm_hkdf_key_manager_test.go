@@ -21,7 +21,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/subtle/streamingaead"
+	"github.com/google/tink/go/streamingaead/subtle"
 	"github.com/google/tink/go/testutil"
 	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -283,7 +283,7 @@ func validateAESGCMHKDFKey(key *gcmhkdfpb.AesGcmHkdfStreamingKey, format *gcmhkd
 		return fmt.Errorf("incorrect HKDF hash type")
 	}
 	// try to encrypt and decrypt
-	p, err := streamingaead.NewAESGCMHKDF(
+	p, err := subtle.NewAESGCMHKDF(
 		key.KeyValue,
 		key.Params.HkdfHashType.String(),
 		int(key.Params.DerivedKeySize),
@@ -297,7 +297,7 @@ func validateAESGCMHKDFKey(key *gcmhkdfpb.AesGcmHkdfStreamingKey, format *gcmhkd
 }
 
 func validatePrimitive(p interface{}, key *gcmhkdfpb.AesGcmHkdfStreamingKey) error {
-	cipher := p.(*streamingaead.AESGCMHKDF)
+	cipher := p.(*subtle.AESGCMHKDF)
 	if !bytes.Equal(cipher.MainKey, key.KeyValue) {
 		return fmt.Errorf("main key and primitive don't match")
 	}
