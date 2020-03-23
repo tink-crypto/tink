@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package daead_test
+package subtle_test
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/tink/go/subtle/daead"
+	"github.com/google/tink/go/daead/subtle"
 	"github.com/google/tink/go/subtle/random"
 )
 
@@ -55,7 +55,7 @@ func TestAESSIV_EncryptDecrypt(t *testing.T) {
 	msg := []byte("Some data to encrypt.")
 	aad := []byte("Additional data")
 
-	a, err := daead.NewAESSIV(key)
+	a, err := subtle.NewAESSIV(key)
 	if err != nil {
 		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
@@ -79,7 +79,7 @@ func TestAESSIV_EmptyPlaintext(t *testing.T) {
 	key, _ := hex.DecodeString(keyStr)
 	aad := []byte("Additional data")
 
-	a, err := daead.NewAESSIV(key)
+	a, err := subtle.NewAESSIV(key)
 	if err != nil {
 		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
@@ -111,7 +111,7 @@ func TestAESSIV_EmptyAdditionalData(t *testing.T) {
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
 	key, _ := hex.DecodeString(keyStr)
 
-	a, err := daead.NewAESSIV(key)
+	a, err := subtle.NewAESSIV(key)
 	if err != nil {
 		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
@@ -144,11 +144,11 @@ func TestAESSIV_KeySizes(t *testing.T) {
 	key, _ := hex.DecodeString(keyStr)
 
 	for i := 0; i < len(key); i++ {
-		_, err := daead.NewAESSIV(key[:i])
-		if i == daead.AESSIVKeySize && err != nil {
+		_, err := subtle.NewAESSIV(key[:i])
+		if i == subtle.AESSIVKeySize && err != nil {
 			t.Errorf("Rejected valid key size: %v, %v", i, err)
 		}
-		if i != daead.AESSIVKeySize && err == nil {
+		if i != subtle.AESSIVKeySize && err == nil {
 			t.Errorf("Allowed invalid key size: %v", i)
 		}
 	}
@@ -161,7 +161,7 @@ func TestAESSIV_MessageSizes(t *testing.T) {
 	key, _ := hex.DecodeString(keyStr)
 	aad := []byte("Additional data")
 
-	a, err := daead.NewAESSIV(key)
+	a, err := subtle.NewAESSIV(key)
 	if err != nil {
 		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
@@ -200,7 +200,7 @@ func TestAESSIV_AdditionalDataSizes(t *testing.T) {
 	key, _ := hex.DecodeString(keyStr)
 	msg := []byte("Some data to encrypt.")
 
-	a, err := daead.NewAESSIV(key)
+	a, err := subtle.NewAESSIV(key)
 	if err != nil {
 		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
@@ -226,7 +226,7 @@ func TestAESSIV_CiphertextModifications(t *testing.T) {
 	key, _ := hex.DecodeString(keyStr)
 	aad := []byte("Additional data")
 
-	a, err := daead.NewAESSIV(key)
+	a, err := subtle.NewAESSIV(key)
 	if err != nil {
 		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 	}
@@ -261,7 +261,7 @@ func TestAESSIV_WycheproofVectors(t *testing.T) {
 	}
 
 	for _, g := range data.TestGroups {
-		if g.KeySize/8 != daead.AESSIVKeySize {
+		if g.KeySize/8 != subtle.AESSIVKeySize {
 			continue
 		}
 
@@ -283,7 +283,7 @@ func TestAESSIV_WycheproofVectors(t *testing.T) {
 				t.Errorf("#%d, cannot decode ct: %s", tc.TcID, err)
 			}
 
-			a, err := daead.NewAESSIV(key)
+			a, err := subtle.NewAESSIV(key)
 			if err != nil {
 				t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
 				continue

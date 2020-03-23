@@ -12,9 +12,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package daead provides subtle implementations of the DeterministicAEAD
+// Package subtle provides subtle implementations of the DeterministicAEAD
 // primitive.
-package daead
+package subtle
 
 import (
 	"crypto/aes"
@@ -22,8 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-
-	"github.com/google/tink/go/tink"
 )
 
 // AESSIV is an implemenatation of AES-SIV-CMAC as defined in
@@ -57,9 +55,6 @@ type AESSIV struct {
 
 // AESSIVKeySize is the key size in bytes.
 const AESSIVKeySize = 64
-
-// Assert that AESSIV implements the DeterministicAEAD interface.
-var _ tink.DeterministicAEAD = (*AESSIV)(nil)
 
 // NewAESSIV returns an AESSIV instance.
 func NewAESSIV(key []byte) (*AESSIV, error) {

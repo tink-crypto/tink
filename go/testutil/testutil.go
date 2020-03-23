@@ -30,7 +30,7 @@ import (
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
 
-	subtedaead "github.com/google/tink/go/subtle/daead"
+	subtedaead "github.com/google/tink/go/daead/subtle"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
 	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"

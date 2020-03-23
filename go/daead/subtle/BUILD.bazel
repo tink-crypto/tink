@@ -1,16 +1,13 @@
-package(default_visibility = ["//:__subpackages__"])  # keep
-
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
     name = "go_default_library",
     srcs = [
         "aes_siv.go",
     ],
-    importpath = "github.com/google/tink/go/subtle/daead",
-    deps = [
-        "//tink:go_default_library",
-    ],
+    importpath = "github.com/google/tink/go/daead/subtle",
 )
 
 go_test(
