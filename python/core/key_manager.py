@@ -28,15 +28,11 @@ from tink.python.core import tink_error
 P = TypeVar('P')
 
 
-def native_key_data(proto):
-  """Convert pybind11_protobuf KeyData proto to native Python proto."""
-  # This function is needed because native_pb.MergeFrom(pybind11_pb)
-  # is not currently supported.
-  if not getattr(proto, '_is_wrapped_c_proto', False):
-    return proto
-  native = tink_pb2.KeyData()
-  native.ParseFromString(proto.SerializeToString())
-  return native
+def deserialize_key_data(serialized_proto):
+  """Convert serialized KeyData proto to native Python proto."""
+  key_data = tink_pb2.KeyData()
+  key_data.ParseFromString(serialized_proto)
+  return key_data
 
 
 class KeyManager(Generic[P]):
@@ -126,7 +122,8 @@ class KeyManagerCcToPyWrapper(KeyManager[P]):
 
   @tink_error.use_tink_errors
   def primitive(self, key_data: tink_pb2.KeyData) -> P:
-    return self._primitive_py_wrapper(self._cc_key_manager.primitive(key_data))
+    return self._primitive_py_wrapper(
+        self._cc_key_manager.primitive(key_data.SerializeToString()))
 
   def key_type(self) -> Text:
     return self._cc_key_manager.key_type()
@@ -134,7 +131,8 @@ class KeyManagerCcToPyWrapper(KeyManager[P]):
   @tink_error.use_tink_errors
   def new_key_data(self,
                    key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
-    return native_key_data(self._cc_key_manager.new_key_data(key_template))
+    return deserialize_key_data(
+        self._cc_key_manager.new_key_data(key_template.SerializeToString()))
 
 
 class PrivateKeyManagerCcToPyWrapper(PrivateKeyManager[P]):
@@ -153,7 +151,8 @@ class PrivateKeyManagerCcToPyWrapper(PrivateKeyManager[P]):
 
   @tink_error.use_tink_errors
   def primitive(self, key_data: tink_pb2.KeyData) -> P:
-    return self._primitive_py_wrapper(self._cc_key_manager.primitive(key_data))
+    return self._primitive_py_wrapper(
+        self._cc_key_manager.primitive(key_data.SerializeToString()))
 
   def key_type(self) -> Text:
     return self._cc_key_manager.key_type()
@@ -161,8 +160,10 @@ class PrivateKeyManagerCcToPyWrapper(PrivateKeyManager[P]):
   @tink_error.use_tink_errors
   def new_key_data(self,
                    key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
-    return native_key_data(self._cc_key_manager.new_key_data(key_template))
+    return deserialize_key_data(
+        self._cc_key_manager.new_key_data(key_template.SerializeToString()))
 
   @tink_error.use_tink_errors
   def public_key_data(self, key_data: tink_pb2.KeyData) -> tink_pb2.KeyData:
-    return native_key_data(self._cc_key_manager.public_key_data(key_data))
+    return deserialize_key_data(
+        self._cc_key_manager.public_key_data(key_data.SerializeToString()))

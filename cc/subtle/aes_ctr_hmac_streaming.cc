@@ -51,20 +51,21 @@ static std::string NonceForSegment(absl::string_view nonce_prefix,
       std::string(4, '\x00'));
 }
 
-static util::Status DeriveKeys(absl::string_view ikm, HashType hkdf_algo,
+static util::Status DeriveKeys(const util::SecretData& ikm, HashType hkdf_algo,
                                absl::string_view salt,
                                absl::string_view associated_data, int key_size,
-                               std::string* key_value,
+                               util::SecretData* key_value,
                                util::SecretData* hmac_key_value) {
   int derived_key_material_size =
       key_size + AesCtrHmacStreaming::kHmacKeySizeInBytes;
   auto hkdf_result = Hkdf::ComputeHkdf(hkdf_algo, ikm, salt, associated_data,
                                        derived_key_material_size);
   if (!hkdf_result.ok()) return hkdf_result.status();
-  std::string key_material = std::move(hkdf_result.ValueOrDie());
-  *key_value = key_material.substr(0, key_size);
-  *hmac_key_value = util::SecretDataFromStringView(
-      key_material.substr(key_size, AesCtrHmacStreaming::kHmacKeySizeInBytes));
+  util::SecretData key_material = std::move(hkdf_result.ValueOrDie());
+  *key_value =
+      util::SecretData(key_material.begin(), key_material.begin() + key_size);
+  *hmac_key_value =
+      util::SecretData(key_material.begin() + key_size, key_material.end());
   return util::OkStatus();
 }
 
@@ -151,7 +152,7 @@ AesCtrHmacStreamSegmentEncrypter::New(const AesCtrHmacStreaming::Params& params,
       Random::GetRandomBytes(AesCtrHmacStreaming::kNoncePrefixSizeInBytes);
   std::string header = MakeHeader(salt, nonce_prefix);
 
-  std::string key_value;
+  util::SecretData key_value;
   util::SecretData hmac_key_value;
   status = DeriveKeys(params.ikm, params.hkdf_algo, salt, associated_data,
                       params.key_size, &key_value, &hmac_key_value);
@@ -168,8 +169,9 @@ AesCtrHmacStreamSegmentEncrypter::New(const AesCtrHmacStreaming::Params& params,
   auto mac = std::move(hmac_result.ValueOrDie());
 
   return {absl::WrapUnique(new AesCtrHmacStreamSegmentEncrypter(
-      key_value, header, nonce_prefix, params.ciphertext_segment_size,
-      params.ciphertext_offset, params.tag_size, cipher, std::move(mac)))};
+      std::move(key_value), header, nonce_prefix,
+      params.ciphertext_segment_size, params.ciphertext_offset, params.tag_size,
+      cipher, std::move(mac)))};
 }
 
 util::Status AesCtrHmacStreamSegmentEncrypter::EncryptSegment(

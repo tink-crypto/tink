@@ -222,6 +222,9 @@ func main() {
         }
 
         v, err := signature.NewVerifier(khPub)
+        if err != nil {
+                log.Fatal(err)
+        }
 
         if err := v.Verify(a, []byte("this data needs to be signed")); err != nil {
                 log.Fatal("signature verification failed")

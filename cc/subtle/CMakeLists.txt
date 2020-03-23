@@ -306,10 +306,14 @@ tink_cc_library(
     tink::subtle::random
     tink::subtle::stream_segment_decrypter
     tink::subtle::subtle_util_boringssl
-    tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
+    absl::algorithm_container
+    absl::config
+    absl::memory
+    absl::span
     absl::strings
 )
 
@@ -323,9 +327,13 @@ tink_cc_library(
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util_boringssl
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
+    absl::algorithm_container
+    absl::config
+    absl::memory
     absl::strings
 )
 
@@ -347,9 +355,11 @@ tink_cc_library(
     tink::core::input_stream
     tink::core::output_stream
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
+    absl::memory
     absl::strings
 )
 
@@ -844,6 +854,7 @@ tink_cc_test(
   NAME aes_gcm_hkdf_stream_segment_encrypter_test
   SRCS aes_gcm_hkdf_stream_segment_encrypter_test.cc
   DEPS
+    gmock
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
     tink::subtle::random
     tink::subtle::stream_segment_encrypter

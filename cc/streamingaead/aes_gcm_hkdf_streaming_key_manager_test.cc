@@ -30,6 +30,7 @@
 #include "tink/subtle/test_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -109,10 +110,14 @@ TEST(AesGcmHkdfStreamingKeyManagerTest, GetPrimitive) {
   int derived_key_size = 16;
   int ciphertext_segment_size = 1024;
   int ciphertext_offset = 0;
+  subtle::AesGcmHkdfStreaming::Params params;
+  params.ikm = util::SecretDataFromStringView("16 bytes of key ");
+  params.hkdf_hash = crypto::tink::subtle::HashType::SHA256;
+  params.derived_key_size = derived_key_size;
+  params.ciphertext_segment_size = ciphertext_segment_size;
+  params.ciphertext_offset = ciphertext_offset;
   auto streaming_aead_direct_result =
-      crypto::tink::subtle::AesGcmHkdfStreaming::New(
-          "16 bytes of key ", crypto::tink::subtle::HashType::SHA256,
-          derived_key_size, ciphertext_segment_size, ciphertext_offset);
+      subtle::AesGcmHkdfStreaming::New(std::move(params));
   EXPECT_THAT(streaming_aead_direct_result.status(), IsOk());
 
   // Check that the two primitives are the same by encrypting with one, and

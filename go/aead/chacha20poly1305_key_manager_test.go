@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/chacha20poly1305"
+	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"

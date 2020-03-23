@@ -36,7 +36,7 @@ TEST_F(ErrorsTest, ToStatusFTest) {
   const char* const msg2 = "test message %s 2 %d";
   crypto::tink::util::Status status;
 
-  status = ToStatusF(crypto::tink::util::error::OK, msg1);
+  status = util::Status(crypto::tink::util::error::OK, msg1);
   EXPECT_TRUE(status.ok());
   // if status is OK, error message is ignored
   EXPECT_EQ("", status.error_message());

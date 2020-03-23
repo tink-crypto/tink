@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from tink.python.cc.clif import status
+from tink.python.cc.pybind import status
 
 
 def use_tink_errors(func):
