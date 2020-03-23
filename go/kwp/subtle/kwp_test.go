@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package kwp_test
+package subtle_test
 
 import (
 	"bytes"
@@ -20,17 +20,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+
 	"os"
 	"testing"
 
-	"github.com/google/tink/go/subtle/kwp"
+	"github.com/google/tink/go/kwp/subtle"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 )
 
 func TestWrapUnwrap(t *testing.T) {
 	kek := random.GetRandomBytes(16)
-	cipher, err := kwp.NewKWP(kek)
+	cipher, err := subtle.NewKWP(kek)
 	if err != nil {
 		t.Fatalf("failed to make kwp, error: %v", err)
 	}
@@ -60,7 +61,7 @@ func TestKeySizes(t *testing.T) {
 	for i := 0; i < 255; i++ {
 		expectSuccess := i == 16 || i == 32
 		t.Run(fmt.Sprintf("KeySize%d", i), func(t *testing.T) {
-			_, err := kwp.NewKWP(make([]byte, i))
+			_, err := subtle.NewKWP(make([]byte, i))
 
 			if expectSuccess && err != nil {
 				t.Errorf("failed to create KWP: %v", err)
@@ -76,7 +77,7 @@ func TestKeySizes(t *testing.T) {
 
 func TestInvalidWrappingSizes(t *testing.T) {
 	kek := random.GetRandomBytes(16)
-	cipher, err := kwp.NewKWP(kek)
+	cipher, err := subtle.NewKWP(kek)
 	if err != nil {
 		t.Fatalf("failed to make kwp, error: %v", err)
 	}
@@ -149,7 +150,7 @@ func runWycheproofCase(t *testing.T, testCase *KwpCase) {
 		t.Fatalf("hex.DecodeString(testCase.Ciphertext) => %v", err)
 	}
 
-	cipher, err := kwp.NewKWP(kek)
+	cipher, err := subtle.NewKWP(kek)
 	if err != nil {
 		switch testCase.Result {
 		case "valid":

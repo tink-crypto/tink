@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package kwp implements the key wrapping primitive KWP defined in
+// Package subtle implements the key wrapping primitive KWP defined in
 // NIST SP 800 38f.
 //
 // The same encryption mode is also defined in RFC 5649. The NIST document is
@@ -33,7 +33,7 @@
 // The upper bound for the key size is somewhat arbitrary. Setting an upper
 // bound is motivated by the analysis in section A.4 of NIST SP 800 38f:
 // forgery of long messages is simpler than forgery of short messages.
-package kwp
+package subtle
 
 import (
 	"crypto/aes"
