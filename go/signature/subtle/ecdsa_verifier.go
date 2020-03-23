@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package signature
+package subtle
 
 import (
 	"crypto/ecdsa"
@@ -22,7 +22,6 @@ import (
 	"math/big"
 
 	"github.com/google/tink/go/subtle"
-	"github.com/google/tink/go/tink"
 )
 
 var errInvalidECDSASignature = errors.New("ecdsa_verifier: invalid signature")
@@ -34,9 +33,6 @@ type ECDSAVerifier struct {
 	hashFunc  func() hash.Hash
 	encoding  string
 }
-
-// Assert that ECDSAVerifier implements the Verifier interface.
-var _ tink.Verifier = (*ECDSAVerifier)(nil)
 
 // NewECDSAVerifier creates a new instance of ECDSAVerifier.
 func NewECDSAVerifier(hashAlg string, curve string, encoding string, x []byte, y []byte) (*ECDSAVerifier, error) {

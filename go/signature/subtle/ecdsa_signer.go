@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package signature
+package subtle
 
 import (
 	"crypto/ecdsa"
@@ -23,7 +23,6 @@ import (
 	"math/big"
 
 	"github.com/google/tink/go/subtle"
-	"github.com/google/tink/go/tink"
 )
 
 // ECDSASigner is an implementation of Signer for ECDSA.
@@ -33,9 +32,6 @@ type ECDSASigner struct {
 	hashFunc   func() hash.Hash
 	encoding   string
 }
-
-// Assert that ecdsaSign implements the Signer interface.
-var _ tink.Signer = (*ECDSASigner)(nil)
 
 // NewECDSASigner creates a new instance of ECDSASigner.
 func NewECDSASigner(hashAlg string,

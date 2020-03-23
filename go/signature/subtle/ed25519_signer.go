@@ -12,21 +12,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package signature
+package subtle
 
 import (
 	"golang.org/x/crypto/ed25519"
-
-	"github.com/google/tink/go/tink"
 )
 
 // ED25519Signer is an implementation of Signer for ED25519.
 type ED25519Signer struct {
 	privateKey *ed25519.PrivateKey
 }
-
-// Assert that ed25519Sign implements the Signer interface.
-var _ tink.Signer = (*ED25519Signer)(nil)
 
 // NewED25519Signer creates a new instance of ED25519Signer.
 func NewED25519Signer(keyValue []byte) (*ED25519Signer, error) {

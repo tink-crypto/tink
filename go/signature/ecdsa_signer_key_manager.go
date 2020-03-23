@@ -21,9 +21,8 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
+	subtleSignature "github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
@@ -42,9 +41,6 @@ var errInvalidECDSASignKeyFormat = errors.New("ecdsa_signer_key_manager: invalid
 // ecdsaSignerKeyManager is an implementation of KeyManager interface.
 // It generates new ECDSAPrivateKeys and produces new instances of ECDSASign subtle.
 type ecdsaSignerKeyManager struct{}
-
-// Assert that ecdsaSignerKeyManager implements the PrivateKeyManager interface.
-var _ registry.PrivateKeyManager = (*ecdsaSignerKeyManager)(nil)
 
 // newECDSASignerKeyManager creates a new ecdsaSignerKeyManager.
 func newECDSASignerKeyManager() *ecdsaSignerKeyManager {

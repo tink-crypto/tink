@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package signature_test
+package subtle_test
 
 import (
 	"encoding/asn1"
@@ -21,8 +21,8 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle/random"
-	. "github.com/google/tink/go/subtle/signature"
 )
 
 type paramsTest struct {
@@ -54,7 +54,7 @@ func TestECDSAEncodeDecodeDER(t *testing.T) {
 		if len(encoded) != int(encoded[1])+2 {
 			t.Errorf("incorrect length, expected %d, got %d", len(encoded), encoded[1]+2)
 		}
-		decodedSig, err := DecodeECDSASignature(encoded, encoding)
+		decodedSig, err := subtle.DecodeECDSASignature(encoded, encoding)
 		if err != nil {
 			t.Errorf("unexpected error during decoding: %s", err)
 		}
@@ -92,7 +92,7 @@ func TestECDSAEncodeDecodeIEEEP1363(t *testing.T) {
 				}
 			}
 		}
-		decodedSig, err := DecodeECDSASignature(encoded, encoding)
+		decodedSig, err := subtle.DecodeECDSASignature(encoded, encoding)
 		if err != nil {
 			t.Errorf("unexpected error during decoding: %s", err)
 		}
@@ -111,7 +111,7 @@ func TestECDSAEncodeWithInvalidInput(t *testing.T) {
 }
 
 func TestECDSADecodeWithInvalidInput(t *testing.T) {
-	var sig *ECDSASignature
+	var sig *subtle.ECDSASignature
 	var encoded []byte
 	encoding := "DER"
 
@@ -119,21 +119,21 @@ func TestECDSADecodeWithInvalidInput(t *testing.T) {
 	sig = newECDSARandomSignature()
 	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
 	encoded[0] = 0x31
-	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when first byte is not 0x30")
 	}
 	// modified tag
 	sig = newECDSARandomSignature()
 	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
 	encoded[2] = encoded[2] + 1
-	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when tag is modified")
 	}
 	// modified length
 	sig = newECDSARandomSignature()
 	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
 	encoded[1] = encoded[1] + 1
-	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when length is modified")
 	}
 	// append unused 0s
@@ -141,7 +141,7 @@ func TestECDSADecodeWithInvalidInput(t *testing.T) {
 	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
 	tmp := make([]byte, len(encoded)+4)
 	copy(tmp, encoded)
-	if _, err := DecodeECDSASignature(tmp, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(tmp, encoding); err == nil {
 		t.Errorf("expect an error when unused 0s are appended to signature")
 	}
 	// a struct with three numbers
@@ -151,7 +151,7 @@ func TestECDSADecodeWithInvalidInput(t *testing.T) {
 		Z: new(big.Int).SetBytes(random.GetRandomBytes(32)),
 	}
 	encoded, _ = asn1.Marshal(randomStruct)
-	if _, err := DecodeECDSASignature(encoded, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when input is not an ECDSASignature")
 	}
 }
@@ -159,13 +159,13 @@ func TestECDSADecodeWithInvalidInput(t *testing.T) {
 func TestECDSAValidateParams(t *testing.T) {
 	params := genECDSAValidParams()
 	for i := 0; i < len(params); i++ {
-		if err := ValidateECDSAParams(params[i].hash, params[i].curve, params[i].encoding); err != nil {
+		if err := subtle.ValidateECDSAParams(params[i].hash, params[i].curve, params[i].encoding); err != nil {
 			t.Errorf("unexpected error for valid params: %s, i = %d", err, i)
 		}
 	}
 	params = genECDSAInvalidParams()
 	for i := 0; i < len(params); i++ {
-		if err := ValidateECDSAParams(params[i].hash, params[i].curve, params[i].encoding); err == nil {
+		if err := subtle.ValidateECDSAParams(params[i].hash, params[i].curve, params[i].encoding); err == nil {
 			t.Errorf("expect an error when params are invalid, i = %d", i)
 		}
 	}
@@ -203,8 +203,8 @@ func genECDSAValidParams() []paramsTest {
 	}
 }
 
-func newECDSARandomSignature() *ECDSASignature {
+func newECDSARandomSignature() *subtle.ECDSASignature {
 	r := new(big.Int).SetBytes(random.GetRandomBytes(32))
 	s := new(big.Int).SetBytes(random.GetRandomBytes(32))
-	return NewECDSASignature(r, s)
+	return subtle.NewECDSASignature(r, s)
 }

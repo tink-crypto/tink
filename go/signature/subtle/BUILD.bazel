@@ -1,6 +1,6 @@
-package(default_visibility = ["//:__subpackages__"])  # keep
-
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
     name = "go_default_library",
@@ -12,10 +12,9 @@ go_library(
         "ed25519_verifier.go",
         "encoding.go",
     ],
-    importpath = "github.com/google/tink/go/subtle/signature",
+    importpath = "github.com/google/tink/go/signature/subtle",
     deps = [
         "//subtle:go_default_library",
-        "//tink:go_default_library",
         "@org_golang_x_crypto//ed25519:go_default_library",
     ],
 )

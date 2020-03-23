@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package signature_test
+package subtle_test
 
 import (
 	"crypto/ecdsa"
@@ -23,9 +23,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/tink/go/subtle"
+	subtleSignature "github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle/random"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/subtle"
 )
 
 func TestSignVerify(t *testing.T) {

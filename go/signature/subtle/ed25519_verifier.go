@@ -12,15 +12,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package signature
+package subtle
 
 import (
 	"errors"
 	"fmt"
 
 	"golang.org/x/crypto/ed25519"
-
-	"github.com/google/tink/go/tink"
 )
 
 var errInvalidED25519Signature = errors.New("ed25519: invalid signature")
@@ -30,9 +28,6 @@ var errInvalidED25519Signature = errors.New("ed25519: invalid signature")
 type ED25519Verifier struct {
 	publicKey *ed25519.PublicKey
 }
-
-// Assert that ED25519Verifier implements the Verifier interface.
-var _ tink.Verifier = (*ED25519Verifier)(nil)
 
 // NewED25519Verifier creates a new instance of ED25519Verifier.
 func NewED25519Verifier(pub []byte) (*ED25519Verifier, error) {

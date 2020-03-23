@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package signature_test
+package subtle_test
 
 import (
 	"bytes"
@@ -24,8 +24,8 @@ import (
 
 	"golang.org/x/crypto/ed25519"
 
+	subtleSignature "github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle/random"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
 )
 
 func TestED25519Deterministic(t *testing.T) {

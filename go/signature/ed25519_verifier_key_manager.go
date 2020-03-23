@@ -19,9 +19,8 @@ import (
 
 	"golang.org/x/crypto/ed25519"
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/signature/subtle"
 	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -38,9 +37,6 @@ var errED25519VerifierNotImplemented = fmt.Errorf("ed25519_verifier_key_manager:
 // ed25519VerifierKeyManager is an implementation of KeyManager interface.
 // It doesn't support key generation.
 type ed25519VerifierKeyManager struct{}
-
-// Assert that ed25519VerifierKeyManager implements the KeyManager interface.
-var _ registry.KeyManager = (*ed25519VerifierKeyManager)(nil)
 
 // newED25519VerifierKeyManager creates a new ed25519VerifierKeyManager.
 func newED25519VerifierKeyManager() *ed25519VerifierKeyManager {
@@ -59,7 +55,7 @@ func (km *ed25519VerifierKeyManager) Primitive(serializedKey []byte) (interface{
 	if err := km.validateKey(key); err != nil {
 		return nil, fmt.Errorf("ed25519_verifier_key_manager: %s", err)
 	}
-	ret, err := subtleSignature.NewED25519Verifier(key.KeyValue)
+	ret, err := subtle.NewED25519Verifier(key.KeyValue)
 	if err != nil {
 		return nil, fmt.Errorf("ed25519_verifier_key_manager: invalid key: %s", err)
 	}
