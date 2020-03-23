@@ -20,7 +20,9 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/core/cryptofmt"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
@@ -147,4 +149,28 @@ func verifyMacPrimitive(computePrimitive tink.MAC, verifyPrimitive tink.MAC,
 		}
 	}
 	return nil
+}
+
+func TestFactoryWithInvalidPrimitiveSetType(t *testing.T) {
+	wrongKH, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("failed to build *keyset.Handle: %s", err)
+	}
+
+	_, err = mac.New(wrongKH)
+	if err == nil {
+		t.Fatal("calling New() with wrong *keyset.Handle should fail")
+	}
+}
+
+func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
+	goodKH, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
+	if err != nil {
+		t.Fatalf("failed to build *keyset.Handle: %s", err)
+	}
+
+	_, err = mac.New(goodKH)
+	if err != nil {
+		t.Fatalf("calling New() with good *keyset.Handle failed: %s", err)
+	}
 }

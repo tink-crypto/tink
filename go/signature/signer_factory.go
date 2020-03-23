@@ -36,7 +36,8 @@ func NewSignerWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Sig
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}
-	return newWrappedSigner(ps), nil
+
+	return newWrappedSigner(ps)
 }
 
 // wrappedSigner is an Signer implementation that uses the underlying primitive set for signing.
@@ -47,17 +48,34 @@ type wrappedSigner struct {
 // Asserts that wrappedSigner implements the Signer interface.
 var _ tink.Signer = (*wrappedSigner)(nil)
 
-func newWrappedSigner(ps *primitiveset.PrimitiveSet) *wrappedSigner {
+func newWrappedSigner(ps *primitiveset.PrimitiveSet) (*wrappedSigner, error) {
+	if _, ok := (ps.Primary.Primitive).(tink.Signer); !ok {
+		return nil, fmt.Errorf("public_key_sign_factory: not a Signer primitive")
+	}
+
+	for _, primitives := range ps.Entries {
+		for _, p := range primitives {
+			if _, ok := (p.Primitive).(tink.Signer); !ok {
+				return nil, fmt.Errorf("public_key_sign_factory: not an Signer primitive")
+			}
+		}
+	}
+
 	ret := new(wrappedSigner)
 	ret.ps = ps
-	return ret
+
+	return ret, nil
 }
 
 // Sign signs the given data and returns the signature concatenated with the identifier of the
 // primary primitive.
 func (s *wrappedSigner) Sign(data []byte) ([]byte, error) {
 	primary := s.ps.Primary
-	var signer = (primary.Primitive).(tink.Signer)
+	signer, ok := (primary.Primitive).(tink.Signer)
+	if !ok {
+		return nil, fmt.Errorf("public_key_sign_factory: not a Signer primitive")
+	}
+
 	var signedData []byte
 	if primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		signedData = append(signedData, data...)
@@ -65,10 +83,12 @@ func (s *wrappedSigner) Sign(data []byte) ([]byte, error) {
 	} else {
 		signedData = data
 	}
+
 	signature, err := signer.Sign(signedData)
 	if err != nil {
 		return nil, err
 	}
+
 	ret := make([]byte, 0, len(primary.Prefix)+len(signature))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, signature...)

@@ -20,8 +20,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/core/cryptofmt"
+	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
@@ -132,4 +134,28 @@ func validateDAEADFactoryCipher(encryptCipher, decryptCipher tink.DeterministicA
 		return fmt.Errorf("incorrect prefix with short plaintext")
 	}
 	return nil
+}
+
+func TestFactoryWithInvalidPrimitiveSetType(t *testing.T) {
+	wrongKH, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("failed to build *keyset.Handle: %s", err)
+	}
+
+	_, err = daead.New(wrongKH)
+	if err == nil {
+		t.Fatal("calling New() with wrong *keyset.Handle should fail")
+	}
+}
+
+func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
+	goodKH, err := keyset.NewHandle(daead.AESSIVKeyTemplate())
+	if err != nil {
+		t.Fatalf("failed to build *keyset.Handle: %s", err)
+	}
+
+	_, err = daead.New(goodKH)
+	if err != nil {
+		t.Fatalf("calling New() with good *keyset.Handle failed: %s", err)
+	}
 }

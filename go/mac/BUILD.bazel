@@ -20,6 +20,7 @@ go_library(
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
         "//mac/subtle:go_default_library",
+        "//signature:go_default_library",
         "//proto:common_go_proto",
         "//proto:hmac_go_proto",
         "//proto:tink_go_proto",

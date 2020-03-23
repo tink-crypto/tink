@@ -35,7 +35,8 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.MAC, erro
 	if err != nil {
 		return nil, fmt.Errorf("mac_factory: cannot obtain primitive set: %s", err)
 	}
-	return newWrappedMAC(ps), nil
+
+	return newWrappedMAC(ps)
 }
 
 // wrappedMAC is a MAC implementation that uses the underlying primitive set to compute and
@@ -44,17 +45,34 @@ type wrappedMAC struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-func newWrappedMAC(ps *primitiveset.PrimitiveSet) *wrappedMAC {
+func newWrappedMAC(ps *primitiveset.PrimitiveSet) (*wrappedMAC, error) {
+	if _, ok := (ps.Primary.Primitive).(tink.MAC); !ok {
+		return nil, fmt.Errorf("mac_factory: not a MAC primitive")
+	}
+
+	for _, primitives := range ps.Entries {
+		for _, p := range primitives {
+			if _, ok := (p.Primitive).(tink.MAC); !ok {
+				return nil, fmt.Errorf("mac_factory: not an MAC primitive")
+			}
+		}
+	}
+
 	ret := new(wrappedMAC)
 	ret.ps = ps
-	return ret
+
+	return ret, nil
 }
 
 // ComputeMAC calculates a MAC over the given data using the primary primitive
 // and returns the concatenation of the primary's identifier and the calculated mac.
 func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 	primary := m.ps.Primary
-	var primitive = (primary.Primitive).(tink.MAC)
+	primitive, ok := (primary.Primitive).(tink.MAC)
+	if !ok {
+		return nil, fmt.Errorf("mac_factory: not a MAC primitive")
+	}
+
 	mac, err := primitive.ComputeMAC(data)
 	if err != nil {
 		return nil, err
@@ -76,28 +94,39 @@ func (m *wrappedMAC) VerifyMAC(mac, data []byte) error {
 	if len(mac) <= prefixSize {
 		return errInvalidMAC
 	}
+
 	// try non raw keys
 	prefix := mac[:prefixSize]
 	macNoPrefix := mac[prefixSize:]
 	entries, err := m.ps.EntriesForPrefix(string(prefix))
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p = (entries[i].Primitive).(tink.MAC)
+			p, ok := (entries[i].Primitive).(tink.MAC)
+			if !ok {
+				return fmt.Errorf("mac_factory: not an MAC primitive")
+			}
+
 			if err = p.VerifyMAC(macNoPrefix, data); err == nil {
 				return nil
 			}
 		}
 	}
+
 	// try raw keys
 	entries, err = m.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p = (entries[i].Primitive).(tink.MAC)
+			p, ok := (entries[i].Primitive).(tink.MAC)
+			if !ok {
+				return fmt.Errorf("mac_factory: not an MAC primitive")
+			}
+
 			if err = p.VerifyMAC(mac, data); err == nil {
 				return nil
 			}
 		}
 	}
+
 	// nothing worked
 	return errInvalidMAC
 }

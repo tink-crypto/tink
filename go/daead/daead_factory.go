@@ -35,6 +35,19 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Determini
 	if err != nil {
 		return nil, fmt.Errorf("daead_factory: cannot obtain primitive set: %s", err)
 	}
+
+	if _, ok := (ps.Primary.Primitive).(tink.DeterministicAEAD); !ok {
+		return nil, fmt.Errorf("daead_factory: not a DeterministicAEAD primitive")
+	}
+
+	for _, primitives := range ps.Entries {
+		for _, p := range primitives {
+			if _, ok := (p.Primitive).(tink.DeterministicAEAD); !ok {
+				return nil, fmt.Errorf("daead_factory: not a DeterministicAEAD primitive")
+			}
+		}
+	}
+
 	ret := new(wrappedDeterministicAEAD)
 	ret.ps = ps
 	return tink.DeterministicAEAD(ret), nil
@@ -53,7 +66,11 @@ var _ tink.DeterministicAEAD = (*wrappedDeterministicAEAD)(nil)
 // It returns the concatenation of the primary's identifier and the ciphertext.
 func (d *wrappedDeterministicAEAD) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
 	primary := d.ps.Primary
-	p := (primary.Primitive).(tink.DeterministicAEAD)
+	p, ok := (primary.Primitive).(tink.DeterministicAEAD)
+	if !ok {
+		return nil, fmt.Errorf("daead_factory: not a DeterministicAEAD primitive")
+	}
+
 	ct, err := p.EncryptDeterministically(pt, aad)
 	if err != nil {
 		return nil, err
@@ -77,7 +94,11 @@ func (d *wrappedDeterministicAEAD) DecryptDeterministically(ct, aad []byte) ([]b
 		entries, err := d.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
-				p := (entries[i].Primitive).(tink.DeterministicAEAD)
+				p, ok := (entries[i].Primitive).(tink.DeterministicAEAD)
+				if !ok {
+					return nil, fmt.Errorf("daead_factory: not a DeterministicAEAD primitive")
+				}
+
 				pt, err := p.DecryptDeterministically(ctNoPrefix, aad)
 				if err == nil {
 					return pt, nil
@@ -85,17 +106,23 @@ func (d *wrappedDeterministicAEAD) DecryptDeterministically(ct, aad []byte) ([]b
 			}
 		}
 	}
+
 	// try raw keys
 	entries, err := d.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			p := (entries[i].Primitive).(tink.DeterministicAEAD)
+			p, ok := (entries[i].Primitive).(tink.DeterministicAEAD)
+			if !ok {
+				return nil, fmt.Errorf("daead_factory: not a DeterministicAEAD primitive")
+			}
+
 			pt, err := p.DecryptDeterministically(ct, aad)
 			if err == nil {
 				return pt, nil
 			}
 		}
 	}
+
 	// nothing worked
 	return nil, fmt.Errorf("daead_factory: decryption failed")
 }

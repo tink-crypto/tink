@@ -35,7 +35,8 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.AEAD, err
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}
-	return newWrappedAead(ps), nil
+
+	return newWrappedAead(ps)
 }
 
 // wrappedAead is an AEAD implementation that uses the underlying primitive set for encryption
@@ -47,17 +48,34 @@ type wrappedAead struct {
 // Asserts that wrappedAead implements the AEAD interface.
 var _ tink.AEAD = (*wrappedAead)(nil)
 
-func newWrappedAead(ps *primitiveset.PrimitiveSet) *wrappedAead {
+func newWrappedAead(ps *primitiveset.PrimitiveSet) (*wrappedAead, error) {
+	if _, ok := (ps.Primary.Primitive).(tink.AEAD); !ok {
+		return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
+	}
+
+	for _, primitives := range ps.Entries {
+		for _, p := range primitives {
+			if _, ok := (p.Primitive).(tink.AEAD); !ok {
+				return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
+			}
+		}
+	}
+
 	ret := new(wrappedAead)
 	ret.ps = ps
-	return ret
+
+	return ret, nil
 }
 
 // Encrypt encrypts the given plaintext with the given additional authenticated data.
 // It returns the concatenation of the primary's identifier and the ciphertext.
 func (a *wrappedAead) Encrypt(pt, ad []byte) ([]byte, error) {
 	primary := a.ps.Primary
-	var p = (primary.Primitive).(tink.AEAD)
+	p, ok := (primary.Primitive).(tink.AEAD)
+	if !ok {
+		return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
+	}
+
 	ct, err := p.Encrypt(pt, ad)
 	if err != nil {
 		return nil, err
@@ -65,6 +83,7 @@ func (a *wrappedAead) Encrypt(pt, ad []byte) ([]byte, error) {
 	ret := make([]byte, 0, len(primary.Prefix)+len(ct))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, ct...)
+
 	return ret, nil
 }
 
@@ -80,7 +99,11 @@ func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
-				var p = (entries[i].Primitive).(tink.AEAD)
+				p, ok := (entries[i].Primitive).(tink.AEAD)
+				if !ok {
+					return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
+				}
+
 				pt, err := p.Decrypt(ctNoPrefix, ad)
 				if err == nil {
 					return pt, nil
@@ -92,7 +115,11 @@ func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 	entries, err := a.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p = (entries[i].Primitive).(tink.AEAD)
+			p, ok := (entries[i].Primitive).(tink.AEAD)
+			if !ok {
+				return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
+			}
+
 			pt, err := p.Decrypt(ct, ad)
 			if err == nil {
 				return pt, nil

@@ -47,6 +47,7 @@ go_test(
         "//proto:common_go_proto",
         "//proto:tink_go_proto",
         "//streamingaead/subtle:go_default_library",
+        "//mac:go_default_library",
         "//subtle/random:go_default_library",
         "//testkeyset:go_default_library",
         "//testutil:go_default_library",

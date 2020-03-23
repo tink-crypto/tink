@@ -36,7 +36,8 @@ func NewHybridDecryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (t
 	if err != nil {
 		return nil, fmt.Errorf("hybrid_factory: cannot obtain primitive set: %s", err)
 	}
-	return newWrappedHybridDecrypt(ps), nil
+
+	return newWrappedHybridDecrypt(ps)
 }
 
 // wrappedHybridDecrypt is an HybridDecrypt implementation that uses the underlying primitive set
@@ -48,10 +49,23 @@ type wrappedHybridDecrypt struct {
 // Asserts that primitiveSet implements the HybridDecrypt interface.
 var _ tink.HybridDecrypt = (*wrappedHybridDecrypt)(nil)
 
-func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) *wrappedHybridDecrypt {
+func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) (*wrappedHybridDecrypt, error) {
+	if _, ok := (ps.Primary.Primitive).(tink.HybridDecrypt); !ok {
+		return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
+	}
+
+	for _, primitives := range ps.Entries {
+		for _, p := range primitives {
+			if _, ok := (p.Primitive).(tink.HybridDecrypt); !ok {
+				return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
+			}
+		}
+	}
+
 	ret := new(wrappedHybridDecrypt)
 	ret.ps = ps
-	return ret
+
+	return ret, nil
 }
 
 // Decrypt decrypts the given ciphertext and authenticates it with the given
@@ -66,7 +80,11 @@ func (a *wrappedHybridDecrypt) Decrypt(ct, ad []byte) ([]byte, error) {
 		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
-				var p = (entries[i].Primitive).(tink.HybridDecrypt)
+				p, ok := (entries[i].Primitive).(tink.HybridDecrypt)
+				if !ok {
+					return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
+				}
+
 				pt, err := p.Decrypt(ctNoPrefix, ad)
 				if err == nil {
 					return pt, nil
@@ -74,17 +92,23 @@ func (a *wrappedHybridDecrypt) Decrypt(ct, ad []byte) ([]byte, error) {
 			}
 		}
 	}
+
 	// try raw keys
 	entries, err := a.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p = (entries[i].Primitive).(tink.HybridDecrypt)
+			p, ok := (entries[i].Primitive).(tink.HybridDecrypt)
+			if !ok {
+				return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
+			}
+
 			pt, err := p.Decrypt(ct, ad)
 			if err == nil {
 				return pt, nil
 			}
 		}
 	}
+
 	// nothing worked
 	return nil, fmt.Errorf("hybrid_factory: decryption failed")
 }
