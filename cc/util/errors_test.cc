@@ -14,8 +14,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <stdarg.h>
-
 #include "gtest/gtest.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -25,13 +23,7 @@ namespace crypto {
 namespace tink {
 namespace {
 
-class ErrorsTest : public ::testing::Test {
- protected:
-  void SetUp() override {}
-  void TearDown() override {}
-};
-
-TEST_F(ErrorsTest, ToStatusFTest) {
+TEST(ErrorsTest, ToStatusFTest) {
   const char* const msg1 = "test message 1";
   const char* const msg2 = "test message %s 2 %d";
   crypto::tink::util::Status status;

@@ -52,7 +52,7 @@ StatusOr<std::string> ReadFile(absl::string_view filename) {
   input_stream.open(std::string(filename), std::ifstream::in);
   if (!input_stream.is_open()) {
     return ToStatusF(util::error::INVALID_ARGUMENT, "Error reading file %s",
-                     std::string(filename).c_str());
+                     filename);
   }
   std::stringstream input;
   input << input_stream.rdbuf();
@@ -83,8 +83,7 @@ StatusOr<std::shared_ptr<ChannelCredentials>> GetCredentials(
     return grpc::CompositeChannelCredentials(channel_creds, creds);
   }
   return ToStatusF(util::error::INVALID_ARGUMENT,
-                   "Could not load credentials from file %s",
-                   std::string(credentials_path).c_str());
+                   "Could not load credentials from file %s", credentials_path);
 }
 
 // Returns GCP KMS key name contained in 'key_uri'.
@@ -107,7 +106,7 @@ GcpKmsClient::New(absl::string_view key_uri,
     client->key_name_ = GetKeyName(key_uri);
     if (client->key_name_.empty()) {
       return ToStatusF(util::error::INVALID_ARGUMENT, "Key '%s' not supported",
-                       std::string(key_uri).c_str());
+                       key_uri);
     }
   }
   // Read credentials.
@@ -135,11 +134,10 @@ GcpKmsClient::GetAead(absl::string_view key_uri) const {
     if (!key_name_.empty()) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "This client is bound to '%s', and cannot use key '%s'.",
-                       key_name_.c_str(), std::string(key_uri).c_str());
+                       key_name_, key_uri);
     } else {
       return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "This client does not support key '%s'.",
-                       std::string(key_uri).c_str());
+                       "This client does not support key '%s'.", key_uri);
     }
   }
   if (!key_name_.empty()) {  // This client is bound to a specific key.

@@ -77,9 +77,8 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
   auto status_or_ec_point =
       SubtleUtilBoringSSL::EcPointDecode(curve_, point_format, kem_bytes);
   if (!status_or_ec_point.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid KEM bytes: %s",
-                     status_or_ec_point.status().error_message().c_str());
+    return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid KEM bytes: %s",
+                     status_or_ec_point.status().error_message());
   }
   bssl::UniquePtr<EC_POINT> pub_key =
       std::move(status_or_ec_point.ValueOrDie());

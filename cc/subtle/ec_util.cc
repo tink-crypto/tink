@@ -51,7 +51,7 @@ crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
   if (coordinate_size == 0) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Unsupported elliptic curve type: %s",
-                     EnumToString(curve_type).c_str());
+                     EnumToString(curve_type));
   }
   switch (point_format) {
   case EcPointFormat::UNCOMPRESSED:
@@ -63,7 +63,7 @@ crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
   default:
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Unsupported elliptic curve point format: %s",
-                     EnumToString(point_format).c_str());
+                     EnumToString(point_format));
   }
 }
 

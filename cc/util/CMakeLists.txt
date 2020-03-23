@@ -23,10 +23,10 @@ tink_cc_library(
 tink_cc_library(
   NAME errors
   SRCS
-    errors.cc
     errors.h
   DEPS
     tink::util::status
+    absl::str_format
 )
 
 tink_cc_library(

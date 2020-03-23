@@ -76,13 +76,13 @@ EciesAeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
     helper->dem_key_size_in_bytes_ = 32;
   } else {
     return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Unsupported DEM key type '%s'.", dem_type_url.c_str());
+                     "Unsupported DEM key type '%s'.", dem_type_url);
   }
   auto key_manager_result = Registry::get_key_manager<Aead>(dem_type_url);
   if (!key_manager_result.ok()) {
     return ToStatusF(util::error::FAILED_PRECONDITION,
                      "No manager for DEM key type '%s' found in the registry.",
-                     dem_type_url.c_str());
+                     dem_type_url);
   }
   helper->dem_key_manager_ = key_manager_result.ValueOrDie();
   return std::unique_ptr<const EciesAeadHkdfDemHelper>(helper.release());

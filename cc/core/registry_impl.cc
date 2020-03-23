@@ -32,8 +32,7 @@ StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
     return ToStatusF(util::error::NOT_FOUND,
-                     "No manager for type '%s' has been registered.",
-                     type_url.c_str());
+                     "No manager for type '%s' has been registered.", type_url);
   }
   return &it->second;
 }
@@ -62,7 +61,8 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
   if (factory == nullptr) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "KeyManager for type '%s' does not have "
-                     "a PrivateKeyFactory.", type_url.c_str());
+                     "a PrivateKeyFactory.",
+                     type_url);
   }
   auto result = factory->GetPublicKeyData(serialized_private_key);
   return result;
@@ -79,13 +79,13 @@ crypto::tink::util::Status RegistryImpl::CheckInsertable(
   if (it->second.key_manager_type_index() != key_manager_type_index) {
     return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                      "A manager for type '%s' has been already registered.",
-                     type_url.c_str());
+                     type_url);
   }
   if (!it->second.new_key_allowed() && new_key_allowed) {
     return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                      "A manager for type '%s' has been already registered "
                      "with forbidden new key operation.",
-                     type_url.c_str());
+                     type_url);
   }
   return crypto::tink::util::Status::OK;
 }

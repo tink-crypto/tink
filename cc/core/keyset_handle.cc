@@ -84,7 +84,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
   if (!enc_keyset_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Error reading encrypted keyset data: %s",
-                     enc_keyset_result.status().error_message().c_str());
+                     enc_keyset_result.status().error_message());
   }
 
   auto keyset_result =
@@ -92,7 +92,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
   if (!keyset_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Error decrypting encrypted keyset: %s",
-                     keyset_result.status().error_message().c_str());
+                     keyset_result.status().error_message());
   }
 
   std::unique_ptr<KeysetHandle> handle(
@@ -123,7 +123,7 @@ util::Status KeysetHandle::Write(KeysetWriter* writer,
   if (!encrypt_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Encryption of the keyset failed: %s",
-                     encrypt_result.status().error_message().c_str());
+                     encrypt_result.status().error_message());
   }
   return writer->Write(*(encrypt_result.ValueOrDie().get()));
 }

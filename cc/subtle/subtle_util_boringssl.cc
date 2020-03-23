@@ -495,7 +495,7 @@ util::Status SubtleUtilBoringSSL::ValidateRsaModulusSize(size_t modulus_size) {
   if (modulus_size < 2048) {
     return ToStatusF(
         util::error::INVALID_ARGUMENT,
-        "Modulus size is %zu; only modulus size >= 2048-bit is supported",
+        "Modulus size is %u; only modulus size >= 2048-bit is supported",
         modulus_size);
   }
   return util::Status::OK;
