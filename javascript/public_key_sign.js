@@ -23,7 +23,7 @@ goog.module('tink.PublicKeySign');
  * against adaptive chosen-message attacks. Signing data ensures the
  * authenticity and the integrity of that data, but not its secrecy.
  *
- * @record
+ * @abstract
  */
 class PublicKeySign {
   /**
@@ -31,6 +31,7 @@ class PublicKeySign {
    *
    * @param {!Uint8Array} message the message to be signed, must be non-null.
    * @return {!Promise.<!Uint8Array>} resulting digital signature
+   * @abstract
    */
   sign(message) {}
 }

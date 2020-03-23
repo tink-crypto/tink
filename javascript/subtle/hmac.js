@@ -29,17 +29,18 @@ const MIN_TAG_SIZE_IN_BYTES = 10;
 /**
  * Implementation of HMAC.
  *
- * @implements {Mac}
  * @public
  * @final
  */
-class Hmac {
+class Hmac extends Mac {
   /**
    * @param {string} hash accepted names are SHA-1, SHA-256 and SHA-512
    * @param {!webCrypto.CryptoKey} key
    * @param {number} tagSize the size of the tag
    */
   constructor(hash, key, tagSize) {
+    super();
+
     /** @const @private {string} */
     this.hash_ = hash;
 

@@ -141,10 +141,9 @@ const createDummyPrimitiveSet = function(opt_withPrimary = true) {
 };
 
 /**
- * @implements {HybridEncrypt}
  * @final
  */
-class DummyHybridEncrypt {
+class DummyHybridEncrypt extends HybridEncrypt {
   /** @override */
   async encrypt(plaintext, opt_contextInfo) {
     return plaintext;

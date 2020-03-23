@@ -22,14 +22,14 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
- * @implements {HybridDecrypt}
  * @final
  */
-class WrappedHybridDecrypt {
+class WrappedHybridDecrypt extends HybridDecrypt {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   /** @param {!PrimitiveSet.PrimitiveSet} hybridDecryptPrimitiveSet */
   constructor(hybridDecryptPrimitiveSet) {
+    super();
     /** @private @const {!PrimitiveSet.PrimitiveSet} */
     this.primitiveSet_ = hybridDecryptPrimitiveSet;
   }

@@ -277,12 +277,12 @@ const createDummyPrimitiveSets = function(opt_withPrimary = true) {
 };
 
 /**
- * @implements {HybridEncrypt}
  * @final
  */
-class DummyHybridEncrypt {
+class DummyHybridEncrypt extends HybridEncrypt {
   /** @param {!Uint8Array} ciphertextSuffix */
   constructor(ciphertextSuffix) {
+    super();
     this.ciphertextSuffix_ = ciphertextSuffix;
   }
   /** @override */
@@ -296,12 +296,12 @@ class DummyHybridEncrypt {
 }
 
 /**
- * @implements {HybridDecrypt}
  * @final
  */
-class DummyHybridDecrypt {
+class DummyHybridDecrypt extends HybridDecrypt {
   /** @param {!Uint8Array} ciphertextSuffix */
   constructor(ciphertextSuffix) {
+    super();
     this.ciphertextSuffix_ = ciphertextSuffix;
   }
 

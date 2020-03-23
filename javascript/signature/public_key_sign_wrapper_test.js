@@ -142,10 +142,9 @@ const createDummyPrimitiveSet = function(opt_withPrimary = true) {
 };
 
 /**
- * @implements {PublicKeySign}
  * @final
  */
-class DummyPublicKeySign {
+class DummyPublicKeySign extends PublicKeySign {
   /** @override */
   async sign(data) {
     return data;

@@ -197,12 +197,12 @@ const createDummyPrimitiveSets = function(opt_withPrimary = true) {
 };
 
 /**
- * @implements {PublicKeySign}
  * @final
  */
-class DummyPublicKeySign {
+class DummyPublicKeySign extends PublicKeySign {
   /** @param {!Uint8Array} signatureSuffix */
   constructor(signatureSuffix) {
+    super();
     this.signatureSuffix_ = signatureSuffix;
   }
   /** @override */
@@ -212,12 +212,12 @@ class DummyPublicKeySign {
 }
 
 /**
- * @implements {PublicKeyVerify}
  * @final
  */
-class DummyPublicKeyVerify {
+class DummyPublicKeyVerify extends PublicKeyVerify {
   /** @param {!Uint8Array} signatureSuffix */
   constructor(signatureSuffix) {
+    super();
     this.signatureSuffix_ = signatureSuffix;
   }
 

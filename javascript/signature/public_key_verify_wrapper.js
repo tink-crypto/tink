@@ -23,14 +23,14 @@ const Validators = goog.require('tink.subtle.Validators');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
- * @implements {PublicKeyVerify}
  * @final
  */
-class WrappedPublicKeyVerify {
+class WrappedPublicKeyVerify extends PublicKeyVerify {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   /** @param {!PrimitiveSet.PrimitiveSet} primitiveSet */
   constructor(primitiveSet) {
+    super();
     /** @private @const {!PrimitiveSet.PrimitiveSet} */
     this.primitiveSet_ = primitiveSet;
   }

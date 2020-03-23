@@ -23,7 +23,7 @@ goog.module('tink.Mac');
  * or randomized. This interface should be used for authentication only, and not
  * for other purposes like generation of pseudorandom bytes.
  *
- * @record
+ * @abstract
  */
 class Mac {
   /**
@@ -31,6 +31,7 @@ class Mac {
    *
    * @param {!Uint8Array} data the data to compute MAC
    * @return {!Promise.<!Uint8Array>} the MAC tag
+   * @abstract
    */
   computeMac(data) {}
 
@@ -40,6 +41,7 @@ class Mac {
    * @param {!Uint8Array} tag  the MAC tag
    * @param {!Uint8Array} data the data to compute MAC
    * @return {!Promise.<boolean>}
+   * @abstract
    */
   verifyMac(tag, data) {}
 }

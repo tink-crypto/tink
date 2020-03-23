@@ -54,7 +54,7 @@ goog.module('tink.HybridDecrypt');
  * implementation uses HKDF as key derivation function, cf.
  *      https://tools.ietf.org/html/rfc5869).
  *
- * @record
+ * @abstract
  */
 class HybridDecrypt {
   /**
@@ -68,6 +68,7 @@ class HybridDecrypt {
    *     during encryption. It can be null, which is equivalent to an empty
    *     (zero-length) byte array.
    * @return {!Promise<!Uint8Array>} resulting plaintext
+   * @abstract
    */
   decrypt(ciphertext, opt_contextInfo) {}
 }

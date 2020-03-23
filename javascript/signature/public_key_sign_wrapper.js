@@ -22,14 +22,14 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
 
 /**
- * @implements {PublicKeySign}
  * @final
  */
-class WrappedPublicKeySign {
+class WrappedPublicKeySign extends PublicKeySign {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   /** @param {!PrimitiveSet.PrimitiveSet} primitiveSet */
   constructor(primitiveSet) {
+    super();
     /** @private @const {!PrimitiveSet.PrimitiveSet} */
     this.primitiveSet_ = primitiveSet;
   }

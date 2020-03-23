@@ -291,12 +291,9 @@ class ExceptionText {
 }
 
 /**
- * @implements {Aead}
  * @final
  */
-class DummyAead1 {
-  constructor() {}
-
+class DummyAead1 extends Aead {
   /** @override */
   encrypt(plaintext, aad) {
     throw new SecurityException(
@@ -311,12 +308,9 @@ class DummyAead1 {
 }
 
 /**
- * @implements {Aead}
  * @final
  */
-class DummyAead2 {
-  constructor() {}
-
+class DummyAead2 extends Aead {
   /** @override */
   encrypt(plaintext, aad) {
     throw new SecurityException(

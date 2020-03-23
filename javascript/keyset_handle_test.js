@@ -653,14 +653,14 @@ const createKeysetAndInitializeRegistry = function(
 };
 
 /**
- * @implements {Aead}
  * @final
  */
-class DummyAead {
+class DummyAead extends Aead {
   /**
    * @param {!Uint8Array} ciphertextSuffix
    */
   constructor(ciphertextSuffix) {
+    super();
     /** @private @const {!Uint8Array} */
     this.ciphertextSuffix_ = ciphertextSuffix;
   }
@@ -695,12 +695,12 @@ class DummyAead {
 }
 
 /**
- * @implements {HybridEncrypt}
  * @final
  */
-class DummyHybridEncrypt {
+class DummyHybridEncrypt extends HybridEncrypt {
   /** @param {!Uint8Array} ciphertextSuffix */
   constructor(ciphertextSuffix) {
+    super();
     /** @const @private {!Uint8Array} */
     this.ciphertextSuffix_ = ciphertextSuffix;
   }
@@ -712,12 +712,12 @@ class DummyHybridEncrypt {
 }
 
 /**
- * @implements {HybridDecrypt}
  * @final
  */
-class DummyHybridDecrypt {
+class DummyHybridDecrypt extends HybridDecrypt {
   /** @param {!Uint8Array} ciphertextSuffix */
   constructor(ciphertextSuffix) {
+    super();
     /** @const @private {!Uint8Array} */
     this.ciphertextSuffix_ = ciphertextSuffix;
   }

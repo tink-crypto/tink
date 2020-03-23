@@ -34,11 +34,10 @@ const Validators = goog.require('tink.subtle.Validators');
  * This implementation is based on
  * http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05.
  *
- * @implements {Aead}
  * @public
  * @final
  */
-class EncryptThenAuthenticate {
+class EncryptThenAuthenticate extends Aead {
   /**
    * @param {!IndCpaCipher} cipher
    * @param {number} ivSize the IV size in bytes
@@ -47,6 +46,8 @@ class EncryptThenAuthenticate {
    * @throws {InvalidArgumentsException}
    */
   constructor(cipher, ivSize, mac, tagSize) {
+    super();
+
     /** @const @private {!IndCpaCipher} */
     this.cipher_ = cipher;
 

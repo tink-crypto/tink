@@ -22,11 +22,10 @@ const Validators = goog.require('tink.subtle.Validators');
 /**
  * Implementation of ECDSA verifying.
  *
- * @implements {PublicKeyVerify}
  * @public
  * @final
  */
-class EcdsaVerify {
+class EcdsaVerify extends PublicKeyVerify {
   /**
    * @param {!webCrypto.CryptoKey} key
    * @param {string} hash
@@ -34,6 +33,8 @@ class EcdsaVerify {
    *     encoding of the signature.
    */
   constructor(key, hash, encoding) {
+    super();
+
     /** @const @private {!webCrypto.CryptoKey} */
     this.key_ = key;
 

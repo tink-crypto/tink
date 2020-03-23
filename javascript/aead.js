@@ -23,7 +23,7 @@ goog.module('tink.Aead');
  * tampered with) of that data, but not its secrecy.
  *
  * @see https://tools.ietf.org/html/rfc5116
- * @record
+ * @abstract
  */
 class Aead {
   /**
@@ -38,7 +38,7 @@ class Aead {
    *     empty (zero-length) byte array. For successful decryption the same
    *     associated data must be provided along with the ciphertext.
    * @return {!Promise.<!Uint8Array>} resulting ciphertext
-   *
+   * @abstract
    */
   encrypt(plaintext, opt_associatedData) {}
 
@@ -54,6 +54,7 @@ class Aead {
    *     byte array. For successful decryption the same associated data must be
    *     provided along with the ciphertext.
    * @return {!Promise.<!Uint8Array>} resulting plaintext
+   * @abstract
    */
   decrypt(ciphertext, opt_associatedData) {}
 }

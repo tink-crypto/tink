@@ -37,15 +37,15 @@ const TAG_SIZE_IN_BITS = 128;
 /**
  * Implementation of AES-GCM.
  *
- * @implements {Aead}
  * @public
  * @final
  */
-class AesGcm {
+class AesGcm extends Aead {
   /**
    * @param {!webCrypto.CryptoKey} key
    */
   constructor(key) {
+    super();
     /** @const @private {!webCrypto.CryptoKey} */
     this.key_ = key;
   }

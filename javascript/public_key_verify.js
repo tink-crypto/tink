@@ -23,7 +23,7 @@ goog.module('tink.PublicKeyVerify');
  * against adaptive chosen-message attacks. Signing data ensures the
  * authenticity and the integrity of that data, but not its secrecy.
  *
- * @record
+ * @abstract
  */
 class PublicKeyVerify {
   /**
@@ -33,6 +33,7 @@ class PublicKeyVerify {
    * @param {!Uint8Array} message the message, must be non-null.
    * @return {!Promise.<boolean>} true iff the signature is valid, false
    *     otherwise.
+   * @abstract
    */
   verify(signature, message) {}
 }

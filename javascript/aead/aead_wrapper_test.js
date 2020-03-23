@@ -264,14 +264,14 @@ const createPrimitiveSet = function(opt_withPrimary = true) {
 };
 
 /**
- * @implements {Aead}
  * @final
  */
-class DummyAead {
+class DummyAead extends Aead {
   /**
    * @param {!Uint8Array} primitiveIdentifier
    */
   constructor(primitiveIdentifier) {
+    super();
     /** @private @const {!Uint8Array} */
     this.primitiveIdentifier_ = primitiveIdentifier;
   }

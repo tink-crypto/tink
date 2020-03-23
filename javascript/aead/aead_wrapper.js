@@ -23,16 +23,16 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
- * @implements {Aead}
  * @final
  */
-class WrappedAead {
+class WrappedAead extends Aead {
   /**
    * @param {!PrimitiveSet.PrimitiveSet} aeadSet
    */
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   constructor(aeadSet) {
+    super();
     /** @private @const {!PrimitiveSet.PrimitiveSet} */
     this.aeadSet_ = aeadSet;
   }

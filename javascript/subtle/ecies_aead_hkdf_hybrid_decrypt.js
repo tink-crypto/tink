@@ -25,11 +25,10 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 /**
  * Implementation of ECIES AEAD HKDF hybrid decryption.
  *
- * @implements {HybridDecrypt}
  * @protected
  * @final
  */
-class EciesAeadHkdfHybridDecrypt {
+class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
   /**
    * @param {!webCrypto.JsonWebKey} recipientPrivateKey
    * @param {!EciesHkdfKemRecipient} kemRecipient
@@ -42,6 +41,8 @@ class EciesAeadHkdfHybridDecrypt {
   constructor(
       recipientPrivateKey, kemRecipient, hkdfHash, pointFormat, demHelper,
       opt_hkdfSalt) {
+    super();
+
     if (!recipientPrivateKey) {
       throw new SecurityException('Recipient private key has to be non-null.');
     }
