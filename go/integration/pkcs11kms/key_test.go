@@ -49,7 +49,6 @@ func setupTests(t testing.TB) func(t testing.TB) {
 		testHSMConfigured = true
 	}
 
-	//logrus.SetLevel(logrus.DebugLevel)
 	if testHSMConfigured {
 
 		// Allow the MasterKey to be created if missing to be created
