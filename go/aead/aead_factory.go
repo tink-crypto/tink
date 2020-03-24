@@ -18,9 +18,9 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/cryptofmt"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/tink"
 )
 
@@ -35,34 +35,34 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.AEAD, err
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}
-	return newPrimitiveSet(ps), nil
+	return newWrappedAead(ps), nil
 }
 
-// primitiveSet is an AEAD implementation that uses the underlying primitive set for encryption
+// wrappedAead is an AEAD implementation that uses the underlying primitive set for encryption
 // and decryption.
-type primitiveSet struct {
+type wrappedAead struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-// Asserts that primitiveSet implements the AEAD interface.
-var _ tink.AEAD = (*primitiveSet)(nil)
+// Asserts that wrappedAead implements the AEAD interface.
+var _ tink.AEAD = (*wrappedAead)(nil)
 
-func newPrimitiveSet(ps *primitiveset.PrimitiveSet) *primitiveSet {
-	ret := new(primitiveSet)
+func newWrappedAead(ps *primitiveset.PrimitiveSet) *wrappedAead {
+	ret := new(wrappedAead)
 	ret.ps = ps
 	return ret
 }
 
 // Encrypt encrypts the given plaintext with the given additional authenticated data.
 // It returns the concatenation of the primary's identifier and the ciphertext.
-func (a *primitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
+func (a *wrappedAead) Encrypt(pt, ad []byte) ([]byte, error) {
 	primary := a.ps.Primary
 	var p = (primary.Primitive).(tink.AEAD)
 	ct, err := p.Encrypt(pt, ad)
 	if err != nil {
 		return nil, err
 	}
-	ret := make([]byte, 0, len(primary.Prefix) + len(ct))
+	ret := make([]byte, 0, len(primary.Prefix)+len(ct))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, ct...)
 	return ret, nil
@@ -71,7 +71,7 @@ func (a *primitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
 // Decrypt decrypts the given ciphertext and authenticates it with the given
 // additional authenticated data. It returns the corresponding plaintext if the
 // ciphertext is authenticated.
-func (a *primitiveSet) Decrypt(ct, ad []byte) ([]byte, error) {
+func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 	// try non-raw keys
 	prefixSize := cryptofmt.NonRawPrefixSize
 	if len(ct) > prefixSize {
