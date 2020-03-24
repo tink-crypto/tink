@@ -232,7 +232,7 @@ TEST(CreateDeriverFunctionForTest, UseParametersAndReturnValue) {
   EXPECT_CALL(internal_km, DeriveKey(_, _))
       .WillOnce([](const AesGcmKeyFormat& format, InputStream* randomness)
                     -> crypto::tink::util::StatusOr<AesGcmKey> {
-        auto bytes_or = ReadAtMostFromStream(format.key_size(), randomness);
+        auto bytes_or = ReadBytesFromStream(format.key_size(), randomness);
         if (!bytes_or.ok()) {
           return bytes_or.status();
         }

@@ -14,34 +14,53 @@
 
 #include "tink/util/input_stream_util.h"
 
+#include <algorithm>
+
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
+#include "absl/types/span.h"
+#include "tink/input_stream.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 
-crypto::tink::util::StatusOr<std::string> ReadAtMostFromStream(
-    int num_bytes, InputStream* input_stream) {
+namespace {
+template <typename Result>
+util::StatusOr<Result> ReadBytesFromStreamImpl(int num_bytes,
+                                               InputStream* input_stream) {
   const void* buffer;
-  std::string result;
+  Result result;
+  if (num_bytes > 0) {
+    result.resize(num_bytes);
+  }
   int num_bytes_read = 0;
 
   while (num_bytes_read < num_bytes) {
     auto next_result = input_stream->Next(&buffer);
-    if (!next_result.ok()) {
-      if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
-        return result;
-      }
-      return next_result.status();
-    }
+    if (!next_result.ok()) return next_result.status();
 
+    int num_bytes_in_chunk = next_result.ValueOrDie();
     int num_bytes_to_copy =
-        std::min(num_bytes - num_bytes_read, next_result.ValueOrDie());
-    input_stream->BackUp(next_result.ValueOrDie() - num_bytes_to_copy);
-    absl::StrAppend(&result, std::string(reinterpret_cast<const char*>(buffer),
-                                         num_bytes_to_copy));
+        std::min(num_bytes - num_bytes_read, num_bytes_in_chunk);
+    absl::c_copy(absl::MakeSpan(reinterpret_cast<const char*>(buffer),
+                                num_bytes_to_copy),
+                 result.begin() + num_bytes_read);
+    input_stream->BackUp(num_bytes_in_chunk - num_bytes_to_copy);
     num_bytes_read += num_bytes_to_copy;
   }
   return result;
+}
+}  // namespace
+
+util::StatusOr<std::string> ReadBytesFromStream(int num_bytes,
+                                                InputStream* input_stream) {
+  return ReadBytesFromStreamImpl<std::string>(num_bytes, input_stream);
+}
+
+util::StatusOr<util::SecretData> ReadSecretBytesFromStream(
+    int num_bytes, InputStream* input_stream) {
+  return ReadBytesFromStreamImpl<util::SecretData>(num_bytes, input_stream);
 }
 
 }  // namespace tink

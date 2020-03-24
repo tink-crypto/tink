@@ -18,17 +18,19 @@
 #include <string>
 
 #include "tink/input_stream.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 
-// A utility function which reads up to num_bytes from the given input
-// stream, calling Next repeatedly until either 'num_bytes' are obtained or
-// the end of the stream is reached. In case not enough bytes are available,
-// the bytes read are returned. Other errors are propagated. This can loop
-// indefinitely (in case Next() repeatedly returns 0).
-::crypto::tink::util::StatusOr<std::string> ReadAtMostFromStream(
+// A utility function which reads num_bytes from the given input stream, calling
+// Next repeatedly until 'num_bytes' are obtained. All stream errors are
+// propagated. This can loop indefinitely (in case Next() repeatedly returns 0).
+util::StatusOr<std::string> ReadBytesFromStream(int num_bytes,
+                                                InputStream* input_stream);
+// A SecretData variant of ReadBytesFromStream
+util::StatusOr<util::SecretData> ReadSecretBytesFromStream(
     int num_bytes, InputStream* input_stream);
 
 }  // namespace tink

@@ -220,7 +220,10 @@ tink_cc_library(
     input_stream_util.h
   DEPS
     tink::core::input_stream
+    tink::util::secret_data
     tink::util::statusor
+    absl::algorithm_container
+    absl::span
     absl::strings
 )
 
@@ -356,6 +359,8 @@ tink_cc_test(
   DEPS
     tink::util::input_stream_util
     tink::util::istream_input_stream
+    tink::util::secret_data
+    tink::util::status
     tink::util::test_matchers
     absl::memory
     gmock

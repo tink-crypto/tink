@@ -224,8 +224,8 @@ TEST(HkdfPrfKeyManagerTest, CreatePrf) {
   std::unique_ptr<InputStream> direct_input =
   direct_prf.ValueOrDie()->ComputePrf("input string");
 
-  auto output_or = ReadAtMostFromStream(100, input.get());
-  auto direct_output_or = ReadAtMostFromStream(100, direct_input.get());
+  auto output_or = ReadBytesFromStream(100, input.get());
+  auto direct_output_or = ReadBytesFromStream(100, direct_input.get());
 
   ASSERT_THAT(output_or.status(), IsOk());
   ASSERT_THAT(direct_output_or.status(), IsOk());

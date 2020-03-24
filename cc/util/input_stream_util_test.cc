@@ -18,6 +18,8 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/util/istream_input_stream.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -26,74 +28,201 @@ namespace tink {
 namespace {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::IstreamInputStream;
 using ::testing::Eq;
 
-TEST(ReadAtMostTest, Basic) {
+TEST(ReadBytesTest, ReadExact) {
+  const std::string content = "Some content";
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>(content)};
+  auto text_or = ReadBytesFromStream(content.size(), &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  std::string text = std::move(text_or).ValueOrDie();
+  EXPECT_THAT(text, Eq(content));
+}
+
+TEST(ReadBytesTest, ShortRead) {
   IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("Some content")};
-  auto text_or = ReadAtMostFromStream(100, &input_stream);
+  auto text_or = ReadBytesFromStream(100, &input_stream);
+  EXPECT_THAT(text_or.status(), StatusIs(util::error::OUT_OF_RANGE));
+}
+
+TEST(ReadBytesTest, ReadLess) {
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
+  auto text_or = ReadBytesFromStream(7, &input_stream);
   ASSERT_THAT(text_or.status(), IsOk());
-  EXPECT_THAT(text_or.ValueOrDie(), Eq("Some content"));
-}
-
-TEST(ReadAtMostTest, ReadLess) {
-  IstreamInputStream input_stream{
-      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
-  auto text_or = ReadAtMostFromStream(7, &input_stream);
   EXPECT_THAT(text_or.ValueOrDie(), Eq("0123456"));
 }
 
-TEST(ReadAtMostTest, ReadTwice) {
+TEST(ReadBytesTest, ReadTwice) {
   IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
-  auto text_or = ReadAtMostFromStream(7, &input_stream);
+  auto text_or = ReadBytesFromStream(7, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
   EXPECT_THAT(text_or.ValueOrDie(), Eq("0123456"));
 
-  text_or = ReadAtMostFromStream(5, &input_stream);
+  text_or = ReadBytesFromStream(5, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
   EXPECT_THAT(text_or.ValueOrDie(), Eq("789ab"));
 }
 
-TEST(ReadAtMostTest, ReadMoreThanBlockSize) {
+TEST(ReadBytesTest, ReadMoreThanBlockSize) {
   // Use a block size of 4 such that ReadAtMost has to call the input multiple
   // times.
   IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop"), 4};
-  auto text_or = ReadAtMostFromStream(11, &input_stream);
+  auto text_or = ReadBytesFromStream(11, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
   EXPECT_THAT(text_or.ValueOrDie(), Eq("0123456789a"));
 
-  text_or = ReadAtMostFromStream(5, &input_stream);
+  text_or = ReadBytesFromStream(5, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
   EXPECT_THAT(text_or.ValueOrDie(), Eq("bcdef"));
 }
 
-TEST(ReadAtMostTest, LessAvailable) {
-  IstreamInputStream input_stream(
-      absl::make_unique<std::stringstream>("0123456789"));
-  auto text_or = ReadAtMostFromStream(16, &input_stream);
-  EXPECT_THAT(text_or.ValueOrDie(), Eq("0123456789"));
-}
-
-TEST(ReadAtMostTest, Request0) {
+TEST(ReadBytesTest, Request0) {
   IstreamInputStream input_stream(
       absl::make_unique<std::stringstream>("012345678"));
-  auto text_or = ReadAtMostFromStream(0, &input_stream);
-  EXPECT_THAT(ReadAtMostFromStream(4, &input_stream).ValueOrDie(), Eq("0123"));
-  EXPECT_THAT(ReadAtMostFromStream(0, &input_stream).ValueOrDie(), Eq(""));
-  EXPECT_THAT(ReadAtMostFromStream(5, &input_stream).ValueOrDie(), Eq("45678"));
-  EXPECT_THAT(ReadAtMostFromStream(0, &input_stream).ValueOrDie(), Eq(""));
+  auto text_or = ReadBytesFromStream(4, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  EXPECT_THAT(text_or.ValueOrDie(), Eq("0123"));
+  text_or = ReadBytesFromStream(0, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  EXPECT_THAT(text_or.ValueOrDie(), Eq(""));
+  text_or = ReadBytesFromStream(5, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  EXPECT_THAT(text_or.ValueOrDie(), Eq("45678"));
+  text_or = ReadBytesFromStream(0, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  EXPECT_THAT(text_or.ValueOrDie(), Eq(""));
 }
 
-TEST(ReadAtMostTest, RequestNegative) {
+TEST(ReadBytesTest, RequestNegative) {
   IstreamInputStream input_stream(
       absl::make_unique<std::stringstream>("012345678"));
-  EXPECT_THAT(ReadAtMostFromStream(-1, &input_stream).ValueOrDie(), Eq(""));
+  auto text_or = ReadBytesFromStream(-1, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  EXPECT_THAT(text_or.ValueOrDie(), Eq(""));
 }
 
-TEST(ReadAtMostTest, EmptyInput) {
+TEST(ReadBytesTest, EmptyInput) {
+  IstreamInputStream input_stream(absl::make_unique<std::stringstream>(""));
+  auto text_or = ReadBytesFromStream(0, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  EXPECT_THAT(text_or.ValueOrDie(), Eq(""));
+  text_or = ReadBytesFromStream(1, &input_stream);
+  EXPECT_THAT(text_or.status(), StatusIs(util::error::OUT_OF_RANGE));
+}
+
+TEST(ReadSecretBytesTest, ReadExact) {
+  const std::string content = "Some content";
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>(content)};
+  auto text_or = ReadSecretBytesFromStream(content.size(), &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  std::string text(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq(content));
+}
+
+TEST(ReadSecretBytesTest, ShortRead) {
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("Some content")};
+  auto text_or = ReadSecretBytesFromStream(100, &input_stream);
+  EXPECT_THAT(text_or.status(), StatusIs(util::error::OUT_OF_RANGE));
+}
+
+TEST(ReadSecretBytesTest, ReadLess) {
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
+  auto text_or = ReadSecretBytesFromStream(7, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  std::string text(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq("0123456"));
+}
+
+TEST(ReadSecretBytesTest, ReadTwice) {
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
+  auto text_or = ReadSecretBytesFromStream(7, &input_stream);
+  std::string text(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq("0123456"));
+
+  text_or = ReadSecretBytesFromStream(5, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  text = std::string(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq("789ab"));
+}
+
+TEST(ReadSecretBytesTest, ReadMoreThanBlockSize) {
+  // Use a block size of 4 such that ReadAtMost has to call the input multiple
+  // times.
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop"), 4};
+  auto text_or = ReadSecretBytesFromStream(11, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  std::string text(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq("0123456789a"));
+
+  text_or = ReadSecretBytesFromStream(5, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  text = std::string(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq("bcdef"));
+}
+
+TEST(ReadSecretBytesTest, Request0) {
+  IstreamInputStream input_stream(
+      absl::make_unique<std::stringstream>("012345678"));
+  auto text_or = ReadSecretBytesFromStream(4, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  std::string text(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq("0123"));
+  text_or = ReadSecretBytesFromStream(0, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  text = std::string(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq(""));
+  text_or = ReadSecretBytesFromStream(5, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  text = std::string(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq("45678"));
+  text_or = ReadSecretBytesFromStream(0, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  text = std::string(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq(""));
+}
+
+TEST(ReadSecretBytesTest, RequestNegative) {
+  IstreamInputStream input_stream(
+      absl::make_unique<std::stringstream>("012345678"));
+  auto text_or = ReadSecretBytesFromStream(-1, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  std::string text(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq(""));
+}
+
+TEST(ReadSecretBytesTest, EmptyInput) {
   IstreamInputStream input_stream(
       absl::make_unique<std::stringstream>(""));
-  EXPECT_THAT(ReadAtMostFromStream(0, &input_stream).ValueOrDie(), Eq(""));
-  EXPECT_THAT(ReadAtMostFromStream(1, &input_stream).ValueOrDie(), Eq(""));
+  auto text_or = ReadSecretBytesFromStream(0, &input_stream);
+  ASSERT_THAT(text_or.status(), IsOk());
+  std::string text(
+      util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
+  EXPECT_THAT(text, Eq(""));
+  text_or = ReadSecretBytesFromStream(1, &input_stream);
+  EXPECT_THAT(text_or.status(), StatusIs(util::error::OUT_OF_RANGE));
 }
 
 }  // namespace

@@ -33,6 +33,7 @@ using ::crypto::tink::test::IsOk;
 using ::testing::Eq;
 using ::testing::Ge;
 using ::testing::Ne;
+using ::testing::Not;
 using ::testing::SizeIs;
 
 // GENERIC TESTS ===============================================================
@@ -45,7 +46,7 @@ TEST(HkdfStreamingPrf, Basic) {
 
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or = ReadAtMostFromStream(10, stream.get());
+  auto result_or = ReadBytesFromStream(10, stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
 
   EXPECT_THAT(result_or.ValueOrDie(), SizeIs(10));
@@ -57,13 +58,13 @@ TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
 
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or = ReadAtMostFromStream(10, stream.get());
+  auto result_or = ReadBytesFromStream(10, stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
 
   // Different input.
   std::unique_ptr<InputStream> stream2 =
       streaming_prf_or.ValueOrDie()->ComputePrf("input2");
-  auto result_or2 = ReadAtMostFromStream(10, stream2.get());
+  auto result_or2 = ReadBytesFromStream(10, stream2.get());
   ASSERT_THAT(result_or2.status(), IsOk());
   EXPECT_THAT(result_or2.ValueOrDie(), Ne(result_or.ValueOrDie()));
 }
@@ -74,13 +75,13 @@ TEST(HkdfStreamingPrf, SameInputTwice) {
 
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or = ReadAtMostFromStream(10, stream.get());
+  auto result_or = ReadBytesFromStream(10, stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
 
   // Same input.
   std::unique_ptr<InputStream> stream2 =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or2 = ReadAtMostFromStream(10, stream2.get());
+  auto result_or2 = ReadBytesFromStream(10, stream2.get());
   ASSERT_THAT(result_or2.status(), IsOk());
   EXPECT_THAT(result_or2.ValueOrDie(), Eq(result_or.ValueOrDie()));
 }
@@ -256,10 +257,11 @@ TEST(HkdfStreamingPrf, ExhaustInput) {
   const int max_output_length = 255 * (512 / 8);
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or = ReadAtMostFromStream(max_output_length + 50, stream.get());
+  auto result_or = ReadBytesFromStream(max_output_length, stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
-
   EXPECT_THAT(result_or.ValueOrDie(), SizeIs(max_output_length));
+  result_or = ReadBytesFromStream(50, stream.get());
+  ASSERT_THAT(result_or.status(), Not(IsOk()));
 }
 
 // TEST VECTORS AND COMPARISON =================================================
@@ -281,7 +283,7 @@ TEST(HkdfStreamingPrf, TestVector1) {
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf(info);
-  auto result_or = ReadAtMostFromStream(expected_result.size(), stream.get());
+  auto result_or = ReadBytesFromStream(expected_result.size(), stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
   EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
 }
@@ -295,7 +297,7 @@ crypto::tink::util::StatusOr<std::string> ComputeWithHkdfStreamingPrf(
   }
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf(info);
-  return ReadAtMostFromStream(length, stream.get());
+  return ReadBytesFromStream(length, stream.get());
 }
 
 TEST(HkdfStreamingPrf, TestVector2) {
