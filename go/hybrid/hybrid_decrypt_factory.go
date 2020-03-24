@@ -29,26 +29,27 @@ func NewHybridDecrypt(h *keyset.Handle) (tink.HybridDecrypt, error) {
 	return NewHybridDecryptWithKeyManager(h, nil /*keyManager*/)
 }
 
-// NewHybridDecryptWithKeyManager returns an HybridDecrypt primitive from the given keyset handle and custom key manager.
+// NewHybridDecryptWithKeyManager returns an HybridDecrypt primitive from the given keyset handle
+// and custom key manager.
 func NewHybridDecryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.HybridDecrypt, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
 		return nil, fmt.Errorf("hybrid_factory: cannot obtain primitive set: %s", err)
 	}
-	return newDecryptPrimitiveSet(ps), nil
+	return newWrappedHybridDecrypt(ps), nil
 }
 
-// decryptPrimitiveSet is an HybridDecrypt implementation that uses the underlying primitive set for
-// decryption.
-type decryptPrimitiveSet struct {
+// wrappedHybridDecrypt is an HybridDecrypt implementation that uses the underlying primitive set
+// for decryption.
+type wrappedHybridDecrypt struct {
 	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that primitiveSet implements the HybridDecrypt interface.
-var _ tink.HybridDecrypt = (*decryptPrimitiveSet)(nil)
+var _ tink.HybridDecrypt = (*wrappedHybridDecrypt)(nil)
 
-func newDecryptPrimitiveSet(ps *primitiveset.PrimitiveSet) *decryptPrimitiveSet {
-	ret := new(decryptPrimitiveSet)
+func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) *wrappedHybridDecrypt {
+	ret := new(wrappedHybridDecrypt)
 	ret.ps = ps
 	return ret
 }
@@ -56,7 +57,7 @@ func newDecryptPrimitiveSet(ps *primitiveset.PrimitiveSet) *decryptPrimitiveSet 
 // Decrypt decrypts the given ciphertext and authenticates it with the given
 // additional authenticated data. It returns the corresponding plaintext if the
 // ciphertext is authenticated.
-func (a *decryptPrimitiveSet) Decrypt(ct, ad []byte) ([]byte, error) {
+func (a *wrappedHybridDecrypt) Decrypt(ct, ad []byte) ([]byte, error) {
 	// try non-raw keys
 	prefixSize := cryptofmt.NonRawPrefixSize
 	if len(ct) > prefixSize {

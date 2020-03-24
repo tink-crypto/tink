@@ -35,25 +35,25 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Streaming
 	if err != nil {
 		return nil, fmt.Errorf("streamingaead_factory: cannot obtain primitive set: %s", err)
 	}
-	ret := new(primitiveSet)
+	ret := new(wrappedStreamingAEAD)
 	ret.ps = ps
 	return tink.StreamingAEAD(ret), nil
 }
 
-// primitiveSet is an StreamingAEAD implementation that uses the underlying primitive set
+// wrappedStreamingAEAD is an StreamingAEAD implementation that uses the underlying primitive set
 // for deterministic encryption and decryption.
-type primitiveSet struct {
+type wrappedStreamingAEAD struct {
 	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that primitiveSet implements the StreamingAEAD interface.
-var _ tink.StreamingAEAD = (*primitiveSet)(nil)
+var _ tink.StreamingAEAD = (*wrappedStreamingAEAD)(nil)
 
 // NewEncryptingWriter returns a wrapper around underlying io.Writer, such that any write-operation
 // via the wrapper results in AEAD-encryption of the written data, using aad
 // as associated authenticated data. The associated data is not included in the ciphertext
 // and has to be passed in as parameter for decryption.
-func (s *primitiveSet) NewEncryptingWriter(w io.Writer, aad []byte) (io.WriteCloser, error) {
+func (s *wrappedStreamingAEAD) NewEncryptingWriter(w io.Writer, aad []byte) (io.WriteCloser, error) {
 	primary := s.ps.Primary
 	p := (primary.Primitive).(tink.StreamingAEAD)
 	return p.NewEncryptingWriter(w, aad)
@@ -62,10 +62,10 @@ func (s *primitiveSet) NewEncryptingWriter(w io.Writer, aad []byte) (io.WriteClo
 // NewDecryptingReader returns a wrapper around underlying io.Reader, such that any read-operation
 // via the wrapper results in AEAD-decryption of the underlying ciphertext,
 // using aad as associated authenticated data.
-func (s *primitiveSet) NewDecryptingReader(r io.Reader, aad []byte) (io.Reader, error) {
+func (s *wrappedStreamingAEAD) NewDecryptingReader(r io.Reader, aad []byte) (io.Reader, error) {
 	return &decryptReader{
-		ps:  s,
-		cr:  r,
-		aad: aad,
+		wrapped: s,
+		cr:      r,
+		aad:     aad,
 	}, nil
 }

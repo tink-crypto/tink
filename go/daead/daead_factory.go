@@ -18,9 +18,9 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/cryptofmt"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/tink"
 )
 
@@ -35,23 +35,23 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Determini
 	if err != nil {
 		return nil, fmt.Errorf("daead_factory: cannot obtain primitive set: %s", err)
 	}
-	ret := new(primitiveSet)
+	ret := new(wrappedDeterministicAEAD)
 	ret.ps = ps
 	return tink.DeterministicAEAD(ret), nil
 }
 
 // primitiveSet is an DeterministicAEAD implementation that uses the underlying primitive set
 // for deterministic encryption and decryption.
-type primitiveSet struct {
+type wrappedDeterministicAEAD struct {
 	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that primitiveSet implements the DeterministicAEAD interface.
-var _ tink.DeterministicAEAD = (*primitiveSet)(nil)
+var _ tink.DeterministicAEAD = (*wrappedDeterministicAEAD)(nil)
 
 // EncryptDeterministically deterministically encrypts plaintext with additionalData as additional authenticated data.
 // It returns the concatenation of the primary's identifier and the ciphertext.
-func (d *primitiveSet) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
+func (d *wrappedDeterministicAEAD) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
 	primary := d.ps.Primary
 	p := (primary.Primitive).(tink.DeterministicAEAD)
 	ct, err := p.EncryptDeterministically(pt, aad)
@@ -59,7 +59,7 @@ func (d *primitiveSet) EncryptDeterministically(pt, aad []byte) ([]byte, error) 
 		return nil, err
 	}
 
-	ret := make([]byte, 0, len(primary.Prefix) + len(ct))
+	ret := make([]byte, 0, len(primary.Prefix)+len(ct))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, ct...)
 	return ret, nil
@@ -68,7 +68,7 @@ func (d *primitiveSet) EncryptDeterministically(pt, aad []byte) ([]byte, error) 
 // DecryptDeterministically deterministically decrypts ciphertext with additionalData as
 // additional authenticated data. It returns the corresponding plaintext if the
 // ciphertext is authenticated.
-func (d *primitiveSet) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
+func (d *wrappedDeterministicAEAD) DecryptDeterministically(ct, aad []byte) ([]byte, error) {
 	// try non-raw keys
 	prefixSize := cryptofmt.NonRawPrefixSize
 	if len(ct) > prefixSize {

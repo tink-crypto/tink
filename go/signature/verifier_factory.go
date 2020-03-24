@@ -37,21 +37,21 @@ func NewVerifierWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.V
 	if err != nil {
 		return nil, fmt.Errorf("verifier_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret = newVerifierSet(ps)
+	var ret = newWrappedVerifier(ps)
 	return ret, nil
 }
 
 // verifierSet is a Verifier implementation that uses the
 // underlying primitive set for verifying.
-type verifierSet struct {
+type wrappedVerifier struct {
 	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that verifierSet implements the Verifier interface.
-var _ tink.Verifier = (*verifierSet)(nil)
+var _ tink.Verifier = (*wrappedVerifier)(nil)
 
-func newVerifierSet(ps *primitiveset.PrimitiveSet) *verifierSet {
-	ret := new(verifierSet)
+func newWrappedVerifier(ps *primitiveset.PrimitiveSet) *wrappedVerifier {
+	ret := new(wrappedVerifier)
 	ret.ps = ps
 	return ret
 }
@@ -59,7 +59,7 @@ func newVerifierSet(ps *primitiveset.PrimitiveSet) *verifierSet {
 var errInvalidSignature = errors.New("verifier_factory: invalid signature")
 
 // Verify checks whether the given signature is a valid signature of the given data.
-func (v *verifierSet) Verify(signature, data []byte) error {
+func (v *wrappedVerifier) Verify(signature, data []byte) error {
 	prefixSize := cryptofmt.NonRawPrefixSize
 	if len(signature) < prefixSize {
 		return errInvalidSignature

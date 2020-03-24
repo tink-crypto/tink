@@ -38,29 +38,29 @@ func NewHybridEncryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (t
 }
 
 // encryptPrimitiveSet is an HybridEncrypt implementation that uses the underlying primitive set for encryption.
-type encryptPrimitiveSet struct {
+type wrappedHybridEncrypt struct {
 	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that primitiveSet implements the HybridEncrypt interface.
-var _ tink.HybridEncrypt = (*encryptPrimitiveSet)(nil)
+var _ tink.HybridEncrypt = (*wrappedHybridEncrypt)(nil)
 
-func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) *encryptPrimitiveSet {
-	ret := new(encryptPrimitiveSet)
+func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) *wrappedHybridEncrypt {
+	ret := new(wrappedHybridEncrypt)
 	ret.ps = ps
 	return ret
 }
 
 // Encrypt encrypts the given plaintext with the given additional authenticated data.
 // It returns the concatenation of the primary's identifier and the ciphertext.
-func (a *encryptPrimitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
+func (a *wrappedHybridEncrypt) Encrypt(pt, ad []byte) ([]byte, error) {
 	primary := a.ps.Primary
 	var p = (primary.Primitive).(tink.HybridEncrypt)
 	ct, err := p.Encrypt(pt, ad)
 	if err != nil {
 		return nil, err
 	}
-	ret := make([]byte, 0, len(primary.Prefix) + len(ct))
+	ret := make([]byte, 0, len(primary.Prefix)+len(ct))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, ct...)
 	return ret, nil

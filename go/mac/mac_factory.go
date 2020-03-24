@@ -35,24 +35,24 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.MAC, erro
 	if err != nil {
 		return nil, fmt.Errorf("mac_factory: cannot obtain primitive set: %s", err)
 	}
-	return newPrimitiveSet(ps), nil
+	return newWrappedMAC(ps), nil
 }
 
-// primitiveSet is a MAC implementation that uses the underlying primitive set to compute and
+// wrappedMAC is a MAC implementation that uses the underlying primitive set to compute and
 // verify MACs.
-type primitiveSet struct {
+type wrappedMAC struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-func newPrimitiveSet(ps *primitiveset.PrimitiveSet) *primitiveSet {
-	ret := new(primitiveSet)
+func newWrappedMAC(ps *primitiveset.PrimitiveSet) *wrappedMAC {
+	ret := new(wrappedMAC)
 	ret.ps = ps
 	return ret
 }
 
 // ComputeMAC calculates a MAC over the given data using the primary primitive
 // and returns the concatenation of the primary's identifier and the calculated mac.
-func (m *primitiveSet) ComputeMAC(data []byte) ([]byte, error) {
+func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 	primary := m.ps.Primary
 	var primitive = (primary.Primitive).(tink.MAC)
 	mac, err := primitive.ComputeMAC(data)
@@ -69,7 +69,7 @@ var errInvalidMAC = fmt.Errorf("mac_factory: invalid mac")
 
 // VerifyMAC verifies whether the given mac is a correct authentication code
 // for the given data.
-func (m *primitiveSet) VerifyMAC(mac, data []byte) error {
+func (m *wrappedMAC) VerifyMAC(mac, data []byte) error {
 	// This also rejects raw MAC with size of 4 bytes or fewer. Those MACs are
 	// clearly insecure, thus should be discouraged.
 	prefixSize := cryptofmt.NonRawPrefixSize

@@ -18,9 +18,9 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/cryptofmt"
-	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -36,26 +36,26 @@ func NewSignerWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Sig
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}
-	return newSignerSet(ps), nil
+	return newWrappedSigner(ps), nil
 }
 
-// signerSet is an Signer implementation that uses the underlying primitive set for signing.
-type signerSet struct {
+// wrappedSigner is an Signer implementation that uses the underlying primitive set for signing.
+type wrappedSigner struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-// Asserts that signerSet implements the Signer interface.
-var _ tink.Signer = (*signerSet)(nil)
+// Asserts that wrappedSigner implements the Signer interface.
+var _ tink.Signer = (*wrappedSigner)(nil)
 
-func newSignerSet(ps *primitiveset.PrimitiveSet) *signerSet {
-	ret := new(signerSet)
+func newWrappedSigner(ps *primitiveset.PrimitiveSet) *wrappedSigner {
+	ret := new(wrappedSigner)
 	ret.ps = ps
 	return ret
 }
 
 // Sign signs the given data and returns the signature concatenated with the identifier of the
 // primary primitive.
-func (s *signerSet) Sign(data []byte) ([]byte, error) {
+func (s *wrappedSigner) Sign(data []byte) ([]byte, error) {
 	primary := s.ps.Primary
 	var signer = (primary.Primitive).(tink.Signer)
 	var signedData []byte
@@ -69,7 +69,7 @@ func (s *signerSet) Sign(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ret := make([]byte, 0, len(primary.Prefix) + len(signature))
+	ret := make([]byte, 0, len(primary.Prefix)+len(signature))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, signature...)
 	return ret, nil
