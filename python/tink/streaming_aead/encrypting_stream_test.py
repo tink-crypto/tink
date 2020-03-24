@@ -20,8 +20,7 @@ import io
 import sys
 
 from absl.testing import absltest
-# TODO(b/141106504) Replace this with unittest.mock
-import mock
+from absl.testing.absltest import mock
 
 from tink.streaming_aead import encrypting_stream
 

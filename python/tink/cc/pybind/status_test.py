@@ -18,12 +18,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from google3.testing.pybase import googletest
+from absl.testing import absltest
 from tink.cc.pybind import status
 from tink.cc.pybind import status_example
 
 
-class UtilStatusTest(googletest.TestCase):
+class UtilStatusTest(absltest.TestCase):
 
   def test_pass_status(self):
     test_status = status.Status(status.ErrorCode.CANCELLED, 'test')
@@ -91,7 +91,7 @@ class UtilStatusTest(googletest.TestCase):
     self.assertFalse(status.is_ok(failure_status))
 
 
-class UtilStatusOrTest(googletest.TestCase):
+class UtilStatusOrTest(absltest.TestCase):
 
   def test_return_value(self):
     self.assertEqual(status_example.return_value_status_or(5), 5)
@@ -156,4 +156,4 @@ class UtilStatusOrTest(googletest.TestCase):
 
 
 if __name__ == '__main__':
-  googletest.main()
+  absltest.main()
