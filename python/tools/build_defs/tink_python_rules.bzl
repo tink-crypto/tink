@@ -46,7 +46,7 @@ def tink_pybind_extension(
     )
     return native.py_library(
         name = name,
-        data = shared_lib_name,
+        data = [shared_lib_name],
     )
 
 def tink_pybind_library(
