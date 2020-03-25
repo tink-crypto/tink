@@ -10,17 +10,18 @@ cc_library(
     include_prefix = "tink/prf",
     deps = [
         "//:core/key_type_manager",
+        "//proto:common_cc_proto",
+        "//proto:hkdf_prf_cc_proto",
+        "//proto:tink_cc_proto",
         "//subtle",
         "//subtle/prf:hkdf_streaming_prf",
         "//subtle/prf:streaming_prf",
         "//util:constants",
         "//util:enums",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:validation",
-        "//proto:common_cc_proto",
-        "//proto:hkdf_prf_cc_proto",
-        "//proto:tink_cc_proto",
     ],
 )
 
@@ -33,8 +34,8 @@ cc_library(
     deps = [
         ":hkdf_prf_key_manager",
         "//:registry",
-        "//util:status",
         "//proto:tink_cc_proto",
+        "//util:status",
     ],
 )
 
@@ -56,11 +57,12 @@ cc_test(
     srcs = ["hkdf_prf_key_manager_test.cc"],
     deps = [
         ":hkdf_prf_key_manager",
+        "//proto:common_cc_proto",
         "//subtle",
         "//subtle/prf:hkdf_streaming_prf",
         "//util:input_stream_util",
+        "//util:secret_data",
         "//util:test_matchers",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

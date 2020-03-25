@@ -19,6 +19,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 #include "tink/util/input_stream_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
 
@@ -215,7 +216,9 @@ TEST(HkdfPrfKeyManagerTest, CreatePrf) {
 
   StatusOr<std::unique_ptr<StreamingPrf>> direct_prf =
       subtle::HkdfStreamingPrf::New(
-          subtle::SHA256, key_or.ValueOrDie().key_value(), "salt string");
+          subtle::SHA256,
+          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()),
+          "salt string");
 
   ASSERT_THAT(direct_prf.status(), IsOk());
 

@@ -12,6 +12,7 @@ tink_cc_library(
     tink::subtle::prf::streaming_prf
     tink::util::constants
     tink::util::enums
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -52,6 +53,7 @@ tink_cc_test(
     tink::subtle::prf::streaming_prf
     tink::subtle::subtle
     tink::util::input_stream_util
+    tink::util::secret_data
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::common_cc_proto

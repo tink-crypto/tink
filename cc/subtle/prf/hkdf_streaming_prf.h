@@ -17,12 +17,13 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/base.h"
-#include "tink/input_stream.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/streaming_prf.h"
+#include "tink/util/secret_data.h"
 
 namespace crypto {
 namespace tink {
@@ -31,18 +32,18 @@ namespace subtle {
 class HkdfStreamingPrf : public StreamingPrf {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<StreamingPrf>> New(
-      HashType hash, absl::string_view secret, absl::string_view salt);
+      HashType hash, util::SecretData secret, absl::string_view salt);
 
   std::unique_ptr<InputStream> ComputePrf(
       absl::string_view input) const override;
 
  private:
-  HkdfStreamingPrf(const EVP_MD* hash, absl::string_view secret,
+  HkdfStreamingPrf(const EVP_MD* hash, util::SecretData secret,
                    absl::string_view salt)
-      : hash_(hash), secret_(secret), salt_(salt) {}
+      : hash_(hash), secret_(std::move(secret)), salt_(salt) {}
 
   const EVP_MD* hash_;
-  const std::string secret_;
+  const util::SecretData secret_;
   const std::string salt_;
 };
 

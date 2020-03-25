@@ -23,6 +23,7 @@
 #include "tink/subtle/random.h"
 #include "tink/util/constants.h"
 #include "tink/util/enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -43,7 +44,7 @@ class HkdfPrfKeyManager
         const google::crypto::tink::HkdfPrfKey& key) const override {
       return subtle::HkdfStreamingPrf::New(
           crypto::tink::util::Enums::ProtoToSubtle(key.params().hash()),
-          key.key_value(), key.params().salt());
+          util::SecretDataFromStringView(key.key_value()), key.params().salt());
     }
   };
 

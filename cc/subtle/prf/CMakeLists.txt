@@ -31,6 +31,7 @@ tink_cc_library(
     tink::subtle::subtle
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
     absl::memory
     absl::strings
 )
@@ -43,6 +44,7 @@ tink_cc_test(
     tink::subtle::prf::streaming_prf
     tink::subtle::subtle
     tink::util::input_stream_util
+    tink::util::secret_data
     tink::util::test_matchers
     tink::util::test_util
     gmock
