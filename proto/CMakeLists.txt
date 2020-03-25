@@ -132,6 +132,17 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME aes_cmac_prf_cc_proto
+  SRCS aes_cmac_prf.proto
+)
+
+tink_cc_proto(
+  NAME hmac_prf_cc_proto
+  SRCS hmac_prf.proto
+  DEPS tink::proto::common_cc_proto
+)
+
+tink_cc_proto(
   NAME prf_based_deriver_cc_proto
   SRCS prf_based_deriver.proto
   DEPS

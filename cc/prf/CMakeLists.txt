@@ -39,9 +39,11 @@ tink_cc_library(
     prf_key_templates.h
     prf_key_templates.cc
   DEPS
-    tink::prf::hkdf_prf_key_manager
+    tink::proto::aes_cmac_prf_cc_proto
     tink::proto::hkdf_prf_cc_proto
+    tink::proto::hmac_prf_cc_proto
     tink::proto::tink_cc_proto
+    absl::memory
 )
 
 tink_cc_library(

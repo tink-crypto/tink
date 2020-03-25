@@ -120,6 +120,17 @@ cc_proto_library(
     deps = ["@tink_base//proto:aes_gcm_hkdf_streaming_proto"],
 )
 
+
+cc_proto_library(
+    name = "aes_cmac_prf_cc_proto",
+    deps = ["@tink_base//proto:aes_cmac_prf_proto"],
+)
+
+cc_proto_library(
+    name = "hmac_prf_cc_proto",
+    deps = ["@tink_base//proto:hmac_prf_proto"],
+)
+
 cc_proto_library(
     name = "aes_ctr_hmac_streaming_cc_proto",
     deps = ["@tink_base//proto:aes_ctr_hmac_streaming_proto"],

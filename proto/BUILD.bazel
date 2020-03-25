@@ -451,6 +451,43 @@ objc_proto_compile(
     tags = ["manual"],
 )
 
+# -----------------------------------------------
+# aes_cmac_prf
+# -----------------------------------------------
+proto_library(
+    visibility = ["//visibility:public"],
+    name = "aes_cmac_prf_proto",
+    srcs = [
+        "aes_cmac_prf.proto",
+    ],
+)
+
+objc_proto_compile(
+    name = "aes_cmac_prf_objc_pb",
+    protos = ["aes_cmac_prf.proto"],
+    tags = ["manual"],
+    deps = [],
+)
+
+# -----------------------------------------------
+# hmac_prf
+# -----------------------------------------------
+proto_library(
+    visibility = ["//visibility:public"],
+    name = "hmac_prf_proto",
+    srcs = [
+        "hmac_prf.proto",
+    ],
+    deps = [":common_proto"],
+)
+
+objc_proto_compile(
+    name = "hmac_prf_objc_pb",
+    protos = ["hmac_prf.proto"],
+    tags = ["manual"],
+    deps = [":common_objc_pb"],
+)
+
 # ----------------------------------------------------------------------------
 # prf_based_deriver
 # ----------------------------------------------------------------------------
@@ -491,6 +528,7 @@ tink_objc_proto_library(
     name = "all_objc_proto",
     srcs = [
         ":aes_cmac_objc_pb",
+        ":aes_cmac_prf_objc_pb",
         ":aes_ctr_hmac_aead_objc_pb",
         ":aes_ctr_hmac_streaming_objc_pb",
         ":aes_ctr_objc_pb",
@@ -506,6 +544,7 @@ tink_objc_proto_library(
         ":ed25519_objc_pb",
         ":empty_objc_pb",
         ":hmac_objc_pb",
+        ":hmac_prf_objc_pb",
         ":kms_aead_objc_pb",
         ":kms_envelope_objc_pb",
         ":rsa_ssa_pkcs1_objc_pb",

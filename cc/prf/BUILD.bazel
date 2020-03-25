@@ -46,9 +46,11 @@ cc_library(
     include_prefix = "tink/prf",
     visibility = ["//visibility:public"],
     deps = [
-        ":hkdf_prf_key_manager",
+        "//proto:aes_cmac_prf_cc_proto",
         "//proto:hkdf_prf_cc_proto",
+        "//proto:hmac_prf_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
     ],
 )
 
