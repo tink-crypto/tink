@@ -17,10 +17,12 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_DEM_HELPER_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_DEM_HELPER_H_
 
-#include "absl/strings/string_view.h"
+#include <memory>
+
 #include "tink/aead.h"
 #include "tink/key_manager.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -38,14 +40,14 @@ class EciesAeadHkdfDemHelper {
 
   // Returns the size of the DEM-key in bytes.
   uint32_t dem_key_size_in_bytes() const {
-    return dem_key_size_in_bytes_;
+    return key_params_.key_size_in_bytes;
   }
 
   // Creates and returns a new Aead-primitive that uses
   // the key material given in 'symmetric_key', which must
   // be of length dem_key_size_in_bytes().
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetAead(
-      const std::string& symmetric_key_value) const;
+      const util::SecretData& symmetric_key_value) const;
 
  private:
   enum DemKeyType {
@@ -55,18 +57,28 @@ class EciesAeadHkdfDemHelper {
     XCHACHA20_POLY1305_KEY,
   };
 
-  explicit EciesAeadHkdfDemHelper(
-      const google::crypto::tink::KeyTemplate& dem_key_template)
-      : dem_key_template_(dem_key_template) {}
+  struct DemKeyParams {
+    DemKeyType key_type;
+    uint32_t key_size_in_bytes;
+    uint32_t aes_ctr_key_size_in_bytes;
+  };
 
-  bool ReplaceKeyBytes(const std::string& key_bytes,
-                       portable_proto::MessageLite* key) const;
+  EciesAeadHkdfDemHelper(const KeyManager<Aead>* key_manager,
+                         const google::crypto::tink::KeyTemplate& key_template,
+                         DemKeyParams key_params)
+      : key_manager_(key_manager),
+        key_template_(key_template),
+        key_params_(key_params) {}
 
-  google::crypto::tink::KeyTemplate dem_key_template_;
-  DemKeyType dem_key_type_;
-  uint32_t dem_key_size_in_bytes_;
-  uint32_t aes_ctr_key_size_in_bytes_ = 0;
-  const KeyManager<Aead>* dem_key_manager_;  // not owned
+  static util::StatusOr<DemKeyParams> GetKeyParams(
+      const ::google::crypto::tink::KeyTemplate& key_template);
+
+  bool ReplaceKeyBytes(const util::SecretData& key_bytes,
+                       portable_proto::MessageLite* proto) const;
+
+  const KeyManager<Aead>* key_manager_;  // not owned
+  const google::crypto::tink::KeyTemplate key_template_;
+  const DemKeyParams key_params_;
 };
 
 }  // namespace tink

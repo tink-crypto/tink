@@ -127,24 +127,10 @@ TEST_F(HkdfTest, testLongOutput) {
             "BoringSSL's HKDF failed");
 }
 
-TEST_F(HkdfTest, ComputeEciesHkdfBasic) {
-  for (const TestVector& test : test_vector) {
-    std::string ikm = test::HexDecodeOrDie(test.ikm_hex);
-    std::string kem_bytes = ikm.substr(0, ikm.size() / 2);
-    std::string shared_secret = ikm.substr(ikm.size() / 2);
-    auto hkdf_or = Hkdf::ComputeEciesHkdfSymmetricKey(
-        test.hash_type, kem_bytes, shared_secret,
-        test::HexDecodeOrDie(test.salt_hex),
-        test::HexDecodeOrDie(test.info_hex), test.out_len);
-    ASSERT_TRUE(hkdf_or.ok());
-    EXPECT_EQ(test::HexEncode(hkdf_or.ValueOrDie()), test.out_key_hex);
-  }
-}
-
 TEST_F(HkdfTest, ComputeEciesHkdfSecretData) {
   for (const TestVector& test : test_vector) {
     std::string ikm = test::HexDecodeOrDie(test.ikm_hex);
-    util::SecretData kem_bytes(ikm.begin(), ikm.begin() + ikm.size() / 2);
+    std::string kem_bytes = ikm.substr(0, ikm.size() / 2);
     util::SecretData shared_secret(ikm.begin() + ikm.size() / 2, ikm.end());
     auto hkdf_or = Hkdf::ComputeEciesHkdfSymmetricKey(
         test.hash_type, kem_bytes, shared_secret,

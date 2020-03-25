@@ -58,6 +58,7 @@ tink_cc_library(
     tink::subtle::hkdf
     tink::subtle::subtle_util_boringssl
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -74,6 +75,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -535,6 +537,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -751,6 +754,7 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
@@ -764,6 +768,7 @@ tink_cc_test(
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
     tink::subtle::ecies_hkdf_sender_kem_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util

@@ -102,10 +102,10 @@ TEST(SubtleUtilBoringSSLTest, EcPointEncode) {
     EXPECT_EQ(1, EC_POINT_set_affine_coordinates_GFp(
                      status_or_group.ValueOrDie(), point.get(), x.get(),
                      y.get(), nullptr));
-    auto status_or_string = SubtleUtilBoringSSL::EcPointEncode(
+    auto encoded_or = SubtleUtilBoringSSL::EcPointEncode(
         test.curve, test.format, point.get());
-    EXPECT_TRUE(status_or_string.ok());
-    EXPECT_EQ(test.encoded_hex, test::HexEncode(status_or_string.ValueOrDie()));
+    EXPECT_TRUE(encoded_or.ok());
+    EXPECT_EQ(test.encoded_hex, test::HexEncode(encoded_or.ValueOrDie()));
   }
 }
 
@@ -247,12 +247,13 @@ bool WycheproofTest(const rapidjson::Value& root) {
       auto status_or_shared = SubtleUtilBoringSSL ::ComputeEcdhSharedSecret(
           curve, priv_key.get(), pub_key.get());
       if (status_or_shared.ok()) {
-        std::string shared = status_or_shared.ValueOrDie();
+        util::SecretData shared = status_or_shared.ValueOrDie();
         if (result == "invalid") {
           ADD_FAILURE() << "Computed shared secret with invalid test vector"
                         << ", tcId= " << id;
           errors++;
-        } else if (shared != expected_shared_bytes) {
+        } else if (util::SecretDataAsStringView(shared) !=
+                   expected_shared_bytes) {
           ADD_FAILURE() << "Computed wrong shared secret with tcId: " << id;
           errors++;
         }

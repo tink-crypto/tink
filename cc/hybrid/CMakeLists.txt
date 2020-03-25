@@ -109,7 +109,9 @@ tink_cc_library(
     tink::core::aead
     tink::core::key_manager
     tink::core::registry
+    tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::aes_ctr_hmac_aead_cc_proto
@@ -131,11 +133,11 @@ tink_cc_library(
     tink::subtle::ec_util
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
     tink::util::enums
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
-    tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
-    tink::proto::tink_cc_proto
+    absl::memory
 )
 
 tink_cc_library(
@@ -147,15 +149,13 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_dem_helper
     tink::core::aead
     tink::core::hybrid_encrypt
-    tink::core::key_manager
-    tink::core::registry
     tink::subtle::ecies_hkdf_sender_kem_boringssl
     tink::util::enums
     tink::util::status
     tink::util::statusor
-    tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
-    tink::proto::tink_cc_proto
+    absl::memory
+    absl::strings
 )
 
 tink_cc_library(

@@ -17,13 +17,14 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_DECRYPT_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_DECRYPT_H_
 
-#include "absl/strings/string_view.h"
-#include "tink/hybrid_decrypt.h"
+#include <memory>
+#include <utility>
+
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
+#include "tink/hybrid_decrypt.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 #include "tink/util/statusor.h"
 #include "proto/ecies_aead_hkdf.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -41,20 +42,16 @@ class EciesAeadHkdfHybridDecrypt : public HybridDecrypt {
       absl::string_view ciphertext,
       absl::string_view context_info) const override;
 
-  virtual ~EciesAeadHkdfHybridDecrypt() {}
-
  private:
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfPrivateKey& key);
-
   EciesAeadHkdfHybridDecrypt(
-      const google::crypto::tink::EciesAeadHkdfPrivateKey& recipient_key,
+      google::crypto::tink::EciesAeadHkdfParams recipient_key_params,
       std::unique_ptr<const subtle::EciesHkdfRecipientKemBoringSsl> kem,
       std::unique_ptr<const EciesAeadHkdfDemHelper> dem_helper)
-      : recipient_key_(recipient_key), recipient_kem_(std::move(kem)),
+      : recipient_key_params_(std::move(recipient_key_params)),
+        recipient_kem_(std::move(kem)),
         dem_helper_(std::move(dem_helper)) {}
 
-  google::crypto::tink::EciesAeadHkdfPrivateKey recipient_key_;
+  google::crypto::tink::EciesAeadHkdfParams recipient_key_params_;
   std::unique_ptr<const subtle::EciesHkdfRecipientKemBoringSsl> recipient_kem_;
   std::unique_ptr<const EciesAeadHkdfDemHelper> dem_helper_;
 };

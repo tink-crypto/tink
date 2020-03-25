@@ -69,16 +69,8 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
   return out_key;
 }
 
-// static
-util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
-    HashType hash, absl::string_view kem_bytes, absl::string_view shared_secret,
-    absl::string_view salt, absl::string_view info, size_t out_len) {
-  return Hkdf::ComputeHkdf(hash, absl::StrCat(kem_bytes, shared_secret), salt,
-                           info, out_len);
-}
-
 util::StatusOr<util::SecretData> Hkdf::ComputeEciesHkdfSymmetricKey(
-    HashType hash, const util::SecretData &kem_bytes,
+    HashType hash, absl::string_view kem_bytes,
     const util::SecretData &shared_secret, absl::string_view salt,
     absl::string_view info, size_t out_len) {
   util::SecretData ikm(kem_bytes.size() + shared_secret.size());

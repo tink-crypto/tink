@@ -62,6 +62,18 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::bn2str(const BIGNUM *bn,
   return std::string(reinterpret_cast<const char *>(res.get()), len);
 }
 
+util::StatusOr<util::SecretData> SubtleUtilBoringSSL::BignumToSecretData(
+    const BIGNUM *bn, size_t len) {
+  if (bn == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
+  }
+  util::SecretData res(len);
+  if (BN_bn2bin_padded(res.data(), len, bn) != 1) {
+    return util::Status(util::error::INTERNAL, "Value too large");
+  }
+  return res;
+}
+
 // static
 util::StatusOr<bssl::UniquePtr<BIGNUM>> SubtleUtilBoringSSL::str2bn(
     absl::string_view s) {
@@ -244,7 +256,7 @@ util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
 }
 
 // static
-util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
+util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key) {
   auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
@@ -276,7 +288,8 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     return util::Status(util::error::INTERNAL,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
-  return bn2str(shared_x.get(), FieldElementSizeInBytes(priv_group.get()));
+  return BignumToSecretData(shared_x.get(),
+                            FieldElementSizeInBytes(priv_group.get()));
 }
 
 // static

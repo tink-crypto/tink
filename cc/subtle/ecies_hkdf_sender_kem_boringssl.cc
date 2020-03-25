@@ -27,20 +27,6 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-EciesHkdfSenderKemBoringSsl::KemKey::KemKey(const std::string& kem_bytes,
-                                            const std::string& symmetric_key)
-    : kem_bytes_(kem_bytes), symmetric_key_(symmetric_key) {}
-
-const std::string&
-EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_kem_bytes() const {
-  return kem_bytes_;
-}
-
-const std::string&
-EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() const {
-  return symmetric_key_;
-}
-
 // static
 util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
 EciesHkdfSenderKemBoringSsl::New(subtle::EllipticCurveType curve,
@@ -107,22 +93,22 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
   if (!status_or_string_kem.ok()) {
     return status_or_string_kem.status();
   }
-  std::string kem_bytes(status_or_string_kem.ValueOrDie());
+  std::string kem_bytes = status_or_string_kem.ValueOrDie();
   auto status_or_string_shared_secret =
       SubtleUtilBoringSSL::ComputeEcdhSharedSecret(curve_, ephemeral_priv,
                                                    peer_pub_key_.get());
   if (!status_or_string_shared_secret.ok()) {
     return status_or_string_shared_secret.status();
   }
-  std::string shared_secret(status_or_string_shared_secret.ValueOrDie());
-  auto status_or_string_symmetric_key = Hkdf::ComputeEciesHkdfSymmetricKey(
+  util::SecretData shared_secret = status_or_string_shared_secret.ValueOrDie();
+  auto symmetric_key_or = Hkdf::ComputeEciesHkdfSymmetricKey(
       hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
-  if (!status_or_string_symmetric_key.ok()) {
-    return status_or_string_symmetric_key.status();
+  if (!symmetric_key_or.ok()) {
+    return symmetric_key_or.status();
   }
-  std::string symmetric_key(status_or_string_symmetric_key.ValueOrDie());
-  auto kem_key = absl::make_unique<const KemKey>(kem_bytes, symmetric_key);
-  return std::move(kem_key);
+  util::SecretData symmetric_key = symmetric_key_or.ValueOrDie();
+  return absl::make_unique<const KemKey>(std::move(kem_bytes),
+                                         std::move(symmetric_key));
 }
 
 EciesHkdfX25519SendKemBoringSsl::EciesHkdfX25519SendKemBoringSsl(
@@ -163,24 +149,22 @@ EciesHkdfX25519SendKemBoringSsl::GenerateKey(
         "X25519 only supports compressed elliptic curve points");
   }
 
-  uint8_t ephemeral_private_key[X25519_PRIVATE_KEY_LEN];
-  uint8_t ephemeral_public_value[X25519_PUBLIC_VALUE_LEN];
-  X25519_keypair(ephemeral_public_value, ephemeral_private_key);
-  std::string kem_bytes(ephemeral_public_value,
-                        &ephemeral_public_value[X25519_PUBLIC_VALUE_LEN]);
+  util::SecretData ephemeral_private_key(X25519_PRIVATE_KEY_LEN);
+  std::string kem_bytes(X25519_PUBLIC_VALUE_LEN, '\0');
+  X25519_keypair(reinterpret_cast<uint8_t*>(&kem_bytes[0]),
+                 ephemeral_private_key.data());
 
-  uint8_t shared_key[X25519_SHARED_KEY_LEN];
-  X25519(shared_key, ephemeral_private_key, peer_public_value_);
-  std::string shared_secret(shared_key, &shared_key[X25519_SHARED_KEY_LEN]);
+  util::SecretData shared_secret(X25519_SHARED_KEY_LEN);
+  X25519(shared_secret.data(), ephemeral_private_key.data(),
+         peer_public_value_);
 
-  auto status_or_string_symmetric_key = Hkdf::ComputeEciesHkdfSymmetricKey(
+  auto symmetric_key_or = Hkdf::ComputeEciesHkdfSymmetricKey(
       hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
-  if (!status_or_string_symmetric_key.ok()) {
-    return status_or_string_symmetric_key.status();
+  if (!symmetric_key_or.ok()) {
+    return symmetric_key_or.status();
   }
-  std::string symmetric_key(status_or_string_symmetric_key.ValueOrDie());
-  auto kem_key = absl::make_unique<const KemKey>(kem_bytes, symmetric_key);
-  return std::move(kem_key);
+  util::SecretData symmetric_key = symmetric_key_or.ValueOrDie();
+  return absl::make_unique<const KemKey>(kem_bytes, symmetric_key);
 }
 
 }  // namespace subtle
