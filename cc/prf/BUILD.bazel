@@ -52,6 +52,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "prf_set",
+    srcs = ["prf_set.cc"],
+    hdrs = ["prf_set.h"],
+    include_prefix = "tink/prf",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 cc_test(
     name = "hkdf_prf_key_manager_test",
     srcs = ["hkdf_prf_key_manager_test.cc"],
@@ -74,6 +86,18 @@ cc_test(
         ":hkdf_prf_key_manager",
         ":prf_key_templates",
         "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "prf_set_test",
+    srcs = ["prf_set_test.cc"],
+    deps = [
+        ":prf_set",
+        "//util:statusor",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -44,6 +44,16 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME prf_set
+  SRCS
+    prf_set.h
+    prf_set.cc
+  DEPS
+    tink::util::statusor
+    absl::strings
+)
+
 tink_cc_test(
   NAME hkdf_prf_key_manager_test
   SRCS hkdf_prf_key_manager_test.cc
@@ -70,3 +80,13 @@ tink_cc_test(
     gmock
 )
 
+tink_cc_test(
+  NAME prf_set_test
+  SRCS prf_set_test.cc
+  DEPS
+    tink::prf::prf_set
+    tink::util::statusor
+    absl::memory
+    absl::strings
+    gmock
+)
