@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+import six
 from typing import Any, Generic, Text, Type, TypeVar
 
 from google3.third_party.tink.proto import tink_pb2
@@ -35,6 +36,7 @@ def deserialize_key_data(serialized_proto):
   return key_data
 
 
+@six.add_metaclass(abc.ABCMeta)
 class KeyManager(Generic[P]):
   """Generates keys and provides primitives for the keys.
 
@@ -44,8 +46,6 @@ class KeyManager(Generic[P]):
   corresponding key material, and is given by type_url-field of KeyData-protocol
   buffer.
   """
-
-  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def primitive_class(self) -> Type[P]:
