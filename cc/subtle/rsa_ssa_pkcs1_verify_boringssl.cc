@@ -68,10 +68,6 @@ RsaSsaPkcs1VerifyBoringSsl::New(
   return std::move(verify);
 }
 
-RsaSsaPkcs1VerifyBoringSsl::RsaSsaPkcs1VerifyBoringSsl(bssl::UniquePtr<RSA> rsa,
-                                                       const EVP_MD* sig_hash)
-    : rsa_(std::move(rsa)), sig_hash_(sig_hash) {}
-
 util::Status RsaSsaPkcs1VerifyBoringSsl::Verify(absl::string_view signature,
                                                 absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,

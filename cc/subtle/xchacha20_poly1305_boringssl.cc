@@ -34,13 +34,11 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-static const bool IsValidKeySize(uint32_t size_in_bytes) {
+namespace {
+const bool IsValidKeySize(uint32_t size_in_bytes) {
   return size_in_bytes == 32;
 }
-
-XChacha20Poly1305BoringSsl::XChacha20Poly1305BoringSsl(util::SecretData key,
-                                                       const EVP_AEAD* aead)
-    : key_(std::move(key)), aead_(aead) {}
+}  // namespace
 
 util::StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305BoringSsl::New(
     util::SecretData key) {

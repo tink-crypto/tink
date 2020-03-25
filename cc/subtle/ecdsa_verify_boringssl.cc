@@ -67,13 +67,9 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
   if (!hash_result.ok()) return hash_result.status();
   const EVP_MD* hash = hash_result.ValueOrDie();
   std::unique_ptr<EcdsaVerifyBoringSsl> verify(
-      new EcdsaVerifyBoringSsl(ec_key.release(), hash, encoding));
+      new EcdsaVerifyBoringSsl(std::move(ec_key), hash, encoding));
   return std::move(verify);
 }
-
-EcdsaVerifyBoringSsl::EcdsaVerifyBoringSsl(EC_KEY* key, const EVP_MD* hash,
-                                           EcdsaSignatureEncoding encoding)
-    : key_(key), hash_(hash), encoding_(encoding) {}
 
 util::Status EcdsaVerifyBoringSsl::Verify(absl::string_view signature,
                                           absl::string_view data) const {

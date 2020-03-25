@@ -18,12 +18,11 @@
 #define TINK_SUBTLE_AES_CTR_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
-#include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/util/secret_data.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -49,7 +48,7 @@ class AesCtrBoringSsl : public IndCpaCipher {
       : key_(std::move(key)), iv_size_(iv_size), cipher_(cipher) {}
 
   const util::SecretData key_;
-  int iv_size_;
+  const int iv_size_;
   // cipher_ is a singleton owned by BoringSsl.
   const EVP_CIPHER *cipher_;
 };

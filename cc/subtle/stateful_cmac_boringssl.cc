@@ -14,6 +14,7 @@
 
 #include "tink/subtle/stateful_cmac_boringssl.h"
 
+#include "absl/memory/memory.h"
 #include "openssl/base.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -49,16 +50,9 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
                         "CMAC initialization failed");
   }
 
-  return std::unique_ptr<StatefulMac>(
-      new StatefulCmacBoringSsl(tag_size, key_value, std::move(ctx)));
+  return {
+      absl::WrapUnique(new StatefulCmacBoringSsl(tag_size, std::move(ctx)))};
 }
-
-StatefulCmacBoringSsl::StatefulCmacBoringSsl(uint32_t tag_size,
-                                             const std::string& key_value,
-                                             bssl::UniquePtr<CMAC_CTX> ctx)
-    : cmac_context_(std::move(ctx)),
-      tag_size_(tag_size),
-      key_value_(key_value) {}
 
 util::Status StatefulCmacBoringSsl::Update(absl::string_view data) {
   // BoringSSL expects a non-null pointer for data,

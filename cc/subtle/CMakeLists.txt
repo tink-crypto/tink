@@ -153,16 +153,14 @@ tink_cc_library(
     aes_cmac_boringssl.cc
     aes_cmac_boringssl.h
   DEPS
-    tink::subtle::common_enums
+    tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::core::mac
-    tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
     absl::memory
-    absl::strings
 )
 
 tink_cc_library(
@@ -294,6 +292,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::strings
+    absl::memory
 )
 
 tink_cc_library(
@@ -440,13 +439,11 @@ tink_cc_library(
     tink::subtle::random
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
-    tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
     absl::memory
-    absl::strings
 )
 
 tink_cc_library(
@@ -729,6 +726,7 @@ tink_cc_library(
       tink::subtle::mac::stateful_mac
       tink::util::status
       tink::util::statusor
+      absl::memory
 )
 
 tink_cc_library(
@@ -830,10 +828,12 @@ tink_cc_test(
     tink::subtle::aes_gcm_boringssl
     tink::subtle::wycheproof_util
     tink::core::aead
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
     absl::strings
+    gmock
     rapidjson
 )
 

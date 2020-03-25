@@ -17,18 +17,13 @@
 #include "tink/subtle/aes_ctr_boringssl.h"
 
 #include <string>
-#include <vector>
 
 #include "absl/memory/memory.h"
-#include "openssl/err.h"
 #include "openssl/evp.h"
-#include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
-#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -67,9 +62,9 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
   // the new memory.
   iv_block.resize(kBlockSize, '\0');
 
-  int ret = EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr /* engine */,
-                               reinterpret_cast<const uint8_t*>(key_.data()),
-                               reinterpret_cast<const uint8_t*>(&iv_block[0]));
+  int ret =
+      EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr /* engine */, key_.data(),
+                         reinterpret_cast<const uint8_t*>(&iv_block[0]));
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "could not initialize ctx");
   }

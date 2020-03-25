@@ -18,12 +18,10 @@
 #define TINK_SUBTLE_AES_CMAC_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
-#include "absl/strings/string_view.h"
 #include "tink/mac.h"
-#include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -44,21 +42,20 @@ class AesCmacBoringSsl : public Mac {
   crypto::tink::util::Status VerifyMac(absl::string_view mac,
                                        absl::string_view data) const override;
 
-  ~AesCmacBoringSsl() override {}
-
  private:
   // CMAC key sizes in bytes.
   // The small key size is used only to check RFC 4493's test vectors due to
   // the attack described in
   // https://www.math.uwaterloo.ca/~ajmeneze/publications/tightness.pdf. We
   // check this restriction in AesCmacManager.
-  static const size_t kSmallKeySize = 16;
-  static const size_t kBigKeySize = 32;
-  static const size_t kMaxTagSize = 16;
+  static constexpr size_t kSmallKeySize = 16;
+  static constexpr size_t kBigKeySize = 32;
+  static constexpr size_t kMaxTagSize = 16;
 
-  AesCmacBoringSsl(util::SecretData key_value, uint32_t tag_size);
+  AesCmacBoringSsl(util::SecretData key, uint32_t tag_size)
+      : key_(std::move(key)), tag_size_(tag_size) {}
 
-  const util::SecretData key_value_;
+  const util::SecretData key_;
   const uint32_t tag_size_;
 };
 

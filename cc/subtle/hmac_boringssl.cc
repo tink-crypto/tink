@@ -56,10 +56,6 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(HashType hash_type,
   return {absl::WrapUnique(new HmacBoringSsl(md, tag_size, std::move(key)))};
 }
 
-HmacBoringSsl::HmacBoringSsl(const EVP_MD* md, uint32_t tag_size,
-                             util::SecretData key)
-    : md_(md), tag_size_(tag_size), key_(std::move(key)) {}
-
 util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,

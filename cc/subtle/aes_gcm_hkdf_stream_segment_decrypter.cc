@@ -88,12 +88,12 @@ AesGcmHkdfStreamSegmentDecrypter::AesGcmHkdfStreamSegmentDecrypter(
     Params params)
     : ikm_(std::move(params.ikm)),
       hkdf_hash_(params.hkdf_hash),
-      header_size_(1 + params.derived_key_size +
-                   AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes),
-      ciphertext_segment_size_(params.ciphertext_segment_size),
-      ciphertext_offset_(params.ciphertext_offset),
       derived_key_size_(params.derived_key_size),
-      associated_data_(std::move(params.associated_data)) {}
+      ciphertext_offset_(params.ciphertext_offset),
+      ciphertext_segment_size_(params.ciphertext_segment_size),
+      associated_data_(std::move(params.associated_data)),
+      header_size_(1 + derived_key_size_ +
+                   AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes) {}
 
 // static
 util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>

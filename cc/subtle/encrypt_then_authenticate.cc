@@ -44,7 +44,7 @@ static const std::string longToBigEndianStr(uint64_t value) {
 util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
     std::unique_ptr<IndCpaCipher> ind_cpa_cipher, std::unique_ptr<Mac> mac,
     uint8_t tag_size) {
-  if (tag_size < MIN_TAG_SIZE_IN_BYTES) {
+  if (tag_size < kMinTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT, "tag size too small");
   }
   std::unique_ptr<Aead> aead(new EncryptThenAuthenticate(

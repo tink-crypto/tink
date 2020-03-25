@@ -59,11 +59,9 @@ class AesGcmSivBoringSsl : public Aead {
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
 
-  ~AesGcmSivBoringSsl() override {}
-
  private:
-  static const int IV_SIZE_IN_BYTES = 12;
-  static const int TAG_SIZE_IN_BYTES = 16;
+  static constexpr int kIvSizeInBytes = 12;
+  static constexpr int kTagSizeInBytes = 16;
 
   AesGcmSivBoringSsl() {}
   crypto::tink::util::Status Init(absl::string_view key_value);

@@ -44,9 +44,6 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> Ed25519VerifyBoringSsl::New(
   return std::move(verify);
 }
 
-Ed25519VerifyBoringSsl::Ed25519VerifyBoringSsl(absl::string_view public_key)
-    : public_key_(public_key) {}
-
 util::Status Ed25519VerifyBoringSsl::Verify(absl::string_view signature,
                                             absl::string_view data) const {
   signature = SubtleUtilBoringSSL::EnsureNonNull(signature);

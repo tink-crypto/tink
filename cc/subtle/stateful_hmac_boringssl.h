@@ -35,16 +35,15 @@ class StatefulHmacBoringSsl : public subtle::StatefulMac {
   util::Status Update(absl::string_view data) override;
   util::StatusOr<std::string> Finalize() override;
 
-  ~StatefulHmacBoringSsl() override {}
-
  private:
   // Minimum HMAC key size in bytes.
-  static const size_t kMinKeySize = 16;
-  StatefulHmacBoringSsl(uint32_t tag_size,
-                const std::string& key_value, bssl::UniquePtr<HMAC_CTX> ctx);
-  bssl::UniquePtr<HMAC_CTX> hmac_context_;
-  uint32_t tag_size_;
-  std::string key_value_;
+  static constexpr size_t kMinKeySize = 16;
+
+  StatefulHmacBoringSsl(uint32_t tag_size, bssl::UniquePtr<HMAC_CTX> ctx)
+      : hmac_context_(std::move(ctx)), tag_size_(tag_size) {}
+
+  const bssl::UniquePtr<HMAC_CTX> hmac_context_;
+  const uint32_t tag_size_;
 };
 
 }  // namespace subtle

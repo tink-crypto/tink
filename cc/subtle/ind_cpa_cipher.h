@@ -17,6 +17,8 @@
 #ifndef TINK_SUBTLE_IND_CPA_CIPHER_H_
 #define TINK_SUBTLE_IND_CPA_CIPHER_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"
 

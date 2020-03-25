@@ -159,16 +159,14 @@ cc_library(
     hdrs = ["aes_cmac_boringssl.h"],
     include_prefix = "tink/subtle",
     deps = [
-        ":common_enums",
+        ":subtle_util",
         ":subtle_util_boringssl",
         "//:mac",
-        "//util:errors",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -307,6 +305,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -461,13 +460,11 @@ cc_library(
         ":random",
         ":subtle_util",
         ":subtle_util_boringssl",
-        "//util:errors",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -781,6 +778,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -911,6 +909,7 @@ cc_test(
         ":aes_gcm_boringssl",
         ":wycheproof_util",
         "//:aead",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_util",

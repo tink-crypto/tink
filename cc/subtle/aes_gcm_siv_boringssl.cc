@@ -32,7 +32,8 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-static const EVP_AEAD* GetCipherForKeySize(int size_in_bytes) {
+namespace {
+const EVP_AEAD* GetCipherForKeySize(int size_in_bytes) {
   switch (size_in_bytes) {
     case 16:
       return EVP_aead_aes_128_gcm_siv();
@@ -42,6 +43,7 @@ static const EVP_AEAD* GetCipherForKeySize(int size_in_bytes) {
       return nullptr;
   }
 }
+}  // namespace
 
 util::Status AesGcmSivBoringSsl::Init(absl::string_view key_value) {
   const EVP_AEAD* aead = GetCipherForKeySize(key_value.size());
@@ -69,20 +71,20 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmSivBoringSsl::New(
 
 util::StatusOr<std::string> AesGcmSivBoringSsl::Encrypt(
     absl::string_view plaintext, absl::string_view additional_data) const {
-  std::string ciphertext = Random::GetRandomBytes(IV_SIZE_IN_BYTES);
+  std::string ciphertext = Random::GetRandomBytes(kIvSizeInBytes);
   ResizeStringUninitialized(
-      &ciphertext, IV_SIZE_IN_BYTES + plaintext.size() + TAG_SIZE_IN_BYTES);
+      &ciphertext, kIvSizeInBytes + plaintext.size() + kTagSizeInBytes);
   size_t len;
   if (EVP_AEAD_CTX_seal(
-          ctx_.get(), reinterpret_cast<uint8_t*>(&ciphertext[IV_SIZE_IN_BYTES]),
-          &len, ciphertext.size() - IV_SIZE_IN_BYTES,
-          reinterpret_cast<const uint8_t*>(&ciphertext[0]), IV_SIZE_IN_BYTES,
+          ctx_.get(), reinterpret_cast<uint8_t*>(&ciphertext[kIvSizeInBytes]),
+          &len, ciphertext.size() - kIvSizeInBytes,
+          reinterpret_cast<const uint8_t*>(&ciphertext[0]), kIvSizeInBytes,
           reinterpret_cast<const uint8_t*>(plaintext.data()), plaintext.size(),
           reinterpret_cast<const uint8_t*>(additional_data.data()),
           additional_data.size()) != 1) {
     return util::Status(util::error::INTERNAL, "Encryption failed");
   }
-  if (len != ciphertext.size() - IV_SIZE_IN_BYTES) {
+  if (len != ciphertext.size() - kIvSizeInBytes) {
     return util::Status(util::error::INTERNAL, "incorrect ciphertext size");
   }
   return ciphertext;
@@ -90,23 +92,22 @@ util::StatusOr<std::string> AesGcmSivBoringSsl::Encrypt(
 
 util::StatusOr<std::string> AesGcmSivBoringSsl::Decrypt(
     absl::string_view ciphertext, absl::string_view additional_data) const {
-  if (ciphertext.size() < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
+  if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
   }
 
   std::string plaintext;
   ResizeStringUninitialized(
-      &plaintext, ciphertext.size() - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES);
+      &plaintext, ciphertext.size() - kIvSizeInBytes - kTagSizeInBytes);
   size_t len;
   if (EVP_AEAD_CTX_open(
           ctx_.get(), reinterpret_cast<uint8_t*>(&plaintext[0]), &len,
           plaintext.size(),
-          // The nonce is the first |IV_SIZE_IN_BYTES| bytes of |ciphertext|.
-          reinterpret_cast<const uint8_t*>(ciphertext.data()), IV_SIZE_IN_BYTES,
+          // The nonce is the first |kIvSizeInBytes| bytes of |ciphertext|.
+          reinterpret_cast<const uint8_t*>(ciphertext.data()), kIvSizeInBytes,
           // The input is the remainder.
-          reinterpret_cast<const uint8_t*>(ciphertext.data()) +
-              IV_SIZE_IN_BYTES,
-          ciphertext.size() - IV_SIZE_IN_BYTES,
+          reinterpret_cast<const uint8_t*>(ciphertext.data()) + kIvSizeInBytes,
+          ciphertext.size() - kIvSizeInBytes,
           reinterpret_cast<const uint8_t*>(additional_data.data()),
           additional_data.size()) != 1) {
     return util::Status(util::error::INTERNAL, "Authentication failed");

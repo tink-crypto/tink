@@ -57,21 +57,18 @@ class EncryptThenAuthenticate : public Aead {
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
 
-  virtual ~EncryptThenAuthenticate() {}
-
  private:
-  static const int MIN_TAG_SIZE_IN_BYTES = 10;
+  static constexpr int kMinTagSizeInBytes = 10;
 
-  EncryptThenAuthenticate() {}
   EncryptThenAuthenticate(std::unique_ptr<IndCpaCipher> ind_cpa_cipher,
                           std::unique_ptr<Mac> mac, uint8_t tag_size)
       : ind_cpa_cipher_(std::move(ind_cpa_cipher)),
         mac_(std::move(mac)),
         tag_size_(tag_size) {}
 
-  std::unique_ptr<IndCpaCipher> ind_cpa_cipher_;
-  std::unique_ptr<Mac> mac_;
-  uint8_t tag_size_;
+  const std::unique_ptr<IndCpaCipher> ind_cpa_cipher_;
+  const std::unique_ptr<Mac> mac_;
+  const uint8_t tag_size_;
 };
 
 }  // namespace subtle

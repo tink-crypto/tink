@@ -100,16 +100,16 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
 
   // Parameters set upon decrypter creation.
   // All sizes are in bytes.
-  util::SecretData ikm_;
-  HashType hkdf_hash_;
-  int header_size_;
-  int ciphertext_segment_size_;
-  int ciphertext_offset_;
-  int derived_key_size_;
-  std::string associated_data_;
-  bool is_initialized_ = false;
+  const util::SecretData ikm_;
+  const HashType hkdf_hash_;
+  const int derived_key_size_;
+  const int ciphertext_offset_;
+  const int ciphertext_segment_size_;
+  const std::string associated_data_;
+  const int header_size_;
 
   // Parameters set when initializing with data from stream header.
+  bool is_initialized_ = false;
   std::vector<uint8_t> salt_;
   std::vector<uint8_t> nonce_prefix_;
   bssl::ScopedEVP_AEAD_CTX ctx_;

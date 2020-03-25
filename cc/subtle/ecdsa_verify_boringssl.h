@@ -47,11 +47,10 @@ class EcdsaVerifyBoringSsl : public PublicKeyVerify {
       absl::string_view signature,
       absl::string_view data) const override;
 
-  virtual ~EcdsaVerifyBoringSsl() {}
-
  private:
-  EcdsaVerifyBoringSsl(EC_KEY* key, const EVP_MD* hash,
-                       EcdsaSignatureEncoding encoding);
+  EcdsaVerifyBoringSsl(bssl::UniquePtr<EC_KEY> key, const EVP_MD* hash,
+                       EcdsaSignatureEncoding encoding)
+      : key_(std::move(key)), hash_(hash), encoding_(encoding) {}
 
   bssl::UniquePtr<EC_KEY> key_;
   const EVP_MD* hash_;  // Owned by BoringSSL.

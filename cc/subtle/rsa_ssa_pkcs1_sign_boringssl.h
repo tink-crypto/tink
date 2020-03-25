@@ -49,11 +49,12 @@ class RsaSsaPkcs1SignBoringSsl : public PublicKeySign {
   ~RsaSsaPkcs1SignBoringSsl() override = default;
 
  private:
-  const bssl::UniquePtr<RSA> private_key_;
-  const EVP_MD* sig_hash_;  // Owned by BoringSSL.
-
   RsaSsaPkcs1SignBoringSsl(bssl::UniquePtr<RSA> private_key,
-                           const EVP_MD* sig_hash);
+                           const EVP_MD* sig_hash)
+      : private_key_(std::move(private_key)), sig_hash_(sig_hash) {}
+
+  const bssl::UniquePtr<RSA> private_key_;
+  const EVP_MD* const sig_hash_;  // Owned by BoringSSL.
 };
 
 }  // namespace subtle

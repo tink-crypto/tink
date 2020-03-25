@@ -18,9 +18,10 @@
 #define TINK_SUBTLE_XCHACHA20_POLY1305_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
 #include "absl/strings/string_view.h"
-#include "openssl/evp.h"
+#include "openssl/base.h"
 #include "tink/aead.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -52,10 +53,11 @@ class XChacha20Poly1305BoringSsl : public Aead {
   static constexpr int kNonceSize = 24;
   static constexpr int kTagSize = 16;
 
-  XChacha20Poly1305BoringSsl(util::SecretData key, const EVP_AEAD* aead);
+  XChacha20Poly1305BoringSsl(util::SecretData key, const EVP_AEAD* aead)
+      : key_(std::move(key)), aead_(aead) {}
 
   const util::SecretData key_;
-  const EVP_AEAD* aead_;
+  const EVP_AEAD* const aead_;
 };
 
 }  // namespace subtle

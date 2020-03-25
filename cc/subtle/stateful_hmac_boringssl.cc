@@ -48,15 +48,8 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
   }
 
   return std::unique_ptr<StatefulMac>(
-      new StatefulHmacBoringSsl(tag_size, key_value, std::move(ctx)));
+      new StatefulHmacBoringSsl(tag_size, std::move(ctx)));
 }
-
-StatefulHmacBoringSsl::StatefulHmacBoringSsl(uint32_t tag_size,
-                                               const std::string& key_value,
-                                               bssl::UniquePtr<HMAC_CTX> ctx)
-    : hmac_context_(std::move(ctx)),
-      tag_size_(tag_size),
-      key_value_(key_value) {}
 
 util::Status StatefulHmacBoringSsl::Update(absl::string_view data) {
   // BoringSSL expects a non-null pointer for data,
