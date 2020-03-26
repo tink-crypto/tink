@@ -25,6 +25,7 @@ from tink import core
 from tink import mac
 from tink import tink_config
 from tink.core import cleartext_keyset_handle
+from tink.core import keyset_handle
 
 
 def setUpModule():
@@ -33,23 +34,30 @@ def setUpModule():
 
 class CleartextKeysetHandleTest(absltest.TestCase):
 
-  def test_write(self):
-    handle = cleartext_keyset_handle.CleartextKeysetHandle.generate_new(
+  def test_write_read(self):
+    handle = keyset_handle.KeysetHandle.generate_new(
         mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     output_stream = io.BytesIO()
     writer = core.BinaryKeysetWriter(output_stream)
-    handle.write(writer)
+    cleartext_keyset_handle.write(writer, handle)
     reader = core.BinaryKeysetReader(output_stream.getvalue())
-    handle2 = cleartext_keyset_handle.CleartextKeysetHandle.read(reader)
+    handle2 = cleartext_keyset_handle.read(reader)
+    # Check that handle2 has the same primitive as handle.
+    handle2.primitive(mac.Mac).verify_mac(
+        handle.primitive(mac.Mac).compute_mac(b'data'), b'data')
+
+  def test_from_keyset(self):
+    handle = keyset_handle.KeysetHandle.generate_new(
+        mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    keyset = handle._keyset
+    handle2 = cleartext_keyset_handle.from_keyset(keyset)
     # Check that handle2 has the same primitive as handle.
     handle2.primitive(mac.Mac).verify_mac(
         handle.primitive(mac.Mac).compute_mac(b'data'), b'data')
 
   def test_read_empty_keyset_fails(self):
-    with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      cleartext_keyset_handle.CleartextKeysetHandle.read(
-          core.BinaryKeysetReader(b''))
-
+    with self.assertRaises(core.TinkError):
+      cleartext_keyset_handle.read(core.BinaryKeysetReader(b''))
 
 if __name__ == '__main__':
   absltest.main()

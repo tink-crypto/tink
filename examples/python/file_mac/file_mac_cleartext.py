@@ -75,8 +75,7 @@ def main(argv):
   with open(keyset_filename, 'rb') as keyset_file:
     try:
       text = keyset_file.read()
-      keyset = cleartext_keyset_handle.CleartextKeysetHandle(
-          tink.JsonKeysetReader(text).read())
+      keyset = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
     except tink.TinkError as e:
       logging.error('Error reading key: %s', e)
       return 1

@@ -25,6 +25,7 @@ import io
 # Special imports
 import six
 
+from typing import Union
 from google.protobuf import json_format
 from google3.third_party.tink.proto import tink_pb2
 from tink.core import tink_error
@@ -83,7 +84,7 @@ class BinaryKeysetWriter(KeysetWriter):
   cf. https://developers.google.com/protocol-buffers/docs/encoding
   """
 
-  def __init__(self, binary_io_stream: io.BufferedIOBase):
+  def __init__(self, binary_io_stream: Union[io.BufferedIOBase, io.BytesIO]):
     self._io_stream = binary_io_stream
 
   def write(self, keyset: tink_pb2.Keyset) -> None:
