@@ -23,6 +23,16 @@ set -x
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
+# Install Python 3.7 in Linux images on Kokoro
+if [[ "${PLATFORM}" != 'darwin' ]]; then
+  # Update python version list.
+  cd /home/kbuilder/.pyenv/plugins/python-build/../.. && git pull && cd -
+  # Install Python 3.7.1
+  eval "$(pyenv init -)"
+  pyenv install -v 3.7.1
+  pyenv global 3.7.1
+fi
+
 # TODO(b/140615798): Remove once fixed.
 DISABLE_GRPC_ON_MAC_OS=""
 if [[ "${PLATFORM}" == 'darwin' ]]; then
@@ -61,7 +71,10 @@ run_all_linux_tests() {
   )
   run_linux_tests "java"
   run_linux_tests "go"
-  run_linux_tests "python"
+  # TODO: Enable when working on MacOS
+  if [[ "${PLATFORM}" != 'darwin' ]]; then
+    run_linux_tests "python"
+  fi
   run_linux_tests "examples/cc"
   run_linux_tests "examples/java_src"
   run_linux_tests "tools"
@@ -129,6 +142,9 @@ main() {
 
   echo "using go: $(which go)"
   go version
+
+  echo "using python: $(which python)"
+  python --version
 
   run_all_linux_tests
 

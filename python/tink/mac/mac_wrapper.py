@@ -23,7 +23,7 @@ from absl import logging
 
 from typing import Type
 
-from google3.third_party.tink.proto import tink_pb2
+from proto import tink_pb2
 from tink.core import crypto_format
 from tink.core import primitive_set
 from tink.core import primitive_wrapper

@@ -12,12 +12,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/python_input_stream.h"
+#include "tink/cc/python_input_stream.h"
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/subtle/random.h"
-#include "tink/python/tink/cc/test_util.h"
+#include "tink/cc/test_util.h"
 
 namespace crypto {
 namespace tink {

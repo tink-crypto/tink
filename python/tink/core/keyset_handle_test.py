@@ -21,7 +21,7 @@ from __future__ import print_function
 import io
 
 from absl.testing import absltest
-from google3.third_party.tink.proto import tink_pb2
+from proto import tink_pb2
 from tink import aead
 from tink import core
 from tink import hybrid

@@ -23,7 +23,7 @@ import random
 from typing import Type, TypeVar
 
 from google.protobuf import message
-from google3.third_party.tink.proto import tink_pb2
+from proto import tink_pb2
 from tink.aead import aead
 from tink.core import keyset_reader as reader
 from tink.core import keyset_writer as writer

@@ -41,7 +41,7 @@
 
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/tink/cc/pybind/status_utils.h"
+#include "tink/cc/pybind/status_utils.h"
 
 namespace pybind11 {
 namespace detail {

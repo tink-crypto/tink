@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/cc_streaming_aead_wrappers.h"
+#include "tink/cc/cc_streaming_aead_wrappers.h"
 
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"

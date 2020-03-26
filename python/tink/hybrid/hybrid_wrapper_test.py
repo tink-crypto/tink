@@ -19,7 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from google3.third_party.tink.proto import tink_pb2
+from proto import tink_pb2
 from tink import core
 from tink.hybrid import hybrid_decrypt
 from tink.hybrid import hybrid_decrypt_wrapper

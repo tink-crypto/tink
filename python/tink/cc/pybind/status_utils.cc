@@ -14,11 +14,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/pybind/status_utils.h"
+#include "tink/cc/pybind/status_utils.h"
 
 #include <pybind11/pybind11.h>
 
-#include "tink/python/tink/cc/pybind/import_helper.h"
+#include "tink/cc/pybind/import_helper.h"
 
 namespace pybind11 {
 namespace google {
@@ -30,7 +30,7 @@ void ImportStatusModule() {
   // certain to cut out any overhead.
   static bool imported_already = false;
   if (!imported_already) {
-    crypto::tink::ImportTinkPythonModule("python.tink.cc.pybind.status");
+    crypto::tink::ImportTinkPythonModule("cc.pybind.status");
     imported_already = true;
   }
 }

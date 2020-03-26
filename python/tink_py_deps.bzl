@@ -17,6 +17,14 @@ def tink_py_deps():
             sha256 = "de39bc4d6605e6d395faf5e07516c64c8d833404ee3eb132b5ff1161f9617dec",
         )
 
+    if not native.existing_rule("pybind11"):
+        http_archive(
+            name = "pybind11",
+            build_file = "@pybind11_bazel//:pybind11.BUILD",
+            strip_prefix = "pybind11-2.4.3",
+            urls = ["https://github.com/pybind/pybind11/archive/v2.4.3.tar.gz"],
+        )
+
     if not native.existing_rule("pybind11_bazel"):
         # Commit from 2019-12-19
         http_archive(

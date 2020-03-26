@@ -24,9 +24,9 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from google3.third_party.tink.proto import common_pb2
-from google3.third_party.tink.proto import hmac_pb2
-from google3.third_party.tink.proto import tink_pb2
+from proto import common_pb2
+from proto import hmac_pb2
+from proto import tink_pb2
 
 
 def create_hmac_key_template(

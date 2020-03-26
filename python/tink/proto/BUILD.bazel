@@ -1,0 +1,19 @@
+load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+# cc protos
+cc_proto_library(
+    name = "common_cc_proto",
+    deps = ["@tink_base//proto:common_proto"],
+)
+cc_proto_library(
+    name = "config_cc_proto",
+    deps = ["@tink_base//proto:config_proto"],
+)
+cc_proto_library(
+    name = "tink_cc_proto",
+    deps = ["@tink_base//proto:tink_proto"],
+)

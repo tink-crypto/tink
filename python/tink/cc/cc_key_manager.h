@@ -20,12 +20,11 @@
 #include <algorithm>
 #include <vector>
 
-#include "third_party/pybind11/include/pybind11/pybind11.h"
+#include "pybind11/pybind11.h"
 #include "tink/key_manager.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "proto/tink.proto.h"
 
 namespace crypto {
 namespace tink {

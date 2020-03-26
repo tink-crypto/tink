@@ -16,10 +16,10 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from google3.third_party.tink.proto import aes_ctr_hmac_streaming_pb2
-from google3.third_party.tink.proto import aes_gcm_hkdf_streaming_pb2
-from google3.third_party.tink.proto import common_pb2
-from google3.third_party.tink.proto import tink_pb2
+from proto import aes_ctr_hmac_streaming_pb2
+from proto import aes_gcm_hkdf_streaming_pb2
+from proto import common_pb2
+from proto import tink_pb2
 from tink.streaming_aead import streaming_aead_key_templates
 
 

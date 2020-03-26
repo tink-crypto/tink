@@ -14,10 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/input_stream_adapter.h"
+#include "tink/cc/input_stream_adapter.h"
 
-#include "third_party/pybind11/include/pybind11/pybind11.h"
-#include "tink/python/tink/cc/pybind/status_casters.h"
+#include "pybind11/pybind11.h"
+#include "tink/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {

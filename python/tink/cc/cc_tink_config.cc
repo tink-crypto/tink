@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/cc_tink_config.h"
+#include "tink/cc/cc_tink_config.h"
 
 #include "tink/config/tink_config.h"
 

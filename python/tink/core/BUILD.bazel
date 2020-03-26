@@ -1,8 +1,210 @@
 load("@rules_python//python:defs.bzl", "py_library")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_visibility = ["//:__subpackages__"],
+)
+
+py_library(
+    name = "core",
+    srcs = ["__init__.py"],
+    deps = [
+        ":crypto_format",
+        ":key_manager",
+        ":keyset_handle",
+        ":keyset_reader",
+        ":keyset_writer",
+        ":primitive_set",
+        ":primitive_wrapper",
+        ":registry",
+        ":tink_error",
+    ],
+)
+
+py_library(
+    name = "key_manager",
+    srcs = ["key_manager.py"],
+    deps = [
+        ":tink_error",
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
 
 py_library(
     name = "tink_error",
     srcs = ["tink_error.py"],
+    deps = [
+        "//tink/cc/pybind:status",
+    ],
+)
+
+py_library(
+    name = "registry",
+    srcs = ["registry.py"],
+    deps = [
+        ":key_manager",
+        ":primitive_set",
+        ":primitive_wrapper",
+        ":tink_error",
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "registry_test",
+    srcs = ["registry_test.py"],
+    deps = [
+        ":core",
+        requirement("absl-py"),
+        "@tink_base//proto:tink_py_pb2",
+        "//tink/aead",
+        "//tink/mac",
+        "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "crypto_format",
+    srcs = ["crypto_format.py"],
+    deps = [
+        ":tink_error",
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "crypto_format_test",
+    srcs = ["crypto_format_test.py"],
+    deps = [
+        ":core",
+        ":crypto_format",
+        requirement("absl-py"),
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "keyset_reader",
+    srcs = ["keyset_reader.py"],
+    deps = [
+        ":tink_error",
+        requirement("six"),
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "keyset_reader_test",
+    srcs = ["keyset_reader_test.py"],
+    deps = [
+        ":core",
+        requirement("absl-py"),
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "primitive_set",
+    srcs = ["primitive_set.py"],
+    deps = [
+        ":crypto_format",
+        ":tink_error",
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "primitive_set_test",
+    srcs = ["primitive_set_test.py"],
+    deps = [
+        ":core",
+        ":crypto_format",
+        requirement("absl-py"),
+        "@tink_base//proto:tink_py_pb2",
+        "//tink/aead",
+        "//tink/mac",
+        "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "primitive_wrapper",
+    srcs = ["primitive_wrapper.py"],
+    deps = [
+        ":primitive_set",
+        requirement("six"),
+    ],
+)
+
+py_library(
+    name = "keyset_writer",
+    srcs = ["keyset_writer.py"],
+    deps = [
+        ":tink_error",
+        requirement("six"),
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "keyset_writer_test",
+    srcs = ["keyset_writer_test.py"],
+    deps = [
+        ":core",
+        requirement("absl-py"),
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "keyset_handle",
+    srcs = ["keyset_handle.py"],
+    deps = [
+        ":keyset_reader",
+        ":keyset_writer",
+        ":primitive_set",
+        ":registry",
+        ":tink_error",
+        "@tink_base//proto:tink_py_pb2",
+        "//tink/aead:aead_primitive",
+    ],
+)
+
+py_test(
+    name = "keyset_handle_test",
+    srcs = ["keyset_handle_test.py"],
+    deps = [
+        ":core",
+        requirement("absl-py"),
+        "@tink_base//proto:ecies_aead_hkdf_py_pb2",
+        "@tink_base//proto:tink_py_pb2",
+        "//tink:tink_config",
+        "//tink/aead",
+        "//tink/hybrid",
+        "//tink/mac",
+        "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "cleartext_keyset_handle",
+    srcs = ["cleartext_keyset_handle.py"],
+    deps = [
+        ":keyset_handle",
+        ":keyset_reader",
+        ":keyset_writer",
+        "@tink_base//proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "cleartext_keyset_handle_test",
+    srcs = ["cleartext_keyset_handle_test.py"],
+    deps = [
+        ":cleartext_keyset_handle",
+        ":core",
+        requirement("absl-py"),
+        "//tink:tink_config",
+        "//tink/mac",
+    ],
 )

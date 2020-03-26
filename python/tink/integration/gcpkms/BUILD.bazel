@@ -64,6 +64,7 @@ py_library(
         requirement("protobuf"),
         requirement("googleapis-common-protos"),
         requirement("google-api-core"),
+        requirement("google-auth"),
         requirement("google-cloud-kms"),
     ]
 )

@@ -15,7 +15,7 @@
 #ifndef TINK_PYTHON_CC_TEST_UTIL_H_
 #define TINK_PYTHON_CC_TEST_UTIL_H_
 
-#include "tink/python/tink/cc/python_file_object_adapter.h"
+#include "tink/cc/python_file_object_adapter.h"
 #include "tink/streaming_aead.h"
 #include "absl/base/thread_annotations.h"
 #include "absl/strings/str_cat.h"

@@ -20,7 +20,7 @@ from __future__ import print_function
 
 from absl.testing import absltest
 
-from google3.third_party.tink.proto import tink_pb2
+from proto import tink_pb2
 from tink.core import primitive_set
 from tink.signature import public_key_sign
 from tink.signature import public_key_sign_wrapper

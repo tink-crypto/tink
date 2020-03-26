@@ -21,7 +21,7 @@ from __future__ import print_function
 
 import struct
 
-from google3.third_party.tink.proto import tink_pb2
+from proto import tink_pb2
 from tink.core import tink_error
 
 TINK_START_BYTE = b'\x01'

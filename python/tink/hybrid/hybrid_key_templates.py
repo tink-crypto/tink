@@ -25,9 +25,9 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from google3.third_party.tink.proto import common_pb2
-from google3.third_party.tink.proto import ecies_aead_hkdf_pb2
-from google3.third_party.tink.proto import tink_pb2
+from proto import common_pb2
+from proto import ecies_aead_hkdf_pb2
+from proto import tink_pb2
 from tink.aead import aead_key_templates
 
 

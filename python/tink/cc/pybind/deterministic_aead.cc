@@ -16,9 +16,9 @@
 
 #include "tink/deterministic_aead.h"
 
-#include "third_party/pybind11/include/pybind11/pybind11.h"
+#include "pybind11/pybind11.h"
 #include "tink/util/statusor.h"
-#include "tink/python/tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {

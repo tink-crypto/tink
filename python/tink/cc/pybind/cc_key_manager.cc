@@ -14,11 +14,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/cc_key_manager.h"
+#include "tink/cc/cc_key_manager.h"
 
 #include <memory>
 
-#include "third_party/pybind11/include/pybind11/pybind11.h"
+#include "pybind11/pybind11.h"
 #include "tink/aead.h"
 #include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
@@ -27,8 +27,8 @@
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/streaming_aead.h"
-#include "tink/python/tink/cc/pybind/import_helper.h"
-#include "tink/python/tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/import_helper.h"
+#include "tink/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {
@@ -41,7 +41,7 @@ std::unique_ptr<pybind11::class_<CcKeyManager<PrimitiveType>>> WrapCcKeyManager(
     const char* py_class_docstring, const char* primitive_module_name) {
   namespace py = pybind11;
   ImportTinkPythonModule(
-      (std::string("python.tink.cc.pybind.") + primitive_module_name).c_str());
+      (std::string("cc.pybind.") + primitive_module_name).c_str());
   auto cls = absl::make_unique<py::class_<CcKeyManager<PrimitiveType>>>(
       m, py_class_name, py_class_docstring);
   cls->def_static("from_cc_registry",

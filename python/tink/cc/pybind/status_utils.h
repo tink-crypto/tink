@@ -22,6 +22,7 @@
 #include <pybind11/pybind11.h>
 
 #include <exception>
+#include <functional>
 
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

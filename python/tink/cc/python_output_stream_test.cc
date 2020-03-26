@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/python_output_stream.h"
+#include "tink/cc/python_output_stream.h"
 
 #include <memory>
 
@@ -23,7 +23,7 @@
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/tink/cc/test_util.h"
+#include "tink/cc/test_util.h"
 
 namespace crypto {
 namespace tink {

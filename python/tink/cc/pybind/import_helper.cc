@@ -14,29 +14,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/pybind/import_helper.h"
+#include "tink/cc/pybind/import_helper.h"
 
 #include <pybind11/pybind11.h>
-
 #include <string>
 
-// The value of THIRD_PARTY_TINK_PYTHON_IMPORT_PATH will be different depending
-// on whether this is being built inside or outside of google3. The value used
-// inside of google3 is defined here. Outside of google3, change this value by
-// passing "-DTHIRD_PARTY_TINK_PYTHON_IMPORT_PATH=..." on the commandline.
-#ifndef THIRD_PARTY_TINK_PYTHON_IMPORT_PATH
-#define THIRD_PARTY_TINK_PYTHON_IMPORT_PATH google3.third_party.tink
-#endif
+#include "absl/strings/str_cat.h"
+
+
 
 namespace crypto {
 namespace tink {
 
-void ImportTinkPythonModule(const char* relative_import_path) {
-  std::string full_path =
-      PYBIND11_TOSTRING(THIRD_PARTY_TINK_PYTHON_IMPORT_PATH);
-  if (relative_import_path && (*relative_import_path)) {
-    full_path += ".";
-    full_path += relative_import_path;
+void ImportTinkPythonModule(const std::string& relative_import_path) {
+  std::string full_path = "tink";
+  if (!relative_import_path.empty()) {
+    absl::StrAppend(&full_path, ".", relative_import_path);
   }
   pybind11::module::import(full_path.c_str());
 }

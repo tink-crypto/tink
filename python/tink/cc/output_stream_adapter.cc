@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/output_stream_adapter.h"
+#include "tink/cc/output_stream_adapter.h"
 
 #include <algorithm>
 

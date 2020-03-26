@@ -20,11 +20,11 @@
 #include "absl/strings/string_view.h"
 #include "tink/streaming_aead.h"
 #include "tink/util/statusor.h"
-#include "tink/python/tink/cc/input_stream_adapter.h"
-#include "tink/python/tink/cc/output_stream_adapter.h"
-#include "tink/python/tink/cc/python_file_object_adapter.h"
-#include "tink/python/tink/cc/python_input_stream.h"
-#include "tink/python/tink/cc/python_output_stream.h"
+#include "tink/cc/input_stream_adapter.h"
+#include "tink/cc/output_stream_adapter.h"
+#include "tink/cc/python_file_object_adapter.h"
+#include "tink/cc/python_input_stream.h"
+#include "tink/cc/python_output_stream.h"
 
 namespace crypto {
 namespace tink {

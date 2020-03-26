@@ -20,7 +20,7 @@
 #include "tink/input_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/python/tink/cc/python_file_object_adapter.h"
+#include "tink/cc/python_file_object_adapter.h"
 
 namespace crypto {
 namespace tink {

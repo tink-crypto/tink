@@ -17,13 +17,15 @@
 #ifndef TINK_PYTHON_TINK_CC_PYBIND_IMPORT_HELPER_H_
 #define TINK_PYTHON_TINK_CC_PYBIND_IMPORT_HELPER_H_
 
+#include <string>
+
 namespace crypto {
 namespace tink {
 
 // relative_import_path is relative to the tink directory, e.g.,
 // "python.cc.pybind.cc_key_manager". The absolute import path to the
 // tink directory is determined via a define in import_helper.cc.
-void ImportTinkPythonModule(const char* relative_import_path);
+void ImportTinkPythonModule(const std::string& relative_import_path);
 
 }  // namespace tink
 }  // namespace crypto

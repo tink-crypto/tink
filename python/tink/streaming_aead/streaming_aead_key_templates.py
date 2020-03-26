@@ -26,10 +26,10 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from google3.third_party.tink.proto import aes_ctr_hmac_streaming_pb2
-from google3.third_party.tink.proto import aes_gcm_hkdf_streaming_pb2
-from google3.third_party.tink.proto import common_pb2
-from google3.third_party.tink.proto import tink_pb2
+from proto import aes_ctr_hmac_streaming_pb2
+from proto import aes_gcm_hkdf_streaming_pb2
+from proto import common_pb2
+from proto import tink_pb2
 
 _AES_GCM_HKDF_STREAMING_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey')

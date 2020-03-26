@@ -19,13 +19,13 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from google3.third_party.tink.proto import aes_eax_pb2
-from google3.third_party.tink.proto import aes_siv_pb2
-from google3.third_party.tink.proto import common_pb2
-from google3.third_party.tink.proto import ecdsa_pb2
-from google3.third_party.tink.proto import ecies_aead_hkdf_pb2
-from google3.third_party.tink.proto import hmac_pb2
-from google3.third_party.tink.proto import tink_pb2
+from proto import aes_eax_pb2
+from proto import aes_siv_pb2
+from proto import common_pb2
+from proto import ecdsa_pb2
+from proto import ecies_aead_hkdf_pb2
+from proto import hmac_pb2
+from proto import tink_pb2
 from tink.aead import aead_key_templates
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import cc_tink_config

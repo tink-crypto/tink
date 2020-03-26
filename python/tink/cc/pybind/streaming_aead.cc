@@ -16,7 +16,7 @@
 
 #include "tink/streaming_aead.h"
 
-#include "third_party/pybind11/include/pybind11/pybind11.h"
+#include "pybind11/pybind11.h"
 
 namespace crypto {
 namespace tink {

@@ -12,10 +12,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/python/tink/cc/cc_streaming_aead_wrappers.h"
+#include "tink/cc/cc_streaming_aead_wrappers.h"
 
 #include "gtest/gtest.h"
-#include "tink/python/tink/cc/test_util.h"
+#include "tink/cc/test_util.h"
 
 namespace crypto {
 namespace tink {
