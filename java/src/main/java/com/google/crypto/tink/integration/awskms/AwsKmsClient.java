@@ -24,10 +24,12 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.google.auto.service.AutoService;
+import com.google.common.base.Splitter;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
+import java.util.List;
 
 /**
  * An implementation of {@link KmsClient} for <a href="https://aws.amazon.com/kms/">AWS KMS</a>.
@@ -39,8 +41,8 @@ public final class AwsKmsClient implements KmsClient {
   /** The prefix of all keys stored in AWS KMS. */
   public static final String PREFIX = "aws-kms://";
 
-  private AWSKMS client;
   private String keyUri;
+  private AWSCredentialsProvider provider;
 
   /** Constructs a generic AwsKmsClient that is not bound to any specific key. */
   public AwsKmsClient() {}
@@ -112,17 +114,8 @@ public final class AwsKmsClient implements KmsClient {
   /** Loads AWS credentials from a provider. */
   public KmsClient withCredentialsProvider(AWSCredentialsProvider provider)
       throws GeneralSecurityException {
-    try {
-      String[] tokens = this.keyUri.split(":");
-      this.client =
-          AWSKMSClientBuilder.standard()
-              .withCredentials(provider)
-              .withRegion(Regions.fromName(tokens[4]))
-              .build();
-      return this;
-    } catch (AmazonServiceException e) {
-      throw new GeneralSecurityException("cannot load credentials from provider", e);
-    }
+    this.provider = provider;
+    return this;
   }
 
   @Override
@@ -132,6 +125,18 @@ public final class AwsKmsClient implements KmsClient {
           String.format(
               "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
     }
-    return new AwsKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
+
+    try {
+      String keyUri = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri);
+      List<String> tokens = Splitter.on(':').splitToList(keyUri);
+      AWSKMS client =
+          AWSKMSClientBuilder.standard()
+              .withCredentials(provider)
+              .withRegion(Regions.fromName(tokens.get(3)))
+              .build();
+      return new AwsKmsAead(client, keyUri);
+    } catch (AmazonServiceException e) {
+      throw new GeneralSecurityException("cannot load credentials from provider", e);
+    }
   }
 }
