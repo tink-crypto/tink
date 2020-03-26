@@ -2,9 +2,7 @@ load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
 licenses(["notice"])
 
-package(
-    default_visibility = ["//:__subpackages__"],
-)
+package(default_visibility = ["//:__subpackages__"])
 
 py_library(
     name = "file_object_adapter",
