@@ -17,9 +17,10 @@
 #ifndef TINK_PYTHON_CC_CC_KEY_MANAGER_H_
 #define TINK_PYTHON_CC_CC_KEY_MANAGER_H_
 
-#include <algorithm>
-#include <vector>
+#include <string>
 
+#include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "pybind11/pybind11.h"
 #include "tink/key_manager.h"
 #include "tink/registry.h"

@@ -22,8 +22,10 @@
 #include <unordered_map>
 
 #include "absl/base/thread_annotations.h"
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "absl/types/optional.h"
 #include "absl/synchronization/mutex.h"
 // placeholder for dllexport_macros.h
 #include "tink/catalogue.h"

@@ -16,9 +16,9 @@
 #ifndef TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 #define TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 
-#include <algorithm>
-#include <vector>
+#include <string>
 
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"

@@ -19,6 +19,8 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::hkdf_prf_cc_proto
     tink::proto::tink_cc_proto
+    absl::memory
+    absl::strings
 )
 
 tink_cc_library(

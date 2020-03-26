@@ -15,6 +15,8 @@
 #define TINK_CORE_KEY_MANAGER_IMPL_H_
 
 #include "absl/base/casts.h"
+#include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/key_manager.h"
 #include "tink/util/constants.h"

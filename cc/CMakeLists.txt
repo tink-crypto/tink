@@ -420,6 +420,8 @@ tink_cc_library(
     tink::util::validation
     tink::proto::tink_cc_proto
     absl::base
+    absl::memory
+    absl::optional
     absl::strings
     absl::synchronization
 )
@@ -558,6 +560,8 @@ tink_cc_library(
     tink::util::constants
     tink::util::status
     absl::base
+    absl::memory
+    absl::strings
 )
 
 tink_cc_library(
@@ -799,6 +803,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::validation
+    absl::memory
 )
 
 tink_cc_test(
