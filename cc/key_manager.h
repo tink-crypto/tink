@@ -17,10 +17,10 @@
 #ifndef TINK_KEY_MANAGER_H_
 #define TINK_KEY_MANAGER_H_
 
-#include <algorithm>
-#include <vector>
+#include <string>
 
-#include "absl/strings/string_view.h"
+#include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"

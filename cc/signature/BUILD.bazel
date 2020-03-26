@@ -137,6 +137,8 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "//util:validation",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -182,6 +184,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "//util:validation",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -241,6 +244,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "//util:validation",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -294,6 +298,8 @@ cc_library(
         "//util:protobuf_helper",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -672,8 +678,8 @@ cc_test(
     srcs = ["signature_pem_keyset_reader_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":signature_pem_keyset_reader",
         ":signature_config",
+        ":signature_pem_keyset_reader",
         "//:keyset_handle",
         "//:keyset_reader",
         "//proto:common_cc_proto",

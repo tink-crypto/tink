@@ -17,6 +17,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::aes_siv_cc_proto
+    absl::memory
     absl::strings
 )
 

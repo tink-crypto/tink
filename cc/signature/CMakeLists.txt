@@ -126,6 +126,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::ecdsa_cc_proto
+    absl::memory
     absl::strings
 )
 
@@ -170,6 +171,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::ed25519_cc_proto
+    absl::memory
     absl::strings
 )
 
@@ -227,6 +229,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::rsa_ssa_pkcs1_cc_proto
+    absl::memory
     absl::strings
 )
 
@@ -276,6 +279,8 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::rsa_ssa_pss_cc_proto
     tink::proto::tink_cc_proto
+    absl::memory
+    absl::strings
 )
 
 tink_cc_library(

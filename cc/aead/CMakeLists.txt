@@ -117,6 +117,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::aes_eax_cc_proto
+    absl::memory
     absl::strings
 )
 
@@ -140,6 +141,8 @@ tink_cc_library(
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
     absl::base
+    absl::memory
+    absl::strings
 )
 
 tink_cc_library(
@@ -161,6 +164,8 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
     absl::base
+    absl::memory
+    absl::strings
 )
 
 tink_cc_library(
@@ -190,6 +195,8 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
     absl::base
+    absl::memory
+    absl::strings
 )
 
 tink_cc_library(
@@ -208,6 +215,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::xchacha20_poly1305_cc_proto
+    absl::memory
     absl::strings
 )
 
@@ -224,6 +232,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::kms_aead_cc_proto
+    absl::memory
     absl::strings
 )
 

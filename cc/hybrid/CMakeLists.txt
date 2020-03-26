@@ -202,6 +202,8 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+    absl::strings
+    absl::memory
 )
 
 # tests

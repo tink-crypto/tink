@@ -16,10 +16,10 @@
 #ifndef TINK_MAC_HMAC_KEY_MANAGER_H_
 #define TINK_MAC_HMAC_KEY_MANAGER_H_
 
-#include <algorithm>
-#include <vector>
+#include <string>
 
-#include "absl/strings/string_view.h"
+#include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/mac.h"
 #include "tink/subtle/hmac_boringssl.h"
