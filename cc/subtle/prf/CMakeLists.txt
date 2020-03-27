@@ -36,6 +36,22 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME prf_set_util
+  SRCS
+    prf_set_util.cc
+    prf_set_util.h
+  DEPS
+    tink::prf::prf_set
+    tink::util::input_stream_util
+    tink::util::status
+    tink::util::statusor
+    tink::subtle::mac::stateful_mac
+    tink::subtle::prf::streaming_prf
+    absl::strings
+    absl::memory
+)
+
 tink_cc_test(
   NAME hkdf_streaming_prf_test
   SRCS hkdf_streaming_prf_test.cc
@@ -61,5 +77,20 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     gmock
+    absl::strings
+)
+
+tink_cc_test(
+  NAME prf_set_util_test
+  SRCS prf_set_util_test.cc
+  DEPS
+    tink::core::input_stream
+    tink::util::istream_input_stream
+    tink::util::status
+    tink::util::test_matchers
+    tink::subtle::prf::prf_set_util
+    tink::subtle::prf::streaming_prf
+    gmock
+    absl::memory
     absl::strings
 )

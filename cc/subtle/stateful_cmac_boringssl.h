@@ -23,6 +23,7 @@
 #include "openssl/evp.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/mac/stateful_mac.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -35,7 +36,7 @@ class StatefulCmacBoringSsl : public subtle::StatefulMac {
  public:
   // Key must be 16 or 32 bytes, all other sizes will be rejected.
   static util::StatusOr<std::unique_ptr<StatefulMac>> New(
-      uint32_t tag_size, const std::string& key_value);
+      uint32_t tag_size, const util::SecretData& key_value);
   util::Status Update(absl::string_view data) override;
   util::StatusOr<std::string> Finalize() override;
 
@@ -49,6 +50,17 @@ class StatefulCmacBoringSsl : public subtle::StatefulMac {
 
   const bssl::UniquePtr<CMAC_CTX> cmac_context_;
   const uint32_t tag_size_;
+};
+
+class StatefulCmacBoringSslFactory : public subtle::StatefulMacFactory {
+ public:
+  StatefulCmacBoringSslFactory(uint32_t tag_size,
+                               const util::SecretData& key_value);
+  util::StatusOr<std::unique_ptr<StatefulMac>> Create() const override;
+
+ private:
+  const uint32_t tag_size_;
+  const util::SecretData key_value_;
 };
 
 }  // namespace subtle

@@ -706,10 +706,12 @@ tink_cc_library(
       stateful_hmac_boringssl.cc
       stateful_hmac_boringssl.h
     DEPS
-      tink::subtle::common_enums
-      tink::subtle::subtle_util_boringssl
+      absl::memory
       crypto
+      tink::subtle::common_enums
       tink::subtle::mac::stateful_mac
+      tink::subtle::subtle_util_boringssl
+      tink::util::secret_data
       tink::util::status
       tink::util::statusor
 )
@@ -720,13 +722,14 @@ tink_cc_library(
       stateful_cmac_boringssl.cc
       stateful_cmac_boringssl.h
     DEPS
-      tink::subtle::common_enums
-      tink::subtle::subtle_util_boringssl
+      absl::memory
       crypto
+      tink::subtle::common_enums
       tink::subtle::mac::stateful_mac
+      tink::subtle::subtle_util_boringssl
+      tink::util::secret_data
       tink::util::status
       tink::util::statusor
-      absl::memory
 )
 
 tink_cc_library(
@@ -739,7 +742,6 @@ tink_cc_library(
     absl::strings
     crypto
     tink::subtle::subtle_util_boringssl
-    tink::subtle::mac::stateful_mac
     tink::util::status
     tink::util::statusor
 )
@@ -1277,10 +1279,12 @@ tink_cc_test(
   NAME stateful_hmac_boringssl_test
   SRCS stateful_hmac_boringssl_test.cc
   DEPS
+    absl::memory
     tink::subtle::common_enums
     tink::subtle::stateful_hmac_boringssl
     tink::subtle::wycheproof_util
     tink::subtle::test_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
@@ -1291,10 +1295,12 @@ tink_cc_test(
   NAME stateful_cmac_boringssl_test
   SRCS stateful_cmac_boringssl_test.cc
   DEPS
+    absl::memory
     tink::subtle::common_enums
     tink::subtle::stateful_cmac_boringssl
     tink::subtle::wycheproof_util
     tink::subtle::test_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util

@@ -19,8 +19,10 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/wycheproof_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -37,11 +39,11 @@ constexpr size_t kSmallTagSize = 10;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::HasSubstr;
-
-class StatefulCmacBoringSslTest : public ::testing::Test {};
+using ::testing::StrEq;
 
 void EmptyCmac(uint32_t tag_size, std::string key, std::string expected) {
-  auto cmac_result = StatefulCmacBoringSsl::New(tag_size, key);
+  auto cmac_result =
+      StatefulCmacBoringSsl::New(tag_size, util::SecretDataFromStringView(key));
   EXPECT_THAT(cmac_result.status(), IsOk());
   auto cmac = std::move(cmac_result.ValueOrDie());
   auto result = cmac->Finalize();
@@ -52,7 +54,7 @@ void EmptyCmac(uint32_t tag_size, std::string key, std::string expected) {
   EXPECT_EQ(tag, expected);
 }
 
-TEST_F(StatefulCmacBoringSslTest, testEmpty) {
+TEST(StatefulCmacBoringSslTest, testEmpty) {
   std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
 
   std::string expected(
@@ -65,7 +67,8 @@ TEST_F(StatefulCmacBoringSslTest, testEmpty) {
 
 void BasicCmac(uint32_t tag_size, std::string key, std::string data,
                std::string expected) {
-  auto cmac_result = StatefulCmacBoringSsl::New(tag_size, key);
+  auto cmac_result =
+      StatefulCmacBoringSsl::New(tag_size, util::SecretDataFromStringView(key));
   EXPECT_THAT(cmac_result.status(), IsOk());
   auto cmac = std::move(cmac_result.ValueOrDie());
 
@@ -79,7 +82,7 @@ void BasicCmac(uint32_t tag_size, std::string key, std::string data,
   EXPECT_EQ(tag, expected);
 }
 
-TEST_F(StatefulCmacBoringSslTest, testBasic) {
+TEST(StatefulCmacBoringSslTest, testBasic) {
   std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   std::string data = "Some data to test.";
 
@@ -94,7 +97,8 @@ TEST_F(StatefulCmacBoringSslTest, testBasic) {
 void MultipleUpdateCmac(uint32_t tag_size, std::string key, std::string data1,
                         std::string data2, std::string data3, std::string data4,
                         std::string expected) {
-  auto cmac_result = StatefulCmacBoringSsl::New(tag_size, key);
+  auto cmac_result =
+      StatefulCmacBoringSsl::New(tag_size, util::SecretDataFromStringView(key));
   EXPECT_THAT(cmac_result.status(), IsOk());
   auto cmac = std::move(cmac_result.ValueOrDie());
 
@@ -115,7 +119,7 @@ void MultipleUpdateCmac(uint32_t tag_size, std::string key, std::string data1,
   EXPECT_EQ(tag, expected);
 }
 
-TEST_F(StatefulCmacBoringSslTest, testMultipleUpdates) {
+TEST(StatefulCmacBoringSslTest, testMultipleUpdates) {
   std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   std::string data1 = "Some ", data2 = "data ", data3 = "to ", data4 = "test.";
 
@@ -131,12 +135,13 @@ TEST_F(StatefulCmacBoringSslTest, testMultipleUpdates) {
                      expected_small);
 }
 
-TEST_F(StatefulCmacBoringSslTest, testInvalidKeySizes) {
+TEST(StatefulCmacBoringSslTest, testInvalidKeySizes) {
   size_t tag_size = 16;
 
   for (int keysize = 0; keysize < 65; keysize++) {
     std::string key(keysize, 'x');
-    auto cmac_result = StatefulCmacBoringSsl::New(tag_size, key);
+    auto cmac_result = StatefulCmacBoringSsl::New(
+        tag_size, util::SecretDataFromStringView(key));
     if (keysize == 16 || keysize == 32) {
       EXPECT_THAT(cmac_result.status(), IsOk());
     } else {
@@ -147,31 +152,24 @@ TEST_F(StatefulCmacBoringSslTest, testInvalidKeySizes) {
   }
 }
 
-class StatefulCmacBoringSslTestVectorTest
-    : public ::testing::TestWithParam<std::pair<int, std::string>> {
- public:
-  // Utility to simplify testing with test vectors.
-  // Arguments and result are hexadecimal.
-  void StatefulCmacVerifyHex(const std::string &key_hex,
-                             const std::string &msg_hex,
-                             const std::string &tag_hex) {
-    std::string key = test::HexDecodeOrDie(key_hex);
-    std::string tag = test::HexDecodeOrDie(tag_hex);
-    std::string msg = test::HexDecodeOrDie(msg_hex);
-    auto create_result = StatefulCmacBoringSsl::New(tag.size(), key);
-    EXPECT_THAT(create_result.status(), IsOk());
-    auto cmac = std::move(create_result.ValueOrDie());
+TEST(StatefulCmacFactoryTest, createsObjects) {
+  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  std::string data = "Some data to test.";
 
-    auto update_result = cmac->Update(msg);
-    EXPECT_THAT(update_result, IsOk());
-
-    auto finalize_result = cmac->Finalize();
-    EXPECT_THAT(finalize_result.status(), IsOk());
-    auto result = finalize_result.ValueOrDie();
-
-    EXPECT_EQ(result, tag);
-  }
-};
+  std::string expected(
+      test::HexDecodeOrDie("c856e183e8dee9bb99402d54c34f3222"));
+  BasicCmac(kTagSize, key, data, expected);
+  auto factory = absl::make_unique<StatefulCmacBoringSslFactory>(
+      kTagSize, util::SecretDataFromStringView(key));
+  auto stateful_cmac_or = factory->Create();
+  ASSERT_THAT(stateful_cmac_or.status(), IsOk());
+  auto stateful_cmac = std::move(stateful_cmac_or.ValueOrDie());
+  EXPECT_THAT(stateful_cmac->Update(data), IsOk());
+  auto output_or = stateful_cmac->Finalize();
+  ASSERT_THAT(output_or.status(), IsOk());
+  auto output = output_or.ValueOrDie();
+  EXPECT_THAT(output, StrEq(expected));
+}
 
 // Test with test vectors from Wycheproof project.
 bool WycheproofTest(const rapidjson::Document &root) {
@@ -191,7 +189,8 @@ bool WycheproofTest(const rapidjson::Document &root) {
       std::string id = absl::StrCat(test["tcId"].GetInt());
       std::string expected = test["result"].GetString();
 
-      auto create_result = StatefulCmacBoringSsl::New(tag.length(), key);
+      auto create_result = StatefulCmacBoringSsl::New(
+          tag.length(), util::SecretDataFromStringView(key));
       EXPECT_THAT(create_result.status(), IsOk());
       auto cmac = std::move(create_result.ValueOrDie());
 
@@ -221,7 +220,7 @@ bool WycheproofTest(const rapidjson::Document &root) {
   return errors == 0;
 }
 
-TEST_F(StatefulCmacBoringSslTest, TestVectors) {
+TEST(StatefulCmacBoringSslTest, TestVectors) {
   std::unique_ptr<rapidjson::Document> root256 =
       WycheproofUtil::ReadTestVectors("aes_cmac_test.json");
   ASSERT_TRUE(WycheproofTest(*root256));

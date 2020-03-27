@@ -69,7 +69,7 @@ class PrfSet {
   virtual uint32_t GetPrimaryId() const = 0;
   // A map of the PRFs represented by the keys in this keyset.
   // The map is guaranteed to contain getPrimaryId() as a key.
-  virtual std::map<uint32_t, Prf*> GetPrfs() const = 0;
+  virtual const std::map<uint32_t, Prf*>& GetPrfs() const = 0;
   // Convenience method to compute the primary PRF on a given input.
   // See PRF.compute for details of the parameters.
   util::StatusOr<std::string> ComputePrimary(absl::string_view input,

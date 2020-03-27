@@ -36,10 +36,10 @@ class DummyPrf : public Prf {
 class DummyPrfSet : public PrfSet {
  public:
   uint32_t GetPrimaryId() const override { return 1; }
-  std::map<uint32_t, Prf*> GetPrfs() const override {
-    std::map<uint32_t, Prf*> prfs;
-    prfs.insert({1, dummy_.get()});
-    return prfs;
+  const std::map<uint32_t, Prf*>& GetPrfs() const override {
+    static const std::map<uint32_t, Prf*>* prfs =
+        new std::map<uint32_t, Prf*>({{1, dummy_.get()}});
+    return *prfs;
   }
 
  private:
@@ -49,8 +49,10 @@ class DummyPrfSet : public PrfSet {
 class BrokenDummyPrfSet : public PrfSet {
  public:
   uint32_t GetPrimaryId() const override { return 1; }
-  std::map<uint32_t, Prf*> GetPrfs() const override {
-    return std::map<uint32_t, Prf*>();
+  const std::map<uint32_t, Prf*>& GetPrfs() const override {
+    static const std::map<uint32_t, Prf*>* prfs =
+        new std::map<uint32_t, Prf*>();
+    return *prfs;
   }
 };
 
