@@ -131,6 +131,12 @@ class SignatureKeyTemplates {
 
   // Returns a KeyTemplate that generates new instances of Ed25519PrivateKey.
   static const google::crypto::tink::KeyTemplate& Ed25519();
+
+  // Returns a KeyTemplate that generates new instances of Ed25519PrivateKey.
+  // The difference between Ed25519WithRawOutput and Ed25519 is the format of
+  // signatures generated. Ed25519WithRawOutput generates signatures of
+  // OutputPrefixType::RAW format, which is 64 bytes long.
+  static const google::crypto::tink::KeyTemplate& Ed25519WithRawOutput();
 };
 
 }  // namespace tink

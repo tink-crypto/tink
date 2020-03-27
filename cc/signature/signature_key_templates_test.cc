@@ -409,6 +409,31 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithEd25519) {
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 
+TEST(SignatureKeyTemplatesTest, KeyTemplatesWithEd25519WithRawOutput) {
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
+  const KeyTemplate& key_template =
+      SignatureKeyTemplates::Ed25519WithRawOutput();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 =
+      SignatureKeyTemplates::Ed25519WithRawOutput();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the key manager works with the template.
+  Ed25519SignKeyManager sign_key_type_manager;
+  Ed25519VerifyKeyManager verify_key_type_manager;
+  auto key_manager = internal::MakePrivateKeyManager<PublicKeySign>(
+      &sign_key_type_manager, &verify_key_type_manager);
+
+  EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+  Ed25519KeyFormat key_format;
+  auto new_key_result = key_manager->get_key_factory().NewKey(key_format);
+  EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

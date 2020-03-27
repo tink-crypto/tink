@@ -149,6 +149,14 @@ public class SignatureKeyTemplatesTest {
   }
 
   @Test
+  public void testED25519WithRawOutput() throws Exception {
+    KeyTemplate template = SignatureKeyTemplates.ED25519WithRawOutput;
+    assertEquals(new Ed25519PrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
+    assertTrue(template.getValue().isEmpty()); // Empty format.
+  }
+
+  @Test
   public void testRSA_SSA_PKCS1_3072_SHA256_F4() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA256_F4;
     assertEquals(new RsaSsaPkcs1SignKeyManager().getKeyType(), template.getTypeUrl());
