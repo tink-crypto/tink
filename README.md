@@ -49,7 +49,7 @@ the Bazel team and makes it easy to ensure usage of a version of Bazel that's
 compatible with the project.
 
 As a starting point, the [`hello world
-examples`](https://github.com/google/tink/tree/master/examples/helloworld)
+examples`](https://github.com/google/tink/tree/master/examples)
 demonstrate performing simple tasks using Tink in a variety of languages.
 
 ## Overview
