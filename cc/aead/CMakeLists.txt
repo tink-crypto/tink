@@ -1,5 +1,7 @@
 tink_module(aead)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME aead_wrapper
   SRCS
