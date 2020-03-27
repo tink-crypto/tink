@@ -16,6 +16,7 @@
 #ifndef TINK_CORE_TEMPLATE_UTIL_H_
 #define TINK_CORE_TEMPLATE_UTIL_H_
 
+#include <cstddef>
 #include <tuple>
 #include <type_traits>
 
@@ -23,6 +24,10 @@
 
 namespace crypto {
 namespace tink {
+
+// A list of types
+template <typename... P>
+struct List {};
 
 namespace internal {
 
@@ -63,6 +68,19 @@ class HasDuplicates<First, List...>
     : public absl::disjunction<
           OccursInTuple<First, typename std::tuple<List...>>,
           HasDuplicates<List...>> {};
+
+// The class IndexOf. Defines ::value as zero-based index of first element of
+// type T in the List.
+template <typename T, typename List>
+struct IndexOf;
+template <typename T, typename... Elements>
+struct IndexOf<T, List<T, Elements...>>
+    : public std::integral_constant<std::size_t, 0> {};
+template <typename T, typename E, typename... Elements>
+struct IndexOf<T, List<E, Elements...>>
+    : public std::integral_constant<std::size_t,
+                                    1 + IndexOf<T, List<Elements...>>::value> {
+};
 
 }  // namespace internal
 }  // namespace tink

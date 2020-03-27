@@ -20,11 +20,13 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
+namespace {
 class C0 {};
 class C1 {};
 class C2 {};
 class C3 {};
 class C4 {};
+}  // namespace
 
 static_assert(!HasDuplicates<>::value, "");
 static_assert(!HasDuplicates<C0>::value, "");
@@ -37,6 +39,16 @@ static_assert(HasDuplicates<C0, C1, C0>::value, "");
 static_assert(HasDuplicates<C0, C1, C1>::value, "");
 static_assert(HasDuplicates<C0, C0, C1>::value, "");
 static_assert(HasDuplicates<C0, C1, C2, C3, C1, C4>::value, "");
+
+static_assert(IndexOf<C0, List<C0, C1, C2, C3>>::value == 0, "");
+static_assert(IndexOf<C1, List<C0, C1, C2, C3>>::value == 1, "");
+static_assert(IndexOf<C2, List<C0, C1, C2, C3>>::value == 2, "");
+static_assert(IndexOf<C3, List<C0, C1, C2, C3>>::value == 3, "");
+
+static_assert(IndexOf<C0, List<C0, C1, C2, C3, C1>>::value == 0, "");
+static_assert(IndexOf<C1, List<C0, C1, C2, C3, C1>>::value == 1, "");
+static_assert(IndexOf<C2, List<C0, C1, C2, C3, C1>>::value == 2, "");
+static_assert(IndexOf<C3, List<C0, C1, C2, C3, C1>>::value == 3, "");
 
 }  // namespace internal
 }  // namespace tink

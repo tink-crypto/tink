@@ -541,8 +541,7 @@ tink_cc_library(
   SRCS
     core/key_type_manager.h
   DEPS
-    absl::hash
-    absl::flat_hash_map
+    absl::strings
     tink::core::input_stream
     tink::proto::tink_cc_proto
     tink::util::status
