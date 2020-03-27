@@ -438,7 +438,7 @@ public final class Registry {
    *   * The class implementing the existing key manager differs from the given one.
    *   * The value of newKeyAllowed currently registered is false, but the input parameter is true.
    */
-  private static synchronized <P> void ensureKeyManagerInsertable(
+  private static synchronized void ensureKeyManagerInsertable(
       String typeUrl, Class<?> implementingClass, boolean newKeyAllowed)
       throws GeneralSecurityException {
     if (!keyManagerMap.containsKey(typeUrl)) {
