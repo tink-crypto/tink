@@ -19,7 +19,7 @@
 
 goog.module('tink.subtle.Random');
 
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
 
 /**
  * Randomly generates `n` bytes.

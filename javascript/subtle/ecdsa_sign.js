@@ -16,7 +16,7 @@ goog.module('tink.subtle.EcdsaSign');
 
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const PublicKeySign = goog.require('tink.PublicKeySign');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Validators = goog.require('tink.subtle.Validators');
 
 /**

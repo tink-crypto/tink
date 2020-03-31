@@ -15,7 +15,7 @@
 goog.module('tink.signature.EcdsaUtil');
 
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Util = goog.require('tink.Util');
 const Validators = goog.require('tink.subtle.Validators');
 const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding: PbEcdsaSignatureEncodingType} = goog.require('google3.third_party.tink.javascript.internal.proto');

@@ -17,7 +17,7 @@ goog.module('tink.subtle.EciesHkdfKemSender');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Hkdf = goog.require('tink.subtle.Hkdf');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 /**
  * HKDF-based ECIES-KEM (key encapsulation mechanism) for ECIES sender.

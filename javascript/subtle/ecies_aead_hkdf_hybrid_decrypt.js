@@ -20,7 +20,7 @@ const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper'
 const EciesHkdfKemRecipient = goog.require('tink.subtle.EciesHkdfKemRecipient');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const HybridDecrypt = goog.require('tink.HybridDecrypt');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 /**
  * Implementation of ECIES AEAD HKDF hybrid decryption.

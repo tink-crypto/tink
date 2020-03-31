@@ -19,9 +19,9 @@ const AesCtr = goog.require('tink.subtle.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Hmac = goog.require('tink.subtle.Hmac');
 const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
 const Mac = goog.require('tink.Mac');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Validators = goog.require('tink.subtle.Validators');
 
 /**

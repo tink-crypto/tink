@@ -18,7 +18,7 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 /**
  * @final

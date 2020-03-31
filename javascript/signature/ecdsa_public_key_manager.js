@@ -18,7 +18,7 @@ const EcdsaUtil = goog.require('tink.signature.EcdsaUtil');
 const EcdsaVerify = goog.require('tink.subtle.EcdsaVerify');
 const KeyManager = goog.require('tink.KeyManager');
 const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Util = goog.require('tink.Util');
 const {PbEcdsaParams, PbEcdsaPublicKey, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

@@ -15,7 +15,7 @@
 goog.module('tink.hybrid.EciesAeadHkdfValidators');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Validators = goog.require('tink.subtle.Validators');
 const {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

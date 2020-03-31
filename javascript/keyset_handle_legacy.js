@@ -15,14 +15,14 @@
 goog.module('tink.KeysetHandle');
 
 const Aead = goog.require('tink.Aead');
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetReader = goog.require('tink.KeysetReader');
 const KeysetWriter = goog.require('tink.KeysetWriter');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Util = goog.require('tink.Util');
 const {PbKeyMaterialType, PbKeyStatusType, PbKeyTemplate, PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

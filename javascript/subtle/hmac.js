@@ -15,7 +15,7 @@
 goog.module('tink.subtle.Hmac');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
 const Mac = goog.require('tink.Mac');
 const Validators = goog.require('tink.subtle.Validators');
 
