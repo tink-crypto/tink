@@ -35,6 +35,20 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Streaming
 	if err != nil {
 		return nil, fmt.Errorf("streamingaead_factory: cannot obtain primitive set: %s", err)
 	}
+
+	_, ok := (ps.Primary.Primitive).(tink.StreamingAEAD)
+	if !ok {
+		return nil, fmt.Errorf("streamingaead_factory: not a StreamingAEAD primitive")
+	}
+
+	for _, primitives := range ps.Entries {
+		for _, p := range primitives {
+			if _, ok := (p.Primitive).(tink.StreamingAEAD); !ok {
+				return nil, fmt.Errorf("streamingaead_factory: not a StreamingAEAD primitive")
+			}
+		}
+	}
+
 	ret := new(wrappedStreamingAEAD)
 	ret.ps = ps
 	return tink.StreamingAEAD(ret), nil
@@ -55,7 +69,11 @@ var _ tink.StreamingAEAD = (*wrappedStreamingAEAD)(nil)
 // and has to be passed in as parameter for decryption.
 func (s *wrappedStreamingAEAD) NewEncryptingWriter(w io.Writer, aad []byte) (io.WriteCloser, error) {
 	primary := s.ps.Primary
-	p := (primary.Primitive).(tink.StreamingAEAD)
+	p, ok := (primary.Primitive).(tink.StreamingAEAD)
+	if !ok {
+		return nil, fmt.Errorf("streamingaead_factory: not a StreamingAEAD primitive")
+	}
+
 	return p.NewEncryptingWriter(w, aad)
 }
 

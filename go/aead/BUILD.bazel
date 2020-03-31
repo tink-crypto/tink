@@ -59,6 +59,7 @@ go_test(
         "//core/cryptofmt:go_default_library",
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
+        "//signature:go_default_library",
         "//proto:aes_ctr_hmac_aead_go_proto",
         "//proto:aes_gcm_go_proto",
         "//proto:chacha20_poly1305_go_proto",

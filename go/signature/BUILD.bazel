@@ -51,6 +51,7 @@ go_test(
     deps = [
         "//core/cryptofmt:go_default_library",
         "//core/registry:go_default_library",
+        "//mac:go_default_library",
         "//proto:common_go_proto",
         "//proto:ecdsa_go_proto",
         "//proto:ed25519_go_proto",
