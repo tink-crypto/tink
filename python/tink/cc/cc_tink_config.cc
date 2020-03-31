@@ -25,9 +25,5 @@ util::Status CcTinkConfigRegister() {
   return TinkConfig::Register();
 }
 
-const google::crypto::tink::RegistryConfig& CcTinkConfigLatest() {
-  return TinkConfig::Latest();
-}
-
 }  // namespace tink
 }  // namespace crypto

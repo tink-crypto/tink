@@ -19,14 +19,11 @@
 
 #include "tink/util/status.h"
 #include "tink/registry.h"
-#include "proto/config.pb.h"
 
 namespace crypto {
 namespace tink {
 
 crypto::tink::util::Status CcTinkConfigRegister();
-
-const google::crypto::tink::RegistryConfig& CcTinkConfigLatest();
 
 }  // namespace tink
 }  // namespace crypto

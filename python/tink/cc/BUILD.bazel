@@ -10,7 +10,6 @@ cc_library(
         "@tink_cc",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
-        "//tink/proto:tink_cc_proto",
     ],
 )
 
@@ -22,7 +21,6 @@ cc_library(
         "@tink_cc",
         "@tink_cc//config:tink_config",
         "@tink_cc//util:status",
-        "//tink/proto:config_cc_proto",
     ],
 )
 
