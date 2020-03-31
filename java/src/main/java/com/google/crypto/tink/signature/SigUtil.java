@@ -26,7 +26,7 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums;
 import java.security.GeneralSecurityException;
 
-final class SigUtil {
+public final class SigUtil {
   static final String INVALID_PARAMS = "Invalid ECDSA parameters";
 
   /**
