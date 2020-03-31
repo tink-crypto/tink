@@ -26,11 +26,11 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from proto import common_pb2
-from proto import ecdsa_pb2
-from proto import rsa_ssa_pkcs1_pb2
-from proto import rsa_ssa_pss_pb2
-from proto import tink_pb2
+from tink.proto import common_pb2
+from tink.proto import ecdsa_pb2
+from tink.proto import rsa_ssa_pkcs1_pb2
+from tink.proto import rsa_ssa_pss_pb2
+from tink.proto import tink_pb2
 
 _prefix = 'type.googleapis.com/google.crypto.tink.'
 _ECDSA_KEY_TYPE_URL = _prefix + 'EcdsaPrivateKey'

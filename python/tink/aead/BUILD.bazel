@@ -47,9 +47,9 @@ py_test(
         requirement("absl-py"),
         "//tink:tink_config",
         "//tink/core:tink_error",
-        "@tink_base//proto:aes_eax_py_pb2",
-        "@tink_base//proto:aes_gcm_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_eax_py_pb2",
+        "//tink/proto:aes_gcm_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -76,7 +76,7 @@ py_test(
         "//tink/core:primitive_set",
         "//tink/core:tink_error",
         "//tink/testing:helper",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -85,11 +85,11 @@ py_library(
     srcs = ["aead_key_templates.py"],
     srcs_version = "PY2AND3",
     deps = [
-        "@tink_base//proto:aes_ctr_hmac_aead_py_pb2",
-        "@tink_base//proto:aes_eax_py_pb2",
-        "@tink_base//proto:aes_gcm_py_pb2",
-        "@tink_base//proto:common_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_ctr_hmac_aead_py_pb2",
+        "//tink/proto:aes_eax_py_pb2",
+        "//tink/proto:aes_gcm_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -99,11 +99,11 @@ py_test(
     deps = [
         ":aead_key_templates",
         requirement("absl-py"),
-        "@tink_base//proto:aes_ctr_hmac_aead_py_pb2",
-        "@tink_base//proto:aes_eax_py_pb2",
-        "@tink_base//proto:aes_gcm_py_pb2",
-        "@tink_base//proto:common_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_ctr_hmac_aead_py_pb2",
+        "//tink/proto:aes_eax_py_pb2",
+        "//tink/proto:aes_gcm_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -114,7 +114,7 @@ py_library(
         ":aead_primitive",
         "//tink/core",
         "//tink/core:tink_error",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -129,6 +129,6 @@ py_test(
         "//tink:tink_config",
         "//tink/core",
         "//tink/core:tink_error",
-        "@tink_base//proto:aes_gcm_py_pb2",
+        "//tink/proto:aes_gcm_py_pb2",
     ],
 )

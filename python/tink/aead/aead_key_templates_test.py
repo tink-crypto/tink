@@ -19,11 +19,11 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from proto import aes_ctr_hmac_aead_pb2
-from proto import aes_eax_pb2
-from proto import aes_gcm_pb2
-from proto import common_pb2
-from proto import tink_pb2
+from tink.proto import aes_ctr_hmac_aead_pb2
+from tink.proto import aes_eax_pb2
+from tink.proto import aes_gcm_pb2
+from tink.proto import common_pb2
+from tink.proto import tink_pb2
 from tink.aead import aead_key_templates
 
 

@@ -22,7 +22,7 @@ from __future__ import print_function
 import collections
 from typing import Generic, List, Type, TypeVar
 
-from proto import tink_pb2
+from tink.proto import tink_pb2
 from tink.core import crypto_format
 from tink.core import tink_error
 

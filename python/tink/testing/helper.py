@@ -21,7 +21,7 @@ from __future__ import print_function
 
 from typing import Text
 
-from proto import tink_pb2
+from tink.proto import tink_pb2
 from tink import aead
 from tink import daead
 from tink import hybrid

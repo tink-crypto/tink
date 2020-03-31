@@ -19,9 +19,9 @@ from __future__ import print_function
 
 from absl.testing import absltest
 
-from proto import common_pb2
-from proto import hmac_pb2
-from proto import tink_pb2
+from tink.proto import common_pb2
+from tink.proto import hmac_pb2
+from tink.proto import tink_pb2
 
 from tink import core
 from tink import tink_config

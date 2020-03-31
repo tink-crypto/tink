@@ -79,7 +79,7 @@ py_library(
         "//tink/cc/pybind:streaming_aead",
         "//tink/core:key_manager",
         "//tink/core:tink_error",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -96,9 +96,9 @@ py_test(
         "//tink/core:tink_error",
         "//tink/cc/pybind:input_stream_adapter",
         "//tink/cc/pybind:output_stream_adapter",
-        "@tink_base//proto:aes_ctr_hmac_streaming_py_pb2",
-        "@tink_base//proto:aes_gcm_hkdf_streaming_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
+        "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -106,10 +106,10 @@ py_library(
     name = "streaming_aead_key_templates",
     srcs = ["streaming_aead_key_templates.py"],
     deps = [
-        "@tink_base//proto:aes_ctr_hmac_streaming_py_pb2",
-        "@tink_base//proto:aes_gcm_hkdf_streaming_py_pb2",
-        "@tink_base//proto:common_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
+        "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -120,10 +120,10 @@ py_test(
     deps = [
         ":streaming_aead_key_templates",
         requirement("absl-py"),
-        "@tink_base//proto:aes_ctr_hmac_streaming_py_pb2",
-        "@tink_base//proto:aes_gcm_hkdf_streaming_py_pb2",
-        "@tink_base//proto:common_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
+        "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 

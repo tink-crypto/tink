@@ -21,7 +21,7 @@ from __future__ import print_function
 import struct
 from absl.testing import absltest
 
-from proto import aes_gcm_pb2
+from tink.proto import aes_gcm_pb2
 from tink import core
 from tink import tink_config
 from tink.aead import aead

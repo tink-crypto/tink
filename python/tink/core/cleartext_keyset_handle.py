@@ -23,7 +23,7 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from proto import tink_pb2
+from tink.proto import tink_pb2
 from tink.core import keyset_handle as handle
 from tink.core import keyset_reader as reader
 from tink.core import keyset_writer as writer

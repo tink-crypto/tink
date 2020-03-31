@@ -46,7 +46,7 @@ py_test(
     deps = [
         ":tink_config",
         requirement("absl-py"),
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:tink_py_pb2",
         "//tink/aead",
         "//tink/core",
         "//tink/daead",

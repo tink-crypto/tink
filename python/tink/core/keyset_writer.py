@@ -27,7 +27,7 @@ import six
 
 from typing import Union
 from google.protobuf import json_format
-from proto import tink_pb2
+from tink.proto import tink_pb2
 from tink.core import tink_error
 
 

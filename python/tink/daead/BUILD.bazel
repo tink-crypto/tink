@@ -27,7 +27,7 @@ py_library(
     srcs = ["deterministic_aead_key_manager.py"],
     deps = [
         ":daead_primitive",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:tink_py_pb2",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/core:key_manager",
         "//tink/core:tink_error",
@@ -42,8 +42,8 @@ py_test(
         ":deterministic_aead_key_manager",
         ":deterministic_aead_key_templates",
         requirement("absl-py"),
-        "@tink_base//proto:aes_siv_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_siv_py_pb2",
+        "//tink/proto:tink_py_pb2",
         "//tink:tink_config",
         "//tink/core:tink_error",
     ],
@@ -53,8 +53,8 @@ py_library(
     name = "deterministic_aead_key_templates",
     srcs = ["deterministic_aead_key_templates.py"],
     deps = [
-        "@tink_base//proto:aes_siv_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_siv_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -64,8 +64,8 @@ py_test(
     deps = [
         ":deterministic_aead_key_templates",
         requirement("absl-py"),
-        "@tink_base//proto:aes_siv_py_pb2",
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:aes_siv_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -89,7 +89,7 @@ py_test(
         ":daead_primitive",
         ":deterministic_aead_wrapper",
         requirement("absl-py"),
-        "@tink_base//proto:tink_py_pb2",
+        "//tink/proto:tink_py_pb2",
         "//tink/core:primitive_set",
         "//tink/core:tink_error",
         "//tink/testing:helper",

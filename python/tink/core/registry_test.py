@@ -15,7 +15,7 @@
 """Tests for tink.python.tink.registry."""
 from absl.testing import absltest
 
-from proto import tink_pb2
+from tink.proto import tink_pb2
 
 from tink import aead
 from tink import core

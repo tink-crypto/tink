@@ -25,8 +25,8 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from proto import aes_siv_pb2
-from proto import tink_pb2
+from tink.proto import aes_siv_pb2
+from tink.proto import tink_pb2
 
 
 _AES_SIV_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.AesSivKey'

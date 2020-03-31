@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import struct
 
-from proto import tink_pb2
+from tink.proto import tink_pb2
 from tink import core
 from tink.aead import aead
 from tink.core import tink_error

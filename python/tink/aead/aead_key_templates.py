@@ -25,11 +25,11 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from proto import aes_ctr_hmac_aead_pb2
-from proto import aes_eax_pb2
-from proto import aes_gcm_pb2
-from proto import common_pb2
-from proto import tink_pb2
+from tink.proto import aes_ctr_hmac_aead_pb2
+from tink.proto import aes_eax_pb2
+from tink.proto import aes_gcm_pb2
+from tink.proto import common_pb2
+from tink.proto import tink_pb2
 
 _AES_EAX_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.AesEaxKey'
 _AES_GCM_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.AesGcmKey'

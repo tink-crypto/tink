@@ -21,7 +21,7 @@ from __future__ import print_function
 
 from typing import Any, Text, Tuple, Type, TypeVar
 
-from proto import tink_pb2
+from tink.proto import tink_pb2
 from tink.core import key_manager as km_module
 from tink.core import primitive_set as pset_module
 from tink.core import primitive_wrapper

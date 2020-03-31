@@ -25,7 +25,7 @@ import six
 
 from typing import Text
 
-from proto import tink_pb2
+from tink.proto import tink_pb2
 from tink.core import tink_error
 from google.protobuf import json_format
 from google.protobuf import message

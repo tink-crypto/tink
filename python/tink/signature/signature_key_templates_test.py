@@ -21,11 +21,11 @@ from __future__ import print_function
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from proto import common_pb2
-from proto import ecdsa_pb2
-from proto import rsa_ssa_pkcs1_pb2
-from proto import rsa_ssa_pss_pb2
-from proto import tink_pb2
+from tink.proto import common_pb2
+from tink.proto import ecdsa_pb2
+from tink.proto import rsa_ssa_pkcs1_pb2
+from tink.proto import rsa_ssa_pss_pb2
+from tink.proto import tink_pb2
 from tink import tink_config
 from tink.signature import public_key_sign_key_manager
 from tink.signature import signature_key_templates
