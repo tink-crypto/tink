@@ -24,7 +24,6 @@ from tink import daead
 from tink import hybrid
 from tink import mac
 from tink import signature
-from tink import streaming_aead
 from tink import tink_config
 
 
@@ -35,7 +34,6 @@ HybridEncrypt = hybrid.HybridEncrypt
 Mac = mac.Mac
 PublicKeySign = signature.PublicKeySign
 PublicKeyVerify = signature.PublicKeyVerify
-StreamingAead = streaming_aead.StreamingAead
 
 KeyManager = core.KeyManager
 PrivateKeyManager = core.PrivateKeyManager

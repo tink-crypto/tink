@@ -187,6 +187,7 @@ py_test(
 py_library(
     name = "cleartext_keyset_handle",
     srcs = ["cleartext_keyset_handle.py"],
+    visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
         ":keyset_reader",

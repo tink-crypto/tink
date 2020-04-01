@@ -74,6 +74,7 @@ run_all_linux_tests() {
   # TODO: Enable when working on MacOS
   if [[ "${PLATFORM}" != 'darwin' ]]; then
     run_linux_tests "python"
+    run_linux_tests "examples/python"
   fi
   run_linux_tests "examples/cc"
   run_linux_tests "examples/java_src"
