@@ -20,11 +20,15 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/input_stream.h"
+#include "tink/prf/prf_set.h"
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
+#include "tink/subtle/prf/prf_set_util.h"
 #include "tink/subtle/prf/streaming_prf.h"
 #include "tink/subtle/random.h"
 #include "tink/util/constants.h"
 #include "tink/util/enums.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -39,7 +43,7 @@ namespace tink {
 class HkdfPrfKeyManager
     : public KeyTypeManager<google::crypto::tink::HkdfPrfKey,
                             google::crypto::tink::HkdfPrfKeyFormat,
-                            List<StreamingPrf>> {
+                            List<StreamingPrf, PrfSet>> {
  public:
   class StreamingPrfFactory : public PrimitiveFactory<StreamingPrf> {
     crypto::tink::util::StatusOr<std::unique_ptr<StreamingPrf>> Create(
@@ -50,8 +54,23 @@ class HkdfPrfKeyManager
     }
   };
 
+  class PrfSetFactory : public PrimitiveFactory<PrfSet> {
+    crypto::tink::util::StatusOr<std::unique_ptr<PrfSet>> Create(
+        const google::crypto::tink::HkdfPrfKey& key) const override {
+      auto hkdf_result = subtle::HkdfStreamingPrf::New(
+          crypto::tink::util::Enums::ProtoToSubtle(key.params().hash()),
+          util::SecretDataFromStringView(key.key_value()), key.params().salt());
+      if (!hkdf_result.ok()) {
+        return hkdf_result.status();
+      }
+      return subtle::CreatePrfSetFromPrf(subtle::CreatePrfFromStreamingPrf(
+          std::move(hkdf_result.ValueOrDie())));
+    }
+  };
+
   HkdfPrfKeyManager()
-      : KeyTypeManager(absl::make_unique<StreamingPrfFactory>()) {}
+      : KeyTypeManager(absl::make_unique<StreamingPrfFactory>(),
+                       absl::make_unique<PrfSetFactory>()) {}
 
   uint32_t get_version() const override { return 0; }
 
@@ -74,7 +93,10 @@ class HkdfPrfKeyManager
 
   crypto::tink::util::Status ValidateKeyFormat(
       const google::crypto::tink::HkdfPrfKeyFormat& key_format) const override {
-    crypto::tink::util::Status status = ValidateKeySize(key_format.key_size());
+    crypto::tink::util::Status status =
+        ValidateVersion(key_format.version(), get_version());
+    if (!status.ok()) return status;
+    status = ValidateKeySize(key_format.key_size());
     if (!status.ok()) return status;
     return ValidateParams(key_format.params());
   }
@@ -86,6 +108,25 @@ class HkdfPrfKeyManager
     *key.mutable_params() = key_format.params();
     key.set_key_value(
         crypto::tink::subtle::Random::GetRandomBytes(key_format.key_size()));
+    return key;
+  }
+
+  crypto::tink::util::StatusOr<google::crypto::tink::HkdfPrfKey> DeriveKey(
+      const google::crypto::tink::HkdfPrfKeyFormat& key_format,
+      InputStream* input_stream) const override {
+    auto status = ValidateKeyFormat(key_format);
+    if (!status.ok()) {
+      return status;
+    }
+    crypto::tink::util::StatusOr<std::string> randomness =
+        ReadBytesFromStream(key_format.key_size(), input_stream);
+    if (!randomness.ok()) {
+      return randomness.status();
+    }
+    google::crypto::tink::HkdfPrfKey key;
+    key.set_version(get_version());
+    *key.mutable_params() = key_format.params();
+    key.set_key_value(randomness.ValueOrDie());
     return key;
   }
 

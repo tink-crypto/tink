@@ -7,11 +7,14 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::core::input_stream
     tink::core::key_type_manager
+    tink::prf::prf_set
     tink::subtle::subtle
     tink::subtle::prf::hkdf_streaming_prf
+    tink::subtle::prf::prf_set_util
     tink::subtle::prf::streaming_prf
     tink::util::constants
     tink::util::enums
+    tink::util::input_stream_util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -43,6 +46,7 @@ tink_cc_library(
   DEPS
     tink::prf::aes_cmac_prf_key_manager
     tink::prf::hmac_prf_key_manager
+    tink::prf::hkdf_prf_key_manager
     tink::proto::aes_cmac_prf_cc_proto
     tink::proto::hkdf_prf_cc_proto
     tink::proto::hmac_prf_cc_proto
@@ -117,9 +121,11 @@ tink_cc_test(
   DEPS
     tink::prf::hkdf_prf_key_manager
     tink::subtle::prf::hkdf_streaming_prf
+    tink::subtle::prf::prf_set_util
     tink::subtle::prf::streaming_prf
     tink::subtle::subtle
     tink::util::input_stream_util
+    tink::util::istream_input_stream
     tink::util::secret_data
     tink::util::test_matchers
     tink::util::test_util
