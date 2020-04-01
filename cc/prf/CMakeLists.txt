@@ -42,6 +42,7 @@ tink_cc_library(
     prf_key_templates.cc
   DEPS
     tink::prf::aes_cmac_prf_key_manager
+    tink::prf::hmac_prf_key_manager
     tink::proto::aes_cmac_prf_cc_proto
     tink::proto::hkdf_prf_cc_proto
     tink::proto::hmac_prf_cc_proto
@@ -83,6 +84,33 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME hmac_prf_key_manager
+  SRCS
+    hmac_prf_key_manager.cc
+    hmac_prf_key_manager.h
+  DEPS
+    tink::core::key_type_manager
+    tink::core::key_manager
+    tink::proto::hmac_prf_cc_proto
+    tink::proto::tink_cc_proto
+    tink::subtle::common_enums
+    tink::subtle::random
+    tink::subtle::stateful_hmac_boringssl
+    tink::subtle::prf::prf_set_util
+    tink::util::constants
+    tink::util::errors
+    tink::util::enums
+    tink::util::input_stream_util
+    tink::util::protobuf_helper
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    absl::memory
+    absl::strings
+)
+
 tink_cc_test(
   NAME hkdf_prf_key_manager_test
   SRCS hkdf_prf_key_manager_test.cc
@@ -104,9 +132,11 @@ tink_cc_test(
   SRCS prf_key_templates_test.cc
   DEPS
     tink::prf::aes_cmac_prf_key_manager
+    tink::prf::hmac_prf_key_manager
     tink::prf::hkdf_prf_key_manager
     tink::prf::prf_key_templates
     tink::proto::aes_cmac_prf_cc_proto
+    tink::proto::hmac_prf_cc_proto
     tink::util::test_matchers
     absl::memory
     gmock
@@ -131,6 +161,23 @@ tink_cc_test(
     tink::proto::aes_cmac_prf_cc_proto
     tink::subtle::aes_cmac_boringssl
     tink::util::istream_input_stream
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    gmock
+)
+
+tink_cc_test(
+  NAME hmac_prf_key_manager_test
+  SRCS hmac_prf_key_manager_test.cc
+  DEPS
+    tink::prf::hmac_prf_key_manager
+    tink::prf::prf_set
+    tink::core::key_manager_impl
+    tink::proto::hmac_prf_cc_proto
+    tink::subtle::hmac_boringssl
+    tink::util::istream_input_stream
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

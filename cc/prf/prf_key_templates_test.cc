@@ -19,8 +19,10 @@
 #include "absl/memory/memory.h"
 #include "tink/prf/aes_cmac_prf_key_manager.h"
 #include "tink/prf/hkdf_prf_key_manager.h"
+#include "tink/prf/hmac_prf_key_manager.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_cmac_prf.pb.h"
+#include "proto/hmac_prf.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -62,7 +64,14 @@ TEST(HmacPrfTest, Basics) {
               Eq("type.googleapis.com/google.crypto.tink.HmacPrfKey"));
   EXPECT_THAT(PrfKeyTemplates::HmacSha512().type_url(),
               Eq("type.googleapis.com/google.crypto.tink.HmacPrfKey"));
-  // TODO(sschmieg): Add key type manager test
+  auto manager = absl::make_unique<HmacPrfKeyManager>();
+  EXPECT_THAT(PrfKeyTemplates::HmacSha256().type_url(),
+              Eq(manager->get_key_type()));
+  google::crypto::tink::HmacPrfKeyFormat format;
+  ASSERT_TRUE(format.ParseFromString(PrfKeyTemplates::HmacSha256().value()));
+  EXPECT_THAT(manager->ValidateKeyFormat(format), IsOk());
+  ASSERT_TRUE(format.ParseFromString(PrfKeyTemplates::HmacSha512().value()));
+  EXPECT_THAT(manager->ValidateKeyFormat(format), IsOk());
 }
 
 TEST(HmacPrfTest, OutputPrefixType) {
