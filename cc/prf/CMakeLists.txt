@@ -32,7 +32,10 @@ tink_cc_library(
     prf_config.cc
     prf_config.h
   DEPS
+    tink::prf::aes_cmac_prf_key_manager
     tink::prf::hkdf_prf_key_manager
+    tink::prf::hmac_prf_key_manager
+    tink::prf::prf_set_wrapper
     tink::core::registry
     tink::util::status
     tink::proto::tink_cc_proto
@@ -180,7 +183,13 @@ tink_cc_test(
   SRCS prf_set_test.cc
   DEPS
     tink::prf::prf_set
+    tink::prf::prf_config
+    tink::prf::prf_key_templates
+    tink::core::keyset_handle
+    tink::core::keyset_manager
     tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
     absl::memory
     absl::strings
     gmock

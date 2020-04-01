@@ -337,6 +337,7 @@ tink_cc_test(
   DEPS
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
+    tink::util::test_matchers
     tink::util::test_util
     tink::subtle::random
     absl::strings

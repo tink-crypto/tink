@@ -13,15 +13,32 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/prf_config.h"
 
+#include "tink/prf/aes_cmac_prf_key_manager.h"
 #include "tink/prf/hkdf_prf_key_manager.h"
+#include "tink/prf/hmac_prf_key_manager.h"
+#include "tink/prf/prf_set_wrapper.h"
 #include "tink/registry.h"
 
 namespace crypto {
 namespace tink {
 
 crypto::tink::util::Status PrfConfig::Register() {
-  return Registry::RegisterKeyTypeManager(
+  auto status = Registry::RegisterKeyTypeManager(
       absl::make_unique<HkdfPrfKeyManager>(), true);
+  if (!status.ok()) {
+    return status;
+  }
+  status = Registry::RegisterKeyTypeManager(
+      absl::make_unique<HmacPrfKeyManager>(), true);
+  if (!status.ok()) {
+    return status;
+  }
+  status = Registry::RegisterKeyTypeManager(
+      absl::make_unique<AesCmacPrfKeyManager>(), true);
+  if (!status.ok()) {
+    return status;
+  }
+  return Registry::RegisterPrimitiveWrapper(absl::make_unique<PrfSetWrapper>());
 }
 
 }  // namespace tink
