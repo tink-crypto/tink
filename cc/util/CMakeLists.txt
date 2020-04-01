@@ -193,6 +193,7 @@ tink_cc_library(
     test_matchers.h
   DEPS
     tink::util::status
+    tink::util::statusor
     gmock
 )
 

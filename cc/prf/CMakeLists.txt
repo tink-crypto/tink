@@ -65,6 +65,20 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME prf_set_wrapper
+  SRCS
+    prf_set_wrapper.cc
+    prf_set_wrapper.h
+  DEPS
+    tink::prf::prf_set
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::proto::tink_cc_proto
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME aes_cmac_prf_key_manager
   SRCS aes_cmac_prf_key_manager.h
   DEPS
@@ -145,6 +159,19 @@ tink_cc_test(
     tink::proto::hmac_prf_cc_proto
     tink::util::test_matchers
     absl::memory
+    gmock
+)
+
+tink_cc_test(
+  NAME prf_set_wrapper_test
+  SRCS prf_set_wrapper_test.cc
+  DEPS
+    tink::prf::prf_set
+    tink::prf::prf_set_wrapper
+    tink::util::statusor
+    tink::util::test_matchers
+    absl::memory
+    absl::strings
     gmock
 )
 

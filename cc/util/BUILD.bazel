@@ -239,6 +239,7 @@ cc_library(
     include_prefix = "tink/util",
     deps = [
         ":status",
+        ":statusor",
         "@com_google_googletest//:gtest",
     ],
 )
