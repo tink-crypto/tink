@@ -41,6 +41,7 @@ tink_cc_library(
     prf_key_templates.h
     prf_key_templates.cc
   DEPS
+    tink::prf::aes_cmac_prf_key_manager
     tink::proto::aes_cmac_prf_cc_proto
     tink::proto::hkdf_prf_cc_proto
     tink::proto::hmac_prf_cc_proto
@@ -55,6 +56,30 @@ tink_cc_library(
     prf_set.cc
   DEPS
     tink::util::statusor
+    absl::strings
+)
+
+tink_cc_library(
+  NAME aes_cmac_prf_key_manager
+  SRCS aes_cmac_prf_key_manager.h
+  DEPS
+    tink::core::key_type_manager
+    tink::core::key_manager
+    tink::proto::aes_cmac_prf_cc_proto
+    tink::proto::tink_cc_proto
+    tink::subtle::common_enums
+    tink::subtle::random
+    tink::subtle::stateful_cmac_boringssl
+    tink::subtle::prf::prf_set_util
+    tink::util::constants
+    tink::util::errors
+    tink::util::enums
+    tink::util::protobuf_helper
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    absl::memory
     absl::strings
 )
 
@@ -78,9 +103,12 @@ tink_cc_test(
   NAME prf_key_templates_test
   SRCS prf_key_templates_test.cc
   DEPS
+    tink::prf::aes_cmac_prf_key_manager
     tink::prf::hkdf_prf_key_manager
     tink::prf::prf_key_templates
+    tink::proto::aes_cmac_prf_cc_proto
     tink::util::test_matchers
+    absl::memory
     gmock
 )
 
@@ -92,5 +120,19 @@ tink_cc_test(
     tink::util::statusor
     absl::memory
     absl::strings
+    gmock
+)
+
+tink_cc_test(
+  NAME aes_cmac_prf_key_manager_test
+  SRCS aes_cmac_prf_key_manager_test.cc
+  DEPS
+    tink::prf::aes_cmac_prf_key_manager
+    tink::proto::aes_cmac_prf_cc_proto
+    tink::subtle::aes_cmac_boringssl
+    tink::util::istream_input_stream
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
     gmock
 )

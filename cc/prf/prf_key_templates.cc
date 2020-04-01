@@ -14,6 +14,7 @@
 #include "tink/prf/prf_key_templates.h"
 
 #include "absl/memory/memory.h"
+#include "tink/prf/aes_cmac_prf_key_manager.h"
 #include "proto/aes_cmac_prf.pb.h"
 #include "proto/hkdf_prf.pb.h"
 #include "proto/hmac_prf.pb.h"
@@ -56,11 +57,12 @@ std::unique_ptr<google::crypto::tink::KeyTemplate> NewHmacTemplate(
 
 std::unique_ptr<google::crypto::tink::KeyTemplate> NewAesCmacTemplate() {
   auto key_template = absl::make_unique<google::crypto::tink::KeyTemplate>();
-  key_template->set_type_url(
-      "type.googleapis.com/google.crypto.tink.AesCmacPrfKey");
+  auto aes_cmac_prf_key_manager = absl::make_unique<AesCmacPrfKeyManager>();
+  key_template->set_type_url(aes_cmac_prf_key_manager->get_key_type());
   key_template->set_output_prefix_type(
       google::crypto::tink::OutputPrefixType::RAW);
   AesCmacPrfKeyFormat key_format;
+  key_format.set_version(aes_cmac_prf_key_manager->get_version());
   key_format.set_key_size(32);
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;

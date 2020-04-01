@@ -16,8 +16,11 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
+#include "tink/prf/aes_cmac_prf_key_manager.h"
 #include "tink/prf/hkdf_prf_key_manager.h"
 #include "tink/util/test_matchers.h"
+#include "proto/aes_cmac_prf.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -79,7 +82,12 @@ TEST(HmacPrfTest, MultipleCallsSameReference) {
 TEST(CmacPrfTest, Basics) {
   EXPECT_THAT(PrfKeyTemplates::AesCmac().type_url(),
               Eq("type.googleapis.com/google.crypto.tink.AesCmacPrfKey"));
-  // TODO(sschmieg): Add key type manager test
+  auto manager = absl::make_unique<AesCmacPrfKeyManager>();
+  EXPECT_THAT(PrfKeyTemplates::AesCmac().type_url(),
+              Eq(manager->get_key_type()));
+  google::crypto::tink::AesCmacPrfKeyFormat format;
+  ASSERT_TRUE(format.ParseFromString(PrfKeyTemplates::AesCmac().value()));
+  EXPECT_THAT(manager->ValidateKeyFormat(format), IsOk());
 }
 
 TEST(CmacPrfTest, OutputPrefixType) {
@@ -88,8 +96,7 @@ TEST(CmacPrfTest, OutputPrefixType) {
 }
 
 TEST(CmacPrfTest, MultipleCallsSameReference) {
-  EXPECT_THAT(PrfKeyTemplates::AesCmac(),
-              Ref(PrfKeyTemplates::AesCmac()));
+  EXPECT_THAT(PrfKeyTemplates::AesCmac(), Ref(PrfKeyTemplates::AesCmac()));
 }
 
 }  // namespace
