@@ -229,6 +229,12 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ED25519WithRawOutput">ED25519WithRawOutput</a></span></code>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>com.google.crypto.tink.proto.ED25519PrivateKey</code>.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA256_F4">RSA_SSA_PKCS1_3072_SHA256_F4</a></span></code>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPkcs1PrivateKey</code> with the following parameters:
 
@@ -236,7 +242,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
    Hash function: SHA256.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_4096_SHA512_F4">RSA_SSA_PKCS1_4096_SHA512_F4</a></span></code>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPkcs1PrivateKey</code> with the following parameters:
@@ -245,7 +251,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
    Hash function: SHA512.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_3072_SHA256_SHA256_32_F4">RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</a></span></code>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPssPrivateKey</code> with the following parameters:
@@ -254,7 +260,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
    Signature hash: SHA256.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_4096_SHA512_SHA512_64_F4">RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</a></span></code>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPssPrivateKey</code> with the following parameters:
@@ -470,6 +476,24 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.1.0</dd>
+</dl>
+</li>
+</ul>
+<a name="ED25519WithRawOutput">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ED25519WithRawOutput</h4>
+<pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ED25519WithRawOutput</pre>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>com.google.crypto.tink.proto.ED25519PrivateKey</code>.
+
+ The difference between <code>ED25519WithRawOutput</code> and <code>ED25519</code> is the format of
+ signatures generated. <code>ED25519WithRawOutput</code> generates signatures of
+ <code>OutputPrefixType.RAW</code> format, which is 64 bytes long.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>1.3.0</dd>
 </dl>
 </li>
 </ul>

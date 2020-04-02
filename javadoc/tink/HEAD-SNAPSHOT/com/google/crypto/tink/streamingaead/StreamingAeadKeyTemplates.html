@@ -188,6 +188,19 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_GCM_HKDF_1MB">AES256_GCM_HKDF_1MB</a></span></code>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the following parameters:
+
+ 
+   Size of the main key: 32 bytes
+   HKDF algo: HMAC-SHA256
+   Size of AES-GCM derived keys: 32 bytes
+   Ciphertext segment size: 1048576 bytes (1 MB)
+ </div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_GCM_HKDF_4KB">AES256_GCM_HKDF_4KB</a></span></code>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the following parameters:
 
@@ -327,7 +340,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <a name="AES256_GCM_HKDF_4KB">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>AES256_GCM_HKDF_4KB</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES256_GCM_HKDF_4KB</pre>
@@ -338,6 +351,23 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
    <li>HKDF algo: HMAC-SHA256
    <li>Size of AES-GCM derived keys: 32 bytes
    <li>Ciphertext segment size: 4096 bytes
+ </ul></div>
+</li>
+</ul>
+<a name="AES256_GCM_HKDF_1MB">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>AES256_GCM_HKDF_1MB</h4>
+<pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES256_GCM_HKDF_1MB</pre>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the following parameters:
+
+ <ul>
+   <li>Size of the main key: 32 bytes
+   <li>HKDF algo: HMAC-SHA256
+   <li>Size of AES-GCM derived keys: 32 bytes
+   <li>Ciphertext segment size: 1048576 bytes (1 MB)
  </ul></div>
 </li>
 </ul>
