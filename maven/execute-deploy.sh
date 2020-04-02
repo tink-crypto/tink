@@ -129,7 +129,7 @@ deploy_library() {
     print_and_do bazel build "${library}" "${src_jar}" "${javadoc}"
 
     # Update the version
-    do_if_not_dry_run echo sed -i \
+    do_if_not_dry_run sed -i \
       's/VERSION_PLACEHOLDER/'"${VERSION}"'/' "${pom_file}"
 
     do_if_not_dry_run mvn "${MVN_GOAL}" \
@@ -140,7 +140,7 @@ deploy_library() {
       "${EXTRA_MAVEN_ARGS[@]:+${EXTRA_MAVEN_ARGS[@]}}"
 
     # Reverse the version change
-    do_if_not_dry_run echo sed -i \
+    do_if_not_dry_run sed -i \
       's/'"${VERSION}"'/VERSION_PLACEHOLDER/' "${pom_file}"
   )
 
