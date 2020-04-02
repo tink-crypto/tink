@@ -15,8 +15,11 @@
 """Core package."""
 from __future__ import absolute_import
 from __future__ import division
+# Placeholder for import for type annotations
 from __future__ import print_function
 
+from tink.proto import tink_pb2
+from tink.aead import aead
 from tink.core import crypto_format as _crypto_format
 from tink.core import key_manager
 from tink.core import keyset_handle
@@ -32,9 +35,22 @@ KeyManager = key_manager.KeyManager
 PrivateKeyManager = key_manager.PrivateKeyManager
 
 KeysetHandle = keyset_handle.KeysetHandle
-new_keyset_handle = KeysetHandle.generate_new
-read_keyset_handle = KeysetHandle.read
-read_no_secret_keyset_handle = KeysetHandle.read_no_secret
+
+
+def new_keyset_handle(key_template: tink_pb2.KeyTemplate) -> KeysetHandle:
+  return KeysetHandle.generate_new(key_template)
+
+
+def read_keyset_handle(
+    reader: keyset_reader.KeysetReader,
+    master_key_aead: aead.Aead) -> KeysetHandle:
+  return KeysetHandle.read(reader, master_key_aead)
+
+
+def read_no_secret_keyset_handle(
+    reader: keyset_reader.KeysetReader) -> KeysetHandle:
+  return KeysetHandle.read_no_secret(reader)
+
 
 KeysetReader = keyset_reader.KeysetReader
 JsonKeysetReader = keyset_reader.JsonKeysetReader

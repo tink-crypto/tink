@@ -121,7 +121,7 @@ class KeysetHandle(object):
     contain any secret key material.
     This can be used to persist public keysets or envelope encryption keysets.
     Users that need to persist keysets with secret material can use
-    CleartextKeysetHandle.
+    cleartext_keyset_handle.
 
     Args:
       keyset_writer: A KeysetWriter object.

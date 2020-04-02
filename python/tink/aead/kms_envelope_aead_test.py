@@ -38,7 +38,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.KeysetHandle.generate_new(key_template)
+    keyset_handle = core.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -48,7 +48,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt_missing_ad(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.KeysetHandle.generate_new(key_template)
+    keyset_handle = core.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -59,7 +59,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
   def test_corrupted_ciphertext(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.KeysetHandle.generate_new(key_template)
+    keyset_handle = core.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -73,7 +73,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
   def test_corrupted_dek(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.KeysetHandle.generate_new(key_template)
+    keyset_handle = core.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -87,7 +87,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
   def test_malformed_dek_length(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.KeysetHandle.generate_new(key_template)
+    keyset_handle = core.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -107,7 +107,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
   def test_dek_extraction(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.KeysetHandle.generate_new(key_template)
+    keyset_handle = core.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
