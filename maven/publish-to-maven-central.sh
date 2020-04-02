@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +15,6 @@
 # limitations under the License.
 ####################################################################################
 
-#!/bin/bash
-
 set -eu
 
 if [ $# -lt 1 ]; then
@@ -22,22 +22,22 @@ if [ $# -lt 1 ]; then
   exit 1;
 fi
 
-version_name=$1
+version_name="$1"
 shift 1
 
-if [[ ! "$version_name" =~ ^1\. ]]; then
+if [[ ! "${version_name}" =~ ^1\. ]]; then
   echo 'Version name must begin with "1."'
   exit 2
 fi
 
-if [[ "$version_name" =~ " " ]]; then
+if [[ "${version_name}" =~ " " ]]; then
   echo "Version name must not have any spaces"
   exit 3
 fi
 
-bash $(dirname $0)/execute-deploy.sh \
+bash "$(dirname $0)/execute-deploy.sh" \
   "gpg:sign-and-deploy-file" \
-  "$version_name" \
+  "${version_name}" \
   "-DrepositoryId=ossrh" \
   "-Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/" \
   "-X"

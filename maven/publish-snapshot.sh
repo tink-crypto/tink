@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +15,6 @@
 # limitations under the License.
 ####################################################################################
 
-#!/bin/bash
-
 # Fail on any error.
 set -e
 
@@ -23,11 +23,11 @@ set -x
 
 echo -e "Publishing Maven snapshot...\n"
 
-bash $(dirname $0)/execute-deploy.sh \
+bash "$(dirname $0)/execute-deploy.sh" \
   "deploy:deploy-file" \
   "HEAD-SNAPSHOT" \
-  -DrepositoryId=ossrh \
-  -Durl=https://oss.sonatype.org/content/repositories/snapshots \
-  --settings=$(dirname $0)/settings.xml
+  "-DrepositoryId=ossrh" \
+  "-Durl=https://oss.sonatype.org/content/repositories/snapshots" \
+  "--settings=../$(dirname $0)/settings.xml"
 
 echo -e "Published Maven snapshot"
