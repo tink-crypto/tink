@@ -174,7 +174,7 @@ publish_javadoc_to_github_pages() {
     print_and_do rm -rf "javadoc/${library_name}/${VERSION}/META-INF/"
     print_and_do git "${GIT_ARGS[@]}" add \
       -f "javadoc/${library_name}/${VERSION}"
-    if [[ "$(print_and_do git "${GIT_ARGS[@]}" status --porcelain)" ]]; then
+    if [[ "$(git "${GIT_ARGS[@]}" status --porcelain)" ]]; then
       # Changes exist.
       do_if_not_dry_run \
         git "${GIT_ARGS[@]}" commit \
