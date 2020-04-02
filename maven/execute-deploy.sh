@@ -197,7 +197,7 @@ main() {
     tink.jar \
     tink-src.jar \
     tink-javadoc.jar \
-    "$(dirname $0)/tink.pom.xml"
+    "../$(dirname $0)/tink.pom.xml"
 
   deploy_library \
     tink-awskms \
@@ -205,7 +205,7 @@ main() {
     tink-awskms.jar \
     tink-awskms-src.jar \
     tink-awskms-javadoc.jar \
-    "$(dirname $0)/tink-awskms.pom.xml"
+    "../$(dirname $0)/tink-awskms.pom.xml"
 
   deploy_library \
     tink-gcpkms \
@@ -213,7 +213,7 @@ main() {
     tink-gcpkms.jar \
     tink-gcpkms-src.jar \
     tink-gcpkms-javadoc.jar \
-    "$(dirname $0)/tink-gcpkms.pom.xml"
+    "../$(dirname $0)/tink-gcpkms.pom.xml"
 
   deploy_library \
     tink-android \
@@ -221,7 +221,7 @@ main() {
     tink-android.jar \
     tink-android-src.jar \
     tink-android-javadoc.jar \
-    "$(dirname $0)/tink-android.pom.xml"
+    "../$(dirname $0)/tink-android.pom.xml"
 
   deploy_library \
     apps-paymentmethodtoken \
@@ -229,7 +229,7 @@ main() {
     paymentmethodtoken/maven.jar \
     paymentmethodtoken/maven-src.jar \
     paymentmethodtoken/maven-javadoc.jar \
-    "$(dirname $0)/apps-paymentmethodtoken.pom.xml"
+    "../$(dirname $0)/apps-paymentmethodtoken.pom.xml"
 
   deploy_library \
     apps-rewardedads \
@@ -237,7 +237,7 @@ main() {
     rewardedads/maven.jar \
     rewardedads/maven-src.jar \
     rewardedads/maven-javadoc.jar \
-    "$(dirname $0)/apps-rewardedads.pom.xml"
+    "../$(dirname $0)/apps-rewardedads.pom.xml"
 
   deploy_library \
     apps-webpush \
@@ -245,7 +245,7 @@ main() {
     webpush/maven.jar \
     webpush/maven-src.jar \
     webpush/maven-javadoc.jar \
-    "$(dirname $0)/apps-webpush.pom.xml"
+    "../$(dirname $0)/apps-webpush.pom.xml"
 }
 
 main "$@"
