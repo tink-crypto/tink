@@ -22,11 +22,12 @@ from __future__ import print_function
 import io
 
 from absl.testing import absltest
+from typing import cast
 from tink.proto import tink_pb2
 from tink import core
 
 
-def example_keyset():
+def example_keyset() -> tink_pb2.Keyset:
   keyset = tink_pb2.Keyset()
   keyset.primary_key_id = 42
   key = keyset.key.add()
@@ -39,7 +40,7 @@ def example_keyset():
   return keyset
 
 
-def example_encrypted_keyset():
+def example_encrypted_keyset() -> tink_pb2.EncryptedKeyset:
   encrypted_keyset = tink_pb2.EncryptedKeyset()
   encrypted_keyset.encrypted_keyset = b'c29tZSBjaXBoZXJ0ZXh0IHdpdGgga2V5c2V0'
   encrypted_keyset.keyset_info.primary_key_id = 42
@@ -84,13 +85,16 @@ class JsonKeysetWriterTest(absltest.TestCase):
     with self.assertRaisesRegex(core.TinkError, 'invalid keyset'):
       stream = io.StringIO()
       writer = core.JsonKeysetWriter(stream)
-      writer.write(example_encrypted_keyset())
+      invalid_keyset = cast(tink_pb2.Keyset, example_encrypted_keyset())
+      writer.write(invalid_keyset)
 
   def test_write_encrypted_invalid_fails(self):
     with self.assertRaisesRegex(core.TinkError, 'invalid encrypted keyset'):
       stream = io.StringIO()
       writer = core.JsonKeysetWriter(stream)
-      writer.write_encrypted(example_keyset())
+      invalid_encrypted_keyset = cast(
+          tink_pb2.EncryptedKeyset, example_keyset())
+      writer.write_encrypted(invalid_encrypted_keyset)
 
 
 class BinaryKeysetReaderTest(absltest.TestCase):
@@ -115,13 +119,16 @@ class BinaryKeysetReaderTest(absltest.TestCase):
     with self.assertRaisesRegex(core.TinkError, 'invalid keyset'):
       stream = io.BytesIO()
       writer = core.BinaryKeysetWriter(stream)
-      writer.write(example_encrypted_keyset())
+      invalid_keyset = cast(tink_pb2.Keyset, example_encrypted_keyset())
+      writer.write(invalid_keyset)
 
   def test_write_encrypted_invalid_fails(self):
     with self.assertRaisesRegex(core.TinkError, 'invalid encrypted keyset'):
       stream = io.BytesIO()
       writer = core.BinaryKeysetWriter(stream)
-      writer.write_encrypted(example_keyset())
+      invalid_encrypted_keyset = cast(
+          tink_pb2.EncryptedKeyset, example_keyset())
+      writer.write_encrypted(invalid_encrypted_keyset)
 
 
 if __name__ == '__main__':

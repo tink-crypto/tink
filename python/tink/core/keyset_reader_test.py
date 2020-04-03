@@ -19,6 +19,8 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
+
+from typing import cast
 from tink.proto import tink_pb2
 from tink import core
 
@@ -100,12 +102,12 @@ class BinaryKeysetReaderTest(absltest.TestCase):
 
   def test_read_none(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      reader = core.BinaryKeysetReader(None)
+      reader = core.BinaryKeysetReader(cast(bytes, None))
       reader.read()
 
   def test_read_empty(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      reader = core.BinaryKeysetReader('')
+      reader = core.BinaryKeysetReader(b'')
       reader.read()
 
   def test_read_invalid(self):
@@ -128,12 +130,12 @@ class BinaryKeysetReaderTest(absltest.TestCase):
 
   def test_read_encrypted_none(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      reader = core.BinaryKeysetReader(None)
+      reader = core.BinaryKeysetReader(cast(bytes, None))
       reader.read_encrypted()
 
   def test_read_encrypted_empty(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      reader = core.BinaryKeysetReader('')
+      reader = core.BinaryKeysetReader(b'')
       reader.read_encrypted()
 
   def test_read_encrypted_invalid(self):

@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
+from typing import cast
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_siv_pb2
 from tink.proto import common_pb2
@@ -165,7 +166,7 @@ class HybridKeyManagerTest(absltest.TestCase):
                                 'Unsupported elliptic curve'):
       self.hybrid_decrypt_key_manager().new_key_data(
           hybrid_key_templates.create_ecies_aead_hkdf_key_template(
-              curve_type=100,
+              curve_type=cast(common_pb2.EllipticCurveType, 100),  # invalid
               ec_point_format=common_pb2.UNCOMPRESSED,
               hash_type=common_pb2.SHA256,
               dem_key_template=aead_key_templates.AES128_GCM).SerializeToString(
