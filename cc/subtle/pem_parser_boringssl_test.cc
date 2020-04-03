@@ -107,12 +107,12 @@ TEST_F(PemParserTest, ReadRsaPublicKey) {
 
   // Verify exponent and modulus are correctly set.
   auto key = std::move(key_statusor.ValueOrDie());
-  EXPECT_EQ(
-      key->e,
-      SubtleUtilBoringSSL::bn2str(rsa_->e, BN_num_bytes(rsa_->e)).ValueOrDie());
-  EXPECT_EQ(
-      key->n,
-      SubtleUtilBoringSSL::bn2str(rsa_->n, BN_num_bytes(rsa_->n)).ValueOrDie());
+  const BIGNUM *e_bn, *n_bn;
+  RSA_get0_key(rsa_.get(), &n_bn, &e_bn, nullptr);
+  EXPECT_EQ(key->e,
+            SubtleUtilBoringSSL::bn2str(e_bn, BN_num_bytes(e_bn)).ValueOrDie());
+  EXPECT_EQ(key->n,
+            SubtleUtilBoringSSL::bn2str(n_bn, BN_num_bytes(n_bn)).ValueOrDie());
 }
 
 // Test we can correctly parse an RSA private key.
@@ -123,22 +123,21 @@ TEST_F(PemParserTest, ReadRsaPrivatekey) {
 
   // Verify exponents and modulus.
   auto key = std::move(key_statusor.ValueOrDie());
-  EXPECT_EQ(
-      key->e,
-      SubtleUtilBoringSSL::bn2str(rsa_->e, BN_num_bytes(rsa_->e)).ValueOrDie());
-  EXPECT_EQ(
-      key->n,
-      SubtleUtilBoringSSL::bn2str(rsa_->n, BN_num_bytes(rsa_->n)).ValueOrDie());
-  EXPECT_EQ(
-      key->d,
-      SubtleUtilBoringSSL::bn2str(rsa_->d, BN_num_bytes(rsa_->d)).ValueOrDie());
+  const BIGNUM *e_bn, *n_bn, *d_bn;
+  RSA_get0_key(rsa_.get(), &n_bn, &e_bn, &d_bn);
+  EXPECT_EQ(key->e,
+            SubtleUtilBoringSSL::bn2str(e_bn, BN_num_bytes(e_bn)).ValueOrDie());
+  EXPECT_EQ(key->n,
+            SubtleUtilBoringSSL::bn2str(n_bn, BN_num_bytes(n_bn)).ValueOrDie());
+  EXPECT_EQ(key->d,
+            SubtleUtilBoringSSL::bn2str(d_bn, BN_num_bytes(d_bn)).ValueOrDie());
   // Verify private key factors.
-  EXPECT_EQ(
-      key->p,
-      SubtleUtilBoringSSL::bn2str(rsa_->p, BN_num_bytes(rsa_->p)).ValueOrDie());
-  EXPECT_EQ(
-      key->q,
-      SubtleUtilBoringSSL::bn2str(rsa_->q, BN_num_bytes(rsa_->q)).ValueOrDie());
+  const BIGNUM *p_bn, *q_bn;
+  RSA_get0_factors(rsa_.get(), &p_bn, &q_bn);
+  EXPECT_EQ(key->p,
+            SubtleUtilBoringSSL::bn2str(p_bn, BN_num_bytes(p_bn)).ValueOrDie());
+  EXPECT_EQ(key->q,
+            SubtleUtilBoringSSL::bn2str(q_bn, BN_num_bytes(q_bn)).ValueOrDie());
   // Verify CRT parameters.
   const BIGNUM *dp_bn, *dq_bn, *crt_bn;
   RSA_get0_crt_params(rsa_.get(), &dp_bn, &dq_bn, &crt_bn);
