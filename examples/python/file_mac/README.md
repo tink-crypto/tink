@@ -27,8 +27,8 @@ bazel build ...
 echo "some data" > data.txt
 echo "01293ce6590fb883aa111a53e56d537dea5641b664901e35ce10e0c31df8398218fa9b030d" > expected.txt
 
-./bazel-bin/examples/file_mac/python/file_mac ./examples/file_mac/python/hmac_sha256_256bittag_test_keyset.json \
+./bazel-bin/examples/python/file_mac/file_mac_cleartext ./examples/python/file_mac/hmac_sha256_256bittag_test_keyset.json \
     data.txt
-./bazel-bin/examples/file_mac/python/file_mac ./examples/file_mac/python/hmac_sha256_256bittag_test_keyset.json \
+./bazel-bin/examples/python/file_mac/file_mac_cleartext ./examples/python/file_mac/hmac_sha256_256bittag_test_keyset.json \
     data.txt expected.txt
 ```
