@@ -23,16 +23,6 @@ set -x
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
-# Install Python 3.7 in Linux images on Kokoro
-if [[ "${PLATFORM}" != 'darwin' ]]; then
-  # Update python version list.
-  cd /home/kbuilder/.pyenv/plugins/python-build/../.. && git pull && cd -
-  # Install Python 3.7.1
-  eval "$(pyenv init -)"
-  pyenv install -v 3.7.1
-  pyenv global 3.7.1
-fi
-
 # TODO(b/140615798): Remove once fixed.
 DISABLE_GRPC_ON_MAC_OS=""
 if [[ "${PLATFORM}" == 'darwin' ]]; then
@@ -115,6 +105,21 @@ main() {
 
     # TODO(b/131821833) Use the latest version of Bazel.
     use_bazel.sh $(cat .bazelversion)
+
+    # Install Python 3.7 in Linux environments.
+    if [[ "${PLATFORM}" == 'linux' ]]; then
+      : "${PYTHON_VERSION:=3.7.1}"
+
+      # Update python version list.
+      (
+        cd /home/kbuilder/.pyenv/plugins/python-build/../..
+        git pull
+      )
+      # Install Python.
+      eval "$(pyenv init -)"
+      pyenv install -v "${PYTHON_VERSION}"
+      pyenv global "${PYTHON_VERSION}"
+    fi
 
     if [[ "${PLATFORM}" == 'darwin' ]]; then
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
