@@ -21,6 +21,9 @@ set -e
 # Display commands to stderr.
 set -x
 
+# Version of Android build-tools required for gradle.
+readonly ANDROID_BUILD_TOOLS_VERSION="28.0.3"
+
 test_java_snapshot() {
   local -r test_tmpdir="$(mktemp -d)"
   mkdir -p "${test_tmpdir}"
@@ -49,6 +52,13 @@ test_java_snapshot() {
 }
 
 test_android_snapshot() {
+  # Only in the Kokoro environment.
+  if [[ -n "${KOKORO_ROOT}" ]]; then
+    yes | "${ANDROID_HOME}/tools/bin/sdkmanager" \
+      "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+    yes | "${ANDROID_HOME}/tools/bin/sdkmanager" --licenses
+  fi
+
   ./examples/android/helloworld/gradlew -p ./examples/android/helloworld build
 }
 
