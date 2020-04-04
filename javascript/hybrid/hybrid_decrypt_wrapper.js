@@ -15,7 +15,7 @@
 goog.module('tink.hybrid.HybridDecryptWrapper');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const HybridDecrypt = goog.require('tink.HybridDecrypt');
+const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');

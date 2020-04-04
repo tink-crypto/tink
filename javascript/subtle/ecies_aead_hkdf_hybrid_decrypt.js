@@ -15,11 +15,11 @@
 
 goog.module('tink.subtle.EciesAeadHkdfHybridDecrypt');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper');
 const EciesHkdfKemRecipient = goog.require('tink.subtle.EciesHkdfKemRecipient');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const HybridDecrypt = goog.require('tink.HybridDecrypt');
+const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 /**

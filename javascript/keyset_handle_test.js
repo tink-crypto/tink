@@ -15,18 +15,18 @@
 goog.module('tink.KeysetHandleTest');
 goog.setTestOnly('tink.KeysetHandleTest');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
 const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
 const Bytes = goog.require('tink.subtle.Bytes');
 const CleartextKeysetHandle = goog.require('tink.CleartextKeysetHandle');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
-const HybridDecrypt = goog.require('tink.HybridDecrypt');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
+const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const Mac = goog.require('tink.Mac');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');

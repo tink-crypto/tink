@@ -1,18 +1,13 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 ////////////////////////////////////////////////////////////////////////////////
-
-goog.module('tink.Mac');
 
 /**
  * Interface for Message Authentication Codes (MAC).
@@ -23,27 +18,21 @@ goog.module('tink.Mac');
  * or randomized. This interface should be used for authentication only, and not
  * for other purposes like generation of pseudorandom bytes.
  *
- * @abstract
  */
-class Mac {
+export abstract class Mac {
   /**
    * Computes message authentication code (MAC) for `data`.
    *
-   * @param {!Uint8Array} data the data to compute MAC
-   * @return {!Promise.<!Uint8Array>} the MAC tag
-   * @abstract
+   * @param data the data to compute MAC
+   * @return the MAC tag
    */
-  computeMac(data) {}
+  abstract computeMac(data: Uint8Array): Promise<Uint8Array>;
 
   /**
    * Verifies whether `tag` is a correct authentication code for `data`.
    *
-   * @param {!Uint8Array} tag  the MAC tag
-   * @param {!Uint8Array} data the data to compute MAC
-   * @return {!Promise.<boolean>}
-   * @abstract
+   * @param tag  the MAC tag
+   * @param data the data to compute MAC
    */
-  verifyMac(tag, data) {}
+  abstract verifyMac(tag: Uint8Array, data: Uint8Array): Promise<boolean>;
 }
-
-exports = Mac;

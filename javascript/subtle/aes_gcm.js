@@ -14,7 +14,7 @@
 
 goog.module('tink.subtle.AesGcm');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');

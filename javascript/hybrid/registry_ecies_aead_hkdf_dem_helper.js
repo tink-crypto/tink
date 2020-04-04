@@ -14,7 +14,7 @@
 
 goog.module('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper');
 const Registry = goog.require('tink.Registry');

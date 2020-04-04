@@ -14,7 +14,7 @@
 
 goog.module('tink.aead.AesGcmKeyManager');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AesGcm = goog.require('tink.subtle.AesGcm');
 const KeyManager = goog.require('tink.KeyManager');
 const Random = goog.require('tink.subtle.Random');

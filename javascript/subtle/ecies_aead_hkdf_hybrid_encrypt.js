@@ -19,7 +19,7 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper');
 const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 /**

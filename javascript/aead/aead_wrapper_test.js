@@ -15,7 +15,7 @@
 goog.module('tink.aead.AeadWrapperTest');
 goog.setTestOnly('tink.aead.AeadWrapperTest');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AeadWrapper = goog.require('tink.aead.AeadWrapper');
 const Bytes = goog.require('tink.subtle.Bytes');
 const CryptoFormat = goog.require('tink.CryptoFormat');

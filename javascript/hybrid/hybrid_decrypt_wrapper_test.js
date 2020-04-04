@@ -16,9 +16,9 @@ goog.module('tink.hybrid.HybridDecryptWrapperTest');
 goog.setTestOnly('tink.hybrid.HybridDecryptWrapperTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const HybridDecrypt = goog.require('tink.HybridDecrypt');
+const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');

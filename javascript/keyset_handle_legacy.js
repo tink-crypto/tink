@@ -14,7 +14,7 @@
 
 goog.module('tink.KeysetHandle');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetReader = goog.require('tink.KeysetReader');

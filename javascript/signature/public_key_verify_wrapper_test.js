@@ -17,9 +17,9 @@ goog.setTestOnly('tink.signature.PublicKeyVerifyWrapperTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
-const PublicKeySign = goog.require('tink.PublicKeySign');
+const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
 const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper');
-const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
+const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
 const PublicKeyVerifyWrapper = goog.require('tink.signature.PublicKeyVerifyWrapper');
 const Random = goog.require('tink.subtle.Random');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');

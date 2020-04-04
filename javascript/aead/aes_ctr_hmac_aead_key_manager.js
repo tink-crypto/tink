@@ -14,7 +14,7 @@
 
 goog.module('tink.aead.AesCtrHmacAeadKeyManager');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const KeyManager = goog.require('tink.KeyManager');
 const Random = goog.require('tink.subtle.Random');

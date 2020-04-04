@@ -14,13 +14,13 @@
 
 goog.module('tink.subtle.EncryptThenAuthenticate');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AesCtr = goog.require('tink.subtle.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Hmac = goog.require('tink.subtle.Hmac');
 const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
 const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
-const Mac = goog.require('tink.Mac');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Validators = goog.require('tink.subtle.Validators');
 

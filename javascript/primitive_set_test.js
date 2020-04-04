@@ -15,7 +15,7 @@
 goog.module('tink.PrimitiveSetTest');
 goog.setTestOnly('tink.PrimitiveSetTest');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');

@@ -1,1 +1,1 @@
-export {default as HybridDecrypt} from 'goog:tink.HybridDecrypt';  // from //third_party/tink/javascript:primitives
+export {HybridDecrypt} from './internal/hybrid_decrypt';
