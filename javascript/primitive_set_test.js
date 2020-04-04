@@ -39,20 +39,6 @@ describe('primitive set test', function() {
     fail('An exception should be thrown.');
   });
 
-  it('add primitive null primitive', function() {
-    const primitive = null;
-    const key = createKey();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
-
-    try {
-      primitiveSet.addPrimitive(primitive, key);
-    } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.addingNullPrimitive());
-      return;
-    }
-    fail('An exception should be thrown.');
-  });
-
   it('add primitive multiple times should work', function() {
     const key = createKey();
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
