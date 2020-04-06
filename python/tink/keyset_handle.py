@@ -24,12 +24,8 @@ from typing import Type, TypeVar
 
 from google.protobuf import message
 from tink.proto import tink_pb2
+from tink import core
 from tink.aead import aead
-from tink.core import keyset_reader as reader
-from tink.core import keyset_writer as writer
-from tink.core import primitive_set
-from tink.core import registry
-from tink.core import tink_error
 
 P = TypeVar('P')
 
@@ -45,7 +41,7 @@ class KeysetHandle(object):
   """
 
   def __new__(cls):
-    raise tink_error.TinkError(
+    raise core.TinkError(
         ('KeysetHandle cannot be instantiated directly.'))
 
   def __init__(self, keyset: tink_pb2.Keyset):
@@ -64,7 +60,7 @@ class KeysetHandle(object):
       A new KeysetHandle.
     """
     keyset = tink_pb2.Keyset()
-    key_data = registry.Registry.new_key_data(key_template)
+    key_data = core.Registry.new_key_data(key_template)
     key_id = _generate_unused_key_id(keyset)
     key = keyset.key.add()
     key.key_data.CopyFrom(key_data)
@@ -75,7 +71,7 @@ class KeysetHandle(object):
     return cls._create(keyset)
 
   @classmethod
-  def read(cls, keyset_reader: reader.KeysetReader,
+  def read(cls, keyset_reader: core.KeysetReader,
            master_key_aead: aead.Aead) -> 'KeysetHandle':
     """Tries to create a KeysetHandle from an encrypted keyset."""
     encrypted_keyset = keyset_reader.read_encrypted()
@@ -83,7 +79,7 @@ class KeysetHandle(object):
     return cls._create(_decrypt(encrypted_keyset, master_key_aead))
 
   @classmethod
-  def read_no_secret(cls, keyset_reader: reader.KeysetReader) -> 'KeysetHandle':
+  def read_no_secret(cls, keyset_reader: core.KeysetReader) -> 'KeysetHandle':
     """Creates a KeysetHandle from a keyset with no secret key material.
 
     This can be used to load public keysets or envelope encryption keysets.
@@ -108,13 +104,13 @@ class KeysetHandle(object):
     """Returns the KeysetInfo that doesn't contain actual key material."""
     return _keyset_info(self._keyset)
 
-  def write(self, keyset_writer: writer.KeysetWriter,
+  def write(self, keyset_writer: core.KeysetWriter,
             master_key_primitive: aead.Aead) -> None:
     """Serializes, encrypts with master_key_primitive and writes the keyset."""
     encrypted_keyset = _encrypt(self._keyset, master_key_primitive)
     keyset_writer.write_encrypted(encrypted_keyset)
 
-  def write_no_secret(self, keyset_writer: writer.KeysetWriter) -> None:
+  def write_no_secret(self, keyset_writer: core.KeysetWriter) -> None:
     """Writes the underlying keyset to keyset_writer.
 
     Writes the underlying keyset to keyset_writer only if the keyset does not
@@ -136,7 +132,7 @@ class KeysetHandle(object):
       public_key = public_keyset.key.add()
       public_key.CopyFrom(key)
       public_key.key_data.CopyFrom(
-          registry.Registry.public_key_data(key.key_data))
+          core.Registry.public_key_data(key.key_data))
       _validate_key(public_key)
     public_keyset.primary_key_id = self._keyset.primary_key_id
     return self._create(public_keyset)
@@ -159,14 +155,29 @@ class KeysetHandle(object):
       primitive_class cannot be used with this KeysetHandle.
     """
     _validate_keyset(self._keyset)
-    pset = primitive_set.PrimitiveSet(primitive_class)
+    pset = core.PrimitiveSet(primitive_class)
     for key in self._keyset.key:
       if key.status == tink_pb2.ENABLED:
-        primitive = registry.Registry.primitive(key.key_data, primitive_class)
+        primitive = core.Registry.primitive(key.key_data, primitive_class)
         entry = pset.add_primitive(primitive, key)
         if key.key_id == self._keyset.primary_key_id:
           pset.set_primary(entry)
-    return registry.Registry.wrap(pset)
+    return core.Registry.wrap(pset)
+
+
+def new_keyset_handle(key_template: tink_pb2.KeyTemplate) -> KeysetHandle:
+  return KeysetHandle.generate_new(key_template)
+
+
+def read_keyset_handle(
+    keyset_reader: core.KeysetReader,
+    master_key_aead: aead.Aead) -> KeysetHandle:
+  return KeysetHandle.read(keyset_reader, master_key_aead)
+
+
+def read_no_secret_keyset_handle(
+    keyset_reader: core.KeysetReader) -> KeysetHandle:
+  return KeysetHandle.read_no_secret(keyset_reader)
 
 
 def _keyset_info(keyset: tink_pb2.Keyset) -> tink_pb2.KeysetInfo:
@@ -190,10 +201,10 @@ def _encrypt(keyset: tink_pb2.Keyset,
     keyset2 = tink_pb2.Keyset.FromString(
         master_key_primitive.decrypt(encrypted_keyset, b''))
     if keyset != keyset2:
-      raise tink_error.TinkError('cannot encrypt keyset: %s != %s' %
-                                 (keyset, keyset2))
+      raise core.TinkError('cannot encrypt keyset: %s != %s' %
+                           (keyset, keyset2))
   except message.DecodeError:
-    raise tink_error.TinkError('invalid keyset, corrupted key material')
+    raise core.TinkError('invalid keyset, corrupted key material')
   return tink_pb2.EncryptedKeyset(
       encrypted_keyset=encrypted_keyset, keyset_info=_keyset_info(keyset))
 
@@ -208,7 +219,7 @@ def _decrypt(encrypted_keyset: tink_pb2.EncryptedKeyset,
     _assert_enough_key_material(keyset)
     return keyset
   except message.DecodeError:
-    raise tink_error.TinkError('invalid keyset, corrupted key material')
+    raise core.TinkError('invalid keyset, corrupted key material')
 
 
 def _validate_keyset(keyset: tink_pb2.Keyset):
@@ -225,21 +236,21 @@ def _validate_keyset(keyset: tink_pb2.Keyset):
       1 for key in keyset.key
       if key.status == tink_pb2.ENABLED and key.key_id == keyset.primary_key_id)
   if num_non_destroyed_keys == 0:
-    raise tink_error.TinkError('empty keyset')
+    raise core.TinkError('empty keyset')
   if num_primary_keys > 1:
-    raise tink_error.TinkError('keyset contains multiple primary keys')
+    raise core.TinkError('keyset contains multiple primary keys')
   if num_primary_keys == 0 and num_non_public_key_material > 0:
-    raise tink_error.TinkError('keyset does not contain a valid primary key')
+    raise core.TinkError('keyset does not contain a valid primary key')
 
 
 def _validate_key(key: tink_pb2.Keyset.Key):
   """Raises tink_error.TinkError if key is not valid."""
   if not key.HasField('key_data'):
-    raise tink_error.TinkError('key {} has no key data'.format(key.key_id))
+    raise core.TinkError('key {} has no key data'.format(key.key_id))
   if key.output_prefix_type == tink_pb2.UNKNOWN_PREFIX:
-    raise tink_error.TinkError('key {} has unknown prefix'.format(key.key_id))
+    raise core.TinkError('key {} has unknown prefix'.format(key.key_id))
   if key.status == tink_pb2.UNKNOWN_STATUS:
-    raise tink_error.TinkError('key {} has unknown status'.format(key.key_id))
+    raise core.TinkError('key {} has unknown status'.format(key.key_id))
 
 
 def _assert_no_secret_key_material(keyset: tink_pb2.Keyset):
@@ -247,18 +258,18 @@ def _assert_no_secret_key_material(keyset: tink_pb2.Keyset):
     if key.key_data.key_material_type in (tink_pb2.KeyData.UNKNOWN_KEYMATERIAL,
                                           tink_pb2.KeyData.SYMMETRIC,
                                           tink_pb2.KeyData.ASYMMETRIC_PRIVATE):
-      raise tink_error.TinkError('keyset contains secret key material')
+      raise core.TinkError('keyset contains secret key material')
 
 
 def _assert_enough_key_material(keyset: tink_pb2.Keyset):
   if not keyset or not keyset.key:
-    raise tink_error.TinkError('empty keyset')
+    raise core.TinkError('empty keyset')
 
 
 def _assert_enough_encrypted_key_material(
     encrypted_keyset: tink_pb2.EncryptedKeyset):
   if not encrypted_keyset or not encrypted_keyset.encrypted_keyset:
-    raise tink_error.TinkError('empty keyset')
+    raise core.TinkError('empty keyset')
 
 
 def _generate_unused_key_id(keyset: tink_pb2.Keyset) -> int:

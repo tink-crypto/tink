@@ -22,12 +22,12 @@ import struct
 from absl.testing import absltest
 
 from tink.proto import aes_gcm_pb2
+import tink
 from tink import core
 from tink import tink_config
 from tink.aead import aead
 from tink.aead import aead_key_templates
 from tink.aead import kms_envelope_aead
-from tink.core import tink_error
 
 
 def setUpModule():
@@ -38,7 +38,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.new_keyset_handle(key_template)
+    keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -48,18 +48,18 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt_missing_ad(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.new_keyset_handle(key_template)
+    keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
     plaintext = b'helloworld'
     ciphertext = env_aead.encrypt(plaintext, b'envelope_ad')
-    with self.assertRaises(tink_error.TinkError):
+    with self.assertRaises(core.TinkError):
       plaintext = env_aead.decrypt(ciphertext, b'')
 
   def test_corrupted_ciphertext(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.new_keyset_handle(key_template)
+    keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -68,12 +68,12 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     ciphertext[-1] ^= 0x1
     corrupted_ciphertext = bytes(ciphertext)
 
-    with self.assertRaises(tink_error.TinkError):
+    with self.assertRaises(core.TinkError):
       plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
   def test_corrupted_dek(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.new_keyset_handle(key_template)
+    keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -82,12 +82,12 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     ciphertext[4] ^= 0x1
     corrupted_ciphertext = bytes(ciphertext)
 
-    with self.assertRaises(tink_error.TinkError):
+    with self.assertRaises(core.TinkError):
       plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
   def test_malformed_dek_length(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.new_keyset_handle(key_template)
+    keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
@@ -96,18 +96,18 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     ciphertext[0:3] = [0xff, 0xff, 0xff, 0xff]
     corrupted_ciphertext = bytes(ciphertext)
 
-    with self.assertRaises(tink_error.TinkError):
+    with self.assertRaises(core.TinkError):
       plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
     ciphertext[0:3] = [0, 0, 0, 0]
     corrupted_ciphertext = bytes(ciphertext)
 
-    with self.assertRaises(tink_error.TinkError):
+    with self.assertRaises(core.TinkError):
       plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
   def test_dek_extraction(self):
     key_template = aead_key_templates.AES256_GCM
-    keyset_handle = core.new_keyset_handle(key_template)
+    keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
     env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
 
