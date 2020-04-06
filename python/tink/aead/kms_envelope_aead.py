@@ -23,6 +23,7 @@ import struct
 from tink.proto import tink_pb2
 from tink import core
 from tink.aead import aead
+from tink.core import tink_error
 
 # Defines in how many bytes the DEK length will be encoded.
 DEK_LEN_BYTES = 4
@@ -68,13 +69,13 @@ class KmsEnvelopeAead(aead.Aead):
 
     # Recover DEK length
     if ct_len < DEK_LEN_BYTES:
-      raise core.TinkError
+      raise tink_error.TinkError
 
     dek_len = struct.unpack('>I', ciphertext[0:DEK_LEN_BYTES])[0]
 
     # Basic check if DEK length can be valid.
     if dek_len > (ct_len - DEK_LEN_BYTES) or dek_len < 0:
-      raise core.TinkError
+      raise tink_error.TinkError
 
     # Decrypt DEK with remote AEAD
     encrypted_dek_bytes = ciphertext[DEK_LEN_BYTES:DEK_LEN_BYTES + dek_len]

@@ -22,7 +22,6 @@ import io
 
 from absl.testing import absltest
 from tink.proto import tink_pb2
-import tink
 from tink import aead
 from tink import core
 from tink import hybrid
@@ -70,17 +69,17 @@ def _master_key_aead():
 def _keyset_handle(keyset):
   # CleartextKeysetHandle is encouraged but we want to avoid that dependency
   # in the test
-  return tink.KeysetHandle._create(keyset)
+  return core.KeysetHandle._create(keyset)
 
 
 class KeysetHandleTest(absltest.TestCase):
 
   def test_instantiation(self):
     with self.assertRaisesRegex(core.TinkError, 'cannot be instantiated'):
-      tink.KeysetHandle()
+      core.KeysetHandle()
 
   def test_generate_new(self):
-    keyset_info = tink.new_keyset_handle(
+    keyset_info = core.new_keyset_handle(
         mac.mac_key_templates.HMAC_SHA256_128BITTAG).keyset_info()
     self.assertLen(keyset_info.key_info, 1)
     key_info = keyset_info.key_info[0]
@@ -91,15 +90,15 @@ class KeysetHandleTest(absltest.TestCase):
     self.assertEqual(keyset_info.primary_key_id, key_info.key_id)
 
   def test_generate_new_key_id_is_randomized(self):
-    handle1 = tink.new_keyset_handle(
+    handle1 = core.new_keyset_handle(
         mac.mac_key_templates.HMAC_SHA256_128BITTAG)
-    handle2 = tink.new_keyset_handle(
+    handle2 = core.new_keyset_handle(
         mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     self.assertNotEqual(handle1.keyset_info().key_info[0].key_id,
                         handle2.keyset_info().key_info[0].key_id)
 
   def test_read_no_secret(self):
-    private_handle = tink.new_keyset_handle(
+    private_handle = core.new_keyset_handle(
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     public_handle = private_handle.public_keyset_handle()
 
@@ -112,15 +111,15 @@ class KeysetHandleTest(absltest.TestCase):
     writer.write(private_handle._keyset)
 
     reader = core.BinaryKeysetReader(output_stream_pub.getvalue())
-    tink.read_no_secret_keyset_handle(reader)
+    core.read_no_secret_keyset_handle(reader)
 
     with self.assertRaisesRegex(core.TinkError,
                                 'keyset contains secret key material'):
       reader = core.BinaryKeysetReader(output_stream_priv.getvalue())
-      tink.read_no_secret_keyset_handle(reader)
+      core.read_no_secret_keyset_handle(reader)
 
   def test_write_no_secret(self):
-    private_handle = tink.new_keyset_handle(
+    private_handle = core.new_keyset_handle(
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     public_handle = private_handle.public_keyset_handle()
 
@@ -134,43 +133,43 @@ class KeysetHandleTest(absltest.TestCase):
       private_handle.write_no_secret(writer)
 
   def test_write_encrypted(self):
-    handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     # Encrypt the keyset with Aead.
     master_key_aead = _master_key_aead()
     output_stream = io.BytesIO()
     writer = core.BinaryKeysetWriter(output_stream)
     handle.write(writer, master_key_aead)
     reader = core.BinaryKeysetReader(output_stream.getvalue())
-    handle2 = tink.read_keyset_handle(reader, master_key_aead)
+    handle2 = core.read_keyset_handle(reader, master_key_aead)
     # Check that handle2 has the same primitive as handle.
     handle2.primitive(mac.Mac).verify_mac(
         handle.primitive(mac.Mac).compute_mac(b'data'), b'data')
 
   def test_write_raises_error_when_encrypt_failed(self):
-    handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     writer = core.BinaryKeysetWriter(io.BytesIO())
     with self.assertRaisesRegex(core.TinkError, 'encrypt failed'):
       handle.write(writer, FaultyAead())
 
   def test_write_raises_error_when_decrypt_not_possible(self):
-    handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     writer = core.BinaryKeysetWriter(io.BytesIO())
     with self.assertRaisesRegex(core.TinkError,
                                 'invalid keyset, corrupted key material'):
       handle.write(writer, BadAead1())
 
   def test_write_raises_error_when_decrypt_to_wrong_keyset(self):
-    handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    handle = core.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     writer = core.BinaryKeysetWriter(io.BytesIO())
     with self.assertRaisesRegex(core.TinkError, 'cannot encrypt keyset:'):
       handle.write(writer, BadAead2())
 
   def test_read_empty_keyset_fails(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      tink.read_keyset_handle(core.BinaryKeysetReader(b''), _master_key_aead())
+      core.read_keyset_handle(core.BinaryKeysetReader(b''), _master_key_aead())
 
   def test_public_keyset_handle(self):
-    private_handle = tink.new_keyset_handle(
+    private_handle = core.new_keyset_handle(
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     public_handle = private_handle.public_keyset_handle()
     hybrid_dec = private_handle.primitive(hybrid.HybridDecrypt)

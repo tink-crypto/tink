@@ -113,6 +113,7 @@ py_library(
     deps = [
         ":aead_primitive",
         "//tink/core",
+        "//tink/core:tink_error",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -126,8 +127,8 @@ py_test(
         ":kms_envelope_aead",
         requirement("absl-py"),
         "//tink:tink_config",
-        "//tink:tink_python",
         "//tink/core",
+        "//tink/core:tink_error",
         "//tink/proto:aes_gcm_py_pb2",
     ],
 )

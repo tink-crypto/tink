@@ -22,10 +22,10 @@ import io
 from absl.testing import absltest
 
 from tink import core
-from tink import keyset_handle
 from tink import mac
 from tink import tink_config
 from tink.core import cleartext_keyset_handle
+from tink.core import keyset_handle
 
 
 def setUpModule():

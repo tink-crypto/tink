@@ -16,7 +16,6 @@ py_library(
 py_library(
     name = "tink",
     deps = [
-        ":keyset_handle",
         ":tink_config",
         "//tink/aead",
         "//tink/core",
@@ -25,32 +24,6 @@ py_library(
         "//tink/mac",
         "//tink/signature",
         "//tink/streaming_aead",
-    ],
-)
-
-py_library(
-    name = "keyset_handle",
-    srcs = ["keyset_handle.py"],
-    deps = [
-        "//tink/aead:aead_primitive",
-        "//tink/core",
-        "//tink/proto:tink_py_pb2",
-    ],
-)
-
-py_test(
-    name = "keyset_handle_test",
-    srcs = ["keyset_handle_test.py"],
-    deps = [
-        ":tink_config",
-        ":tink_python",
-        requirement("absl-py"),
-        "//tink/aead",
-        "//tink/core",
-        "//tink/hybrid",
-        "//tink/mac",
-        "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )
 
@@ -82,12 +55,12 @@ py_test(
     deps = [
         ":tink_config",
         requirement("absl-py"),
+        "//tink/proto:tink_py_pb2",
         "//tink/aead",
         "//tink/core",
         "//tink/daead",
         "//tink/hybrid",
         "//tink/mac",
-        "//tink/proto:tink_py_pb2",
         "//tink/signature",
     ],
 )
