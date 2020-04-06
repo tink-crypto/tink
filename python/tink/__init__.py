@@ -22,6 +22,7 @@ from tink import aead
 from tink import core
 from tink import daead
 from tink import hybrid
+from tink import keyset_handle
 from tink import mac
 from tink import signature
 from tink import tink_config
@@ -40,9 +41,10 @@ PrivateKeyManager = core.PrivateKeyManager
 
 Registry = core.Registry
 
-new_keyset_handle = core.new_keyset_handle
-read_keyset_handle = core.read_keyset_handle
-KeysetHandle = core.KeysetHandle
+new_keyset_handle = keyset_handle.new_keyset_handle
+read_keyset_handle = keyset_handle.read_keyset_handle
+read_no_secret_keyset_handle = keyset_handle.read_no_secret_keyset_handle
+KeysetHandle = keyset_handle.KeysetHandle
 
 
 KeysetReader = core.KeysetReader

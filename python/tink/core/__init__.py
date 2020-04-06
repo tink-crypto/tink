@@ -22,7 +22,6 @@ from tink.proto import tink_pb2
 from tink.aead import aead
 from tink.core import crypto_format as _crypto_format
 from tink.core import key_manager
-from tink.core import keyset_handle
 from tink.core import keyset_reader
 from tink.core import keyset_writer
 from tink.core import primitive_set
@@ -33,24 +32,6 @@ from tink.core import tink_error
 
 KeyManager = key_manager.KeyManager
 PrivateKeyManager = key_manager.PrivateKeyManager
-
-KeysetHandle = keyset_handle.KeysetHandle
-
-
-def new_keyset_handle(key_template: tink_pb2.KeyTemplate) -> KeysetHandle:
-  return KeysetHandle.generate_new(key_template)
-
-
-def read_keyset_handle(
-    reader: keyset_reader.KeysetReader,
-    master_key_aead: aead.Aead) -> KeysetHandle:
-  return KeysetHandle.read(reader, master_key_aead)
-
-
-def read_no_secret_keyset_handle(
-    reader: keyset_reader.KeysetReader) -> KeysetHandle:
-  return KeysetHandle.read_no_secret(reader)
-
 
 KeysetReader = keyset_reader.KeysetReader
 JsonKeysetReader = keyset_reader.JsonKeysetReader
