@@ -31,7 +31,7 @@ const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyData, PbKeyMaterialType, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {createKeyset} = goog.require('tink.testUtils');
+const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
 describe('keyset handle test', function() {
   beforeEach(function() {

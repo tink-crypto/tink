@@ -25,7 +25,7 @@ const KeyManager = goog.require('tink.KeyManager');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const {PbAesCtrKeyFormat, PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {assertExists, assertInstanceof} = goog.require('tink.testUtils');
+const {assertExists, assertInstanceof} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
 const PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';

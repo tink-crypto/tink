@@ -17,7 +17,7 @@ goog.setTestOnly('tink.BinaryKeysetWriterTest');
 
 const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
 const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
-const {createKeyset} = goog.require('tink.testUtils');
+const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
 describe('binary keyset writer test', function() {
   it('get serialized key set', function() {
