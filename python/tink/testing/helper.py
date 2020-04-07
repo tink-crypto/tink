@@ -23,11 +23,11 @@ from typing import Text
 
 from tink.proto import tink_pb2
 from tink import aead
+from tink import core
 from tink import daead
 from tink import hybrid
 from tink import mac
 from tink import signature as pk_signature
-from tink.core import tink_error
 
 
 def fake_key(value: bytes = b'fakevalue',
@@ -60,7 +60,7 @@ class FakeMac(mac.Mac):
 
   def verify_mac(self, mac_value: bytes, data: bytes) -> None:
     if mac_value != data + b'|' + self._name.encode():
-      raise tink_error.TinkError('invalid mac ' + mac_value.decode())
+      raise core.TinkError('invalid mac ' + mac_value.decode())
 
 
 class FakeAead(aead.Aead):
@@ -76,8 +76,8 @@ class FakeAead(aead.Aead):
     data = ciphertext.split(b'|')
     if (len(data) < 3 or data[1] != associated_data or
         data[2] != self._name.encode()):
-      raise tink_error.TinkError('failed to decrypt ciphertext ' +
-                                 ciphertext.decode())
+      raise core.TinkError('failed to decrypt ciphertext ' +
+                           ciphertext.decode())
     return data[0]
 
 
@@ -97,8 +97,8 @@ class FakeDeterministicAead(daead.DeterministicAead):
     if (len(data) < 3 or
         data[1] != associated_data or
         data[2] != self._name.encode()):
-      raise tink_error.TinkError('failed to decrypt ciphertext ' +
-                                 ciphertext.decode())
+      raise core.TinkError('failed to decrypt ciphertext ' +
+                           ciphertext.decode())
     return data[0]
 
 
@@ -113,8 +113,8 @@ class FakeHybridDecrypt(hybrid.HybridDecrypt):
     if (len(data) < 3 or
         data[1] != context_info or
         data[2] != self._name.encode()):
-      raise tink_error.TinkError('failed to decrypt ciphertext ' +
-                                 ciphertext.decode())
+      raise core.TinkError('failed to decrypt ciphertext ' +
+                           ciphertext.decode())
     return data[0]
 
 
@@ -146,4 +146,4 @@ class FakePublicKeyVerify(pk_signature.PublicKeyVerify):
 
   def verify(self, signature: bytes, data: bytes):
     if signature != data + b'|' + self._name.encode():
-      raise tink_error.TinkError('invalid signature ' + signature.decode())
+      raise core.TinkError('invalid signature ' + signature.decode())

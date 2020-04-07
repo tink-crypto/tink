@@ -21,10 +21,9 @@ from __future__ import print_function
 
 from typing import Text
 
+from tink import core
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import public_key_sign as cc_public_key_sign
-from tink.core import key_manager
-from tink.core import tink_error
 from tink.signature import public_key_sign
 
 
@@ -34,14 +33,14 @@ class _PublicKeySignCcToPyWrapper(public_key_sign.PublicKeySign):
   def __init__(self, cc_primitive: cc_public_key_sign.PublicKeySign):
     self._public_key_sign = cc_primitive
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def sign(self, data: bytes) -> bytes:
     return self._public_key_sign.sign(data)
 
 
 def from_cc_registry(
     type_url: Text
-) -> key_manager.PrivateKeyManager[public_key_sign.PublicKeySign]:
-  return key_manager.PrivateKeyManagerCcToPyWrapper(
+) -> core.PrivateKeyManager[public_key_sign.PublicKeySign]:
+  return core.PrivateKeyManagerCcToPyWrapper(
       cc_key_manager.PublicKeySignKeyManager.from_cc_registry(type_url),
       public_key_sign.PublicKeySign, _PublicKeySignCcToPyWrapper)

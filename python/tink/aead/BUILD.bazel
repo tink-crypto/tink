@@ -33,8 +33,7 @@ py_library(
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:deterministic_aead",
         "//tink/cc/pybind:streaming_aead",
-        "//tink/core:key_manager",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -46,7 +45,7 @@ py_test(
         ":aead_primitive",
         requirement("absl-py"),
         "//tink:tink_config",
-        "//tink/core:tink_error",
+        "//tink/core",
         "//tink/proto:aes_eax_py_pb2",
         "//tink/proto:aes_gcm_py_pb2",
         "//tink/proto:tink_py_pb2",
@@ -59,10 +58,7 @@ py_library(
     deps = [
         ":aead_primitive",
         requirement("absl-py"),
-        "//tink/core:crypto_format",
-        "//tink/core:primitive_set",
-        "//tink/core:primitive_wrapper",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -73,8 +69,7 @@ py_test(
         ":aead_primitive",
         ":aead_wrapper",
         requirement("absl-py"),
-        "//tink/core:primitive_set",
-        "//tink/core:tink_error",
+        "//tink/core",
         "//tink/testing:helper",
         "//tink/proto:tink_py_pb2",
     ],

@@ -30,8 +30,7 @@ py_library(
         "//tink/proto:tink_py_pb2",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:mac",
-        "//tink/core:key_manager",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -58,10 +57,7 @@ py_library(
         ":mac_primitive",
         requirement("absl-py"),
         "//tink/proto:tink_py_pb2",
-        "//tink/core:crypto_format",
-        "//tink/core:primitive_set",
-        "//tink/core:primitive_wrapper",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 

@@ -40,8 +40,7 @@ py_library(
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:hybrid_decrypt",
         "//tink/cc/pybind:hybrid_encrypt",
-        "//tink/core:key_manager",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -54,8 +53,7 @@ py_library(
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:hybrid_decrypt",
         "//tink/cc/pybind:hybrid_encrypt",
-        "//tink/core:key_manager",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -75,7 +73,7 @@ py_test(
         "//tink/proto:tink_py_pb2",
         "//tink:tink_config",
         "//tink/aead:aead_key_templates",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -84,8 +82,7 @@ py_library(
     srcs = ["hybrid_encrypt_wrapper.py"],
     deps = [
         ":hybrid_encrypt",
-        "//tink/core:primitive_set",
-        "//tink/core:primitive_wrapper",
+        "//tink/core",
     ],
 )
 
@@ -95,10 +92,7 @@ py_library(
     deps = [
         ":hybrid_decrypt",
         requirement("absl-py"),
-        "//tink/core:crypto_format",
-        "//tink/core:primitive_set",
-        "//tink/core:primitive_wrapper",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -113,8 +107,6 @@ py_test(
         requirement("absl-py"),
         "//tink/proto:tink_py_pb2",
         "//tink/core",
-        "//tink/core:primitive_set",
-        "//tink/core:tink_error",
         "//tink/testing:helper",
     ],
 )

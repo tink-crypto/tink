@@ -33,8 +33,7 @@ py_library(
         "//tink/proto:tink_py_pb2",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:public_key_sign",
-        "//tink/core:key_manager",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -67,8 +66,7 @@ py_library(
         "//tink/proto:tink_py_pb2",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:public_key_verify",
-        "//tink/core:key_manager",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -83,7 +81,7 @@ py_test(
         "//tink/proto:ecdsa_py_pb2",
         "//tink/proto:tink_py_pb2",
         "//tink:tink_config",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -93,10 +91,7 @@ py_library(
     deps = [
         ":public_key_sign",
         "//tink/proto:tink_py_pb2",
-        "//tink/core:crypto_format",
-        "//tink/core:primitive_set",
-        "//tink/core:primitive_wrapper",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -110,8 +105,7 @@ py_test(
         ":public_key_verify_wrapper",
         requirement("absl-py"),
         "//tink/proto:tink_py_pb2",
-        "//tink/core:primitive_set",
-        "//tink/core:tink_error",
+        "//tink/core",
         "//tink/testing:helper",
     ],
 )
@@ -123,10 +117,7 @@ py_library(
     deps = [
         ":public_key_verify",
         "//tink/proto:tink_py_pb2",
-        "//tink/core:crypto_format",
-        "//tink/core:primitive_set",
-        "//tink/core:primitive_wrapper",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -140,7 +131,7 @@ py_test(
         ":public_key_verify_wrapper",
         requirement("absl-py"),
         "//tink/proto:tink_py_pb2",
-        "//tink/core:primitive_set",
+        "//tink/core",
         "//tink/testing:helper",
     ],
 )

@@ -21,9 +21,8 @@ from __future__ import print_function
 
 from typing import Text
 
+from tink import core
 from tink.cc.pybind import cc_key_manager
-from tink.core import key_manager
-from tink.core import tink_error
 from tink.daead import deterministic_aead
 
 
@@ -33,13 +32,13 @@ class _DeterministicAeadCcToPyWrapper(deterministic_aead.DeterministicAead):
   def __init__(self, cc_deterministic_aead):
     self._deterministic_aead = cc_deterministic_aead
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def encrypt_deterministically(self, plaintext: bytes,
                                 associated_data: bytes) -> bytes:
     return self._deterministic_aead.encrypt_deterministically(
         plaintext, associated_data)
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def decrypt_deterministically(self, ciphertext: bytes,
                                 associated_data: bytes) -> bytes:
     return self._deterministic_aead.decrypt_deterministically(
@@ -48,7 +47,7 @@ class _DeterministicAeadCcToPyWrapper(deterministic_aead.DeterministicAead):
 
 def from_cc_registry(
     type_url: Text
-) -> key_manager.KeyManager[deterministic_aead.DeterministicAead]:
-  return key_manager.KeyManagerCcToPyWrapper(
+) -> core.KeyManager[deterministic_aead.DeterministicAead]:
+  return core.KeyManagerCcToPyWrapper(
       cc_key_manager.DeterministicAeadKeyManager.from_cc_registry(type_url),
       deterministic_aead.DeterministicAead, _DeterministicAeadCcToPyWrapper)

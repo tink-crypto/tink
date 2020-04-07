@@ -23,9 +23,9 @@ from typing import cast
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
+from tink import core
 from tink import tink_config
 from tink.aead import aead_key_templates
-from tink.core import tink_error
 from tink.hybrid import hybrid_decrypt
 from tink.hybrid import hybrid_decrypt_key_manager
 from tink.hybrid import hybrid_encrypt
@@ -81,7 +81,7 @@ class HybridKeyManagerTest(absltest.TestCase):
                      common_pb2.NIST_P256)
 
   def test_new_key_data_invalid_params_throw_exception(self):
-    with self.assertRaisesRegex(tink_error.TinkError,
+    with self.assertRaisesRegex(core.TinkError,
                                 'Unsupported elliptic curve'):
       _hybrid_decrypt_key_manager().new_key_data(
           hybrid_key_templates.create_ecies_aead_hkdf_key_template(
@@ -98,7 +98,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     key_template.value = key_format.SerializeToString()
     key_template.output_prefix_type = tink_pb2.TINK
     with self.assertRaisesRegex(
-        tink_error.TinkError,
+        core.TinkError,
         'Creating new keys is not supported for this key manager'):
       key_manager = _hybrid_encrypt_key_manager()
       key_manager.new_key_data(key_template)
@@ -120,7 +120,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     key_data = decrypt_key_manager.new_key_data(
         hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     hybrid_dec = decrypt_key_manager.primitive(key_data)
-    with self.assertRaisesRegex(tink_error.TinkError, 'ciphertext too short'):
+    with self.assertRaisesRegex(core.TinkError, 'ciphertext too short'):
       hybrid_dec.decrypt(b'bad ciphertext', b'some context info')
 
 if __name__ == '__main__':

@@ -21,8 +21,8 @@ import io
 
 from absl.testing import absltest
 
+import tink
 from tink import core
-from tink import keyset_handle
 from tink import mac
 from tink import tink_config
 from tink.core import cleartext_keyset_handle
@@ -35,7 +35,7 @@ def setUpModule():
 class CleartextKeysetHandleTest(absltest.TestCase):
 
   def test_write_read(self):
-    handle = keyset_handle.KeysetHandle.generate_new(
+    handle = tink.new_keyset_handle(
         mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     output_stream = io.BytesIO()
     writer = core.BinaryKeysetWriter(output_stream)
@@ -47,7 +47,7 @@ class CleartextKeysetHandleTest(absltest.TestCase):
         handle.primitive(mac.Mac).compute_mac(b'data'), b'data')
 
   def test_from_keyset(self):
-    handle = keyset_handle.KeysetHandle.generate_new(
+    handle = tink.new_keyset_handle(
         mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     keyset = handle._keyset
     handle2 = cleartext_keyset_handle.from_keyset(keyset)

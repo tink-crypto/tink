@@ -11,7 +11,7 @@ py_library(
     deps = [
         "//tink/proto:tink_py_pb2",
         "//tink/aead",
-        "//tink/core:tink_error",
+        "//tink/core",
         "//tink/daead",
         "//tink/hybrid",
         "//tink/mac",
@@ -25,6 +25,6 @@ py_test(
     deps = [
         ":helper",
         requirement("absl-py"),
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )

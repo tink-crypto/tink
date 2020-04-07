@@ -20,7 +20,7 @@ py_library(
     srcs = ["encrypting_stream.py"],
     deps = [
         "//tink/cc/pybind:cc_streaming_aead_wrappers",
-        "//tink/core:tink_error",
+        "//tink/core",
         "//tink/util:file_object_adapter",
     ],
 )
@@ -43,7 +43,7 @@ py_library(
     deps = [
         "//tink/cc/pybind:cc_streaming_aead_wrappers",
         "//tink/cc/pybind:status",
-        "//tink/core:tink_error",
+        "//tink/core",
         "//tink/util:file_object_adapter",
     ],
 )
@@ -58,7 +58,7 @@ py_test(
         "//tink/cc/pybind:status",
         "//tink/cc/pybind:input_stream_adapter",
         "//tink/cc/pybind:output_stream_adapter",
-        "//tink/core:tink_error",
+        "//tink/core",
     ],
 )
 
@@ -77,8 +77,7 @@ py_library(
         ":streaming_aead_primitive",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:streaming_aead",
-        "//tink/core:key_manager",
-        "//tink/core:tink_error",
+        "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -93,7 +92,7 @@ py_test(
         ":streaming_aead_primitive",
         requirement("absl-py"),
         "//tink:tink_config",
-        "//tink/core:tink_error",
+        "//tink/core",
         "//tink/cc/pybind:input_stream_adapter",
         "//tink/cc/pybind:output_stream_adapter",
         "//tink/proto:aes_ctr_hmac_streaming_py_pb2",

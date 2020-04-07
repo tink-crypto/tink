@@ -20,10 +20,9 @@ from __future__ import print_function
 
 from typing import Text
 
+from tink import core
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import mac as cc_mac
-from tink.core import key_manager
-from tink.core import tink_error
 from tink.mac import mac
 
 
@@ -33,16 +32,16 @@ class _MacCcToPyWrapper(mac.Mac):
   def __init__(self, cc_primitive: cc_mac.Mac):
     self._cc_mac = cc_primitive
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def compute_mac(self, data: bytes) -> bytes:
     return self._cc_mac.compute_mac(data)
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def verify_mac(self, mac_value: bytes, data: bytes) -> None:
     self._cc_mac.verify_mac(mac_value, data)
 
 
-def from_cc_registry(type_url: Text) -> key_manager.KeyManager[mac.Mac]:
-  return key_manager.KeyManagerCcToPyWrapper(
+def from_cc_registry(type_url: Text) -> core.KeyManager[mac.Mac]:
+  return core.KeyManagerCcToPyWrapper(
       cc_key_manager.MacKeyManager.from_cc_registry(type_url), mac.Mac,
       _MacCcToPyWrapper)

@@ -22,10 +22,9 @@ from __future__ import print_function
 from typing import Text
 
 
+from tink import core
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import hybrid_encrypt as cc_hybrid_encrypt
-from tink.core import key_manager
-from tink.core import tink_error
 from tink.hybrid import hybrid_encrypt
 
 
@@ -35,13 +34,13 @@ class _HybridEncryptCcToPyWrapper(hybrid_encrypt.HybridEncrypt):
   def __init__(self, cc_primitive: cc_hybrid_encrypt.HybridEncrypt):
     self._hybrid_encrypt = cc_primitive
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
     return self._hybrid_encrypt.encrypt(plaintext, context_info)
 
 
 def from_cc_registry(
-    type_url: Text) -> key_manager.KeyManager[hybrid_encrypt.HybridEncrypt]:
-  return key_manager.KeyManagerCcToPyWrapper(
+    type_url: Text) -> core.KeyManager[hybrid_encrypt.HybridEncrypt]:
+  return core.KeyManagerCcToPyWrapper(
       cc_key_manager.HybridEncryptKeyManager.from_cc_registry(type_url),
       hybrid_encrypt.HybridEncrypt, _HybridEncryptCcToPyWrapper)

@@ -22,10 +22,10 @@ from absl.testing import absltest
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
 from tink.proto import tink_pb2
+from tink import core
 from tink import tink_config
 from tink.aead import aead
 from tink.aead import aead_key_manager
-from tink.core import tink_error
 
 
 def setUpModule():
@@ -92,12 +92,11 @@ class AeadKeyManagerTest(absltest.TestCase):
 
   def test_invalid_params_throw_exception(self):
     key_template = self.new_aes_eax_key_template(9, 16)
-    with self.assertRaisesRegex(tink_error.TinkError,
-                                'Invalid IV size'):
+    with self.assertRaisesRegex(core.TinkError, 'Invalid IV size'):
       self.key_manager_eax.new_key_data(key_template)
 
     key_template = self.new_aes_gcm_key_template(17)
-    with self.assertRaisesRegex(tink_error.TinkError,
+    with self.assertRaisesRegex(core.TinkError,
                                 'supported sizes: 16 or 32 bytes'):
       self.key_manager_gcm.new_key_data(key_template)
 
@@ -123,7 +122,7 @@ class AeadKeyManagerTest(absltest.TestCase):
     primitive = self.key_manager_eax.primitive(
         self.key_manager_eax.new_key_data(
             self.new_aes_eax_key_template(12, 16)))
-    with self.assertRaisesRegex(tink_error.TinkError, 'Ciphertext too short'):
+    with self.assertRaisesRegex(core.TinkError, 'Ciphertext too short'):
       primitive.decrypt(b'invalid ciphertext', b'ad')
 
 

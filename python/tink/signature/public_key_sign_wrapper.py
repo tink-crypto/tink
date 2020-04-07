@@ -22,17 +22,14 @@ from __future__ import print_function
 from typing import Type
 
 from tink.proto import tink_pb2
-from tink.core import crypto_format
-from tink.core import primitive_set
-from tink.core import primitive_wrapper
-from tink.core import tink_error
+from tink import core
 from tink.signature import public_key_sign
 
 
 class _WrappedPublicKeySign(public_key_sign.PublicKeySign):
   """Implements PublicKeySign for a set of PublicKeySign primitives."""
 
-  def __init__(self, primitives_set: primitive_set.PrimitiveSet):
+  def __init__(self, primitives_set: core.PrimitiveSet):
     self._primitive_set = primitives_set
 
   def sign(self, data: bytes) -> bytes:
@@ -47,17 +44,17 @@ class _WrappedPublicKeySign(public_key_sign.PublicKeySign):
     primary = self._primitive_set.primary()
 
     if not primary:
-      raise tink_error.TinkError('primary primitive not set')
+      raise core.TinkError('primary primitive not set')
 
     sign_data = data
     if primary.output_prefix_type == tink_pb2.LEGACY:
-      sign_data = sign_data + crypto_format.LEGACY_START_BYTE
+      sign_data = sign_data + core.crypto_format.LEGACY_START_BYTE
 
     return primary.identifier + primary.primitive.sign(sign_data)
 
 
 class PublicKeySignWrapper(
-    primitive_wrapper.PrimitiveWrapper[public_key_sign.PublicKeySign]):
+    core.PrimitiveWrapper[public_key_sign.PublicKeySign]):
   """A PrimitiveWrapper for the PublicKeySign primitive.
 
   The returned primitive works with a keyset (rather than a single key). To sign
@@ -65,7 +62,7 @@ class PublicKeySignWrapper(
   signature a certain prefix associated with the primary key.
   """
 
-  def wrap(self, primitives_set: primitive_set.PrimitiveSet
+  def wrap(self, primitives_set: core.PrimitiveSet
           ) -> _WrappedPublicKeySign:
     return _WrappedPublicKeySign(primitives_set)
 

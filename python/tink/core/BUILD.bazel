@@ -161,7 +161,7 @@ py_library(
     visibility = ["//visibility:public"],
     deps = [
         ":core",
-        "//tink:keyset_handle",
+        "//tink:tink_python",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -173,6 +173,7 @@ py_test(
         ":cleartext_keyset_handle",
         ":core",
         requirement("absl-py"),
+        "//tink:tink_python",
         "//tink:tink_config",
         "//tink/mac",
     ],

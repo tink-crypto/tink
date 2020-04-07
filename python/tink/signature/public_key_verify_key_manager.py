@@ -21,10 +21,9 @@ from __future__ import print_function
 
 from typing import Text
 
+from tink import core
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import public_key_verify as cc_public_key_verify
-from tink.core import key_manager
-from tink.core import tink_error
 from tink.signature import public_key_verify
 
 
@@ -34,14 +33,14 @@ class _PublicKeyVerifyCcToPyWrapper(public_key_verify.PublicKeyVerify):
   def __init__(self, cc_primitive: cc_public_key_verify.PublicKeyVerify):
     self._public_key_verify = cc_primitive
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def verify(self, signature: bytes, data: bytes) -> None:
     self._public_key_verify.verify(signature, data)
 
 
 def from_cc_registry(
     type_url: Text
-) -> key_manager.KeyManager[public_key_verify.PublicKeyVerify]:
-  return key_manager.KeyManagerCcToPyWrapper(
+) -> core.KeyManager[public_key_verify.PublicKeyVerify]:
+  return core.KeyManagerCcToPyWrapper(
       cc_key_manager.PublicKeyVerifyKeyManager.from_cc_registry(type_url),
       public_key_verify.PublicKeyVerify, _PublicKeyVerifyCcToPyWrapper)

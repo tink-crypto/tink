@@ -24,8 +24,8 @@ import errno
 import io
 from typing import Iterable, BinaryIO
 
+from tink import core
 from tink.cc.pybind import cc_streaming_aead_wrappers
-from tink.core import tink_error
 from tink.util import file_object_adapter
 
 
@@ -74,13 +74,13 @@ class EncryptingStream(io.BufferedIOBase):
         stream_aead, associated_data, cc_ciphertext_destination)
 
   @staticmethod
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def _get_output_stream_adapter(cc_primitive, aad, destination):
     """Implemented as a separate method to ensure correct error transform."""
     return cc_streaming_aead_wrappers.new_cc_encrypting_stream(
         cc_primitive, aad, destination)
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def write(self, b: bytes) -> int:
     """Write the given buffer to the stream.
 
@@ -110,7 +110,7 @@ class EncryptingStream(io.BufferedIOBase):
     # exceptions.
     written = self._output_stream_adapter.write(b)
     if written < 0:
-      raise tink_error.TinkError('Number of written bytes was negative')
+      raise core.TinkError('Number of written bytes was negative')
 
     self._bytes_written += written
 
@@ -119,7 +119,7 @@ class EncryptingStream(io.BufferedIOBase):
                                'Write could not complete without blocking.',
                                written)
     elif written > len(b):
-      raise tink_error.TinkError(
+      raise core.TinkError(
           'Number of written bytes was greater than length of bytes given')
 
     return written
@@ -161,7 +161,7 @@ class EncryptingStream(io.BufferedIOBase):
     self._check_not_closed()
     return
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def close(self) -> None:
     """Flush and close the stream.
 

@@ -23,17 +23,14 @@ from absl import logging
 
 from typing import Type
 
+from tink import core
 from tink.aead import aead
-from tink.core import crypto_format
-from tink.core import primitive_set
-from tink.core import primitive_wrapper
-from tink.core import tink_error
 
 
 class _WrappedAead(aead.Aead):
   """Implements Aead for a set of Aead primitives."""
 
-  def __init__(self, pset: primitive_set.PrimitiveSet):
+  def __init__(self, pset: core.PrimitiveSet):
     self._primitive_set = pset
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
@@ -42,27 +39,27 @@ class _WrappedAead(aead.Aead):
         plaintext, associated_data)
 
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
-    if len(ciphertext) > crypto_format.NON_RAW_PREFIX_SIZE:
-      prefix = ciphertext[:crypto_format.NON_RAW_PREFIX_SIZE]
-      ciphertext_no_prefix = ciphertext[crypto_format.NON_RAW_PREFIX_SIZE:]
+    if len(ciphertext) > core.crypto_format.NON_RAW_PREFIX_SIZE:
+      prefix = ciphertext[:core.crypto_format.NON_RAW_PREFIX_SIZE]
+      ciphertext_no_prefix = ciphertext[core.crypto_format.NON_RAW_PREFIX_SIZE:]
       for entry in self._primitive_set.primitive_from_identifier(prefix):
         try:
           return entry.primitive.decrypt(ciphertext_no_prefix,
                                          associated_data)
-        except tink_error.TinkError as e:
+        except core.TinkError as e:
           logging.info(
               'ciphertext prefix matches a key, but cannot decrypt: %s', e)
     # Let's try all RAW keys.
     for entry in self._primitive_set.raw_primitives():
       try:
         return entry.primitive.decrypt(ciphertext, associated_data)
-      except tink_error.TinkError as e:
+      except core.TinkError as e:
         pass
     # nothing works.
-    raise tink_error.TinkError('Decryption failed.')
+    raise core.TinkError('Decryption failed.')
 
 
-class AeadWrapper(primitive_wrapper.PrimitiveWrapper[aead.Aead]):
+class AeadWrapper(core.PrimitiveWrapper[aead.Aead]):
   """AeadWrapper is the implementation of PrimitiveWrapper for Aead.
 
   Key rotation works as follows: each ciphertext is prefixed with the keyId.
@@ -72,7 +69,7 @@ class AeadWrapper(primitive_wrapper.PrimitiveWrapper[aead.Aead]):
   TinkError.
   """
 
-  def wrap(self, pset: primitive_set.PrimitiveSet) -> aead.Aead:
+  def wrap(self, pset: core.PrimitiveSet) -> aead.Aead:
     return _WrappedAead(pset)
 
   def primitive_class(self) -> Type[aead.Aead]:

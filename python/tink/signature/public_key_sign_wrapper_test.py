@@ -22,8 +22,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 from tink.proto import tink_pb2
-from tink.core import primitive_set
-from tink.core import tink_error
+from tink import core
 from tink.signature import public_key_sign
 from tink.signature import public_key_sign_wrapper
 from tink.signature import public_key_verify
@@ -53,8 +52,8 @@ class PublicKeySignWrapperTest(parameterized.TestCase):
   def test_signature(self, output_prefix_type):
     pair0 = new_primitive_key_pair(1234, output_prefix_type)
     pair1 = new_primitive_key_pair(5678, output_prefix_type)
-    pset = primitive_set.new_primitive_set(public_key_sign.PublicKeySign)
-    pset_verify = primitive_set.new_primitive_set(
+    pset = core.new_primitive_set(public_key_sign.PublicKeySign)
+    pset_verify = core.new_primitive_set(
         public_key_verify.PublicKeyVerify)
 
     pset.add_primitive(*pair0)
@@ -71,7 +70,7 @@ class PublicKeySignWrapperTest(parameterized.TestCase):
 
     wrapped_pk_verify.verify(signature, b'data')
 
-    with self.assertRaisesRegex(tink_error.TinkError, 'invalid signature'):
+    with self.assertRaisesRegex(core.TinkError, 'invalid signature'):
       wrapped_pk_verify.verify(signature, b'invalid')
 
 

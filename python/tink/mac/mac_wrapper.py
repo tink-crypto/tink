@@ -24,44 +24,41 @@ from absl import logging
 from typing import Type
 
 from tink.proto import tink_pb2
-from tink.core import crypto_format
-from tink.core import primitive_set
-from tink.core import primitive_wrapper
-from tink.core import tink_error
+from tink import core
 from tink.mac import mac
 
 
 class _WrappedMac(mac.Mac):
   """Implements Mac for a set of Mac primitives."""
 
-  def __init__(self, pset: primitive_set.PrimitiveSet):
+  def __init__(self, pset: core.PrimitiveSet):
     self._primitive_set = pset
 
   def compute_mac(self, data: bytes) -> bytes:
     primary = self._primitive_set.primary()
     if primary.output_prefix_type == tink_pb2.LEGACY:
       return primary.identifier + primary.primitive.compute_mac(
-          data + crypto_format.LEGACY_START_BYTE)
+          data + core.crypto_format.LEGACY_START_BYTE)
     else:
       return primary.identifier + primary.primitive.compute_mac(data)
 
   def verify_mac(self, mac_value: bytes, data: bytes) -> None:
-    if len(mac_value) <= crypto_format.NON_RAW_PREFIX_SIZE:
+    if len(mac_value) <= core.crypto_format.NON_RAW_PREFIX_SIZE:
       # This also rejects raw MAC with size of 4 bytes or fewer. Those MACs are
       # clearly insecure, thus should be discouraged.
-      raise tink_error.TinkError('tag too short')
-    prefix = mac_value[:crypto_format.NON_RAW_PREFIX_SIZE]
-    mac_no_prefix = mac_value[crypto_format.NON_RAW_PREFIX_SIZE:]
+      raise core.TinkError('tag too short')
+    prefix = mac_value[:core.crypto_format.NON_RAW_PREFIX_SIZE]
+    mac_no_prefix = mac_value[core.crypto_format.NON_RAW_PREFIX_SIZE:]
     for entry in self._primitive_set.primitive_from_identifier(prefix):
       try:
         if entry.output_prefix_type == tink_pb2.LEGACY:
-          entry.primitive.verify_mac(mac_no_prefix,
-                                     data + crypto_format.LEGACY_START_BYTE)
+          entry.primitive.verify_mac(
+              mac_no_prefix, data + core.crypto_format.LEGACY_START_BYTE)
         else:
           entry.primitive.verify_mac(mac_no_prefix, data)
         # If there is no exception, the MAC is valid and we can return.
         return
-      except tink_error.TinkError as e:
+      except core.TinkError as e:
         logging.info('tag prefix matches a key, but cannot verify: %s', e)
 
     # No 'non-raw' key matched, so let's try the raw keys (if any exist).
@@ -70,12 +67,12 @@ class _WrappedMac(mac.Mac):
         entry.primitive.verify_mac(mac_value, data)
         # If there is no exception, the MAC is valid and we can return.
         return
-      except tink_error.TinkError as e:
+      except core.TinkError as e:
         pass
-    raise tink_error.TinkError('invalid MAC')
+    raise core.TinkError('invalid MAC')
 
 
-class MacWrapper(primitive_wrapper.PrimitiveWrapper[mac.Mac]):
+class MacWrapper(core.PrimitiveWrapper[mac.Mac]):
   """MacWrapper is the implementation of PrimitiveWrapper for the Mac primitive.
 
   The returned primitive works with a keyset (rather than a single key). To
@@ -86,7 +83,7 @@ class MacWrapper(primitive_wrapper.PrimitiveWrapper[mac.Mac]):
   primitive tries all keys with tink_pb2.OutputPrefixType = tink_pb2.RAW.
   """
 
-  def wrap(self, pset: primitive_set.PrimitiveSet) -> mac.Mac:
+  def wrap(self, pset: core.PrimitiveSet) -> mac.Mac:
     return _WrappedMac(pset)
 
   def primitive_class(self) -> Type[mac.Mac]:

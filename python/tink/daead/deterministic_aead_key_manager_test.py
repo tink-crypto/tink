@@ -21,8 +21,8 @@ from __future__ import print_function
 from absl.testing import absltest
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
+from tink import core
 from tink import tink_config
-from tink.core import tink_error
 from tink.daead import deterministic_aead
 from tink.daead import deterministic_aead_key_manager
 from tink.daead import deterministic_aead_key_templates
@@ -60,7 +60,7 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
   def test_invalid_params_throw_exception(self):
     key_template = deterministic_aead_key_templates.create_aes_siv_key_template(
         63)
-    with self.assertRaisesRegex(tink_error.TinkError,
+    with self.assertRaisesRegex(core.TinkError,
                                 'Invalid key size'):
       self.key_manager.new_key_data(key_template)
 

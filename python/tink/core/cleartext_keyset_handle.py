@@ -24,29 +24,29 @@ from __future__ import division
 from __future__ import print_function
 
 from tink.proto import tink_pb2
+import tink
 from tink import core
-from tink import keyset_handle as handle
 
 
-def from_keyset(keyset: tink_pb2.Keyset) -> handle.KeysetHandle:
+def from_keyset(keyset: tink_pb2.Keyset) -> tink.KeysetHandle:
   """Create a KeysetHandle from a keyset."""
-  return handle.KeysetHandle._create(keyset)  # pylint: disable=protected-access
+  return tink.KeysetHandle._create(keyset)  # pylint: disable=protected-access
 
 
-def read(keyset_reader: core.KeysetReader) -> handle.KeysetHandle:
+def read(keyset_reader: core.KeysetReader) -> tink.KeysetHandle:
   """Create a KeysetHandle from a keyset_reader."""
   keyset = keyset_reader.read()
-  return handle.KeysetHandle._create(keyset)  # pylint: disable=protected-access
+  return tink.KeysetHandle._create(keyset)  # pylint: disable=protected-access
 
 
 def write(keyset_writer: core.KeysetWriter,
-          keyset_handle: handle.KeysetHandle) -> None:
+          keyset_handle: tink.KeysetHandle) -> None:
   """Serializes and writes the keyset."""
   keyset_writer.write(keyset_handle._keyset)  # pylint: disable=protected-access
 
 
 # DEPRECATED. Use static functions instead.
-class CleartextKeysetHandle(handle.KeysetHandle):
+class CleartextKeysetHandle(tink.KeysetHandle):
   """CleartextKeysetHandle creates KeysetHandle from a Tink Keyset."""
 
   def __new__(cls, keyset: tink_pb2.Keyset):
@@ -54,7 +54,7 @@ class CleartextKeysetHandle(handle.KeysetHandle):
 
   @classmethod
   def read(cls,
-           keyset_reader: core.KeysetReader) -> handle.KeysetHandle:
+           keyset_reader: core.KeysetReader) -> tink.KeysetHandle:
     """Create a KeysetHandle from a keyset read with keyset_reader."""
     keyset = keyset_reader.read()
     return cls._create(keyset)

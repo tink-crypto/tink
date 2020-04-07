@@ -21,10 +21,9 @@ from __future__ import print_function
 
 from typing import Text
 
+from tink import core
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import hybrid_decrypt as cc_hybrid_decrypt
-from tink.core import key_manager
-from tink.core import tink_error
 from tink.hybrid import hybrid_decrypt
 
 
@@ -34,14 +33,14 @@ class _HybridDecryptCcToPyWrapper(hybrid_decrypt.HybridDecrypt):
   def __init__(self, cc_primitive: cc_hybrid_decrypt.HybridDecrypt):
     self._hybrid_decrypt = cc_primitive
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
     return self._hybrid_decrypt.decrypt(ciphertext, context_info)
 
 
 def from_cc_registry(
     type_url: Text
-) -> key_manager.PrivateKeyManager[hybrid_decrypt.HybridDecrypt]:
-  return key_manager.PrivateKeyManagerCcToPyWrapper(
+) -> core.PrivateKeyManager[hybrid_decrypt.HybridDecrypt]:
+  return core.PrivateKeyManagerCcToPyWrapper(
       cc_key_manager.HybridDecryptKeyManager.from_cc_registry(type_url),
       hybrid_decrypt.HybridDecrypt, _HybridDecryptCcToPyWrapper)

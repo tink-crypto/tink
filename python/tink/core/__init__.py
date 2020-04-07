@@ -19,7 +19,6 @@ from __future__ import division
 from __future__ import print_function
 
 from tink.proto import tink_pb2
-from tink.aead import aead
 from tink.core import crypto_format as _crypto_format
 from tink.core import key_manager
 from tink.core import keyset_reader
@@ -40,10 +39,13 @@ BinaryKeysetReader = keyset_reader.BinaryKeysetReader
 KeysetWriter = keyset_writer.KeysetWriter
 JsonKeysetWriter = keyset_writer.JsonKeysetWriter
 BinaryKeysetWriter = keyset_writer.BinaryKeysetWriter
+KeyManagerCcToPyWrapper = key_manager.KeyManagerCcToPyWrapper
+PrivateKeyManagerCcToPyWrapper = key_manager.PrivateKeyManagerCcToPyWrapper
 
 Registry = registry.Registry
 
 TinkError = tink_error.TinkError
+use_tink_errors = tink_error.use_tink_errors
 
 new_primitive_set = primitive_set.new_primitive_set
 PrimitiveSet = primitive_set.PrimitiveSet

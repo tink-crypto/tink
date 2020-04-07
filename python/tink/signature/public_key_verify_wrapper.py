@@ -23,17 +23,14 @@ from absl import logging
 from typing import Type
 
 from tink.proto import tink_pb2
-from tink.core import crypto_format
-from tink.core import primitive_set
-from tink.core import primitive_wrapper
-from tink.core import tink_error
+from tink import core
 from tink.signature import public_key_verify
 
 
 class _WrappedPublicKeyVerify(public_key_verify.PublicKeyVerify):
   """Implements PublicKeyVerify for a set of PublicKeyVerify primitives."""
 
-  def __init__(self, primitives_set: primitive_set.PrimitiveSet):
+  def __init__(self, primitives_set: core.PrimitiveSet):
     self._primitive_set = primitives_set
 
   def verify(self, signature: bytes, data: bytes):
@@ -46,24 +43,24 @@ class _WrappedPublicKeyVerify(public_key_verify.PublicKeyVerify):
     Raises:
       tink_error.TinkError if the verification fails.
     """
-    if len(signature) <= crypto_format.NON_RAW_PREFIX_SIZE:
+    if len(signature) <= core.crypto_format.NON_RAW_PREFIX_SIZE:
       # This also rejects raw signatures with size of 4 bytes or fewer.
       # We're not aware of any schemes that output signatures that small.
-      raise tink_error.TinkError('signature too short')
+      raise core.TinkError('signature too short')
 
-    key_id = signature[:crypto_format.NON_RAW_PREFIX_SIZE]
-    raw_sig = signature[crypto_format.NON_RAW_PREFIX_SIZE:]
+    key_id = signature[:core.crypto_format.NON_RAW_PREFIX_SIZE]
+    raw_sig = signature[core.crypto_format.NON_RAW_PREFIX_SIZE:]
 
     for entry in self._primitive_set.primitive_from_identifier(key_id):
       try:
         if entry.output_prefix_type == tink_pb2.LEGACY:
           entry.primitive.verify(raw_sig,
-                                 data + crypto_format.LEGACY_START_BYTE)
+                                 data + core.crypto_format.LEGACY_START_BYTE)
         else:
           entry.primitive.verify(raw_sig, data)
         # Signature is valid, we can return
         return
-      except tink_error.TinkError as err:
+      except core.TinkError as err:
         logging.info('signature prefix matches a key, but cannot verify: %s',
                      err)
 
@@ -73,14 +70,14 @@ class _WrappedPublicKeyVerify(public_key_verify.PublicKeyVerify):
         entry.primitive.verify(signature, data)
         # Signature is valid, we can return
         return
-      except tink_error.TinkError:
+      except core.TinkError:
         pass
 
-    raise tink_error.TinkError('invalid signature')
+    raise core.TinkError('invalid signature')
 
 
 class PublicKeyVerifyWrapper(
-    primitive_wrapper.PrimitiveWrapper[public_key_verify.PublicKeyVerify]):
+    core.PrimitiveWrapper[public_key_verify.PublicKeyVerify]):
   """WrappedPublicKeyVerify is the PrimitiveWrapper for PublicKeyVerify.
 
   The returned primitive works with a keyset (rather than a single key). To sign
@@ -94,7 +91,7 @@ class PublicKeyVerifyWrapper(
   primitive tries all keys with tink_pb2.OutputPrefixType = tink_pb2.RAW.
   """
 
-  def wrap(self, primitives_set: primitive_set.PrimitiveSet
+  def wrap(self, primitives_set: core.PrimitiveSet
           ) -> _WrappedPublicKeyVerify:
     return _WrappedPublicKeyVerify(primitives_set)
 

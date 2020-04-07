@@ -22,8 +22,8 @@ from tink.proto import aes_ctr_hmac_streaming_pb2
 from tink.proto import aes_gcm_hkdf_streaming_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
+from tink import core
 from tink import tink_config
-from tink.core import tink_error
 from tink.streaming_aead import streaming_aead
 from tink.streaming_aead import streaming_aead_key_manager
 from tink.streaming_aead import streaming_aead_key_templates
@@ -99,14 +99,14 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     # AES GCM HKDF
     key_template = streaming_aead_key_templates.create_aes_gcm_hkdf_streaming_key_template(
         63, common_pb2.HashType.SHA1, 65, 55)
-    with self.assertRaisesRegex(tink_error.TinkError,
+    with self.assertRaisesRegex(core.TinkError,
                                 'key_size must not be smaller than'):
       self.key_manager_gcm.new_key_data(key_template)
 
     # AES CTR HKDF
     key_template = streaming_aead_key_templates.create_aes_ctr_hmac_streaming_key_template(
         63, common_pb2.HashType.SHA1, 65, common_pb2.HashType.SHA256, 55, 2)
-    with self.assertRaisesRegex(tink_error.TinkError,
+    with self.assertRaisesRegex(core.TinkError,
                                 'key_size must not be smaller than'):
       self.key_manager_ctr.new_key_data(key_template)
 
@@ -144,7 +144,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     # Decrypt
     ct_source = TestBytesObject(ct_destination.getvalue())
     with saead_primitive.new_decrypting_stream(ct_source, b'bad ' + aad) as ds:
-      with self.assertRaises(tink_error.TinkError):
+      with self.assertRaises(core.TinkError):
         ds.read()
 
 

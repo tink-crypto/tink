@@ -22,42 +22,39 @@ from __future__ import print_function
 from absl import logging
 from typing import Type
 
-from tink.core import crypto_format
-from tink.core import primitive_set
-from tink.core import primitive_wrapper
-from tink.core import tink_error
+from tink import core
 from tink.hybrid import hybrid_decrypt
 
 
 class _WrappedHybridDecrypt(hybrid_decrypt.HybridDecrypt):
   """Implements HybridDecrypt for a set of HybridDecrypt primitives."""
 
-  def __init__(self, pset: primitive_set.PrimitiveSet):
+  def __init__(self, pset: core.PrimitiveSet):
     self._primitive_set = pset
 
   def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
-    if len(ciphertext) > crypto_format.NON_RAW_PREFIX_SIZE:
-      prefix = ciphertext[:crypto_format.NON_RAW_PREFIX_SIZE]
-      ciphertext_no_prefix = ciphertext[crypto_format.NON_RAW_PREFIX_SIZE:]
+    if len(ciphertext) > core.crypto_format.NON_RAW_PREFIX_SIZE:
+      prefix = ciphertext[:core.crypto_format.NON_RAW_PREFIX_SIZE]
+      ciphertext_no_prefix = ciphertext[core.crypto_format.NON_RAW_PREFIX_SIZE:]
       for entry in self._primitive_set.primitive_from_identifier(prefix):
         try:
           return entry.primitive.decrypt(ciphertext_no_prefix,
                                          context_info)
-        except tink_error.TinkError as e:
+        except core.TinkError as e:
           logging.info(
               'ciphertext prefix matches a key, but cannot decrypt: %s', e)
     # Let's try all RAW keys.
     for entry in self._primitive_set.raw_primitives():
       try:
         return entry.primitive.decrypt(ciphertext, context_info)
-      except tink_error.TinkError as e:
+      except core.TinkError as e:
         pass
     # nothing works.
-    raise tink_error.TinkError('Decryption failed.')
+    raise core.TinkError('Decryption failed.')
 
 
 class HybridDecryptWrapper(
-    primitive_wrapper.PrimitiveWrapper[hybrid_decrypt.HybridDecrypt]):
+    core.PrimitiveWrapper[hybrid_decrypt.HybridDecrypt]):
   """HybridDecryptWrapper is the PrimitiveWrapper for HybridDecrypt.
 
   The returned primitive works with a keyset (rather than a single key). To
@@ -67,7 +64,7 @@ class HybridDecryptWrapper(
   """
 
   def wrap(self,
-           pset: primitive_set.PrimitiveSet) -> hybrid_decrypt.HybridDecrypt:
+           pset: core.PrimitiveSet) -> hybrid_decrypt.HybridDecrypt:
     return _WrappedHybridDecrypt(pset)
 
   def primitive_class(self) -> Type[hybrid_decrypt.HybridDecrypt]:

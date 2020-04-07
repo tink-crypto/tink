@@ -23,8 +23,8 @@ from absl.testing import absltest
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
 from tink.proto import tink_pb2
+from tink import core
 from tink import tink_config
-from tink.core import tink_error
 from tink.signature import public_key_sign_key_manager
 from tink.signature import public_key_verify_key_manager
 
@@ -64,7 +64,7 @@ class PublicKeyVerifyKeyManagerTest(absltest.TestCase):
   def test_new_key_data(self):
     key_template = new_ecdsa_key_template(
         common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER, True)
-    with self.assertRaisesRegex(tink_error.TinkError, 'not supported'):
+    with self.assertRaisesRegex(core.TinkError, 'not supported'):
       self.key_manager.new_key_data(key_template)
 
   def test_verify_success(self):
@@ -93,10 +93,10 @@ class PublicKeyVerifyKeyManagerTest(absltest.TestCase):
     data = b'data'
     signature = signer.sign(data)
 
-    with self.assertRaisesRegex(tink_error.TinkError, 'Signature is not valid'):
+    with self.assertRaisesRegex(core.TinkError, 'Signature is not valid'):
       verifier.verify(signature, b'wrongdata')
 
-    with self.assertRaisesRegex(tink_error.TinkError, 'Signature is not valid'):
+    with self.assertRaisesRegex(core.TinkError, 'Signature is not valid'):
       verifier.verify(b'wrongsignature', data)
 
 

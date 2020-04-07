@@ -21,15 +21,14 @@ from __future__ import print_function
 
 from typing import Type
 
-from tink.core import primitive_set
-from tink.core import primitive_wrapper
+from tink import core
 from tink.hybrid import hybrid_encrypt
 
 
 class _WrappedHybridEncrypt(hybrid_encrypt.HybridEncrypt):
   """Implements HybridEncrypt for a set of HybridEncrypt primitives."""
 
-  def __init__(self, pset: primitive_set.PrimitiveSet):
+  def __init__(self, pset: core.PrimitiveSet):
     self._primitive_set = pset
 
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
@@ -38,8 +37,7 @@ class _WrappedHybridEncrypt(hybrid_encrypt.HybridEncrypt):
         plaintext, context_info)
 
 
-class HybridEncryptWrapper(
-    primitive_wrapper.PrimitiveWrapper[hybrid_encrypt.HybridEncrypt]):
+class HybridEncryptWrapper(core.PrimitiveWrapper[hybrid_encrypt.HybridEncrypt]):
   """HybridEncryptWrapper is the PrimitiveWrapper for HybridEncrypt.
 
   The returned primitive works with a keyset (rather than a single key). To
@@ -48,7 +46,7 @@ class HybridEncryptWrapper(
   """
 
   def wrap(self,
-           pset: primitive_set.PrimitiveSet) -> hybrid_encrypt.HybridEncrypt:
+           pset: core.PrimitiveSet) -> hybrid_encrypt.HybridEncrypt:
     return _WrappedHybridEncrypt(pset)
 
   def primitive_class(self) -> Type[hybrid_encrypt.HybridEncrypt]:

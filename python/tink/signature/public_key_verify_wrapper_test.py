@@ -21,7 +21,7 @@ from __future__ import print_function
 from absl.testing import absltest
 
 from tink.proto import tink_pb2
-from tink.core import primitive_set
+from tink import core
 from tink.signature import public_key_sign
 from tink.signature import public_key_sign_wrapper
 from tink.signature import public_key_verify
@@ -44,7 +44,7 @@ class PublicKeyVerifyWrapperTest(absltest.TestCase):
     pair0 = new_primitive_key_pair(1234, tink_pb2.RAW)
     pair1 = new_primitive_key_pair(5678, tink_pb2.TINK)
     pair2 = new_primitive_key_pair(9012, tink_pb2.LEGACY)
-    pset = primitive_set.new_primitive_set(public_key_verify.PublicKeyVerify)
+    pset = core.new_primitive_set(public_key_verify.PublicKeyVerify)
 
     pset.add_primitive(*pair0)
     pset.add_primitive(*pair1)
@@ -52,7 +52,7 @@ class PublicKeyVerifyWrapperTest(absltest.TestCase):
 
     # Check all keys work
     for unused_primitive, key in (pair0, pair1, pair2):
-      pset_sign = primitive_set.new_primitive_set(public_key_sign.PublicKeySign)
+      pset_sign = core.new_primitive_set(public_key_sign.PublicKeySign)
       pset_sign.set_primary(
           pset_sign.add_primitive(
               helper.FakePublicKeySign('fakePublicKeySign {}'.format(

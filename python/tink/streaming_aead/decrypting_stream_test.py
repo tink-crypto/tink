@@ -20,8 +20,8 @@ import io
 from absl.testing import absltest
 from absl.testing.absltest import mock
 
+from tink import core
 from tink.cc.pybind import status as error
-from tink.core import tink_error
 from tink.streaming_aead import decrypting_stream
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
@@ -35,7 +35,7 @@ class FakeInputStreamAdapter(object):
   def __init__(self, file_object_adapter):
     self._adapter = file_object_adapter
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def read(self, size=-1):
     try:
       if size < 0:

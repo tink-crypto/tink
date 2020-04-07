@@ -22,17 +22,14 @@ from __future__ import print_function
 from absl import logging
 from typing import Type
 
-from tink.core import crypto_format
-from tink.core import primitive_set
-from tink.core import primitive_wrapper
-from tink.core import tink_error
+from tink import core
 from tink.daead import deterministic_aead
 
 
 class _WrappedDeterministicAead(deterministic_aead.DeterministicAead):
   """Implements DeterministicAead for a set of DeterministicAead primitives."""
 
-  def __init__(self, pset: primitive_set.PrimitiveSet):
+  def __init__(self, pset: core.PrimitiveSet):
     self._primitive_set = pset
 
   def encrypt_deterministically(self, plaintext: bytes,
@@ -43,14 +40,14 @@ class _WrappedDeterministicAead(deterministic_aead.DeterministicAead):
 
   def decrypt_deterministically(self, ciphertext: bytes,
                                 associated_data: bytes) -> bytes:
-    if len(ciphertext) > crypto_format.NON_RAW_PREFIX_SIZE:
-      prefix = ciphertext[:crypto_format.NON_RAW_PREFIX_SIZE]
-      ciphertext_no_prefix = ciphertext[crypto_format.NON_RAW_PREFIX_SIZE:]
+    if len(ciphertext) > core.crypto_format.NON_RAW_PREFIX_SIZE:
+      prefix = ciphertext[:core.crypto_format.NON_RAW_PREFIX_SIZE]
+      ciphertext_no_prefix = ciphertext[core.crypto_format.NON_RAW_PREFIX_SIZE:]
       for entry in self._primitive_set.primitive_from_identifier(prefix):
         try:
           return entry.primitive.decrypt_deterministically(ciphertext_no_prefix,
                                                            associated_data)
-        except tink_error.TinkError as e:
+        except core.TinkError as e:
           logging.info(
               'ciphertext prefix matches a key, but cannot decrypt: %s', e)
     # Let's try all RAW keys.
@@ -58,14 +55,14 @@ class _WrappedDeterministicAead(deterministic_aead.DeterministicAead):
       try:
         return entry.primitive.decrypt_deterministically(ciphertext,
                                                          associated_data)
-      except tink_error.TinkError as e:
+      except core.TinkError as e:
         pass
     # nothing works.
-    raise tink_error.TinkError('Decryption failed.')
+    raise core.TinkError('Decryption failed.')
 
 
 class DeterministicAeadWrapper(
-    primitive_wrapper.PrimitiveWrapper[deterministic_aead.DeterministicAead]):
+    core.PrimitiveWrapper[deterministic_aead.DeterministicAead]):
   """DeterministicAeadWrapper is a PrimitiveWrapper for DeterministicAead.
 
   The created primitive works with a keyset (rather than a single key). To
@@ -76,8 +73,8 @@ class DeterministicAeadWrapper(
   primitive tries all keys with OutputPrefixType RAW.
   """
 
-  def wrap(self, pset: primitive_set.PrimitiveSet
-          ) -> deterministic_aead.DeterministicAead:
+  def wrap(
+      self, pset: core.PrimitiveSet) -> deterministic_aead.DeterministicAead:
     return _WrappedDeterministicAead(pset)
 
   def primitive_class(self) -> Type[deterministic_aead.DeterministicAead]:

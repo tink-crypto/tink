@@ -19,9 +19,8 @@ from __future__ import print_function
 import typing
 from typing import Text, BinaryIO
 
+from tink import core
 from tink.cc.pybind import cc_key_manager
-from tink.core import key_manager
-from tink.core import tink_error
 from tink.streaming_aead import decrypting_stream
 from tink.streaming_aead import encrypting_stream
 from tink.streaming_aead import streaming_aead
@@ -33,7 +32,7 @@ class _StreamingAeadCcToPyWrapper(streaming_aead.StreamingAead):
   def __init__(self, cc_streaming_aead):
     self._streaming_aead = cc_streaming_aead
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     stream = encrypting_stream.EncryptingStream(self._streaming_aead,
@@ -41,7 +40,7 @@ class _StreamingAeadCcToPyWrapper(streaming_aead.StreamingAead):
                                                 associated_data)
     return typing.cast(BinaryIO, stream)
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def new_decrypting_stream(self, ciphertext_source: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     stream = decrypting_stream.DecryptingStream(self._streaming_aead,
@@ -51,7 +50,7 @@ class _StreamingAeadCcToPyWrapper(streaming_aead.StreamingAead):
 
 
 def from_cc_registry(
-    type_url: Text) -> key_manager.KeyManager[streaming_aead.StreamingAead]:
-  return key_manager.KeyManagerCcToPyWrapper(
+    type_url: Text) -> core.KeyManager[streaming_aead.StreamingAead]:
+  return core.KeyManagerCcToPyWrapper(
       cc_key_manager.StreamingAeadKeyManager.from_cc_registry(type_url),
       streaming_aead.StreamingAead, _StreamingAeadCcToPyWrapper)

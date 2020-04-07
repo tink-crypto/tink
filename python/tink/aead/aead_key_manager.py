@@ -21,11 +21,10 @@ from __future__ import print_function
 
 from typing import Text
 
+from tink import core
 from tink.aead import aead
 from tink.cc.pybind import aead as cc_aead
 from tink.cc.pybind import cc_key_manager
-from tink.core import key_manager
-from tink.core import tink_error
 
 
 class _AeadCcToPyWrapper(aead.Aead):
@@ -34,16 +33,16 @@ class _AeadCcToPyWrapper(aead.Aead):
   def __init__(self, cc_primitive: cc_aead.Aead):
     self._aead = cc_primitive
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
     return self._aead.encrypt(plaintext, associated_data)
 
-  @tink_error.use_tink_errors
+  @core.use_tink_errors
   def decrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
     return self._aead.decrypt(plaintext, associated_data)
 
 
-def from_cc_registry(type_url: Text) -> key_manager.KeyManager[aead.Aead]:
-  return key_manager.KeyManagerCcToPyWrapper(
+def from_cc_registry(type_url: Text) -> core.KeyManager[aead.Aead]:
+  return core.KeyManagerCcToPyWrapper(
       cc_key_manager.AeadKeyManager.from_cc_registry(type_url), aead.Aead,
       _AeadCcToPyWrapper)
