@@ -26,7 +26,7 @@ import six
 
 from typing import Generic, Type, TypeVar
 
-from tink.core import primitive_set
+from tink.core import _primitive_set
 
 
 P = TypeVar('P')
@@ -43,7 +43,7 @@ class PrimitiveWrapper(Generic[P]):
   """
 
   @abc.abstractmethod
-  def wrap(self, pset: primitive_set.PrimitiveSet) -> P:
+  def wrap(self, pset: _primitive_set.PrimitiveSet) -> P:
     """Wraps a PrimitiveSet and returns a single primitive instance."""
     pass
 

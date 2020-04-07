@@ -7,51 +7,51 @@ py_library(
     name = "core",
     srcs = ["__init__.py"],
     deps = [
-        ":crypto_format",
-        ":key_manager",
+        ":_crypto_format",
+        ":_key_manager",
+        ":_primitive_set",
+        ":_primitive_wrapper",
+        ":_registry",
+        ":_tink_error",
         ":keyset_reader",
         ":keyset_writer",
-        ":primitive_set",
-        ":primitive_wrapper",
-        ":registry",
-        ":tink_error",
         "//tink/aead:aead_primitive",
         "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_library(
-    name = "key_manager",
-    srcs = ["key_manager.py"],
+    name = "_key_manager",
+    srcs = ["_key_manager.py"],
     deps = [
-        ":tink_error",
+        ":_tink_error",
         "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_library(
-    name = "tink_error",
-    srcs = ["tink_error.py"],
+    name = "_tink_error",
+    srcs = ["_tink_error.py"],
     deps = [
         "//tink/cc/pybind:status",
     ],
 )
 
 py_library(
-    name = "registry",
-    srcs = ["registry.py"],
+    name = "_registry",
+    srcs = ["_registry.py"],
     deps = [
-        ":key_manager",
-        ":primitive_set",
-        ":primitive_wrapper",
-        ":tink_error",
+        ":_key_manager",
+        ":_primitive_set",
+        ":_primitive_wrapper",
+        ":_tink_error",
         "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "registry_test",
-    srcs = ["registry_test.py"],
+    name = "_registry_test",
+    srcs = ["_registry_test.py"],
     deps = [
         ":core",
         requirement("absl-py"),
@@ -63,20 +63,19 @@ py_test(
 )
 
 py_library(
-    name = "crypto_format",
-    srcs = ["crypto_format.py"],
+    name = "_crypto_format",
+    srcs = ["_crypto_format.py"],
     deps = [
-        ":tink_error",
+        ":_tink_error",
         "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "crypto_format_test",
-    srcs = ["crypto_format_test.py"],
+    name = "_crypto_format_test",
+    srcs = ["_crypto_format_test.py"],
     deps = [
         ":core",
-        ":crypto_format",
         requirement("absl-py"),
         "//tink/proto:tink_py_pb2",
     ],
@@ -86,7 +85,7 @@ py_library(
     name = "keyset_reader",
     srcs = ["keyset_reader.py"],
     deps = [
-        ":tink_error",
+        ":_tink_error",
         requirement("six"),
         "//tink/proto:tink_py_pb2",
     ],
@@ -103,21 +102,20 @@ py_test(
 )
 
 py_library(
-    name = "primitive_set",
-    srcs = ["primitive_set.py"],
+    name = "_primitive_set",
+    srcs = ["_primitive_set.py"],
     deps = [
-        ":crypto_format",
-        ":tink_error",
+        ":_crypto_format",
+        ":_tink_error",
         "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "primitive_set_test",
-    srcs = ["primitive_set_test.py"],
+    name = "_primitive_set_test",
+    srcs = ["_primitive_set_test.py"],
     deps = [
         ":core",
-        ":crypto_format",
         requirement("absl-py"),
         "//tink/aead",
         "//tink/mac",
@@ -127,10 +125,10 @@ py_test(
 )
 
 py_library(
-    name = "primitive_wrapper",
-    srcs = ["primitive_wrapper.py"],
+    name = "_primitive_wrapper",
+    srcs = ["_primitive_wrapper.py"],
     deps = [
-        ":primitive_set",
+        ":_primitive_set",
         requirement("six"),
     ],
 )
@@ -139,7 +137,7 @@ py_library(
     name = "keyset_writer",
     srcs = ["keyset_writer.py"],
     deps = [
-        ":tink_error",
+        ":_tink_error",
         requirement("six"),
         "//tink/proto:tink_py_pb2",
     ],
@@ -173,8 +171,8 @@ py_test(
         ":cleartext_keyset_handle",
         ":core",
         requirement("absl-py"),
-        "//tink:tink_python",
         "//tink:tink_config",
+        "//tink:tink_python",
         "//tink/mac",
     ],
 )

@@ -9,7 +9,7 @@ py_library(
     deps = [
         ":aws_kms_aead",
         "//tink/aead:aead_primitive",
-        "//tink/core:tink_error",
+        "//tink/core",
         requirement("boto3"),
     ]
 )
@@ -31,7 +31,7 @@ py_library(
     srcs = ["aws_kms_aead.py"],
     deps = [
         "//tink/aead:aead_primitive",
-        "//tink/core:tink_error",
+        "//tink/core",
         requirement("boto3"),
     ]
 )

@@ -22,7 +22,7 @@ from __future__ import print_function
 import struct
 
 from tink.proto import tink_pb2
-from tink.core import tink_error
+from tink.core import _tink_error
 
 TINK_START_BYTE = b'\x01'
 LEGACY_START_BYTE = b'\x00'
@@ -42,6 +42,6 @@ def output_prefix(key: tink_pb2.Keyset.Key) -> bytes:
   elif key.output_prefix_type == tink_pb2.RAW:
     return b''
   else:
-    raise tink_error.TinkError(
+    raise _tink_error.TinkError(
         'The given key has invalid OutputPrefixType {}.'.format(
             key.output_prefix_type))

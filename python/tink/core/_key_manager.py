@@ -23,7 +23,7 @@ import six
 from typing import Any, Generic, Text, Type, TypeVar
 
 from tink.proto import tink_pb2
-from tink.core import tink_error
+from tink.core import _tink_error
 
 
 P = TypeVar('P')
@@ -120,7 +120,7 @@ class KeyManagerCcToPyWrapper(KeyManager[P]):
   def primitive_class(self) -> Type[P]:
     return self._primitive_class
 
-  @tink_error.use_tink_errors
+  @_tink_error.use_tink_errors
   def primitive(self, key_data: tink_pb2.KeyData) -> P:
     return self._primitive_py_wrapper(
         self._cc_key_manager.primitive(key_data.SerializeToString()))
@@ -128,7 +128,7 @@ class KeyManagerCcToPyWrapper(KeyManager[P]):
   def key_type(self) -> Text:
     return self._cc_key_manager.key_type()
 
-  @tink_error.use_tink_errors
+  @_tink_error.use_tink_errors
   def new_key_data(self,
                    key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
     return deserialize_key_data(
@@ -149,7 +149,7 @@ class PrivateKeyManagerCcToPyWrapper(PrivateKeyManager[P]):
   def primitive_class(self) -> Type[P]:
     return self._primitive_class
 
-  @tink_error.use_tink_errors
+  @_tink_error.use_tink_errors
   def primitive(self, key_data: tink_pb2.KeyData) -> P:
     return self._primitive_py_wrapper(
         self._cc_key_manager.primitive(key_data.SerializeToString()))
@@ -157,13 +157,13 @@ class PrivateKeyManagerCcToPyWrapper(PrivateKeyManager[P]):
   def key_type(self) -> Text:
     return self._cc_key_manager.key_type()
 
-  @tink_error.use_tink_errors
+  @_tink_error.use_tink_errors
   def new_key_data(self,
                    key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
     return deserialize_key_data(
         self._cc_key_manager.new_key_data(key_template.SerializeToString()))
 
-  @tink_error.use_tink_errors
+  @_tink_error.use_tink_errors
   def public_key_data(self, key_data: tink_pb2.KeyData) -> tink_pb2.KeyData:
     return deserialize_key_data(
         self._cc_key_manager.public_key_data(key_data.SerializeToString()))

@@ -9,7 +9,6 @@ py_library(
     deps = [
         ":gcp_kms_aead",
         "//tink/aead:aead_primitive",
-        "//tink/core:tink_error",
         requirement("grpc-google-iam-v1"),
         requirement("idna"),
         requirement("certifi"),
@@ -48,7 +47,6 @@ py_library(
     srcs = ["gcp_kms_aead.py"],
     deps = [
         "//tink/aead:aead_primitive",
-        "//tink/core:tink_error",
         requirement("grpc-google-iam-v1"),
         requirement("idna"),
         requirement("certifi"),

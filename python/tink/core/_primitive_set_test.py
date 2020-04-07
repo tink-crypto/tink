@@ -23,7 +23,6 @@ from tink.proto import tink_pb2
 from tink import aead
 from tink import core
 from tink import mac
-from tink.core import crypto_format
 from tink.testing import helper
 
 
@@ -39,7 +38,7 @@ class PrimitiveSetTest(absltest.TestCase):
     entry = entries[0]
     self.assertEqual(fake_mac, entry.primitive)
     self.assertEqual(tink_pb2.ENABLED, entry.status)
-    self.assertEqual(crypto_format.output_prefix(key), entry.identifier)
+    self.assertEqual(core.crypto_format.output_prefix(key), entry.identifier)
 
   def test_unknown_key_returns_empty_list(self):
     primitive_set = core.new_primitive_set(mac.Mac)
@@ -52,7 +51,7 @@ class PrimitiveSetTest(absltest.TestCase):
     fake_mac = helper.FakeMac('FakeMac')
     primitive_set.add_primitive(fake_mac, key)
 
-    ident = crypto_format.output_prefix(key)
+    ident = core.crypto_format.output_prefix(key)
     entries = primitive_set.primitive_from_identifier(ident)
     self.assertLen(entries, 1)
     entry = entries[0]
@@ -78,7 +77,7 @@ class PrimitiveSetTest(absltest.TestCase):
     entry = primitive_set.primary()
     self.assertEqual(fake_mac, entry.primitive)
     self.assertEqual(tink_pb2.ENABLED, entry.status)
-    self.assertEqual(crypto_format.output_prefix(key), entry.identifier)
+    self.assertEqual(core.crypto_format.output_prefix(key), entry.identifier)
 
   def test_primary_returns_none(self):
     primitive_set = core.new_primitive_set(mac.Mac)
@@ -95,7 +94,7 @@ class PrimitiveSetTest(absltest.TestCase):
     fake_mac2 = helper.FakeMac('FakeMac2')
     primitive_set.add_primitive(fake_mac2, key2)
 
-    expected_ident = crypto_format.output_prefix(key1)
+    expected_ident = core.crypto_format.output_prefix(key1)
     entries = primitive_set.primitive(key1)
     self.assertLen(entries, 2)
     self.assertEqual(fake_mac1, entries[0].primitive)
@@ -119,13 +118,15 @@ class PrimitiveSetTest(absltest.TestCase):
     self.assertLen(entries1, 1)
     self.assertEqual(fake_mac1, entries1[0].primitive)
     self.assertEqual(tink_pb2.ENABLED, entries1[0].status)
-    self.assertEqual(crypto_format.output_prefix(key1), entries1[0].identifier)
+    self.assertEqual(core.crypto_format.output_prefix(key1),
+                     entries1[0].identifier)
 
     entries2 = primitive_set.primitive(key2)
     self.assertLen(entries2, 1)
     self.assertEqual(fake_mac2, entries2[0].primitive)
     self.assertEqual(tink_pb2.ENABLED, entries2[0].status)
-    self.assertEqual(crypto_format.output_prefix(key2), entries2[0].identifier)
+    self.assertEqual(core.crypto_format.output_prefix(key2),
+                     entries2[0].identifier)
 
   def test_add_invalid_key_fails(self):
     primitive_set = core.new_primitive_set(mac.Mac)
@@ -160,10 +161,12 @@ class PrimitiveSetTest(absltest.TestCase):
     self.assertLen(entries, 2)
     self.assertEqual(fake_mac2, entries[0].primitive)
     self.assertEqual(tink_pb2.ENABLED, entries[0].status)
-    self.assertEqual(crypto_format.RAW_PREFIX, entries[0].identifier)
+    self.assertEqual(core.crypto_format.RAW_PREFIX,
+                     entries[0].identifier)
     self.assertEqual(fake_mac3, entries[1].primitive)
     self.assertEqual(tink_pb2.DISABLED, entries[1].status)
-    self.assertEqual(crypto_format.RAW_PREFIX, entries[1].identifier)
+    self.assertEqual(core.crypto_format.RAW_PREFIX,
+                     entries[1].identifier)
 
 
 if __name__ == '__main__':

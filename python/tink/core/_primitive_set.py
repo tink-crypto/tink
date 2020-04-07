@@ -23,8 +23,8 @@ import collections
 from typing import Generic, List, Type, TypeVar
 
 from tink.proto import tink_pb2
-from tink.core import crypto_format
-from tink.core import tink_error
+from tink.core import _crypto_format
+from tink.core import _tink_error
 
 P = TypeVar('P')
 Entry = collections.namedtuple(
@@ -65,20 +65,20 @@ class PrimitiveSet(Generic[P]):
 
   def primitive(self, key: tink_pb2.Keyset.Key) -> List[P]:
     """Returns a copy of the list of primitives for a given identifier."""
-    return self.primitive_from_identifier(crypto_format.output_prefix(key))
+    return self.primitive_from_identifier(_crypto_format.output_prefix(key))
 
   def raw_primitives(self) -> List[P]:
     """Returns a copy of the list of primitives for a given identifier."""
     # All raw keys have the same identifier, which is just b''.
-    return self.primitive_from_identifier(crypto_format.RAW_PREFIX)
+    return self.primitive_from_identifier(_crypto_format.RAW_PREFIX)
 
   def add_primitive(self, primitive: P, key: tink_pb2.Keyset.Key) -> Entry:
     """Adds a new primitive and key entry to the set, and returns the entry."""
     if not isinstance(primitive, self._primitive_class):
-      raise tink_error.TinkError(
+      raise _tink_error.TinkError(
           'The primitive is not an instance of {}'.format(
               self._primitive_class))
-    identifier = crypto_format.output_prefix(key)
+    identifier = _crypto_format.output_prefix(key)
 
     entry = Entry(primitive, identifier, key.status, key.output_prefix_type)
     entries = self._primitives.setdefault(identifier, [])
