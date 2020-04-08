@@ -71,11 +71,8 @@ public final class KeysetHandle {
    *     {@code keyTemplate}.
    * @throws GeneralSecurityException
    */
-  @SuppressWarnings("GuardedBy")
   public static final KeysetHandle generateNew(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
-    // is not currently held
     return KeysetManager.withEmptyKeyset().rotate(keyTemplate).getKeysetHandle();
   }
 

@@ -50,7 +50,6 @@ public final class KeysetManager {
   }
 
   /** @return a {@link KeysetHandle} of the managed keyset */
-  @GuardedBy("this")
   public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
     return KeysetHandle.fromKeyset(keysetBuilder.build());
   }
@@ -62,7 +61,6 @@ public final class KeysetManager {
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
    */
-  @GuardedBy("this")
   public synchronized KeysetManager rotate(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     addNewKey(keyTemplate, true);
@@ -75,7 +73,6 @@ public final class KeysetManager {
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
    */
-  @GuardedBy("this")
   public synchronized KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
     addNewKey(keyTemplate, false);
     return this;
@@ -85,7 +82,6 @@ public final class KeysetManager {
    * Generates a fresh key using {@code keyTemplate} and returns the {@code keyId} of it. In case
    * {@isPrimary} is true the generated key will be the new primary.
    */
-  @GuardedBy("this")
   public synchronized int addNewKey(KeyTemplate keyTemplate, boolean asPrimary)
       throws GeneralSecurityException {
     Keyset.Key key = newKey(keyTemplate);
@@ -101,7 +97,6 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or not enabled
    */
-  @GuardedBy("this")
   public synchronized KeysetManager setPrimary(int keyId) throws GeneralSecurityException {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
@@ -123,7 +118,6 @@ public final class KeysetManager {
    * @throws GeneralSecurityException if the key is not found or not enabled
    * @deprecated use {@link setPrimary}
    */
-  @GuardedBy("this")
   @Deprecated
   public synchronized KeysetManager promote(int keyId) throws GeneralSecurityException {
     return setPrimary(keyId);
@@ -134,7 +128,6 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found
    */
-  @GuardedBy("this")
   public synchronized KeysetManager enable(int keyId) throws GeneralSecurityException {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
@@ -156,7 +149,6 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @GuardedBy("this")
   public synchronized KeysetManager disable(int keyId) throws GeneralSecurityException {
     if (keyId == keysetBuilder.getPrimaryKeyId()) {
       throw new GeneralSecurityException("cannot disable the primary key");
@@ -182,7 +174,6 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @GuardedBy("this")
   public synchronized KeysetManager delete(int keyId) throws GeneralSecurityException {
     if (keyId == keysetBuilder.getPrimaryKeyId()) {
       throw new GeneralSecurityException("cannot delete the primary key");
@@ -203,7 +194,6 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @GuardedBy("this")
   public synchronized KeysetManager destroy(int keyId) throws GeneralSecurityException {
     if (keyId == keysetBuilder.getPrimaryKeyId()) {
       throw new GeneralSecurityException("cannot destroy the primary key");
@@ -226,7 +216,6 @@ public final class KeysetManager {
     throw new GeneralSecurityException("key not found: " + keyId);
   }
 
-  @GuardedBy("this")
   private synchronized Keyset.Key newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyData keyData = Registry.newKeyData(keyTemplate);
     int keyId = newKeyId();
@@ -242,7 +231,6 @@ public final class KeysetManager {
         .build();
   }
 
-  @GuardedBy("this")
   private synchronized boolean keyIdExists(int keyId) {
     for (Keyset.Key key : keysetBuilder.getKeyList()) {
       if (key.getKeyId() == keyId) {
@@ -252,7 +240,6 @@ public final class KeysetManager {
     return false;
   }
 
-  @GuardedBy("this")
   private synchronized int newKeyId() {
     int keyId = randPositiveInt();
     while (keyIdExists(keyId)) {
