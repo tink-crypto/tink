@@ -39,11 +39,6 @@ Mac = mac.Mac
 PublicKeySign = signature.PublicKeySign
 PublicKeyVerify = signature.PublicKeyVerify
 
-KeyManager = core.KeyManager
-PrivateKeyManager = core.PrivateKeyManager
-
-Registry = core.Registry
-
 new_keyset_handle = _keyset_handle.new_keyset_handle
 read_keyset_handle = _keyset_handle.read_keyset_handle
 read_no_secret_keyset_handle = _keyset_handle.read_no_secret_keyset_handle
@@ -57,7 +52,5 @@ BinaryKeysetReader = _keyset_reader.BinaryKeysetReader
 KeysetWriter = _keyset_writer.KeysetWriter
 JsonKeysetWriter = _keyset_writer.JsonKeysetWriter
 BinaryKeysetWriter = _keyset_writer.BinaryKeysetWriter
-
-new_primitive_set = core.new_primitive_set
 
 TinkError = core.TinkError
