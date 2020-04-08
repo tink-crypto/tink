@@ -31,3 +31,19 @@ sh_test(
         ":hmac_sha256_256bittag_test_keyset.json",
     ],
 )
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "file_mac_test_package",
+    size = "small",
+    srcs = ["file_mac_test.sh"],
+    args = [
+        "'python3 $(rootpath :file_mac_cleartext.py)'",
+        "$(rootpath :hmac_sha256_256bittag_test_keyset.json)",
+    ],
+    data = [
+        ":file_mac_cleartext.py",
+        ":hmac_sha256_256bittag_test_keyset.json",
+    ],
+)
