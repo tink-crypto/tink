@@ -16,7 +16,9 @@ py_library(
 py_library(
     name = "tink",
     deps = [
-        ":keyset_handle",
+        ":_keyset_handle",
+        ":_keyset_reader",
+        ":_keyset_writer",
         ":tink_config",
         "//tink/aead",
         "//tink/core",
@@ -29,9 +31,11 @@ py_library(
 )
 
 py_library(
-    name = "keyset_handle",
-    srcs = ["keyset_handle.py"],
+    name = "_keyset_handle",
+    srcs = ["_keyset_handle.py"],
     deps = [
+        ":_keyset_reader",
+        ":_keyset_writer",
         "//tink/aead:aead_primitive",
         "//tink/core",
         "//tink/proto:tink_py_pb2",
@@ -39,8 +43,8 @@ py_library(
 )
 
 py_test(
-    name = "keyset_handle_test",
-    srcs = ["keyset_handle_test.py"],
+    name = "_keyset_handle_test",
+    srcs = ["_keyset_handle_test.py"],
     deps = [
         ":tink_config",
         ":tink_python",
@@ -51,6 +55,48 @@ py_test(
         "//tink/mac",
         "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "_keyset_reader",
+    srcs = ["_keyset_reader.py"],
+    deps = [
+        "//tink/core",
+        requirement("six"),
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_keyset_reader_test",
+    srcs = ["_keyset_reader_test.py"],
+    deps = [
+        ":tink_python",
+        "//tink/core",
+        requirement("absl-py"),
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_keyset_writer",
+    srcs = ["_keyset_writer.py"],
+    deps = [
+        "//tink/core",
+        requirement("six"),
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_keyset_writer_test",
+    srcs = ["_keyset_writer_test.py"],
+    deps = [
+        ":tink_python",
+        "//tink/core",
+        requirement("absl-py"),
+        "//tink/proto:tink_py_pb2",
     ],
 )
 

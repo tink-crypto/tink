@@ -25,20 +25,11 @@ from tink.core import _primitive_set
 from tink.core import _primitive_wrapper
 from tink.core import _registry
 from tink.core import _tink_error
-from tink.core import keyset_reader
-from tink.core import keyset_writer
 
 
 KeyManager = _key_manager.KeyManager
 PrivateKeyManager = _key_manager.PrivateKeyManager
 
-KeysetReader = keyset_reader.KeysetReader
-JsonKeysetReader = keyset_reader.JsonKeysetReader
-BinaryKeysetReader = keyset_reader.BinaryKeysetReader
-
-KeysetWriter = keyset_writer.KeysetWriter
-JsonKeysetWriter = keyset_writer.JsonKeysetWriter
-BinaryKeysetWriter = keyset_writer.BinaryKeysetWriter
 KeyManagerCcToPyWrapper = _key_manager.KeyManagerCcToPyWrapper
 PrivateKeyManagerCcToPyWrapper = _key_manager.PrivateKeyManagerCcToPyWrapper
 

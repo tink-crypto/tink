@@ -18,11 +18,14 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+from tink import _keyset_handle
+from tink import _keyset_reader
+from tink import _keyset_writer
+
 from tink import aead
 from tink import core
 from tink import daead
 from tink import hybrid
-from tink import keyset_handle
 from tink import mac
 from tink import signature
 from tink import tink_config
@@ -41,19 +44,19 @@ PrivateKeyManager = core.PrivateKeyManager
 
 Registry = core.Registry
 
-new_keyset_handle = keyset_handle.new_keyset_handle
-read_keyset_handle = keyset_handle.read_keyset_handle
-read_no_secret_keyset_handle = keyset_handle.read_no_secret_keyset_handle
-KeysetHandle = keyset_handle.KeysetHandle
+new_keyset_handle = _keyset_handle.new_keyset_handle
+read_keyset_handle = _keyset_handle.read_keyset_handle
+read_no_secret_keyset_handle = _keyset_handle.read_no_secret_keyset_handle
+KeysetHandle = _keyset_handle.KeysetHandle
 
 
-KeysetReader = core.KeysetReader
-JsonKeysetReader = core.JsonKeysetReader
-BinaryKeysetReader = core.BinaryKeysetReader
+KeysetReader = _keyset_reader.KeysetReader
+JsonKeysetReader = _keyset_reader.JsonKeysetReader
+BinaryKeysetReader = _keyset_reader.BinaryKeysetReader
 
-KeysetWriter = core.KeysetWriter
-JsonKeysetWriter = core.JsonKeysetWriter
-BinaryKeysetWriter = core.BinaryKeysetWriter
+KeysetWriter = _keyset_writer.KeysetWriter
+JsonKeysetWriter = _keyset_writer.JsonKeysetWriter
+BinaryKeysetWriter = _keyset_writer.BinaryKeysetWriter
 
 new_primitive_set = core.new_primitive_set
 

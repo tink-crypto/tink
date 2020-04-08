@@ -38,9 +38,9 @@ class CleartextKeysetHandleTest(absltest.TestCase):
     handle = tink.new_keyset_handle(
         mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     output_stream = io.BytesIO()
-    writer = core.BinaryKeysetWriter(output_stream)
+    writer = tink.BinaryKeysetWriter(output_stream)
     cleartext_keyset_handle.write(writer, handle)
-    reader = core.BinaryKeysetReader(output_stream.getvalue())
+    reader = tink.BinaryKeysetReader(output_stream.getvalue())
     handle2 = cleartext_keyset_handle.read(reader)
     # Check that handle2 has the same primitive as handle.
     handle2.primitive(mac.Mac).verify_mac(
@@ -57,7 +57,7 @@ class CleartextKeysetHandleTest(absltest.TestCase):
 
   def test_read_empty_keyset_fails(self):
     with self.assertRaises(core.TinkError):
-      cleartext_keyset_handle.read(core.BinaryKeysetReader(b''))
+      cleartext_keyset_handle.read(tink.BinaryKeysetReader(b''))
 
 if __name__ == '__main__':
   absltest.main()

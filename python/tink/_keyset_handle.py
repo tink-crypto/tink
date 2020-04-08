@@ -24,6 +24,8 @@ from typing import Type, TypeVar
 
 from google.protobuf import message
 from tink.proto import tink_pb2
+from tink import _keyset_reader
+from tink import _keyset_writer
 from tink import core
 from tink.aead import aead
 
@@ -71,7 +73,7 @@ class KeysetHandle(object):
     return cls._create(keyset)
 
   @classmethod
-  def read(cls, keyset_reader: core.KeysetReader,
+  def read(cls, keyset_reader: _keyset_reader.KeysetReader,
            master_key_aead: aead.Aead) -> 'KeysetHandle':
     """Tries to create a KeysetHandle from an encrypted keyset."""
     encrypted_keyset = keyset_reader.read_encrypted()
@@ -79,13 +81,14 @@ class KeysetHandle(object):
     return cls._create(_decrypt(encrypted_keyset, master_key_aead))
 
   @classmethod
-  def read_no_secret(cls, keyset_reader: core.KeysetReader) -> 'KeysetHandle':
+  def read_no_secret(
+      cls, keyset_reader: _keyset_reader.KeysetReader) -> 'KeysetHandle':
     """Creates a KeysetHandle from a keyset with no secret key material.
 
     This can be used to load public keysets or envelope encryption keysets.
 
     Args:
-      keyset_reader: A core.KeysetReader object.
+      keyset_reader: A _keyset_reader.KeysetReader object.
 
     Returns:
       A new KeysetHandle.
@@ -104,13 +107,13 @@ class KeysetHandle(object):
     """Returns the KeysetInfo that doesn't contain actual key material."""
     return _keyset_info(self._keyset)
 
-  def write(self, keyset_writer: core.KeysetWriter,
+  def write(self, keyset_writer: _keyset_writer.KeysetWriter,
             master_key_primitive: aead.Aead) -> None:
     """Serializes, encrypts with master_key_primitive and writes the keyset."""
     encrypted_keyset = _encrypt(self._keyset, master_key_primitive)
     keyset_writer.write_encrypted(encrypted_keyset)
 
-  def write_no_secret(self, keyset_writer: core.KeysetWriter) -> None:
+  def write_no_secret(self, keyset_writer: _keyset_writer.KeysetWriter) -> None:
     """Writes the underlying keyset to keyset_writer.
 
     Writes the underlying keyset to keyset_writer only if the keyset does not
@@ -170,13 +173,13 @@ def new_keyset_handle(key_template: tink_pb2.KeyTemplate) -> KeysetHandle:
 
 
 def read_keyset_handle(
-    keyset_reader: core.KeysetReader,
+    keyset_reader: _keyset_reader.KeysetReader,
     master_key_aead: aead.Aead) -> KeysetHandle:
   return KeysetHandle.read(keyset_reader, master_key_aead)
 
 
 def read_no_secret_keyset_handle(
-    keyset_reader: core.KeysetReader) -> KeysetHandle:
+    keyset_reader: _keyset_reader.KeysetReader) -> KeysetHandle:
   return KeysetHandle.read_no_secret(keyset_reader)
 
 

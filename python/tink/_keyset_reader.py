@@ -26,7 +26,7 @@ import six
 from typing import Text
 
 from tink.proto import tink_pb2
-from tink.core import _tink_error
+from tink import core
 from google.protobuf import json_format
 from google.protobuf import message
 
@@ -56,14 +56,14 @@ class JsonKeysetReader(KeysetReader):
     try:
       return json_format.Parse(self._serialized_keyset, tink_pb2.Keyset())
     except json_format.ParseError as e:
-      raise _tink_error.TinkError(e)
+      raise core.TinkError(e)
 
   def read_encrypted(self) -> tink_pb2.EncryptedKeyset:
     try:
       return json_format.Parse(self._serialized_keyset,
                                tink_pb2.EncryptedKeyset())
     except json_format.ParseError as e:
-      raise _tink_error.TinkError(e)
+      raise core.TinkError(e)
 
 
 class BinaryKeysetReader(KeysetReader):
@@ -74,20 +74,20 @@ class BinaryKeysetReader(KeysetReader):
 
   def read(self) -> tink_pb2.Keyset:
     if not self._serialized_keyset:
-      raise _tink_error.TinkError('No keyset found')
+      raise core.TinkError('No keyset found')
     try:
       keyset = tink_pb2.Keyset()
       keyset.ParseFromString(self._serialized_keyset)
       return keyset
     except message.DecodeError as e:
-      raise _tink_error.TinkError(e)
+      raise core.TinkError(e)
 
   def read_encrypted(self) -> tink_pb2.EncryptedKeyset:
     if not self._serialized_keyset:
-      raise _tink_error.TinkError('No keyset found')
+      raise core.TinkError('No keyset found')
     try:
       encrypted_keyset = tink_pb2.EncryptedKeyset()
       encrypted_keyset.ParseFromString(self._serialized_keyset)
       return encrypted_keyset
     except message.DecodeError as e:
-      raise _tink_error.TinkError(e)
+      raise core.TinkError(e)

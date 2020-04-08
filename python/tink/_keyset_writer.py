@@ -28,7 +28,7 @@ import six
 from typing import Union
 from google.protobuf import json_format
 from tink.proto import tink_pb2
-from tink.core import _tink_error
+from tink import core
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -57,7 +57,7 @@ class JsonKeysetWriter(KeysetWriter):
 
   def write(self, keyset: tink_pb2.Keyset) -> None:
     if not isinstance(keyset, tink_pb2.Keyset):
-      raise _tink_error.TinkError('invalid keyset.')
+      raise core.TinkError('invalid keyset.')
     json_keyset = json_format.MessageToJson(keyset)
     # TODO(b/141106504) Needed for python 2.7 compatibility. StringIO expects
     # unicode, but MessageToJson outputs UTF-8.
@@ -68,7 +68,7 @@ class JsonKeysetWriter(KeysetWriter):
 
   def write_encrypted(self, encrypted_keyset: tink_pb2.EncryptedKeyset) -> None:
     if not isinstance(encrypted_keyset, tink_pb2.EncryptedKeyset):
-      raise _tink_error.TinkError('invalid encrypted keyset.')
+      raise core.TinkError('invalid encrypted keyset.')
     json_keyset = json_format.MessageToJson(encrypted_keyset)
     # TODO(b/141106504) Needed for python 2.7 compatibility. StringIO expects
     # unicode, but MessageToJson outputs UTF-8.
@@ -89,12 +89,12 @@ class BinaryKeysetWriter(KeysetWriter):
 
   def write(self, keyset: tink_pb2.Keyset) -> None:
     if not isinstance(keyset, tink_pb2.Keyset):
-      raise _tink_error.TinkError('invalid keyset.')
+      raise core.TinkError('invalid keyset.')
     self._io_stream.write(keyset.SerializeToString())
     self._io_stream.flush()
 
   def write_encrypted(self, encrypted_keyset: tink_pb2.EncryptedKeyset) -> None:
     if not isinstance(encrypted_keyset, tink_pb2.EncryptedKeyset):
-      raise _tink_error.TinkError('invalid encrypted keyset.')
+      raise core.TinkError('invalid encrypted keyset.')
     self._io_stream.write(encrypted_keyset.SerializeToString())
     self._io_stream.flush()

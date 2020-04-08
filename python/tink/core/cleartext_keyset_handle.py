@@ -25,7 +25,6 @@ from __future__ import print_function
 
 from tink.proto import tink_pb2
 import tink
-from tink import core
 
 
 def from_keyset(keyset: tink_pb2.Keyset) -> tink.KeysetHandle:
@@ -33,13 +32,13 @@ def from_keyset(keyset: tink_pb2.Keyset) -> tink.KeysetHandle:
   return tink.KeysetHandle._create(keyset)  # pylint: disable=protected-access
 
 
-def read(keyset_reader: core.KeysetReader) -> tink.KeysetHandle:
+def read(keyset_reader: tink.KeysetReader) -> tink.KeysetHandle:
   """Create a KeysetHandle from a keyset_reader."""
   keyset = keyset_reader.read()
   return tink.KeysetHandle._create(keyset)  # pylint: disable=protected-access
 
 
-def write(keyset_writer: core.KeysetWriter,
+def write(keyset_writer: tink.KeysetWriter,
           keyset_handle: tink.KeysetHandle) -> None:
   """Serializes and writes the keyset."""
   keyset_writer.write(keyset_handle._keyset)  # pylint: disable=protected-access
@@ -54,11 +53,11 @@ class CleartextKeysetHandle(tink.KeysetHandle):
 
   @classmethod
   def read(cls,
-           keyset_reader: core.KeysetReader) -> tink.KeysetHandle:
+           keyset_reader: tink.KeysetReader) -> tink.KeysetHandle:
     """Create a KeysetHandle from a keyset read with keyset_reader."""
     keyset = keyset_reader.read()
     return cls._create(keyset)
 
-  def write(self, keyset_writer: core.KeysetWriter) -> None:
+  def write(self, keyset_writer: tink.KeysetWriter) -> None:
     """Serializes and writes the keyset."""
     keyset_writer.write(self._keyset)

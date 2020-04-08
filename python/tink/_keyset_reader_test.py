@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for tink.python.tink.keyset_reader."""
+"""Tests for tink.python.tink._keyset_reader."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,6 +22,7 @@ from absl.testing import absltest
 
 from typing import cast
 from tink.proto import tink_pb2
+import tink
 from tink import core
 
 
@@ -44,14 +45,14 @@ class JsonKeysetReaderTest(absltest.TestCase):
             }
           ]
         }"""
-    reader = core.JsonKeysetReader(json_keyset)
+    reader = tink.JsonKeysetReader(json_keyset)
     keyset = reader.read()
     self.assertEqual(keyset.primary_key_id, 42)
     self.assertLen(keyset.key, 1)
 
   def test_read_invalid(self):
     with self.assertRaisesRegex(core.TinkError, 'Failed to load JSON'):
-      reader = core.JsonKeysetReader('not json')
+      reader = tink.JsonKeysetReader('not json')
       reader.read()
 
   def test_read_encrypted(self):
@@ -71,7 +72,7 @@ class JsonKeysetReaderTest(absltest.TestCase):
             ]
           }
         }"""
-    reader = core.JsonKeysetReader(json_encrypted_keyset)
+    reader = tink.JsonKeysetReader(json_encrypted_keyset)
     enc_keyset = reader.read_encrypted()
     self.assertEqual(enc_keyset.encrypted_keyset,
                      b'some ciphertext with keyset')
@@ -81,7 +82,7 @@ class JsonKeysetReaderTest(absltest.TestCase):
 
   def test_read_encrypted_invalid(self):
     with self.assertRaisesRegex(core.TinkError, 'Failed to load JSON'):
-      reader = core.JsonKeysetReader('not json')
+      reader = tink.JsonKeysetReader('not json')
       reader.read_encrypted()
 
 
@@ -97,22 +98,22 @@ class BinaryKeysetReaderTest(absltest.TestCase):
     key.output_prefix_type = tink_pb2.TINK
     key.key_id = 42
     key.status = tink_pb2.ENABLED
-    reader = core.BinaryKeysetReader(keyset.SerializeToString())
+    reader = tink.BinaryKeysetReader(keyset.SerializeToString())
     self.assertEqual(keyset, reader.read())
 
   def test_read_none(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      reader = core.BinaryKeysetReader(cast(bytes, None))
+      reader = tink.BinaryKeysetReader(cast(bytes, None))
       reader.read()
 
   def test_read_empty(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      reader = core.BinaryKeysetReader(b'')
+      reader = tink.BinaryKeysetReader(b'')
       reader.read()
 
   def test_read_invalid(self):
     with self.assertRaisesRegex(core.TinkError, 'Wrong wire type'):
-      reader = core.BinaryKeysetReader(b'some weird data')
+      reader = tink.BinaryKeysetReader(b'some weird data')
       reader.read()
 
   def test_read_encrypted(self):
@@ -124,23 +125,23 @@ class BinaryKeysetReaderTest(absltest.TestCase):
     key_info.output_prefix_type = tink_pb2.TINK
     key_info.key_id = 42
     key_info.status = tink_pb2.ENABLED
-    reader = core.BinaryKeysetReader(
+    reader = tink.BinaryKeysetReader(
         encrypted_keyset.SerializeToString())
     self.assertEqual(encrypted_keyset, reader.read_encrypted())
 
   def test_read_encrypted_none(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      reader = core.BinaryKeysetReader(cast(bytes, None))
+      reader = tink.BinaryKeysetReader(cast(bytes, None))
       reader.read_encrypted()
 
   def test_read_encrypted_empty(self):
     with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
-      reader = core.BinaryKeysetReader(b'')
+      reader = tink.BinaryKeysetReader(b'')
       reader.read_encrypted()
 
   def test_read_encrypted_invalid(self):
     with self.assertRaisesRegex(core.TinkError, 'Wrong wire type'):
-      reader = core.BinaryKeysetReader(b'some weird data')
+      reader = tink.BinaryKeysetReader(b'some weird data')
       reader.read_encrypted()
 
 
