@@ -27,7 +27,7 @@ from google.api_core.exceptions import GoogleAPICallError
 from google.api_core.exceptions import RetryError
 from google.cloud import kms_v1
 
-from tink.aead import aead
+from tink import aead
 
 
 class GcpKmsAead(aead.Aead):

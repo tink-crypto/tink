@@ -27,7 +27,7 @@ from botocore.exceptions import ClientError
 
 from typing import Text
 
-from tink.aead import aead
+from tink import aead
 
 
 class AwsKmsAead(aead.Aead):

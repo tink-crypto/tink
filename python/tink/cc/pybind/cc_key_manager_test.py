@@ -27,7 +27,7 @@ from tink.proto import ecdsa_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import tink_pb2
-from tink.aead import aead_key_templates
+from tink import aead
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import cc_tink_config
 from tink.cc.pybind import status as error
@@ -80,11 +80,11 @@ class AeadKeyManagerTest(absltest.TestCase):
     key_template = self.new_aes_eax_key_template(12, 16)
     key_data = self.key_manager.new_key_data(key_template)
 
-    aead = self.key_manager.primitive(key_data)
+    primitive = self.key_manager.primitive(key_data)
     plaintext = b'plaintext'
     associated_data = b'associated_data'
-    ciphertext = aead.encrypt(plaintext, associated_data)
-    self.assertEqual(aead.decrypt(ciphertext, associated_data), plaintext)
+    ciphertext = primitive.encrypt(plaintext, associated_data)
+    self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
 
 
 class DeterministicAeadKeyManagerTest(absltest.TestCase):
@@ -127,12 +127,13 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
     key_template = self.new_aes_siv_key_template(64)
     key_data = self.key_manager.new_key_data(key_template)
 
-    aead = self.key_manager.primitive(key_data)
+    primitive = self.key_manager.primitive(key_data)
     plaintext = b'plaintext'
     associated_data = b'associated_data'
-    ciphertext = aead.encrypt_deterministically(plaintext, associated_data)
+    ciphertext = primitive.encrypt_deterministically(plaintext, associated_data)
     self.assertEqual(
-        aead.decrypt_deterministically(ciphertext, associated_data), plaintext)
+        primitive.decrypt_deterministically(ciphertext, associated_data),
+        plaintext)
 
 
 class HybridKeyManagerTest(absltest.TestCase):
@@ -169,8 +170,8 @@ class HybridKeyManagerTest(absltest.TestCase):
               curve_type=cast(common_pb2.EllipticCurveType, 100),  # invalid
               ec_point_format=common_pb2.UNCOMPRESSED,
               hash_type=common_pb2.SHA256,
-              dem_key_template=aead_key_templates.AES128_GCM).SerializeToString(
-              ))
+              dem_key_template=aead.aead_key_templates.AES128_GCM)
+          .SerializeToString())
 
   def test_encrypt_decrypt(self):
     decrypt_key_manager = self.hybrid_decrypt_key_manager()

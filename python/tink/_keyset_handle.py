@@ -26,8 +26,8 @@ from google.protobuf import message
 from tink.proto import tink_pb2
 from tink import _keyset_reader
 from tink import _keyset_writer
+from tink import aead
 from tink import core
-from tink.aead import aead
 
 P = TypeVar('P')
 

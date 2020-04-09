@@ -27,7 +27,7 @@ from google.auth import default
 from google.cloud import kms_v1
 from google.oauth2 import service_account
 
-from tink.aead import aead
+from tink import aead
 from tink.integration.gcpkms.gcp_kms_aead import GcpKmsAead
 
 GCP_KEYURI_PREFIX = "gcp-kms://"

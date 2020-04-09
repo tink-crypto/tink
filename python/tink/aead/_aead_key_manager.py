@@ -22,12 +22,12 @@ from __future__ import print_function
 from typing import Text
 
 from tink import core
-from tink.aead import aead
+from tink.aead import _aead
 from tink.cc.pybind import aead as cc_aead
 from tink.cc.pybind import cc_key_manager
 
 
-class _AeadCcToPyWrapper(aead.Aead):
+class _AeadCcToPyWrapper(_aead.Aead):
   """Transforms cliffed C++ Aead primitive into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_aead.Aead):
@@ -42,7 +42,7 @@ class _AeadCcToPyWrapper(aead.Aead):
     return self._aead.decrypt(plaintext, associated_data)
 
 
-def from_cc_registry(type_url: Text) -> core.KeyManager[aead.Aead]:
+def from_cc_registry(type_url: Text) -> core.KeyManager[_aead.Aead]:
   return core.KeyManagerCcToPyWrapper(
-      cc_key_manager.AeadKeyManager.from_cc_registry(type_url), aead.Aead,
+      cc_key_manager.AeadKeyManager.from_cc_registry(type_url), _aead.Aead,
       _AeadCcToPyWrapper)

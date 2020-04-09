@@ -24,13 +24,13 @@ from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
-from tink.aead import aead_key_templates
+from tink import aead
 
 
 class AeadKeyTemplatesTest(absltest.TestCase):
 
   def test_aes128_eax(self):
-    template = aead_key_templates.AES128_EAX
+    template = aead.aead_key_templates.AES128_EAX
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesEaxKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -40,7 +40,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(16, key_format.params.iv_size)
 
   def test_aes256_eax(self):
-    template = aead_key_templates.AES256_EAX
+    template = aead.aead_key_templates.AES256_EAX
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesEaxKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -52,7 +52,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
   def test_create_aes_eax_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = aead_key_templates.create_aes_eax_key_template(
+    template = aead.aead_key_templates.create_aes_eax_key_template(
         key_size=42, iv_size=72)
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesEaxKey',
                      template.type_url)
@@ -63,7 +63,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(72, key_format.params.iv_size)
 
   def test_aes128_gcm(self):
-    template = aead_key_templates.AES128_GCM
+    template = aead.aead_key_templates.AES128_GCM
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesGcmKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -72,7 +72,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(16, key_format.key_size)
 
   def test_aes256_gcm(self):
-    template = aead_key_templates.AES256_GCM
+    template = aead.aead_key_templates.AES256_GCM
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesGcmKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -83,7 +83,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
   def test_create_aes_gcm_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = aead_key_templates.create_aes_gcm_key_template(key_size=42)
+    template = aead.aead_key_templates.create_aes_gcm_key_template(key_size=42)
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesGcmKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -92,7 +92,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(42, key_format.key_size)
 
   def test_aes256_ctr_hmac_sha256(self):
-    template = aead_key_templates.AES128_CTR_HMAC_SHA256
+    template = aead.aead_key_templates.AES128_CTR_HMAC_SHA256
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -105,7 +105,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(32, key_format.hmac_key_format.key_size)
 
   def test_aes128_ctr_hmac_sha256(self):
-    template = aead_key_templates.AES256_CTR_HMAC_SHA256
+    template = aead.aead_key_templates.AES256_CTR_HMAC_SHA256
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -120,7 +120,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
   def test_create_aes_ctr_hmac_aead_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = aead_key_templates.create_aes_ctr_hmac_aead_key_template(
+    template = aead.aead_key_templates.create_aes_ctr_hmac_aead_key_template(
         aes_key_size=34,
         iv_size=93,
         hmac_key_size=46,
@@ -138,7 +138,7 @@ class AeadKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(46, key_format.hmac_key_format.key_size)
 
   def test_xchacha20_poly1305(self):
-    template = aead_key_templates.XCHACHA20_POLY1305
+    template = aead.aead_key_templates.XCHACHA20_POLY1305
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key',
         template.type_url)

@@ -24,10 +24,10 @@ from absl import logging
 from typing import Type
 
 from tink import core
-from tink.aead import aead
+from tink.aead import _aead
 
 
-class _WrappedAead(aead.Aead):
+class _WrappedAead(_aead.Aead):
   """Implements Aead for a set of Aead primitives."""
 
   def __init__(self, pset: core.PrimitiveSet):
@@ -59,7 +59,7 @@ class _WrappedAead(aead.Aead):
     raise core.TinkError('Decryption failed.')
 
 
-class AeadWrapper(core.PrimitiveWrapper[aead.Aead]):
+class AeadWrapper(core.PrimitiveWrapper[_aead.Aead]):
   """AeadWrapper is the implementation of PrimitiveWrapper for Aead.
 
   Key rotation works as follows: each ciphertext is prefixed with the keyId.
@@ -69,8 +69,8 @@ class AeadWrapper(core.PrimitiveWrapper[aead.Aead]):
   TinkError.
   """
 
-  def wrap(self, pset: core.PrimitiveSet) -> aead.Aead:
+  def wrap(self, pset: core.PrimitiveSet) -> _aead.Aead:
     return _WrappedAead(pset)
 
-  def primitive_class(self) -> Type[aead.Aead]:
-    return aead.Aead
+  def primitive_class(self) -> Type[_aead.Aead]:
+    return _aead.Aead

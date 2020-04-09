@@ -8,43 +8,43 @@ py_library(
     srcs = ["aws_kms_client.py"],
     deps = [
         ":aws_kms_aead",
-        "//tink/aead:aead_primitive",
+        "//tink/aead",
         "//tink/core",
         requirement("boto3"),
-    ]
+    ],
 )
 
 py_test(
     name = "aws_kms_client_test",
     srcs = ["aws_kms_client_test.py"],
     data = [
-        "@tink_base//testdata:credentials"
+        "@tink_base//testdata:credentials",
     ],
     deps = [
         ":aws_kms_client",
         requirement("absl-py"),
-    ]
+    ],
 )
 
 py_library(
     name = "aws_kms_aead",
     srcs = ["aws_kms_aead.py"],
     deps = [
-        "//tink/aead:aead_primitive",
+        "//tink/aead",
         "//tink/core",
         requirement("boto3"),
-    ]
+    ],
 )
 
 py_test(
     name = "aws_kms_aead_test",
     srcs = ["aws_kms_aead_test.py"],
     data = [
-        "@tink_base//testdata:credentials"
+        "@tink_base//testdata:credentials",
     ],
     deps = [
-        ":aws_kms_client",
         ":aws_kms_aead",
+        ":aws_kms_client",
         requirement("absl-py"),
-    ]
+    ],
 )

@@ -67,13 +67,13 @@ py_test(
         ":hybrid_encrypt_key_manager",
         ":hybrid_key_templates",
         requirement("absl-py"),
+        "//tink:tink_config",
+        "//tink/aead:aead_key_templates",
+        "//tink/core",
         "//tink/proto:aes_gcm_py_pb2",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink:tink_config",
-        "//tink/aead:aead_key_templates",
-        "//tink/core",
     ],
 )
 
@@ -105,8 +105,8 @@ py_test(
         ":hybrid_encrypt",
         ":hybrid_encrypt_wrapper",
         requirement("absl-py"),
-        "//tink/proto:tink_py_pb2",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
     ],
 )
@@ -115,10 +115,10 @@ py_library(
     name = "hybrid_key_templates",
     srcs = ["hybrid_key_templates.py"],
     deps = [
+        "//tink/aead",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/aead:aead_key_templates",
     ],
 )
 
@@ -128,9 +128,9 @@ py_test(
     deps = [
         ":hybrid_key_templates",
         requirement("absl-py"),
+        "//tink/aead:aead_key_templates",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/aead:aead_key_templates",
     ],
 )

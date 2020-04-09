@@ -9,15 +9,15 @@ py_library(
     name = "aead",
     srcs = ["__init__.py"],
     deps = [
-        ":aead_key_manager",
-        ":aead_key_templates",
-        ":aead_primitive",
-        ":aead_wrapper",
+        ":_aead",
+        ":_aead_key_manager",
+        ":_aead_key_templates",
+        ":_aead_wrapper",
     ],
 )
 
 py_library(
-    name = "aead_primitive",
+    name = "_aead",
     srcs = ["aead.py"],
     deps = [
         requirement("six"),
@@ -25,10 +25,10 @@ py_library(
 )
 
 py_library(
-    name = "aead_key_manager",
-    srcs = ["aead_key_manager.py"],
+    name = "_aead_key_manager",
+    srcs = ["_aead_key_manager.py"],
     deps = [
-        ":aead_primitive",
+        ":_aead",
         "//tink/cc/pybind:aead",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:deterministic_aead",
@@ -38,11 +38,10 @@ py_library(
 )
 
 py_test(
-    name = "aead_key_manager_test",
-    srcs = ["aead_key_manager_test.py"],
+    name = "_aead_key_manager_test",
+    srcs = ["_aead_key_manager_test.py"],
     deps = [
-        ":aead_key_manager",
-        ":aead_primitive",
+        ":aead",
         requirement("absl-py"),
         "//tink:tink_config",
         "//tink/core",
@@ -53,31 +52,30 @@ py_test(
 )
 
 py_library(
-    name = "aead_wrapper",
-    srcs = ["aead_wrapper.py"],
+    name = "_aead_wrapper",
+    srcs = ["_aead_wrapper.py"],
     deps = [
-        ":aead_primitive",
+        ":_aead",
         requirement("absl-py"),
         "//tink/core",
     ],
 )
 
 py_test(
-    name = "aead_wrapper_test",
-    srcs = ["aead_wrapper_test.py"],
+    name = "_aead_wrapper_test",
+    srcs = ["_aead_wrapper_test.py"],
     deps = [
-        ":aead_primitive",
-        ":aead_wrapper",
+        ":aead",
         requirement("absl-py"),
         "//tink/core",
-        "//tink/testing:helper",
         "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
     ],
 )
 
 py_library(
-    name = "aead_key_templates",
-    srcs = ["aead_key_templates.py"],
+    name = "_aead_key_templates",
+    srcs = ["_aead_key_templates.py"],
     srcs_version = "PY2AND3",
     deps = [
         "//tink/proto:aes_ctr_hmac_aead_py_pb2",
@@ -89,10 +87,10 @@ py_library(
 )
 
 py_test(
-    name = "aead_key_templates_test",
-    srcs = ["aead_key_templates_test.py"],
+    name = "_aead_key_templates_test",
+    srcs = ["_aead_key_templates_test.py"],
     deps = [
-        ":aead_key_templates",
+        ":aead",
         requirement("absl-py"),
         "//tink/proto:aes_ctr_hmac_aead_py_pb2",
         "//tink/proto:aes_eax_py_pb2",
@@ -106,7 +104,7 @@ py_library(
     name = "kms_envelope_aead",
     srcs = ["kms_envelope_aead.py"],
     deps = [
-        ":aead_primitive",
+        ":aead",
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
@@ -116,8 +114,7 @@ py_test(
     name = "kms_envelope_aead_test",
     srcs = ["kms_envelope_aead_test.py"],
     deps = [
-        ":aead_key_templates",
-        ":aead_primitive",
+        ":aead",
         ":kms_envelope_aead",
         requirement("absl-py"),
         "//tink:tink_config",

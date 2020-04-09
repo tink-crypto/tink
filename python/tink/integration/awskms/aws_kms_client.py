@@ -28,7 +28,7 @@ import boto3
 import configparser
 from typing import Text
 
-from tink.aead import aead
+from tink import aead
 from tink.integration.awskms.aws_kms_aead import AwsKmsAead
 
 AWS_KEYURI_PREFIX = 'aws-kms://'

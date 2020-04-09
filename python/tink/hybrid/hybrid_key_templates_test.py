@@ -22,7 +22,7 @@ from absl.testing import absltest
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
-from tink.aead import aead_key_templates
+from tink import aead
 from tink.hybrid import hybrid_key_templates
 
 
@@ -39,7 +39,7 @@ class HybridKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(key_format.params.kem_params.curve_type,
                      common_pb2.NIST_P256)
     self.assertEqual(key_format.params.dem_params.aead_dem,
-                     aead_key_templates.AES128_GCM)
+                     aead.aead_key_templates.AES128_GCM)
 
   def test_ecies_p256_hkdf_hmac_sha256_aes128_ctr_hmac_sha256(self):
     template = (
@@ -53,7 +53,7 @@ class HybridKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(key_format.params.kem_params.curve_type,
                      common_pb2.NIST_P256)
     self.assertEqual(key_format.params.dem_params.aead_dem,
-                     aead_key_templates.AES128_CTR_HMAC_SHA256)
+                     aead.aead_key_templates.AES128_CTR_HMAC_SHA256)
 
   def test_create_aes_eax_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
@@ -62,7 +62,7 @@ class HybridKeyTemplatesTest(absltest.TestCase):
         curve_type=common_pb2.NIST_P521,
         ec_point_format=common_pb2.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
         hash_type=common_pb2.SHA1,
-        dem_key_template=aead_key_templates.AES256_EAX)
+        dem_key_template=aead.aead_key_templates.AES256_EAX)
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey',
         template.type_url)
@@ -76,7 +76,7 @@ class HybridKeyTemplatesTest(absltest.TestCase):
     self.assertEqual(key_format.params.ec_point_format,
                      common_pb2.DO_NOT_USE_CRUNCHY_UNCOMPRESSED)
     self.assertEqual(key_format.params.dem_params.aead_dem,
-                     aead_key_templates.AES256_EAX)
+                     aead.aead_key_templates.AES256_EAX)
 
 
 if __name__ == '__main__':

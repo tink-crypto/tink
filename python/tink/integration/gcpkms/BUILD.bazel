@@ -46,7 +46,7 @@ py_library(
     name = "gcp_kms_aead",
     srcs = ["gcp_kms_aead.py"],
     deps = [
-        "//tink/aead:aead_primitive",
+        "//tink/aead",
         requirement("grpc-google-iam-v1"),
         requirement("idna"),
         requirement("certifi"),

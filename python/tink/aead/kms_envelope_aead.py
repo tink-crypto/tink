@@ -21,8 +21,8 @@ from __future__ import print_function
 import struct
 
 from tink.proto import tink_pb2
+from tink import aead
 from tink import core
-from tink.aead import aead
 
 # Defines in how many bytes the DEK length will be encoded.
 DEK_LEN_BYTES = 4

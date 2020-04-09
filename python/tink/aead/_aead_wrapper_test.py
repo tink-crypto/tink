@@ -20,9 +20,8 @@ from __future__ import print_function
 
 from absl.testing import absltest
 from tink.proto import tink_pb2
+from tink import aead
 from tink import core
-from tink.aead import aead
-from tink.aead import aead_wrapper
 from tink.testing import helper
 
 
@@ -40,7 +39,7 @@ class AeadWrapperTest(absltest.TestCase):
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
 
-    wrapped_aead = aead_wrapper.AeadWrapper().wrap(pset)
+    wrapped_aead = aead.AeadWrapper().wrap(pset)
 
     plaintext = b'plaintext'
     associated_data = b'associated_data'
@@ -53,7 +52,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(aead.Aead)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
-    wrapped_aead = aead_wrapper.AeadWrapper().wrap(pset)
+    wrapped_aead = aead.AeadWrapper().wrap(pset)
     ciphertext = wrapped_aead.encrypt(b'plaintext', b'associated_data')
 
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
@@ -78,7 +77,7 @@ class AeadWrapperTest(absltest.TestCase):
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
     new_entry = pset.add_primitive(new_primitive, new_key)
     pset.set_primary(new_entry)
-    wrapped_aead = aead_wrapper.AeadWrapper().wrap(pset)
+    wrapped_aead = aead.AeadWrapper().wrap(pset)
     new_ciphertext = wrapped_aead.encrypt(b'new_plaintext',
                                           b'new_associated_data')
 
@@ -99,7 +98,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset.add_primitive(primitive1, raw_key1)
     pset.set_primary(
         pset.add_primitive(primitive2, raw_key2))
-    wrapped_aead = aead_wrapper.AeadWrapper().wrap(pset)
+    wrapped_aead = aead.AeadWrapper().wrap(pset)
 
     self.assertEqual(
         wrapped_aead.decrypt(raw_ciphertext1, b'associated_data1'),
@@ -124,7 +123,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset.add_primitive(primitive, raw_key)
     new_entry = pset.add_primitive(new_primitive, new_key)
     pset.set_primary(new_entry)
-    wrapped_aead = aead_wrapper.AeadWrapper().wrap(pset)
+    wrapped_aead = aead.AeadWrapper().wrap(pset)
 
     with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
       wrapped_aead.decrypt(unknown_ciphertext, b'associated_data')
@@ -134,7 +133,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(aead.Aead)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
-    wrapped_aead = aead_wrapper.AeadWrapper().wrap(pset)
+    wrapped_aead = aead.AeadWrapper().wrap(pset)
 
     ciphertext = wrapped_aead.encrypt(b'plaintext', b'associated_data')
     with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):

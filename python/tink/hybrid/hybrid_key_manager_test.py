@@ -23,9 +23,9 @@ from typing import cast
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
+from tink import aead
 from tink import core
 from tink import tink_config
-from tink.aead import aead_key_templates
 from tink.hybrid import hybrid_decrypt
 from tink.hybrid import hybrid_decrypt_key_manager
 from tink.hybrid import hybrid_encrypt
@@ -88,7 +88,7 @@ class HybridKeyManagerTest(absltest.TestCase):
               curve_type=cast(common_pb2.EllipticCurveType, 100),
               ec_point_format=common_pb2.UNCOMPRESSED,
               hash_type=common_pb2.SHA256,
-              dem_key_template=aead_key_templates.AES128_GCM))
+              dem_key_template=aead.aead_key_templates.AES128_GCM))
 
   def test_new_key_data_on_public_key_manager_fails(self):
     key_format = ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat()

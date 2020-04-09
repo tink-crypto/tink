@@ -13,7 +13,6 @@ py_library(
         ":_primitive_wrapper",
         ":_registry",
         ":_tink_error",
-        "//tink/aead:aead_primitive",
         "//tink/proto:tink_py_pb2",
     ],
 )
