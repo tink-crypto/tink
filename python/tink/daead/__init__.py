@@ -26,3 +26,4 @@ from tink.daead import deterministic_aead_wrapper
 
 DeterministicAead = deterministic_aead.DeterministicAead
 DeterministicAeadWrapper = deterministic_aead_wrapper.DeterministicAeadWrapper
+key_manager_from_cc_registry = deterministic_aead_key_manager.from_cc_registry

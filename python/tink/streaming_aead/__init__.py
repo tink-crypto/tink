@@ -22,3 +22,4 @@ from tink.streaming_aead import streaming_aead_key_templates
 
 
 StreamingAead = streaming_aead.StreamingAead
+key_manager_from_cc_registry = streaming_aead_key_manager.from_cc_registry

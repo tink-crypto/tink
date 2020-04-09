@@ -31,3 +31,5 @@ PublicKeySign = public_key_sign.PublicKeySign
 PublicKeyVerify = public_key_verify.PublicKeyVerify
 PublicKeySignWrapper = public_key_sign_wrapper.PublicKeySignWrapper
 PublicKeyVerifyWrapper = public_key_verify_wrapper.PublicKeyVerifyWrapper
+sign_key_manager_from_cc_registry = public_key_sign_key_manager.from_cc_registry
+verify_key_manager_from_cc_registry = public_key_verify_key_manager.from_cc_registry

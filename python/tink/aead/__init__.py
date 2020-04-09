@@ -26,3 +26,4 @@ from tink.aead import aead_wrapper
 
 Aead = aead.Aead
 AeadWrapper = aead_wrapper.AeadWrapper
+key_manager_from_cc_registry = aead_key_manager.from_cc_registry

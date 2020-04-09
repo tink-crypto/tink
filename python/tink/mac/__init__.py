@@ -25,3 +25,4 @@ from tink.mac import mac_wrapper
 
 Mac = mac.Mac
 MacWrapper = mac_wrapper.MacWrapper
+key_manager_from_cc_registry = mac_key_manager.from_cc_registry

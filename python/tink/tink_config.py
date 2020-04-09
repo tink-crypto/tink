@@ -24,14 +24,7 @@ from tink import daead
 from tink import hybrid
 from tink import mac
 from tink import signature
-from tink.aead import aead_key_manager
 from tink.cc.pybind import cc_tink_config
-from tink.daead import deterministic_aead_key_manager
-from tink.hybrid import hybrid_decrypt_key_manager
-from tink.hybrid import hybrid_encrypt_key_manager
-from tink.mac import mac_key_manager
-from tink.signature import public_key_sign_key_manager
-from tink.signature import public_key_verify_key_manager
 
 
 def register():
@@ -46,37 +39,43 @@ def _register_key_managers():
   for key_type_identifier in ('AesCtrHmacAeadKey', 'AesGcmKey', 'AesGcmSivKey',
                               'AesEaxKey', 'XChaCha20Poly1305Key', 'KmsAeadKey',
                               'KmsEnvelopeAeadKey',):
-    _transfer_cc_key_manager(aead_key_manager, key_type_identifier)
+    _register_cc_key_manager(
+        aead.key_manager_from_cc_registry, key_type_identifier)
 
   for key_type_identifier in ('AesSivKey',):
-    _transfer_cc_key_manager(deterministic_aead_key_manager,
+    _register_cc_key_manager(daead.key_manager_from_cc_registry,
                              key_type_identifier)
 
   for key_type_identifier in ('EciesAeadHkdfPrivateKey',):
-    _transfer_cc_key_manager(hybrid_decrypt_key_manager, key_type_identifier)
+    _register_cc_key_manager(
+        hybrid.decrypt_key_manager_from_cc_registry, key_type_identifier)
 
   for key_type_identifier in ('EciesAeadHkdfPublicKey',):
-    _transfer_cc_key_manager(hybrid_encrypt_key_manager, key_type_identifier)
+    _register_cc_key_manager(
+        hybrid.encrypt_key_manager_from_cc_registry, key_type_identifier)
 
   for key_type_identifier in ('HmacKey', 'AesCmacKey',):
-    _transfer_cc_key_manager(mac_key_manager, key_type_identifier)
+    _register_cc_key_manager(mac.key_manager_from_cc_registry,
+                             key_type_identifier)
 
   for key_type_identifier in ('EcdsaPrivateKey', 'Ed25519PrivateKey',
                               'RsaSsaPssPrivateKey', 'RsaSsaPkcs1PrivateKey',):
-    _transfer_cc_key_manager(public_key_sign_key_manager, key_type_identifier)
+    _register_cc_key_manager(
+        signature.sign_key_manager_from_cc_registry, key_type_identifier)
 
   for key_type_identifier in ('EcdsaPublicKey', 'Ed25519PublicKey',
                               'RsaSsaPssPublicKey', 'RsaSsaPkcs1PublicKey',):
-    _transfer_cc_key_manager(public_key_verify_key_manager, key_type_identifier)
+    _register_cc_key_manager(
+        signature.verify_key_manager_from_cc_registry, key_type_identifier)
 
 
-def _transfer_cc_key_manager(key_manager_module,
+def _register_cc_key_manager(key_manager_from_cc_registry,
                              type_identifier,
                              new_key_allowed=True):
   """Obtains a cc key manager and adds it to the Python registry."""
 
   core.Registry.register_key_manager(
-      key_manager_module.from_cc_registry(
+      key_manager_from_cc_registry(
           'type.googleapis.com/google.crypto.tink.{}'.format(type_identifier)),
       new_key_allowed)
 

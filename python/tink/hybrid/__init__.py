@@ -31,3 +31,5 @@ HybridDecrypt = hybrid_decrypt.HybridDecrypt
 HybridEncrypt = hybrid_encrypt.HybridEncrypt
 HybridDecryptWrapper = hybrid_decrypt_wrapper.HybridDecryptWrapper
 HybridEncryptWrapper = hybrid_encrypt_wrapper.HybridEncryptWrapper
+encrypt_key_manager_from_cc_registry = hybrid_encrypt_key_manager.from_cc_registry
+decrypt_key_manager_from_cc_registry = hybrid_decrypt_key_manager.from_cc_registry

@@ -105,20 +105,13 @@ py_library(
     srcs = ["tink_config.py"],
     deps = [
         "//tink/aead",
-        "//tink/aead:aead_key_manager",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:cc_tink_config",
         "//tink/core",
         "//tink/daead",
-        "//tink/daead:deterministic_aead_key_manager",
         "//tink/hybrid",
-        "//tink/hybrid:hybrid_decrypt_key_manager",
-        "//tink/hybrid:hybrid_encrypt_key_manager",
         "//tink/mac",
-        "//tink/mac:mac_key_manager",
         "//tink/signature",
-        "//tink/signature:public_key_sign_key_manager",
-        "//tink/signature:public_key_verify_key_manager",
     ],
 )
 
