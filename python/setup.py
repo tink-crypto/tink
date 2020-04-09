@@ -212,7 +212,7 @@ setuptools.setup(
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     # Contained modules and scripts.
-    packages=setuptools.find_packages() + ['tink/proto'],
+    packages=setuptools.find_packages(),
     install_requires=_parse_requirements('requirements.txt'),
     cmdclass=dict(build_ext=BuildBazelExtension),
     ext_modules=bazel_modules,
