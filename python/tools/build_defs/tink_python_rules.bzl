@@ -44,9 +44,13 @@ def tink_pybind_extension(
         deps = deps,
         alwayslink = True,
     )
-    return native.py_library(
+
+    # Extract Python targets from deps
+    pybind_deps = [dep[:-3] for dep in deps if dep.endswith("_cc")]
+    native.py_library(
         name = name,
         data = [shared_lib_name],
+        deps = pybind_deps,
     )
 
 def tink_pybind_library(
