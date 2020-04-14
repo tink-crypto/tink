@@ -68,7 +68,7 @@ py_test(
         ":hybrid_key_templates",
         requirement("absl-py"),
         "//tink:tink_config",
-        "//tink/aead:aead_key_templates",
+        "//tink/aead",
         "//tink/core",
         "//tink/proto:aes_gcm_py_pb2",
         "//tink/proto:common_py_pb2",
@@ -128,7 +128,7 @@ py_test(
     deps = [
         ":hybrid_key_templates",
         requirement("absl-py"),
-        "//tink/aead:aead_key_templates",
+        "//tink/aead",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:tink_py_pb2",
