@@ -8,7 +8,7 @@ py_library(
     srcs = ["gcp_kms_client.py"],
     deps = [
         ":gcp_kms_aead",
-        "//tink/aead:aead_primitive",
+        "//tink/aead",
         requirement("grpc-google-iam-v1"),
         requirement("idna"),
         requirement("certifi"),
