@@ -82,13 +82,12 @@ def tink_cc_deps():
 
     # Needed for Cloud KMS API via gRPC.
     if not native.existing_rule("googleapis"):
-        # Commit from 2019-10-11
+        # Commit from 2020-04-09
         http_archive(
             name = "googleapis",
-            url = "https://github.com/googleapis/googleapis/archive/192d3d8221175f7cc0aa8eeac1d820f47c53da7f.zip",
-            sha256 = "6b5a017082eade41c7efcc4d2f441422e41c0a0c57dd88e19d3ebfb1b8ff4f12",
-            strip_prefix = "googleapis-192d3d8221175f7cc0aa8eeac1d820f47c53da7f",
-            patches = ["@tink_cc//third_party:googleapis.patch"],
+            url = "https://github.com/googleapis/googleapis/archive/ee4ea76504aa60c2bff9b7c11269c155d8c21e0d.zip",
+            sha256 = "687e5b241d365a59d4b95c60d63df07931476c7d14b0c261202ae2aceb44d119",
+            strip_prefix = "googleapis-ee4ea76504aa60c2bff9b7c11269c155d8c21e0d",
         )
 
     if "upb" not in native.existing_rules():
