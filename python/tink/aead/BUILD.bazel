@@ -18,7 +18,7 @@ py_library(
 
 py_library(
     name = "_aead",
-    srcs = ["aead.py"],
+    srcs = ["_aead.py"],
     deps = [
         requirement("six"),
     ],
