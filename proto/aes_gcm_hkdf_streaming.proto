@@ -33,6 +33,7 @@ message AesGcmHkdfStreamingParams {
 }
 
 message AesGcmHkdfStreamingKeyFormat {
+  uint32 version = 3;
   AesGcmHkdfStreamingParams params = 1;
   uint32 key_size = 2;  // size of the main key (aka. "ikm", input key material)
 }

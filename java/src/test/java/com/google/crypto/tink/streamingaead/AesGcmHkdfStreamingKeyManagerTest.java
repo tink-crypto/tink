@@ -26,8 +26,10 @@ import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.TestUtil;
+import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -117,6 +119,73 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     assertThat(key.getParams()).isEqualTo(format.getParams());
     assertThat(key.getVersion()).isEqualTo(0);
     assertThat(key.getKeyValue()).hasSize(format.getKeySize());
+  }
+
+  @Test
+  public void testDeriveKey_size32() throws Exception {
+    final int keySize = 32;
+    final int derivedKeySize = 16;
+    AesGcmHkdfStreamingKeyFormat format =
+        createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
+
+    byte[] keyMaterial = Random.randBytes(100);
+    AesGcmHkdfStreamingKey key = factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
+    assertThat(key.getKeyValue()).hasSize(32);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
+    assertThat(key.getParams()).isEqualTo(format.getParams());
+  }
+
+  @Test
+  public void testDeriveKey_notEnoughKeyMaterial_throws() throws Exception {
+    final int keySize = 32;
+    final int derivedKeySize = 16;
+    AesGcmHkdfStreamingKeyFormat format =
+        createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
+
+    byte[] keyMaterial = Random.randBytes(31);
+    try {
+      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testDeriveKey_justEnoughKeyMaterial_works() throws Exception {
+    final int keySize = 32;
+    final int derivedKeySize = 16;
+    AesGcmHkdfStreamingKeyFormat format =
+        createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
+
+    byte[] keyMaterial = Random.randBytes(32);
+    AesGcmHkdfStreamingKey key = factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
+    assertThat(key.getKeyValue()).hasSize(32);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
+    assertThat(key.getParams()).isEqualTo(format.getParams());
+  }
+
+  @Test
+  public void testDeriveKey_badVersion_throws() throws Exception {
+    final int keySize = 32;
+    final int derivedKeySize = 16;
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.newBuilder(
+                createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024))
+            .setVersion(1)
+            .build();
+
+    byte[] keyMaterial = Random.randBytes(32);
+    try {
+      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
   }
 
   @Test

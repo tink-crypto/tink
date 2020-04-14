@@ -87,6 +87,11 @@ class AesGcmHkdfStreamingKeyManager
   CreateKey(const google::crypto::tink::AesGcmHkdfStreamingKeyFormat&
                 key_format) const override;
 
+  crypto::tink::util::StatusOr<google::crypto::tink::AesGcmHkdfStreamingKey>
+  DeriveKey(
+      const google::crypto::tink::AesGcmHkdfStreamingKeyFormat& key_format,
+      InputStream* input_stream) const override;
+
   ~AesGcmHkdfStreamingKeyManager() override {}
 
  private:
