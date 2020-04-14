@@ -19,7 +19,8 @@ git clone https://github.com/google/tink.git
 
 ```shell
 cd tink/tools
-bazel build tinkey
+mkdir -p ~/.ccache
+bazel build tinkey --sandbox_writable_path ~/.ccache
 ```
 
 The binary is located at `bazel-bin/tinkey/tinkey`.
