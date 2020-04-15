@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "aes_cmac.go",
+    ],
+    importpath = "github.com/google/tink/go/subtle/prf",
+)
+
+go_test(
+    name = "go_default_test",
+    size = "small",
+    srcs = [
+        "aes_cmac_test.go",
+    ],
+    data = ["@wycheproof//testvectors:all"],
+    embed = [":go_default_library"],
+)
