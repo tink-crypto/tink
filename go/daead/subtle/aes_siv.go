@@ -19,9 +19,12 @@ package subtle
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/subtle"
 	"errors"
 	"fmt"
 	"math"
+
+	// Placeholder for internal crypto/subtle allowlist, please ignore.
 )
 
 // AESSIV is an implemenatation of AES-SIV-CMAC as defined in
@@ -91,16 +94,12 @@ func NewAESSIV(key []byte) (*AESSIV, error) {
 //
 // This function is incorrectly named "doubling" in section 2.3 of RFC 5297.
 func multiplyByX(block []byte) {
-	carry := block[0] >> 7
+	carry := int(block[0] >> 7)
 	for i := 0; i < aes.BlockSize-1; i++ {
 		block[i] = (block[i] << 1) | (block[i+1] >> 7)
 	}
 
-	if carry == 1 {
-		block[aes.BlockSize-1] = (block[aes.BlockSize-1] << 1) ^ 0x87
-	} else {
-		block[aes.BlockSize-1] = (block[aes.BlockSize-1] << 1)
-	}
+	block[aes.BlockSize-1] = (block[aes.BlockSize-1] << 1) ^ byte(subtle.ConstantTimeSelect(carry, 0x87, 0x00))
 }
 
 // EncryptDeterministically deterministically encrypts plaintext with
