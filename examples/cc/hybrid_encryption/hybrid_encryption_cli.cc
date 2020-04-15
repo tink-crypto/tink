@@ -52,7 +52,7 @@
 #include "tink/hybrid/hybrid_key_templates.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
-#include "third_party/tink/examples/cc/hybrid_encryption/util.h"
+#include "hybrid_encryption/util.h"
 
 // Prints usage info.
 void PrintUsageInfo() {

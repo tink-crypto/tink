@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "third_party/tink/examples/cc/hybrid_encryption/util.h"
+#include "hybrid_encryption/util.h"
 
 #include <fstream>
 #include <iostream>
