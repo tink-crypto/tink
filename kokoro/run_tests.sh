@@ -112,7 +112,7 @@ install_pip_package_linux() {
     # Update pip and start setup
     pip3 install --upgrade pip
     pip3 install --upgrade setuptools
-    pip3 install . -v
+    pip3 install .
   )
 }
 
@@ -128,7 +128,7 @@ install_pip_package_macos() {
     # use the --user flag as otherwise pip will complain about permissions.
     pip3 install --upgrade pip --user
     pip3 install --upgrade setuptools --user
-    pip3 install . -v --user
+    pip3 install . --user
   )
 }
 
