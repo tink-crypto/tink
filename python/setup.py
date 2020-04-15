@@ -38,7 +38,7 @@ def _get_tink_version():
     except StopIteration:
       raise ValueError('Version not defined in python/VERSION')
     else:
-      return version_line.split(' = ')[-1]
+      return version_line.split(' = ')[-1].strip('\n \'"')
 
 # Find the Protocol Compiler.
 if 'PROTOC' in os.environ and os.path.exists(os.environ['PROTOC']):
