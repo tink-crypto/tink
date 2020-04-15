@@ -23,10 +23,10 @@ from absl import logging
 from typing import Type
 
 from tink import core
-from tink.daead import deterministic_aead
+from tink.daead import _deterministic_aead
 
 
-class _WrappedDeterministicAead(deterministic_aead.DeterministicAead):
+class _WrappedDeterministicAead(_deterministic_aead.DeterministicAead):
   """Implements DeterministicAead for a set of DeterministicAead primitives."""
 
   def __init__(self, pset: core.PrimitiveSet):
@@ -62,7 +62,7 @@ class _WrappedDeterministicAead(deterministic_aead.DeterministicAead):
 
 
 class DeterministicAeadWrapper(
-    core.PrimitiveWrapper[deterministic_aead.DeterministicAead]):
+    core.PrimitiveWrapper[_deterministic_aead.DeterministicAead]):
   """DeterministicAeadWrapper is a PrimitiveWrapper for DeterministicAead.
 
   The created primitive works with a keyset (rather than a single key). To
@@ -74,8 +74,8 @@ class DeterministicAeadWrapper(
   """
 
   def wrap(
-      self, pset: core.PrimitiveSet) -> deterministic_aead.DeterministicAead:
+      self, pset: core.PrimitiveSet) -> _deterministic_aead.DeterministicAead:
     return _WrappedDeterministicAead(pset)
 
-  def primitive_class(self) -> Type[deterministic_aead.DeterministicAead]:
-    return deterministic_aead.DeterministicAead
+  def primitive_class(self) -> Type[_deterministic_aead.DeterministicAead]:
+    return _deterministic_aead.DeterministicAead

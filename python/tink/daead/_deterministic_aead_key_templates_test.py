@@ -21,13 +21,13 @@ from __future__ import print_function
 from absl.testing import absltest
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
-from tink.daead import deterministic_aead_key_templates
+from tink import daead
 
 
 class DeterministicAeadKeyTemplatesTest(absltest.TestCase):
 
   def test_aes256_siv(self):
-    template = deterministic_aead_key_templates.AES256_SIV
+    template = daead.deterministic_aead_key_templates.AES256_SIV
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesSivKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
@@ -38,8 +38,8 @@ class DeterministicAeadKeyTemplatesTest(absltest.TestCase):
   def test_create_aes_siv_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = deterministic_aead_key_templates.create_aes_siv_key_template(
-        key_size=42)
+    template = (daead.deterministic_aead_key_templates
+                .create_aes_siv_key_template(key_size=42))
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesSivKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)

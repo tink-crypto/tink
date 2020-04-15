@@ -23,10 +23,10 @@ from typing import Text
 
 from tink import core
 from tink.cc.pybind import cc_key_manager
-from tink.daead import deterministic_aead
+from tink.daead import _deterministic_aead
 
 
-class _DeterministicAeadCcToPyWrapper(deterministic_aead.DeterministicAead):
+class _DeterministicAeadCcToPyWrapper(_deterministic_aead.DeterministicAead):
   """Transforms cliffed C++ DeterministicAead into a Python primitive."""
 
   def __init__(self, cc_deterministic_aead):
@@ -47,7 +47,7 @@ class _DeterministicAeadCcToPyWrapper(deterministic_aead.DeterministicAead):
 
 def from_cc_registry(
     type_url: Text
-) -> core.KeyManager[deterministic_aead.DeterministicAead]:
+) -> core.KeyManager[_deterministic_aead.DeterministicAead]:
   return core.KeyManagerCcToPyWrapper(
       cc_key_manager.DeterministicAeadKeyManager.from_cc_registry(type_url),
-      deterministic_aead.DeterministicAead, _DeterministicAeadCcToPyWrapper)
+      _deterministic_aead.DeterministicAead, _DeterministicAeadCcToPyWrapper)

@@ -9,48 +9,46 @@ py_library(
     name = "daead",
     srcs = ["__init__.py"],
     deps = [
-        ":daead_primitive",
-        ":deterministic_aead_key_manager",
-        ":deterministic_aead_key_templates",
-        ":deterministic_aead_wrapper",
+        ":_deterministic_aead",
+        ":_deterministic_aead_key_manager",
+        ":_deterministic_aead_key_templates",
+        ":_deterministic_aead_wrapper",
     ],
 )
 
 py_library(
-    name = "daead_primitive",
-    srcs = ["deterministic_aead.py"],
+    name = "_deterministic_aead",
+    srcs = ["_deterministic_aead.py"],
     deps = [requirement("six")],
 )
 
 py_library(
-    name = "deterministic_aead_key_manager",
-    srcs = ["deterministic_aead_key_manager.py"],
+    name = "_deterministic_aead_key_manager",
+    srcs = ["_deterministic_aead_key_manager.py"],
     deps = [
-        ":daead_primitive",
-        "//tink/proto:tink_py_pb2",
+        ":_deterministic_aead",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "deterministic_aead_key_manager_test",
-    srcs = ["deterministic_aead_key_manager_test.py"],
+    name = "_deterministic_aead_key_manager_test",
+    srcs = ["_deterministic_aead_key_manager_test.py"],
     deps = [
-        ":daead_primitive",
-        ":deterministic_aead_key_manager",
-        ":deterministic_aead_key_templates",
+        ":daead",
         requirement("absl-py"),
-        "//tink/proto:aes_siv_py_pb2",
-        "//tink/proto:tink_py_pb2",
         "//tink:tink_config",
         "//tink/core",
+        "//tink/proto:aes_siv_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_library(
-    name = "deterministic_aead_key_templates",
-    srcs = ["deterministic_aead_key_templates.py"],
+    name = "_deterministic_aead_key_templates",
+    srcs = ["_deterministic_aead_key_templates.py"],
     deps = [
         "//tink/proto:aes_siv_py_pb2",
         "//tink/proto:tink_py_pb2",
@@ -58,10 +56,10 @@ py_library(
 )
 
 py_test(
-    name = "deterministic_aead_key_templates_test",
-    srcs = ["deterministic_aead_key_templates_test.py"],
+    name = "_deterministic_aead_key_templates_test",
+    srcs = ["_deterministic_aead_key_templates_test.py"],
     deps = [
-        ":deterministic_aead_key_templates",
+        ":daead",
         requirement("absl-py"),
         "//tink/proto:aes_siv_py_pb2",
         "//tink/proto:tink_py_pb2",
@@ -69,24 +67,23 @@ py_test(
 )
 
 py_library(
-    name = "deterministic_aead_wrapper",
-    srcs = ["deterministic_aead_wrapper.py"],
+    name = "_deterministic_aead_wrapper",
+    srcs = ["_deterministic_aead_wrapper.py"],
     deps = [
-        ":daead_primitive",
+        ":_deterministic_aead",
         requirement("absl-py"),
         "//tink/core",
     ],
 )
 
 py_test(
-    name = "deterministic_aead_wrapper_test",
-    srcs = ["deterministic_aead_wrapper_test.py"],
+    name = "_deterministic_aead_wrapper_test",
+    srcs = ["_deterministic_aead_wrapper_test.py"],
     deps = [
-        ":daead_primitive",
-        ":deterministic_aead_wrapper",
+        ":daead",
         requirement("absl-py"),
-        "//tink/proto:tink_py_pb2",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
     ],
 )

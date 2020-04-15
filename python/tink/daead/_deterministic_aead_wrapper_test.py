@@ -21,8 +21,7 @@ from __future__ import print_function
 from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink import core
-from tink.daead import deterministic_aead
-from tink.daead import deterministic_aead_wrapper
+from tink import daead
 from tink.testing import helper
 
 
@@ -37,12 +36,11 @@ class AeadWrapperTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
     primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(deterministic_aead.DeterministicAead)
+    pset = core.new_primitive_set(daead.DeterministicAead)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
 
-    wrapped_daead = deterministic_aead_wrapper.DeterministicAeadWrapper().wrap(
-        pset)
+    wrapped_daead = daead.DeterministicAeadWrapper().wrap(pset)
 
     plaintext = b'plaintext'
     associated_data = b'associated_data'
@@ -54,11 +52,10 @@ class AeadWrapperTest(absltest.TestCase):
 
   def test_encrypt_decrypt_with_key_rotation(self):
     primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(deterministic_aead.DeterministicAead)
+    pset = core.new_primitive_set(daead.DeterministicAead)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
-    wrapped_daead = deterministic_aead_wrapper.DeterministicAeadWrapper().wrap(
-        pset)
+    wrapped_daead = daead.DeterministicAeadWrapper().wrap(pset)
     ciphertext = wrapped_daead.encrypt_deterministically(
         b'plaintext', b'associated_data')
 
@@ -81,13 +78,12 @@ class AeadWrapperTest(absltest.TestCase):
     old_raw_ciphertext = primitive.encrypt_deterministically(
         b'plaintext', b'associated_data')
 
-    pset = core.new_primitive_set(deterministic_aead.DeterministicAead)
+    pset = core.new_primitive_set(daead.DeterministicAead)
     pset.add_primitive(primitive, raw_key)
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
     new_entry = pset.add_primitive(new_primitive, new_key)
     pset.set_primary(new_entry)
-    wrapped_daead = deterministic_aead_wrapper.DeterministicAeadWrapper().wrap(
-        pset)
+    wrapped_daead = daead.DeterministicAeadWrapper().wrap(pset)
     new_ciphertext = wrapped_daead.encrypt_deterministically(
         b'new_plaintext', b'new_associated_data')
 
@@ -108,11 +104,10 @@ class AeadWrapperTest(absltest.TestCase):
     raw_ciphertext2 = primitive2.encrypt_deterministically(
         b'plaintext2', b'associated_data2')
 
-    pset = core.new_primitive_set(deterministic_aead.DeterministicAead)
+    pset = core.new_primitive_set(daead.DeterministicAead)
     pset.add_primitive(primitive1, raw_key1)
     pset.set_primary(pset.add_primitive(primitive2, raw_key2))
-    wrapped_daead = deterministic_aead_wrapper.DeterministicAeadWrapper().wrap(
-        pset)
+    wrapped_daead = daead.DeterministicAeadWrapper().wrap(pset)
 
     self.assertEqual(
         wrapped_daead.decrypt_deterministically(raw_ciphertext1,
@@ -134,14 +129,13 @@ class AeadWrapperTest(absltest.TestCase):
     unknown_ciphertext = unknown_primitive.encrypt_deterministically(
         b'plaintext', b'associated_data')
 
-    pset = core.new_primitive_set(deterministic_aead.DeterministicAead)
+    pset = core.new_primitive_set(daead.DeterministicAead)
     primitive, raw_key = self.new_primitive_key_pair(1234, tink_pb2.RAW)
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
     pset.add_primitive(primitive, raw_key)
     new_entry = pset.add_primitive(new_primitive, new_key)
     pset.set_primary(new_entry)
-    wrapped_daead = deterministic_aead_wrapper.DeterministicAeadWrapper().wrap(
-        pset)
+    wrapped_daead = daead.DeterministicAeadWrapper().wrap(pset)
 
     with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
       wrapped_daead.decrypt_deterministically(unknown_ciphertext,
@@ -149,11 +143,10 @@ class AeadWrapperTest(absltest.TestCase):
 
   def test_decrypt_wrong_associated_data_fails(self):
     primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(deterministic_aead.DeterministicAead)
+    pset = core.new_primitive_set(daead.DeterministicAead)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
-    wrapped_daead = deterministic_aead_wrapper.DeterministicAeadWrapper().wrap(
-        pset)
+    wrapped_daead = daead.DeterministicAeadWrapper().wrap(pset)
 
     ciphertext = wrapped_daead.encrypt_deterministically(
         b'plaintext', b'associated_data')

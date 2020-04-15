@@ -18,12 +18,12 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from tink.daead import deterministic_aead
-from tink.daead import deterministic_aead_key_manager
-from tink.daead import deterministic_aead_key_templates
-from tink.daead import deterministic_aead_wrapper
+from tink.daead import _deterministic_aead
+from tink.daead import _deterministic_aead_key_manager
+from tink.daead import _deterministic_aead_key_templates as deterministic_aead_key_templates
+from tink.daead import _deterministic_aead_wrapper
 
 
-DeterministicAead = deterministic_aead.DeterministicAead
-DeterministicAeadWrapper = deterministic_aead_wrapper.DeterministicAeadWrapper
-key_manager_from_cc_registry = deterministic_aead_key_manager.from_cc_registry
+DeterministicAead = _deterministic_aead.DeterministicAead
+DeterministicAeadWrapper = _deterministic_aead_wrapper.DeterministicAeadWrapper
+key_manager_from_cc_registry = _deterministic_aead_key_manager.from_cc_registry
