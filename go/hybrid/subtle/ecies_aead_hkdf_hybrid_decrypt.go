@@ -12,12 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hybrid
+package subtle
 
 import (
 	"errors"
-
-	"github.com/google/tink/go/tink"
 )
 
 // ECIESAEADHKDFHybridDecrypt is an instance of ECIES decryption with HKDF-KEM (key encapsulation mechanism)
@@ -29,8 +27,6 @@ type ECIESAEADHKDFHybridDecrypt struct {
 	pointFormat  string
 	demHelper    EciesAEADHKDFDEMHelper
 }
-
-var _ tink.HybridDecrypt = (*ECIESAEADHKDFHybridDecrypt)(nil)
 
 // NewECIESAEADHKDFHybridDecrypt returns ECIES decryption construct with HKDF-KEM (key encapsulation mechanism)
 // and AEAD-DEM (data encapsulation mechanism).

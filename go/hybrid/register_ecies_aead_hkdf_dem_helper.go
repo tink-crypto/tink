@@ -21,7 +21,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
-	subtle "github.com/google/tink/go/subtle/hybrid"
+	"github.com/google/tink/go/hybrid/subtle"
 	"github.com/google/tink/go/tink"
 	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_aead_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"

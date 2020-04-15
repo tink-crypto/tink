@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/aead"
-	subtle "github.com/google/tink/go/subtle/hybrid"
+	"github.com/google/tink/go/hybrid/subtle"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"

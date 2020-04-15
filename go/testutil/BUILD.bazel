@@ -1,6 +1,6 @@
-package(default_visibility = ["//:__subpackages__"])  # keep
-
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
     name = "go_default_library",
@@ -15,6 +15,7 @@ go_library(
         "//core/registry:go_default_library",
         "//daead:go_default_library",
         "//daead/subtle:go_default_library",
+        "//hybrid/subtle:go_default_library",
         "//keyset:go_default_library",
         "//mac:go_default_library",
         "//proto:aes_gcm_go_proto",
@@ -28,7 +29,6 @@ go_library(
         "//proto:tink_go_proto",
         "//signature:go_default_library",
         "//subtle:go_default_library",
-        "//subtle/hybrid:go_default_library",
         "//subtle/random:go_default_library",
         "//tink:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",

@@ -12,7 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hybrid
+// Package subtle provides subtle implementations of Hybrid Encryption primitives.
+package subtle
 
 import (
 	"bytes"

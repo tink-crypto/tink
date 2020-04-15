@@ -43,9 +43,6 @@ type wrappedHybridEncrypt struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-// Asserts that primitiveSet implements the HybridEncrypt interface.
-var _ tink.HybridEncrypt = (*wrappedHybridEncrypt)(nil)
-
 func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncrypt, error) {
 	fmt.Println("type is:", ps.Primary.Primitive)
 	if _, ok := (ps.Primary.Primitive).(tink.HybridEncrypt); !ok {

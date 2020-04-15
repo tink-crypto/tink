@@ -21,8 +21,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/hybrid/subtle"
 	"github.com/google/tink/go/keyset"
-	subtle "github.com/google/tink/go/subtle/hybrid"
 	eahpb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
