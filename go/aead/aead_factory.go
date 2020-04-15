@@ -45,9 +45,6 @@ type wrappedAead struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-// Asserts that wrappedAead implements the AEAD interface.
-var _ tink.AEAD = (*wrappedAead)(nil)
-
 func newWrappedAead(ps *primitiveset.PrimitiveSet) (*wrappedAead, error) {
 	if _, ok := (ps.Primary.Primitive).(tink.AEAD); !ok {
 		return nil, fmt.Errorf("aead_factory: not an AEAD primitive")

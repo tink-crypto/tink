@@ -1,6 +1,6 @@
-package(default_visibility = ["//:__subpackages__"])  # keep
-
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
     name = "go_default_library",
@@ -13,7 +13,7 @@ go_library(
         "ind_cpa.go",
         "xchacha20poly1305.go",
     ],
-    importpath = "github.com/google/tink/go/subtle/aead",
+    importpath = "github.com/google/tink/go/aead/subtle",
     deps = [
         "//subtle/random:go_default_library",
         "//tink:go_default_library",

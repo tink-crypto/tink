@@ -6,8 +6,8 @@ go_library(
     importpath = "github.com/google/tink/go/streamingaead/subtle",
     visibility = ["//visibility:public"],
     deps = [
+        "//aead/subtle:go_default_library",
         "//subtle:go_default_library",
-        "//subtle/aead:go_default_library",
         "//subtle/random:go_default_library",
     ],
 )

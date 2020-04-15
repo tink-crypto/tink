@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package aead_test
+package subtle_test
 
 import (
 	"bytes"
@@ -22,9 +22,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/tink/go/subtle/aead"
-	"github.com/google/tink/go/subtle/random"
 	"golang.org/x/crypto/chacha20poly1305"
+	"github.com/google/tink/go/aead/subtle"
+	"github.com/google/tink/go/subtle/random"
 )
 
 func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
@@ -35,7 +35,7 @@ func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
 		nonce, _ := hex.DecodeString(test.nonce)
 		out, _ := hex.DecodeString(test.out)
 
-		ca, err := aead.NewChaCha20Poly1305(key)
+		ca, err := subtle.NewChaCha20Poly1305(key)
 		if err != nil {
 			t.Errorf("#%d, cannot create new instance of ChaCha20Poly1305: %s", i, err)
 			continue
@@ -65,7 +65,7 @@ func TestChaCha20Poly1305EmptyAssociatedData(t *testing.T) {
 	aad := []byte{}
 	badAad := []byte{1, 2, 3}
 
-	ca, err := aead.NewChaCha20Poly1305(key)
+	ca, err := subtle.NewChaCha20Poly1305(key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestChaCha20Poly1305LongMessages(t *testing.T) {
 		aad := random.GetRandomBytes(dataSize / 3)
 		key := random.GetRandomBytes(chacha20poly1305.KeySize)
 
-		ca, err := aead.NewChaCha20Poly1305(key)
+		ca, err := subtle.NewChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -143,7 +143,7 @@ func TestChaCha20Poly1305ModifyCiphertext(t *testing.T) {
 		pt, _ := hex.DecodeString(test.plaintext)
 		aad, _ := hex.DecodeString(test.aad)
 
-		ca, err := aead.NewChaCha20Poly1305(key)
+		ca, err := subtle.NewChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +178,7 @@ func TestChaCha20Poly1305ModifyCiphertext(t *testing.T) {
 // The test simply checks that the multiple ciphertexts of the same message are distinct.
 func TestChaCha20Poly1305RandomNonce(t *testing.T) {
 	key := random.GetRandomBytes(chacha20poly1305.KeySize)
-	ca, err := aead.NewChaCha20Poly1305(key)
+	ca, err := subtle.NewChaCha20Poly1305(key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -246,7 +246,7 @@ func TestChaCha20Poly1305WycheproofVectors(t *testing.T) {
 			combinedCt = append(combinedCt, ct...)
 			combinedCt = append(combinedCt, tag...)
 
-			ca, err := aead.NewChaCha20Poly1305(key)
+			ca, err := subtle.NewChaCha20Poly1305(key)
 			if err != nil {
 				t.Errorf("#%d, cannot create new instance of ChaCha20Poly1305: %s", tc.TcID, err)
 				continue

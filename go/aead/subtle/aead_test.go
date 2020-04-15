@@ -12,24 +12,21 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package aead_test
+package subtle_test
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/google/tink/go/subtle/aead"
+	"github.com/google/tink/go/aead/subtle"
 )
 
 func TestValidateAESKeySize(t *testing.T) {
 	var i uint32
 	for i = 0; i < 65; i++ {
-		err := aead.ValidateAESKeySize(i)
+		err := subtle.ValidateAESKeySize(i)
 		switch i {
-		case 16:
-			fallthrough
-		case 32:
-			// Valid key sizes.
+    case 16, 32: // Valid key sizes.
 			if err != nil {
 				t.Errorf("want no error, got %v", err)
 			}

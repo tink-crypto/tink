@@ -1,10 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])  # keep
-
-
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
 
 go_library(
     name = "go_default_library",
@@ -15,13 +13,12 @@ go_library(
     importpath = "github.com/google/tink/go/integration/awskms",
     visibility = ["//visibility:public"],
     deps = [
+        "//core/registry:go_default_library",
+        "//tink:go_default_library",
         "@com_github_aws_aws_sdk_go//aws:go_default_library",
-        "@com_github_aws_aws_sdk_go//service/kms:go_default_library",
         "@com_github_aws_aws_sdk_go//aws/credentials:go_default_library",
         "@com_github_aws_aws_sdk_go//aws/session:go_default_library",
-        "//aead:go_default_library",
-        "//tink:go_default_library",
-        "//core/registry:go_default_library",
+        "@com_github_aws_aws_sdk_go//service/kms:go_default_library",
     ],
 )
 
@@ -29,17 +26,17 @@ go_test(
     name = "go_default_test",
     srcs = ["aws_kms_aead_test.go"],
     data = [
-        "@google_root_pem//file", #keep
+        "@google_root_pem//file",  #keep
         "@tink_base//testdata:credentials",
     ],
-    embed = [":go_default_library",],
+    embed = [":go_default_library"],
+    tags = ["no_rbe"],
     deps = [
         "//aead:go_default_library",
-        "//subtle/random:go_default_library",
-        "//subtle/aead:go_default_library",
-        "//tink:go_default_library",
-        "//keyset:go_default_library",
+        "//aead/subtle:go_default_library",
         "//core/registry:go_default_library",
+        "//keyset:go_default_library",
+        "//subtle/random:go_default_library",
+        "//tink:go_default_library",
     ],
-    tags = ["no_rbe"],
 )

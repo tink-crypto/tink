@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package aead_test
+package subtle_test
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/tink/go/subtle/aead"
+	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/subtle/random"
 )
 
@@ -31,7 +31,7 @@ func TestNewAESCTR(t *testing.T) {
 	// Test various key sizes with a fixed IV size.
 	for i := 0; i < 64; i++ {
 		k := key[:i]
-		c, err := aead.NewAESCTR(k, aead.AESCTRMinIVSize)
+		c, err := subtle.NewAESCTR(k, subtle.AESCTRMinIVSize)
 
 		switch len(k) {
 		case 16:
@@ -45,8 +45,8 @@ func TestNewAESCTR(t *testing.T) {
 			if len(c.Key) != len(k) {
 				t.Errorf("want: key size=%d, got: key size=%d", len(k), len(c.Key))
 			}
-			if c.IVSize != aead.AESCTRMinIVSize {
-				t.Errorf("want: IV size=%d, got: IV size=%d", aead.AESCTRMinIVSize, c.IVSize)
+			if c.IVSize != subtle.AESCTRMinIVSize {
+				t.Errorf("want: IV size=%d, got: IV size=%d", subtle.AESCTRMinIVSize, c.IVSize)
 			}
 		default:
 			// Invalid key sizes.
@@ -59,8 +59,8 @@ func TestNewAESCTR(t *testing.T) {
 	// Test different IV sizes with a fixed key.
 	for i := 0; i < 64; i++ {
 		k := key[:16]
-		c, err := aead.NewAESCTR(k, i)
-		if i >= aead.AESCTRMinIVSize && i <= aes.BlockSize {
+		c, err := subtle.NewAESCTR(k, i)
+		if i >= subtle.AESCTRMinIVSize && i <= aes.BlockSize {
 			if err != nil {
 				t.Errorf("want: valid cipher (IV size=%d), got: error %v", i, err)
 			}
@@ -107,7 +107,7 @@ func TestNistTestVector(t *testing.T) {
 		t.Fatalf("failed to hex decode message, error: %v", err)
 	}
 
-	stream, err := aead.NewAESCTR(key, len(iv)/2)
+	stream, err := subtle.NewAESCTR(key, len(iv)/2)
 	if err != nil {
 		t.Fatalf("failed to create AESCTR instance, error: %v", err)
 	}
@@ -125,7 +125,7 @@ func TestNistTestVector(t *testing.T) {
 func TestMultipleEncrypt(t *testing.T) {
 	key := random.GetRandomBytes(16)
 
-	stream, err := aead.NewAESCTR(key, aead.AESCTRMinIVSize)
+	stream, err := subtle.NewAESCTR(key, subtle.AESCTRMinIVSize)
 	if err != nil {
 		t.Fatalf("failed to create AESCTR instance, error: %v", err)
 	}
@@ -163,7 +163,7 @@ func TestEncryptDecrypt(t *testing.T) {
 		t.Fatal("failed to hex decode key")
 	}
 
-	stream, err := aead.NewAESCTR(key, aead.AESCTRMinIVSize)
+	stream, err := subtle.NewAESCTR(key, subtle.AESCTRMinIVSize)
 	if err != nil {
 		t.Fatalf("failed to get AESCTR instance, error: %v", err)
 	}
@@ -174,8 +174,8 @@ func TestEncryptDecrypt(t *testing.T) {
 		t.Errorf("encryption failed, error: %v", err)
 	}
 
-	if len(ciphertext) != len(message)+aead.AESCTRMinIVSize {
-		t.Errorf("ciphertext incorrect size, got: %d, want: %d", len(ciphertext), len(message)+aead.AESCTRMinIVSize)
+	if len(ciphertext) != len(message)+subtle.AESCTRMinIVSize {
+		t.Errorf("ciphertext incorrect size, got: %d, want: %d", len(ciphertext), len(message)+subtle.AESCTRMinIVSize)
 	}
 
 	plaintext, err := stream.Decrypt(ciphertext)
@@ -191,7 +191,7 @@ func TestEncryptDecrypt(t *testing.T) {
 func TestEncryptRandomMessage(t *testing.T) {
 	key := random.GetRandomBytes(16)
 
-	stream, err := aead.NewAESCTR(key, aead.AESCTRMinIVSize)
+	stream, err := subtle.NewAESCTR(key, subtle.AESCTRMinIVSize)
 	if err != nil {
 		t.Errorf("failed to instantiate AESCTR, error: %v", err)
 	}
@@ -202,7 +202,7 @@ func TestEncryptRandomMessage(t *testing.T) {
 		if err != nil {
 			t.Errorf("encryption failed at iteration %d, error: %v", i, err)
 		}
-		if len(ciphertext) != len(message)+aead.AESCTRMinIVSize {
+		if len(ciphertext) != len(message)+subtle.AESCTRMinIVSize {
 			t.Errorf("invalid ciphertext length for i = %d", i)
 		}
 
@@ -221,7 +221,7 @@ func TestEncryptRandomKeyAndMessage(t *testing.T) {
 	for i := 0; i < 256; i++ {
 		key := random.GetRandomBytes(16)
 
-		stream, err := aead.NewAESCTR(key, aead.AESCTRMinIVSize)
+		stream, err := subtle.NewAESCTR(key, subtle.AESCTRMinIVSize)
 		if err != nil {
 			t.Errorf("failed to instantiate AESCTR, error: %v", err)
 		}
@@ -231,7 +231,7 @@ func TestEncryptRandomKeyAndMessage(t *testing.T) {
 		if err != nil {
 			t.Errorf("encryption failed at iteration %d, error: %v", i, err)
 		}
-		if len(ciphertext) != len(message)+aead.AESCTRMinIVSize {
+		if len(ciphertext) != len(message)+subtle.AESCTRMinIVSize {
 			t.Errorf("invalid ciphertext length for i = %d", i)
 		}
 

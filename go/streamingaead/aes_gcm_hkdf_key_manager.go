@@ -19,9 +19,9 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	subtleaead "github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/streamingaead/subtle"
-	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	ghpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -122,7 +122,7 @@ func (km *aesGCMHKDFKeyManager) validateKey(key *ghpb.AesGcmHkdfStreamingKey) er
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
 	keySize := uint32(len(key.KeyValue))
-	if err := aead.ValidateAESKeySize(keySize); err != nil {
+	if err := subtleaead.ValidateAESKeySize(keySize); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
 	if err := km.validateParams(key.Params); err != nil {
@@ -133,7 +133,7 @@ func (km *aesGCMHKDFKeyManager) validateKey(key *ghpb.AesGcmHkdfStreamingKey) er
 
 // validateKeyFormat validates the given AESGCMHKDFKeyFormat.
 func (km *aesGCMHKDFKeyManager) validateKeyFormat(format *ghpb.AesGcmHkdfStreamingKeyFormat) error {
-	if err := aead.ValidateAESKeySize(format.KeySize); err != nil {
+	if err := subtleaead.ValidateAESKeySize(format.KeySize); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
 	if err := km.validateParams(format.Params); err != nil {
@@ -144,7 +144,7 @@ func (km *aesGCMHKDFKeyManager) validateKeyFormat(format *ghpb.AesGcmHkdfStreami
 
 // validateKeyFormat validates the given AESGCMHKDFKeyFormat.
 func (km *aesGCMHKDFKeyManager) validateParams(params *ghpb.AesGcmHkdfStreamingParams) error {
-	if err := aead.ValidateAESKeySize(params.DerivedKeySize); err != nil {
+	if err := subtleaead.ValidateAESKeySize(params.DerivedKeySize); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
 	if params.HkdfHashType == commonpb.HashType_UNKNOWN_HASH {

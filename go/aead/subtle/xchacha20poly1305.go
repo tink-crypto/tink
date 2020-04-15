@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package aead
+package subtle
 
 import (
 	"errors"
@@ -23,57 +23,57 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// ChaCha20Poly1305 is an implementation of AEAD interface.
-type ChaCha20Poly1305 struct {
+// XChaCha20Poly1305 is an implementation of AEAD interface.
+type XChaCha20Poly1305 struct {
 	Key []byte
 }
 
-// Assert that ChaCha20Poly1305 implements the AEAD interface.
-var _ tink.AEAD = (*ChaCha20Poly1305)(nil)
+// Assert that XChaCha20Poly1305 implements the AEAD interface.
+var _ tink.AEAD = (*XChaCha20Poly1305)(nil)
 
-// NewChaCha20Poly1305 returns an ChaCha20Poly1305 instance.
+// NewXChaCha20Poly1305 returns an XChaCha20Poly1305 instance.
 // The key argument should be a 32-bytes key.
-func NewChaCha20Poly1305(key []byte) (*ChaCha20Poly1305, error) {
+func NewXChaCha20Poly1305(key []byte) (*XChaCha20Poly1305, error) {
 	if len(key) != chacha20poly1305.KeySize {
-		return nil, errors.New("chacha20poly1305: bad key length")
+		return nil, errors.New("xchacha20poly1305: bad key length")
 	}
 
-	return &ChaCha20Poly1305{Key: key}, nil
+	return &XChaCha20Poly1305{Key: key}, nil
 }
 
 // Encrypt encrypts {@code pt} with {@code aad} as additional
 // authenticated data. The resulting ciphertext consists of two parts:
 // (1) the nonce used for encryption and (2) the actual ciphertext.
-func (ca *ChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
-	c, err := chacha20poly1305.New(ca.Key)
+func (x *XChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
+	c, err := chacha20poly1305.NewX(x.Key)
 	if err != nil {
 		return nil, err
 	}
 
-	n := ca.newNonce()
+	n := x.newNonce()
 	ct := c.Seal(nil, n, pt, aad)
-	ret := make([]byte, 0, len(n) + len(ct))
+	var ret []byte
 	ret = append(ret, n...)
 	ret = append(ret, ct...)
 	return ret, nil
 }
 
 // Decrypt decrypts {@code ct} with {@code aad} as the additionalauthenticated data.
-func (ca *ChaCha20Poly1305) Decrypt(ct []byte, aad []byte) ([]byte, error) {
-	c, err := chacha20poly1305.New(ca.Key)
+func (x *XChaCha20Poly1305) Decrypt(ct []byte, aad []byte) ([]byte, error) {
+	c, err := chacha20poly1305.NewX(x.Key)
 	if err != nil {
 		return nil, err
 	}
 
-	n := ct[:chacha20poly1305.NonceSize]
-	pt, err := c.Open(nil, n, ct[chacha20poly1305.NonceSize:], aad)
+	n := ct[:chacha20poly1305.NonceSizeX]
+	pt, err := c.Open(nil, n, ct[chacha20poly1305.NonceSizeX:], aad)
 	if err != nil {
-		return nil, fmt.Errorf("ChaCha20Poly1305.Decrypt: %s", err)
+		return nil, fmt.Errorf("XChaCha20Poly1305.Decrypt: %s", err)
 	}
 	return pt, nil
 }
 
 // newNonce creates a new nonce for encryption.
-func (ca *ChaCha20Poly1305) newNonce() []byte {
-	return random.GetRandomBytes(chacha20poly1305.NonceSize)
+func (x *XChaCha20Poly1305) newNonce() []byte {
+	return random.GetRandomBytes(chacha20poly1305.NonceSizeX)
 }

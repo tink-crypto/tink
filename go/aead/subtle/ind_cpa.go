@@ -12,17 +12,17 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package aead provides subtle implementations of the AEAD primitive.
-package aead
+package subtle
 
-import "fmt"
+// INDCPACipher provides an interface for symmetric key ciphers that are
+// indistinguishable against chosen-plaintext attacks. Said primitives do not
+// provide authentication, thus should not be used directly, but only to
+// construct safer primitives such as AEAD.
+type INDCPACipher interface {
+	// Encrypt encrypts plaintext. The resulting ciphertext is indistinguishable under
+	// chosen-plaintext attack. However, it does not have integrity protection.
+	Encrypt(plaintext []byte) ([]byte, error)
 
-// ValidateAESKeySize checks if the given key size is a valid AES key size.
-func ValidateAESKeySize(sizeInBytes uint32) error {
-	switch sizeInBytes {
-	case 16, 32:
-		return nil
-	default:
-		return fmt.Errorf("invalid AES key size; want 16 or 32, got %d", sizeInBytes)
-	}
+	// Decrypt decrypts ciphertext and returns the resulting plaintext.
+	Decrypt(ciphertext []byte) ([]byte, error)
 }

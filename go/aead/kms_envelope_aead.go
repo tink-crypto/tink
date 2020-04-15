@@ -36,8 +36,6 @@ type KMSEnvelopeAEAD struct {
 	remote      tink.AEAD
 }
 
-var _ tink.AEAD = (*KMSEnvelopeAEAD)(nil)
-
 // NewKMSEnvelopeAEAD creates an new instance of KMSEnvelopeAEAD
 func NewKMSEnvelopeAEAD(kt tinkpb.KeyTemplate, remote tink.AEAD) *KMSEnvelopeAEAD {
 	return &KMSEnvelopeAEAD{

@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/google/tink/go/subtle/aead"
+	subtleaead "github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 )
@@ -83,7 +83,7 @@ func NewAESGCMHKDF(
 	if len(mainKey) < 16 || len(mainKey) < keySizeInBytes {
 		return nil, errors.New("mainKey too short")
 	}
-	if err := aead.ValidateAESKeySize(uint32(keySizeInBytes)); err != nil {
+	if err := subtleaead.ValidateAESKeySize(uint32(keySizeInBytes)); err != nil {
 		return nil, err
 	}
 	headerLen := 1 + keySizeInBytes + NoncePrefixInBytes

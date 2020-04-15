@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/core/registry"
-	subteAEAD "github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
@@ -241,7 +241,7 @@ func validateAESGCMKey(key *gcmpb.AesGcmKey, format *gcmpb.AesGcmKeyFormat) erro
 		return fmt.Errorf("incorrect key version")
 	}
 	// try to encrypt and decrypt
-	p, err := subteAEAD.NewAESGCM(key.KeyValue)
+	p, err := subtle.NewAESGCM(key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("invalid key")
 	}
@@ -249,7 +249,7 @@ func validateAESGCMKey(key *gcmpb.AesGcmKey, format *gcmpb.AesGcmKeyFormat) erro
 }
 
 func validateAESGCMPrimitive(p interface{}, key *gcmpb.AesGcmKey) error {
-	cipher := p.(*subteAEAD.AESGCM)
+	cipher := p.(*subtle.AESGCM)
 	if !bytes.Equal(cipher.Key, key.KeyValue) {
 		return fmt.Errorf("key and primitive don't match")
 	}

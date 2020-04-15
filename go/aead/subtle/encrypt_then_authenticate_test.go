@@ -12,21 +12,21 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package aead_test
+package subtle_test
 
 import (
 	"bytes"
 	"encoding/hex"
 	"testing"
 
+	"github.com/google/tink/go/aead/subtle"
 	subtleMac "github.com/google/tink/go/mac/subtle"
-	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
 
 func createAEADWithKeys(encryptionKey []byte, ivSize int, hashAlgo string, macKey []byte, tagSize int) (tink.AEAD, error) {
-	ctr, err := aead.NewAESCTR(encryptionKey, ivSize)
+	ctr, err := subtle.NewAESCTR(encryptionKey, ivSize)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func createAEADWithKeys(encryptionKey []byte, ivSize int, hashAlgo string, macKe
 		return nil, err
 	}
 
-	cipher, err := aead.NewEncryptThenAuthenticate(ctr, mac, tagSize)
+	cipher, err := subtle.NewEncryptThenAuthenticate(ctr, mac, tagSize)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func createAEADWithKeys(encryptionKey []byte, ivSize int, hashAlgo string, macKe
 
 func createAEAD(keySize, ivSize int, hashAlgo string, macKeySize int, tagSize int) (tink.AEAD, error) {
 	encryptionKey := random.GetRandomBytes(uint32(keySize))
-	ctr, err := aead.NewAESCTR(encryptionKey, ivSize)
+	ctr, err := subtle.NewAESCTR(encryptionKey, ivSize)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func createAEAD(keySize, ivSize int, hashAlgo string, macKeySize int, tagSize in
 		return nil, err
 	}
 
-	cipher, err := aead.NewEncryptThenAuthenticate(ctr, mac, tagSize)
+	cipher, err := subtle.NewEncryptThenAuthenticate(ctr, mac, tagSize)
 	if err != nil {
 		return nil, err
 	}

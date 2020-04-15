@@ -19,9 +19,9 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 
@@ -64,9 +64,9 @@ func TestNewHandleWithInvalidInput(t *testing.T) {
 }
 
 func TestRead(t *testing.T) {
-	masterKey, err := aead.NewAESGCM([]byte(strings.Repeat("A", 32)))
+	masterKey, err := subtle.NewAESGCM([]byte(strings.Repeat("A", 32)))
 	if err != nil {
-		t.Errorf("aead.NewAESGCM(): %v", err)
+		t.Errorf("subtle.NewAESGCM(): %v", err)
 	}
 
 	// Create a keyset

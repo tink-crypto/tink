@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package aead_test
+package subtle_test
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"golang.org/x/crypto/chacha20poly1305"
-	"github.com/google/tink/go/subtle/aead"
+	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/subtle/random"
 )
 
@@ -34,7 +34,7 @@ func TestXChaCha20Poly1305EncryptDecrypt(t *testing.T) {
 		out, _ := hex.DecodeString(test.out)
 		tag, _ := hex.DecodeString(test.tag)
 
-		x, err := aead.NewXChaCha20Poly1305(key)
+		x, err := subtle.NewXChaCha20Poly1305(key)
 		if err != nil {
 			t.Errorf("#%d, cannot create new instance of XChaCha20Poly1305: %s", i, err)
 			continue
@@ -65,7 +65,7 @@ func TestXChaCha20Poly1305EmptyAssociatedData(t *testing.T) {
 	aad := []byte{}
 	badAad := []byte{1, 2, 3}
 
-	x, err := aead.NewXChaCha20Poly1305(key)
+	x, err := subtle.NewXChaCha20Poly1305(key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestXChaCha20Poly1305LongMessages(t *testing.T) {
 		aad := random.GetRandomBytes(dataSize / 3)
 		key := random.GetRandomBytes(chacha20poly1305.KeySize)
 
-		x, err := aead.NewXChaCha20Poly1305(key)
+		x, err := subtle.NewXChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -143,7 +143,7 @@ func TestXChaCha20Poly1305ModifyCiphertext(t *testing.T) {
 		pt, _ := hex.DecodeString(test.plaintext)
 		aad, _ := hex.DecodeString(test.aad)
 
-		x, err := aead.NewXChaCha20Poly1305(key)
+		x, err := subtle.NewXChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +178,7 @@ func TestXChaCha20Poly1305ModifyCiphertext(t *testing.T) {
 // The test simply checks that the multiple ciphertexts of the same message are distinct.
 func TestXChaCha20Poly1305RandomNonce(t *testing.T) {
 	key := random.GetRandomBytes(chacha20poly1305.KeySize)
-	x, err := aead.NewXChaCha20Poly1305(key)
+	x, err := subtle.NewXChaCha20Poly1305(key)
 	if err != nil {
 		t.Fatal(err)
 	}
