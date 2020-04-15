@@ -1,0 +1,125 @@
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
+licenses(["notice"])
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
+
+java_library(
+    name = "test_util",
+    srcs = ["TestUtil.java"],
+    javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:aes_ctr_hmac_aead_java_proto",
+        "//proto:aes_ctr_hmac_streaming_java_proto",
+        "//proto:aes_ctr_java_proto",
+        "//proto:aes_eax_java_proto",
+        "//proto:aes_gcm_hkdf_streaming_java_proto",
+        "//proto:aes_gcm_java_proto",
+        "//proto:aes_siv_java_proto",
+        "//proto:common_java_proto",
+        "//proto:config_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:ecies_aead_hkdf_java_proto",
+        "//proto:hmac_java_proto",
+        "//proto:rsa_ssa_pkcs1_java_proto",
+        "//proto:rsa_ssa_pss_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:core",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/aead",
+        "//src/main/java/com/google/crypto/tink/daead",
+        "//src/main/java/com/google/crypto/tink/hybrid",
+        "//src/main/java/com/google/crypto/tink/mac",
+        "//src/main/java/com/google/crypto/tink/streamingaead",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_library(
+    name = "test_util-android",
+    srcs = ["TestUtil.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        "//proto:aes_ctr_hmac_aead_java_proto_lite",
+        "//proto:aes_ctr_hmac_streaming_java_proto_lite",
+        "//proto:aes_ctr_java_proto_lite",
+        "//proto:aes_eax_java_proto_lite",
+        "//proto:aes_gcm_hkdf_streaming_java_proto_lite",
+        "//proto:aes_gcm_java_proto_lite",
+        "//proto:aes_siv_java_proto_lite",
+        "//proto:common_java_proto_lite",
+        "//proto:config_java_proto_lite",
+        "//proto:ecdsa_java_proto_lite",
+        "//proto:ecies_aead_hkdf_java_proto_lite",
+        "//proto:hmac_java_proto_lite",
+        "//proto:rsa_ssa_pkcs1_java_proto_lite",
+        "//proto:rsa_ssa_pss_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
+        "//src/main/java/com/google/crypto/tink:core-android",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/aead:android",
+        "//src/main/java/com/google/crypto/tink/daead:android",
+        "//src/main/java/com/google/crypto/tink/hybrid:android",
+        "//src/main/java/com/google/crypto/tink/mac:android",
+        "//src/main/java/com/google/crypto/tink/streamingaead:android",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_library(
+    name = "streaming_test_util",
+    srcs = ["StreamingTestUtil.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":test_util",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_library(
+    name = "streaming_test_util-android",
+    srcs = ["StreamingTestUtil.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":test_util-android",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_library(
+    name = "wycheproof_test_util",
+    srcs = ["WycheproofTestUtil.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":test_util",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_library(
+    name = "wycheproof_test_util-android",
+    srcs = ["WycheproofTestUtil.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":test_util-android",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@maven//:org_json_json",
+    ],
+)

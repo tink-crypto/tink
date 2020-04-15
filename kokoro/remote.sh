@@ -83,7 +83,7 @@ time bazel --bazelrc="$RBE_BAZELRC" \
   -- ...
 
 # Build and test Java.
-cd ../java
+cd ../java_src
 time bazel --bazelrc="$RBE_BAZELRC" \
   build "${RBE_ARGS[@]}" \
   --config=remote \

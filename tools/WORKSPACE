@@ -12,7 +12,7 @@ local_repository(
 
 local_repository(
     name = "tink_java",
-    path = "../java",
+    path = "../java_src",
 )
 
 local_repository(

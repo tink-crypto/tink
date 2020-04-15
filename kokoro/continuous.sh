@@ -31,7 +31,7 @@ go get github.com/google/tink/go/...
 
 # Run all manual tests.
 (
-  cd java
+  cd java_src
   time bazel test \
     --strategy=TestRunner=standalone \
     --test_timeout 10000 \

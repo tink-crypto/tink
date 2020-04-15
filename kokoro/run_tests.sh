@@ -59,7 +59,7 @@ run_all_linux_tests() {
     time bazel test "${TEST_FLAGS[@]}" -- ... ${DISABLE_GRPC_ON_MAC_OS} \
         || fail_with_debug_output
   )
-  run_linux_tests "java"
+  run_linux_tests "java_src"
   run_linux_tests "go"
   # TODO: Enable when working on MacOS
   if [[ "${PLATFORM}" != 'darwin' ]]; then

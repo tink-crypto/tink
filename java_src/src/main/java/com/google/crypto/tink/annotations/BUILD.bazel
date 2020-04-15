@@ -1,0 +1,13 @@
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+java_library(
+    name = "annotations",
+    srcs = glob([
+        "*.java",
+    ]),
+    javacopts = JAVACOPTS_OSS,
+)
