@@ -193,7 +193,7 @@ publish_javadoc_to_github_pages() {
 main() {
   deploy_library \
     tink \
-    java \
+    java_src \
     tink.jar \
     tink-src.jar \
     tink-javadoc.jar \
@@ -201,7 +201,7 @@ main() {
 
   deploy_library \
     tink-awskms \
-    java \
+    java_src \
     tink-awskms.jar \
     tink-awskms-src.jar \
     tink-awskms-javadoc.jar \
@@ -209,7 +209,7 @@ main() {
 
   deploy_library \
     tink-gcpkms \
-    java \
+    java_src \
     tink-gcpkms.jar \
     tink-gcpkms-src.jar \
     tink-gcpkms-javadoc.jar \
@@ -217,7 +217,7 @@ main() {
 
   deploy_library \
     tink-android \
-    java \
+    java_src \
     tink-android.jar \
     tink-android-src.jar \
     tink-android-javadoc.jar \
