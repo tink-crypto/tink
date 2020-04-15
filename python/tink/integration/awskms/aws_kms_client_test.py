@@ -20,7 +20,9 @@ import os
 
 from absl.testing import absltest
 
+from tink import core
 from tink.integration.awskms.aws_kms_client import AwsKmsClient
+from tink.integration.awskms.aws_kms_client import FileNotFoundError
 
 CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
                                'tink_base/testdata/aws_credentials_cc.txt')
@@ -35,7 +37,7 @@ class AwsKmsClientTest(absltest.TestCase):
     self.assertNotEqual(aws_client, None)
 
   def test_wrong_key_uri(self):
-    with self.assertRaises(ValueError):
+    with self.assertRaises(core.TinkError):
       AwsKmsClient(BAD_KEY_URI, CREDENTIAL_PATH)
 
   def test_client_not_bound(self):
@@ -47,7 +49,7 @@ class AwsKmsClientTest(absltest.TestCase):
     self.assertEqual(aws_client.does_support(gcp_key1), False)
 
   def test_wrong_credentials_path(self):
-    with self.assertRaises(ValueError):
+    with self.assertRaises(FileNotFoundError):
       AwsKmsClient(KEY_URI, '../credentials.txt')
 
 

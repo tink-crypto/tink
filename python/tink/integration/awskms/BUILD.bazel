@@ -6,6 +6,7 @@ package(default_visibility = ["//visibility:public"])
 py_library(
     name = "aws_kms_client",
     srcs = ["aws_kms_client.py"],
+    srcs_version =  "PY3",
     deps = [
         ":aws_kms_aead",
         "//tink/aead",
@@ -17,6 +18,7 @@ py_library(
 py_test(
     name = "aws_kms_client_test",
     srcs = ["aws_kms_client_test.py"],
+    srcs_version =  "PY3",
     data = [
         "@tink_base//testdata:credentials",
     ],
@@ -29,6 +31,7 @@ py_test(
 py_library(
     name = "aws_kms_aead",
     srcs = ["aws_kms_aead.py"],
+    srcs_version =  "PY3",
     deps = [
         "//tink/aead",
         "//tink/core",
@@ -39,6 +42,7 @@ py_library(
 py_test(
     name = "aws_kms_aead_test",
     srcs = ["aws_kms_aead_test.py"],
+    srcs_version =  "PY3",
     data = [
         "@tink_base//testdata:credentials",
     ],

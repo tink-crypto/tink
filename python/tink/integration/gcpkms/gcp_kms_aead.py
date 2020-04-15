@@ -11,11 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Provides AEAD using the Google Cloud KMS client.
-
-Currently works only in Python3 (see Bug 146480447)
-"""
+"""Provides AEAD using the Google Cloud KMS client."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -28,6 +24,7 @@ from google.api_core.exceptions import RetryError
 from google.cloud import kms_v1
 
 from tink import aead
+from tink import core
 
 
 class GcpKmsAead(aead.Aead):
@@ -52,8 +49,7 @@ class GcpKmsAead(aead.Aead):
                                      plaintext,
                                      associated_data)
     except (GoogleAPICallError, RetryError, ValueError):
-      # TODO(kste): Change to tink_error when its moved to pybind11
-      raise ValueError("Encryption failed inside GCP client.")
+      raise core.TinkError("Encryption failed inside GCP client.")
 
     return response.ciphertext
 
@@ -61,7 +57,6 @@ class GcpKmsAead(aead.Aead):
     try:
       response = self.client.decrypt(self.key_name, ciphertext, associated_data)
     except (GoogleAPICallError, RetryError, ValueError):
-      # TODO(kste): Change to tink_error when its moved to pybind11
-      raise ValueError("Decryption failed inside GCP client.")
+      raise core.TinkError("Decryption failed inside GCP client.")
 
     return response.plaintext

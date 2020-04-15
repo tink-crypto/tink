@@ -11,11 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""A client for Google Cloud KMS.
-
-Currently works only in Python3 (see Bug 146480447)
-"""
+"""A client for Google Cloud KMS."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -28,6 +24,7 @@ from google.cloud import kms_v1
 from google.oauth2 import service_account
 
 from tink import aead
+from tink import core
 from tink.integration.gcpkms.gcp_kms_aead import GcpKmsAead
 
 GCP_KEYURI_PREFIX = "gcp-kms://"
@@ -50,7 +47,8 @@ class GcpKmsClient(object):
       credentials_path: Text, Path to the file with the access credentials.
 
     Raises:
-      FileNotFoundError: If the path to the credentials is invalid.
+      FileNotFoundError: If the path or filename of the credentials is invalid.
+      TinkError: If the key uri is not valid.
     """
 
     if not key_uri:
@@ -58,8 +56,7 @@ class GcpKmsClient(object):
     elif key_uri.startswith(GCP_KEYURI_PREFIX):
       self.key_uri = key_uri
     else:
-      # TODO(kste): Change to tink_error when its moved to pybind11
-      raise ValueError
+      raise core.TinkError
 
     if not credentials_path:
       # Use GCP KMS client with default credentials

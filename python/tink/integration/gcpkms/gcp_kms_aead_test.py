@@ -21,6 +21,7 @@ import os
 
 from absl.testing import absltest
 
+from tink import core
 from tink.integration.gcpkms.gcp_kms_client import GcpKmsClient
 
 CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
@@ -58,7 +59,7 @@ class GcpKmsAeadTest(absltest.TestCase):
       tmp_ciphertext = list(ciphertext)
       tmp_ciphertext[byte_idx] ^= 1
       corrupted_ciphertext = bytes(tmp_ciphertext)
-      with self.assertRaises(ValueError):
+      with self.assertRaises(core.TinkError):
         aead.decrypt(corrupted_ciphertext, None)
 
 if __name__ == '__main__':

@@ -11,16 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A client for AWS KMS.
-
-Currently works only in Python3 (see Bug 146480447)
-"""
+"""A client for AWS KMS."""
 
 from __future__ import absolute_import
 from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+import errno
 import os
 import re
 
@@ -29,10 +27,15 @@ import configparser
 from typing import Text
 
 from tink import aead
+from tink import core
 from tink.integration.awskms.aws_kms_aead import AwsKmsAead
 
 AWS_KEYURI_PREFIX = 'aws-kms://'
 AWS_KMS_BOTO = 'kms'
+
+
+class FileNotFoundError(OSError):
+  pass
 
 
 class AwsKmsClient(object):
@@ -54,7 +57,8 @@ class AwsKmsClient(object):
       credentials_path: Text, Path to the file with the access credentials.
 
     Raises:
-      ValueError: If the key uri or credentials are invalid.
+      FileNotFoundError: If the path or filename of the credentials is invalid.
+      TinkError: If the key uri is not valid.
       ClientError: If an error occured inside the boto3 client.
     """
 
@@ -63,7 +67,7 @@ class AwsKmsClient(object):
       self.key_uri = key_uri
       region = key_uri.split(':')[4]
     else:
-      raise ValueError
+      raise core.TinkError
 
     if not credentials_path:
       kms_client = boto3.client(AWS_KMS_BOTO, region_name=region)
@@ -94,13 +98,16 @@ class AwsKmsClient(object):
       access key loaded from the file.
 
     Raises:
-      ValueError: If the credentials could not be loaded.
+      FileNotFoundError: If the path to the credentials is invalid.
+      TinkError: If the key uri is not valid.
     """
     if not os.path.exists(credentials_path):
-      raise ValueError
+      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                              credentials_path)
 
     if not os.path.isfile(credentials_path):
-      raise ValueError
+      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                              credentials_path)
 
     cred_config = configparser.ConfigParser()
     cred_config.read(credentials_path)
@@ -111,7 +118,7 @@ class AwsKmsClient(object):
       if 'aws_secret_access_key' in cred_config['default']:
         aws_secret_access_key = cred_config['default']['aws_secret_access_key']
     except KeyError:
-      raise ValueError
+      raise core.TinkError
 
     return (aws_access_key_id, aws_secret_access_key)
 
@@ -136,11 +143,11 @@ class AwsKmsClient(object):
       An AEAD primitive which uses the specified key.
 
     Raises:
-      ValueError: If the key_uri is not supported.
+      TinkError: If the key_uri is not supported.
     """
 
     if not self.does_support(key_uri):
-      raise ValueError('Key URI not supported.')
+      raise core.TinkError('Key URI not supported.')
 
     key_name = key_uri[len(AWS_KEYURI_PREFIX):]
     return AwsKmsAead(key_name, self.client)

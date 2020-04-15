@@ -11,11 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Provides AEAD using the AWS KMS client.
-
-Currently works only in Python3 (see Bug 146480447)
-"""
+"""Provides AEAD using the AWS KMS client."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -28,6 +24,7 @@ from botocore.exceptions import ClientError
 from typing import Text
 
 from tink import aead
+from tink import core
 
 
 class AwsKmsAead(aead.Aead):
@@ -56,8 +53,7 @@ class AwsKmsAead(aead.Aead):
         response = self.client.encrypt(KeyId=self.key_name,
                                        Plaintext=plaintext)
     except (ValueError, ClientError):
-      # TODO(b/146515546): Change to tink_error when its moved to pybind11
-      raise ValueError('Encryption failed inside AWS client.')
+      raise core.TinkError('Encryption failed inside AWS client.')
 
     return response['CiphertextBlob']
 
@@ -74,7 +70,6 @@ class AwsKmsAead(aead.Aead):
         response = self.client.decrypt(KeyId=self.key_name,
                                        CiphertextBlob=ciphertext)
     except ClientError:
-      # TODO(b/146515546): Change to tink_error when its moved to pybind11
-      raise ValueError('Decryption failed inside AWS client.')
+      raise core.TinkError('Decryption failed inside AWS client.')
 
     return response['Plaintext']
