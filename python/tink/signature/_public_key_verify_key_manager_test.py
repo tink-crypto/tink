@@ -24,9 +24,8 @@ from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
 from tink.proto import tink_pb2
 from tink import core
+from tink import signature
 from tink import tink_config
-from tink.signature import public_key_sign_key_manager
-from tink.signature import public_key_verify_key_manager
 
 
 def setUpModule():
@@ -52,9 +51,9 @@ class PublicKeyVerifyKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(PublicKeyVerifyKeyManagerTest, self).setUp()
-    self.key_manager = public_key_verify_key_manager.from_cc_registry(
+    self.key_manager = signature.verify_key_manager_from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EcdsaPublicKey')
-    self.key_manager_sign = public_key_sign_key_manager.from_cc_registry(
+    self.key_manager_sign = signature.sign_key_manager_from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey')
 
   def test_key_type(self):
@@ -77,9 +76,7 @@ class PublicKeyVerifyKeyManagerTest(absltest.TestCase):
     verifier = self.key_manager.primitive(pub_key)
 
     data = b'data'
-    signature = signer.sign(data)
-
-    verifier.verify(signature, data)
+    verifier.verify(signer.sign(data), data)
 
   def test_verify_wrong(self):
     key_template = new_ecdsa_key_template(
@@ -91,10 +88,8 @@ class PublicKeyVerifyKeyManagerTest(absltest.TestCase):
     verifier = self.key_manager.primitive(pub_key)
 
     data = b'data'
-    signature = signer.sign(data)
-
     with self.assertRaisesRegex(core.TinkError, 'Signature is not valid'):
-      verifier.verify(signature, b'wrongdata')
+      verifier.verify(signer.sign(data), b'wrongdata')
 
     with self.assertRaisesRegex(core.TinkError, 'Signature is not valid'):
       verifier.verify(b'wrongsignature', data)

@@ -23,10 +23,10 @@ from typing import Type
 
 from tink.proto import tink_pb2
 from tink import core
-from tink.signature import public_key_sign
+from tink.signature import _public_key_sign
 
 
-class _WrappedPublicKeySign(public_key_sign.PublicKeySign):
+class _WrappedPublicKeySign(_public_key_sign.PublicKeySign):
   """Implements PublicKeySign for a set of PublicKeySign primitives."""
 
   def __init__(self, primitives_set: core.PrimitiveSet):
@@ -54,7 +54,7 @@ class _WrappedPublicKeySign(public_key_sign.PublicKeySign):
 
 
 class PublicKeySignWrapper(
-    core.PrimitiveWrapper[public_key_sign.PublicKeySign]):
+    core.PrimitiveWrapper[_public_key_sign.PublicKeySign]):
   """A PrimitiveWrapper for the PublicKeySign primitive.
 
   The returned primitive works with a keyset (rather than a single key). To sign
@@ -66,5 +66,5 @@ class PublicKeySignWrapper(
           ) -> _WrappedPublicKeySign:
     return _WrappedPublicKeySign(primitives_set)
 
-  def primitive_class(self) -> Type[public_key_sign.PublicKeySign]:
-    return public_key_sign.PublicKeySign
+  def primitive_class(self) -> Type[_public_key_sign.PublicKeySign]:
+    return _public_key_sign.PublicKeySign

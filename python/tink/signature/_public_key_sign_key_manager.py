@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python wrapper of the CLIF-wrapped C++ Public Key Verify key manager."""
+"""Python wrapper of the CLIF-wrapped C++ Public Key Signature key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -23,24 +23,24 @@ from typing import Text
 
 from tink import core
 from tink.cc.pybind import cc_key_manager
-from tink.cc.pybind import public_key_verify as cc_public_key_verify
-from tink.signature import public_key_verify
+from tink.cc.pybind import public_key_sign as cc_public_key_sign
+from tink.signature import _public_key_sign
 
 
-class _PublicKeyVerifyCcToPyWrapper(public_key_verify.PublicKeyVerify):
-  """Transforms cliffed C++ PublicKeyVerify into a Python primitive."""
+class _PublicKeySignCcToPyWrapper(_public_key_sign.PublicKeySign):
+  """Transforms cliffed C++ PublicKeySign into a Python primitive."""
 
-  def __init__(self, cc_primitive: cc_public_key_verify.PublicKeyVerify):
-    self._public_key_verify = cc_primitive
+  def __init__(self, cc_primitive: cc_public_key_sign.PublicKeySign):
+    self._public_key_sign = cc_primitive
 
   @core.use_tink_errors
-  def verify(self, signature: bytes, data: bytes) -> None:
-    self._public_key_verify.verify(signature, data)
+  def sign(self, data: bytes) -> bytes:
+    return self._public_key_sign.sign(data)
 
 
 def from_cc_registry(
     type_url: Text
-) -> core.KeyManager[public_key_verify.PublicKeyVerify]:
-  return core.KeyManagerCcToPyWrapper(
-      cc_key_manager.PublicKeyVerifyKeyManager.from_cc_registry(type_url),
-      public_key_verify.PublicKeyVerify, _PublicKeyVerifyCcToPyWrapper)
+) -> core.PrivateKeyManager[_public_key_sign.PublicKeySign]:
+  return core.PrivateKeyManagerCcToPyWrapper(
+      cc_key_manager.PublicKeySignKeyManager.from_cc_registry(type_url),
+      _public_key_sign.PublicKeySign, _PublicKeySignCcToPyWrapper)

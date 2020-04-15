@@ -23,10 +23,8 @@ from absl.testing import absltest
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
 from tink.proto import tink_pb2
+from tink import signature
 from tink import tink_config
-from tink.signature import public_key_sign
-from tink.signature import public_key_sign_key_manager
-from tink.signature import public_key_verify_key_manager
 
 
 def setUpModule():
@@ -49,14 +47,14 @@ class PublicKeySignKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(PublicKeySignKeyManagerTest, self).setUp()
-    self.key_manager = public_key_sign_key_manager.from_cc_registry(
+    self.key_manager = signature.sign_key_manager_from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey')
-    self.key_manager_verify = public_key_verify_key_manager.from_cc_registry(
+    self.key_manager_verify = signature.verify_key_manager_from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EcdsaPublicKey')
 
   def test_primitive_class(self):
     self.assertEqual(self.key_manager.primitive_class(),
-                     public_key_sign.PublicKeySign)
+                     signature.PublicKeySign)
 
   def test_key_type(self):
     self.assertEqual(self.key_manager.key_type(),
@@ -88,12 +86,12 @@ class PublicKeySignKeyManagerTest(absltest.TestCase):
     signer = self.key_manager.primitive(priv_key)
 
     data = b'data'
-    signature = signer.sign(data)
+    data_signature = signer.sign(data)
 
     # Starts with a DER sequence
-    self.assertEqual(bytearray(signature)[0], 0x30)
+    self.assertEqual(bytearray(data_signature)[0], 0x30)
 
-    verifier.verify(signature, data)
+    verifier.verify(data_signature, data)
 
 
 if __name__ == '__main__':

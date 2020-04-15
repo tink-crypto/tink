@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for tink.python.tink.public_key_verify_wrapper."""
+"""Tests for tink.python.tink._public_key_verify_wrapper."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,10 +22,7 @@ from absl.testing import absltest
 
 from tink.proto import tink_pb2
 from tink import core
-from tink.signature import public_key_sign
-from tink.signature import public_key_sign_wrapper
-from tink.signature import public_key_verify
-from tink.signature import public_key_verify_wrapper
+from tink import signature
 from tink.testing import helper
 
 
@@ -44,7 +41,7 @@ class PublicKeyVerifyWrapperTest(absltest.TestCase):
     pair0 = new_primitive_key_pair(1234, tink_pb2.RAW)
     pair1 = new_primitive_key_pair(5678, tink_pb2.TINK)
     pair2 = new_primitive_key_pair(9012, tink_pb2.LEGACY)
-    pset = core.new_primitive_set(public_key_verify.PublicKeyVerify)
+    pset = core.new_primitive_set(signature.PublicKeyVerify)
 
     pset.add_primitive(*pair0)
     pset.add_primitive(*pair1)
@@ -52,15 +49,15 @@ class PublicKeyVerifyWrapperTest(absltest.TestCase):
 
     # Check all keys work
     for unused_primitive, key in (pair0, pair1, pair2):
-      pset_sign = core.new_primitive_set(public_key_sign.PublicKeySign)
+      pset_sign = core.new_primitive_set(signature.PublicKeySign)
       pset_sign.set_primary(
           pset_sign.add_primitive(
               helper.FakePublicKeySign('fakePublicKeySign {}'.format(
                   key.key_id)), key))
 
-      wrapped_pk_verify = public_key_verify_wrapper.PublicKeyVerifyWrapper(
+      wrapped_pk_verify = signature.PublicKeyVerifyWrapper(
       ).wrap(pset)
-      wrapped_pk_sign = public_key_sign_wrapper.PublicKeySignWrapper().wrap(
+      wrapped_pk_sign = signature.PublicKeySignWrapper().wrap(
           pset_sign)
 
       wrapped_pk_verify.verify(wrapped_pk_sign.sign(b'data'), b'data')

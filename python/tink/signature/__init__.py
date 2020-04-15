@@ -18,18 +18,18 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from tink.signature import public_key_sign
-from tink.signature import public_key_sign_key_manager
-from tink.signature import public_key_sign_wrapper
-from tink.signature import public_key_verify
-from tink.signature import public_key_verify_key_manager
-from tink.signature import public_key_verify_wrapper
-from tink.signature import signature_key_templates
+from tink.signature import _public_key_sign
+from tink.signature import _public_key_sign_key_manager
+from tink.signature import _public_key_sign_wrapper
+from tink.signature import _public_key_verify
+from tink.signature import _public_key_verify_key_manager
+from tink.signature import _public_key_verify_wrapper
+from tink.signature import _signature_key_templates as signature_key_templates
 
 
-PublicKeySign = public_key_sign.PublicKeySign
-PublicKeyVerify = public_key_verify.PublicKeyVerify
-PublicKeySignWrapper = public_key_sign_wrapper.PublicKeySignWrapper
-PublicKeyVerifyWrapper = public_key_verify_wrapper.PublicKeyVerifyWrapper
-sign_key_manager_from_cc_registry = public_key_sign_key_manager.from_cc_registry
-verify_key_manager_from_cc_registry = public_key_verify_key_manager.from_cc_registry
+PublicKeySign = _public_key_sign.PublicKeySign
+PublicKeyVerify = _public_key_verify.PublicKeyVerify
+PublicKeySignWrapper = _public_key_sign_wrapper.PublicKeySignWrapper
+PublicKeyVerifyWrapper = _public_key_verify_wrapper.PublicKeyVerifyWrapper
+sign_key_manager_from_cc_registry = _public_key_sign_key_manager.from_cc_registry
+verify_key_manager_from_cc_registry = _public_key_verify_key_manager.from_cc_registry

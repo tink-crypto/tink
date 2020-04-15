@@ -24,10 +24,10 @@ from typing import Type
 
 from tink.proto import tink_pb2
 from tink import core
-from tink.signature import public_key_verify
+from tink.signature import _public_key_verify
 
 
-class _WrappedPublicKeyVerify(public_key_verify.PublicKeyVerify):
+class _WrappedPublicKeyVerify(_public_key_verify.PublicKeyVerify):
   """Implements PublicKeyVerify for a set of PublicKeyVerify primitives."""
 
   def __init__(self, primitives_set: core.PrimitiveSet):
@@ -77,7 +77,7 @@ class _WrappedPublicKeyVerify(public_key_verify.PublicKeyVerify):
 
 
 class PublicKeyVerifyWrapper(
-    core.PrimitiveWrapper[public_key_verify.PublicKeyVerify]):
+    core.PrimitiveWrapper[_public_key_verify.PublicKeyVerify]):
   """WrappedPublicKeyVerify is the PrimitiveWrapper for PublicKeyVerify.
 
   The returned primitive works with a keyset (rather than a single key). To sign
@@ -95,5 +95,5 @@ class PublicKeyVerifyWrapper(
           ) -> _WrappedPublicKeyVerify:
     return _WrappedPublicKeyVerify(primitives_set)
 
-  def primitive_class(self) -> Type[public_key_verify.PublicKeyVerify]:
-    return public_key_verify.PublicKeyVerify
+  def primitive_class(self) -> Type[_public_key_verify.PublicKeyVerify]:
+    return _public_key_verify.PublicKeyVerify

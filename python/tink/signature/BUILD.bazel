@@ -9,136 +9,127 @@ py_library(
     name = "signature",
     srcs = ["__init__.py"],
     deps = [
-        ":public_key_sign",
-        ":public_key_sign_key_manager",
-        ":public_key_sign_wrapper",
-        ":public_key_verify",
-        ":public_key_verify_key_manager",
-        ":public_key_verify_wrapper",
-        ":signature_key_templates",
+        ":_public_key_sign",
+        ":_public_key_sign_key_manager",
+        ":_public_key_sign_wrapper",
+        ":_public_key_verify",
+        ":_public_key_verify_key_manager",
+        ":_public_key_verify_wrapper",
+        ":_signature_key_templates",
     ],
 )
 
 py_library(
-    name = "public_key_sign",
-    srcs = ["public_key_sign.py"],
+    name = "_public_key_sign",
+    srcs = ["_public_key_sign.py"],
     deps = [requirement("six")],
 )
 
 py_library(
-    name = "public_key_sign_key_manager",
-    srcs = ["public_key_sign_key_manager.py"],
+    name = "_public_key_sign_key_manager",
+    srcs = ["_public_key_sign_key_manager.py"],
     deps = [
-        ":public_key_sign",
-        "//tink/proto:tink_py_pb2",
+        ":_public_key_sign",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:public_key_sign",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "public_key_sign_key_manager_test",
-    srcs = ["public_key_sign_key_manager_test.py"],
+    name = "_public_key_sign_key_manager_test",
+    srcs = ["_public_key_sign_key_manager_test.py"],
     deps = [
-        ":public_key_sign",
-        ":public_key_sign_key_manager",
-        ":public_key_verify_key_manager",
+        ":signature",
         requirement("absl-py"),
+        "//tink:tink_config",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink:tink_config",
     ],
 )
 
 py_library(
-    name = "public_key_verify",
-    srcs = ["public_key_verify.py"],
+    name = "_public_key_verify",
+    srcs = ["_public_key_verify.py"],
     deps = [requirement("six")],
 )
 
 py_library(
-    name = "public_key_verify_key_manager",
-    srcs = ["public_key_verify_key_manager.py"],
+    name = "_public_key_verify_key_manager",
+    srcs = ["_public_key_verify_key_manager.py"],
     deps = [
-        ":public_key_verify",
-        "//tink/proto:tink_py_pb2",
+        ":_public_key_verify",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:public_key_verify",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "public_key_verify_key_manager_test",
-    srcs = ["public_key_verify_key_manager_test.py"],
+    name = "_public_key_verify_key_manager_test",
+    srcs = ["_public_key_verify_key_manager_test.py"],
     deps = [
-        ":public_key_sign_key_manager",
-        ":public_key_verify_key_manager",
+        ":signature",
         requirement("absl-py"),
+        "//tink:tink_config",
+        "//tink/core",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink:tink_config",
-        "//tink/core",
     ],
 )
 
 py_library(
-    name = "public_key_sign_wrapper",
-    srcs = ["public_key_sign_wrapper.py"],
+    name = "_public_key_sign_wrapper",
+    srcs = ["_public_key_sign_wrapper.py"],
     deps = [
-        ":public_key_sign",
-        "//tink/proto:tink_py_pb2",
+        ":_public_key_sign",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "public_key_sign_wrapper_test",
-    srcs = ["public_key_sign_wrapper_test.py"],
+    name = "_public_key_sign_wrapper_test",
+    srcs = ["_public_key_sign_wrapper_test.py"],
     deps = [
-        ":public_key_sign",
-        ":public_key_sign_wrapper",
-        ":public_key_verify",
-        ":public_key_verify_wrapper",
+        ":signature",
         requirement("absl-py"),
-        "//tink/proto:tink_py_pb2",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
     ],
 )
 
 py_library(
-    name = "public_key_verify_wrapper",
-    srcs = ["public_key_verify_wrapper.py"],
+    name = "_public_key_verify_wrapper",
+    srcs = ["_public_key_verify_wrapper.py"],
     srcs_version = "PY2AND3",
     deps = [
-        ":public_key_verify",
-        "//tink/proto:tink_py_pb2",
+        ":_public_key_verify",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "public_key_verify_wrapper_test",
-    srcs = ["public_key_verify_wrapper_test.py"],
+    name = "_public_key_verify_wrapper_test",
+    srcs = ["_public_key_verify_wrapper_test.py"],
     deps = [
-        ":public_key_sign",
-        ":public_key_sign_wrapper",
-        ":public_key_verify",
-        ":public_key_verify_wrapper",
+        ":signature",
         requirement("absl-py"),
-        "//tink/proto:tink_py_pb2",
         "//tink/core",
+        "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
     ],
 )
 
 py_library(
-    name = "signature_key_templates",
-    srcs = ["signature_key_templates.py"],
+    name = "_signature_key_templates",
+    srcs = ["_signature_key_templates.py"],
     deps = [
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
@@ -149,17 +140,16 @@ py_library(
 )
 
 py_test(
-    name = "signature_key_templates_test",
-    srcs = ["signature_key_templates_test.py"],
+    name = "_signature_key_templates_test",
+    srcs = ["_signature_key_templates_test.py"],
     deps = [
-        ":public_key_sign_key_manager",
-        ":signature_key_templates",
+        ":signature",
         requirement("absl-py"),
+        "//tink:tink_config",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
         "//tink/proto:rsa_ssa_pkcs1_py_pb2",
         "//tink/proto:rsa_ssa_pss_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink:tink_config",
     ],
 )

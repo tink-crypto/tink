@@ -23,10 +23,7 @@ from absl.testing import parameterized
 
 from tink.proto import tink_pb2
 from tink import core
-from tink.signature import public_key_sign
-from tink.signature import public_key_sign_wrapper
-from tink.signature import public_key_verify
-from tink.signature import public_key_verify_wrapper
+from tink import signature
 from tink.testing import helper
 
 
@@ -52,9 +49,8 @@ class PublicKeySignWrapperTest(parameterized.TestCase):
   def test_signature(self, output_prefix_type):
     pair0 = new_primitive_key_pair(1234, output_prefix_type)
     pair1 = new_primitive_key_pair(5678, output_prefix_type)
-    pset = core.new_primitive_set(public_key_sign.PublicKeySign)
-    pset_verify = core.new_primitive_set(
-        public_key_verify.PublicKeyVerify)
+    pset = core.new_primitive_set(signature.PublicKeySign)
+    pset_verify = core.new_primitive_set(signature.PublicKeyVerify)
 
     pset.add_primitive(*pair0)
     pset.set_primary(pset.add_primitive(*pair1))
@@ -63,15 +59,14 @@ class PublicKeySignWrapperTest(parameterized.TestCase):
     entry = pset_verify.add_primitive(*to_verify_key_pair(pair1[1]))
     pset_verify.set_primary(entry)
 
-    wrapped_pk_sign = public_key_sign_wrapper.PublicKeySignWrapper().wrap(pset)
-    wrapped_pk_verify = public_key_verify_wrapper.PublicKeyVerifyWrapper().wrap(
-        pset_verify)
-    signature = wrapped_pk_sign.sign(b'data')
+    wrapped_pk_sign = signature.PublicKeySignWrapper().wrap(pset)
+    wrapped_pk_verify = signature.PublicKeyVerifyWrapper().wrap(pset_verify)
+    data_signature = wrapped_pk_sign.sign(b'data')
 
-    wrapped_pk_verify.verify(signature, b'data')
+    wrapped_pk_verify.verify(data_signature, b'data')
 
     with self.assertRaisesRegex(core.TinkError, 'invalid signature'):
-      wrapped_pk_verify.verify(signature, b'invalid')
+      wrapped_pk_verify.verify(data_signature, b'invalid')
 
 
 if __name__ == '__main__':
