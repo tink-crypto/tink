@@ -21,26 +21,26 @@ from __future__ import print_function
 
 from typing import Text
 
+
 from tink import core
 from tink.cc.pybind import cc_key_manager
-from tink.cc.pybind import hybrid_decrypt as cc_hybrid_decrypt
-from tink.hybrid import hybrid_decrypt
+from tink.cc.pybind import hybrid_encrypt as cc_hybrid_encrypt
+from tink.hybrid import _hybrid_encrypt
 
 
-class _HybridDecryptCcToPyWrapper(hybrid_decrypt.HybridDecrypt):
-  """Transforms cliffed C++ HybridDecrypt primitive into a Python primitive."""
+class _HybridEncryptCcToPyWrapper(_hybrid_encrypt.HybridEncrypt):
+  """Transforms cliffed C++ HybridEncrypt primitive into a Python primitive."""
 
-  def __init__(self, cc_primitive: cc_hybrid_decrypt.HybridDecrypt):
-    self._hybrid_decrypt = cc_primitive
+  def __init__(self, cc_primitive: cc_hybrid_encrypt.HybridEncrypt):
+    self._hybrid_encrypt = cc_primitive
 
   @core.use_tink_errors
-  def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
-    return self._hybrid_decrypt.decrypt(ciphertext, context_info)
+  def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
+    return self._hybrid_encrypt.encrypt(plaintext, context_info)
 
 
 def from_cc_registry(
-    type_url: Text
-) -> core.PrivateKeyManager[hybrid_decrypt.HybridDecrypt]:
-  return core.PrivateKeyManagerCcToPyWrapper(
-      cc_key_manager.HybridDecryptKeyManager.from_cc_registry(type_url),
-      hybrid_decrypt.HybridDecrypt, _HybridDecryptCcToPyWrapper)
+    type_url: Text) -> core.KeyManager[_hybrid_encrypt.HybridEncrypt]:
+  return core.KeyManagerCcToPyWrapper(
+      cc_key_manager.HybridEncryptKeyManager.from_cc_registry(type_url),
+      _hybrid_encrypt.HybridEncrypt, _HybridEncryptCcToPyWrapper)

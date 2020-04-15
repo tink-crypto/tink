@@ -25,12 +25,8 @@ from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
 from tink import aead
 from tink import core
+from tink import hybrid
 from tink import tink_config
-from tink.hybrid import hybrid_decrypt
-from tink.hybrid import hybrid_decrypt_key_manager
-from tink.hybrid import hybrid_encrypt
-from tink.hybrid import hybrid_encrypt_key_manager
-from tink.hybrid import hybrid_key_templates
 
 
 def setUpModule():
@@ -38,12 +34,12 @@ def setUpModule():
 
 
 def _hybrid_decrypt_key_manager():
-  return hybrid_decrypt_key_manager.from_cc_registry(
+  return hybrid.decrypt_key_manager_from_cc_registry(
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey')
 
 
 def _hybrid_encrypt_key_manager():
-  return hybrid_encrypt_key_manager.from_cc_registry(
+  return hybrid.encrypt_key_manager_from_cc_registry(
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
 
 
@@ -51,11 +47,11 @@ class HybridKeyManagerTest(absltest.TestCase):
 
   def test_hybrid_decrypt_primitive_class(self):
     self.assertEqual(_hybrid_decrypt_key_manager().primitive_class(),
-                     hybrid_decrypt.HybridDecrypt)
+                     hybrid.HybridDecrypt)
 
   def test_hybrid_encrypt_primitive_class(self):
     self.assertEqual(_hybrid_encrypt_key_manager().primitive_class(),
-                     hybrid_encrypt.HybridEncrypt)
+                     hybrid.HybridEncrypt)
 
   def test_hybrid_decrypt_key_type(self):
     self.assertEqual(
@@ -70,7 +66,7 @@ class HybridKeyManagerTest(absltest.TestCase):
   def test_new_key_data(self):
     key_manager = _hybrid_decrypt_key_manager()
     key_data = key_manager.new_key_data(
-        hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     self.assertEqual(key_data.type_url, key_manager.key_type())
     self.assertEqual(key_data.key_material_type,
                      tink_pb2.KeyData.ASYMMETRIC_PRIVATE)
@@ -84,7 +80,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     with self.assertRaisesRegex(core.TinkError,
                                 'Unsupported elliptic curve'):
       _hybrid_decrypt_key_manager().new_key_data(
-          hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+          hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
               curve_type=cast(common_pb2.EllipticCurveType, 100),
               ec_point_format=common_pb2.UNCOMPRESSED,
               hash_type=common_pb2.SHA256,
@@ -107,7 +103,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     decrypt_key_manager = _hybrid_decrypt_key_manager()
     encrypt_key_manager = _hybrid_encrypt_key_manager()
     key_data = decrypt_key_manager.new_key_data(
-        hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     public_key_data = decrypt_key_manager.public_key_data(key_data)
     hybrid_enc = encrypt_key_manager.primitive(public_key_data)
     ciphertext = hybrid_enc.encrypt(b'some plaintext', b'some context info')
@@ -118,7 +114,7 @@ class HybridKeyManagerTest(absltest.TestCase):
   def test_decrypt_fails(self):
     decrypt_key_manager = _hybrid_decrypt_key_manager()
     key_data = decrypt_key_manager.new_key_data(
-        hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     hybrid_dec = decrypt_key_manager.primitive(key_data)
     with self.assertRaisesRegex(core.TinkError, 'ciphertext too short'):
       hybrid_dec.decrypt(b'bad ciphertext', b'some context info')

@@ -28,10 +28,10 @@ from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import tink_pb2
 from tink import aead
+from tink import hybrid
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import cc_tink_config
 from tink.cc.pybind import status as error
-from tink.hybrid import hybrid_key_templates
 
 
 def setUpModule():
@@ -151,7 +151,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     key_data = tink_pb2.KeyData()
     key_data.ParseFromString(
         key_manager.new_key_data(
-            hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+            hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
             .SerializeToString()))
     self.assertEqual(key_data.type_url, key_manager.key_type())
     self.assertEqual(key_data.key_material_type,
@@ -166,7 +166,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     with self.assertRaisesRegex(error.StatusNotOk,
                                 'Unsupported elliptic curve'):
       self.hybrid_decrypt_key_manager().new_key_data(
-          hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+          hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
               curve_type=cast(common_pb2.EllipticCurveType, 100),  # invalid
               ec_point_format=common_pb2.UNCOMPRESSED,
               hash_type=common_pb2.SHA256,
@@ -177,7 +177,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     decrypt_key_manager = self.hybrid_decrypt_key_manager()
     encrypt_key_manager = self.hybrid_encrypt_key_manager()
     key_data = decrypt_key_manager.new_key_data(
-        hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
         .SerializeToString())
     public_key_data = decrypt_key_manager.public_key_data(key_data)
     hybrid_encrypt = encrypt_key_manager.primitive(public_key_data)
@@ -189,7 +189,7 @@ class HybridKeyManagerTest(absltest.TestCase):
   def test_decrypt_fails(self):
     decrypt_key_manager = self.hybrid_decrypt_key_manager()
     key_data = decrypt_key_manager.new_key_data(
-        hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
         .SerializeToString())
     hybrid_decrypt = decrypt_key_manager.primitive(key_data)
     with self.assertRaisesRegex(error.StatusNotOk, 'ciphertext too short'):

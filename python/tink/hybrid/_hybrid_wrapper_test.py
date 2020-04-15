@@ -21,10 +21,7 @@ from __future__ import print_function
 from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink import core
-from tink.hybrid import hybrid_decrypt
-from tink.hybrid import hybrid_decrypt_wrapper
-from tink.hybrid import hybrid_encrypt
-from tink.hybrid import hybrid_encrypt_wrapper
+from tink import hybrid
 from tink.testing import helper
 
 
@@ -47,13 +44,13 @@ class HybridWrapperTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
     dec, enc, dec_key, enc_key = new_primitives_and_keys(1234, tink_pb2.TINK)
-    dec_pset = core.new_primitive_set(hybrid_decrypt.HybridDecrypt)
+    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
     dec_pset.set_primary(dec_pset.add_primitive(dec, dec_key))
-    wrapped_dec = hybrid_decrypt_wrapper.HybridDecryptWrapper().wrap(dec_pset)
+    wrapped_dec = hybrid.HybridDecryptWrapper().wrap(dec_pset)
 
-    enc_pset = core.new_primitive_set(hybrid_encrypt.HybridEncrypt)
+    enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
     enc_pset.set_primary(enc_pset.add_primitive(enc, enc_key))
-    wrapped_enc = hybrid_encrypt_wrapper.HybridEncryptWrapper().wrap(enc_pset)
+    wrapped_enc = hybrid.HybridEncryptWrapper().wrap(enc_pset)
 
     ciphertext = wrapped_enc.encrypt(b'plaintext', b'context_info')
     self.assertEqual(
@@ -61,24 +58,24 @@ class HybridWrapperTest(absltest.TestCase):
 
   def test_encrypt_decrypt_with_key_rotation(self):
     dec, enc, dec_key, enc_key = new_primitives_and_keys(1234, tink_pb2.TINK)
-    enc_pset = core.new_primitive_set(hybrid_encrypt.HybridEncrypt)
+    enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
     enc_pset.set_primary(enc_pset.add_primitive(enc, enc_key))
-    wrapped_enc = hybrid_encrypt_wrapper.HybridEncryptWrapper().wrap(enc_pset)
+    wrapped_enc = hybrid.HybridEncryptWrapper().wrap(enc_pset)
     ciphertext = wrapped_enc.encrypt(b'plaintext', b'context_info')
 
     new_dec, new_enc, new_dec_key, new_enc_key = new_primitives_and_keys(
         5678, tink_pb2.TINK)
-    new_enc_pset = core.new_primitive_set(hybrid_encrypt.HybridEncrypt)
+    new_enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
     new_enc_pset.set_primary(new_enc_pset.add_primitive(new_enc, new_enc_key))
-    new_wrapped_enc = hybrid_encrypt_wrapper.HybridEncryptWrapper().wrap(
+    new_wrapped_enc = hybrid.HybridEncryptWrapper().wrap(
         new_enc_pset)
 
     new_dec, new_enc, new_dec_key, new_enc_key = new_primitives_and_keys(
         5678, tink_pb2.TINK)
-    new_dec_pset = core.new_primitive_set(hybrid_decrypt.HybridDecrypt)
+    new_dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
     new_dec_pset.add_primitive(dec, dec_key)
     new_dec_pset.set_primary(new_dec_pset.add_primitive(new_dec, new_dec_key))
-    new_wrapped_dec = hybrid_decrypt_wrapper.HybridDecryptWrapper().wrap(
+    new_wrapped_dec = hybrid.HybridDecryptWrapper().wrap(
         new_dec_pset)
 
     new_ciphertext = new_wrapped_enc.encrypt(b'new_plaintext',
@@ -97,16 +94,16 @@ class HybridWrapperTest(absltest.TestCase):
 
     new_dec, new_enc, new_dec_key, new_enc_key = new_primitives_and_keys(
         5678, tink_pb2.TINK)
-    enc_pset = core.new_primitive_set(hybrid_encrypt.HybridEncrypt)
+    enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
     enc_pset.add_primitive(raw_enc, raw_enc_key)
     enc_pset.set_primary(enc_pset.add_primitive(new_enc, new_enc_key))
-    wrapped_enc = hybrid_encrypt_wrapper.HybridEncryptWrapper().wrap(
+    wrapped_enc = hybrid.HybridEncryptWrapper().wrap(
         enc_pset)
 
-    dec_pset = core.new_primitive_set(hybrid_decrypt.HybridDecrypt)
+    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
     dec_pset.add_primitive(raw_dec, raw_dec_key)
     dec_pset.set_primary(dec_pset.add_primitive(new_dec, new_dec_key))
-    wrapped_dec = hybrid_decrypt_wrapper.HybridDecryptWrapper().wrap(dec_pset)
+    wrapped_dec = hybrid.HybridDecryptWrapper().wrap(dec_pset)
 
     new_ciphertext = wrapped_enc.encrypt(b'new_plaintext', b'new_context_info')
     self.assertEqual(
@@ -124,10 +121,10 @@ class HybridWrapperTest(absltest.TestCase):
         1234, tink_pb2.RAW)
     raw_ciphertext2 = enc2.encrypt(b'plaintext2', b'context_info2')
 
-    dec_pset = core.new_primitive_set(hybrid_decrypt.HybridDecrypt)
+    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
     dec_pset.add_primitive(dec1, dec1_key)
     dec_pset.set_primary(dec_pset.add_primitive(dec2, dec2_key))
-    wrapped_dec = hybrid_decrypt_wrapper.HybridDecryptWrapper().wrap(dec_pset)
+    wrapped_dec = hybrid.HybridDecryptWrapper().wrap(dec_pset)
 
     self.assertEqual(
         wrapped_dec.decrypt(raw_ciphertext1, b'context_info1'),
@@ -140,27 +137,27 @@ class HybridWrapperTest(absltest.TestCase):
     unknown_enc = helper.FakeHybridEncrypt('unknownHybrid')
     unknown_ciphertext = unknown_enc.encrypt(b'plaintext', b'context_info')
 
-    dec_pset = core.new_primitive_set(hybrid_decrypt.HybridDecrypt)
+    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
 
     dec1, _, dec1_key, _ = new_primitives_and_keys(1234, tink_pb2.RAW)
     dec2, _, dec2_key, _ = new_primitives_and_keys(5678, tink_pb2.TINK)
     dec_pset.add_primitive(dec1, dec1_key)
     dec_pset.set_primary(dec_pset.add_primitive(dec2, dec2_key))
 
-    wrapped_dec = hybrid_decrypt_wrapper.HybridDecryptWrapper().wrap(dec_pset)
+    wrapped_dec = hybrid.HybridDecryptWrapper().wrap(dec_pset)
 
     with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
       wrapped_dec.decrypt(unknown_ciphertext, b'context_info')
 
   def test_decrypt_wrong_associated_data_fails(self):
     dec, enc, dec_key, enc_key = new_primitives_and_keys(1234, tink_pb2.TINK)
-    dec_pset = core.new_primitive_set(hybrid_decrypt.HybridDecrypt)
+    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
     dec_pset.set_primary(dec_pset.add_primitive(dec, dec_key))
-    wrapped_dec = hybrid_decrypt_wrapper.HybridDecryptWrapper().wrap(dec_pset)
+    wrapped_dec = hybrid.HybridDecryptWrapper().wrap(dec_pset)
 
-    enc_pset = core.new_primitive_set(hybrid_encrypt.HybridEncrypt)
+    enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
     enc_pset.set_primary(enc_pset.add_primitive(enc, enc_key))
-    wrapped_enc = hybrid_encrypt_wrapper.HybridEncryptWrapper().wrap(enc_pset)
+    wrapped_enc = hybrid.HybridEncryptWrapper().wrap(enc_pset)
 
     ciphertext = wrapped_enc.encrypt(b'plaintext', b'context_info')
     with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):

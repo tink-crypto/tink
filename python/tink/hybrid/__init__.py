@@ -18,18 +18,18 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from tink.hybrid import hybrid_decrypt
-from tink.hybrid import hybrid_decrypt_key_manager
-from tink.hybrid import hybrid_decrypt_wrapper
-from tink.hybrid import hybrid_encrypt
-from tink.hybrid import hybrid_encrypt_key_manager
-from tink.hybrid import hybrid_encrypt_wrapper
-from tink.hybrid import hybrid_key_templates
+from tink.hybrid import _hybrid_decrypt
+from tink.hybrid import _hybrid_decrypt_key_manager
+from tink.hybrid import _hybrid_decrypt_wrapper
+from tink.hybrid import _hybrid_encrypt
+from tink.hybrid import _hybrid_encrypt_key_manager
+from tink.hybrid import _hybrid_encrypt_wrapper
+from tink.hybrid import _hybrid_key_templates as hybrid_key_templates
 
 
-HybridDecrypt = hybrid_decrypt.HybridDecrypt
-HybridEncrypt = hybrid_encrypt.HybridEncrypt
-HybridDecryptWrapper = hybrid_decrypt_wrapper.HybridDecryptWrapper
-HybridEncryptWrapper = hybrid_encrypt_wrapper.HybridEncryptWrapper
-encrypt_key_manager_from_cc_registry = hybrid_encrypt_key_manager.from_cc_registry
-decrypt_key_manager_from_cc_registry = hybrid_decrypt_key_manager.from_cc_registry
+HybridDecrypt = _hybrid_decrypt.HybridDecrypt
+HybridEncrypt = _hybrid_encrypt.HybridEncrypt
+HybridDecryptWrapper = _hybrid_decrypt_wrapper.HybridDecryptWrapper
+HybridEncryptWrapper = _hybrid_encrypt_wrapper.HybridEncryptWrapper
+encrypt_key_manager_from_cc_registry = _hybrid_encrypt_key_manager.from_cc_registry
+decrypt_key_manager_from_cc_registry = _hybrid_decrypt_key_manager.from_cc_registry

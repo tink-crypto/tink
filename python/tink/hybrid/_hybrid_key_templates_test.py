@@ -23,13 +23,14 @@ from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
 from tink import aead
-from tink.hybrid import hybrid_key_templates
+from tink import hybrid
 
 
 class HybridKeyTemplatesTest(absltest.TestCase):
 
   def test_ecies_p256_hkdf_hmac_sha256_aes128_gcm(self):
-    template = hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+    template = (
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey',
         template.type_url)
@@ -43,7 +44,8 @@ class HybridKeyTemplatesTest(absltest.TestCase):
 
   def test_ecies_p256_hkdf_hmac_sha256_aes128_ctr_hmac_sha256(self):
     template = (
-        hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256)
+        hybrid.hybrid_key_templates
+        .ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256)
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey',
         template.type_url)
@@ -58,7 +60,7 @@ class HybridKeyTemplatesTest(absltest.TestCase):
   def test_create_aes_eax_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+    template = hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
         curve_type=common_pb2.NIST_P521,
         ec_point_format=common_pb2.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
         hash_type=common_pb2.SHA1,

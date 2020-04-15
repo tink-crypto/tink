@@ -23,10 +23,10 @@ from absl import logging
 from typing import Type
 
 from tink import core
-from tink.hybrid import hybrid_decrypt
+from tink.hybrid import _hybrid_decrypt
 
 
-class _WrappedHybridDecrypt(hybrid_decrypt.HybridDecrypt):
+class _WrappedHybridDecrypt(_hybrid_decrypt.HybridDecrypt):
   """Implements HybridDecrypt for a set of HybridDecrypt primitives."""
 
   def __init__(self, pset: core.PrimitiveSet):
@@ -54,7 +54,7 @@ class _WrappedHybridDecrypt(hybrid_decrypt.HybridDecrypt):
 
 
 class HybridDecryptWrapper(
-    core.PrimitiveWrapper[hybrid_decrypt.HybridDecrypt]):
+    core.PrimitiveWrapper[_hybrid_decrypt.HybridDecrypt]):
   """HybridDecryptWrapper is the PrimitiveWrapper for HybridDecrypt.
 
   The returned primitive works with a keyset (rather than a single key). To
@@ -64,8 +64,8 @@ class HybridDecryptWrapper(
   """
 
   def wrap(self,
-           pset: core.PrimitiveSet) -> hybrid_decrypt.HybridDecrypt:
+           pset: core.PrimitiveSet) -> _hybrid_decrypt.HybridDecrypt:
     return _WrappedHybridDecrypt(pset)
 
-  def primitive_class(self) -> Type[hybrid_decrypt.HybridDecrypt]:
-    return hybrid_decrypt.HybridDecrypt
+  def primitive_class(self) -> Type[_hybrid_decrypt.HybridDecrypt]:
+    return _hybrid_decrypt.HybridDecrypt

@@ -9,34 +9,34 @@ py_library(
     name = "hybrid",
     srcs = ["__init__.py"],
     deps = [
-        ":hybrid_decrypt",
-        ":hybrid_decrypt_key_manager",
-        ":hybrid_decrypt_wrapper",
-        ":hybrid_encrypt",
-        ":hybrid_encrypt_key_manager",
-        ":hybrid_encrypt_wrapper",
-        ":hybrid_key_templates",
+        ":_hybrid_decrypt",
+        ":_hybrid_decrypt_key_manager",
+        ":_hybrid_decrypt_wrapper",
+        ":_hybrid_encrypt",
+        ":_hybrid_encrypt_key_manager",
+        ":_hybrid_encrypt_wrapper",
+        ":_hybrid_key_templates",
     ],
 )
 
 py_library(
-    name = "hybrid_decrypt",
-    srcs = ["hybrid_decrypt.py"],
+    name = "_hybrid_decrypt",
+    srcs = ["_hybrid_decrypt.py"],
     deps = [requirement("six")],
 )
 
 py_library(
-    name = "hybrid_encrypt",
-    srcs = ["hybrid_encrypt.py"],
+    name = "_hybrid_encrypt",
+    srcs = ["_hybrid_encrypt.py"],
     deps = [requirement("six")],
 )
 
 py_library(
-    name = "hybrid_decrypt_key_manager",
-    srcs = ["hybrid_decrypt_key_manager.py"],
+    name = "_hybrid_decrypt_key_manager",
+    srcs = ["_hybrid_decrypt_key_manager.py"],
     deps = [
-        ":hybrid_decrypt",
-        ":hybrid_encrypt",
+        ":_hybrid_decrypt",
+        ":_hybrid_encrypt",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:hybrid_decrypt",
         "//tink/cc/pybind:hybrid_encrypt",
@@ -45,11 +45,11 @@ py_library(
 )
 
 py_library(
-    name = "hybrid_encrypt_key_manager",
-    srcs = ["hybrid_encrypt_key_manager.py"],
+    name = "_hybrid_encrypt_key_manager",
+    srcs = ["_hybrid_encrypt_key_manager.py"],
     deps = [
-        ":hybrid_decrypt",
-        ":hybrid_encrypt",
+        ":_hybrid_decrypt",
+        ":_hybrid_encrypt",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/cc/pybind:hybrid_decrypt",
         "//tink/cc/pybind:hybrid_encrypt",
@@ -58,14 +58,10 @@ py_library(
 )
 
 py_test(
-    name = "hybrid_key_manager_test",
-    srcs = ["hybrid_key_manager_test.py"],
+    name = "_hybrid_key_manager_test",
+    srcs = ["_hybrid_key_manager_test.py"],
     deps = [
-        ":hybrid_decrypt",
-        ":hybrid_decrypt_key_manager",
-        ":hybrid_encrypt",
-        ":hybrid_encrypt_key_manager",
-        ":hybrid_key_templates",
+        ":hybrid",
         requirement("absl-py"),
         "//tink:tink_config",
         "//tink/aead",
@@ -78,32 +74,29 @@ py_test(
 )
 
 py_library(
-    name = "hybrid_encrypt_wrapper",
-    srcs = ["hybrid_encrypt_wrapper.py"],
+    name = "_hybrid_encrypt_wrapper",
+    srcs = ["_hybrid_encrypt_wrapper.py"],
     deps = [
-        ":hybrid_encrypt",
+        ":_hybrid_encrypt",
         "//tink/core",
     ],
 )
 
 py_library(
-    name = "hybrid_decrypt_wrapper",
-    srcs = ["hybrid_decrypt_wrapper.py"],
+    name = "_hybrid_decrypt_wrapper",
+    srcs = ["_hybrid_decrypt_wrapper.py"],
     deps = [
-        ":hybrid_decrypt",
+        ":_hybrid_decrypt",
         requirement("absl-py"),
         "//tink/core",
     ],
 )
 
 py_test(
-    name = "hybrid_wrapper_test",
-    srcs = ["hybrid_wrapper_test.py"],
+    name = "_hybrid_wrapper_test",
+    srcs = ["_hybrid_wrapper_test.py"],
     deps = [
-        ":hybrid_decrypt",
-        ":hybrid_decrypt_wrapper",
-        ":hybrid_encrypt",
-        ":hybrid_encrypt_wrapper",
+        ":hybrid",
         requirement("absl-py"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
@@ -112,8 +105,8 @@ py_test(
 )
 
 py_library(
-    name = "hybrid_key_templates",
-    srcs = ["hybrid_key_templates.py"],
+    name = "_hybrid_key_templates",
+    srcs = ["_hybrid_key_templates.py"],
     deps = [
         "//tink/aead",
         "//tink/proto:common_py_pb2",
@@ -123,10 +116,10 @@ py_library(
 )
 
 py_test(
-    name = "hybrid_key_templates_test",
-    srcs = ["hybrid_key_templates_test.py"],
+    name = "_hybrid_key_templates_test",
+    srcs = ["_hybrid_key_templates_test.py"],
     deps = [
-        ":hybrid_key_templates",
+        ":hybrid",
         requirement("absl-py"),
         "//tink/aead",
         "//tink/proto:common_py_pb2",
