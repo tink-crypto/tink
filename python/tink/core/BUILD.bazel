@@ -6,6 +6,7 @@ package(default_visibility = ["//:__subpackages__"])
 py_library(
     name = "core",
     srcs = ["__init__.py"],
+    srcs_version = "PY3",
     deps = [
         ":_crypto_format",
         ":_key_manager",
@@ -20,6 +21,7 @@ py_library(
 py_library(
     name = "_key_manager",
     srcs = ["_key_manager.py"],
+    srcs_version = "PY3",
     deps = [
         ":_tink_error",
         "//tink/proto:tink_py_pb2",
@@ -29,6 +31,7 @@ py_library(
 py_library(
     name = "_tink_error",
     srcs = ["_tink_error.py"],
+    srcs_version = "PY3",
     deps = [
         "//tink/cc/pybind:status",
     ],
@@ -37,6 +40,7 @@ py_library(
 py_library(
     name = "_registry",
     srcs = ["_registry.py"],
+    srcs_version = "PY3",
     deps = [
         ":_key_manager",
         ":_primitive_set",
@@ -49,6 +53,7 @@ py_library(
 py_test(
     name = "_registry_test",
     srcs = ["_registry_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":core",
         requirement("absl-py"),
@@ -62,6 +67,7 @@ py_test(
 py_library(
     name = "_crypto_format",
     srcs = ["_crypto_format.py"],
+    srcs_version = "PY3",
     deps = [
         ":_tink_error",
         "//tink/proto:tink_py_pb2",
@@ -71,6 +77,7 @@ py_library(
 py_test(
     name = "_crypto_format_test",
     srcs = ["_crypto_format_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":core",
         requirement("absl-py"),
@@ -81,6 +88,7 @@ py_test(
 py_library(
     name = "_primitive_set",
     srcs = ["_primitive_set.py"],
+    srcs_version = "PY3",
     deps = [
         ":_crypto_format",
         ":_tink_error",
@@ -91,6 +99,7 @@ py_library(
 py_test(
     name = "_primitive_set_test",
     srcs = ["_primitive_set_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":core",
         requirement("absl-py"),
@@ -104,6 +113,7 @@ py_test(
 py_library(
     name = "_primitive_wrapper",
     srcs = ["_primitive_wrapper.py"],
+    srcs_version = "PY3",
     deps = [
         ":_primitive_set",
         requirement("six"),
@@ -113,6 +123,7 @@ py_library(
 py_library(
     name = "cleartext_keyset_handle",
     srcs = ["cleartext_keyset_handle.py"],
+    srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
         "//tink:tink_python",
@@ -123,6 +134,7 @@ py_library(
 py_test(
     name = "cleartext_keyset_handle_test",
     srcs = ["cleartext_keyset_handle_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":cleartext_keyset_handle",
         ":core",

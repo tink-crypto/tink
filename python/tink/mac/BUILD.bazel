@@ -8,6 +8,7 @@ licenses(["notice"])
 py_library(
     name = "mac",
     srcs = ["__init__.py"],
+    srcs_version = "PY3",
     deps = [
         ":_mac",
         ":_mac_key_manager",
@@ -19,12 +20,14 @@ py_library(
 py_library(
     name = "_mac",
     srcs = ["_mac.py"],
+    srcs_version = "PY3",
     deps = [requirement("six")],
 )
 
 py_library(
-    name = "_mac_key_manager",
-    srcs = ["_mac_key_manager.py"],
+    name = "mac_key_manager",
+    srcs = ["mac_key_manager.py"],
+    srcs_version = "PY3",
     deps = [
         ":_mac",
         "//tink/cc/pybind:cc_key_manager",
@@ -35,8 +38,9 @@ py_library(
 )
 
 py_test(
-    name = "_mac_key_manager_test",
-    srcs = ["_mac_key_manager_test.py"],
+    name = "mac_key_manager_test",
+    srcs = ["mac_key_manager_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":mac",
         requirement("absl-py"),
@@ -51,7 +55,7 @@ py_test(
 py_library(
     name = "_mac_wrapper",
     srcs = ["_mac_wrapper.py"],
-    srcs_version = "PY2AND3",
+    srcs_version = "PY3",
     deps = [
         ":_mac",
         requirement("absl-py"),
@@ -61,8 +65,9 @@ py_library(
 )
 
 py_test(
-    name = "_mac_wrapper_test",
-    srcs = ["_mac_wrapper_test.py"],
+    name = "mac_wrapper_test",
+    srcs = ["mac_wrapper_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":mac",
         requirement("absl-py"),
@@ -75,7 +80,7 @@ py_test(
 py_library(
     name = "_mac_key_templates",
     srcs = ["_mac_key_templates.py"],
-    srcs_version = "PY2AND3",
+    srcs_version = "PY3",
     deps = [
         "//tink/proto:common_py_pb2",
         "//tink/proto:hmac_py_pb2",
@@ -84,8 +89,8 @@ py_library(
 )
 
 py_test(
-    name = "_mac_key_templates_test",
-    srcs = ["_mac_key_templates_test.py"],
+    name = "mac_key_templates_test",
+    srcs = ["mac_key_templates_test.py"],
     deps = [
         ":mac",
         requirement("absl-py"),

@@ -8,6 +8,7 @@ licenses(["notice"])
 py_library(
     name = "signature",
     srcs = ["__init__.py"],
+    srcs_version = "PY3",
     deps = [
         ":_public_key_sign",
         ":_public_key_sign_key_manager",
@@ -22,12 +23,14 @@ py_library(
 py_library(
     name = "_public_key_sign",
     srcs = ["_public_key_sign.py"],
+    srcs_version = "PY3",
     deps = [requirement("six")],
 )
 
 py_library(
     name = "_public_key_sign_key_manager",
     srcs = ["_public_key_sign_key_manager.py"],
+    srcs_version = "PY3",
     deps = [
         ":_public_key_sign",
         "//tink/cc/pybind:cc_key_manager",
@@ -40,6 +43,7 @@ py_library(
 py_test(
     name = "_public_key_sign_key_manager_test",
     srcs = ["_public_key_sign_key_manager_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":signature",
         requirement("absl-py"),
@@ -53,12 +57,14 @@ py_test(
 py_library(
     name = "_public_key_verify",
     srcs = ["_public_key_verify.py"],
+    srcs_version = "PY3",
     deps = [requirement("six")],
 )
 
 py_library(
     name = "_public_key_verify_key_manager",
     srcs = ["_public_key_verify_key_manager.py"],
+    srcs_version = "PY3",
     deps = [
         ":_public_key_verify",
         "//tink/cc/pybind:cc_key_manager",
@@ -71,6 +77,7 @@ py_library(
 py_test(
     name = "_public_key_verify_key_manager_test",
     srcs = ["_public_key_verify_key_manager_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":signature",
         requirement("absl-py"),
@@ -85,6 +92,7 @@ py_test(
 py_library(
     name = "_public_key_sign_wrapper",
     srcs = ["_public_key_sign_wrapper.py"],
+    srcs_version = "PY3",
     deps = [
         ":_public_key_sign",
         "//tink/core",
@@ -95,6 +103,7 @@ py_library(
 py_test(
     name = "_public_key_sign_wrapper_test",
     srcs = ["_public_key_sign_wrapper_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":signature",
         requirement("absl-py"),
@@ -107,7 +116,7 @@ py_test(
 py_library(
     name = "_public_key_verify_wrapper",
     srcs = ["_public_key_verify_wrapper.py"],
-    srcs_version = "PY2AND3",
+    srcs_version = "PY3",
     deps = [
         ":_public_key_verify",
         "//tink/core",
@@ -118,6 +127,7 @@ py_library(
 py_test(
     name = "_public_key_verify_wrapper_test",
     srcs = ["_public_key_verify_wrapper_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":signature",
         requirement("absl-py"),
@@ -130,6 +140,7 @@ py_test(
 py_library(
     name = "_signature_key_templates",
     srcs = ["_signature_key_templates.py"],
+    srcs_version = "PY3",
     deps = [
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
@@ -142,6 +153,7 @@ py_library(
 py_test(
     name = "_signature_key_templates_test",
     srcs = ["_signature_key_templates_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":signature",
         requirement("absl-py"),

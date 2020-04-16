@@ -8,6 +8,7 @@ licenses(["notice"])
 py_library(
     name = "helper",
     srcs = ["helper.py"],
+    srcs_version = "PY3",
     deps = [
         "//tink/proto:tink_py_pb2",
         "//tink/aead",
@@ -22,6 +23,7 @@ py_library(
 py_test(
     name = "helper_test",
     srcs = ["helper_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":helper",
         requirement("absl-py"),

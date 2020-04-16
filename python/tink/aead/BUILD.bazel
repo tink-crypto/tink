@@ -8,6 +8,7 @@ licenses(["notice"])
 py_library(
     name = "aead",
     srcs = ["__init__.py"],
+    srcs_version =  "PY3",
     deps = [
         ":_aead",
         ":_aead_key_manager",
@@ -20,6 +21,7 @@ py_library(
 py_library(
     name = "_aead",
     srcs = ["_aead.py"],
+    srcs_version =  "PY3",
     deps = [
         requirement("six"),
     ],
@@ -28,6 +30,7 @@ py_library(
 py_library(
     name = "_aead_key_manager",
     srcs = ["_aead_key_manager.py"],
+    srcs_version =  "PY3",
     deps = [
         ":_aead",
         "//tink/cc/pybind:aead",
@@ -41,6 +44,7 @@ py_library(
 py_test(
     name = "_aead_key_manager_test",
     srcs = ["_aead_key_manager_test.py"],
+    srcs_version =  "PY3",
     deps = [
         ":aead",
         requirement("absl-py"),
@@ -55,6 +59,7 @@ py_test(
 py_library(
     name = "_aead_wrapper",
     srcs = ["_aead_wrapper.py"],
+    srcs_version =  "PY3",
     deps = [
         ":_aead",
         requirement("absl-py"),
@@ -65,6 +70,7 @@ py_library(
 py_test(
     name = "_aead_wrapper_test",
     srcs = ["_aead_wrapper_test.py"],
+    srcs_version =  "PY3",
     deps = [
         ":aead",
         requirement("absl-py"),
@@ -77,7 +83,7 @@ py_test(
 py_library(
     name = "_aead_key_templates",
     srcs = ["_aead_key_templates.py"],
-    srcs_version = "PY2AND3",
+    srcs_version = "PY3",
     deps = [
         "//tink/proto:aes_ctr_hmac_aead_py_pb2",
         "//tink/proto:aes_eax_py_pb2",
@@ -90,6 +96,7 @@ py_library(
 py_test(
     name = "_aead_key_templates_test",
     srcs = ["_aead_key_templates_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":aead",
         requirement("absl-py"),
@@ -104,6 +111,7 @@ py_test(
 py_library(
     name = "_kms_envelope_aead",
     srcs = ["_kms_envelope_aead.py"],
+    srcs_version = "PY3",
     deps = [
         ":_aead",
         "//tink/core",
@@ -114,6 +122,7 @@ py_library(
 py_test(
     name = "_kms_envelope_aead_test",
     srcs = ["_kms_envelope_aead_test.py"],
+    srcs_version = "PY3",
     deps = [
         ":aead",
         requirement("absl-py"),
