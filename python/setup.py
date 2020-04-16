@@ -40,6 +40,16 @@ def _get_tink_version():
     else:
       return version_line.split(' = ')[-1].strip('\n \'"')
 
+# Check Bazel enviroment and set executable
+if spawn.find_executable('bazelisk'):
+  bazel = 'bazelisk'
+elif spawn.find_executable('bazel'):
+  bazel = 'bazel'
+else:
+  sys.stderr.write('Could not find bazel executable. Please install bazel to'
+                   'compile the Tink Python package.')
+  sys.exit(-1)
+
 # Find the Protocol Compiler.
 if 'PROTOC' in os.environ and os.path.exists(os.environ['PROTOC']):
   protoc = os.environ['PROTOC']
@@ -165,7 +175,7 @@ class BuildBazelExtension(build_ext.build_ext):
       os.makedirs(self.build_temp)
 
     bazel_argv = [
-        'bazel',
+        bazel,
         'build',
         ext.bazel_target,
         '--compilation_mode=' + ('dbg' if self.debug else 'opt'),
