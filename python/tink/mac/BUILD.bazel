@@ -25,8 +25,8 @@ py_library(
 )
 
 py_library(
-    name = "mac_key_manager",
-    srcs = ["mac_key_manager.py"],
+    name = "_mac_key_manager",
+    srcs = ["_mac_key_manager.py"],
     srcs_version = "PY3",
     deps = [
         ":_mac",
@@ -38,8 +38,8 @@ py_library(
 )
 
 py_test(
-    name = "mac_key_manager_test",
-    srcs = ["mac_key_manager_test.py"],
+    name = "_mac_key_manager_test",
+    srcs = ["_mac_key_manager_test.py"],
     srcs_version = "PY3",
     deps = [
         ":mac",
@@ -65,8 +65,8 @@ py_library(
 )
 
 py_test(
-    name = "mac_wrapper_test",
-    srcs = ["mac_wrapper_test.py"],
+    name = "_mac_wrapper_test",
+    srcs = ["_mac_wrapper_test.py"],
     srcs_version = "PY3",
     deps = [
         ":mac",
@@ -89,8 +89,8 @@ py_library(
 )
 
 py_test(
-    name = "mac_key_templates_test",
-    srcs = ["mac_key_templates_test.py"],
+    name = "_mac_key_templates_test",
+    srcs = ["_mac_key_templates_test.py"],
     deps = [
         ":mac",
         requirement("absl-py"),
