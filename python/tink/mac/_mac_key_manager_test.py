@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.python.tink.mac_key_manager."""
+"""Tests for tink.python.tink._mac_key_manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -24,9 +24,8 @@ from tink.proto import hmac_pb2
 from tink.proto import tink_pb2
 
 from tink import core
+from tink import mac
 from tink import tink_config
-from tink.mac import mac
-from tink.mac import mac_key_manager
 
 
 def setUpModule():
@@ -37,7 +36,7 @@ class MacKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(MacKeyManagerTest, self).setUp()
-    self.key_manager = mac_key_manager.from_cc_registry(
+    self.key_manager = mac.key_manager_from_cc_registry(
         'type.googleapis.com/google.crypto.tink.HmacKey')
 
   def new_hmac_key_template(self, hash_type, tag_size, key_size):

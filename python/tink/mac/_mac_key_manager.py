@@ -23,10 +23,10 @@ from typing import Text
 from tink import core
 from tink.cc.pybind import cc_key_manager
 from tink.cc.pybind import mac as cc_mac
-from tink.mac import mac
+from tink.mac import _mac
 
 
-class _MacCcToPyWrapper(mac.Mac):
+class _MacCcToPyWrapper(_mac.Mac):
   """Transforms cliffed C++ Mac primitive into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_mac.Mac):
@@ -41,7 +41,7 @@ class _MacCcToPyWrapper(mac.Mac):
     self._cc_mac.verify_mac(mac_value, data)
 
 
-def from_cc_registry(type_url: Text) -> core.KeyManager[mac.Mac]:
+def from_cc_registry(type_url: Text) -> core.KeyManager[_mac.Mac]:
   return core.KeyManagerCcToPyWrapper(
-      cc_key_manager.MacKeyManager.from_cc_registry(type_url), mac.Mac,
+      cc_key_manager.MacKeyManager.from_cc_registry(type_url), _mac.Mac,
       _MacCcToPyWrapper)

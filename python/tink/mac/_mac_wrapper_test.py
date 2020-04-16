@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.python.tink.mac_wrapper."""
+"""Tests for tink.python.tink._mac_wrapper."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -21,8 +21,7 @@ from absl.testing import absltest
 
 from tink.proto import tink_pb2
 from tink import core
-from tink.mac import mac
-from tink.mac import mac_wrapper
+from tink import mac
 from tink.testing import helper
 
 
@@ -39,7 +38,7 @@ class MacWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(mac.Mac)
     pset.set_primary(pset.add_primitive(primitive, key))
 
-    wrapped_mac = mac_wrapper.MacWrapper().wrap(pset)
+    wrapped_mac = mac.MacWrapper().wrap(pset)
     tag = wrapped_mac.compute_mac(b'data')
     # No exception raised, no return value.
     self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
@@ -49,7 +48,7 @@ class MacWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(mac.Mac)
     pset.set_primary(pset.add_primitive(primitive, key))
 
-    wrapped_mac = mac_wrapper.MacWrapper().wrap(pset)
+    wrapped_mac = mac.MacWrapper().wrap(pset)
     tag = wrapped_mac.compute_mac(b'data')
     # No exception raised, no return value.
     self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
@@ -63,7 +62,7 @@ class MacWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(mac.Mac)
     pset.add_primitive(primitive1, raw_key1)
     pset.set_primary(pset.add_primitive(primitive2, raw_key2))
-    wrapped_mac = mac_wrapper.MacWrapper().wrap(pset)
+    wrapped_mac = mac.MacWrapper().wrap(pset)
 
     self.assertIsNone(wrapped_mac.verify_mac(tag1, b'data1'))
     self.assertIsNone(wrapped_mac.verify_mac(tag2, b'data2'))
@@ -74,7 +73,7 @@ class MacWrapperTest(absltest.TestCase):
     primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
     pset = core.new_primitive_set(mac.Mac)
     pset.set_primary(pset.add_primitive(primitive, key))
-    wrapped_mac = mac_wrapper.MacWrapper().wrap(pset)
+    wrapped_mac = mac.MacWrapper().wrap(pset)
     tag = wrapped_mac.compute_mac(b'data')
 
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
@@ -90,7 +89,7 @@ class MacWrapperTest(absltest.TestCase):
     pset.add_primitive(primitive, key)
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
     pset.set_primary(pset.add_primitive(new_primitive, new_key))
-    wrapped_mac = mac_wrapper.MacWrapper().wrap(pset)
+    wrapped_mac = mac.MacWrapper().wrap(pset)
     self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
 
   def test_verify_unknown_mac_fails(self):
@@ -102,7 +101,7 @@ class MacWrapperTest(absltest.TestCase):
     pset.add_primitive(primitive, raw_key)
     new_entry = pset.add_primitive(new_primitive, new_key)
     pset.set_primary(new_entry)
-    wrapped_mac = mac_wrapper.MacWrapper().wrap(pset)
+    wrapped_mac = mac.MacWrapper().wrap(pset)
 
     with self.assertRaisesRegex(core.TinkError, 'invalid MAC'):
       wrapped_mac.verify_mac(unknown_tag, b'data')

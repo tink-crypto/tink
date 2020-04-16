@@ -25,10 +25,10 @@ from typing import Type
 
 from tink.proto import tink_pb2
 from tink import core
-from tink.mac import mac
+from tink.mac import _mac
 
 
-class _WrappedMac(mac.Mac):
+class _WrappedMac(_mac.Mac):
   """Implements Mac for a set of Mac primitives."""
 
   def __init__(self, pset: core.PrimitiveSet):
@@ -72,7 +72,7 @@ class _WrappedMac(mac.Mac):
     raise core.TinkError('invalid MAC')
 
 
-class MacWrapper(core.PrimitiveWrapper[mac.Mac]):
+class MacWrapper(core.PrimitiveWrapper[_mac.Mac]):
   """MacWrapper is the implementation of PrimitiveWrapper for the Mac primitive.
 
   The returned primitive works with a keyset (rather than a single key). To
@@ -83,8 +83,8 @@ class MacWrapper(core.PrimitiveWrapper[mac.Mac]):
   primitive tries all keys with tink_pb2.OutputPrefixType = tink_pb2.RAW.
   """
 
-  def wrap(self, pset: core.PrimitiveSet) -> mac.Mac:
+  def wrap(self, pset: core.PrimitiveSet) -> _mac.Mac:
     return _WrappedMac(pset)
 
-  def primitive_class(self) -> Type[mac.Mac]:
-    return mac.Mac
+  def primitive_class(self) -> Type[_mac.Mac]:
+    return _mac.Mac
