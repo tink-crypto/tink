@@ -107,6 +107,18 @@ cc_binary(
 )
 
 cc_binary(
+    name = "prf_set_cli_cc",
+    srcs = ["prf_set_cli.cc"],
+    deps = [
+        ":cli_util",
+        "@com_google_absl//absl/strings",
+        "@tink_cc",
+        "@tink_cc//prf:prf_set",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_binary(
     name = "hybrid_encrypt_cli_cc",
     srcs = ["hybrid_encrypt_cli.cc"],
     deps = [

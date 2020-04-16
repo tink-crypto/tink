@@ -17,10 +17,11 @@
 #include "tink/config/tink_config.h"
 
 #include "tink/config.h"
-#include "tink/key_manager.h"
-#include "tink/registry.h"
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/hybrid/hybrid_config.h"
+#include "tink/key_manager.h"
+#include "tink/prf/prf_config.h"
+#include "tink/registry.h"
 #include "tink/signature/signature_config.h"
 #include "tink/streamingaead/streaming_aead_config.h"
 #include "tink/util/status.h"
@@ -40,6 +41,8 @@ const RegistryConfig& TinkConfig::Latest() {
 // static
 util::Status TinkConfig::Register() {
   auto status = HybridConfig::Register();  // includes Mac & Aead
+  if (!status.ok()) return status;
+  status = PrfConfig::Register();
   if (!status.ok()) return status;
   status = SignatureConfig::Register();
   if (!status.ok()) return status;

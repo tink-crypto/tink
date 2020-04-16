@@ -34,7 +34,7 @@ public class PrfKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(HkdfPrfKeyManager.staticKeyType())
-        .setOutputPrefixType(OutputPrefixType.TINK)
+        .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
   }
 

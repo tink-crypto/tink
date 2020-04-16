@@ -31,7 +31,7 @@ public final class PrfKeyTemplatesTest {
   public void testHKDF_SHA256() throws Exception {
     assertThat(PrfKeyTemplates.HKDF_SHA256.getTypeUrl())
         .isEqualTo(new HkdfPrfKeyManager().getKeyType());
-    assertThat(PrfKeyTemplates.HKDF_SHA256.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(PrfKeyTemplates.HKDF_SHA256.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
   }
 
   @Test

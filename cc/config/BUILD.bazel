@@ -13,10 +13,11 @@ cc_library(
         "//:key_manager",
         "//daead:deterministic_aead_config",
         "//hybrid:hybrid_config",
+        "//prf:prf_config",
+        "//proto:config_cc_proto",
         "//signature:signature_config",
         "//streamingaead:streaming_aead_config",
         "//util:status",
-        "//proto:config_cc_proto",
         "@com_google_absl//absl/base:core_headers",
     ],
 )
