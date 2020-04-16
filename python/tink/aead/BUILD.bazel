@@ -13,6 +13,7 @@ py_library(
         ":_aead_key_manager",
         ":_aead_key_templates",
         ":_aead_wrapper",
+        ":_kms_envelope_aead",
     ],
 )
 
@@ -101,21 +102,20 @@ py_test(
 )
 
 py_library(
-    name = "kms_envelope_aead",
-    srcs = ["kms_envelope_aead.py"],
+    name = "_kms_envelope_aead",
+    srcs = ["_kms_envelope_aead.py"],
     deps = [
-        ":aead",
+        ":_aead",
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
 )
 
 py_test(
-    name = "kms_envelope_aead_test",
-    srcs = ["kms_envelope_aead_test.py"],
+    name = "_kms_envelope_aead_test",
+    srcs = ["_kms_envelope_aead_test.py"],
     deps = [
         ":aead",
-        ":kms_envelope_aead",
         requirement("absl-py"),
         "//tink:tink_config",
         "//tink:tink_python",

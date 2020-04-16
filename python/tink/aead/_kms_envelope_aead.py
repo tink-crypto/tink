@@ -21,14 +21,11 @@ from __future__ import print_function
 import struct
 
 from tink.proto import tink_pb2
-from tink import aead
 from tink import core
-
-# Defines in how many bytes the DEK length will be encoded.
-DEK_LEN_BYTES = 4
+from tink.aead import _aead
 
 
-class KmsEnvelopeAead(aead.Aead):
+class KmsEnvelopeAead(_aead.Aead):
   """Implements envelope encryption.
 
      Envelope encryption generates a data encryption key (DEK) which is used
@@ -44,14 +41,17 @@ class KmsEnvelopeAead(aead.Aead):
      * AEAD payload: variable length
   """
 
-  def __init__(self, key_template: tink_pb2.KeyTemplate, remote: aead.Aead):
+  # Defines in how many bytes the DEK length will be encoded.
+  DEK_LEN_BYTES = 4
+
+  def __init__(self, key_template: tink_pb2.KeyTemplate, remote: _aead.Aead):
     self.key_template = key_template
     self.remote_aead = remote
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
     # Get new key from template
     dek = core.Registry.new_key_data(self.key_template)
-    dek_aead = core.Registry.primitive(dek, aead.Aead)
+    dek_aead = core.Registry.primitive(dek, _aead.Aead)
 
     # Encrypt plaintext
     ciphertext = dek_aead.encrypt(plaintext, associated_data)
@@ -67,17 +67,18 @@ class KmsEnvelopeAead(aead.Aead):
     ct_len = len(ciphertext)
 
     # Recover DEK length
-    if ct_len < DEK_LEN_BYTES:
+    if ct_len < self.DEK_LEN_BYTES:
       raise core.TinkError
 
-    dek_len = struct.unpack('>I', ciphertext[0:DEK_LEN_BYTES])[0]
+    dek_len = struct.unpack('>I', ciphertext[0:self.DEK_LEN_BYTES])[0]
 
     # Basic check if DEK length can be valid.
-    if dek_len > (ct_len - DEK_LEN_BYTES) or dek_len < 0:
+    if dek_len > (ct_len - self.DEK_LEN_BYTES) or dek_len < 0:
       raise core.TinkError
 
     # Decrypt DEK with remote AEAD
-    encrypted_dek_bytes = ciphertext[DEK_LEN_BYTES:DEK_LEN_BYTES + dek_len]
+    encrypted_dek_bytes = ciphertext[self.DEK_LEN_BYTES:self.DEK_LEN_BYTES +
+                                     dek_len]
     dek_bytes = self.remote_aead.decrypt(encrypted_dek_bytes, b'')
 
     # Get AEAD primitive based on DEK
@@ -85,9 +86,9 @@ class KmsEnvelopeAead(aead.Aead):
     dek.type_url = self.key_template.type_url
     dek.value = dek_bytes
     dek.key_material_type = tink_pb2.KeyData.KeyMaterialType.SYMMETRIC
-    dek_aead = core.Registry.primitive(dek, aead.Aead)
+    dek_aead = core.Registry.primitive(dek, _aead.Aead)
 
     # Extract ciphertext payload and decrypt
-    ct_bytes = ciphertext[DEK_LEN_BYTES + dek_len:]
+    ct_bytes = ciphertext[self.DEK_LEN_BYTES + dek_len:]
 
     return dek_aead.decrypt(ct_bytes, associated_data)

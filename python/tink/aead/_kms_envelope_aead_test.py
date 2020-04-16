@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.python.tink.aead.kms_envelope_aead."""
+"""Tests for tink.python.tink.aead.aead."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -26,7 +26,6 @@ import tink
 from tink import aead
 from tink import core
 from tink import tink_config
-from tink.aead import kms_envelope_aead
 
 
 def setUpModule():
@@ -39,7 +38,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     key_template = aead.aead_key_templates.AES256_GCM
     keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
 
     plaintext = b'helloworld'
     ciphertext = env_aead.encrypt(plaintext, b'')
@@ -49,7 +48,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     key_template = aead.aead_key_templates.AES256_GCM
     keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
 
     plaintext = b'helloworld'
     ciphertext = env_aead.encrypt(plaintext, b'envelope_ad')
@@ -60,7 +59,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     key_template = aead.aead_key_templates.AES256_GCM
     keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
@@ -74,7 +73,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     key_template = aead.aead_key_templates.AES256_GCM
     keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
@@ -88,7 +87,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     key_template = aead.aead_key_templates.AES256_GCM
     keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
@@ -108,16 +107,16 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     key_template = aead.aead_key_templates.AES256_GCM
     keyset_handle = tink.new_keyset_handle(key_template)
     remote_aead = keyset_handle.primitive(aead.Aead)
-    env_aead = kms_envelope_aead.KmsEnvelopeAead(key_template, remote_aead)
+    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
 
     # Decrypt DEK
     dek_len = struct.unpack('>I',
-                            ciphertext[0:kms_envelope_aead.DEK_LEN_BYTES])[0]
+                            ciphertext[0:aead.KmsEnvelopeAead.DEK_LEN_BYTES])[0]
     encrypted_dek_bytes = bytes(ciphertext[
-        kms_envelope_aead.DEK_LEN_BYTES:kms_envelope_aead.DEK_LEN_BYTES +
+        aead.KmsEnvelopeAead.DEK_LEN_BYTES:aead.KmsEnvelopeAead.DEK_LEN_BYTES +
         dek_len])
     dek_bytes = remote_aead.decrypt(encrypted_dek_bytes, b'')
 

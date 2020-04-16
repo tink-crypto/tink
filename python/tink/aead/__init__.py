@@ -22,8 +22,10 @@ from tink.aead import _aead
 from tink.aead import _aead_key_manager
 from tink.aead import _aead_key_templates as aead_key_templates
 from tink.aead import _aead_wrapper
+from tink.aead import _kms_envelope_aead
 
 
 Aead = _aead.Aead
 AeadWrapper = _aead_wrapper.AeadWrapper
 key_manager_from_cc_registry = _aead_key_manager.from_cc_registry
+KmsEnvelopeAead = _kms_envelope_aead.KmsEnvelopeAead
