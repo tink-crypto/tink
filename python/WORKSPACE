@@ -16,7 +16,7 @@ load("@tink_py//:tink_py_deps.bzl", "tink_py_deps")
 tink_py_deps()
 
 load("@tink_py//:tink_py_deps_init.bzl", "tink_py_deps_init")
-tink_py_deps_init()
+tink_py_deps_init("tink_py")
 
 load("@tink_py_pip_deps//:requirements.bzl", "pip_install")
 pip_install()
