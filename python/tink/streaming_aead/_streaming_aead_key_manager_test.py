@@ -23,10 +23,8 @@ from tink.proto import aes_gcm_hkdf_streaming_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink import core
+from tink import streaming_aead
 from tink import tink_config
-from tink.streaming_aead import streaming_aead
-from tink.streaming_aead import streaming_aead_key_manager
-from tink.streaming_aead import streaming_aead_key_templates
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -47,9 +45,9 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(StreamingAeadKeyManagerTest, self).setUp()
-    self.key_manager_gcm = streaming_aead_key_manager.from_cc_registry(
+    self.key_manager_gcm = streaming_aead.key_manager_from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey')
-    self.key_manager_ctr = streaming_aead_key_manager.from_cc_registry(
+    self.key_manager_ctr = streaming_aead.key_manager_from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey')
 
   def test_primitive_class(self):
@@ -68,7 +66,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
 
   def test_new_key_data(self):
     # AES GCM HKDF
-    key_template = streaming_aead_key_templates.AES128_GCM_HKDF_4KB
+    key_template = streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB
     key_data = self.key_manager_gcm.new_key_data(key_template)
     self.assertEqual(key_data.type_url, self.key_manager_gcm.key_type())
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
@@ -81,7 +79,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.params.ciphertext_segment_size, 4096)
 
     # AES CTR HMAC
-    key_template = streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB
+    key_template = streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB
     key_data = self.key_manager_ctr.new_key_data(key_template)
     self.assertEqual(key_data.type_url, self.key_manager_ctr.key_type())
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
@@ -97,14 +95,14 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
 
   def test_invalid_params_throw_exception(self):
     # AES GCM HKDF
-    key_template = streaming_aead_key_templates.create_aes_gcm_hkdf_streaming_key_template(
+    key_template = streaming_aead.streaming_aead_key_templates.create_aes_gcm_hkdf_streaming_key_template(
         63, common_pb2.HashType.SHA1, 65, 55)
     with self.assertRaisesRegex(core.TinkError,
                                 'key_size must not be smaller than'):
       self.key_manager_gcm.new_key_data(key_template)
 
     # AES CTR HKDF
-    key_template = streaming_aead_key_templates.create_aes_ctr_hmac_streaming_key_template(
+    key_template = streaming_aead.streaming_aead_key_templates.create_aes_ctr_hmac_streaming_key_template(
         63, common_pb2.HashType.SHA1, 65, common_pb2.HashType.SHA256, 55, 2)
     with self.assertRaisesRegex(core.TinkError,
                                 'key_size must not be smaller than'):
@@ -113,7 +111,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
   def test_encrypt_decrypt(self):
     saead_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
-            streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB))
+            streaming_aead.streaming_aead_key_templates
+            .AES128_CTR_HMAC_SHA256_4KB))
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
@@ -131,7 +130,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
   def test_encrypt_decrypt_wrong_aad(self):
     saead_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
-            streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB))
+            streaming_aead.streaming_aead_key_templates
+            .AES128_CTR_HMAC_SHA256_4KB))
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 

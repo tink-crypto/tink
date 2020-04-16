@@ -20,9 +20,8 @@ import io
 
 from absl.testing import absltest
 
+from tink import streaming_aead
 from tink import tink_config
-from tink.streaming_aead import streaming_aead_key_manager
-from tink.streaming_aead import streaming_aead_key_templates
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -46,11 +45,11 @@ class StreamingAeadTest(absltest.TestCase):
 
   @staticmethod
   def get_primitive():
-    key_manager = streaming_aead_key_manager.from_cc_registry(
+    key_manager = streaming_aead.key_manager_from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey')
 
     # Generate the key data.
-    key_template = streaming_aead_key_templates.AES128_GCM_HKDF_4KB
+    key_template = streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB
     key_data = key_manager.new_key_data(key_template)
 
     return key_manager.primitive(key_data)

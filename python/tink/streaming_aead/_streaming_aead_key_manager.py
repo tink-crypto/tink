@@ -21,36 +21,36 @@ from typing import Text, BinaryIO
 
 from tink import core
 from tink.cc.pybind import cc_key_manager
-from tink.streaming_aead import decrypting_stream
-from tink.streaming_aead import encrypting_stream
-from tink.streaming_aead import streaming_aead
+from tink.streaming_aead import _decrypting_stream
+from tink.streaming_aead import _encrypting_stream
+from tink.streaming_aead import _streaming_aead
 
 
-class _StreamingAeadCcToPyWrapper(streaming_aead.StreamingAead):
+class _StreamingAeadCcToPyWrapper(_streaming_aead.StreamingAead):
   """Transforms cliffed C++ StreamingAead into a Python primitive."""
 
   def __init__(self, cc_streaming_aead):
-    self._streaming_aead = cc_streaming_aead
+    self._cc_streaming_aead = cc_streaming_aead
 
   @core.use_tink_errors
   def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
-    stream = encrypting_stream.EncryptingStream(self._streaming_aead,
-                                                ciphertext_destination,
-                                                associated_data)
+    stream = _encrypting_stream.EncryptingStream(self._cc_streaming_aead,
+                                                 ciphertext_destination,
+                                                 associated_data)
     return typing.cast(BinaryIO, stream)
 
   @core.use_tink_errors
   def new_decrypting_stream(self, ciphertext_source: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
-    stream = decrypting_stream.DecryptingStream(self._streaming_aead,
-                                                ciphertext_source,
-                                                associated_data)
+    stream = _decrypting_stream.DecryptingStream(self._cc_streaming_aead,
+                                                 ciphertext_source,
+                                                 associated_data)
     return typing.cast(BinaryIO, stream)
 
 
 def from_cc_registry(
-    type_url: Text) -> core.KeyManager[streaming_aead.StreamingAead]:
+    type_url: Text) -> core.KeyManager[_streaming_aead.StreamingAead]:
   return core.KeyManagerCcToPyWrapper(
       cc_key_manager.StreamingAeadKeyManager.from_cc_registry(type_url),
-      streaming_aead.StreamingAead, _StreamingAeadCcToPyWrapper)
+      _streaming_aead.StreamingAead, _StreamingAeadCcToPyWrapper)

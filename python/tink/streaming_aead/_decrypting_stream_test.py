@@ -21,8 +21,8 @@ from absl.testing import absltest
 from absl.testing.absltest import mock
 
 from tink import core
+from tink import streaming_aead
 from tink.cc.pybind import status as error
-from tink.streaming_aead import decrypting_stream
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -55,7 +55,7 @@ def fake_get_input_stream_adapter(self, cc_primitive, aad, source):
 
 
 def get_decrypting_stream(ciphertext_source, aad):
-  return decrypting_stream.DecryptingStream(None, ciphertext_source, aad)
+  return streaming_aead.DecryptingStream(None, ciphertext_source, aad)
 
 
 class DecryptingStreamTest(absltest.TestCase):
@@ -66,7 +66,7 @@ class DecryptingStreamTest(absltest.TestCase):
     # avoid the need for a Streaming AEAD primitive.
     self.addCleanup(mock.patch.stopall)
     mock.patch.object(
-        decrypting_stream.DecryptingStream,
+        streaming_aead.DecryptingStream,
         '_get_input_stream_adapter',
         new=fake_get_input_stream_adapter).start()
 

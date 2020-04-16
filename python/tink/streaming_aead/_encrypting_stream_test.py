@@ -22,7 +22,7 @@ import sys
 from absl.testing import absltest
 from absl.testing.absltest import mock
 
-from tink.streaming_aead import encrypting_stream
+from tink import streaming_aead
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -43,7 +43,7 @@ class TestBytesObject(io.BytesIO):
 
 
 def get_encrypting_stream(ciphertext_destination, aad):
-  return encrypting_stream.EncryptingStream(None, ciphertext_destination, aad)
+  return streaming_aead.EncryptingStream(None, ciphertext_destination, aad)
 
 
 class EncryptingStreamTest(absltest.TestCase):
@@ -54,7 +54,7 @@ class EncryptingStreamTest(absltest.TestCase):
     # avoid the need for a Streaming AEAD primitive.
     self.addCleanup(mock.patch.stopall)
     mock.patch.object(
-        encrypting_stream.EncryptingStream,
+        streaming_aead.EncryptingStream,
         '_get_output_stream_adapter',
         new=fake_get_output_stream_adapter).start()
 
