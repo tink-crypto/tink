@@ -24,20 +24,19 @@ from tink.proto import aes_gcm_pb2
 from tink.proto import tink_pb2
 from tink import aead
 from tink import core
-from tink import tink_config
 
 
 def setUpModule():
-  tink_config.register()
+  aead.register()
 
 
 class AeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(AeadKeyManagerTest, self).setUp()
-    self.key_manager_eax = aead.key_manager_from_cc_registry(
+    self.key_manager_eax = core.Registry.key_manager(
         'type.googleapis.com/google.crypto.tink.AesEaxKey')
-    self.key_manager_gcm = aead.key_manager_from_cc_registry(
+    self.key_manager_gcm = core.Registry.key_manager(
         'type.googleapis.com/google.crypto.tink.AesGcmKey')
 
   def new_aes_eax_key_template(self, iv_size, key_size):

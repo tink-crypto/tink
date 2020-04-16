@@ -21,11 +21,9 @@ from __future__ import print_function
 from tink.aead import _aead
 from tink.aead import _aead_key_manager
 from tink.aead import _aead_key_templates as aead_key_templates
-from tink.aead import _aead_wrapper
 from tink.aead import _kms_envelope_aead
 
 
 Aead = _aead.Aead
-AeadWrapper = _aead_wrapper.AeadWrapper
-key_manager_from_cc_registry = _aead_key_manager.from_cc_registry
+register = _aead_key_manager.register
 KmsEnvelopeAead = _kms_envelope_aead.KmsEnvelopeAead

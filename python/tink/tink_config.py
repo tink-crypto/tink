@@ -28,6 +28,7 @@ from tink.cc.pybind import cc_tink_config
 
 
 def register():
+  aead.register()
   cc_tink_config.register()
   _register_key_managers()
   _register_primitive_wrappers()
@@ -35,13 +36,6 @@ def register():
 
 def _register_key_managers():
   """Registers all currently known key managers in the Python registry."""
-
-  for key_type_identifier in ('AesCtrHmacAeadKey', 'AesGcmKey', 'AesGcmSivKey',
-                              'AesEaxKey', 'XChaCha20Poly1305Key', 'KmsAeadKey',
-                              'KmsEnvelopeAeadKey',):
-    _register_cc_key_manager(
-        aead.key_manager_from_cc_registry, key_type_identifier)
-
   for key_type_identifier in ('AesSivKey',):
     _register_cc_key_manager(daead.key_manager_from_cc_registry,
                              key_type_identifier)
@@ -83,7 +77,6 @@ def _register_cc_key_manager(key_manager_from_cc_registry,
 def _register_primitive_wrappers():
   """Registers all primitive wrappers."""
   register_primitive_wrapper = core.Registry.register_primitive_wrapper
-  register_primitive_wrapper(aead.AeadWrapper())
   register_primitive_wrapper(daead.DeterministicAeadWrapper())
   register_primitive_wrapper(hybrid.HybridDecryptWrapper())
   register_primitive_wrapper(hybrid.HybridEncryptWrapper())
