@@ -1,0 +1,47 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+py_binary(
+    name = "envelope",
+    srcs = ["envelope.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/integration/gcpkms",
+    ],
+)
+
+sh_test(
+    name = "envelope_test",
+    size = "small",
+    srcs = ["envelope_test.sh"],
+    args = [
+        "$(rootpath :envelope)",
+        "$(rootpath @tink_base//testdata:credential.json)",
+    ],
+    data = [
+        ":envelope",
+        "@tink_base//testdata:credential.json"
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "envelope_test_package",
+    size = "small",
+    srcs = ["envelope_test.sh"],
+    args = [
+        "'python3 $(rootpath :envelope.py)'",
+        "$(rootpath @tink_base//testdata:credential.json)",
+    ],
+    data = [
+        ":envelope.py",
+        "@tink_base//testdata:credential.json"
+    ],
+)

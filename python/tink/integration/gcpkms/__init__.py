@@ -20,5 +20,5 @@ from __future__ import print_function
 from tink.integration.gcpkms import gcp_kms_aead
 from tink.integration.gcpkms import gcp_kms_client
 
-GcpKmsAead = gcp_kms_client.GcpKmsAead
+GcpKmsAead = gcp_kms_aead.GcpKmsAead
 GcpKmsClient = gcp_kms_client.GcpKmsClient

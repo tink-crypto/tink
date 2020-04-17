@@ -4,6 +4,16 @@ load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 package(default_visibility = ["//visibility:public"])
 
 py_library(
+    name = "gcpkms",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":gcp_kms_aead",
+        ":gcp_kms_client",
+    ],
+)
+
+py_library(
     name = "gcp_kms_client",
     srcs = ["gcp_kms_client.py"],
     srcs_version =  "PY3",
