@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.python.tink.cleartext_keyset_handle."""
+"""Tests for tink.python.tink.core.cleartext_keyset_handle."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,10 +22,10 @@ import io
 from absl.testing import absltest
 
 import tink
-from tink import cleartext_keyset_handle
 from tink import core
 from tink import mac
 from tink import tink_config
+from tink.core import cleartext_keyset_handle
 
 
 def setUpModule():

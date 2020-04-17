@@ -17,8 +17,6 @@ WARNING
 
 Reading or writing cleartext keysets is a bad practice, usage of this API
 should be restricted. Users can read encrypted keysets using KeysetHandle.read.
-
-DEPRECATED. Use tink.cleartext_keyset_handle instead.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -29,7 +27,24 @@ from tink.proto import tink_pb2
 import tink
 
 
-# DEPRECATED. Use tink.cleartext_keyset_handle instead.
+def from_keyset(keyset: tink_pb2.Keyset) -> tink.KeysetHandle:
+  """Create a KeysetHandle from a keyset."""
+  return tink.KeysetHandle._create(keyset)  # pylint: disable=protected-access
+
+
+def read(keyset_reader: tink.KeysetReader) -> tink.KeysetHandle:
+  """Create a KeysetHandle from a keyset_reader."""
+  keyset = keyset_reader.read()
+  return tink.KeysetHandle._create(keyset)  # pylint: disable=protected-access
+
+
+def write(keyset_writer: tink.KeysetWriter,
+          keyset_handle: tink.KeysetHandle) -> None:
+  """Serializes and writes the keyset."""
+  keyset_writer.write(keyset_handle._keyset)  # pylint: disable=protected-access
+
+
+# DEPRECATED. Use static functions instead.
 class CleartextKeysetHandle(tink.KeysetHandle):
   """CleartextKeysetHandle creates KeysetHandle from a Tink Keyset."""
 
