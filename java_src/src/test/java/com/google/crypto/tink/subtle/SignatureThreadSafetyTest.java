@@ -176,6 +176,13 @@ public class SignatureThreadSafetyTest {
       int numberOfThreads,
       int numberOfSignatures)
       throws Exception {
+    // TODO(b/148134669): Remove the following line.
+    // There is a potential (but unlikely) race in java.security.Provider. In some cases, we only
+    // initalize some of the java.security.Providers the first time we sign. If we do this
+    // multithreaded, there is a potential for a race. To get around this, we first sign once, to
+    // initialize everything.
+    signer.sign(message);
+
     ExceptionHandler exceptionHandler = new ExceptionHandler();
     Thread[] thread = new Thread[numberOfThreads];
     ArrayList<HashSet<String>> signatures = new ArrayList<HashSet<String>>();
@@ -192,13 +199,6 @@ public class SignatureThreadSafetyTest {
       thread[i].join();
     }
     exceptionHandler.check();
-
-    // TODO(b/148134669): Remove the following line.
-    // There is a potential (but unlikely) race in java.security.Provider. In some cases, we only
-    // initalize some of the java.security.Providers the first time we sign. If we do this
-    // multithreaded, there is a potential for a race. To get around this, we first sign once, to
-    // initialize everything.
-    signer.sign(message);
 
     if (isDeterministic) {
       String expectedSignature = TestUtil.hexEncode(signer.sign(message));
