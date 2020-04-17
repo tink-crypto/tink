@@ -23,18 +23,17 @@ from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
 from tink import core
 from tink import daead
-from tink import tink_config
 
 
 def setUpModule():
-  tink_config.register()
+  daead.register()
 
 
 class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(DeterministicAeadKeyManagerTest, self).setUp()
-    self.key_manager = daead.key_manager_from_cc_registry(
+    self.key_manager = core.Registry.key_manager(
         'type.googleapis.com/google.crypto.tink.AesSivKey')
 
   def test_primitive_class(self):

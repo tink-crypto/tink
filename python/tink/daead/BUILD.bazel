@@ -13,7 +13,6 @@ py_library(
         ":_deterministic_aead",
         ":_deterministic_aead_key_manager",
         ":_deterministic_aead_key_templates",
-        ":_deterministic_aead_wrapper",
     ],
 )
 
@@ -30,6 +29,7 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_deterministic_aead",
+        ":_deterministic_aead_wrapper",
         "//tink/cc/pybind:cc_key_manager",
         "//tink/core",
         "//tink/proto:tink_py_pb2",
@@ -43,7 +43,6 @@ py_test(
     deps = [
         ":daead",
         requirement("absl-py"),
-        "//tink:tink_config",
         "//tink/core",
         "//tink/proto:aes_siv_py_pb2",
         "//tink/proto:tink_py_pb2",

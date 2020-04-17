@@ -19,11 +19,11 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from typing import Text
-
 from tink import core
 from tink.cc.pybind import cc_key_manager
+from tink.cc.pybind import cc_tink_config
 from tink.daead import _deterministic_aead
+from tink.daead import _deterministic_aead_wrapper
 
 
 class _DeterministicAeadCcToPyWrapper(_deterministic_aead.DeterministicAead):
@@ -45,9 +45,16 @@ class _DeterministicAeadCcToPyWrapper(_deterministic_aead.DeterministicAead):
         ciphertext, associated_data)
 
 
-def from_cc_registry(
-    type_url: Text
-) -> core.KeyManager[_deterministic_aead.DeterministicAead]:
-  return core.KeyManagerCcToPyWrapper(
+def register():
+  """Registers all Hybrid key managers and wrapper in the Python Registry."""
+  cc_tink_config.register()
+
+  type_url = 'type.googleapis.com/google.crypto.tink.AesSivKey'
+  key_manager = core.KeyManagerCcToPyWrapper(
       cc_key_manager.DeterministicAeadKeyManager.from_cc_registry(type_url),
       _deterministic_aead.DeterministicAead, _DeterministicAeadCcToPyWrapper)
+  core.Registry.register_key_manager(key_manager, new_key_allowed=True)
+  core.Registry.register_primitive_wrapper(
+      _deterministic_aead_wrapper.DeterministicAeadWrapper())
+
+
