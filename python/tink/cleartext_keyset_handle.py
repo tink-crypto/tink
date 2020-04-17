@@ -17,8 +17,6 @@ WARNING
 
 Reading or writing cleartext keysets is a bad practice, usage of this API
 should be restricted. Users can read encrypted keysets using KeysetHandle.read.
-
-DEPRECATED. Use tink.cleartext_keyset_handle instead.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -29,20 +27,18 @@ from tink.proto import tink_pb2
 import tink
 
 
-# DEPRECATED. Use tink.cleartext_keyset_handle instead.
-class CleartextKeysetHandle(tink.KeysetHandle):
-  """CleartextKeysetHandle creates KeysetHandle from a Tink Keyset."""
+def from_keyset(keyset: tink_pb2.Keyset) -> tink.KeysetHandle:
+  """Create a KeysetHandle from a keyset."""
+  return tink.KeysetHandle._create(keyset)  # pylint: disable=protected-access
 
-  def __new__(cls, keyset: tink_pb2.Keyset):
-    return cls._create(keyset)
 
-  @classmethod
-  def read(cls,
-           keyset_reader: tink.KeysetReader) -> tink.KeysetHandle:
-    """Create a KeysetHandle from a keyset read with keyset_reader."""
-    keyset = keyset_reader.read()
-    return cls._create(keyset)
+def read(keyset_reader: tink.KeysetReader) -> tink.KeysetHandle:
+  """Create a KeysetHandle from a keyset_reader."""
+  keyset = keyset_reader.read()
+  return tink.KeysetHandle._create(keyset)  # pylint: disable=protected-access
 
-  def write(self, keyset_writer: tink.KeysetWriter) -> None:
-    """Serializes and writes the keyset."""
-    keyset_writer.write(self._keyset)
+
+def write(keyset_writer: tink.KeysetWriter,
+          keyset_handle: tink.KeysetHandle) -> None:
+  """Serializes and writes the keyset."""
+  keyset_writer.write(keyset_handle._keyset)  # pylint: disable=protected-access
