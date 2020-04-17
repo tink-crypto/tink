@@ -31,6 +31,7 @@ py_library(
         ":_deterministic_aead",
         ":_deterministic_aead_wrapper",
         "//tink/cc/pybind:cc_key_manager",
+        "//tink/cc/pybind:cc_tink_config",
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
