@@ -14,7 +14,7 @@ py_binary(
     deps = [
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
-        "@tink_py//tink/core:cleartext_keyset_handle",
+        "@tink_py//tink:cleartext_keyset_handle",
     ],
 )
 

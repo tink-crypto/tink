@@ -36,7 +36,7 @@ from absl import app
 from absl import flags
 from absl import logging
 import tink
-from tink.core import cleartext_keyset_handle
+from tink import cleartext_keyset_handle
 
 FLAGS = flags.FLAGS
 
