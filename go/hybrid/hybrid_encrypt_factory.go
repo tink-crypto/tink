@@ -44,7 +44,6 @@ type wrappedHybridEncrypt struct {
 }
 
 func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncrypt, error) {
-	fmt.Println("type is:", ps.Primary.Primitive)
 	if _, ok := (ps.Primary.Primitive).(tink.HybridEncrypt); !ok {
 		return nil, fmt.Errorf("hybrid_factory: not a HybridEncrypt primitive")
 	}
