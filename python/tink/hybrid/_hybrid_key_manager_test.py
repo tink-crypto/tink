@@ -26,20 +26,19 @@ from tink.proto import tink_pb2
 from tink import aead
 from tink import core
 from tink import hybrid
-from tink import tink_config
 
 
 def setUpModule():
-  tink_config.register()
+  hybrid.register()
 
 
 def _hybrid_decrypt_key_manager():
-  return hybrid.decrypt_key_manager_from_cc_registry(
+  return core.Registry.key_manager(
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey')
 
 
 def _hybrid_encrypt_key_manager():
-  return hybrid.encrypt_key_manager_from_cc_registry(
+  return core.Registry.key_manager(
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
 
 

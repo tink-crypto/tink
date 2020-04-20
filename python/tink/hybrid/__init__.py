@@ -19,17 +19,11 @@ from __future__ import division
 from __future__ import print_function
 
 from tink.hybrid import _hybrid_decrypt
-from tink.hybrid import _hybrid_decrypt_key_manager
-from tink.hybrid import _hybrid_decrypt_wrapper
 from tink.hybrid import _hybrid_encrypt
-from tink.hybrid import _hybrid_encrypt_key_manager
-from tink.hybrid import _hybrid_encrypt_wrapper
+from tink.hybrid import _hybrid_key_manager
 from tink.hybrid import _hybrid_key_templates as hybrid_key_templates
 
 
 HybridDecrypt = _hybrid_decrypt.HybridDecrypt
 HybridEncrypt = _hybrid_encrypt.HybridEncrypt
-HybridDecryptWrapper = _hybrid_decrypt_wrapper.HybridDecryptWrapper
-HybridEncryptWrapper = _hybrid_encrypt_wrapper.HybridEncryptWrapper
-encrypt_key_manager_from_cc_registry = _hybrid_encrypt_key_manager.from_cc_registry
-decrypt_key_manager_from_cc_registry = _hybrid_decrypt_key_manager.from_cc_registry
+register = _hybrid_key_manager.register
