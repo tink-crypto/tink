@@ -20,6 +20,7 @@ from tink.proto import tink_pb2
 from tink import aead
 from tink import core
 from tink import mac
+from tink.mac import _mac_wrapper
 from tink.testing import helper
 
 
@@ -203,7 +204,7 @@ class RegistryTest(absltest.TestCase):
       self.reg.public_key_data(key_data)
 
   def test_wrap_success(self):
-    self.reg.register_primitive_wrapper(mac.MacWrapper())
+    self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
     mac1 = helper.FakeMac('FakeMac1')
     mac2 = helper.FakeMac('FakeMac2')
     wrapped_mac = self.reg.wrap(_mac_set([mac1, mac2]))
@@ -218,7 +219,7 @@ class RegistryTest(absltest.TestCase):
       self.reg.wrap(_mac_set([helper.FakeMac()]))
 
   def test_primitive_wrapper_reset(self):
-    self.reg.register_primitive_wrapper(mac.MacWrapper())
+    self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
     self.reg.reset()
     with self.assertRaisesRegex(
         core.TinkError,
@@ -226,11 +227,11 @@ class RegistryTest(absltest.TestCase):
       self.reg.wrap(_mac_set([helper.FakeMac()]))
 
   def test_register_same_primitive_wrapper_twice(self):
-    self.reg.register_primitive_wrapper(mac.MacWrapper())
-    self.reg.register_primitive_wrapper(mac.MacWrapper())
+    self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
+    self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
 
   def test_register_different_primitive_wrappers_twice_fails(self):
-    self.reg.register_primitive_wrapper(mac.MacWrapper())
+    self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
     with self.assertRaisesRegex(
         core.TinkError,
         'A wrapper for primitive Mac has already been added.'):

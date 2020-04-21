@@ -59,6 +59,7 @@ py_test(
         requirement("absl-py"),
         "//tink/aead",
         "//tink/mac",
+        "//tink/mac:_mac_wrapper",
         "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
     ],

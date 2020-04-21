@@ -18,12 +18,12 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from typing import Text
-
 from tink import core
 from tink.cc.pybind import cc_key_manager
+from tink.cc.pybind import cc_tink_config
 from tink.cc.pybind import mac as cc_mac
 from tink.mac import _mac
+from tink.mac import _mac_wrapper
 
 
 class _MacCcToPyWrapper(_mac.Mac):
@@ -41,7 +41,13 @@ class _MacCcToPyWrapper(_mac.Mac):
     self._cc_mac.verify_mac(mac_value, data)
 
 
-def from_cc_registry(type_url: Text) -> core.KeyManager[_mac.Mac]:
-  return core.KeyManagerCcToPyWrapper(
-      cc_key_manager.MacKeyManager.from_cc_registry(type_url), _mac.Mac,
-      _MacCcToPyWrapper)
+def register():
+  cc_tink_config.register()
+
+  for key_type_identifier in ('HmacKey', 'AesCmacKey',):
+    type_url = 'type.googleapis.com/google.crypto.tink.' + key_type_identifier
+    key_manager = core.KeyManagerCcToPyWrapper(
+        cc_key_manager.MacKeyManager.from_cc_registry(type_url), _mac.Mac,
+        _MacCcToPyWrapper)
+    core.Registry.register_key_manager(key_manager, new_key_allowed=True)
+  core.Registry.register_primitive_wrapper(_mac_wrapper.MacWrapper())

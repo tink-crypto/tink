@@ -31,6 +31,7 @@ def register():
   aead.register()
   daead.register()
   hybrid.register()
+  mac.register()
   cc_tink_config.register()
   _register_key_managers()
   _register_primitive_wrappers()
@@ -38,10 +39,6 @@ def register():
 
 def _register_key_managers():
   """Registers all currently known key managers in the Python registry."""
-  for key_type_identifier in ('HmacKey', 'AesCmacKey',):
-    _register_cc_key_manager(mac.key_manager_from_cc_registry,
-                             key_type_identifier)
-
   for key_type_identifier in ('EcdsaPrivateKey', 'Ed25519PrivateKey',
                               'RsaSsaPssPrivateKey', 'RsaSsaPkcs1PrivateKey',):
     _register_cc_key_manager(
@@ -67,6 +64,5 @@ def _register_cc_key_manager(key_manager_from_cc_registry,
 def _register_primitive_wrappers():
   """Registers all primitive wrappers."""
   register_primitive_wrapper = core.Registry.register_primitive_wrapper
-  register_primitive_wrapper(mac.MacWrapper())
   register_primitive_wrapper(signature.PublicKeySignWrapper())
   register_primitive_wrapper(signature.PublicKeyVerifyWrapper())

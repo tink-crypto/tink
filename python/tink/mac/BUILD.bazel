@@ -13,7 +13,6 @@ py_library(
         ":_mac",
         ":_mac_key_manager",
         ":_mac_key_templates",
-        ":_mac_wrapper",
     ],
 )
 
@@ -30,7 +29,9 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_mac",
+        ":_mac_wrapper",
         "//tink/cc/pybind:cc_key_manager",
+        "//tink/cc/pybind:cc_tink_config",
         "//tink/cc/pybind:mac",
         "//tink/core",
         "//tink/proto:tink_py_pb2",
@@ -44,7 +45,6 @@ py_test(
     deps = [
         ":mac",
         requirement("absl-py"),
-        "//tink:tink_config",
         "//tink/core",
         "//tink/proto:common_py_pb2",
         "//tink/proto:hmac_py_pb2",
