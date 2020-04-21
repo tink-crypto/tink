@@ -287,11 +287,6 @@ go_repository(
     tag = "v1.0.0",
 )
 go_repository(
-    name = "com_github_sirupsen_logrus",
-    importpath = "github.com/sirupsen/logrus",
-    tag = "v1.2.0"
-)
-go_repository(
     name = "com_github_thalesignite_crypto11",
     importpath = "github.com/ThalesIgnite/crypto11",
     tag = "v1.2.1",
