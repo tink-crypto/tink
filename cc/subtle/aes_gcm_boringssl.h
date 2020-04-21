@@ -45,8 +45,8 @@ class AesGcmBoringSsl : public Aead {
   virtual ~AesGcmBoringSsl() {}
 
  private:
-  static const int IV_SIZE_IN_BYTES = 12;
-  static const int TAG_SIZE_IN_BYTES = 16;
+  static constexpr int IV_SIZE_IN_BYTES = 12;
+  static constexpr int TAG_SIZE_IN_BYTES = 16;
 
   AesGcmBoringSsl() {}
   crypto::tink::util::Status Init(absl::string_view key_value);

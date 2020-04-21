@@ -467,7 +467,7 @@ class ExampleKeyTypeManagerWithoutFactory
   }
 
  private:
-  static const int kVersion = 0;
+  static constexpr int kVersion = 0;
   const std::string key_type_ =
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };

@@ -60,11 +60,11 @@ util::Status ReadFromStream(InputStream* input_stream, std::string* output);
 class DummyStreamSegmentEncrypter : public StreamSegmentEncrypter {
  public:
   // Size of the per-segment tag added upon encryption.
-  static const int kSegmentTagSize = sizeof(int64_t) + 1;
+  static constexpr int kSegmentTagSize = sizeof(int64_t) + 1;
 
   // Bytes for marking whether a given segment is the last one.
-  static const char kLastSegment = 'l';
-  static const char kNotLastSegment = 'n';
+  static constexpr char kLastSegment = 'l';
+  static constexpr char kNotLastSegment = 'n';
 
   DummyStreamSegmentEncrypter(int pt_segment_size,
                               int header_size,

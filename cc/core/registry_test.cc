@@ -806,7 +806,7 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
   }
 
  private:
-  static const int kVersion = 0;
+  static constexpr int kVersion = 0;
   const std::string kKeyType =
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
 };
@@ -1503,7 +1503,7 @@ class DelegatingKeyTypeManager
  private:
   RegistryImpl* registry_;
 
-  static const int kVersion = 0;
+  static constexpr int kVersion = 0;
   const std::string kKeyType =
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 };

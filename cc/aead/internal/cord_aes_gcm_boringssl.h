@@ -43,8 +43,8 @@ class CordAesGcmBoringSsl : public CordAead {
   ~CordAesGcmBoringSsl() override {}
 
  private:
-  static const int kIvSizeInBytes = 12;
-  static const int kTagSizeInBytes = 16;
+  static constexpr int kIvSizeInBytes = 12;
+  static constexpr int kTagSizeInBytes = 16;
 
   CordAesGcmBoringSsl() {}
   crypto::tink::util::Status Init(crypto::tink::util::SecretData key_value);

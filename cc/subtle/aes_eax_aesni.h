@@ -58,8 +58,8 @@ class AesEaxAesni : public Aead {
  protected:
   // The tag size is fixed for this implementation.
   // Using the full 128-bits of the tag allows an efficient verification.
-  static const size_t kTagSize = 16;
-  static const size_t kBlockSize = 16;
+  static constexpr size_t kTagSize = 16;
+  static constexpr size_t kBlockSize = 16;
 
   virtual bool RawEncrypt(absl::string_view nonce, absl::string_view in,
                           absl::string_view additional_data,

@@ -103,7 +103,7 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
   }
 
  private:
-  static const int kVersion = 0;
+  static constexpr int kVersion = 0;
   const std::string kKeyType = "myKeyType";
 };
 
@@ -175,7 +175,7 @@ class ExampleKeyTypeManagerWithoutFactory
   }
 
  private:
-  static const int kVersion = 0;
+  static constexpr int kVersion = 0;
   const std::string key_type_ = "bla";
 };
 
