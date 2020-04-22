@@ -21,29 +21,12 @@ from __future__ import print_function
 from tink import _keyset_handle
 from tink import _keyset_reader
 from tink import _keyset_writer
-
-from tink import aead
 from tink import core
-from tink import daead
-from tink import hybrid
-from tink import mac
-from tink import signature
-from tink import tink_config
-
-
-Aead = aead.Aead
-DeterministicAead = daead.DeterministicAead
-HybridDecrypt = hybrid.HybridDecrypt
-HybridEncrypt = hybrid.HybridEncrypt
-Mac = mac.Mac
-PublicKeySign = signature.PublicKeySign
-PublicKeyVerify = signature.PublicKeyVerify
 
 new_keyset_handle = _keyset_handle.new_keyset_handle
 read_keyset_handle = _keyset_handle.read_keyset_handle
 read_no_secret_keyset_handle = _keyset_handle.read_no_secret_keyset_handle
 KeysetHandle = _keyset_handle.KeysetHandle
-
 
 KeysetReader = _keyset_reader.KeysetReader
 JsonKeysetReader = _keyset_reader.JsonKeysetReader

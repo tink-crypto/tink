@@ -14,8 +14,9 @@ py_binary(
     srcs_version = "PY3",
     deps = [
         requirement("absl-py"),
-        "@tink_py//tink:tink_python",
         "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/signature",
     ],
 )
 
@@ -28,8 +29,9 @@ py_binary(
     srcs_version = "PY3",
     deps = [
         requirement("absl-py"),
-        "@tink_py//tink:tink_python",
         "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/signature",
     ],
 )
 
@@ -42,7 +44,8 @@ py_binary(
     srcs_version = "PY3",
     deps = [
         requirement("absl-py"),
-        "@tink_py//tink:tink_python",
         "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/mac",
     ],
 )

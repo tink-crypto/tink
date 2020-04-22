@@ -33,6 +33,7 @@ from absl import logging
 import tink
 
 from tink import cleartext_keyset_handle
+from tink import mac
 
 FLAGS = flags.FLAGS
 
@@ -76,7 +77,7 @@ def main(argv):
 
   # Initialise Tink
   try:
-    tink.tink_config.register()
+    mac.register()
   except tink.TinkError as e:
     logging.error('Error initialising Tink: %s', e)
     return 1
@@ -90,7 +91,7 @@ def main(argv):
 
   # Get the primitive
   try:
-    mac = keyset_handle.primitive(tink.Mac)
+    mac_primitive = keyset_handle.primitive(mac.Mac)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
     return 1
@@ -102,7 +103,7 @@ def main(argv):
   # Compute the output
   if operation.lower() == 'compute':
     try:
-      tag = mac.compute_mac(input_data)
+      tag = mac_primitive.compute_mac(input_data)
     except tink.TinkError as e:
       logging.error('Error computing MAC on the input: %s', e)
 
@@ -116,7 +117,7 @@ def main(argv):
       tag = mac_file.read()
     # Check for valid MAC
     try:
-      mac.verify_mac(tag, input_data)
+      mac_primitive.verify_mac(tag, input_data)
       result = b'valid'
     except tink.TinkError as e:
       logging.error('Error verifying MAC of the input: %s', e)

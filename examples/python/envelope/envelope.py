@@ -48,7 +48,7 @@ def main(argv):
 
   # Initialise Tink.
   try:
-    tink.tink_config.register()
+    aead.register()
   except tink.TinkError as e:
     logging.error('Error initialising Tink: %s', e)
     return 1
@@ -63,7 +63,7 @@ def main(argv):
 
   # Create envelope AEAD primitive using AES256 GCM for encrypting the data
   try:
-    key_template = tink.aead.aead_key_templates.AES256_GCM
+    key_template = aead.aead_key_templates.AES256_GCM
     env_aead = aead.KmsEnvelopeAead(key_template, gcp_aead)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)

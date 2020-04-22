@@ -37,6 +37,7 @@ from absl import flags
 from absl import logging
 import tink
 from tink import cleartext_keyset_handle
+from tink import mac
 
 FLAGS = flags.FLAGS
 
@@ -66,7 +67,7 @@ def main(argv):
 
   # Initialise Tink.
   try:
-    tink.tink_config.register()
+    mac.register()
   except tink.TinkError as e:
     logging.error('Error initialising Tink: %s', e)
     return 1
@@ -82,7 +83,7 @@ def main(argv):
 
   # Get the primitive.
   try:
-    cipher = keyset_handle.primitive(tink.Mac)
+    cipher = keyset_handle.primitive(mac.Mac)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
     return 1

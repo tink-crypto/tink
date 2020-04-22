@@ -20,14 +20,7 @@ py_library(
         ":_keyset_handle",
         ":_keyset_reader",
         ":_keyset_writer",
-        ":tink_config",
-        "//tink/aead",
         "//tink/core",
-        "//tink/daead",
-        "//tink/hybrid",
-        "//tink/mac",
-        "//tink/signature",
-        "//tink/streaming_aead",
     ],
 )
 

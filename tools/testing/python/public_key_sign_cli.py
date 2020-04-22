@@ -29,6 +29,7 @@ from absl import logging
 import tink
 
 from tink import cleartext_keyset_handle
+from tink import signature
 
 FLAGS = flags.FLAGS
 
@@ -69,7 +70,7 @@ def main(argv):
 
   # Initialise Tink
   try:
-    tink.tink_config.register()
+    signature.register()
   except tink.TinkError as e:
     logging.error('Error initialising Tink: %s', e)
     return 1
@@ -83,7 +84,7 @@ def main(argv):
 
   # Get the primitive
   try:
-    sign_primitive = keyset_handle.primitive(tink.PublicKeySign)
+    sign_primitive = keyset_handle.primitive(signature.PublicKeySign)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
     return 1
