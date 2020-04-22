@@ -47,6 +47,7 @@ sh_test(
         "//testing:aead_cli_java",
         "//testing/cc:aead_cli_cc",
         "//testing/go:aead_cli_go",
+        "//testing/python:aead_cli_python",
         "//tinkey",
         "@tink_base//testdata:credentials",
     ],

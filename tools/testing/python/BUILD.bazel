@@ -6,6 +6,21 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 py_binary(
+    name = "aead_cli_python",
+    testonly = 1,
+    srcs = ["aead_cli.py"],
+    main = "aead_cli.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_binary(
     name = "deterministic_aead_cli_python",
     testonly = 1,
     srcs = ["deterministic_aead_cli.py"],
