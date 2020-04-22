@@ -28,7 +28,7 @@ from typing import Text
 
 from tink import aead
 from tink import core
-from tink.integration.awskms.aws_kms_aead import AwsKmsAead
+from tink.integration.awskms import _aws_kms_aead
 
 AWS_KEYURI_PREFIX = 'aws-kms://'
 AWS_KMS_BOTO = 'kms'
@@ -150,4 +150,4 @@ class AwsKmsClient(object):
       raise core.TinkError('Key URI not supported.')
 
     key_name = key_uri[len(AWS_KEYURI_PREFIX):]
-    return AwsKmsAead(key_name, self.client)
+    return _aws_kms_aead.AwsKmsAead(key_name, self.client)

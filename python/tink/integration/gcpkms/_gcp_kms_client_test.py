@@ -21,7 +21,7 @@ import os
 
 from absl.testing import absltest
 
-from tink.integration.gcpkms.gcp_kms_client import GcpKmsClient
+from tink.integration import gcpkms
 
 CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
                                'tink_base/testdata/credential.json')
@@ -30,7 +30,7 @@ CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
 class GcpKmsClientTest(absltest.TestCase):
 
   def test_client_generation(self):
-    gcp_client = GcpKmsClient('', CREDENTIAL_PATH)
+    gcp_client = gcpkms.GcpKmsClient('', CREDENTIAL_PATH)
     self.assertNotEqual(gcp_client, None)
 
   def test_client_not_bound(self):
@@ -38,7 +38,7 @@ class GcpKmsClientTest(absltest.TestCase):
     gcp_key2 = 'gcp-kms://projects/otherProject/.../cryptoKeys/key2'
     non_gcp_key = 'aws-kms://arn:aws:kms:us-west-2:acc:other/key3'
 
-    gcp_client = GcpKmsClient('', CREDENTIAL_PATH)
+    gcp_client = gcpkms.GcpKmsClient('', CREDENTIAL_PATH)
 
     self.assertEqual(gcp_client.does_support(gcp_key1), True)
     self.assertEqual(gcp_client.does_support(gcp_key2), True)

@@ -21,8 +21,7 @@ import os
 from absl.testing import absltest
 
 from tink import core
-from tink.integration.awskms.aws_kms_client import AwsKmsClient
-from tink.integration.awskms.aws_kms_client import FileNotFoundError
+from tink.integration import awskms
 
 CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
                                'tink_base/testdata/aws_credentials_cc.txt')
@@ -33,24 +32,24 @@ BAD_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyR
 class AwsKmsClientTest(absltest.TestCase):
 
   def test_client_generation(self):
-    aws_client = AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
+    aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
     self.assertNotEqual(aws_client, None)
 
   def test_wrong_key_uri(self):
     with self.assertRaises(core.TinkError):
-      AwsKmsClient(BAD_KEY_URI, CREDENTIAL_PATH)
+      awskms.AwsKmsClient(BAD_KEY_URI, CREDENTIAL_PATH)
 
   def test_client_not_bound(self):
     gcp_key1 = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
 
-    aws_client = AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
+    aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
 
     self.assertEqual(aws_client.does_support(KEY_URI), True)
     self.assertEqual(aws_client.does_support(gcp_key1), False)
 
   def test_wrong_credentials_path(self):
-    with self.assertRaises(FileNotFoundError):
-      AwsKmsClient(KEY_URI, '../credentials.txt')
+    with self.assertRaises(awskms.FileNotFoundError):
+      awskms.AwsKmsClient(KEY_URI, '../credentials.txt')
 
 
 if __name__ == '__main__':

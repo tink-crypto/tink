@@ -21,7 +21,7 @@ import os
 from absl.testing import absltest
 
 from tink import core
-from tink.integration.awskms.aws_kms_client import AwsKmsClient
+from tink.integration import awskms
 
 CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
                                'tink_base/testdata/aws_credentials_cc.txt')
@@ -34,7 +34,7 @@ BAD_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyR
 class AwsKmsAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
-    aws_client = AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
+    aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
     aead = aws_client.get_aead(KEY_URI)
 
     plaintext = b'hello'
@@ -47,7 +47,7 @@ class AwsKmsAeadTest(absltest.TestCase):
     self.assertEqual(plaintext, aead.decrypt(ciphertext, None))
 
   def test_corrupted_ciphertext(self):
-    aws_client = AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
+    aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
     aead = aws_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
@@ -65,11 +65,11 @@ class AwsKmsAeadTest(absltest.TestCase):
 
   def test_encrypt_with_bad_uri(self):
     with self.assertRaises(core.TinkError):
-      aws_client = AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
+      aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
       aws_client.get_aead(BAD_KEY_URI)
 
   def test_encrypt_with_bad_credentials(self):
-    aws_client = AwsKmsClient(KEY_URI, BAD_CREDENTIALS_PATH)
+    aws_client = awskms.AwsKmsClient(KEY_URI, BAD_CREDENTIALS_PATH)
     aead = aws_client.get_aead(KEY_URI)
 
     plaintext = b'hello'

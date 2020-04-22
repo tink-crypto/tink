@@ -22,7 +22,7 @@ import os
 from absl.testing import absltest
 
 from tink import core
-from tink.integration.gcpkms.gcp_kms_client import GcpKmsClient
+from tink.integration import gcpkms
 
 CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
                                'tink_base/testdata/credential.json')
@@ -32,7 +32,7 @@ KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings
 class GcpKmsAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
-    gcp_client = GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
     aead = gcp_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
@@ -45,7 +45,7 @@ class GcpKmsAeadTest(absltest.TestCase):
     self.assertEqual(plaintext, aead.decrypt(ciphertext, associated_data))
 
   def test_corrupted_ciphertext(self):
-    gcp_client = GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
     aead = gcp_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'

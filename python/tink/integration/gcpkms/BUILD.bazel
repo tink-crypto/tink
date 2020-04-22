@@ -8,17 +8,17 @@ py_library(
     srcs = ["__init__.py"],
     srcs_version = "PY3",
     deps = [
-        ":gcp_kms_aead",
-        ":gcp_kms_client",
+        ":_gcp_kms_aead",
+        ":_gcp_kms_client",
     ],
 )
 
 py_library(
-    name = "gcp_kms_client",
-    srcs = ["gcp_kms_client.py"],
+    name = "_gcp_kms_client",
+    srcs = ["_gcp_kms_client.py"],
     srcs_version =  "PY3",
     deps = [
-        ":gcp_kms_aead",
+        ":_gcp_kms_aead",
         "//tink/aead",
         "//tink/core",
         requirement("grpc-google-iam-v1"),
@@ -42,22 +42,22 @@ py_library(
 )
 
 py_test(
-    name = "gcp_kms_client_test",
-    srcs = ["gcp_kms_client_test.py"],
+    name = "_gcp_kms_client_test",
+    srcs = ["_gcp_kms_client_test.py"],
     srcs_version =  "PY3",
     legacy_create_init = 0,
     data = [
         "@tink_base//testdata:credentials"
     ],
     deps = [
-        ":gcp_kms_client",
+        ":gcpkms",
         requirement("absl-py"),
     ]
 )
 
 py_library(
-    name = "gcp_kms_aead",
-    srcs = ["gcp_kms_aead.py"],
+    name = "_gcp_kms_aead",
+    srcs = ["_gcp_kms_aead.py"],
     srcs_version =  "PY3",
     deps = [
         "//tink/aead",
@@ -83,16 +83,15 @@ py_library(
 )
 
 py_test(
-    name = "gcp_kms_aead_test",
-    srcs = ["gcp_kms_aead_test.py"],
+    name = "_gcp_kms_aead_test",
+    srcs = ["_gcp_kms_aead_test.py"],
     srcs_version =  "PY3",
     legacy_create_init = 0,
     data = [
         "@tink_base//testdata:credentials"
     ],
     deps = [
-        ":gcp_kms_client",
-        ":gcp_kms_aead",
+        ":gcpkms",
         requirement("absl-py"),
     ]
 )
