@@ -82,6 +82,7 @@ sh_test(
         "//testing:deterministic_aead_cli_java",
         "//testing/cc:deterministic_aead_cli_cc",
         "//testing/go:deterministic_aead_cli_go",
+        "//testing/python:deterministic_aead_cli_python",
         "//tinkey",
     ],
 )

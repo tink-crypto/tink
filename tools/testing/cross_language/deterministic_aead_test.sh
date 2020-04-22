@@ -17,6 +17,7 @@ ROOT_DIR="$TEST_SRCDIR/tools"
 CC_DAEAD_CLI="$ROOT_DIR/testing/cc/deterministic_aead_cli_cc"
 JAVA_DAEAD_CLI="$ROOT_DIR/testing/deterministic_aead_cli_java"
 GO_DAEAD_CLI="$ROOT_DIR/testing/go/deterministic_aead_cli_go"
+PY_DAEAD_CLI="$ROOT_DIR/testing/python/deterministic_aead_cli_python"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 KEY_TEMPLATES=(AES256_SIV)
@@ -74,3 +75,7 @@ deterministic_aead_basic_test "CC-GO"\
     $CC_DAEAD_CLI $GO_DAEAD_CLI "${KEY_TEMPLATES[*]}"
 deterministic_aead_basic_test "GO-CC"\
     $GO_DAEAD_CLI $CC_DAEAD_CLI "${KEY_TEMPLATES[*]}"
+deterministic_aead_basic_test "GO-PY"\
+    $GO_DAEAD_CLI $PY_DAEAD_CLI "${KEY_TEMPLATES[*]}"
+deterministic_aead_basic_test "PY-GO"\
+    $PY_DAEAD_CLI $GO_DAEAD_CLI "${KEY_TEMPLATES[*]}"
