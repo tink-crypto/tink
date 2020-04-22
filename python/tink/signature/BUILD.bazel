@@ -11,12 +11,9 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_public_key_sign",
-        ":_public_key_sign_key_manager",
-        ":_public_key_sign_wrapper",
         ":_public_key_verify",
-        ":_public_key_verify_key_manager",
-        ":_public_key_verify_wrapper",
         ":_signature_key_templates",
+        ":_signature_key_manager",
     ],
 )
 
