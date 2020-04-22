@@ -120,28 +120,3 @@ py_library(
         requirement("six"),
     ],
 )
-
-py_library(
-    name = "cleartext_keyset_handle",
-    srcs = ["cleartext_keyset_handle.py"],
-    srcs_version = "PY3",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//tink:tink_python",
-        "//tink/proto:tink_py_pb2",
-    ],
-)
-
-py_test(
-    name = "cleartext_keyset_handle_test",
-    srcs = ["cleartext_keyset_handle_test.py"],
-    srcs_version = "PY3",
-    deps = [
-        ":cleartext_keyset_handle",
-        ":core",
-        requirement("absl-py"),
-        "//tink:tink_config",
-        "//tink:tink_python",
-        "//tink/mac",
-    ],
-)
