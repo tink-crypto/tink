@@ -9,6 +9,7 @@ py_library(
     name = "signature",
     srcs = ["__init__.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         ":_public_key_sign",
         ":_public_key_verify",

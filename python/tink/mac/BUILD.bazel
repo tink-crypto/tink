@@ -9,6 +9,7 @@ py_library(
     name = "mac",
     srcs = ["__init__.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         ":_mac",
         ":_mac_key_manager",

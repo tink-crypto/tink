@@ -9,6 +9,7 @@ py_library(
     name = "aead",
     srcs = ["__init__.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         ":_aead",
         ":_aead_key_manager",

@@ -1,12 +1,13 @@
 load("@rules_python//python:defs.bzl", "py_test")
 load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//:__subpackages__"])
 
 py_library(
     name = "gcpkms",
     srcs = ["__init__.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         ":_gcp_kms_aead",
         ":_gcp_kms_client",

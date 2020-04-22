@@ -9,6 +9,7 @@ py_library(
     name = "hybrid",
     srcs = ["__init__.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         ":_hybrid_decrypt",
         ":_hybrid_encrypt",
