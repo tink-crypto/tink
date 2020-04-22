@@ -113,9 +113,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink/aead",
-        "//tink/cc/pybind:cc_key_manager",
-        "//tink/cc/pybind:cc_tink_config",
-        "//tink/core",
         "//tink/daead",
         "//tink/hybrid",
         "//tink/mac",

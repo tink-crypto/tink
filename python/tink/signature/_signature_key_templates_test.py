@@ -26,8 +26,8 @@ from tink.proto import ecdsa_pb2
 from tink.proto import rsa_ssa_pkcs1_pb2
 from tink.proto import rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
+from tink import core
 from tink import signature
-from tink import tink_config
 
 
 ECDSA_DER_PARAMS_P256 = [
@@ -86,7 +86,7 @@ def bytes_to_num(data):
 
 
 def setUpModule():
-  tink_config.register()
+  signature.register()
 
 
 class SignatureKeyTemplatesTest(parameterized.TestCase):
@@ -122,8 +122,7 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(key_format.params.encoding, ecdsa_pb2.DER)
 
     # Check that the template works with the key manager
-    key_manager = signature.sign_key_manager_from_cc_registry(
-        key_template.type_url)
+    key_manager = core.Registry.key_manager(key_template.type_url)
     key_manager.new_key_data(key_template)
 
   @parameterized.named_parameters(
@@ -143,7 +142,7 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(key_format.params.encoding, ecdsa_pb2.IEEE_P1363)
 
     # Check that the template works with the key manager
-    key_manager = signature.sign_key_manager_from_cc_registry(
+    key_manager = core.Registry.key_manager(
         key_template.type_url)
     key_manager.new_key_data(key_template)
 
@@ -155,8 +154,7 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(key_template.output_prefix_type, tink_pb2.TINK)
 
     # Check that the template works with the key manager
-    key_manager = signature.sign_key_manager_from_cc_registry(
-        key_template.type_url)
+    key_manager = core.Registry.key_manager(key_template.type_url)
     key_manager.new_key_data(key_template)
 
   @parameterized.named_parameters(
@@ -176,8 +174,7 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(bytes_to_num(key_format.public_exponent), exponent)
 
     # Check that the template works with the key manager
-    key_manager = signature.sign_key_manager_from_cc_registry(
-        key_template.type_url)
+    key_manager = core.Registry.key_manager(key_template.type_url)
     key_manager.new_key_data(key_template)
 
   @parameterized.named_parameters(
@@ -198,8 +195,7 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(bytes_to_num(key_format.public_exponent), exponent)
 
     # Check that the template works with the key manager
-    key_manager = signature.sign_key_manager_from_cc_registry(
-        key_template.type_url)
+    key_manager = core.Registry.key_manager(key_template.type_url)
     key_manager.new_key_data(key_template)
 
 
