@@ -10,19 +10,28 @@ package using pip.
 
 ### Build with Bazel
 
-`bash bazel build "..."`
+```shell
+bazel build "..."
+```
 
 ### Build with pip from source
 
 A setup script is provided which allows to install Tink as a Python package
-`bash pip3 install .`
+
+```shell
+pip3 install .
+```
 
 Note that this still requires Bazel to compile the binding to C++ and the
 [protobuf compiler](https://github.com/protocolbuffers/protobuf).
 
 ### Running tests
 
-You can run all tests with Bazel using `bash bazel test "..."`
+You can run all tests with Bazel using
+
+```shell
+bazel test "..."
+```
 
 ## Examples
 
