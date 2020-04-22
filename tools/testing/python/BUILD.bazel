@@ -1,0 +1,36 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+py_binary(
+    name = "public_key_sign_cli_python",
+    testonly = 1,
+    srcs = ["public_key_sign_cli.py"],
+    main = "public_key_sign_cli.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+    ],
+    tags = ["no_rbe"],
+)
+
+py_binary(
+    name = "public_key_verify_cli_python",
+    testonly = 1,
+    srcs = ["public_key_verify_cli.py"],
+    main = "public_key_verify_cli.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+    ],
+    tags = ["no_rbe"],
+)

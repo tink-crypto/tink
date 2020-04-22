@@ -20,6 +20,8 @@ JAVA_SIGN_CLI="$ROOT_DIR/testing/public_key_sign_cli_java"
 JAVA_VERIFY_CLI="$ROOT_DIR/testing/public_key_verify_cli_java"
 GO_SIGN_CLI="$ROOT_DIR/testing/go/public_key_sign_cli_go"
 GO_VERIFY_CLI="$ROOT_DIR/testing/go/public_key_verify_cli_go"
+PY_SIGN_CLI="$ROOT_DIR/testing/python/public_key_sign_cli_python"
+PY_VERIFY_CLI="$ROOT_DIR/testing/python/public_key_verify_cli_python"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 source $TEST_UTIL || exit 1
@@ -77,8 +79,8 @@ signature_basic_test() {
 # Common tests for Java, C++ and Go
 KEY_TEMPLATES=(ECDSA_P256 ECDSA_P384 ECDSA_P521 ECDSA_P256_IEEE_P1363 ECDSA_P384_IEEE_P1363 ECDSA_P521_IEEE_P1363 ED25519)
 OUTPUT_PREFIXES=(TINK LEGACY)
-SIGN_CLIS=($CC_SIGN_CLI $JAVA_SIGN_CLI $GO_SIGN_CLI)
-VERIFY_CLIS=($CC_VERIFY_CLI $JAVA_VERIFY_CLI $GO_VERIFY_CLI)
+SIGN_CLIS=($CC_SIGN_CLI $JAVA_SIGN_CLI $GO_SIGN_CLI $PY_SIGN_CLI)
+VERIFY_CLIS=($CC_VERIFY_CLI $JAVA_VERIFY_CLI $GO_VERIFY_CLI $PY_VERIFY_CLI)
 signature_basic_test "${SIGN_CLIS[*]}" "${VERIFY_CLIS[*]}" \
     "${KEY_TEMPLATES[*]}" "${OUTPUT_PREFIXES[*]}"
 

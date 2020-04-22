@@ -162,6 +162,8 @@ sh_test(
         "//testing/cc:public_key_verify_cli_cc",
         "//testing/go:public_key_sign_cli_go",
         "//testing/go:public_key_verify_cli_go",
+        "//testing/python:public_key_sign_cli_python",
+        "//testing/python:public_key_verify_cli_python",
         "//tinkey",
     ],
 )
