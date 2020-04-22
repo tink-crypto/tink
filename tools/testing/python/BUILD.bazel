@@ -49,3 +49,33 @@ py_binary(
         "@tink_py//tink/mac",
     ],
 )
+
+py_binary(
+    name = "hybrid_encrypt_cli_python",
+    testonly = 1,
+    srcs = ["hybrid_encrypt_cli.py"],
+    main = "hybrid_encrypt_cli.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink/hybrid",
+    ],
+)
+
+py_binary(
+    name = "hybrid_decrypt_cli_python",
+    testonly = 1,
+    srcs = ["hybrid_decrypt_cli.py"],
+    main = "hybrid_decrypt_cli.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink/hybrid",
+    ],
+)

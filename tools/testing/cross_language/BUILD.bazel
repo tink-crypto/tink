@@ -144,6 +144,8 @@ sh_test(
         "//testing/cc:hybrid_encrypt_cli_cc",
         "//testing/go:hybrid_decrypt_cli_go",
         "//testing/go:hybrid_encrypt_cli_go",
+        "//testing/python:hybrid_decrypt_cli_python",
+        "//testing/python:hybrid_encrypt_cli_python",
         "//tinkey",
     ],
 )
