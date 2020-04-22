@@ -17,7 +17,6 @@ py_binary(
         "@tink_py//tink:tink_python",
         "@tink_py//tink:cleartext_keyset_handle",
     ],
-    tags = ["no_rbe"],
 )
 
 py_binary(
@@ -32,5 +31,18 @@ py_binary(
         "@tink_py//tink:tink_python",
         "@tink_py//tink:cleartext_keyset_handle",
     ],
-    tags = ["no_rbe"],
+)
+
+py_binary(
+    name = "mac_cli_python",
+    testonly = 1,
+    srcs = ["mac_cli.py"],
+    main = "mac_cli.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+    ],
 )

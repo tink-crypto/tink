@@ -112,6 +112,7 @@ sh_test(
         "//testing:mac_cli_java",
         "//testing/cc:mac_cli_cc",
         "//testing/go:mac_cli_go",
+        "//testing/python:mac_cli_python",
         "//tinkey",
     ],
 )
