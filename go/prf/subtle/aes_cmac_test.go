@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package cmac
+package subtle
 
 import (
 	"encoding/hex"
@@ -37,12 +37,12 @@ func TestVectorsRFC(t *testing.T) {
 		40: "dfa66747de9ae63030ca32611497c827",
 		64: "51f0bebf7e3b9d92fc49741779363cfe",
 	}
-	a, err := New(key)
+	a, err := NewAESCMACPRF(key)
 	if err != nil {
 		t.Errorf("Could not create cmac.AES object: %v", err)
 	}
 	for l, e := range expected {
-		output, err := a.Compute(data[:l], 16)
+		output, err := a.ComputePRF(data[:l], 16)
 		if err != nil {
 			t.Errorf("Error computing AES-CMAC: %v", err)
 		}
@@ -98,7 +98,7 @@ func TestVectorsWycheproof(t *testing.T) {
 				t.Errorf("Could not decode message for test case %d (%s): %v", tc.TcID, tc.Comment, err)
 				continue
 			}
-			aes, err := New(key)
+			aes, err := NewAESCMACPRF(key)
 			valid := tc.Result == "valid"
 			if valid && err != nil {
 				t.Errorf("Could not create cmac.AES for test case %d (%s): %v", tc.TcID, tc.Comment, err)
@@ -111,7 +111,7 @@ func TestVectorsWycheproof(t *testing.T) {
 				t.Errorf("Requested tag size for test case %d (%s) is not a multiple of 8, but %d", tc.TcID, tc.Comment, g.TagSize)
 				continue
 			}
-			res, err := aes.Compute(msg, g.TagSize/8)
+			res, err := aes.ComputePRF(msg, g.TagSize/8)
 			if valid && err != nil {
 				t.Errorf("Could not compute AES-CMAC for test case %d (%s): %v", tc.TcID, tc.Comment, err)
 				continue

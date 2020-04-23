@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package cmac provides an implementation of AES-CMAC.
-package cmac
+// Package subtle provides an implementation of PRFs like AES-CMAC.
+package subtle
 
 import (
 	"crypto/aes"
@@ -29,15 +29,15 @@ const (
 	pad = byte(0x80)
 )
 
-// AES is a type that can be used to compute several CMACs with the same key material.
-type AES struct {
+// AESCMACPRF is a type that can be used to compute several CMACs with the same key material.
+type AESCMACPRF struct {
 	bc               cipher.Block
 	subkey1, subkey2 []byte
 }
 
-// New creates a new cmac.AES object and initializes it with the correct key material.
-func New(key []byte) (*AES, error) {
-	aesCmac := &AES{}
+// NewAESCMACPRF creates a new AESCMACPRF object and initializes it with the correct key material.
+func NewAESCMACPRF(key []byte) (*AESCMACPRF, error) {
+	aesCmac := &AESCMACPRF{}
 	var err error
 	aesCmac.bc, err = aes.NewCipher(key)
 	if err != nil {
@@ -56,9 +56,9 @@ func New(key []byte) (*AES, error) {
 	return aesCmac, nil
 }
 
-// Compute computes the AES-CMAC for the given key and data, returning outputLength bytes.
+// ComputePRF computes the AES-CMAC for the given key and data, returning outputLength bytes.
 // The timing of this function will only depend on len(data), and not leak any additional information about the key or the data.
-func (a AES) Compute(data []byte, outputLength uint32) ([]byte, error) {
+func (a AESCMACPRF) ComputePRF(data []byte, outputLength uint32) ([]byte, error) {
 	// Setup
 	bs := a.bc.BlockSize()
 	if outputLength > uint32(bs) {

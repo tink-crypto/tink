@@ -30,14 +30,16 @@ import (
 // Entry represents a single entry in the keyset. In addition to the actual
 // primitive, it holds the identifier and status of the primitive.
 type Entry struct {
+	KeyID      uint32
 	Primitive  interface{}
 	Prefix     string
 	PrefixType tinkpb.OutputPrefixType
 	Status     tinkpb.KeyStatusType
 }
 
-func newEntry(p interface{}, prefix string, prefixType tinkpb.OutputPrefixType, status tinkpb.KeyStatusType) *Entry {
+func newEntry(keyID uint32, p interface{}, prefix string, prefixType tinkpb.OutputPrefixType, status tinkpb.KeyStatusType) *Entry {
 	return &Entry{
+		KeyID:      keyID,
 		Primitive:  p,
 		Prefix:     prefix,
 		Status:     status,
@@ -100,7 +102,7 @@ func (ps *PrimitiveSet) Add(p interface{}, key *tinkpb.Keyset_Key) (*Entry, erro
 	if err != nil {
 		return nil, fmt.Errorf("primitive_set: %s", err)
 	}
-	e := newEntry(p, prefix, key.OutputPrefixType, key.Status)
+	e := newEntry(key.KeyId, p, prefix, key.OutputPrefixType, key.Status)
 	ps.Entries[prefix] = append(ps.Entries[prefix], e)
 	return e, nil
 }

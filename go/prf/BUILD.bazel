@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+licenses(["notice"])  # keep
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "prf_set.go",
+        "prf_set_factory.go",
+    ],
+    importpath = "github.com/google/tink/go/prf",
+    deps = [
+        "//core/primitiveset:go_default_library",
+        "//core/registry:go_default_library",
+        "//keyset:go_default_library",
+    ],
+)
