@@ -15,6 +15,8 @@
 #define TINK_CORE_KEY_MANAGER_IMPL_H_
 
 #include "absl/base/casts.h"
+#include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/key_manager.h"
 #include "tink/util/constants.h"
@@ -168,13 +170,13 @@ class KeyManagerImpl<
     if (!this->DoesSupport(key_data.type_url())) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Key type '%s' is not supported by this manager.",
-                       key_data.type_url().c_str());
+                       key_data.type_url());
     }
     KeyProto key_proto;
     if (!key_proto.ParseFromString(key_data.value())) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
+                       key_data.type_url());
     }
     auto validation = key_type_manager_->ValidateKey(key_proto);
     if (!validation.ok()) {
@@ -189,7 +191,7 @@ class KeyManagerImpl<
     if (!this->DoesSupport(key_type)) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Key type '%s' is not supported by this manager.",
-                       key_type.c_str());
+                       key_type);
     }
     const KeyProto& key_proto = static_cast<const KeyProto&>(key);
     auto validation = key_type_manager_->ValidateKey(key_proto);

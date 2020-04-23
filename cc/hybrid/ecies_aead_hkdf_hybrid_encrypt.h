@@ -17,15 +17,13 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_ENCRYPT_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_ENCRYPT_H_
 
-#include "absl/strings/string_view.h"
-#include "tink/aead.h"
-#include "tink/hybrid_encrypt.h"
-#include "tink/key_manager.h"
+#include <memory>
+
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
+#include "tink/hybrid_encrypt.h"
 #include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 #include "tink/util/statusor.h"
 #include "proto/ecies_aead_hkdf.pb.h"
-#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -43,12 +41,7 @@ class EciesAeadHkdfHybridEncrypt : public HybridEncrypt {
       absl::string_view plaintext,
       absl::string_view context_info) const override;
 
-  virtual ~EciesAeadHkdfHybridEncrypt() {}
-
  private:
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfPublicKey& key);
-
   EciesAeadHkdfHybridEncrypt(
       const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key,
       std::unique_ptr<const subtle::EciesHkdfSenderKemBoringSsl> sender_kem,

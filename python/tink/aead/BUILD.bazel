@@ -1,0 +1,134 @@
+load("@rules_python//python:defs.bzl", "py_library")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+py_library(
+    name = "aead",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_aead",
+        ":_aead_key_manager",
+        ":_aead_key_templates",
+        ":_kms_envelope_aead",
+    ],
+)
+
+py_library(
+    name = "_aead",
+    srcs = ["_aead.py"],
+    srcs_version = "PY3",
+    deps = [
+        requirement("six"),
+    ],
+)
+
+py_library(
+    name = "_aead_key_manager",
+    srcs = ["_aead_key_manager.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_aead",
+        ":_aead_wrapper",
+        "//tink/cc/pybind:aead",
+        "//tink/cc/pybind:cc_key_manager",
+        "//tink/cc/pybind:cc_tink_config",
+        "//tink/cc/pybind:deterministic_aead",
+        "//tink/cc/pybind:streaming_aead",
+        "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_aead_key_manager_test",
+    srcs = ["_aead_key_manager_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":aead",
+        requirement("absl-py"),
+        "//tink/core",
+        "//tink/proto:aes_eax_py_pb2",
+        "//tink/proto:aes_gcm_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_aead_wrapper",
+    srcs = ["_aead_wrapper.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_aead",
+        requirement("absl-py"),
+        "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_aead_wrapper_test",
+    srcs = ["_aead_wrapper_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":aead",
+        requirement("absl-py"),
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "_aead_key_templates",
+    srcs = ["_aead_key_templates.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/proto:aes_ctr_hmac_aead_py_pb2",
+        "//tink/proto:aes_eax_py_pb2",
+        "//tink/proto:aes_gcm_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_aead_key_templates_test",
+    srcs = ["_aead_key_templates_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":aead",
+        requirement("absl-py"),
+        "//tink/proto:aes_ctr_hmac_aead_py_pb2",
+        "//tink/proto:aes_eax_py_pb2",
+        "//tink/proto:aes_gcm_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_kms_envelope_aead",
+    srcs = ["_kms_envelope_aead.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_aead",
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_kms_envelope_aead_test",
+    srcs = ["_kms_envelope_aead_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":aead",
+        requirement("absl-py"),
+        "//tink:tink_config",
+        "//tink:tink_python",
+        "//tink/core",
+        "//tink/proto:aes_gcm_py_pb2",
+    ],
+)

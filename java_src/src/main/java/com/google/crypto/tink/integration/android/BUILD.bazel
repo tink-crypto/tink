@@ -1,0 +1,42 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
+
+# public interfaces
+
+java_library(
+    name = "protos",
+    exports = [
+        "//proto:tink_java_proto_lite",
+    ],
+)
+
+android_library(
+    name = "android",
+    srcs = [
+        ":srcs",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":protos",
+        "//src/main/java/com/google/crypto/tink:android",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:aead",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)

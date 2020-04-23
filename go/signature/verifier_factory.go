@@ -37,33 +37,46 @@ func NewVerifierWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.V
 	if err != nil {
 		return nil, fmt.Errorf("verifier_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret = newVerifierSet(ps)
-	return ret, nil
+	return newWrappedVerifier(ps)
 }
 
 // verifierSet is a Verifier implementation that uses the
 // underlying primitive set for verifying.
-type verifierSet struct {
+type wrappedVerifier struct {
 	ps *primitiveset.PrimitiveSet
 }
 
 // Asserts that verifierSet implements the Verifier interface.
-var _ tink.Verifier = (*verifierSet)(nil)
+var _ tink.Verifier = (*wrappedVerifier)(nil)
 
-func newVerifierSet(ps *primitiveset.PrimitiveSet) *verifierSet {
-	ret := new(verifierSet)
+func newWrappedVerifier(ps *primitiveset.PrimitiveSet) (*wrappedVerifier, error) {
+	if _, ok := (ps.Primary.Primitive).(tink.Verifier); !ok {
+		return nil, fmt.Errorf("verifier_factory: not a Verifier primitive")
+	}
+
+	for _, primitives := range ps.Entries {
+		for _, p := range primitives {
+			if _, ok := (p.Primitive).(tink.Verifier); !ok {
+				return nil, fmt.Errorf("verifier_factory: not an Verifier primitive")
+			}
+		}
+	}
+
+	ret := new(wrappedVerifier)
 	ret.ps = ps
-	return ret
+
+	return ret, nil
 }
 
 var errInvalidSignature = errors.New("verifier_factory: invalid signature")
 
 // Verify checks whether the given signature is a valid signature of the given data.
-func (v *verifierSet) Verify(signature, data []byte) error {
+func (v *wrappedVerifier) Verify(signature, data []byte) error {
 	prefixSize := cryptofmt.NonRawPrefixSize
 	if len(signature) < prefixSize {
 		return errInvalidSignature
 	}
+
 	// try non-raw keys
 	prefix := signature[:prefixSize]
 	signatureNoPrefix := signature[prefixSize:]
@@ -76,21 +89,32 @@ func (v *verifierSet) Verify(signature, data []byte) error {
 			} else {
 				signedData = data
 			}
-			var verifier = (entries[i].Primitive).(tink.Verifier)
+
+			verifier, ok := (entries[i].Primitive).(tink.Verifier)
+			if !ok {
+				return fmt.Errorf("verifier_factory: not an Verifier primitive")
+			}
+
 			if err = verifier.Verify(signatureNoPrefix, signedData); err == nil {
 				return nil
 			}
 		}
 	}
+
 	// try raw keys
 	entries, err = v.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var verifier = (entries[i].Primitive).(tink.Verifier)
+			verifier, ok := (entries[i].Primitive).(tink.Verifier)
+			if !ok {
+				return fmt.Errorf("verifier_factory: not an Verifier primitive")
+			}
+
 			if err = verifier.Verify(signature, data); err == nil {
 				return nil
 			}
 		}
 	}
+
 	return errInvalidSignature
 }

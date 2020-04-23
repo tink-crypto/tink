@@ -36,6 +36,9 @@ class PrfKeyTemplates {
   //  * Key size: 256 bit
   //  * Salt: empty
   static const google::crypto::tink::KeyTemplate& HkdfSha256();
+  static const google::crypto::tink::KeyTemplate& HmacSha256();
+  static const google::crypto::tink::KeyTemplate& HmacSha512();
+  static const google::crypto::tink::KeyTemplate& AesCmac();
 };
 
 }  // namespace tink

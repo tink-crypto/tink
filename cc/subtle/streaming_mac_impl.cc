@@ -21,9 +21,9 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-StreamingMacImpl::StreamingMacImpl(
-    std::unique_ptr<StatefulMacFactory> mac_factory)
-    : mac_factory_(std::move(mac_factory)) {}
+namespace {
+constexpr size_t kBufferSize = 4096;
+}
 
 class ComputeMacOutputStream : public OutputStreamWithResult<std::string> {
  public:

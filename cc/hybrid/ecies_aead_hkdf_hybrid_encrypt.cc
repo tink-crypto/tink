@@ -16,30 +16,50 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 
+#include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "tink/aead.h"
-#include "tink/hybrid_encrypt.h"
-#include "tink/key_manager.h"
-#include "tink/registry.h"
-#include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
-#include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 #include "tink/util/enums.h"
-#include "tink/util/statusor.h"
-#include "proto/aes_gcm.pb.h"
+#include "tink/util/status.h"
 #include "proto/ecies_aead_hkdf.pb.h"
-#include "proto/tink.pb.h"
 
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
-using google::crypto::tink::EciesAeadHkdfPublicKey;
-using google::crypto::tink::EllipticCurveType;
+using ::google::crypto::tink::EciesAeadHkdfPublicKey;
+using ::google::crypto::tink::EllipticCurveType;
 
 namespace crypto {
 namespace tink {
 
+namespace {
+
+util::Status Validate(const EciesAeadHkdfPublicKey& key) {
+  if (key.x().empty() || !key.has_params()) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "Invalid EciesAeadHkdfPublicKey: missing required fields.");
+  }
+
+  if (key.params().has_kem_params() &&
+      key.params().kem_params().curve_type() == EllipticCurveType::CURVE25519) {
+    if (!key.y().empty()) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "Invalid EciesAeadHkdfPublicKey: has unexpected field.");
+    }
+  } else if (key.y().empty()) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "Invalid EciesAeadHkdfPublicKey: missing required fields.");
+  }
+
+  return util::Status::OK;
+}
+
+}  // namespace
+
 // static
-StatusOr<std::unique_ptr<HybridEncrypt>>
-EciesAeadHkdfHybridEncrypt::New(const EciesAeadHkdfPublicKey& recipient_key) {
-  Status status = Validate(recipient_key);
+util::StatusOr<std::unique_ptr<HybridEncrypt>> EciesAeadHkdfHybridEncrypt::New(
+    const EciesAeadHkdfPublicKey& recipient_key) {
+  util::Status status = Validate(recipient_key);
   if (!status.ok()) return status;
 
   auto kem_result = subtle::EciesHkdfSenderKemBoringSsl::New(
@@ -52,13 +72,12 @@ EciesAeadHkdfHybridEncrypt::New(const EciesAeadHkdfPublicKey& recipient_key) {
       recipient_key.params().dem_params().aead_dem());
   if (!dem_result.ok()) return dem_result.status();
 
-  std::unique_ptr<HybridEncrypt> hybrid_encrypt(new EciesAeadHkdfHybridEncrypt(
-      recipient_key,
-      std::move(kem_result.ValueOrDie()), std::move(dem_result.ValueOrDie())));
-  return std::move(hybrid_encrypt);
+  return {absl::WrapUnique(new EciesAeadHkdfHybridEncrypt(
+      recipient_key, std::move(kem_result).ValueOrDie(),
+      std::move(dem_result).ValueOrDie()))};
 }
 
-StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
+util::StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
     absl::string_view plaintext, absl::string_view context_info) const {
   // Use KEM to get a symmetric key.
   auto kem_key_result = sender_kem_->GenerateKey(
@@ -82,32 +101,9 @@ StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
   if (!encrypt_result.ok()) return encrypt_result.status();
 
   // Prepend AEAD-ciphertext with a KEM component.
-  std::string ciphertext = kem_key->get_kem_bytes();
-  ciphertext.append(encrypt_result.ValueOrDie());
+  std::string ciphertext =
+      absl::StrCat(kem_key->get_kem_bytes(), encrypt_result.ValueOrDie());
   return ciphertext;
-}
-
-// static
-Status EciesAeadHkdfHybridEncrypt::Validate(const EciesAeadHkdfPublicKey& key) {
-  if (key.x().empty() || !key.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT,
-                  "Invalid EciesAeadHkdfPublicKey: missing required fields.");
-  }
-
-  if (key.params().has_kem_params() &&
-      key.params().kem_params().curve_type() == EllipticCurveType::CURVE25519) {
-    if (!key.y().empty()) {
-      return util::Status(
-          util::error::INVALID_ARGUMENT,
-          "Invalid EciesAeadHkdfPublicKey: has unexpected field.");
-    }
-  } else if (key.y().empty()) {
-    return util::Status(
-        util::error::INVALID_ARGUMENT,
-        "Invalid EciesAeadHkdfPublicKey: missing required fields.");
-  }
-
-  return Status::OK;
 }
 
 }  // namespace tink

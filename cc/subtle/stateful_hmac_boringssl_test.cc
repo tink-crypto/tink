@@ -19,8 +19,10 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/wycheproof_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -37,12 +39,12 @@ constexpr size_t kSmallTagSize = 10;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::HasSubstr;
-
-class StatefulHmacBoringSslTest : public ::testing::Test {};
+using ::testing::StrEq;
 
 void EmptyHmac(HashType hash_type, uint32_t tag_size, std::string key,
                std::string expected) {
-  auto hmac_result = StatefulHmacBoringSsl::New(hash_type, tag_size, key);
+  auto hmac_result = StatefulHmacBoringSsl::New(
+      hash_type, tag_size, util::SecretDataFromStringView(key));
   EXPECT_THAT(hmac_result.status(), IsOk());
   auto hmac = std::move(hmac_result.ValueOrDie());
   auto result = hmac->Finalize();
@@ -53,7 +55,7 @@ void EmptyHmac(HashType hash_type, uint32_t tag_size, std::string key,
   EXPECT_EQ(tag, expected);
 }
 
-TEST_F(StatefulHmacBoringSslTest, testEmpty) {
+TEST(StatefulHmacBoringSslTest, testEmpty) {
   std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
 
   std::string expected_256(
@@ -73,7 +75,8 @@ TEST_F(StatefulHmacBoringSslTest, testEmpty) {
 
 void BasicHmac(HashType hash_type, uint32_t tag_size, std::string key,
                std::string data, std::string expected) {
-  auto hmac_result = StatefulHmacBoringSsl::New(hash_type, tag_size, key);
+  auto hmac_result = StatefulHmacBoringSsl::New(
+      hash_type, tag_size, util::SecretDataFromStringView(key));
   EXPECT_THAT(hmac_result.status(), IsOk());
   auto hmac = std::move(hmac_result.ValueOrDie());
 
@@ -87,7 +90,7 @@ void BasicHmac(HashType hash_type, uint32_t tag_size, std::string key,
   EXPECT_EQ(tag, expected);
 }
 
-TEST_F(StatefulHmacBoringSslTest, testBasic) {
+TEST(StatefulHmacBoringSslTest, testBasic) {
   std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   std::string data = "Some data to test.";
 
@@ -109,7 +112,8 @@ TEST_F(StatefulHmacBoringSslTest, testBasic) {
 void MultipleUpdateHmac(HashType hash_type, uint32_t tag_size, std::string key,
                         std::string data1, std::string data2, std::string data3,
                         std::string data4, std::string expected) {
-  auto hmac_result = StatefulHmacBoringSsl::New(hash_type, tag_size, key);
+  auto hmac_result = StatefulHmacBoringSsl::New(
+      hash_type, tag_size, util::SecretDataFromStringView(key));
   EXPECT_THAT(hmac_result.status(), IsOk());
   auto hmac = std::move(hmac_result.ValueOrDie());
 
@@ -130,7 +134,7 @@ void MultipleUpdateHmac(HashType hash_type, uint32_t tag_size, std::string key,
   EXPECT_EQ(tag, expected);
 }
 
-TEST_F(StatefulHmacBoringSslTest, testMultipleUpdates) {
+TEST(StatefulHmacBoringSslTest, testMultipleUpdates) {
   std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   std::string data1 = "Some ", data2 = "data ", data3 = "to ", data4 = "test.";
 
@@ -156,13 +160,13 @@ TEST_F(StatefulHmacBoringSslTest, testMultipleUpdates) {
                      data4, expected_512_small);
 }
 
-TEST_F(StatefulHmacBoringSslTest, testInvalidKeySizes) {
+TEST(StatefulHmacBoringSslTest, testInvalidKeySizes) {
   size_t tag_size = 16;
 
   for (int keysize = 0; keysize < 65; keysize++) {
     std::string key(keysize, 'x');
-    auto hmac_result =
-        StatefulHmacBoringSsl::New(HashType::SHA256, tag_size, key);
+    auto hmac_result = StatefulHmacBoringSsl::New(
+        HashType::SHA256, tag_size, util::SecretDataFromStringView(key));
     if (keysize >= 16) {
       EXPECT_THAT(hmac_result.status(), IsOk());
     } else {
@@ -171,6 +175,25 @@ TEST_F(StatefulHmacBoringSslTest, testInvalidKeySizes) {
                            HasSubstr("invalid key size")));
     }
   }
+}
+
+TEST(StatefulCmacFactoryTest, createsObjects) {
+  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  std::string data = "Some data to test.";
+
+  std::string expected(
+      test::HexDecodeOrDie("1d6eb74bc283f7947e92c72bd985ce6e"));
+  BasicHmac(HashType::SHA256, kTagSize, key, data, expected);
+  auto factory = absl::make_unique<StatefulHmacBoringSslFactory>(
+      HashType::SHA256, kTagSize, util::SecretDataFromStringView(key));
+  auto stateful_hmac_or = factory->Create();
+  ASSERT_THAT(stateful_hmac_or.status(), IsOk());
+  auto stateful_hmac = std::move(stateful_hmac_or.ValueOrDie());
+  EXPECT_THAT(stateful_hmac->Update(data), IsOk());
+  auto output_or = stateful_hmac->Finalize();
+  ASSERT_THAT(output_or.status(), IsOk());
+  auto output = output_or.ValueOrDie();
+  EXPECT_THAT(output, StrEq(expected));
 }
 
 class StatefulHmacBoringSslTestVectorTest
@@ -184,8 +207,8 @@ class StatefulHmacBoringSslTestVectorTest
     std::string key = test::HexDecodeOrDie(key_hex);
     std::string tag = test::HexDecodeOrDie(tag_hex);
     std::string msg = test::HexDecodeOrDie(msg_hex);
-    auto create_result =
-        StatefulHmacBoringSsl::New(HashType::SHA1, tag.size(), key);
+    auto create_result = StatefulHmacBoringSsl::New(
+        HashType::SHA1, tag.size(), util::SecretDataFromStringView(key));
     EXPECT_THAT(create_result.status(), IsOk());
     auto hmac = std::move(create_result.ValueOrDie());
 

@@ -16,25 +16,20 @@
 #define TINK_SUBTLE_STREAMING_MAC_IMPL_H_
 
 #include <memory>
+#include <utility>
 
-#include "tink/mac.h"
 #include "tink/streaming_mac.h"
 #include "tink/subtle/mac/stateful_mac.h"
-#include "tink/util/status.h"
-#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 
-constexpr size_t kBufferSize = 4096;
-
 class StreamingMacImpl : public StreamingMac {
  public:
   // Constructor
-  explicit StreamingMacImpl() {}
-  explicit StreamingMacImpl(
-      const std::unique_ptr<StatefulMacFactory> mac_factory);
+  explicit StreamingMacImpl(std::unique_ptr<StatefulMacFactory> mac_factory)
+      : mac_factory_(std::move(mac_factory)) {}
 
   // Implement streaming mac class functions
   // Returns an ComputeMacOutputStream, which when closed will return the

@@ -17,10 +17,10 @@ goog.module('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const EciesAeadHkdfHybridEncrypt = goog.require('tink.subtle.EciesAeadHkdfHybridEncrypt');
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const KeyManager = goog.require('tink.KeyManager');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Util = goog.require('tink.Util');
 const {PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

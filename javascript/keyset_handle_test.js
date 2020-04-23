@@ -15,23 +15,23 @@
 goog.module('tink.KeysetHandleTest');
 goog.setTestOnly('tink.KeysetHandleTest');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
 const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
 const Bytes = goog.require('tink.subtle.Bytes');
 const CleartextKeysetHandle = goog.require('tink.CleartextKeysetHandle');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
-const HybridDecrypt = goog.require('tink.HybridDecrypt');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
+const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const Mac = goog.require('tink.Mac');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyData, PbKeyMaterialType, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {createKeyset} = goog.require('tink.testUtils');
+const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
 describe('keyset handle test', function() {
   beforeEach(function() {
@@ -653,14 +653,14 @@ const createKeysetAndInitializeRegistry = function(
 };
 
 /**
- * @implements {Aead}
  * @final
  */
-class DummyAead {
+class DummyAead extends Aead {
   /**
    * @param {!Uint8Array} ciphertextSuffix
    */
   constructor(ciphertextSuffix) {
+    super();
     /** @private @const {!Uint8Array} */
     this.ciphertextSuffix_ = ciphertextSuffix;
   }
@@ -695,12 +695,12 @@ class DummyAead {
 }
 
 /**
- * @implements {HybridEncrypt}
  * @final
  */
-class DummyHybridEncrypt {
+class DummyHybridEncrypt extends HybridEncrypt {
   /** @param {!Uint8Array} ciphertextSuffix */
   constructor(ciphertextSuffix) {
+    super();
     /** @const @private {!Uint8Array} */
     this.ciphertextSuffix_ = ciphertextSuffix;
   }
@@ -712,12 +712,12 @@ class DummyHybridEncrypt {
 }
 
 /**
- * @implements {HybridDecrypt}
  * @final
  */
-class DummyHybridDecrypt {
+class DummyHybridDecrypt extends HybridDecrypt {
   /** @param {!Uint8Array} ciphertextSuffix */
   constructor(ciphertextSuffix) {
+    super();
     /** @const @private {!Uint8Array} */
     this.ciphertextSuffix_ = ciphertextSuffix;
   }

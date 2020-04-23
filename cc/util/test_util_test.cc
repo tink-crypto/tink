@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/subtle/random.h"
+#include "tink/util/test_matchers.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
@@ -27,6 +28,7 @@ namespace {
 using ::google::crypto::tink::AesGcmKey;
 using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
+using ::testing::Not;
 
 TEST(AsKeyDataTest, Basic) {
   AesGcmKey key;
@@ -71,8 +73,39 @@ TEST(DummyTests, AeadCordMultipleChunks) {
               Eq("5:3:dummybarfoo"));
 }
 
-}  // namespace
+TEST(ZTests, UniformString) {
+  EXPECT_THAT(ZTestUniformString(std::string(32, 0xaa)), IsOk());
+  EXPECT_THAT(ZTestUniformString(std::string(32, 0x00)), Not(IsOk()));
+  EXPECT_THAT(ZTestUniformString(subtle::Random::GetRandomBytes(32)), IsOk());
+}
 
+TEST(ZTests, CrossCorrelationUniformString) {
+  EXPECT_THAT(ZTestCrosscorrelationUniformStrings(std::string(32, 0xaa),
+                                                  std::string(32, 0x99)),
+              IsOk());
+  EXPECT_THAT(ZTestCrosscorrelationUniformStrings(std::string(32, 0xaa),
+                                                  std::string(32, 0xaa)),
+              Not(IsOk()));
+  EXPECT_THAT(
+      ZTestCrosscorrelationUniformStrings(subtle::Random::GetRandomBytes(32),
+                                          subtle::Random::GetRandomBytes(32)),
+      IsOk());
+}
+
+TEST(ZTests, AutocorrelationUniformString) {
+  EXPECT_THAT(ZTestAutocorrelationUniformString(std::string(32, 0xaa)),
+              Not(IsOk()));
+  EXPECT_THAT(ZTestAutocorrelationUniformString(std::string(
+                  "This is a text that is only ascii characters and therefore "
+                  "not random. It needs quite a few characters before it has "
+                  "enough to find a pattern, though, as it is text.")),
+              Not(IsOk()));
+  EXPECT_THAT(
+      ZTestAutocorrelationUniformString(subtle::Random::GetRandomBytes(32)),
+      IsOk());
+}
+
+}  // namespace
 }  // namespace test
 }  // namespace tink
 }  // namespace crypto

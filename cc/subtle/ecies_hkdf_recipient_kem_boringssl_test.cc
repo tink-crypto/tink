@@ -16,11 +16,12 @@
 
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include "gtest/gtest.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 namespace crypto {
 namespace tink {
@@ -69,21 +70,25 @@ static const std::vector<TestVector> test_vector(
 
 TEST_F(EciesHkdfRecipientKemBoringSslTest, testBasic) {
   for (const TestVector& test : test_vector) {
-    auto ecies_kem(std::move(EciesHkdfRecipientKemBoringSsl::New(
-        test.curve, test::HexDecodeOrDie(test.priv_hex)).ValueOrDie()));
-    auto status_or_string = ecies_kem->GenerateKey(
+    auto ecies_kem_or = EciesHkdfRecipientKemBoringSsl::New(
+        test.curve,
+        util::SecretDataFromStringView(test::HexDecodeOrDie(test.priv_hex)));
+    ASSERT_TRUE(ecies_kem_or.ok());
+    auto ecies_kem = std::move(ecies_kem_or).ValueOrDie();
+    auto kem_key_or = ecies_kem->GenerateKey(
         test::HexDecodeOrDie(test.pub_encoded_hex), test.hash,
         test::HexDecodeOrDie(test.salt_hex),
         test::HexDecodeOrDie(test.info_hex), test.out_len, test.point_format);
-    EXPECT_TRUE(status_or_string.ok());
-
-    EXPECT_EQ(test.out_key_hex, test::HexEncode(status_or_string.ValueOrDie()));
+    ASSERT_TRUE(kem_key_or.ok());
+    EXPECT_EQ(
+        test.out_key_hex,
+        test::HexEncode(util::SecretDataAsStringView(kem_key_or.ValueOrDie())));
   }
 }
 
 TEST_F(EciesHkdfRecipientKemBoringSslTest, testNewUnimplementedCurve) {
   auto status_or_recipient_kem =
-      EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType::UNKNOWN_CURVE, "");
+      EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType::UNKNOWN_CURVE, {});
   EXPECT_EQ(status_or_recipient_kem.status().error_code(),
             util::error::UNIMPLEMENTED);
 }
@@ -93,21 +98,23 @@ class EciesHkdfNistPCurveRecipientKemBoringSslTest : public ::testing::Test {};
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, testNew) {
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
       EllipticCurveType::NIST_P256,
-      test::HexDecodeOrDie(kNistP256PrivateKeyHex));
+      util::SecretDataFromStringView(
+          test::HexDecodeOrDie(kNistP256PrivateKeyHex)));
   ASSERT_TRUE(status_or_recipient_kem.ok());
 }
 
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, testNewInvalidCurve) {
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519,
-      test::HexDecodeOrDie(kNistP256PrivateKeyHex));
+      util::SecretDataFromStringView(
+          test::HexDecodeOrDie(kNistP256PrivateKeyHex)));
   EXPECT_EQ(status_or_recipient_kem.status().error_code(),
             util::error::UNIMPLEMENTED);
 }
 
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, testNewEmptyPrivateKey) {
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
-      EllipticCurveType::CURVE25519, "");
+      EllipticCurveType::CURVE25519, {});
   EXPECT_EQ(status_or_recipient_kem.status().error_code(),
             util::error::INVALID_ARGUMENT);
 }
@@ -115,7 +122,8 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, testNewEmptyPrivateKey) {
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, testGenerateKey) {
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
       EllipticCurveType::NIST_P256,
-      test::HexDecodeOrDie(kNistP256PrivateKeyHex));
+      util::SecretDataFromStringView(
+          test::HexDecodeOrDie(kNistP256PrivateKeyHex)));
   ASSERT_TRUE(status_or_recipient_kem.ok());
   auto recipient_kem = std::move(status_or_recipient_kem.ValueOrDie());
 
@@ -125,7 +133,8 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, testGenerateKey) {
       EcPointFormat::UNCOMPRESSED);
   ASSERT_TRUE(status_or_shared_key.ok());
 
-  EXPECT_EQ(test::HexEncode(status_or_shared_key.ValueOrDie()),
+  EXPECT_EQ(test::HexEncode(util::SecretDataAsStringView(
+                status_or_shared_key.ValueOrDie())),
             kNistP256SharedKeyHex);
 }
 
@@ -134,19 +143,23 @@ class EciesHkdfX25519RecipientKemBoringSslTest : public ::testing::Test {};
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, testNew) {
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519,
-      test::HexDecodeOrDie(kX25519PrivateKeyHex));
+      util::SecretDataFromStringView(
+          test::HexDecodeOrDie(kX25519PrivateKeyHex)));
   ASSERT_TRUE(status_or_recipient_kem.ok());
 }
 
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, testNewInvalidCurve) {
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
-      EllipticCurveType::NIST_P256, test::HexDecodeOrDie(kX25519PrivateKeyHex));
+      EllipticCurveType::NIST_P256,
+      util::SecretDataFromStringView(
+          test::HexDecodeOrDie(kX25519PrivateKeyHex)));
   EXPECT_EQ(status_or_recipient_kem.status().error_code(),
             util::error::INVALID_ARGUMENT);
 }
 
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, testNewShortKey) {
-  std::string private_key = test::HexDecodeOrDie(kX25519PrivateKeyHex);
+  util::SecretData private_key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie(kX25519PrivateKeyHex));
   private_key.resize(private_key.size() / 2);
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519, private_key);

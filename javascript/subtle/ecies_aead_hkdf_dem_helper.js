@@ -14,7 +14,7 @@
 
 goog.module('tink.subtle.EciesAeadHkdfDemHelper');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 
 /**
  * A helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF.

@@ -44,9 +44,6 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> Ed25519SignBoringSsl::New(
   return {absl::WrapUnique(new Ed25519SignBoringSsl(std::move(private_key)))};
 }
 
-Ed25519SignBoringSsl::Ed25519SignBoringSsl(util::SecretData private_key)
-    : private_key_(std::move(private_key)) {}
-
 util::StatusOr<std::string> Ed25519SignBoringSsl::Sign(
     absl::string_view data) const {
   data = SubtleUtilBoringSSL::EnsureNonNull(data);

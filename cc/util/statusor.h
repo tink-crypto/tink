@@ -36,6 +36,7 @@ class ABSL_MUST_USE_RESULT StatusOr;
 template <typename T>
 class StatusOr {
  public:
+  using type = T;
   // Has status UNKNOWN.
   inline StatusOr();
 

@@ -37,6 +37,7 @@ cc_library(
         "//subtle:subtle_util_boringssl",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )

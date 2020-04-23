@@ -33,7 +33,7 @@ from absl import flags
 from absl import logging
 import tink
 
-from tink.core import cleartext_keyset_handle
+from tink import cleartext_keyset_handle
 
 FLAGS = flags.FLAGS
 
@@ -52,8 +52,7 @@ def read_keyset(keyset_filename):
   """
   with open(keyset_filename, 'rb') as keyset_file:
     text = keyset_file.read()
-    keyset = cleartext_keyset_handle.CleartextKeysetHandle(
-        tink.BinaryKeysetReader(text).read())
+    keyset = cleartext_keyset_handle.read(tink.BinaryKeysetReader(text))
   return keyset
 
 
@@ -83,16 +82,16 @@ def main(argv):
     logging.error('Error initialising Tink: %s', e)
     return 1
 
-  # Read the keyset
+  # Read the keyset into keyset_handle
   try:
-    keyset = read_keyset(keyset_filename)
+    keyset_handle = read_keyset(keyset_filename)
   except tink.TinkError as e:
     logging.error('Error reading key: %s', e)
     return 1
 
   # Get the primitive
   try:
-    cipher = keyset.primitive(tink.Aead)
+    cipher = keyset_handle.primitive(tink.Aead)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
     return 1

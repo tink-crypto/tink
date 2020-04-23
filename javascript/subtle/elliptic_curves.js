@@ -19,7 +19,7 @@
 goog.module('tink.subtle.EllipticCurves');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
 
 /**
  * Supported elliptic curves.

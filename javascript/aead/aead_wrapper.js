@@ -14,25 +14,25 @@
 
 goog.module('tink.aead.AeadWrapper');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const Registry = goog.require('tink.Registry');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
- * @implements {Aead}
  * @final
  */
-class WrappedAead {
+class WrappedAead extends Aead {
   /**
    * @param {!PrimitiveSet.PrimitiveSet} aeadSet
    */
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   constructor(aeadSet) {
+    super();
     /** @private @const {!PrimitiveSet.PrimitiveSet} */
     this.aeadSet_ = aeadSet;
   }

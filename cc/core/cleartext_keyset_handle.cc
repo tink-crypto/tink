@@ -38,7 +38,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
   if (!keyset_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Error reading keyset data: %s",
-                     keyset_result.status().error_message().c_str());
+                     keyset_result.status().error_message());
   }
   std::unique_ptr<KeysetHandle> handle(
       new KeysetHandle(std::move(keyset_result.ValueOrDie())));

@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_HMAC_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
@@ -50,12 +51,13 @@ class HmacBoringSsl : public Mac {
   // Minimum HMAC key size in bytes.
   static constexpr size_t kMinKeySize = 16;
 
-  HmacBoringSsl(const EVP_MD* md, uint32_t tag_size, util::SecretData key);
+  HmacBoringSsl(const EVP_MD* md, uint32_t tag_size, util::SecretData key)
+      : md_(md), tag_size_(tag_size), key_(std::move(key)) {}
 
   // HmacBoringSsl is not owner of md (it is owned by BoringSSL).
-  const EVP_MD* md_;
-  uint32_t tag_size_;
-  util::SecretData key_;
+  const EVP_MD* const md_;
+  const uint32_t tag_size_;
+  const util::SecretData key_;
 };
 
 }  // namespace subtle

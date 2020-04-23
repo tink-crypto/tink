@@ -25,7 +25,7 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 
-	subteaead "github.com/google/tink/go/subtle/aead"
+	"github.com/google/tink/go/aead/subtle"
 	cppb "github.com/google/tink/go/proto/chacha20_poly1305_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -147,7 +147,7 @@ func genInvalidChaCha20Poly1305Keys() []*cppb.ChaCha20Poly1305Key {
 }
 
 func validateChaCha20Poly1305Primitive(p interface{}, key *cppb.ChaCha20Poly1305Key) error {
-	cipher := p.(*subteaead.ChaCha20Poly1305)
+	cipher := p.(*subtle.ChaCha20Poly1305)
 	if !bytes.Equal(cipher.Key, key.KeyValue) {
 		return fmt.Errorf("key and primitive don't match")
 	}
@@ -178,7 +178,7 @@ func validateChaCha20Poly1305Key(key *cppb.ChaCha20Poly1305Key) error {
 	}
 
 	// Try to encrypt and decrypt.
-	p, err := subteaead.NewChaCha20Poly1305(key.KeyValue)
+	p, err := subtle.NewChaCha20Poly1305(key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("invalid key: %v", key.KeyValue)
 	}

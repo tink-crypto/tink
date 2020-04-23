@@ -1,6 +1,6 @@
-package(default_visibility = ["//:__subpackages__"])  # keep
-
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
     name = "go_default_library",
@@ -14,14 +14,10 @@ go_library(
         "//aead:go_default_library",
         "//core/registry:go_default_library",
         "//daead:go_default_library",
+        "//daead/subtle:go_default_library",
+        "//hybrid/subtle:go_default_library",
         "//keyset:go_default_library",
         "//mac:go_default_library",
-        "//signature:go_default_library",
-        "//subtle:go_default_library",
-        "//subtle/daead:go_default_library",
-        "//subtle/hybrid:go_default_library",
-        "//subtle/random:go_default_library",
-        "//tink:go_default_library",
         "//proto:aes_gcm_go_proto",
         "//proto:aes_gcm_hkdf_streaming_go_proto",
         "//proto:aes_siv_go_proto",
@@ -31,6 +27,10 @@ go_library(
         "//proto:ed25519_go_proto",
         "//proto:hmac_go_proto",
         "//proto:tink_go_proto",
+        "//signature:go_default_library",
+        "//subtle:go_default_library",
+        "//subtle/random:go_default_library",
+        "//tink:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
         "@org_golang_x_crypto//ed25519:go_default_library",
     ],

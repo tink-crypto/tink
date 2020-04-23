@@ -23,11 +23,11 @@ local_repository(
 # http_archive(
 #     name = "tink_java",
 #     urls = ["https://github.com/google/tink/archive/master.zip"],
-#     strip_prefix = "tink-master/java",
+#     strip_prefix = "tink-master/java_src",
 # )
 local_repository(
     name = "tink_java",
-    path = "../../java",
+    path = "../../java_src",
 )
 
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")

@@ -1,0 +1,151 @@
+load("@rules_python//python:defs.bzl", "py_library")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+py_library(
+    name = "streaming_aead",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_decrypting_stream",
+        ":_encrypting_stream",
+        ":_streaming_aead",
+        ":_streaming_aead_key_manager",
+        ":_streaming_aead_key_templates",
+    ],
+)
+
+py_library(
+    name = "_encrypting_stream",
+    srcs = ["_encrypting_stream.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/cc/pybind:cc_streaming_aead_wrappers",
+        "//tink/core",
+        "//tink/util:file_object_adapter",
+    ],
+)
+
+py_test(
+    name = "_encrypting_stream_test",
+    srcs = ["_encrypting_stream_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":streaming_aead",
+        requirement("absl-py"),
+        requirement("six"),
+        "//tink/cc/pybind:input_stream_adapter",
+        "//tink/cc/pybind:output_stream_adapter",
+    ],
+)
+
+py_library(
+    name = "_decrypting_stream",
+    srcs = ["_decrypting_stream.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/cc/pybind:cc_streaming_aead_wrappers",
+        "//tink/cc/pybind:status",
+        "//tink/core",
+        "//tink/util:file_object_adapter",
+    ],
+)
+
+py_test(
+    name = "_decrypting_stream_test",
+    srcs = ["_decrypting_stream_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":streaming_aead",
+        requirement("absl-py"),
+        requirement("six"),
+        "//tink/cc/pybind:input_stream_adapter",
+        "//tink/cc/pybind:output_stream_adapter",
+        "//tink/cc/pybind:status",
+        "//tink/core",
+    ],
+)
+
+py_library(
+    name = "_streaming_aead",
+    srcs = ["_streaming_aead.py"],
+    srcs_version = "PY3",
+    deps = [requirement("six")],
+)
+
+py_library(
+    name = "_streaming_aead_key_manager",
+    srcs = ["_streaming_aead_key_manager.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_decrypting_stream",
+        ":_encrypting_stream",
+        ":_streaming_aead",
+        "//tink/cc/pybind:cc_key_manager",
+        "//tink/cc/pybind:streaming_aead",
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_streaming_aead_key_manager_test",
+    timeout = "short",
+    srcs = ["_streaming_aead_key_manager_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":streaming_aead",
+        requirement("absl-py"),
+        "//tink:tink_config",
+        "//tink/cc/pybind:input_stream_adapter",
+        "//tink/cc/pybind:output_stream_adapter",
+        "//tink/core",
+        "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
+        "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_streaming_aead_key_templates",
+    srcs = ["_streaming_aead_key_templates.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
+        "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_streaming_aead_key_templates_test",
+    timeout = "short",
+    srcs = ["_streaming_aead_key_templates_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":streaming_aead",
+        requirement("absl-py"),
+        "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
+        "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_streaming_aead_test",
+    timeout = "short",
+    srcs = ["_streaming_aead_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":streaming_aead",
+        requirement("absl-py"),
+        "//tink:tink_config",
+        "//tink/cc/pybind:input_stream_adapter",
+        "//tink/cc/pybind:output_stream_adapter",
+    ],
+)

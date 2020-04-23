@@ -18,9 +18,8 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/signature/subtle"
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -37,9 +36,6 @@ var errECDSAVerifierNotImplemented = fmt.Errorf("ecdsa_verifier_key_manager: not
 // ecdsaVerifierKeyManager is an implementation of KeyManager interface.
 // It doesn't support key generation.
 type ecdsaVerifierKeyManager struct{}
-
-// Assert that ecdsaVerifierKeyManager implements the KeyManager interface.
-var _ registry.KeyManager = (*ecdsaVerifierKeyManager)(nil)
 
 // newECDSAVerifierKeyManager creates a new ecdsaVerifierKeyManager.
 func newECDSAVerifierKeyManager() *ecdsaVerifierKeyManager {
@@ -59,7 +55,7 @@ func (km *ecdsaVerifierKeyManager) Primitive(serializedKey []byte) (interface{},
 		return nil, fmt.Errorf("ecdsa_verifier_key_manager: %s", err)
 	}
 	hash, curve, encoding := getECDSAParamNames(key.Params)
-	ret, err := subtleSignature.NewECDSAVerifier(hash, curve, encoding, key.X, key.Y)
+	ret, err := subtle.NewECDSAVerifier(hash, curve, encoding, key.X, key.Y)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_verifier_key_manager: invalid key: %s", err)
 	}
@@ -93,5 +89,5 @@ func (km *ecdsaVerifierKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) erro
 		return fmt.Errorf("ecdsa_verifier_key_manager: %s", err)
 	}
 	hash, curve, encoding := getECDSAParamNames(key.Params)
-	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
+	return subtle.ValidateECDSAParams(hash, curve, encoding)
 }

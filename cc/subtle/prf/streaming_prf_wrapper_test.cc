@@ -79,9 +79,9 @@ TEST(KeysetDeriverWrapperTest, WrapSingle) {
 
   ASSERT_THAT(wrapped_prf.status(), IsOk());
 
-  auto prf_output = ReadAtMostFromStream(
-      100, wrapped_prf.ValueOrDie()->ComputePrf("input_text").get());
-  EXPECT_THAT(prf_output.status(), IsOk());
+  auto prf_output = ReadBytesFromStream(
+      23, wrapped_prf.ValueOrDie()->ComputePrf("input_text").get());
+  ASSERT_THAT(prf_output.status(), IsOk());
   EXPECT_THAT(prf_output.ValueOrDie(), Eq("10:single_keyinput_text"));
 }
 

@@ -14,13 +14,17 @@
 
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 
+#include <algorithm>
+#include <utility>
+
 #include "absl/memory/memory.h"
-#include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "openssl/hkdf.h"
 #include "openssl/hmac.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/secret_data.h"
 
 namespace crypto {
 namespace tink {
@@ -30,23 +34,19 @@ namespace {
 
 class HkdfInputStream : public InputStream {
  public:
-  HkdfInputStream(const EVP_MD *digest, absl::string_view secret,
+  HkdfInputStream(const EVP_MD *digest, const util::SecretData &secret,
                   absl::string_view salt, absl::string_view input)
-      : digest_(digest), ti_(""), i_(0), input_(input), position_in_ti_(0) {
-    stream_status_ = util::OkStatus();
-
-    ResizeStringUninitialized(&prk_, EVP_MAX_MD_SIZE);
+      : digest_(digest), input_(input) {
+    prk_.resize(EVP_MAX_MD_SIZE);
     size_t prk_len;
 
     if (1 != HKDF_extract(
-                 reinterpret_cast<uint8_t *>(&prk_[0]), &prk_len, digest_,
-                 reinterpret_cast<const uint8_t *>(secret.data()),
-                 secret.size(), reinterpret_cast<const uint8_t *>(salt.data()),
-                 salt.size())) {
+                 prk_.data(), &prk_len, digest_, secret.data(), secret.size(),
+                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size())) {
       stream_status_ =
           util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
     }
-    ResizeStringUninitialized(&prk_, prk_len);
+    prk_.resize(prk_len);
   }
 
   crypto::tink::util::StatusOr<int> Next(const void **data) override {
@@ -69,7 +69,7 @@ class HkdfInputStream : public InputStream {
   }
 
   void BackUp(int count) override {
-    position_in_ti_ -= std::min(count, position_in_ti_);
+    position_in_ti_ -= std::min(std::max(0, count), position_in_ti_);
   }
 
   int64_t Position() const override {
@@ -100,8 +100,7 @@ class HkdfInputStream : public InputStream {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Init_ex failed");
     }
-    if (!HMAC_Update(&hmac_ctx, reinterpret_cast<const uint8_t *>(&ti_[0]),
-                     ti_.size())) {
+    if (!HMAC_Update(&hmac_ctx, ti_.data(), ti_.size())) {
       HMAC_CTX_cleanup(&hmac_ctx);
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Update failed on ti_");
@@ -118,8 +117,8 @@ class HkdfInputStream : public InputStream {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Update failed on i_");
     }
-    ResizeStringUninitialized(&ti_, EVP_MD_size(digest_));
-    if (!HMAC_Final(&hmac_ctx, reinterpret_cast<uint8_t *>(&ti_[0]), nullptr)) {
+    ti_.resize(EVP_MD_size(digest_));
+    if (!HMAC_Final(&hmac_ctx, ti_.data(), nullptr)) {
       HMAC_CTX_cleanup(&hmac_ctx);
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Final failed");
@@ -132,22 +131,22 @@ class HkdfInputStream : public InputStream {
 
   // OUT_OF_RANGE_ERROR in case we returned all the data. Other errors indicate
   // problems and are permanent.
-  util::Status stream_status_;
+  util::Status stream_status_ = util::OkStatus();
 
   const EVP_MD *digest_;
 
   // PRK as by RFC 5869, Section 2.2
-  std::string prk_;
+  util::SecretData prk_;
 
   // Current value T(i).
-  std::string ti_;
+  util::SecretData ti_;
   // By RFC 5869: 0 <= i_ <= 255*HashLen
-  int i_;
+  int i_ = 0;
 
   std::string input_;
 
   // The current position of ti which we returned.
-  int position_in_ti_;
+  int position_in_ti_ = 0;
 };
 
 }  // namespace
@@ -159,7 +158,7 @@ std::unique_ptr<InputStream> HkdfStreamingPrf::ComputePrf(
 
 // static
 crypto::tink::util::StatusOr<std::unique_ptr<StreamingPrf>>
-HkdfStreamingPrf::New(HashType hash, absl::string_view secret,
+HkdfStreamingPrf::New(HashType hash, util::SecretData secret,
                       absl::string_view salt) {
   if (hash != SHA256 && hash != SHA512 && hash != SHA1) {
     return util::Status(
@@ -169,15 +168,15 @@ HkdfStreamingPrf::New(HashType hash, absl::string_view secret,
 
   if (secret.size() < 10) {
     return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("Too short secret for HkdfStreamingPrf"));
+                        "Too short secret for HkdfStreamingPrf");
   }
-  auto status_or_evp_md = SubtleUtilBoringSSL::EvpHash(hash);
-  if (!status_or_evp_md.ok()) {
+  auto evp_md_or = SubtleUtilBoringSSL::EvpHash(hash);
+  if (!evp_md_or.ok()) {
     return util::Status(util::error::UNIMPLEMENTED, "Unsupported hash");
   }
 
   return {absl::WrapUnique(
-      new HkdfStreamingPrf(status_or_evp_md.ValueOrDie(), secret, salt))};
+      new HkdfStreamingPrf(evp_md_or.ValueOrDie(), std::move(secret), salt))};
 }
 
 }  // namespace subtle

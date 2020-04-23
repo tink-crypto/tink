@@ -18,7 +18,10 @@
 #include "gtest/gtest.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
+#include "tink/subtle/prf/prf_set_util.h"
 #include "tink/util/input_stream_util.h"
+#include "tink/util/istream_input_stream.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
 
@@ -34,6 +37,7 @@ using ::google::crypto::tink::HkdfPrfKey;
 using ::google::crypto::tink::HkdfPrfKeyFormat;
 using ::testing::Eq;
 using ::testing::HasSubstr;
+using ::testing::Not;
 using ::testing::SizeIs;
 
 TEST(HkdfPrfKeyManagerTest, Basics) {
@@ -215,17 +219,95 @@ TEST(HkdfPrfKeyManagerTest, CreatePrf) {
 
   StatusOr<std::unique_ptr<StreamingPrf>> direct_prf =
       subtle::HkdfStreamingPrf::New(
-          subtle::SHA256, key_or.ValueOrDie().key_value(), "salt string");
+          subtle::SHA256,
+          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()),
+          "salt string");
 
   ASSERT_THAT(direct_prf.status(), IsOk());
 
   std::unique_ptr<InputStream> input =
       prf_or.ValueOrDie()->ComputePrf("input string");
   std::unique_ptr<InputStream> direct_input =
-  direct_prf.ValueOrDie()->ComputePrf("input string");
+      direct_prf.ValueOrDie()->ComputePrf("input string");
 
-  auto output_or = ReadAtMostFromStream(100, input.get());
-  auto direct_output_or = ReadAtMostFromStream(100, direct_input.get());
+  auto output_or = ReadBytesFromStream(100, input.get());
+  auto direct_output_or = ReadBytesFromStream(100, direct_input.get());
+
+  ASSERT_THAT(output_or.status(), IsOk());
+  ASSERT_THAT(direct_output_or.status(), IsOk());
+  EXPECT_THAT(output_or.ValueOrDie(), Eq(direct_output_or.ValueOrDie()));
+}
+
+TEST(HkdfPrfKeyManagerTest, DeriveKey) {
+  HkdfPrfKeyFormat format;
+  format.set_key_size(32);
+  format.set_version(0);
+  format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+
+  StatusOr<HkdfPrfKey> key_or =
+      HkdfPrfKeyManager().DeriveKey(format, &input_stream);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+              Eq("0123456789abcdef0123456789abcdef"));
+  EXPECT_THAT(key_or.ValueOrDie().params().hash(), Eq(format.params().hash()));
+}
+
+TEST(HmacPrfKeyManagerTest, DeriveKeyNotEnoughRandomness) {
+  HkdfPrfKeyFormat format;
+  format.set_key_size(32);
+  format.set_version(0);
+  format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef")};
+
+  ASSERT_THAT(HkdfPrfKeyManager().DeriveKey(format, &input_stream).status(),
+              Not(IsOk()));
+}
+
+TEST(HmacPrfKeyManagerTest, DeriveKeyWrongVersion) {
+  HkdfPrfKeyFormat format;
+  format.set_key_size(32);
+  format.set_version(1);
+  format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+
+  ASSERT_THAT(HkdfPrfKeyManager().DeriveKey(format, &input_stream).status(),
+              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+}
+
+TEST(HkdfPrfKeyManagerTest, CreatePrfSet) {
+  HkdfPrfKeyFormat key_format;
+  key_format.set_key_size(32);
+  key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
+  key_format.mutable_params()->set_salt("salt string");
+  auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<PrfSet>> prf_or =
+      HkdfPrfKeyManager().GetPrimitive<PrfSet>(key_or.ValueOrDie());
+
+  ASSERT_THAT(prf_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<StreamingPrf>> direct_streaming_prf =
+      subtle::HkdfStreamingPrf::New(
+          subtle::SHA256,
+          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()),
+          "salt string");
+
+  ASSERT_THAT(direct_streaming_prf.status(), IsOk());
+  auto direct_prf = subtle::CreatePrfFromStreamingPrf(
+      std::move(direct_streaming_prf.ValueOrDie()));
+
+  util::StatusOr<std::string> output_or =
+      prf_or.ValueOrDie()->ComputePrimary("input string", 100);
+  util::StatusOr<std::string> direct_output_or =
+      direct_prf->Compute("input string", 100);
 
   ASSERT_THAT(output_or.status(), IsOk());
   ASSERT_THAT(direct_output_or.status(), IsOk());

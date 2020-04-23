@@ -1,0 +1,97 @@
+load("@rules_python//python:defs.bzl", "py_library")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+py_library(
+    name = "daead",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_deterministic_aead",
+        ":_deterministic_aead_key_manager",
+        ":_deterministic_aead_key_templates",
+    ],
+)
+
+py_library(
+    name = "_deterministic_aead",
+    srcs = ["_deterministic_aead.py"],
+    srcs_version = "PY3",
+    deps = [requirement("six")],
+)
+
+py_library(
+    name = "_deterministic_aead_key_manager",
+    srcs = ["_deterministic_aead_key_manager.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_deterministic_aead",
+        ":_deterministic_aead_wrapper",
+        "//tink/cc/pybind:cc_key_manager",
+        "//tink/cc/pybind:cc_tink_config",
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_deterministic_aead_key_manager_test",
+    srcs = ["_deterministic_aead_key_manager_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":daead",
+        requirement("absl-py"),
+        "//tink/core",
+        "//tink/proto:aes_siv_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_deterministic_aead_key_templates",
+    srcs = ["_deterministic_aead_key_templates.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/proto:aes_siv_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_deterministic_aead_key_templates_test",
+    srcs = ["_deterministic_aead_key_templates_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":daead",
+        requirement("absl-py"),
+        "//tink/proto:aes_siv_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_deterministic_aead_wrapper",
+    srcs = ["_deterministic_aead_wrapper.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_deterministic_aead",
+        requirement("absl-py"),
+        "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_deterministic_aead_wrapper_test",
+    srcs = ["_deterministic_aead_wrapper_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":daead",
+        requirement("absl-py"),
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
+    ],
+)

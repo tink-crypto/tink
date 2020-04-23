@@ -22,6 +22,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/streamingaead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testkeyset"
@@ -120,4 +122,29 @@ func encryptDecrypt(encryptCipher, decryptCipher tink.StreamingAEAD, ptSize, aad
 		return fmt.Errorf("decryption failed")
 	}
 	return nil
+}
+
+
+func TestFactoryWithInvalidPrimitiveSetType(t *testing.T) {
+	wrongKH, err := keyset.NewHandle(mac.HMACSHA256Tag128KeyTemplate())
+	if err != nil {
+		t.Fatalf("failed to build *keyset.Handle: %s", err)
+	}
+
+	_, err = streamingaead.New(wrongKH)
+	if err == nil {
+		t.Fatal("New() should fail with wrong *keyset.Handle")
+	}
+}
+
+func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
+	goodKH, err := keyset.NewHandle(streamingaead.AES128GCMHKDF4KBKeyTemplate())
+	if err != nil {
+		t.Fatalf("failed to build *keyset.Handle: %s", err)
+	}
+
+	_, err = streamingaead.New(goodKH)
+	if err != nil {
+		t.Fatalf("New() failed with good *keyset.Handle: %s", err)
+	}
 }

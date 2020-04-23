@@ -23,10 +23,10 @@ tink_cc_library(
 tink_cc_library(
   NAME errors
   SRCS
-    errors.cc
     errors.h
   DEPS
     tink::util::status
+    absl::str_format
 )
 
 tink_cc_library(
@@ -39,6 +39,7 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
+    tink::util::statusor
     absl::strings
 )
 
@@ -192,6 +193,7 @@ tink_cc_library(
     test_matchers.h
   DEPS
     tink::util::status
+    tink::util::statusor
     gmock
 )
 
@@ -219,8 +221,20 @@ tink_cc_library(
     input_stream_util.h
   DEPS
     tink::core::input_stream
+    tink::util::secret_data
     tink::util::statusor
+    absl::algorithm_container
+    absl::span
     absl::strings
+)
+
+tink_cc_library(
+  NAME keyset_util
+  SRCS
+    keyset_util.cc
+    keyset_util.h
+  DEPS
+    tink::proto::tink_cc_proto
 )
 
 # tests
@@ -323,6 +337,7 @@ tink_cc_test(
   DEPS
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
+    tink::util::test_matchers
     tink::util::test_util
     tink::subtle::random
     absl::strings
@@ -346,6 +361,8 @@ tink_cc_test(
   DEPS
     tink::util::input_stream_util
     tink::util::istream_input_stream
+    tink::util::secret_data
+    tink::util::status
     tink::util::test_matchers
     absl::memory
     gmock

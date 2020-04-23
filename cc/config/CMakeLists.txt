@@ -10,6 +10,7 @@ tink_cc_library(
     tink::core::key_manager
     tink::daead::deterministic_aead_config
     tink::hybrid::hybrid_config
+    tink::prf::prf_config
     tink::signature::signature_config
     tink::streamingaead::streaming_aead_config
     tink::util::status

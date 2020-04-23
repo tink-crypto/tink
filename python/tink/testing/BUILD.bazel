@@ -1,0 +1,32 @@
+load("@rules_python//python:defs.bzl", "py_library")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+py_library(
+    name = "helper",
+    srcs = ["helper.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/proto:tink_py_pb2",
+        "//tink/aead",
+        "//tink/core",
+        "//tink/daead",
+        "//tink/hybrid",
+        "//tink/mac",
+        "//tink/signature",
+    ],
+)
+
+py_test(
+    name = "helper_test",
+    srcs = ["helper_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":helper",
+        requirement("absl-py"),
+        "//tink/core",
+    ],
+)

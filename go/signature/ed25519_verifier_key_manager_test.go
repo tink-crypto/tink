@@ -19,7 +19,6 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
 )
 
@@ -29,11 +28,10 @@ func TestED25519VerifyGetPrimitiveBasic(t *testing.T) {
 		t.Errorf("cannot obtain ED25519Verifier key manager: %s", err)
 	}
 	serializedKey, _ := proto.Marshal(testutil.NewED25519PublicKey())
-	tmp, err := km.Primitive(serializedKey)
+	_, err = km.Primitive(serializedKey)
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	var _ *signature.ED25519Verifier = tmp.(*signature.ED25519Verifier)
 }
 
 func TestED25519VerifyGetPrimitiveWithInvalidInput(t *testing.T) {

@@ -16,12 +16,11 @@
 
 #include "tink/util/enums.h"
 
-#include "tink/subtle/common_enums.h"
 #include "gtest/gtest.h"
+#include "tink/subtle/common_enums.h"
 #include "proto/common.pb.h"
 
 using crypto::tink::util::Enums;
-
 
 namespace crypto {
 
@@ -30,8 +29,7 @@ namespace pb = google::crypto::tink;
 namespace tink {
 namespace {
 
-class EnumsTest : public ::testing::Test {
-};
+class EnumsTest : public ::testing::Test {};
 
 TEST_F(EnumsTest, testEllipticCurveType) {
   EXPECT_EQ(pb::EllipticCurveType::NIST_P256,
@@ -66,8 +64,7 @@ TEST_F(EnumsTest, testEllipticCurveType) {
        int_type <= static_cast<int>(pb::EllipticCurveType_MAX); int_type++) {
     if (pb::EllipticCurveType_IsValid(int_type)) {
       pb::EllipticCurveType type = static_cast<pb::EllipticCurveType>(int_type);
-      EXPECT_EQ(type,
-                Enums::SubtleToProto(Enums::ProtoToSubtle(type)));
+      EXPECT_EQ(type, Enums::SubtleToProto(Enums::ProtoToSubtle(type)));
       count++;
     }
   }
@@ -75,8 +72,7 @@ TEST_F(EnumsTest, testEllipticCurveType) {
 }
 
 TEST_F(EnumsTest, testHashType) {
-  EXPECT_EQ(pb::HashType::SHA1,
-            Enums::SubtleToProto(subtle::HashType::SHA1));
+  EXPECT_EQ(pb::HashType::SHA1, Enums::SubtleToProto(subtle::HashType::SHA1));
   EXPECT_EQ(pb::HashType::SHA256,
             Enums::SubtleToProto(subtle::HashType::SHA256));
   EXPECT_EQ(pb::HashType::SHA384,
@@ -88,8 +84,7 @@ TEST_F(EnumsTest, testHashType) {
   EXPECT_EQ(pb::HashType::UNKNOWN_HASH,
             Enums::SubtleToProto((subtle::HashType)42));
 
-  EXPECT_EQ(subtle::HashType::SHA1,
-            Enums::ProtoToSubtle(pb::HashType::SHA1));
+  EXPECT_EQ(subtle::HashType::SHA1, Enums::ProtoToSubtle(pb::HashType::SHA1));
   EXPECT_EQ(subtle::HashType::SHA256,
             Enums::ProtoToSubtle(pb::HashType::SHA256));
   EXPECT_EQ(subtle::HashType::SHA384,
@@ -107,12 +102,19 @@ TEST_F(EnumsTest, testHashType) {
        int_type <= static_cast<int>(pb::HashType_MAX); int_type++) {
     if (pb::HashType_IsValid(int_type)) {
       pb::HashType type = static_cast<pb::HashType>(int_type);
-      EXPECT_EQ(type,
-                Enums::SubtleToProto(Enums::ProtoToSubtle(type)));
+      EXPECT_EQ(type, Enums::SubtleToProto(Enums::ProtoToSubtle(type)));
       count++;
     }
   }
   EXPECT_EQ(5, count);
+}
+
+TEST_F(EnumsTest, testHashSize) {
+  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA256).ValueOrDie(), 32);
+  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA384).ValueOrDie(), 48);
+  EXPECT_EQ(Enums::HashLength(pb::HashType::SHA512).ValueOrDie(), 64);
+  EXPECT_TRUE(!Enums::HashLength(pb::HashType::UNKNOWN_HASH).ok());
+  EXPECT_TRUE(!Enums::HashLength(pb::HashType::SHA1).ok());
 }
 
 TEST_F(EnumsTest, testEcPointFormat) {
@@ -146,8 +148,7 @@ TEST_F(EnumsTest, testEcPointFormat) {
        int_format <= static_cast<int>(pb::EcPointFormat_MAX); int_format++) {
     if (pb::EcPointFormat_IsValid(int_format)) {
       pb::EcPointFormat format = static_cast<pb::EcPointFormat>(int_format);
-      EXPECT_EQ(format,
-                Enums::SubtleToProto(Enums::ProtoToSubtle(format)));
+      EXPECT_EQ(format, Enums::SubtleToProto(Enums::ProtoToSubtle(format)));
       count++;
     }
   }
@@ -210,8 +211,7 @@ TEST_F(EnumsTest, testKeyStatusName) {
        int_status <= static_cast<int>(pb::KeyStatusType_MAX); int_status++) {
     if (pb::KeyStatusType_IsValid(int_status)) {
       pb::KeyStatusType status = static_cast<pb::KeyStatusType>(int_status);
-      EXPECT_EQ(status,
-                Enums::KeyStatus(Enums::KeyStatusName(status)));
+      EXPECT_EQ(status, Enums::KeyStatus(Enums::KeyStatusName(status)));
       count++;
     }
   }
@@ -263,14 +263,12 @@ TEST_F(EnumsTest, testKeyMaterialName) {
       "UNKNOWN_KEYMATERIAL",
       std::string(Enums::KeyMaterialName((pb::KeyData::KeyMaterialType)42)));
 
-  EXPECT_EQ(pb::KeyData::SYMMETRIC,
-            Enums::KeyMaterial("SYMMETRIC"));
+  EXPECT_EQ(pb::KeyData::SYMMETRIC, Enums::KeyMaterial("SYMMETRIC"));
   EXPECT_EQ(pb::KeyData::ASYMMETRIC_PRIVATE,
             Enums::KeyMaterial("ASYMMETRIC_PRIVATE"));
   EXPECT_EQ(pb::KeyData::ASYMMETRIC_PUBLIC,
             Enums::KeyMaterial("ASYMMETRIC_PUBLIC"));
-  EXPECT_EQ(pb::KeyData::REMOTE,
-            Enums::KeyMaterial("REMOTE"));
+  EXPECT_EQ(pb::KeyData::REMOTE, Enums::KeyMaterial("REMOTE"));
   EXPECT_EQ(pb::KeyData::UNKNOWN_KEYMATERIAL,
             Enums::KeyMaterial("Other string"));
   EXPECT_EQ(pb::KeyData::UNKNOWN_KEYMATERIAL,
@@ -284,8 +282,7 @@ TEST_F(EnumsTest, testKeyMaterialName) {
     if (pb::KeyData::KeyMaterialType_IsValid(int_type)) {
       pb::KeyData::KeyMaterialType type =
           static_cast<pb::KeyData::KeyMaterialType>(int_type);
-      EXPECT_EQ(type,
-                Enums::KeyMaterial(Enums::KeyMaterialName(type)));
+      EXPECT_EQ(type, Enums::KeyMaterial(Enums::KeyMaterialName(type)));
       count++;
     }
   }

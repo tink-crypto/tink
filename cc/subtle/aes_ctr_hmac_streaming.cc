@@ -112,10 +112,10 @@ static util::Status Validate(const AesCtrHmacStreaming::Params& params) {
 // AesCtrHmacStreaming
 // static
 util::StatusOr<std::unique_ptr<AesCtrHmacStreaming>> AesCtrHmacStreaming::New(
-    const Params& params) {
+    Params params) {
   auto status = Validate(params);
   if (!status.ok()) return status;
-  return {absl::WrapUnique(new AesCtrHmacStreaming(params))};
+  return {absl::WrapUnique(new AesCtrHmacStreaming(std::move(params)))};
 }
 
 // static

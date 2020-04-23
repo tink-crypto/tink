@@ -1,0 +1,175 @@
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+load("@tink_base//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("@tink_base//tools:common.bzl", "template_rule")
+
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+full_protos = [
+    "//proto:common_java_proto",
+    "//proto:config_java_proto",
+    "//proto:tink_java_proto",
+]
+
+lite_protos = [
+    "//proto:common_java_proto_lite",
+    "//proto:config_java_proto_lite",
+    "//proto:tink_java_proto_lite",
+]
+
+# public interfaces
+
+PRIMITIVES_SRCS = [
+    "Aead.java",
+    "DeterministicAead.java",
+    "HybridDecrypt.java",
+    "HybridEncrypt.java",
+    "KeyWrap.java",
+    "Mac.java",
+    "PublicKeySign.java",
+    "PublicKeyVerify.java",
+    "StreamingAead.java",
+]
+
+java_library(
+    name = "primitives",
+    srcs = PRIMITIVES_SRCS,
+    javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
+)
+
+# restricted APIs
+
+CLEARTEXT_KEYSET_HANDLE_SRCS = [
+    # Storing keyset in cleartext usually leads to security incidents.
+    # To discourage users from doing that, the visibility of
+    # CleartextKeysetHandle, which allows loading cleartext keyset,
+    # is restricted.
+    "CleartextKeysetHandle.java",
+]
+
+PRIVILEGED_REGISTRY = ["PrivilegedRegistry.java"]
+
+filegroup(
+    name = "cleartext_keyset_handle_srcs",
+    srcs = CLEARTEXT_KEYSET_HANDLE_SRCS,
+)
+
+# core, without restricted APIs
+
+template_rule(
+    name = "version_java",
+    src = "Version.java.templ",
+    out = "Version.java",
+    substitutions = {
+        "TINK_VERSION_LABEL": "%s" % TINK_VERSION_LABEL,
+    },
+)
+
+java_library(
+    name = "core",
+    srcs = glob(
+        ["*.java"],
+        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + PRIMITIVES_SRCS + PRIVILEGED_REGISTRY,
+    ) + [":version_java"],
+    visibility = ["//visibility:public"],
+    deps = full_protos + [
+        "//src/main/java/com/google/crypto/tink/annotations",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        ":primitives",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@com_google_protobuf//:protobuf_java",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_library(
+    name = "tink",
+    deprecation = "Use :core and :primitives instead",
+    visibility = ["//visibility:public"],
+    exports = [
+        ":core",
+        ":primitives",
+    ],
+)
+
+java_library(
+    name = "core-android",
+    srcs = glob(
+        ["*.java"],
+        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + PRIMITIVES_SRCS + PRIVILEGED_REGISTRY + [
+            # TextFormat doesn't work with lite protos
+            "TextFormatKeysetReaders.java",
+            "TextFormatKeysetWriters.java",
+        ],
+    ) + [":version_java"],
+    javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
+    deps = lite_protos + [
+        "//src/main/java/com/google/crypto/tink/annotations",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        ":primitives",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_library(
+    name = "android",
+    deprecation = "Use :core-android and :primitives instead",
+    visibility = ["//visibility:public"],
+    exports = [
+        ":core-android",
+        ":primitives",
+    ],
+)
+
+java_library(
+    name = "cleartext_keyset_handle",
+    srcs = [
+        ":cleartext_keyset_handle_srcs",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = full_protos + [
+        ":tink",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "cleartext_keyset_handle_android",
+    srcs = [
+        ":cleartext_keyset_handle_srcs",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = lite_protos + [
+        ":android",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "privileged_registry",
+    srcs = ["PrivilegedRegistry.java"],
+    javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":core",
+        "//proto:tink_java_proto",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "privileged_registry-android",
+    srcs = ["PrivilegedRegistry.java"],
+    javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":core-android",
+        "//proto:tink_java_proto_lite",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+    ],
+)

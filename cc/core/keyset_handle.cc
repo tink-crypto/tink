@@ -16,13 +16,14 @@
 #include "tink/keyset_handle.h"
 
 #include <memory>
-#include <random>
+
 #include "absl/memory/memory.h"
 #include "tink/aead.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/registry.h"
 #include "tink/util/errors.h"
+#include "tink/util/keyset_util.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;
@@ -60,27 +61,6 @@ Decrypt(const EncryptedKeyset& enc_keyset, const Aead& master_key_aead) {
   return std::move(keyset);
 }
 
-uint32_t NewKeyId() {
-  std::random_device rd;
-  std::minstd_rand0 gen(rd());
-  std::uniform_int_distribution<uint32_t> dist;
-  return dist(gen);
-}
-
-uint32_t GenerateUnusedKeyId(const Keyset& keyset) {
-  while (true) {
-    uint32_t key_id = NewKeyId();
-    bool already_exists = false;
-    for (auto& key : keyset.key()) {
-      if (key.key_id() == key_id) {
-        already_exists = true;
-        break;
-      }
-    }
-    if (!already_exists) return key_id;
-  }
-}
-
 util::Status ValidateNoSecret(const Keyset& keyset) {
   for (const Keyset::Key& key : keyset.key()) {
     if (key.key_data().key_material_type() == KeyData::UNKNOWN_KEYMATERIAL ||
@@ -104,7 +84,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
   if (!enc_keyset_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Error reading encrypted keyset data: %s",
-                     enc_keyset_result.status().error_message().c_str());
+                     enc_keyset_result.status().error_message());
   }
 
   auto keyset_result =
@@ -112,7 +92,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
   if (!keyset_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Error decrypting encrypted keyset: %s",
-                     keyset_result.status().error_message().c_str());
+                     keyset_result.status().error_message());
   }
 
   std::unique_ptr<KeysetHandle> handle(
@@ -143,7 +123,7 @@ util::Status KeysetHandle::Write(KeysetWriter* writer,
   if (!encrypt_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Encryption of the keyset failed: %s",
-                     encrypt_result.status().error_message().c_str());
+                     encrypt_result.status().error_message());
   }
   return writer->Write(*(encrypt_result.ValueOrDie().get()));
 }

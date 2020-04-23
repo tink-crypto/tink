@@ -9,18 +9,25 @@ cc_library(
     hdrs = ["hkdf_prf_key_manager.h"],
     include_prefix = "tink/prf",
     deps = [
+        ":prf_set",
         "//:core/key_type_manager",
-        "//subtle",
-        "//subtle/prf:hkdf_streaming_prf",
-        "//subtle/prf:streaming_prf",
-        "//util:constants",
-        "//util:enums",
-        "//util:status",
-        "//util:statusor",
-        "//util:validation",
+        "//:input_stream",
         "//proto:common_cc_proto",
         "//proto:hkdf_prf_cc_proto",
         "//proto:tink_cc_proto",
+        "//subtle",
+        "//subtle/prf:hkdf_streaming_prf",
+        "//subtle/prf:prf_set_util",
+        "//subtle/prf:streaming_prf",
+        "//util:constants",
+        "//util:enums",
+        "//util:input_stream_util",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -31,10 +38,13 @@ cc_library(
     include_prefix = "tink/prf",
     visibility = ["//visibility:public"],
     deps = [
+        ":aes_cmac_prf_key_manager",
         ":hkdf_prf_key_manager",
+        ":hmac_prf_key_manager",
+        ":prf_set_wrapper",
         "//:registry",
-        "//util:status",
         "//proto:tink_cc_proto",
+        "//util:status",
     ],
 )
 
@@ -45,9 +55,95 @@ cc_library(
     include_prefix = "tink/prf",
     visibility = ["//visibility:public"],
     deps = [
+        ":aes_cmac_prf_key_manager",
         ":hkdf_prf_key_manager",
+        ":hmac_prf_key_manager",
+        "//proto:aes_cmac_prf_cc_proto",
         "//proto:hkdf_prf_cc_proto",
+        "//proto:hmac_prf_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "prf_set",
+    srcs = ["prf_set.cc"],
+    hdrs = ["prf_set.h"],
+    include_prefix = "tink/prf",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "prf_set_wrapper",
+    srcs = ["prf_set_wrapper.cc"],
+    hdrs = ["prf_set_wrapper.h"],
+    include_prefix = "tink/prf",
+    deps = [
+        ":prf_set",
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+    ],
+)
+
+cc_library(
+    name = "aes_cmac_prf_key_manager",
+    hdrs = ["aes_cmac_prf_key_manager.h"],
+    include_prefix = "tink/prf",
+    deps = [
+        "//:core/key_type_manager",
+        "//:key_manager",
+        "//proto:aes_cmac_prf_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle",
+        "//subtle:common_enums",
+        "//subtle:random",
+        "//subtle:stateful_cmac_boringssl",
+        "//subtle/prf:prf_set_util",
+        "//util:constants",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "hmac_prf_key_manager",
+    srcs = ["hmac_prf_key_manager.cc"],
+    hdrs = ["hmac_prf_key_manager.h"],
+    include_prefix = "tink/prf",
+    deps = [
+        "//:core/key_type_manager",
+        "//:key_manager",
+        "//proto:hmac_prf_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle:common_enums",
+        "//subtle:random",
+        "//subtle:stateful_hmac_boringssl",
+        "//subtle/prf:prf_set_util",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:input_stream_util",
+        "//util:protobuf_helper",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -56,11 +152,14 @@ cc_test(
     srcs = ["hkdf_prf_key_manager_test.cc"],
     deps = [
         ":hkdf_prf_key_manager",
+        "//proto:common_cc_proto",
         "//subtle",
         "//subtle/prf:hkdf_streaming_prf",
+        "//subtle/prf:prf_set_util",
         "//util:input_stream_util",
+        "//util:istream_input_stream",
+        "//util:secret_data",
         "//util:test_matchers",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -69,8 +168,78 @@ cc_test(
     name = "prf_key_templates_test",
     srcs = ["prf_key_templates_test.cc"],
     deps = [
+        ":aes_cmac_prf_key_manager",
         ":hkdf_prf_key_manager",
+        ":hmac_prf_key_manager",
         ":prf_key_templates",
+        "//proto:aes_cmac_prf_cc_proto",
+        "//proto:hmac_prf_cc_proto",
+        "//util:test_matchers",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "prf_set_wrapper_test",
+    srcs = ["prf_set_wrapper_test.cc"],
+    deps = [
+        ":prf_set",
+        ":prf_set_wrapper",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "prf_set_test",
+    srcs = ["prf_set_test.cc"],
+    deps = [
+        ":prf_config",
+        ":prf_key_templates",
+        ":prf_set",
+        "//:keyset_handle",
+        "//:keyset_manager",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_cmac_prf_key_manager_test",
+    srcs = ["aes_cmac_prf_key_manager_test.cc"],
+    deps = [
+        ":aes_cmac_prf_key_manager",
+        "//proto:aes_cmac_prf_cc_proto",
+        "//subtle:aes_cmac_boringssl",
+        "//util:istream_input_stream",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hmac_prf_key_manager_test",
+    srcs = ["hmac_prf_key_manager_test.cc"],
+    deps = [
+        ":hmac_prf_key_manager",
+        ":prf_set",
+        "//:core/key_manager_impl",
+        "//proto:hmac_prf_cc_proto",
+        "//subtle:hmac_boringssl",
+        "//util:istream_input_stream",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],

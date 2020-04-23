@@ -212,5 +212,15 @@ const google::crypto::tink::KeyTemplate& SignatureKeyTemplates::Ed25519() {
   return *key_template;
 }
 
+// static
+const google::crypto::tink::KeyTemplate&
+SignatureKeyTemplates::Ed25519WithRawOutput() {
+  static KeyTemplate* key_template = new KeyTemplate();
+  key_template->set_type_url(
+      absl::StrCat(kTypeGoogleapisCom, Ed25519PrivateKey().GetTypeName()));
+  key_template->set_output_prefix_type(OutputPrefixType::RAW);
+  return *key_template;
+}
+
 }  // namespace tink
 }  // namespace crypto

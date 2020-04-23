@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
@@ -53,10 +54,13 @@ class RsaSsaPkcs1VerifyBoringSsl : public PublicKeyVerify {
   // while 2048-bit RSA key only has 112-bit security. Nevertheless, a 2048-bit
   // RSA key is considered safe by NIST until 2030 (see
   // https://www.keylength.com/en/4/).
-  static const size_t kMinModulusSizeInBits = 2048;
-  RsaSsaPkcs1VerifyBoringSsl(bssl::UniquePtr<RSA> rsa, const EVP_MD* sig_hash);
+  static constexpr size_t kMinModulusSizeInBits = 2048;
+
+  RsaSsaPkcs1VerifyBoringSsl(bssl::UniquePtr<RSA> rsa, const EVP_MD* sig_hash)
+      : rsa_(std::move(rsa)), sig_hash_(sig_hash) {}
+
   const bssl::UniquePtr<RSA> rsa_;
-  const EVP_MD* sig_hash_;  // Owned by BoringSSL.
+  const EVP_MD* const sig_hash_;  // Owned by BoringSSL.
 };
 
 }  // namespace subtle

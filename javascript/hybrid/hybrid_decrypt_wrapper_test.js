@@ -16,13 +16,13 @@ goog.module('tink.hybrid.HybridDecryptWrapperTest');
 goog.setTestOnly('tink.hybrid.HybridDecryptWrapperTest');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const HybridDecrypt = goog.require('tink.HybridDecrypt');
+const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('hybrid decrypt wrapper test', function() {
@@ -277,12 +277,12 @@ const createDummyPrimitiveSets = function(opt_withPrimary = true) {
 };
 
 /**
- * @implements {HybridEncrypt}
  * @final
  */
-class DummyHybridEncrypt {
+class DummyHybridEncrypt extends HybridEncrypt {
   /** @param {!Uint8Array} ciphertextSuffix */
   constructor(ciphertextSuffix) {
+    super();
     this.ciphertextSuffix_ = ciphertextSuffix;
   }
   /** @override */
@@ -296,12 +296,12 @@ class DummyHybridEncrypt {
 }
 
 /**
- * @implements {HybridDecrypt}
  * @final
  */
-class DummyHybridDecrypt {
+class DummyHybridDecrypt extends HybridDecrypt {
   /** @param {!Uint8Array} ciphertextSuffix */
   constructor(ciphertextSuffix) {
+    super();
     this.ciphertextSuffix_ = ciphertextSuffix;
   }
 

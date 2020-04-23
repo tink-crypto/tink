@@ -21,9 +21,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <cmath>
+#include <cstdint>
 #include <cstdlib>
 
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
@@ -381,6 +385,72 @@ Ed25519PrivateKey GetEd25519TestPrivateKey() {
   public_key->set_key_value(test_key->public_key);
 
   return ed25519_key;
+}
+
+util::Status ZTestUniformString(absl::string_view bytes) {
+  double expected = bytes.size() * 8.0 / 2.0;
+  double stddev = std::sqrt(static_cast<double>(bytes.size()) * 8.0 / 4.0);
+  uint64_t num_set_bits = 0;
+  for (uint8_t byte : bytes) {
+    // Counting the number of bits set in byte:
+    while (byte != 0) {
+      num_set_bits++;
+      byte = byte & (byte - 1);
+    }
+  }
+  // Check that the number of bits is within 10 stddevs.
+  if (abs(static_cast<double>(num_set_bits) - expected) < 10.0 * stddev) {
+    return util::OkStatus();
+  }
+  return util::Status(
+      util::error::INTERNAL,
+      absl::StrCat("Z test for uniformly distributed variable out of bounds; "
+                   "Actual number of set bits was ",
+                   num_set_bits, " expected was ", expected,
+                   " 10 * standard deviation is 10 * ", stddev, " = ",
+                   10.0 * stddev));
+}
+
+std::string Rotate(absl::string_view bytes) {
+  std::string result(bytes.size(), '\0');
+  for (int i = 0; i < bytes.size(); i++) {
+    result[i] = (static_cast<uint8_t>(bytes[i]) >> 1) |
+                (bytes[(i == 0 ? bytes.size() : i) - 1] << 7);
+  }
+  return result;
+}
+
+util::Status ZTestCrosscorrelationUniformStrings(absl::string_view bytes1,
+                                                 absl::string_view bytes2) {
+  if (bytes1.size() != bytes2.size()) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Strings are not of equal length");
+  }
+  std::string crossed(bytes1.size(), '\0');
+  for (int i = 0; i < bytes1.size(); i++) {
+    crossed[i] = bytes1[i] ^ bytes2[i];
+  }
+  return ZTestUniformString(crossed);
+}
+
+util::Status ZTestAutocorrelationUniformString(absl::string_view bytes) {
+  std::string rotated(bytes);
+  std::vector<int> violations;
+  for (int i = 1; i < bytes.size() * 8; i++) {
+    rotated = Rotate(rotated);
+    auto status = ZTestCrosscorrelationUniformStrings(bytes, rotated);
+    if (!status.ok()) {
+      violations.push_back(i);
+    }
+  }
+  if (violations.empty()) {
+    return util::OkStatus();
+  }
+  return util::Status(
+      util::error::INTERNAL,
+      absl::StrCat("Autocorrelation exceeded 10 standard deviation at ",
+                   violations.size(),
+                   " indices: ", absl::StrJoin(violations, ", ")));
 }
 
 }  // namespace test

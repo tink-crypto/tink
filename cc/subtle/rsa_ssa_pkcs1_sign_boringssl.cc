@@ -77,10 +77,6 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPkcs1SignBoringSsl::New(
       new RsaSsaPkcs1SignBoringSsl(std::move(rsa), sig_hash.ValueOrDie()));
 }
 
-RsaSsaPkcs1SignBoringSsl::RsaSsaPkcs1SignBoringSsl(
-    bssl::UniquePtr<RSA> private_key, const EVP_MD* sig_hash)
-    : private_key_(std::move(private_key)), sig_hash_(sig_hash) {}
-
 util::StatusOr<std::string> RsaSsaPkcs1SignBoringSsl::Sign(
     absl::string_view data) const {
   data = SubtleUtilBoringSSL::EnsureNonNull(data);

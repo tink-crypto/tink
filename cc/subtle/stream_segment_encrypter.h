@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_STREAM_SEGMENT_ENCRYPTER_H_
 #define TINK_SUBTLE_STREAM_SEGMENT_ENCRYPTER_H_
 
+#include <cstdint>
 #include <vector>
 
 #include "tink/util/status.h"

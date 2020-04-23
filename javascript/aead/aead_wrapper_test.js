@@ -15,12 +15,12 @@
 goog.module('tink.aead.AeadWrapperTest');
 goog.setTestOnly('tink.aead.AeadWrapperTest');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AeadWrapper = goog.require('tink.aead.AeadWrapper');
 const Bytes = goog.require('tink.subtle.Bytes');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('aead wrapper test', function() {
@@ -264,14 +264,14 @@ const createPrimitiveSet = function(opt_withPrimary = true) {
 };
 
 /**
- * @implements {Aead}
  * @final
  */
-class DummyAead {
+class DummyAead extends Aead {
   /**
    * @param {!Uint8Array} primitiveIdentifier
    */
   constructor(primitiveIdentifier) {
+    super();
     /** @private @const {!Uint8Array} */
     this.primitiveIdentifier_ = primitiveIdentifier;
   }

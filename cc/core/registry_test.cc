@@ -796,7 +796,7 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
     // Note: in an actual key type manager we need to do more work, e.g., test
     // that the generated key is long enough.
     crypto::tink::util::StatusOr<std::string> randomness =
-        ReadAtMostFromStream(key_format.key_size(), input_stream);
+        ReadBytesFromStream(key_format.key_size(), input_stream);
     if (!randomness.status().ok()) {
       return randomness.status();
     }

@@ -18,6 +18,7 @@
 
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/random.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/validation.h"
 
 namespace crypto {
@@ -62,6 +63,25 @@ AesGcmHkdfStreamingKeyManager::CreateKey(
   return key;
 };
 
+crypto::tink::util::StatusOr<google::crypto::tink::AesGcmHkdfStreamingKey>
+AesGcmHkdfStreamingKeyManager::DeriveKey(
+    const google::crypto::tink::AesGcmHkdfStreamingKeyFormat& key_format,
+    InputStream* input_stream) const {
+  crypto::tink::util::Status status =
+      ValidateVersion(key_format.version(), get_version());
+  if (!status.ok()) return status;
+
+  crypto::tink::util::StatusOr<std::string> randomness_or =
+      ReadBytesFromStream(key_format.key_size(), input_stream);
+  if (!randomness_or.ok()) {
+    return randomness_or.status();
+  }
+  AesGcmHkdfStreamingKey key;
+  key.set_version(get_version());
+  key.set_key_value(randomness_or.ValueOrDie());
+  *key.mutable_params() = key_format.params();
+  return key;
+}
 
 Status AesGcmHkdfStreamingKeyManager::ValidateKey(
     const AesGcmHkdfStreamingKey& key) const {

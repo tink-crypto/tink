@@ -22,8 +22,10 @@
 #include <unordered_map>
 
 #include "absl/base/thread_annotations.h"
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "absl/types/optional.h"
 #include "absl/synchronization/mutex.h"
 // placeholder for dllexport_macros.h
 #include "tink/catalogue.h"
@@ -367,7 +369,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
         std::type_index(typeid(*catalogue))) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A catalogue named '%s' has been already added.",
-                       catalogue_name.c_str());
+                       catalogue_name);
     }
   } else {
     name_to_catalogue_map_.emplace(
@@ -385,15 +387,14 @@ crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
   auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
-                     "No catalogue named '%s' has been added.",
-                     catalogue_name.c_str());
+                     "No catalogue named '%s' has been added.", catalogue_name);
   }
   if (catalogue_entry->second.type_id_name != typeid(P).name()) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Wrong Primitive type for catalogue named '%s': "
                      "got '%s', expected '%s'",
-                     catalogue_name.c_str(), typeid(P).name(),
-                     catalogue_entry->second.type_id_name.c_str());
+                     catalogue_name, typeid(P).name(),
+                     catalogue_entry->second.type_id_name);
   }
   return static_cast<Catalogue<P>*>(catalogue_entry->second.catalogue.get());
 }
@@ -410,8 +411,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
   std::string type_url = owned_manager->get_key_type();
   if (!manager->DoesSupport(type_url)) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
-                     "The manager does not support type '%s'.",
-                     type_url.c_str());
+                     "The manager does not support type '%s'.", type_url);
   }
   absl::MutexLock lock(&maps_mutex_);
   crypto::tink::util::Status status = CheckInsertable(
@@ -597,8 +597,7 @@ RegistryImpl::get_key_manager(const std::string& type_url) const {
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
-                     "No manager for type '%s' has been registered.",
-                     type_url.c_str());
+                     "No manager for type '%s' has been registered.", type_url);
   }
   return it->second.get_key_manager<P>(type_url);
 }

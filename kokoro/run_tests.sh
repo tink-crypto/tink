@@ -59,9 +59,17 @@ run_all_linux_tests() {
     time bazel test "${TEST_FLAGS[@]}" -- ... ${DISABLE_GRPC_ON_MAC_OS} \
         || fail_with_debug_output
   )
-  run_linux_tests "java"
+  run_linux_tests "java_src"
   run_linux_tests "go"
+  # Install pip package for tests which execute python3.
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
+    install_pip_package_macos
+  fi
+  if [[ "${PLATFORM}" == 'linux' ]]; then
+    install_pip_package_linux
+  fi
   run_linux_tests "python"
+  run_linux_tests "examples/python"
   run_linux_tests "examples/cc"
   run_linux_tests "examples/java_src"
   run_linux_tests "tools"
@@ -93,6 +101,37 @@ run_macos_tests() {
   )
 }
 
+install_pip_package_linux() {
+  # Check if we can build Tink python package.
+  (
+    cd python
+    # Install the proto compiler
+    PROTOC_ZIP=protoc-3.11.4-linux-x86_64.zip
+    curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/$PROTOC_ZIP
+    sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
+    # Update pip and start setup
+    pip3 install --upgrade pip
+    pip3 install --upgrade setuptools
+    pip3 install .
+  )
+}
+
+install_pip_package_macos() {
+  # Check if we can build Tink python package.
+  (
+    cd python
+    # Install the proto compiler
+    PROTOC_ZIP=protoc-3.11.4-osx-x86_64.zip
+    curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/$PROTOC_ZIP
+    sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
+    # Update pip and install all requirements. Note that on MacOS we need to
+    # use the --user flag as otherwise pip will complain about permissions.
+    pip3 install --upgrade pip --user
+    pip3 install --upgrade setuptools --user
+    pip3 install . --user
+  )
+}
+
 main() {
   # Only in Kokoro environments.
   if [[ -n "${KOKORO_ROOT}" ]]; then
@@ -101,6 +140,22 @@ main() {
 
     # TODO(b/131821833) Use the latest version of Bazel.
     use_bazel.sh $(cat .bazelversion)
+
+    # Install Python 3.7 in Linux environments.
+    if [[ "${PLATFORM}" == 'linux' ]]; then
+      : "${PYTHON_VERSION:=3.7.1}"
+
+      # Update python version list.
+      (
+        cd /home/kbuilder/.pyenv/plugins/python-build/../..
+        git pull
+      )
+      # Install Python.
+      eval "$(pyenv init -)"
+      pyenv install -v "${PYTHON_VERSION}"
+      pyenv global "${PYTHON_VERSION}"
+
+    fi
 
     if [[ "${PLATFORM}" == 'darwin' ]]; then
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
@@ -129,6 +184,9 @@ main() {
 
   echo "using go: $(which go)"
   go version
+
+  echo "using python: $(which python)"
+  python3 --version
 
   run_all_linux_tests
 

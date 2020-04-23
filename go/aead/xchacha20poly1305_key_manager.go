@@ -19,9 +19,9 @@ import (
 
 	"golang.org/x/crypto/chacha20poly1305"
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -60,7 +60,7 @@ func (km *xChaCha20Poly1305KeyManager) Primitive(serializedKey []byte) (interfac
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	ret, err := aead.NewXChaCha20Poly1305(key.KeyValue)
+	ret, err := subtle.NewXChaCha20Poly1305(key.KeyValue)
 	if err != nil {
 		return nil, fmt.Errorf("xchacha20poly1305_key_manager: cannot create new primitive: %s", err)
 	}

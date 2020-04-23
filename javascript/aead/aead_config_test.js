@@ -15,7 +15,7 @@
 goog.module('tink.aead.AeadConfigTest');
 goog.setTestOnly('tink.aead.AeadConfigTest');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');

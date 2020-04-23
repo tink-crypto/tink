@@ -1,1 +1,1 @@
-export {default as PublicKeyVerify} from 'goog:tink.PublicKeyVerify';  // from //third_party/tink/javascript:primitives
+export {PublicKeyVerify} from './internal/public_key_verify';

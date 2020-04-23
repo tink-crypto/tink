@@ -18,7 +18,7 @@ goog.setTestOnly();
 const CleartextKeysetHandle = goog.require('tink.CleartextKeysetHandle');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {createKeyset} = goog.require('tink.testUtils');
+const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
 describe('cleartext keyset handle test', function() {
   it('parse from lightweight should work', function() {

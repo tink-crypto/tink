@@ -1,0 +1,27 @@
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
+
+java_library(
+    name = "util",
+    srcs = [
+        ":srcs",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:joda_time_joda_time",
+    ],
+)

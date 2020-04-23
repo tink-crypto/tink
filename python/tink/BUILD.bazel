@@ -1,0 +1,166 @@
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+py_library(
+    name = "tink_python",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":tink",
+    ],
+)
+
+py_library(
+    name = "tink",
+    deps = [
+        ":_keyset_handle",
+        ":_keyset_reader",
+        ":_keyset_writer",
+        ":tink_config",
+        "//tink/aead",
+        "//tink/core",
+        "//tink/daead",
+        "//tink/hybrid",
+        "//tink/mac",
+        "//tink/signature",
+        "//tink/streaming_aead",
+    ],
+)
+
+py_library(
+    name = "_keyset_handle",
+    srcs = ["_keyset_handle.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_keyset_reader",
+        ":_keyset_writer",
+        "//tink/aead",
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_keyset_handle_test",
+    srcs = ["_keyset_handle_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":tink_config",
+        ":tink_python",
+        requirement("absl-py"),
+        "//tink/aead",
+        "//tink/core",
+        "//tink/hybrid",
+        "//tink/mac",
+        "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "_keyset_reader",
+    srcs = ["_keyset_reader.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/core",
+        requirement("six"),
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_keyset_reader_test",
+    srcs = ["_keyset_reader_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":tink_python",
+        "//tink/core",
+        requirement("absl-py"),
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_keyset_writer",
+    srcs = ["_keyset_writer.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/core",
+        requirement("six"),
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_keyset_writer_test",
+    srcs = ["_keyset_writer_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":tink_python",
+        "//tink/core",
+        requirement("absl-py"),
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "tink_config",
+    srcs = ["tink_config.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/aead",
+        "//tink/cc/pybind:cc_key_manager",
+        "//tink/cc/pybind:cc_tink_config",
+        "//tink/core",
+        "//tink/daead",
+        "//tink/hybrid",
+        "//tink/mac",
+        "//tink/signature",
+    ],
+)
+
+py_test(
+    name = "tink_config_test",
+    srcs = ["tink_config_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":tink_config",
+        requirement("absl-py"),
+        "//tink/aead",
+        "//tink/core",
+        "//tink/daead",
+        "//tink/hybrid",
+        "//tink/mac",
+        "//tink/proto:tink_py_pb2",
+        "//tink/signature",
+    ],
+)
+
+py_library(
+    name = "cleartext_keyset_handle",
+    srcs = ["cleartext_keyset_handle.py"],
+    srcs_version = "PY3",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//tink:tink_python",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "cleartext_keyset_handle_test",
+    srcs = ["cleartext_keyset_handle_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":cleartext_keyset_handle",
+        requirement("absl-py"),
+        "//tink:tink_config",
+        "//tink:tink_python",
+        "//tink/core",
+        "//tink/mac",
+    ],
+)

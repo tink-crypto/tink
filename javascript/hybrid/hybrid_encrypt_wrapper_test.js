@@ -16,7 +16,7 @@ goog.module('tink.hybrid.HybridEncryptWrapperTest');
 goog.setTestOnly('tink.hybrid.HybridEncryptWrapperTest');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const Random = goog.require('tink.subtle.Random');
@@ -141,10 +141,9 @@ const createDummyPrimitiveSet = function(opt_withPrimary = true) {
 };
 
 /**
- * @implements {HybridEncrypt}
  * @final
  */
-class DummyHybridEncrypt {
+class DummyHybridEncrypt extends HybridEncrypt {
   /** @override */
   async encrypt(plaintext, opt_contextInfo) {
     return plaintext;

@@ -63,7 +63,7 @@ StatusOr<Aws::Client::ClientConfiguration>
   std::vector<std::string> key_arn_parts = absl::StrSplit(key_arn, ':');
   if (key_arn_parts.size() < 6) {
     return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid key ARN '%s'.",
-                     std::string(key_arn).c_str());
+                     key_arn);
   }
   Aws::Client::ClientConfiguration config;
   config.region = key_arn_parts[3].c_str();  // 4th part of key arn
@@ -78,8 +78,8 @@ StatusOr<std::string> Read(const std::string& filename) {
   std::ifstream input_stream;
   input_stream.open(filename, std::ifstream::in);
   if (!input_stream.is_open()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Error opening file '%s'.", filename.c_str());
+    return ToStatusF(util::error::INVALID_ARGUMENT, "Error opening file '%s'.",
+                     filename);
   }
   std::stringstream input;
   input << input_stream.rdbuf();
@@ -93,8 +93,7 @@ StatusOr<std::string> GetValue(absl::string_view name, absl::string_view line) {
   std::vector<std::string> parts = absl::StrSplit(line, '=');
   if (parts.size() != 2 || absl::StripAsciiWhitespace(parts[0]) != name) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Expected line in format '%s = some_value'.",
-                     std::string(name).c_str());
+                     "Expected line in format '%s = some_value'.", name);
   }
   return std::string(absl::StripAsciiWhitespace(parts[1]));
 }
@@ -132,21 +131,21 @@ StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
     if (creds_lines.size() < 3) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid format of credentials in file '%s'.",
-                       std::string(credentials_path).c_str());
+                       credentials_path);
     }
     auto key_id_result = GetValue("aws_access_key_id", creds_lines[1]);
     if (!key_id_result.ok()) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid format of credentials in file '%s': %s",
-                       std::string(credentials_path).c_str(),
-                       key_id_result.status().error_message().c_str());
+                       credentials_path,
+                       key_id_result.status().error_message());
     }
     auto secret_key_result = GetValue("aws_secret_access_key", creds_lines[2]);
     if (!secret_key_result.ok()) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid format of credentials in file '%s': %s",
-                       std::string(credentials_path).c_str(),
-                       secret_key_result.status().error_message().c_str());
+                       credentials_path,
+                       secret_key_result.status().error_message());
     }
     return Aws::Auth::AWSCredentials(key_id_result.ValueOrDie().c_str(),
                                      secret_key_result.ValueOrDie().c_str());
@@ -197,7 +196,7 @@ AwsKmsClient::New(absl::string_view key_uri,
     client->key_arn_ = GetKeyArn(key_uri);
     if (client->key_arn_.empty()) {
       return ToStatusF(util::error::INVALID_ARGUMENT, "Key '%s' not supported",
-                       std::string(key_uri).c_str());
+                       key_uri);
     }
     auto config_result = GetAwsClientConfig(client->key_arn_);
     if (!config_result.ok()) return config_result.status();
@@ -223,11 +222,10 @@ AwsKmsClient::GetAead(absl::string_view key_uri) const {
     if (!key_arn_.empty()) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "This client is bound to '%s', and cannot use key '%s'.",
-                       key_arn_.c_str(), std::string(key_uri).c_str());
+                       key_arn_, key_uri);
     } else {
       return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "This client does not support key '%s'.",
-                       std::string(key_uri).c_str());
+                       "This client does not support key '%s'.", key_uri);
     }
   }
   if (!key_arn_.empty()) {  // This client is bound to a specific key.

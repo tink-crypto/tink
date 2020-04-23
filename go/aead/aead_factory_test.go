@@ -22,12 +22,14 @@ import (
 
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/cryptofmt"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 
-	subtleAEAD "github.com/google/tink/go/subtle/aead"
+	"github.com/google/tink/go/aead/subtle"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -113,7 +115,7 @@ func validateAEADFactoryCipher(encryptCipher tink.AEAD,
 	if string(ct[:prefixSize]) != expectedPrefix {
 		return fmt.Errorf("incorrect prefix with regular plaintext")
 	}
-	if prefixSize+len(pt)+subtleAEAD.AESGCMIVSize+subtleAEAD.AESGCMTagSize != len(ct) {
+	if prefixSize+len(pt)+subtle.AESGCMIVSize+subtle.AESGCMTagSize != len(ct) {
 		return fmt.Errorf("lengths of plaintext and ciphertext don't match with regular plaintext")
 	}
 
@@ -131,8 +133,32 @@ func validateAEADFactoryCipher(encryptCipher tink.AEAD,
 	if string(ct[:prefixSize]) != expectedPrefix {
 		return fmt.Errorf("incorrect prefix with short plaintext")
 	}
-	if prefixSize+len(pt)+subtleAEAD.AESGCMIVSize+subtleAEAD.AESGCMTagSize != len(ct) {
+	if prefixSize+len(pt)+subtle.AESGCMIVSize+subtle.AESGCMTagSize != len(ct) {
 		return fmt.Errorf("lengths of plaintext and ciphertext don't match with short plaintext")
 	}
 	return nil
+}
+
+func TestFactoryWithInvalidPrimitiveSetType(t *testing.T) {
+	wrongKH, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("failed to build *keyset.Handle: %s", err)
+	}
+
+	_, err = aead.New(wrongKH)
+	if err == nil {
+		t.Fatalf("calling New() with wrong *keyset.Handle should fail")
+	}
+}
+
+func TestFactoryWithValidPrimitiveSetType(t *testing.T) {
+	goodKH, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("failed to build *keyset.Handle: %s", err)
+	}
+
+	_, err = aead.New(goodKH)
+	if err != nil {
+		t.Fatalf("calling New() with good *keyset.Handle failed: %s", err)
+	}
 }

@@ -7,7 +7,7 @@ local_repository(
 
 local_repository(
     name = "tink_java",
-    path = "../java",
+    path = "../java_src",
 )
 
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")

@@ -36,7 +36,7 @@ from absl import app
 from absl import flags
 from absl import logging
 import tink
-from tink.core import cleartext_keyset_handle
+from tink import cleartext_keyset_handle
 
 FLAGS = flags.FLAGS
 
@@ -71,19 +71,18 @@ def main(argv):
     logging.error('Error initialising Tink: %s', e)
     return 1
 
-  # Read the keyset.
-  with open(keyset_filename, 'rb') as keyset_file:
+  # Read the keyset into a keyset_handle.
+  with open(keyset_filename, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
-      keyset = cleartext_keyset_handle.CleartextKeysetHandle(
-          tink.JsonKeysetReader(text).read())
+      keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
     except tink.TinkError as e:
       logging.error('Error reading key: %s', e)
       return 1
 
   # Get the primitive.
   try:
-    cipher = keyset.primitive(tink.Mac)
+    cipher = keyset_handle.primitive(tink.Mac)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
     return 1

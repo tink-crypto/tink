@@ -32,14 +32,16 @@ namespace subtle {
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
 EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType curve,
-                                    const std::string& priv_key) {
+                                    util::SecretData priv_key) {
   switch (curve) {
     case EllipticCurveType::NIST_P256:
     case EllipticCurveType::NIST_P384:
     case EllipticCurveType::NIST_P521:
-      return EciesHkdfNistPCurveRecipientKemBoringSsl::New(curve, priv_key);
+      return EciesHkdfNistPCurveRecipientKemBoringSsl::New(curve,
+                                                           std::move(priv_key));
     case EllipticCurveType::CURVE25519:
-      return EciesHkdfX25519RecipientKemBoringSsl::New(curve, priv_key);
+      return EciesHkdfX25519RecipientKemBoringSsl::New(curve,
+                                                       std::move(priv_key));
     default:
       return util::Status(util::error::UNIMPLEMENTED,
                           "Unsupported elliptic curve");
@@ -49,7 +51,7 @@ EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType curve,
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
 EciesHkdfNistPCurveRecipientKemBoringSsl::New(EllipticCurveType curve,
-                                              const std::string& priv_key) {
+                                              util::SecretData priv_key) {
   if (priv_key.empty()) {
     return util::Status(util::error::INVALID_ARGUMENT, "empty priv_key");
   }
@@ -57,19 +59,19 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::New(EllipticCurveType curve,
   if (!status_or_ec_group.ok()) return status_or_ec_group.status();
   // TODO(przydatek): consider refactoring SubtleUtilBoringSSL,
   //     so that the saved group can be used for KEM operations.
-  std::unique_ptr<EciesHkdfRecipientKemBoringSsl> recipient_kem(
-      new EciesHkdfNistPCurveRecipientKemBoringSsl(
-          curve, priv_key, status_or_ec_group.ValueOrDie()));
-  return std::move(recipient_kem);
+  return {absl::WrapUnique(new EciesHkdfNistPCurveRecipientKemBoringSsl(
+      curve, std::move(priv_key), status_or_ec_group.ValueOrDie()))};
 }
 
 EciesHkdfNistPCurveRecipientKemBoringSsl::
     EciesHkdfNistPCurveRecipientKemBoringSsl(EllipticCurveType curve,
-                                             const std::string& priv_key_value,
+                                             util::SecretData priv_key_value,
                                              EC_GROUP* ec_group)
-    : curve_(curve), priv_key_value_(priv_key_value), ec_group_(ec_group) {}
+    : curve_(curve),
+      priv_key_value_(std::move(priv_key_value)),
+      ec_group_(ec_group) {}
 
-util::StatusOr<std::string>
+util::StatusOr<util::SecretData>
 EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
     absl::string_view kem_bytes, HashType hash, absl::string_view hkdf_salt,
     absl::string_view hkdf_info, uint32_t key_size_in_bytes,
@@ -77,35 +79,31 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
   auto status_or_ec_point =
       SubtleUtilBoringSSL::EcPointDecode(curve_, point_format, kem_bytes);
   if (!status_or_ec_point.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid KEM bytes: %s",
-                     status_or_ec_point.status().error_message().c_str());
+    return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid KEM bytes: %s",
+                     status_or_ec_point.status().error_message());
   }
   bssl::UniquePtr<EC_POINT> pub_key =
       std::move(status_or_ec_point.ValueOrDie());
   bssl::UniquePtr<BIGNUM> priv_key(
-      BN_bin2bn(reinterpret_cast<const unsigned char*>(priv_key_value_.data()),
-                priv_key_value_.size(), nullptr));
-  auto status_or_string = SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
+      BN_bin2bn(priv_key_value_.data(), priv_key_value_.size(), nullptr));
+  auto shared_secret_or = SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
       curve_, priv_key.get(), pub_key.get());
-  if (!status_or_string.ok()) {
-    return status_or_string.status();
+  if (!shared_secret_or.ok()) {
+    return shared_secret_or.status();
   }
-  std::string shared_secret(status_or_string.ValueOrDie());
+  util::SecretData shared_secret = shared_secret_or.ValueOrDie();
   return Hkdf::ComputeEciesHkdfSymmetricKey(
       hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
 }
 
 EciesHkdfX25519RecipientKemBoringSsl::EciesHkdfX25519RecipientKemBoringSsl(
-    const std::string& private_key) {
-  private_key.copy(reinterpret_cast<char*>(private_key_),
-                   X25519_PRIVATE_KEY_LEN);
-}
+    util::SecretData private_key)
+    : private_key_(std::move(private_key)) {}
 
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
 EciesHkdfX25519RecipientKemBoringSsl::New(EllipticCurveType curve,
-                                          const std::string& priv_key) {
+                                          util::SecretData priv_key) {
   if (curve != CURVE25519) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "curve is not CURVE25519");
@@ -115,12 +113,11 @@ EciesHkdfX25519RecipientKemBoringSsl::New(EllipticCurveType curve,
                         "pubx has unexpected length");
   }
 
-  std::unique_ptr<EciesHkdfRecipientKemBoringSsl> recipient_kem(
-      new EciesHkdfX25519RecipientKemBoringSsl(priv_key));
-  return std::move(recipient_kem);
+  return {absl::WrapUnique(
+      new EciesHkdfX25519RecipientKemBoringSsl(std::move(priv_key)))};
 }
 
-crypto::tink::util::StatusOr<std::string>
+crypto::tink::util::StatusOr<util::SecretData>
 EciesHkdfX25519RecipientKemBoringSsl::GenerateKey(
     absl::string_view kem_bytes, HashType hash, absl::string_view hkdf_salt,
     absl::string_view hkdf_info, uint32_t key_size_in_bytes,
@@ -136,10 +133,9 @@ EciesHkdfX25519RecipientKemBoringSsl::GenerateKey(
                         "kem_bytes has unexpected size");
   }
 
-  uint8_t shared_key[X25519_SHARED_KEY_LEN];
-  X25519(shared_key, private_key_,
+  util::SecretData shared_secret(X25519_SHARED_KEY_LEN);
+  X25519(shared_secret.data(), private_key_.data(),
          reinterpret_cast<const uint8_t*>(kem_bytes.data()));
-  std::string shared_secret(shared_key, &shared_key[X25519_SHARED_KEY_LEN]);
 
   return Hkdf::ComputeEciesHkdfSymmetricKey(
       hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);

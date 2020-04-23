@@ -68,14 +68,14 @@ StatusOr<HmacKey> HmacKeyManager::DeriveKey(
   if (!status.ok()) return status;
 
   crypto::tink::util::StatusOr<std::string> randomness =
-      ReadAtMostFromStream(hmac_key_format.key_size(), input_stream);
-  if (!randomness.status().ok()) {
+      ReadBytesFromStream(hmac_key_format.key_size(), input_stream);
+  if (!randomness.ok()) {
+    if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT,
+          "Could not get enough pseudorandomness from input stream");
+    }
     return randomness.status();
-  }
-  if (randomness.ValueOrDie().size() != hmac_key_format.key_size()) {
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
-        "Could not get enough pseudorandomness from input stream");
   }
 
   HmacKey hmac_key;

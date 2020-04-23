@@ -16,10 +16,10 @@
 #ifndef TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_
 #define TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_
 
-#include <algorithm>
-#include <vector>
+#include <string>
 
-#include "absl/strings/string_view.h"
+#include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "tink/core/private_key_type_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/constants.h"

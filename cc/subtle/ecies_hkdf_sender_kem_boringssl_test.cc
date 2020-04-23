@@ -14,16 +14,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
+
 #include <iostream>
 
-#include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
+#include "gtest/gtest.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 
 // TODO(quannguyen): Add extensive tests.
 // It's important to test compatibility with Java.
@@ -83,16 +85,20 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, testSenderRecipientBasic) {
         test::HexDecodeOrDie(test.info_hex), test.out_len, test.point_format);
     ASSERT_TRUE(status_or_kem_key.ok());
     auto kem_key = std::move(status_or_kem_key.ValueOrDie());
-    auto ecies_recipient(std::move(EciesHkdfRecipientKemBoringSsl::New(
-        test.curve, test_key.priv).ValueOrDie()));
+    auto ecies_recipient(
+        std::move(EciesHkdfRecipientKemBoringSsl::New(
+                      test.curve, util::SecretDataFromStringView(test_key.priv))
+                      .ValueOrDie()));
     auto status_or_shared_secret = ecies_recipient->GenerateKey(
         kem_key->get_kem_bytes(), test.hash,
         test::HexDecodeOrDie(test.salt_hex),
         test::HexDecodeOrDie(test.info_hex),
         test.out_len, test.point_format);
     std::cout << test::HexEncode(kem_key->get_kem_bytes()) << std::endl;
-    EXPECT_EQ(test::HexEncode(kem_key->get_symmetric_key()),
-              test::HexEncode(status_or_shared_secret.ValueOrDie()));
+    EXPECT_EQ(test::HexEncode(
+                  util::SecretDataAsStringView(kem_key->get_symmetric_key())),
+              test::HexEncode(util::SecretDataAsStringView(
+                  status_or_shared_secret.ValueOrDie())));
   }
 }
 

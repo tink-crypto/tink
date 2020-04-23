@@ -19,17 +19,16 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper');
 const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 /**
  * Implementation of ECIES AEAD HKDF hybrid encryption.
  *
- * @implements {HybridEncrypt}
  * @protected
  * @final
  */
-class EciesAeadHkdfHybridEncrypt {
+class EciesAeadHkdfHybridEncrypt extends HybridEncrypt {
   /**
    * @param {!EciesHkdfKemSender} kemSender
    * @param {string} hkdfHash the name of the HMAC algorithm, accepted names
@@ -39,6 +38,8 @@ class EciesAeadHkdfHybridEncrypt {
    * @param {!Uint8Array=} opt_hkdfSalt
    */
   constructor(kemSender, hkdfHash, pointFormat, demHelper, opt_hkdfSalt) {
+    super();
+
     // TODO(thaidn): do we actually need these null checks?
     if (!kemSender) {
       throw new SecurityException('KEM sender has to be non-null.');

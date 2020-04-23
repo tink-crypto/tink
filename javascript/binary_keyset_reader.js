@@ -15,7 +15,7 @@
 goog.module('tink.BinaryKeysetReader');
 
 const KeysetReader = goog.require('tink.KeysetReader');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**

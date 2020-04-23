@@ -18,8 +18,6 @@ import (
 	"bytes"
 	"errors"
 	"os"
-	// ignore-placeholder1
-	// ignore-placeholder2
 	"testing"
 
 	"flag"
@@ -28,7 +26,6 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
-	// ignore-placeholder3
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
@@ -87,13 +84,12 @@ func basicAEADTest(t *testing.T, a tink.AEAD) error {
 func TestBasicAead(t *testing.T) {
 	for _, file := range []string{credFile, credINIFile} {
 		setupKMS(t, file)
-		// ignore-placeholder4
 		dek := aead.AES128CTRHMACSHA256KeyTemplate()
 		kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
 		if err != nil {
 			t.Fatalf("error getting a new keyset handle: %v", err)
 		}
-		a, err := awsaead(kh)
+		a, err := aead.New(kh)
 		if err != nil {
 			t.Fatalf("error getting the primitive: %v", err)
 		}
@@ -106,17 +102,17 @@ func TestBasicAead(t *testing.T) {
 func TestBasicAeadWithoutAdditionalData(t *testing.T) {
 	for _, file := range []string{credFile, credINIFile} {
 		setupKMS(t, file)
-		// ignore-placeholder4
 		dek := aead.AES128CTRHMACSHA256KeyTemplate()
 		kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
 		if err != nil {
 			t.Fatalf("error getting a new keyset handle: %v", err)
 		}
-		a, err := awsaead(kh)
+		a, err := aead.New(kh)
 		if err != nil {
 			t.Fatalf("error getting the primitive: %v", err)
 		}
-		for i := 0; i < 100; i++ {
+		// Only test 10 times (instead of 100) because each test makes HTTP requests to AWS.
+		for i := 0; i < 10; i++ {
 			pt := random.GetRandomBytes(20)
 			ct, err := a.Encrypt(pt, nil)
 			if err != nil {
@@ -132,8 +128,6 @@ func TestBasicAeadWithoutAdditionalData(t *testing.T) {
 		}
 	}
 }
-
-// ignore-placeholder5
 
 func TestLoadBadCSVCredential(t *testing.T) {
 	_, err := NewClientWithCredentials(keyURI, badCredFile)

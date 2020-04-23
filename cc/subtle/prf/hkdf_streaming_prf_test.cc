@@ -19,6 +19,7 @@
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
 #include "tink/util/input_stream_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
@@ -33,6 +34,7 @@ using ::crypto::tink::test::IsOk;
 using ::testing::Eq;
 using ::testing::Ge;
 using ::testing::Ne;
+using ::testing::Not;
 using ::testing::SizeIs;
 
 // GENERIC TESTS ===============================================================
@@ -40,47 +42,50 @@ using ::testing::SizeIs;
 // These should be satisfied for any streaming prf which generates enough
 // output.
 TEST(HkdfStreamingPrf, Basic) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA512, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA512, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or = ReadAtMostFromStream(10, stream.get());
+  auto result_or = ReadBytesFromStream(10, stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
 
   EXPECT_THAT(result_or.ValueOrDie(), SizeIs(10));
 }
 
 TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA512, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA512, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or = ReadAtMostFromStream(10, stream.get());
+  auto result_or = ReadBytesFromStream(10, stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
 
   // Different input.
   std::unique_ptr<InputStream> stream2 =
       streaming_prf_or.ValueOrDie()->ComputePrf("input2");
-  auto result_or2 = ReadAtMostFromStream(10, stream2.get());
+  auto result_or2 = ReadBytesFromStream(10, stream2.get());
   ASSERT_THAT(result_or2.status(), IsOk());
   EXPECT_THAT(result_or2.ValueOrDie(), Ne(result_or.ValueOrDie()));
 }
 
 TEST(HkdfStreamingPrf, SameInputTwice) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA512, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA512, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or = ReadAtMostFromStream(10, stream.get());
+  auto result_or = ReadBytesFromStream(10, stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
 
   // Same input.
   std::unique_ptr<InputStream> stream2 =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or2 = ReadAtMostFromStream(10, stream2.get());
+  auto result_or2 = ReadBytesFromStream(10, stream2.get());
   ASSERT_THAT(result_or2.status(), IsOk());
   EXPECT_THAT(result_or2.ValueOrDie(), Eq(result_or.ValueOrDie()));
 }
@@ -92,7 +97,8 @@ TEST(HkdfStreamingPrf, SameInputTwice) {
 
 // Tests that after Backing up the full stream, we get back the same data.
 TEST(HkdfStreamingPrf, BackupFullStream) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA256, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
@@ -121,7 +127,8 @@ TEST(HkdfStreamingPrf, BackupFullStream) {
 
 // Tests that after Backing up half the stream, we get back the same data.
 TEST(HkdfStreamingPrf, BackupHalf) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA256, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
@@ -152,7 +159,8 @@ TEST(HkdfStreamingPrf, BackupHalf) {
 
 // Tests that after Position is correct initially (i.e., 0).
 TEST(HkdfStreamingPrf, PositionOneRead) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA256, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
@@ -163,7 +171,8 @@ TEST(HkdfStreamingPrf, PositionOneRead) {
 
 // Tests that after Position is correct after a single read.
 TEST(HkdfStreamingPrf, PositionSingleRead) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA256, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
@@ -177,7 +186,8 @@ TEST(HkdfStreamingPrf, PositionSingleRead) {
 
 // Tests that after Position is correct after a two reads.
 TEST(HkdfStreamingPrf, PositionTwoReads) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA256, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
@@ -196,7 +206,8 @@ TEST(HkdfStreamingPrf, PositionTwoReads) {
 
 // Tests that we can backup the first read completely.
 TEST(HkdfStreamingPrf, BackupSingleRead) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA256, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
@@ -211,7 +222,8 @@ TEST(HkdfStreamingPrf, BackupSingleRead) {
 
 // Tests that we can backup the second read completely.
 TEST(HkdfStreamingPrf, BackupSecondRead) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA256, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
@@ -231,7 +243,8 @@ TEST(HkdfStreamingPrf, BackupSecondRead) {
 
 // Tests that we can partially backup and position is correct.
 TEST(HkdfStreamingPrf, PartialBackup) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA256, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   std::unique_ptr<InputStream> stream =
@@ -250,16 +263,18 @@ TEST(HkdfStreamingPrf, PartialBackup) {
 // HKDF Specific tests =========================================================
 // Tests which only apply for Hkdf.
 TEST(HkdfStreamingPrf, ExhaustInput) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(SHA512, "key0123456", "salt");
+  auto streaming_prf_or = HkdfStreamingPrf::New(
+      SHA512, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
 
   const int max_output_length = 255 * (512 / 8);
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf("input");
-  auto result_or = ReadAtMostFromStream(max_output_length + 50, stream.get());
+  auto result_or = ReadBytesFromStream(max_output_length, stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
-
   EXPECT_THAT(result_or.ValueOrDie(), SizeIs(max_output_length));
+  result_or = ReadBytesFromStream(50, stream.get());
+  ASSERT_THAT(result_or.status(), Not(IsOk()));
 }
 
 // TEST VECTORS AND COMPARISON =================================================
@@ -268,8 +283,8 @@ TEST(HkdfStreamingPrf, ExhaustInput) {
 TEST(HkdfStreamingPrf, TestVector1) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.1
   HashType hash = SHA256;
-  std::string ikm =
-      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+  util::SecretData ikm = util::SecretDataFromStringView(
+      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"));
   std::string salt = HexDecodeOrDie("000102030405060708090a0b0c");
   std::string info = HexDecodeOrDie("f0f1f2f3f4f5f6f7f8f9");
   std::string expected_result = HexDecodeOrDie(
@@ -281,32 +296,32 @@ TEST(HkdfStreamingPrf, TestVector1) {
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf(info);
-  auto result_or = ReadAtMostFromStream(expected_result.size(), stream.get());
+  auto result_or = ReadBytesFromStream(expected_result.size(), stream.get());
   ASSERT_THAT(result_or.status(), IsOk());
   EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
 }
 
 crypto::tink::util::StatusOr<std::string> ComputeWithHkdfStreamingPrf(
-    HashType hash, std::string ikm, std::string salt, std::string info,
+    HashType hash, util::SecretData ikm, std::string salt, std::string info,
     int length) {
-  auto streaming_prf_or = HkdfStreamingPrf::New(hash, ikm, salt);
+  auto streaming_prf_or = HkdfStreamingPrf::New(hash, std::move(ikm), salt);
   if (!streaming_prf_or.status().ok()) {
     return streaming_prf_or.status();
   }
   std::unique_ptr<InputStream> stream =
       streaming_prf_or.ValueOrDie()->ComputePrf(info);
-  return ReadAtMostFromStream(length, stream.get());
+  return ReadBytesFromStream(length, stream.get());
 }
 
 TEST(HkdfStreamingPrf, TestVector2) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.2
   HashType hash = SHA256;
-  std::string ikm = HexDecodeOrDie(
-      "000102030405060708090a0b0c0d0e0f"
-      "101112131415161718191a1b1c1d1e1f"
-      "202122232425262728292a2b2c2d2e2f"
-      "303132333435363738393a3b3c3d3e3f"
-      "404142434445464748494a4b4c4d4e4f");
+  util::SecretData ikm = util::SecretDataFromStringView(
+      HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"
+                     "101112131415161718191a1b1c1d1e1f"
+                     "202122232425262728292a2b2c2d2e2f"
+                     "303132333435363738393a3b3c3d3e3f"
+                     "404142434445464748494a4b4c4d4e4f"));
   std::string salt = HexDecodeOrDie(
       "606162636465666768696a6b6c6d6e6f"
       "707172737475767778797a7b7c7d7e7f"
@@ -327,7 +342,7 @@ TEST(HkdfStreamingPrf, TestVector2) {
       "cc30c58179ec3e87c14c01d5c1f3434f"
       "1d87");
 
-  auto result_or = ComputeWithHkdfStreamingPrf(hash, ikm, salt, info,
+  auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
   ASSERT_THAT(result_or.status(), IsOk());
   EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
@@ -336,8 +351,8 @@ TEST(HkdfStreamingPrf, TestVector2) {
 TEST(HkdfStreamingPrf, TestVector3) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.3
   HashType hash = SHA256;
-  std::string ikm =
-      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+  util::SecretData ikm = util::SecretDataFromStringView(
+      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"));
   std::string salt = HexDecodeOrDie("");
   std::string info = HexDecodeOrDie("");
   std::string expected_result = HexDecodeOrDie(
@@ -345,7 +360,7 @@ TEST(HkdfStreamingPrf, TestVector3) {
       "b8a11f5c5ee1879ec3454e5f3c738d2d"
       "9d201395faa4b61a96c8");
 
-  auto result_or = ComputeWithHkdfStreamingPrf(hash, ikm, salt, info,
+  auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
   ASSERT_THAT(result_or.status(), IsOk());
   EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
@@ -354,7 +369,8 @@ TEST(HkdfStreamingPrf, TestVector3) {
 TEST(HkdfStreamingPrf, TestVector4) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.4
   HashType hash = SHA1;
-  std::string ikm = HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b");
+  util::SecretData ikm =
+      util::SecretDataFromStringView(HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b"));
   std::string salt = HexDecodeOrDie("000102030405060708090a0b0c");
   std::string info = HexDecodeOrDie("f0f1f2f3f4f5f6f7f8f9");
   std::string expected_result = HexDecodeOrDie(
@@ -362,7 +378,7 @@ TEST(HkdfStreamingPrf, TestVector4) {
       "a4f14b822f5b091568a9cdd4f155fda2"
       "c22e422478d305f3f896");
 
-  auto result_or = ComputeWithHkdfStreamingPrf(hash, ikm, salt, info,
+  auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
   ASSERT_THAT(result_or.status(), IsOk());
   EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
@@ -371,12 +387,12 @@ TEST(HkdfStreamingPrf, TestVector4) {
 TEST(HkdfStreamingPrf, TestVector5) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.5
   HashType hash = SHA1;
-  std::string ikm = HexDecodeOrDie(
-      "000102030405060708090a0b0c0d0e0f"
-      "101112131415161718191a1b1c1d1e1f"
-      "202122232425262728292a2b2c2d2e2f"
-      "303132333435363738393a3b3c3d3e3f"
-      "404142434445464748494a4b4c4d4e4f");
+  util::SecretData ikm = util::SecretDataFromStringView(
+      HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"
+                     "101112131415161718191a1b1c1d1e1f"
+                     "202122232425262728292a2b2c2d2e2f"
+                     "303132333435363738393a3b3c3d3e3f"
+                     "404142434445464748494a4b4c4d4e4f"));
   std::string salt = HexDecodeOrDie(
       "606162636465666768696a6b6c6d6e6f"
       "707172737475767778797a7b7c7d7e7f"
@@ -397,7 +413,7 @@ TEST(HkdfStreamingPrf, TestVector5) {
       "927336d0441f4c4300e2cff0d0900b52"
       "d3b4");
 
-  auto result_or = ComputeWithHkdfStreamingPrf(hash, ikm, salt, info,
+  auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
   ASSERT_THAT(result_or.status(), IsOk());
   EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
@@ -406,8 +422,8 @@ TEST(HkdfStreamingPrf, TestVector5) {
 TEST(HkdfStreamingPrf, TestVector6) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.6
   HashType hash = SHA1;
-  std::string ikm =
-      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+  util::SecretData ikm = util::SecretDataFromStringView(
+      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"));
   std::string salt = HexDecodeOrDie("");
   std::string info = HexDecodeOrDie("");
   std::string expected_result = HexDecodeOrDie(
@@ -415,7 +431,7 @@ TEST(HkdfStreamingPrf, TestVector6) {
       "b9ae52057220a306e07b6b87e8df21d0"
       "ea00033de03984d34918");
 
-  auto result_or = ComputeWithHkdfStreamingPrf(hash, ikm, salt, info,
+  auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
   ASSERT_THAT(result_or.status(), IsOk());
   EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
@@ -424,8 +440,8 @@ TEST(HkdfStreamingPrf, TestVector6) {
 TEST(HkdfStreamingPrf, TestVector7) {
   // https://tools.ietf.org/html/rfc5869#appendix-A.7
   HashType hash = SHA1;
-  std::string ikm =
-      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+  util::SecretData ikm = util::SecretDataFromStringView(
+      HexDecodeOrDie("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"));
   // Since HMAC anyhow pads, this is the same as an absent salt.
   std::string salt = HexDecodeOrDie("");
   std::string info = HexDecodeOrDie("");
@@ -434,7 +450,7 @@ TEST(HkdfStreamingPrf, TestVector7) {
       "b9ae52057220a306e07b6b87e8df21d0"
       "ea00033de03984d34918");
 
-  auto result_or = ComputeWithHkdfStreamingPrf(hash, ikm, salt, info,
+  auto result_or = ComputeWithHkdfStreamingPrf(hash, std::move(ikm), salt, info,
                                                expected_result.size());
   ASSERT_THAT(result_or.status(), IsOk());
   EXPECT_THAT(result_or.ValueOrDie(), Eq(expected_result));
@@ -442,7 +458,7 @@ TEST(HkdfStreamingPrf, TestVector7) {
 
 TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
   HashType hash = SHA1;
-  std::string ikm = Random::GetRandomBytes(123);
+  util::SecretData ikm = Random::GetRandomKeyBytes(123);
   std::string salt = Random::GetRandomBytes(234);
   std::string info = Random::GetRandomBytes(345);
 
@@ -452,9 +468,11 @@ TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
 
   auto compute_hkdf_result_or =  Hkdf::ComputeHkdf(
       hash, ikm, salt, info, 456);
+  util::SecretData compute_hkdf_result =
+      std::move(compute_hkdf_result_or).ValueOrDie();
   ASSERT_THAT(compute_hkdf_result_or.status(), IsOk());
   EXPECT_THAT(streaming_result_or.ValueOrDie(),
-              Eq(compute_hkdf_result_or.ValueOrDie()));
+              Eq(util::SecretDataAsStringView(compute_hkdf_result)));
 }
 
 }  // namespace

@@ -75,11 +75,13 @@ cc_library(
         "//util:constants",
         "//util:enums",
         "//util:errors",
+        "//util:input_stream_util",
         "//util:protobuf_helper",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:validation",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -105,6 +107,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "//util:validation",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )

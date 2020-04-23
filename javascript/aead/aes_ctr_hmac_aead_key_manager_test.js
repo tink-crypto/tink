@@ -15,9 +15,9 @@
 goog.module('tink.aead.AesCtrHmacAeadKeyManagerTest');
 goog.setTestOnly('tink.aead.AesCtrHmacAeadKeyManagerTest');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
-const Mac = goog.require('tink.Mac');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const Random = goog.require('tink.subtle.Random');
 const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

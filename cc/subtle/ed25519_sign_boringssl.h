@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_ED25519_SIGN_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
 #include "tink/public_key_sign.h"
 #include "tink/util/secret_data.h"
@@ -37,7 +38,8 @@ class Ed25519SignBoringSsl : public PublicKeySign {
       absl::string_view data) const override;
 
  private:
-  explicit Ed25519SignBoringSsl(util::SecretData private_key);
+  explicit Ed25519SignBoringSsl(util::SecretData private_key)
+      : private_key_(std::move(private_key)) {}
 
   const util::SecretData private_key_;
 };

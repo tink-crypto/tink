@@ -1,0 +1,101 @@
+load("@rules_python//python:defs.bzl", "py_library")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+py_library(
+    name = "mac",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_mac",
+        ":_mac_key_manager",
+        ":_mac_key_templates",
+        ":_mac_wrapper",
+    ],
+)
+
+py_library(
+    name = "_mac",
+    srcs = ["_mac.py"],
+    srcs_version = "PY3",
+    deps = [requirement("six")],
+)
+
+py_library(
+    name = "_mac_key_manager",
+    srcs = ["_mac_key_manager.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_mac",
+        "//tink/cc/pybind:cc_key_manager",
+        "//tink/cc/pybind:mac",
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_mac_key_manager_test",
+    srcs = ["_mac_key_manager_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":mac",
+        requirement("absl-py"),
+        "//tink:tink_config",
+        "//tink/core",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:hmac_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_mac_wrapper",
+    srcs = ["_mac_wrapper.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_mac",
+        requirement("absl-py"),
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_mac_wrapper_test",
+    srcs = ["_mac_wrapper_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":mac",
+        requirement("absl-py"),
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "_mac_key_templates",
+    srcs = ["_mac_key_templates.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:hmac_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_mac_key_templates_test",
+    srcs = ["_mac_key_templates_test.py"],
+    deps = [
+        ":mac",
+        requirement("absl-py"),
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:hmac_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)

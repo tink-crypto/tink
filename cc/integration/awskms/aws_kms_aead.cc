@@ -105,7 +105,7 @@ StatusOr<std::string> AwsKmsAead::Encrypt(
   auto& err = outcome.GetError();
   return ToStatusF(util::error::INVALID_ARGUMENT,
                    "AWS KMS encryption failed with error: %s",
-                   AwsErrorToString(err).c_str());
+                   AwsErrorToString(err));
 }
 
 StatusOr<std::string> AwsKmsAead::Decrypt(
@@ -134,7 +134,7 @@ StatusOr<std::string> AwsKmsAead::Decrypt(
   auto& err = outcome.GetError();
   return ToStatusF(util::error::INVALID_ARGUMENT,
                    "AWS KMS decryption failed with error: %s",
-                   AwsErrorToString(err).c_str());
+                   AwsErrorToString(err));
 }
 
 }  // namespace awskms

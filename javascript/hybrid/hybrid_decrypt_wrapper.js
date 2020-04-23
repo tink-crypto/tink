@@ -15,21 +15,21 @@
 goog.module('tink.hybrid.HybridDecryptWrapper');
 
 const CryptoFormat = goog.require('tink.CryptoFormat');
-const HybridDecrypt = goog.require('tink.HybridDecrypt');
+const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
- * @implements {HybridDecrypt}
  * @final
  */
-class WrappedHybridDecrypt {
+class WrappedHybridDecrypt extends HybridDecrypt {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   /** @param {!PrimitiveSet.PrimitiveSet} hybridDecryptPrimitiveSet */
   constructor(hybridDecryptPrimitiveSet) {
+    super();
     /** @private @const {!PrimitiveSet.PrimitiveSet} */
     this.primitiveSet_ = hybridDecryptPrimitiveSet;
   }

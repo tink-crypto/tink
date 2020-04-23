@@ -71,8 +71,7 @@ StatusOr<std::string> GcpKmsAead::Encrypt(
 
   if (status.ok()) return resp.ciphertext();
   return ToStatusF(util::error::INVALID_ARGUMENT,
-                   "GCP KMS encryption failed: %s",
-                   status.error_message().c_str());
+                   "GCP KMS encryption failed: %s", status.error_message());
 }
 
 StatusOr<std::string> GcpKmsAead::Decrypt(
@@ -88,8 +87,7 @@ StatusOr<std::string> GcpKmsAead::Decrypt(
 
   if (status.ok()) return resp.plaintext();
   return ToStatusF(util::error::INVALID_ARGUMENT,
-                   "GCP KMS encryption failed: %s",
-                   status.error_message().c_str());
+                   "GCP KMS encryption failed: %s", status.error_message());
 }
 
 }  // namespace gcpkms

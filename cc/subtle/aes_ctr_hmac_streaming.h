@@ -15,6 +15,7 @@
 #ifndef TINK_SUBTLE_AES_CTR_HMAC_STREAMING_H_
 #define TINK_SUBTLE_AES_CTR_HMAC_STREAMING_H_
 
+#include <utility>
 #include <vector>
 
 #include "absl/strings/string_view.h"
@@ -82,7 +83,7 @@ class AesCtrHmacStreaming : public NonceBasedStreamingAead {
   static constexpr int kHmacKeySizeInBytes = 32;
 
   static util::StatusOr<std::unique_ptr<AesCtrHmacStreaming>> New(
-      const Params& params);
+      Params params);
 
  protected:
   util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> NewSegmentEncrypter(
@@ -92,7 +93,7 @@ class AesCtrHmacStreaming : public NonceBasedStreamingAead {
       absl::string_view associated_data) const override;
 
  private:
-  explicit AesCtrHmacStreaming(const Params& params) : params_(params) {}
+  explicit AesCtrHmacStreaming(Params params) : params_(std::move(params)) {}
   const Params params_;
 };
 
@@ -190,8 +191,7 @@ class AesCtrHmacStreamSegmentDecrypter : public StreamSegmentDecrypter {
         ciphertext_segment_size_(ciphertext_segment_size),
         ciphertext_offset_(ciphertext_offset),
         tag_algo_(tag_algo),
-        tag_size_(tag_size),
-        is_initialized_(false) {}
+        tag_size_(tag_size) {}
 
   // Parameters set upon decrypter creation.
   const util::SecretData ikm_;
@@ -202,9 +202,9 @@ class AesCtrHmacStreamSegmentDecrypter : public StreamSegmentDecrypter {
   const int ciphertext_offset_;
   const HashType tag_algo_;
   const int tag_size_;
-  bool is_initialized_;
 
   // Parameters set when initializing with data from stream header.
+  bool is_initialized_ = false;
   util::SecretData key_value_;
   std::string nonce_prefix_;
   const EVP_CIPHER* cipher_;

@@ -34,9 +34,6 @@ const (
 // It generates new KMSEnvelopeAEADKey keys and produces new instances of KMSEnvelopeAEAD subtle.
 type kmsEnvelopeAEADKeyManager struct{}
 
-// Assert that kmsEnvelopeAEADKeyManager implements the KeyManager interface.
-var _ registry.KeyManager = (*kmsEnvelopeAEADKeyManager)(nil)
-
 // newKMSEnvelopeAEADKeyManager creates a new aesGcmKeyManager.
 func newKMSEnvelopeAEADKeyManager() *kmsEnvelopeAEADKeyManager {
 	return new(kmsEnvelopeAEADKeyManager)

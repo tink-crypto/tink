@@ -14,6 +14,7 @@
 
 #include "tink/subtle/stateful_cmac_boringssl.h"
 
+#include "absl/memory/memory.h"
 #include "openssl/base.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -23,7 +24,7 @@ namespace tink {
 namespace subtle {
 
 util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
-    uint32_t tag_size, const std::string& key_value) {
+    uint32_t tag_size, const util::SecretData& key_value) {
   const EVP_CIPHER* cipher;
   switch (key_value.size()) {
     case 16:
@@ -49,16 +50,9 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
                         "CMAC initialization failed");
   }
 
-  return std::unique_ptr<StatefulMac>(
-      new StatefulCmacBoringSsl(tag_size, key_value, std::move(ctx)));
+  return {
+      absl::WrapUnique(new StatefulCmacBoringSsl(tag_size, std::move(ctx)))};
 }
-
-StatefulCmacBoringSsl::StatefulCmacBoringSsl(uint32_t tag_size,
-                                             const std::string& key_value,
-                                             bssl::UniquePtr<CMAC_CTX> ctx)
-    : cmac_context_(std::move(ctx)),
-      tag_size_(tag_size),
-      key_value_(key_value) {}
 
 util::Status StatefulCmacBoringSsl::Update(absl::string_view data) {
   // BoringSSL expects a non-null pointer for data,
@@ -68,8 +62,7 @@ util::Status StatefulCmacBoringSsl::Update(absl::string_view data) {
   if (!CMAC_Update(cmac_context_.get(),
                    reinterpret_cast<const uint8_t*>(data.data()),
                    data.size())) {
-    return util::Status(util::error::INTERNAL,
-                        "Inputs to CMAC Update invalid");
+    return util::Status(util::error::INTERNAL, "Inputs to CMAC Update invalid");
   }
   return util::OkStatus();
 }
@@ -82,6 +75,15 @@ util::StatusOr<std::string> StatefulCmacBoringSsl::Finalize() {
     return util::Status(util::error::INTERNAL, "CMAC finalization failed");
   }
   return std::string(reinterpret_cast<char*>(buf), tag_size_);
+}
+
+StatefulCmacBoringSslFactory::StatefulCmacBoringSslFactory(
+    uint32_t tag_size, const util::SecretData& key_value)
+    : tag_size_(tag_size), key_value_(key_value) {}
+
+util::StatusOr<std::unique_ptr<StatefulMac>>
+StatefulCmacBoringSslFactory::Create() const {
+  return StatefulCmacBoringSsl::New(tag_size_, key_value_);
 }
 
 }  // namespace subtle

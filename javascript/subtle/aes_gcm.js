@@ -14,10 +14,10 @@
 
 goog.module('tink.subtle.AesGcm');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Validators = goog.require('tink.subtle.Validators');
 
 /**
@@ -37,15 +37,15 @@ const TAG_SIZE_IN_BITS = 128;
 /**
  * Implementation of AES-GCM.
  *
- * @implements {Aead}
  * @public
  * @final
  */
-class AesGcm {
+class AesGcm extends Aead {
   /**
    * @param {!webCrypto.CryptoKey} key
    */
   constructor(key) {
+    super();
     /** @const @private {!webCrypto.CryptoKey} */
     this.key_ = key;
   }

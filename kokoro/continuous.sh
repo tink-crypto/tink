@@ -31,7 +31,7 @@ go get github.com/google/tink/go/...
 
 # Run all manual tests.
 (
-  cd java
+  cd java_src
   time bazel test \
     --strategy=TestRunner=standalone \
     --test_timeout 10000 \
@@ -41,8 +41,7 @@ go get github.com/google/tink/go/...
 )
 
 # On Linux, run all Maven tests and upload snapshot jars
-# TODO(b/148672827): Disable until deployment script is updated.
-#if [[ $PLATFORM == 'linux' ]]; then
-#  ./maven/publish-snapshot.sh
-#  ./maven/test-snapshot.sh
-#fi
+if [[ $PLATFORM == 'linux' ]]; then
+  ./maven/publish-snapshot.sh
+  ./maven/test-snapshot.sh
+fi

@@ -20,8 +20,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
 	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -38,7 +38,7 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	var s = tmp.(*signature.ED25519Signer)
+	var s = tmp.(*subtle.ED25519Signer)
 
 	kmPub, err := registry.GetKeyManager(testutil.ED25519VerifierTypeURL)
 	if err != nil {
@@ -50,7 +50,7 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
 	}
-	var v = tmp.(*signature.ED25519Verifier)
+	var v = tmp.(*subtle.ED25519Verifier)
 
 	data := random.GetRandomBytes(1281)
 	signature, err := s.Sign(data)
@@ -169,12 +169,12 @@ func validateED25519PrivateKey(key *ed25519pb.Ed25519PrivateKey) error {
 			testutil.ED25519SignerKeyVersion, key.Version)
 	}
 
-	signer, err := signature.NewED25519Signer(key.KeyValue)
+	signer, err := subtle.NewED25519Signer(key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("unexpected error when creating ED25519Sign: %s", err)
 	}
 
-	verifier, err := signature.NewED25519Verifier(publicKey.KeyValue)
+	verifier, err := subtle.NewED25519Verifier(publicKey.KeyValue)
 	if err != nil {
 		return fmt.Errorf("unexpected error when creating ED25519Verify: %s", err)
 	}

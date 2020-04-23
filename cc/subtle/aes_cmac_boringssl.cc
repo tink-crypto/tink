@@ -20,13 +20,9 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/cmac.h"
-#include "openssl/err.h"
-#include "tink/mac.h"
-#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
-#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -44,26 +40,23 @@ util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(util::SecretData key,
   return {absl::WrapUnique(new AesCmacBoringSsl(std::move(key), tag_size))};
 }
 
-AesCmacBoringSsl::AesCmacBoringSsl(util::SecretData key_value,
-                                   uint32_t tag_size)
-    : key_value_(std::move(key_value)), tag_size_(tag_size) {}
-
 util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
   data = SubtleUtilBoringSSL::EnsureNonNull(data);
 
-  uint8_t buf[kMaxTagSize];
+  std::string result;
+  ResizeStringUninitialized(&result, kMaxTagSize);
   const int res =
-      AES_CMAC(buf, reinterpret_cast<const uint8_t*>(key_value_.data()),
-               key_value_.size(), reinterpret_cast<const uint8_t*>(data.data()),
-               data.size());
+      AES_CMAC(reinterpret_cast<uint8_t*>(&result[0]), key_.data(), key_.size(),
+               reinterpret_cast<const uint8_t*>(data.data()), data.size());
   if (res == 0) {
     return util::Status(util::error::INTERNAL,
                         "BoringSSL failed to compute CMAC");
   }
-  return std::string(reinterpret_cast<char*>(buf), tag_size_);
+  result.resize(tag_size_);
+  return result;
 }
 
 util::Status AesCmacBoringSsl::VerifyMac(absl::string_view mac,
@@ -77,9 +70,8 @@ util::Status AesCmacBoringSsl::VerifyMac(absl::string_view mac,
   }
   uint8_t buf[kMaxTagSize];
   const int res =
-      AES_CMAC(buf, reinterpret_cast<const uint8_t*>(key_value_.data()),
-               key_value_.size(), reinterpret_cast<const uint8_t*>(data.data()),
-               data.size());
+      AES_CMAC(buf, key_.data(), key_.size(),
+               reinterpret_cast<const uint8_t*>(data.data()), data.size());
   if (res == 0) {
     return util::Status(util::error::INTERNAL,
                         "BoringSSL failed to compute CMAC");

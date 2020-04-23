@@ -31,6 +31,19 @@ namespace tink {
 namespace subtle {
 namespace {
 
+TEST(AesSivBoringSslTest, testCarryComputation) {
+  uint8_t value = 0;
+  for (int i = 0; i < 256; i++) {
+    uint8_t carry = *reinterpret_cast<int8_t*>(&value) >> 7;
+    if (i < 128) {
+      EXPECT_EQ(carry, 0x00);
+    } else {
+      EXPECT_EQ(carry, 0xff);
+    }
+    value++;
+  }
+}
+
 TEST(AesSivBoringSslTest, testEncryptDecrypt) {
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"

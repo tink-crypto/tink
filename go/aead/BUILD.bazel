@@ -1,8 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 licenses(["notice"])  # keep
-
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
@@ -20,6 +20,7 @@ go_library(
     importpath = "github.com/google/tink/go/aead",
     visibility = ["//visibility:public"],
     deps = [
+        "//aead/subtle:go_default_library",
         "//core/cryptofmt:go_default_library",
         "//core/primitiveset:go_default_library",
         "//core/registry:go_default_library",
@@ -34,7 +35,6 @@ go_library(
         "//proto:kms_envelope_go_proto",
         "//proto:tink_go_proto",
         "//proto:xchacha20_poly1305_go_proto",
-        "//subtle/aead:go_default_library",
         "//subtle/random:go_default_library",
         "//tink:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
@@ -56,6 +56,7 @@ go_test(
     ],
     embed = [":go_default_library"],
     deps = [
+        "//aead/subtle:go_default_library",
         "//core/cryptofmt:go_default_library",
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
@@ -64,7 +65,7 @@ go_test(
         "//proto:chacha20_poly1305_go_proto",
         "//proto:tink_go_proto",
         "//proto:xchacha20_poly1305_go_proto",
-        "//subtle/aead:go_default_library",
+        "//signature:go_default_library",
         "//subtle/random:go_default_library",
         "//testkeyset:go_default_library",
         "//testutil:go_default_library",

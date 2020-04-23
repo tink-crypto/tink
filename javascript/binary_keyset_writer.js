@@ -15,7 +15,7 @@
 goog.module('tink.BinaryKeysetWriter');
 
 const KeysetWriter = goog.require('tink.KeysetWriter');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 
 /**

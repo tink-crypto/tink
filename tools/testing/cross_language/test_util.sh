@@ -67,6 +67,37 @@ generate_symmetric_key() {
   echo "Done generating a symmetric keyset."
 }
 
+# Generates symmetric keys according to $key_template,
+# which should be supported by Tinkey.
+# Stores the key in file $symmetric_key_file.
+generate_symmetric_keys() {
+  local key_name="$1"
+  local key_template="$2"
+  local output_format="$3"
+  local number="$4"
+  if [ "$output_format" == "" ]; then
+    output_format="BINARY"
+  fi
+
+  symmetric_key_file="$TEST_TMPDIR/${key_name}_symmetric_key.bin"
+  echo "--- Using template $key_template to generate keyset"\
+      "to file $symmetric_key_file ..."
+
+  $TINKEY_CLI create-keyset --key-template $key_template\
+      --out-format $output_format --out "${symmetric_key_file}_1"  || exit 1
+
+  j=1
+  for i in `seq 2 $number`
+  do
+    $TINKEY_CLI add-key --key-template $key_template\
+        --in-format $output_format --in "${symmetric_key_file}_${j}"\
+        --out-format $output_format --out "${symmetric_key_file}_${i}"  || exit 1
+    j=$i
+  done
+  cp "${symmetric_key_file}_${number}" $symmetric_key_file
+  echo "Done generating a symmetric keyset."
+}
+
 # Generates an AWS Envelope Encryption using $key_template,
 # which should be supported by Tinkey.
 # Stores the key in file $aws_keyset_file.

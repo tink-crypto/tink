@@ -34,34 +34,51 @@ func NewHybridEncryptWithKeyManager(h *keyset.Handle, km registry.KeyManager) (t
 	if err != nil {
 		return nil, fmt.Errorf("hybrid_factory: cannot obtain primitive set: %s", err)
 	}
-	return newEncryptPrimitiveSet(ps), nil
+
+	return newEncryptPrimitiveSet(ps)
 }
 
 // encryptPrimitiveSet is an HybridEncrypt implementation that uses the underlying primitive set for encryption.
-type encryptPrimitiveSet struct {
+type wrappedHybridEncrypt struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-// Asserts that primitiveSet implements the HybridEncrypt interface.
-var _ tink.HybridEncrypt = (*encryptPrimitiveSet)(nil)
+func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncrypt, error) {
+	if _, ok := (ps.Primary.Primitive).(tink.HybridEncrypt); !ok {
+		return nil, fmt.Errorf("hybrid_factory: not a HybridEncrypt primitive")
+	}
 
-func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) *encryptPrimitiveSet {
-	ret := new(encryptPrimitiveSet)
+	for _, primitives := range ps.Entries {
+		for _, p := range primitives {
+			if _, ok := (p.Primitive).(tink.HybridEncrypt); !ok {
+				return nil, fmt.Errorf("hybrid_factory: not a HybridEncrypt primitive")
+			}
+		}
+	}
+
+	ret := new(wrappedHybridEncrypt)
 	ret.ps = ps
-	return ret
+
+	return ret, nil
 }
 
 // Encrypt encrypts the given plaintext with the given additional authenticated data.
 // It returns the concatenation of the primary's identifier and the ciphertext.
-func (a *encryptPrimitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
+func (a *wrappedHybridEncrypt) Encrypt(pt, ad []byte) ([]byte, error) {
 	primary := a.ps.Primary
-	var p = (primary.Primitive).(tink.HybridEncrypt)
+	p, ok := (primary.Primitive).(tink.HybridEncrypt)
+	if !ok {
+		return nil, fmt.Errorf("hybrid_factory: not a HybridEncrypt primitive")
+	}
+
 	ct, err := p.Encrypt(pt, ad)
 	if err != nil {
 		return nil, err
 	}
-	ret := make([]byte, 0, len(primary.Prefix) + len(ct))
+
+	ret := make([]byte, 0, len(primary.Prefix)+len(ct))
 	ret = append(ret, primary.Prefix...)
 	ret = append(ret, ct...)
+
 	return ret, nil
 }

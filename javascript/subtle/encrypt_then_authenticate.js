@@ -14,14 +14,14 @@
 
 goog.module('tink.subtle.EncryptThenAuthenticate');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AesCtr = goog.require('tink.subtle.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Hmac = goog.require('tink.subtle.Hmac');
 const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
-const Mac = goog.require('tink.Mac');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Validators = goog.require('tink.subtle.Validators');
 
 /**
@@ -34,11 +34,10 @@ const Validators = goog.require('tink.subtle.Validators');
  * This implementation is based on
  * http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05.
  *
- * @implements {Aead}
  * @public
  * @final
  */
-class EncryptThenAuthenticate {
+class EncryptThenAuthenticate extends Aead {
   /**
    * @param {!IndCpaCipher} cipher
    * @param {number} ivSize the IV size in bytes
@@ -47,6 +46,8 @@ class EncryptThenAuthenticate {
    * @throws {InvalidArgumentsException}
    */
   constructor(cipher, ivSize, mac, tagSize) {
+    super();
+
     /** @const @private {!IndCpaCipher} */
     this.cipher_ = cipher;
 

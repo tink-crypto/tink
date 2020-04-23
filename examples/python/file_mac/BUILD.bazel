@@ -1,0 +1,49 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files(["hmac_sha256_256bittag_test_keyset.json"])
+
+py_binary(
+    name = "file_mac_cleartext",
+    srcs = ["file_mac_cleartext.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+    ],
+)
+
+sh_test(
+    name = "file_mac_test",
+    size = "small",
+    srcs = ["file_mac_test.sh"],
+    args = [
+        "$(rootpath :file_mac_cleartext)",
+        "$(rootpath :hmac_sha256_256bittag_test_keyset.json)",
+    ],
+    data = [
+        ":file_mac_cleartext",
+        ":hmac_sha256_256bittag_test_keyset.json",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "file_mac_test_package",
+    size = "small",
+    srcs = ["file_mac_test.sh"],
+    args = [
+        "'python3 $(rootpath :file_mac_cleartext.py)'",
+        "$(rootpath :hmac_sha256_256bittag_test_keyset.json)",
+    ],
+    data = [
+        ":file_mac_cleartext.py",
+        ":hmac_sha256_256bittag_test_keyset.json",
+    ],
+)

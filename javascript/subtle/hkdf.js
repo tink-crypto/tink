@@ -19,7 +19,7 @@
 goog.module('tink.subtle.Hkdf');
 
 const Hmac = goog.require('tink.subtle.Hmac');
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
 const Validators = goog.require('tink.subtle.Validators');
 
 /**

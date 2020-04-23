@@ -15,10 +15,10 @@
 goog.module('tink.PrimitiveSetTest');
 goog.setTestOnly('tink.PrimitiveSetTest');
 
-const Aead = goog.require('tink.Aead');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('primitive set test', function() {
@@ -34,20 +34,6 @@ describe('primitive set test', function() {
       primitiveSet.addPrimitive(primitive, key);
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownPrefixType());
-      return;
-    }
-    fail('An exception should be thrown.');
-  });
-
-  it('add primitive null primitive', function() {
-    const primitive = null;
-    const key = createKey();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
-
-    try {
-      primitiveSet.addPrimitive(primitive, key);
-    } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.addingNullPrimitive());
       return;
     }
     fail('An exception should be thrown.');
@@ -291,12 +277,9 @@ class ExceptionText {
 }
 
 /**
- * @implements {Aead}
  * @final
  */
-class DummyAead1 {
-  constructor() {}
-
+class DummyAead1 extends Aead {
   /** @override */
   encrypt(plaintext, aad) {
     throw new SecurityException(
@@ -311,12 +294,9 @@ class DummyAead1 {
 }
 
 /**
- * @implements {Aead}
  * @final
  */
-class DummyAead2 {
-  constructor() {}
-
+class DummyAead2 extends Aead {
   /** @override */
   encrypt(plaintext, aad) {
     throw new SecurityException(

@@ -16,9 +16,9 @@
 #ifndef TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 #define TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 
-#include <algorithm>
-#include <vector>
+#include <string>
 
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
@@ -95,14 +95,14 @@ class AesGcmKeyManager
     if (!status.ok()) return status;
 
     crypto::tink::util::StatusOr<std::string> randomness =
-        ReadAtMostFromStream(key_format.key_size(), input_stream);
-    if (!randomness.status().ok()) {
+        ReadBytesFromStream(key_format.key_size(), input_stream);
+    if (!randomness.ok()) {
+      if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
+        return crypto::tink::util::Status(
+            crypto::tink::util::error::INVALID_ARGUMENT,
+            "Could not get enough pseudorandomness from input stream");
+      }
       return randomness.status();
-    }
-    if (randomness.ValueOrDie().size() != key_format.key_size()) {
-      return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
-          "Could not get enough pseudorandomness from input stream");
     }
     google::crypto::tink::AesGcmKey key;
     key.set_version(get_version());

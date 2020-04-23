@@ -58,6 +58,7 @@ tink_cc_library(
     tink::subtle::hkdf
     tink::subtle::subtle_util_boringssl
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -74,6 +75,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -151,16 +153,14 @@ tink_cc_library(
     aes_cmac_boringssl.cc
     aes_cmac_boringssl.h
   DEPS
-    tink::subtle::common_enums
+    tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::core::mac
-    tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
     absl::memory
-    absl::strings
 )
 
 tink_cc_library(
@@ -292,6 +292,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::strings
+    absl::memory
 )
 
 tink_cc_library(
@@ -438,13 +439,11 @@ tink_cc_library(
     tink::subtle::random
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
-    tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
     absl::memory
-    absl::strings
 )
 
 tink_cc_library(
@@ -535,6 +534,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
@@ -706,10 +706,12 @@ tink_cc_library(
       stateful_hmac_boringssl.cc
       stateful_hmac_boringssl.h
     DEPS
-      tink::subtle::common_enums
-      tink::subtle::subtle_util_boringssl
+      absl::memory
       crypto
+      tink::subtle::common_enums
       tink::subtle::mac::stateful_mac
+      tink::subtle::subtle_util_boringssl
+      tink::util::secret_data
       tink::util::status
       tink::util::statusor
 )
@@ -720,10 +722,12 @@ tink_cc_library(
       stateful_cmac_boringssl.cc
       stateful_cmac_boringssl.h
     DEPS
-      tink::subtle::common_enums
-      tink::subtle::subtle_util_boringssl
+      absl::memory
       crypto
+      tink::subtle::common_enums
       tink::subtle::mac::stateful_mac
+      tink::subtle::subtle_util_boringssl
+      tink::util::secret_data
       tink::util::status
       tink::util::statusor
 )
@@ -738,7 +742,6 @@ tink_cc_library(
     absl::strings
     crypto
     tink::subtle::subtle_util_boringssl
-    tink::subtle::mac::stateful_mac
     tink::util::status
     tink::util::statusor
 )
@@ -751,6 +754,7 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
@@ -764,6 +768,7 @@ tink_cc_test(
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
     tink::subtle::ecies_hkdf_sender_kem_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
@@ -825,10 +830,12 @@ tink_cc_test(
     tink::subtle::aes_gcm_boringssl
     tink::subtle::wycheproof_util
     tink::core::aead
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
     absl::strings
+    gmock
     rapidjson
 )
 
@@ -1272,10 +1279,12 @@ tink_cc_test(
   NAME stateful_hmac_boringssl_test
   SRCS stateful_hmac_boringssl_test.cc
   DEPS
+    absl::memory
     tink::subtle::common_enums
     tink::subtle::stateful_hmac_boringssl
     tink::subtle::wycheproof_util
     tink::subtle::test_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
@@ -1286,10 +1295,12 @@ tink_cc_test(
   NAME stateful_cmac_boringssl_test
   SRCS stateful_cmac_boringssl_test.cc
   DEPS
+    absl::memory
     tink::subtle::common_enums
     tink::subtle::stateful_cmac_boringssl
     tink::subtle::wycheproof_util
     tink::subtle::test_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util

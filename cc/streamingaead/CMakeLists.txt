@@ -58,6 +58,7 @@ tink_cc_library(
     aes_gcm_hkdf_streaming_key_manager.cc
     aes_gcm_hkdf_streaming_key_manager.h
   DEPS
+    absl::memory
     absl::strings
     tink::core::key_manager
     tink::core::key_type_manager
@@ -70,6 +71,7 @@ tink_cc_library(
     tink::util::constants
     tink::util::enums
     tink::util::errors
+    tink::util::input_stream_util
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::status
@@ -83,6 +85,7 @@ tink_cc_library(
     aes_ctr_hmac_streaming_key_manager.cc
     aes_ctr_hmac_streaming_key_manager.h
   DEPS
+    absl::memory
     absl::strings
     tink::core::key_manager
     tink::core::key_type_manager

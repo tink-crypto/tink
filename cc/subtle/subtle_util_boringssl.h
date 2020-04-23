@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
 #define TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
 
+#include <cstdint>
 #include <vector>
 
 #include "absl/strings/string_view.h"
@@ -26,6 +27,7 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -117,6 +119,10 @@ class SubtleUtilBoringSSL {
   // Returns a string of size 'len' that holds BIGNUM 'bn'.
   static util::StatusOr<std::string> bn2str(const BIGNUM *bn, size_t len);
 
+  // Returns a SecretData of size 'len' that holds BIGNUM 'bn'.
+  static util::StatusOr<util::SecretData> BignumToSecretData(const BIGNUM *bn,
+                                                             size_t len);
+
   // Returns BoringSSL error strings accumulated in the error queue,
   // thus emptying the queue.
   static std::string GetErrors();
@@ -167,7 +173,7 @@ class SubtleUtilBoringSSL {
 
   // Returns the ECDH's shared secret based on our private key and peer's public
   // key. Returns error if the public key is not on private key's curve.
-  static crypto::tink::util::StatusOr<std::string> ComputeEcdhSharedSecret(
+  static crypto::tink::util::StatusOr<util::SecretData> ComputeEcdhSharedSecret(
       EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key);
 
   // Transforms ECDSA IEEE_P1363 signature encoding to DER encoding.
@@ -220,6 +226,9 @@ class SubtleUtilBoringSSL {
 
   // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
   static const EVP_CIPHER *GetAesCtrCipherForKeySize(uint32_t size_in_bytes);
+
+  // Returns BoringSSL's AES GCM EVP_CIPHER for the key size.
+  static const EVP_CIPHER *GetAesGcmCipherForKeySize(uint32_t size_in_bytes);
 
   // Returns BoringSSL's AES GCM EVP_AEAD for the key size.
   static const EVP_AEAD *GetAesGcmAeadForKeySize(uint32_t size_in_bytes);

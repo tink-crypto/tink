@@ -20,10 +20,83 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace test {
+namespace internal {
+
+////////////////////////////////////////////////////////////
+// Implementation of IsOkAndHolds().
+
+// Monomorphic implementation of matcher IsOkAndHolds(m).  StatusOrType is a
+// reference to StatusOr<T>.
+template <typename StatusOrType>
+class IsOkAndHoldsMatcherImpl
+    : public ::testing::MatcherInterface<StatusOrType> {
+ public:
+  using value_type = typename std::remove_reference<StatusOrType>::type::type;
+
+  template <typename InnerMatcher>
+  explicit IsOkAndHoldsMatcherImpl(InnerMatcher&& inner_matcher)
+      : inner_matcher_(::testing::SafeMatcherCast<const value_type&>(
+            std::forward<InnerMatcher>(inner_matcher))) {}
+
+  void DescribeTo(std::ostream* os) const override {
+    *os << "is OK and has a value that ";
+    inner_matcher_.DescribeTo(os);
+  }
+
+  void DescribeNegationTo(std::ostream* os) const override {
+    *os << "isn't OK or has a value that ";
+    inner_matcher_.DescribeNegationTo(os);
+  }
+
+  bool MatchAndExplain(
+      StatusOrType actual_value,
+      ::testing::MatchResultListener* result_listener) const override {
+    if (!actual_value.ok()) {
+      *result_listener << "which has status " << actual_value.status();
+      return false;
+    }
+
+    ::testing::StringMatchResultListener inner_listener;
+    const bool matches = inner_matcher_.MatchAndExplain(
+        actual_value.ValueOrDie(), &inner_listener);
+    const std::string inner_explanation = inner_listener.str();
+    if (!inner_explanation.empty()) {
+      *result_listener << "which contains value "
+                       << ::testing::PrintToString(actual_value.ValueOrDie())
+                       << ", " << inner_explanation;
+    }
+    return matches;
+  }
+
+ private:
+  const ::testing::Matcher<const value_type&> inner_matcher_;
+};
+
+// Implements IsOkAndHolds(m) as a polymorphic matcher.
+template <typename InnerMatcher>
+class IsOkAndHoldsMatcher {
+ public:
+  explicit IsOkAndHoldsMatcher(InnerMatcher inner_matcher)
+      : inner_matcher_(std::move(inner_matcher)) {}
+
+  // Converts this polymorphic matcher to a monomorphic matcher of the
+  // given type.  StatusOrType can be either StatusOr<T> or a
+  // reference to StatusOr<T>.
+  template <typename StatusOrType>
+  operator ::testing::Matcher<StatusOrType>() const {  // NOLINT
+    return ::testing::Matcher<StatusOrType>(
+        new IsOkAndHoldsMatcherImpl<const StatusOrType&>(inner_matcher_));
+  }
+
+ private:
+  const InnerMatcher inner_matcher_;
+};
+}  // namespace internal
 
 // Matches a util::StatusOk() value.
 // This is better than EXPECT_TRUE(status.ok())
@@ -34,6 +107,15 @@ MATCHER(IsOk, "is a Status with an OK value") {
   }
   *result_listener << arg.ToString();
   return false;
+}
+
+// Returns a gMock matcher that matches a StatusOr<> whose status is
+// OK and whose value matches the inner matcher.
+template <typename InnerMatcher>
+internal::IsOkAndHoldsMatcher<typename std::decay<InnerMatcher>::type>
+IsOkAndHolds(InnerMatcher&& inner_matcher) {
+  return internal::IsOkAndHoldsMatcher<typename std::decay<InnerMatcher>::type>(
+      std::forward<InnerMatcher>(inner_matcher));
 }
 
 // Matches a Status with the specified 'code' as error_code().
@@ -50,7 +132,21 @@ MATCHER_P(StatusIs, code,
 // error_message() matches 'message_macher'.
 MATCHER_P2(StatusIs, code, message_matcher, "") {
   return (arg.CanonicalCode() == code) &&
-      testing::Matches(message_matcher)(arg.error_message());
+         testing::Matches(message_matcher)(arg.error_message());
+}
+
+// Matches a Keyset::Key with `key`.
+MATCHER_P(EqualsKey, key, "is equals to the expected key") {
+  if (arg.key_id() == key.key_id() && arg.status() == key.status() &&
+         arg.output_prefix_type() == key.output_prefix_type() &&
+         arg.key_data().type_url() == key.key_data().type_url() &&
+         arg.key_data().key_material_type() ==
+             key.key_data().key_material_type() &&
+         arg.key_data().value() == key.key_data().value()) {
+    return true;
+  }
+  *result_listener << arg.DebugString();
+  return false;
 }
 
 }  // namespace test

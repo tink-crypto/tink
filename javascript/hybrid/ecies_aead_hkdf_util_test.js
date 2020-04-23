@@ -21,7 +21,7 @@ const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Util = goog.require('tink.Util');
 const {PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {assertExists} = goog.require('tink.testUtils');
+const {assertExists} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
 describe('ecies aead hkdf util test', function() {
   beforeEach(function() {

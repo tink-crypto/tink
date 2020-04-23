@@ -126,6 +126,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::ecdsa_cc_proto
+    absl::memory
     absl::strings
 )
 
@@ -170,6 +171,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::ed25519_cc_proto
+    absl::memory
     absl::strings
 )
 
@@ -227,6 +229,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::rsa_ssa_pkcs1_cc_proto
+    absl::memory
     absl::strings
 )
 
@@ -276,6 +279,8 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::rsa_ssa_pss_cc_proto
     tink::proto::tink_cc_proto
+    absl::memory
+    absl::strings
 )
 
 tink_cc_library(
@@ -300,6 +305,30 @@ tink_cc_library(
     tink::proto::config_cc_proto
     absl::base
     absl::memory
+)
+
+tink_cc_library(
+  NAME signature_pem_keyset_reader
+  SRCS
+    signature_pem_keyset_reader.cc
+    signature_pem_keyset_reader.h
+  DEPS
+    tink::signature::rsa_ssa_pkcs1_sign_key_manager
+    tink::signature::rsa_ssa_pkcs1_verify_key_manager
+    tink::signature::rsa_ssa_pss_sign_key_manager
+    tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::subtle::pem_parser_boringssl
+    tink::subtle::subtle_util_boringssl
+    tink::util::enums
+    tink::util::keyset_util
+    tink::util::status
+    tink::util::statusor
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
+    absl::memory
+    absl::strings
 )
 
 # tests
@@ -563,4 +592,25 @@ tink_cc_test(
     tink::proto::rsa_ssa_pss_cc_proto
     tink::proto::tink_cc_proto
     crypto
+)
+
+tink_cc_test(
+  NAME signature_pem_keyset_reader_test
+  SRCS signature_pem_keyset_reader_test.cc
+  DEPS
+    tink::signature::signature_pem_keyset_reader
+    tink::signature::rsa_ssa_pss_sign_key_manager
+    tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::signature::signature_config
+    tink::subtle::pem_parser_boringssl
+    tink::subtle::subtle_util_boringssl
+    tink::util::enums
+    tink::util::keyset_util
+    tink::util::status
+    tink::util::test_util
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
+    absl::strings
+    gmock
 )

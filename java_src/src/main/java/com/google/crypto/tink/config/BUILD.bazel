@@ -1,0 +1,44 @@
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
+
+java_library(
+    name = "config",
+    srcs = [":srcs"],
+    javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:config_java_proto",
+        "//src/main/java/com/google/crypto/tink/daead",
+        "//src/main/java/com/google/crypto/tink/hybrid",
+        "//src/main/java/com/google/crypto/tink/prf:prf_config",
+        "//src/main/java/com/google/crypto/tink/signature",
+        "//src/main/java/com/google/crypto/tink/streamingaead",
+    ],
+)
+
+java_library(
+    name = "android",
+    srcs = [":srcs"],
+    javacopts = JAVACOPTS_OSS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:config_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/daead:android",
+        "//src/main/java/com/google/crypto/tink/hybrid:android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_config-android",
+        "//src/main/java/com/google/crypto/tink/signature:android",
+        "//src/main/java/com/google/crypto/tink/streamingaead:android",
+    ],
+)

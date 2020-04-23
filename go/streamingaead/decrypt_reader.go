@@ -29,14 +29,14 @@ var (
 
 // decryptReader is a reader that tries to find the right key to decrypt ciphertext from the given primitive set.
 type decryptReader struct {
-	ps  *primitiveSet
+	wrapped *wrappedStreamingAEAD
 	// cr is a source Reader which provides ciphertext to be decrypted.
 	cr  io.Reader
 	aad []byte
 
 	matchAttempted bool
 	// mr is a matched decrypting reader initialized with a proper key to decrypt ciphertext.
-	mr      io.Reader
+	mr io.Reader
 }
 
 func (dr *decryptReader) Read(p []byte) (n int, err error) {
@@ -47,7 +47,7 @@ func (dr *decryptReader) Read(p []byte) (n int, err error) {
 		return 0, errKeyNotFound
 	}
 
-	entries, err := dr.ps.ps.RawEntries()
+	entries, err := dr.wrapped.ps.RawEntries()
 	if err != nil {
 		return 0, err
 	}

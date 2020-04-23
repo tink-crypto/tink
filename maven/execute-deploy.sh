@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,151 +13,239 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/bash
-
 # Fail on any error.
 set -e
 
-# Display commands to stderr.
-set -x
+usage() {
+  echo "Usage: $0 [-dh] <maven goal> <version> <additional maven args...>"
+  echo "  -d: Dry run. Only execute idempotent commands (default: FALSE)."
+  echo "  -h: Help. Print this usage information."
+  exit 1
+}
+
+# Process flags.
+
+DRY_RUN="false"
+
+while getopts "dh" opt; do
+  case "${opt}" in
+    d) DRY_RUN="true" ;;
+    h) usage ;;
+    *) usage ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+readonly DRY_RUN
+
+if (( $# < 2 )); then
+  usage
+fi
+
+# Process arguments.
 
 readonly MVN_GOAL="$1"
 readonly VERSION="$2"
 shift 2
+
+# All remaining arguments are used as extra arguments to maven.
 readonly EXTRA_MAVEN_ARGS=("$@")
 
-if [ -z "${VERSION}" ]
-then
-  echo "Must set the VERSION variable"
-  exit 1
+# URL of the git repository used for javadoc publishing.
+GIT_URL="git@github.com:google/tink.git"
+if [ -n "${KOKORO_ROOT}" ]; then
+  # GITHUB_ACCESS_TOKEN is populated from Keystore via the Kokoro configuration.
+  GIT_URL="https://ise-crypto:${GITHUB_ACCESS_TOKEN}@github.com/google/tink.git"
 fi
+readonly GIT_URL
 
-declare -a GIT_ARGS
-GIT_ARGS=(-c user.email=noreply@google.com -c user.name="Tink Team")
+# Arguments to use for all git invocations.
+declare -a GIT_ARGS=(-c user.email=noreply@google.com -c user.name="Tink Team")
+readonly GIT_ARGS
 
-library_output_file() {
-  library="$1"
-  library_output="bazel-bin/${library}"
-  if [[ ! -e "${library_output}" ]]; then
-     library_output="bazel-genfiles/${library}"
-  fi
-  if [[ ! -e "${library_output}" ]]; then
-    echo "Could not find bazel output file for ${library}"
+do_command() {
+  if ! "$@"; then
+    echo "*** Failed executing command. ***"
+    echo "Failed command: $@"
     exit 1
   fi
-  echo -n "${library_output}"
+  return $?
+}
+
+print_command() {
+  printf '%q ' '+' "$@"
+  echo
+}
+
+print_and_do() {
+  print_command "$@"
+  do_command "$@"
+  return $?
+}
+
+do_if_not_dry_run() {
+  # $@ is an array containing a command to be executed and its arguments.
+  print_command "$@"
+  if [[ "${DRY_RUN}" == "true" ]]; then
+    echo "  *** Dry run, command not executed. ***"
+    return 0
+  fi
+  do_command "$@"
+  return $?
+}
+
+echo_output_file() {
+  local workspace_dir="$1"
+  local library="$2"
+
+  (
+    cd "${workspace_dir}"
+    local file="bazel-bin/${library}"
+    if [[ ! -e "${file}" ]]; then
+       file="bazel-genfiles/${library}"
+    fi
+    if [[ ! -e "${file}" ]]; then
+      echo "Could not find Bazel output file for ${library}"
+      exit 1
+    fi
+    echo -n "${file}"
+  )
 }
 
 deploy_library() {
-  library_name="$1"
-  library="$2"
-  srcjar="$3"
-  javadoc="$4"
-  pomfile="$5"
-  bazel build "${library}" "${srcjar}" "${javadoc}"
+  local library_name="$1"
+  local workspace_dir="$2"
+  local library="$3"
+  local src_jar="$4"
+  local javadoc="$5"
+  local pom_file="$6"
 
-  # Update the version
-  sed -i \
-    's/VERSION_PLACEHOLDER/'"${VERSION}"'/' \
-    "${pomfile}"
+  local library_file="$(echo_output_file "${workspace_dir}" "${library}")"
+  local src_jar_file="$(echo_output_file "${workspace_dir}" "${src_jar}")"
+  local javadoc_file="$(echo_output_file "${workspace_dir}" "${javadoc}")"
 
-  mvn "${MVN_GOAL}" \
-    -Dfile="$(library_output_file ${library})" \
-    -Dsources="$(library_output_file ${srcjar})" \
-    -Djavadoc="$(library_output_file ${javadoc})" \
-    -DpomFile="$pomfile" \
-    "${EXTRA_MAVEN_ARGS[@]:+${EXTRA_MAVEN_ARGS[@]}}"
+  (
+    print_and_do cd "${workspace_dir}"
+    print_and_do bazel build "${library}" "${src_jar}" "${javadoc}"
 
-  # Reverse the version change
-  sed -i \
-    's/'"${VERSION}"'/VERSION_PLACEHOLDER/' \
-    "${pomfile}"
+    # Update the version
+    do_if_not_dry_run sed -i \
+      's/VERSION_PLACEHOLDER/'"${VERSION}"'/' "${pom_file}"
 
-  publish_javadoc_to_github_pages "${library_name}" "${javadoc}"
+    do_if_not_dry_run mvn "${MVN_GOAL}" \
+      -Dfile="${library_file}" \
+      -Dsources="${src_jar_file}" \
+      -Djavadoc="${javadoc_file}" \
+      -DpomFile="${pom_file}" \
+      "${EXTRA_MAVEN_ARGS[@]:+${EXTRA_MAVEN_ARGS[@]}}"
+
+    # Reverse the version change
+    do_if_not_dry_run sed -i \
+      's/'"${VERSION}"'/VERSION_PLACEHOLDER/' "${pom_file}"
+  )
+
+  publish_javadoc_to_github_pages \
+    "${library_name}" \
+    "${workspace_dir}" \
+    "${javadoc}"
 }
 
 publish_javadoc_to_github_pages() {
-  library_name="$1"
-  javadoc="$(library_output_file "$2")"
+  local library_name="$1"
+  local workspace_dir="$2"
+  local javadoc="$3"
 
-  # The account is ise-crypto and its access token is pulled from Keystore.
-  local git_url
-  git_url="https://ise-crypto:${GITHUB_ACCESS_TOKEN}@github.com/google/tink.git"
-  if [ -z "${KOKORO_ROOT}" ]; then
-    git_url="git@github.com:google/tink.git"
-  fi
+  local javadoc_file="$(echo_output_file "${workspace_dir}" "${javadoc}")"
+  javadoc_file="${workspace_dir}/${javadoc_file}"
+  readonly javadoc_file
 
-  rm -rf gh-pages
-  git "${GIT_ARGS[@]}" \
-    clone --quiet --branch=gh-pages "${git_url}" gh-pages > /dev/null
+  print_and_do rm -rf gh-pages
+  print_and_do git "${GIT_ARGS[@]}" clone \
+    --quiet --branch=gh-pages "${GIT_URL}" gh-pages > /dev/null
+  (
+    print_and_do cd gh-pages
+    if [ -d "javadoc/${library_name}/${VERSION}" ]; then
+      print_and_do git "${GIT_ARGS[@]}" rm -rf \
+          "javadoc/${library_name}/${VERSION}"
+    fi
+    print_and_do mkdir -p "javadoc/${library_name}/${VERSION}"
+    print_and_do unzip "../${javadoc_file}" \
+      -d "javadoc/${library_name}/${VERSION}"
+    print_and_do rm -rf "javadoc/${library_name}/${VERSION}/META-INF/"
+    print_and_do git "${GIT_ARGS[@]}" add \
+      -f "javadoc/${library_name}/${VERSION}"
+    if [[ "$(git "${GIT_ARGS[@]}" status --porcelain)" ]]; then
+      # Changes exist.
+      do_if_not_dry_run \
+        git "${GIT_ARGS[@]}" commit \
+        -m "${library_name}-${VERSION} Javadoc auto-pushed to gh-pages"
 
-  cd gh-pages
-  if [ -d "javadoc/${library_name}/${VERSION}" ]; then
-    git "${GIT_ARGS[@]}" rm -rf "javadoc/${library_name}/${VERSION}"
-  fi
-  mkdir -p "javadoc/${library_name}/${VERSION}"
-
-  unzip "../${javadoc}" -d "javadoc/${library_name}/${VERSION}"
-  rm -rf "javadoc/${library_name}/${VERSION}/META-INF/"
-  git "${GIT_ARGS[@]}" add -f "javadoc/${library_name}/${VERSION}"
-  if [[ "$(git "${GIT_ARGS[@]}" status --porcelain)" ]]; then
-    # Changes
-    git "${GIT_ARGS[@]}" \
-      commit -m "${library_name}-${VERSION} Javadoc auto-pushed to gh-pages"
-    git "${GIT_ARGS[@]}" push -fq origin gh-pages > /dev/null
-    echo -e "Published Javadoc to gh-pages.\n"
-  else
-    # No changes
-    echo -e "No changes in ${library_name}-${VERSION} Javadoc.\n"
-  fi
-  cd ..
+      do_if_not_dry_run \
+        git "${GIT_ARGS[@]}" push -fq origin gh-pages > /dev/null
+      echo -e "Published Javadoc to gh-pages.\n"
+    else
+      # No changes exist.
+      echo -e "No changes in ${library_name}-${VERSION} Javadoc.\n"
+    fi
+  )
 }
 
-deploy_library \
-  tink \
-  java/tink.jar \
-  java/tink-src.jar \
-  java/tink-javadoc.jar \
-  $(dirname $0)/tink.pom.xml
+main() {
+  deploy_library \
+    tink \
+    java_src \
+    tink.jar \
+    tink-src.jar \
+    tink-javadoc.jar \
+    "../$(dirname $0)/tink.pom.xml"
 
-deploy_library \
-  tink-awskms \
-  java/tink-awskms.jar \
-  java/tink-awskms-src.jar \
-  java/tink-awskms-javadoc.jar \
-  $(dirname $0)/tink-awskms.pom.xml
+  deploy_library \
+    tink-awskms \
+    java_src \
+    tink-awskms.jar \
+    tink-awskms-src.jar \
+    tink-awskms-javadoc.jar \
+    "../$(dirname $0)/tink-awskms.pom.xml"
 
-deploy_library \
-  tink-gcpkms \
-  java/tink-gcpkms.jar \
-  java/tink-gcpkms-src.jar \
-  java/tink-gcpkms-javadoc.jar \
-  $(dirname $0)/tink-gcpkms.pom.xml
+  deploy_library \
+    tink-gcpkms \
+    java_src \
+    tink-gcpkms.jar \
+    tink-gcpkms-src.jar \
+    tink-gcpkms-javadoc.jar \
+    "../$(dirname $0)/tink-gcpkms.pom.xml"
 
-deploy_library \
-  tink-android \
-  java/tink-android.jar \
-  java/tink-android-src.jar \
-  java/tink-android-javadoc.jar \
-  $(dirname $0)/tink-android.pom.xml
+  deploy_library \
+    tink-android \
+    java_src \
+    tink-android.jar \
+    tink-android-src.jar \
+    tink-android-javadoc.jar \
+    "../$(dirname $0)/tink-android.pom.xml"
 
-deploy_library \
-  apps-paymentmethodtoken \
-  apps/paymentmethodtoken/maven.jar \
-  apps/paymentmethodtoken/maven-src.jar \
-  apps/paymentmethodtoken/maven-javadoc.jar \
-  $(dirname $0)/apps-paymentmethodtoken.pom.xml
+  deploy_library \
+    apps-paymentmethodtoken \
+    apps \
+    paymentmethodtoken/maven.jar \
+    paymentmethodtoken/maven-src.jar \
+    paymentmethodtoken/maven-javadoc.jar \
+    "../$(dirname $0)/apps-paymentmethodtoken.pom.xml"
 
-deploy_library \
-  apps-rewardedads \
-  apps/rewardedads/maven.jar \
-  apps/rewardedads/maven-src.jar \
-  apps/rewardedads/maven-javadoc.jar \
-  $(dirname $0)/apps-rewardedads.pom.xml
+  deploy_library \
+    apps-rewardedads \
+    apps \
+    rewardedads/maven.jar \
+    rewardedads/maven-src.jar \
+    rewardedads/maven-javadoc.jar \
+    "../$(dirname $0)/apps-rewardedads.pom.xml"
 
-deploy_library \
-  apps-webpush \
-  apps/webpush/maven.jar \
-  apps/webpush/maven-src.jar \
-  apps/webpush/maven-javadoc.jar \
-  $(dirname $0)/apps-webpush.pom.xml
+  deploy_library \
+    apps-webpush \
+    apps \
+    webpush/maven.jar \
+    webpush/maven-src.jar \
+    webpush/maven-javadoc.jar \
+    "../$(dirname $0)/apps-webpush.pom.xml"
+}
+
+main "$@"

@@ -1,0 +1,196 @@
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "cc_key_manager",
+    hdrs = ["cc_key_manager.h"],
+    include_prefix = "tink/cc",
+    deps = [
+        "@tink_cc",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+    ],
+)
+
+cc_library(
+    name = "cc_tink_config",
+    srcs = ["cc_tink_config.cc"],
+    hdrs = ["cc_tink_config.h"],
+    deps = [
+        "@tink_cc",
+        "@tink_cc//config:tink_config",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_library(
+    name = "python_file_object_adapter",
+    hdrs = ["python_file_object_adapter.h"],
+    include_prefix = "tink/cc",
+    deps = [
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "python_output_stream",
+    srcs = ["python_output_stream.cc"],
+    hdrs = ["python_output_stream.h"],
+    include_prefix = "tink/cc",
+    deps = [
+        ":python_file_object_adapter",
+        "@tink_cc//:output_stream",
+        "@tink_cc//subtle:subtle_util",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "python_output_stream_test",
+    size = "medium",
+    srcs = ["python_output_stream_test.cc"],
+    deps = [
+        ":python_output_stream",
+        ":test_util",
+        "@tink_cc//subtle:random",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "output_stream_adapter",
+    srcs = ["output_stream_adapter.cc"],
+    hdrs = ["output_stream_adapter.h"],
+    include_prefix = "tink/cc",
+    deps = [
+        "@tink_cc//:output_stream",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "output_stream_adapter_test",
+    size = "small",
+    srcs = ["output_stream_adapter_test.cc"],
+    deps = [
+        ":output_stream_adapter",
+        "@tink_cc//:output_stream",
+        "@tink_cc//subtle:random",
+        "@tink_cc//util:ostream_output_stream",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "test_util",
+    hdrs = ["test_util.h"],
+    include_prefix = "tink/cc",
+    deps = [
+        ":python_file_object_adapter",
+        "@tink_cc//:streaming_aead",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "cc_streaming_aead_wrappers",
+    srcs = ["cc_streaming_aead_wrappers.cc"],
+    hdrs = ["cc_streaming_aead_wrappers.h"],
+    include_prefix = "tink/cc",
+    deps = [
+        ":input_stream_adapter",
+        ":output_stream_adapter",
+        ":python_file_object_adapter",
+        ":python_input_stream",
+        ":python_output_stream",
+        "@tink_cc//:input_stream",
+        "@tink_cc//:output_stream",
+        "@tink_cc//:streaming_aead",
+        "@tink_cc//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "cc_streaming_aead_wrappers_test",
+    size = "small",
+    srcs = ["cc_streaming_aead_wrappers_test.cc"],
+    deps = [
+        ":cc_streaming_aead_wrappers",
+        ":test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "python_input_stream",
+    srcs = ["python_input_stream.cc"],
+    hdrs = ["python_input_stream.h"],
+    include_prefix = "tink/cc",
+    deps = [
+        ":python_file_object_adapter",
+        "@tink_cc//:input_stream",
+        "@tink_cc//subtle:subtle_util",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "python_input_stream_test",
+    size = "medium",
+    srcs = ["python_input_stream_test.cc"],
+    deps = [
+        ":python_input_stream",
+        ":test_util",
+        "@tink_cc//subtle:random",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "input_stream_adapter",
+    srcs = ["input_stream_adapter.cc"],
+    hdrs = ["input_stream_adapter.h"],
+    include_prefix = "tink/cc",
+    deps = [
+        "@tink_cc//:input_stream",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "input_stream_adapter_test",
+    size = "small",
+    srcs = ["input_stream_adapter_test.cc"],
+    deps = [
+        ":input_stream_adapter",
+        "@tink_cc//:input_stream",
+        "@tink_cc//subtle:random",
+        "@tink_cc//util:istream_input_stream",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

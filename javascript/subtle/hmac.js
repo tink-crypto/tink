@@ -15,8 +15,8 @@
 goog.module('tink.subtle.Hmac');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
-const Mac = goog.require('tink.Mac');
+const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const Validators = goog.require('tink.subtle.Validators');
 
 /**
@@ -29,17 +29,18 @@ const MIN_TAG_SIZE_IN_BYTES = 10;
 /**
  * Implementation of HMAC.
  *
- * @implements {Mac}
  * @public
  * @final
  */
-class Hmac {
+class Hmac extends Mac {
   /**
    * @param {string} hash accepted names are SHA-1, SHA-256 and SHA-512
    * @param {!webCrypto.CryptoKey} key
    * @param {number} tagSize the size of the tag
    */
   constructor(hash, key, tagSize) {
+    super();
+
     /** @const @private {string} */
     this.hash_ = hash;
 

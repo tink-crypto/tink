@@ -17,19 +17,19 @@
 #ifndef TINK_UTIL_ERRORS_H_
 #define TINK_UTIL_ERRORS_H_
 
+#include "absl/strings/str_format.h"
 #include "tink/util/status.h"
-
-// from #include "absl/base/port.h"
-#define PRINTF_ATTRIBUTE(string_index, first_to_check)                  \
-    __attribute__((__format__ (__printf__, string_index, first_to_check)))
 
 namespace crypto {
 namespace tink {
 
-// Constructs a Status object given a printf-style va list.
-crypto::tink::util::Status ToStatusF(
-    crypto::tink::util::error::Code code, const char* format, ...)
-    PRINTF_ATTRIBUTE(2, 3);
+// Constructs a Status with formatted error message.
+template <typename... Args>
+util::Status ToStatusF(util::error::Code code,
+                       const absl::FormatSpec<Args...>& format,
+                       const Args&... args) {
+  return util::Status(code, absl::StrFormat(format, args...));
+}
 
 }  // namespace tink
 }  // namespace crypto

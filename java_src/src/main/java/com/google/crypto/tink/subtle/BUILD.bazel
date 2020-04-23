@@ -1,0 +1,194 @@
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
+
+# common subtle
+
+java_library(
+    name = "subtle",
+    srcs = [
+        "Base64.java",
+        "Bytes.java",
+        "EllipticCurves.java",
+        "EngineFactory.java",
+        "EngineWrapper.java",
+        "Enums.java",
+        "Hex.java",
+        "ImmutableByteArray.java",
+        "PemKeyType.java",
+        "Random.java",
+        "SubtleUtil.java",
+        "Validators.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+)
+
+# aead subtle
+
+java_library(
+    name = "aead",
+    srcs = [
+        "AesCtrJceCipher.java",
+        "AesEaxJce.java",
+        "AesGcmJce.java",
+        "ChaCha20.java",
+        "ChaCha20Base.java",
+        "ChaCha20Poly1305.java",
+        "ChaCha20Poly1305Base.java",
+        "EncryptThenAuthenticate.java",
+        "IndCpaCipher.java",
+        "Poly1305.java",
+        "XChaCha20.java",
+        "XChaCha20Poly1305.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":mac",
+        ":subtle",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/annotations",
+    ],
+)
+
+# deterministic aead subtle
+
+java_library(
+    name = "daead",
+    srcs = [
+        "AesSiv.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":mac",
+        ":subtle",
+        "//src/main/java/com/google/crypto/tink:primitives",
+    ],
+)
+
+# mac subtle
+
+java_library(
+    name = "mac",
+    srcs = [
+        "AesCmac.java",
+        "AesUtil.java",
+        "MacJce.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":subtle",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/annotations",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+# signature subtle
+
+java_library(
+    name = "signature",
+    srcs = [
+        "EcdsaSignJce.java",
+        "EcdsaVerifyJce.java",
+        "Ed25519.java",
+        "Ed25519Constants.java",
+        "Ed25519Sign.java",
+        "Ed25519Verify.java",
+        "RsaSsaPkcs1SignJce.java",
+        "RsaSsaPkcs1VerifyJce.java",
+        "RsaSsaPssSignJce.java",
+        "RsaSsaPssVerifyJce.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":subtle",
+        ":x25519",
+        "//src/main/java/com/google/crypto/tink:primitives",
+    ],
+)
+
+# hybrid subtle
+
+java_library(
+    name = "hybrid",
+    srcs = [
+        "EciesAeadHkdfDemHelper.java",
+        "EciesAeadHkdfHybridDecrypt.java",
+        "EciesAeadHkdfHybridEncrypt.java",
+        "EciesHkdfRecipientKem.java",
+        "EciesHkdfSenderKem.java",
+        "Hkdf.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":subtle",
+        "//src/main/java/com/google/crypto/tink:primitives",
+    ],
+)
+
+# Streaming
+
+java_library(
+    name = "streaming",
+    srcs = [
+        "AesCtrHmacStreaming.java",
+        "AesGcmHkdfStreaming.java",
+        "Hkdf.java",
+        "NonceBasedStreamingAead.java",
+        "RewindableReadableByteChannel.java",
+        "StreamSegmentDecrypter.java",
+        "StreamSegmentEncrypter.java",
+        "StreamingAeadDecryptingChannel.java",
+        "StreamingAeadDecryptingStream.java",
+        "StreamingAeadEncryptingChannel.java",
+        "StreamingAeadEncryptingStream.java",
+        "StreamingAeadSeekableDecryptingChannel.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":subtle",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+# KeyWrap subtle
+java_library(
+    name = "keywrap",
+    srcs = [
+        "Kwp.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":subtle",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+# x25519 subtle
+
+java_library(
+    name = "x25519",
+    srcs = [
+        "Curve25519.java",
+        "Field25519.java",
+        "X25519.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":subtle",
+        "//src/main/java/com/google/crypto/tink/annotations",
+    ],
+)

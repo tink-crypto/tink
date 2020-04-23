@@ -16,7 +16,6 @@
 
 #include "tink/keyset_manager.h"
 
-#include <inttypes.h>
 #include <random>
 
 #include "absl/memory/memory.h"
@@ -85,8 +84,7 @@ Status KeysetManager::Enable(uint32_t key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
           key.status() != KeyStatusType::ENABLED) {
         return ToStatusF(util::error::INVALID_ARGUMENT,
-                         "Cannot enable key with key_id %" PRIu32
-                         " and status %s.",
+                         "Cannot enable key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
       key.set_status(KeyStatusType::ENABLED);
@@ -94,24 +92,21 @@ Status KeysetManager::Enable(uint32_t key_id) {
     }
   }
   return ToStatusF(util::error::NOT_FOUND,
-                   "No key with key_id %" PRIu32 " found in the keyset.",
-                   key_id);
+                   "No key with key_id %u found in the keyset.", key_id);
 }
 
 Status KeysetManager::Disable(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Cannot disable primary key (key_id %" PRIu32 ").",
-                     key_id);
+                     "Cannot disable primary key (key_id %u).", key_id);
   }
   for (auto& key : *(keyset_.mutable_key())) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
           key.status() != KeyStatusType::ENABLED) {
         return ToStatusF(util::error::INVALID_ARGUMENT,
-                         "Cannot disable key with key_id %" PRIu32
-                         " and status %s.",
+                         "Cannot disable key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
       key.set_status(KeyStatusType::DISABLED);
@@ -119,16 +114,14 @@ Status KeysetManager::Disable(uint32_t key_id) {
     }
   }
   return ToStatusF(util::error::NOT_FOUND,
-                   "No key with key_id %" PRIu32 " found in the keyset.",
-                   key_id);
+                   "No key with key_id %u found in the keyset.", key_id);
 }
 
 Status KeysetManager::Delete(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Cannot delete primary key (key_id %" PRIu32 ").",
-                     key_id);
+                     "Cannot delete primary key (key_id %u).", key_id);
   }
   auto key_field = keyset_.mutable_key();
   for (auto key_iter = key_field->begin();
@@ -141,16 +134,14 @@ Status KeysetManager::Delete(uint32_t key_id) {
     }
   }
   return ToStatusF(util::error::NOT_FOUND,
-                   "No key with key_id %" PRIu32 " found in the keyset.",
-                   key_id);
+                   "No key with key_id %u found in the keyset.", key_id);
 }
 
 Status KeysetManager::Destroy(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Cannot destroy primary key (key_id %" PRIu32 ").",
-                     key_id);
+                     "Cannot destroy primary key (key_id %u).", key_id);
   }
   for (auto& key : *(keyset_.mutable_key())) {
     if (key.key_id() == key_id) {
@@ -158,8 +149,7 @@ Status KeysetManager::Destroy(uint32_t key_id) {
           key.status() != KeyStatusType::DESTROYED &&
           key.status() != KeyStatusType::ENABLED) {
         return ToStatusF(util::error::INVALID_ARGUMENT,
-                         "Cannot destroy key with key_id %" PRIu32
-                         " and status %s.",
+                         "Cannot destroy key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
       key.clear_key_data();
@@ -168,8 +158,7 @@ Status KeysetManager::Destroy(uint32_t key_id) {
     }
   }
   return ToStatusF(util::error::NOT_FOUND,
-                   "No key with key_id %" PRIu32 " found in the keyset.",
-                   key_id);
+                   "No key with key_id %u found in the keyset.", key_id);
 }
 
 Status KeysetManager::SetPrimary(uint32_t key_id) {
@@ -179,15 +168,15 @@ Status KeysetManager::SetPrimary(uint32_t key_id) {
       if (key.status() != KeyStatusType::ENABLED) {
         return ToStatusF(util::error::INVALID_ARGUMENT,
                          "The candidate for the primary key must be ENABLED"
-                         " (key_id %" PRIu32 ").", key_id);
+                         " (key_id %u).",
+                         key_id);
       }
       keyset_.set_primary_key_id(key_id);
       return Status::OK;
     }
   }
   return ToStatusF(util::error::NOT_FOUND,
-                   "No key with key_id %" PRIu32 " found in the keyset.",
-                   key_id);
+                   "No key with key_id %u found in the keyset.", key_id);
 }
 
 

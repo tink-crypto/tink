@@ -15,18 +15,17 @@
 goog.module('tink.subtle.EcdsaVerify');
 
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Validators = goog.require('tink.subtle.Validators');
 
 /**
  * Implementation of ECDSA verifying.
  *
- * @implements {PublicKeyVerify}
  * @public
  * @final
  */
-class EcdsaVerify {
+class EcdsaVerify extends PublicKeyVerify {
   /**
    * @param {!webCrypto.CryptoKey} key
    * @param {string} hash
@@ -34,6 +33,8 @@ class EcdsaVerify {
    *     encoding of the signature.
    */
   constructor(key, hash, encoding) {
+    super();
+
     /** @const @private {!webCrypto.CryptoKey} */
     this.key_ = key;
 

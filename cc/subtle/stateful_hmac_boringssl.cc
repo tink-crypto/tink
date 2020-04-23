@@ -14,6 +14,7 @@
 
 #include "tink/subtle/stateful_hmac_boringssl.h"
 
+#include "absl/memory/memory.h"
 #include "openssl/base.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -23,7 +24,7 @@ namespace tink {
 namespace subtle {
 
 util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
-    HashType hash_type, uint32_t tag_size, const std::string& key_value) {
+    HashType hash_type, uint32_t tag_size, const util::SecretData& key_value) {
   util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
   if (!res.ok()) {
     return res.status();
@@ -48,15 +49,8 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
   }
 
   return std::unique_ptr<StatefulMac>(
-      new StatefulHmacBoringSsl(tag_size, key_value, std::move(ctx)));
+      new StatefulHmacBoringSsl(tag_size, std::move(ctx)));
 }
-
-StatefulHmacBoringSsl::StatefulHmacBoringSsl(uint32_t tag_size,
-                                               const std::string& key_value,
-                                               bssl::UniquePtr<HMAC_CTX> ctx)
-    : hmac_context_(std::move(ctx)),
-      tag_size_(tag_size),
-      key_value_(key_value) {}
 
 util::Status StatefulHmacBoringSsl::Update(absl::string_view data) {
   // BoringSSL expects a non-null pointer for data,
@@ -80,6 +74,15 @@ util::StatusOr<std::string> StatefulHmacBoringSsl::Finalize() {
     return util::Status(util::error::INTERNAL, "HMAC finalization failed");
   }
   return std::string(reinterpret_cast<char*>(buf), tag_size_);
+}
+
+StatefulHmacBoringSslFactory::StatefulHmacBoringSslFactory(
+    HashType hash_type, uint32_t tag_size, const util::SecretData& key_value)
+    : hash_type_(hash_type), tag_size_(tag_size), key_value_(key_value) {}
+
+util::StatusOr<std::unique_ptr<StatefulMac>>
+StatefulHmacBoringSslFactory::Create() const {
+  return StatefulHmacBoringSsl::New(hash_type_, tag_size_, key_value_);
 }
 
 }  // namespace subtle

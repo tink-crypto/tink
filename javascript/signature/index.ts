@@ -7,7 +7,7 @@ export * from './sign';
 export * from './verify';
 export {ecdsaP256IeeeEncodingKeyTemplate, ecdsaP256KeyTemplate, ecdsaP384IeeeEncodingKeyTemplate, ecdsaP384KeyTemplate, ecdsaP521IeeeEncodingKeyTemplate, ecdsaP521KeyTemplate} from './ecdsa_for_signing';
 
-export function registerSignatureKeyTypes() {
+export function register() {
   ecdsaForSigning.register();
   ecdsaForVerifying.register();
   signWrapper.register();

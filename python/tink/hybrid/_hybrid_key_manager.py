@@ -1,0 +1,74 @@
+# Copyright 2019 Google LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Python wrapper of the CLIF-wrapped C++ Hybrid En- and Decryption key manager."""
+
+from __future__ import absolute_import
+from __future__ import division
+# Placeholder for import for type annotations
+from __future__ import print_function
+
+from tink import core
+from tink.cc.pybind import cc_key_manager
+from tink.cc.pybind import cc_tink_config
+from tink.cc.pybind import hybrid_decrypt as cc_hybrid_decrypt
+from tink.cc.pybind import hybrid_encrypt as cc_hybrid_encrypt
+from tink.hybrid import _hybrid_decrypt
+from tink.hybrid import _hybrid_encrypt
+from tink.hybrid import _hybrid_wrapper
+
+
+class _HybridDecryptCcToPyWrapper(_hybrid_decrypt.HybridDecrypt):
+  """Transforms cliffed C++ HybridDecrypt primitive into a Python primitive."""
+
+  def __init__(self, cc_primitive: cc_hybrid_decrypt.HybridDecrypt):
+    self._hybrid_decrypt = cc_primitive
+
+  @core.use_tink_errors
+  def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
+    return self._hybrid_decrypt.decrypt(ciphertext, context_info)
+
+
+class _HybridEncryptCcToPyWrapper(_hybrid_encrypt.HybridEncrypt):
+  """Transforms cliffed C++ HybridEncrypt primitive into a Python primitive."""
+
+  def __init__(self, cc_primitive: cc_hybrid_encrypt.HybridEncrypt):
+    self._hybrid_encrypt = cc_primitive
+
+  @core.use_tink_errors
+  def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
+    return self._hybrid_encrypt.encrypt(plaintext, context_info)
+
+
+def register():
+  """Registers all Hybrid key managers and wrapper in the Python Registry."""
+  cc_tink_config.register()
+
+  decrypt_type_url = (
+      'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey')
+  decrypt_key_manager = core.PrivateKeyManagerCcToPyWrapper(
+      cc_key_manager.HybridDecryptKeyManager.from_cc_registry(decrypt_type_url),
+      _hybrid_decrypt.HybridDecrypt, _HybridDecryptCcToPyWrapper)
+  core.Registry.register_key_manager(decrypt_key_manager, new_key_allowed=True)
+  core.Registry.register_primitive_wrapper(
+      _hybrid_wrapper.HybridDecryptWrapper())
+
+  encrypt_type_url = (
+      'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
+  encrypt_key_manager = core.KeyManagerCcToPyWrapper(
+      cc_key_manager.HybridEncryptKeyManager.from_cc_registry(encrypt_type_url),
+      _hybrid_encrypt.HybridEncrypt, _HybridEncryptCcToPyWrapper)
+  core.Registry.register_key_manager(encrypt_key_manager, new_key_allowed=True)
+  core.Registry.register_primitive_wrapper(
+      _hybrid_wrapper.HybridEncryptWrapper())

@@ -18,9 +18,9 @@
 #define TINK_SUBTLE_ED25519_VERIFY_BORINGSSL_H_
 
 #include <memory>
+#include <string>
 
 #include "absl/strings/string_view.h"
-#include "openssl/curve25519.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/statusor.h"
 
@@ -37,12 +37,11 @@ class Ed25519VerifyBoringSsl : public PublicKeyVerify {
   crypto::tink::util::Status Verify(absl::string_view signature,
                                     absl::string_view data) const override;
 
-  ~Ed25519VerifyBoringSsl() override = default;
-
  private:
   const std::string public_key_;
 
-  explicit Ed25519VerifyBoringSsl(absl::string_view public_key);
+  explicit Ed25519VerifyBoringSsl(absl::string_view public_key)
+      : public_key_(public_key) {}
 };
 
 }  // namespace subtle

@@ -128,8 +128,7 @@ class PrimitiveSet {
         primitives_.find(identifier);
     if (found == primitives_.end()) {
       return ToStatusF(crypto::tink::util::error::NOT_FOUND,
-                       "No primitives found for identifier '%s'.",
-                       identifier.c_str());
+                       "No primitives found for identifier '%s'.", identifier);
     }
     return &(found->second);
   }

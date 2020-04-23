@@ -17,20 +17,20 @@ goog.module('tink.signature.PublicKeyVerifyWrapper');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
-const PublicKeyVerify = goog.require('tink.PublicKeyVerify');
-const SecurityException = goog.require('tink.exception.SecurityException');
+const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const Validators = goog.require('tink.subtle.Validators');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
- * @implements {PublicKeyVerify}
  * @final
  */
-class WrappedPublicKeyVerify {
+class WrappedPublicKeyVerify extends PublicKeyVerify {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   /** @param {!PrimitiveSet.PrimitiveSet} primitiveSet */
   constructor(primitiveSet) {
+    super();
     /** @private @const {!PrimitiveSet.PrimitiveSet} */
     this.primitiveSet_ = primitiveSet;
   }

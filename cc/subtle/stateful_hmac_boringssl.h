@@ -16,12 +16,13 @@
 #define TINK_SUBTLE_STATEFUL_HMAC_BORINGSSL_H_
 
 #include "openssl/base.h"
-#include "tink/subtle/common_enums.h"
-#include "tink/subtle/mac/stateful_mac.h"
-#include "tink/util/status.h"
-#include "tink/util/statusor.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/mac/stateful_mac.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -31,20 +32,31 @@ namespace subtle {
 class StatefulHmacBoringSsl : public subtle::StatefulMac {
  public:
   static util::StatusOr<std::unique_ptr<StatefulMac>> New(
-      HashType hash_type, uint32_t tag_size, const std::string& key_value);
+      HashType hash_type, uint32_t tag_size, const util::SecretData& key_value);
   util::Status Update(absl::string_view data) override;
   util::StatusOr<std::string> Finalize() override;
 
-  ~StatefulHmacBoringSsl() override {}
-
  private:
   // Minimum HMAC key size in bytes.
-  static const size_t kMinKeySize = 16;
-  StatefulHmacBoringSsl(uint32_t tag_size,
-                const std::string& key_value, bssl::UniquePtr<HMAC_CTX> ctx);
-  bssl::UniquePtr<HMAC_CTX> hmac_context_;
-  uint32_t tag_size_;
-  std::string key_value_;
+  static constexpr size_t kMinKeySize = 16;
+
+  StatefulHmacBoringSsl(uint32_t tag_size, bssl::UniquePtr<HMAC_CTX> ctx)
+      : hmac_context_(std::move(ctx)), tag_size_(tag_size) {}
+
+  const bssl::UniquePtr<HMAC_CTX> hmac_context_;
+  const uint32_t tag_size_;
+};
+
+class StatefulHmacBoringSslFactory : public subtle::StatefulMacFactory {
+ public:
+  StatefulHmacBoringSslFactory(HashType hash_type, uint32_t tag_size,
+                               const util::SecretData& key_value);
+  util::StatusOr<std::unique_ptr<StatefulMac>> Create() const override;
+
+ private:
+  const HashType hash_type_;
+  const uint32_t tag_size_;
+  const util::SecretData key_value_;
 };
 
 }  // namespace subtle

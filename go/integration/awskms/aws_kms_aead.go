@@ -24,9 +24,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
-
-	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/tink"
 )
 
 // AWSAEAD represents a AWS KMS service to a particular URI.
@@ -34,11 +31,6 @@ type AWSAEAD struct {
 	keyURI string
 	kms    *kms.KMS
 }
-
-var (
-	_       tink.AEAD = (*AWSAEAD)(nil)
-	awsaead           = aead.New
-)
 
 // NewAWSAEAD returns a new AWS KMS service.
 func NewAWSAEAD(keyURI string, kms *kms.KMS) *AWSAEAD {
@@ -83,7 +75,7 @@ func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 		}
 	}
 	resp, err := a.kms.Decrypt(req)
-  if err != nil {
+	if err != nil {
 		return nil, err
 	}
 	if strings.Compare(*resp.KeyId, a.keyURI) != 0 {

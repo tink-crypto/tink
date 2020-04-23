@@ -20,13 +20,13 @@ const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const HybridEncrypt = goog.require('tink.HybridEncrypt');
-const Mac = goog.require('tink.Mac');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const Util = goog.require('tink.Util');
 const {PbAesCtrKey, PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {assertExists} = goog.require('tink.testUtils');
+const {assertExists} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
 const KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
