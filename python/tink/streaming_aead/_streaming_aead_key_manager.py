@@ -9,7 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Python wrapper of the CLIF-wrapped C++ Streaming AEAD key manager."""
+"""Python wrapper of the wrapped C++ Streaming AEAD key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -27,7 +27,7 @@ from tink.streaming_aead import _streaming_aead
 
 
 class _StreamingAeadCcToPyWrapper(_streaming_aead.StreamingAead):
-  """Transforms cliffed C++ StreamingAead into a Python primitive."""
+  """Transforms C++ StreamingAead into a Python primitive."""
 
   def __init__(self, cc_streaming_aead):
     self._cc_streaming_aead = cc_streaming_aead

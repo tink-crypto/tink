@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python wrapper of the CLIF-wrapped C++ AEAD key manager."""
+"""Python wrapper of the wrapped C++ AEAD key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -28,7 +28,7 @@ from tink.cc.pybind import cc_tink_config
 
 
 class _AeadCcToPyWrapper(_aead.Aead):
-  """Transforms cliffed C++ Aead primitive into a Python primitive."""
+  """Transforms C++ Aead primitive into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_aead.Aead):
     self._aead = cc_primitive

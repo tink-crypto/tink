@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Python wrapper of the CLIF-wrapped C++ MAC key manager."""
+"""Python wrapper of the wrapped C++ MAC key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -27,7 +27,7 @@ from tink.mac import _mac_wrapper
 
 
 class _MacCcToPyWrapper(_mac.Mac):
-  """Transforms cliffed C++ Mac primitive into a Python primitive."""
+  """Transforms C++ Mac primitive into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_mac.Mac):
     self._cc_mac = cc_primitive

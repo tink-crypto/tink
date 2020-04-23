@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python wrapper of the CLIF-wrapped C++ Hybrid En- and Decryption key manager."""
+"""Python wrapper of the wrapped C++ Hybrid En- and Decryption key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -30,7 +30,7 @@ from tink.hybrid import _hybrid_wrapper
 
 
 class _HybridDecryptCcToPyWrapper(_hybrid_decrypt.HybridDecrypt):
-  """Transforms cliffed C++ HybridDecrypt primitive into a Python primitive."""
+  """Transforms C++ HybridDecrypt primitive into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_hybrid_decrypt.HybridDecrypt):
     self._hybrid_decrypt = cc_primitive
@@ -41,7 +41,7 @@ class _HybridDecryptCcToPyWrapper(_hybrid_decrypt.HybridDecrypt):
 
 
 class _HybridEncryptCcToPyWrapper(_hybrid_encrypt.HybridEncrypt):
-  """Transforms cliffed C++ HybridEncrypt primitive into a Python primitive."""
+  """Transforms C++ HybridEncrypt primitive into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_hybrid_encrypt.HybridEncrypt):
     self._hybrid_encrypt = cc_primitive

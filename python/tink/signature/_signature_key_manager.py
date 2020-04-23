@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python wrapper of the CLIF-wrapped C++ Public Key Signature key manager."""
+"""Python wrapper of the wrapped C++ Public Key Signature key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -30,7 +30,7 @@ from tink.signature import _signature_wrapper
 
 
 class _PublicKeySignCcToPyWrapper(_public_key_sign.PublicKeySign):
-  """Transforms cliffed C++ PublicKeySign into a Python primitive."""
+  """Transforms C++ PublicKeySign into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_public_key_sign.PublicKeySign):
     self._public_key_sign = cc_primitive
@@ -41,7 +41,7 @@ class _PublicKeySignCcToPyWrapper(_public_key_sign.PublicKeySign):
 
 
 class _PublicKeyVerifyCcToPyWrapper(_public_key_verify.PublicKeyVerify):
-  """Transforms cliffed C++ PublicKeyVerify into a Python primitive."""
+  """Transforms C++ PublicKeyVerify into a Python primitive."""
 
   def __init__(self, cc_primitive: cc_public_key_verify.PublicKeyVerify):
     self._public_key_verify = cc_primitive
