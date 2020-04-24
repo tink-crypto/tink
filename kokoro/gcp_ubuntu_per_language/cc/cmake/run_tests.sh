@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
+cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
 echo "========================================================= Running cmake"
 cmake --version

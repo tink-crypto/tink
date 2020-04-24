@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
+cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
 install_python3() {
     : "${PYTHON_VERSION:=3.7.1}"
@@ -35,6 +36,7 @@ install_pip_package() {
 run_bazel_tests() {
   (
     cd python
+    use_bazel.sh $(cat .bazelversion)
 
     time bazel build -- ...
     time bazel test -- ...
