@@ -22,6 +22,9 @@ install_pip_package() {
   # Check if we can build Tink python package.
   (
     cd python
+    # Needed for setuptools
+
+    use_bazel.sh $(cat .bazelversion)
     # Install the proto compiler
     PROTOC_ZIP='protoc-3.11.4-linux-x86_64.zip'
     curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/${PROTOC_ZIP}"
@@ -43,6 +46,6 @@ run_bazel_tests() {
   )
 }
 
-install_python3()
-install_pip_package()
-run_bazel_tests()
+install_python3
+install_pip_package
+run_bazel_tests
