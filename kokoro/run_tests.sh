@@ -61,6 +61,11 @@ run_all_linux_tests() {
   )
   run_linux_tests "java_src"
   run_linux_tests "go"
+  run_linux_tests "python"
+  run_linux_tests "examples/cc"
+  run_linux_tests "examples/java_src"
+  run_linux_tests "tools"
+  run_linux_tests "apps"
   # Install pip package for tests which execute python3.
   if [[ "${PLATFORM}" == 'darwin' ]]; then
     install_pip_package_macos
@@ -68,12 +73,7 @@ run_all_linux_tests() {
   if [[ "${PLATFORM}" == 'linux' ]]; then
     install_pip_package_linux
   fi
-  run_linux_tests "python"
   run_linux_tests "examples/python"
-  run_linux_tests "examples/cc"
-  run_linux_tests "examples/java_src"
-  run_linux_tests "tools"
-  run_linux_tests "apps"
 }
 
 run_macos_tests() {

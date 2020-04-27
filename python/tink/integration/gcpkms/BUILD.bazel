@@ -46,7 +46,6 @@ py_test(
     name = "_gcp_kms_client_test",
     srcs = ["_gcp_kms_client_test.py"],
     srcs_version =  "PY3",
-    legacy_create_init = 0,
     data = [
         "@tink_base//testdata:credentials"
     ],
@@ -87,7 +86,6 @@ py_test(
     name = "_gcp_kms_aead_test",
     srcs = ["_gcp_kms_aead_test.py"],
     srcs_version =  "PY3",
-    legacy_create_init = 0,
     data = [
         "@tink_base//testdata:credentials"
     ],
