@@ -16,6 +16,7 @@ package mac
 
 import (
 	"github.com/golang/protobuf/proto"
+	cmacpb "github.com/google/tink/go/proto/aes_cmac_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -55,6 +56,13 @@ func HMACSHA512Tag512KeyTemplate() *tinkpb.KeyTemplate {
 	return createHMACKeyTemplate(64, 64, commonpb.HashType_SHA512)
 }
 
+// AESCMACTag128KeyTemplate is a KeyTemplate that generates a AES-CMAC key with the following parameters:
+//   - Key size: 32 bytes
+//   - Tag size: 16 bytes
+func AESCMACTag128KeyTemplate() *tinkpb.KeyTemplate {
+	return createCMACKeyTemplate(32, 16)
+}
+
 // createHMACKeyTemplate creates a new KeyTemplate for HMAC using the given parameters.
 func createHMACKeyTemplate(keySize uint32,
 	tagSize uint32,
@@ -70,6 +78,22 @@ func createHMACKeyTemplate(keySize uint32,
 	serializedFormat, _ := proto.Marshal(&format)
 	return &tinkpb.KeyTemplate{
 		TypeUrl: hmacTypeURL,
+		Value:   serializedFormat,
+	}
+}
+
+// createCMACKeyTemplate creates a new KeyTemplate for CMAC using the given parameters.
+func createCMACKeyTemplate(keySize uint32, tagSize uint32) *tinkpb.KeyTemplate {
+	params := cmacpb.AesCmacParams{
+		TagSize: tagSize,
+	}
+	format := cmacpb.AesCmacKeyFormat{
+		Params:  &params,
+		KeySize: keySize,
+	}
+	serializedFormat, _ := proto.Marshal(&format)
+	return &tinkpb.KeyTemplate{
+		TypeUrl: cmacTypeURL,
 		Value:   serializedFormat,
 	}
 }

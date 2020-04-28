@@ -31,6 +31,7 @@ import (
 	"github.com/google/tink/go/tink"
 
 	subtedaead "github.com/google/tink/go/daead/subtle"
+	cmacpb "github.com/google/tink/go/proto/aes_cmac_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
 	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
@@ -398,6 +399,34 @@ func NewHMACKeyFormat(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacKe
 	params := NewHMACParams(hashType, tagSize)
 	keySize := uint32(20)
 	return &hmacpb.HmacKeyFormat{
+		Params:  params,
+		KeySize: keySize,
+	}
+}
+
+// NewAESCMACParams returns a new AESCMACParams.
+func NewAESCMACParams(tagSize uint32) *cmacpb.AesCmacParams {
+	return &cmacpb.AesCmacParams{
+		TagSize: tagSize,
+	}
+}
+
+// NewAESCMACKey creates a new AESCMACKey with the specified parameters.
+func NewAESCMACKey(tagSize uint32) *cmacpb.AesCmacKey {
+	params := NewAESCMACParams(tagSize)
+	keyValue := random.GetRandomBytes(32)
+	return &cmacpb.AesCmacKey{
+		Version:  AESCMACKeyVersion,
+		Params:   params,
+		KeyValue: keyValue,
+	}
+}
+
+// NewAESCMACKeyFormat creates a new AESCMACKeyFormat with the specified parameters.
+func NewAESCMACKeyFormat(tagSize uint32) *cmacpb.AesCmacKeyFormat {
+	params := NewAESCMACParams(tagSize)
+	keySize := uint32(32)
+	return &cmacpb.AesCmacKeyFormat{
 		Params:  params,
 		KeySize: keySize,
 	}

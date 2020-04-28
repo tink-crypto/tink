@@ -67,6 +67,10 @@ const (
 	HMACKeyVersion = 0
 	// HMACTypeURL is the type URL of HMAC keys.
 	HMACTypeURL = "type.googleapis.com/google.crypto.tink.HmacKey"
+	// AESCMACKeyVersion is the maxmimal version of HMAC keys that Tink supports.
+	AESCMACKeyVersion = 0
+	// AESCMACTypeURL is the type URL of AES-CMAC keys.
+	AESCMACTypeURL = "type.googleapis.com/google.crypto.tink.AesCmacKey"
 
 	// Digital signatures
 
