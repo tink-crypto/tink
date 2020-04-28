@@ -19,7 +19,7 @@ cd git*/tink
 
 echo "========================================================= Running cmake"
 cmake --version
-cmake . -DTINK_BUILD_TESTS=ON
+cmake . -DTINK_BUILD_TESTS=ON -DCMAKE_CXX_STANDARD=11
 echo "==================================================== Building with make"
 make -j8 all
 echo "===================================================== Testing with make"

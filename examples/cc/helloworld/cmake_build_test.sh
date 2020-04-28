@@ -52,7 +52,7 @@ cd $PROJECT_DIR
 mkdir build && cd build
 # Record CMake version in the build log.
 cmake --version
-cmake ..
+cmake .. -DCMAKE_CXX_STANDARD=11
 make
 
 ##### Use the resulting hello_world application.
