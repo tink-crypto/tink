@@ -14,17 +14,25 @@ in the current release of Tink, the initialization would look as follows:
 
 ```python
 import tink
-
-tink.tink_config.register()
+from tink import tink_config
+tink_config.register()
 ```
 
-The registration of custom key managers can proceed directly via
-the `Registry` class:
+To use standard implementations of only one primitive, say AEAD:
 
 ```python
 import tink
+from tink import aead
+aead.register()
+```
 
-tink.Registry.register_key_manager(CustomAeadKeyManager())
+The registration of custom key managers can proceed directly via
+the `core.Registry` class:
+
+```python
+import tink
+from tink import core
+core.Registry.register_key_manager(CustomAeadKeyManager())
 ```
 
 ## Generating new keys and keysets
@@ -39,40 +47,30 @@ command-line tool called [Tinkey](TINKEY.md), which can be used for common key
 management tasks.
 
 Still, if there is a need to generate a KeysetHandle with fresh key material
-directly in Python code, you can use `core.new_keyset_handle`:
+directly in Python code, you can use `tink.new_keyset_handle`:
 
 ```python
 import tink
+from tink import aead
 
-key_template = tink.aead.aead_key_templates.AES128_EAX
+key_template = aead.aead_key_templates.AES128_EAX
 keyset_handle = tink.new_keyset_handle(key_template)
 # use the keyset...
 ```
 
 where `key_template` can be obtained from util classes corresponding to Tink
 primitives, e.g.
-[mac_key_templates](https://github.com/google/tink/blob/master/python/mac/mac_key_templates.py),
-[aead_key_templates](https://github.com/google/tink/blob/master/python/aead/aead_key_templates.py),
+[mac_key_templates](https://github.com/google/tink/blob/master/python/tink/mac/_mac_key_templates.py),
+[aead_key_templates](https://github.com/google/tink/blob/master/python/tink/aead/_aead_key_templates.py),
 or
-[HybridKeyTemplates](https://github.com/google/tink/blob/master/python/hybrid/hybrid_key_templates.py).
+[hybrid_key_templates](https://github.com/google/tink/blob/master/python/tink/hybrid/_hybrid_key_templates.py).
 
 ## Loading existing keysets
 
-To load cleartext keysets, use an appropriate [`KeysetReader`](https://github.com/google/tink/blob/master/python/core/keyset_reader.py),
+To load encrypted keysets, use `tink.read_keyset_handle`
+and an appropriate [`KeysetReader`](https://github.com/google/tink/blob/master/python/tink/_keyset_reader.py),
 depending on the wire format of the stored keyset, for example a
-`BinaryKeysetReader` or a `JsonKeysetReader`.
-
-```python
-import tink
-
-json_keyset = ...
-reader = tink.JsonKeysetReader(json_keyset)
-keyset = reader.read()
-keyset_handle = tink.KeysetHandle(keyset)
-```
-
-To load encrypted keysets, one can use `core.read_keyset_handle` and an
-appropriate [`KeysetReader`](https://github.com/google/tink/blob/master/python/core/keyset_reader.py):
+`tink.BinaryKeysetReader` or a `tink.JsonKeysetReader`.
 
 ```python
 import tink
@@ -80,6 +78,18 @@ import tink
 json_encrypted_keyset = ...
 reader = tink.JsonKeysetReader(json_encrypted_keyset)
 keyset_handle = tink.read_keyset_handle(reader, master_key_aead)
+```
+
+To load cleartext keysets, use [`cleartext_keyset_handle`](https://github.com/google/tink/blob/master/python/tink/cleartext_keyset_handle.py)
+and an appropriate `KeysetReader`.
+
+```python
+import tink
+from tink import cleartext_keyset_handle
+
+json_keyset = ...
+reader = tink.JsonKeysetReader(json_keyset)
+keyset_handle = cleartext_keyset_handle.read(reader)
 ```
 ## Obtaining and using primitives
 
@@ -107,8 +117,8 @@ encrypt or decrypt data:
 keyset_handle = ...
 
 # 2. Get the primitive.
-aead = keyset_handle.primitive(tink.Aead)
+aead_primitive = keyset_handle.primitive(aead.Aead)
 
 # 3. Use the primitive.
-ciphertext = aead.encrypt(plaintext, associated data)
+ciphertext = aead_primitive.encrypt(plaintext, associated data)
 ```
