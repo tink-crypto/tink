@@ -77,7 +77,7 @@ Primitive          | Go Implementations
 ------------------ | ------------------------------------------------------------------------
 AEAD               | AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305
 Deterministic AEAD | AES-SIV
-MAC                | HMAC-SHA2
+MAC                | HMAC-SHA2, AES-CMAC
 Digital Signatures | ECDSA over NIST curves, Ed25519
 Hybrid Encryption  | ECIES with AEAD and HKDF
 
