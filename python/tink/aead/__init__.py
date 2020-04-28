@@ -25,5 +25,6 @@ from tink.aead import _kms_envelope_aead
 
 
 Aead = _aead.Aead
+AeadCcToPyWrapper = _aead_key_manager.AeadCcToPyWrapper
 register = _aead_key_manager.register
 KmsEnvelopeAead = _kms_envelope_aead.KmsEnvelopeAead

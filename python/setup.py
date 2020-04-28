@@ -192,6 +192,7 @@ class BuildBazelExtension(build_ext.build_ext):
 # TODO(kste): Parse these targets from the pybind folder.
 bazel_modules = [
     BazelExtension('//tink/cc/pybind:import_helper', 'libimport_helper'),
+    BazelExtension('//tink/cc/pybind:cc_gcp_kms_client'),
     BazelExtension('//tink/cc/pybind:cc_key_manager'),
     BazelExtension('//tink/cc/pybind:cc_tink_config'),
     BazelExtension('//tink/cc/pybind:python_file_object_adapter'),

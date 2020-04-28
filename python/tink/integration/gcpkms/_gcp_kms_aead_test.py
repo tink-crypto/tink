@@ -28,6 +28,10 @@ CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
                                'tink_base/testdata/credential.json')
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 
+# Set root certificates for gRPC
+os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = os.path.join(
+    os.environ['TEST_SRCDIR'], 'google_root_pem/file/downloaded')
+
 
 class GcpKmsAeadTest(absltest.TestCase):
 
@@ -36,8 +40,8 @@ class GcpKmsAeadTest(absltest.TestCase):
     aead = gcp_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
-    ciphertext = aead.encrypt(plaintext, None)
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, None))
+    ciphertext = aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
 
     plaintext = b'hello'
     associated_data = b'world'
@@ -49,8 +53,8 @@ class GcpKmsAeadTest(absltest.TestCase):
     aead = gcp_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
-    ciphertext = aead.encrypt(plaintext, None)
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, None))
+    ciphertext = aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
 
     # Corrupt each byte once and check that decryption fails
     # NOTE: Only starting at 4th byte here, as the 3rd byte is malleable
@@ -60,7 +64,7 @@ class GcpKmsAeadTest(absltest.TestCase):
       tmp_ciphertext[byte_idx] ^= 1
       corrupted_ciphertext = bytes(tmp_ciphertext)
       with self.assertRaises(core.TinkError):
-        aead.decrypt(corrupted_ciphertext, None)
+        aead.decrypt(corrupted_ciphertext, b'')
 
 if __name__ == '__main__':
   absltest.main()

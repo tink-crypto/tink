@@ -19,13 +19,10 @@ from __future__ import division
 from __future__ import print_function
 
 from typing import Text
-from google.auth import default
-from google.cloud import kms_v1
-from google.oauth2 import service_account
 
 from tink import aead
 from tink import core
-from tink.integration.gcpkms._gcp_kms_aead import GcpKmsAead
+from tink.cc.pybind.cc_gcp_kms_client import GcpKmsClient as CcGcpKmsClient
 
 GCP_KEYURI_PREFIX = "gcp-kms://"
 
@@ -47,7 +44,7 @@ class GcpKmsClient(object):
       credentials_path: Text, Path to the file with the access credentials.
 
     Raises:
-      FileNotFoundError: If the path or filename of the credentials is invalid.
+      ValueError: If the path or filename of the credentials is invalid.
       TinkError: If the key uri is not valid.
     """
 
@@ -58,15 +55,8 @@ class GcpKmsClient(object):
     else:
       raise core.TinkError
 
-    if not credentials_path:
-      # Use GCP KMS client with default credentials
-      credentials = default()
-    else:
-      credentials = service_account.Credentials.from_service_account_file(
-          filename=credentials_path
-      )
-
-    self.client = kms_v1.KeyManagementServiceClient(credentials=credentials)
+    # Use the C++ GCP KMS client
+    self.cc_client = CcGcpKmsClient(key_uri, credentials_path)
 
   def does_support(self, key_uri: Text) -> bool:
     """Returns true iff this client supports KMS key specified in 'key_uri'.
@@ -77,7 +67,7 @@ class GcpKmsClient(object):
     Returns:
       A boolean value which is true if the key is supported and false otherwise.
     """
-    return key_uri.startswith(self.key_uri)
+    return self.cc_client.does_support(key_uri)
 
   def get_aead(self, key_uri: Text) -> aead.Aead:
     """Returns an Aead-primitive backed by KMS key specified by 'key_uri'.
@@ -89,5 +79,4 @@ class GcpKmsClient(object):
       The AEAD object...
     """
 
-    key_name = key_uri[len(GCP_KEYURI_PREFIX):]
-    return GcpKmsAead(key_name, self.client)
+    return aead.AeadCcToPyWrapper(self.cc_client.get_aead(key_uri))

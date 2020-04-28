@@ -281,3 +281,14 @@ tink_pybind_extension(
         "@tink_cc//util:status",
     ],
 )
+
+tink_pybind_extension(
+    name = "cc_gcp_kms_client",
+    srcs = ["cc_gcp_kms_client.cc"],
+    deps = [
+        "@tink_cc//integration/gcpkms:gcp_kms_client",
+        "//tink/cc/pybind:status_casters",
+        "//tink/cc:output_stream_adapter",
+        "@pybind11",
+    ],
+)
