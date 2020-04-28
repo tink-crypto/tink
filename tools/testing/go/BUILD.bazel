@@ -9,6 +9,9 @@ go_binary(
     testonly = 1,  # keep
     srcs = ["aead_cli.go"],
     out = "aead_cli_go",
+    data = [
+        "@tink_base//testdata:credentials",
+    ],
     deps = [
         "@tink_go//aead:go_default_library",
         "@tink_go//keyset:go_default_library",
