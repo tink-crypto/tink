@@ -2,7 +2,6 @@
 Dependencies of C++ Tink.
 """
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def tink_cc_deps():
@@ -60,24 +59,28 @@ def tink_cc_deps():
 
     # gRPC needs rules_apple, which in turn needs rules_swift and apple_support
     if not native.existing_rule("build_bazel_rules_apple"):
-        # Release from 2019-10-10
+        # Last commit available at 2020-04-28
         http_archive(
             name = "build_bazel_rules_apple",
-            strip_prefix = "rules_apple-0.19.0",
-            url = "https://github.com/bazelbuild/rules_apple/archive/0.19.0.zip",
-            sha256 = "9f9eb6cdd25d7932cb939df24807c2d70772aad7a79f1357e25ced9d0d443cfd",
+            strip_prefix = "rules_apple-3043ed832213cb979b6580d19f95ab8473814fb5",
+            url = "https://github.com/bazelbuild/rules_apple/archive/3043ed832213cb979b6580d19f95ab8473814fb5.zip",
+            sha256 = "ff18125271214a4e3633241bf3f9a8a0c6b4f4b208f9fee4b360e9fa15538f8a",
         )
     if not native.existing_rule("build_bazel_rules_swift"):
-        git_repository(
+        # Last commit available at 2020-04-28
+        http_archive(
             name = "build_bazel_rules_swift",
-            remote = "https://github.com/bazelbuild/rules_swift.git",
-            branch = "master",
+            strip_prefix = "rules_swift-8767e70f1a8b500f5f3683cb23258964737a3888",
+            url = "https://github.com/bazelbuild/rules_swift/archive/8767e70f1a8b500f5f3683cb23258964737a3888.zip",
+            sha256 = "cc9d87e67afa75c936eed4725e29ed05ba9a542bc586f943d3333cc6406d6bfc",
         )
     if not native.existing_rule("build_bazel_apple_support"):
-        git_repository(
+        # Last commit available at 2020-04-28
+        http_archive(
             name = "build_bazel_apple_support",
-            remote = "https://github.com/bazelbuild/apple_support.git",
-            branch = "master",
+            strip_prefix = "apple_support-501b4afb27745c4813a88ffa28acd901408014e4",
+            url = "https://github.com/bazelbuild/apple_support/archive/501b4afb27745c4813a88ffa28acd901408014e4.zip",
+            sha256 = "8aa07a6388e121763c0164624feac9b20841afa2dd87bac0ba0c3ed1d56feb70",
         )
 
     # Needed for Cloud KMS API via gRPC.
