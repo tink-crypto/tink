@@ -16,6 +16,7 @@
 #define TINK_UTIL_SECRET_DATA_H_
 
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 #include "absl/strings/string_view.h"
@@ -58,14 +59,43 @@ using SecretData = std::vector<uint8_t, internal::SanitizingAllocator<uint8_t>>;
 //   util::SecretUniquePtr<AES_KEY> key_ = util::MakeSecretUniquePtr<AES_KEY>();
 // }
 template <typename T>
-using SecretUniquePtr = std::unique_ptr<T, internal::SanitizingDeleter<T>>;
+class SecretUniquePtr {
+ private:
+  using Value = std::unique_ptr<T, internal::SanitizingDeleter<T>>;
+
+ public:
+  using pointer = typename Value::pointer;
+  using element_type = typename Value::element_type;
+  using deleter_type = typename Value::deleter_type;
+  static_assert(std::is_trivially_destructible<T>::value,
+                "SecureUniquePtr only supports trivially destructible types");
+  SecretUniquePtr() {}
+
+  pointer get() const { return value_.get(); }
+  deleter_type& get_deleter() { return value_.get_deleter(); }
+  const deleter_type& get_deleter() const { return value_.get_deleter(); }
+  void swap(SecretUniquePtr& other) { value_.swap(other.value_); }
+  void reset() { value_.reset(); }
+
+  typename std::add_lvalue_reference<T>::type operator*() const {
+    return value_.operator*();
+  }
+  pointer operator->() const { return value_.operator->(); }
+  explicit operator bool() const { return value_.operator bool(); }
+
+ private:
+  template <typename S, typename... Args>
+  friend SecretUniquePtr<S> MakeSecretUniquePtr(Args&&... args);
+  explicit SecretUniquePtr(Value&& value) : value_(std::move(value)) {}
+  Value value_;
+};
 
 template <typename T, typename... Args>
 SecretUniquePtr<T> MakeSecretUniquePtr(Args&&... args) {
   T* ptr = internal::SanitizingAllocator<T>().allocate(1);
   new (ptr)
       T(std::forward<Args>(args)...);  // Invoke constructor "placement new"
-  return SecretUniquePtr<T>(ptr, internal::SanitizingDeleter<T>());
+  return SecretUniquePtr<T>({ptr, internal::SanitizingDeleter<T>()});
 }
 
 // Convenience conversion functions
