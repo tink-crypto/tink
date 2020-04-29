@@ -50,22 +50,22 @@ struct SanitizingAllocator {
 
   ABSL_MUST_USE_RESULT T* allocate(std::size_t n) {
     if (n > std::numeric_limits<std::size_t>::max() / sizeof(T)) {
-      Throw(std::bad_array_new_length());
+      Throw(std::bad_alloc());
     }
 
     size_t size = n * sizeof(T);
-    T* ptr = static_cast<T*>(::operator new(size));
+    T* ptr = static_cast<T*>(std::malloc(size));
+    if (!ptr) {
+      Throw(std::bad_alloc());
+    }
+
     TrackSensitiveMemory(ptr, size);
     return ptr;
   }
 
   void deallocate(T* ptr, std::size_t n) noexcept {
     UntrackAndSanitizeSensitiveMemory(ptr, n * sizeof(T));
-#ifdef __cpp_sized_deallocation
-    ::operator delete(ptr, n * sizeof(T));
-#else
-    ::operator delete(ptr);
-#endif
+    std::free(ptr);
   }
 
   // Allocator requirements mandate definition of eq and neq operators
@@ -79,8 +79,12 @@ struct SanitizingDeleter {
                 "only trivial types allowed for SecretUniquePtr");
 
   void operator()(T* ptr) {
+    if (!ptr) {
+      return;
+    }
     ptr->~T();  // Invoke destructor. Must do this before sanitize.
-    SanitizingAllocator<T>().deallocate(ptr, 1);
+    UntrackAndSanitizeSensitiveMemory(ptr, sizeof(T));
+    std::free(ptr);
   }
 };
 
