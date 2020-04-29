@@ -101,7 +101,7 @@ GcpKmsClient::New(absl::string_view key_uri,
                   absl::string_view credentials_path) {
   std::unique_ptr<GcpKmsClient> client(new GcpKmsClient());
 
-  // If a specific key is given, create an AWS KMSClient.
+  // If a specific key is given, create a GCP KMSClient.
   if (!key_uri.empty()) {
     client->key_name_ = GetKeyName(key_uri);
     if (client->key_name_.empty()) {
