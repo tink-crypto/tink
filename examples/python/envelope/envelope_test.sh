@@ -21,6 +21,11 @@ ENVELOPE_CLI="$1"
 CRED_FILE="$2"
 KEY_URI="gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key"
 
+# Root certificates for GRPC.
+# Referece:
+#   https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
+export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="${TEST_SRCDIR}/google_root_pem/file/downloaded"
+
 DATA_FILE="$TEST_TMPDIR/example_data.txt"
 
 echo "This is some plaintext to be encrypted." > $DATA_FILE

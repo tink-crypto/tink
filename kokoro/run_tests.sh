@@ -66,13 +66,9 @@ run_all_linux_tests() {
   run_linux_tests "examples/java_src"
   run_linux_tests "tools"
   run_linux_tests "apps"
-  # Install pip package for tests which execute python3.
-  if [[ "${PLATFORM}" == 'darwin' ]]; then
-    install_pip_package_macos
-  fi
-  if [[ "${PLATFORM}" == 'linux' ]]; then
-    install_pip_package_linux
-  fi
+
+  ## Install Tink and its dependencies via pip for the examples/python tests.
+  install_tink_via_pip
   run_linux_tests "examples/python"
 }
 
@@ -101,39 +97,47 @@ run_macos_tests() {
   )
 }
 
-install_pip_package_linux() {
+install_tink_via_pip() {
+  local -a PIP_FLAGS
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
+    PIP_FLAGS=( --user )
+  fi
+  readonly PIP_FLAGS
+
   # Check if we can build Tink python package.
-  (
-    cd python
-    # Install the proto compiler
-    PROTOC_ZIP=protoc-3.11.4-linux-x86_64.zip
-    curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/$PROTOC_ZIP
-    sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
-    # Update pip and start setup
-    pip3 install --upgrade pip
-    pip3 install --upgrade setuptools
-    pip3 install .
-  )
+  pip3 install "${PIP_FLAGS[@]}" --upgrade pip
+  pip3 install "${PIP_FLAGS[@]}" --upgrade setuptools
+  pip3 install "${PIP_FLAGS[@]}" ./python
 }
 
-install_pip_package_macos() {
-  # Check if we can build Tink python package.
+install_temp_protoc() {
+  local protoc_version='3.11.4'
+  local protoc_platform
+  case "${PLATFORM}" in
+    'linux')
+      protoc_platform='linux-x86_64'
+      ;;
+    'darwin')
+      protoc_platform='osx-x86_64'
+      ;;
+    *)
+      echo "Unsupported platform, unable to install protoc."
+      exit 1
+      ;;
+  esac
+  local protoc_zip="protoc-${protoc_version}-${protoc_platform}.zip"
+  local protoc_url="https://github.com/protocolbuffers/protobuf/releases/download/v${protoc_version}/${protoc_zip}"
+  local -r protoc_tmpdir=$(mktemp -dt tink-protoc.XXXXXX)
   (
-    cd python
-    # Install the proto compiler
-    PROTOC_ZIP=protoc-3.11.4-osx-x86_64.zip
-    curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/$PROTOC_ZIP
-    sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
-    # Update pip and install all requirements. Note that on MacOS we need to
-    # use the --user flag as otherwise pip will complain about permissions.
-    pip3 install --upgrade pip --user
-    pip3 install --upgrade setuptools --user
-    pip3 install . --user
+    cd "${protoc_tmpdir}"
+    curl -OL "${protoc_url}"
+    unzip ${protoc_zip} bin/protoc
   )
+  export PATH="${protoc_tmpdir}/bin:${PATH}"
 }
 
 main() {
-  # Only in Kokoro environments.
+  # Initialization for Kokoro environments.
   if [[ -n "${KOKORO_ROOT}" ]]; then
     # TODO(b/73748835): Workaround on Kokoro.
     rm -f ~/.bazelrc
@@ -141,25 +145,28 @@ main() {
     # TODO(b/131821833) Use the latest version of Bazel.
     use_bazel.sh $(cat .bazelversion)
 
-    # Install Python 3.7 in Linux environments.
-    if [[ "${PLATFORM}" == 'linux' ]]; then
-      : "${PYTHON_VERSION:=3.7.1}"
+    # Install protoc into a temporary directory.
+    install_temp_protoc
 
-      # Update python version list.
+    if [[ "${PLATFORM}" == 'linux' ]]; then
+      # Install a more recent Python.
+      : "${PYTHON_VERSION:=3.7.1}"
       (
+        # Update the Python version list.
         cd /home/kbuilder/.pyenv/plugins/python-build/../..
         git pull
       )
-      # Install Python.
       eval "$(pyenv init -)"
       pyenv install -v "${PYTHON_VERSION}"
       pyenv global "${PYTHON_VERSION}"
-
     fi
 
     if [[ "${PLATFORM}" == 'darwin' ]]; then
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
       export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+
+      # TODO(b/155225382): Avoid modifying the sytem Python installation.
+      pip3 install --user protobuf
     fi
   fi
 
@@ -186,7 +193,17 @@ main() {
   go version
 
   echo "using python: $(which python)"
+  python --version
+
+  echo "using python3: $(which python3)"
   python3 --version
+
+  echo "using pip3: $(which pip3)"
+  pip3 --version
+  pip3 list
+
+  echo "using protoc: $(which protoc)"
+  protoc --version
 
   run_all_linux_tests
 
