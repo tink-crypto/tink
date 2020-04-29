@@ -21,6 +21,8 @@ cc_library(
         "//subtle:subtle_util",
         "//subtle:subtle_util_boringssl",
         "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",

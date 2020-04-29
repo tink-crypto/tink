@@ -25,6 +25,8 @@
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -37,16 +39,25 @@ class HkdfInputStream : public InputStream {
   HkdfInputStream(const EVP_MD *digest, const util::SecretData &secret,
                   absl::string_view salt, absl::string_view input)
       : digest_(digest), input_(input) {
-    prk_.resize(EVP_MAX_MD_SIZE);
+    // PRK as by RFC 5869, Section 2.2
+    util::SecretData prk(EVP_MAX_MD_SIZE);
     size_t prk_len;
 
     if (1 != HKDF_extract(
-                 prk_.data(), &prk_len, digest_, secret.data(), secret.size(),
+                 prk.data(), &prk_len, digest_, secret.data(), secret.size(),
                  reinterpret_cast<const uint8_t *>(salt.data()), salt.size())) {
       stream_status_ =
           util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
     }
-    prk_.resize(prk_len);
+    prk.resize(prk_len);
+    if (!hmac_ctx_) {
+      stream_status_ = util::Status(util::error::INTERNAL,
+                                    "BoringSSL's HMAC_CTX_new failed");
+    } else if (!HMAC_Init_ex(hmac_ctx_.get(), prk.data(), prk.size(), digest_,
+                             nullptr)) {
+      stream_status_ = util::Status(util::error::INTERNAL,
+                                    "BoringSSL's HMAC_Init_ex failed");
+    }
   }
 
   crypto::tink::util::StatusOr<int> Next(const void **data) override {
@@ -91,39 +102,31 @@ class HkdfInputStream : public InputStream {
   // Unfortunately, boringSSL does not provide a function which updates T(i)
   // for a single round; hence we implement this ourselves.
   util::Status UpdateTi() {
-    HMAC_CTX hmac_ctx;
-    HMAC_CTX_init(&hmac_ctx);
-
-    if (!HMAC_Init_ex(&hmac_ctx, reinterpret_cast<const uint8_t *>(prk_.data()),
-                      prk_.size(), digest_, nullptr)) {
-      HMAC_CTX_cleanup(&hmac_ctx);
+    if (!HMAC_Init_ex(hmac_ctx_.get(), nullptr, 0, nullptr, nullptr)) {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Init_ex failed");
     }
-    if (!HMAC_Update(&hmac_ctx, ti_.data(), ti_.size())) {
-      HMAC_CTX_cleanup(&hmac_ctx);
+    if (!HMAC_Update(hmac_ctx_.get(),
+                     reinterpret_cast<const uint8_t *>(&ti_[0]), ti_.size())) {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Update failed on ti_");
     }
-    if (!HMAC_Update(&hmac_ctx, reinterpret_cast<const uint8_t *>(&input_[0]),
+    if (!HMAC_Update(hmac_ctx_.get(),
+                     reinterpret_cast<const uint8_t *>(&input_[0]),
                      input_.size())) {
-      HMAC_CTX_cleanup(&hmac_ctx);
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Update failed on input_");
     }
     uint8_t i_as_uint8 = i_ + 1;
-    if (!HMAC_Update(&hmac_ctx, &i_as_uint8, 1)) {
-      HMAC_CTX_cleanup(&hmac_ctx);
+    if (!HMAC_Update(hmac_ctx_.get(), &i_as_uint8, 1)) {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Update failed on i_");
     }
     ti_.resize(EVP_MD_size(digest_));
-    if (!HMAC_Final(&hmac_ctx, ti_.data(), nullptr)) {
-      HMAC_CTX_cleanup(&hmac_ctx);
+    if (!HMAC_Final(hmac_ctx_.get(), ti_.data(), nullptr)) {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Final failed");
     }
-    HMAC_CTX_cleanup(&hmac_ctx);
     i_++;
     position_in_ti_ = 0;
     return util::OkStatus();
@@ -134,9 +137,7 @@ class HkdfInputStream : public InputStream {
   util::Status stream_status_ = util::OkStatus();
 
   const EVP_MD *digest_;
-
-  // PRK as by RFC 5869, Section 2.2
-  util::SecretData prk_;
+  bssl::UniquePtr<HMAC_CTX> hmac_ctx_{HMAC_CTX_new()};
 
   // Current value T(i).
   util::SecretData ti_;

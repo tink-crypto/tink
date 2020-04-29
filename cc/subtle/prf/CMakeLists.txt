@@ -32,6 +32,8 @@ tink_cc_library(
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
     absl::memory
     absl::strings
 )
