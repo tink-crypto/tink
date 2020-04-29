@@ -395,9 +395,12 @@ func main() {
 
 ### Envelope encryption
 
-Tink APIs work with GCP and AWS KMS (cf. more info on
-[Key Management Systems](KEY-MANAGEMENT.md#key-management-systems)
-and [Credentials](KEY-MANAGEMENT.md#credentials)).
+Via the AEAD interface, Tink supports
+[envelope encryption](KEY-MANAGEMENT.md#envelope-encryption).
+
+For example, you can perform envelope encryption with a Google Cloud KMS key at
+`gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`
+using the credentials in `credentials.json` as follows:
 
 ```go
 package main
@@ -412,8 +415,8 @@ import (
 )
 
 const (
-        keyURI          = "gcp-kms://......"   // customize for your key
-        credentialsPath = "/mysecurestorage/credentials.json"
+        keyURI          = "gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar"   // customize for your key
+        credentialsPath = "credentials.json"
 )
 
 func main() {

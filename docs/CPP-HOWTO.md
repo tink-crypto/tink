@@ -200,3 +200,45 @@ symmetric key encryption](PRIMITIVES.md#hybrid-encryption):
     if (!plaintext_result.ok()) return plaintext_result.status();
     auto plaintext = std::move(plaintext_result.ValueOrDie());
 ```
+
+### Envelope encryption
+
+Via the AEAD interface, Tink supports
+[envelope encryption](KEY-MANAGEMENT.md#envelope-encryption).
+
+For example, you can perform envelope encryption with a Google Cloud KMS key at
+`gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`
+using the credentials in `credentials.json` as follows:
+
+```cpp
+  #include "tink/aead.h"
+  #include "tink/integration/gcpkms/gcp_kms_client.h"
+
+  using crypto::tink::Aead;
+  using crypto::tink::integration::gcpkms::GcpKmsClient;
+
+  // Create GcpKmsClient.
+  auto client_result = GcpKmsClient::New("", "credentials.json");
+  if (!client_result.ok()) {
+    std::clog << "Aead creation failed: "
+              << client_result.status().error_message()
+              << "\n";
+    exit(1);
+  }
+  auto client = std::move(client_result.ValueOrDie());
+
+  // Create Aead-primitive.
+  auto aead_result = client->GetAead("gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar");
+  if (!aead_result.ok()) {
+    std::clog << "Aead creation failed: "
+              << aead_result.status().error_message()
+              << "\n";
+    exit(1);
+  }
+  std::unique_ptr<Aead> aead(std::move(aead_result.ValueOrDie()));
+
+  // Use the primitive.
+  auto ciphertext_result = aead->Encrypt(plaintext, aad);
+  if (!ciphertext_result.ok()) return ciphertext_result.status();
+  auto ciphertext = std::move(ciphertext_result.ValueOrDie());
+```

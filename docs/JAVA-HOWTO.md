@@ -514,21 +514,8 @@ use the following:
 
 ### Envelope encryption
 
-Via the AEAD interface, Tink supports envelope encryption, which is getting
-popular with Cloud users.
-
-For more context, reference the following cloud service provider documentation:
-
-* [Amazon Web Services](http://docs.aws.amazon.com/kms/latest/developerguide/workflow.html)
-* [Google Cloud Platform](https://cloud.google.com/kms/docs/data-encryption-keys)
-
-In this mode, you first create a key encryption key (KEK) in a Key
-Management System (KMS) such as AWS KMS or Google Cloud KMS. To encrypt some
-data, you then generate locally a data encryption key (DEK), encrypt data with
-the DEK, ask the KMS to encrypt the DEK with the KEK, and store the encrypted
-DEK with the encrypted data. At a later point, you can retrieve the encrypted
-data and the DEK, ask the KMS to decrypt DEK, and use the decrypted DEK to
-decrypt the data.
+Via the AEAD interface, Tink supports
+[envelope encryption](KEY-MANAGEMENT.md#envelope-encryption).
 
 For example, you can perform envelope encryption with a Google Cloud KMS key at
 `gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`

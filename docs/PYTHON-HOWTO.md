@@ -122,3 +122,39 @@ aead_primitive = keyset_handle.primitive(aead.Aead)
 # 3. Use the primitive.
 ciphertext = aead_primitive.encrypt(plaintext, associated data)
 ```
+
+### Envelope encryption
+
+Via the AEAD interface, Tink supports
+[envelope encryption](KEY-MANAGEMENT.md#envelope-encryption).
+
+For example, you can perform envelope encryption with a Google Cloud KMS key at
+`gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`
+using the credentials in `credentials.json` as follows:
+
+```python
+  import tink
+  from google3.third_party.tink.python.tink import aead
+  from google3.third_party.tink.python.tink.integration import gcpkms
+
+  key_uri = 'gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar'
+  gcp_credentials = 'credentials.json'
+
+  # Read the GCP credentials and setup client
+  try:
+    gcp_client = gcpkms.GcpKmsClient(key_uri, gcp_credentials)
+    gcp_aead = gcp_client.get_aead(key_uri)
+  except tink.TinkError as e:
+    logging.error('Error initializing GCP client: %s', e)
+    return 1
+
+  # Create envelope AEAD primitive using AES256 GCM for encrypting the data
+  try:
+    key_template = aead.aead_key_templates.AES256_GCM
+    env_aead = aead.KmsEnvelopeAead(key_template, gcp_aead)
+  except tink.TinkError as e:
+    logging.error('Error creating primitive: %s', e)
+    return 1
+  # Use env_aead to encrypt data
+  ciphertext = env_aead.encrypt(plaintext, associated data)
+```
