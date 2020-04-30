@@ -3,7 +3,7 @@
 This document contains instructions and Obj-C code snippets for common tasks in
 [Tink](https://github.com/google/tink).
 
-## Setup intructions
+## Setup instructions
 
 Tink is released as a [Cocoapod](https://cocoapods.org/). It can be installed by
 using the pod command as described below, which is the recommended way to use
@@ -296,7 +296,7 @@ that specifies what operations are offered by the primitive. A primitive can
 have multiple implementations, and you choose a desired implementation by using
 a key of corresponding type (see the [this
 section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).  A list of
-primitives and their implemenations currently supported by Tink in Objective-C
+primitives and their implementations currently supported by Tink in Objective-C
 can be found [here](PRIMITIVES.md#objective-c).
 
 You access implementations of a primitive via a factory that corresponds to the
