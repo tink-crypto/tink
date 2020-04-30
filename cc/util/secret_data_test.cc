@@ -22,28 +22,7 @@ namespace tink {
 namespace util {
 namespace {
 
-using ::testing::Eq;
 using ::testing::ElementsAreArray;
-using ::testing::IsTrue;
-
-struct alignas(64) BigAlign {
-  explicit BigAlign(int x = 0) : x(x) {}
-  int x;
-};
-
-TEST(SanitizingAllocatorTest, DISABLED_ExtendedAlignment) {
-  BigAlign* ptr = internal::SanitizingAllocator<BigAlign>().allocate(1);
-  EXPECT_THAT(reinterpret_cast<uintptr_t>(ptr) % alignof(BigAlign), Eq(0));
-  internal::SanitizingAllocator<BigAlign>().deallocate(ptr, 1);
-}
-
-TEST(SecretUniquePtrTest, DISABLED_ExtendedAlignment) {
-  auto ptr = MakeSecretUniquePtr<BigAlign>(42);
-  ASSERT_THAT(ptr, IsTrue());
-  EXPECT_THAT(ptr->x, Eq(42));
-  EXPECT_THAT(reinterpret_cast<uintptr_t>(ptr.get()) % alignof(BigAlign),
-              Eq(0));
-}
 
 TEST(SecretDataTest, OneByOneInsertion) {
   constexpr unsigned char kContents[] = {41, 42, 64, 12, 41, 52, 56, 6, 12, 42};
