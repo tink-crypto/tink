@@ -3,6 +3,49 @@
 This document presents instructions and Python code snippets for common tasks in
 [Tink](https://github.com/google/tink).
 
+## Setup instructions
+
+The Tink Python implementation is a wrapper around the C++ implementation using
+[pybind11](https://github.com/pybind/pybind11). It is therefore necessary to
+compile the project before the Python implementation is ready to use.
+
+### Build with Bazel
+
+[Bazel](https://bazel.io) is used to build and test Tink.
+
+To build the Python implementation:
+
+```shell
+cd python
+bazel build ...
+```
+
+### Build a Python package using pip
+
+A setup script is provided which allows building a Python package using pip.
+
+The setup script requires:
+
+ * Bazel
+ * [protobuf compiler](https://github.com/protocolbuffers/protobuf#protocol-compiler-installation).
+
+To build and install the Python package:
+
+```shell
+cd python
+pip3 install .
+```
+
+### Running tests
+
+To run all tests, you can:
+
+```shell
+cd python
+bazel test ...
+```
+
+
 ## Initializing Tink
 
 Tink provides customizable initialization, which allows for choosing specific

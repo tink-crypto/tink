@@ -106,13 +106,13 @@ AEAD primitive in Java:
 
 ## Current status
 
-*   [Java and Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md),
-    [Obj-C](docs/OBJC-HOWTO.md), and [Go](docs/GOLANG-HOWTO.md) are field
-    tested and ready for production. The latest version is
+*   The latest version is
     [1.3.0](https://github.com/google/tink/releases/tag/v1.3.0), released on
     2020-03-11.
-
-*   Tink for Python and JavaScript are in active development.
+*   [Java and Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md),
+    [Obj-C](docs/OBJC-HOWTO.md), [Go](docs/GOLANG-HOWTO.md), and
+    [Python](g3docs/PYTHON-HOWTO.md) are field tested and ready for production.
+*   Tink for JavaScript is in active development.
 
 ## Learn more
 
@@ -120,6 +120,7 @@ AEAD primitive in Java:
 *   [C++ HOW-TO](docs/CPP-HOWTO.md)
 *   [Obj-C HOW-TO](docs/OBJC-HOWTO.md)
 *   [Go HOW-TO](docs/GOLANG-HOWTO.md)
+*   [Python HOW-TO](docs/PYTHON-HOWTO.md)
 *   [Security and Usability Design Goals](docs/SECURITY-USABILITY.md)
 *   [Supported Crypto Primitives](docs/PRIMITIVES.md)
 *   [Key Management](docs/KEY-MANAGEMENT.md)
