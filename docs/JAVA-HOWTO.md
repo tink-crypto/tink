@@ -12,7 +12,7 @@ The most recent release is
 [1.3.0](https://github.com/google/tink/releases/tag/v1.3.0), released
 2020-03-11.
 
-In addition to the versioned releases, snapshots of Tink are regurlarly built
+In addition to the versioned releases, snapshots of Tink are regularly built
 using the master branch of the Tink GitHub repository.
 
 Tink for Java has two primary build targets specified:
@@ -297,7 +297,7 @@ multiple implementations, and you choose a desired implementation by using a key
 of a corresponding type (see [this
 document](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for further details).
 
-A list of primitives and the implemenations currently supported by Tink in Java
+A list of primitives and the implementations currently supported by Tink in Java
 can be found [here](PRIMITIVES.md#java).
 
 You obtain a primitive by calling the method `getPrimitive(classObject)` of a
