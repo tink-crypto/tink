@@ -31,13 +31,13 @@ struct alignas(64) BigAlign {
   int x;
 };
 
-TEST(SanitizingAllocatorTest, ExtendedAlignment) {
+TEST(SanitizingAllocatorTest, DISABLED_ExtendedAlignment) {
   BigAlign* ptr = internal::SanitizingAllocator<BigAlign>().allocate(1);
   EXPECT_THAT(reinterpret_cast<uintptr_t>(ptr) % alignof(BigAlign), Eq(0));
   internal::SanitizingAllocator<BigAlign>().deallocate(ptr, 1);
 }
 
-TEST(SecretUniquePtrTest, ExtendedAlignment) {
+TEST(SecretUniquePtrTest, DISABLED_ExtendedAlignment) {
   auto ptr = MakeSecretUniquePtr<BigAlign>(42);
   ASSERT_THAT(ptr, IsTrue());
   EXPECT_THAT(ptr->x, Eq(42));
