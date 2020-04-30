@@ -28,6 +28,7 @@ go_library(
         "//proto:ecies_aead_hkdf_go_proto",
         "//proto:ed25519_go_proto",
         "//proto:hmac_go_proto",
+        "//proto:hmac_prf_go_proto",
         "//proto:tink_go_proto",
         "//signature:go_default_library",
         "//subtle:go_default_library",

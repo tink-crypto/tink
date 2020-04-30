@@ -41,6 +41,7 @@ import (
 	eciespb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"
 	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"
 	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
+	hmacprfpb "github.com/google/tink/go/proto/hmac_prf_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -452,6 +453,34 @@ func NewHMACKeyData(hashType commonpb.HashType, tagSize uint32) *tinkpb.KeyData 
 		TypeUrl:         HMACTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+	}
+}
+
+// NewHMACPRFParams returns a new HMACPRFParams.
+func NewHMACPRFParams(hashType commonpb.HashType) *hmacprfpb.HmacPrfParams {
+	return &hmacprfpb.HmacPrfParams{
+		Hash: hashType,
+	}
+}
+
+// NewHMACPRFKey creates a new HMACPRFKey with the specified parameters.
+func NewHMACPRFKey(hashType commonpb.HashType) *hmacprfpb.HmacPrfKey {
+	params := NewHMACPRFParams(hashType)
+	keyValue := random.GetRandomBytes(32)
+	return &hmacprfpb.HmacPrfKey{
+		Version:  HMACPRFKeyVersion,
+		Params:   params,
+		KeyValue: keyValue,
+	}
+}
+
+// NewHMACPRFKeyFormat creates a new HMACPRFKeyFormat with the specified parameters.
+func NewHMACPRFKeyFormat(hashType commonpb.HashType) *hmacprfpb.HmacPrfKeyFormat {
+	params := NewHMACPRFParams(hashType)
+	keySize := uint32(32)
+	return &hmacprfpb.HmacPrfKeyFormat{
+		Params:  params,
+		KeySize: keySize,
 	}
 }
 

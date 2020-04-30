@@ -79,6 +79,11 @@ const (
 	// AESCMACPRFTypeURL is the type URL of AES CMAC PRF keys.
 	AESCMACPRFTypeURL = "type.googleapis.com/google.crypto.tink.AesCmacPrfKey"
 
+	// HMACPRFKeyVersion is the maxmimal version of HMAC PRF keys that Tink supports.
+	HMACPRFKeyVersion = 0
+	// HMACPRFTypeURL is the type URL of HMAC PRF keys.
+	HMACPRFTypeURL = "type.googleapis.com/google.crypto.tink.HmacPrfKey"
+
 	// Digital signatures
 
 	// ECDSASignerKeyVersion is the maximum version of ECDSA private keys that Tink supports.
