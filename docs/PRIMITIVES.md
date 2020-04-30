@@ -26,16 +26,16 @@ describe the main properties of Tink primitives.
 
 ### Primitives supported by language
 
-**Primitive**      | **Java** | **C++** | **ObjC** | **Go**
------------------- | -------- | ------- | -------- | ------
-AEAD               | yes      | yes     | yes      | yes
-Streaming AEAD     | yes      | yes     | no       | no
-Deterministic AEAD | yes      | yes     | yes      | yes
-MAC                | yes      | yes     | yes      | yes
-Digital signatures | yes      | yes     | yes      | yes
-Hybrid encryption  | yes      | yes     | yes      | yes
+**Primitive**      | **Java** | **C++** | **ObjC** | **Go** | **Python**
+------------------ | -------- | ------- | -------- | ------ | ----------
+AEAD               | yes      | yes     | yes      | yes    | yes
+Streaming AEAD     | yes      | yes     | no       | yes    | no
+Deterministic AEAD | yes      | yes     | yes      | yes    | yes
+MAC                | yes      | yes     | yes      | yes    | yes
+Digital signatures | yes      | yes     | yes      | yes    | yes
+Hybrid encryption  | yes      | yes     | yes      | yes    | yes
 
-JavaScript and Python are currently under development.
+JavaScript is currently under development.
 
 ### Primitive implementations supported by languege
 
@@ -54,7 +54,7 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 
 Primitive          | C++ Implementations
 ------------------ | -----------------------------------------------------------------------------
-AEAD               | AES-GCM, AES-GCM-SIV, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305
+AEAD               | AES-GCM, AES-GCM-SIV, AES-CTR-HMAC, AES-EAX, KMS Envelope, CHACHA20-POLY1305, XCHACHA20-POLY1305
 Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2, AES-CMAC
@@ -76,9 +76,20 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 Primitive          | Go Implementations
 ------------------ | ------------------------------------------------------------------------
 AEAD               | AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305
+Streaming AEAD     | AES-GCM-HKDF-STREAMING
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2, AES-CMAC
 Digital Signatures | ECDSA over NIST curves, Ed25519
+Hybrid Encryption  | ECIES with AEAD and HKDF
+
+#### Python
+
+Primitive          | Python Implementations
+------------------ | -----------------------------------------------------------------------------
+AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, CHACHA20-POLY1305, XCHACHA20-POLY1305
+Deterministic AEAD | AES-SIV
+MAC                | HMAC-SHA2
+Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
 Hybrid Encryption  | ECIES with AEAD and HKDF
 
 ---
