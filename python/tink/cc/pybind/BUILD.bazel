@@ -292,3 +292,14 @@ tink_pybind_extension(
         "@pybind11",
     ],
 )
+
+tink_pybind_extension(
+    name = "cc_aws_kms_client",
+    srcs = ["cc_aws_kms_client.cc"],
+    deps = [
+        "@tink_cc//integration/awskms:aws_kms_client",
+        "//tink/cc/pybind:status_casters",
+        "//tink/cc:output_stream_adapter",
+        "@pybind11",
+    ],
+)

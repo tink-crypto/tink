@@ -18,24 +18,13 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-import errno
-import os
 import re
 
-import boto3
-import configparser
 from typing import Text
 
 from tink import aead
 from tink import core
-from tink.integration.awskms import _aws_kms_aead
-
-AWS_KEYURI_PREFIX = 'aws-kms://'
-AWS_KMS_BOTO = 'kms'
-
-
-class FileNotFoundError(OSError):
-  pass
+from tink.cc.pybind.cc_aws_kms_client import AwsKmsClient as CcAwsKmsClient
 
 
 class AwsKmsClient(object):
@@ -57,70 +46,17 @@ class AwsKmsClient(object):
       credentials_path: Text, Path to the file with the access credentials.
 
     Raises:
-      FileNotFoundError: If the path or filename of the credentials is invalid.
+      ValueError: If the path or filename of the credentials is invalid.
       TinkError: If the key uri is not valid.
-      ClientError: If an error occured inside the boto3 client.
     """
 
     match = re.match('aws-kms://arn:aws:kms:([a-z0-9-]+):', key_uri)
     if match:
       self.key_uri = key_uri
-      region = key_uri.split(':')[4]
     else:
       raise core.TinkError
 
-    if not credentials_path:
-      kms_client = boto3.client(AWS_KMS_BOTO, region_name=region)
-    else:
-      (key_id, secret_key) = self._load_credentials_from_file(credentials_path)
-      kms_client = boto3.client(
-          AWS_KMS_BOTO,
-          aws_access_key_id=key_id,
-          aws_secret_access_key=secret_key,
-          region_name=region)
-
-    self.client = kms_client
-
-  def _load_credentials_from_file(self, credentials_path: Text) -> (Text, Text):
-    """Loads the credentials from a file.
-
-    The file must be in the ini format and have a default section. For example:
-
-    [default]
-    aws_access_key_id = your_access_key_id
-    aws_secret_access_key = your_secret_access_key
-
-    Args:
-      credentials_path: Text, Path to file containing the credentials.
-
-    Returns:
-      A tuple which contains the AWS access key id and the AWS secret
-      access key loaded from the file.
-
-    Raises:
-      FileNotFoundError: If the path to the credentials is invalid.
-      TinkError: If the key uri is not valid.
-    """
-    if not os.path.exists(credentials_path):
-      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                              credentials_path)
-
-    if not os.path.isfile(credentials_path):
-      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                              credentials_path)
-
-    cred_config = configparser.ConfigParser()
-    cred_config.read(credentials_path)
-    try:
-      if 'aws_access_key_id' in cred_config['default']:
-        aws_access_key_id = cred_config['default']['aws_access_key_id']
-
-      if 'aws_secret_access_key' in cred_config['default']:
-        aws_secret_access_key = cred_config['default']['aws_secret_access_key']
-    except KeyError:
-      raise core.TinkError
-
-    return (aws_access_key_id, aws_secret_access_key)
+    self.cc_client = CcAwsKmsClient(key_uri, credentials_path)
 
   def does_support(self, key_uri: Text) -> bool:
     """Returns true iff this client supports KMS key specified in 'key_uri'.
@@ -131,8 +67,9 @@ class AwsKmsClient(object):
     Returns: A boolean value which is true if the key is supported and false
       otherwise.
     """
-    return key_uri.startswith(self.key_uri)
+    return self.cc_client.does_support(key_uri)
 
+  @core.use_tink_errors
   def get_aead(self, key_uri: Text) -> aead.Aead:
     """Returns an Aead-primitive backed by KMS key specified by 'key_uri'.
 
@@ -146,8 +83,4 @@ class AwsKmsClient(object):
       TinkError: If the key_uri is not supported.
     """
 
-    if not self.does_support(key_uri):
-      raise core.TinkError('Key URI not supported.')
-
-    key_name = key_uri[len(AWS_KEYURI_PREFIX):]
-    return _aws_kms_aead.AwsKmsAead(key_name, self.client)
+    return aead.AeadCcToPyWrapper(self.cc_client.get_aead(key_uri))

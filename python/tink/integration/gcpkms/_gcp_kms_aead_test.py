@@ -27,6 +27,7 @@ from tink.integration import gcpkms
 CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
                                'tink_base/testdata/credential.json')
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
+BAD_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
 
 # Set root certificates for gRPC
 os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = os.path.join(
@@ -47,6 +48,11 @@ class GcpKmsAeadTest(absltest.TestCase):
     associated_data = b'world'
     ciphertext = aead.encrypt(plaintext, associated_data)
     self.assertEqual(plaintext, aead.decrypt(ciphertext, associated_data))
+
+  def test_encrypt_with_bad_uri(self):
+    with self.assertRaises(core.TinkError):
+      gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
+      gcp_client.get_aead(BAD_KEY_URI)
 
   def test_corrupted_ciphertext(self):
     gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)

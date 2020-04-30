@@ -9,7 +9,6 @@ py_library(
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
-        ":_aws_kms_aead",
         ":_aws_kms_client",
     ],
 )
@@ -19,10 +18,9 @@ py_library(
     srcs = ["_aws_kms_client.py"],
     srcs_version =  "PY3",
     deps = [
-        ":_aws_kms_aead",
         "//tink/aead",
         "//tink/core",
-        requirement("boto3"),
+        "//tink/cc/pybind:cc_aws_kms_client",
     ],
 )
 
@@ -36,17 +34,6 @@ py_test(
     deps = [
         ":awskms",
         requirement("absl-py"),
-    ],
-)
-
-py_library(
-    name = "_aws_kms_aead",
-    srcs = ["_aws_kms_aead.py"],
-    srcs_version =  "PY3",
-    deps = [
-        "//tink/aead",
-        "//tink/core",
-        requirement("boto3"),
     ],
 )
 

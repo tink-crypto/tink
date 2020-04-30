@@ -48,7 +48,7 @@ class AwsKmsClientTest(absltest.TestCase):
     self.assertEqual(aws_client.does_support(gcp_key1), False)
 
   def test_wrong_credentials_path(self):
-    with self.assertRaises(awskms.FileNotFoundError):
+    with self.assertRaises(ValueError):
       awskms.AwsKmsClient(KEY_URI, '../credentials.txt')
 
 

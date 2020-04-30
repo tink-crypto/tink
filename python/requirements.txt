@@ -1,4 +1,3 @@
 absl-py
 protobuf
-boto3
 six

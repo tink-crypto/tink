@@ -43,16 +43,16 @@ class AwsKmsAeadTest(absltest.TestCase):
     self.assertEqual(plaintext, aead.decrypt(ciphertext, associated_data))
 
     plaintext = b'hello'
-    ciphertext = aead.encrypt(plaintext, None)
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, None))
+    ciphertext = aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
 
   def test_corrupted_ciphertext(self):
     aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
     aead = aws_client.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
-    ciphertext = aead.encrypt(plaintext, None)
-    self.assertEqual(plaintext, aead.decrypt(ciphertext, None))
+    ciphertext = aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
 
     # Corrupt each byte once and check that decryption fails
     # NOTE: Skipping two bytes as they are malleable
@@ -61,7 +61,7 @@ class AwsKmsAeadTest(absltest.TestCase):
       tmp_ciphertext[byte_idx] ^= 1
       corrupted_ciphertext = bytes(tmp_ciphertext)
       with self.assertRaises(core.TinkError):
-        aead.decrypt(corrupted_ciphertext, None)
+        aead.decrypt(corrupted_ciphertext, b'')
 
   def test_encrypt_with_bad_uri(self):
     with self.assertRaises(core.TinkError):

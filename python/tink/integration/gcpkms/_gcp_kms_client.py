@@ -69,6 +69,7 @@ class GcpKmsClient(object):
     """
     return self.cc_client.does_support(key_uri)
 
+  @core.use_tink_errors
   def get_aead(self, key_uri: Text) -> aead.Aead:
     """Returns an Aead-primitive backed by KMS key specified by 'key_uri'.
 
