@@ -22,8 +22,8 @@ package aes_ctr_hmac_aead_go_proto
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	aes_ctr_go_proto "github.com/google/tink/proto/aes_ctr_go_proto"
-	hmac_go_proto "github.com/google/tink/proto/hmac_go_proto"
+	aes_ctr_go_proto "github.com/google/tink/go/proto/aes_ctr_go_proto"
+	hmac_go_proto "github.com/google/tink/go/proto/hmac_go_proto"
 	math "math"
 )
 

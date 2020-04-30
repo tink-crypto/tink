@@ -22,7 +22,7 @@ package kms_envelope_go_proto
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	tink_go_proto "github.com/google/tink/proto/tink_go_proto"
+	tink_go_proto "github.com/google/tink/go/proto/tink_go_proto"
 	math "math"
 )
 
