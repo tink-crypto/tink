@@ -9,7 +9,7 @@ hacking guide](JAVA-HACKING.md).
 ## Setup instructions
 
 The most recent release is
-[1.3.0](https://github.com/google/tink/releases/tag/v1.3.0), released
+[1.4.0-rc1](https://github.com/google/tink/releases/tag/v1.4.0-rc1), released
 2020-03-11.
 
 In addition to the versioned releases, snapshots of Tink are regurlarly built
@@ -35,7 +35,7 @@ following configuration:
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0-rc1</version>
   </dependency>
 </dependencies>
 ```
@@ -81,7 +81,7 @@ similarly `tink-gcpkms` for GCP KMS.
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink-awskms</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0-rc1</version>
   </dependency>
 </dependencies>
 ```
@@ -91,7 +91,7 @@ similarly `tink-gcpkms` for GCP KMS.
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink-gcpkms</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0-rc1</version>
   </dependency>
 </dependencies>
 ```
@@ -105,7 +105,7 @@ following configuration:
 
 ```
 dependencies {
-  compile 'com.google.crypto.tink:tink-android:1.3.0'
+  compile 'com.google.crypto.tink:tink-android:1.4.0-rc1'
 }
 ```
 
@@ -125,10 +125,10 @@ dependencies {
 ## API documentation
 
 *   Java:
-    *   [1.3.0](https://google.github.com/tink/javadoc/tink/1.3.0)
+    *   [1.4.0-rc1](https://google.github.com/tink/javadoc/tink/1.4.0-rc1)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.3.0](https://google.github.com/tink/javadoc/tink-android/1.3.0)
+    *   [1.4.0-rc1](https://google.github.com/tink/javadoc/tink-android/1.4.0-rc1)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important warnings
