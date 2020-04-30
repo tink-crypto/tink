@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/subtle/aead_test_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -162,7 +163,8 @@ TEST(AesGcmSivKeyManagerTest, CreateAead) {
   ASSERT_THAT(aead_or.status(), IsOk());
 
   StatusOr<std::unique_ptr<Aead>> boring_ssl_aead_or =
-      subtle::AesGcmSivBoringSsl::New(key_or.ValueOrDie().key_value());
+      subtle::AesGcmSivBoringSsl::New(
+          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
   ASSERT_THAT(EncryptThenDecrypt(aead_or.ValueOrDie().get(),

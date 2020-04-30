@@ -18,11 +18,12 @@
 #define TINK_SUBTLE_AES_GCM_SIV_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/aead.h"
 #include "tink/aead.h"
-#include "tink/util/status.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -49,7 +50,7 @@ namespace subtle {
 class AesGcmSivBoringSsl : public Aead {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
-      absl::string_view key_value);
+      const util::SecretData& key);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
@@ -63,10 +64,10 @@ class AesGcmSivBoringSsl : public Aead {
   static constexpr int kIvSizeInBytes = 12;
   static constexpr int kTagSizeInBytes = 16;
 
-  AesGcmSivBoringSsl() {}
-  crypto::tink::util::Status Init(absl::string_view key_value);
+  explicit AesGcmSivBoringSsl(bssl::UniquePtr<EVP_AEAD_CTX> ctx)
+      : ctx_(std::move(ctx)) {}
 
-  bssl::ScopedEVP_AEAD_CTX ctx_;
+  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
 };
 
 }  // namespace subtle

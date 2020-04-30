@@ -19,14 +19,11 @@
 #include <string>
 #include <vector>
 
+#include "absl/memory/memory.h"
 #include "openssl/aead.h"
-#include "openssl/err.h"
-#include "tink/aead.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
-#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -45,28 +42,19 @@ const EVP_AEAD* GetCipherForKeySize(int size_in_bytes) {
 }
 }  // namespace
 
-util::Status AesGcmSivBoringSsl::Init(absl::string_view key_value) {
-  const EVP_AEAD* aead = GetCipherForKeySize(key_value.size());
+util::StatusOr<std::unique_ptr<Aead>> AesGcmSivBoringSsl::New(
+    const util::SecretData& key) {
+  const EVP_AEAD* aead = GetCipherForKeySize(key.size());
   if (aead == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
   }
-  if (EVP_AEAD_CTX_init(
-          ctx_.get(), aead, reinterpret_cast<const uint8_t*>(key_value.data()),
-          key_value.size(), EVP_AEAD_DEFAULT_TAG_LENGTH, nullptr) != 1) {
+  bssl::UniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
+      aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
+  if (!ctx) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_AEAD_CTX");
   }
-  return util::OkStatus();
-}
-
-util::StatusOr<std::unique_ptr<Aead>> AesGcmSivBoringSsl::New(
-    absl::string_view key_value) {
-  std::unique_ptr<AesGcmSivBoringSsl> aead(new AesGcmSivBoringSsl);
-  auto status = aead->Init(key_value);
-  if (!status.ok()) {
-    return status;
-  }
-  return util::StatusOr<std::unique_ptr<Aead>>(std::move(aead));
+  return {absl::WrapUnique(new AesGcmSivBoringSsl(std::move(ctx)))};
 }
 
 util::StatusOr<std::string> AesGcmSivBoringSsl::Encrypt(

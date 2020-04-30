@@ -503,10 +503,11 @@ tink_cc_library(
     tink::subtle::random
     tink::subtle::subtle_util
     tink::core::aead
-    tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
+    absl::memory
     absl::strings
 )
 
@@ -1109,6 +1110,7 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::wycheproof_util
     tink::core::aead
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
