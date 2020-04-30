@@ -385,3 +385,11 @@ tink_cc_library(
     tink::util::secret_data_internal
     absl::strings
 )
+
+tink_cc_test(
+  NAME secret_data_test
+  SRCS secret_data_test.cc
+  DEPS
+    tink::util::secret_data
+    gmock
+)

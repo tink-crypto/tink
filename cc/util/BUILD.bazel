@@ -417,6 +417,15 @@ cc_test(
 )
 
 cc_test(
+    name = "secret_data_test",
+    srcs = ["secret_data_test.cc"],
+    deps = [
+        ":secret_data",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "test_util_test",
     srcs = ["test_util_test.cc"],
     deps = [
