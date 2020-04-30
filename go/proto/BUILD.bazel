@@ -72,6 +72,12 @@ go_proto_library(
 )
 
 go_proto_library(
+    name = "aes_cmac_prf_go_proto",
+    importpath = "github.com/google/tink/go/proto/aes_cmac_prf_go_proto",
+    proto = "@tink_base//proto:aes_cmac_prf_proto",
+)
+
+go_proto_library(
     name = "aes_ctr_go_proto",
     importpath = "github.com/google/tink/go/proto/aes_ctr_go_proto",
     proto = "@tink_base//proto:aes_ctr_proto",

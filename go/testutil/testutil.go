@@ -32,6 +32,7 @@ import (
 
 	subtedaead "github.com/google/tink/go/daead/subtle"
 	cmacpb "github.com/google/tink/go/proto/aes_cmac_go_proto"
+	aescmacprfpb "github.com/google/tink/go/proto/aes_cmac_prf_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
 	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
@@ -451,6 +452,23 @@ func NewHMACKeyData(hashType commonpb.HashType, tagSize uint32) *tinkpb.KeyData 
 		TypeUrl:         HMACTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+	}
+}
+
+// NewAESCMACPRFKey creates a new AESCMACPRFKey with the specified parameters.
+func NewAESCMACPRFKey() *aescmacprfpb.AesCmacPrfKey {
+	keyValue := random.GetRandomBytes(32)
+	return &aescmacprfpb.AesCmacPrfKey{
+		Version:  AESCMACPRFKeyVersion,
+		KeyValue: keyValue,
+	}
+}
+
+// NewAESCMACPRFKeyFormat creates a new AESCMACPRFKeyFormat with the specified parameters.
+func NewAESCMACPRFKeyFormat() *aescmacprfpb.AesCmacPrfKeyFormat {
+	keySize := uint32(32)
+	return &aescmacprfpb.AesCmacPrfKeyFormat{
+		KeySize: keySize,
 	}
 }
 

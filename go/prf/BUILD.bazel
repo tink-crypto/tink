@@ -7,6 +7,7 @@ licenses(["notice"])  # keep
 go_library(
     name = "go_default_library",
     srcs = [
+        "aes_cmac_prf_key_manager.go",
         "prf_set.go",
         "prf_set_factory.go",
     ],
@@ -15,5 +16,29 @@ go_library(
         "//core/primitiveset:go_default_library",
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
+        "//prf/subtle:go_default_library",
+        "//proto:aes_cmac_prf_go_proto",
+        "//proto:tink_go_proto",
+        "//subtle/random:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    size = "small",
+    srcs = [
+        "aes_cmac_prf_key_manager_test.go",
+    ],
+    embed = [":go_default_library"],
+    deps = [
+        "//core/registry:go_default_library",
+        "//prf/subtle:go_default_library",
+        "//proto:aes_cmac_prf_go_proto",
+        "//proto:common_go_proto",
+        "//proto:tink_go_proto",
+        "//subtle/random:go_default_library",
+        "//testutil:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )

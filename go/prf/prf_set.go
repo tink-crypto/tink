@@ -15,7 +15,11 @@
 // Package prf contains utilities to calculate pseudo random function families.
 package prf
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/tink/go/core/registry"
+)
 
 // The PRF interface is an abstraction for an element of a pseudo random
 // function family, selected by a key. It has the following property:
@@ -67,4 +71,10 @@ func (s Set) ComputePrimaryPRF(input []byte, outputLength uint32) ([]byte, error
 		return nil, fmt.Errorf("Could not find primary ID %d in prf.Set", s.PrimaryID)
 	}
 	return prf.ComputePRF(input, outputLength)
+}
+
+func init() {
+	if err := registry.RegisterKeyManager(newAESCMACPRFKeyManager()); err != nil {
+		panic(fmt.Sprintf("prf.init() failed: %v", err))
+	}
 }

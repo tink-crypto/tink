@@ -19,6 +19,7 @@ go_library(
         "//keyset:go_default_library",
         "//mac:go_default_library",
         "//proto:aes_cmac_go_proto",
+        "//proto:aes_cmac_prf_go_proto",
         "//proto:aes_gcm_go_proto",
         "//proto:aes_gcm_hkdf_streaming_go_proto",
         "//proto:aes_siv_go_proto",
