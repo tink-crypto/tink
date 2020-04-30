@@ -21,7 +21,7 @@ import (
 	"testing"
 )
 
-func TestVectorsRFC(t *testing.T) {
+func TestVectorsRFC4493(t *testing.T) {
 	// Test vectors from RFC 4493.
 	key, err := hex.DecodeString("2b7e151628aed2a6abf7158809cf4f3c")
 	if err != nil {
@@ -125,6 +125,59 @@ func TestVectorsWycheproof(t *testing.T) {
 			if !valid && hex.EncodeToString(res) == tc.Tag {
 				t.Errorf("Compute AES-CMAC and invalid expected for test case %d (%s) match:\nComputed: %q\nExpected: %q", tc.TcID, tc.Comment, hex.EncodeToString(res), tc.Tag)
 			}
+		}
+	}
+}
+
+func TestValidateAESCMACPRFParams(t *testing.T) {
+	if err := ValidateAESCMACPRFParams(32); err != nil {
+		t.Errorf("Unexpected error validating AES CMAC PRF Params: %v", err)
+	}
+	if err := ValidateAESCMACPRFParams(2); err == nil {
+		t.Errorf("Unexpected validation of too short key for AES CMAC PRF Params")
+	}
+}
+
+func TestKeyLength(t *testing.T) {
+	if _, err := NewAESCMACPRF([]byte{0x01, 0x02}); err == nil {
+		t.Errorf("Expected NewAESCMACPRF to fail on short key")
+	}
+	if _, err := NewAESCMACPRF([]byte{
+		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}); err != nil {
+		t.Errorf("Expected NewAESCMACPRF to work on 16 byte key")
+	}
+	if _, err := NewAESCMACPRF([]byte{
+		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
+		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}); err != nil {
+		t.Errorf("Expected NewAESCMACPRF to work on 32 byte key")
+	}
+}
+
+func TestAESCMACPRFOutputLength(t *testing.T) {
+	prf, err := NewAESCMACPRF([]byte{
+		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
+		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10})
+	if err != nil {
+		t.Errorf("Expected NewAESCMACPRF to work on 32 byte key")
+	}
+	for i := 0; i <= 16; i++ {
+		output, err := prf.ComputePRF([]byte{0x01, 0x02}, uint32(i))
+		if err != nil {
+			t.Errorf("Expected to be able to compute AES CMAC PRF with %d output length", i)
+		}
+		if len(output) != i {
+			t.Errorf("Expected AES CMAC PRF to compute %d bytes, got %d", i, len(output))
+		}
+	}
+	for i := 17; i < 32; i++ {
+		_, err := prf.ComputePRF([]byte{0x01, 0x02}, uint32(i))
+		if err == nil {
+			t.Errorf("Expected to not be able to compute AES CMAC PRF with %d output length", i)
 		}
 	}
 }

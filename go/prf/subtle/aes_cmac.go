@@ -25,8 +25,9 @@ import (
 )
 
 const (
-	mul = 0x87
-	pad = byte(0x80)
+	mul                = 0x87
+	pad                = byte(0x80)
+	recommendedKeySize = uint32(32)
 )
 
 // AESCMACPRF is a type that can be used to compute several CMACs with the same key material.
@@ -54,6 +55,14 @@ func NewAESCMACPRF(key []byte) (*AESCMACPRF, error) {
 	copy(aesCmac.subkey2, aesCmac.subkey1)
 	mulByX(aesCmac.subkey2)
 	return aesCmac, nil
+}
+
+// ValidateAESCMACPRFParams checks that the key is the recommended size for AES-CMAC.
+func ValidateAESCMACPRFParams(keySize uint32) error {
+	if keySize != recommendedKeySize {
+		return fmt.Errorf("Recommended key size for AES-CMAC is %d, but %d given", recommendedKeySize, keySize)
+	}
+	return nil
 }
 
 // ComputePRF computes the AES-CMAC for the given key and data, returning outputLength bytes.

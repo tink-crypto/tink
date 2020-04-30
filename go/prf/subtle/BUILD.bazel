@@ -6,8 +6,12 @@ go_library(
     name = "go_default_library",
     srcs = [
         "aes_cmac.go",
+        "hmac.go",
     ],
     importpath = "github.com/google/tink/go/prf/subtle",
+    deps = [
+        "//subtle:go_default_library",
+    ],
 )
 
 go_test(
@@ -15,6 +19,7 @@ go_test(
     size = "small",
     srcs = [
         "aes_cmac_test.go",
+        "hmac_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
     embed = [":go_default_library"],
