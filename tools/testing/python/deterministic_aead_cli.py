@@ -110,11 +110,13 @@ def main(argv):
       output_data = cipher.encrypt_deterministically(input_data, aad)
     except tink.TinkError as e:
       logging.error('Error encrypting the input: %s', e)
+      return 1
   elif operation.lower() == 'decryptdeterministically':
     try:
       output_data = cipher.decrypt_deterministically(input_data, aad)
     except tink.TinkError as e:
       logging.error('Error decrypting the input: %s', e)
+      return 1
   else:
     logging.error(
         'Did not recognise operation %s.\n'

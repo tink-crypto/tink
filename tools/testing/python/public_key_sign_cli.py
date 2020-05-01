@@ -97,6 +97,7 @@ def main(argv):
     signature_data = sign_primitive.sign(message_data)
   except tink.TinkError as e:
     logging.error('Error signing the message: %s', e)
+    return 1
 
   with open(output_filename, 'wb') as output_file:
     output_file.write(signature_data)

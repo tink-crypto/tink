@@ -103,6 +103,7 @@ def main(argv):
     output_data = cipher.encrypt(plaintext_data, contextinfo_data)
   except tink.TinkError as e:
     logging.error('Error encrypting the input: %s', e)
+    return 1
 
   with open(output_filename, 'wb') as output_file:
     output_file.write(output_data)
