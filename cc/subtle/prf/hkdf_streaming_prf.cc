@@ -38,26 +38,8 @@ class HkdfInputStream : public InputStream {
  public:
   HkdfInputStream(const EVP_MD *digest, const util::SecretData &secret,
                   absl::string_view salt, absl::string_view input)
-      : digest_(digest), input_(input) {
-    // PRK as by RFC 5869, Section 2.2
-    util::SecretData prk(EVP_MAX_MD_SIZE);
-    size_t prk_len;
-
-    if (1 != HKDF_extract(
-                 prk.data(), &prk_len, digest_, secret.data(), secret.size(),
-                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size())) {
-      stream_status_ =
-          util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
-    }
-    prk.resize(prk_len);
-    if (!hmac_ctx_) {
-      stream_status_ = util::Status(util::error::INTERNAL,
-                                    "BoringSSL's HMAC_CTX_new failed");
-    } else if (!HMAC_Init_ex(hmac_ctx_.get(), prk.data(), prk.size(), digest_,
-                             nullptr)) {
-      stream_status_ = util::Status(util::error::INTERNAL,
-                                    "BoringSSL's HMAC_Init_ex failed");
-    }
+      : input_(input) {
+    stream_status_ = Init(digest, secret, salt);
   }
 
   crypto::tink::util::StatusOr<int> Next(const void **data) override {
@@ -85,13 +67,46 @@ class HkdfInputStream : public InputStream {
 
   int64_t Position() const override {
     if (i_ == 0) return 0;
-    return (i_ - 1) * EVP_MD_size(digest_) + position_in_ti_;
+    return (i_ - 1) * ti_.size() + position_in_ti_;
   }
 
  private:
+  util::Status Init(const EVP_MD *digest, const util::SecretData &secret,
+                    absl::string_view salt) {
+    // PRK as by RFC 5869, Section 2.2
+    util::SecretData prk(EVP_MAX_MD_SIZE);
+    size_t prk_len;
+
+    if (!digest) {
+      return util::Status(util::error::INVALID_ARGUMENT, "Invalid digest");
+    }
+    const size_t digest_size = EVP_MD_size(digest);
+    if (digest_size == 0) {
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "Invalid digest size (0)");
+    }
+    ti_.resize(digest_size);
+    if (1 != HKDF_extract(
+                 prk.data(), &prk_len, digest, secret.data(), secret.size(),
+                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size())) {
+      return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
+    }
+    prk.resize(prk_len);
+    if (!hmac_ctx_) {
+      return util::Status(util::error::INTERNAL,
+                          "BoringSSL's HMAC_CTX_new failed");
+    }
+    if (!HMAC_Init_ex(hmac_ctx_.get(), prk.data(), prk.size(), digest,
+                      nullptr)) {
+      return util::Status(util::error::INTERNAL,
+                          "BoringSSL's HMAC_Init_ex failed");
+    }
+    return UpdateTi();
+  }
+
   int returnDataFromPosition(const void **data) {
     // There's still data in ti to return.
-    *data = &ti_[position_in_ti_];
+    *data = ti_.data() + position_in_ti_;
     int result = ti_.size() - position_in_ti_;
     position_in_ti_ = ti_.size();
     return result;
@@ -106,8 +121,7 @@ class HkdfInputStream : public InputStream {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Init_ex failed");
     }
-    if (!HMAC_Update(hmac_ctx_.get(),
-                     reinterpret_cast<const uint8_t *>(&ti_[0]), ti_.size())) {
+    if (i_ != 0 && !HMAC_Update(hmac_ctx_.get(), ti_.data(), ti_.size())) {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Update failed on ti_");
     }
@@ -122,7 +136,6 @@ class HkdfInputStream : public InputStream {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Update failed on i_");
     }
-    ti_.resize(EVP_MD_size(digest_));
     if (!HMAC_Final(hmac_ctx_.get(), ti_.data(), nullptr)) {
       return util::Status(util::error::INTERNAL,
                           "BoringSSL's HMAC_Final failed");
@@ -136,7 +149,6 @@ class HkdfInputStream : public InputStream {
   // problems and are permanent.
   util::Status stream_status_ = util::OkStatus();
 
-  const EVP_MD *digest_;
   bssl::UniquePtr<HMAC_CTX> hmac_ctx_{HMAC_CTX_new()};
 
   // Current value T(i).
