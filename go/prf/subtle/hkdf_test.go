@@ -285,4 +285,7 @@ func TestValidateHKDFPRFParams(t *testing.T) {
 	if err := ValidateHKDFPRFParams("md5", 32, []byte{}); err == nil {
 		t.Errorf("Weak hash function not detected for HKDF PRF params")
 	}
+	if err := ValidateHKDFPRFParams("SHA1", 32, []byte{}); err == nil {
+		t.Errorf("Weak hash function not detected for HKDF PRF params")
+	}
 }

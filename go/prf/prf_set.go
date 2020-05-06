@@ -77,6 +77,9 @@ func init() {
 	if err := registry.RegisterKeyManager(newHMACPRFKeyManager()); err != nil {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}
+	if err := registry.RegisterKeyManager(newHKDFPRFKeyManager()); err != nil {
+		panic(fmt.Sprintf("prf.init() failed: %v", err))
+	}
 	if err := registry.RegisterKeyManager(newAESCMACPRFKeyManager()); err != nil {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}

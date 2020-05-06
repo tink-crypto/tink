@@ -22,13 +22,13 @@ import (
 	"github.com/google/tink/go/keyset"
 )
 
-// New creates a prf.Set primitive from the given keyset handle.
-func New(h *keyset.Handle) (*Set, error) {
-	return NewWithKeyManager(h, nil /*keyManager*/)
+// NewPRFSet creates a prf.Set primitive from the given keyset handle.
+func NewPRFSet(h *keyset.Handle) (*Set, error) {
+	return NewPRFSetWithKeyManager(h, nil /*keyManager*/)
 }
 
-// NewWithKeyManager creates a prf.Set primitive from the given keyset handle and a custom key manager.
-func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (*Set, error) {
+// NewPRFSetWithKeyManager creates a prf.Set primitive from the given keyset handle and a custom key manager.
+func NewPRFSetWithKeyManager(h *keyset.Handle, km registry.KeyManager) (*Set, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
 		return nil, fmt.Errorf("prf_set_factory: cannot obtain primitive set: %s", err)

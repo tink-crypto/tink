@@ -40,6 +40,7 @@ import (
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
 	eciespb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"
 	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"
+	hkdfprfpb "github.com/google/tink/go/proto/hkdf_prf_go_proto"
 	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
 	hmacprfpb "github.com/google/tink/go/proto/hmac_prf_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -479,6 +480,35 @@ func NewHMACPRFKeyFormat(hashType commonpb.HashType) *hmacprfpb.HmacPrfKeyFormat
 	params := NewHMACPRFParams(hashType)
 	keySize := uint32(32)
 	return &hmacprfpb.HmacPrfKeyFormat{
+		Params:  params,
+		KeySize: keySize,
+	}
+}
+
+// NewHKDFPRFParams returns a new HKDFPRFParams.
+func NewHKDFPRFParams(hashType commonpb.HashType, salt []byte) *hkdfprfpb.HkdfPrfParams {
+	return &hkdfprfpb.HkdfPrfParams{
+		Hash: hashType,
+		Salt: salt,
+	}
+}
+
+// NewHKDFPRFKey creates a new HKDFPRFKey with the specified parameters.
+func NewHKDFPRFKey(hashType commonpb.HashType, salt []byte) *hkdfprfpb.HkdfPrfKey {
+	params := NewHKDFPRFParams(hashType, salt)
+	keyValue := random.GetRandomBytes(32)
+	return &hkdfprfpb.HkdfPrfKey{
+		Version:  HKDFPRFKeyVersion,
+		Params:   params,
+		KeyValue: keyValue,
+	}
+}
+
+// NewHKDFPRFKeyFormat creates a new HKDFPRFKeyFormat with the specified parameters.
+func NewHKDFPRFKeyFormat(hashType commonpb.HashType, salt []byte) *hkdfprfpb.HkdfPrfKeyFormat {
+	params := NewHKDFPRFParams(hashType, salt)
+	keySize := uint32(32)
+	return &hkdfprfpb.HkdfPrfKeyFormat{
 		Params:  params,
 		KeySize: keySize,
 	}

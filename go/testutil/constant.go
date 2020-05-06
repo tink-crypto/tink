@@ -79,6 +79,11 @@ const (
 	// AESCMACPRFTypeURL is the type URL of AES CMAC PRF keys.
 	AESCMACPRFTypeURL = "type.googleapis.com/google.crypto.tink.AesCmacPrfKey"
 
+	// HKDFPRFKeyVersion is the maxmimal version of HKDF PRF keys that Tink supports.
+	HKDFPRFKeyVersion = 0
+	// HKDFPRFTypeURL is the type URL of HKDF PRF keys.
+	HKDFPRFTypeURL = "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
+
 	// HMACPRFKeyVersion is the maxmimal version of HMAC PRF keys that Tink supports.
 	HMACPRFKeyVersion = 0
 	// HMACPRFTypeURL is the type URL of HMAC PRF keys.

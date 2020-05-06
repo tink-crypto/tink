@@ -56,6 +56,9 @@ func ValidateHKDFPRFParams(hash string, keySize uint32, salt []byte) error {
 	if subtle.GetHashFunc(hash) == nil {
 		return fmt.Errorf("invalid hash function")
 	}
+	if hash != "SHA256" && hash != "SHA512" {
+		return fmt.Errorf("Only SHA-256 and SHA-512 currently allowed for HKDF")
+	}
 	return nil
 }
 
