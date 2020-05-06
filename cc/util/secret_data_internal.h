@@ -64,6 +64,12 @@ struct SanitizingDeleter {
   }
 };
 
+inline void SafeZeroMemory(volatile char* ptr, std::size_t size) {
+  while (size--) {
+    *ptr++ = 0;
+  }
+}
+
 }  // namespace internal
 }  // namespace util
 }  // namespace tink

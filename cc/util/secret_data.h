@@ -107,6 +107,14 @@ inline SecretData SecretDataFromStringView(absl::string_view secret) {
   return {secret.begin(), secret.end()};
 }
 
+inline void SafeZeroMemory(volatile char* ptr, std::size_t size) {
+  internal::SafeZeroMemory(ptr, size);
+}
+
+inline void SafeZeroString(std::string* str) {
+  SafeZeroMemory(&(*str)[0], str->size());
+}
+
 }  // namespace util
 }  // namespace tink
 }  // namespace crypto

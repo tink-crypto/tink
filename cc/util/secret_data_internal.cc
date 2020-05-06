@@ -24,10 +24,7 @@ namespace internal {
 void TrackSensitiveMemory(void*, std::size_t) {}
 
 void UntrackAndSanitizeSensitiveMemory(void* ptr, std::size_t n) {
-  volatile char* s = static_cast<char*>(ptr);
-  while (n--) {
-    *s++ = 0;
-  }
+  SafeZeroMemory(static_cast<char*>(ptr), n);
 }
 
 }  // namespace internal
