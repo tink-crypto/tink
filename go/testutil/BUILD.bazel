@@ -50,6 +50,7 @@ go_test(
         "@wycheproof//testvectors:all",
     ],
     deps = [
+        "//subtle/random:go_default_library",
         "//testutil:go_default_library",
         "//tink:go_default_library",
     ],

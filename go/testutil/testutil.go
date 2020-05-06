@@ -19,6 +19,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"fmt"
+	"math"
+	"strconv"
+	"strings"
 
 	"golang.org/x/crypto/ed25519"
 	"github.com/golang/protobuf/proto"
@@ -596,6 +599,105 @@ func GenerateMutations(src []byte) (all [][]byte) {
 	copy(m, src)
 	all = append(all, m)
 	return
+}
+
+// ZTestUniformString uses a z test on the given byte string, expecting all
+// bits to be uniformly set with probability 1/2. Returns non ok status if the
+// z test fails by more than 10 standard deviations.
+//
+// With less statistics jargon: This counts the number of bits set and expects
+// the number to be roughly half of the length of the string. The law of large
+// numbers suggests that we can assume that the longer the string is, the more
+// accurate that estimate becomes for a random string. This test is useful to
+// detect things like strings that are entirely zero.
+//
+// Note: By itself, this is a very weak test for randomness.
+func ZTestUniformString(bytes []byte) error {
+	expected := float64(len(bytes)) * 8.0 / 2.0
+	stddev := math.Sqrt(float64(len(bytes)) * 8.0 / 4.0)
+	numSetBits := int64(0)
+	for _, b := range bytes {
+		// Counting the number of bits set in byte:
+		for b != 0 {
+			numSetBits++
+			b = b & (b - 1)
+		}
+	}
+	// Check that the number of bits is within 10 stddevs.
+	if math.Abs(float64(numSetBits)-expected) < 10.0*stddev {
+		return nil
+	}
+	return fmt.Errorf("Z test for uniformly distributed variable out of bounds; "+
+		"Actual number of set bits was %d expected was %0.00f, 10 * standard deviation is 10 * %0.00f = %0.00f",
+		numSetBits, expected, stddev, 10.0*stddev)
+}
+
+func rotate(bytes []byte) []byte {
+	result := make([]byte, len(bytes))
+	for i := 0; i < len(bytes); i++ {
+		prev := i
+		if i == 0 {
+			prev = len(bytes)
+		}
+		result[i] = (bytes[i] >> 1) |
+			(bytes[prev-1] << 7)
+	}
+	return result
+}
+
+// ZTestCrosscorrelationUniformStrings tests that the crosscorrelation of two
+// strings of equal length points to independent and uniformly distributed
+// strings. Returns non ok status if the z test fails by more than 10 standard
+// deviations.
+//
+// With less statistics jargon: This xors two strings and then performs the
+// ZTestUniformString on the result. If the two strings are independent and
+// uniformly distributed, the xor'ed string is as well. A cross correlation test
+// will find whether two strings overlap more or less than it would be expected.
+//
+// Note: Having a correlation of zero is only a necessary but not sufficient
+// condition for independence.
+func ZTestCrosscorrelationUniformStrings(bytes1,
+	bytes2 []byte) error {
+	if len(bytes1) != len(bytes2) {
+		return fmt.Errorf(
+			"Strings are not of equal length")
+	}
+	crossed := make([]byte, len(bytes1))
+	for i := 0; i < len(bytes1); i++ {
+		crossed[i] = bytes1[i] ^ bytes2[i]
+	}
+	return ZTestUniformString(crossed)
+}
+
+// ZTestAutocorrelationUniformString tests that the autocorrelation of a string
+// points to the bits being independent and uniformly distributed.
+// Rotates the string in a cyclic fashion. Returns non ok status if the z test
+// fails by more than 10 standard deviations.
+//
+// With less statistics jargon: This rotates the string bit by bit and performs
+// ZTestCrosscorrelationUniformStrings on each of the rotated strings and the
+// original. This will find self similarity of the input string, especially
+// periodic self similarity. For example, it is a decent test to find English
+// text (needs about 180 characters with the current settings).
+//
+// Note: Having a correlation of zero is only a necessary but not sufficient
+// condition for independence.
+func ZTestAutocorrelationUniformString(bytes []byte) error {
+	rotated := make([]byte, len(bytes))
+	copy(rotated, bytes)
+	violations := []string{}
+	for i := 1; i < len(bytes)*8; i++ {
+		rotated = rotate(rotated)
+		err := ZTestCrosscorrelationUniformStrings(bytes, rotated)
+		if err != nil {
+			violations = append(violations, strconv.Itoa(i))
+		}
+	}
+	if len(violations) == 0 {
+		return nil
+	}
+	return fmt.Errorf("Autocorrelation exceeded 10 standard deviation at %d indices: %s", len(violations), strings.Join(violations, ", "))
 }
 
 // eciesAEADHKDFPublicKey returns a EciesAeadHkdfPublicKey with specified parameters.

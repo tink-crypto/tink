@@ -49,6 +49,9 @@ func wrapPRFset(ps *primitiveset.PrimitiveSet) (*Set, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Could not get raw entries: %v", err)
 	}
+	if len(entries) == 0 {
+		return nil, fmt.Errorf("Did not find any raw entries")
+	}
 	if len(ps.Entries) != 1 {
 		return nil, fmt.Errorf("Only raw entries allowed for prf.Set: %v", err)
 	}
