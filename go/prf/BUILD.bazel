@@ -10,6 +10,7 @@ go_library(
         "aes_cmac_prf_key_manager.go",
         "hkdf_prf_key_manager.go",
         "hmac_prf_key_manager.go",
+        "prf_key_templates.go",
         "prf_set.go",
         "prf_set_factory.go",
     ],
@@ -36,6 +37,7 @@ go_test(
         "aes_cmac_prf_key_manager_test.go",
         "hkdf_prf_key_manager_test.go",
         "hmac_prf_key_manager_test.go",
+        "prf_key_templates_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
