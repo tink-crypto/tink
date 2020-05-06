@@ -127,7 +127,6 @@ py_test(
     deps = [
         ":aead",
         requirement("absl-py"),
-        "//tink:tink_config",
         "//tink:tink_python",
         "//tink/core",
         "//tink/proto:aes_gcm_py_pb2",

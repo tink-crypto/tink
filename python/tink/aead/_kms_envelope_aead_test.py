@@ -25,11 +25,10 @@ from tink.proto import aes_gcm_pb2
 import tink
 from tink import aead
 from tink import core
-from tink import tink_config
 
 
 def setUpModule():
-  tink_config.register()
+  aead.register()
 
 
 class KmsEnvelopeAeadTest(absltest.TestCase):
