@@ -37,7 +37,7 @@ Hybrid encryption  | yes      | yes     | yes      | yes    | yes
 
 JavaScript is currently under development.
 
-### Primitive implementations supported by languege
+### Primitive implementations supported by language
 
 #### Java
 
