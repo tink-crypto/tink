@@ -75,11 +75,12 @@ java_library(
     ) + [":version_java"],
     visibility = ["//visibility:public"],
     deps = full_protos + [
+        ":primitives",
         "//src/main/java/com/google/crypto/tink/annotations",
         "//src/main/java/com/google/crypto/tink/subtle",
-        ":primitives",
-        "@maven//:com_google_code_findbugs_jsr305",
         "@com_google_protobuf//:protobuf_java",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:org_json_json",
     ],
 )
@@ -107,11 +108,12 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = lite_protos + [
+        ":primitives",
         "//src/main/java/com/google/crypto/tink/annotations",
         "//src/main/java/com/google/crypto/tink/subtle",
-        ":primitives",
-        "@maven//:com_google_code_findbugs_jsr305",
         "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:org_json_json",
     ],
 )
