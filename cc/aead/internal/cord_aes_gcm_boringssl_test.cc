@@ -41,8 +41,9 @@ using ::testing::Eq;
 namespace {
 
 TEST(CordAesGcmBoringSslTest, EncryptDecryptCord) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto res = CordAesGcmBoringSsl::New(util::SecretDataFromStringView(key));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  auto res = CordAesGcmBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.ValueOrDie());
   const std::string message = "Some data to encrypt.";
@@ -61,8 +62,9 @@ TEST(CordAesGcmBoringSslTest, EncryptDecryptCord) {
 }
 
 TEST(CordAesGcmBoringSslTest, ChunkyCordEncrypt) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto res = CordAesGcmBoringSsl::New(util::SecretDataFromStringView(key));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  auto res = CordAesGcmBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.ValueOrDie());
   std::string message = "This is some long message which will be fragmented.";
@@ -82,8 +84,9 @@ TEST(CordAesGcmBoringSslTest, ChunkyCordEncrypt) {
 }
 
 TEST(CordAesGcmBoringSslTest, ChunkyCordDecrypt) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto res = CordAesGcmBoringSsl::New(util::SecretDataFromStringView(key));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  auto res = CordAesGcmBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.ValueOrDie());
   std::string message = "This is some long message which will be fragmented.";
@@ -104,8 +107,9 @@ TEST(CordAesGcmBoringSslTest, ChunkyCordDecrypt) {
 }
 
 TEST(CordAesGcmBoringSslTest, SameResultAsString) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto res = CordAesGcmBoringSsl::New(util::SecretDataFromStringView(key));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  auto res = CordAesGcmBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.ValueOrDie());
   const std::string message = "Some data to encrypt.";
@@ -134,10 +138,9 @@ TEST(CordAesGcmBoringSslTest, SameResultAsString) {
 }
 
 TEST(CordAesGcmBoringSslTest, ModifiedCord) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto cipher =
-      std::move(CordAesGcmBoringSsl::New(util::SecretDataFromStringView(key))
-                    .ValueOrDie());
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  auto cipher = std::move(CordAesGcmBoringSsl::New(key).ValueOrDie());
   absl::Cord message = absl::Cord("Some data to encrypt.");
   absl::Cord aad = absl::Cord("Some data to authenticate.");
   absl::Cord ct = cipher->Encrypt(message, aad).ValueOrDie();

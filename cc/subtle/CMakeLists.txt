@@ -34,6 +34,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::base
+    absl::core_headers
     absl::strings
   PUBLIC
 )
@@ -287,11 +288,11 @@ tink_cc_library(
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
     tink::core::aead
-    tink::util::errors
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     crypto
-    absl::strings
+    absl::core_headers
     absl::memory
 )
 

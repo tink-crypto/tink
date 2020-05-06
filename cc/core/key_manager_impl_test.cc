@@ -23,6 +23,7 @@
 #include "tink/subtle/random.h"
 #include "tink/util/input_stream_util.h"
 #include "tink/util/istream_input_stream.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -67,7 +68,8 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
     crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
         const AesGcmKey& key) const override {
       // Ignore the key and returned one with a fixed size for this test.
-      return {subtle::AesGcmBoringSsl::New(key.key_value())};
+      return {subtle::AesGcmBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()))};
     }
   };
 
@@ -435,7 +437,8 @@ class ExampleKeyTypeManagerWithoutFactory
     crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
         const AesGcmKey& key) const override {
       // Ignore the key and returned one with a fixed size for this test.
-      return {subtle::AesGcmBoringSsl::New(key.key_value())};
+      return {subtle::AesGcmBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()))};
     }
   };
 

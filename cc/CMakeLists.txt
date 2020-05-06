@@ -602,6 +602,7 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::util::istream_input_stream
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_keyset_handle
@@ -798,6 +799,7 @@ tink_cc_test(
     tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -816,6 +818,7 @@ tink_cc_test(
     tink::subtle::aes_gcm_boringssl
     tink::util::input_stream_util
     tink::util::istream_input_stream
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

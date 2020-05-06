@@ -18,12 +18,13 @@
 #define TINK_SUBTLE_AES_GCM_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
-#include "absl/strings/string_view.h"
-#include "tink/aead.h"
-#include "tink/util/status.h"
-#include "tink/util/statusor.h"
+#include "absl/base/macros.h"
 #include "openssl/aead.h"
+#include "tink/aead.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -31,8 +32,13 @@ namespace subtle {
 
 class AesGcmBoringSsl : public Aead {
  public:
+  ABSL_DEPRECATED("Use AesGcmBoringSsl::New(const util::SecretData&) instead.")
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
-      absl::string_view key_value);
+      absl::string_view key_value) {
+    return AesGcmBoringSsl::New(util::SecretDataFromStringView(key_value));
+  }
+  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
+      const util::SecretData& key);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
@@ -42,16 +48,14 @@ class AesGcmBoringSsl : public Aead {
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
 
-  virtual ~AesGcmBoringSsl() {}
-
  private:
-  static constexpr int IV_SIZE_IN_BYTES = 12;
-  static constexpr int TAG_SIZE_IN_BYTES = 16;
+  static constexpr int kIvSizeInBytes = 12;
+  static constexpr int kTagSizeInBytes = 16;
 
-  AesGcmBoringSsl() {}
-  crypto::tink::util::Status Init(absl::string_view key_value);
+  explicit AesGcmBoringSsl(bssl::UniquePtr<EVP_AEAD_CTX> ctx)
+      : ctx_(std::move(ctx)) {}
 
-  bssl::ScopedEVP_AEAD_CTX ctx_;
+  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
 };
 
 }  // namespace subtle
