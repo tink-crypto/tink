@@ -187,11 +187,7 @@ public final class AndroidKeysetManager {
   }
 
   /** @return a {@link KeysetHandle} of the managed keyset */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     return keysetManager.getKeysetHandle();
   }
 
@@ -202,12 +198,8 @@ public final class AndroidKeysetManager {
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager rotate(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.rotate(keyTemplate);
     write(keysetManager);
     return this;
@@ -219,12 +211,9 @@ public final class AndroidKeysetManager {
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
    */
-  @SuppressWarnings("GuardedBy")
   @GuardedBy("this")
   public synchronized AndroidKeysetManager add(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.add(keyTemplate);
     write(keysetManager);
     return this;
@@ -235,11 +224,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or not enabled
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager setPrimary(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.setPrimary(keyId);
     write(keysetManager);
     return this;
@@ -251,7 +236,6 @@ public final class AndroidKeysetManager {
    * @throws GeneralSecurityException if the key is not found or not enabled
    * @deprecated use {@link setPrimary}
    */
-  @GuardedBy("this")
   @Deprecated
   public synchronized AndroidKeysetManager promote(int keyId) throws GeneralSecurityException {
     return setPrimary(keyId);
@@ -262,11 +246,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager enable(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.enable(keyId);
     write(keysetManager);
     return this;
@@ -277,11 +257,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager disable(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.disable(keyId);
     write(keysetManager);
     return this;
@@ -292,11 +268,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager delete(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.delete(keyId);
     write(keysetManager);
     return this;
@@ -307,11 +279,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager destroy(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.destroy(keyId);
     write(keysetManager);
     return this;
@@ -327,9 +295,6 @@ public final class AndroidKeysetManager {
 
     // Not found.
     if (keyTemplate != null) {
-      @SuppressWarnings("GuardedBy")
-      // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()',
-      // which is not currently held
       KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(keyTemplate);
       write(manager);
       return manager;
@@ -363,16 +328,11 @@ public final class AndroidKeysetManager {
     return KeysetManager.withKeysetHandle(handle);
   }
 
-  @SuppressWarnings("GuardedBy")
   private void write(KeysetManager manager) throws GeneralSecurityException {
     try {
       if (shouldUseKeystore()) {
-        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
-        // held
         manager.getKeysetHandle().write(writer, masterKey);
       } else {
-        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
-        // held
         CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
       }
     } catch (IOException e) {
