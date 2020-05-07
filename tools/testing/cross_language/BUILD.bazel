@@ -90,7 +90,7 @@ sh_test(
 )
 
 sh_test(
-    name = "deterministic_aead_test",
+    name = "deterministic_aead_test_sh",
     size = "medium",
     srcs = [
         "deterministic_aead_test.sh",
@@ -102,6 +102,20 @@ sh_test(
         "//testing/go:deterministic_aead_cli_go",
         "//testing/python:deterministic_aead_cli_python",
         "//tinkey",
+    ],
+)
+
+py_test(
+    name = "deterministic_aead_test",
+    srcs = ["deterministic_aead_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "//testing/cross_language/util:cli_daead",
+        "//testing/cross_language/util:cli_tinkey",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/daead",
     ],
 )
 

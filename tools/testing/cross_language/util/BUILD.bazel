@@ -2,6 +2,7 @@ load("@rules_python//python:defs.bzl", "py_library")
 load("@pip_deps//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//visibility:public"])
+
 py_library(
     name = "cli_aead",
     testonly = 1,
@@ -30,6 +31,68 @@ py_test(
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
+    ],
+)
+
+py_library(
+    name = "cli_daead",
+    testonly = 1,
+    srcs = [
+        "cli_daead.py",
+    ],
+    data = [
+        "//testing:deterministic_aead_cli_java",
+        "//testing/cc:deterministic_aead_cli_cc",
+        "//testing/go:deterministic_aead_cli_go",
+        "//testing/python:deterministic_aead_cli_python",
+    ],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/daead",
+    ],
+)
+
+py_test(
+    name = "cli_daead_test",
+    srcs = ["cli_daead_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":cli_daead",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/daead",
+    ],
+)
+
+py_library(
+    name = "cli_mac",
+    testonly = 1,
+    srcs = [
+        "cli_mac.py",
+    ],
+    data = [
+        "//testing:mac_cli_java",
+        "//testing/cc:mac_cli_cc",
+        "//testing/go:mac_cli_go",
+        "//testing/python:mac_cli_python",
+    ],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/mac",
+    ],
+)
+
+py_test(
+    name = "cli_mac_test",
+    srcs = ["cli_mac_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":cli_mac",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/mac",
     ],
 )
 
