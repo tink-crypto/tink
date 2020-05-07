@@ -1,0 +1,60 @@
+load("@rules_python//python:defs.bzl", "py_library")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+py_library(
+    name = "cli_aead",
+    testonly = 1,
+    srcs = [
+        "cli_aead.py",
+    ],
+    data = [
+        "//testing:aead_cli_java",
+        "//testing/cc:aead_cli_cc",
+        "//testing/go:aead_cli_go",
+        "//testing/python:aead_cli_python",
+    ],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_test(
+    name = "cli_aead_test",
+    srcs = ["cli_aead_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":cli_aead",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_library(
+    name = "cli_tinkey",
+    testonly = 1,
+    srcs = [
+        "cli_tinkey.py",
+    ],
+    data = [
+        "//tinkey",
+    ],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+    ],
+)
+
+py_test(
+    name = "cli_tinkey_test",
+    srcs = ["cli_tinkey_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":cli_aead",
+        ":cli_tinkey",
+        requirement("absl-py"),
+    ],
+)
