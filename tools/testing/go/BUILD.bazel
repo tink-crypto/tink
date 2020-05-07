@@ -14,11 +14,11 @@ go_binary(
     ],
     deps = [
         "@tink_go//aead:go_default_library",
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//testkeyset:go_default_library",
         "@tink_go//core/registry:go_default_library",
         "@tink_go//integration/awskms:go_default_library",
         "@tink_go//integration/gcpkms:go_default_library",
+        "@tink_go//keyset:go_default_library",
+        "@tink_go//testkeyset:go_default_library",
     ],
 )
 
@@ -28,9 +28,9 @@ go_binary(
     srcs = ["streaming_aead_cli.go"],
     out = "streaming_aead_cli_go",
     deps = [
-        "@tink_go//streamingaead:go_default_library",
         "@tink_go//core/registry:go_default_library",
         "@tink_go//keyset:go_default_library",
+        "@tink_go//streamingaead:go_default_library",
         "@tink_go//testkeyset:go_default_library",
     ],
 )
@@ -43,6 +43,18 @@ go_binary(
     deps = [
         "@tink_go//keyset:go_default_library",
         "@tink_go//mac:go_default_library",
+        "@tink_go//testkeyset:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "prf_set_cli_go",
+    testonly = 1,  # keep
+    srcs = ["prf_set_cli.go"],
+    out = "prf_set_cli_go",
+    deps = [
+        "@tink_go//keyset:go_default_library",
+        "@tink_go//prf:go_default_library",
         "@tink_go//testkeyset:go_default_library",
     ],
 )
@@ -77,8 +89,8 @@ go_binary(
     srcs = ["hybrid_encrypt_cli.go"],
     out = "hybrid_encrypt_cli_go",
     deps = [
-        "@tink_go//keyset:go_default_library",
         "@tink_go//hybrid:go_default_library",
+        "@tink_go//keyset:go_default_library",
         "@tink_go//testkeyset:go_default_library",
     ],
 )
@@ -89,8 +101,8 @@ go_binary(
     srcs = ["hybrid_decrypt_cli.go"],
     out = "hybrid_decrypt_cli_go",
     deps = [
-        "@tink_go//keyset:go_default_library",
         "@tink_go//hybrid:go_default_library",
+        "@tink_go//keyset:go_default_library",
         "@tink_go//testkeyset:go_default_library",
     ],
 )
@@ -115,14 +127,14 @@ go_binary(
     data = [
         "@tink_base//testdata:credentials",
     ],
-    deps = [
-         "@tink_go//aead:go_default_library",
-         "@tink_go//core/registry:go_default_library",
-         "@tink_go//insecurecleartextkeyset:go_default_library",
-         "@tink_go//integration/awskms:go_default_library",
-         "@tink_go//integration/gcpkms:go_default_library",
-         "@tink_go//keyset:go_default_library",
-         "@tink_go//proto:tink_go_proto",
-    ],
     tags = ["no_rbe"],
+    deps = [
+        "@tink_go//aead:go_default_library",
+        "@tink_go//core/registry:go_default_library",
+        "@tink_go//insecurecleartextkeyset:go_default_library",
+        "@tink_go//integration/awskms:go_default_library",
+        "@tink_go//integration/gcpkms:go_default_library",
+        "@tink_go//keyset:go_default_library",
+        "@tink_go//proto:tink_go_proto",
+    ],
 )

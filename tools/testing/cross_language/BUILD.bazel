@@ -159,6 +159,7 @@ sh_test(
     data = [
         ":test_lib",
         "//testing/cc:prf_set_cli_cc",
+        "//testing/go:prf_set_cli_go",
         "//tinkey",
     ],
 )

@@ -15,6 +15,7 @@ go_library(
         "prf_set_factory.go",
     ],
     importpath = "github.com/google/tink/go/prf",
+    visibility = ["//visibility:public"],
     deps = [
         "//core/primitiveset:go_default_library",
         "//core/registry:go_default_library",

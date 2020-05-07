@@ -37,7 +37,8 @@ using crypto::tink::PrfSet;
 //   Format of the output set: <prf_id>:hexencode(<prf_output>)
 //   where <prf_id> is the uint32 decimal representation of the ID of the PRF.
 //   If the requested output is too long the result should be instead
-//   <prd_id>:--.
+//   <prf_id>:--.
+//   The file is sorted by <prf_id> in the shell script.
 int main(int argc, char** argv) {
   if (argc != 5) {
     std::clog << "Usage: " << argv[0]
