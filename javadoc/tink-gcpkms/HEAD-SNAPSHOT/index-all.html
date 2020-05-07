@@ -199,6 +199,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Config.html#Config--">Config()</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink">Config</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.html#create-java.lang.String-byte:A-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">create(String, byte[], KeyTemplate.OutputPrefixType)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html#createKey-KeyFormatProtoT-">createKey(KeyFormatProtoT)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a></dt>
 <dd>
 <div class="block">Creates a new key from a given format.</div>
@@ -438,8 +440,6 @@
 <dd>
 <div class="block">Returns the size of an element of the field over which the curve is defined.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.html#fromProto-com.google.crypto.tink.proto.KeyTemplate-">fromProto(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></dt>
-<dd>&nbsp;</dd>
 </dl>
 <a name="I:G">
 <!--   -->
@@ -621,6 +621,8 @@
 <div class="block">Generates the prefix of all cryptographic outputs (ciphertexts, signatures, MACs, ...) produced
  by the specified <code>key</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.html#getOutputPrefixType--">getOutputPrefixType()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.Entry.html#getOutputPrefixType--">getOutputPrefixType()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getPrimary--">getPrimary()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
@@ -775,7 +777,11 @@
 <dd>
 <div class="block">Returns a <code>KeyTypeEntry</code> for Tink key types with the specified properties.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.html#getTypeUrl--">getTypeUrl()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#getUntypedKeyManager-java.lang.String-">getUntypedKeyManager(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.html#getValue--">getValue()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#getVersion--">getVersion()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -919,6 +925,10 @@
 <dt><a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyTemplate</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">A KeyTemplate specifies how to generate keys of a particular type.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink"><span class="typeNameLink">KeyTemplate.OutputPrefixType</span></a> - Enum in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
+<dd>
+<div class="block">Tink produces and accepts ciphertexts or signatures that consist of a prefix and a payload.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PemKeyType.html#keyType">keyType</a></span> - Variable in enum com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PemKeyType.html" title="enum in com.google.crypto.tink.subtle">PemKeyType</a></dt>
 <dd>&nbsp;</dd>
@@ -1450,6 +1460,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Validators.html#Validators--">Validators()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.OutputPrefixType.html#valueOf-java.lang.String-">valueOf(String)</a></span> - Static method in enum com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this type with the specified name.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.CurveType.html#valueOf-java.lang.String-">valueOf(String)</a></span> - Static method in enum com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
@@ -1469,6 +1483,11 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PemKeyType.html#valueOf-java.lang.String-">valueOf(String)</a></span> - Static method in enum com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PemKeyType.html" title="enum in com.google.crypto.tink.subtle">PemKeyType</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.OutputPrefixType.html#values--">values()</a></span> - Static method in enum com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum type, in
+the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.CurveType.html#values--">values()</a></span> - Static method in enum com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a></dt>
 <dd>
