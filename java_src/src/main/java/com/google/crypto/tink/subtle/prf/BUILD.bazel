@@ -23,6 +23,16 @@ java_library(
 )
 
 java_library(
+    name = "prf_impl",
+    srcs = ["PrfImpl.java"],
+    deps = [
+        ":streaming_prf",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
     name = "hkdf_streaming_prf",
     srcs = ["HkdfStreamingPrf.java"],
     javacopts = JAVACOPTS_OSS,

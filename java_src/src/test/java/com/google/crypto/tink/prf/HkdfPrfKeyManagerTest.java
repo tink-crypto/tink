@@ -274,4 +274,18 @@ public class HkdfPrfKeyManagerTest {
 
     assertThat(directOutput).isEqualTo(managerOutput);
   }
+
+  /** Smoke test getPrimitive for PrfSet via the HkdfPrfKeymanager. */
+  @Test
+  public void createPrfSetPrimitive_works() throws Exception {
+    HkdfPrfKey key =
+        HkdfPrfKey.newBuilder()
+            .setKeyValue(ByteString.copyFromUtf8("super secret key value"))
+            .setParams(
+                HkdfPrfParams.newBuilder()
+                    .setSalt(ByteString.copyFromUtf8("some salt"))
+                    .setHash(HashType.SHA256))
+            .build();
+    manager.getPrimitive(key, PrfSet.class);
+  }
 }
