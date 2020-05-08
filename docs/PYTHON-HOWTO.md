@@ -156,14 +156,105 @@ Data)](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive to
 encrypt or decrypt data:
 
 ```python
-# 1. Get a handle to the key material.
-keyset_handle = ...
+  import tink
+  from tink import aead
 
-# 2. Get the primitive.
-aead_primitive = keyset_handle.primitive(aead.Aead)
+  # Register all AEAD primitives
+  aead.register()
 
-# 3. Use the primitive.
-ciphertext = aead_primitive.encrypt(plaintext, associated data)
+  # 1. Get a handle to the key material.
+  keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES256_GCM)
+
+  # 2. Get the primitive.
+  aead_primitive = keyset_handle.primitive(aead.Aead)
+
+  # 3. Use the primitive.
+  ciphertext = aead_primitive.encrypt(plaintext, associated data)
+```
+
+### Deterministic symmetric key encryption
+
+You can obtain and use a
+[DeterministicAEAD (Deterministic Authenticated Encryption with Associated Data](PRIMITIVES.md#deterministic-authenticated-encryption-with-associated-data)
+primitive to encrypt or decrypt data:
+
+```python
+  import tink
+  from tink import daead
+
+  # Register all deterministic AEAD primitives
+  daead.register()
+
+  # 1. Get a handle to the key material.
+  keyset_handle = tink.new_keyset_handle(daead.deterministic_aead_key_templates.AES256_SIV)
+
+  # 2. Get the primitive.
+  daead_primitive = keyset_handle.primitive(daead.DeterministicAead)
+
+  # 3. Use the primitive.
+  ciphertext = daead_primitive.encrypt_deterministically(plaintext, associated data)
+```
+
+### Message Authentication Code
+
+You can compute or verify a
+[MAC (Message Authentication Code)](PRIMITIVES.md#message-authentication-code):
+
+```python
+  import tink
+  from tink import mac
+
+  # Register all MAC primitives
+  mac.register()
+
+  # 1. Get a handle to the key material.
+  keyset_handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+
+  # 2. Get the primitive.
+  mac = keyset_handle.primitive(mac.Mac)
+
+  # 3. Use the primitive to compute a tag,
+  tag = mac.compute_mac(data)
+
+  # ... or to verify a tag.
+  mac.verify_mac(tag, data)
+```
+
+### Hybrid Encryption
+
+To encrypt or decrypt using
+[a combination of public key encryption and symmetric key encryption](PRIMITIVES.md#hybrid-encryption)
+one can use the following:
+
+```python
+  import tink
+  from tink import hybrid
+
+  # Register all Hybrid primitives
+  hybrid.register()
+
+  # 1. Generate the private key material.
+  private_keyset_handle = tink.new_keyset_handle(hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+
+  # Obtain the public key material.
+  public_keyset_handle = private_keyset_handle.public_keyset_handle()
+
+  # Encryption
+
+  # 2. Get the primitive.
+  hybrid_encrypt = public_keyset_handle.primitive(hybrid.HybridEncrypt)
+
+  # 3. Use the primitive.
+  ciphertext = hybrid_encrypt.encrypt(plaintext, context)
+
+  # Decryption
+
+  # 2. Get the primitive.
+  hybrid_decrypt = private_keyset_handle.primitive(hybrid.HybridDecrypt)
+
+  # 3. Use the primitive.
+  plaintext = hybrid_decrypt.decrypt(ciphertext, context)
+
 ```
 
 ### Envelope encryption
