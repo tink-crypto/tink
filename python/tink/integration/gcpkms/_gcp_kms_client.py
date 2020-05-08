@@ -24,7 +24,7 @@ from tink import aead
 from tink import core
 from tink.cc.pybind import tink_bindings
 
-GCP_KEYURI_PREFIX = "gcp-kms://"
+GCP_KEYURI_PREFIX = 'gcp-kms://'
 
 
 class GcpKmsClient(object):
@@ -49,9 +49,9 @@ class GcpKmsClient(object):
     """
 
     if not key_uri:
-      self.key_uri = GCP_KEYURI_PREFIX
+      self._key_uri = ''
     elif key_uri.startswith(GCP_KEYURI_PREFIX):
-      self.key_uri = key_uri
+      self._key_uri = key_uri
     else:
       raise core.TinkError
 
@@ -81,3 +81,8 @@ class GcpKmsClient(object):
     """
 
     return aead.AeadCcToPyWrapper(self.cc_client.get_aead(key_uri))
+
+  @classmethod
+  def register_client(cls, key_uri, credentials_path) -> None:
+    """Registers the KMS client internally."""
+    tink_bindings.GcpKmsClient.register_client(key_uri, credentials_path)

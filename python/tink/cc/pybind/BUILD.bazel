@@ -279,6 +279,7 @@ tink_pybind_library(
     srcs = ["cc_gcp_kms_client.cc"],
     hdrs = ["cc_gcp_kms_client.h"],
     deps = [
+        "@tink_cc//:kms_clients",
         "//tink/cc:output_stream_adapter",
         "//tink/cc/pybind:status_casters",
         "@pybind11",
