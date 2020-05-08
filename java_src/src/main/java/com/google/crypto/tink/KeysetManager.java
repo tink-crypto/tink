@@ -18,7 +18,6 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
@@ -60,8 +59,12 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
+   * @deprecated Please use {@link #add}. This method adds a new key and immediately promotes it to
+   *     primary. However, when you do keyset rotation, you almost never want to make the new key
+   *     primary, because old binaries don't know the new key yet.
    */
-  public synchronized KeysetManager rotate(KeyTemplate keyTemplate)
+  @Deprecated
+  public synchronized KeysetManager rotate(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     addNewKey(keyTemplate, true);
     return this;
@@ -72,17 +75,38 @@ public final class KeysetManager {
    *
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
+   * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
+   *     Please use the add method that takes a {@link KeyTemplate} POJO.
    */
-  public synchronized KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
+  @Deprecated
+  public synchronized KeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
     addNewKey(keyTemplate, false);
     return this;
   }
 
   /**
-   * Generates a fresh key using {@code keyTemplate} and returns the {@code keyId} of it. In case
-   * {@isPrimary} is true the generated key will be the new primary.
+   * Generates and adds a fresh key generated using {@code keyTemplate}.
+   *
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
+   *     keyTemplate}
    */
-  public synchronized int addNewKey(KeyTemplate keyTemplate, boolean asPrimary)
+  public synchronized KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
+    addNewKey(keyTemplate.getProto(), false);
+    return this;
+  }
+
+  /**
+   * Generates a fresh key using {@code keyTemplate} and returns the {@code keyId} of it. In case
+   * {@code asPrimary} is true the generated key will be the new primary.
+   *
+   * @deprecated Please use {@link #add}. This method adds a new key and when {@code asPrimary} is
+   *     true immediately promotes it to primary. However, when you do keyset rotation, you almost
+   *     never want to make the new key primary, because old binaries don't know the new key yet.
+   */
+  @Deprecated
+  public synchronized int addNewKey(
+      com.google.crypto.tink.proto.KeyTemplate keyTemplate, boolean asPrimary)
       throws GeneralSecurityException {
     Keyset.Key key = newKey(keyTemplate);
     keysetBuilder.addKey(key);
@@ -216,7 +240,8 @@ public final class KeysetManager {
     throw new GeneralSecurityException("key not found: " + keyId);
   }
 
-  private synchronized Keyset.Key newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
+  private synchronized Keyset.Key newKey(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
     KeyData keyData = Registry.newKeyData(keyTemplate);
     int keyId = newKeyId();
     OutputPrefixType outputPrefixType = keyTemplate.getOutputPrefixType();

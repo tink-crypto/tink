@@ -20,13 +20,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.proto.AesGcmKey;
+import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -472,8 +476,7 @@ public class KeysetManagerTest {
   @Test
   public void testRotate_shouldAddNewKeyAndSetPrimaryKeyId() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    // is not currently held
+    com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     Keyset keyset = KeysetManager.withEmptyKeyset().rotate(template).getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);
@@ -483,7 +486,8 @@ public class KeysetManagerTest {
 
   @Test
   public void testRotate_bogusKeyTemplate_shouldThrowException() throws Exception {
-    KeyTemplate bogus = TestUtil.createKeyTemplateWithNonExistingTypeUrl();
+    com.google.crypto.tink.proto.KeyTemplate bogus =
+        TestUtil.createKeyTemplateWithNonExistingTypeUrl();
 
     try {
       KeysetManager.withEmptyKeyset().rotate(bogus);
@@ -495,7 +499,6 @@ public class KeysetManagerTest {
 
   @Test
   public void testRotate_existingKeyset_shouldAddNewKeyAndSetPrimaryKeyId() throws Exception {
-    // is not currently held
     KeysetHandle existing =
         KeysetManager.withEmptyKeyset()
             .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
@@ -514,9 +517,30 @@ public class KeysetManagerTest {
 
   @Test
   public void testAdd_shouldAddNewKey() throws Exception {
+    KeyTemplate kt = AesGcmKeyManager.aes128GcmTemplate();
+    Keyset keyset = KeysetManager.withEmptyKeyset().add(kt).getKeysetHandle().getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    // No primary key because add doesn't automatically promote the new key to primary.
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+
+    Keyset.Key key = keyset.getKey(0);
+    assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key.hasKeyData()).isTrue();
+    assertThat(key.getKeyData().getTypeUrl()).isEqualTo(kt.getTypeUrl());
+
+    AesGcmKeyFormat aesGcmKeyFormat =
+        AesGcmKeyFormat.parseFrom(kt.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey =
+        AesGcmKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey.getKeyValue().size()).isEqualTo(aesGcmKeyFormat.getKeySize());
+  }
+
+  @Test
+  public void testAdd_shouldAddNewKey_proto() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    // is not currently held
+    com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     Keyset keyset = KeysetManager.withEmptyKeyset().add(template).getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);
@@ -526,7 +550,21 @@ public class KeysetManagerTest {
 
   @Test
   public void testAdd_bogusKeyTemplate_shouldThrowException() throws Exception {
-    KeyTemplate bogus = TestUtil.createKeyTemplateWithNonExistingTypeUrl();
+    KeyTemplate bogus =
+        KeyTemplate.create("does not exist", new byte[0], KeyTemplate.OutputPrefixType.TINK);
+
+    try {
+      KeysetManager.withEmptyKeyset().add(bogus);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      TestUtil.assertExceptionContains(e, "No key manager found for key type");
+    }
+  }
+
+  @Test
+  public void testAdd_bogusKeyTemplate_shouldThrowException_proto() throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate bogus =
+        TestUtil.createKeyTemplateWithNonExistingTypeUrl();
 
     try {
       KeysetManager.withEmptyKeyset().add(bogus);
@@ -538,7 +576,42 @@ public class KeysetManagerTest {
 
   @Test
   public void testAdd_existingKeySet_shouldAddNewKey() throws Exception {
-    // is not currently held
+    KeyTemplate kt1 = AesGcmKeyManager.aes128GcmTemplate();
+    KeysetHandle existing = KeysetManager.withEmptyKeyset().add(kt1).getKeysetHandle();
+    KeyTemplate kt2 = AesGcmKeyManager.aes256GcmTemplate();
+    Keyset keyset = KeysetManager.withKeysetHandle(existing).add(kt2).getKeysetHandle().getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    // None of the keys are primary.
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+
+    Keyset.Key key1 = keyset.getKey(0);
+    assertThat(key1.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key1.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key1.hasKeyData()).isTrue();
+    assertThat(key1.getKeyData().getTypeUrl()).isEqualTo(kt1.getTypeUrl());
+
+    AesGcmKeyFormat aesGcmKeyFormat1 =
+        AesGcmKeyFormat.parseFrom(kt1.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey1 =
+        AesGcmKey.parseFrom(key1.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey1.getKeyValue().size()).isEqualTo(aesGcmKeyFormat1.getKeySize());
+
+    Keyset.Key key2 = keyset.getKey(1);
+    assertThat(key2.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key2.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key2.hasKeyData()).isTrue();
+    assertThat(key2.getKeyData().getTypeUrl()).isEqualTo(kt2.getTypeUrl());
+
+    AesGcmKeyFormat aesGcmKeyFormat2 =
+        AesGcmKeyFormat.parseFrom(kt2.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey2 =
+        AesGcmKey.parseFrom(key2.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey2.getKeyValue().size()).isEqualTo(aesGcmKeyFormat2.getKeySize());
+  }
+
+  @Test
+  public void testAdd_existingKeySet_shouldAddNewKey_proto() throws Exception {
     KeysetHandle existing =
         KeysetManager.withEmptyKeyset()
             .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
@@ -600,7 +673,7 @@ public class KeysetManagerTest {
 
   private void manipulateKeyset(KeysetManager manager) {
     try {
-      KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+      com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
       manager.rotate(template).add(template).rotate(template).add(template);
     } catch (GeneralSecurityException e) {
       fail("should not throw exception: " + e);
