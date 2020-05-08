@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9};
-var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":41};
+var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -107,8 +107,13 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <hr>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use the key template methods in the key managers, e.g.,
+     HmacKeyManager.hmacSha256HalfDigestTemplate().</span></div>
+</div>
 <br>
-<pre>public final class <span class="typeNameLabel">MacKeyTemplates</span>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public final class <span class="typeNameLabel">MacKeyTemplates</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Pre-generated <code>KeyTemplate</code> for <a href="../../../../../com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><code>Mac</code></a>.
 
@@ -146,6 +151,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#AES_CMAC">AES_CMAC</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>com.google.crypto.tink.proto.CmacKey</code> with the following parameters:
 
  
@@ -158,6 +164,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_128BITTAG">HMAC_SHA256_128BITTAG</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following parameters:
 
  
@@ -171,6 +178,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_256BITTAG">HMAC_SHA256_256BITTAG</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following parameters:
 
  
@@ -184,6 +192,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA512_256BITTAG">HMAC_SHA512_256BITTAG</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following parameters:
 
  
@@ -197,6 +206,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA512_512BITTAG">HMAC_SHA512_512BITTAG</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following parameters:
 
  
@@ -222,7 +232,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#MacKeyTemplates--">MacKeyTemplates</a></span>()</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#MacKeyTemplates--">MacKeyTemplates</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -234,7 +246,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -243,7 +255,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#createHmacKeyTemplate-int-int-com.google.crypto.tink.proto.HashType-">createHmacKeyTemplate</a></span>(int&nbsp;keySize,
                      int&nbsp;tagSize,
-                     com.google.crypto.tink.proto.HashType&nbsp;hashType)</code>&nbsp;</td>
+                     com.google.crypto.tink.proto.HashType&nbsp;hashType)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -274,6 +288,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>HMAC_SHA256_128BITTAG</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate HMAC_SHA256_128BITTAG</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following parameters:
 
  <ul>
@@ -291,6 +306,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>HMAC_SHA256_256BITTAG</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate HMAC_SHA256_256BITTAG</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following parameters:
 
  <ul>
@@ -308,6 +324,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>HMAC_SHA512_256BITTAG</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate HMAC_SHA512_256BITTAG</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following parameters:
 
  <ul>
@@ -325,6 +342,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>HMAC_SHA512_512BITTAG</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate HMAC_SHA512_512BITTAG</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following parameters:
 
  <ul>
@@ -342,6 +360,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES_CMAC</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES_CMAC</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>com.google.crypto.tink.proto.CmacKey</code> with the following parameters:
 
  <ul>
@@ -366,6 +385,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>MacKeyTemplates</h4>
 <pre>public&nbsp;MacKeyTemplates()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 </li>
@@ -385,6 +405,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <pre>public static&nbsp;com.google.crypto.tink.proto.KeyTemplate&nbsp;createHmacKeyTemplate(int&nbsp;keySize,
                                                                              int&nbsp;tagSize,
                                                                              com.google.crypto.tink.proto.HashType&nbsp;hashType)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <code>KeyTemplate</code> containing a <code>HmacKeyFormat</code> with some specified

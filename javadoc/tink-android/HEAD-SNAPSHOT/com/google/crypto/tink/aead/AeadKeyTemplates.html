@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9};
-var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":41,"i1":41,"i2":41,"i3":41,"i4":41};
+var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -107,8 +107,13 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <hr>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use the key template methods in the key managers, e.g.,
+     AesGcmKeyManager.aes128GcmTemplate().</span></div>
+</div>
 <br>
-<pre>public final class <span class="typeNameLabel">AeadKeyTemplates</span>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public final class <span class="typeNameLabel">AeadKeyTemplates</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Pre-generated <code>KeyTemplate</code> for <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> keys.
 
@@ -146,6 +151,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_CTR_HMAC_SHA256">AES128_CTR_HMAC_SHA256</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the following parameters:
 
  
@@ -160,6 +166,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_EAX">AES128_EAX</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>com.google.crypto.tink.proto.AesEaxKey</code> with the following parameters:
 
  
@@ -171,6 +178,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_GCM">AES128_GCM</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following parameters:
 
  
@@ -181,6 +189,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_CTR_HMAC_SHA256">AES256_CTR_HMAC_SHA256</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the following parameters:
 
  
@@ -195,6 +204,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_EAX">AES256_EAX</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following parameters:
 
  
@@ -206,6 +216,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_GCM">AES256_GCM</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following parameters:
 
  
@@ -216,12 +227,14 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#CHACHA20_POLY1305">CHACHA20_POLY1305</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>ChaCha20Poly1305Key</code>.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#XCHACHA20_POLY1305">XCHACHA20_POLY1305</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>XChaCha20Poly1305Key</code>.</div>
 </td>
 </tr>
@@ -240,7 +253,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AeadKeyTemplates--">AeadKeyTemplates</a></span>()</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AeadKeyTemplates--">AeadKeyTemplates</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -252,7 +267,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -263,25 +278,35 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                int&nbsp;ivSize,
                                int&nbsp;hmacKeySize,
                                int&nbsp;tagSize,
-                               com.google.crypto.tink.proto.HashType&nbsp;hashType)</code>&nbsp;</td>
+                               com.google.crypto.tink.proto.HashType&nbsp;hashType)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#createAesEaxKeyTemplate-int-int-">createAesEaxKeyTemplate</a></span>(int&nbsp;keySize,
-                       int&nbsp;ivSize)</code>&nbsp;</td>
+                       int&nbsp;ivSize)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#createAesGcmKeyTemplate-int-">createAesGcmKeyTemplate</a></span>(int&nbsp;keySize)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#createAesGcmKeyTemplate-int-">createAesGcmKeyTemplate</a></span>(int&nbsp;keySize)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#createKmsAeadKeyTemplate-java.lang.String-">createKmsAeadKeyTemplate</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#createKmsAeadKeyTemplate-java.lang.String-">createKmsAeadKeyTemplate</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#createKmsEnvelopeAeadKeyTemplate-java.lang.String-com.google.crypto.tink.proto.KeyTemplate-">createKmsEnvelopeAeadKeyTemplate</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;kekUri,
-                                com.google.crypto.tink.proto.KeyTemplate&nbsp;dekTemplate)</code>&nbsp;</td>
+                                com.google.crypto.tink.proto.KeyTemplate&nbsp;dekTemplate)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -312,6 +337,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES128_GCM</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES128_GCM</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following parameters:
 
  <ul>
@@ -330,6 +356,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES256_GCM</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES256_GCM</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following parameters:
 
  <ul>
@@ -348,6 +375,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES128_EAX</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES128_EAX</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>com.google.crypto.tink.proto.AesEaxKey</code> with the following parameters:
 
  <ul>
@@ -363,6 +391,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES256_EAX</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES256_EAX</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following parameters:
 
  <ul>
@@ -378,6 +407,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES128_CTR_HMAC_SHA256</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES128_CTR_HMAC_SHA256</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the following parameters:
 
  <ul>
@@ -396,6 +426,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES256_CTR_HMAC_SHA256</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES256_CTR_HMAC_SHA256</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the following parameters:
 
  <ul>
@@ -414,6 +445,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>CHACHA20_POLY1305</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate CHACHA20_POLY1305</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>ChaCha20Poly1305Key</code>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -428,6 +460,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>XCHACHA20_POLY1305</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate XCHACHA20_POLY1305</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>XChaCha20Poly1305Key</code>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -450,6 +483,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AeadKeyTemplates</h4>
 <pre>public&nbsp;AeadKeyTemplates()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 </li>
@@ -467,6 +501,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>createAesGcmKeyTemplate</h4>
 <pre>public static&nbsp;com.google.crypto.tink.proto.KeyTemplate&nbsp;createAesGcmKeyTemplate(int&nbsp;keySize)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <code>KeyTemplate</code> containing a <code>AesGcmKeyFormat</code> with some specified
@@ -482,6 +517,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <h4>createAesEaxKeyTemplate</h4>
 <pre>public static&nbsp;com.google.crypto.tink.proto.KeyTemplate&nbsp;createAesEaxKeyTemplate(int&nbsp;keySize,
                                                                                int&nbsp;ivSize)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <code>KeyTemplate</code> containing a <code>AesEaxKeyFormat</code> with some specified
@@ -500,6 +536,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                                                        int&nbsp;hmacKeySize,
                                                                                        int&nbsp;tagSize,
                                                                                        com.google.crypto.tink.proto.HashType&nbsp;hashType)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <code>KeyTemplate</code> containing a <code>AesCtrHmacAeadKeyFormat</code> with some specific
@@ -514,6 +551,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>createKmsAeadKeyTemplate</h4>
 <pre>public static&nbsp;com.google.crypto.tink.proto.KeyTemplate&nbsp;createKmsAeadKeyTemplate(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a new <code>KeyTemplate</code> that can generate a <code>KmsAeadKey</code> pointing to <code>keyUri</code>.</dd>
@@ -528,6 +566,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <h4>createKmsEnvelopeAeadKeyTemplate</h4>
 <pre>public static&nbsp;com.google.crypto.tink.proto.KeyTemplate&nbsp;createKmsEnvelopeAeadKeyTemplate(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;kekUri,
                                                                                         com.google.crypto.tink.proto.KeyTemplate&nbsp;dekTemplate)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a new <code>KeyTemplate</code> that can generate a <code>KmsEnvelopeAeadKey</code> whose KEK is pointing to <code>kekUri</code>

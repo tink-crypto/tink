@@ -74,6 +74,24 @@
 <div class="contentContainer">
 <ul class="blockList">
 <li class="blockList">
+<table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Interface Summary table, listing interfaces, and an explanation">
+<caption><span>Interface Summary</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Interface</th>
+<th class="colLast" scope="col">Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a></td>
+<td class="colLast">
+<div class="block">The PRF interface is an abstraction for an element of a pseudo random function family, selected
+ by a key.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList">
 <table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Class Summary table, listing classes, and an explanation">
 <caption><span>Class Summary</span><span class="tabEnd">&nbsp;</span></caption>
 <tr>
@@ -84,7 +102,7 @@
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></td>
 <td class="colLast">
-<div class="block">This key manager generates new <code>HkdfPrfKey</code> keys and produces new instances of <code>HkdfStreamingPrf</code>.</div>
+<div class="block">This key manager generates new <code>HkdfPrfKey</code> keys and produces new instances of <code>HkdfStreamingPrf</code> and <code>HkdfPrf</code>.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -92,6 +110,12 @@
 <td class="colLast">
 <div class="block">Static methods and registering with the <code>Registry</code> all instances of <a href="../../../../../com/google/crypto/tink/subtle/prf/StreamingPrf.html" title="interface in com.google.crypto.tink.subtle.prf"><code>StreamingPrf</code></a> key types supported in a particular release of
  Tink.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a></td>
+<td class="colLast">
+<div class="block">A Tink Keyset can be converted into a set of PRFs using this primitive.</div>
 </td>
 </tr>
 </tbody>

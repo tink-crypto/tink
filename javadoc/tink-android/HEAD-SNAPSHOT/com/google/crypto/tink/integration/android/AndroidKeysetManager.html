@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":42,"i7":10,"i8":10};
+var methods = {"i0":42,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":42,"i8":42,"i9":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -122,16 +122,16 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  String masterKeyUri = "android-keystore://my_master_key_id";
  AndroidKeysetManager manager = AndroidKeysetManager.Builder()
     .withSharedPref(getApplicationContext(), "my_keyset_name", "my_pref_file_name")
-    .withKeyTemplate(SignatureKeyTemplates.ECDSA_P256)
+    .withKeyTemplate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf4KBTemplate())
     .withMasterKeyUri(masterKeyUri)
     .build();
- PublicKeySign signer = manager.getKeysetHandle().getPrimitive(PublicKeySign.class);
+ StreamingAead streamingAead = manager.getKeysetHandle().getPrimitive(StreamingAead.class);
  </code></pre>
 
  <p>This will read a keyset stored in the <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> preferences file. If the preference file name is null, it uses the default
  preferences file.
 
- <p>If the keyset is not found or invalid, and a valid <code>KeyTemplate</code> is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, a fresh keyset is generated and is written to the
+ <p>If the keyset is not found or invalid, and a valid <a href="../../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, a fresh keyset is generated and is written to the
  <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> shared preferences file.
 
  <p>On Android M or newer and if a master key URI is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withMasterKeyUri-java.lang.String-"><code>AndroidKeysetManager.Builder.withMasterKeyUri(java.lang.String)</code></a>, the keyset is encrypted with a master key
@@ -150,7 +150,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  to rotate the keyset, one can do:
 
  <pre><code>
- manager.rotate(SignatureKeyTemplates.ECDSA_P256);
+ manager.rotate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf1MBTemplate());
  </code></pre>
 
  <p>All operations that manipulate the keyset would automatically persist the new keyset to
@@ -201,38 +201,47 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-">add</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
-<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">This method takes a KeyTemplate proto, which is an internal implementation detail.
+     Please use the add method that takes a <a href="../../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> POJO.</span></div>
+</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#add-com.google.crypto.tink.KeyTemplate-">add</a></span>(<a href="../../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)</code>
+<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#delete-int-">delete</a></span>(int&nbsp;keyId)</code>
 <div class="block">Deletes the key with <code>keyId</code>.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#destroy-int-">destroy</a></span>(int&nbsp;keyId)</code>
 <div class="block">Destroys the key material associated with the <code>keyId</code>.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#disable-int-">disable</a></span>(int&nbsp;keyId)</code>
 <div class="block">Disables the key with <code>keyId</code>.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#enable-int-">enable</a></span>(int&nbsp;keyId)</code>
 <div class="block">Enables the key with <code>keyId</code>.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#getKeysetHandle--">getKeysetHandle</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#promote-int-">promote</a></span>(int&nbsp;keyId)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
@@ -240,14 +249,17 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#rotate-com.google.crypto.tink.proto.KeyTemplate-">rotate</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
-<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
- primary key.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Please use <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-"><code>add(com.google.crypto.tink.proto.KeyTemplate)</code></a>. This method adds a new key and immediately promotes it to
+     primary. However, when you do keyset rotation, you almost never want to make the new key
+     primary, because old binaries don't know the new key yet.</span></div>
+</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#setPrimary-int-">setPrimary</a></span>(int&nbsp;keyId)</code>
 <div class="block">Sets the key with <code>keyId</code> as primary.</div>
@@ -297,8 +309,12 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>rotate</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;rotate(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)
-                            throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;rotate(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)
+                                        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">Please use <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-"><code>add(com.google.crypto.tink.proto.KeyTemplate)</code></a>. This method adds a new key and immediately promotes it to
+     primary. However, when you do keyset rotation, you almost never want to make the new key
+     primary, because old binaries don't know the new key yet.</span></div>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
  primary key.</div>
 <dl>
@@ -313,7 +329,25 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>add</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;add(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;add(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)
+                                     throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">This method takes a KeyTemplate proto, which is an internal implementation detail.
+     Please use the add method that takes a <a href="../../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> POJO.</span></div>
+<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if cannot find any <code>KeyManager</code> that can handle <code>keyTemplate</code></dd>
+</dl>
+</li>
+</ul>
+<a name="add-com.google.crypto.tink.KeyTemplate-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add</h4>
+<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;add(<a href="../../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)
                          throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
 <dl>
