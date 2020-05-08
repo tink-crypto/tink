@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.streamingaead;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
@@ -37,7 +38,7 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesCtrHmacStreamingKey} keys and produces new instances of
  * {@code AesCtrHmacStreaming}.
  */
-public class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStreamingKey> {
+public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStreamingKey> {
   AesCtrHmacStreamingKeyManager() {
     super(
         AesCtrHmacStreamingKey.class,
@@ -177,5 +178,97 @@ public class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHmacStre
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AesCtrHmacStreaming keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Size of the main key: 16 bytes
+   *       <li>HKDF algo: HMAC-SHA256
+   *       <li>Size of AES-CTR derived keys: 16 bytes
+   *       <li>Tag algo: HMAC-SHA256
+   *       <li>Tag size: 32 bytes
+   *       <li>Ciphertext segment size: 4096
+   *     </ul>
+   */
+  public static final KeyTemplate aes128CtrHmacSha2564KBTemplate() {
+    return createKeyTemplate(16, HashType.SHA256, 16, HashType.SHA256, 32, 4096);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AesCtrHmacStreaming keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Size of the main key: 16 bytes
+   *       <li>HKDF algo: HMAC-SHA256
+   *       <li>Size of AES-CTR derived keys: 16 bytes
+   *       <li>Tag algo: HMAC-SHA256
+   *       <li>Tag size: 32 bytes
+   *       <li>Ciphertext segment size: 1MB
+   *     </ul>
+   */
+  public static final KeyTemplate aes128CtrHmacSha2561MBTemplate() {
+    return createKeyTemplate(16, HashType.SHA256, 16, HashType.SHA256, 32, 1 << 20);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AesCtrHmacStreaming keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Size of the main key: 32 bytes
+   *       <li>HKDF algo: HMAC-SHA256
+   *       <li>Size of AES-CTR derived keys: 32 bytes
+   *       <li>Tag algo: HMAC-SHA256
+   *       <li>Tag size: 32 bytes
+   *       <li>Ciphertext segment size: 4096
+   *     </ul>
+   */
+  public static final KeyTemplate aes256CtrHmacSha2564KBTemplate() {
+    return createKeyTemplate(32, HashType.SHA256, 32, HashType.SHA256, 32, 4096);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AesCtrHmacStreaming keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Size of the main key: 32 bytes
+   *       <li>HKDF algo: HMAC-SHA256
+   *       <li>Size of AES-CTR derived keys: 32 bytes
+   *       <li>Tag algo: HMAC-SHA256
+   *       <li>Tag size: 32 bytes
+   *       <li>Ciphertext segment size: 1MB
+   *     </ul>
+   */
+  public static final KeyTemplate aes256CtrHmacSha2561MBTemplate() {
+    return createKeyTemplate(32, HashType.SHA256, 32, HashType.SHA256, 32, 1 << 20);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link AesCtrHmacStreamingKeyFormat} with some
+   *     specified parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      int mainKeySize,
+      HashType hkdfHashType,
+      int derivedKeySize,
+      HashType macHashType,
+      int tagSize,
+      int ciphertextSegmentSize) {
+    HmacParams hmacParams =
+        HmacParams.newBuilder().setHash(macHashType).setTagSize(tagSize).build();
+    AesCtrHmacStreamingParams params =
+        AesCtrHmacStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(ciphertextSegmentSize)
+            .setDerivedKeySize(derivedKeySize)
+            .setHkdfHashType(hkdfHashType)
+            .setHmacParams(hmacParams)
+            .build();
+    AesCtrHmacStreamingKeyFormat format =
+        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(params).setKeySize(mainKeySize).build();
+    return KeyTemplate.create(
+        new AesCtrHmacStreamingKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.RAW);
   }
 }

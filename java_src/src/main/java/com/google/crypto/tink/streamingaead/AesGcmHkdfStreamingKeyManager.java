@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.streamingaead;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
@@ -38,7 +39,7 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesGcmHkdfStreamingKey} keys and produces new instances of
  * {@code AesGcmHkdfStreaming}.
  */
-public class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStreamingKey> {
+public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStreamingKey> {
   AesGcmHkdfStreamingKeyManager() {
     super(
         AesGcmHkdfStreamingKey.class,
@@ -155,5 +156,84 @@ public class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHkdfStre
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AesGcmHkdfStreaming keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Size of the main key: 16 bytes
+   *       <li>HKDF algo: HMAC-SHA256
+   *       <li>Size of AES-GCM derived keys: 16 bytes
+   *       <li>Ciphertext segment size: 4096 bytes
+   *     </ul>
+   */
+  public static final KeyTemplate aes128GcmHkdf4KBTemplate() {
+    return createKeyTemplate(16, HashType.SHA256, 16, 4096);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AesGcmHkdfStreaming keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Size of the main key: 16 bytes
+   *       <li>HKDF algo: HMAC-SHA256
+   *       <li>Size of AES-GCM derived keys: 16 bytes
+   *       <li>Ciphertext segment size: 1MB
+   *     </ul>
+   */
+  public static final KeyTemplate aes128GcmHkdf1MBTemplate() {
+    return createKeyTemplate(16, HashType.SHA256, 16, 1 << 20);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AesGcmHkdfStreaming keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Size of the main key: 32 bytes
+   *       <li>HKDF algo: HMAC-SHA256
+   *       <li>Size of AES-GCM derived keys: 32 bytes
+   *       <li>Ciphertext segment size: 4096 bytes
+   *     </ul>
+   */
+  public static final KeyTemplate aes256GcmHkdf4KBTemplate() {
+    return createKeyTemplate(32, HashType.SHA256, 32, 4096);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AesGcmHkdfStreaming keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Size of the main key: 32 bytes
+   *       <li>HKDF algo: HMAC-SHA256
+   *       <li>Size of AES-GCM derived keys: 32 bytes
+   *       <li>Ciphertext segment size: 1MB
+   *     </ul>
+   */
+  public static final KeyTemplate aes256GcmHkdf1MBTemplate() {
+    return createKeyTemplate(32, HashType.SHA256, 32, 1 << 20);
+  }
+
+  /**
+   * @return a {@code KeyTemplate} containing a {@code AesGcmHkdfStreamingKeyFormat} with some
+   *     specified parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      int mainKeySize, HashType hkdfHashType, int derivedKeySize, int ciphertextSegmentSize) {
+    AesGcmHkdfStreamingParams keyParams =
+        AesGcmHkdfStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(ciphertextSegmentSize)
+            .setDerivedKeySize(derivedKeySize)
+            .setHkdfHashType(hkdfHashType)
+            .build();
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.newBuilder()
+            .setKeySize(mainKeySize)
+            .setParams(keyParams)
+            .build();
+    return KeyTemplate.create(
+        new AesGcmHkdfStreamingKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.RAW);
   }
 }

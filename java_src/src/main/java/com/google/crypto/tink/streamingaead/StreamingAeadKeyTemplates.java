@@ -39,7 +39,10 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * }</pre>
  *
  * @since 1.1.0
+ * @deprecated use the key template methods in the key managers, e.g.,
+ *     AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().
  */
+@Deprecated
 public final class StreamingAeadKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link
