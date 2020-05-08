@@ -21,11 +21,12 @@ import android.os.Build;
 import android.util.Log;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetWriter;
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -45,10 +46,10 @@ import javax.annotation.concurrent.GuardedBy;
  * String masterKeyUri = "android-keystore://my_master_key_id";
  * AndroidKeysetManager manager = AndroidKeysetManager.Builder()
  *    .withSharedPref(getApplicationContext(), "my_keyset_name", "my_pref_file_name")
- *    .withKeyTemplate(SignatureKeyTemplates.ECDSA_P256)
+ *    .withKeyTemplate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf4KBTemplate())
  *    .withMasterKeyUri(masterKeyUri)
  *    .build();
- * PublicKeySign signer = manager.getKeysetHandle().getPrimitive(PublicKeySign.class);
+ * StreamingAead streamingAead = manager.getKeysetHandle().getPrimitive(StreamingAead.class);
  * }</pre>
  *
  * <p>This will read a keyset stored in the {@code my_keyset_name} preference of the {@code
@@ -77,7 +78,7 @@ import javax.annotation.concurrent.GuardedBy;
  * to rotate the keyset, one can do:
  *
  * <pre>{@code
- * manager.rotate(SignatureKeyTemplates.ECDSA_P256);
+ * manager.rotate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf1MBTemplate());
  * }</pre>
  *
  * <p>All operations that manipulate the keyset would automatically persist the new keyset to
@@ -163,6 +164,20 @@ public final class AndroidKeysetManager {
       return this;
     }
 
+    /**
+     * If the keyset is not found or valid, generates a new one using {@code val}.
+     *
+     * @deprecated This method takes a KeyTemplate proto, which is an internal implementation
+     *     detail. Please use the withKeyTemplate method that takes a {@link KeyTemplate} POJO.
+     */
+    @Deprecated
+    public Builder withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate val) {
+      keyTemplate =
+          KeyTemplate.create(
+              val.getTypeUrl(), val.getValue().toByteArray(), fromProto(val.getOutputPrefixType()));
+      return this;
+    }
+
     /** If the keyset is not found or valid, generates a new one using {@code val}. */
     public Builder withKeyTemplate(KeyTemplate val) {
       keyTemplate = val;
@@ -197,10 +212,31 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
+   * @deprecated Please use {@link #add}. This method adds a new key and immediately promotes it to
+   *     primary. However, when you do keyset rotation, you almost never want to make the new key
+   *     primary, because old binaries don't know the new key yet.
    */
-  public synchronized AndroidKeysetManager rotate(KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
+  @Deprecated
+  public synchronized AndroidKeysetManager rotate(
+      com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     keysetManager = keysetManager.rotate(keyTemplate);
+    write(keysetManager);
+    return this;
+  }
+
+  /**
+   * Generates and adds a fresh key generated using {@code keyTemplate}.
+   *
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
+   *     keyTemplate}
+   * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
+   *     Please use the add method that takes a {@link KeyTemplate} POJO.
+   */
+  @GuardedBy("this")
+  @Deprecated
+  public synchronized AndroidKeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
+    keysetManager = keysetManager.add(keyTemplate);
     write(keysetManager);
     return this;
   }
@@ -290,12 +326,14 @@ public final class AndroidKeysetManager {
       return read();
     } catch (IOException e) {
       // Not found, handle below.
-      Log.i(TAG, "cannot read keyset: " + e.toString());
+      Log.i(TAG, "cannot read keyset: " + e);
     }
 
     // Not found.
     if (keyTemplate != null) {
-      KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(keyTemplate);
+      KeysetManager manager = KeysetManager.withEmptyKeyset().add(keyTemplate);
+      int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
+      manager = manager.setPrimary(keyId);
       write(manager);
       return manager;
     }
@@ -317,7 +355,7 @@ public final class AndroidKeysetManager {
         // have the same privilege as the app, thus they can call Android Keystore to read or write
         // the encrypted keyset in the first place.
         // So it's okay to ignore the failure and try to read the keyset in cleartext.
-        Log.i(TAG, "cannot decrypt keyset: " + e.toString());
+        Log.i(TAG, "cannot decrypt keyset: " + e);
       }
     }
     KeysetHandle handle = CleartextKeysetHandle.read(reader);
@@ -342,5 +380,20 @@ public final class AndroidKeysetManager {
 
   private boolean shouldUseKeystore() {
     return (useKeystore && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
+  }
+
+  private static KeyTemplate.OutputPrefixType fromProto(OutputPrefixType outputPrefixType) {
+    switch (outputPrefixType) {
+      case TINK:
+        return KeyTemplate.OutputPrefixType.TINK;
+      case LEGACY:
+        return KeyTemplate.OutputPrefixType.LEGACY;
+      case RAW:
+        return KeyTemplate.OutputPrefixType.RAW;
+      case CRUNCHY:
+        return KeyTemplate.OutputPrefixType.CRUNCHY;
+      default:
+        throw new IllegalArgumentException("Unknown output prefix type");
+    }
   }
 }
