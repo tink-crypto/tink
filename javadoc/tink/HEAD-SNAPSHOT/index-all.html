@@ -276,6 +276,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html#AES256_SIV">AES256_SIV</a></span> - Static variable in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html" title="class in com.google.crypto.tink.daead">DeterministicAeadKeyTemplates</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesSivKey</code> with a 64-byte key.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#aes256CtrHmacSha2561MBTemplate--">aes256CtrHmacSha2561MBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
@@ -289,6 +290,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#aes256GcmHkdf4KBTemplate--">aes256GcmHkdf4KBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesGcmKeyManager.html#aes256GcmTemplate--">aes256GcmTemplate()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesGcmKeyManager.html" title="class in com.google.crypto.tink.aead">AesGcmKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/AesSivKeyManager.html#aes256SivTemplate--">aes256SivTemplate()</a></span> - Static method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/AesSivKeyManager.html" title="class in com.google.crypto.tink.daead">AesSivKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#AES_CMAC">AES_CMAC</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
 <dd>
@@ -583,7 +586,9 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#createAesGcmKeyTemplate-int-">createAesGcmKeyTemplate(int)</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html#createAesSivKeyTemplate-int-">createAesSivKeyTemplate(int)</a></span> - Static method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html" title="class in com.google.crypto.tink.daead">DeterministicAeadKeyTemplates</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#createEcdsaKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.proto.OutputPrefixType-">createEcdsaKeyTemplate(HashType, EllipticCurveType, EcdsaSignatureEncoding, OutputPrefixType)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html#createEciesAeadHkdfKeyTemplate-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EcPointFormat-com.google.crypto.tink.proto.KeyTemplate-com.google.crypto.tink.proto.OutputPrefixType-byte:A-">createEciesAeadHkdfKeyTemplate(EllipticCurveType, HashType, EcPointFormat, KeyTemplate, OutputPrefixType, byte[])</a></span> - Static method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html" title="class in com.google.crypto.tink.hybrid">HybridKeyTemplates</a></dt>
@@ -718,10 +723,15 @@
 &nbsp;</dd>
 <dt><a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html" title="class in com.google.crypto.tink.daead"><span class="typeNameLink">DeterministicAeadKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/daead/package-summary.html">com.google.crypto.tink.daead</a></dt>
 <dd>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>DeterministicAead</code> keys.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">use the key template methods in the key managers, e.g.,
+     AesSivKeyManager.aes256SivTemplate().</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html#DeterministicAeadKeyTemplates--">DeterministicAeadKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadKeyTemplates.html" title="class in com.google.crypto.tink.daead">DeterministicAeadKeyTemplates</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html" title="class in com.google.crypto.tink.daead"><span class="typeNameLink">DeterministicAeadWrapper</span></a> - Class in <a href="com/google/crypto/tink/daead/package-summary.html">com.google.crypto.tink.daead</a></dt>
 <dd>
 <div class="block">The implementation of <code>PrimitiveWrapper&lt;DeterministicAead&gt;</code>.</div>
@@ -2590,6 +2600,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesEaxKeyManager.html#rawAes128EaxTemplate--">rawAes128EaxTemplate()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesEaxKeyManager.html" title="class in com.google.crypto.tink.aead">AesEaxKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesEaxKeyManager.html#rawAes256EaxTemplate--">rawAes256EaxTemplate()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesEaxKeyManager.html" title="class in com.google.crypto.tink.aead">AesEaxKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/AesSivKeyManager.html#rawAes256SivTemplate--">rawAes256SivTemplate()</a></span> - Static method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/AesSivKeyManager.html" title="class in com.google.crypto.tink.daead">AesSivKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetReader.html#read--">read()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetReader.html" title="class in com.google.crypto.tink">BinaryKeysetReader</a></dt>
 <dd>&nbsp;</dd>
