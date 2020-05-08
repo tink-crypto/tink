@@ -17,6 +17,7 @@
 package com.google.crypto.tink.daead;
 
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.AesSivKey;
@@ -36,7 +37,7 @@ import java.security.InvalidKeyException;
  * This key manager generates new {@code AesSivKey} keys and produces new instances of {@code
  * AesSiv}.
  */
-public class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
+public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
   AesSivKeyManager() {
     super(
         AesSivKey.class,
@@ -106,5 +107,29 @@ public class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesSivKeyManager(), newKeyAllowed);
+  }
+
+  /** @return a {@code KeyTemplate} that generates new instances of AES-SIV-CMAC keys. */
+  public static final KeyTemplate aes256SivTemplate() {
+    return createKeyTemplate(64, KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return A {@code KeyTemplate} that generates new instances of AES-SIV-CMAC keys. Keys generated
+   *     from this template create ciphertexts compatible with other libraries.
+   */
+  public static final KeyTemplate rawAes256SivTemplate() {
+    return createKeyTemplate(64, KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return a {@code KeyTemplate} containing a {@code AesSivKeyFormat} with some specified
+   *     parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      int keySize, KeyTemplate.OutputPrefixType prefixType) {
+    AesSivKeyFormat format = AesSivKeyFormat.newBuilder().setKeySize(keySize).build();
+    return KeyTemplate.create(
+        new AesSivKeyManager().getKeyType(), format.toByteArray(), prefixType);
   }
 }

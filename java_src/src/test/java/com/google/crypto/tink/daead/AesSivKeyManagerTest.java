@@ -20,12 +20,14 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
 import javax.crypto.Cipher;
@@ -162,5 +164,27 @@ public class AesSivKeyManagerTest {
     return AesSivKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(keySize)))
         .build();
+  }
+
+  @Test
+  public void testAes256SivTemplate() throws Exception {
+    KeyTemplate template = AesSivKeyManager.aes256SivTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new AesSivKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    AesSivKeyFormat format =
+        AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(format.getKeySize());
+  }
+
+  @Test
+  public void testRawAes256SivTemplate() throws Exception {
+    KeyTemplate template = AesSivKeyManager.rawAes256SivTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new AesSivKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    AesSivKeyFormat format =
+        AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(format.getKeySize());
   }
 }
