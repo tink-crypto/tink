@@ -40,8 +40,6 @@ std::unique_ptr<pybind11::class_<CcKeyManager<PrimitiveType>>> WrapCcKeyManager(
     pybind11::module& m, const char* py_class_name,
     const char* py_class_docstring, const char* primitive_module_name) {
   namespace py = pybind11;
-  ImportTinkPythonModule(
-      (std::string("cc.pybind.") + primitive_module_name).c_str());
   auto cls = absl::make_unique<py::class_<CcKeyManager<PrimitiveType>>>(
       m, py_class_name, py_class_docstring);
   cls->def_static("from_cc_registry",
@@ -56,8 +54,9 @@ std::unique_ptr<pybind11::class_<CcKeyManager<PrimitiveType>>> WrapCcKeyManager(
 
 }  // namespace py_thin_wrappers
 
-PYBIND11_MODULE(cc_key_manager, m) {
+void PybindRegisterCcKeyManager(pybind11::module* module) {
   namespace py = pybind11;
+  py::module& m = *module;
 
   py_thin_wrappers::WrapCcKeyManager<Aead>(
       m, "AeadKeyManager",

@@ -18,21 +18,14 @@ tink_pybind_library(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "cc_key_manager",
     srcs = ["cc_key_manager.cc"],
+    hdrs = ["cc_key_manager.h"],
     deps = [
         ":import_helper",
         ":status_casters",
         "//tink/cc:cc_key_manager",
-        "//tink/cc/pybind:aead_cc",
-        "//tink/cc/pybind:deterministic_aead_cc",
-        "//tink/cc/pybind:hybrid_decrypt_cc",
-        "//tink/cc/pybind:hybrid_encrypt_cc",
-        "//tink/cc/pybind:mac_cc",
-        "//tink/cc/pybind:public_key_sign_cc",
-        "//tink/cc/pybind:public_key_verify_cc",
-        "//tink/cc/pybind:streaming_aead_cc",
         "@pybind11",
         "@tink_cc//:aead",
         "@tink_cc//:deterministic_aead",
@@ -49,19 +42,9 @@ py_test(
     name = "cc_key_manager_test",
     srcs = ["cc_key_manager_test.py"],
     deps = [
-        ":cc_key_manager",
-        ":cc_tink_config",
-        ":status",
+        ":tink_bindings",
         requirement("absl-py"),
         "//tink/aead",
-        "//tink/cc/pybind:aead",
-        "//tink/cc/pybind:deterministic_aead",
-        "//tink/cc/pybind:hybrid_decrypt",
-        "//tink/cc/pybind:hybrid_encrypt",
-        "//tink/cc/pybind:mac",
-        "//tink/cc/pybind:public_key_sign",
-        "//tink/cc/pybind:public_key_verify",
-        "//tink/cc/pybind:streaming_aead",
         "//tink/hybrid",
         "//tink/proto:aes_eax_py_pb2",
         "//tink/proto:aes_siv_py_pb2",
@@ -73,9 +56,10 @@ py_test(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "cc_tink_config",
     srcs = ["cc_tink_config.cc"],
+    hdrs = ["cc_tink_config.h"],
     deps = [
         ":status_casters",
         "//tink/cc:cc_tink_config",
@@ -87,16 +71,16 @@ py_test(
     name = "cc_tink_config_test",
     srcs = ["cc_tink_config_test.py"],
     deps = [
-        ":cc_tink_config",
-        ":status",
+        ":tink_bindings",
         requirement("absl-py"),
         requirement("six"),
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "python_file_object_adapter",
     srcs = ["python_file_object_adapter.cc"],
+    hdrs = ["python_file_object_adapter.h"],
     deps = [
         ":status_casters",
         "//tink/cc:python_file_object_adapter",
@@ -104,9 +88,10 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "output_stream_adapter",
     srcs = ["output_stream_adapter.cc"],
+    hdrs = ["output_stream_adapter.h"],
     deps = [
         ":status_casters",
         "//tink/cc:output_stream_adapter",
@@ -114,23 +99,22 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "cc_streaming_aead_wrappers",
     srcs = ["cc_streaming_aead_wrappers.cc"],
+    hdrs = ["cc_streaming_aead_wrappers.h"],
     deps = [
         ":import_helper",
-        ":input_stream_adapter_cc",
-        ":output_stream_adapter_cc",
-        ":python_file_object_adapter_cc",
         ":status_casters",
         "//tink/cc:cc_streaming_aead_wrappers",
         "@pybind11",
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "input_stream_adapter",
     srcs = ["input_stream_adapter.cc"],
+    hdrs = ["input_stream_adapter.h"],
     deps = [
         ":status_casters",
         "//tink/cc:input_stream_adapter",
@@ -157,7 +141,6 @@ tink_pybind_library(
     name = "status_casters",
     hdrs = ["status_casters.h"],
     deps = [
-        ":status_cc",
         ":status_utils",
         "@pybind11",
         "@tink_cc//util:status",
@@ -165,9 +148,10 @@ tink_pybind_library(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "status",
     srcs = ["status.cc"],
+    hdrs = ["status.h"],
     deps = [
         ":status_utils",
         "@pybind11",
@@ -189,16 +173,17 @@ py_test(
     name = "status_test",
     srcs = ["status_test.py"],
     deps = [
-        ":status",
         ":status_example",
+        ":tink_bindings",
         requirement("absl-py"),
         requirement("six"),
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "aead",
     srcs = ["aead.cc"],
+    hdrs = ["aead.h"],
     deps = [
         ":status_casters",
         "@pybind11",
@@ -207,9 +192,10 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "deterministic_aead",
     srcs = ["deterministic_aead.cc"],
+    hdrs = ["deterministic_aead.h"],
     deps = [
         ":status_casters",
         "@pybind11",
@@ -218,18 +204,20 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "streaming_aead",
     srcs = ["streaming_aead.cc"],
+    hdrs = ["streaming_aead.h"],
     deps = [
         "@pybind11",
         "@tink_cc//:streaming_aead",
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "hybrid_decrypt",
     srcs = ["hybrid_decrypt.cc"],
+    hdrs = ["hybrid_decrypt.h"],
     deps = [
         ":status_casters",
         "@pybind11",
@@ -238,9 +226,10 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "hybrid_encrypt",
     srcs = ["hybrid_encrypt.cc"],
+    hdrs = ["hybrid_encrypt.h"],
     deps = [
         ":status_casters",
         "@pybind11",
@@ -249,9 +238,10 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "mac",
     srcs = ["mac.cc"],
+    hdrs = ["mac.h"],
     deps = [
         ":status_casters",
         "@pybind11",
@@ -260,9 +250,10 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "public_key_sign",
     srcs = ["public_key_sign.cc"],
+    hdrs = ["public_key_sign.h"],
     deps = [
         ":status_casters",
         "@pybind11",
@@ -271,9 +262,10 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "public_key_verify",
     srcs = ["public_key_verify.cc"],
+    hdrs = ["public_key_verify.h"],
     deps = [
         ":status_casters",
         "@pybind11",
@@ -282,24 +274,63 @@ tink_pybind_extension(
     ],
 )
 
-tink_pybind_extension(
+tink_pybind_library(
     name = "cc_gcp_kms_client",
     srcs = ["cc_gcp_kms_client.cc"],
+    hdrs = ["cc_gcp_kms_client.h"],
     deps = [
-        "@tink_cc//integration/gcpkms:gcp_kms_client",
-        "//tink/cc/pybind:status_casters",
         "//tink/cc:output_stream_adapter",
+        "//tink/cc/pybind:status_casters",
         "@pybind11",
+        "@tink_cc//integration/gcpkms:gcp_kms_client",
+    ],
+)
+
+tink_pybind_library(
+    name = "cc_aws_kms_client",
+    srcs = ["cc_aws_kms_client.cc"],
+    hdrs = ["cc_aws_kms_client.h"],
+    deps = [
+        "//tink/cc:output_stream_adapter",
+        "//tink/cc/pybind:status_casters",
+        "@pybind11",
+        "@tink_cc//integration/awskms:aws_kms_client",
     ],
 )
 
 tink_pybind_extension(
-    name = "cc_aws_kms_client",
-    srcs = ["cc_aws_kms_client.cc"],
+    name = "tink_bindings",
+    srcs = ["tink_bindings.cc"],
     deps = [
+        ":aead",
+        ":cc_aws_kms_client",
+        ":cc_gcp_kms_client",
+        ":cc_key_manager",
+        ":cc_streaming_aead_wrappers",
+        ":cc_tink_config",
+        ":deterministic_aead",
+        ":hybrid_decrypt",
+        ":hybrid_encrypt",
+        ":input_stream_adapter",
+        ":mac",
+        ":output_stream_adapter",
+        ":public_key_sign",
+        ":public_key_verify",
+        ":python_file_object_adapter",
+        ":status",
+        ":status_casters",
+        ":streaming_aead",
+        "@tink_cc//:aead",
+        "@tink_cc//:deterministic_aead",
+        "@tink_cc//:hybrid_decrypt",
+        "@tink_cc//:hybrid_encrypt",
+        "@tink_cc//:mac",
+        "@tink_cc//:public_key_sign",
+        "@tink_cc//:public_key_verify",
+        "@tink_cc//:streaming_aead",
         "@tink_cc//integration/awskms:aws_kms_client",
-        "//tink/cc/pybind:status_casters",
-        "//tink/cc:output_stream_adapter",
-        "@pybind11",
+        "@tink_cc//integration/gcpkms:gcp_kms_client",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
     ],
 )

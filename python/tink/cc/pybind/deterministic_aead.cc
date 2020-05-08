@@ -23,8 +23,9 @@
 namespace crypto {
 namespace tink {
 
-PYBIND11_MODULE(deterministic_aead, m) {
+void PybindRegisterDeterministicAead(pybind11::module* module) {
   namespace py = pybind11;
+  py::module& m = *module;
 
   // TODO(b/146492561): Reduce the number of complicated lambdas.
   py::class_<DeterministicAead>(

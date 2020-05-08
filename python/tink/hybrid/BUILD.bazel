@@ -41,10 +41,7 @@ py_library(
         ":_hybrid_decrypt",
         ":_hybrid_encrypt",
         ":_hybrid_wrapper",
-        "//tink/cc/pybind:cc_key_manager",
-        "//tink/cc/pybind:cc_tink_config",
-        "//tink/cc/pybind:hybrid_decrypt",
-        "//tink/cc/pybind:hybrid_encrypt",
+        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
     ],
 )

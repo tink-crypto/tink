@@ -189,27 +189,6 @@ class BuildBazelExtension(build_ext.build_ext):
       os.makedirs(ext_dest_dir)
     shutil.copyfile(ext_bazel_bin_path, ext_dest_path)
 
-# TODO(kste): Parse these targets from the pybind folder.
-bazel_modules = [
-    BazelExtension('//tink/cc/pybind:import_helper', 'libimport_helper'),
-    BazelExtension('//tink/cc/pybind:cc_gcp_kms_client'),
-    BazelExtension('//tink/cc/pybind:cc_key_manager'),
-    BazelExtension('//tink/cc/pybind:cc_tink_config'),
-    BazelExtension('//tink/cc/pybind:python_file_object_adapter'),
-    BazelExtension('//tink/cc/pybind:output_stream_adapter'),
-    BazelExtension('//tink/cc/pybind:cc_streaming_aead_wrappers'),
-    BazelExtension('//tink/cc/pybind:status_utils', 'libstatus_utils'),
-    BazelExtension('//tink/cc/pybind:status'),
-    BazelExtension('//tink/cc/pybind:status_example'),
-    BazelExtension('//tink/cc/pybind:aead'),
-    BazelExtension('//tink/cc/pybind:deterministic_aead'),
-    BazelExtension('//tink/cc/pybind:streaming_aead'),
-    BazelExtension('//tink/cc/pybind:hybrid_decrypt'),
-    BazelExtension('//tink/cc/pybind:hybrid_encrypt'),
-    BazelExtension('//tink/cc/pybind:mac'),
-    BazelExtension('//tink/cc/pybind:public_key_sign'),
-    BazelExtension('//tink/cc/pybind:public_key_verify'),
-]
 
 setuptools.setup(
     name='tink',
@@ -226,7 +205,9 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=_parse_requirements('requirements.txt'),
     cmdclass=dict(build_ext=BuildBazelExtension),
-    ext_modules=bazel_modules,
+    ext_modules=[
+        BazelExtension('//tink/cc/pybind:tink_bindings'),
+    ],
     zip_safe=False,
     # PyPI package information.
     classifiers=[

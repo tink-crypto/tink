@@ -19,76 +19,82 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from tink.cc.pybind import status
 from tink.cc.pybind import status_example
+from tink.cc.pybind import tink_bindings
 
 
 class UtilStatusTest(absltest.TestCase):
 
   def test_pass_status(self):
-    test_status = status.Status(status.ErrorCode.CANCELLED, 'test')
+    test_status = tink_bindings.Status(tink_bindings.ErrorCode.CANCELLED,
+                                       'test')
     self.assertTrue(
-        status_example.check_status(test_status, status.ErrorCode.CANCELLED))
+        status_example.check_status(test_status,
+                                    tink_bindings.ErrorCode.CANCELLED))
 
   def test_return_ok(self):
     # The return_status function should convert an ok status to None.
-    self.assertIsNone(status_example.return_status(status.ErrorCode.OK))
+    self.assertIsNone(status_example.return_status(tink_bindings.ErrorCode.OK))
 
   def test_return_not_ok(self):
     # The return_status function should convert a non-ok status to an exception.
-    with self.assertRaises(status.StatusNotOk) as cm:
-      status_example.return_status(status.ErrorCode.CANCELLED, 'test')
+    with self.assertRaises(tink_bindings.StatusNotOk) as cm:
+      status_example.return_status(tink_bindings.ErrorCode.CANCELLED, 'test')
     self.assertEqual(cm.exception.status.error_code(),
-                     status.ErrorCode.CANCELLED)
+                     tink_bindings.ErrorCode.CANCELLED)
     self.assertEqual(cm.exception.status.error_message(), 'test')
 
   def test_make_ok(self):
     # The make_status function has been set up to return a status object
     # instead of raising an exception (this is done in status_example.cc).
-    test_status = status_example.make_status(status.ErrorCode.OK)
-    self.assertEqual(test_status.error_code(), status.ErrorCode.OK)
+    test_status = status_example.make_status(tink_bindings.ErrorCode.OK)
+    self.assertEqual(test_status.error_code(), tink_bindings.ErrorCode.OK)
     self.assertTrue(test_status.ok())
 
   def test_make_not_ok(self):
     # The make_status function should always return a status object, even if
     # it is not ok (ie, it should *not* convert it to an exception).
-    test_status = status_example.make_status(status.ErrorCode.CANCELLED)
-    self.assertEqual(test_status.error_code(), status.ErrorCode.CANCELLED)
+    test_status = status_example.make_status(tink_bindings.ErrorCode.CANCELLED)
+    self.assertEqual(test_status.error_code(),
+                     tink_bindings.ErrorCode.CANCELLED)
     self.assertFalse(test_status.ok())
 
   def test_make_not_ok_manual_cast(self):
     test_status = status_example.make_status_manual_cast(
-        status.ErrorCode.CANCELLED)
-    self.assertEqual(test_status.error_code(), status.ErrorCode.CANCELLED)
+        tink_bindings.ErrorCode.CANCELLED)
+    self.assertEqual(test_status.error_code(),
+                     tink_bindings.ErrorCode.CANCELLED)
 
   def test_make_status_ref(self):
-    result_1 = status_example.make_status_ref(status.ErrorCode.OK)
-    self.assertEqual(result_1.error_code(), status.ErrorCode.OK)
-    result_2 = status_example.make_status_ref(status.ErrorCode.CANCELLED)
-    self.assertEqual(result_2.error_code(), status.ErrorCode.CANCELLED)
+    result_1 = status_example.make_status_ref(tink_bindings.ErrorCode.OK)
+    self.assertEqual(result_1.error_code(), tink_bindings.ErrorCode.OK)
+    result_2 = status_example.make_status_ref(tink_bindings.ErrorCode.CANCELLED)
+    self.assertEqual(result_2.error_code(), tink_bindings.ErrorCode.CANCELLED)
     # result_1 and 2 reference the same value, so they should always be equal.
     self.assertEqual(result_1.error_code(), result_2.error_code())
 
   def test_make_status_ptr(self):
-    result_1 = status_example.make_status_ptr(status.ErrorCode.OK)
-    self.assertEqual(result_1.error_code(), status.ErrorCode.OK)
-    result_2 = status_example.make_status_ptr(status.ErrorCode.CANCELLED)
-    self.assertEqual(result_2.error_code(), status.ErrorCode.CANCELLED)
+    result_1 = status_example.make_status_ptr(tink_bindings.ErrorCode.OK)
+    self.assertEqual(result_1.error_code(), tink_bindings.ErrorCode.OK)
+    result_2 = status_example.make_status_ptr(tink_bindings.ErrorCode.CANCELLED)
+    self.assertEqual(result_2.error_code(), tink_bindings.ErrorCode.CANCELLED)
     # result_1 and 2 reference the same value, so they should always be equal.
     self.assertEqual(result_1.error_code(), result_2.error_code())
 
   def test_member_method(self):
-    test_status = status_example.TestClass().make_status(status.ErrorCode.OK)
-    self.assertEqual(test_status.error_code(), status.ErrorCode.OK)
+    test_status = status_example.TestClass().make_status(
+        tink_bindings.ErrorCode.OK)
+    self.assertEqual(test_status.error_code(), tink_bindings.ErrorCode.OK)
     test_status = status_example.TestClass().make_status_const(
-        status.ErrorCode.OK)
-    self.assertEqual(test_status.error_code(), status.ErrorCode.OK)
+        tink_bindings.ErrorCode.OK)
+    self.assertEqual(test_status.error_code(), tink_bindings.ErrorCode.OK)
 
   def test_is_ok(self):
-    ok_status = status_example.make_status(status.ErrorCode.OK)
-    self.assertTrue(status.is_ok(ok_status))
-    failure_status = status_example.make_status(status.ErrorCode.CANCELLED)
-    self.assertFalse(status.is_ok(failure_status))
+    ok_status = status_example.make_status(tink_bindings.ErrorCode.OK)
+    self.assertTrue(tink_bindings.is_ok(ok_status))
+    failure_status = status_example.make_status(
+        tink_bindings.ErrorCode.CANCELLED)
+    self.assertFalse(tink_bindings.is_ok(failure_status))
 
 
 class UtilStatusOrTest(absltest.TestCase):
@@ -97,22 +103,22 @@ class UtilStatusOrTest(absltest.TestCase):
     self.assertEqual(status_example.return_value_status_or(5), 5)
 
   def test_return_not_ok(self):
-    with self.assertRaises(status.StatusNotOk) as cm:
-      status_example.return_failure_status_or(status.ErrorCode.NOT_FOUND)
+    with self.assertRaises(tink_bindings.StatusNotOk) as cm:
+      status_example.return_failure_status_or(tink_bindings.ErrorCode.NOT_FOUND)
     self.assertEqual(cm.exception.status.error_code(),
-                     status.ErrorCode.NOT_FOUND)
+                     tink_bindings.ErrorCode.NOT_FOUND)
 
   def test_make_not_ok(self):
     self.assertEqual(
         status_example.make_failure_status_or(
-            status.ErrorCode.CANCELLED).error_code(),
-        status.ErrorCode.CANCELLED)
+            tink_bindings.ErrorCode.CANCELLED).error_code(),
+        tink_bindings.ErrorCode.CANCELLED)
 
   def test_make_not_ok_manual_cast(self):
     self.assertEqual(
         status_example.make_failure_status_or_manual_cast(
-            status.ErrorCode.CANCELLED).error_code(),
-        status.ErrorCode.CANCELLED)
+            tink_bindings.ErrorCode.CANCELLED).error_code(),
+        tink_bindings.ErrorCode.CANCELLED)
 
   def test_return_ptr_status_or(self):
     result_1 = status_example.return_ptr_status_or(5)
@@ -128,16 +134,16 @@ class UtilStatusOrTest(absltest.TestCase):
 
   def test_member_method(self):
     test_status = status_example.TestClass().make_failure_status_or(
-        status.ErrorCode.ABORTED)
-    self.assertEqual(test_status.error_code(), status.ErrorCode.ABORTED)
+        tink_bindings.ErrorCode.ABORTED)
+    self.assertEqual(test_status.error_code(), tink_bindings.ErrorCode.ABORTED)
 
   def test_is_ok(self):
     ok_result = status_example.return_value_status_or(5)
     self.assertEqual(ok_result, 5)
-    self.assertTrue(status.is_ok(ok_result))
+    self.assertTrue(tink_bindings.is_ok(ok_result))
     failure_result = status_example.make_failure_status_or(
-        status.ErrorCode.CANCELLED)
-    self.assertFalse(status.is_ok(failure_result))
+        tink_bindings.ErrorCode.CANCELLED)
+    self.assertFalse(tink_bindings.is_ok(failure_result))
 
   def test_return_alpha_beta_gamma(self):
     running_with_py2 = str is bytes

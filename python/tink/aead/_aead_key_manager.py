@@ -22,15 +22,13 @@ from __future__ import print_function
 from tink import core
 from tink.aead import _aead
 from tink.aead import _aead_wrapper
-from tink.cc.pybind import aead as cc_aead
-from tink.cc.pybind import cc_key_manager
-from tink.cc.pybind import cc_tink_config
+from tink.cc.pybind import tink_bindings
 
 
 class AeadCcToPyWrapper(_aead.Aead):
   """Transforms C++ Aead primitive into a Python primitive."""
 
-  def __init__(self, cc_primitive: cc_aead.Aead):
+  def __init__(self, cc_primitive: tink_bindings.Aead):
     self._aead = cc_primitive
 
   @core.use_tink_errors
@@ -44,7 +42,7 @@ class AeadCcToPyWrapper(_aead.Aead):
 
 def register() -> None:
   """Registers all AEAD key managers and AEAD wrapper in the Registry."""
-  cc_tink_config.register()
+  tink_bindings.register()
   for ident in (
       'AesCtrHmacAeadKey',
       'AesGcmKey',
@@ -56,7 +54,7 @@ def register() -> None:
   ):
     type_url = 'type.googleapis.com/google.crypto.tink.{}'.format(ident)
     key_manager = core.KeyManagerCcToPyWrapper(
-        cc_key_manager.AeadKeyManager.from_cc_registry(type_url), _aead.Aead,
+        tink_bindings.AeadKeyManager.from_cc_registry(type_url), _aead.Aead,
         AeadCcToPyWrapper)
     core.Registry.register_key_manager(key_manager, new_key_allowed=True)
   core.Registry.register_primitive_wrapper(_aead_wrapper.AeadWrapper())

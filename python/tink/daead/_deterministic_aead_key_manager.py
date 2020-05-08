@@ -20,8 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 from tink import core
-from tink.cc.pybind import cc_key_manager
-from tink.cc.pybind import cc_tink_config
+from tink.cc.pybind import tink_bindings
 from tink.daead import _deterministic_aead
 from tink.daead import _deterministic_aead_wrapper
 
@@ -47,11 +46,11 @@ class _DeterministicAeadCcToPyWrapper(_deterministic_aead.DeterministicAead):
 
 def register():
   """Registers all Hybrid key managers and wrapper in the Python Registry."""
-  cc_tink_config.register()
+  tink_bindings.register()
 
   type_url = 'type.googleapis.com/google.crypto.tink.AesSivKey'
   key_manager = core.KeyManagerCcToPyWrapper(
-      cc_key_manager.DeterministicAeadKeyManager.from_cc_registry(type_url),
+      tink_bindings.DeterministicAeadKeyManager.from_cc_registry(type_url),
       _deterministic_aead.DeterministicAead, _DeterministicAeadCcToPyWrapper)
   core.Registry.register_key_manager(key_manager, new_key_allowed=True)
   core.Registry.register_primitive_wrapper(

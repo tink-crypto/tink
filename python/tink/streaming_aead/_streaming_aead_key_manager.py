@@ -20,7 +20,7 @@ import typing
 from typing import Text, BinaryIO
 
 from tink import core
-from tink.cc.pybind import cc_key_manager
+from tink.cc.pybind import tink_bindings
 from tink.streaming_aead import _decrypting_stream
 from tink.streaming_aead import _encrypting_stream
 from tink.streaming_aead import _streaming_aead
@@ -52,5 +52,5 @@ class _StreamingAeadCcToPyWrapper(_streaming_aead.StreamingAead):
 def from_cc_registry(
     type_url: Text) -> core.KeyManager[_streaming_aead.StreamingAead]:
   return core.KeyManagerCcToPyWrapper(
-      cc_key_manager.StreamingAeadKeyManager.from_cc_registry(type_url),
+      tink_bindings.StreamingAeadKeyManager.from_cc_registry(type_url),
       _streaming_aead.StreamingAead, _StreamingAeadCcToPyWrapper)

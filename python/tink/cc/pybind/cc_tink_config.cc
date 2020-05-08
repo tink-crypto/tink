@@ -21,7 +21,11 @@
 namespace crypto {
 namespace tink {
 
-PYBIND11_MODULE(cc_tink_config, m) { m.def("register", CcTinkConfigRegister); }
+void PybindRegisterCcTinkConfig(pybind11::module* module) {
+  namespace py = pybind11;
+  py::module& m = *module;
+  m.def("register", CcTinkConfigRegister);
+}
 
 }  // namespace tink
 }  // namespace crypto

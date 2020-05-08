@@ -20,10 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 from tink import core
-from tink.cc.pybind import cc_key_manager
-from tink.cc.pybind import cc_tink_config
-from tink.cc.pybind import public_key_sign as cc_public_key_sign
-from tink.cc.pybind import public_key_verify as cc_public_key_verify
+from tink.cc.pybind import tink_bindings
 from tink.signature import _public_key_sign
 from tink.signature import _public_key_verify
 from tink.signature import _signature_wrapper
@@ -32,7 +29,7 @@ from tink.signature import _signature_wrapper
 class _PublicKeySignCcToPyWrapper(_public_key_sign.PublicKeySign):
   """Transforms C++ PublicKeySign into a Python primitive."""
 
-  def __init__(self, cc_primitive: cc_public_key_sign.PublicKeySign):
+  def __init__(self, cc_primitive: tink_bindings.PublicKeySign):
     self._public_key_sign = cc_primitive
 
   @core.use_tink_errors
@@ -43,7 +40,7 @@ class _PublicKeySignCcToPyWrapper(_public_key_sign.PublicKeySign):
 class _PublicKeyVerifyCcToPyWrapper(_public_key_verify.PublicKeyVerify):
   """Transforms C++ PublicKeyVerify into a Python primitive."""
 
-  def __init__(self, cc_primitive: cc_public_key_verify.PublicKeyVerify):
+  def __init__(self, cc_primitive: tink_bindings.PublicKeyVerify):
     self._public_key_verify = cc_primitive
 
   @core.use_tink_errors
@@ -53,13 +50,13 @@ class _PublicKeyVerifyCcToPyWrapper(_public_key_verify.PublicKeyVerify):
 
 def register():
   """Registers all signature key managers in the Python registry."""
-  cc_tink_config.register()
+  tink_bindings.register()
 
   for key_type_identifier in ('EcdsaPrivateKey', 'Ed25519PrivateKey',
                               'RsaSsaPssPrivateKey', 'RsaSsaPkcs1PrivateKey',):
     type_url = 'type.googleapis.com/google.crypto.tink.' + key_type_identifier
     key_manager = core.PrivateKeyManagerCcToPyWrapper(
-        cc_key_manager.PublicKeySignKeyManager.from_cc_registry(type_url),
+        tink_bindings.PublicKeySignKeyManager.from_cc_registry(type_url),
         _public_key_sign.PublicKeySign, _PublicKeySignCcToPyWrapper)
     core.Registry.register_key_manager(key_manager, new_key_allowed=True)
 
@@ -67,7 +64,7 @@ def register():
                               'RsaSsaPssPublicKey', 'RsaSsaPkcs1PublicKey',):
     type_url = 'type.googleapis.com/google.crypto.tink.' + key_type_identifier
     key_manager = core.KeyManagerCcToPyWrapper(
-        cc_key_manager.PublicKeyVerifyKeyManager.from_cc_registry(type_url),
+        tink_bindings.PublicKeyVerifyKeyManager.from_cc_registry(type_url),
         _public_key_verify.PublicKeyVerify, _PublicKeyVerifyCcToPyWrapper)
     core.Registry.register_key_manager(key_manager, new_key_allowed=True)
 

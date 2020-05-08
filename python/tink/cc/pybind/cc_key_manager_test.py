@@ -29,20 +29,18 @@ from tink.proto import hmac_pb2
 from tink.proto import tink_pb2
 from tink import aead
 from tink import hybrid
-from tink.cc.pybind import cc_key_manager
-from tink.cc.pybind import cc_tink_config
-from tink.cc.pybind import status as error
+from tink.cc.pybind import tink_bindings
 
 
 def setUpModule():
-  cc_tink_config.register()
+  tink_bindings.register()
 
 
 class AeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(AeadKeyManagerTest, self).setUp()
-    self.key_manager = cc_key_manager.AeadKeyManager.from_cc_registry(
+    self.key_manager = tink_bindings.AeadKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesEaxKey')
 
   def new_aes_eax_key_template(self, iv_size, key_size):
@@ -73,7 +71,7 @@ class AeadKeyManagerTest(absltest.TestCase):
 
   def test_invalid_params_throw_exception(self):
     key_template = self.new_aes_eax_key_template(9, 16)
-    with self.assertRaises(error.StatusNotOk):
+    with self.assertRaises(tink_bindings.StatusNotOk):
       self.key_manager.new_key_data(key_template)
 
   def test_encrypt_decrypt(self):
@@ -91,7 +89,7 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(DeterministicAeadKeyManagerTest, self).setUp()
-    daead_key_manager = cc_key_manager.DeterministicAeadKeyManager
+    daead_key_manager = tink_bindings.DeterministicAeadKeyManager
     self.key_manager = daead_key_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesSivKey')
 
@@ -120,7 +118,7 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def test_invalid_params_throw_exception(self):
     key_template = self.new_aes_siv_key_template(65)
-    with self.assertRaises(error.StatusNotOk):
+    with self.assertRaises(tink_bindings.StatusNotOk):
       self.key_manager.new_key_data(key_template)
 
   def test_encrypt_decrypt(self):
@@ -139,11 +137,11 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
 class HybridKeyManagerTest(absltest.TestCase):
 
   def hybrid_decrypt_key_manager(self):
-    return cc_key_manager.HybridDecryptKeyManager.from_cc_registry(
+    return tink_bindings.HybridDecryptKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey')
 
   def hybrid_encrypt_key_manager(self):
-    return cc_key_manager.HybridEncryptKeyManager.from_cc_registry(
+    return tink_bindings.HybridEncryptKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
 
   def test_new_key_data(self):
@@ -163,7 +161,7 @@ class HybridKeyManagerTest(absltest.TestCase):
                      common_pb2.NIST_P256)
 
   def test_new_key_data_invalid_params_throw_exception(self):
-    with self.assertRaisesRegex(error.StatusNotOk,
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
                                 'Unsupported elliptic curve'):
       self.hybrid_decrypt_key_manager().new_key_data(
           hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
@@ -192,7 +190,8 @@ class HybridKeyManagerTest(absltest.TestCase):
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
         .SerializeToString())
     hybrid_decrypt = decrypt_key_manager.primitive(key_data)
-    with self.assertRaisesRegex(error.StatusNotOk, 'ciphertext too short'):
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'ciphertext too short'):
       hybrid_decrypt.decrypt(b'bad ciphertext', b'some context info')
 
 
@@ -200,7 +199,7 @@ class MacKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(MacKeyManagerTest, self).setUp()
-    self.key_manager = cc_key_manager.MacKeyManager.from_cc_registry(
+    self.key_manager = tink_bindings.MacKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.HmacKey')
 
   def new_hmac_key_template(self, hash_type, tag_size, key_size):
@@ -231,7 +230,7 @@ class MacKeyManagerTest(absltest.TestCase):
 
   def test_invalid_params_throw_exception(self):
     key_template = self.new_hmac_key_template(common_pb2.SHA256, 9, 16)
-    with self.assertRaises(error.StatusNotOk):
+    with self.assertRaises(tink_bindings.StatusNotOk):
       self.key_manager.new_key_data(key_template)
 
   def test_mac_success(self):
@@ -248,7 +247,8 @@ class MacKeyManagerTest(absltest.TestCase):
     mac = self.key_manager.primitive(
         self.key_manager.new_key_data(
             self.new_hmac_key_template(common_pb2.SHA256, 16, 16)))
-    with self.assertRaisesRegex(error.StatusNotOk, 'verification failed'):
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'verification failed'):
       mac.verify_mac(b'0123456789ABCDEF', b'data')
 
 
@@ -256,10 +256,10 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(PublicKeySignVerifyKeyManagerTest, self).setUp()
-    public_key_verify_manager = cc_key_manager.PublicKeyVerifyKeyManager
+    public_key_verify_manager = tink_bindings.PublicKeyVerifyKeyManager
     self.key_manager_verify = public_key_verify_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EcdsaPublicKey')
-    public_key_sign_manager = cc_key_manager.PublicKeySignKeyManager
+    public_key_sign_manager = tink_bindings.PublicKeySignKeyManager
     self.key_manager_sign = public_key_sign_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey')
 
@@ -305,7 +305,7 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
   def test_new_key_data_verify(self):
     key_template = self.new_ecdsa_key_template(
         common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER, True)
-    with self.assertRaisesRegex(error.StatusNotOk, 'not supported'):
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk, 'not supported'):
       self.key_manager_verify.new_key_data(key_template)
 
   def test_signature_success(self):
@@ -337,10 +337,12 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
     data = b'data'
     signature = signer.sign(data)
 
-    with self.assertRaisesRegex(error.StatusNotOk, 'Signature is not valid'):
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'Signature is not valid'):
       verifier.verify(signature, b'wrongdata')
 
-    with self.assertRaisesRegex(error.StatusNotOk, 'Signature is not valid'):
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'Signature is not valid'):
       verifier.verify(b'wrongsignature', data)
 
 

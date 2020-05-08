@@ -22,7 +22,7 @@ from typing import Text
 
 from tink import aead
 from tink import core
-from tink.cc.pybind.cc_gcp_kms_client import GcpKmsClient as CcGcpKmsClient
+from tink.cc.pybind import tink_bindings
 
 GCP_KEYURI_PREFIX = "gcp-kms://"
 
@@ -56,7 +56,7 @@ class GcpKmsClient(object):
       raise core.TinkError
 
     # Use the C++ GCP KMS client
-    self.cc_client = CcGcpKmsClient(key_uri, credentials_path)
+    self.cc_client = tink_bindings.GcpKmsClient(key_uri, credentials_path)
 
   def does_support(self, key_uri: Text) -> bool:
     """Returns true iff this client supports KMS key specified in 'key_uri'.

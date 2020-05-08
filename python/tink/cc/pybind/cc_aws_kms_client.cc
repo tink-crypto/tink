@@ -24,8 +24,9 @@ namespace tink {
 namespace integration {
 namespace awskms {
 
-PYBIND11_MODULE(cc_aws_kms_client, m) {
+void PybindRegisterCcAwsKmsClient(pybind11::module* module) {
   namespace py = pybind11;
+  py::module& m = *module;
 
   py::class_<AwsKmsClient>(
       m, "AwsKmsClient",

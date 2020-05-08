@@ -23,8 +23,9 @@
 namespace crypto {
 namespace tink {
 
-PYBIND11_MODULE(public_key_verify, m) {
+void PybindRegisterPublicKeyVerify(pybind11::module* module) {
   namespace py = pybind11;
+  py::module& m = *module;
 
   // TODO(b/146492561): Reduce the number of complicated lambdas.
   py::class_<PublicKeyVerify>(

@@ -24,8 +24,9 @@ namespace tink {
 namespace integration {
 namespace gcpkms {
 
-PYBIND11_MODULE(cc_gcp_kms_client, m) {
+void PybindRegisterCcGcpKmsClient(pybind11::module* module) {
   namespace py = pybind11;
+  py::module& m = *module;
 
   py::class_<GcpKmsClient>(
       m, "GcpKmsClient",

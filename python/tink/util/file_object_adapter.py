@@ -23,10 +23,10 @@ from __future__ import print_function
 import io
 from typing import BinaryIO
 
-from tink.cc.pybind import python_file_object_adapter
+from tink.cc.pybind import tink_bindings
 
 
-class FileObjectAdapter(python_file_object_adapter.PythonFileObjectAdapter):
+class FileObjectAdapter(tink_bindings.PythonFileObjectAdapter):
   """Adapts a Python file object for use in C++."""
 
   def __init__(self, file_object: BinaryIO):

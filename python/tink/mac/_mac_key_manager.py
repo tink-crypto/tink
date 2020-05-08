@@ -19,9 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from tink import core
-from tink.cc.pybind import cc_key_manager
-from tink.cc.pybind import cc_tink_config
-from tink.cc.pybind import mac as cc_mac
+from tink.cc.pybind import tink_bindings
 from tink.mac import _mac
 from tink.mac import _mac_wrapper
 
@@ -29,7 +27,7 @@ from tink.mac import _mac_wrapper
 class _MacCcToPyWrapper(_mac.Mac):
   """Transforms C++ Mac primitive into a Python primitive."""
 
-  def __init__(self, cc_primitive: cc_mac.Mac):
+  def __init__(self, cc_primitive: tink_bindings.Mac):
     self._cc_mac = cc_primitive
 
   @core.use_tink_errors
@@ -42,12 +40,12 @@ class _MacCcToPyWrapper(_mac.Mac):
 
 
 def register():
-  cc_tink_config.register()
+  tink_bindings.register()
 
   for key_type_identifier in ('HmacKey', 'AesCmacKey',):
     type_url = 'type.googleapis.com/google.crypto.tink.' + key_type_identifier
     key_manager = core.KeyManagerCcToPyWrapper(
-        cc_key_manager.MacKeyManager.from_cc_registry(type_url), _mac.Mac,
+        tink_bindings.MacKeyManager.from_cc_registry(type_url), _mac.Mac,
         _MacCcToPyWrapper)
     core.Registry.register_key_manager(key_manager, new_key_allowed=True)
   core.Registry.register_primitive_wrapper(_mac_wrapper.MacWrapper())

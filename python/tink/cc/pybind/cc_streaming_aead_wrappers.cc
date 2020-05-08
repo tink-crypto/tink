@@ -23,12 +23,9 @@
 namespace crypto {
 namespace tink {
 
-PYBIND11_MODULE(cc_streaming_aead_wrappers, m) {
+void PybindRegisterCcStreamingAeadWrappers(pybind11::module* module) {
   namespace py = pybind11;
-
-  ImportTinkPythonModule("cc.pybind.input_stream_adapter");
-  ImportTinkPythonModule("cc.pybind.output_stream_adapter");
-  ImportTinkPythonModule("cc.pybind.python_file_object_adapter");
+  py::module& m = *module;
 
   // TODO(b/146492561): Reduce the number of complicated lambdas.
   m.def(

@@ -1,5 +1,3 @@
-// Copyright 2019 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,30 +11,15 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "tink/cc/output_stream_adapter.h"
-
-#include "pybind11/pybind11.h"
-#include "tink/cc/pybind/status_casters.h"
+#ifndef TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
+#define TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
 
 namespace crypto {
 namespace tink {
 
-void PybindRegisterOutputStreamAdapter(pybind11::module* module) {
-  namespace py = pybind11;
-  py::module& m = *module;
-
-  // TODO(b/146492561): Reduce the number of complicated lambdas.
-  py::class_<OutputStreamAdapter>(m, "OutputStreamAdapter")
-      .def(
-          "write",
-          [](OutputStreamAdapter* self,
-             const py::bytes& data) -> util::StatusOr<int64_t> {
-            return self->Write(std::string(data));
-          },
-          py::arg("data"))
-      .def("close", &OutputStreamAdapter::Close);
-}
+void PybindRegisterHybridDecrypt(pybind11::module* m);
 
 }  // namespace tink
 }  // namespace crypto
+
+#endif  // TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_

@@ -22,7 +22,7 @@ from absl.testing.absltest import mock
 
 from tink import core
 from tink import streaming_aead
-from tink.cc.pybind import status as error
+from tink.cc.pybind import tink_bindings
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -42,7 +42,7 @@ class FakeInputStreamAdapter(object):
         size = 100
       return self._adapter.read(size)
     except EOFError:
-      raise error.StatusNotOk(11, 'EOF')
+      raise tink_bindings.StatusNotOk(11, 'EOF')
 
   def read1(self, size=-1):
     del size  # unused

@@ -34,11 +34,7 @@ py_library(
     deps = [
         ":_aead",
         ":_aead_wrapper",
-        "//tink/cc/pybind:aead",
-        "//tink/cc/pybind:cc_key_manager",
-        "//tink/cc/pybind:cc_tink_config",
-        "//tink/cc/pybind:deterministic_aead",
-        "//tink/cc/pybind:streaming_aead",
+        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
     ],
 )

@@ -25,7 +25,7 @@ import io
 from typing import Iterable, BinaryIO
 
 from tink import core
-from tink.cc.pybind import cc_streaming_aead_wrappers
+from tink.cc.pybind import tink_bindings
 from tink.util import file_object_adapter
 
 
@@ -77,7 +77,7 @@ class EncryptingStream(io.BufferedIOBase):
   @core.use_tink_errors
   def _get_output_stream_adapter(cc_primitive, aad, destination):
     """Implemented as a separate method to ensure correct error transform."""
-    return cc_streaming_aead_wrappers.new_cc_encrypting_stream(
+    return tink_bindings.new_cc_encrypting_stream(
         cc_primitive, aad, destination)
 
   @core.use_tink_errors
