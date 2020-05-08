@@ -1,0 +1,2 @@
+# Rules File Format: https://github.com/bazelbuild/bazel/blob/master/third_party/jarjar/java/com/tonicsystems/jarjar/help.txt.
+rule com.google.protobuf.** com.google.crypto.tink.shaded.protobuf.@1

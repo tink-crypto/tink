@@ -24,46 +24,40 @@ def _java_single_jar(ctx):
     for dep in ctx.attr.deps:
         inputs = depset(transitive = [inputs, dep[JavaInfo].transitive_runtime_deps])
         source_jars += dep[JavaInfo].transitive_source_jars.to_list()
-
-    compress = ""
-    if ctx.attr.compress == "preserve":
-        compress = "--dont_change_compression"
-    elif ctx.attr.compress == "yes":
-        compress = "--compression"
-    elif ctx.attr.compress == "no":
-        pass
-    else:
-        fail("\"compress\" attribute (%s) must be: yes, no, preserve." % ctx.attr.compress)
-
     if ctx.attr.source_jar:
         inputs = depset(direct = source_jars)
-        compress = ""
 
     args = ctx.actions.args()
-    args.add("--sources")
-    args.add_all(inputs)
+    args.add_all("--sources", inputs)
     args.use_param_file(
         "@%s",
         use_always = True,
     )
     args.set_param_file_format("multiline")
+    args.add("--output", ctx.outputs.jar)
+    args.add("--normalize")
 
-    include_prefixes = " ".join([x.replace(".", "/") for x in ctx.attr.root_packages])
+    # Maybe compress code.
+    if not ctx.attr.source_jar:
+        # Deal with limitation of singlejar flags: tool's default behavior is
+        # "no", but you get that behavior only by absence of compression flags.
+        if ctx.attr.compress == "preserve":
+            args.add("--dont_change_compression")
+        elif ctx.attr.compress == "yes":
+            args.add("--compression")
+        elif ctx.attr.compress == "no":
+            pass
+        else:
+            fail("\"compress\" attribute (%s) must be: yes, no, preserve." % ctx.attr.compress)
+
+    # Each package prefix has to be specified in its own --include_prefixes arg.
+    for p in ctx.attr.root_packages:
+        args.add("--include_prefixes", p.replace(".", "/"))
 
     ctx.actions.run(
         inputs = inputs,
         outputs = [ctx.outputs.jar],
-        arguments = [
-                        args,
-                        "--output",
-                        ctx.outputs.jar.path,
-                        "--include_prefixes",
-                        include_prefixes,
-                        "--normalize",
-                    ] +
-                    # Deal with limitation of singlejar flags: tool's default behavior is
-                    # "no", but you get that behavior only by absence of compression flags.
-                    ([] if not compress else [compress]),
+        arguments = [args],
         progress_message = "Merging into %s" % ctx.outputs.jar.short_path,
         mnemonic = "JavaSingleJar",
         executable = ctx.executable._singlejar,
@@ -86,8 +80,7 @@ java_single_jar = rule(
         "jar": "%{name}.jar",
     },
     implementation = _java_single_jar,
-)
-"""
+    doc = """
 Collects Java dependencies and jar files into a single jar
 
 Args:
@@ -99,10 +92,11 @@ Args:
   compress: Whether to always deflate ("yes"), always store ("no"), or pass
       through unmodified ("preserve"). The default is "preserve", and is the
       most efficient option -- no extra work is done to inflate or deflate.
-  source_jar: Whether to combine the source jars of input to create a single
-      output source jar.
+  source_jar: Whether to combine only the source jars of input to create a single
+      output source jar. The compiled code jars of input will be ignored.
   root_packages: Java packages to include in generated jar.
 
 Outputs:
   {name}.jar: A single jar containing all of the input.
-"""
+""",
+)

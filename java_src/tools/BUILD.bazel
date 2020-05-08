@@ -1,3 +1,14 @@
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
+
+java_binary(
+    name = "jarjar",
+    main_class = "org.pantsbuild.jarjar.Main",
+    visibility = ["//visibility:public"],
+    runtime_deps = [
+        "@maven//:org_ow2_asm_asm",
+        "@maven//:org_ow2_asm_asm_commons",
+        "@maven//:org_pantsbuild_jarjar",
+    ],
+)

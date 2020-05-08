@@ -63,16 +63,5 @@
 
   <properties>
     <java.version>1.7</java.version>
-
-    <!-- library versions -->
-    <protobuf-javalite.version>3.11.1</protobuf-javalite.version>
   </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-javalite</artifactId>
-      <version>${protobuf-javalite.version}</version>
-    </dependency>
-  </dependencies>
 </project>

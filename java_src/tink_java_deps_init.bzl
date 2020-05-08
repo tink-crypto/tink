@@ -31,6 +31,9 @@ def tink_java_deps_init():
             "joda-time:joda-time:2.10.3",
             "junit:junit:4.13",
             "org.mockito:mockito-core:2.23.0",
+            "org.ow2.asm:asm:7.0",
+            "org.ow2.asm:asm-commons:7.0",
+            "org.pantsbuild:jarjar:1.7.2",
         ],
         repositories = [
             "https://jcenter.bintray.com/",
