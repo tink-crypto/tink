@@ -79,6 +79,13 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-">add(KeyTemplate)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">This method takes a KeyTemplate proto, which is an internal implementation detail.
+     Please use the add method that takes a <a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> POJO.</span></div>
+</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.KeyTemplate-">add(KeyTemplate)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
+<dd>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClients.html#add-com.google.crypto.tink.KmsClient-">add(KmsClient)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink">KmsClients</a></dt>
@@ -93,7 +100,11 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#addNewKey-com.google.crypto.tink.proto.KeyTemplate-boolean-">addNewKey(KeyTemplate, boolean)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
 <dd>
-<div class="block">Generates a fresh key using <code>keyTemplate</code> and returns the <code>keyId</code> of it.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Please use <a href="com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-"><code>KeysetManager.add(com.google.crypto.tink.proto.KeyTemplate)</code></a>. This method adds a new key and when <code>asPrimary</code> is
+     true immediately promotes it to primary. However, when you do keyset rotation, you almost
+     never want to make the new key primary, because old binaries don't know the new key yet.</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignaturePemKeysetReader.Builder.html#addPem-java.lang.String-com.google.crypto.tink.subtle.PemKeyType-">addPem(String, PemKeyType)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignaturePemKeysetReader.Builder.html" title="class in com.google.crypto.tink.signature">SignaturePemKeysetReader.Builder</a></dt>
 <dd>
@@ -192,6 +203,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#aes128CtrHmacSha2564KBTemplate--">aes128CtrHmacSha2564KBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesEaxKeyManager.html#aes128EaxTemplate--">aes128EaxTemplate()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesEaxKeyManager.html" title="class in com.google.crypto.tink.aead">AesEaxKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#aes128GcmHkdf1MBTemplate--">aes128GcmHkdf1MBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#aes128GcmHkdf4KBTemplate--">aes128GcmHkdf4KBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
@@ -272,6 +285,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#aes256CtrHmacSha2561MBTemplate--">aes256CtrHmacSha2561MBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#aes256CtrHmacSha2564KBTemplate--">aes256CtrHmacSha2564KBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesEaxKeyManager.html#aes256EaxTemplate--">aes256EaxTemplate()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesEaxKeyManager.html" title="class in com.google.crypto.tink.aead">AesEaxKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#aes256GcmHkdf1MBTemplate--">aes256GcmHkdf1MBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -1193,7 +1208,17 @@
 <div class="block">Generates a new key pair for <code>spec</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#generateNew-com.google.crypto.tink.proto.KeyTemplate-">generateNew(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">This method takes a KeyTemplate proto, which is an internal implementation detail.
+     Please use the generateNew method that takes a <a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> POJO.</span></div>
+</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#generateNew-com.google.crypto.tink.KeyTemplate-">generateNew(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
+<dd>
+<div class="block">Generates a new <a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> that contains a single fresh key generated according to
+ <code>keyTemplate</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html#generateNewAeadKey-java.lang.String-">generateNewAeadKey(String)</a></span> - Static method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient</a></dt>
 <dd>
 <div class="block">Generates a new key in Android Keystore.</div>
@@ -2623,6 +2648,10 @@
 <dd>
 <div class="block">Raw prefix is empty.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesEaxKeyManager.html#rawAes128EaxTemplate--">rawAes128EaxTemplate()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesEaxKeyManager.html" title="class in com.google.crypto.tink.aead">AesEaxKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesEaxKeyManager.html#rawAes256EaxTemplate--">rawAes256EaxTemplate()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesEaxKeyManager.html" title="class in com.google.crypto.tink.aead">AesEaxKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetReader.html#read--">read()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetReader.html" title="class in com.google.crypto.tink">BinaryKeysetReader</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/CleartextKeysetHandle.html#read-com.google.crypto.tink.KeysetReader-">read(KeysetReader)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink">CleartextKeysetHandle</a></dt>
@@ -2864,8 +2893,11 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#rotate-com.google.crypto.tink.proto.KeyTemplate-">rotate(KeyTemplate)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
 <dd>
-<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
- primary key.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Please use <a href="com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-"><code>KeysetManager.add(com.google.crypto.tink.proto.KeyTemplate)</code></a>. This method adds a new key and immediately promotes it to
+     primary. However, when you do keyset rotation, you almost never want to make the new key
+     primary, because old binaries don't know the new key yet.</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureConfig.html#RSA_PKCS1_PRIVATE_KEY_TYPE_URL">RSA_PKCS1_PRIVATE_KEY_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature">SignatureConfig</a></dt>
 <dd>&nbsp;</dd>
