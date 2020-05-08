@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -449,6 +450,17 @@ public class AesGcmKeyManagerTest {
   }
 
   @Test
+  public void testRawAes128GcmTemplate() throws Exception {
+    KeyTemplate template = AesGcmKeyManager.rawAes128GcmTemplate();
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesGcmKeyFormat format =
+        AesGcmKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(16, format.getKeySize());
+  }
+
+  @Test
   public void testAes256GcmTemplate() throws Exception {
     KeyTemplate template = AesGcmKeyManager.aes256GcmTemplate();
     assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
@@ -457,5 +469,26 @@ public class AesGcmKeyManagerTest {
         AesGcmKeyFormat.parseFrom(
             ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
     assertEquals(32, format.getKeySize());
+  }
+
+  @Test
+  public void testRawAes256GcmTemplate() throws Exception {
+    KeyTemplate template = AesGcmKeyManager.rawAes256GcmTemplate();
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesGcmKeyFormat format =
+        AesGcmKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(32, format.getKeySize());
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    AesGcmKeyManager manager = new AesGcmKeyManager();
+
+    testKeyTemplateCompatible(manager, AesGcmKeyManager.aes128GcmTemplate());
+    testKeyTemplateCompatible(manager, AesGcmKeyManager.rawAes128GcmTemplate());
+    testKeyTemplateCompatible(manager, AesGcmKeyManager.aes256GcmTemplate());
+    testKeyTemplateCompatible(manager, AesGcmKeyManager.rawAes256GcmTemplate());
   }
 }

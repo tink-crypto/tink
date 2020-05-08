@@ -17,16 +17,19 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
 import org.junit.Test;
@@ -138,5 +141,33 @@ public class ChaCha20Poly1305KeyManagerTest {
         .setVersion(0)
         .setKeyValue(ByteString.copyFrom(Random.randBytes(keySize)))
         .build();
+  }
+
+  @Test
+  public void testChaCha20Poly1305Template() throws Exception {
+    KeyTemplate template = ChaCha20Poly1305KeyManager.chaCha20Poly1305Template();
+    assertEquals(new ChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
+    ChaCha20Poly1305KeyFormat unused =
+        ChaCha20Poly1305KeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+  }
+
+  @Test
+  public void testRawChaCha20Poly1305Template() throws Exception {
+    KeyTemplate template = ChaCha20Poly1305KeyManager.rawChaCha20Poly1305Template();
+    assertEquals(new ChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    ChaCha20Poly1305KeyFormat unused =
+        ChaCha20Poly1305KeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
+
+    testKeyTemplateCompatible(manager, ChaCha20Poly1305KeyManager.chaCha20Poly1305Template());
+    testKeyTemplateCompatible(manager, ChaCha20Poly1305KeyManager.rawChaCha20Poly1305Template());
   }
 }
