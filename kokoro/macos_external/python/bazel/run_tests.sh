@@ -3,6 +3,8 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
+# Install protobuf pip packages
+pip3 install protobuf --user
 
 run_bazel_tests() {
   (
