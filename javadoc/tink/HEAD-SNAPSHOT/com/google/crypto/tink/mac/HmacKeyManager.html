@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":9,"i6":10};
+var methods = {"i0":10,"i1":10,"i2":9,"i3":9,"i4":9,"i5":9,"i6":10,"i7":10,"i8":10,"i9":9,"i10":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -113,7 +113,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <hr>
 <br>
-<pre>public class <span class="typeNameLabel">HmacKeyManager</span>
+<pre>public final class <span class="typeNameLabel">HmacKeyManager</span>
 extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacKey&gt;</pre>
 <div class="block">This key manager generates new <code>HmacKey</code> keys and produces new instances of <code>MacJce</code>.</div>
 </li>
@@ -179,28 +179,44 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 </td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha256HalfDigestTemplate--">hmacSha256HalfDigestTemplate</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha256Template--">hmacSha256Template</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha512HalfDigestTemplate--">hmacSha512HalfDigestTemplate</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha512Template--">hmacSha512Template</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a>&lt;com.google.crypto.tink.proto.HmacKeyFormat,com.google.crypto.tink.proto.HmacKey&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#keyFactory--">keyFactory</a></span>()</code>
 <div class="block">Returns the <a href="../../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink"><code>KeyTypeManager.KeyFactory</code></a> for this key type.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>com.google.crypto.tink.proto.KeyData.KeyMaterialType</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#keyMaterialType--">keyMaterialType</a></span>()</code>
 <div class="block">Returns the <code>KeyData.KeyMaterialType</code> for this proto.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>com.google.crypto.tink.proto.HmacKey</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey</a></span>(com.google.protobuf.ByteString&nbsp;byteString)</code>
 <div class="block">Parses a serialized key proto.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#register-boolean-">register</a></span>(boolean&nbsp;newKeyAllowed)</code>&nbsp;</td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/HmacKeyManager.html#validateKey-com.google.crypto.tink.proto.HmacKey-">validateKey</a></span>(com.google.crypto.tink.proto.HmacKey&nbsp;key)</code>
 <div class="block">Checks if the given <code>keyProto</code> is a valid key.</div>
@@ -356,7 +372,7 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <a name="register-boolean-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>register</h4>
 <pre>public static&nbsp;void&nbsp;register(boolean&nbsp;newKeyAllowed)
@@ -364,6 +380,86 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="hmacSha256HalfDigestTemplate--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hmacSha256HalfDigestTemplate</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;hmacSha256HalfDigestTemplate()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>A <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of HMAC keys with the following
+     parameters:
+     <ul>
+       <li>Key size: 32 bytes
+       <li>Tag size: 16 bytes
+       <li>Hash function: SHA256
+       <li>Prefix type: <code>KeyTemplate.OutputPrefixType#TINK</code>
+     </ul></dd>
+</dl>
+</li>
+</ul>
+<a name="hmacSha256Template--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hmacSha256Template</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;hmacSha256Template()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>A <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of HMAC keys with the following
+     parameters:
+     <ul>
+       <li>Key size: 32 bytes
+       <li>Tag size: 32 bytes
+       <li>Hash function: SHA256
+       <li>Prefix type: <code>KeyTemplate.OutputPrefixType#TINK</code>
+     </ul></dd>
+</dl>
+</li>
+</ul>
+<a name="hmacSha512HalfDigestTemplate--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hmacSha512HalfDigestTemplate</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;hmacSha512HalfDigestTemplate()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>A <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of HMAC keys with the following
+     parameters:
+     <ul>
+       <li>Key size: 64 bytes
+       <li>Tag size: 32 bytes
+       <li>Hash function: SHA512
+       <li>Prefix type: <code>KeyTemplate.OutputPrefixType#TINK</code>
+     </ul></dd>
+</dl>
+</li>
+</ul>
+<a name="hmacSha512Template--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>hmacSha512Template</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;hmacSha512Template()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>A <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of HMAC keys with the following
+     parameters:
+     <ul>
+       <li>Key size: 64 bytes
+       <li>Tag size: 64 bytes
+       <li>Hash function: SHA512
+       <li>Prefix type: <code>KeyTemplate.OutputPrefixType#TINK</code>
+     </ul></dd>
 </dl>
 </li>
 </ul>
