@@ -117,6 +117,8 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":cli_aead",
+        ":cli_daead",
+        ":cli_mac",
         ":cli_tinkey",
         requirement("absl-py"),
     ],

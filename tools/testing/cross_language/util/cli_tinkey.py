@@ -20,12 +20,14 @@ import tempfile
 import tink
 from tink import cleartext_keyset_handle
 
-# All key templates that are suppored.
-KEY_TEMPLATES = [
-    'AES128_GCM', 'AES256_GCM', 'AES128_CTR_HMAC_SHA256',
-    'AES256_CTR_HMAC_SHA256', 'XCHACHA20_POLY1305', 'AES128_EAX', 'AES256_EAX',
-    'CHACHA20_POLY1305'
-]
+AEAD_KEY_TEMPLATES = ('AES128_GCM', 'AES256_GCM', 'AES128_CTR_HMAC_SHA256',
+                      'AES256_CTR_HMAC_SHA256', 'XCHACHA20_POLY1305',
+                      'AES128_EAX', 'AES256_EAX', 'CHACHA20_POLY1305')
+
+DAEAD_KEY_TEMPLATE = 'AES256_SIV'
+
+MAC_KEY_TEMPLATES = ('HMAC_SHA256_128BITTAG', 'HMAC_SHA256_256BITTAG',
+                     'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG')
 
 # Path is relative to tools directory
 _TINKEY_CLI_PATH = 'tinkey/tinkey'

@@ -23,7 +23,7 @@ from tink import daead
 
 from typing import Text
 
-# All languages that have an AEAD CLI.
+# All languages that have an Deterministic AEAD CLI.
 LANGUAGES = ('cc', 'go', 'java', 'python')
 
 # Path are relative to tools directory.

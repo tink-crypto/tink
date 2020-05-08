@@ -58,8 +58,6 @@ class CliMac(mac.Mac):
       with open(data_filename, 'wb') as f:
         f.write(data)
       mac_filename = os.path.join(tmpdir, 'mac_file')
-      if os.path.exists(mac_filename):
-        os.remove(mac_filename)
       try:
         unused_return_value = subprocess.check_output([
             self._cli, keyset_filename, 'compute', data_filename, mac_filename
@@ -83,8 +81,6 @@ class CliMac(mac.Mac):
       with open(mac_filename, 'wb') as f:
         f.write(mac_value)
       result_filename = os.path.join(tmpdir, 'result_file')
-      if os.path.exists(result_filename):
-        os.remove(result_filename)
       try:
         unused_return_value = subprocess.check_output([
             self._cli, keyset_filename, 'verify',

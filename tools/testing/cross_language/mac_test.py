@@ -15,7 +15,6 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 import tink
-from tink import cleartext_keyset_handle
 from tink import mac
 
 from tools.testing.cross_language.util import cli_mac
@@ -34,15 +33,14 @@ class MacTest(parameterized.TestCase):
       ('HMAC_SHA512_256BITTAG', ('cc', 'go', 'java', 'python')),
       ('HMAC_SHA512_512BITTAG', ('cc', 'go', 'java', 'python')))
   def test_compute_verify(self, key_template, supported_langs):
-    keyset = cli_tinkey.generate_keyset(key_template)
-    keyset_handle = cleartext_keyset_handle.from_keyset(keyset)
+    keyset_handle = cli_tinkey.generate_keyset_handle(key_template)
     supported_macs = [
         cli_mac.CliMac(lang, keyset_handle)
         for lang in supported_langs
     ]
     unsupported_macs = [
         cli_mac.CliMac(lang, keyset_handle)
-        for lang in cli_mac.ALL_LANGUAGES
+        for lang in cli_mac.LANGUAGES
         if lang not in supported_langs
     ]
     for p in supported_macs:
@@ -53,10 +51,10 @@ class MacTest(parameterized.TestCase):
       for p2 in supported_macs:
         self.assertIsNone(p2.verify_mac(mac_value, data))
       for p2 in unsupported_macs:
-        with self.assertRaises(tink.Error):
+        with self.assertRaises(tink.TinkError):
           p2.verify_mac(mac_value, data)
     for p in unsupported_macs:
-      with self.assertRaises(tink.Error):
+      with self.assertRaises(tink.TinkError):
         p.compute_mac(data)
 
 

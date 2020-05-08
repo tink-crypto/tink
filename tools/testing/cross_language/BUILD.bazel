@@ -135,7 +135,7 @@ sh_test(
 )
 
 sh_test(
-    name = "mac_test",
+    name = "mac_test_sh",
     size = "medium",
     srcs = [
         "mac_test.sh",
@@ -147,6 +147,20 @@ sh_test(
         "//testing/go:mac_cli_go",
         "//testing/python:mac_cli_python",
         "//tinkey",
+    ],
+)
+
+py_test(
+    name = "mac_test",
+    srcs = ["mac_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "//testing/cross_language/util:cli_mac",
+        "//testing/cross_language/util:cli_tinkey",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/mac",
     ],
 )
 
