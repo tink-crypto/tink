@@ -20,15 +20,21 @@ import com.google.crypto.tink.proto.HkdfPrfParams;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 
-/** Key templates for PRF-Keys. */
-public class PrfKeyTemplates {
+/**
+ * Key templates for PRF-Keys.
+ *
+ * @deprecated use the key template methods in the key managers, e.g.,
+ *     HkdfPrfKeyManager.hkdfSha256Template().
+ */
+@Deprecated
+public final class PrfKeyTemplates {
 
   private PrfKeyTemplates() {}
 
   private static KeyTemplate createHkdfKeyTemplate() {
     HkdfPrfKeyFormat format =
         HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
+            .setKeySize(32) // the size in bytes of the HKDF key
             .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
             .build();
     return KeyTemplate.newBuilder()

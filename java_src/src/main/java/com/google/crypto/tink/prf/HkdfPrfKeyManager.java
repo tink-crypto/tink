@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.prf;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.HashType;
@@ -171,5 +172,24 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
 
   public static String staticKeyType() {
     return new HkdfPrfKeyManager().getKeyType();
+  }
+
+  /**
+   * Generates a {@link KeyTemplate} for HKDF-PRF keys with the following parameters.
+   *
+   * <ul>
+   *   <li>Hash function: SHA256
+   *   <li>HMAC key size: 32 bytes
+   *   <li>Salt: empty
+   * </ul>
+   */
+  public static final KeyTemplate hkdfSha256Template() {
+    HkdfPrfKeyFormat format =
+        HkdfPrfKeyFormat.newBuilder()
+            .setKeySize(32) // the size in bytes of the HKDF key
+            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
+            .build();
+    return KeyTemplate.create(
+        HkdfPrfKeyManager.staticKeyType(), format.toByteArray(), KeyTemplate.OutputPrefixType.RAW);
   }
 }
