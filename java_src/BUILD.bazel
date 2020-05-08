@@ -190,15 +190,15 @@ gen_maven_jar_rules(
 )
 
 gen_maven_jar_rules(
-    name = "tink-android-maven",
+    name = "tink-android",
     doctitle = "Tink Cryptography API for Android",
     deps = lite_proto_deps + android_deps + cleartext_android_deps + subtle_deps,
 )
 
 # Shading com.google.protobuf classes.
 jar_jar(
-    name = "tink-android",
-    input_jar = ":tink-android-maven",
+    name = "tink-android-shaded",
+    input_jar = ":tink-android",
     rules = "jar_jar_rules.txt",
 )
 
