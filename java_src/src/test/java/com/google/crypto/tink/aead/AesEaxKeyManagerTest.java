@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -353,5 +354,13 @@ public class AesEaxKeyManagerTest {
     assertEquals(32, format.getKeySize());
     assertTrue(format.hasParams());
     assertEquals(16, format.getParams().getIvSize());
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    testKeyTemplateCompatible(manager, AesEaxKeyManager.aes128EaxTemplate());
+    testKeyTemplateCompatible(manager, AesEaxKeyManager.rawAes128EaxTemplate());
+    testKeyTemplateCompatible(manager, AesEaxKeyManager.aes256EaxTemplate());
+    testKeyTemplateCompatible(manager, AesEaxKeyManager.rawAes256EaxTemplate());
   }
 }

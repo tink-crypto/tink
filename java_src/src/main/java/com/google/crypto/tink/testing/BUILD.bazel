@@ -103,6 +103,28 @@ java_library(
 )
 
 java_library(
+    name = "key_type_manager_test_util",
+    srcs = ["KeyTypeManagerTestUtil.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        "//src/main/java/com/google/crypto/tink:core",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+java_library(
+    name = "key_type_manager_test_util-android",
+    srcs = ["KeyTypeManagerTestUtil.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        "//src/main/java/com/google/crypto/tink:core",
+        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+java_library(
     name = "wycheproof_test_util",
     srcs = ["WycheproofTestUtil.java"],
     javacopts = JAVACOPTS_OSS,
