@@ -17,8 +17,10 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.proto.HashType;
@@ -29,6 +31,7 @@ import com.google.crypto.tink.subtle.MacJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -332,5 +335,67 @@ public class HmacKeyManagerTest {
     for (int i = 0; i < keySize; ++i) {
       assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
     }
+  }
+
+  @Test
+  public void testHmacSha256HalfDigestTemplate() throws Exception {
+    KeyTemplate template = HmacKeyManager.hmacSha256HalfDigestTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new HmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getTagSize()).isEqualTo(16);
+    assertThat(format.getParams().getHash()).isEqualTo(HashType.SHA256);
+  }
+
+  @Test
+  public void testHmacSha256Template() throws Exception {
+    KeyTemplate template = HmacKeyManager.hmacSha256Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new HmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getTagSize()).isEqualTo(32);
+    assertThat(format.getParams().getHash()).isEqualTo(HashType.SHA256);
+  }
+
+  @Test
+  public void testHmacSha512HalfDigestTemplate() throws Exception {
+    KeyTemplate template = HmacKeyManager.hmacSha512HalfDigestTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new HmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(64);
+    assertThat(format.getParams().getTagSize()).isEqualTo(32);
+    assertThat(format.getParams().getHash()).isEqualTo(HashType.SHA512);
+  }
+
+  @Test
+  public void testHmacSha512Template() throws Exception {
+    KeyTemplate template = HmacKeyManager.hmacSha512Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new HmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    HmacKeyFormat format =
+        HmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(64);
+    assertThat(format.getParams().getTagSize()).isEqualTo(64);
+    assertThat(format.getParams().getHash()).isEqualTo(HashType.SHA512);
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    HmacKeyManager manager = new HmacKeyManager();
+
+    testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha256Template());
+    testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha256HalfDigestTemplate());
+    testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha512Template());
+    testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha512HalfDigestTemplate());
   }
 }

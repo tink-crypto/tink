@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.mac;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
@@ -38,7 +39,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * This key manager generates new {@code HmacKey} keys and produces new instances of {@code MacJce}.
  */
-public class HmacKeyManager extends KeyTypeManager<HmacKey> {
+public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
   public HmacKeyManager() {
     super(
         HmacKey.class,
@@ -173,5 +174,72 @@ public class HmacKeyManager extends KeyTypeManager<HmacKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new HmacKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of HMAC keys with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 32 bytes
+   *       <li>Tag size: 16 bytes
+   *       <li>Hash function: SHA256
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
+   *     </ul>
+   */
+  public static final KeyTemplate hmacSha256HalfDigestTemplate() {
+    return createTemplate(32, 16, HashType.SHA256);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of HMAC keys with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 32 bytes
+   *       <li>Tag size: 32 bytes
+   *       <li>Hash function: SHA256
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
+   *     </ul>
+   */
+  public static final KeyTemplate hmacSha256Template() {
+    return createTemplate(32, 32, HashType.SHA256);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of HMAC keys with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 64 bytes
+   *       <li>Tag size: 32 bytes
+   *       <li>Hash function: SHA512
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
+   *     </ul>
+   */
+  public static final KeyTemplate hmacSha512HalfDigestTemplate() {
+    return createTemplate(64, 32, HashType.SHA512);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of HMAC keys with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 64 bytes
+   *       <li>Tag size: 64 bytes
+   *       <li>Hash function: SHA512
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
+   *     </ul>
+   */
+  public static final KeyTemplate hmacSha512Template() {
+    return createTemplate(64, 64, HashType.SHA512);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link HmacKeyFormat} with some specified
+   *     parameters.
+   */
+  private static KeyTemplate createTemplate(int keySize, int tagSize, HashType hashType) {
+    HmacParams params = HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build();
+    HmacKeyFormat format = HmacKeyFormat.newBuilder().setParams(params).setKeySize(keySize).build();
+    return KeyTemplate.create(
+        new HmacKeyManager().getKeyType(), format.toByteArray(), KeyTemplate.OutputPrefixType.TINK);
   }
 }
