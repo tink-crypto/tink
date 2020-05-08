@@ -66,6 +66,41 @@ py_test(
 )
 
 py_library(
+    name = "cli_hybrid",
+    testonly = 1,
+    srcs = [
+        "cli_hybrid.py",
+    ],
+    data = [
+        "//testing:hybrid_decrypt_cli_java",
+        "//testing:hybrid_encrypt_cli_java",
+        "//testing/cc:hybrid_decrypt_cli_cc",
+        "//testing/cc:hybrid_encrypt_cli_cc",
+        "//testing/go:hybrid_decrypt_cli_go",
+        "//testing/go:hybrid_encrypt_cli_go",
+        "//testing/python:hybrid_decrypt_cli_python",
+        "//testing/python:hybrid_encrypt_cli_python",
+    ],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/hybrid",
+    ],
+)
+
+py_test(
+    name = "cli_hybrid_test",
+    srcs = ["cli_hybrid_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":cli_hybrid",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/hybrid",
+    ],
+)
+
+py_library(
     name = "cli_mac",
     testonly = 1,
     srcs = [
@@ -118,6 +153,7 @@ py_test(
     deps = [
         ":cli_aead",
         ":cli_daead",
+        ":cli_hybrid",
         ":cli_mac",
         ":cli_tinkey",
         requirement("absl-py"),

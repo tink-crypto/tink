@@ -26,6 +26,10 @@ AEAD_KEY_TEMPLATES = ('AES128_GCM', 'AES256_GCM', 'AES128_CTR_HMAC_SHA256',
 
 DAEAD_KEY_TEMPLATE = 'AES256_SIV'
 
+HYBRID_KEY_TEMPLATES = (
+    'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
+    'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM')
+
 MAC_KEY_TEMPLATES = ('HMAC_SHA256_128BITTAG', 'HMAC_SHA256_256BITTAG',
                      'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG')
 
@@ -39,7 +43,7 @@ def _tools_path():
 
 
 def generate_keyset_handle(key_template) -> tink.KeysetHandle:
-  """Generates a keyset from a key templates."""
+  """Generates a keyset handle from a key templates."""
   with tempfile.TemporaryDirectory() as tmpdir:
     keyset_filename = os.path.join(tmpdir, 'keyset_file')
     cli_path = os.path.join(_tools_path(), _TINKEY_CLI_PATH)
@@ -52,3 +56,25 @@ def generate_keyset_handle(key_template) -> tink.KeysetHandle:
     with open(keyset_filename, 'rb') as f:
       keyset_data = f.read()
     return cleartext_keyset_handle.read(tink.BinaryKeysetReader(keyset_data))
+
+
+def public_keyset_handle(private_keyset_handle) -> tink.KeysetHandle:
+  """Generates a public keyset handle from a private one."""
+  with tempfile.TemporaryDirectory() as tmpdir:
+    cli_path = os.path.join(_tools_path(), _TINKEY_CLI_PATH)
+    private_keyset_filename = os.path.join(tmpdir, 'private_keyset_file')
+    with open(private_keyset_filename, 'wb') as f:
+      cleartext_keyset_handle.write(
+          tink.BinaryKeysetWriter(f), private_keyset_handle)
+    public_keyset_filename = os.path.join(tmpdir, 'public_keyset_file')
+    unused_return_value = subprocess.check_output([
+        cli_path, 'create-public-keyset',
+        '--in-format', 'BINARY',
+        '--in', private_keyset_filename,
+        '--out-format', 'BINARY',
+        '--out', public_keyset_filename,
+    ])
+    with open(public_keyset_filename, 'rb') as f:
+      public_keyset_data = f.read()
+    return cleartext_keyset_handle.read(
+        tink.BinaryKeysetReader(public_keyset_data))

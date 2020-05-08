@@ -15,6 +15,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 from tools.testing.cross_language.util import cli_aead
 from tools.testing.cross_language.util import cli_daead
+from tools.testing.cross_language.util import cli_hybrid
 from tools.testing.cross_language.util import cli_mac
 from tools.testing.cross_language.util import cli_tinkey
 
@@ -49,6 +50,17 @@ class TinkeyCliWrapperTest(parameterized.TestCase):
     mac_value = p.compute_mac(data)
     self.assertIsNone(p.verify_mac(mac_value, data))
 
+  @parameterized.parameters(*cli_tinkey.HYBRID_KEY_TEMPLATES)
+  def test_hybrid_generate_encrypt_decrypt(self, key_template):
+    private_handle = cli_tinkey.generate_keyset_handle(key_template)
+    public_handle = cli_tinkey.public_keyset_handle(private_handle)
+    enc = cli_hybrid.CliHybridEncrypt('java', public_handle)
+    dec = cli_hybrid.CliHybridDecrypt('java', private_handle)
+    plaintext = b'plaintext'
+    context_info = b'context_info'
+    ciphertext = enc.encrypt(plaintext, context_info)
+    output = dec.decrypt(ciphertext, context_info)
+    self.assertEqual(output, plaintext)
 
 if __name__ == '__main__':
   absltest.main()
