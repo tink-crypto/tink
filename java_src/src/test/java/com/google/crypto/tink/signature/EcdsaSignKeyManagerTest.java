@@ -17,8 +17,10 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
@@ -29,6 +31,7 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -288,5 +291,41 @@ public class EcdsaSignKeyManagerTest {
       keys.add(TestUtil.hexEncode(factory.createKey(format).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
+  }
+
+  @Test
+  public void testEcdsaP256Template() throws Exception {
+    KeyTemplate template = EcdsaSignKeyManager.ecdsaP256Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new EcdsaSignKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.hasParams()).isTrue();
+    assertThat(format.getParams().getHashType()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getCurve()).isEqualTo(EllipticCurveType.NIST_P256);
+    assertThat(format.getParams().getEncoding()).isEqualTo(EcdsaSignatureEncoding.DER);
+  }
+
+  @Test
+  public void testRawEcdsaP256Template() throws Exception {
+    KeyTemplate template = EcdsaSignKeyManager.rawEcdsaP256Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new EcdsaSignKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    EcdsaKeyFormat format =
+        EcdsaKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.hasParams()).isTrue();
+    assertThat(format.getParams().getHashType()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getCurve()).isEqualTo(EllipticCurveType.NIST_P256);
+    assertThat(format.getParams().getEncoding()).isEqualTo(EcdsaSignatureEncoding.IEEE_P1363);
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    EcdsaSignKeyManager manager = new EcdsaSignKeyManager();
+
+    testKeyTemplateCompatible(manager, EcdsaSignKeyManager.ecdsaP256Template());
+    testKeyTemplateCompatible(manager, EcdsaSignKeyManager.rawEcdsaP256Template());
   }
 }

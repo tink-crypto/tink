@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -23,6 +24,9 @@ import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
+import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
+import com.google.crypto.tink.proto.EllipticCurveType;
+import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
@@ -40,7 +44,8 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances of {@code
  * EcdsaSignJce}.
  */
-public class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPublicKey> {
+public final class EcdsaSignKeyManager
+    extends PrivateKeyTypeManager<EcdsaPrivateKey, EcdsaPublicKey> {
   EcdsaSignKeyManager() {
     super(
         EcdsaPrivateKey.class,
@@ -141,5 +146,63 @@ public class EcdsaSignKeyManager extends PrivateKeyTypeManager<EcdsaPrivateKey, 
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new EcdsaSignKeyManager(), new EcdsaVerifyKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of ECDSA keys with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Hash function: SHA256
+   *       <li>Curve: NIST P-256
+   *       <li>Signature encoding: DER (this is the encoding that Java uses).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
+   *     </ul>
+   */
+  public static final KeyTemplate ecdsaP256Template() {
+    return createKeyTemplate(
+        HashType.SHA256,
+        EllipticCurveType.NIST_P256,
+        EcdsaSignatureEncoding.DER,
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of ECDSA keys with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Hash function: SHA256
+   *       <li>Curve: NIST P-256
+   *       <li>Signature encoding: DER (this is the encoding that Java uses).
+   *       <li>Prefix type: RAW (no prefix).
+   *     </ul>
+   *     Keys generated from this template create raw signatures of exactly 64 bytes. It is
+   *     compatible with JWS and most other libraries.
+   */
+  public static final KeyTemplate rawEcdsaP256Template() {
+    return createKeyTemplate(
+        HashType.SHA256,
+        EllipticCurveType.NIST_P256,
+        EcdsaSignatureEncoding.IEEE_P1363,
+        KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link EcdsaKeyFormat} with some specified
+   *     parameters.
+   */
+  public static KeyTemplate createKeyTemplate(
+      HashType hashType,
+      EllipticCurveType curve,
+      EcdsaSignatureEncoding encoding,
+      KeyTemplate.OutputPrefixType prefixType) {
+    EcdsaParams params =
+        EcdsaParams.newBuilder()
+            .setHashType(hashType)
+            .setCurve(curve)
+            .setEncoding(encoding)
+            .build();
+    EcdsaKeyFormat format = EcdsaKeyFormat.newBuilder().setParams(params).build();
+    return KeyTemplate.create(
+        new EcdsaSignKeyManager().getKeyType(), format.toByteArray(), prefixType);
   }
 }
