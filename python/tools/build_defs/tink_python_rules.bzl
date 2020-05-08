@@ -5,6 +5,7 @@ def tink_pybind_extension(
         srcs = [],
         hdrs = [],
         copts = [],
+        linkopts = [],
         features = ["-use_header_modules"],
         deps = []):
     """
@@ -20,6 +21,7 @@ def tink_pybind_extension(
       srcs: source files corresponding to the target
       hdrs: header files corresponding to the target
       copts: flags for the compiler
+      linkopts: flags for the linker
       features: features enabled for Bazel
       deps: dependencies of the target
 
@@ -33,7 +35,11 @@ def tink_pybind_extension(
         linkshared = 1,
         linkstatic = 1,
         srcs = srcs + hdrs,
-        copts = copts,
+        copts = copts + ["-fvisibility=hidden"],
+        linkopts = linkopts + select({
+            "@pybind11//:osx": [],
+            "//conditions:default": ["-Wl,-Bsymbolic"],
+        }),
         features = features,
         deps = deps,
     )
