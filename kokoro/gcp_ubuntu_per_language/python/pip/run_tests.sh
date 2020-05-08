@@ -36,16 +36,5 @@ install_pip_package() {
   )
 }
 
-run_bazel_tests() {
-  (
-    cd python
-    use_bazel.sh $(cat .bazelversion)
-
-    time bazel build -- ...
-    time bazel test --test_output=errors -- ...
-  )
-}
-
 install_python3
 install_pip_package
-run_bazel_tests
