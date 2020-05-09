@@ -34,5 +34,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     // Tink HEAD-SNAPSHOT for Android.
+    // In production apps, please use a named version, e.g., 1.4.0.
     implementation 'com.google.crypto.tink:tink-android:HEAD-SNAPSHOT'
+
+    // An artificial dependency to test whether Tink can co-exist with other
+    // protobuf dependencies. Please remove from production apps.
+    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
 }

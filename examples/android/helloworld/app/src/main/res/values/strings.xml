@@ -1,9 +1,23 @@
 <resources>
     <string name="app_name">Tink Hello World</string>
 
-    <!-- Strings related to login -->
-    <string name="prompt_plaintext">Plaintext</string>
+    <string name="prompt_plaintext">Message</string>
+    <string name="hint_plaintext">
+      The secrecy and integrity of this message will be guaranteed.
+    </string>
+
+    <string name="prompt_associated_data">Associated data</string>
+    <string name="hint_associated_data">
+      Only the integrity of this associated data will be guaranteed. For successful decryption it
+      must be the same as the associated data used during encryption.
+    </string>
+
     <string name="prompt_ciphertext">Ciphertext</string>
+    <string name="hint_ciphertext">
+      The ciphertext is in Base64 encoding. Try to modify it and verify that the decryption will
+      fail.
+    </string>
+
     <string name="action_encrypt">Encrypt</string>
     <string name="action_decrypt">Decrypt</string>
     <string name="error_cannot_encrypt">Cannot encrypt</string>
