@@ -16,9 +16,11 @@
 
 package com.google.crypto.tink.signature;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
@@ -32,7 +34,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -47,12 +49,12 @@ import java.security.spec.RSAPublicKeySpec;
  * This key manager generates new {@code RsaSsaPkcs1PrivateKey} keys and produces new instances of
  * {@code RsaSsaPkcs1SignJce}.
  */
-class RsaSsaPkcs1SignKeyManager
+public final class RsaSsaPkcs1SignKeyManager
     extends PrivateKeyTypeManager<RsaSsaPkcs1PrivateKey, RsaSsaPkcs1PublicKey> {
   private static final byte[] TEST_MESSAGE =
-      "Tink and Wycheproof.".getBytes(Charset.forName("UTF-8"));
+      "Tink and Wycheproof.".getBytes(StandardCharsets.UTF_8);
 
-  public RsaSsaPkcs1SignKeyManager() {
+  RsaSsaPkcs1SignKeyManager() {
     super(
         RsaSsaPkcs1PrivateKey.class,
         RsaSsaPkcs1PublicKey.class,
@@ -197,5 +199,97 @@ class RsaSsaPkcs1SignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new RsaSsaPkcs1SignKeyManager(), new RsaSsaPkcs1VerifyKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of RSA-SSA-PKCS1 key pairs with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Hash function: SHA256.
+   *       <li>Modulus size: 3072 bit.
+   *       <li>Public exponent: 65537 (aka F4).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
+   *     </ul>
+   */
+  public static final KeyTemplate rsa3072SsaPkcs1Sha256F4Template() {
+    return createKeyTemplate(
+        HashType.SHA256,
+        /*modulusSize=*/ 3072,
+        RSAKeyGenParameterSpec.F4,
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of RSA-SSA-PKCS1 key pairs with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Hash function: SHA256.
+   *       <li>Modulus size: 3072 bit.
+   *       <li>Public exponent: 65537 (aka F4).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix).
+   *     </ul>
+   */
+  public static final KeyTemplate rawRsa3072SsaPkcs1Sha256F4Template() {
+    return createKeyTemplate(
+        HashType.SHA256,
+        /*modulusSize=*/ 3072,
+        RSAKeyGenParameterSpec.F4,
+        KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of RSA-SSA-PKCS1 key pairs with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Hash function: SHA512.
+   *       <li>Modulus size: 4096 bit.
+   *       <li>Public exponent: 65537 (aka F4).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
+   *     </ul>
+   */
+  public static final KeyTemplate rsa4096SsaPkcs1Sha512F4Template() {
+    return createKeyTemplate(
+        HashType.SHA512,
+        /*modulusSize=*/ 4096,
+        RSAKeyGenParameterSpec.F4,
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of RSA-SSA-PKCS1 key pairs with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Hash function: SHA512.
+   *       <li>Modulus size: 4096 bit.
+   *       <li>Public exponent: 65537 (aka F4).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix).
+   *     </ul>
+   */
+  public static final KeyTemplate rawRsa4096SsaPkcs1Sha512F4Template() {
+    return createKeyTemplate(
+        HashType.SHA512,
+        /*modulusSize=*/ 4096,
+        RSAKeyGenParameterSpec.F4,
+        KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link RsaSsaPkcs1KeyFormat} with some specified
+   *     parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      HashType hashType,
+      int modulusSize,
+      BigInteger publicExponent,
+      KeyTemplate.OutputPrefixType prefixType) {
+    RsaSsaPkcs1Params params = RsaSsaPkcs1Params.newBuilder().setHashType(hashType).build();
+    RsaSsaPkcs1KeyFormat format =
+        RsaSsaPkcs1KeyFormat.newBuilder()
+            .setParams(params)
+            .setModulusSizeInBits(modulusSize)
+            .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
+            .build();
+    return KeyTemplate.create(
+        new RsaSsaPkcs1SignKeyManager().getKeyType(), format.toByteArray(), prefixType);
   }
 }
