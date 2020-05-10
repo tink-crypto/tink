@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -35,7 +34,6 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -245,105 +243,5 @@ public class RsaSsaPkcs1SignKeyManagerTest {
 
     byte[] message = Random.randBytes(135);
     verifier.verify(signer.sign(message), message);
-  }
-
-  @Test
-  public void testRsa3072SsaPkcs1Sha256F4Template() throws Exception {
-    KeyTemplate template = RsaSsaPkcs1SignKeyManager.rsa3072SsaPkcs1Sha256F4Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new RsaSsaPkcs1SignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().getHashType()).isEqualTo(HashType.SHA256);
-    assertThat(format.getModulusSizeInBits()).isEqualTo(3072);
-    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
-        .isEqualTo(BigInteger.valueOf(65537));
-  }
-
-  @Test
-  public void testRawRsa3072SsaPkcs1Sha256F4Template() throws Exception {
-    KeyTemplate template = RsaSsaPkcs1SignKeyManager.rawRsa3072SsaPkcs1Sha256F4Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new RsaSsaPkcs1SignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().getHashType()).isEqualTo(HashType.SHA256);
-    assertThat(format.getModulusSizeInBits()).isEqualTo(3072);
-    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
-        .isEqualTo(BigInteger.valueOf(65537));
-  }
-
-  @Test
-  public void testRsa4096SsaPkcs1Sha512F4Template() throws Exception {
-    KeyTemplate template = RsaSsaPkcs1SignKeyManager.rsa4096SsaPkcs1Sha512F4Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new RsaSsaPkcs1SignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().getHashType()).isEqualTo(HashType.SHA512);
-    assertThat(format.getModulusSizeInBits()).isEqualTo(4096);
-    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
-        .isEqualTo(BigInteger.valueOf(65537));
-  }
-
-  @Test
-  public void testRawRsa4096SsaPkcs1Sha512F4Template() throws Exception {
-    KeyTemplate template = RsaSsaPkcs1SignKeyManager.rawRsa4096SsaPkcs1Sha512F4Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new RsaSsaPkcs1SignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().getHashType()).isEqualTo(HashType.SHA512);
-    assertThat(format.getModulusSizeInBits()).isEqualTo(4096);
-    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
-        .isEqualTo(BigInteger.valueOf(65537));
-  }
-
-  @Test
-  public void testRsa3072SsaPkcs1Sha256F4TemplateWithManager() throws Exception {
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.parseFrom(
-            RsaSsaPkcs1SignKeyManager.rsa3072SsaPkcs1Sha256F4Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new RsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
-  }
-
-  @Test
-  public void testRawRsa3072SsaPkcs1Sha256F4TemplateWithManager() throws Exception {
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.parseFrom(
-            RsaSsaPkcs1SignKeyManager.rawRsa3072SsaPkcs1Sha256F4Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new RsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
-  }
-
-  @Test
-  public void testRsa4096SsaPkcs1Sha512F4TemplateWithManager() throws Exception {
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.parseFrom(
-            RsaSsaPkcs1SignKeyManager.rsa4096SsaPkcs1Sha512F4Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new RsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
-  }
-
-  @Test
-  public void testRawRsa4096SsaPkcs1Sha512F4TemplateWithManager() throws Exception {
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.parseFrom(
-            RsaSsaPkcs1SignKeyManager.rawRsa4096SsaPkcs1Sha512F4Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new RsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
   }
 }
