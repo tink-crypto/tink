@@ -51,8 +51,10 @@ class AwsKmsClient(object):
     """
 
     match = re.match('aws-kms://arn:aws:kms:([a-z0-9-]+):', key_uri)
-    if match:
-      self.key_uri = key_uri
+    if not key_uri:
+      self._key_uri = ''
+    elif match:
+      self._key_uri = key_uri
     else:
       raise core.TinkError
 
