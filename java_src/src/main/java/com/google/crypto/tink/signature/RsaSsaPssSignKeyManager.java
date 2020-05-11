@@ -16,9 +16,11 @@
 
 package com.google.crypto.tink.signature;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
@@ -47,12 +49,12 @@ import java.security.spec.RSAPublicKeySpec;
  * This key manager generates new {@code RsaSsaPssPrivateKey} keys and produces new instances of
  * {@code RsaSsaPssSignJce}.
  */
-class RsaSsaPssSignKeyManager
+public final class RsaSsaPssSignKeyManager
     extends PrivateKeyTypeManager<RsaSsaPssPrivateKey, RsaSsaPssPublicKey> {
   private static final byte[] TEST_MESSAGE =
       "Tink and Wycheproof.".getBytes(Charset.forName("UTF-8"));
 
-  public RsaSsaPssSignKeyManager() {
+  RsaSsaPssSignKeyManager() {
     super(
         RsaSsaPssPrivateKey.class,
         RsaSsaPssPublicKey.class,
@@ -202,5 +204,123 @@ class RsaSsaPssSignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new RsaSsaPssSignKeyManager(), new RsaSsaPssVerifyKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of RSA-SSA-PSS key pairs with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Signature hash: SHA256.
+   *       <li>MGF1 hash: SHA256.
+   *       <li>Salt length: 32 (i.e., SHA256's output length).
+   *       <li>Modulus size: 3072 bit.
+   *       <li>Public exponent: 65537 (aka F4).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
+   *     </ul>
+   */
+  public static final KeyTemplate rsa3072PssSha256F4Template() {
+    return createKeyTemplate(
+        HashType.SHA256,
+        HashType.SHA256,
+        /*saltLength=*/ 32,
+        /*modulusSize=*/ 3072,
+        RSAKeyGenParameterSpec.F4,
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of RSA-SSA-PSS key pairs with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Signature hash: SHA256.
+   *       <li>MGF1 hash: SHA256.
+   *       <li>Salt length: 32 (i.e., SHA256's output length).
+   *       <li>Modulus size: 3072 bit.
+   *       <li>Public exponent: 65537 (aka F4).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix).
+   *     </ul>
+   *     <p>Keys generated from this template create signatures compatible with OpenSSL and other
+   *     libraries.
+   */
+  public static final KeyTemplate rawRsa3072PssSha256F4Template() {
+    return createKeyTemplate(
+        HashType.SHA256,
+        HashType.SHA256,
+        /*saltLength=*/ 32,
+        /*modulusSize=*/ 3072,
+        RSAKeyGenParameterSpec.F4,
+        KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of RSA-SSA-PSS key pairs with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Signature hash: SHA512.
+   *       <li>MGF1 hash: SHA512.
+   *       <li>Salt length: 64 (i.e., SHA512's output length).
+   *       <li>Modulus size: 4096 bit.
+   *       <li>Public exponent: 65537 (aka F4).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
+   *     </ul>
+   */
+  public static final KeyTemplate rsa4096PssSha512F4Template() {
+    return createKeyTemplate(
+        HashType.SHA512,
+        HashType.SHA512,
+        /*saltLength=*/ 64,
+        /*modulusSize=*/ 4096,
+        RSAKeyGenParameterSpec.F4,
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of RSA-SSA-PSS key pairs with the
+   *     following parameters:
+   *     <ul>
+   *       <li>Signature hash: SHA512.
+   *       <li>MGF1 hash: SHA512.
+   *       <li>Salt length: 64 (i.e., SHA512's output length).
+   *       <li>Modulus size: 4096 bit.
+   *       <li>Public exponent: 65537 (aka F4).
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix).
+   *     </ul>
+   *     <p>Keys generated from this template create signatures compatible with OpenSSL and other
+   *     libraries.
+   */
+  public static final KeyTemplate rawRsa4096PssSha512F4Template() {
+    return createKeyTemplate(
+        HashType.SHA512,
+        HashType.SHA512,
+        /*saltLength=*/ 64,
+        /*modulusSize=*/ 4096,
+        RSAKeyGenParameterSpec.F4,
+        KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link RsaSsaPssKeyFormat} with some specified
+   *     parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      HashType sigHash,
+      HashType mgf1Hash,
+      int saltLength,
+      int modulusSize,
+      BigInteger publicExponent,
+      KeyTemplate.OutputPrefixType prefixType) {
+    RsaSsaPssParams params =
+        RsaSsaPssParams.newBuilder()
+            .setSigHash(sigHash)
+            .setMgf1Hash(mgf1Hash)
+            .setSaltLength(saltLength)
+            .build();
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.newBuilder()
+            .setParams(params)
+            .setModulusSizeInBits(modulusSize)
+            .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
+            .build();
+    return KeyTemplate.create(
+        new RsaSsaPssSignKeyManager().getKeyType(), format.toByteArray(), prefixType);
   }
 }
