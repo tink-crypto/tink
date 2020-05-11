@@ -257,6 +257,39 @@ one can use the following:
 
 ```
 
+### Digital Signatures
+
+You can sign or verify using a
+[digital signature](PRIMITIVES.md#digital-signatures):
+
+```python
+   import tink
+   from tink import signature
+
+   # Register key manager for signatures
+   signature.register()
+
+   # Signing
+   # 1. Generate the private key material.
+   keyset_handle = tink.new_keyset_handle(signature.signature_key_templates.ED25519)
+
+   # 2. Get the primitive.
+   signer = keyset_handle.primitive(signature.PublicKeySign)
+
+   # 3. Use the primitive to sign.
+   signature = signer.sign(b'your data')
+
+   # Verifying
+   # 1. Obtain the public key material.
+   public_keyset_handle = keyset_handle.public_keyset_handle()
+
+   # 2. Get the primitive.
+   verifier = public_keyset_handle.primitive(signature.PublicKeyVerify)
+
+   # 3. Use the primitive to verify.
+   verifier.verify(signature, b'your data')
+```
+
 ### Envelope encryption
 
 Via the AEAD interface, Tink supports
@@ -268,8 +301,8 @@ using the credentials in `credentials.json` as follows:
 
 ```python
   import tink
-  from google3.third_party.tink.python.tink import aead
-  from google3.third_party.tink.python.tink.integration import gcpkms
+  from tink import aead
+  from tink.integration import gcpkms
 
   key_uri = 'gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar'
   gcp_credentials = 'credentials.json'

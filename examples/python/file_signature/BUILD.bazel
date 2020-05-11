@@ -1,0 +1,57 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files([
+    "ed25519_test_private_keyset.json",
+    "ed25519_test_public_keyset.json",
+])
+
+py_binary(
+    name = "file_signature_cleartext",
+    srcs = ["file_signature_cleartext.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/signature",
+    ],
+)
+
+sh_test(
+    name = "file_signature_test",
+    size = "small",
+    srcs = ["file_signature_test.sh"],
+    args = [
+        "$(rootpath :file_signature_cleartext)",
+        "$(rootpath :ed25519_test_private_keyset.json)",
+        "$(rootpath :ed25519_test_public_keyset.json)",
+    ],
+    data = [
+        ":file_signature_cleartext",
+        ":ed25519_test_private_keyset.json",
+        ":ed25519_test_public_keyset.json",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "file_signature_test_package",
+    size = "small",
+    srcs = ["file_signature_test.sh"],
+    args = [
+        "'python3 $(rootpath :file_signature_cleartext.py)'",
+        "$(rootpath :ed25519_test_private_keyset.json)",
+        "$(rootpath :ed25519_test_public_keyset.json)",
+    ],
+    data = [
+        ":file_signature_cleartext.py",
+        ":ed25519_test_private_keyset.json",
+        ":ed25519_test_public_keyset.json",
+    ],
+)
