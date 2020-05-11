@@ -104,7 +104,10 @@ util::StatusOr<std::string> ReturnAlphaBetaGammaEncoded() {
   return std::string("EDD4f89 alpha=\xce\xb1 beta=\xce\xb2 gamma=\xce\xb3");
 }
 
-PYBIND11_MODULE(status_example, m) {
+void PybindRegisterStatusInjector(pybind11::module* module) {
+  namespace py = pybind11;
+  py::module& m = *module;
+
   class_<IntValue>(m, "IntValue").def_readonly("value", &IntValue::value);
 
   class_<TestClass>(m, "TestClass")
