@@ -82,12 +82,12 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
                         key.getParams().getSalt().toByteArray()));
             return new PrfSet() {
               @Override
-              int getPrimaryId() {
+              public int getPrimaryId() {
                 return unknownKeyId;
               }
 
               @Override
-              Map<Integer, Prf> getPrfs() {
+              public Map<Integer, Prf> getPrfs() {
                 return Collections.singletonMap(unknownKeyId, prf);
               }
             };

@@ -26,19 +26,19 @@ import java.util.Map;
 @Immutable
 public abstract class PrfSet {
   /** Returns the primary ID of the keyset. */
-  abstract int getPrimaryId();
+  public abstract int getPrimaryId();
 
   /**
    * A map of the PRFs represented by the keys in this keyset. The map is guaranteed to contain
    * getPrimaryId() as a key.
    */
-  abstract Map<Integer, Prf> getPrfs();
+  public abstract Map<Integer, Prf> getPrfs() throws GeneralSecurityException;
 
   /**
    * Convenience method to compute the primary PRF on a given input. See PRF.compute for details of
    * the parameters.
    */
-  byte[] computePrimary(byte[] input, int outputLength) throws GeneralSecurityException {
+  public byte[] computePrimary(byte[] input, int outputLength) throws GeneralSecurityException {
     return getPrfs().get(getPrimaryId()).compute(input, outputLength);
   }
 }
