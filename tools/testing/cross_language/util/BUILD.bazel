@@ -132,6 +132,41 @@ py_test(
 )
 
 py_library(
+    name = "cli_signature",
+    testonly = 1,
+    srcs = [
+        "cli_signature.py",
+    ],
+    data = [
+        "//testing:public_key_sign_cli_java",
+        "//testing:public_key_verify_cli_java",
+        "//testing/cc:public_key_sign_cli_cc",
+        "//testing/cc:public_key_verify_cli_cc",
+        "//testing/go:public_key_sign_cli_go",
+        "//testing/go:public_key_verify_cli_go",
+        "//testing/python:public_key_sign_cli_python",
+        "//testing/python:public_key_verify_cli_python",
+    ],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/mac",
+    ],
+)
+
+py_test(
+    name = "cli_signature_test",
+    srcs = ["cli_signature_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":cli_signature",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/signature",
+    ],
+)
+
+py_library(
     name = "cli_tinkey",
     testonly = 1,
     srcs = [
