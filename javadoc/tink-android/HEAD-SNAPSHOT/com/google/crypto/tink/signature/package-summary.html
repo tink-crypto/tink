@@ -127,6 +127,20 @@
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/signature/RsaSsaPkcs1SignKeyManager.html" title="class in com.google.crypto.tink.signature">RsaSsaPkcs1SignKeyManager</a></td>
+<td class="colLast">
+<div class="block">This key manager generates new <code>RsaSsaPkcs1PrivateKey</code> keys and produces new instances of
+ <code>RsaSsaPkcs1SignJce</code>.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/signature/RsaSsaPssSignKeyManager.html" title="class in com.google.crypto.tink.signature">RsaSsaPssSignKeyManager</a></td>
+<td class="colLast">
+<div class="block">This key manager generates new <code>RsaSsaPssPrivateKey</code> keys and produces new instances of
+ <code>RsaSsaPssSignJce</code>.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature">SignatureConfig</a></td>
 <td class="colLast">
 <div class="block">Static methods and constants for registering with the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="../../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><code>PublicKeySign</code></a> and <a href="../../../../../com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><code>PublicKeyVerify</code></a> key
@@ -135,8 +149,9 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></td>
-<td class="colLast">
-<div class="block">Pre-generated <code>KeyTemplate</code> for <a href="../../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><code>PublicKeySign</code></a> and <a href="../../../../../com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><code>PublicKeyVerify</code></a>.</div>
+<td class="colLast">Deprecated
+<div class="block"><span class="deprecationComment">use the key template methods in the key managers, e.g.,
+     {@link com.google.crypto.tink.signature.RsaSsaPssSignKeyManager#rsa3072PssSha256F4Template).</span></div>
 </td>
 </tr>
 <tr class="rowColor">

@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9};
-var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":41,"i1":41,"i2":41};
+var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -107,8 +107,13 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <hr>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use the key template methods in the key managers, e.g.,
+     {@link com.google.crypto.tink.signature.RsaSsaPssSignKeyManager#rsa3072PssSha256F4Template).</span></div>
+</div>
 <br>
-<pre>public final class <span class="typeNameLabel">SignatureKeyTemplates</span>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public final class <span class="typeNameLabel">SignatureKeyTemplates</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Pre-generated <code>KeyTemplate</code> for <a href="../../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><code>PublicKeySign</code></a> and <a href="../../../../../com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><code>PublicKeyVerify</code></a>.
 
@@ -147,6 +152,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P256">ECDSA_P256</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  
@@ -158,6 +164,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P256_IEEE_P1363">ECDSA_P256_IEEE_P1363</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  
@@ -169,6 +176,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX">ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  
@@ -180,6 +188,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P384">ECDSA_P384</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  
@@ -191,6 +200,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P384_IEEE_P1363">ECDSA_P384_IEEE_P1363</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  
@@ -202,6 +212,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P521">ECDSA_P521</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  
@@ -213,6 +224,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P521_IEEE_P1363">ECDSA_P521_IEEE_P1363</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  
@@ -224,18 +236,21 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ED25519">ED25519</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>Ed25519PrivateKey</code>.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ED25519WithRawOutput">ED25519WithRawOutput</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>com.google.crypto.tink.proto.ED25519PrivateKey</code>.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA256_F4">RSA_SSA_PKCS1_3072_SHA256_F4</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPkcs1PrivateKey</code> with the following parameters:
 
  
@@ -245,6 +260,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX">RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPkcs1PrivateKey</code> with the following parameters:
 
  
@@ -254,6 +270,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_4096_SHA512_F4">RSA_SSA_PKCS1_4096_SHA512_F4</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPkcs1PrivateKey</code> with the following parameters:
 
  
@@ -263,6 +280,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_3072_SHA256_SHA256_32_F4">RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPssPrivateKey</code> with the following parameters:
 
  
@@ -272,6 +290,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_4096_SHA512_SHA512_64_F4">RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPssPrivateKey</code> with the following parameters:
 
  
@@ -293,7 +312,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#SignatureKeyTemplates--">SignatureKeyTemplates</a></span>()</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#SignatureKeyTemplates--">SignatureKeyTemplates</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -305,7 +326,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -315,14 +336,18 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#createEcdsaKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.proto.OutputPrefixType-">createEcdsaKeyTemplate</a></span>(com.google.crypto.tink.proto.HashType&nbsp;hashType,
                       com.google.crypto.tink.proto.EllipticCurveType&nbsp;curve,
                       com.google.crypto.tink.proto.EcdsaSignatureEncoding&nbsp;encoding,
-                      com.google.crypto.tink.proto.OutputPrefixType&nbsp;prefixType)</code>&nbsp;</td>
+                      com.google.crypto.tink.proto.OutputPrefixType&nbsp;prefixType)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPkcs1KeyTemplate-com.google.crypto.tink.proto.HashType-int-java.math.BigInteger-com.google.crypto.tink.proto.OutputPrefixType-">createRsaSsaPkcs1KeyTemplate</a></span>(com.google.crypto.tink.proto.HashType&nbsp;hashType,
                             int&nbsp;modulusSize,
                             <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent,
-                            com.google.crypto.tink.proto.OutputPrefixType&nbsp;prefixType)</code>&nbsp;</td>
+                            com.google.crypto.tink.proto.OutputPrefixType&nbsp;prefixType)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
@@ -330,7 +355,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                           com.google.crypto.tink.proto.HashType&nbsp;mgf1Hash,
                           int&nbsp;saltLength,
                           int&nbsp;modulusSize,
-                          <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent)</code>&nbsp;</td>
+                          <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -361,6 +388,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P256</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ECDSA_P256</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  <ul>
@@ -378,6 +406,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P384</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ECDSA_P384</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  <ul>
@@ -395,6 +424,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P521</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ECDSA_P521</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  <ul>
@@ -412,6 +442,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P256_IEEE_P1363</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ECDSA_P256_IEEE_P1363</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  <ul>
@@ -429,6 +460,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P384_IEEE_P1363</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ECDSA_P384_IEEE_P1363</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  <ul>
@@ -446,6 +478,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  <ul>
@@ -465,6 +498,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P521_IEEE_P1363</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ECDSA_P521_IEEE_P1363</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the following parameters:
 
  <ul>
@@ -482,6 +516,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ED25519</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ED25519</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>Ed25519PrivateKey</code>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -496,6 +531,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ED25519WithRawOutput</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate ED25519WithRawOutput</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>com.google.crypto.tink.proto.ED25519PrivateKey</code>.
 
  The difference between <code>ED25519WithRawOutput</code> and <code>ED25519</code> is the format of
@@ -514,6 +550,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>RSA_SSA_PKCS1_3072_SHA256_F4</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate RSA_SSA_PKCS1_3072_SHA256_F4</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPkcs1PrivateKey</code> with the following parameters:
 
  <ul>
@@ -531,6 +568,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPkcs1PrivateKey</code> with the following parameters:
 
  <ul>
@@ -548,6 +586,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>RSA_SSA_PKCS1_4096_SHA512_F4</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate RSA_SSA_PKCS1_4096_SHA512_F4</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPkcs1PrivateKey</code> with the following parameters:
 
  <ul>
@@ -565,6 +604,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPssPrivateKey</code> with the following parameters:
 
  <ul>
@@ -583,6 +623,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</h4>
 <pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>RsaSsaPssPrivateKey</code> with the following parameters:
 
  <ul>
@@ -609,6 +650,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>SignatureKeyTemplates</h4>
 <pre>public&nbsp;SignatureKeyTemplates()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 </li>
@@ -629,6 +671,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                                               com.google.crypto.tink.proto.EllipticCurveType&nbsp;curve,
                                                                               com.google.crypto.tink.proto.EcdsaSignatureEncoding&nbsp;encoding,
                                                                               com.google.crypto.tink.proto.OutputPrefixType&nbsp;prefixType)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <code>KeyTemplate</code> containing a <code>EcdsaKeyFormat</code> with some specified
@@ -646,6 +689,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                                                     int&nbsp;modulusSize,
                                                                                     <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent,
                                                                                     com.google.crypto.tink.proto.OutputPrefixType&nbsp;prefixType)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <code>KeyTemplate</code> containing a <code>RsaSsaPkcs1KeyFormat</code> with some specified
@@ -664,6 +708,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                                                   int&nbsp;saltLength,
                                                                                   int&nbsp;modulusSize,
                                                                                   <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <code>KeyTemplate</code> containing a <code>RsaSsaPssKeyFormat</code> with some specified
