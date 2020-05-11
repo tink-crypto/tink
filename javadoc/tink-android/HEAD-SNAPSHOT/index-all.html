@@ -4052,6 +4052,10 @@
 <div class="block">Returns an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a> which is indistinguishable from a stream returning random bytes
  in the above sense.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSet.html#computePrimary-byte:A-int-">computePrimary(byte[], int)</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a></dt>
+<dd>
+<div class="block">Convenience method to compute the primary PRF on a given input.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#computeSharedSecret-java.security.interfaces.ECPrivateKey-java.security.interfaces.ECPublicKey-">computeSharedSecret(ECPrivateKey, ECPublicKey)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#computeSharedSecret-java.security.interfaces.ECPrivateKey-java.security.spec.ECPoint-">computeSharedSecret(ECPrivateKey, ECPoint)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
@@ -11463,8 +11467,16 @@
 <dd>
 <div class="block"><code>optional uint64 positive_int_value = 4;</code></div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSet.html#getPrfs--">getPrfs()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a></dt>
+<dd>
+<div class="block">A map of the PRFs represented by the keys in this keyset.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getPrimary--">getPrimary()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSet.html#getPrimaryId--">getPrimaryId()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a></dt>
+<dd>
+<div class="block">Returns the primary ID of the keyset.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive(KeysetHandle)</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadFactory.html" title="class in com.google.crypto.tink.aead">AeadFactory</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -11659,6 +11671,8 @@
 <div class="block">Returns the primitive class object of the P.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerImpl.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerImpl.html" title="class in com.google.crypto.tink">KeyManagerImpl</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSetWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf">PrfSetWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>&nbsp;</dd>
@@ -20758,6 +20772,8 @@
 <div class="block">The PRF interface is an abstraction for an element of a pseudo random function family, selected
  by a key.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfConfig.html#PRF_TYPE_URL">PRF_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfConfig.html" title="class in com.google.crypto.tink.prf">PrfConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/prf/PrfConfig.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">PrfConfig</span></a> - Class in <a href="com/google/crypto/tink/prf/package-summary.html">com.google.crypto.tink.prf</a></dt>
 <dd>
 <div class="block">Static methods and registering with the <code>Registry</code> all instances of <a href="com/google/crypto/tink/subtle/prf/StreamingPrf.html" title="interface in com.google.crypto.tink.subtle.prf"><code>StreamingPrf</code></a> key types supported in a particular release of
@@ -20772,6 +20788,12 @@
 <div class="block">A Tink Keyset can be converted into a set of PRFs using this primitive.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSet.html#PrfSet--">PrfSet()</a></span> - Constructor for class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">PrfSetWrapper</span></a> - Class in <a href="com/google/crypto/tink/prf/package-summary.html">com.google.crypto.tink.prf</a></dt>
+<dd>
+<div class="block">PrfSetWrapper is the implementation of PrimitiveWrapper for the PrfSet primitive.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSetWrapper.html#PrfSetWrapper--">PrfSetWrapper()</a></span> - Constructor for class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf">PrfSetWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.PrimitiveFactory.html#PrimitiveFactory-java.lang.Class-">PrimitiveFactory(Class&lt;PrimitiveT&gt;)</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.PrimitiveFactory</a></dt>
 <dd>&nbsp;</dd>
@@ -21069,6 +21091,8 @@
 <dd>
 <div class="block">Tries to register with the <code>Registry</code> all instances of <a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> needed to handle Prf key types supported in Tink.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSetWrapper.html#register--">register()</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf">PrfSetWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html#register--">register()</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature">PublicKeySignWrapper</a></dt>
 <dd>
 <div class="block">Register the wrapper within the registry.</div>
@@ -24850,6 +24874,8 @@ the order they are declared.</div>
 <dd>
 <div class="block">Wraps some key material <code>data</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSetWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;PrfSet&gt;)</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf">PrfSetWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;P&gt;)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a></dt>
 <dd>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.</div>
