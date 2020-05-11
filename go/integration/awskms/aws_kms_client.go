@@ -48,15 +48,11 @@ type awsClient struct {
 	kms          *kms.KMS
 }
 
-var _ registry.KMSClient = (*awsClient)(nil)
-
 // NewClient returns a new AWS KMS client which will use default
 // credentials to handle keys with uriPrefix prefix.
-// uriPrefix must have the following format: 'aws-kms://arn:aws:kms:<region>[:path]'.
+// uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
+// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func NewClient(uriPrefix string) (registry.KMSClient, error) {
-	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
-		return nil, fmt.Errorf("uriPrefix must start with %s", awsPrefix)
-	}
 	r, err := getRegion(uriPrefix)
 	if err != nil {
 		return nil, err
@@ -66,19 +62,14 @@ func NewClient(uriPrefix string) (registry.KMSClient, error) {
 		Region: aws.String(r),
 	}))
 
-	return &awsClient{
-		keyURIPrefix: uriPrefix,
-		kms:          kms.New(session),
-	}, nil
+	return NewClientWithKMS(uriPrefix, kms.New(session))
 }
 
 // NewClientWithCredentials returns a new AWS KMS client which will use given
 // credentials to handle keys with uriPrefix prefix.
-// uriPrefix must have the following format: 'aws-kms://arn:aws:kms:<region>[:path]'.
+// uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
+// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry.KMSClient, error) {
-	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
-		return nil, fmt.Errorf("uriPrefix must start with %s", awsPrefix)
-	}
 	r, err := getRegion(uriPrefix)
 	if err != nil {
 		return nil, err
@@ -103,18 +94,16 @@ func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry
 		Region:      aws.String(r),
 	}))
 
-	return &awsClient{
-		keyURIPrefix: uriPrefix,
-		kms:          kms.New(session),
-	}, nil
+	return NewClientWithKMS(uriPrefix, kms.New(session))
 }
 
 // NewClientWithKMS returns a new AWS KMS client with user created KMS client.
 // Client is responsible for keeping the region consistency between key URI and KMS client.
-// uriPrefix must have the following format: 'aws-kms://arn:aws:kms:<region>[:path]'.
+// uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
+// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func NewClientWithKMS(uriPrefix string, kms *kms.KMS) (registry.KMSClient, error) {
 	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
-		return nil, fmt.Errorf("uriPrefix must start with %s", awsPrefix)
+		return nil, fmt.Errorf("uriPrefix must start with %s, but got %s", awsPrefix, uriPrefix)
 	}
 
 	return &awsClient{
@@ -129,13 +118,15 @@ func (c *awsClient) Supported(keyURI string) bool {
 }
 
 // GetAEAD gets an AEAD backend by keyURI.
+// keyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
+// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func (c *awsClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 	if !c.Supported(keyURI) {
-		return nil, errors.New("unsupported keyURI")
+		return nil, fmt.Errorf("keyURI must start with prefix %s, but got %s", c.keyURIPrefix, keyURI)
 	}
 
 	uri := strings.TrimPrefix(keyURI, awsPrefix)
-	return NewAWSAEAD(uri, c.kms), nil
+	return newAWSAEAD(uri, c.kms), nil
 }
 
 func extractCredsCSV(file string) (*credentials.Value, error) {
@@ -174,17 +165,18 @@ func extractCredsCSV(file string) (*credentials.Value, error) {
 		AccessKeyID:     lines[1][2],
 		SecretAccessKey: lines[1][3],
 	}, nil
-
 }
 
 func getRegion(keyURI string) (string, error) {
-	re1, err := regexp.Compile(`aws-kms://arn:aws:kms:([a-z0-9-]+):`)
+	// keyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
+	// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
+	re1, err := regexp.Compile(`aws-kms://arn:(aws[a-zA-Z0-9-_]*):kms:([a-z0-9-]+):`)
 	if err != nil {
 		return "", err
 	}
 	r := re1.FindStringSubmatch(keyURI)
-	if len(r) != 2 {
+	if len(r) != 3 {
 		return "", errors.New("extracting region from URI failed")
 	}
-	return r[1], nil
+	return r[2], nil
 }

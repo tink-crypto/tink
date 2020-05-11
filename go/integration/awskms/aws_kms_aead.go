@@ -32,8 +32,10 @@ type AWSAEAD struct {
 	kms    *kms.KMS
 }
 
-// NewAWSAEAD returns a new AWS KMS service.
-func NewAWSAEAD(keyURI string, kms *kms.KMS) *AWSAEAD {
+// newAWSAEAD returns a new AWS KMS service.
+// keyURI must have the following format: 'arn:<partition>:kms:<region>:[:path]'.
+// See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
+func newAWSAEAD(keyURI string, kms *kms.KMS) *AWSAEAD {
 	return &AWSAEAD{
 		keyURI: keyURI,
 		kms:    kms,

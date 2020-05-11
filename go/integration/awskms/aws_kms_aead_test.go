@@ -36,11 +36,8 @@ const (
 )
 
 var (
-	// lint placeholder header, please ignore
 	credFile    = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.csv"
-	badCredFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/bad_access_keys_aws.csv"
 	credINIFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.cred"
-	// lint placeholder footer, please ignore
 )
 
 // lint placeholder header, please ignore
@@ -126,15 +123,5 @@ func TestBasicAeadWithoutAdditionalData(t *testing.T) {
 				t.Fatalf("decrypt not inverse of encrypt")
 			}
 		}
-	}
-}
-
-func TestLoadBadCSVCredential(t *testing.T) {
-	_, err := NewClientWithCredentials(keyURI, badCredFile)
-	if err == nil {
-		t.Fatalf("does not reject two-column csv file, expect error : %v", errCredCSV)
-	}
-	if err != errCredCSV {
-		t.Fatalf("expect error : %v, got: %v", errCredCSV, err)
 	}
 }
