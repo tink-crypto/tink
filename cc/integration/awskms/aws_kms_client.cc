@@ -240,6 +240,15 @@ AwsKmsClient::GetAead(absl::string_view key_uri) const {
   }
 }
 
+Status AwsKmsClient::RegisterNewClient(absl::string_view key_uri,
+                                       absl::string_view credentials_path) {
+  auto client_result = AwsKmsClient::New(key_uri, credentials_path);
+  if (!client_result.ok()) {
+    return client_result.status();
+  }
+
+  return KmsClients::Add(std::move(client_result.ValueOrDie()));
+}
 
 }  // namespace awskms
 }  // namespace integration

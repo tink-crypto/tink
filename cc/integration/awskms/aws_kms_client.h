@@ -23,6 +23,7 @@
 #include "aws/kms/KMSClient.h"
 #include "tink/aead.h"
 #include "tink/kms_client.h"
+#include "tink/kms_clients.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -44,6 +45,10 @@ class AwsKmsClient : public crypto::tink::KmsClient  {
   // If 'credential_path' is empty, then default credentials will be used.
   static crypto::tink::util::StatusOr<std::unique_ptr<AwsKmsClient>>
   New(absl::string_view key_uri, absl::string_view credentials_path);
+
+  // Creates a new client and registers it in KMSClients.
+  static crypto::tink::util::Status RegisterNewClient(
+      absl::string_view key_uri, absl::string_view credentials_path);
 
   // Returns true iff this client does support KMS key specified by 'key_uri'.
   bool DoesSupport(absl::string_view key_uri) const override;

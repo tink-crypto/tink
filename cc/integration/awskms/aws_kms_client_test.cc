@@ -18,12 +18,17 @@
 #include <string>
 #include <vector>
 
-#include "absl/strings/str_cat.h"
 #include "aws/core/Aws.h"
 #include "aws/kms/KMSClient.h"
 #include "gtest/gtest.h"
+#include "absl/strings/str_cat.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
+#include "tink/util/test_util.h"
+
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 
 namespace crypto {
 namespace tink {
@@ -59,6 +64,27 @@ TEST(AwsKmsClientTest, testBasic) {
   }
 }
 
+TEST(AwsKmsClientTest, ClientCreationAndRegistry) {
+  std::string aws_key1 = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
+  std::string creds_file = absl::StrCat(
+      getenv("TEST_SRCDIR"), "/tink_base/testdata/aws_credentials_cc.txt");
+
+  auto client_result = AwsKmsClient::RegisterNewClient(aws_key1, creds_file);
+  EXPECT_THAT(client_result, IsOk());
+
+  auto registry_result = KmsClients::Get(aws_key1);
+  EXPECT_THAT(registry_result.status(), IsOk());
+}
+
+TEST(AwsKmsClientTest, ClientCreationInvalidRegistry) {
+  std::string non_aws_key =
+      "gcp-kms://projects/someProject/.../cryptoKeys/key1";
+  std::string creds_file =
+      std::string(getenv("TEST_SRCDIR")) + "/tink_base/testdata/credential.json";
+
+  auto client_result = AwsKmsClient::RegisterNewClient(non_aws_key, creds_file);
+  EXPECT_THAT(client_result, StatusIs(util::error::INVALID_ARGUMENT));
+}
 
 }  // namespace
 }  // namespace awskms

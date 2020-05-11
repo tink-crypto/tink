@@ -84,3 +84,8 @@ class AwsKmsClient(object):
     """
 
     return aead.AeadCcToPyWrapper(self.cc_client.get_aead(key_uri))
+
+  @classmethod
+  def register_client(cls, key_uri, credentials_path) -> None:
+    """Registers the KMS client internally."""
+    tink_bindings.AwsKmsClient.register_client(key_uri, credentials_path)

@@ -39,6 +39,10 @@ class AwsKmsClientTest(absltest.TestCase):
     with self.assertRaises(core.TinkError):
       awskms.AwsKmsClient(BAD_KEY_URI, CREDENTIAL_PATH)
 
+  def test_client_registration(self):
+    aws_client = awskms.AwsKmsClient('', CREDENTIAL_PATH)
+    aws_client.register_client('', CREDENTIAL_PATH)
+
   def test_client_not_bound(self):
     gcp_key1 = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
 

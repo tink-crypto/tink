@@ -52,7 +52,16 @@ void PybindRegisterCcAwsKmsClient(pybind11::module* module) {
           util::StatusOr<std::unique_ptr<Aead>> {
             return self.GetAead(key_uri);
           },
-          py::arg("key_uri"), "URI of the key which should be used.");
+          py::arg("key_uri"), "URI of the key which should be used.")
+      .def_static(
+          "register_client",
+          [](const std::string& key_uri,
+             const std::string& credentials_path) -> util::Status {
+            return AwsKmsClient::RegisterNewClient(key_uri, credentials_path);
+          },
+          py::arg("key_uri"), "URI of the key which should be used.",
+          py::arg("credentials_path"),
+          "Path to the credentials for the client.");
 }
 
 }  // namespace awskms
