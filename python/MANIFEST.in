@@ -1,0 +1,10 @@
+# Files needed for Bazel to build the C++ bindings when creating a package
+# distribution. Note that this file is used when creating distributions with
+# "python setup.py sdist" or "python setup.py bdist_wheel".
+include requirements.txt
+include VERSION
+include WORKSPACE
+global-include BUILD.bazel
+global-include *.bzl
+global-include *.cc
+global-include *.h
