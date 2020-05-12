@@ -17,6 +17,8 @@ py_binary(
         "@tink_py//tink:tink_python",
         "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink/aead",
+        "@tink_py//tink/integration/awskms",
+        "@tink_py//tink/integration/gcpkms",
     ],
 )
 

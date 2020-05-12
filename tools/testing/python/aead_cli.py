@@ -27,6 +27,7 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+import os
 # Special imports
 from absl import app
 from absl import flags
@@ -35,8 +36,17 @@ import tink
 
 from tink import aead
 from tink import cleartext_keyset_handle
+from tink.integration import awskms
+from tink.integration import gcpkms
+
 
 FLAGS = flags.FLAGS
+AWS_CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
+                                   'tink_base/testdata/aws_credentials_cc.txt')
+AWS_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
+GCP_CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
+                                   'tink_base/testdata/credential.json')
+GCP_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 
 
 def read_keyset(keyset_filename):
@@ -82,6 +92,10 @@ def main(argv):
   except tink.TinkError as e:
     logging.error('Error initialising Tink: %s', e)
     return 1
+
+  # Initialize KMS clients
+  awskms.AwsKmsClient.register_client(AWS_KEY_URI, AWS_CREDENTIAL_PATH)
+  gcpkms.GcpKmsClient.register_client(GCP_KEY_URI, GCP_CREDENTIAL_PATH)
 
   # Read the keyset into keyset_handle
   try:

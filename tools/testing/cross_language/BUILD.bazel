@@ -82,6 +82,7 @@ sh_test(
         "//testing/cc:aead_cli_cc",
         "//testing/go:aead_cli_go",
         "//testing/go:generate_envelope_keyset",
+        "//testing/python:aead_cli_python",
         "//tinkey",
         "@google_root_pem//file",
         "@tink_base//testdata:credentials",

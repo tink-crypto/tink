@@ -17,6 +17,7 @@ ROOT_DIR="$TEST_SRCDIR/tools"
 CC_AEAD_CLI="$ROOT_DIR/testing/cc/aead_cli_cc"
 GO_AEAD_CLI="$ROOT_DIR/testing/go/aead_cli_go"
 JAVA_AEAD_CLI="$ROOT_DIR/testing/aead_cli_java"
+PY_AEAD_CLI="$ROOT_DIR/testing/python/aead_cli_python"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 # TODO(b/136245485): Update this script to use go/gbash.
@@ -119,7 +120,7 @@ aead_gcp_test() {
 ##### Run the actual tests.
 
 KEY_TEMPLATES=(AES128_GCM AES128_CTR_HMAC_SHA256)
-ENCRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI $CC_AEAD_CLI)
-DECRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI $CC_AEAD_CLI)
+ENCRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI $CC_AEAD_CLI $PY_AEAD_CLI)
+DECRYPT_CLIS=($GO_AEAD_CLI $JAVA_AEAD_CLI $CC_AEAD_CLI $PY_AEAD_CLI)
 aead_gcp_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
 aead_aws_test "${ENCRYPT_CLIS[*]}" "${DECRYPT_CLIS[*]}" "${KEY_TEMPLATES[*]}"
