@@ -2,7 +2,7 @@
 Initialization of dependencies of Java Tink.
 """
 
-load("@com_google_protobuf_javalite//:protobuf_deps.bzl", javalite_protobuf_deps = "protobuf_deps")
+load("@com_google_protobuf//:protobuf_deps.bzl", javalite_protobuf_deps = "protobuf_deps")
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@build_bazel_rules_android//android:rules.bzl", "android_sdk_repository")
 

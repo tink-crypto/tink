@@ -56,13 +56,13 @@ def tink_base_deps():
     # on @com_google_protobuf//:proto, @com_google_protobuf//:cc_toolchain and
     # @com_google_protobuf//:java_toolchain, respectively.
     # This statement defines the @com_google_protobuf repo.
-    # Release from 2019-12-02
+    # Release from 2020-02-14
     if not native.existing_rule("com_google_protobuf"):
         http_archive(
             name = "com_google_protobuf",
-            strip_prefix = "protobuf-3.11.1",
-            urls = ["https://github.com/google/protobuf/archive/v3.11.1.zip"],
-            sha256 = "20e55e7dc9ebbb5800072fff25fd56d7c0a168493ef4652e78910566fa6b45f5",
+            strip_prefix = "protobuf-3.11.4",
+            urls = ["https://github.com/google/protobuf/archive/v3.11.4.zip"],
+            sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
         )
 
     # Remote Build Execution

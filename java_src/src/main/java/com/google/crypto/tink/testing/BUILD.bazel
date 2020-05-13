@@ -39,7 +39,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/prf:prf_config",
         "//src/main/java/com/google/crypto/tink/streamingaead",
         "//src/main/java/com/google/crypto/tink/subtle",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -76,7 +76,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/prf:prf_config-android",
         "//src/main/java/com/google/crypto/tink/streamingaead:android",
         "//src/main/java/com/google/crypto/tink/subtle",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -112,7 +112,7 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         "//src/main/java/com/google/crypto/tink:core",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],
 )
@@ -123,7 +123,7 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         "//src/main/java/com/google/crypto/tink:core",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],
 )

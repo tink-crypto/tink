@@ -26,18 +26,6 @@ def tink_java_deps():
             strip_prefix = "rules_android-0.1.1",
         )
 
-    if not native.existing_rule("com_google_protobuf_javalite"):
-        # java_lite_proto_library rules implicitly depend on
-        # @com_google_protobuf_javalite//:javalite_toolchain, which is the JavaLite proto
-        # runtime (base classes and common utilities).
-        # Commit from 2019-12-03 on the 3.11.x branch.
-        http_archive(
-            name = "com_google_protobuf_javalite",
-            strip_prefix = "protobuf-0425fa932ce95a32bb9f88b2c09b995e9ff8207b",
-            urls = ["https://github.com/google/protobuf/archive/0425fa932ce95a32bb9f88b2c09b995e9ff8207b.zip"],
-            sha256 = "e60211a40473f6be95b53f64559f82a3b2971672b11710db2fc9081708e25699",
-        )
-
     if not native.existing_rule("rules_python"):
         # Needed by @com_google_protobuf_javalite.
         http_archive(
