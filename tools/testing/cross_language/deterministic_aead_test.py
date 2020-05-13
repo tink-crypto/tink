@@ -9,15 +9,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.tools.testing.python.cli."""
+"""Cross-language tests for the DeterministicAead primitive."""
 
 from absl.testing import absltest
 from absl.testing import parameterized
 
 import tink
 from tink import daead
+from tools.testing import supported_key_types
 from tools.testing.cross_language.util import cli_daead
-from tools.testing.cross_language.util import cli_tinkey
+from tools.testing.cross_language.util import keyset_manager
 
 
 def setUpModule():
@@ -26,9 +27,11 @@ def setUpModule():
 
 class DeterministicAeadTest(parameterized.TestCase):
 
-  @parameterized.parameters(('AES256_SIV', ('cc', 'go', 'java', 'python')),)
-  def test_encrypt_decrypt(self, key_template, supported_langs):
-    keyset_handle = cli_tinkey.generate_keyset_handle(key_template)
+  @parameterized.parameters(
+      supported_key_types.test_cases(supported_key_types.DAEAD_KEY_TYPES))
+  def test_encrypt_decrypt(self, key_template_name, supported_langs):
+    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    keyset_handle = keyset_manager.new_keyset_handle(key_template)
     supported_daeads = [
         cli_daead.CliDeterministicAead(lang, keyset_handle)
         for lang in supported_langs
@@ -40,12 +43,12 @@ class DeterministicAeadTest(parameterized.TestCase):
     ]
     for p in supported_daeads:
       plaintext = (
-          b'This is some plaintext message to be encrypted using key_template '
-          b'%s using %s for encryption.'
-          % (key_template.encode('utf8'), p.lang.encode('utf8')))
+          b'This is some plaintext message to be encrypted using '
+          b'key_template %s using %s for encryption.'
+          % (key_template_name.encode('utf8'), p.lang.encode('utf8')))
       associated_data = (
           b'Some associated data for %s using %s for encryption.' %
-          (key_template.encode('utf8'), p.lang.encode('utf8')))
+          (key_template_name.encode('utf8'), p.lang.encode('utf8')))
       ciphertext = p.encrypt_deterministically(plaintext, associated_data)
       for p2 in supported_daeads:
         output = p2.decrypt_deterministically(ciphertext, associated_data)

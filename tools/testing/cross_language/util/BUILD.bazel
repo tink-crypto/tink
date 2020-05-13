@@ -194,3 +194,16 @@ py_test(
         requirement("absl-py"),
     ],
 )
+
+py_library(
+    name = "keyset_manager",
+    testonly = 1,
+    srcs = [
+        "keyset_manager.py",
+    ],
+    deps = [
+        ":cli_tinkey",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)

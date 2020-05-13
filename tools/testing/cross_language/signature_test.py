@@ -9,7 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.tools.testing.python.cli."""
+"""Cross-language tests for Public-Key Signatures."""
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -17,8 +17,9 @@ from absl.testing import parameterized
 import tink
 from tink import signature
 
+from tools.testing import supported_key_types
 from tools.testing.cross_language.util import cli_signature
-from tools.testing.cross_language.util import cli_tinkey
+from tools.testing.cross_language.util import keyset_manager
 
 
 def setUpModule():
@@ -28,19 +29,10 @@ def setUpModule():
 class SignaturePythonTest(parameterized.TestCase):
 
   @parameterized.parameters(
-      ('ECDSA_P256', ('cc', 'go', 'java', 'python')),
-      ('ECDSA_P384', ('cc', 'go', 'java', 'python')),
-      ('ECDSA_P521', ('cc', 'go', 'java', 'python')),
-      ('ECDSA_P256_IEEE_P1363', ('cc', 'go', 'java', 'python')),
-      ('ECDSA_P384_IEEE_P1363', ('cc', 'go', 'java', 'python')),
-      ('ECDSA_P521_IEEE_P1363', ('cc', 'go', 'java', 'python')),
-      ('ED25519', ('cc', 'go', 'java', 'python')),
-      ('RSA_SSA_PKCS1_3072_SHA256_F4', ('cc', 'java', 'python')),
-      ('RSA_SSA_PKCS1_4096_SHA512_F4', ('cc', 'java', 'python')),
-      ('RSA_SSA_PSS_3072_SHA256_SHA256_32_F4', ('cc', 'java', 'python')),
-      ('RSA_SSA_PSS_4096_SHA512_SHA512_64_F4', ('cc', 'java', 'python')))
-  def test_encrypt_decrypt(self, key_template, supported_langs):
-    private_handle = cli_tinkey.generate_keyset_handle(key_template)
+      supported_key_types.test_cases(supported_key_types.SIGNATURE_KEY_TYPES))
+  def test_encrypt_decrypt(self, key_template_name, supported_langs):
+    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    private_handle = keyset_manager.new_keyset_handle(key_template)
     supported_signers = [
         cli_signature.CliPublicKeySign(lang, private_handle)
         for lang in supported_langs
@@ -63,7 +55,7 @@ class SignaturePythonTest(parameterized.TestCase):
     for signer in supported_signers:
       message = (
           b'A message to be signed using key_template %s in %s.'
-          % (key_template.encode('utf8'), signer.lang.encode('utf8')))
+          % (key_template_name.encode('utf8'), signer.lang.encode('utf8')))
       sign = signer.sign(message)
       for verifier in supported_verifiers:
         self.assertIsNone(verifier.verify(sign, message))

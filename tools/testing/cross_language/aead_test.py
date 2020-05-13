@@ -9,15 +9,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.tools.testing.python.cli."""
+"""Cross-language tests for the Aead primitive."""
 
 from absl.testing import absltest
 from absl.testing import parameterized
 
 import tink
 from tink import aead
+
+from tools.testing import supported_key_types
 from tools.testing.cross_language.util import cli_aead
-from tools.testing.cross_language.util import cli_tinkey
+from tools.testing.cross_language.util import keyset_manager
 
 
 def setUpModule():
@@ -27,16 +29,10 @@ def setUpModule():
 class AeadPythonTest(parameterized.TestCase):
 
   @parameterized.parameters(
-      ('AES128_GCM', ('cc', 'go', 'java', 'python')),
-      ('AES256_GCM', ('cc', 'go', 'java', 'python')),
-      ('AES128_CTR_HMAC_SHA256', ('cc', 'go', 'java', 'python')),
-      ('AES256_CTR_HMAC_SHA256', ('cc', 'go', 'java', 'python')),
-      ('XCHACHA20_POLY1305', ('cc', 'go', 'java', 'python')),
-      ('AES128_EAX', ('cc', 'java', 'python')),
-      ('AES256_EAX', ('cc', 'java', 'python')),
-      ('CHACHA20_POLY1305', ('go', 'java')))
-  def test_encrypt_decrypt(self, key_template, supported_langs):
-    keyset_handle = cli_tinkey.generate_keyset_handle(key_template)
+      supported_key_types.test_cases(supported_key_types.AEAD_KEY_TYPES))
+  def test_encrypt_decrypt(self, key_template_name, supported_langs):
+    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    keyset_handle = keyset_manager.new_keyset_handle(key_template)
     supported_aeads = [
         cli_aead.CliAead(lang, keyset_handle) for lang in supported_langs
     ]
@@ -49,10 +45,10 @@ class AeadPythonTest(parameterized.TestCase):
       plaintext = (
           b'This is some plaintext message to be encrypted using key_template '
           b'%s using %s for encryption.'
-          % (key_template.encode('utf8'), p.lang.encode('utf8')))
+          % (key_template_name.encode('utf8'), p.lang.encode('utf8')))
       associated_data = (
           b'Some associated data for %s using %s for encryption.' %
-          (key_template.encode('utf8'), p.lang.encode('utf8')))
+          (key_template_name.encode('utf8'), p.lang.encode('utf8')))
       ciphertext = p.encrypt(plaintext, associated_data)
       for p2 in supported_aeads:
         output = p2.decrypt(ciphertext, associated_data)
