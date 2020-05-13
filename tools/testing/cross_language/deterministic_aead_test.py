@@ -36,26 +36,31 @@ class DeterministicAeadTest(parameterized.TestCase):
         cli_daead.CliDeterministicAead(lang, keyset_handle)
         for lang in supported_langs
     ]
+    self.assertNotEmpty(supported_daeads)
     unsupported_daeads = [
         cli_daead.CliDeterministicAead(lang, keyset_handle)
         for lang in cli_daead.LANGUAGES
         if lang not in supported_langs
     ]
+    plaintext = (
+        b'This is some plaintext message to be encrypted using '
+        b'key_template %s.' % key_template_name.encode('utf8'))
+    associated_data = (
+        b'Some associated data for %s.' % key_template_name.encode('utf8'))
+    ciphertext = None
     for p in supported_daeads:
-      plaintext = (
-          b'This is some plaintext message to be encrypted using '
-          b'key_template %s using %s for encryption.'
-          % (key_template_name.encode('utf8'), p.lang.encode('utf8')))
-      associated_data = (
-          b'Some associated data for %s using %s for encryption.' %
-          (key_template_name.encode('utf8'), p.lang.encode('utf8')))
-      ciphertext = p.encrypt_deterministically(plaintext, associated_data)
-      for p2 in supported_daeads:
-        output = p2.decrypt_deterministically(ciphertext, associated_data)
-        self.assertEqual(output, plaintext)
-      for p2 in unsupported_daeads:
-        with self.assertRaises(tink.TinkError):
-          p2.decrypt_deterministically(ciphertext, associated_data)
+      if ciphertext:
+        self.assertEqual(
+            ciphertext,
+            p.encrypt_deterministically(plaintext, associated_data))
+      else:
+        ciphertext = p.encrypt_deterministically(plaintext, associated_data)
+    for p2 in supported_daeads:
+      output = p2.decrypt_deterministically(ciphertext, associated_data)
+      self.assertEqual(output, plaintext)
+    for p2 in unsupported_daeads:
+      with self.assertRaises(tink.TinkError):
+        p2.decrypt_deterministically(ciphertext, associated_data)
     for p in unsupported_daeads:
       with self.assertRaises(tink.TinkError):
         p.encrypt_deterministically(b'plaintext', b'associated_data')
