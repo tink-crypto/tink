@@ -22,7 +22,6 @@ _EXTERNAL_JAVADOC_LINKS = [
 
 _TINK_PACKAGES = [
     "com.google.crypto.tink",
-    "com.google.protobuf",
 ]
 
 def gen_maven_jar_rules(
