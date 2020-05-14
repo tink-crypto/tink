@@ -39,23 +39,6 @@ sh_test(
     ],
 )
 
-sh_test(
-    name = "aead_test_sh",
-    size = "medium",
-    srcs = [
-        "aead_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:aead_cli_java",
-        "//testing/cc:aead_cli_cc",
-        "//testing/go:aead_cli_go",
-        "//testing/python:aead_cli_python",
-        "//tinkey",
-        "@tink_base//testdata:credentials",
-    ],
-)
-
 py_test(
     name = "aead_test",
     srcs = ["aead_test.py"],
@@ -91,22 +74,6 @@ sh_test(
     tags = ["no_rbe"],
 )
 
-sh_test(
-    name = "deterministic_aead_test_sh",
-    size = "medium",
-    srcs = [
-        "deterministic_aead_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:deterministic_aead_cli_java",
-        "//testing/cc:deterministic_aead_cli_cc",
-        "//testing/go:deterministic_aead_cli_go",
-        "//testing/python:deterministic_aead_cli_python",
-        "//tinkey",
-    ],
-)
-
 py_test(
     name = "deterministic_aead_test",
     srcs = ["deterministic_aead_test.py"],
@@ -133,22 +100,6 @@ sh_test(
         "//testing:streaming_aead_cli_java",
         "//testing/cc:streaming_aead_cli_cc",
         "//testing/go:streaming_aead_cli_go",
-        "//tinkey",
-    ],
-)
-
-sh_test(
-    name = "mac_test_sh",
-    size = "medium",
-    srcs = [
-        "mac_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:mac_cli_java",
-        "//testing/cc:mac_cli_cc",
-        "//testing/go:mac_cli_go",
-        "//testing/python:mac_cli_python",
         "//tinkey",
     ],
 )
@@ -182,26 +133,6 @@ sh_test(
     ],
 )
 
-sh_test(
-    name = "hybrid_encryption_test_sh",
-    size = "medium",
-    srcs = [
-        "hybrid_encryption_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:hybrid_decrypt_cli_java",
-        "//testing:hybrid_encrypt_cli_java",
-        "//testing/cc:hybrid_decrypt_cli_cc",
-        "//testing/cc:hybrid_encrypt_cli_cc",
-        "//testing/go:hybrid_decrypt_cli_go",
-        "//testing/go:hybrid_encrypt_cli_go",
-        "//testing/python:hybrid_decrypt_cli_python",
-        "//testing/python:hybrid_encrypt_cli_python",
-        "//tinkey",
-    ],
-)
-
 py_test(
     name = "hybrid_encryption_test",
     srcs = ["hybrid_encryption_test.py"],
@@ -214,27 +145,6 @@ py_test(
         "//testing/cross_language/util:keyset_manager",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/hybrid",
-    ],
-)
-
-sh_test(
-    name = "signature_test_sh",
-    size = "large",
-    timeout = "long",
-    srcs = [
-        "signature_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:public_key_sign_cli_java",
-        "//testing:public_key_verify_cli_java",
-        "//testing/cc:public_key_sign_cli_cc",
-        "//testing/cc:public_key_verify_cli_cc",
-        "//testing/go:public_key_sign_cli_go",
-        "//testing/go:public_key_verify_cli_go",
-        "//testing/python:public_key_sign_cli_python",
-        "//testing/python:public_key_verify_cli_python",
-        "//tinkey",
     ],
 )
 
