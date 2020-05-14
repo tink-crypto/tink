@@ -47,7 +47,8 @@ class FileObjectAdapterTest(absltest.TestCase):
     adapter = file_object_adapter.FileObjectAdapter(file_object)
 
     adapter.close()
-    self.assertRaises(ValueError, adapter.write, b'something')
+    with self.assertRaises(ValueError):
+      adapter.write(b'something')
 
   def test_write_returns_none(self):
     file_object = mock.Mock()
@@ -96,7 +97,8 @@ class FileObjectAdapterTest(absltest.TestCase):
     file_object.read = mock.Mock(return_value=b'')
     adapter = file_object_adapter.FileObjectAdapter(file_object)
 
-    self.assertRaises(EOFError, adapter.read, 10)
+    with self.assertRaises(EOFError):
+      adapter.read(10)
 
   def test_read_size_0(self):
     file_object = io.BytesIO(b'something')
