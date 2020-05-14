@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 from absl.testing import absltest
@@ -32,12 +33,15 @@ def setUpModule():
   hybrid.register()
 
 
-def _hybrid_decrypt_key_manager():
-  return core.Registry.key_manager(
+def _hybrid_decrypt_key_manager() -> core.PrivateKeyManager:
+  key_manager = core.Registry.key_manager(
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey')
+  if not isinstance(key_manager, core.PrivateKeyManager):
+    raise core.TinkError('key_manager is not a PrivateKeyManager')
+  return key_manager
 
 
-def _hybrid_encrypt_key_manager():
+def _hybrid_encrypt_key_manager() -> core.KeyManager:
   return core.Registry.key_manager(
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
 
@@ -76,8 +80,7 @@ class HybridKeyManagerTest(absltest.TestCase):
                      common_pb2.NIST_P256)
 
   def test_new_key_data_invalid_params_throw_exception(self):
-    with self.assertRaisesRegex(core.TinkError,
-                                'Unsupported elliptic curve'):
+    with self.assertRaises(core.TinkError):
       _hybrid_decrypt_key_manager().new_key_data(
           hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
               curve_type=cast(common_pb2.EllipticCurveType, 100),
@@ -92,9 +95,7 @@ class HybridKeyManagerTest(absltest.TestCase):
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
     key_template.value = key_format.SerializeToString()
     key_template.output_prefix_type = tink_pb2.TINK
-    with self.assertRaisesRegex(
-        core.TinkError,
-        'Creating new keys is not supported for this key manager'):
+    with self.assertRaises(core.TinkError):
       key_manager = _hybrid_encrypt_key_manager()
       key_manager.new_key_data(key_template)
 
@@ -115,7 +116,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     key_data = decrypt_key_manager.new_key_data(
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     hybrid_dec = decrypt_key_manager.primitive(key_data)
-    with self.assertRaisesRegex(core.TinkError, 'ciphertext too short'):
+    with self.assertRaises(core.TinkError):
       hybrid_dec.decrypt(b'bad ciphertext', b'some context info')
 
 if __name__ == '__main__':
