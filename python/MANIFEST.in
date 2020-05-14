@@ -4,7 +4,10 @@
 include requirements.txt
 include VERSION
 include WORKSPACE
-global-include BUILD.bazel
-global-include *.bzl
-global-include *.cc
-global-include *.h
+include BUILD.bazel
+include tink_py_deps.bzl
+include tink_py_deps_init.bzl
+
+# Collect all sources needed for build
+graft tink
+graft tools
