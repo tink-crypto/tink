@@ -20,12 +20,11 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
-import io
 
 # Special imports
 import six
 
-from typing import Union
+from typing import BinaryIO, TextIO
 from google.protobuf import json_format
 from tink.proto import tink_pb2
 from tink import core
@@ -52,7 +51,7 @@ class JsonKeysetWriter(KeysetWriter):
   cf. https://developers.google.com/protocol-buffers/docs/encoding
   """
 
-  def __init__(self, text_io_stream: io.TextIOBase):
+  def __init__(self, text_io_stream: TextIO):
     self._io_stream = text_io_stream
 
   def write(self, keyset: tink_pb2.Keyset) -> None:
@@ -84,7 +83,7 @@ class BinaryKeysetWriter(KeysetWriter):
   cf. https://developers.google.com/protocol-buffers/docs/encoding
   """
 
-  def __init__(self, binary_io_stream: Union[io.BufferedIOBase, io.BytesIO]):
+  def __init__(self, binary_io_stream: BinaryIO):
     self._io_stream = binary_io_stream
 
   def write(self, keyset: tink_pb2.Keyset) -> None:

@@ -20,13 +20,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.proto.AesGcmKey;
+import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -76,8 +80,6 @@ public class KeysetManagerTest {
     int keyId = 42;
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(createDisabledKey(keyId)));
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).enable(keyId).getKeysetHandle().getKeyset();
 
@@ -86,7 +88,6 @@ public class KeysetManagerTest {
     assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testEnable_unknownStatus_shouldThrowException() throws Exception {
     int keyId = 42;
@@ -94,7 +95,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(createUnknownStatusKey(keyId)));
 
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).enable(keyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -102,7 +102,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testEnable_keyDestroyed_shouldThrowException() throws Exception {
     int keyId = 42;
@@ -110,7 +109,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(createDestroyedKey(keyId)));
 
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).enable(keyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -118,7 +116,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testEnable_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
@@ -126,7 +123,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(createDisabledKey(keyId)));
 
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).enable(keyId + 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -142,8 +138,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(newPrimaryKeyId)));
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle)
             .setPrimary(newPrimaryKeyId)
@@ -154,7 +148,6 @@ public class KeysetManagerTest {
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(newPrimaryKeyId);
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testSetPrimary_keyNotFound_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -164,7 +157,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createEnabledKey(newPrimaryKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).setPrimary(44);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -172,7 +164,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testSetPrimary_keyDisabled_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -182,7 +173,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createDisabledKey(newPrimaryKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -190,7 +180,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testSetPrimary_keyDestroyed_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -200,7 +189,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createDestroyedKey(newPrimaryKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -208,7 +196,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testSetPrimary_keyUnknownStatus_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -218,7 +205,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createUnknownStatusKey(newPrimaryKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -235,8 +221,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(newPrimaryKeyId)));
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle)
             .promote(newPrimaryKeyId)
@@ -247,7 +231,6 @@ public class KeysetManagerTest {
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(newPrimaryKeyId);
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testPromote_keyNotFound_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -257,7 +240,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createEnabledKey(newPrimaryKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).promote(44);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -265,7 +247,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testPromote_keyDisabled_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -275,7 +256,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createDisabledKey(newPrimaryKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -283,7 +263,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testPromote_keyDestroyed_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -293,7 +272,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createDestroyedKey(newPrimaryKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -301,7 +279,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testPromote_keyUnknownStatus_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -311,7 +288,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createUnknownStatusKey(newPrimaryKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -327,8 +303,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).disable(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -339,7 +313,6 @@ public class KeysetManagerTest {
     assertThat(keyset.getKey(1).getStatus()).isEqualTo(KeyStatusType.DISABLED);
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testDisable_keyIsPrimary_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -349,7 +322,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).disable(primaryKeyId).getKeysetHandle().getKeyset();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -357,7 +329,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testDisable_keyDestroyed_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -367,7 +338,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createDestroyedKey(otherKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).disable(otherKeyId).getKeysetHandle().getKeyset();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -375,7 +345,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testDisable_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
@@ -383,7 +352,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(createDisabledKey(keyId)));
 
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).disable(keyId + 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -399,8 +367,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).destroy(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -412,7 +378,6 @@ public class KeysetManagerTest {
     assertThat(keyset.getKey(1).hasKeyData()).isFalse();
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testDestroy_keyIsPrimary_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -422,7 +387,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).destroy(primaryKeyId).getKeysetHandle().getKeyset();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -430,7 +394,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testDestroy_keyUnknownStatus_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -440,7 +403,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createUnknownStatusKey(otherKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).destroy(otherKeyId).getKeysetHandle().getKeyset();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -448,7 +410,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testDestroy_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
@@ -456,7 +417,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(createDisabledKey(keyId)));
 
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).destroy(keyId + 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -472,8 +432,6 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).delete(otherKeyId).getKeysetHandle().getKeyset();
 
@@ -482,7 +440,6 @@ public class KeysetManagerTest {
     assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testDelete_keyIsPrimary_shouldThrowException() throws Exception {
     int primaryKeyId = 42;
@@ -492,7 +449,6 @@ public class KeysetManagerTest {
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).delete(primaryKeyId).getKeysetHandle().getKeyset();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -500,7 +456,6 @@ public class KeysetManagerTest {
     }
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testDelete_keyNotFound_shouldThrowException() throws Exception {
     int keyId1 = 42;
@@ -511,7 +466,6 @@ public class KeysetManagerTest {
             createEnabledKey(keyId2)));
 
     try {
-      // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
       KeysetManager.withKeysetHandle(handle).delete(44);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -522,11 +476,7 @@ public class KeysetManagerTest {
   @Test
   public void testRotate_shouldAddNewKeyAndSetPrimaryKeyId() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
-    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
-    // is not currently held
+    com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     Keyset keyset = KeysetManager.withEmptyKeyset().rotate(template).getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);
@@ -534,14 +484,12 @@ public class KeysetManagerTest {
     TestUtil.assertHmacKey(template, keyset.getKey(0));
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testRotate_bogusKeyTemplate_shouldThrowException() throws Exception {
-    KeyTemplate bogus = TestUtil.createKeyTemplateWithNonExistingTypeUrl();
+    com.google.crypto.tink.proto.KeyTemplate bogus =
+        TestUtil.createKeyTemplateWithNonExistingTypeUrl();
 
     try {
-      // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()',
-      // which is not currently held
       KeysetManager.withEmptyKeyset().rotate(bogus);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -551,16 +499,10 @@ public class KeysetManagerTest {
 
   @Test
   public void testRotate_existingKeyset_shouldAddNewKeyAndSetPrimaryKeyId() throws Exception {
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
-    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
-    // is not currently held
     KeysetHandle existing =
         KeysetManager.withEmptyKeyset()
             .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
             .getKeysetHandle();
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
     Keyset keyset =
         KeysetManager.withKeysetHandle(existing)
             .rotate(MacKeyTemplates.HMAC_SHA256_256BITTAG)
@@ -575,12 +517,30 @@ public class KeysetManagerTest {
 
   @Test
   public void testAdd_shouldAddNewKey() throws Exception {
+    KeyTemplate kt = AesGcmKeyManager.aes128GcmTemplate();
+    Keyset keyset = KeysetManager.withEmptyKeyset().add(kt).getKeysetHandle().getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    // No primary key because add doesn't automatically promote the new key to primary.
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+
+    Keyset.Key key = keyset.getKey(0);
+    assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key.hasKeyData()).isTrue();
+    assertThat(key.getKeyData().getTypeUrl()).isEqualTo(kt.getTypeUrl());
+
+    AesGcmKeyFormat aesGcmKeyFormat =
+        AesGcmKeyFormat.parseFrom(kt.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey =
+        AesGcmKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey.getKeyValue().size()).isEqualTo(aesGcmKeyFormat.getKeySize());
+  }
+
+  @Test
+  public void testAdd_shouldAddNewKey_proto() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
-    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
-    // is not currently held
+    com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     Keyset keyset = KeysetManager.withEmptyKeyset().add(template).getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);
@@ -588,14 +548,25 @@ public class KeysetManagerTest {
     TestUtil.assertHmacKey(template, keyset.getKey(0));
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testAdd_bogusKeyTemplate_shouldThrowException() throws Exception {
-    KeyTemplate bogus = TestUtil.createKeyTemplateWithNonExistingTypeUrl();
+    KeyTemplate bogus =
+        KeyTemplate.create("does not exist", new byte[0], KeyTemplate.OutputPrefixType.TINK);
 
     try {
-      // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()',
-      // which is not currently held
+      KeysetManager.withEmptyKeyset().add(bogus);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      TestUtil.assertExceptionContains(e, "No key manager found for key type");
+    }
+  }
+
+  @Test
+  public void testAdd_bogusKeyTemplate_shouldThrowException_proto() throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate bogus =
+        TestUtil.createKeyTemplateWithNonExistingTypeUrl();
+
+    try {
       KeysetManager.withEmptyKeyset().add(bogus);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
@@ -605,17 +576,47 @@ public class KeysetManagerTest {
 
   @Test
   public void testAdd_existingKeySet_shouldAddNewKey() throws Exception {
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
-    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
-    // is not currently held
+    KeyTemplate kt1 = AesGcmKeyManager.aes128GcmTemplate();
+    KeysetHandle existing = KeysetManager.withEmptyKeyset().add(kt1).getKeysetHandle();
+    KeyTemplate kt2 = AesGcmKeyManager.aes256GcmTemplate();
+    Keyset keyset = KeysetManager.withKeysetHandle(existing).add(kt2).getKeysetHandle().getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    // None of the keys are primary.
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+
+    Keyset.Key key1 = keyset.getKey(0);
+    assertThat(key1.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key1.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key1.hasKeyData()).isTrue();
+    assertThat(key1.getKeyData().getTypeUrl()).isEqualTo(kt1.getTypeUrl());
+
+    AesGcmKeyFormat aesGcmKeyFormat1 =
+        AesGcmKeyFormat.parseFrom(kt1.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey1 =
+        AesGcmKey.parseFrom(key1.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey1.getKeyValue().size()).isEqualTo(aesGcmKeyFormat1.getKeySize());
+
+    Keyset.Key key2 = keyset.getKey(1);
+    assertThat(key2.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key2.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key2.hasKeyData()).isTrue();
+    assertThat(key2.getKeyData().getTypeUrl()).isEqualTo(kt2.getTypeUrl());
+
+    AesGcmKeyFormat aesGcmKeyFormat2 =
+        AesGcmKeyFormat.parseFrom(kt2.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey2 =
+        AesGcmKey.parseFrom(key2.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey2.getKeyValue().size()).isEqualTo(aesGcmKeyFormat2.getKeySize());
+  }
+
+  @Test
+  public void testAdd_existingKeySet_shouldAddNewKey_proto() throws Exception {
     KeysetHandle existing =
         KeysetManager.withEmptyKeyset()
             .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
             .getKeysetHandle();
     int existingPrimaryKeyId = existing.getKeyset().getPrimaryKeyId();
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'this', which could not be resolved
     Keyset keyset =
         KeysetManager.withKeysetHandle(existing)
             .add(MacKeyTemplates.HMAC_SHA256_256BITTAG)
@@ -629,80 +630,50 @@ public class KeysetManagerTest {
   }
 
   @Test
-  @SuppressWarnings("GuardedBy")
   public void testAddNewKey_onePrimary() throws Exception {
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     int keyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(1);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyId);
     TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testAddNewKey_onePrimaryAnotherPrimary() throws Exception {
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     int primaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(primaryKeyId);
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testAddNewKey_primaryThenNonPrimary() throws Exception {
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     int primaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, false);
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(primaryKeyId);
   }
 
-  @SuppressWarnings("GuardedBy")
   @Test
   public void testAddNewKey_addThenDestroy() throws Exception {
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     int secondaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, false);
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     keysetManager.destroy(secondaryKeyId);
-    // TODO(b/145386688): This access should be guarded by 'keysetManager', which is not currently
-    // held
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     // One of the two keys is destroyed and doesn't have keyData anymore.
     assertTrue(!keyset.getKey(0).hasKeyData() || !keyset.getKey(1).hasKeyData());
   }
 
-  @SuppressWarnings("GuardedBy")
   private void manipulateKeyset(KeysetManager manager) {
     try {
-      KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-      // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
+      com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
       manager.rotate(template).add(template).rotate(template).add(template);
     } catch (GeneralSecurityException e) {
       fail("should not throw exception: " + e);
@@ -741,17 +712,13 @@ public class KeysetManagerTest {
     thread1.join();
     thread2.join();
     thread3.join();
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(12);
   }
 
-  @SuppressWarnings("GuardedBy")
   private void enableSetPrimaryKey(KeysetManager manager, int keyId) {
     try {
-      // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
       manager.enable(keyId).setPrimary(keyId);
     } catch (GeneralSecurityException e) {
       fail("should not throw exception: " + e);
@@ -799,8 +766,6 @@ public class KeysetManagerTest {
     thread1.join();
     thread2.join();
     thread3.join();
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(3);
@@ -809,10 +774,8 @@ public class KeysetManagerTest {
     assertThat(keyset.getKey(2).getStatus()).isEqualTo(KeyStatusType.ENABLED);
   }
 
-  @SuppressWarnings("GuardedBy")
   private void disableEnableSetPrimaryKey(KeysetManager manager, int keyId) {
     try {
-      // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
       manager.disable(keyId).enable(keyId).setPrimary(keyId);
     } catch (GeneralSecurityException e) {
       fail("should not throw exception: " + e);
@@ -851,8 +814,6 @@ public class KeysetManagerTest {
     // Wait until all threads finished.
     thread2.join();
     thread3.join();
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(3);
@@ -861,10 +822,8 @@ public class KeysetManagerTest {
     assertThat(keyset.getKey(2).getStatus()).isEqualTo(KeyStatusType.ENABLED);
   }
 
-  @SuppressWarnings("GuardedBy")
   private void enableDisableDeleteKey(KeysetManager manager, int keyId) {
     try {
-      // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
       manager.enable(keyId).disable(keyId).delete(keyId);
     } catch (GeneralSecurityException e) {
       fail("should not throw exception: " + e);
@@ -903,8 +862,6 @@ public class KeysetManagerTest {
     // Wait until all threads finished.
     thread2.join();
     thread3.join();
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);

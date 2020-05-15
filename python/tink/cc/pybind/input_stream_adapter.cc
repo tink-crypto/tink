@@ -22,8 +22,10 @@
 namespace crypto {
 namespace tink {
 
-PYBIND11_MODULE(input_stream_adapter, m) {
+void PybindRegisterInputStreamAdapter(pybind11::module* module) {
   namespace py = pybind11;
+  py::module& m = *module;
+
 
   // TODO(b/146492561): Reduce the number of complicated lambdas.
   py::class_<InputStreamAdapter>(m, "InputStreamAdapter")

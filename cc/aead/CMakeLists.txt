@@ -137,6 +137,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::input_stream_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -157,8 +158,8 @@ tink_cc_library(
     tink::subtle::aes_gcm_siv_boringssl
     tink::subtle::random
     tink::util::constants
-    tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -380,6 +381,7 @@ tink_cc_test(
     tink::core::aead
     tink::subtle::aead_test_util
     tink::util::istream_input_stream
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -394,6 +396,7 @@ tink_cc_test(
     tink::aead::aes_gcm_siv_key_manager
     tink::core::key_type_manager
     tink::subtle::aead_test_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

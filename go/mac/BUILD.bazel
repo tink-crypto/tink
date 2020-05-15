@@ -7,6 +7,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = [
+        "aes_cmac_key_manager.go",
         "hmac_key_manager.go",
         "mac.go",
         "mac_factory.go",
@@ -20,10 +21,11 @@ go_library(
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
         "//mac/subtle:go_default_library",
-        "//signature:go_default_library",
+        "//proto:aes_cmac_go_proto",
         "//proto:common_go_proto",
         "//proto:hmac_go_proto",
         "//proto:tink_go_proto",
+        "//signature:go_default_library",
         "//subtle/random:go_default_library",
         "//tink:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
@@ -33,6 +35,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
+        "aes_cmac_key_manager_test.go",
         "hmac_key_manager_test.go",
         "mac_factory_test.go",
         "mac_key_templates_test.go",
@@ -43,6 +46,7 @@ go_test(
         "//core/cryptofmt:go_default_library",
         "//core/registry:go_default_library",
         "//mac/subtle:go_default_library",
+        "//proto:aes_cmac_go_proto",
         "//proto:common_go_proto",
         "//proto:hmac_go_proto",
         "//proto:tink_go_proto",

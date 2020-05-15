@@ -15,7 +15,7 @@
 
 ROOT_DIR="$TEST_SRCDIR/tools"
 CC_PRF_SET_CLI="$ROOT_DIR/testing/cc/prf_set_cli_cc"
-#GO_PRF_SET_CLI="$ROOT_DIR/testing/go/prf_set_cli_go"
+GO_PRF_SET_CLI="$ROOT_DIR/testing/go/prf_set_cli_go"
 #JAVA_PRF_SET_CLI="$ROOT_DIR/testing/prf_set_cli_java"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
@@ -54,9 +54,11 @@ prf_set_basic_test() {
 
           local prf_file="$TEST_TMPDIR/${test_instance}_PRF_set_${cli_name}_${output_length}_result"
 
-          $cli $symmetric_key_file $plaintext_file $prf_file $output_length \
+          $cli $symmetric_key_file $plaintext_file ${prf_file}_tmp $output_length \
               || exit 1
-          cat $prf_file | sort > $prf_file
+          cat ${prf_file}_tmp | sort > $prf_file
+          echo "## Result for ${cli_name}:"
+          cat $prf_file
           assert_files_different $plaintext_file $prf_file
           prf_files="${prf_files} ${prf_file}"
           echo "## CHECKING against files:"
@@ -73,9 +75,10 @@ prf_set_basic_test() {
 #############################################################################
 ##### Run the actual tests.
 
+# TODO(sschmieg): Uncomment when Tinkey learns about these keys:
 #KEY_TEMPLATES=(HMAC_SHA256_PRF HMAC_SHA512_PRF HKDF_SHA256_PRF AES_CMAC_PRF)
 KEY_TEMPLATES=(HKDF_SHA256)
-PRF_CLIS=($CC_PRF_SET_CLI)
+PRF_CLIS=($CC_PRF_SET_CLI $GO_PRF_SET_CLI)
 OUTPUT_LENGTHS=(1 2 5 10 16 17 20 32 33 48 64 65 100 256 512 1024)
 prf_set_basic_test "${PRF_CLIS[*]}" "${OUTPUT_LENGTHS[*]}" \
     "${KEY_TEMPLATES[*]}"

@@ -218,7 +218,7 @@ main() {
   deploy_library \
     tink-android \
     java_src \
-    tink-android.jar \
+    tink-android-shaded.jar \
     tink-android-src.jar \
     tink-android-javadoc.jar \
     "../$(dirname $0)/tink-android.pom.xml"

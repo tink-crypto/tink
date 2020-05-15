@@ -18,12 +18,13 @@
 
 #include <string>
 
-#include "absl/memory/memory.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "tink/aead.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -61,7 +62,8 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
     crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
         const AesGcmKey& key) const override {
       // Ignore the key and returned one with a fixed size for this test.
-      return {subtle::AesGcmBoringSsl::New(key.key_value())};
+      return {subtle::AesGcmBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()))};
     }
   };
 
@@ -103,7 +105,7 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
   }
 
  private:
-  static const int kVersion = 0;
+  static constexpr int kVersion = 0;
   const std::string kKeyType = "myKeyType";
 };
 
@@ -143,7 +145,8 @@ class ExampleKeyTypeManagerWithoutFactory
     crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
         const AesGcmKey& key) const override {
       // Ignore the key and returned one with a fixed size for this test.
-      return {subtle::AesGcmBoringSsl::New(key.key_value())};
+      return {subtle::AesGcmBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()))};
     }
   };
 
@@ -175,7 +178,7 @@ class ExampleKeyTypeManagerWithoutFactory
   }
 
  private:
-  static const int kVersion = 0;
+  static constexpr int kVersion = 0;
   const std::string key_type_ = "bla";
 };
 

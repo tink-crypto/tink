@@ -18,7 +18,6 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.protobuf.ByteString;
@@ -38,7 +37,7 @@ import java.security.GeneralSecurityException;
  * @since 1.0.0
  */
 public final class KeysetHandle {
-  private Keyset keyset;
+  private final Keyset keyset;
 
   private KeysetHandle(Keyset keyset) {
     this.keyset = keyset;
@@ -46,7 +45,7 @@ public final class KeysetHandle {
 
   /**
    * @return a new {@link KeysetHandle} from a {@code keyset}.
-   * @throws GeneralSecurityException
+   * @throws GeneralSecurityException if the keyset is null or empty.
    */
   static final KeysetHandle fromKeyset(Keyset keyset) throws GeneralSecurityException {
     assertEnoughKeyMaterial(keyset);
@@ -67,13 +66,28 @@ public final class KeysetHandle {
   }
 
   /**
-   * @return a new {@link KeysetHandle} that contains a single fresh key generated according to
-   *     {@code keyTemplate}.
-   * @throws GeneralSecurityException
+   * Generates a new {@link KeysetHandle} that contains a single fresh key generated according to
+   * {@code keyTemplate}.
+   *
+   * @throws GeneralSecurityException if the key template is invalid.
+   * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
+   *     Please use the generateNew method that takes a {@link KeyTemplate} POJO.
+   */
+  @Deprecated
+  public static final KeysetHandle generateNew(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
+    return KeysetManager.withEmptyKeyset().rotate(keyTemplate).getKeysetHandle();
+  }
+
+  /**
+   * Generates a new {@link KeysetHandle} that contains a single fresh key generated according to
+   * {@code keyTemplate}.
+   *
+   * @throws GeneralSecurityException if the key template is invalid.
    */
   public static final KeysetHandle generateNew(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    return KeysetManager.withEmptyKeyset().rotate(keyTemplate).getKeysetHandle();
+    return KeysetManager.withEmptyKeyset().rotate(keyTemplate.getProto()).getKeysetHandle();
   }
 
   /**

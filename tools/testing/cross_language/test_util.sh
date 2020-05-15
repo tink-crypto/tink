@@ -175,7 +175,7 @@ assert_files_equal() {
   echo "*** Checking that 2 files are equal:"
   echo "    file #1: $expected_file"
   echo "    file #2: $given_file"
-  diff -q $expected_file $given_file
+  diff $expected_file $given_file
   if [ $? -ne 0 ]; then
     echo "--- Failure: the files are different."
     exit 1

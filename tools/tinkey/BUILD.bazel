@@ -30,7 +30,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink/signature",
         "@tink_java//src/main/java/com/google/crypto/tink/streamingaead",
         "@tink_java//proto:tink_java_proto",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:args4j_args4j",
     ],
 )
@@ -64,7 +64,7 @@ java_library(
         ":libtinkey",
         "@tink_java//:testonly",
         "@tink_java//:testutil",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

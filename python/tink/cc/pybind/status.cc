@@ -37,7 +37,10 @@ bool IsOk(handle status_or) {
   return static_cast<util::Status &>(caster).ok();
 }
 
-PYBIND11_MODULE(status, m) {
+void PybindRegisterStatus(pybind11::module* module) {
+  namespace py = pybind11;
+  py::module& m = *module;
+
   enum_<util::error::Code>(m, "ErrorCode")
       .value("OK", util::error::Code::OK)
       .value("CANCELLED", util::error::Code::CANCELLED)

@@ -7,6 +7,7 @@ py_library(
     name = "core",
     srcs = ["__init__.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         ":_crypto_format",
         ":_key_manager",
@@ -33,7 +34,7 @@ py_library(
     srcs = ["_tink_error.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink/cc/pybind:status",
+        "//tink/cc/pybind:tink_bindings",
     ],
 )
 
@@ -59,6 +60,7 @@ py_test(
         requirement("absl-py"),
         "//tink/aead",
         "//tink/mac",
+        "//tink/mac:_mac_wrapper",
         "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
     ],
@@ -117,30 +119,5 @@ py_library(
     deps = [
         ":_primitive_set",
         requirement("six"),
-    ],
-)
-
-py_library(
-    name = "cleartext_keyset_handle",
-    srcs = ["cleartext_keyset_handle.py"],
-    srcs_version = "PY3",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//tink:tink_python",
-        "//tink/proto:tink_py_pb2",
-    ],
-)
-
-py_test(
-    name = "cleartext_keyset_handle_test",
-    srcs = ["cleartext_keyset_handle_test.py"],
-    srcs_version = "PY3",
-    deps = [
-        ":cleartext_keyset_handle",
-        ":core",
-        requirement("absl-py"),
-        "//tink:tink_config",
-        "//tink:tink_python",
-        "//tink/mac",
     ],
 )

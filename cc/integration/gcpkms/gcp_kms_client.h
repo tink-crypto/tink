@@ -44,6 +44,10 @@ class GcpKmsClient : public crypto::tink::KmsClient  {
   static crypto::tink::util::StatusOr<std::unique_ptr<GcpKmsClient>>
   New(absl::string_view key_uri, absl::string_view credentials_path);
 
+  // Creates a new client and registers it in KMSClients.
+  static crypto::tink::util::Status RegisterNewClient(
+      absl::string_view key_uri, absl::string_view credentials_path);
+
   // Returns true iff this client does support KMS key specified by 'key_uri'.
   bool DoesSupport(absl::string_view key_uri) const override;
 

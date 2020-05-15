@@ -85,7 +85,7 @@ class KmsEnvelopeAead(_aead.Aead):
     dek = tink_pb2.KeyData()
     dek.type_url = self.key_template.type_url
     dek.value = dek_bytes
-    dek.key_material_type = tink_pb2.KeyData.KeyMaterialType.SYMMETRIC
+    dek.key_material_type = tink_pb2.KeyData.SYMMETRIC
     dek_aead = core.Registry.primitive(dek, _aead.Aead)
 
     # Extract ciphertext payload and decrypt

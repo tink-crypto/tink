@@ -41,12 +41,7 @@ public class NoSecretKeysetHandleTest {
   public void testBasic() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()', which
-    // is not currently held
     KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
-    @SuppressWarnings("GuardedBy")
-    // TODO(b/145386688): This access should be guarded by 'manager', which is not currently held
     Keyset keyset = manager.getKeysetHandle().getKeyset();
     try {
       KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset.toByteArray());

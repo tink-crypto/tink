@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -34,6 +35,7 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -278,5 +280,109 @@ public class RsaSsaPssSignKeyManagerTest {
 
     byte[] message = Random.randBytes(135);
     verifier.verify(signer.sign(message), message);
+  }
+
+  @Test
+  public void testRsa3072PssSha256F4Template() throws Exception {
+    KeyTemplate template = RsaSsaPssSignKeyManager.rsa3072PssSha256F4Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new RsaSsaPssSignKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.hasParams()).isTrue();
+    assertThat(format.getParams().getSigHash()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getSaltLength()).isEqualTo(32);
+    assertThat(format.getModulusSizeInBits()).isEqualTo(3072);
+    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
+        .isEqualTo(BigInteger.valueOf(65537));
+  }
+
+  @Test
+  public void testRawRsa3072PssSha256F4Template() throws Exception {
+    KeyTemplate template = RsaSsaPssSignKeyManager.rawRsa3072PssSha256F4Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new RsaSsaPssSignKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.hasParams()).isTrue();
+    assertThat(format.getParams().getSigHash()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getSaltLength()).isEqualTo(32);
+    assertThat(format.getModulusSizeInBits()).isEqualTo(3072);
+    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
+        .isEqualTo(BigInteger.valueOf(65537));
+  }
+
+  @Test
+  public void testRsa4096PssSha512F4Template() throws Exception {
+    KeyTemplate template = RsaSsaPssSignKeyManager.rsa4096PssSha512F4Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new RsaSsaPssSignKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.hasParams()).isTrue();
+    assertThat(format.getParams().getSigHash()).isEqualTo(HashType.SHA512);
+    assertThat(format.getParams().getMgf1Hash()).isEqualTo(HashType.SHA512);
+    assertThat(format.getParams().getSaltLength()).isEqualTo(64);
+    assertThat(format.getModulusSizeInBits()).isEqualTo(4096);
+    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
+        .isEqualTo(BigInteger.valueOf(65537));
+  }
+
+  @Test
+  public void testRawRsa4096PssSha512F4Template() throws Exception {
+    KeyTemplate template = RsaSsaPssSignKeyManager.rawRsa4096PssSha512F4Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new RsaSsaPssSignKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.hasParams()).isTrue();
+    assertThat(format.getParams().getSigHash()).isEqualTo(HashType.SHA512);
+    assertThat(format.getParams().getMgf1Hash()).isEqualTo(HashType.SHA512);
+    assertThat(format.getParams().getSaltLength()).isEqualTo(64);
+    assertThat(format.getModulusSizeInBits()).isEqualTo(4096);
+    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
+        .isEqualTo(BigInteger.valueOf(65537));
+  }
+
+  @Test
+  public void testRsa3072PssSha256F4TemplateWithManager() throws Exception {
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(
+            RsaSsaPssSignKeyManager.rsa3072PssSha256F4Template().getValue(),
+            ExtensionRegistryLite.getEmptyRegistry());
+    new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+  }
+
+  @Test
+  public void testRawRsa3072PssSha256F4TemplateWithManager() throws Exception {
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(
+            RsaSsaPssSignKeyManager.rawRsa3072PssSha256F4Template().getValue(),
+            ExtensionRegistryLite.getEmptyRegistry());
+    new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+  }
+
+  @Test
+  public void testRsa4096PssSha512F4TemplateWithManager() throws Exception {
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(
+            RsaSsaPssSignKeyManager.rsa4096PssSha512F4Template().getValue(),
+            ExtensionRegistryLite.getEmptyRegistry());
+    new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+  }
+
+  @Test
+  public void testRawRsa4096PssSha512F4TemplateWithManager() throws Exception {
+    RsaSsaPssKeyFormat format =
+        RsaSsaPssKeyFormat.parseFrom(
+            RsaSsaPssSignKeyManager.rawRsa4096PssSha512F4Template().getValue(),
+            ExtensionRegistryLite.getEmptyRegistry());
+    new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
   }
 }

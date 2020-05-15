@@ -25,18 +25,17 @@ from tink.proto import tink_pb2
 
 from tink import core
 from tink import mac
-from tink import tink_config
 
 
 def setUpModule():
-  tink_config.register()
+  mac.register()
 
 
 class MacKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
     super(MacKeyManagerTest, self).setUp()
-    self.key_manager = mac.key_manager_from_cc_registry(
+    self.key_manager = core.Registry.key_manager(
         'type.googleapis.com/google.crypto.tink.HmacKey')
 
   def new_hmac_key_template(self, hash_type, tag_size, key_size):

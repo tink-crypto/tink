@@ -9,6 +9,7 @@ py_library(
     name = "daead",
     srcs = ["__init__.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         ":_deterministic_aead",
         ":_deterministic_aead_key_manager",
@@ -30,8 +31,7 @@ py_library(
     deps = [
         ":_deterministic_aead",
         ":_deterministic_aead_wrapper",
-        "//tink/cc/pybind:cc_key_manager",
-        "//tink/cc/pybind:cc_tink_config",
+        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],

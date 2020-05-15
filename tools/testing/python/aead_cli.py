@@ -27,15 +27,26 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+import os
 # Special imports
 from absl import app
 from absl import flags
 from absl import logging
 import tink
 
+from tink import aead
 from tink import cleartext_keyset_handle
+from tink.integration import awskms
+from tink.integration import gcpkms
+
 
 FLAGS = flags.FLAGS
+AWS_CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
+                                   'tink_base/testdata/aws_credentials_cc.txt')
+AWS_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
+GCP_CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
+                                   'tink_base/testdata/credential.json')
+GCP_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 
 
 def read_keyset(keyset_filename):
@@ -77,10 +88,14 @@ def main(argv):
 
   # Initialise Tink
   try:
-    tink.tink_config.register()
+    aead.register()
   except tink.TinkError as e:
     logging.error('Error initialising Tink: %s', e)
     return 1
+
+  # Initialize KMS clients
+  awskms.AwsKmsClient.register_client(AWS_KEY_URI, AWS_CREDENTIAL_PATH)
+  gcpkms.GcpKmsClient.register_client(GCP_KEY_URI, GCP_CREDENTIAL_PATH)
 
   # Read the keyset into keyset_handle
   try:
@@ -91,7 +106,7 @@ def main(argv):
 
   # Get the primitive
   try:
-    cipher = keyset_handle.primitive(tink.Aead)
+    cipher = keyset_handle.primitive(aead.Aead)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
     return 1
@@ -108,11 +123,13 @@ def main(argv):
       output_data = cipher.encrypt(input_data, aad)
     except tink.TinkError as e:
       logging.error('Error encrypting the input: %s', e)
+      return 1
   elif operation.lower() == 'decrypt':
     try:
       output_data = cipher.decrypt(input_data, aad)
     except tink.TinkError as e:
       logging.error('Error decrypting the input: %s', e)
+      return 1
   else:
     logging.error(
         'Did not recognise operation %s.\n'

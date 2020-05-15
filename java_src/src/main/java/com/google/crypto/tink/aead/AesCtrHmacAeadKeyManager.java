@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
@@ -24,7 +25,12 @@ import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKey;
+import com.google.crypto.tink.proto.AesCtrKeyFormat;
+import com.google.crypto.tink.proto.AesCtrParams;
+import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
+import com.google.crypto.tink.proto.HmacKeyFormat;
+import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.IndCpaCipher;
@@ -38,7 +44,7 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@link AesCtrHmacAeadKey} keys and produces new instances of
  * {@link EncryptThenAuthenticate}.
  */
-public class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> {
+public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> {
   AesCtrHmacAeadKeyManager() {
     super(
         AesCtrHmacAeadKey.class,
@@ -116,5 +122,62 @@ public class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> 
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AES-CTR-HMAC-AEAD keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>AES key size: 16 bytes
+   *       <li>AES CTR IV size: 16 byte
+   *       <li>HMAC key size: 32 bytes
+   *       <li>HMAC tag size: 16 bytes
+   *       <li>HMAC hash function: SHA256
+   *     </ul>
+   */
+  public static final KeyTemplate aes128CtrHmacSha256Template() {
+    return createKeyTemplate(16, 16, 32, 16, HashType.SHA256);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AES-CTR-HMAC-AEAD keys with the
+   *     following parameters:
+   *     <ul>
+   *       <li>AES key size: 32 bytes
+   *       <li>AES CTR IV size: 16 byte
+   *       <li>HMAC key size: 32 bytes
+   *       <li>HMAC tag size: 32 bytes
+   *       <li>HMAC hash function: SHA256
+   *     </ul>
+   */
+  public static final KeyTemplate aes256CtrHmacSha256Template() {
+    return createKeyTemplate(32, 16, 32, 32, HashType.SHA256);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link AesCtrHmacAeadKeyFormat} with some specific
+   *     parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      int aesKeySize, int ivSize, int hmacKeySize, int tagSize, HashType hashType) {
+    AesCtrKeyFormat aesCtrKeyFormat =
+        AesCtrKeyFormat.newBuilder()
+            .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
+            .setKeySize(aesKeySize)
+            .build();
+    HmacKeyFormat hmacKeyFormat =
+        HmacKeyFormat.newBuilder()
+            .setParams(HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build())
+            .setKeySize(hmacKeySize)
+            .build();
+    AesCtrHmacAeadKeyFormat format =
+        AesCtrHmacAeadKeyFormat.newBuilder()
+            .setAesCtrKeyFormat(aesCtrKeyFormat)
+            .setHmacKeyFormat(hmacKeyFormat)
+            .build();
+    return KeyTemplate.create(
+        new AesCtrHmacAeadKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.TINK);
   }
 }

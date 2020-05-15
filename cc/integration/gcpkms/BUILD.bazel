@@ -27,6 +27,7 @@ cc_library(
     deps = [
         ":gcp_kms_aead",
         "//:kms_client",
+        "//:kms_clients",
         "//util:errors",
         "//util:status",
         "//util:statusor",
@@ -61,6 +62,8 @@ cc_test(
         "//util:errors",
         "//util:status",
         "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

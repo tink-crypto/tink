@@ -60,4 +60,7 @@ func init() {
 	if err := registry.RegisterKeyManager(newHMACKeyManager()); err != nil {
 		panic(fmt.Sprintf("mac.init() failed: %v", err))
 	}
+	if err := registry.RegisterKeyManager(newAESCMACKeyManager()); err != nil {
+		panic(fmt.Sprintf("mac.init() failed: %v", err))
+	}
 }

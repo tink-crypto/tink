@@ -22,7 +22,7 @@ from absl.testing.absltest import mock
 
 from tink import core
 from tink import streaming_aead
-from tink.cc.pybind import status as error
+from tink.cc.pybind import tink_bindings
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -42,7 +42,7 @@ class FakeInputStreamAdapter(object):
         size = 100
       return self._adapter.read(size)
     except EOFError:
-      raise error.StatusNotOk(11, 'EOF')
+      raise tink_bindings.StatusNotOk(11, 'EOF')
 
   def read1(self, size=-1):
     del size  # unused
@@ -123,7 +123,8 @@ class DecryptingStreamTest(absltest.TestCase):
     f.readable = mock.Mock(return_value=True)
     ds = get_decrypting_stream(f, B_AAD_)
 
-    self.assertRaises(io.BlockingIOError, ds.read, 5)
+    with self.assertRaises(io.BlockingIOError):
+      ds.read(5)
 
   def test_unsupported_operation(self):
     f = io.BytesIO(B_SOMETHING_)
@@ -131,14 +132,18 @@ class DecryptingStreamTest(absltest.TestCase):
 
     with self.assertRaises(io.UnsupportedOperation):
       ds.seek(0, 0)
-    self.assertRaises(io.UnsupportedOperation, ds.tell)
-    self.assertRaises(io.UnsupportedOperation, ds.truncate)
+    with self.assertRaises(io.UnsupportedOperation):
+      ds.tell()
+    with self.assertRaises(io.UnsupportedOperation):
+      ds.truncate()
     with self.assertRaises(io.UnsupportedOperation):
       ds.write(b'data')
     with self.assertRaises(io.UnsupportedOperation):
       ds.writelines([b'data'])
-    self.assertRaises(io.UnsupportedOperation, ds.fileno)
-    self.assertRaises(io.UnsupportedOperation, ds.detach)
+    with self.assertRaises(io.UnsupportedOperation):
+      ds.fileno()
+    with self.assertRaises(io.UnsupportedOperation):
+      ds.detach()
 
   def test_closed(self):
     f = io.BytesIO(B_SOMETHING_)
@@ -156,11 +161,16 @@ class DecryptingStreamTest(absltest.TestCase):
     ds = get_decrypting_stream(f, B_AAD_)
 
     ds.close()
-    self.assertRaisesRegex(ValueError, 'closed', ds.read)
-    self.assertRaisesRegex(ValueError, 'closed', ds.flush)
-    self.assertRaisesRegex(ValueError, 'closed', ds.__enter__)
-    self.assertRaisesRegex(ValueError, 'closed', ds.__iter__)
-    self.assertRaisesRegex(ValueError, 'closed', ds.isatty)
+    with self.assertRaisesRegex(ValueError, 'closed'):
+      ds.read()
+    with self.assertRaisesRegex(ValueError, 'closed'):
+      ds.flush()
+    with self.assertRaisesRegex(ValueError, 'closed'):
+      ds.__enter__()
+    with self.assertRaisesRegex(ValueError, 'closed'):
+      ds.__iter__()
+    with self.assertRaisesRegex(ValueError, 'closed'):
+      ds.isatty()
 
   def test_position(self):
     f = io.BytesIO(B_SOMETHING_)

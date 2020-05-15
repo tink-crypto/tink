@@ -15,9 +15,11 @@
 package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HkdfPrfKey;
@@ -29,6 +31,7 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.prf.HkdfStreamingPrf;
 import com.google.crypto.tink.subtle.prf.StreamingPrf;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
@@ -273,5 +276,38 @@ public class HkdfPrfKeyManagerTest {
     assertThat(directInput.read(directOutput)).isEqualTo(10);
 
     assertThat(directOutput).isEqualTo(managerOutput);
+  }
+
+  /** Smoke test getPrimitive for PrfSet via the HkdfPrfKeymanager. */
+  @Test
+  public void createPrfSetPrimitive_works() throws Exception {
+    HkdfPrfKey key =
+        HkdfPrfKey.newBuilder()
+            .setKeyValue(ByteString.copyFromUtf8("super secret key value"))
+            .setParams(
+                HkdfPrfParams.newBuilder()
+                    .setSalt(ByteString.copyFromUtf8("some salt"))
+                    .setHash(HashType.SHA256))
+            .build();
+    manager.getPrimitive(key, PrfSet.class);
+  }
+
+  @Test
+  public void testHkdfSha256Template() throws Exception {
+    KeyTemplate kt = HkdfPrfKeyManager.hkdfSha256Template();
+    assertThat(kt.getTypeUrl()).isEqualTo(new HkdfPrfKeyManager().getKeyType());
+    assertThat(kt.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+
+    HkdfPrfKeyFormat format =
+        HkdfPrfKeyFormat.parseFrom(kt.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getHash()).isEqualTo(HashType.SHA256);
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    HkdfPrfKeyManager manager = new HkdfPrfKeyManager();
+
+    testKeyTemplateCompatible(manager, HkdfPrfKeyManager.hkdfSha256Template());
   }
 }

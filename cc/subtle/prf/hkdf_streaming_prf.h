@@ -24,6 +24,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/streaming_prf.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

@@ -129,6 +129,8 @@ tink_cc_proto(
 tink_cc_proto(
   NAME hkdf_prf_cc_proto
   SRCS hkdf_prf.proto
+  DEPS
+    tink::proto::common_cc_proto
 )
 
 tink_cc_proto(

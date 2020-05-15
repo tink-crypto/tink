@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc.
+// Copyright 2020 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -313,7 +313,9 @@ func init() {
 	proto.RegisterType((*EcdsaKeyFormat)(nil), "google.crypto.tink.EcdsaKeyFormat")
 }
 
-func init() { proto.RegisterFile("proto/ecdsa.proto", fileDescriptor_8eef580f8138be98) }
+func init() {
+	proto.RegisterFile("proto/ecdsa.proto", fileDescriptor_8eef580f8138be98)
+}
 
 var fileDescriptor_8eef580f8138be98 = []byte{
 	// 435 bytes of a gzipped FileDescriptorProto

@@ -17,10 +17,12 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
+import com.google.crypto.tink.proto.AesEaxParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Random;
@@ -34,7 +36,7 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesEaxKey} keys and produces new instances of {@code
  * AesEaxJce}.
  */
-public class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
+public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
   AesEaxKeyManager() {
     super(
         AesEaxKey.class,
@@ -107,5 +109,72 @@ public class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesEaxKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AES-EAX with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 16 bytes
+   *       <li>IV size: 16 bytes
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
+   *     </ul>
+   */
+  public static final KeyTemplate aes128EaxTemplate() {
+    return createKeyTemplate(16, 16, KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AES-EAX with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 16 bytes
+   *       <li>IV size: 16 bytes
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix)
+   *     </ul>
+   */
+  public static final KeyTemplate rawAes128EaxTemplate() {
+    return createKeyTemplate(16, 16, KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AES-EAX with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 32 bytes
+   *       <li>IV size: 16 bytes
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
+   *     </ul>
+   */
+  public static final KeyTemplate aes256EaxTemplate() {
+    return createKeyTemplate(32, 16, KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of AES-EAX with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 32 bytes
+   *       <li>IV size: 16 bytes
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix)
+   *     </ul>
+   */
+  public static final KeyTemplate rawAes256EaxTemplate() {
+    return createKeyTemplate(32, 16, KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link AesEaxKeyFormat} with some specified
+   *     parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      int keySize, int ivSize, KeyTemplate.OutputPrefixType prefixType) {
+    AesEaxKeyFormat format =
+        AesEaxKeyFormat.newBuilder()
+            .setKeySize(keySize)
+            .setParams(AesEaxParams.newBuilder().setIvSize(ivSize).build())
+            .build();
+    return KeyTemplate.create(
+        new AesEaxKeyManager().getKeyType(), format.toByteArray(), prefixType);
   }
 }

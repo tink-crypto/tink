@@ -26,7 +26,8 @@ sh_test(
     ],
     data = [
         ":envelope",
-        "@tink_base//testdata:credential.json"
+        "@google_root_pem//file",
+        "@tink_base//testdata:credential.json",
     ],
 )
 
@@ -42,6 +43,7 @@ sh_test(
     ],
     data = [
         ":envelope.py",
-        "@tink_base//testdata:credential.json"
+        "@google_root_pem//file",
+        "@tink_base//testdata:credential.json",
     ],
 )

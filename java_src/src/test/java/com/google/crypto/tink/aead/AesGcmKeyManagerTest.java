@@ -17,10 +17,13 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
@@ -30,6 +33,7 @@ import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -432,5 +436,59 @@ public class AesGcmKeyManagerTest {
     for (int i = 0; i < keySize; ++i) {
       assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
     }
+  }
+
+  @Test
+  public void testAes128GcmTemplate() throws Exception {
+    KeyTemplate template = AesGcmKeyManager.aes128GcmTemplate();
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
+    AesGcmKeyFormat format =
+        AesGcmKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(16, format.getKeySize());
+  }
+
+  @Test
+  public void testRawAes128GcmTemplate() throws Exception {
+    KeyTemplate template = AesGcmKeyManager.rawAes128GcmTemplate();
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesGcmKeyFormat format =
+        AesGcmKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(16, format.getKeySize());
+  }
+
+  @Test
+  public void testAes256GcmTemplate() throws Exception {
+    KeyTemplate template = AesGcmKeyManager.aes256GcmTemplate();
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
+    AesGcmKeyFormat format =
+        AesGcmKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(32, format.getKeySize());
+  }
+
+  @Test
+  public void testRawAes256GcmTemplate() throws Exception {
+    KeyTemplate template = AesGcmKeyManager.rawAes256GcmTemplate();
+    assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesGcmKeyFormat format =
+        AesGcmKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(32, format.getKeySize());
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    AesGcmKeyManager manager = new AesGcmKeyManager();
+
+    testKeyTemplateCompatible(manager, AesGcmKeyManager.aes128GcmTemplate());
+    testKeyTemplateCompatible(manager, AesGcmKeyManager.rawAes128GcmTemplate());
+    testKeyTemplateCompatible(manager, AesGcmKeyManager.aes256GcmTemplate());
+    testKeyTemplateCompatible(manager, AesGcmKeyManager.rawAes256GcmTemplate());
   }
 }

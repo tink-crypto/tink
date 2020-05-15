@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
@@ -104,5 +105,25 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new ChaCha20Poly1305KeyManager(), newKeyAllowed);
+  }
+
+  /** @return a {@link KeyTemplate} that generates new instances of ChaCha20Poly1305 keys. */
+  public static final KeyTemplate chaCha20Poly1305Template() {
+    return KeyTemplate.create(
+        new ChaCha20Poly1305KeyManager().getKeyType(),
+        ChaCha20Poly1305KeyFormat.getDefaultInstance().toByteArray(),
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} that generates new instances of ChaCha20Poly1305 keys. Keys
+   *     generated from this template create ciphertexts compatible with libsodium and other
+   *     libraries.
+   */
+  public static final KeyTemplate rawChaCha20Poly1305Template() {
+    return KeyTemplate.create(
+        new ChaCha20Poly1305KeyManager().getKeyType(),
+        ChaCha20Poly1305KeyFormat.getDefaultInstance().toByteArray(),
+        KeyTemplate.OutputPrefixType.RAW);
   }
 }

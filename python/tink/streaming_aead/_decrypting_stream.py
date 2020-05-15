@@ -24,8 +24,7 @@ import io
 from typing import BinaryIO
 
 from tink import core
-from tink.cc.pybind import cc_streaming_aead_wrappers
-from tink.cc.pybind import status as error
+from tink.cc.pybind import tink_bindings
 from tink.util import file_object_adapter
 
 
@@ -68,7 +67,7 @@ class DecryptingStream(io.BufferedIOBase):
   @core.use_tink_errors
   def _get_input_stream_adapter(cc_primitive, aad, source):
     """Implemented as a separate method to ensure correct error transform."""
-    return cc_streaming_aead_wrappers.new_cc_decrypting_stream(
+    return tink_bindings.new_cc_decrypting_stream(
         cc_primitive, aad, source)
 
   ### Reading ###
@@ -168,8 +167,8 @@ class DecryptingStream(io.BufferedIOBase):
       # We are checking if the exception was raised because of C++
       # OUT_OF_RANGE status, which signals EOF.
       wrapped_e = e.args[0]
-      if (isinstance(wrapped_e, error.StatusNotOk) and
-          wrapped_e.args[0] == error.ErrorCode.OUT_OF_RANGE):
+      if (isinstance(wrapped_e, tink_bindings.StatusNotOk) and
+          wrapped_e.args[0] == tink_bindings.ErrorCode.OUT_OF_RANGE):
         return b''
       else:
         raise e

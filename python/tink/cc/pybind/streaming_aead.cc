@@ -21,7 +21,10 @@
 namespace crypto {
 namespace tink {
 
-PYBIND11_MODULE(streaming_aead, m) {
+void PybindRegisterStreamingAead(pybind11::module* module) {
+  namespace py = pybind11;
+  py::module& m = *module;
+
   namespace py = pybind11;
 
   py::class_<StreamingAead>(

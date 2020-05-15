@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc.
+// Copyright 2020 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -579,7 +579,9 @@ func init() {
 	proto.RegisterType((*EncryptedKeyset)(nil), "google.crypto.tink.EncryptedKeyset")
 }
 
-func init() { proto.RegisterFile("proto/tink.proto", fileDescriptor_a580d178bdd2ec8a) }
+func init() {
+	proto.RegisterFile("proto/tink.proto", fileDescriptor_a580d178bdd2ec8a)
+}
 
 var fileDescriptor_a580d178bdd2ec8a = []byte{
 	// 667 bytes of a gzipped FileDescriptorProto

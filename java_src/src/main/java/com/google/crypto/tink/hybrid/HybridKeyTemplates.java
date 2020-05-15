@@ -44,7 +44,10 @@ import com.google.protobuf.ByteString;
  * }</pre>
  *
  * @since 1.0.0
+ * @deprecated use the key template methods in the key managers, e.g.,
+ *     EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128Gcm().
  */
+@Deprecated
 public final class HybridKeyTemplates {
   private static final byte[] EMPTY_SALT = new byte[0];
   /**

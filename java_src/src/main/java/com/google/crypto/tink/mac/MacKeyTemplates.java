@@ -38,7 +38,10 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * }</pre>
  *
  * @since 1.0.0
+ * @deprecated use the key template methods in the key managers, e.g.,
+ *     HmacKeyManager.hmacSha256HalfDigestTemplate().
  */
+@Deprecated
 public final class MacKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link

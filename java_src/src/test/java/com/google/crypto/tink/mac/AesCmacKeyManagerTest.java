@@ -17,8 +17,10 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.proto.AesCmacKey;
 import com.google.crypto.tink.proto.AesCmacKeyFormat;
@@ -26,6 +28,7 @@ import com.google.crypto.tink.proto.AesCmacParams;
 import com.google.crypto.tink.subtle.AesCmac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -218,5 +221,37 @@ public class AesCmacKeyManagerTest {
         new AesCmac(validKey.getKeyValue().toByteArray(), validKey.getParams().getTagSize());
     byte[] message = Random.randBytes(50);
     managerMac.verifyMac(directMac.computeMac(message), message);
+  }
+
+  @Test
+  public void testAes256CmacTemplate() throws Exception {
+    KeyTemplate template = AesCmacKeyManager.aes256CmacTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new AesCmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    AesCmacKeyFormat format =
+        AesCmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getTagSize()).isEqualTo(16);
+  }
+
+  @Test
+  public void testRawAes256CmacTemplate() throws Exception {
+    KeyTemplate template = AesCmacKeyManager.rawAes256CmacTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new AesCmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    AesCmacKeyFormat format =
+        AesCmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getTagSize()).isEqualTo(16);
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    AesCmacKeyManager manager = new AesCmacKeyManager();
+
+    testKeyTemplateCompatible(manager, AesCmacKeyManager.aes256CmacTemplate());
+    testKeyTemplateCompatible(manager, AesCmacKeyManager.rawAes256CmacTemplate());
   }
 }

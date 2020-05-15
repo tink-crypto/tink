@@ -17,11 +17,14 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
@@ -32,6 +35,7 @@ import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -298,5 +302,65 @@ public class AesEaxKeyManagerTest {
     byte[] associatedData = "associatedData".getBytes("UTF-8");
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     assertEquals(16 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */, ciphertext.length);
+  }
+
+  @Test
+  public void testAes128EaxTemplate() throws Exception {
+    KeyTemplate template = AesEaxKeyManager.aes128EaxTemplate();
+    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
+    AesEaxKeyFormat format =
+        AesEaxKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(16, format.getKeySize());
+    assertTrue(format.hasParams());
+    assertEquals(16, format.getParams().getIvSize());
+  }
+
+  @Test
+  public void testRawAes128EaxTemplate() throws Exception {
+    KeyTemplate template = AesEaxKeyManager.rawAes128EaxTemplate();
+    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesEaxKeyFormat format =
+        AesEaxKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(16, format.getKeySize());
+    assertTrue(format.hasParams());
+    assertEquals(16, format.getParams().getIvSize());
+  }
+
+  @Test
+  public void testAes256EaxTemplate() throws Exception {
+    KeyTemplate template = AesEaxKeyManager.aes256EaxTemplate();
+    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
+    AesEaxKeyFormat format =
+        AesEaxKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(32, format.getKeySize());
+    assertTrue(format.hasParams());
+    assertEquals(16, format.getParams().getIvSize());
+  }
+
+  @Test
+  public void testRawAes256EaxTemplate() throws Exception {
+    KeyTemplate template = AesEaxKeyManager.rawAes256EaxTemplate();
+    assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesEaxKeyFormat format =
+        AesEaxKeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+    assertEquals(32, format.getKeySize());
+    assertTrue(format.hasParams());
+    assertEquals(16, format.getParams().getIvSize());
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    testKeyTemplateCompatible(manager, AesEaxKeyManager.aes128EaxTemplate());
+    testKeyTemplateCompatible(manager, AesEaxKeyManager.rawAes128EaxTemplate());
+    testKeyTemplateCompatible(manager, AesEaxKeyManager.aes256EaxTemplate());
+    testKeyTemplateCompatible(manager, AesEaxKeyManager.rawAes256EaxTemplate());
   }
 }

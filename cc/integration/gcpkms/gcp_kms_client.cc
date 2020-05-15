@@ -13,19 +13,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/integration/gcpkms/gcp_kms_client.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-#include "absl/memory/memory.h"
-#include "absl/strings/ascii.h"
-#include "absl/strings/str_split.h"
-#include "absl/strings/string_view.h"
 #include "grpcpp/channel.h"
 #include "grpcpp/create_channel.h"
 #include "grpcpp/security/credentials.h"
+#include "absl/memory/memory.h"
+#include "absl/strings/ascii.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
 #include "tink/integration/gcpkms/gcp_kms_aead.h"
-#include "tink/kms_client.h"
+#include "tink/kms_clients.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -101,7 +102,7 @@ GcpKmsClient::New(absl::string_view key_uri,
                   absl::string_view credentials_path) {
   std::unique_ptr<GcpKmsClient> client(new GcpKmsClient());
 
-  // If a specific key is given, create an AWS KMSClient.
+  // If a specific key is given, create a GCP KMSClient.
   if (!key_uri.empty()) {
     client->key_name_ = GetKeyName(key_uri);
     if (client->key_name_.empty()) {
@@ -148,6 +149,15 @@ GcpKmsClient::GetAead(absl::string_view key_uri) const {
   }
 }
 
+Status GcpKmsClient::RegisterNewClient(absl::string_view key_uri,
+                                       absl::string_view credentials_path) {
+  auto client_result = GcpKmsClient::New(key_uri, credentials_path);
+  if (!client_result.ok()) {
+    return client_result.status();
+  }
+
+  return KmsClients::Add(std::move(client_result.ValueOrDie()));
+}
 
 }  // namespace gcpkms
 }  // namespace integration

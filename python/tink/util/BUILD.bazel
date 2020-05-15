@@ -9,7 +9,7 @@ py_library(
     srcs = ["file_object_adapter.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink/cc/pybind:python_file_object_adapter",
+        "//tink/cc/pybind:tink_bindings",
     ],
 )
 

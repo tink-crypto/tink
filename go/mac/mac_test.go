@@ -26,4 +26,8 @@ func TestMacInit(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
+	_, err = registry.GetKeyManager(testutil.AESCMACTypeURL)
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
 }

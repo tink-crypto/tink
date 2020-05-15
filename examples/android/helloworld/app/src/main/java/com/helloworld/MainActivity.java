@@ -23,17 +23,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import java.io.UnsupportedEncodingException;
+import com.google.protobuf.ByteString;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 
-/**
- * This activity allows users to encrypt and decrypt a string.
- */
+/** This activity allows users to encrypt and decrypt a string. */
 public class MainActivity extends AppCompatActivity {
-  private static final byte[] EMPTY_ASSOCIATED_DATA = new byte[0];
-
   private TinkApplication mApplication;
   private EditText mPlaintextView;
+  private EditText mAssociatedDataView;
   private EditText mCiphertextView;
 
   @Override
@@ -44,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     mApplication = (TinkApplication) getApplicationContext();
 
     mPlaintextView = (EditText) findViewById(R.id.plaintext);
+    mAssociatedDataView = (EditText) findViewById(R.id.associated_data);
     mCiphertextView = (EditText) findViewById(R.id.ciphertext);
     Button mEncryptButton = (Button) findViewById(R.id.encrypt_button);
     mEncryptButton.setOnClickListener(
@@ -69,10 +68,14 @@ public class MainActivity extends AppCompatActivity {
     mCiphertextView.setText("");
 
     try {
-      byte[] plaintext = mPlaintextView.getText().toString().getBytes("UTF-8");
-      byte[] ciphertext = mApplication.aead.encrypt(plaintext, EMPTY_ASSOCIATED_DATA);
+      byte[] plaintext = mPlaintextView.getText().toString().getBytes(StandardCharsets.UTF_8);
+      // An artifical step to test whether Tink can co-exist with protobuf-lite.
+      ByteString pStr = ByteString.copyFrom(plaintext);
+      byte[] associatedData =
+          mAssociatedDataView.getText().toString().getBytes(StandardCharsets.UTF_8);
+      byte[] ciphertext = mApplication.aead.encrypt(pStr.toByteArray(), associatedData);
       mCiphertextView.setText(base64Encode(ciphertext));
-    } catch (UnsupportedEncodingException | GeneralSecurityException | IllegalArgumentException e) {
+    } catch (GeneralSecurityException | IllegalArgumentException e) {
       mCiphertextView.setError(
           String.format("%s: %s", getString(R.string.error_cannot_encrypt), e.toString()));
       mPlaintextView.requestFocus();
@@ -86,9 +89,11 @@ public class MainActivity extends AppCompatActivity {
 
     try {
       byte[] ciphertext = base64Decode(mCiphertextView.getText().toString());
-      byte[] plaintext = mApplication.aead.decrypt(ciphertext, EMPTY_ASSOCIATED_DATA);
-      mPlaintextView.setText(new String(plaintext, "UTF-8"));
-    } catch (UnsupportedEncodingException | GeneralSecurityException | IllegalArgumentException e) {
+      byte[] associatedData =
+          mAssociatedDataView.getText().toString().getBytes(StandardCharsets.UTF_8);
+      byte[] plaintext = mApplication.aead.decrypt(ciphertext, associatedData);
+      mPlaintextView.setText(new String(plaintext, StandardCharsets.UTF_8));
+    } catch (GeneralSecurityException | IllegalArgumentException e) {
       mPlaintextView.setError(
           String.format("%s: %s", getString(R.string.error_cannot_decrypt), e.toString()));
       mCiphertextView.requestFocus();

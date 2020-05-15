@@ -30,18 +30,18 @@ namespace tink {
 class CryptoFormat {
  public:
   // Prefix size of Tink and Legacy key types.
-  static const int kNonRawPrefixSize = 5;
+  static constexpr int kNonRawPrefixSize = 5;
 
   // Legacy prefix starts with \x00 and followed by a 4-byte key id.
-  static const int kLegacyPrefixSize = kNonRawPrefixSize;
-  static const uint8_t kLegacyStartByte = 0x00;
+  static constexpr int kLegacyPrefixSize = kNonRawPrefixSize;
+  static constexpr uint8_t kLegacyStartByte = 0x00;
 
   // Tink prefix starts with \x01 and followed by a 4-byte key id.
-  static const int kTinkPrefixSize = kNonRawPrefixSize;
-  static const uint8_t kTinkStartByte = 0x01;
+  static constexpr int kTinkPrefixSize = kNonRawPrefixSize;
+  static constexpr uint8_t kTinkStartByte = 0x01;
 
   // Raw prefix is empty.
-  static const int kRawPrefixSize = 0;
+  static constexpr int kRawPrefixSize = 0;
   static const std::string kRawPrefix;  // empty string
 
   // Generates the prefix for the outputs handled by the specified 'key'.

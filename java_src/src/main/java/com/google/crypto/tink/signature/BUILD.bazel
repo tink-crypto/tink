@@ -45,7 +45,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/annotations",
         "//src/main/java/com/google/crypto/tink/subtle",
         "//src/main/java/com/google/crypto/tink/subtle:signature",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
     ],
 )
 
@@ -59,6 +59,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/annotations",
         "//src/main/java/com/google/crypto/tink/subtle",
         "//src/main/java/com/google/crypto/tink/subtle:signature",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
     ],
 )

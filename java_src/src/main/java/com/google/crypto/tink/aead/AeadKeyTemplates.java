@@ -44,7 +44,10 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * }</pre>
  *
  * @since 1.0.0
+ * @deprecated use the key template methods in the key managers, e.g.,
+ *     AesGcmKeyManager.aes128GcmTemplate().
  */
+@Deprecated
 public final class AeadKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link

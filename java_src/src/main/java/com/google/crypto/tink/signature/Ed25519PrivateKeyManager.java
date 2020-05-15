@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -34,8 +35,9 @@ import java.security.GeneralSecurityException;
  * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and produces new
  * instances of {@code Ed25519Sign}.
  */
-class Ed25519PrivateKeyManager extends PrivateKeyTypeManager<Ed25519PrivateKey, Ed25519PublicKey> {
-  public Ed25519PrivateKeyManager() {
+public final class Ed25519PrivateKeyManager
+    extends PrivateKeyTypeManager<Ed25519PrivateKey, Ed25519PublicKey> {
+  Ed25519PrivateKeyManager() {
     super(
         Ed25519PrivateKey.class,
         Ed25519PublicKey.class,
@@ -118,5 +120,25 @@ class Ed25519PrivateKeyManager extends PrivateKeyTypeManager<Ed25519PrivateKey, 
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), newKeyAllowed);
+  }
+
+  /** @return A {@link KeyTemplate} that generates new instances of ED25519 keys. */
+  public static final KeyTemplate ed25519Template() {
+    return KeyTemplate.create(
+        new Ed25519PrivateKeyManager().getKeyType(),
+        /*value=*/ new byte[0],
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of Ed25519 keys. Keys generated from
+   *     this template creates raw signatures of exactly 64 bytes. It's compatible with most other
+   *     libraries.
+   */
+  public static final KeyTemplate rawEd25519Template() {
+    return KeyTemplate.create(
+        new Ed25519PrivateKeyManager().getKeyType(),
+        /*value=*/ new byte[0],
+        KeyTemplate.OutputPrefixType.RAW);
   }
 }

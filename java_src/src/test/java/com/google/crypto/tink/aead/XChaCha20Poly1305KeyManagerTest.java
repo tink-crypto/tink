@@ -17,8 +17,10 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
@@ -26,6 +28,8 @@ import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.XChaCha20Poly1305;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Test;
@@ -94,5 +98,33 @@ public class XChaCha20Poly1305KeyManagerTest {
     byte[] associatedData = Random.randBytes(20);
     assertThat(directAead.decrypt(managerAead.encrypt(plaintext, associatedData), associatedData))
         .isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testXChaCha20Poly1305Template() throws Exception {
+    KeyTemplate template = XChaCha20Poly1305KeyManager.xChaCha20Poly1305Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new XChaCha20Poly1305KeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    XChaCha20Poly1305KeyFormat unused =
+        XChaCha20Poly1305KeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+  }
+
+  @Test
+  public void testRawXChaCha20Poly1305Template() throws Exception {
+    KeyTemplate template = XChaCha20Poly1305KeyManager.rawXChaCha20Poly1305Template();
+    assertThat(template.getTypeUrl()).isEqualTo(new XChaCha20Poly1305KeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    XChaCha20Poly1305KeyFormat unused =
+        XChaCha20Poly1305KeyFormat.parseFrom(
+            ByteString.copyFrom(template.getValue()), ExtensionRegistryLite.getEmptyRegistry());
+  }
+
+  @Test
+  public void testKeyTemplateAndManagerCompatibility() throws Exception {
+    XChaCha20Poly1305KeyManager manager = new XChaCha20Poly1305KeyManager();
+
+    testKeyTemplateCompatible(manager, XChaCha20Poly1305KeyManager.xChaCha20Poly1305Template());
+    testKeyTemplateCompatible(manager, XChaCha20Poly1305KeyManager.rawXChaCha20Poly1305Template());
   }
 }

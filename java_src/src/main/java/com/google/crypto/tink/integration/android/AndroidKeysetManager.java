@@ -21,13 +21,17 @@ import android.os.Build;
 import android.util.Log;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetWriter;
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import javax.annotation.concurrent.GuardedBy;
 
@@ -45,10 +49,10 @@ import javax.annotation.concurrent.GuardedBy;
  * String masterKeyUri = "android-keystore://my_master_key_id";
  * AndroidKeysetManager manager = AndroidKeysetManager.Builder()
  *    .withSharedPref(getApplicationContext(), "my_keyset_name", "my_pref_file_name")
- *    .withKeyTemplate(SignatureKeyTemplates.ECDSA_P256)
+ *    .withKeyTemplate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf4KBTemplate())
  *    .withMasterKeyUri(masterKeyUri)
  *    .build();
- * PublicKeySign signer = manager.getKeysetHandle().getPrimitive(PublicKeySign.class);
+ * StreamingAead streamingAead = manager.getKeysetHandle().getPrimitive(StreamingAead.class);
  * }</pre>
  *
  * <p>This will read a keyset stored in the {@code my_keyset_name} preference of the {@code
@@ -66,18 +70,22 @@ import javax.annotation.concurrent.GuardedBy;
  * Tink cannot decrypt the keyset it would assume that it is not encrypted.
  *
  * <p>The master key URI must start with {@code android-keystore://}. If the master key doesn't
- * exist, a fresh one is generated. Usage of Android Keystore can be disabled with {@link
- * AndroidKeysetManager.Builder#doNotUseKeystore}.
+ * exist, a fresh one is generated.
  *
- * <p>On Android L or older, or when the master key URI is not set, the keyset will be stored in
- * cleartext in private preferences which, thanks to the security of the Android framework, no other
- * apps can read or write.
+ * <p>Usage of Android Keystore can be disabled with {@link
+ * AndroidKeysetManager.Builder#doNotUseKeystore}. Android Keystore on certain devices is broken.
+ * Tink runs a self-test to detect such problems and disable Android Keystore accordingly. Users can
+ * check whether Android Keystore is in use with {@link #isUsingKeystore}.
+ *
+ * <p>On Android L or older, or when either Android Keystore is disabled or the master key URI is
+ * not set, the keyset will be stored in cleartext in private preferences which, thanks to the
+ * security of the Android framework, no other apps can read or write.
  *
  * <p>The resulting manager supports all operations supported by {@link KeysetManager}. For example
  * to rotate the keyset, one can do:
  *
  * <pre>{@code
- * manager.rotate(SignatureKeyTemplates.ECDSA_P256);
+ * manager.rotate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf1MBTemplate());
  * }</pre>
  *
  * <p>All operations that manipulate the keyset would automatically persist the new keyset to
@@ -109,11 +117,12 @@ public final class AndroidKeysetManager {
           "need to specify where to write the keyset to with Builder#withSharedPref");
     }
 
-    useKeystore = builder.useKeystore;
-    if (useKeystore && builder.masterKeyUri == null) {
+    if (builder.useKeystore && builder.masterKeyUri == null) {
       throw new IllegalArgumentException(
           "need a master key URI, please set it with Builder#masterKeyUri");
     }
+    useKeystore = builder.useKeystore && verifyAndroidKeystore();
+
     if (shouldUseKeystore()) {
       masterKey = AndroidKeystoreKmsClient.getOrGenerateNewAeadKey(builder.masterKeyUri);
     } else {
@@ -163,6 +172,20 @@ public final class AndroidKeysetManager {
       return this;
     }
 
+    /**
+     * If the keyset is not found or valid, generates a new one using {@code val}.
+     *
+     * @deprecated This method takes a KeyTemplate proto, which is an internal implementation
+     *     detail. Please use the withKeyTemplate method that takes a {@link KeyTemplate} POJO.
+     */
+    @Deprecated
+    public Builder withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate val) {
+      keyTemplate =
+          KeyTemplate.create(
+              val.getTypeUrl(), val.getValue().toByteArray(), fromProto(val.getOutputPrefixType()));
+      return this;
+    }
+
     /** If the keyset is not found or valid, generates a new one using {@code val}. */
     public Builder withKeyTemplate(KeyTemplate val) {
       keyTemplate = val;
@@ -187,11 +210,7 @@ public final class AndroidKeysetManager {
   }
 
   /** @return a {@link KeysetHandle} of the managed keyset */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     return keysetManager.getKeysetHandle();
   }
 
@@ -201,13 +220,13 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
+   * @deprecated Please use {@link #add}. This method adds a new key and immediately promotes it to
+   *     primary. However, when you do keyset rotation, you almost never want to make the new key
+   *     primary, because old binaries don't know the new key yet.
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
-  public synchronized AndroidKeysetManager rotate(KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
+  @Deprecated
+  public synchronized AndroidKeysetManager rotate(
+      com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     keysetManager = keysetManager.rotate(keyTemplate);
     write(keysetManager);
     return this;
@@ -218,13 +237,27 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
    *     keyTemplate}
+   * @deprecated This method takes a KeyTemplate proto, which is an internal implementation detail.
+   *     Please use the add method that takes a {@link KeyTemplate} POJO.
    */
-  @SuppressWarnings("GuardedBy")
+  @GuardedBy("this")
+  @Deprecated
+  public synchronized AndroidKeysetManager add(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
+    keysetManager = keysetManager.add(keyTemplate);
+    write(keysetManager);
+    return this;
+  }
+
+  /**
+   * Generates and adds a fresh key generated using {@code keyTemplate}.
+   *
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
+   *     keyTemplate}
+   */
   @GuardedBy("this")
   public synchronized AndroidKeysetManager add(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.add(keyTemplate);
     write(keysetManager);
     return this;
@@ -235,11 +268,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or not enabled
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager setPrimary(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.setPrimary(keyId);
     write(keysetManager);
     return this;
@@ -251,7 +280,6 @@ public final class AndroidKeysetManager {
    * @throws GeneralSecurityException if the key is not found or not enabled
    * @deprecated use {@link setPrimary}
    */
-  @GuardedBy("this")
   @Deprecated
   public synchronized AndroidKeysetManager promote(int keyId) throws GeneralSecurityException {
     return setPrimary(keyId);
@@ -262,11 +290,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager enable(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.enable(keyId);
     write(keysetManager);
     return this;
@@ -277,11 +301,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager disable(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.disable(keyId);
     write(keysetManager);
     return this;
@@ -292,11 +312,7 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager delete(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.delete(keyId);
     write(keysetManager);
     return this;
@@ -307,14 +323,15 @@ public final class AndroidKeysetManager {
    *
    * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
-  @SuppressWarnings("GuardedBy")
-  @GuardedBy("this")
   public synchronized AndroidKeysetManager destroy(int keyId) throws GeneralSecurityException {
-    // TODO(b/145386688): This access should be guarded by 'this.keysetManager'; instead found:
-    // 'this'
     keysetManager = keysetManager.destroy(keyId);
     write(keysetManager);
     return this;
+  }
+
+  /** Returns whether this keyset manager is wrapping keys with Android Keystore. */
+  public synchronized boolean isUsingKeystore() {
+    return shouldUseKeystore();
   }
 
   private KeysetManager readOrGenerateNewKeyset() throws GeneralSecurityException, IOException {
@@ -322,15 +339,14 @@ public final class AndroidKeysetManager {
       return read();
     } catch (IOException e) {
       // Not found, handle below.
-      Log.i(TAG, "cannot read keyset: " + e.toString());
+      Log.i(TAG, "cannot read keyset: " + e);
     }
 
     // Not found.
     if (keyTemplate != null) {
-      @SuppressWarnings("GuardedBy")
-      // TODO(b/145386688): This access should be guarded by 'KeysetManager.withEmptyKeyset()',
-      // which is not currently held
-      KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(keyTemplate);
+      KeysetManager manager = KeysetManager.withEmptyKeyset().add(keyTemplate);
+      int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
+      manager = manager.setPrimary(keyId);
       write(manager);
       return manager;
     }
@@ -352,7 +368,7 @@ public final class AndroidKeysetManager {
         // have the same privilege as the app, thus they can call Android Keystore to read or write
         // the encrypted keyset in the first place.
         // So it's okay to ignore the failure and try to read the keyset in cleartext.
-        Log.i(TAG, "cannot decrypt keyset: " + e.toString());
+        Log.i(TAG, "cannot decrypt keyset: " + e);
       }
     }
     KeysetHandle handle = CleartextKeysetHandle.read(reader);
@@ -363,16 +379,11 @@ public final class AndroidKeysetManager {
     return KeysetManager.withKeysetHandle(handle);
   }
 
-  @SuppressWarnings("GuardedBy")
   private void write(KeysetManager manager) throws GeneralSecurityException {
     try {
       if (shouldUseKeystore()) {
-        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
-        // held
         manager.getKeysetHandle().write(writer, masterKey);
       } else {
-        // TODO(b/145386688): This access should be guarded by 'manager', which is not currently
-        // held
         CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
       }
     } catch (IOException e) {
@@ -381,6 +392,92 @@ public final class AndroidKeysetManager {
   }
 
   private boolean shouldUseKeystore() {
-    return (useKeystore && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
+    return useKeystore && isAtLeastM();
+  }
+
+  private static KeyTemplate.OutputPrefixType fromProto(OutputPrefixType outputPrefixType) {
+    switch (outputPrefixType) {
+      case TINK:
+        return KeyTemplate.OutputPrefixType.TINK;
+      case LEGACY:
+        return KeyTemplate.OutputPrefixType.LEGACY;
+      case RAW:
+        return KeyTemplate.OutputPrefixType.RAW;
+      case CRUNCHY:
+        return KeyTemplate.OutputPrefixType.CRUNCHY;
+      default:
+        throw new IllegalArgumentException("Unknown output prefix type");
+    }
+  }
+
+  private static boolean isAtLeastM() {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+  }
+
+  /**
+   * Does a self-test to verify whether we can rely on Android Keystore, which is broken in many
+   * devices.
+   */
+  private static boolean verifyAndroidKeystore() {
+    if (!isAtLeastM()) {
+      return false;
+    }
+
+    try {
+      String randomKeyId =
+          AndroidKeystoreKmsClient.PREFIX
+              + new String(Random.randBytes(16), Charset.forName("UTF-8"));
+      Aead aead = AndroidKeystoreKmsClient.getOrGenerateNewAeadKey(randomKeyId);
+
+      // Empty message.
+      // Empty aad.
+      byte[] message = new byte[0];
+      byte[] aad = new byte[0];
+      byte[] ciphertext = aead.encrypt(message, aad);
+      byte[] decrypted = aead.decrypt(ciphertext, aad);
+      if (decrypted.length != 0) {
+        Log.i(
+            TAG,
+            "cannot use Android Keystore: encryption/decryption of empty message and empty aad"
+                + " returns incorrect results");
+        return false;
+      }
+
+      // Non-empty message.
+      // Empty aad.
+      message = Random.randBytes(10);
+      aad = new byte[0];
+      ciphertext = aead.encrypt(message, aad);
+      decrypted = aead.decrypt(ciphertext, aad);
+      if (!Hex.encode(decrypted).equals(Hex.encode(message))) {
+        Log.i(
+            TAG,
+            "cannot use Android Keystore: encryption/decryption of non-empty message and empty"
+                + " aad returns incorrect results");
+        return false;
+      }
+
+      // Non-empty message.
+      // Non-empty aad.
+      message = Random.randBytes(10);
+      aad = Random.randBytes(10);
+      ciphertext = aead.encrypt(message, aad);
+      decrypted = aead.decrypt(ciphertext, aad);
+      if (!Hex.encode(decrypted).equals(Hex.encode(message))) {
+        Log.i(
+            TAG,
+            "cannot use Android Keystore: encryption/decryption of non-empty message and"
+                + " non-empty aad returns incorrect results");
+        return false;
+      }
+
+      AndroidKeystoreKmsClient.delete(randomKeyId);
+
+      return true;
+    } catch (Exception ex) {
+      Log.i(TAG, "cannot use Android Keystore: " + ex);
+    }
+
+    return false;
   }
 }

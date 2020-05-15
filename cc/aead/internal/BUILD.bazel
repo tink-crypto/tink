@@ -8,16 +8,15 @@ cc_library(
     hdrs = ["cord_aes_gcm_boringssl.h"],
     include_prefix = "tink/aead/internal",
     deps = [
+        "//aead:cord_aead",
         "//subtle:random",
         "//subtle:subtle_util",
         "//subtle:subtle_util_boringssl",
-        "//aead:cord_aead",
-        "//util:errors",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
-        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -31,9 +30,9 @@ cc_test(
     ],
     deps = [
         ":cord_aes_gcm_boringssl",
+        "//aead:cord_aead",
         "//subtle:aes_gcm_boringssl",
         "//subtle:wycheproof_util",
-        "//aead:cord_aead",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",

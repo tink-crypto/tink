@@ -20,7 +20,6 @@ full_protos = [
     "//proto:common_java_proto",
     "//proto:config_java_proto",
     "//proto:ecies_aead_hkdf_java_proto",
-    "//proto:empty_java_proto",
     "//proto:hmac_java_proto",
     "//proto:tink_java_proto",
 ]
@@ -32,7 +31,6 @@ lite_protos = [
     "//proto:common_java_proto_lite",
     "//proto:config_java_proto_lite",
     "//proto:ecies_aead_hkdf_java_proto_lite",
-    "//proto:empty_java_proto",
     "//proto:hmac_java_proto_lite",
     "//proto:tink_java_proto_lite",
 ]
@@ -50,7 +48,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/mac",
         "//src/main/java/com/google/crypto/tink/subtle",
         "//src/main/java/com/google/crypto/tink/subtle:hybrid",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
     ],
 )
 
@@ -67,6 +65,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/mac:android",
         "//src/main/java/com/google/crypto/tink/subtle",
         "//src/main/java/com/google/crypto/tink/subtle:hybrid",
-        "@com_google_protobuf_javalite//:protobuf_javalite",
+        "@com_google_protobuf//:protobuf_javalite",
     ],
 )

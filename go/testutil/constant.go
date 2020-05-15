@@ -67,6 +67,27 @@ const (
 	HMACKeyVersion = 0
 	// HMACTypeURL is the type URL of HMAC keys.
 	HMACTypeURL = "type.googleapis.com/google.crypto.tink.HmacKey"
+	// AESCMACKeyVersion is the maxmimal version of HMAC keys that Tink supports.
+	AESCMACKeyVersion = 0
+	// AESCMACTypeURL is the type URL of AES-CMAC keys.
+	AESCMACTypeURL = "type.googleapis.com/google.crypto.tink.AesCmacKey"
+
+	// PRF Set
+
+	// AESCMACPRFKeyVersion is the maxmimal version of AES CMAC PRF keys that Tink supports.
+	AESCMACPRFKeyVersion = 0
+	// AESCMACPRFTypeURL is the type URL of AES CMAC PRF keys.
+	AESCMACPRFTypeURL = "type.googleapis.com/google.crypto.tink.AesCmacPrfKey"
+
+	// HKDFPRFKeyVersion is the maxmimal version of HKDF PRF keys that Tink supports.
+	HKDFPRFKeyVersion = 0
+	// HKDFPRFTypeURL is the type URL of HKDF PRF keys.
+	HKDFPRFTypeURL = "type.googleapis.com/google.crypto.tink.HkdfPrfKey"
+
+	// HMACPRFKeyVersion is the maxmimal version of HMAC PRF keys that Tink supports.
+	HMACPRFKeyVersion = 0
+	// HMACPRFTypeURL is the type URL of HMAC PRF keys.
+	HMACPRFTypeURL = "type.googleapis.com/google.crypto.tink.HmacPrfKey"
 
 	// Digital signatures
 

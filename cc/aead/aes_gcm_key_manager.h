@@ -30,6 +30,7 @@
 #include "tink/util/errors.h"
 #include "tink/util/input_stream_util.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -46,7 +47,8 @@ class AesGcmKeyManager
   class AeadFactory : public PrimitiveFactory<Aead> {
     crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
         const google::crypto::tink::AesGcmKey& key) const override {
-      auto aes_gcm_result = subtle::AesGcmBoringSsl::New(key.key_value());
+      auto aes_gcm_result = subtle::AesGcmBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()));
       if (!aes_gcm_result.ok()) return aes_gcm_result.status();
       return {std::move(aes_gcm_result.ValueOrDie())};
     }

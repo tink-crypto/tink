@@ -30,7 +30,7 @@ void ImportStatusModule() {
   // certain to cut out any overhead.
   static bool imported_already = false;
   if (!imported_already) {
-    crypto::tink::ImportTinkPythonModule("cc.pybind.status");
+    // crypto::tink::ImportTinkPythonModule("python.tink.cc.pybind.status");
     imported_already = true;
   }
 }

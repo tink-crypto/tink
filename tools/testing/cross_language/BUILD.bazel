@@ -1,3 +1,6 @@
+load("@rules_python//python:defs.bzl", "py_test")
+load("@pip_deps//:requirements.bzl", "requirement")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
@@ -36,19 +39,18 @@ sh_test(
     ],
 )
 
-sh_test(
+py_test(
     name = "aead_test",
-    size = "medium",
-    srcs = [
-        "aead_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:aead_cli_java",
-        "//testing/cc:aead_cli_cc",
-        "//testing/go:aead_cli_go",
-        "//tinkey",
-        "@tink_base//testdata:credentials",
+    srcs = ["aead_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "//testing:supported_key_types",
+        "//testing/cross_language/util:cli_aead",
+        "//testing/cross_language/util:keyset_manager",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
     ],
 )
 
@@ -64,6 +66,7 @@ sh_test(
         "//testing/cc:aead_cli_cc",
         "//testing/go:aead_cli_go",
         "//testing/go:generate_envelope_keyset",
+        "//testing/python:aead_cli_python",
         "//tinkey",
         "@google_root_pem//file",
         "@tink_base//testdata:credentials",
@@ -71,18 +74,18 @@ sh_test(
     tags = ["no_rbe"],
 )
 
-sh_test(
+py_test(
     name = "deterministic_aead_test",
-    size = "medium",
-    srcs = [
-        "deterministic_aead_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:deterministic_aead_cli_java",
-        "//testing/cc:deterministic_aead_cli_cc",
-        "//testing/go:deterministic_aead_cli_go",
-        "//tinkey",
+    srcs = ["deterministic_aead_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "//testing:supported_key_types",
+        "//testing/cross_language/util:cli_daead",
+        "//testing/cross_language/util:keyset_manager",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/daead",
     ],
 )
 
@@ -101,18 +104,18 @@ sh_test(
     ],
 )
 
-sh_test(
+py_test(
     name = "mac_test",
-    size = "medium",
-    srcs = [
-        "mac_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:mac_cli_java",
-        "//testing/cc:mac_cli_cc",
-        "//testing/go:mac_cli_go",
-        "//tinkey",
+    srcs = ["mac_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "//testing:supported_key_types",
+        "//testing/cross_language/util:cli_mac",
+        "//testing/cross_language/util:keyset_manager",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/mac",
     ],
 )
 
@@ -125,43 +128,37 @@ sh_test(
     data = [
         ":test_lib",
         "//testing/cc:prf_set_cli_cc",
+        "//testing/go:prf_set_cli_go",
         "//tinkey",
     ],
 )
 
-sh_test(
+py_test(
     name = "hybrid_encryption_test",
-    size = "medium",
-    srcs = [
-        "hybrid_encryption_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:hybrid_decrypt_cli_java",
-        "//testing:hybrid_encrypt_cli_java",
-        "//testing/cc:hybrid_decrypt_cli_cc",
-        "//testing/cc:hybrid_encrypt_cli_cc",
-        "//testing/go:hybrid_decrypt_cli_go",
-        "//testing/go:hybrid_encrypt_cli_go",
-        "//tinkey",
+    srcs = ["hybrid_encryption_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "//testing:supported_key_types",
+        "//testing/cross_language/util:cli_hybrid",
+        "//testing/cross_language/util:keyset_manager",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/hybrid",
     ],
 )
 
-sh_test(
+py_test(
     name = "signature_test",
-    size = "large",
-    timeout = "long",
-    srcs = [
-        "signature_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:public_key_sign_cli_java",
-        "//testing:public_key_verify_cli_java",
-        "//testing/cc:public_key_sign_cli_cc",
-        "//testing/cc:public_key_verify_cli_cc",
-        "//testing/go:public_key_sign_cli_go",
-        "//testing/go:public_key_verify_cli_go",
-        "//tinkey",
+    srcs = ["signature_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "//testing:supported_key_types",
+        "//testing/cross_language/util:cli_signature",
+        "//testing/cross_language/util:keyset_manager",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/signature",
     ],
 )

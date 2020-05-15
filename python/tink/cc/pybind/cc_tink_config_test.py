@@ -19,13 +19,13 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from tink.cc.pybind import cc_tink_config
+from tink.cc.pybind import tink_bindings
 
 
 class CcTinkConfigTest(absltest.TestCase):
 
   def test_register(self):
-    cc_tink_config.register()
+    tink_bindings.register()
 
 
 if __name__ == '__main__':

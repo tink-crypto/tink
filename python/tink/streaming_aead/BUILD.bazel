@@ -23,7 +23,7 @@ py_library(
     srcs = ["_encrypting_stream.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink/cc/pybind:cc_streaming_aead_wrappers",
+        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
         "//tink/util:file_object_adapter",
     ],
@@ -37,8 +37,7 @@ py_test(
         ":streaming_aead",
         requirement("absl-py"),
         requirement("six"),
-        "//tink/cc/pybind:input_stream_adapter",
-        "//tink/cc/pybind:output_stream_adapter",
+        "//tink/cc/pybind:tink_bindings",
     ],
 )
 
@@ -47,8 +46,7 @@ py_library(
     srcs = ["_decrypting_stream.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink/cc/pybind:cc_streaming_aead_wrappers",
-        "//tink/cc/pybind:status",
+        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
         "//tink/util:file_object_adapter",
     ],
@@ -62,9 +60,7 @@ py_test(
         ":streaming_aead",
         requirement("absl-py"),
         requirement("six"),
-        "//tink/cc/pybind:input_stream_adapter",
-        "//tink/cc/pybind:output_stream_adapter",
-        "//tink/cc/pybind:status",
+        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
     ],
 )
@@ -84,8 +80,7 @@ py_library(
         ":_decrypting_stream",
         ":_encrypting_stream",
         ":_streaming_aead",
-        "//tink/cc/pybind:cc_key_manager",
-        "//tink/cc/pybind:streaming_aead",
+        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
@@ -100,8 +95,7 @@ py_test(
         ":streaming_aead",
         requirement("absl-py"),
         "//tink:tink_config",
-        "//tink/cc/pybind:input_stream_adapter",
-        "//tink/cc/pybind:output_stream_adapter",
+        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
         "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
         "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
@@ -145,7 +139,6 @@ py_test(
         ":streaming_aead",
         requirement("absl-py"),
         "//tink:tink_config",
-        "//tink/cc/pybind:input_stream_adapter",
-        "//tink/cc/pybind:output_stream_adapter",
+        "//tink/cc/pybind:tink_bindings",
     ],
 )

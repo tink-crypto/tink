@@ -24,6 +24,7 @@
 #include "openssl/err.h"
 #include "include/rapidjson/document.h"
 #include "tink/subtle/wycheproof_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -34,7 +35,8 @@ namespace subtle {
 namespace {
 
 TEST(AesGcmSivBoringSslTest, Basic) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto res = AesGcmSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.ValueOrDie());
@@ -53,7 +55,8 @@ TEST(AesGcmSivBoringSslTest, Basic) {
 }
 
 TEST(AesGcmSivBoringSslTest, Sizes) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto res = AesGcmSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   auto cipher = std::move(res.ValueOrDie());
@@ -81,7 +84,8 @@ TEST(AesGcmSivBoringSslTest, Sizes) {
 }
 
 TEST(AesGcmSivBoringSslTest, Modification) {
-  std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmSivBoringSsl::New(key).ValueOrDie());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
@@ -110,7 +114,7 @@ TEST(AesGcmSivBoringSslTest, Modification) {
 }
 
 TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
-  const std::string key(
+  const util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmSivBoringSsl::New(key).ValueOrDie());
   const std::string message = "Some data to encrypt.";
@@ -165,7 +169,7 @@ TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmSivBoringSslTest, MessageEmptyVersusNullStringView) {
-  const std::string key(
+  const util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmSivBoringSsl::New(key).ValueOrDie());
   const std::string aad = "Some data to authenticate.";
@@ -205,13 +209,10 @@ TEST(AesGcmSivBoringSslTest, InvalidKeySizes) {
     if (keysize == 16 || keysize == 32) {
       continue;
     }
-    std::string key(keysize, 'x');
+    util::SecretData key(keysize, 'x');
     auto cipher = AesGcmSivBoringSsl::New(key);
     EXPECT_FALSE(cipher.ok());
   }
-  absl::string_view null_string_view;
-  auto nokeycipher = AesGcmSivBoringSsl::New(null_string_view);
-  EXPECT_FALSE(nokeycipher.ok());
 }
 
 // Test with test vectors from Wycheproof project.
@@ -229,7 +230,8 @@ bool WycheproofTest(const rapidjson::Document& root) {
     }
     for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
       std::string comment = test["comment"].GetString();
-      std::string key = WycheproofUtil::GetBytes(test["key"]);
+      util::SecretData key =
+          util::SecretDataFromStringView(WycheproofUtil::GetBytes(test["key"]));
       std::string nonce = WycheproofUtil::GetBytes(test["iv"]);
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
       std::string ct = WycheproofUtil::GetBytes(test["ct"]);

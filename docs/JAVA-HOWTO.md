@@ -9,8 +9,8 @@ hacking guide](JAVA-HACKING.md).
 ## Setup instructions
 
 The most recent release is
-[1.3.0](https://github.com/google/tink/releases/tag/v1.3.0), released
-2020-03-11.
+[1.4.0-rc2](https://github.com/google/tink/releases/tag/v1.4.0-rc2), released
+2020-05-14.
 
 In addition to the versioned releases, snapshots of Tink are regurlarly built
 using the master branch of the Tink GitHub repository.
@@ -35,7 +35,7 @@ following configuration:
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0-rc2</version>
   </dependency>
 </dependencies>
 ```
@@ -72,7 +72,7 @@ You can specify the latest snapshot as a project dependency by using the version
 
 ### AWS/GCP integration
 
-Since 1.3.0-rc1 the support for AWS/GCP KMS has been moved to a separate
+Since 1.3.0-rc2 the support for AWS/GCP KMS has been moved to a separate
 package. To use AWS KMS, one should also add dependency on `tink-awskms`, and
 similarly `tink-gcpkms` for GCP KMS.
 
@@ -81,7 +81,7 @@ similarly `tink-gcpkms` for GCP KMS.
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink-awskms</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0-rc2</version>
   </dependency>
 </dependencies>
 ```
@@ -91,7 +91,7 @@ similarly `tink-gcpkms` for GCP KMS.
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink-gcpkms</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0-rc2</version>
   </dependency>
 </dependencies>
 ```
@@ -105,7 +105,7 @@ following configuration:
 
 ```
 dependencies {
-  compile 'com.google.crypto.tink:tink-android:1.3.0'
+  implementation 'com.google.crypto.tink:tink-android:1.4.0-rc2'
 }
 ```
 
@@ -118,17 +118,17 @@ repositories {
 }
 
 dependencies {
-  compile 'com.google.crypto.tink:tink-android:HEAD-SNAPSHOT'
+  implementation 'com.google.crypto.tink:tink-android:HEAD-SNAPSHOT'
 }
 ```
 
 ## API documentation
 
 *   Java:
-    *   [1.3.0](https://google.github.com/tink/javadoc/tink/1.3.0)
+    *   [1.4.0-rc2](https://google.github.com/tink/javadoc/tink/1.4.0-rc2)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.3.0](https://google.github.com/tink/javadoc/tink-android/1.3.0)
+    *   [1.4.0-rc2](https://google.github.com/tink/javadoc/tink-android/1.4.0-rc2)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important warnings
@@ -514,21 +514,8 @@ use the following:
 
 ### Envelope encryption
 
-Via the AEAD interface, Tink supports envelope encryption, which is getting
-popular with Cloud users.
-
-For more context, reference the following cloud service provider documentation:
-
-* [Amazon Web Services](http://docs.aws.amazon.com/kms/latest/developerguide/workflow.html)
-* [Google Cloud Platform](https://cloud.google.com/kms/docs/data-encryption-keys)
-
-In this mode, you first create a key encryption key (KEK) in a Key
-Management System (KMS) such as AWS KMS or Google Cloud KMS. To encrypt some
-data, you then generate locally a data encryption key (DEK), encrypt data with
-the DEK, ask the KMS to encrypt the DEK with the KEK, and store the encrypted
-DEK with the encrypted data. At a later point, you can retrieve the encrypted
-data and the DEK, ask the KMS to decrypt DEK, and use the decrypted DEK to
-decrypt the data.
+Via the AEAD interface, Tink supports
+[envelope encryption](KEY-MANAGEMENT.md#envelope-encryption).
 
 For example, you can perform envelope encryption with a Google Cloud KMS key at
 `gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`

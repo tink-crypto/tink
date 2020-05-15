@@ -1,5 +1,6 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
+load("//tools:jar_jar.bzl", "jar_jar")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -169,12 +170,18 @@ java_library(
 gen_maven_jar_rules(
     name = "tink",
     doctitle = "Tink Cryptography API",
+    root_packages = [
+        "com.google.crypto.tink",
+    ],
     deps = full_proto_deps + java_deps + cleartext_deps + subtle_deps,
 )
 
 gen_maven_jar_rules(
     name = "tink-awskms",
     doctitle = "Tink Cryptography API with AWS KMS",
+    root_packages = [
+        "com.google.crypto.tink",
+    ],
     deps = [
         "//src/main/java/com/google/crypto/tink/integration/awskms",
     ],
@@ -183,6 +190,9 @@ gen_maven_jar_rules(
 gen_maven_jar_rules(
     name = "tink-gcpkms",
     doctitle = "Tink Cryptography API with Google Cloud KMS",
+    root_packages = [
+        "com.google.crypto.tink",
+    ],
     deps = [
         "//src/main/java/com/google/crypto/tink/integration/gcpkms",
     ],
@@ -191,7 +201,19 @@ gen_maven_jar_rules(
 gen_maven_jar_rules(
     name = "tink-android",
     doctitle = "Tink Cryptography API for Android",
+    root_packages = [
+        "com.google.crypto.tink",
+        # The following package(s) will be shaded by the "tink-android-shaded" target.
+        "com.google.protobuf",
+    ],
     deps = lite_proto_deps + android_deps + cleartext_android_deps + subtle_deps,
+)
+
+# Shade embedded packages to avoid dependency version conflicts in user projects.
+jar_jar(
+    name = "tink-android-shaded",
+    input_jar = ":tink-android",
+    rules = "jar_jar_rules.txt",
 )
 
 # TEST

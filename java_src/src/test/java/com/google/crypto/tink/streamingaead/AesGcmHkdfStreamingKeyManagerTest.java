@@ -19,6 +19,7 @@ package com.google.crypto.tink.streamingaead;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
@@ -29,6 +30,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -210,5 +212,65 @@ public class AesGcmHkdfStreamingKeyManagerTest {
       keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }
     assertThat(keys).hasSize(numTests);
+  }
+
+  @Test
+  public void testAes128GcmHkdf4KBTemplate() throws Exception {
+    KeyTemplate template = AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new AesGcmHkdfStreamingKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(16);
+    assertThat(format.getParams().getDerivedKeySize()).isEqualTo(16);
+    assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(4096);
+  }
+
+  @Test
+  public void testAes256GcmHkdf4KBTemplate() throws Exception {
+    KeyTemplate template = AesGcmHkdfStreamingKeyManager.aes256GcmHkdf4KBTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new AesGcmHkdfStreamingKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getDerivedKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(4096);
+  }
+
+  @Test
+  public void testAes128GcmHkdf1MBTemplate() throws Exception {
+    KeyTemplate template = AesGcmHkdfStreamingKeyManager.aes128GcmHkdf1MBTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new AesGcmHkdfStreamingKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(16);
+    assertThat(format.getParams().getDerivedKeySize()).isEqualTo(16);
+    assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(1 << 20);
+  }
+
+  @Test
+  public void testAes256GcmHkdf1MBTemplate() throws Exception {
+    KeyTemplate template = AesGcmHkdfStreamingKeyManager.aes256GcmHkdf1MBTemplate();
+    assertThat(template.getTypeUrl()).isEqualTo(new AesGcmHkdfStreamingKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    AesGcmHkdfStreamingKeyFormat format =
+        AesGcmHkdfStreamingKeyFormat.parseFrom(
+            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getDerivedKeySize()).isEqualTo(32);
+    assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
+    assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(1 << 20);
   }
 }

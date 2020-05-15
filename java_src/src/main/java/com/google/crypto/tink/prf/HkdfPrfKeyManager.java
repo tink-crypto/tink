@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.prf;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.HashType;
@@ -23,15 +24,18 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.subtle.prf.HkdfStreamingPrf;
+import com.google.crypto.tink.subtle.prf.PrfImpl;
 import com.google.crypto.tink.subtle.prf.StreamingPrf;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code HkdfPrfKey} keys and produces new instances of {@code
- * HkdfStreamingPrf}.
+ * HkdfStreamingPrf} and {@code HkdfPrf}.
  */
 public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
   private static com.google.crypto.tink.subtle.Enums.HashType convertHash(HashType hashType)
@@ -46,7 +50,7 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
       case SHA512:
         return com.google.crypto.tink.subtle.Enums.HashType.SHA512;
       default:
-        throw new GeneralSecurityException("HashType " + hashType + " not known in");
+        throw new GeneralSecurityException("HashType " + hashType.name() + " not known in");
     }
   }
 
@@ -60,6 +64,33 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
                 convertHash(key.getParams().getHash()),
                 key.getKeyValue().toByteArray(),
                 key.getParams().getSalt().toByteArray());
+          }
+        },
+        // PrfSet can be constructed using a KeyManager, but it is not really usable until it
+        // is wrapped with a KeySet, since the KeyManager does not know about key IDs.
+        new PrimitiveFactory<PrfSet, HkdfPrfKey>(PrfSet.class) {
+          @Override
+          public PrfSet getPrimitive(HkdfPrfKey key) throws GeneralSecurityException {
+            // We don't know the key ID here. Use 0 as a placeholder. PrfSetWrapper will fix this
+            // for us.
+            final int unknownKeyId = 0;
+            final Prf prf =
+                PrfImpl.wrap(
+                    new HkdfStreamingPrf(
+                        convertHash(key.getParams().getHash()),
+                        key.getKeyValue().toByteArray(),
+                        key.getParams().getSalt().toByteArray()));
+            return new PrfSet() {
+              @Override
+              public int getPrimaryId() {
+                return unknownKeyId;
+              }
+
+              @Override
+              public Map<Integer, Prf> getPrfs() {
+                return Collections.singletonMap(unknownKeyId, prf);
+              }
+            };
           }
         });
   }
@@ -141,5 +172,24 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
 
   public static String staticKeyType() {
     return new HkdfPrfKeyManager().getKeyType();
+  }
+
+  /**
+   * Generates a {@link KeyTemplate} for HKDF-PRF keys with the following parameters.
+   *
+   * <ul>
+   *   <li>Hash function: SHA256
+   *   <li>HMAC key size: 32 bytes
+   *   <li>Salt: empty
+   * </ul>
+   */
+  public static final KeyTemplate hkdfSha256Template() {
+    HkdfPrfKeyFormat format =
+        HkdfPrfKeyFormat.newBuilder()
+            .setKeySize(32) // the size in bytes of the HKDF key
+            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
+            .build();
+    return KeyTemplate.create(
+        HkdfPrfKeyManager.staticKeyType(), format.toByteArray(), KeyTemplate.OutputPrefixType.RAW);
   }
 }

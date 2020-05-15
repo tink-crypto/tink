@@ -32,7 +32,10 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * </pre>
  *
  * @since 1.1.0
+ * @deprecated use the key template methods in the key managers, e.g.,
+ *     AesSivKeyManager.aes256SivTemplate().
  */
+@Deprecated
 public final class DeterministicAeadKeyTemplates {
   /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 64-byte key. */
   public static final KeyTemplate AES256_SIV = createAesSivKeyTemplate(64);

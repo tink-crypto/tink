@@ -16,8 +16,6 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from tink.integration.awskms import aws_kms_aead
-from tink.integration.awskms import aws_kms_client
+from tink.integration.awskms import _aws_kms_client
 
-AwsKmsAead = aws_kms_aead.AwsKmsAead
-AwsKmsClient = aws_kms_client.AwsKmsClient
+AwsKmsClient = _aws_kms_client.AwsKmsClient

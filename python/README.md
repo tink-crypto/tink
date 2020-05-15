@@ -1,30 +1,23 @@
-# Tink for Python
+# Tink
 
-Note that this is still under active development and the API might change until
-the official release.
+Using crypto in your application shouldn't have to feel like juggling chainsaws
+in the dark. Tink is a crypto library written by a group of cryptographers and
+security engineers at Google. It was born out of our extensive experience
+working with Google's product teams, fixing weaknesses in implementations, and
+providing simple APIs that can be used safely without needing a crypto
+background.
 
-## Getting Started
+Tink provides secure APIs that are easy to use correctly and hard(er) to misuse.
+It reduces common crypto pitfalls with user-centered design, careful
+implementation and code reviews, and extensive testing. At Google, Tink is
+already being used to secure data of many products such as AdMob, Google Pay,
+Google Assistant, Firebase, the Android Search App, etc.
 
-In order to build Tink from source you can either use Bazel or build a Python
-package using pip.
+## Documentation
 
-### Build with Bazel
+For an overview of using Tink in Python, see the
+[Python HOW-TO](../docs/PYTHON-HOWTO.md).
 
-`bash bazel build "..."`
-
-### Build with pip from source
-
-A setup script is provided which allows to install Tink as a Python package
-`bash pip3 install .`
-
-Note that this still requires Bazel to compile the binding to C++ and the
-[protobuf compiler](https://github.com/protocolbuffers/protobuf).
-
-### Running tests
-
-You can run all tests with Bazel using `bash bazel test "..."`
-
-## Examples
-
-As a starting point, it is best to look at the examples provided in
-[../examples/python/](https://github.com/google/tink/examples/python/).
+In addition, there are illustrative [examples of using Tink
+Python](https://github.com/google/tink/tree/master/examples/python/) which can
+used as a jumping off point.

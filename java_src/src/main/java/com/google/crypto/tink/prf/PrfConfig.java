@@ -21,12 +21,15 @@ import java.security.GeneralSecurityException;
  * Tink.
  */
 public final class PrfConfig {
+  public static final String PRF_TYPE_URL = new HkdfPrfKeyManager().getKeyType();
+
   /**
    * Tries to register with the {@link Registry} all instances of {@link
    * com.google.crypto.tink.KeyManager} needed to handle Prf key types supported in Tink.
    */
   public static void register() throws GeneralSecurityException {
     HkdfPrfKeyManager.register(/*newKeyAllowed=*/ true);
+    PrfSetWrapper.register();
   }
 
   private PrfConfig() {}

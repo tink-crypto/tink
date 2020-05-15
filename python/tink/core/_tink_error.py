@@ -18,9 +18,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from tink.cc.pybind import status as error
+from tink.cc.pybind import tink_bindings
 
-KNOWN_STATUS_NOT_OK_TYPES = (error.StatusNotOk,)
+KNOWN_STATUS_NOT_OK_TYPES = (tink_bindings.StatusNotOk,)
 
 
 def register_status_not_ok_type(status_not_ok_type):

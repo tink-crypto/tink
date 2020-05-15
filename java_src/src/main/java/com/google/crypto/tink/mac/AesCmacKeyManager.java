@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.mac;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
@@ -35,8 +36,7 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesCmacKey} keys and produces new instances of {@code
  * AesCmac}.
  */
-public class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
-
+public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
   AesCmacKeyManager() {
     super(
         AesCmacKey.class,
@@ -123,5 +123,47 @@ public class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCmacKeyManager(), newKeyAllowed);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of AES-CMAC keys with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 32 bytes
+   *       <li>Tag size: 16 bytes
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
+   *     </ul>
+   */
+  public static final KeyTemplate aes256CmacTemplate() {
+    AesCmacKeyFormat format =
+        AesCmacKeyFormat.newBuilder()
+            .setKeySize(32)
+            .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
+            .build();
+    return KeyTemplate.create(
+        new AesCmacKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of AES-CMAC keys with the following
+   *     parameters:
+   *     <ul>
+   *       <li>Key size: 32 bytes
+   *       <li>Tag size: 16 bytes
+   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix)
+   *     </ul>
+   */
+  public static final KeyTemplate rawAes256CmacTemplate() {
+    AesCmacKeyFormat format =
+        AesCmacKeyFormat.newBuilder()
+            .setKeySize(32)
+            .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
+            .build();
+    return KeyTemplate.create(
+        new AesCmacKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.RAW);
   }
 }

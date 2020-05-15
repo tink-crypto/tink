@@ -150,4 +150,12 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     keyGenerator.init(spec);
     keyGenerator.generateKey();
   }
+
+  /** Deletes a key in Android Keystore. */
+  static void delete(String keyUri) throws GeneralSecurityException, IOException {
+    String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
+    KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+    keyStore.load(null /* param */);
+    keyStore.deleteEntry(keyId);
+  }
 }

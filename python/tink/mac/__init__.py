@@ -20,9 +20,7 @@ from __future__ import print_function
 from tink.mac import _mac
 from tink.mac import _mac_key_manager
 from tink.mac import _mac_key_templates as mac_key_templates
-from tink.mac import _mac_wrapper
 
 
 Mac = _mac.Mac
-MacWrapper = _mac_wrapper.MacWrapper
-key_manager_from_cc_registry = _mac_key_manager.from_cc_registry
+register = _mac_key_manager.register
