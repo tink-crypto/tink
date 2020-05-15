@@ -27,8 +27,11 @@ import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import javax.annotation.concurrent.GuardedBy;
 
@@ -67,12 +70,16 @@ import javax.annotation.concurrent.GuardedBy;
  * Tink cannot decrypt the keyset it would assume that it is not encrypted.
  *
  * <p>The master key URI must start with {@code android-keystore://}. If the master key doesn't
- * exist, a fresh one is generated. Usage of Android Keystore can be disabled with {@link
- * AndroidKeysetManager.Builder#doNotUseKeystore}.
+ * exist, a fresh one is generated.
  *
- * <p>On Android L or older, or when the master key URI is not set, the keyset will be stored in
- * cleartext in private preferences which, thanks to the security of the Android framework, no other
- * apps can read or write.
+ * <p>Usage of Android Keystore can be disabled with {@link
+ * AndroidKeysetManager.Builder#doNotUseKeystore}. Android Keystore on certain devices is broken.
+ * Tink runs a self-test to detect such problems and disable Android Keystore accordingly. Users can
+ * check whether Android Keystore is in use with {@link #isUsingKeystore}.
+ *
+ * <p>On Android L or older, or when either Android Keystore is disabled or the master key URI is
+ * not set, the keyset will be stored in cleartext in private preferences which, thanks to the
+ * security of the Android framework, no other apps can read or write.
  *
  * <p>The resulting manager supports all operations supported by {@link KeysetManager}. For example
  * to rotate the keyset, one can do:
@@ -110,11 +117,12 @@ public final class AndroidKeysetManager {
           "need to specify where to write the keyset to with Builder#withSharedPref");
     }
 
-    useKeystore = builder.useKeystore;
-    if (useKeystore && builder.masterKeyUri == null) {
+    if (builder.useKeystore && builder.masterKeyUri == null) {
       throw new IllegalArgumentException(
           "need a master key URI, please set it with Builder#masterKeyUri");
     }
+    useKeystore = builder.useKeystore && verifyAndroidKeystore();
+
     if (shouldUseKeystore()) {
       masterKey = AndroidKeystoreKmsClient.getOrGenerateNewAeadKey(builder.masterKeyUri);
     } else {
@@ -321,6 +329,11 @@ public final class AndroidKeysetManager {
     return this;
   }
 
+  /** Returns whether this keyset manager is wrapping keys with Android Keystore. */
+  public synchronized boolean isUsingKeystore() {
+    return shouldUseKeystore();
+  }
+
   private KeysetManager readOrGenerateNewKeyset() throws GeneralSecurityException, IOException {
     try {
       return read();
@@ -379,7 +392,7 @@ public final class AndroidKeysetManager {
   }
 
   private boolean shouldUseKeystore() {
-    return (useKeystore && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
+    return useKeystore && isAtLeastM();
   }
 
   private static KeyTemplate.OutputPrefixType fromProto(OutputPrefixType outputPrefixType) {
@@ -395,5 +408,76 @@ public final class AndroidKeysetManager {
       default:
         throw new IllegalArgumentException("Unknown output prefix type");
     }
+  }
+
+  private static boolean isAtLeastM() {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+  }
+
+  /**
+   * Does a self-test to verify whether we can rely on Android Keystore, which is broken in many
+   * devices.
+   */
+  private static boolean verifyAndroidKeystore() {
+    if (!isAtLeastM()) {
+      return false;
+    }
+
+    try {
+      String randomKeyId =
+          AndroidKeystoreKmsClient.PREFIX
+              + new String(Random.randBytes(16), Charset.forName("UTF-8"));
+      Aead aead = AndroidKeystoreKmsClient.getOrGenerateNewAeadKey(randomKeyId);
+
+      // Empty message.
+      // Empty aad.
+      byte[] message = new byte[0];
+      byte[] aad = new byte[0];
+      byte[] ciphertext = aead.encrypt(message, aad);
+      byte[] decrypted = aead.decrypt(ciphertext, aad);
+      if (decrypted.length != 0) {
+        Log.i(
+            TAG,
+            "cannot use Android Keystore: encryption/decryption of empty message and empty aad"
+                + " returns incorrect results");
+        return false;
+      }
+
+      // Non-empty message.
+      // Empty aad.
+      message = Random.randBytes(10);
+      aad = new byte[0];
+      ciphertext = aead.encrypt(message, aad);
+      decrypted = aead.decrypt(ciphertext, aad);
+      if (!Hex.encode(decrypted).equals(Hex.encode(message))) {
+        Log.i(
+            TAG,
+            "cannot use Android Keystore: encryption/decryption of non-empty message and empty"
+                + " aad returns incorrect results");
+        return false;
+      }
+
+      // Non-empty message.
+      // Non-empty aad.
+      message = Random.randBytes(10);
+      aad = Random.randBytes(10);
+      ciphertext = aead.encrypt(message, aad);
+      decrypted = aead.decrypt(ciphertext, aad);
+      if (!Hex.encode(decrypted).equals(Hex.encode(message))) {
+        Log.i(
+            TAG,
+            "cannot use Android Keystore: encryption/decryption of non-empty message and"
+                + " non-empty aad returns incorrect results");
+        return false;
+      }
+
+      AndroidKeystoreKmsClient.delete(randomKeyId);
+
+      return true;
+    } catch (Exception ex) {
+      Log.i(TAG, "cannot use Android Keystore: " + ex);
+    }
+
+    return false;
   }
 }
