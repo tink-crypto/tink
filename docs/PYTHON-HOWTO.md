@@ -156,20 +156,23 @@ Data)](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive to
 encrypt or decrypt data:
 
 ```python
-  import tink
-  from tink import aead
+import tink
+from tink import aead
 
-  # Register all AEAD primitives
-  aead.register()
+plaintext = b'your data...'
+associated_data = b'context'
 
-  # 1. Get a handle to the key material.
-  keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES256_GCM)
+# Register all AEAD primitives
+aead.register()
 
-  # 2. Get the primitive.
-  aead_primitive = keyset_handle.primitive(aead.Aead)
+# 1. Get a handle to the key material.
+keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES256_GCM)
 
-  # 3. Use the primitive.
-  ciphertext = aead_primitive.encrypt(plaintext, associated data)
+# 2. Get the primitive.
+aead_primitive = keyset_handle.primitive(aead.Aead)
+
+# 3. Use the primitive.
+ciphertext = aead_primitive.encrypt(plaintext, associated_data)
 ```
 
 ### Deterministic symmetric key encryption
@@ -179,20 +182,23 @@ You can obtain and use a
 primitive to encrypt or decrypt data:
 
 ```python
-  import tink
-  from tink import daead
+import tink
+from tink import daead
 
-  # Register all deterministic AEAD primitives
-  daead.register()
+plaintext = b'your data...'
+associated_data = b'context'
 
-  # 1. Get a handle to the key material.
-  keyset_handle = tink.new_keyset_handle(daead.deterministic_aead_key_templates.AES256_SIV)
+# Register all deterministic AEAD primitives
+daead.register()
 
-  # 2. Get the primitive.
-  daead_primitive = keyset_handle.primitive(daead.DeterministicAead)
+# 1. Get a handle to the key material.
+keyset_handle = tink.new_keyset_handle(daead.deterministic_aead_key_templates.AES256_SIV)
 
-  # 3. Use the primitive.
-  ciphertext = daead_primitive.encrypt_deterministically(plaintext, associated data)
+# 2. Get the primitive.
+daead_primitive = keyset_handle.primitive(daead.DeterministicAead)
+
+# 3. Use the primitive.
+ciphertext = daead_primitive.encrypt_deterministically(plaintext, associated_data)
 ```
 
 ### Message Authentication Code
@@ -201,23 +207,25 @@ You can compute or verify a
 [MAC (Message Authentication Code)](PRIMITIVES.md#message-authentication-code):
 
 ```python
-  import tink
-  from tink import mac
+import tink
+from tink import mac
 
-  # Register all MAC primitives
-  mac.register()
+data = b'your data...'
 
-  # 1. Get a handle to the key material.
-  keyset_handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+# Register all MAC primitives
+mac.register()
 
-  # 2. Get the primitive.
-  mac = keyset_handle.primitive(mac.Mac)
+# 1. Get a handle to the key material.
+keyset_handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
 
-  # 3. Use the primitive to compute a tag,
-  tag = mac.compute_mac(data)
+# 2. Get the primitive.
+mac = keyset_handle.primitive(mac.Mac)
 
-  # ... or to verify a tag.
-  mac.verify_mac(tag, data)
+# 3. Use the primitive to compute a tag,
+tag = mac.compute_mac(data)
+
+# ... or to verify a tag.
+mac.verify_mac(tag, data)
 ```
 
 ### Hybrid Encryption
@@ -227,34 +235,36 @@ To encrypt or decrypt using
 one can use the following:
 
 ```python
-  import tink
-  from tink import hybrid
+import tink
+from tink import hybrid
 
-  # Register all Hybrid primitives
-  hybrid.register()
+plaintext = b'your data...'
+context = b'context'
 
-  # 1. Generate the private key material.
-  private_keyset_handle = tink.new_keyset_handle(hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+# Register all Hybrid primitives
+hybrid.register()
 
-  # Obtain the public key material.
-  public_keyset_handle = private_keyset_handle.public_keyset_handle()
+# 1. Generate the private key material.
+private_keyset_handle = tink.new_keyset_handle(hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
 
-  # Encryption
+# Obtain the public key material.
+public_keyset_handle = private_keyset_handle.public_keyset_handle()
 
-  # 2. Get the primitive.
-  hybrid_encrypt = public_keyset_handle.primitive(hybrid.HybridEncrypt)
+# Encryption
 
-  # 3. Use the primitive.
-  ciphertext = hybrid_encrypt.encrypt(plaintext, context)
+# 2. Get the primitive.
+hybrid_encrypt = public_keyset_handle.primitive(hybrid.HybridEncrypt)
 
-  # Decryption
+# 3. Use the primitive.
+ciphertext = hybrid_encrypt.encrypt(plaintext, context)
 
-  # 2. Get the primitive.
-  hybrid_decrypt = private_keyset_handle.primitive(hybrid.HybridDecrypt)
+# Decryption
 
-  # 3. Use the primitive.
-  plaintext = hybrid_decrypt.decrypt(ciphertext, context)
+# 2. Get the primitive.
+hybrid_decrypt = private_keyset_handle.primitive(hybrid.HybridDecrypt)
 
+# 3. Use the primitive.
+plaintext = hybrid_decrypt.decrypt(ciphertext, context)
 ```
 
 ### Digital Signatures
@@ -263,31 +273,31 @@ You can sign or verify using a
 [digital signature](PRIMITIVES.md#digital-signatures):
 
 ```python
-   import tink
-   from tink import signature
+import tink
+from tink import signature
 
-   # Register key manager for signatures
-   signature.register()
+# Register key manager for signatures
+signature.register()
 
-   # Signing
-   # 1. Generate the private key material.
-   keyset_handle = tink.new_keyset_handle(signature.signature_key_templates.ED25519)
+# Signing
+# 1. Generate the private key material.
+keyset_handle = tink.new_keyset_handle(signature.signature_key_templates.ED25519)
 
-   # 2. Get the primitive.
-   signer = keyset_handle.primitive(signature.PublicKeySign)
+# 2. Get the primitive.
+signer = keyset_handle.primitive(signature.PublicKeySign)
 
-   # 3. Use the primitive to sign.
-   signature = signer.sign(b'your data')
+# 3. Use the primitive to sign.
+signature_data = signer.sign(b'your data')
 
-   # Verifying
-   # 1. Obtain the public key material.
-   public_keyset_handle = keyset_handle.public_keyset_handle()
+# Verifying
+# 1. Obtain the public key material.
+public_keyset_handle = keyset_handle.public_keyset_handle()
 
-   # 2. Get the primitive.
-   verifier = public_keyset_handle.primitive(signature.PublicKeyVerify)
+# 2. Get the primitive.
+verifier = public_keyset_handle.primitive(signature.PublicKeyVerify)
 
-   # 3. Use the primitive to verify.
-   verifier.verify(signature, b'your data')
+# 3. Use the primitive to verify.
+verifier.verify(signature_data, b'your data')
 ```
 
 ### Envelope encryption
@@ -300,28 +310,32 @@ For example, you can perform envelope encryption with a Google Cloud KMS key at
 using the credentials in `credentials.json` as follows:
 
 ```python
-  import tink
-  from tink import aead
-  from tink.integration import gcpkms
+import tink
+from tink import aead
+from tink.integration import gcpkms
 
-  key_uri = 'gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar'
-  gcp_credentials = 'credentials.json'
+key_uri = 'gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar'
+gcp_credentials = 'credentials.json'
 
-  # Read the GCP credentials and setup client
-  try:
-    gcp_client = gcpkms.GcpKmsClient(key_uri, gcp_credentials)
-    gcp_aead = gcp_client.get_aead(key_uri)
-  except tink.TinkError as e:
-    logging.error('Error initializing GCP client: %s', e)
-    return 1
+plaintext = b'your data...'
+associated_data = b'context'
 
-  # Create envelope AEAD primitive using AES256 GCM for encrypting the data
-  try:
-    key_template = aead.aead_key_templates.AES256_GCM
-    env_aead = aead.KmsEnvelopeAead(key_template, gcp_aead)
-  except tink.TinkError as e:
-    logging.error('Error creating primitive: %s', e)
-    return 1
-  # Use env_aead to encrypt data
-  ciphertext = env_aead.encrypt(plaintext, associated data)
+# Read the GCP credentials and setup client
+try:
+  gcp_client = gcpkms.GcpKmsClient(key_uri, gcp_credentials)
+  gcp_aead = gcp_client.get_aead(key_uri)
+except tink.TinkError as e:
+  logging.error('Error initializing GCP client: %s', e)
+  return 1
+
+# Create envelope AEAD primitive using AES256 GCM for encrypting the data
+try:
+  key_template = aead.aead_key_templates.AES256_GCM
+  env_aead = aead.KmsEnvelopeAead(key_template, gcp_aead)
+except tink.TinkError as e:
+  logging.error('Error creating primitive: %s', e)
+  return 1
+
+# Use env_aead to encrypt data
+ciphertext = env_aead.encrypt(plaintext, associated_data)
 ```
