@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":42,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":42,"i8":42,"i9":10};
+var methods = {"i0":42,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":42,"i9":42,"i10":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -140,11 +140,15 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  Tink cannot decrypt the keyset it would assume that it is not encrypted.
 
  <p>The master key URI must start with <code>android-keystore://</code>. If the master key doesn't
- exist, a fresh one is generated. Usage of Android Keystore can be disabled with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#doNotUseKeystore--"><code>AndroidKeysetManager.Builder.doNotUseKeystore()</code></a>.
+ exist, a fresh one is generated.
 
- <p>On Android L or older, or when the master key URI is not set, the keyset will be stored in
- cleartext in private preferences which, thanks to the security of the Android framework, no other
- apps can read or write.
+ <p>Usage of Android Keystore can be disabled with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#doNotUseKeystore--"><code>AndroidKeysetManager.Builder.doNotUseKeystore()</code></a>. Android Keystore on certain devices is broken.
+ Tink runs a self-test to detect such problems and disable Android Keystore accordingly. Users can
+ check whether Android Keystore is in use with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#isUsingKeystore--"><code>isUsingKeystore()</code></a>.
+
+ <p>On Android L or older, or when either Android Keystore is disabled or the master key URI is
+ not set, the keyset will be stored in cleartext in private preferences which, thanks to the
+ security of the Android framework, no other apps can read or write.
 
  <p>The resulting manager supports all operations supported by <a href="../../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><code>KeysetManager</code></a>. For example
  to rotate the keyset, one can do:
@@ -242,6 +246,12 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#getKeysetHandle--">getKeysetHandle</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i7" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#isUsingKeystore--">isUsingKeystore</a></span>()</code>
+<div class="block">Returns whether this keyset manager is wrapping keys with Android Keystore.</div>
+</td>
+</tr>
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#promote-int-">promote</a></span>(int&nbsp;keyId)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
@@ -249,7 +259,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#rotate-com.google.crypto.tink.proto.KeyTemplate-">rotate</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
@@ -259,7 +269,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#setPrimary-int-">setPrimary</a></span>(int&nbsp;keyId)</code>
 <div class="block">Sets the key with <code>keyId</code> as primary.</div>
@@ -436,7 +446,7 @@ public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/androi
 <a name="destroy-int-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>destroy</h4>
 <pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;destroy(int&nbsp;keyId)
@@ -446,6 +456,16 @@ public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/androi
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the key is not found or it is the primary key</dd>
 </dl>
+</li>
+</ul>
+<a name="isUsingKeystore--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>isUsingKeystore</h4>
+<pre>public&nbsp;boolean&nbsp;isUsingKeystore()</pre>
+<div class="block">Returns whether this keyset manager is wrapping keys with Android Keystore.</div>
 </li>
 </ul>
 </li>
