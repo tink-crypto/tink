@@ -11,5 +11,3 @@ com.google.crypto.tink.signature
 com.google.crypto.tink.streamingaead
 com.google.crypto.tink.subtle
 com.google.crypto.tink.subtle.prf
-com.google.protobuf
-com.google.protobuf.compiler
