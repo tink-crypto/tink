@@ -54,8 +54,6 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = [
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:core",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -122,7 +120,7 @@ java_library(
     deps = [
         ":prf_set",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:core",
+        "//src/main/java/com/google/crypto/tink:core-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
