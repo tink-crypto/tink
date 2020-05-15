@@ -107,8 +107,8 @@ AEAD primitive in Java:
 ## Current status
 
 *   The latest version is
-    [1.4.0-rc1](https://github.com/google/tink/releases/tag/v1.4.0-rc1),
-    released on 2020-04-30.
+    [1.4.0-rc2](https://github.com/google/tink/releases/tag/v1.4.0-rc2),
+    released on 2020-05-14.
 *   [Java and Android](docs/JAVA-HOWTO.md), [C++](docs/CPP-HOWTO.md),
     [Obj-C](docs/OBJC-HOWTO.md), [Go](docs/GOLANG-HOWTO.md), and
     [Python](g3docs/PYTHON-HOWTO.md) are field tested and ready for production.
