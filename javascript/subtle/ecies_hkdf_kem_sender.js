@@ -39,16 +39,6 @@ class EciesHkdfKemSender {
   }
 
   /**
-   * @param {!webCrypto.JsonWebKey} jwk
-   * @return {!Promise.<!EciesHkdfKemSender>}
-   * @static
-   */
-  static async newInstance(jwk) {
-    const publicKey = await EllipticCurves.importPublicKey('ECDH', jwk);
-    return new EciesHkdfKemSender(publicKey);
-  }
-
-  /**
    * @param {number} keySizeInBytes The length of the generated pseudorandom
    *     string in bytes. The maximal size is 255 * DigestSize, where DigestSize
    *     is the size of the underlying HMAC.
@@ -80,3 +70,13 @@ class EciesHkdfKemSender {
 }
 
 exports = EciesHkdfKemSender;
+
+/**
+ * @param {!webCrypto.JsonWebKey} jwk
+ * @return {!Promise<!EciesHkdfKemSender>}
+ */
+async function fromJsonWebKey(jwk) {
+  const publicKey = await EllipticCurves.importPublicKey('ECDH', jwk);
+  return new EciesHkdfKemSender(publicKey);
+}
+exports.fromJsonWebKey = fromJsonWebKey;

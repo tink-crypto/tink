@@ -67,7 +67,7 @@ class EcdsaPublicKeyManager {
     const params = /** @type{!PbEcdsaParams} */ (keyProto.getParams());
     const hash = Util.hashTypeProtoToString(params.getHashType());
     const encoding = EcdsaUtil.encodingTypeProtoToEnum(params.getEncoding());
-    return await EcdsaVerify.newInstance(jwk, hash, encoding);
+    return await EcdsaVerify.fromJsonWebKey(jwk, hash, encoding);
   }
 
   /** @override */

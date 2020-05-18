@@ -189,12 +189,12 @@ class EcdsaPrivateKeyManager {
         keyProto, EcdsaPrivateKeyManager.VERSION_,
         EcdsaPublicKeyManager.VERSION);
 
-    const recepientPrivateKey = EcdsaUtil.getJsonWebKeyFromProto(keyProto);
+    const recipientPrivateKey = EcdsaUtil.getJsonWebKeyFromProto(keyProto);
     const params =
         /** @type {!PbEcdsaParams} */ (keyProto.getPublicKey().getParams());
     const hash = Util.hashTypeProtoToString(params.getHashType());
     const encoding = EcdsaUtil.encodingTypeProtoToEnum(params.getEncoding());
-    return await EcdsaSign.newInstance(recepientPrivateKey, hash, encoding);
+    return await EcdsaSign.fromJsonWebKey(recipientPrivateKey, hash, encoding);
   }
 
   /** @override */

@@ -55,32 +55,6 @@ class AesCtr {
   }
 
   /**
-   * @param {!Uint8Array} key
-   * @param {number} ivSize the size of the IV, must be larger than or equal to
-   *     {@link MIN_IV_SIZE_IN_BYTES}
-   * @return {!Promise.<!IndCpaCipher>}
-   * @static
-   */
-  static async newInstance(key, ivSize) {
-    if (!Number.isInteger(ivSize)) {
-      throw new SecurityException('invalid IV length, must be an integer');
-    }
-    if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > AES_BLOCK_SIZE_IN_BYTES) {
-      throw new SecurityException(
-          'invalid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +
-          ' and at most ' + AES_BLOCK_SIZE_IN_BYTES);
-    }
-    Validators.requireUint8Array(key);
-    Validators.validateAesKeySize(key.length);
-
-    const cryptoKey = await self.crypto.subtle.importKey(
-        'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
-        ['encrypt', 'decrypt']);
-
-    return new AesCtr(cryptoKey, ivSize);
-  }
-
-  /**
    * @override
    */
   async encrypt(plaintext) {
@@ -111,3 +85,27 @@ class AesCtr {
 }
 
 exports = AesCtr;
+
+/**
+ * @param {!Uint8Array} key
+ * @param {number} ivSize the size of the IV, must be larger than or equal to
+ *     {@link MIN_IV_SIZE_IN_BYTES}
+ * @return {!Promise<!IndCpaCipher>}
+ */
+async function fromRawKey(key, ivSize) {
+  if (!Number.isInteger(ivSize)) {
+    throw new SecurityException('invalid IV length, must be an integer');
+  }
+  if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > AES_BLOCK_SIZE_IN_BYTES) {
+    throw new SecurityException(
+        'invalid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +
+        ' and at most ' + AES_BLOCK_SIZE_IN_BYTES);
+  }
+  Validators.requireUint8Array(key);
+  Validators.validateAesKeySize(key.length);
+  const cryptoKey = await self.crypto.subtle.importKey(
+      'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
+      ['encrypt', 'decrypt']);
+  return new AesCtr(cryptoKey, ivSize);
+}
+exports.fromRawKey = fromRawKey;

@@ -23,6 +23,8 @@ const {SecurityException} = goog.require('google3.third_party.tink.javascript.ex
 const Validators = goog.require('tink.subtle.Validators');
 const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbHashType, PbHmacKey, PbHmacKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
+const {aesCtrHmacFromRawKeys} = EncryptThenAuthenticate;
+
 /**
  * @final
  * @implements {KeyManager.KeyFactory}
@@ -242,7 +244,7 @@ class AesCtrHmacAeadKeyManager {
         hashType = 'UNKNOWN HASH';
     }
 
-    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+    const aead = await aesCtrHmacFromRawKeys(
         aesCtrKey.getKeyValue_asU8(), aesCtrKey.getParams().getIvSize(),
         hashType, hmacKey.getKeyValue_asU8(), hmacKey.getParams().getTagSize());
 

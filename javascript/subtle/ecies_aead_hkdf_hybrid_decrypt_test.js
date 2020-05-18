@@ -24,6 +24,9 @@ const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 
+const decrypterFromJsonWebKey = EciesAeadHkdfHybridDecrypt.fromJsonWebKey;
+const encrypterFromJsonWebKey = EciesAeadHkdfHybridEncrypt.fromJsonWebKey;
+
 describe('ecies aead hkdf hybrid decrypt test', function() {
   beforeEach(function() {
     AeadConfig.register();
@@ -45,7 +48,7 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const demHelper = new DemHelper(AeadKeyTemplates.aes128CtrHmacSha256());
 
-    await EciesAeadHkdfHybridDecrypt.newInstance(
+    await decrypterFromJsonWebKey(
         privateKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   });
 
@@ -63,9 +66,9 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
 
-    const hybridEncrypt = await EciesAeadHkdfHybridEncrypt.newInstance(
+    const hybridEncrypt = await encrypterFromJsonWebKey(
         publicKey, hkdfHash, pointFormat, demHelper);
-    const hybridDecrypt = await EciesAeadHkdfHybridDecrypt.newInstance(
+    const hybridDecrypt = await decrypterFromJsonWebKey(
         privateKey, hkdfHash, pointFormat, demHelper);
 
     const plaintext = Random.randBytes(10);
@@ -90,11 +93,11 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
        const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
 
        const demHelperEncrypt = new DemHelper(keyTemplate);
-       const hybridEncrypt = await EciesAeadHkdfHybridEncrypt.newInstance(
+       const hybridEncrypt = await encrypterFromJsonWebKey(
            publicKey, hkdfHash, pointFormat, demHelperEncrypt);
 
        const demHelperDecrypt = new DemHelper(keyTemplate);
-       const hybridDecrypt = await EciesAeadHkdfHybridDecrypt.newInstance(
+       const hybridDecrypt = await decrypterFromJsonWebKey(
            privateKey, hkdfHash, pointFormat, demHelperDecrypt);
 
        const plaintext = Random.randBytes(15);
@@ -125,9 +128,9 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
         const publicKey =
             await EllipticCurves.exportCryptoKey(keyPair.publicKey);
 
-        const hybridEncrypt = await EciesAeadHkdfHybridEncrypt.newInstance(
+        const hybridEncrypt = await encrypterFromJsonWebKey(
             publicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
-        const hybridDecrypt = await EciesAeadHkdfHybridDecrypt.newInstance(
+        const hybridDecrypt = await decrypterFromJsonWebKey(
             privateKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
 
         for (let i = 0; i < repetitions; ++i) {

@@ -67,36 +67,6 @@ class EciesAeadHkdfHybridEncrypt extends HybridEncrypt {
   }
 
   /**
-   * @param {!webCrypto.JsonWebKey} recipientPublicKey
-   * @param {string} hkdfHash the name of the HMAC algorithm, accepted names
-   *     are: SHA-1, SHA-256 and SHA-512.
-   * @param {!EllipticCurves.PointFormatType} pointFormat
-   * @param {!EciesAeadHkdfDemHelper} demHelper
-   * @param {!Uint8Array=} opt_hkdfSalt
-   *
-   * @return {!Promise.<!HybridEncrypt>}
-   */
-  static async newInstance(
-      recipientPublicKey, hkdfHash, pointFormat, demHelper, opt_hkdfSalt) {
-    if (!recipientPublicKey) {
-      throw new SecurityException('Recipient public key has to be non-null.');
-    }
-    if (!hkdfHash) {
-      throw new SecurityException('HMAC algorithm has to be non-null.');
-    }
-    if (!pointFormat) {
-      throw new SecurityException('Point format has to be non-null.');
-    }
-    if (!demHelper) {
-      throw new SecurityException('DEM helper has to be non-null.');
-    }
-
-    const kemSender = await EciesHkdfKemSender.newInstance(recipientPublicKey);
-    return new EciesAeadHkdfHybridEncrypt(
-        kemSender, hkdfHash, pointFormat, demHelper, opt_hkdfSalt);
-  }
-
-  /**
    * Encrypts plaintext using opt_contextInfo as info parameter of the
    * underlying HKDF.
    *
@@ -124,3 +94,32 @@ class EciesAeadHkdfHybridEncrypt extends HybridEncrypt {
 }
 
 exports = EciesAeadHkdfHybridEncrypt;
+
+/**
+ * @param {!webCrypto.JsonWebKey} recipientPublicKey
+ * @param {string} hkdfHash the name of the HMAC algorithm, accepted names
+ *     are: SHA-1, SHA-256 and SHA-512.
+ * @param {!EllipticCurves.PointFormatType} pointFormat
+ * @param {!EciesAeadHkdfDemHelper} demHelper
+ * @param {!Uint8Array=} hkdfSalt
+ * @return {!Promise<!HybridEncrypt>}
+ */
+async function fromJsonWebKey(
+    recipientPublicKey, hkdfHash, pointFormat, demHelper, hkdfSalt) {
+  if (!recipientPublicKey) {
+    throw new SecurityException('Recipient public key has to be non-null.');
+  }
+  if (!hkdfHash) {
+    throw new SecurityException('HMAC algorithm has to be non-null.');
+  }
+  if (!pointFormat) {
+    throw new SecurityException('Point format has to be non-null.');
+  }
+  if (!demHelper) {
+    throw new SecurityException('DEM helper has to be non-null.');
+  }
+  const kemSender = await EciesHkdfKemSender.fromJsonWebKey(recipientPublicKey);
+  return new EciesAeadHkdfHybridEncrypt(
+      kemSender, hkdfHash, pointFormat, demHelper, hkdfSalt);
+}
+exports.fromJsonWebKey = fromJsonWebKey;

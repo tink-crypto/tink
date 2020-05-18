@@ -1,3 +1,2 @@
-import {EncryptThenAuthenticate} from './encrypt_then_authenticate';
-
-export const aesCtrHmac = EncryptThenAuthenticate.newAesCtrHmac;
+import EncryptThenAuthenticate from 'goog:tink.subtle.EncryptThenAuthenticate'; // from //third_party/tink/javascript/subtle:aead
+export const fromRawKeys = EncryptThenAuthenticate.aesCtrHmacFromRawKeys;

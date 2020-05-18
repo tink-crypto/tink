@@ -19,6 +19,8 @@ const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 
+const {fromJsonWebKey} = EcdsaSign;
+
 describe('ecdsa sign test', function() {
   beforeEach(function() {
     // Use a generous promise timeout for running continuously.
@@ -32,7 +34,7 @@ describe('ecdsa sign test', function() {
 
   it('sign', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-    const signer = await EcdsaSign.newInstance(
+    const signer = await fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
     for (let i = 0; i < 100; i++) {
       const data = Random.randBytes(i);
@@ -51,7 +53,7 @@ describe('ecdsa sign test', function() {
 
   it('sign with der encoding', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-    const signer = await EcdsaSign.newInstance(
+    const signer = await fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256',
         EllipticCurves.EcdsaSignatureEncodingType.DER);
     for (let i = 0; i < 100; i++) {
@@ -83,7 +85,7 @@ describe('ecdsa sign test', function() {
 
   it('sign always generate new signatures', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-    const signer = await EcdsaSign.newInstance(
+    const signer = await fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
     const signatures = new Set();
     for (let i = 0; i < 100; i++) {
@@ -97,7 +99,7 @@ describe('ecdsa sign test', function() {
   it('constructor with invalid hash', async function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-      await EcdsaSign.newInstance(
+      await fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-1');
       fail('Should throw an exception.');
     } catch (e) {
@@ -109,7 +111,7 @@ describe('ecdsa sign test', function() {
 
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-384');
-      await EcdsaSign.newInstance(
+      await fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
@@ -120,7 +122,7 @@ describe('ecdsa sign test', function() {
 
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-521');
-      await EcdsaSign.newInstance(
+      await fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
@@ -135,7 +137,7 @@ describe('ecdsa sign test', function() {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
       const jwk = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
       jwk.crv = 'blah';
-      await EcdsaSign.newInstance(jwk, 'SHA-256');
+      await fromJsonWebKey(jwk, 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString()).toBe('SecurityException: unsupported curve: blah');

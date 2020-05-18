@@ -126,7 +126,7 @@ class AesGcmKeyManager {
     const keyProto = AesGcmKeyManager.getKeyProto_(key);
     AesGcmKeyManager.validateKey_(keyProto);
 
-    return await AesGcm.newInstance(keyProto.getKeyValue_asU8());
+    return await AesGcm.fromRawKey(keyProto.getKeyValue_asU8());
   }
 
   /** @override */

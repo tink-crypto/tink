@@ -19,11 +19,13 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const Hmac = goog.require('tink.subtle.Hmac');
 const Random = goog.require('tink.subtle.Random');
 
+const hmacFromRawKey = Hmac.fromRawKey;
+
 describe('hmac test', function() {
   it('basic', async function() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(4);
-    const hmac = await Hmac.newInstance('SHA-1', key, 10);
+    const hmac = await hmacFromRawKey('SHA-1', key, 10);
     const tag = await hmac.computeMac(msg);
     expect(tag.length).toBe(10);
     expect(await hmac.verifyMac(tag, msg)).toBe(true);
@@ -31,7 +33,7 @@ describe('hmac test', function() {
 
   it('constructor', async function() {
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
       fail('Should throw an exception.');
     } catch (e) {
@@ -40,7 +42,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-1', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
@@ -49,7 +51,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-1', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
     } catch (e) {
@@ -58,7 +60,7 @@ describe('hmac test', function() {
               'InvalidArgumentsException: tag too short, must be at least 10 bytes');
     }
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-1', Random.randBytes(16), 21);  // tag size too long
       fail('Should throw an exception.');
     } catch (e) {
@@ -68,7 +70,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-256', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
@@ -77,7 +79,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-256', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
     } catch (e) {
@@ -87,7 +89,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-256', Random.randBytes(16), 33);  // tag size too long
       fail('Should throw an exception.');
     } catch (e) {
@@ -97,7 +99,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-512', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
     } catch (e) {
@@ -106,7 +108,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-512', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
     } catch (e) {
@@ -116,7 +118,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance(
+      await hmacFromRawKey(
           'SHA-512', Random.randBytes(16), 65);  // tag size too long
       fail('Should throw an exception.');
     } catch (e) {
@@ -128,7 +130,7 @@ describe('hmac test', function() {
 
   it('constructor, invalid tag sizes', async function() {
     try {
-      await Hmac.newInstance('SHA-512', Random.randBytes(16), NaN);
+      await hmacFromRawKey('SHA-512', Random.randBytes(16), NaN);
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -137,7 +139,7 @@ describe('hmac test', function() {
     }
 
     try {
-      await Hmac.newInstance('SHA-512', Random.randBytes(16), 12.5);
+      await hmacFromRawKey('SHA-512', Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -149,7 +151,7 @@ describe('hmac test', function() {
   it('modify', async function() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(8);
-    const hmac = await Hmac.newInstance('SHA-1', key, 20);
+    const hmac = await hmacFromRawKey('SHA-1', key, 20);
     const tag = await hmac.computeMac(msg);
 
     // Modify tag.
@@ -216,7 +218,7 @@ describe('hmac test', function() {
       const key = Bytes.fromHex(testVector['key']);
       const message = Bytes.fromHex(testVector['message']);
       const tag = Bytes.fromHex(testVector['tag']);
-      const hmac = await Hmac.newInstance(testVector['algo'], key, tag.length);
+      const hmac = await hmacFromRawKey(testVector['algo'], key, tag.length);
       expect(await hmac.verifyMac(tag, message)).toBe(true);
     }
   });

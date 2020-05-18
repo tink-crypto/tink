@@ -51,22 +51,6 @@ class AesGcm extends Aead {
   }
 
   /**
-   * @param {!Uint8Array} key
-   * @return {!Promise.<!Aead>}
-   * @static
-   */
-  static async newInstance(key) {
-    Validators.requireUint8Array(key);
-    Validators.validateAesKeySize(key.length);
-
-    const webCryptoKey = await self.crypto.subtle.importKey(
-        'raw' /* format */, key /* keyData */,
-        {'name': 'AES-GCM', 'length': key.length} /* algo */,
-        false /* extractable*/, ['encrypt', 'decrypt'] /* usage */);
-    return new AesGcm(webCryptoKey);
-  }
-
-  /**
    * @override
    */
   async encrypt(plaintext, opt_associatedData) {
@@ -120,3 +104,17 @@ class AesGcm extends Aead {
 }
 
 exports = AesGcm;
+
+/**
+ * @param {!Uint8Array} key
+ * @return {!Promise<!Aead>}
+ */
+async function fromRawKey(key) {
+  Validators.requireUint8Array(key);
+  Validators.validateAesKeySize(key.length);
+  const webCryptoKey = await self.crypto.subtle.importKey(
+      'raw', key, {'name': 'AES-GCM', 'length': key.length},
+      /* extractable= */ false, ['encrypt', 'decrypt']);
+  return new AesGcm(webCryptoKey);
+}
+exports.fromRawKey = fromRawKey;

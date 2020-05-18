@@ -20,12 +20,13 @@ const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 
+const {fromJsonWebKey} = EciesHkdfKemSender;
 
 describe('ecies hkdf kem sender test', function() {
   it('encapsulate, always generate random key', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    const sender = await EciesHkdfKemSender.newInstance(publicKey);
+    const sender = await fromJsonWebKey(publicKey);
     const keySizeInBytes = 32;
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const hkdfHash = 'SHA-256';
@@ -46,7 +47,7 @@ describe('ecies hkdf kem sender test', function() {
   it('encapsulate, non integer key size', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    const sender = await EciesHkdfKemSender.newInstance(publicKey);
+    const sender = await fromJsonWebKey(publicKey);
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const hkdfHash = 'SHA-256';
     const hkdfInfo = Random.randBytes(32);
@@ -68,11 +69,11 @@ describe('ecies hkdf kem sender test', function() {
   });
 
   it('new instance, invalid parameters', async function() {
-    // Test newInstance with public key instead private key.
+    // Test fromJsonWebKey with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     try {
-      await EciesHkdfKemSender.newInstance(privateKey);
+      await fromJsonWebKey(privateKey);
       fail('An exception should be thrown.');
     } catch (e) {
     }
@@ -93,7 +94,7 @@ describe('ecies hkdf kem sender test', function() {
       const hkdfInfo = Random.randBytes(10);
       const salt = Random.randBytes(8);
       try {
-        const sender = await EciesHkdfKemSender.newInstance(publicJwk);
+        const sender = await fromJsonWebKey(publicJwk);
         await sender.encapsulate(
             /* keySizeInBytes = */ 32,
             EllipticCurves.PointFormatType.UNCOMPRESSED,

@@ -23,6 +23,8 @@ const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 
+const {fromJsonWebKey} = EciesAeadHkdfHybridEncrypt;
+
 describe('ecies aead hkdf hybrid encrypt test', function() {
   beforeEach(function() {
     AeadConfig.register();
@@ -44,8 +46,7 @@ describe('ecies aead hkdf hybrid encrypt test', function() {
     const demHelper = new RegistryEciesAeadHkdfDemHelper(
         AeadKeyTemplates.aes128CtrHmacSha256());
 
-    await EciesAeadHkdfHybridEncrypt.newInstance(
-        publicKey, hkdfHash, pointFormat, demHelper);
+    await fromJsonWebKey(publicKey, hkdfHash, pointFormat, demHelper);
   });
 
   it('encrypt, different arguments', async function() {
@@ -65,7 +66,7 @@ describe('ecies aead hkdf hybrid encrypt test', function() {
         const publicKey =
             await EllipticCurves.exportCryptoKey(keyPair.publicKey);
 
-        const hybridEncrypt = await EciesAeadHkdfHybridEncrypt.newInstance(
+        const hybridEncrypt = await fromJsonWebKey(
             publicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
 
         const plaintext = Random.randBytes(15);

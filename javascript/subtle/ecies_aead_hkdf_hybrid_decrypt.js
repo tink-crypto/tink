@@ -22,6 +22,8 @@ const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
+const kemRecipientFromJsonWebKey = EciesHkdfKemRecipient.fromJsonWebKey;
+
 /**
  * Implementation of ECIES AEAD HKDF hybrid decryption.
  *
@@ -79,42 +81,6 @@ class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
   }
 
   /**
-   * @param {!webCrypto.JsonWebKey} recipientPrivateKey
-   * @param {string} hkdfHash the name of the HMAC algorithm, accepted names
-   *     are: SHA-1, SHA-256 and SHA-512.
-   * @param {!EllipticCurves.PointFormatType} pointFormat
-   * @param {!EciesAeadHkdfDemHelper} demHelper
-   * @param {!Uint8Array=} opt_hkdfSalt
-   *
-   * @return {!Promise.<!HybridDecrypt>}
-   */
-  static async newInstance(
-      recipientPrivateKey, hkdfHash, pointFormat, demHelper, opt_hkdfSalt) {
-    if (!recipientPrivateKey) {
-      throw new SecurityException('Recipient private key has to be non-null.');
-    }
-    if (!hkdfHash) {
-      throw new SecurityException('HKDF hash algorithm has to be non-null.');
-    }
-    if (!pointFormat) {
-      throw new SecurityException('Point format has to be non-null.');
-    }
-    if (!demHelper) {
-      throw new SecurityException('DEM helper has to be non-null.');
-    }
-
-    if (!recipientPrivateKey) {
-      throw new SecurityException('Recipient private key has to be non-null.');
-    }
-    const kemRecipient =
-        await EciesHkdfKemRecipient.newInstance(recipientPrivateKey);
-
-    return new EciesAeadHkdfHybridDecrypt(
-        recipientPrivateKey, kemRecipient, hkdfHash, pointFormat, demHelper,
-        opt_hkdfSalt);
-  }
-
-  /**
    * Decrypts ciphertext using opt_contextInfo as info parameter of the
    * underlying HKDF.
    *
@@ -156,3 +122,36 @@ class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
 }
 
 exports = EciesAeadHkdfHybridDecrypt;
+
+/**
+ * @param {!webCrypto.JsonWebKey} recipientPrivateKey
+ * @param {string} hkdfHash the name of the HMAC algorithm, accepted names
+ *     are: SHA-1, SHA-256 and SHA-512.
+ * @param {!EllipticCurves.PointFormatType} pointFormat
+ * @param {!EciesAeadHkdfDemHelper} demHelper
+ * @param {!Uint8Array=} hkdfSalt
+ * @return {!Promise<!HybridDecrypt>}
+ */
+async function fromJsonWebKey(
+    recipientPrivateKey, hkdfHash, pointFormat, demHelper, hkdfSalt) {
+  if (!recipientPrivateKey) {
+    throw new SecurityException('Recipient private key has to be non-null.');
+  }
+  if (!hkdfHash) {
+    throw new SecurityException('HKDF hash algorithm has to be non-null.');
+  }
+  if (!pointFormat) {
+    throw new SecurityException('Point format has to be non-null.');
+  }
+  if (!demHelper) {
+    throw new SecurityException('DEM helper has to be non-null.');
+  }
+  if (!recipientPrivateKey) {
+    throw new SecurityException('Recipient private key has to be non-null.');
+  }
+  const kemRecipient = await kemRecipientFromJsonWebKey(recipientPrivateKey);
+  return new EciesAeadHkdfHybridDecrypt(
+      recipientPrivateKey, kemRecipient, hkdfHash, pointFormat, demHelper,
+      hkdfSalt);
+}
+exports.fromJsonWebKey = fromJsonWebKey;

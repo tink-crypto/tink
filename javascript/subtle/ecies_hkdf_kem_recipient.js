@@ -39,16 +39,6 @@ class EciesHkdfKemRecipient {
   }
 
   /**
-   * @param {!webCrypto.JsonWebKey} jwk
-   * @return {!Promise.<!EciesHkdfKemRecipient>}
-   * @static
-   */
-  static async newInstance(jwk) {
-    const privateKey = await EllipticCurves.importPrivateKey('ECDH', jwk);
-    return new EciesHkdfKemRecipient(privateKey);
-  }
-
-  /**
    * @param {!Uint8Array} kemToken the public ephemeral point.
    * @param {number} keySizeInBytes The length of the generated pseudorandom
    *     string in bytes. The maximal size is 255 * DigestSize, where DigestSize
@@ -78,3 +68,13 @@ class EciesHkdfKemRecipient {
 }
 
 exports = EciesHkdfKemRecipient;
+
+/**
+ * @param {!webCrypto.JsonWebKey} jwk
+ * @return {!Promise<!EciesHkdfKemRecipient>}
+ */
+async function fromJsonWebKey(jwk) {
+  const privateKey = await EllipticCurves.importPrivateKey('ECDH', jwk);
+  return new EciesHkdfKemRecipient(privateKey);
+}
+exports.fromJsonWebKey = fromJsonWebKey;

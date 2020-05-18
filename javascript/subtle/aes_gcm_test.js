@@ -19,6 +19,8 @@ const AesGcm = goog.require('tink.subtle.AesGcm');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
 
+const aesGcmFromRawKey = AesGcm.fromRawKey;
+
 /**
  * Asserts that an exception is the result of a Web Crypto error.
  *
@@ -41,7 +43,7 @@ describe('aes gcm test', function() {
   });
 
   it('basic', async function() {
-    const aead = await AesGcm.newInstance(Random.randBytes(16));
+    const aead = await aesGcmFromRawKey(Random.randBytes(16));
     for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(i);
       let ciphertext = await aead.encrypt(msg);
@@ -64,7 +66,7 @@ describe('aes gcm test', function() {
   });
 
   it('probabilistic encryption', async function() {
-    const aead = await AesGcm.newInstance(Random.randBytes(16));
+    const aead = await aesGcmFromRawKey(Random.randBytes(16));
     const msg = Random.randBytes(20);
     const aad = Random.randBytes(20);
     const results = new Set();
@@ -76,7 +78,7 @@ describe('aes gcm test', function() {
   });
 
   it('bit flip ciphertext', async function() {
-    const aead = await AesGcm.newInstance(Random.randBytes(16));
+    const aead = await aesGcmFromRawKey(Random.randBytes(16));
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
     const ciphertext = await aead.encrypt(plaintext, aad);
@@ -95,7 +97,7 @@ describe('aes gcm test', function() {
   });
 
   it('bit flip aad', async function() {
-    const aead = await AesGcm.newInstance(Random.randBytes(16));
+    const aead = await aesGcmFromRawKey(Random.randBytes(16));
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
     const ciphertext = await aead.encrypt(plaintext, aad);
@@ -114,7 +116,7 @@ describe('aes gcm test', function() {
   });
 
   it('truncation', async function() {
-    const aead = await AesGcm.newInstance(Random.randBytes(16));
+    const aead = await aesGcmFromRawKey(Random.randBytes(16));
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
     const ciphertext = await aead.encrypt(plaintext, aad);
@@ -626,7 +628,7 @@ describe('aes gcm test', function() {
         ];
     for (let i = 0; i < NIST_TEST_VECTORS.length; i++) {
       const testVector = NIST_TEST_VECTORS[i];
-      const aead = await AesGcm.newInstance(Bytes.fromHex(testVector['Key']));
+      const aead = await aesGcmFromRawKey(Bytes.fromHex(testVector['Key']));
       const ciphertext = Bytes.fromHex(
           testVector['IV'] + testVector['CT'] + testVector['Tag']);
       const aad = Bytes.fromHex(testVector['AAD']);

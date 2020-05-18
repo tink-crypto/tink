@@ -52,56 +52,6 @@ class Hmac extends Mac {
   }
 
   /**
-   * @param {string} hash accepted names are SHA-1, SHA-256 and SHA-512
-   * @param {!Uint8Array} key
-   * @param {number} tagSize the size of the tag
-   * @return {!Promise.<!Mac>}
-   * @static
-   */
-  static async newInstance(hash, key, tagSize) {
-    Validators.requireUint8Array(key);
-    if (!Number.isInteger(tagSize)) {
-      throw new InvalidArgumentsException(
-          'invalid tag size, must be an integer');
-    }
-    if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
-      throw new InvalidArgumentsException(
-          'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES +
-          ' bytes');
-    }
-    switch (hash) {
-      case 'SHA-1':
-        if (tagSize > 20) {
-          throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 20 bytes');
-        }
-        break;
-      case 'SHA-256':
-        if (tagSize > 32) {
-          throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 32 bytes');
-        }
-        break;
-      case 'SHA-512':
-        if (tagSize > 64) {
-          throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 64 bytes');
-        }
-        break;
-      default:
-        throw new InvalidArgumentsException(hash + ' is not supported');
-    }
-
-    // TODO(b/115974209): Add check that key.length > 16.
-
-    const cryptoKey = await self.crypto.subtle.importKey(
-        'raw', key,
-        {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8},
-        false, ['sign', 'verify']);
-    return new Hmac(hash, cryptoKey, tagSize);
-  }
-
-  /**
    * @override
    */
   async computeMac(data) {
@@ -123,3 +73,50 @@ class Hmac extends Mac {
 }
 
 exports = Hmac;
+
+/**
+ * @param {string}hash  accepted names are SHA-1, SHA-256 and SHA-512
+ * @param {!Uint8Array} key
+ * @param {number} tagSize the size of the tag
+ * @return {!Promise<!Mac>}
+ */
+async function fromRawKey(hash, key, tagSize) {
+  Validators.requireUint8Array(key);
+  if (!Number.isInteger(tagSize)) {
+    throw new InvalidArgumentsException('invalid tag size, must be an integer');
+  }
+  if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
+    throw new InvalidArgumentsException(
+        'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES + ' bytes');
+  }
+  switch (hash) {
+    case 'SHA-1':
+      if (tagSize > 20) {
+        throw new InvalidArgumentsException(
+            'tag too long, must not be larger than 20 bytes');
+      }
+      break;
+    case 'SHA-256':
+      if (tagSize > 32) {
+        throw new InvalidArgumentsException(
+            'tag too long, must not be larger than 32 bytes');
+      }
+      break;
+    case 'SHA-512':
+      if (tagSize > 64) {
+        throw new InvalidArgumentsException(
+            'tag too long, must not be larger than 64 bytes');
+      }
+      break;
+    default:
+      throw new InvalidArgumentsException(hash + ' is not supported');
+  }
+
+  // TODO(b/115974209): Add check that key.length > 16.
+  const cryptoKey = await self.crypto.subtle.importKey(
+      'raw', key,
+      {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8}, false,
+      ['sign', 'verify']);
+  return new Hmac(hash, cryptoKey, tagSize);
+}
+exports.fromRawKey = fromRawKey;

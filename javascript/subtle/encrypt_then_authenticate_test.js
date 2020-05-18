@@ -19,6 +19,8 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const Random = goog.require('tink.subtle.Random');
 
+const {aesCtrHmacFromRawKeys} = EncryptThenAuthenticate;
+
 describe('encrypt then authenticate test', function() {
   beforeEach(function() {
     // Use a generous promise timeout for running continuously.
@@ -31,7 +33,7 @@ describe('encrypt then authenticate test', function() {
   });
 
   it('basic', async function() {
-    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+    const aead = await aesCtrHmacFromRawKeys(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
     for (let i = 0; i < 100; i++) {
@@ -53,7 +55,7 @@ describe('encrypt then authenticate test', function() {
   });
 
   it('probabilistic encryption', async function() {
-    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+    const aead = await aesCtrHmacFromRawKeys(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
     const msg = Random.randBytes(20);
@@ -67,7 +69,7 @@ describe('encrypt then authenticate test', function() {
   });
 
   it('bit flip ciphertext', async function() {
-    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+    const aead = await aesCtrHmacFromRawKeys(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
     const plaintext = Random.randBytes(8);
@@ -88,7 +90,7 @@ describe('encrypt then authenticate test', function() {
   });
 
   it('bit flip aad', async function() {
-    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+    const aead = await aesCtrHmacFromRawKeys(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
     const plaintext = Random.randBytes(8);
@@ -109,7 +111,7 @@ describe('encrypt then authenticate test', function() {
   });
 
   it('truncation', async function() {
-    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+    const aead = await aesCtrHmacFromRawKeys(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
     const plaintext = Random.randBytes(8);
@@ -184,7 +186,7 @@ describe('encrypt then authenticate test', function() {
     ];
     for (let i = 0; i < RFC_TEST_VECTORS.length; i++) {
       const testVector = RFC_TEST_VECTORS[i];
-      const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+      const aead = await aesCtrHmacFromRawKeys(
           Bytes.fromHex(testVector['encryptionKey']), testVector['ivSize'],
           testVector['hashAlgoName'], Bytes.fromHex(testVector['macKey']),
           testVector['tagSize']);

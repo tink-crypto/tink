@@ -204,7 +204,7 @@ class EciesAeadHkdfPrivateKeyManager {
         Util.hashTypeProtoToString(params.getKemParams().getHkdfHashType());
     const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
 
-    return await EciesAeadHkdfHybridDecrypt.newInstance(
+    return await EciesAeadHkdfHybridDecrypt.fromJsonWebKey(
         recepientPrivateKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
 

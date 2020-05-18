@@ -76,7 +76,7 @@ class EciesAeadHkdfPublicKeyManager {
         Util.hashTypeProtoToString(params.getKemParams().getHkdfHashType());
     const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
 
-    return await EciesAeadHkdfHybridEncrypt.newInstance(
+    return await EciesAeadHkdfHybridEncrypt.fromJsonWebKey(
         recepientPublicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
 

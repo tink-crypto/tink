@@ -78,11 +78,11 @@ const compute = async function(size, hash, ikm, info, opt_salt) {
   Validators.requireUint8Array(salt);
 
   // Extract.
-  let hmac = await Hmac.newInstance(hash, salt, digestSize);
+  let hmac = await Hmac.fromRawKey(hash, salt, digestSize);
   const prk = await hmac.computeMac(ikm);  // Pseudorandom Key
 
   // Expand
-  hmac = await Hmac.newInstance(hash, prk, digestSize);
+  hmac = await Hmac.fromRawKey(hash, prk, digestSize);
   let ctr = 1;
   let pos = 0;
   let digest = new Uint8Array(0);

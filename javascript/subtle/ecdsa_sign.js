@@ -50,24 +50,6 @@ class EcdsaSign extends PublicKeySign {
   }
 
   /**
-   * @param {!webCrypto.JsonWebKey} jwk
-   * @param {string} hash
-   * @param {?EllipticCurves.EcdsaSignatureEncodingType=} opt_encoding The
-   *     optional encoding of the signature. If absent, default is IEEE P1363.
-   *
-   * @return {!Promise<!PublicKeySign>}
-   * @static
-   */
-  static async newInstance(jwk, hash, opt_encoding) {
-    if (!jwk) {
-      throw new SecurityException('private key has to be non-null');
-    }
-    Validators.validateEcdsaParams(jwk.crv, hash);
-    const cryptoKey = await EllipticCurves.importPrivateKey('ECDSA', jwk);
-    return new EcdsaSign(cryptoKey, hash, opt_encoding);
-  }
-
-  /**
    * @override
    */
   async sign(data) {
@@ -89,3 +71,24 @@ class EcdsaSign extends PublicKeySign {
 }
 
 exports = EcdsaSign;
+
+/**
+ * @param {!webCrypto.JsonWebKey} jwk
+ * @param {string} hash
+ * @param {?EllipticCurves.EcdsaSignatureEncodingType=} opt_encoding The
+ *     optional encoding of the signature. If absent, default is IEEE P1363.
+ * @return {!Promise<!PublicKeySign>}
+ */
+async function fromJsonWebKey(jwk, hash, opt_encoding) {
+  if (!jwk) {
+    throw new SecurityException('private key has to be non-null');
+  }
+  const {crv} = jwk;
+  if (!crv) {
+    throw new SecurityException('curve has to be defined');
+  }
+  Validators.validateEcdsaParams(crv, hash);
+  const cryptoKey = await EllipticCurves.importPrivateKey('ECDSA', jwk);
+  return new EcdsaSign(cryptoKey, hash, opt_encoding);
+}
+exports.fromJsonWebKey = fromJsonWebKey;

@@ -62,25 +62,6 @@ class EncryptThenAuthenticate extends Aead {
   }
 
   /**
-   * @param {!Uint8Array} aesKey
-   * @param {number} ivSize the size of the IV
-   * @param {string} hmacHashAlgo accepted names are SHA-1, SHA-256 and SHA-512
-   * @param {!Uint8Array} hmacKey
-   * @param {number} tagSize the size of the tag
-   * @return {!Promise.<!EncryptThenAuthenticate>}
-   * @throws {InvalidArgumentsException}
-   * @static
-   */
-  static async newAesCtrHmac(aesKey, ivSize, hmacHashAlgo, hmacKey, tagSize) {
-    Validators.requireUint8Array(aesKey);
-    Validators.requireUint8Array(hmacKey);
-
-    const cipher = await AesCtr.newInstance(aesKey, ivSize);
-    const mac = await Hmac.newInstance(hmacHashAlgo, hmacKey, tagSize);
-    return new EncryptThenAuthenticate(cipher, ivSize, mac, tagSize);
-  }
-
-  /**
    * The plaintext is encrypted with an {@link IndCpaCipher}, then MAC
    * is computed over `aad || ciphertext || t` where t is aad's length in bits
    * represented as 64-bit bigendian unsigned integer. The final ciphertext
@@ -134,3 +115,22 @@ class EncryptThenAuthenticate extends Aead {
 }
 
 exports = EncryptThenAuthenticate;
+
+/**
+ * @param {!Uint8Array} aesKey
+ * @param {number} ivSize the size of the IV
+ * @param {string} hmacHashAlgo accepted names are SHA-1, SHA-256 and SHA-512
+ * @param {!Uint8Array} hmacKey
+ * @param {number} tagSize the size of the tag
+ * @return {!Promise<!EncryptThenAuthenticate>}
+ * @throws {!InvalidArgumentsException}
+ */
+async function aesCtrHmacFromRawKeys(
+    aesKey, ivSize, hmacHashAlgo, hmacKey, tagSize) {
+  Validators.requireUint8Array(aesKey);
+  Validators.requireUint8Array(hmacKey);
+  const cipher = await AesCtr.fromRawKey(aesKey, ivSize);
+  const mac = await Hmac.fromRawKey(hmacHashAlgo, hmacKey, tagSize);
+  return new EncryptThenAuthenticate(cipher, ivSize, mac, tagSize);
+}
+exports.aesCtrHmacFromRawKeys = aesCtrHmacFromRawKeys;
