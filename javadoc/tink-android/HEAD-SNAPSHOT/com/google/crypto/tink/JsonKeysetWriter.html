@@ -205,7 +205,9 @@ implements <a href="../../../../com/google/crypto/tink/KeysetWriter.html" title=
 <li class="blockList">
 <h4>withOutputStream</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;withOutputStream(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a>&nbsp;stream)</pre>
-<div class="block">Static method to create a JsonKeysetWriter that writes to an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io"><code>OutputStream</code></a>.</div>
+<div class="block">Static method to create a JsonKeysetWriter that writes to an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io"><code>OutputStream</code></a>.
+
+ <p><code>stream</code> will be closed after the keyset is written.</div>
 </li>
 </ul>
 <a name="withFile-java.io.File-">
