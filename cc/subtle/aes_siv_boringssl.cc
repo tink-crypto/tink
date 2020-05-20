@@ -226,10 +226,14 @@ util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
   S2v(absl::MakeSpan(reinterpret_cast<const uint8_t*>(additional_data.data()),
                      additional_data.size()),
       absl::MakeSpan(pt), s2v);
-  // Compare the siv from the ciphertext with the recomputed siv
-  uint8_t diff = 0;
+  // Compare the siv from the ciphertext with the recomputed siv.
+  // The compiler is required by the standard not to elide volatile reads,
+  // which helps avoid unfortunate optimizations.
+  const volatile uint8_t* volatile_siv = siv;
+  const volatile uint8_t* volatile_s2v = s2v;
+  volatile uint8_t diff = 0;
   for (int i = 0; i < kBlockSize; ++i) {
-    diff |= siv[i] ^ s2v[i];
+    diff |= volatile_siv[i] ^ volatile_s2v[i];
   }
   if (diff != 0) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid ciphertext");

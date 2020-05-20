@@ -96,9 +96,13 @@ util::Status HmacBoringSsl::VerifyMac(
     return util::Status(util::error::INTERNAL,
                         "BoringSSL failed to compute HMAC");
   }
-  uint8_t diff = 0;
+  // The compiler is required by the standard not to elide volatile reads,
+  // which helps avoid unfortunate optimizations.
+  const volatile uint8_t* volatile_buf = buf;
+  const volatile char* volatile_mac = mac.data();
+  volatile uint8_t diff = 0;
   for (uint32_t i = 0; i < tag_size_; i++) {
-    diff |= buf[i] ^ static_cast<uint8_t>(mac[i]);
+    diff |= volatile_buf[i] ^ static_cast<uint8_t>(volatile_mac[i]);
   }
   if (diff != 0) {
     return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
