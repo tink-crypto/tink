@@ -104,8 +104,8 @@ void AesEaxBoringSsl::MultiplyByX(const uint8_t in[kBlockSize],
   uint64_t in_low = BigEndianLoad64(in + 8);
   uint64_t out_high = (in_high << 1) ^ (in_low >> 63);
   // If the most significant bit is set then the result has to
-  // be reduced by x^128 + x^7 + x^4 + x^2 + x + 1.
-  // The representation of x^7 + x^4 + x^2 + x + 1 is 0x87.
+  // be reduced by x^128 + x^7 + x^2 + x + 1.
+  // The representation of x^7 + x^2 + x + 1 is 0x87.
   uint64_t out_low = (in_low << 1) ^ (in_high >> 63 ? 0x87 : 0);
   BigEndianStore64(out_high, out);
   BigEndianStore64(out_low, out + 8);
