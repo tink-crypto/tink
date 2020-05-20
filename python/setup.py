@@ -26,6 +26,7 @@ from distutils import spawn
 import setuptools
 from setuptools.command import build_ext
 
+
 here = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -112,7 +113,10 @@ def _patch_workspace(workspace_content):
   workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
                                 workspace_lines[1:])
 
-  # Replace local with http archives
+  # This is run by pip from a temporary folder which breaks the WORKSPACE paths.
+  # This replaces the paths with the latest http_archive.
+  # In order to override this with a local WORKSPACE use the TINK_BASE_PATH
+  # environment variable.
   base = ('local_repository(\n'
           '    name = "tink_base",\n'
           '    path = "..",\n'
@@ -123,22 +127,35 @@ def _patch_workspace(workspace_content):
         '    path = "../cc",\n'
         ')\n')
 
-  base_http = (
-      'http_archive(\n'
-      '    name = "tink_base",\n'
-      '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
-      '    strip_prefix = "tink-master/",\n'
-      ')\n')
+  if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
+    base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
+    base_patched = ('local_repository(\n'
+                    '    name = "tink_base",\n'
+                    '    path = "{}",\n'
+                    ')\n'.format(base_path))
 
-  cc_http = (
-      'http_archive(\n'
-      '    name = "tink_cc",\n'
-      '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
-      '    strip_prefix = "tink-master/cc",\n'
-      ')\n')
+    cc_patched = ('local_repository(\n'
+                  '    name = "tink_cc",\n'
+                  '    path = "{}/cc",\n'
+                  ')\n'.format(base_path))
+  else:
+    # If not base is specified use the latest version from GitHub
+    base_patched = (
+        'http_archive(\n'
+        '    name = "tink_base",\n'
+        '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
+        '    strip_prefix = "tink-master/",\n'
+        ')\n')
 
-  workspace_content = workspace_content.replace(base, base_http)
-  workspace_content = workspace_content.replace(cc, cc_http)
+    cc_patched = (
+        'http_archive(\n'
+        '    name = "tink_cc",\n'
+        '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
+        '    strip_prefix = "tink-master/cc",\n'
+        ')\n')
+
+  workspace_content = workspace_content.replace(base, base_patched)
+  workspace_content = workspace_content.replace(cc, cc_patched)
   return workspace_content
 
 
@@ -216,4 +233,5 @@ setuptools.setup(
     ],
     license='Apache 2.0',
     keywords='tink cryptography',
+    build_dir='build',
 )

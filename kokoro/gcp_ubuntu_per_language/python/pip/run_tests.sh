@@ -29,6 +29,10 @@ install_pip_package() {
     PROTOC_ZIP='protoc-3.11.4-linux-x86_64.zip'
     curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/${PROTOC_ZIP}"
     sudo unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
+
+    # Set path to Tink base folder
+    export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH=$PWD/..
+
     # Update pip and start setup
     pip3 install --upgrade pip
     pip3 install --upgrade setuptools
