@@ -31,28 +31,42 @@ import java.io.OutputStream;
  */
 public final class BinaryKeysetWriter implements KeysetWriter {
   private final OutputStream outputStream;
+  private final boolean closeStreamAfterReading;
 
-  private BinaryKeysetWriter(OutputStream stream) {
-    outputStream = stream;
+  private BinaryKeysetWriter(OutputStream stream, boolean closeStreamAfterReading) {
+    this.outputStream = stream;
+    this.closeStreamAfterReading = closeStreamAfterReading;
   }
 
   /** Static method to create a BinaryKeysetWriter that writes to an {@link OutputStream}. */
   public static KeysetWriter withOutputStream(OutputStream stream) {
-    return new BinaryKeysetWriter(stream);
+    return new BinaryKeysetWriter(stream, /*closeStreamAfterReading=*/ false);
   }
 
   /** Static method to create a BinaryKeysetWriter that writes to a file. */
   public static KeysetWriter withFile(File file) throws IOException {
-    return new BinaryKeysetWriter(new FileOutputStream(file));
+    return new BinaryKeysetWriter(new FileOutputStream(file), /*closeStreamAfterReading=*/ true);
   }
 
   @Override
   public void write(Keyset keyset) throws IOException {
-    outputStream.write(keyset.toByteArray());
+    try {
+      keyset.writeTo(outputStream);
+    } finally {
+      if (closeStreamAfterReading) {
+        outputStream.close();
+      }
+    }
   }
 
   @Override
   public void write(EncryptedKeyset keyset) throws IOException {
-    outputStream.write(keyset.toByteArray());
+    try {
+      keyset.writeTo(outputStream);
+    } finally {
+      if (closeStreamAfterReading) {
+        outputStream.close();
+      }
+    }
   }
 }
