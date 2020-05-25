@@ -1,2 +1,6 @@
 # Rules File Format: https://github.com/bazelbuild/bazel/blob/master/third_party/jarjar/java/com/tonicsystems/jarjar/help.txt.
+#
+# Shade protobuf to avoid dependency version conflicts in user projects.
+# WARNING: the shaded package name com.google.crypto.tink.shaded.protobuf must
+# be kept in sync with src/main/resources/META-INF/proguard/tink.pro.
 rule com.google.protobuf.** com.google.crypto.tink.shaded.protobuf.@1

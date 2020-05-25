@@ -201,6 +201,9 @@ gen_maven_jar_rules(
 gen_maven_jar_rules(
     name = "tink-android",
     doctitle = "Tink Cryptography API for Android",
+    resources = glob([
+        "src/main/resources/**",
+    ]),
     root_packages = [
         "com.google.crypto.tink",
         # The following package(s) will be shaded by the "tink-android-shaded" target.

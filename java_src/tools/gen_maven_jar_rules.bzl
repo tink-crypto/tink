@@ -27,6 +27,7 @@ _TINK_PACKAGES = [
 def gen_maven_jar_rules(
         name,
         deps = [],
+        resources = [],
         root_packages = _TINK_PACKAGES,
         exclude_packages = [],
         doctitle = "",
@@ -41,6 +42,9 @@ def gen_maven_jar_rules(
         name.jar, a source package name-src.jar and a Javadoc package
         name-javadoc.jar.
       deps: A combination of the deps of java_single_jar and javadoc_library
+      resources: A list of resource files. Files must be stored in
+        src/main/resources. Mapping rules: src/main/resources/a/b/c.txt will be
+        copied to a/b/c.txt in the output jar.
       root_packages: See javadoc_library
       exclude_packages: See javadoc_library
       doctitle: See javadoc_library
@@ -52,6 +56,7 @@ def gen_maven_jar_rules(
     java_single_jar(
         name = name,
         deps = deps,
+        resources = resources,
         root_packages = root_packages,
     )
 
