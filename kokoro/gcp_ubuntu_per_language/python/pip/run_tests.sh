@@ -40,5 +40,16 @@ install_pip_package() {
   )
 }
 
+run_tests_with_package() {
+  # Set path to Tink base folder
+  export TINK_SRC_PATH=${PWD}
+
+  # Run Python tests directly so the package is used.
+  # We exclude tests in tink/cc/pybind: they are implementation details and may
+  # depend on a testonly shared object.
+  find python/tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 | xargs -0 -n1 python3
+}
+
 install_python3
 install_pip_package
+run_tests_with_package

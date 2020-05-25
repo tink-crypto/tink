@@ -102,17 +102,17 @@ class BinaryKeysetReaderTest(absltest.TestCase):
     self.assertEqual(keyset, reader.read())
 
   def test_read_none(self):
-    with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
+    with self.assertRaises(core.TinkError):
       reader = tink.BinaryKeysetReader(cast(bytes, None))
       reader.read()
 
   def test_read_empty(self):
-    with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
+    with self.assertRaises(core.TinkError):
       reader = tink.BinaryKeysetReader(b'')
       reader.read()
 
   def test_read_invalid(self):
-    with self.assertRaisesRegex(core.TinkError, 'Wrong wire type'):
+    with self.assertRaises(core.TinkError):
       reader = tink.BinaryKeysetReader(b'some weird data')
       reader.read()
 
@@ -130,17 +130,17 @@ class BinaryKeysetReaderTest(absltest.TestCase):
     self.assertEqual(encrypted_keyset, reader.read_encrypted())
 
   def test_read_encrypted_none(self):
-    with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
+    with self.assertRaises(core.TinkError):
       reader = tink.BinaryKeysetReader(cast(bytes, None))
       reader.read_encrypted()
 
   def test_read_encrypted_empty(self):
-    with self.assertRaisesRegex(core.TinkError, 'No keyset found'):
+    with self.assertRaises(core.TinkError):
       reader = tink.BinaryKeysetReader(b'')
       reader.read_encrypted()
 
   def test_read_encrypted_invalid(self):
-    with self.assertRaisesRegex(core.TinkError, 'Wrong wire type'):
+    with self.assertRaises(core.TinkError):
       reader = tink.BinaryKeysetReader(b'some weird data')
       reader.read_encrypted()
 

@@ -23,15 +23,17 @@ from absl.testing import absltest
 
 from tink import core
 from tink.integration import gcpkms
+from tink.testing import helper
 
-CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
-                               'tink_base/testdata/credential.json')
+CREDENTIAL_PATH = os.path.join(helper.get_tink_src_path(),
+                               'testdata/credential.json')
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 BAD_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
 
-# Set root certificates for gRPC
-os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = os.path.join(
-    os.environ['TEST_SRCDIR'], 'google_root_pem/file/downloaded')
+if 'TEST_SRCDIR' in os.environ:
+  # Set root certificates for gRPC in Bazel Test which are needed on MacOS
+  os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = os.path.join(
+      os.environ['TEST_SRCDIR'], 'google_root_pem/file/downloaded')
 
 
 class GcpKmsAeadTest(absltest.TestCase):

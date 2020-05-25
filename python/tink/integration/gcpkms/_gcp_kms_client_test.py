@@ -22,9 +22,11 @@ import os
 from absl.testing import absltest
 
 from tink.integration import gcpkms
+from tink.testing import helper
 
-CREDENTIAL_PATH = os.path.join(os.environ['TEST_SRCDIR'],
-                               'tink_base/testdata/credential.json')
+
+CREDENTIAL_PATH = os.path.join(helper.get_tink_src_path(),
+                               'testdata/credential.json')
 
 
 class GcpKmsClientTest(absltest.TestCase):
