@@ -177,6 +177,7 @@ py_library(
     ],
     deps = [
         "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink/proto:tink_py_pb2",
         "@tink_py//tink:tink_python",
     ],
 )
@@ -196,14 +197,27 @@ py_test(
 )
 
 py_library(
-    name = "keyset_manager",
+    name = "keyset_builder",
     testonly = 1,
     srcs = [
-        "keyset_manager.py",
+        "keyset_builder.py",
     ],
     deps = [
         ":cli_tinkey",
+        "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
-        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "keyset_builder_test",
+    srcs = ["keyset_builder_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":keyset_builder",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
     ],
 )

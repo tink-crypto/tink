@@ -19,6 +19,7 @@ import tempfile
 
 import tink
 from tink import cleartext_keyset_handle
+from tink.proto import tink_pb2
 
 AEAD_KEY_TEMPLATES = ('AES128_GCM', 'AES256_GCM', 'AES128_CTR_HMAC_SHA256',
                       'AES256_CTR_HMAC_SHA256', 'XCHACHA20_POLY1305',
@@ -42,7 +43,7 @@ def _tools_path():
   return os.path.dirname(os.path.dirname(os.path.dirname(util_path)))
 
 
-def generate_keyset_handle(key_template) -> tink.KeysetHandle:
+def generate_keyset(key_template) -> tink_pb2.Keyset:
   """Generates a keyset handle from a key templates."""
   with tempfile.TemporaryDirectory() as tmpdir:
     keyset_filename = os.path.join(tmpdir, 'keyset_file')
@@ -55,7 +56,12 @@ def generate_keyset_handle(key_template) -> tink.KeysetHandle:
     ])
     with open(keyset_filename, 'rb') as f:
       keyset_data = f.read()
-    return cleartext_keyset_handle.read(tink.BinaryKeysetReader(keyset_data))
+    return tink.BinaryKeysetReader(keyset_data).read()
+
+
+def generate_keyset_handle(key_template) -> tink.KeysetHandle:
+  """Generates a keyset handle from a key templates."""
+  return cleartext_keyset_handle.from_keyset(generate_keyset(key_template))
 
 
 def public_keyset_handle(private_keyset_handle) -> tink.KeysetHandle:

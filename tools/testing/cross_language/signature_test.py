@@ -19,7 +19,7 @@ from tink import signature
 
 from tools.testing import supported_key_types
 from tools.testing.cross_language.util import cli_signature
-from tools.testing.cross_language.util import keyset_manager
+from tools.testing.cross_language.util import keyset_builder
 
 
 def setUpModule():
@@ -32,7 +32,7 @@ class SignaturePythonTest(parameterized.TestCase):
       supported_key_types.test_cases(supported_key_types.SIGNATURE_KEY_TYPES))
   def test_encrypt_decrypt(self, key_template_name, supported_langs):
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
-    private_handle = keyset_manager.new_keyset_handle(key_template)
+    private_handle = keyset_builder.new_keyset_handle(key_template)
     supported_signers = [
         cli_signature.CliPublicKeySign(lang, private_handle)
         for lang in supported_langs
