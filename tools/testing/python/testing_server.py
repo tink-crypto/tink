@@ -25,10 +25,9 @@ import grpc
 import tink
 from tink import aead
 from tink import cleartext_keyset_handle
+from tink.proto import tink_pb2
 from tools.testing import tink_testing_pb2
 from tools.testing import tink_testing_pb2_grpc
-from google3.net.grpc.python import loas2
-from tink.proto import tink_pb2
 
 FLAGS = flags.FLAGS
 
@@ -86,7 +85,7 @@ def main(unused_argv):
   servicer = TinkTestingServicer()
   tink_testing_pb2_grpc.add_TinkTestingServicer_to_server(servicer, server)
   server.add_secure_port('[::]:%d' % FLAGS.port,
-                         loas2.loas2_server_credentials())
+                         grpc.local_server_credentials())
   server.start()
   server.wait_for_termination()
 

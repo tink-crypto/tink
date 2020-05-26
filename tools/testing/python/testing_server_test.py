@@ -23,7 +23,6 @@ import portpicker
 
 from tink import aead
 
-from google3.net.grpc.python import loas2
 from google3.pyglib import logging
 from tools.testing import tink_testing_pb2
 from tools.testing import tink_testing_pb2_grpc
@@ -53,8 +52,8 @@ class TestingServerTest(absltest.TestCase):
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     logging.info('Server started on port %d with pid: %d.',
                  port, cls._server.pid)
-    cls._channel = grpc.secure_channel('localhost:%d' % port,
-                                       loas2.loas2_channel_credentials())
+    cls._channel = grpc.secure_channel('[::]:%d' % port,
+                                       grpc.local_channel_credentials())
     grpc.channel_ready_future(cls._channel).result()
     cls._stub = tink_testing_pb2_grpc.TinkTestingStub(cls._channel)
 
