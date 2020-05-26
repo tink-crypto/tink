@@ -265,6 +265,46 @@ TEST(EncryptThenAuthenticateTest, testParamsEmptyVersusNullStringView) {
   }
 }
 
+// EncryptThenAuthenticate computes the MAC over aad || ciphertext ||
+// aad_size_in_bits, where aad_size_in_bits = aad_size() * 8 [1].
+// aad.size() returns a size_t which is usually unsigned long or unsigned long
+// long. On 32-bit machines (and maybe others), long is 32-bit int. If
+// aad.size() returns a number equal to or larger than 2^29, an overflow will
+// occur when multiplying with 8 to get the size in bits. This leads to an
+// authentication bypass vulnerability. This test ensures that the overflow
+// issue and the auth bypass vulnerability are fixed.
+TEST(EncryptThenAuthenticateTest, testAuthBypassShouldNotWork) {
+// Disable this test when running with ASYLO, because it allocates more memory
+// than ASYLO can handle.
+#ifndef __ASYLO__
+  int encryption_key_size = 16;
+  int iv_size = 12;
+  int mac_key_size = 16;
+  int tag_size = 16;
+  auto cipher = std::move(createAead(encryption_key_size, iv_size, mac_key_size,
+                                     tag_size, HashType::SHA1)
+                              .ValueOrDie());
+
+  // Encrypt a message...
+  const std::string message = "Some data to encrypt.";
+  // ...with a long aad whose size in bits converted to an unsigned 32-bit
+  // integer is 0.
+  const std::string aad = std::string(1 << 29, 'a');
+  auto encrypted = cipher->Encrypt(message, aad);
+  EXPECT_TRUE(encrypted.ok()) << encrypted.status();
+  auto ct = encrypted.ValueOrDie();
+  auto decrypted = cipher->Decrypt(ct, aad);
+  EXPECT_TRUE(decrypted.ok()) << decrypted.status();
+
+  // Test that the 2^29-byte aad is NOT considered equal to an empty aad.
+  // That is, test that a valid tag for (ciphertext, aad) is INVALID for (aad
+  // + ciphertext, "").
+  ct = aad + ct;
+  decrypted = cipher->Decrypt(ct, "");
+  EXPECT_FALSE(decrypted.ok());
+#endif  // __ASYLO__
+}
+
 }  // namespace
 }  // namespace subtle
 }  // namespace tink
