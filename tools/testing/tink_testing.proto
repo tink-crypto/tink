@@ -1,0 +1,65 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+syntax = "proto3";
+
+package third_party.tink.tools.testing;
+
+option java_multiple_files = true;
+
+import "proto/tink.proto";
+
+// The Tink primitive testing service definition.
+service TinkTesting {
+  // Generates a new keyset from a template.
+  rpc GenerateKeyset (GenerateKeysetRequest) returns (GenerateKeysetResponse) {}
+  // Encrypts a plaintext with the provided keyset
+  rpc AeadEncrypt (AeadEncryptRequest) returns (AeadEncryptResponse) {}
+  // Decrypts a ciphertext with the provided keyset
+  rpc AeadDecrypt (AeadDecryptRequest) returns (AeadDecryptResponse) {}
+}
+
+message GenerateKeysetRequest {
+  bytes template = 1;  // serialized google.crypto.tink.KeyTemplate.
+}
+
+message GenerateKeysetResponse {
+  oneof result {
+    bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+    string err = 2;
+  }
+}
+
+message AeadEncryptRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes plaintext = 2;
+  bytes associated_data = 3;
+}
+
+message AeadEncryptResponse {
+  oneof result {
+    bytes ciphertext = 1;
+    string err = 2;
+  }
+}
+
+message AeadDecryptRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes ciphertext = 2;
+  bytes associated_data = 3;
+}
+
+message AeadDecryptResponse {
+  oneof result {
+    bytes plaintext = 1;
+    string err = 2;
+  }
+}
