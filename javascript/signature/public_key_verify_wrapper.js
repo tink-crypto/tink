@@ -19,7 +19,7 @@ const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Validators = goog.require('tink.subtle.Validators');
+const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**

@@ -17,13 +17,11 @@ goog.setTestOnly('tink.subtle.EciesAeadHkdfHybridEncryptTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const EciesAeadHkdfHybridEncrypt = goog.require('tink.subtle.EciesAeadHkdfHybridEncrypt');
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const Random = goog.require('tink.subtle.Random');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('tink.Registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
-
-const {fromJsonWebKey} = EciesAeadHkdfHybridEncrypt;
+const {fromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_encrypt');
 
 describe('ecies aead hkdf hybrid encrypt test', function() {
   beforeEach(function() {
@@ -59,9 +57,10 @@ describe('ecies aead hkdf hybrid encrypt test', function() {
     // Test the encryption for different HMAC algorithms and different types of
     // curves.
     for (let hkdfHash of hmacAlgorithms) {
-      for (let curve of Object.keys(EllipticCurves.CurveType)) {
-        const curveName =
-            EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
+      for (let curve
+               of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
+                   EllipticCurves.CurveType.P521]) {
+        const curveName = EllipticCurves.curveToString(curve);
         const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
         const publicKey =
             await EllipticCurves.exportCryptoKey(keyPair.publicKey);

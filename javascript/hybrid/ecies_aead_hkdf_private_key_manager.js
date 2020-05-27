@@ -14,12 +14,12 @@
 
 goog.module('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 
-const Bytes = goog.require('tink.subtle.Bytes');
-const EciesAeadHkdfHybridDecrypt = goog.require('tink.subtle.EciesAeadHkdfHybridDecrypt');
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const hybridDecrypt = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_decrypt');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
 const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const KeyManager = goog.require('tink.KeyManager');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
@@ -204,7 +204,7 @@ class EciesAeadHkdfPrivateKeyManager {
         Util.hashTypeProtoToString(params.getKemParams().getHkdfHashType());
     const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
 
-    return await EciesAeadHkdfHybridDecrypt.fromJsonWebKey(
+    return await hybridDecrypt.fromJsonWebKey(
         recepientPrivateKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
 

@@ -15,11 +15,9 @@
 goog.module('tink.subtle.HmacTest');
 goog.setTestOnly('tink.subtle.HmacTest');
 
-const Bytes = goog.require('tink.subtle.Bytes');
-const Hmac = goog.require('tink.subtle.Hmac');
-const Random = goog.require('tink.subtle.Random');
-
-const hmacFromRawKey = Hmac.fromRawKey;
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const {fromRawKey: hmacFromRawKey} = goog.require('google3.third_party.tink.javascript.subtle.hmac');
 
 describe('hmac test', function() {
   it('basic', async function() {

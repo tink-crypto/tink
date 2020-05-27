@@ -1,101 +1,88 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 ////////////////////////////////////////////////////////////////////////////////
+import {Aead} from '../aead/internal/aead';
+import {SecurityException} from '../exception/security_exception';
 
-goog.module('tink.subtle.AesGcm');
-
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const Bytes = goog.require('tink.subtle.Bytes');
-const Random = goog.require('tink.subtle.Random');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Validators = goog.require('tink.subtle.Validators');
+import * as Bytes from './bytes';
+import * as Random from './random';
+import * as Validators from './validators';
 
 /**
  * The only supported IV size.
  *
- * @const {number}
  */
-const IV_SIZE_IN_BYTES = 12;
+const IV_SIZE_IN_BYTES: number = 12;
 
 /**
  * The only supported tag size.
  *
- * @const {number}
  */
-const TAG_SIZE_IN_BITS = 128;
+const TAG_SIZE_IN_BITS: number = 128;
 
 /**
  * Implementation of AES-GCM.
  *
- * @public
  * @final
  */
-class AesGcm extends Aead {
-  /**
-   * @param {!webCrypto.CryptoKey} key
-   */
-  constructor(key) {
-    super();
-    /** @const @private {!webCrypto.CryptoKey} */
-    this.key_ = key;
-  }
+export class AesGcm implements Aead {
+  constructor(private readonly key: CryptoKey) {}
 
   /**
    * @override
    */
-  async encrypt(plaintext, opt_associatedData) {
+  async encrypt(plaintext: Uint8Array, associatedData?: Uint8Array):
+      Promise<Uint8Array> {
     Validators.requireUint8Array(plaintext);
-    if (opt_associatedData != null) {
-      Validators.requireUint8Array(opt_associatedData);
+    if (associatedData != null) {
+      Validators.requireUint8Array(associatedData);
     }
     const iv = Random.randBytes(IV_SIZE_IN_BYTES);
-    const alg = {
+    const alg: AesGcmParams = {
       'name': 'AES-GCM',
       'iv': iv,
-      'tagLength': TAG_SIZE_IN_BITS,
+      'tagLength': TAG_SIZE_IN_BITS
     };
-    if (opt_associatedData) {
-      alg['additionalData'] = opt_associatedData;
+    if (associatedData) {
+      alg['additionalData'] = associatedData;
     }
     const ciphertext =
-        await self.crypto.subtle.encrypt(alg, this.key_, plaintext);
+        await self.crypto.subtle.encrypt(alg, this.key, plaintext);
     return Bytes.concat(iv, new Uint8Array(ciphertext));
   }
 
   /**
    * @override
    */
-  async decrypt(ciphertext, opt_associatedData) {
+  async decrypt(ciphertext: Uint8Array, associatedData?: Uint8Array):
+      Promise<Uint8Array> {
     Validators.requireUint8Array(ciphertext);
     if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BITS / 8) {
       throw new SecurityException('ciphertext too short');
     }
-    if (opt_associatedData != null) {
-      Validators.requireUint8Array(opt_associatedData);
+    if (associatedData != null) {
+      Validators.requireUint8Array(associatedData);
     }
     const iv = new Uint8Array(IV_SIZE_IN_BYTES);
     iv.set(ciphertext.subarray(0, IV_SIZE_IN_BYTES));
-    const alg = {
+    const alg: AesGcmParams = {
       'name': 'AES-GCM',
       'iv': iv,
-      'tagLength': TAG_SIZE_IN_BITS,
+      'tagLength': TAG_SIZE_IN_BITS
     };
-    if (opt_associatedData) {
-      alg['additionalData'] = opt_associatedData;
+    if (associatedData) {
+      alg['additionalData'] = associatedData;
     }
     try {
       return new Uint8Array(await self.crypto.subtle.decrypt(
-          alg, this.key_,
+          alg, this.key,
           new Uint8Array(ciphertext.subarray(IV_SIZE_IN_BYTES))));
     } catch (e) {
       throw new SecurityException(e.toString());
@@ -103,18 +90,19 @@ class AesGcm extends Aead {
   }
 }
 
-exports = AesGcm;
-
-/**
- * @param {!Uint8Array} key
- * @return {!Promise<!Aead>}
- */
-async function fromRawKey(key) {
+export async function fromRawKey(key: Uint8Array): Promise<Aead> {
   Validators.requireUint8Array(key);
   Validators.validateAesKeySize(key.length);
   const webCryptoKey = await self.crypto.subtle.importKey(
-      'raw', key, {'name': 'AES-GCM', 'length': key.length},
-      /* extractable= */ false, ['encrypt', 'decrypt']);
+      /* format */
+      'raw', key,
+      /* keyData */
+      {'name': 'AES-GCM', 'length': key.length},
+      /* algo */
+      false,
+      /* extractable*/
+      ['encrypt', 'decrypt']);
+
+  /* usage */
   return new AesGcm(webCryptoKey);
 }
-exports.fromRawKey = fromRawKey;

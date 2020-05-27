@@ -14,7 +14,7 @@
 
 goog.module('tink.hybrid.HybridEncryptWrapper');
 
-const Bytes = goog.require('tink.subtle.Bytes');
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');

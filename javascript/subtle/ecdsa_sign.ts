@@ -1,68 +1,47 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 ////////////////////////////////////////////////////////////////////////////////
+import {SecurityException} from '../exception/security_exception';
+import {PublicKeySign} from '../signature/internal/public_key_sign';
 
-goog.module('tink.subtle.EcdsaSign');
-
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Validators = goog.require('tink.subtle.Validators');
+import * as EllipticCurves from './elliptic_curves';
+import * as Validators from './validators';
 
 /**
  * Implementation of ECDSA signing.
  *
- * @public
  * @final
  */
-class EcdsaSign extends PublicKeySign {
+export class EcdsaSign implements PublicKeySign {
+  private readonly encoding_: EllipticCurves.EcdsaSignatureEncodingType;
+
   /**
-   * @param {!webCrypto.CryptoKey} key
-   * @param {string} hash
-   * @param {?EllipticCurves.EcdsaSignatureEncodingType=} opt_encoding The
+   * @param opt_encoding The
    *     optional encoding of the signature. If absent, default is IEEE P1363.
    */
-  constructor(key, hash, opt_encoding) {
-    super();
-
-    /** @const @private {!webCrypto.CryptoKey} */
-    this.key_ = key;
-
-    /** @const @private {string} */
-    this.hash_ = hash;
-
+  constructor(
+      private readonly key: CryptoKey, private readonly hash: string,
+      opt_encoding?: EllipticCurves.EcdsaSignatureEncodingType|null) {
     if (!opt_encoding) {
       opt_encoding = EllipticCurves.EcdsaSignatureEncodingType.IEEE_P1363;
     }
-
-    /** @const @private {!EllipticCurves.EcdsaSignatureEncodingType} */
     this.encoding_ = opt_encoding;
   }
 
   /**
    * @override
    */
-  async sign(data) {
-    Validators.requireUint8Array(data);
+  async sign(message: Uint8Array): Promise<Uint8Array> {
+    Validators.requireUint8Array(message);
     const signature = await window.crypto.subtle.sign(
-        {
-          name: 'ECDSA',
-          hash: {
-            name: this.hash_,
-          },
-        },
-        this.key_, data);
-
+        {name: 'ECDSA', hash: {name: this.hash}}, this.key, message);
     if (this.encoding_ == EllipticCurves.EcdsaSignatureEncodingType.DER) {
       return EllipticCurves.ecdsaIeee2Der(new Uint8Array(signature));
     }
@@ -70,16 +49,14 @@ class EcdsaSign extends PublicKeySign {
   }
 }
 
-exports = EcdsaSign;
-
 /**
- * @param {!webCrypto.JsonWebKey} jwk
- * @param {string} hash
- * @param {?EllipticCurves.EcdsaSignatureEncodingType=} opt_encoding The
+ * @param opt_encoding The
  *     optional encoding of the signature. If absent, default is IEEE P1363.
- * @return {!Promise<!PublicKeySign>}
  */
-async function fromJsonWebKey(jwk, hash, opt_encoding) {
+export async function fromJsonWebKey(
+    jwk: JsonWebKey, hash: string,
+    opt_encoding?: EllipticCurves.EcdsaSignatureEncodingType|
+    null): Promise<PublicKeySign> {
   if (!jwk) {
     throw new SecurityException('private key has to be non-null');
   }
@@ -91,4 +68,3 @@ async function fromJsonWebKey(jwk, hash, opt_encoding) {
   const cryptoKey = await EllipticCurves.importPrivateKey('ECDSA', jwk);
   return new EcdsaSign(cryptoKey, hash, opt_encoding);
 }
-exports.fromJsonWebKey = fromJsonWebKey;
