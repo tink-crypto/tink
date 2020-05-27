@@ -14,11 +14,11 @@
 
 goog.module('tink.signature.EcdsaPrivateKeyManager');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const Bytes = goog.require('tink.subtle.Bytes');
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
-const ecdsaSign = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_sign');
+const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
 const EcdsaUtil = goog.require('tink.signature.EcdsaUtil');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const KeyManager = goog.require('tink.KeyManager');
 const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
@@ -194,7 +194,7 @@ class EcdsaPrivateKeyManager {
         /** @type {!PbEcdsaParams} */ (keyProto.getPublicKey().getParams());
     const hash = Util.hashTypeProtoToString(params.getHashType());
     const encoding = EcdsaUtil.encodingTypeProtoToEnum(params.getEncoding());
-    return await ecdsaSign.fromJsonWebKey(recipientPrivateKey, hash, encoding);
+    return await EcdsaSign.fromJsonWebKey(recipientPrivateKey, hash, encoding);
   }
 
   /** @override */

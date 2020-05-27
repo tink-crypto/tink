@@ -17,7 +17,7 @@ goog.setTestOnly('tink.hybrid.RegistryEciesAeadHkdfDemHelperTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 

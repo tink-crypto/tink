@@ -15,9 +15,11 @@
 goog.module('tink.subtle.AesGcmTest');
 goog.setTestOnly('tink.subtle.AesGcmTest');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {fromRawKey: aesGcmFromRawKey} = goog.require('google3.third_party.tink.javascript.subtle.aes_gcm');
+const AesGcm = goog.require('tink.subtle.AesGcm');
+const Bytes = goog.require('tink.subtle.Bytes');
+const Random = goog.require('tink.subtle.Random');
+
+const aesGcmFromRawKey = AesGcm.fromRawKey;
 
 /**
  * Asserts that an exception is the result of a Web Crypto error.

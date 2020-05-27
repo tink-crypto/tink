@@ -16,7 +16,7 @@ goog.module('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AeadConfig = goog.require('tink.aead.AeadConfig');
-const {EciesAeadHkdfDemHelper} = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_dem_helper');
+const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper');
 const Registry = goog.require('tink.Registry');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.internal.proto');

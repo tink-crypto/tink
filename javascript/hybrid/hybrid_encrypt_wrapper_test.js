@@ -19,7 +19,7 @@ const CryptoFormat = goog.require('tink.CryptoFormat');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Random = goog.require('tink.subtle.Random');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('hybrid encrypt wrapper test', function() {

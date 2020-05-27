@@ -14,7 +14,7 @@
 
 goog.module('tink.hybrid.EciesAeadHkdfUtil');
 
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Util = goog.require('tink.Util');
 const {PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

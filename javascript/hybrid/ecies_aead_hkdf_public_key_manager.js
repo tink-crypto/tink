@@ -14,7 +14,7 @@
 
 goog.module('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 
-const encrypt = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_encrypt');
+const EciesAeadHkdfHybridEncrypt = goog.require('tink.subtle.EciesAeadHkdfHybridEncrypt');
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
@@ -76,7 +76,7 @@ class EciesAeadHkdfPublicKeyManager {
         Util.hashTypeProtoToString(params.getKemParams().getHkdfHashType());
     const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
 
-    return await encrypt.fromJsonWebKey(
+    return await EciesAeadHkdfHybridEncrypt.fromJsonWebKey(
         recepientPublicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
 

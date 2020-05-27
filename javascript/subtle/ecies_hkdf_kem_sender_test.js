@@ -15,10 +15,12 @@
 goog.module('tink.subtle.EciesHkdfKemSenderTest');
 goog.setTestOnly('tink.subtle.EciesHkdfKemSenderTest');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {EciesHkdfKemSender, fromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_hkdf_kem_sender');
+const Bytes = goog.require('tink.subtle.Bytes');
+const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const Random = goog.require('tink.subtle.Random');
+
+const {fromJsonWebKey} = EciesHkdfKemSender;
 
 describe('ecies hkdf kem sender test', function() {
   it('encapsulate, always generate random key', async function() {
@@ -78,9 +80,8 @@ describe('ecies hkdf kem sender test', function() {
   });
 
   it('new instance, invalid public key', async function() {
-    for (let curve
-             of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-                 EllipticCurves.CurveType.P521]) {
+    for (let crv of Object.keys(EllipticCurves.CurveType)) {
+      const curve = EllipticCurves.CurveType[crv];
       const crvString = EllipticCurves.curveToString(curve);
       const keyPair = await EllipticCurves.generateKeyPair('ECDH', crvString);
       const publicJwk = await EllipticCurves.exportCryptoKey(keyPair.publicKey);

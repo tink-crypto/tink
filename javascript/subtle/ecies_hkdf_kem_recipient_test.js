@@ -15,11 +15,14 @@
 goog.module('tink.subtle.EciesHkdfKemRecipientTest');
 goog.setTestOnly('tink.subtle.EciesHkdfKemRecipientTest');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {EciesHkdfKemRecipient, fromJsonWebKey: recipientFromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_hkdf_kem_recipient');
-const {fromJsonWebKey: senderFromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_hkdf_kem_sender');
+const Bytes = goog.require('tink.subtle.Bytes');
+const EciesHkdfKemRecipient = goog.require('tink.subtle.EciesHkdfKemRecipient');
+const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const Random = goog.require('tink.subtle.Random');
+
+const recipientFromJsonWebKey = EciesHkdfKemRecipient.fromJsonWebKey;
+const senderFromJsonWebKey = EciesHkdfKemSender.fromJsonWebKey;
 
 describe('ecies hkdf kem recipient test', function() {
   beforeEach(function() {
@@ -146,13 +149,11 @@ describe('ecies hkdf kem recipient test', function() {
   });
 
   it('encap decap, different params', async function() {
-    const curveTypes = [
-      EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-      EllipticCurves.CurveType.P521
-    ];
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
     const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
     for (let curve of curveTypes) {
-      const curveString = EllipticCurves.curveToString(curve);
+      const curveString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
       for (let hashType of hashTypes) {
         const keyPair =
             await EllipticCurves.generateKeyPair('ECDH', curveString);
@@ -181,12 +182,10 @@ describe('ecies hkdf kem recipient test', function() {
   });
 
   it('encap decap, modified token', async function() {
-    const curveTypes = [
-      EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-      EllipticCurves.CurveType.P521
-    ];
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
     const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
-    for (let curve of curveTypes) {
+    for (let crvId of curveTypes) {
+      const curve = EllipticCurves.CurveType[crvId];
       const curveString = EllipticCurves.curveToString(curve);
       for (let hashType of hashTypes) {
         const keyPair =

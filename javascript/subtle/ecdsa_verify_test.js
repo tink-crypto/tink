@@ -15,14 +15,14 @@
 goog.module('tink.subtle.EcdsaVerifyTest');
 goog.setTestOnly('tink.subtle.EcdsaVerifyTest');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
-const wycheproofEcdsaTestVectors = goog.require('tink.subtle.wycheproofEcdsaTestVectors');
-const ecdsaSign = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_sign');
-const ecdsaVerify = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_verify');
+const Bytes = goog.require('tink.subtle.Bytes');
+const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
+const EcdsaVerify = goog.require('tink.subtle.EcdsaVerify');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
+const Random = goog.require('tink.subtle.Random');
+const Validators = goog.require('tink.subtle.Validators');
+const wycheproofEcdsaTestVectors = goog.require('tink.subtle.wycheproofEcdsaTestVectors');
 
 describe('ecdsa verify test', function() {
   beforeEach(function() {
@@ -37,9 +37,9 @@ describe('ecdsa verify test', function() {
 
   it('verify', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-    const signer = await ecdsaSign.fromJsonWebKey(
+    const signer = await EcdsaSign.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
-    const verifier = await ecdsaVerify.fromJsonWebKey(
+    const verifier = await EcdsaVerify.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
     for (let i = 0; i < 100; i++) {
       const data = Random.randBytes(i);
@@ -50,12 +50,12 @@ describe('ecdsa verify test', function() {
 
   it('verify with der encoding', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-    const signer = await ecdsaSign.fromJsonWebKey(
+    const signer = await EcdsaSign.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256',
         EllipticCurves.EcdsaSignatureEncodingType.DER);
-    const verifier = await ecdsaVerify.fromJsonWebKey(
+    const verifier = await EcdsaVerify.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
-    const verifierDer = await ecdsaVerify.fromJsonWebKey(
+    const verifierDer = await EcdsaVerify.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256',
         EllipticCurves.EcdsaSignatureEncodingType.DER);
     for (let i = 0; i < 100; i++) {
@@ -69,7 +69,7 @@ describe('ecdsa verify test', function() {
   it('constructor with invalid hash', async function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-      await ecdsaVerify.fromJsonWebKey(
+      await EcdsaVerify.fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-1');
       fail('Should throw an exception.');
     } catch (e) {
@@ -80,7 +80,7 @@ describe('ecdsa verify test', function() {
 
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-384');
-      await ecdsaVerify.fromJsonWebKey(
+      await EcdsaVerify.fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
@@ -91,7 +91,7 @@ describe('ecdsa verify test', function() {
 
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-521');
-      await ecdsaVerify.fromJsonWebKey(
+      await EcdsaVerify.fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
@@ -106,7 +106,7 @@ describe('ecdsa verify test', function() {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
       const jwk = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
       jwk.crv = 'blah';
-      await ecdsaVerify.fromJsonWebKey(jwk, 'SHA-256');
+      await EcdsaVerify.fromJsonWebKey(jwk, 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString()).toBe('SecurityException: unsupported curve: blah');
@@ -115,9 +115,9 @@ describe('ecdsa verify test', function() {
 
   it('verify modified signature', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-    const signer = await ecdsaSign.fromJsonWebKey(
+    const signer = await EcdsaSign.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
-    const verifier = await ecdsaVerify.fromJsonWebKey(
+    const verifier = await EcdsaVerify.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
     const data = Random.randBytes(20);
     const signature = await signer.sign(data);
@@ -133,9 +133,9 @@ describe('ecdsa verify test', function() {
 
   it('verify modified data', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-    const signer = await ecdsaSign.fromJsonWebKey(
+    const signer = await EcdsaSign.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
-    const verifier = await ecdsaVerify.fromJsonWebKey(
+    const verifier = await EcdsaVerify.fromJsonWebKey(
         await EllipticCurves.exportCryptoKey(keyPair.publicKey), 'SHA-256');
     const data = Random.randBytes(20);
     const signature = await signer.sign(data);
@@ -159,7 +159,7 @@ describe('ecdsa verify test', function() {
         continue;
       }
       const verifier =
-          await ecdsaVerify.fromJsonWebKey(testGroup['jwk'], testGroup['sha']);
+          await EcdsaVerify.fromJsonWebKey(testGroup['jwk'], testGroup['sha']);
       let errors = '';
       for (let test of testGroup['tests']) {
         errors += await runWycheproofTest(verifier, test);

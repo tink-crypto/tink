@@ -15,7 +15,7 @@
 goog.module('tink.signature.EcdsaPublicKeyManager');
 
 const EcdsaUtil = goog.require('tink.signature.EcdsaUtil');
-const ecdsaVerify = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_verify');
+const EcdsaVerify = goog.require('tink.subtle.EcdsaVerify');
 const KeyManager = goog.require('tink.KeyManager');
 const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
@@ -67,7 +67,7 @@ class EcdsaPublicKeyManager {
     const params = /** @type{!PbEcdsaParams} */ (keyProto.getParams());
     const hash = Util.hashTypeProtoToString(params.getHashType());
     const encoding = EcdsaUtil.encodingTypeProtoToEnum(params.getEncoding());
-    return await ecdsaVerify.fromJsonWebKey(jwk, hash, encoding);
+    return await EcdsaVerify.fromJsonWebKey(jwk, hash, encoding);
   }
 
   /** @override */

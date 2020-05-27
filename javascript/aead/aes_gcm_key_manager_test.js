@@ -18,7 +18,7 @@ goog.setTestOnly('tink.aead.AesGcmKeyManagerTest');
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Random = goog.require('tink.subtle.Random');
 const {PbAesCtrKey, PbAesCtrKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';

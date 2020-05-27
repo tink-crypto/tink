@@ -14,12 +14,12 @@
 
 goog.module('tink.signature.PublicKeySignWrapper');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const Bytes = goog.require('tink.subtle.Bytes');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
 const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
+const Validators = goog.require('tink.subtle.Validators');
 
 /**
  * @final

@@ -15,9 +15,11 @@
 goog.module('tink.subtle.EcdsaSignTest');
 goog.setTestOnly('tink.subtle.EcdsaSignTest');
 
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {fromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_sign');
+const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const Random = goog.require('tink.subtle.Random');
+
+const {fromJsonWebKey} = EcdsaSign;
 
 describe('ecdsa sign test', function() {
   beforeEach(function() {

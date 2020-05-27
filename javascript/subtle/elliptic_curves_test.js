@@ -15,9 +15,9 @@
 goog.module('tink.subtle.EllipticCurvesTest');
 goog.setTestOnly('tink.subtle.EllipticCurvesTest');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Bytes = goog.require('tink.subtle.Bytes');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const Random = goog.require('tink.subtle.Random');
 const wycheproofEcdhTestVectors = goog.require('tink.subtle.wycheproofEcdhTestVectors');
 
 describe('elliptic curves test', function() {
@@ -55,12 +55,10 @@ describe('elliptic curves test', function() {
 
   // Test that both ECDH public and private key are defined in the result.
   it('generate key pair e c d h', async function() {
-    const curveTypes = [
-      EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-      EllipticCurves.CurveType.P521
-    ];
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
-      const curveTypeString = EllipticCurves.curveToString(curve);
+      const curveTypeString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
       expect(keyPair.privateKey != null).toBe(true);
@@ -70,12 +68,10 @@ describe('elliptic curves test', function() {
 
   // Test that both ECDSA public and private key are defined in the result.
   it('generate key pair e c d s a', async function() {
-    const curveTypes = [
-      EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-      EllipticCurves.CurveType.P521
-    ];
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
-      const curveTypeString = EllipticCurves.curveToString(curve);
+      const curveTypeString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
       expect(keyPair.privateKey != null).toBe(true);
@@ -86,12 +82,10 @@ describe('elliptic curves test', function() {
   // Test that when ECDH crypto key is exported and imported it gives the same
   // key as the original one.
   it('import export crypto key e c d h', async function() {
-    const curveTypes = [
-      EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-      EllipticCurves.CurveType.P521
-    ];
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
-      const curveTypeString = EllipticCurves.curveToString(curve);
+      const curveTypeString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
 
@@ -112,12 +106,10 @@ describe('elliptic curves test', function() {
   // Test that when ECDSA crypto key is exported and imported it gives the same
   // key as the original one.
   it('import export crypto key e c d s a', async function() {
-    const curveTypes = [
-      EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-      EllipticCurves.CurveType.P521
-    ];
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
     for (let curve of curveTypes) {
-      const curveTypeString = EllipticCurves.curveToString(curve);
+      const curveTypeString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
 
@@ -139,7 +131,7 @@ describe('elliptic curves test', function() {
   // key as the original one.
   it('import export json key e c d h', async function() {
     for (let testKey of TEST_KEYS) {
-      const jwk = /** @type {!JsonWebKey} */ ({
+      const jwk = /** @type{!webCrypto.JsonWebKey} */ ({
         'kty': 'EC',
         'crv': testKey.curve,
         'x': Bytes.toBase64(Bytes.fromHex(testKey.x), true),
@@ -166,7 +158,7 @@ describe('elliptic curves test', function() {
   // same key as the original one.
   it('import export json key e c d s a', async function() {
     for (let testKey of TEST_KEYS) {
-      const jwk = /** @type {!JsonWebKey} */ ({
+      const jwk = /** @type{!webCrypto.JsonWebKey} */ ({
         'kty': 'EC',
         'crv': testKey.curve,
         'x': Bytes.toBase64(Bytes.fromHex(testKey.x), true),
@@ -269,10 +261,9 @@ describe('elliptic curves test', function() {
     const point = new Uint8Array(10);
     const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
 
-    for (let curve
-             of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-                 EllipticCurves.CurveType.P521]) {
-      const curveTypeString = EllipticCurves.curveToString(curve);
+    for (let curve of Object.keys(EllipticCurves.CurveType)) {
+      const curveTypeString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
 
       // It should throw an exception as the point array is too short.
       try {
@@ -299,14 +290,13 @@ describe('elliptic curves test', function() {
 
   it('point encode decode', function() {
     const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
-    for (let curveType
-             of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-                 EllipticCurves.CurveType.P521]) {
+    for (let curve of Object.keys(EllipticCurves.CurveType)) {
+      const curveType = EllipticCurves.CurveType[curve];
       const curveTypeString = EllipticCurves.curveToString(curveType);
       const x = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
       const y = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
 
-      const point = /** @type {!JsonWebKey} */ ({
+      const point = /** @type {!webCrypto.JsonWebKey} */ ({
         'kty': 'EC',
         'crv': curveTypeString,
         'x': Bytes.toBase64(x, /* websafe = */ true),

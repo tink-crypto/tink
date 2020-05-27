@@ -15,8 +15,8 @@
 goog.module('tink.subtle.BytesTest');
 goog.setTestOnly('tink.subtle.BytesTest');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Bytes = goog.require('tink.subtle.Bytes');
+const Random = goog.require('tink.subtle.Random');
 
 describe('bytes test', function() {
   it('concat', function() {

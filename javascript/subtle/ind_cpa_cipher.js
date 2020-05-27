@@ -1,13 +1,20 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 ////////////////////////////////////////////////////////////////////////////////
+
+goog.module('tink.subtle.IndCpaCipher');
+
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 /**
  * Interface for symmetric key ciphers that are indistinguishable against
@@ -17,25 +24,29 @@
  * authentication, thus should not be used directly, but only to construct safer
  * primitives such as {@link tink.Aead}.
  *
+ * @protected
+ * @record
  */
-export interface IndCpaCipher {
+class IndCpaCipher {
   /**
    * Encrypts `plaintext`.
    *
-   * @param plaintext the plaintext to be encrypted. It must be
+   * @param {!Uint8Array} plaintext the plaintext to be encrypted. It must be
    *     non-null, but can also be an empty (zero-length) byte array.
-   * @return resulting ciphertext
+   * @return {!Promise.<!Uint8Array>} resulting ciphertext
    * @throws {SecurityException}
    */
-  encrypt(plaintext: Uint8Array): Promise<Uint8Array>;
+  encrypt(plaintext) {}
 
   /**
    * Decrypts ciphertext with associated authenticated data.
    *
-   * @param ciphertext the ciphertext to be decrypted, must be
+   * @param {!Uint8Array} ciphertext the ciphertext to be decrypted, must be
    *     non-null.
-   * @return resulting plaintext
+   * @return {!Promise.<!Uint8Array>} resulting plaintext
    * @throws {SecurityException}
    */
-  decrypt(ciphertext: Uint8Array): Promise<Uint8Array>;
+  decrypt(ciphertext) {}
 }
+
+exports = IndCpaCipher;

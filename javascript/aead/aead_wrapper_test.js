@@ -17,7 +17,7 @@ goog.setTestOnly('tink.aead.AeadWrapperTest');
 
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
 const AeadWrapper = goog.require('tink.aead.AeadWrapper');
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const Bytes = goog.require('tink.subtle.Bytes');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');

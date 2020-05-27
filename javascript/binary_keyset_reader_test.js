@@ -16,7 +16,7 @@ goog.module('tink.BinaryKeysetReaderTest');
 goog.setTestOnly('tink.BinaryKeysetReaderTest');
 
 const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Random = goog.require('tink.subtle.Random');
 const {PbKeyData, PbKeyStatusType, PbKeyset, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('binary keyset reader test', function() {

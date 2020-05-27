@@ -15,9 +15,11 @@
 goog.module('tink.subtle.AesCtrTest');
 goog.setTestOnly('tink.subtle.AesCtrTest');
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {fromRawKey: aesCtrFromRawKey} = goog.require('google3.third_party.tink.javascript.subtle.aes_ctr');
+const AesCtr = goog.require('tink.subtle.AesCtr');
+const Bytes = goog.require('tink.subtle.Bytes');
+const Random = goog.require('tink.subtle.Random');
+
+const aesCtrFromRawKey = AesCtr.fromRawKey;
 
 describe('aes ctr test', function() {
   beforeEach(function() {
