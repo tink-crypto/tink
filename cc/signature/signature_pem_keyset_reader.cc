@@ -315,6 +315,8 @@ SignaturePemKeysetReaderBuilder::Build() {
           new PublicKeyVerifyPemKeysetReader(pem_serialized_keys_));
     }
   }
+  return util::Status(util::error::INVALID_ARGUMENT,
+                      "Unknown pem_reader_type_");
 }
 
 util::StatusOr<std::unique_ptr<Keyset>> PublicKeySignPemKeysetReader::Read() {
