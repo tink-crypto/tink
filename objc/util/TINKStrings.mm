@@ -40,3 +40,6 @@ NSData* TINKStringViewToNSData(absl::string_view s) {
   return [NSData dataWithBytes:s.data() length:s.size()];
 }
 
+std::string NSDataToTINKString(NSData* data) {
+  return std::string(static_cast<const char*>(data.bytes), data.length);
+}

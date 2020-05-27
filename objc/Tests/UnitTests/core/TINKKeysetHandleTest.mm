@@ -31,7 +31,6 @@
 #import "objc/TINKSignatureKeyTemplate.h"
 #import "objc/aead/TINKAeadInternal.h"
 #import "objc/util/TINKStrings.h"
-#import "proto/Tink.pbobjc.h"
 
 #include "tink/binary_keyset_reader.h"
 #include "tink/util/status.h"
@@ -41,6 +40,7 @@
 
 using ::crypto::tink::test::AddRawKey;
 using ::crypto::tink::test::AddTinkKey;
+using ::google::crypto::tink::EncryptedKeyset;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
@@ -136,11 +136,12 @@ static Keyset *gKeyset;
 
   XCTAssertNotNil(keysetCiphertext);
 
-  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
-  encryptedKeyset.encryptedKeyset = keysetCiphertext;
+  EncryptedKeyset encryptedKeyset;
+  encryptedKeyset.set_encrypted_keyset(NSDataToTINKString(keysetCiphertext));
 
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+  TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc]
+      initWithSerializedKeyset:TINKStringToNSData(encryptedKeyset.SerializeAsString())
+                         error:nil];
 
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:nil];
@@ -165,11 +166,12 @@ static Keyset *gKeyset;
                         withAdditionalData:[NSData data]
                                      error:nil];
 
-  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
-  encryptedKeyset.encryptedKeyset = keysetCiphertext;
+  EncryptedKeyset encryptedKeyset;
+  encryptedKeyset.set_encrypted_keyset(NSDataToTINKString(keysetCiphertext));
 
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+  TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc]
+      initWithSerializedKeyset:TINKStringToNSData(encryptedKeyset.SerializeAsString())
+                         error:nil];
 
   auto ccWrongAead =
       std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("wrong aead"));
@@ -205,13 +207,14 @@ static Keyset *gKeyset;
   auto ccAead =
       std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
   TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
-  NSString *keysetCiphertext = @"totally wrong ciphertext";
+  NSData *keysetCiphertext = [@"totally wrong ciphertext" dataUsingEncoding:NSUTF8StringEncoding];
 
-  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
-  encryptedKeyset.encryptedKeyset = [keysetCiphertext dataUsingEncoding:NSUTF8StringEncoding];
+  EncryptedKeyset encryptedKeyset;
+  encryptedKeyset.set_encrypted_keyset(NSDataToTINKString(keysetCiphertext));
 
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+  TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc]
+      initWithSerializedKeyset:TINKStringToNSData(encryptedKeyset.SerializeAsString())
+                         error:nil];
   NSError *error = nil;
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:&error];
@@ -248,11 +251,12 @@ static Keyset *gKeyset;
 
   XCTAssertNotNil(keysetCiphertext);
 
-  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
-  encryptedKeyset.encryptedKeyset = keysetCiphertext;
+  EncryptedKeyset encryptedKeyset;
+  encryptedKeyset.set_encrypted_keyset(NSDataToTINKString(keysetCiphertext));
 
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+  TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc]
+      initWithSerializedKeyset:TINKStringToNSData(encryptedKeyset.SerializeAsString())
+                         error:nil];
 
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:nil];
