@@ -15,27 +15,29 @@ package third_party.tink.tools.testing;
 
 option java_multiple_files = true;
 
-import "proto/tink.proto";
-
-// The Tink primitive testing service definition.
-service TinkTesting {
+// Service for Keyset operations.
+service Keyset {
   // Generates a new keyset from a template.
-  rpc GenerateKeyset (GenerateKeysetRequest) returns (GenerateKeysetResponse) {}
-  // Encrypts a plaintext with the provided keyset
-  rpc AeadEncrypt (AeadEncryptRequest) returns (AeadEncryptResponse) {}
-  // Decrypts a ciphertext with the provided keyset
-  rpc AeadDecrypt (AeadDecryptRequest) returns (AeadDecryptResponse) {}
+  rpc Generate (GenerateKeysetRequest) returns (KeysetResponse) {}
 }
 
 message GenerateKeysetRequest {
   bytes template = 1;  // serialized google.crypto.tink.KeyTemplate.
 }
 
-message GenerateKeysetResponse {
+message KeysetResponse {
   oneof result {
     bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
     string err = 2;
   }
+}
+
+// Service for AEAD encryption and decryption
+service Aead {
+  // Encrypts a plaintext with the provided keyset
+  rpc Encrypt (AeadEncryptRequest) returns (CiphertextResponse) {}
+  // Decrypts a ciphertext with the provided keyset
+  rpc Decrypt (AeadDecryptRequest) returns (PlaintextResponse) {}
 }
 
 message AeadEncryptRequest {
@@ -44,7 +46,7 @@ message AeadEncryptRequest {
   bytes associated_data = 3;
 }
 
-message AeadEncryptResponse {
+message CiphertextResponse {
   oneof result {
     bytes ciphertext = 1;
     string err = 2;
@@ -57,7 +59,7 @@ message AeadDecryptRequest {
   bytes associated_data = 3;
 }
 
-message AeadDecryptResponse {
+message PlaintextResponse {
   oneof result {
     bytes plaintext = 1;
     string err = 2;

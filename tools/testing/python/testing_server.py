@@ -26,20 +26,20 @@ import tink
 from tink import aead
 from tink import cleartext_keyset_handle
 from tink.proto import tink_pb2
-from tools.testing import tink_testing_pb2
-from tools.testing import tink_testing_pb2_grpc
+from tools.testing import testing_api_pb2
+from tools.testing import testing_api_pb2_grpc
 
 FLAGS = flags.FLAGS
 
 flags.DEFINE_integer('port', 10000, 'The port of the server.')
 
 
-class TinkTestingServicer(tink_testing_pb2_grpc.TinkTestingServicer):
-  """A Tink Primitive Testing gRPC server."""
+class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
+  """A service for testing Keyset operations."""
 
-  def GenerateKeyset(
-      self, request: tink_testing_pb2.GenerateKeysetRequest,
-      context: grpc.ServicerContext) -> tink_testing_pb2.GenerateKeysetResponse:
+  def Generate(
+      self, request: testing_api_pb2.GenerateKeysetRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.KeysetResponse:
     """Generates a keyset."""
     try:
       template = tink_pb2.KeyTemplate()
@@ -48,42 +48,46 @@ class TinkTestingServicer(tink_testing_pb2_grpc.TinkTestingServicer):
       keyset = io.BytesIO()
       cleartext_keyset_handle.write(
           tink.BinaryKeysetWriter(keyset), keyset_handle)
-      return tink_testing_pb2.GenerateKeysetResponse(keyset=keyset.getvalue())
+      return testing_api_pb2.KeysetResponse(keyset=keyset.getvalue())
     except tink.TinkError as e:
-      return tink_testing_pb2.GenerateKeysetResponse(err=str(e))
+      return testing_api_pb2.KeysetResponse(err=str(e))
 
-  def AeadEncrypt(
-      self, request: tink_testing_pb2.AeadEncryptRequest,
-      context: grpc.ServicerContext) -> tink_testing_pb2.AeadEncryptResponse:
+
+class AeadServicer(testing_api_pb2_grpc.AeadServicer):
+  """A service for testing Aead encryption."""
+
+  def Encrypt(
+      self, request: testing_api_pb2.AeadEncryptRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.CiphertextResponse:
     """Encrypts a message."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
       p = keyset_handle.primitive(aead.Aead)
       ciphertext = p.encrypt(request.plaintext, request.associated_data)
-      return tink_testing_pb2.AeadEncryptResponse(ciphertext=ciphertext)
+      return testing_api_pb2.CiphertextResponse(ciphertext=ciphertext)
     except tink.TinkError as e:
-      return tink_testing_pb2.AeadEncryptResponse(err=str(e))
+      return testing_api_pb2.CiphertextResponse(err=str(e))
 
-  def AeadDecrypt(
-      self, request: tink_testing_pb2.AeadDecryptRequest,
-      context: grpc.ServicerContext) -> tink_testing_pb2.AeadDecryptResponse:
+  def Decrypt(
+      self, request: testing_api_pb2.AeadDecryptRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.PlaintextResponse:
     """Decrypts a message."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
       p = keyset_handle.primitive(aead.Aead)
       plaintext = p.decrypt(request.ciphertext, request.associated_data)
-      return tink_testing_pb2.AeadDecryptResponse(plaintext=plaintext)
+      return testing_api_pb2.PlaintextResponse(plaintext=plaintext)
     except tink.TinkError as e:
-      return tink_testing_pb2.AeadDecryptResponse(err=str(e))
+      return testing_api_pb2.PlaintextResponse(err=str(e))
 
 
 def main(unused_argv):
   aead.register()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
-  servicer = TinkTestingServicer()
-  tink_testing_pb2_grpc.add_TinkTestingServicer_to_server(servicer, server)
+  testing_api_pb2_grpc.add_KeysetServicer_to_server(KeysetServicer(), server)
+  testing_api_pb2_grpc.add_AeadServicer_to_server(AeadServicer(), server)
   server.add_secure_port('[::]:%d' % FLAGS.port,
                          grpc.local_server_credentials())
   server.start()

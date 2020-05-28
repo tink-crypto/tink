@@ -24,8 +24,8 @@ import portpicker
 from tink import aead
 
 from google3.pyglib import logging
-from tools.testing import tink_testing_pb2
-from tools.testing import tink_testing_pb2_grpc
+from tools.testing import testing_api_pb2
+from tools.testing import testing_api_pb2_grpc
 
 # Path are relative to tools directory.
 _PYTHON_TESTING_SERVER_PATH = 'testing/python/testing_server'
@@ -40,7 +40,8 @@ class TestingServerTest(absltest.TestCase):
 
   _server = None
   _channel = None
-  _stub = None
+  _keyset_stub = None
+  _aead_stub = None
 
   @classmethod
   def setUpClass(cls):
@@ -55,7 +56,8 @@ class TestingServerTest(absltest.TestCase):
     cls._channel = grpc.secure_channel('[::]:%d' % port,
                                        grpc.local_channel_credentials())
     grpc.channel_ready_future(cls._channel).result()
-    cls._stub = tink_testing_pb2_grpc.TinkTestingStub(cls._channel)
+    cls._keyset_stub = testing_api_pb2_grpc.KeysetStub(cls._channel)
+    cls._aead_stub = testing_api_pb2_grpc.AeadStub(cls._channel)
 
   @classmethod
   def tearDownClass(cls):
@@ -70,37 +72,36 @@ class TestingServerTest(absltest.TestCase):
   def test_generate_encrypt_decrypt(self):
     t = time.time()
     template = aead.aead_key_templates.AES128_GCM.SerializeToString()
-    gen_request = tink_testing_pb2.GenerateKeysetRequest(template=template)
-    gen_response = self._stub.GenerateKeyset(gen_request)
+    gen_request = testing_api_pb2.GenerateKeysetRequest(template=template)
+    gen_response = self._keyset_stub.Generate(gen_request)
     self.assertEmpty(gen_response.err)
     keyset = gen_response.keyset
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
-    enc_request = tink_testing_pb2.AeadEncryptRequest(
+    enc_request = testing_api_pb2.AeadEncryptRequest(
         keyset=keyset, plaintext=plaintext, associated_data=associated_data)
-    enc_response = self._stub.AeadEncrypt(enc_request)
+    enc_response = self._aead_stub.Encrypt(enc_request)
     self.assertEmpty(enc_response.err)
     ciphertext = enc_response.ciphertext
-    dec_request = tink_testing_pb2.AeadDecryptRequest(
+    dec_request = testing_api_pb2.AeadDecryptRequest(
         keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
-    dec_response = self._stub.AeadDecrypt(dec_request)
+    dec_response = self._aead_stub.Decrypt(dec_request)
     self.assertEmpty(dec_response.err)
     self.assertEqual(dec_response.plaintext, plaintext)
     logging.info('Testing took %s s', time.time() - t)
 
   def test_generate_decrypt_fail(self):
     template = aead.aead_key_templates.AES128_GCM.SerializeToString()
-    gen_request = tink_testing_pb2.GenerateKeysetRequest(template=template)
-    gen_response = self._stub.GenerateKeyset(gen_request)
+    gen_request = testing_api_pb2.GenerateKeysetRequest(template=template)
+    gen_response = self._keyset_stub.Generate(gen_request)
     self.assertEmpty(gen_response.err)
     keyset = gen_response.keyset
 
     ciphertext = b'some invalid ciphertext'
     associated_data = b'associated_data'
-    dec_request = tink_testing_pb2.AeadDecryptRequest(
-        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data
-    )
-    dec_response = self._stub.AeadDecrypt(dec_request)
+    dec_request = testing_api_pb2.AeadDecryptRequest(
+        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+    dec_response = self._aead_stub.Decrypt(dec_request)
     logging.info('Error in response: %s', dec_response.err)
     self.assertNotEmpty(dec_response.err)
     self.assertEmpty(dec_response.plaintext)
