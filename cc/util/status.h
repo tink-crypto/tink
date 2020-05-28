@@ -23,8 +23,7 @@
 #include <string>
 
 #include "absl/base/attributes.h"
-
-// placeholder_forward_declaration, please ignore
+#include "absl/status/status.h"
 
 namespace crypto {
 namespace tink {
@@ -171,7 +170,8 @@ class Status {
 
   std::string ToString() const;
 
-  // placeholder_implicit_type_conversion, please ignore
+  Status(const ::absl::Status& status);
+  operator ::absl::Status() const;
 
  private:
   ::crypto::tink::util::error::Code code_;
