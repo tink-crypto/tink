@@ -21,7 +21,6 @@
 #import <XCTest/XCTest.h>
 
 #import "objc/util/TINKStrings.h"
-#import "proto/Tink.pbobjc.h"
 
 #include "google/protobuf/util/json_util.h"
 #include "tink/util/test_util.h"
