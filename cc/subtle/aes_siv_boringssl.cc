@@ -97,12 +97,13 @@ void AesSivBoringSsl::EncryptBlock(const uint8_t in[kBlockSize],
 
 // static
 void AesSivBoringSsl::MultiplyByX(uint8_t block[kBlockSize]) {
-  // Cast to signed makes the left shift produce either 0x00 or 0xff.
-  uint8_t carry = *reinterpret_cast<int8_t*>(&block[0]) >> 7;
+  // Carry over 0x87 if msb is 1 0x00 if msb is 0.
+  uint8_t carry = 0x87 & -(block[0] >> 7);
   for (size_t i = 0; i < kBlockSize - 1; ++i) {
     block[i] = (block[i] << 1) | (block[i + 1] >> 7);
   }
-  block[kBlockSize - 1] = (block[kBlockSize - 1] << 1) ^ (carry & 0x87);
+  block[kBlockSize - 1] =
+      (block[kBlockSize - 1] << 1) ^ carry;
 }
 
 // static
