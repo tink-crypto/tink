@@ -105,33 +105,69 @@ util::StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(
   if (!ReplaceKeyBytes(symmetric_key_value, key.get())) {
     return util::Status(util::error::INTERNAL, "Generation of DEM-key failed.");
   }
-  return key_manager_->GetPrimitive(*key);
+  auto aead_or = key_manager_->GetPrimitive(*key);
+  ZeroKeyBytes(key.get());
+  return aead_or;
 }
 
 bool EciesAeadHkdfDemHelper::ReplaceKeyBytes(
     const util::SecretData& key_bytes,
     portable_proto::MessageLite* proto) const {
-  if (key_params_.key_type == AES_GCM_KEY) {
-    AesGcmKey* key = static_cast<AesGcmKey*>(proto);
-    key->set_key_value(std::string(util::SecretDataAsStringView(key_bytes)));
-    return true;
-  } else if (key_params_.key_type == AES_CTR_HMAC_AEAD_KEY) {
-    AesCtrHmacAeadKey* key = static_cast<AesCtrHmacAeadKey*>(proto);
-    auto aes_ctr_key = key->mutable_aes_ctr_key();
-    aes_ctr_key->set_key_value(
-        std::string(util::SecretDataAsStringView(key_bytes).substr(
-            0, key_params_.aes_ctr_key_size_in_bytes)));
-    auto hmac_key = key->mutable_hmac_key();
-    hmac_key->set_key_value(
-        std::string(util::SecretDataAsStringView(key_bytes).substr(
-            key_params_.aes_ctr_key_size_in_bytes)));
-    return true;
-  } else if (key_params_.key_type == XCHACHA20_POLY1305_KEY) {
-    XChaCha20Poly1305Key* key = static_cast<XChaCha20Poly1305Key*>(proto);
-    key->set_key_value(std::string(util::SecretDataAsStringView(key_bytes)));
-    return true;
+  switch (key_params_.key_type) {
+    case AES_GCM_KEY: {
+      AesGcmKey* key = static_cast<AesGcmKey*>(proto);
+      key->set_key_value(std::string(util::SecretDataAsStringView(key_bytes)));
+      return true;
+    }
+    case AES_CTR_HMAC_AEAD_KEY: {
+      AesCtrHmacAeadKey* key = static_cast<AesCtrHmacAeadKey*>(proto);
+      auto aes_ctr_key = key->mutable_aes_ctr_key();
+      aes_ctr_key->set_key_value(
+          std::string(util::SecretDataAsStringView(key_bytes).substr(
+              0, key_params_.aes_ctr_key_size_in_bytes)));
+      auto hmac_key = key->mutable_hmac_key();
+      hmac_key->set_key_value(
+          std::string(util::SecretDataAsStringView(key_bytes).substr(
+              key_params_.aes_ctr_key_size_in_bytes)));
+      return true;
+    }
+    case XCHACHA20_POLY1305_KEY: {
+      XChaCha20Poly1305Key* key = static_cast<XChaCha20Poly1305Key*>(proto);
+      key->set_key_value(std::string(util::SecretDataAsStringView(key_bytes)));
+      return true;
+    }
   }
   return false;
+}
+
+void EciesAeadHkdfDemHelper::ZeroKeyBytes(
+    portable_proto::MessageLite* proto) const {
+  switch (key_params_.key_type) {
+    case AES_GCM_KEY: {
+      AesGcmKey* key = static_cast<AesGcmKey*>(proto);
+      std::unique_ptr<std::string> key_value =
+          absl::WrapUnique(key->release_key_value());
+      util::SafeZeroString(key_value.get());
+      break;
+    }
+    case AES_CTR_HMAC_AEAD_KEY: {
+      AesCtrHmacAeadKey* key = static_cast<AesCtrHmacAeadKey*>(proto);
+      std::unique_ptr<std::string> aes_ctr_key_value =
+          absl::WrapUnique(key->mutable_aes_ctr_key()->release_key_value());
+      util::SafeZeroString(aes_ctr_key_value.get());
+      std::unique_ptr<std::string> hmac_key_value =
+          absl::WrapUnique(key->mutable_hmac_key()->release_key_value());
+      util::SafeZeroString(hmac_key_value.get());
+      break;
+    }
+    case XCHACHA20_POLY1305_KEY: {
+      XChaCha20Poly1305Key* key = static_cast<XChaCha20Poly1305Key*>(proto);
+      std::unique_ptr<std::string> key_value =
+          absl::WrapUnique(key->release_key_value());
+      util::SafeZeroString(key_value.get());
+      break;
+    }
+  }
 }
 
 }  // namespace tink

@@ -51,7 +51,6 @@ class EciesAeadHkdfDemHelper {
 
  private:
   enum DemKeyType {
-    UNKNOWN_KEY = 0,
     AES_GCM_KEY,
     AES_CTR_HMAC_AEAD_KEY,
     XCHACHA20_POLY1305_KEY,
@@ -75,6 +74,8 @@ class EciesAeadHkdfDemHelper {
 
   bool ReplaceKeyBytes(const util::SecretData& key_bytes,
                        portable_proto::MessageLite* proto) const;
+
+  void ZeroKeyBytes(portable_proto::MessageLite* proto) const;
 
   const KeyManager<Aead>* key_manager_;  // not owned
   const google::crypto::tink::KeyTemplate key_template_;
