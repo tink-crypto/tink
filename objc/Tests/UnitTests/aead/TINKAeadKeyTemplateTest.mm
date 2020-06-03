@@ -40,7 +40,7 @@ using google::crypto::tink::XChaCha20Poly1305KeyFormat;
 @implementation TINKAeadKeyTemplatesTest
 
 - (void)testAesGcmKeyTemplates {
-  static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.AesGcmKey";
+  static std::string const kTypeURL = "type.googleapis.com/google.crypto.tink.AesGcmKey";
 
   NSError *error = nil;
   // AES-128 GCM
@@ -49,41 +49,22 @@ using google::crypto::tink::XChaCha20Poly1305KeyFormat;
   XCTAssertNil(error);
   XCTAssertNotNil(tpl);
 
-  error = nil;
-  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
-
-  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
-  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
-  error = nil;
-  TINKPBAesGcmKeyFormat *keyFormat =
-      [TINKPBAesGcmKeyFormat parseFromData:keyTemplate.value error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyFormat);
-  XCTAssertTrue(16 == keyFormat.keySize);
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::TINK);
 
   // AES-256 GCM
   tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes256Gcm error:&error];
   XCTAssertNil(error);
   XCTAssertNotNil(tpl);
 
-  error = nil;
-  keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
-
-  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
-  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
-  error = nil;
-  keyFormat = [TINKPBAesGcmKeyFormat parseFromData:keyTemplate.value error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyFormat);
-  XCTAssertTrue(32 == keyFormat.keySize);
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::TINK);
 }
 
 - (void)testAesCtrHmacKeyTemplates {
-  NSString *kTypeURL = @"type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
+  static std::string const kTypeURL = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
 
   // AES-128 CTR HMAC SHA-256
   NSError *error = nil;
@@ -92,49 +73,22 @@ using google::crypto::tink::XChaCha20Poly1305KeyFormat;
   XCTAssertNil(error);
   XCTAssertNotNil(tpl);
 
-  error = nil;
-  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
-
-  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
-  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
-  error = nil;
-  TINKPBAesCtrHmacAeadKeyFormat *keyFormat =
-      [TINKPBAesCtrHmacAeadKeyFormat parseFromData:keyTemplate.value error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyFormat);
-  XCTAssertTrue(16 == keyFormat.aesCtrKeyFormat.keySize);
-  XCTAssertTrue(16 == keyFormat.aesCtrKeyFormat.params.ivSize);
-  XCTAssertTrue(32 == keyFormat.hmacKeyFormat.keySize);
-  XCTAssertTrue(16 == keyFormat.hmacKeyFormat.params.tagSize);
-  XCTAssertTrue(TINKPBHashType_Sha256 == keyFormat.hmacKeyFormat.params.hash_p);
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::TINK);
 
   // AES-256 CTR HMAC SHA-256
   tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes256CtrHmacSha256 error:&error];
   XCTAssertNil(error);
   XCTAssertNotNil(tpl);
 
-  error = nil;
-  keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
-
-  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
-  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
-  error = nil;
-  keyFormat = [TINKPBAesCtrHmacAeadKeyFormat parseFromData:keyTemplate.value error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyFormat);
-  XCTAssertTrue(32 == keyFormat.aesCtrKeyFormat.keySize);
-  XCTAssertTrue(16 == keyFormat.aesCtrKeyFormat.params.ivSize);
-  XCTAssertTrue(32 == keyFormat.hmacKeyFormat.keySize);
-  XCTAssertTrue(32 == keyFormat.hmacKeyFormat.params.tagSize);
-  XCTAssertTrue(TINKPBHashType_Sha256 == keyFormat.hmacKeyFormat.params.hash_p);
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::TINK);
 }
 
 - (void)testAesEaxKeyTemplates {
-  static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.AesEaxKey";
+  static std::string const kTypeURL = "type.googleapis.com/google.crypto.tink.AesEaxKey";
 
   NSError *error = nil;
   // AES-128 EAX
@@ -143,41 +97,22 @@ using google::crypto::tink::XChaCha20Poly1305KeyFormat;
   XCTAssertNil(error);
   XCTAssertNotNil(tpl);
 
-  error = nil;
-  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
-
-  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
-  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
-  error = nil;
-  TINKPBAesGcmKeyFormat *keyFormat =
-      [TINKPBAesGcmKeyFormat parseFromData:keyTemplate.value error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyFormat);
-  XCTAssertEqual(keyFormat.keySize, 16);
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::TINK);
 
   // AES-256 EAX
   tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes256Eax error:&error];
   XCTAssertNil(error);
   XCTAssertNotNil(tpl);
 
-  error = nil;
-  keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
-
-  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
-  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
-  error = nil;
-  keyFormat = [TINKPBAesGcmKeyFormat parseFromData:keyTemplate.value error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyFormat);
-  XCTAssertEqual(keyFormat.keySize, 32);
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::TINK);
 }
 
 - (void)testXChaCha20Poly1305KeyTemplates {
-  static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
+  static std::string const kTypeURL = "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
 
   NSError *error = nil;
   TINKAeadKeyTemplate *tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKXChaCha20Poly1305
@@ -185,22 +120,9 @@ using google::crypto::tink::XChaCha20Poly1305KeyFormat;
   XCTAssertNil(error);
   XCTAssertNotNil(tpl);
 
-  error = nil;
-  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
-
-  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
-  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
-  error = nil;
-
-  // Check that the template works with the key manager.
-  crypto::tink::XChaCha20Poly1305KeyManager key_manager;
-  XCTAssertTrue(key_manager.get_key_type() == tpl.ccKeyTemplate->type_url());
-  XChaCha20Poly1305KeyFormat key_format;
-  XCTAssertTrue(key_format.ParseFromString(tpl.ccKeyTemplate->value()));
-  auto validation = key_manager.ValidateKeyFormat(key_format);
-  XCTAssertTrue(validation.ok());
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::TINK);
 }
 
 @end
