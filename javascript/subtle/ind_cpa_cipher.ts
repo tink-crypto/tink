@@ -1,20 +1,13 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 ////////////////////////////////////////////////////////////////////////////////
-
-goog.module('tink.subtle.IndCpaCipher');
-
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 /**
  * Interface for symmetric key ciphers that are indistinguishable against
@@ -24,29 +17,25 @@ const {SecurityException} = goog.require('google3.third_party.tink.javascript.ex
  * authentication, thus should not be used directly, but only to construct safer
  * primitives such as {@link tink.Aead}.
  *
- * @protected
- * @record
  */
-class IndCpaCipher {
+export interface IndCpaCipher {
   /**
    * Encrypts `plaintext`.
    *
-   * @param {!Uint8Array} plaintext the plaintext to be encrypted. It must be
+   * @param plaintext the plaintext to be encrypted. It must be
    *     non-null, but can also be an empty (zero-length) byte array.
-   * @return {!Promise.<!Uint8Array>} resulting ciphertext
+   * @return resulting ciphertext
    * @throws {SecurityException}
    */
-  encrypt(plaintext) {}
+  encrypt(plaintext: Uint8Array): Promise<Uint8Array>;
 
   /**
    * Decrypts ciphertext with associated authenticated data.
    *
-   * @param {!Uint8Array} ciphertext the ciphertext to be decrypted, must be
+   * @param ciphertext the ciphertext to be decrypted, must be
    *     non-null.
-   * @return {!Promise.<!Uint8Array>} resulting plaintext
+   * @return resulting plaintext
    * @throws {SecurityException}
    */
-  decrypt(ciphertext) {}
+  decrypt(ciphertext: Uint8Array): Promise<Uint8Array>;
 }
-
-exports = IndCpaCipher;

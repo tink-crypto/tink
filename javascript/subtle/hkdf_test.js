@@ -15,9 +15,9 @@
 goog.module('tink.subtle.HkdfTest');
 goog.setTestOnly('tink.subtle.HkdfTest');
 
-const Bytes = goog.require('tink.subtle.Bytes');
-const Hkdf = goog.require('tink.subtle.Hkdf');
-const Random = goog.require('tink.subtle.Random');
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const Hkdf = goog.require('google3.third_party.tink.javascript.subtle.hkdf');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 
 describe('hkdf test', function() {
   it('constructor', async function() {

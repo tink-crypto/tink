@@ -21,7 +21,7 @@ const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const Random = goog.require('tink.subtle.Random');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('tink.Registry');
 const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

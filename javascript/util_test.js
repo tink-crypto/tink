@@ -15,7 +15,7 @@
 goog.module('tink.UtilTest');
 goog.setTestOnly('tink.UtilTest');
 
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
 const Util = goog.require('tink.Util');
 const {PbEllipticCurveType, PbHashType, PbKeyData, PbKeyStatusType, PbKeyset, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

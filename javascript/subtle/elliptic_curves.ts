@@ -1,74 +1,70 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @fileoverview Common enums.
  */
 
-goog.module('tink.subtle.EllipticCurves');
+import {InvalidArgumentsException} from '../exception/invalid_arguments_exception';
 
-const Bytes = goog.require('tink.subtle.Bytes');
-const {InvalidArgumentsException} = goog.require('google3.third_party.tink.javascript.exception.invalid_arguments_exception');
+import * as Bytes from './bytes';
 
 /**
  * Supported elliptic curves.
- * @enum {number}
  */
-const CurveType = {
-  P256: 1,
-  P384: 2,
-  P521: 3,
-};
+export enum CurveType {
+  P256 = 1,
+  P384,
+  P521
+}
 
 /**
  * Supported point format.
- * @enum {number}
  */
-const PointFormatType = {
-  UNCOMPRESSED: 1,
-  COMPRESSED: 2,
+export enum PointFormatType {
+  UNCOMPRESSED = 1,
+  COMPRESSED,
+
   // Like UNCOMPRESSED but without the \x04 prefix. Crunchy uses this format.
   // DO NOT USE unless you are a Crunchy user moving to Tink.
-  DO_NOT_USE_CRUNCHY_UNCOMPRESSED: 3,
-};
+  DO_NOT_USE_CRUNCHY_UNCOMPRESSED
+}
 
 /**
  * Supported ECDSA signature encoding.
- * @enum {number}
  */
-const EcdsaSignatureEncodingType = {
+export enum EcdsaSignatureEncodingType {
+
   // The DER signature is encoded using ASN.1
   // (https://tools.ietf.org/html/rfc5480#appendix-A):
   // ECDSA-Sig-Value :: = SEQUENCE { r INTEGER, s INTEGER }. In particular, the
   // encoding is:
   // 0x30 || totalLength || 0x02 || r's length || r || 0x02 || s's length || s.
-  DER: 1,
+  DER = 1,
+
   // The IEEE_P1363 signature's format is r || s, where r and s are zero-padded
   // and have the same size in bytes as the order of the curve. For example, for
   // NIST P-256 curve, r and s are zero-padded to 32 bytes.
-  IEEE_P1363: 2,
-};
+  IEEE_P1363
+}
 
 /**
  * Transform an ECDSA signature in DER encoding to IEEE P1363 encoding.
  *
- * @param {!Uint8Array} der the ECDSA signature in DER encoding
- * @param {number} ieeeLength the length of the ECDSA signature in IEEE
+ * @param der the ECDSA signature in DER encoding
+ * @param ieeeLength the length of the ECDSA signature in IEEE
  *     encoding. This is usually 2 * size of the elliptic curve field.
- * @return {!Uint8Array} ECDSA signature in IEEE encoding
+ * @return ECDSA signature in IEEE encoding
  */
-const ecdsaDer2Ieee = function(der, ieeeLength) {
+export function ecdsaDer2Ieee(der: Uint8Array, ieeeLength: number): Uint8Array {
   if (!isValidDerEcdsaSignature(der)) {
     throw new InvalidArgumentsException('invalid DER signature');
   }
@@ -77,12 +73,20 @@ const ecdsaDer2Ieee = function(der, ieeeLength) {
         'ieeeLength must be a nonnegative integer');
   }
   const ieee = new Uint8Array(ieeeLength);
-  const length = der[1] & 0xff;
-  let offset = 1 /* 0x30 */ + 1 /* totalLength */;
+  const length = der[1] & 255;
+  let offset = 1 +
+      /* 0x30 */
+      1;
+
+  /* totalLength */
   if (length >= 128) {
-    offset++;  // Long form length
+    offset++;
   }
-  offset++;  // 0x02
+
+  // Long form length
+  offset++;
+
+  // 0x02
   const rLength = der[offset++];
   let extraZero = 0;
   if (der[offset] === 0) {
@@ -90,7 +94,11 @@ const ecdsaDer2Ieee = function(der, ieeeLength) {
   }
   const rOffset = ieeeLength / 2 - rLength + extraZero;
   ieee.set(der.subarray(offset + extraZero, offset + rLength), rOffset);
-  offset += rLength /* r byte array */ + 1 /* 0x02 */;
+  offset += rLength +
+      /* r byte array */
+      1;
+
+  /* 0x02 */
   const sLength = der[offset++];
   extraZero = 0;
   if (der[offset] === 0) {
@@ -99,53 +107,51 @@ const ecdsaDer2Ieee = function(der, ieeeLength) {
   const sOffset = ieeeLength - sLength + extraZero;
   ieee.set(der.subarray(offset + extraZero, offset + sLength), sOffset);
   return ieee;
-};
+}
 
 /**
  * Transform an ECDSA signature in IEEE 1363 encoding to DER encoding.
  *
- * @param {!Uint8Array} ieee the ECDSA signature in IEEE encoding
- * @return {!Uint8Array} ECDSA signature in DER encoding
+ * @param ieee the ECDSA signature in IEEE encoding
+ * @return ECDSA signature in DER encoding
  */
-const ecdsaIeee2Der = function(ieee) {
+export function ecdsaIeee2Der(ieee: Uint8Array): Uint8Array {
   if (ieee.length % 2 != 0 || ieee.length == 0 || ieee.length > 132) {
     throw new InvalidArgumentsException(
         'Invalid IEEE P1363 signature encoding. Length: ' + ieee.length);
   }
   const r = toUnsignedBigNum(ieee.subarray(0, ieee.length / 2));
   const s = toUnsignedBigNum(ieee.subarray(ieee.length / 2, ieee.length));
-
   let offset = 0;
   const length = 1 + 1 + r.length + 1 + 1 + s.length;
   let der;
   if (length >= 128) {
     der = new Uint8Array(length + 3);
-    der[offset++] = 0x30;
-    der[offset++] = 0x80 + 0x01;
+    der[offset++] = 48;
+    der[offset++] = 128 + 1;
     der[offset++] = length;
   } else {
     der = new Uint8Array(length + 2);
-    der[offset++] = 0x30;
+    der[offset++] = 48;
     der[offset++] = length;
   }
-  der[offset++] = 0x02;
+  der[offset++] = 2;
   der[offset++] = r.length;
   der.set(r, offset);
   offset += r.length;
-  der[offset++] = 0x02;
+  der[offset++] = 2;
   der[offset++] = s.length;
   der.set(s, offset);
   return der;
-};
+}
 
 /**
  * Validate that the ECDSA signature is in DER encoding, based on
  * https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki.
  *
- * @param {!Uint8Array} sig an ECDSA siganture
- * @return {boolean}
+ * @param sig an ECDSA siganture
  */
-const isValidDerEcdsaSignature = function(sig) {
+export function isValidDerEcdsaSignature(sig: Uint8Array): boolean {
   // Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
   // * total-length: 1-byte or 2-byte length descriptor of everything that
   // follows.
@@ -156,14 +162,22 @@ const isValidDerEcdsaSignature = function(sig) {
   //   set).
   // * S-length: 1-byte length descriptor of the S value that follows.
   // * S: arbitrary-length big-endian encoded S value. The same rules apply.
-  if (sig.length < 1 /* 0x30 */
-          + 1        /* total-length */
-          + 1        /* 0x02 */
-          + 1        /* R-length */
-          + 1        /* R */
-          + 1        /* 0x02 */
-          + 1        /* S-length */
-          + 1 /* S */) {
+  /* S */
+  if (sig.length < 1 +
+          /* 0x30 */
+          1 +
+          /* total-length */
+          1 +
+          /* 0x02 */
+          1 +
+          /* R-length */
+          1 +
+          /* R */
+          1 +
+          /* 0x02 */
+          1 +
+          /* S-length */
+          1) {
     // Signature is too short.
     return false;
   }
@@ -171,20 +185,22 @@ const isValidDerEcdsaSignature = function(sig) {
   // Checking bytes from left to right.
 
   // byte #1: a signature is of type 0x30 (compound).
-  if (sig[0] != 0x30) {
+  if (sig[0] != 48) {
     return false;
   }
 
   // byte #2 and maybe #3: the total length of the signature.
-  let totalLen = sig[1] & 0xff;
-  let totalLenLen =
-      1;  // the length of the total length field, could be 2-byte.
+  let totalLen = sig[1] & 255;
+  let totalLenLen = 1;
+
+  // the length of the total length field, could be 2-byte.
   if (totalLen == 129) {
     // The signature is >= 128 bytes thus total length field is in long-form
     // encoding and occupies 2 bytes.
     totalLenLen = 2;
+
     // byte #3 is the total length.
-    totalLen = sig[2] & 0xff;
+    totalLen = sig[2] & 255;
     if (totalLen < 128) {
       // Length in long-form encoding must be >= 128.
       return false;
@@ -194,6 +210,7 @@ const isValidDerEcdsaSignature = function(sig) {
     return false;
   }
 
+
   // Make sure the length covers the entire sig.
   if (totalLen != sig.length - 1 - totalLenLen) {
     return false;
@@ -201,78 +218,106 @@ const isValidDerEcdsaSignature = function(sig) {
 
   // Start checking R.
   // Check whether the R element is an integer.
-  if (sig[1 + totalLenLen] != 0x02) {
+  if (sig[1 + totalLenLen] != 2) {
     return false;
   }
+
   // Extract the length of the R element.
-  const rLen = sig[1 /* 0x30 */ + totalLenLen + 1 /* 0x02 */] & 0xff;
+  const rLen = sig[1 +
+                   /* 0x30 */
+                   totalLenLen + 1] &
+      /* 0x02 */
+      255;
+
   // Make sure the length of the S element is still inside the signature.
-  if (1 /* 0x30 */ + totalLenLen + 1 /* 0x02 */ + 1 /* rLen */ + rLen +
-          1 /* 0x02 */
-      >= sig.length) {
+  if (1 +
+          /* 0x30 */
+          totalLenLen + 1 +
+          /* 0x02 */
+          1 +
+          /* rLen */
+          rLen + 1 >=
+      /* 0x02 */
+      sig.length) {
     return false;
   }
+
   // Zero-length integers are not allowed for R.
   if (rLen == 0) {
     return false;
   }
+
   // Negative numbers are not allowed for R.
-  if ((sig[3 + totalLenLen] & 0xff) >= 128) {
+  if ((sig[3 + totalLenLen] & 255) >= 128) {
     return false;
   }
+
   // Null bytes at the start of R are not allowed, unless R would
   // otherwise be interpreted as a negative number.
-  if (rLen > 1 && (sig[3 + totalLenLen] == 0x00) &&
-      ((sig[4 + totalLenLen] & 0xff) < 128)) {
+  if (rLen > 1 && sig[3 + totalLenLen] == 0 &&
+      (sig[4 + totalLenLen] & 255) < 128) {
     return false;
   }
 
   // Start checking S.
   // Check whether the S element is an integer.
-  if (sig[3 + totalLenLen + rLen] != 0x02) {
+  if (sig[3 + totalLenLen + rLen] != 2) {
     return false;
   }
+
   // Extract the length of the S element.
-  const sLen = sig[1 /* 0x30 */ + totalLenLen + 1 /* 0x02 */ + 1 /* rLen */ +
-                   rLen + 1 /* 0x02 */] &
-      0xff;
+  const sLen = sig[1 +
+                   /* 0x30 */
+                   totalLenLen + 1 +
+                   /* 0x02 */
+                   1 +
+                   /* rLen */
+                   rLen + 1] &
+      /* 0x02 */
+      255;
+
   // Verify that the length of the signature matches the sum of the length of
   // the elements.
-  if (1                     /* 0x30 */
-          + totalLenLen + 1 /* 0x02 */
-          + 1               /* rLen */
-          + rLen + 1        /* 0x02 */
-          + 1               /* sLen */
-          + sLen !=
+  if (1 +
+          /* 0x30 */
+          totalLenLen + 1 +
+          /* 0x02 */
+          1 +
+          /* rLen */
+          rLen + 1 +
+          /* 0x02 */
+          1 +
+          /* sLen */
+          sLen !=
       sig.length) {
     return false;
   }
+
   // Zero-length integers are not allowed for S.
   if (sLen == 0) {
     return false;
   }
+
   // Negative numbers are not allowed for S.
-  if ((sig[5 + totalLenLen + rLen] & 0xff) >= 128) {
-    return false;
-  }
-  // Null bytes at the start of S are not allowed, unless S would
-  // otherwise be interpreted as a negative number.
-  if (sLen > 1 && (sig[5 + totalLenLen + rLen] == 0x00) &&
-      ((sig[6 + totalLenLen + rLen] & 0xff) < 128)) {
+  if ((sig[5 + totalLenLen + rLen] & 255) >= 128) {
     return false;
   }
 
+  // Null bytes at the start of S are not allowed, unless S would
+  // otherwise be interpreted as a negative number.
+  if (sLen > 1 && sig[5 + totalLenLen + rLen] == 0 &&
+      (sig[6 + totalLenLen + rLen] & 255) < 128) {
+    return false;
+  }
   return true;
-};
+}
 
 /**
  * Transform a big integer in big endian to minimal unsigned form which has
  * no extra zero at the beginning except when the highest bit is set.
  *
- * @param {!Uint8Array} bytes
- * @return {!Uint8Array}
  */
-const toUnsignedBigNum = function(bytes) {
+function toUnsignedBigNum(bytes: Uint8Array): Uint8Array {
   // Remove zero prefixes.
   let start = 0;
   while (start < bytes.length && bytes[start] == 0) {
@@ -281,23 +326,19 @@ const toUnsignedBigNum = function(bytes) {
   if (start == bytes.length) {
     start = bytes.length - 1;
   }
-
   let extraZero = 0;
+
   // If the 1st bit is not zero, add 1 zero byte.
-  if ((bytes[start] & 0x80) == 0x80) {
+  if ((bytes[start] & 128) == 128) {
     // Add extra zero.
     extraZero = 1;
   }
   const res = new Uint8Array(bytes.length - start + extraZero);
   res.set(bytes.subarray(start), extraZero);
   return res;
-};
+}
 
-/**
- * @param {!CurveType} curve
- * @return {string}
- */
-const curveToString = function(curve) {
+export function curveToString(curve: CurveType): string {
   switch (curve) {
     case CurveType.P256:
       return 'P-256';
@@ -307,13 +348,9 @@ const curveToString = function(curve) {
       return 'P-521';
   }
   throw new InvalidArgumentsException('unknown curve: ' + curve);
-};
+}
 
-/**
- * @param {string} curve
- * @return {!CurveType}
- */
-const curveFromString = function(curve) {
+export function curveFromString(curve: string): CurveType {
   switch (curve) {
     case 'P-256':
       return CurveType.P256;
@@ -323,84 +360,85 @@ const curveFromString = function(curve) {
       return CurveType.P521;
   }
   throw new InvalidArgumentsException('unknown curve: ' + curve);
-};
+}
 
-/**
- * @param {string} curve
- * @param {!PointFormatType} format
- * @param {!webCrypto.JsonWebKey} point
- * @return {!Uint8Array}
- */
-const pointEncode = function(curve, format, point) {
+export function pointEncode(
+    curve: string, format: PointFormatType, point: JsonWebKey): Uint8Array {
   const fieldSize = fieldSizeInBytes(curveFromString(curve));
   switch (format) {
     case PointFormatType.UNCOMPRESSED:
-      let result = new Uint8Array(1 + 2 * fieldSize);
-      result[0] = 0x04;
-      result.set(Bytes.fromBase64(point.x, /* opt_webSafe = */ true), 1);
+      const {x, y} = point;
+      if (x === undefined) {
+        throw new InvalidArgumentsException('x must be provided');
+      }
+      if (y === undefined) {
+        throw new InvalidArgumentsException('y must be provided');
+      }
+      const result = new Uint8Array(1 + 2 * fieldSize);
+      result[0] = 4;
       result.set(
-          Bytes.fromBase64(point.y, /* opt_webSafe = */ true), 1 + fieldSize);
+          /* opt_webSafe = */
+          Bytes.fromBase64(x, true), 1);
+      result.set(
+          /* opt_webSafe = */
+          Bytes.fromBase64(y, true), 1 + fieldSize);
       return result;
   }
   throw new InvalidArgumentsException('invalid format');
-};
+}
 
-/**
- * @param {string} curve
- * @param {!PointFormatType} format
- * @param {!Uint8Array} point
- * @return {!webCrypto.JsonWebKey}
- */
-const pointDecode = function(curve, format, point) {
+export function pointDecode(
+    curve: string, format: PointFormatType, point: Uint8Array): JsonWebKey {
   const fieldSize = fieldSizeInBytes(curveFromString(curve));
   switch (format) {
     case PointFormatType.UNCOMPRESSED:
-      if (point.length != 1 + 2 * fieldSize || point[0] != 0x04) {
+      if (point.length != 1 + 2 * fieldSize || point[0] != 4) {
         throw new InvalidArgumentsException('invalid point');
       }
-      let result = /** @type {!webCrypto.JsonWebKey} */ ({
+      const result = ({
         'kty': 'EC',
         'crv': curve,
         'x': Bytes.toBase64(
             new Uint8Array(point.subarray(1, 1 + fieldSize)),
-            true /* websafe */),
+            /* websafe */
+            true),
         'y': Bytes.toBase64(
             new Uint8Array(point.subarray(1 + fieldSize, point.length)),
-            true /* websafe */),
-        'ext': true,
-      });
+            /* websafe */
+            true),
+        'ext': true
+      } as JsonWebKey);
       return result;
   }
   throw new InvalidArgumentsException('invalid format');
-};
+}
 
-/**
- * @param {!CurveType} curve
- * @param {!Uint8Array} x
- * @param {!Uint8Array} y
- * @param {?Uint8Array=} d
- *
- * @return {!webCrypto.JsonWebKey}
- */
-const getJsonWebKey = function(curve, x, y, d) {
-  const key = /** @type {!webCrypto.JsonWebKey} */ ({
+export function getJsonWebKey(
+    curve: CurveType, x: Uint8Array, y: Uint8Array,
+    d?: Uint8Array|null): JsonWebKey {
+  const key = ({
     'kty': 'EC',
     'crv': curveToString(curve),
-    'x': Bytes.toBase64(x, true /* websafe */),
-    'y': Bytes.toBase64(y, true /* websafe */),
-    'ext': true,
-  });
+    'x': Bytes.toBase64(
+        x,
+        /* websafe */
+        true),
+    'y': Bytes.toBase64(
+        y,
+        /* websafe */
+        true),
+    'ext': true
+  } as JsonWebKey);
   if (d) {
-    key['d'] = Bytes.toBase64(d, true /* websafe */);
+    key['d'] = Bytes.toBase64(
+        d,
+        /* websafe */
+        true);
   }
   return key;
-};
+}
 
-/**
- * @param {!CurveType} curve
- * @return {number}
- */
-const fieldSizeInBytes = function(curve) {
+export function fieldSizeInBytes(curve: CurveType): number {
   switch (curve) {
     case CurveType.P256:
       return 32;
@@ -410,15 +448,10 @@ const fieldSizeInBytes = function(curve) {
       return 66;
   }
   throw new InvalidArgumentsException('unknown curve: ' + curve);
-};
+}
 
-/**
- * @param {!CurveType} curve
- * @param {!PointFormatType} pointFormat
- *
- * @return {number}
- */
-const encodingSizeInBytes = function(curve, pointFormat) {
+export function encodingSizeInBytes(
+    curve: CurveType, pointFormat: PointFormatType): number {
   switch (pointFormat) {
     case PointFormatType.UNCOMPRESSED:
       return 2 * fieldSizeInBytes(curve) + 1;
@@ -428,105 +461,82 @@ const encodingSizeInBytes = function(curve, pointFormat) {
       return 2 * fieldSizeInBytes(curve);
   }
   throw new InvalidArgumentsException('invalid format');
-};
+}
 
-/**
- * @param {!webCrypto.CryptoKey} privateKey
- * @param {!webCrypto.CryptoKey} publicKey
- * @return {!Promise<!Uint8Array>}
- */
-const computeEcdhSharedSecret = async function(privateKey, publicKey) {
-  const ecdhParams =
-      /** @type {!webCrypto.AlgorithmIdentifier} */ (privateKey.algorithm);
-  ecdhParams['public'] = publicKey;
-  const fieldSizeInBits =
-      8 * fieldSizeInBytes(curveFromString(ecdhParams['namedCurve']));
+export async function computeEcdhSharedSecret(
+    privateKey: CryptoKey, publicKey: CryptoKey): Promise<Uint8Array> {
+  const {namedCurve}: Partial<EcKeyImportParams> = privateKey.algorithm;
+  if (!namedCurve) {
+    throw new InvalidArgumentsException('namedCurve must be provided');
+  }
+  const ecdhParams = {'public': publicKey, ...privateKey.algorithm};
+  const fieldSizeInBits = 8 * fieldSizeInBytes(curveFromString(namedCurve));
   const sharedSecret = await window.crypto.subtle.deriveBits(
       ecdhParams, privateKey, fieldSizeInBits);
   return new Uint8Array(sharedSecret);
-};
+}
 
-/**
- * @param {string} algorithm
- * @param {string} curve
- * @return {!Promise<!webCrypto.CryptoKeyPair>}
- */
-const generateKeyPair = async function(algorithm, curve) {
+export async function generateKeyPair(
+    algorithm: 'ECDH'|'ECDSA', curve: string): Promise<CryptoKeyPair> {
   if (algorithm != 'ECDH' && algorithm != 'ECDSA') {
     throw new InvalidArgumentsException(
         'algorithm must be either ECDH or ECDSA');
   }
-  const params = /** @type {!webCrypto.AlgorithmIdentifier} */ (
-      {'name': algorithm, 'namedCurve': curve});
+  const params = {'name': algorithm, 'namedCurve': curve};
   const ephemeralKeyPair = await window.crypto.subtle.generateKey(
-      params, true /* extractable */,
-      algorithm == 'ECDH' ? ['deriveKey', 'deriveBits'] :
-                            ['sign', 'verify'] /* usage */);
-  return /** @type {!webCrypto.CryptoKeyPair} */ (ephemeralKeyPair);
-};
+      params, /* extractable= */ true,
+      algorithm == 'ECDH' ? ['deriveKey', 'deriveBits'] : ['sign', 'verify']);
+  return ephemeralKeyPair;
+}
 
-/**
- * @param {!webCrypto.CryptoKey} cryptoKey
- * @return {!Promise<!webCrypto.JsonWebKey>}
- */
-const exportCryptoKey = async function(cryptoKey) {
+export async function exportCryptoKey(cryptoKey: CryptoKey):
+    Promise<JsonWebKey> {
   const jwk = await window.crypto.subtle.exportKey('jwk', cryptoKey);
-  return /** @type {!webCrypto.JsonWebKey} */ (jwk);
-};
+  return (jwk as JsonWebKey);
+}
 
-/**
- * @param {string} algorithm
- * @param {!webCrypto.JsonWebKey} jwk
- * @return {!Promise<!webCrypto.CryptoKey>}
- */
-const importPublicKey = async function(algorithm, jwk) {
+export async function importPublicKey(
+    algorithm: string, jwk: JsonWebKey): Promise<CryptoKey> {
   if (algorithm != 'ECDH' && algorithm != 'ECDSA') {
     throw new InvalidArgumentsException(
         'algorithm must be either ECDH or ECDSA');
+  }
+  const {crv} = jwk;
+  if (!crv) {
+    throw new InvalidArgumentsException('crv must be provided');
   }
   const publicKey = await window.crypto.subtle.importKey(
-      'jwk' /* format */, jwk,
-      {'name': algorithm, 'namedCurve': jwk.crv} /* algorithm */,
-      true /* extractable */,
-      algorithm == 'ECDH' ? [] : ['verify'] /* usage */);
-  return publicKey;
-};
+      /* format */
+      'jwk', jwk, {'name': algorithm, 'namedCurve': crv},
+      /* algorithm */
+      true,
+      /* extractable */
+      algorithm == 'ECDH' ? [] : ['verify']);
 
-/**
- * @param {string} algorithm
- * @param {!webCrypto.JsonWebKey} jwk
- * @return {!Promise<!webCrypto.CryptoKey>}
- */
-const importPrivateKey = async function(algorithm, jwk) {
+  /* usage */
+  return publicKey;
+}
+
+export async function importPrivateKey(
+    algorithm: string, jwk: JsonWebKey): Promise<CryptoKey> {
   if (algorithm != 'ECDH' && algorithm != 'ECDSA') {
     throw new InvalidArgumentsException(
         'algorithm must be either ECDH or ECDSA');
   }
+  const {crv} = jwk;
+  if (!crv) {
+    throw new InvalidArgumentsException('crv must be provided');
+  }
   const privateKey = await window.crypto.subtle.importKey(
-      'jwk' /* format */, jwk /* key material */,
-      {'name': algorithm, 'namedCurve': jwk.crv} /* algorithm */,
-      true /* extractable */,
-      algorithm == 'ECDH' ? ['deriveKey', 'deriveBits'] : ['sign'] /* usage */);
-  return privateKey;
-};
+      /* format */
+      'jwk', jwk,
+      /* key material */
+      {'name': algorithm, 'namedCurve': crv},
+      /* algorithm */
+      true,
+      /* extractable */
+      algorithm == 'ECDH' ? ['deriveKey', 'deriveBits'] : ['sign']);
 
-exports = {
-  CurveType,
-  EcdsaSignatureEncodingType,
-  PointFormatType,
-  computeEcdhSharedSecret,
-  curveToString,
-  curveFromString,
-  ecdsaDer2Ieee,
-  ecdsaIeee2Der,
-  getJsonWebKey,
-  isValidDerEcdsaSignature,
-  encodingSizeInBytes,
-  exportCryptoKey,
-  fieldSizeInBytes,
-  generateKeyPair,
-  importPrivateKey,
-  importPublicKey,
-  pointDecode,
-  pointEncode,
-};
+  /* usage */
+  return privateKey;
+}

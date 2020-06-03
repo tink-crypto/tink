@@ -15,15 +15,13 @@
 goog.module('tink.aead.AesCtrHmacAeadKeyManager');
 
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
+const {aesCtrHmacFromRawKeys} = goog.require('google3.third_party.tink.javascript.subtle.encrypt_then_authenticate');
 const KeyManager = goog.require('tink.KeyManager');
-const Random = goog.require('tink.subtle.Random');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('tink.Registry');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Validators = goog.require('tink.subtle.Validators');
+const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
 const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbHashType, PbHmacKey, PbHmacKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
-
-const {aesCtrHmacFromRawKeys} = EncryptThenAuthenticate;
 
 /**
  * @final

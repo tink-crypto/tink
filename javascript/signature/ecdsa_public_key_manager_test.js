@@ -15,9 +15,9 @@
 goog.module('tink.signature.EcdsaPublicKeyManagerTest');
 goog.setTestOnly('tink.signature.EcdsaPublicKeyManagerTest');
 
-const Bytes = goog.require('tink.subtle.Bytes');
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
 const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
 const Registry = goog.require('tink.Registry');

@@ -17,12 +17,12 @@ goog.setTestOnly('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const Bytes = goog.require('tink.subtle.Bytes');
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
-const Random = goog.require('tink.subtle.Random');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('tink.Registry');
 const Util = goog.require('tink.Util');
 const {PbAesCtrKey, PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
