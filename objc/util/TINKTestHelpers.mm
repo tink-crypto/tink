@@ -20,6 +20,7 @@
 
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/secret_data.h"
 
 #import <Foundation/Foundation.h>
 
@@ -119,7 +120,8 @@ TINKPBEciesAeadHkdfPrivateKey *TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurve
 
   TINKPBEciesAeadHkdfPrivateKey *eciesKey = [[TINKPBEciesAeadHkdfPrivateKey alloc] init];
   eciesKey.version = 0;
-  eciesKey.keyValue = TINKStringToNSData(test_key.priv);
+  eciesKey.keyValue =
+      TINKStringViewToNSData(crypto::tink::util::SecretDataAsStringView(test_key.priv));
 
   if (!eciesKey.hasPublicKey) {
     eciesKey.publicKey = [[TINKPBEciesAeadHkdfPublicKey alloc] init];

@@ -38,6 +38,7 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
@@ -265,7 +266,8 @@ EciesAeadHkdfPrivateKey GetEciesAeadHkdfTestKey(
       Enums::ProtoToSubtle(curve_type)).ValueOrDie();
   EciesAeadHkdfPrivateKey ecies_key;
   ecies_key.set_version(0);
-  ecies_key.set_key_value(test_key.priv);
+  ecies_key.set_key_value(
+      std::string(util::SecretDataAsStringView(test_key.priv)));
   auto public_key = ecies_key.mutable_public_key();
   public_key->set_version(0);
   public_key->set_x(test_key.pub_x);
@@ -362,7 +364,8 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
       Enums::ProtoToSubtle(curve_type)).ValueOrDie();
   EcdsaPrivateKey ecdsa_key;
   ecdsa_key.set_version(0);
-  ecdsa_key.set_key_value(test_key.priv);
+  ecdsa_key.set_key_value(
+      std::string(util::SecretDataAsStringView(test_key.priv)));
   auto public_key = ecdsa_key.mutable_public_key();
   public_key->set_version(0);
   public_key->set_x(test_key.pub_x);

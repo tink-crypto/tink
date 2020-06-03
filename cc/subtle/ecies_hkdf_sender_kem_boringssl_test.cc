@@ -86,8 +86,7 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, testSenderRecipientBasic) {
     ASSERT_TRUE(status_or_kem_key.ok());
     auto kem_key = std::move(status_or_kem_key.ValueOrDie());
     auto ecies_recipient(
-        std::move(EciesHkdfRecipientKemBoringSsl::New(
-                      test.curve, util::SecretDataFromStringView(test_key.priv))
+        std::move(EciesHkdfRecipientKemBoringSsl::New(test.curve, test_key.priv)
                       .ValueOrDie()));
     auto status_or_shared_secret = ecies_recipient->GenerateKey(
         kem_key->get_kem_bytes(), test.hash,

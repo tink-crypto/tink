@@ -197,6 +197,7 @@ cc_library(
         "//util:enums",
         "//util:errors",
         "//util:protobuf_helper",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:validation",

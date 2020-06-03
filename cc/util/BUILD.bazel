@@ -193,6 +193,7 @@ cc_library(
         ":constants",
         ":enums",
         ":protobuf_helper",
+        ":secret_data",
         ":status",
         ":statusor",
         "//:aead",

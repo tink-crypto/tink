@@ -16,16 +16,17 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 
-#include "absl/strings/string_view.h"
 #include "absl/memory/memory.h"
-#include "tink/hybrid_decrypt.h"
-#include "tink/key_manager.h"
+#include "absl/strings/string_view.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/key_manager.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -63,7 +64,8 @@ EciesAeadHkdfPrivateKeyManager::CreateKey(
   // Build EciesAeadHkdfPrivateKey.
   EciesAeadHkdfPrivateKey ecies_private_key;
   ecies_private_key.set_version(get_version());
-  ecies_private_key.set_key_value(ec_key.priv);
+  ecies_private_key.set_key_value(
+      std::string(util::SecretDataAsStringView(ec_key.priv)));
   auto ecies_public_key = ecies_private_key.mutable_public_key();
   ecies_public_key->set_version(get_version());
   ecies_public_key->set_x(ec_key.pub_x);

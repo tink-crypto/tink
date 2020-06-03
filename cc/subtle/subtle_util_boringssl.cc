@@ -16,6 +16,9 @@
 
 #include "tink/subtle/subtle_util_boringssl.h"
 
+#include <algorithm>
+#include <iterator>
+
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
@@ -30,6 +33,7 @@
 #include "openssl/rsa.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -165,11 +169,12 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
     return pub_y_str.status();
   }
   ec_key.pub_y = pub_y_str.ValueOrDie();
-  auto priv_key_str = bn2str(priv_key, ScalarSizeInBytes(group.get()));
-  if (!priv_key_str.ok()) {
-    return priv_key_str.status();
+  auto priv_key_or =
+      BignumToSecretData(priv_key, ScalarSizeInBytes(group.get()));
+  if (!priv_key_or.ok()) {
+    return priv_key_or.status();
   }
-  ec_key.priv = priv_key_str.ValueOrDie();
+  ec_key.priv = priv_key_or.ValueOrDie();
   return ec_key;
 }
 
@@ -191,9 +196,8 @@ SubtleUtilBoringSSL::EcKey SubtleUtilBoringSSL::EcKeyFromX25519Key(
   ec_key.pub_x =
       std::string(reinterpret_cast<const char *>(x25519_key->public_value),
                   X25519_PUBLIC_VALUE_LEN);
-  ec_key.priv =
-      std::string(reinterpret_cast<const char *>(x25519_key->private_key),
-                  X25519_PRIVATE_KEY_LEN);
+  ec_key.priv = util::SecretData(std::begin(x25519_key->private_key),
+                                 std::end(x25519_key->private_key));
   return ec_key;
 }
 
@@ -211,10 +215,10 @@ SubtleUtilBoringSSL::X25519KeyFromEcKey(
                         "Invalid X25519 key. pub_y is unexpectedly set.");
   }
   // Curve25519 public key is x, not (x,y).
-  ec_key.pub_x.copy(reinterpret_cast<char *>(x25519_key->public_value),
-                    X25519_PUBLIC_VALUE_LEN);
-  ec_key.priv.copy(reinterpret_cast<char *>(x25519_key->private_key),
-                   X25519_PRIVATE_KEY_LEN);
+  std::copy_n(ec_key.pub_x.begin(), X25519_PUBLIC_VALUE_LEN,
+              std::begin(x25519_key->public_value));
+  std::copy_n(ec_key.priv.begin(), X25519_PRIVATE_KEY_LEN,
+              std::begin(x25519_key->private_key));
   return std::move(x25519_key);
 }
 

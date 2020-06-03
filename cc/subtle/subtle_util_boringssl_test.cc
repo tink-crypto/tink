@@ -440,7 +440,7 @@ TEST(CreateNewX25519KeyTest, KeyIsWellFormed) {
   EXPECT_EQ(ec_key.curve, EllipticCurveType::CURVE25519);
   EXPECT_EQ(ec_key.pub_x.length(), X25519_PUBLIC_VALUE_LEN);
   EXPECT_TRUE(ec_key.pub_y.empty());
-  EXPECT_EQ(ec_key.priv.length(), X25519_PRIVATE_KEY_LEN);
+  EXPECT_EQ(ec_key.priv.size(), X25519_PRIVATE_KEY_LEN);
 }
 
 TEST(CreateNewX25519KeyTest, GeneratesDifferentKeysEveryTime) {
