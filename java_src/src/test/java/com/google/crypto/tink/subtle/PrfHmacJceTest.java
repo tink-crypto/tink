@@ -17,9 +17,11 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.prf.Prf;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
@@ -28,9 +30,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for MacJce. */
+/**
+ * Unit tests for PrfHmacJce. Note that this used to be a Mac primitive, so all these tests first
+ * convert the Prf to a Mac.
+ */
 @RunWith(JUnit4.class)
-public class MacJceTest {
+public class PrfHmacJceTest {
   private static class MacTestVector {
     String algName;
     public byte[] key;
@@ -75,7 +80,8 @@ public class MacJceTest {
   @Test
   public void testMacTestVectors() throws Exception {
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(t.algName, new SecretKeySpec(t.key, "HMAC"), t.tag.length);
+      Mac mac =
+          new PrfMac(new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC")), t.tag.length);
       assertArrayEquals(t.tag, mac.computeMac(t.message));
       try {
         mac.verifyMac(t.tag, t.message);
@@ -86,9 +92,23 @@ public class MacJceTest {
   }
 
   @Test
+  public void testPrfPrefixOfMac() throws Exception {
+    for (MacTestVector t : HMAC_TEST_VECTORS) {
+      Prf prf = new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC"));
+      Mac mac = new PrfMac(prf, t.tag.length);
+      byte[] prBytes = prf.compute(t.message, t.tag.length - 1);
+      byte[] tag = mac.computeMac(t.message);
+
+      assertEquals(prBytes.length, t.tag.length - 1);
+      assertArrayEquals(prBytes, Arrays.copyOf(tag, prBytes.length));
+    }
+  }
+
+  @Test
   public void testTagTruncation() throws Exception {
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(t.algName, new SecretKeySpec(t.key, "HMAC"), t.tag.length);
+      Mac mac =
+          new PrfMac(new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC")), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -101,8 +121,10 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(
-          t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac =
+          new PrfMac(
+              new PrfHmacJce(t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC")),
+              t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -118,7 +140,8 @@ public class MacJceTest {
   @Test
   public void testBitFlipMessage() throws Exception {
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(t.algName, new SecretKeySpec(t.key, "HMAC"), t.tag.length);
+      Mac mac =
+          new PrfMac(new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC")), t.tag.length);
       for (int b = 0; b < t.message.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedMessage = Arrays.copyOf(t.message, t.message.length);
@@ -134,8 +157,10 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(
-          t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac =
+          new PrfMac(
+              new PrfHmacJce(t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC")),
+              t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -151,7 +176,8 @@ public class MacJceTest {
   @Test
   public void testBitFlipTag() throws Exception {
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(t.algName, new SecretKeySpec(t.key, "HMAC"), t.tag.length);
+      Mac mac =
+          new PrfMac(new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC")), t.tag.length);
       for (int b = 0; b < t.tag.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
@@ -167,8 +193,10 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(
-          t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac =
+          new PrfMac(
+              new PrfHmacJce(t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC")),
+              t.tag.length);
       for (int b = 0; b < t.tag.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
@@ -187,7 +215,7 @@ public class MacJceTest {
   @Test
   public void testThrowExceptionIfKeySizeIsTooSmall() throws Exception {
     try {
-      new MacJce("HMACSHA1", new SecretKeySpec(Random.randBytes(15), "HMAC"), 16);
+      new PrfMac(new PrfHmacJce("HMACSHA1", new SecretKeySpec(Random.randBytes(15), "HMAC")), 16);
       fail("Expected InvalidAlgorithmParameterException");
     } catch (InvalidAlgorithmParameterException ex) {
       // expected.
@@ -201,14 +229,28 @@ public class MacJceTest {
     testThrowExceptionIfTagSizeIsTooSmall("HMACSHA512");
   }
 
+  @Test
+  public void testPrfAllowsSmallTagSizeCompute() throws Exception {
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA1");
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA256");
+    testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA512");
+  }
+
   private static void testThrowExceptionIfTagSizeIsTooSmall(String algoName) throws Exception {
-    for (int i = 0; i < MacJce.MIN_TAG_SIZE_IN_BYTES; i++) {
+    for (int i = 0; i < PrfMac.MIN_TAG_SIZE_IN_BYTES; i++) {
       try {
-        new MacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC"), i);
+        new PrfMac(new PrfHmacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC")), i);
         fail("Expected InvalidAlgorithmParameterException");
       } catch (InvalidAlgorithmParameterException ex) {
         // expected.
       }
+    }
+  }
+
+  private static void testPrfNoExceptionIfTagSizeIsTooSmall(String algoName) throws Exception {
+    for (int i = 0; i < PrfMac.MIN_TAG_SIZE_IN_BYTES; i++) {
+      new PrfHmacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC"))
+          .compute(new byte[100], i);
     }
   }
 
@@ -217,12 +259,27 @@ public class MacJceTest {
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA1", 21);
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA256", 33);
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA512", 65);
+    testPrfThrowsExceptionIfTagSizeIsTooLarge("HMACSHA1", 21);
+    testPrfThrowsExceptionIfTagSizeIsTooLarge("HMACSHA256", 33);
+    testPrfThrowsExceptionIfTagSizeIsTooLarge("HMACSHA512", 65);
   }
 
   private static void testThrowExceptionIfTagSizeIsTooLarge(String algoName, int tagSize)
       throws Exception {
     try {
-      new MacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC"), tagSize);
+      new PrfMac(
+          new PrfHmacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC")), tagSize);
+      fail("Expected InvalidAlgorithmParameterException");
+    } catch (InvalidAlgorithmParameterException ex) {
+      // expected.
+    }
+  }
+
+  public void testPrfThrowsExceptionIfTagSizeIsTooLarge(String algoName, int tagSize)
+      throws Exception {
+    try {
+      Prf r = new PrfHmacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC"));
+      r.compute(new byte[30], tagSize);
       fail("Expected InvalidAlgorithmParameterException");
     } catch (InvalidAlgorithmParameterException ex) {
       // expected.

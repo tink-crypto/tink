@@ -150,7 +150,7 @@ public class AeadThreadSafetyTest {
     int macSize = 12;
     IndCpaCipher cipher = new AesCtrJceCipher(key, ivSize);
     SecretKeySpec keySpec = new SecretKeySpec(macKey, "HMAC");
-    Mac mac = new MacJce("HMACSHA256", keySpec, macSize);
+    Mac mac = new PrfMac(new PrfHmacJce("HMACSHA256", keySpec), macSize);
 
     // TODO(b/148134669): Remove the following line.
     // There is a potential (but unlikely) race in java.security.Provider. Since AesCtrHmac

@@ -44,7 +44,7 @@ import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
-import com.google.crypto.tink.subtle.MacJce;
+import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil.DummyAead;
 import com.google.protobuf.ByteString;
@@ -158,7 +158,7 @@ public class RegistryTest {
       fail("Expected ClassCastException");
     } catch (ClassCastException e) {
       assertExceptionContains(e, "com.google.crypto.tink.Aead");
-      assertExceptionContains(e, "com.google.crypto.tink.subtle.MacJce");
+      assertExceptionContains(e, "com.google.crypto.tink.subtle.PrfMac");
     }
   }
 
@@ -386,7 +386,7 @@ public class RegistryTest {
     assertThat(hmacKey.getParams().getHash()).isEqualTo(HashType.SHA256);
     assertThat(hmacKeyData.getTypeUrl()).isEqualTo(MacConfig.HMAC_TYPE_URL);
     // This might break when we add native implementations.
-    assertThat(mac.getClass()).isEqualTo(MacJce.class);
+    assertThat(mac.getClass()).isEqualTo(PrfMac.class);
   }
 
   @Test
@@ -401,7 +401,7 @@ public class RegistryTest {
     assertThat(hmacKey.getParams().getHash()).isEqualTo(HashType.SHA256);
     assertThat(hmacKeyData.getTypeUrl()).isEqualTo(MacConfig.HMAC_TYPE_URL);
     // This might break when we add native implementations.
-    assertThat(mac.getClass()).isEqualTo(MacJce.class);
+    assertThat(mac.getClass()).isEqualTo(PrfMac.class);
   }
 
   @Test

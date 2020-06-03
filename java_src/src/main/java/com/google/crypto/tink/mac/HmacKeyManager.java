@@ -25,7 +25,8 @@ import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.MacJce;
+import com.google.crypto.tink.subtle.PrfHmacJce;
+import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
@@ -37,7 +38,8 @@ import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This key manager generates new {@code HmacKey} keys and produces new instances of {@code MacJce}.
+ * This key manager generates new {@code HmacKey} keys and produces new instances of {@code
+ * PrfHmacJce}.
  */
 public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
   public HmacKeyManager() {
@@ -52,11 +54,11 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
             int tagSize = key.getParams().getTagSize();
             switch (hash) {
               case SHA1:
-                return new MacJce("HMACSHA1", keySpec, tagSize);
+                return new PrfMac(new PrfHmacJce("HMACSHA1", keySpec), tagSize);
               case SHA256:
-                return new MacJce("HMACSHA256", keySpec, tagSize);
+                return new PrfMac(new PrfHmacJce("HMACSHA256", keySpec), tagSize);
               case SHA512:
-                return new MacJce("HMACSHA512", keySpec, tagSize);
+                return new PrfMac(new PrfHmacJce("HMACSHA512", keySpec), tagSize);
               default:
                 throw new GeneralSecurityException("unknown hash");
             }

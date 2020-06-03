@@ -20,7 +20,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "proto/Tink.pbobjc.h"
+#import "third_party/tink/proto/Tink.pbobjc.h"
 
 #include "proto/tink.pb.h"
 

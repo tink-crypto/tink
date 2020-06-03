@@ -16,69 +16,58 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.prf.Prf;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
-/**
- * {@link Mac} implementations in JCE.
- *
- * @since 1.0.0
- */
+/** {@link Prf} implementation using JCE. */
 @Immutable
-public final class MacJce implements Mac {
-  static final int MIN_TAG_SIZE_IN_BYTES = 10;
+public final class PrfHmacJce implements Prf {
   static final int MIN_KEY_SIZE_IN_BYTES = 16;
 
   @SuppressWarnings("Immutable")  // We do not mutate the underlying mac.
   private final javax.crypto.Mac mac;
 
-  private final int digestSize;
   private final String algorithm;
   @SuppressWarnings("Immutable")  // We do not mutate the key.
   private final java.security.Key key;
 
-  public MacJce(String algorithm, java.security.Key key, int digestSize)
-      throws GeneralSecurityException {
-    if (digestSize < MIN_TAG_SIZE_IN_BYTES) {
-      throw new InvalidAlgorithmParameterException(
-          "tag size too small, need at least " + MIN_TAG_SIZE_IN_BYTES + " bytes");
-    }
+  private final int maxOutputLength;
+
+  public PrfHmacJce(String algorithm, java.security.Key key) throws GeneralSecurityException {
+    this.algorithm = algorithm;
+    this.key = key;
+    this.mac = EngineFactory.MAC.getInstance(algorithm);
     if (key.getEncoded().length < MIN_KEY_SIZE_IN_BYTES) {
       throw new InvalidAlgorithmParameterException(
           "key size too small, need at least " + MIN_KEY_SIZE_IN_BYTES + " bytes");
     }
+
     switch (algorithm) {
       case "HMACSHA1":
-        if (digestSize > 20) {
-          throw new InvalidAlgorithmParameterException("tag size too big");
-        }
+        maxOutputLength = 20;
         break;
       case "HMACSHA256":
-        if (digestSize > 32) {
-          throw new InvalidAlgorithmParameterException("tag size too big");
-        }
+        maxOutputLength = 32;
         break;
       case "HMACSHA512":
-        if (digestSize > 64) {
-          throw new InvalidAlgorithmParameterException("tag size too big");
-        }
+        maxOutputLength = 64;
         break;
       default:
         throw new NoSuchAlgorithmException("unknown Hmac algorithm: " + algorithm);
     }
-
-    this.algorithm = algorithm;
-    this.digestSize = digestSize;
-    this.key = key;
-    this.mac = EngineFactory.MAC.getInstance(algorithm);
     mac.init(key);
   }
 
   @Override
-  public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
+  public byte[] compute(byte[] data, int outputLength) throws GeneralSecurityException {
+    if (outputLength > maxOutputLength) {
+      throw new InvalidAlgorithmParameterException("tag size too big");
+    }
+
     javax.crypto.Mac tmp;
     try {
       // Cloning a mac is frequently fast and thread-safe.
@@ -89,15 +78,11 @@ public final class MacJce implements Mac {
       tmp.init(this.key);
     }
     tmp.update(data);
-    byte[] digest = new byte[digestSize];
-    System.arraycopy(tmp.doFinal(), 0, digest, 0, digestSize);
-    return digest;
+    return Arrays.copyOf(tmp.doFinal(), outputLength);
   }
 
-  @Override
-  public void verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException {
-    if (!Bytes.equal(computeMac(data), mac)) {
-      throw new GeneralSecurityException("invalid MAC");
-    }
+  /** Returns the maximum supported tag length. */
+  public int getMaxOutputLength() {
+    return maxOutputLength;
   }
 }

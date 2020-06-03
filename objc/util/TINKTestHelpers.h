@@ -18,10 +18,10 @@
 
 #include "absl/strings/string_view.h"
 
-#import "GPBMessage.h"
-#import "proto/Common.pbobjc.h"
-#import "proto/EciesAeadHkdf.pbobjc.h"
-#import "proto/Tink.pbobjc.h"
+#import "third_party/protobuf/objectivec/GPBMessage.h"
+#import "third_party/tink/proto/Common.pbobjc.h"
+#import "third_party/tink/proto/EciesAeadHkdf.pbobjc.h"
+#import "third_party/tink/proto/Tink.pbobjc.h"
 
 TINKPBKeyset *TINKCreateKeyset(TINKPBKeyset_Key *primaryKey, TINKPBKeyset_Key *key1,
                                TINKPBKeyset_Key *key2);

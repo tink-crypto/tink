@@ -20,7 +20,7 @@
 
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
-#import "proto/Tink.pbobjc.h"
+#import "third_party/tink/proto/Tink.pbobjc.h"
 
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"

@@ -25,12 +25,12 @@
 #import "objc/TINKKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/util/TINKProtoHelpers.h"
-#import "proto/AesCtr.pbobjc.h"
-#import "proto/AesCtrHmacAead.pbobjc.h"
-#import "proto/AesGcm.pbobjc.h"
-#import "proto/Common.pbobjc.h"
-#import "proto/Hmac.pbobjc.h"
-#import "proto/Tink.pbobjc.h"
+#import "third_party/tink/proto/AesCtr.pbobjc.h"
+#import "third_party/tink/proto/AesCtrHmacAead.pbobjc.h"
+#import "third_party/tink/proto/AesGcm.pbobjc.h"
+#import "third_party/tink/proto/Common.pbobjc.h"
+#import "third_party/tink/proto/Hmac.pbobjc.h"
+#import "third_party/tink/proto/Tink.pbobjc.h"
 
 using google::crypto::tink::XChaCha20Poly1305KeyFormat;
 

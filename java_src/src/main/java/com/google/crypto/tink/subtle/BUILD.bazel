@@ -57,7 +57,6 @@ java_library(
         ":mac",
         ":subtle",
         "//src/main/java/com/google/crypto/tink:primitives",
-        "//src/main/java/com/google/crypto/tink/annotations",
     ],
 )
 
@@ -83,13 +82,15 @@ java_library(
     srcs = [
         "AesCmac.java",
         "AesUtil.java",
-        "MacJce.java",
+        "PrfHmacJce.java",
+        "PrfMac.java",
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
         "//src/main/java/com/google/crypto/tink:primitives",
         "//src/main/java/com/google/crypto/tink/annotations",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
