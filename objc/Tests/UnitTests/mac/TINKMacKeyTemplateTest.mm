@@ -22,7 +22,6 @@
 
 #import "objc/TINKKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"
-#import "objc/util/TINKProtoHelpers.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 

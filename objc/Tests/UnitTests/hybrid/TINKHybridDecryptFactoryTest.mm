@@ -34,7 +34,6 @@
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
-#import "objc/util/TINKTestHelpers.h"
 
 using ::crypto::tink::TestKeysetHandle;
 using ::crypto::tink::test::AddTinkKey;

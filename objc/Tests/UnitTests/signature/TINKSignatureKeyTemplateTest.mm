@@ -22,7 +22,6 @@
 
 #import "objc/TINKKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"
-#import "objc/util/TINKProtoHelpers.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
@@ -133,9 +132,6 @@ static std::string const kTypeURLEd25519 =
   XCTAssertNotNil(tpl);
 
   error = nil;
-  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
 
   XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURLRsaPkcs1);
   XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
