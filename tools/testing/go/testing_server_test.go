@@ -30,8 +30,8 @@ import (
 	"google3/third_party/golang/grpc/grpc"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
-	pbgrpc "google3/third_party/tink/tools/testing/testing_api_go_grpc"
-	pb "google3/third_party/tink/tools/testing/testing_api_go_proto"
+	pbgrpc "github.com/google/tink/go/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/go/proto/testing/testing_api_go_proto"
 )
 
 const (

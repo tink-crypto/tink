@@ -29,9 +29,9 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testkeyset"
+	pbgrpc "github.com/google/tink/go/proto/testing/testing_api_go_grpc"
+	pb "github.com/google/tink/go/proto/testing/testing_api_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
-	pbgrpc "google3/third_party/tink/tools/testing/testing_api_go_grpc"
-	pb "google3/third_party/tink/tools/testing/testing_api_go_proto"
 
 	"github.com/golang/protobuf/proto"
 )

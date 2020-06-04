@@ -11,8 +11,9 @@
 // limitations under the License.
 syntax = "proto3";
 
-package third_party.tink.tools.testing;
+package third_party.tink.proto.testing;
 
+option java_package = "com.google.crypto.tink.proto.testing";
 option java_multiple_files = true;
 
 // Service for Keyset operations.
