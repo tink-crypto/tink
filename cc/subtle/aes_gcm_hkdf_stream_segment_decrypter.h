@@ -112,7 +112,7 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
   bool is_initialized_ = false;
   std::vector<uint8_t> salt_;
   std::vector<uint8_t> nonce_prefix_;
-  bssl::ScopedEVP_AEAD_CTX ctx_;
+  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
 };
 
 }  // namespace subtle

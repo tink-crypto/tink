@@ -144,9 +144,10 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
   if (aead == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }
-  if (EVP_AEAD_CTX_init(ctx_.get(), aead, key.data(), key.size(),
-                        AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes,
-                        nullptr) != 1) {
+  ctx_.reset(
+      EVP_AEAD_CTX_new(aead, key.data(), key.size(),
+                       AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes));
+  if (!ctx_) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_AEAD_CTX");
   }
