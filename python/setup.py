@@ -15,14 +15,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from distutils import spawn
 import glob
 import os
 import posixpath
+import re
 import shutil
 import subprocess
 import sys
 
-from distutils import spawn
 import setuptools
 from setuptools.command import build_ext
 
@@ -117,30 +118,29 @@ def _patch_workspace(workspace_content):
   # This replaces the paths with the latest http_archive.
   # In order to override this with a local WORKSPACE use the TINK_BASE_PATH
   # environment variable.
-  base = ('local_repository(\n'
-          '    name = "tink_base",\n'
-          '    path = "..",\n'
-          ')\n')
-
-  cc = ('local_repository(\n'
-        '    name = "tink_cc",\n'
-        '    path = "../cc",\n'
-        ')\n')
 
   if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
     base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
-    base_patched = ('local_repository(\n'
-                    '    name = "tink_base",\n'
-                    '    path = "{}",\n'
-                    ')\n'.format(base_path))
-
-    cc_patched = ('local_repository(\n'
-                  '    name = "tink_cc",\n'
-                  '    path = "{}/cc",\n'
-                  ')\n'.format(base_path))
+    workspace_content = re.sub(r'(?<="tink_base",\n    path = ").*(?=\n)',
+                               base_path + '",  # Modified by setup.py',
+                               workspace_content)
+    workspace_content = re.sub(r'(?<="tink_cc",\n    path = ").*(?=\n)',
+                               base_path + '/cc' + '",  # Modified by setup.py',
+                               workspace_content)
   else:
     # If not base is specified use the latest version from GitHub
+    base = ('local_repository(\n'
+            '    name = "tink_base",\n'
+            '    path = "..",\n'
+            ')\n')
+
+    cc = ('local_repository(\n'
+          '    name = "tink_cc",\n'
+          '    path = "../cc",\n'
+          ')\n')
+
     base_patched = (
+        '# Modified by setup.py\n'
         'http_archive(\n'
         '    name = "tink_base",\n'
         '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
@@ -148,14 +148,15 @@ def _patch_workspace(workspace_content):
         ')\n')
 
     cc_patched = (
+        '# Modified by setup.py\n'
         'http_archive(\n'
         '    name = "tink_cc",\n'
         '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
         '    strip_prefix = "tink-master/cc",\n'
         ')\n')
 
-  workspace_content = workspace_content.replace(base, base_patched)
-  workspace_content = workspace_content.replace(cc, cc_patched)
+    workspace_content = workspace_content.replace(base, base_patched)
+    workspace_content = workspace_content.replace(cc, cc_patched)
   return workspace_content
 
 
