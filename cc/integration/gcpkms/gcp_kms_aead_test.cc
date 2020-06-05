@@ -23,7 +23,8 @@ namespace {
 using crypto::tink::integration::gcpkms::GcpKmsAead;
 
 class GcpKmsAeadTest : public ::testing::Test {
-  // TODO(przydatek): add a test with a mock KMSClient.
+  // TODO(kste): Add tests when mock for
+  // google::cloud::kms::v1::KeyManagementService::StubInterface is available.
 };
 
 

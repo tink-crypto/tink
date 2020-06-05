@@ -28,6 +28,7 @@ from tink.testing import helper
 CREDENTIAL_PATH = os.path.join(helper.get_tink_src_path(),
                                'testdata/credential.json')
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
+LOCAL_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/europe-west1/keyRings/unit-and-integration-test/cryptoKeys/aead-key'
 BAD_KEY_URI = 'aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f'
 
 if 'TEST_SRCDIR' in os.environ:
@@ -41,6 +42,19 @@ class GcpKmsAeadTest(absltest.TestCase):
   def test_encrypt_decrypt(self):
     gcp_client = gcpkms.GcpKmsClient(KEY_URI, CREDENTIAL_PATH)
     aead = gcp_client.get_aead(KEY_URI)
+
+    plaintext = b'helloworld'
+    ciphertext = aead.encrypt(plaintext, b'')
+    self.assertEqual(plaintext, aead.decrypt(ciphertext, b''))
+
+    plaintext = b'hello'
+    associated_data = b'world'
+    ciphertext = aead.encrypt(plaintext, associated_data)
+    self.assertEqual(plaintext, aead.decrypt(ciphertext, associated_data))
+
+  def test_encrypt_decrypt_localized_uri(self):
+    gcp_client = gcpkms.GcpKmsClient(LOCAL_KEY_URI, CREDENTIAL_PATH)
+    aead = gcp_client.get_aead(LOCAL_KEY_URI)
 
     plaintext = b'helloworld'
     ciphertext = aead.encrypt(plaintext, b'')
