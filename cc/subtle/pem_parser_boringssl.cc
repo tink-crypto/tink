@@ -131,7 +131,8 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
       absl::make_unique<SubtleUtilBoringSSL::RsaPrivateKey>();
   auto n_str = SubtleUtilBoringSSL::bn2str(n_bn, BN_num_bytes(n_bn));
   auto e_str = SubtleUtilBoringSSL::bn2str(e_bn, BN_num_bytes(e_bn));
-  auto d_str = SubtleUtilBoringSSL::bn2str(d_bn, BN_num_bytes(d_bn));
+  auto d_str =
+      SubtleUtilBoringSSL::BignumToSecretData(d_bn, BN_num_bytes(d_bn));
   if (!n_str.ok()) return n_str.status();
   if (!e_str.ok()) return e_str.status();
   if (!d_str.ok()) return d_str.status();
@@ -142,8 +143,10 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   // Save factors.
   const BIGNUM *p_bn, *q_bn;
   RSA_get0_factors(bssl_rsa_key, &p_bn, &q_bn);
-  auto p_str = SubtleUtilBoringSSL::bn2str(p_bn, BN_num_bytes(p_bn));
-  auto q_str = SubtleUtilBoringSSL::bn2str(q_bn, BN_num_bytes(q_bn));
+  auto p_str =
+      SubtleUtilBoringSSL::BignumToSecretData(p_bn, BN_num_bytes(p_bn));
+  auto q_str =
+      SubtleUtilBoringSSL::BignumToSecretData(q_bn, BN_num_bytes(q_bn));
   if (!p_str.ok()) return p_str.status();
   if (!q_str.ok()) return q_str.status();
   rsa_private_key->p = std::move(p_str.ValueOrDie());
@@ -152,9 +155,12 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   // Save CRT parameters.
   const BIGNUM *dp_bn, *dq_bn, *crt_bn;
   RSA_get0_crt_params(bssl_rsa_key, &dp_bn, &dq_bn, &crt_bn);
-  auto dp_str = SubtleUtilBoringSSL::bn2str(dp_bn, BN_num_bytes(dp_bn));
-  auto dq_str = SubtleUtilBoringSSL::bn2str(dq_bn, BN_num_bytes(dq_bn));
-  auto crt_str = SubtleUtilBoringSSL::bn2str(crt_bn, BN_num_bytes(crt_bn));
+  auto dp_str =
+      SubtleUtilBoringSSL::BignumToSecretData(dp_bn, BN_num_bytes(dp_bn));
+  auto dq_str =
+      SubtleUtilBoringSSL::BignumToSecretData(dq_bn, BN_num_bytes(dq_bn));
+  auto crt_str =
+      SubtleUtilBoringSSL::BignumToSecretData(crt_bn, BN_num_bytes(crt_bn));
   if (!dp_str.ok()) return dp_str.status();
   if (!dq_str.ok()) return dq_str.status();
   if (!crt_str.ok()) return crt_str.status();

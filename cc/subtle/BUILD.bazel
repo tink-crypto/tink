@@ -254,6 +254,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -288,6 +289,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -1331,6 +1333,7 @@ cc_test(
         ":ec_util",
         ":subtle_util_boringssl",
         ":wycheproof_util",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
@@ -1521,6 +1524,7 @@ cc_test(
     deps = [
         ":pem_parser_boringssl",
         ":subtle_util_boringssl",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",

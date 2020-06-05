@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "openssl/digest.h"
@@ -73,8 +74,8 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPkcs1SignBoringSsl::New(
                                      SubtleUtilBoringSSL::GetErrors()));
   }
 
-  return std::unique_ptr<PublicKeySign>(
-      new RsaSsaPkcs1SignBoringSsl(std::move(rsa), sig_hash.ValueOrDie()));
+  return {absl::WrapUnique(
+      new RsaSsaPkcs1SignBoringSsl(std::move(rsa), sig_hash.ValueOrDie()))};
 }
 
 util::StatusOr<std::string> RsaSsaPkcs1SignBoringSsl::Sign(

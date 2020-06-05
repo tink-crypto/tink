@@ -28,6 +28,7 @@
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -129,26 +130,26 @@ TEST_F(PemParserTest, ReadRsaPrivatekey) {
             SubtleUtilBoringSSL::bn2str(e_bn, BN_num_bytes(e_bn)).ValueOrDie());
   EXPECT_EQ(key->n,
             SubtleUtilBoringSSL::bn2str(n_bn, BN_num_bytes(n_bn)).ValueOrDie());
-  EXPECT_EQ(key->d,
+  EXPECT_EQ(util::SecretDataAsStringView(key->d),
             SubtleUtilBoringSSL::bn2str(d_bn, BN_num_bytes(d_bn)).ValueOrDie());
   // Verify private key factors.
   const BIGNUM *p_bn, *q_bn;
   RSA_get0_factors(rsa_.get(), &p_bn, &q_bn);
-  EXPECT_EQ(key->p,
+  EXPECT_EQ(util::SecretDataAsStringView(key->p),
             SubtleUtilBoringSSL::bn2str(p_bn, BN_num_bytes(p_bn)).ValueOrDie());
-  EXPECT_EQ(key->q,
+  EXPECT_EQ(util::SecretDataAsStringView(key->q),
             SubtleUtilBoringSSL::bn2str(q_bn, BN_num_bytes(q_bn)).ValueOrDie());
   // Verify CRT parameters.
   const BIGNUM *dp_bn, *dq_bn, *crt_bn;
   RSA_get0_crt_params(rsa_.get(), &dp_bn, &dq_bn, &crt_bn);
   EXPECT_EQ(
-      key->dp,
+      util::SecretDataAsStringView(key->dp),
       SubtleUtilBoringSSL::bn2str(dp_bn, BN_num_bytes(dp_bn)).ValueOrDie());
   EXPECT_EQ(
-      key->dq,
+      util::SecretDataAsStringView(key->dq),
       SubtleUtilBoringSSL::bn2str(dq_bn, BN_num_bytes(dq_bn)).ValueOrDie());
   EXPECT_EQ(
-      key->crt,
+      util::SecretDataAsStringView(key->crt),
       SubtleUtilBoringSSL::bn2str(crt_bn, BN_num_bytes(crt_bn)).ValueOrDie());
 }
 

@@ -33,6 +33,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
 #include "tink/subtle/wycheproof_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -327,11 +328,21 @@ TEST(CreatesNewRsaKeyPairTest, KeyIsWellFormed) {
                                                     &public_key),
               IsOk());
   auto n = std::move(SubtleUtilBoringSSL::str2bn(private_key.n).ValueOrDie());
-  auto d = std::move(SubtleUtilBoringSSL::str2bn(private_key.d).ValueOrDie());
-  auto p = std::move(SubtleUtilBoringSSL::str2bn(private_key.p).ValueOrDie());
-  auto q = std::move(SubtleUtilBoringSSL::str2bn(private_key.q).ValueOrDie());
-  auto dp = std::move(SubtleUtilBoringSSL::str2bn(private_key.dp).ValueOrDie());
-  auto dq = std::move(SubtleUtilBoringSSL::str2bn(private_key.dq).ValueOrDie());
+  auto d = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.d))
+          .ValueOrDie());
+  auto p = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.p))
+          .ValueOrDie());
+  auto q = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.q))
+          .ValueOrDie());
+  auto dp = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.dp))
+          .ValueOrDie());
+  auto dq = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.dq))
+          .ValueOrDie());
   bssl::UniquePtr<BN_CTX> ctx(BN_CTX_new());
 
   // Check n = p * q.

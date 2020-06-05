@@ -32,6 +32,7 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/keyset_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/common.pb.h"
@@ -101,12 +102,18 @@ util::StatusOr<RsaSsaPssPrivateKey> NewRsaSsaPrivateKey(
 
   // RSA Private key parameters.
   private_key_proto.set_version(key_version);
-  private_key_proto.set_d(private_key_subtle.d);
-  private_key_proto.set_p(private_key_subtle.p);
-  private_key_proto.set_q(private_key_subtle.q);
-  private_key_proto.set_dp(private_key_subtle.dp);
-  private_key_proto.set_dq(private_key_subtle.dq);
-  private_key_proto.set_crt(private_key_subtle.crt);
+  private_key_proto.set_d(
+      std::string(util::SecretDataAsStringView(private_key_subtle.d)));
+  private_key_proto.set_p(
+      std::string(util::SecretDataAsStringView(private_key_subtle.p)));
+  private_key_proto.set_q(
+      std::string(util::SecretDataAsStringView(private_key_subtle.q)));
+  private_key_proto.set_dp(
+      std::string(util::SecretDataAsStringView(private_key_subtle.dp)));
+  private_key_proto.set_dq(
+      std::string(util::SecretDataAsStringView(private_key_subtle.dq)));
+  private_key_proto.set_crt(
+      std::string(util::SecretDataAsStringView(private_key_subtle.crt)));
 
   // Inner RSA public key.
   RsaSsaPssPublicKey* public_key_proto = private_key_proto.mutable_public_key();
@@ -134,12 +141,18 @@ RsaSsaPkcs1PrivateKey NewRsaSsaPkcs1PrivateKey(
 
   // RSA Private key parameters.
   private_key_proto.set_version(key_version);
-  private_key_proto.set_d(private_key_subtle.d);
-  private_key_proto.set_p(private_key_subtle.p);
-  private_key_proto.set_q(private_key_subtle.q);
-  private_key_proto.set_dp(private_key_subtle.dp);
-  private_key_proto.set_dq(private_key_subtle.dq);
-  private_key_proto.set_crt(private_key_subtle.crt);
+  private_key_proto.set_d(
+      std::string(util::SecretDataAsStringView(private_key_subtle.d)));
+  private_key_proto.set_p(
+      std::string(util::SecretDataAsStringView(private_key_subtle.p)));
+  private_key_proto.set_q(
+      std::string(util::SecretDataAsStringView(private_key_subtle.q)));
+  private_key_proto.set_dp(
+      std::string(util::SecretDataAsStringView(private_key_subtle.dp)));
+  private_key_proto.set_dq(
+      std::string(util::SecretDataAsStringView(private_key_subtle.dq)));
+  private_key_proto.set_crt(
+      std::string(util::SecretDataAsStringView(private_key_subtle.crt)));
 
   // Inner RSA Public key parameters.
   RsaSsaPkcs1PublicKey* public_key_proto =

@@ -27,6 +27,7 @@
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -47,12 +48,12 @@ RsaSsaPkcs1PrivateKey RsaPrivateKeySubtleToProto(
     const subtle::SubtleUtilBoringSSL::RsaPrivateKey& private_key) {
   RsaSsaPkcs1PrivateKey key_proto;
   key_proto.set_version(RsaSsaPkcs1SignKeyManager().get_version());
-  key_proto.set_d(private_key.d);
-  key_proto.set_p(private_key.p);
-  key_proto.set_q(private_key.q);
-  key_proto.set_dp(private_key.dp);
-  key_proto.set_dq(private_key.dq);
-  key_proto.set_crt(private_key.crt);
+  key_proto.set_d(std::string(util::SecretDataAsStringView(private_key.d)));
+  key_proto.set_p(std::string(util::SecretDataAsStringView(private_key.p)));
+  key_proto.set_q(std::string(util::SecretDataAsStringView(private_key.q)));
+  key_proto.set_dp(std::string(util::SecretDataAsStringView(private_key.dp)));
+  key_proto.set_dq(std::string(util::SecretDataAsStringView(private_key.dq)));
+  key_proto.set_crt(std::string(util::SecretDataAsStringView(private_key.crt)));
   auto* public_key_proto = key_proto.mutable_public_key();
   public_key_proto->set_version(RsaSsaPkcs1SignKeyManager().get_version());
   public_key_proto->set_n(private_key.n);
@@ -65,12 +66,12 @@ subtle::SubtleUtilBoringSSL::RsaPrivateKey RsaPrivateKeyProtoToSubtle(
   subtle::SubtleUtilBoringSSL::RsaPrivateKey key;
   key.n = key_proto.public_key().n();
   key.e = key_proto.public_key().e();
-  key.d = key_proto.d();
-  key.p = key_proto.p();
-  key.q = key_proto.q();
-  key.dp = key_proto.dp();
-  key.dq = key_proto.dq();
-  key.crt = key_proto.crt();
+  key.d = util::SecretDataFromStringView(key_proto.d());
+  key.p = util::SecretDataFromStringView(key_proto.p());
+  key.q = util::SecretDataFromStringView(key_proto.q());
+  key.dp = util::SecretDataFromStringView(key_proto.dp());
+  key.dq = util::SecretDataFromStringView(key_proto.dq());
+  key.crt = util::SecretDataFromStringView(key_proto.crt());
   return key;
 }
 

@@ -564,7 +564,7 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
   // Save exponents.
   auto n_str = bn2str(n_bn, BN_num_bytes(n_bn));
   auto e_str = bn2str(e_bn, BN_num_bytes(e_bn));
-  auto d_str = bn2str(d_bn, BN_num_bytes(d_bn));
+  auto d_str = BignumToSecretData(d_bn, BN_num_bytes(d_bn));
   if (!n_str.ok()) return n_str.status();
   if (!e_str.ok()) return e_str.status();
   if (!d_str.ok()) return d_str.status();
@@ -578,8 +578,8 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
   // Save factors.
   const BIGNUM *p_bn, *q_bn;
   RSA_get0_factors(rsa.get(), &p_bn, &q_bn);
-  auto p_str = bn2str(p_bn, BN_num_bytes(p_bn));
-  auto q_str = bn2str(q_bn, BN_num_bytes(q_bn));
+  auto p_str = BignumToSecretData(p_bn, BN_num_bytes(p_bn));
+  auto q_str = BignumToSecretData(q_bn, BN_num_bytes(q_bn));
   if (!p_str.ok()) return p_str.status();
   if (!q_str.ok()) return q_str.status();
   private_key->p = std::move(p_str.ValueOrDie());
@@ -588,9 +588,9 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
   // Save CRT parameters.
   const BIGNUM *dp_bn, *dq_bn, *crt_bn;
   RSA_get0_crt_params(rsa.get(), &dp_bn, &dq_bn, &crt_bn);
-  auto dp_str = bn2str(dp_bn, BN_num_bytes(dp_bn));
-  auto dq_str = bn2str(dq_bn, BN_num_bytes(dq_bn));
-  auto crt_str = bn2str(crt_bn, BN_num_bytes(crt_bn));
+  auto dp_str = BignumToSecretData(dp_bn, BN_num_bytes(dp_bn));
+  auto dq_str = BignumToSecretData(dq_bn, BN_num_bytes(dq_bn));
+  auto crt_str = BignumToSecretData(crt_bn, BN_num_bytes(crt_bn));
   if (!dp_str.ok()) return dp_str.status();
   if (!dq_str.ok()) return dq_str.status();
   if (!crt_str.ok()) return crt_str.status();
@@ -606,7 +606,7 @@ util::Status SubtleUtilBoringSSL::CopyKey(
     const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
   auto n = SubtleUtilBoringSSL::str2bn(key.n);
   auto e = SubtleUtilBoringSSL::str2bn(key.e);
-  auto d = SubtleUtilBoringSSL::str2bn(key.d);
+  auto d = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.d));
   if (!n.ok()) return n.status();
   if (!e.ok()) return e.status();
   if (!d.ok()) return d.status();
@@ -626,8 +626,8 @@ util::Status SubtleUtilBoringSSL::CopyKey(
 // static
 util::Status SubtleUtilBoringSSL::CopyPrimeFactors(
     const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
-  auto p = SubtleUtilBoringSSL::str2bn(key.p);
-  auto q = SubtleUtilBoringSSL::str2bn(key.q);
+  auto p = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.p));
+  auto q = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.q));
   if (!p.ok()) return p.status();
   if (!q.ok()) return q.status();
   if (RSA_set0_factors(rsa, p.ValueOrDie().get(), q.ValueOrDie().get()) != 1) {
@@ -643,9 +643,9 @@ util::Status SubtleUtilBoringSSL::CopyPrimeFactors(
 // static
 util::Status SubtleUtilBoringSSL::CopyCrtParams(
     const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
-  auto dp = SubtleUtilBoringSSL::str2bn(key.dp);
-  auto dq = SubtleUtilBoringSSL::str2bn(key.dq);
-  auto crt = SubtleUtilBoringSSL::str2bn(key.crt);
+  auto dp = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.dp));
+  auto dq = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.dq));
+  auto crt = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.crt));
   if (!dp.ok()) return dp.status();
   if (!dq.ok()) return dq.status();
   if (!crt.ok()) return crt.status();

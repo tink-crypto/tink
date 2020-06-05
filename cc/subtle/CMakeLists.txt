@@ -243,6 +243,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::memory
     absl::strings
 )
 
@@ -275,6 +276,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::memory
     absl::strings
 )
 
@@ -1152,6 +1154,7 @@ tink_cc_test(
     tink::subtle::ec_util
     tink::subtle::subtle_util_boringssl
     tink::subtle::wycheproof_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -1316,6 +1319,7 @@ tink_cc_test(
   DEPS
     tink::subtle::pem_parser_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
