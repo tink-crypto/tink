@@ -554,6 +554,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/prf/PrfImpl.html#compute-byte:A-int-">compute(byte[], int)</a></span> - Method in class com.google.crypto.tink.subtle.prf.<a href="com/google/crypto/tink/subtle/prf/PrfImpl.html" title="class in com.google.crypto.tink.subtle.prf">PrfImpl</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PrfHmacJce.html#compute-byte:A-int-">compute(byte[], int)</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PrfHmacJce.html" title="class in com.google.crypto.tink.subtle">PrfHmacJce</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Hkdf.html#computeEciesHkdfSymmetricKey-byte:A-byte:A-java.lang.String-byte:A-byte:A-int-">computeEciesHkdfSymmetricKey(byte[], byte[], String, byte[], byte[], int)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Hkdf.html" title="class in com.google.crypto.tink.subtle">Hkdf</a></dt>
 <dd>
 <div class="block">Computes symmetric key for ECIES with HKDF from the provided parameters.</div>
@@ -568,7 +570,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCmac.html#computeMac-byte:A-">computeMac(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCmac.html" title="class in com.google.crypto.tink.subtle">AesCmac</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/MacJce.html#computeMac-byte:A-">computeMac(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/MacJce.html" title="class in com.google.crypto.tink.subtle">MacJce</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PrfMac.html#computeMac-byte:A-">computeMac(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PrfMac.html" title="class in com.google.crypto.tink.subtle">PrfMac</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/prf/HkdfStreamingPrf.html#computePrf-byte:A-">computePrf(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.prf.<a href="com/google/crypto/tink/subtle/prf/HkdfStreamingPrf.html" title="class in com.google.crypto.tink.subtle.prf">HkdfStreamingPrf</a></dt>
 <dd>&nbsp;</dd>
@@ -1462,6 +1464,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ImmutableByteArray.html#getLength--">getLength()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle">ImmutableByteArray</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PrfHmacJce.html#getMaxOutputLength--">getMaxOutputLength()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PrfHmacJce.html" title="class in com.google.crypto.tink.subtle">PrfHmacJce</a></dt>
+<dd>
+<div class="block">Returns the maximum supported tag length.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#getModulus-java.security.spec.EllipticCurve-">getModulus(EllipticCurve)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
 <dd>
 <div class="block">Returns the modulus of the field used by the curve specified in ecParams.</div>
@@ -1924,7 +1930,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">HmacKeyManager</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
 <dd>
-<div class="block">This key manager generates new <code>HmacKey</code> keys and produces new instances of <code>MacJce</code>.</div>
+<div class="block">This key manager generates new <code>HmacKey</code> keys and produces new instances of <code>PrfHmacJce</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#HmacKeyManager--">HmacKeyManager()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -2389,12 +2395,6 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
-<dt><a href="com/google/crypto/tink/subtle/MacJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">MacJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
-<dd>
-<div class="block"><a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><code>Mac</code></a> implementations in JCE.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/MacJce.html#MacJce-java.lang.String-java.security.Key-int-">MacJce(String, Key, int)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/MacJce.html" title="class in com.google.crypto.tink.subtle">MacJce</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -2630,9 +2630,23 @@
 <div class="block">Static methods and registering with the <code>Registry</code> all instances of <a href="com/google/crypto/tink/subtle/prf/StreamingPrf.html" title="interface in com.google.crypto.tink.subtle.prf"><code>StreamingPrf</code></a> key types supported in a particular release of
  Tink.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/subtle/PrfHmacJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">PrfHmacJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
+<dd>
+<div class="block"><a href="com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf"><code>Prf</code></a> implementation using JCE.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PrfHmacJce.html#PrfHmacJce-java.lang.String-java.security.Key-">PrfHmacJce(String, Key)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PrfHmacJce.html" title="class in com.google.crypto.tink.subtle">PrfHmacJce</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/prf/PrfImpl.html" title="class in com.google.crypto.tink.subtle.prf"><span class="typeNameLink">PrfImpl</span></a> - Class in <a href="com/google/crypto/tink/subtle/prf/package-summary.html">com.google.crypto.tink.subtle.prf</a></dt>
 <dd>
 <div class="block">Class that implements the Prf primitive by wrapping a StreamingPrf.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/subtle/PrfMac.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">PrfMac</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
+<dd>
+<div class="block">Class that provides the functionality expressed by the Mac primitive using a Prf implementation.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PrfMac.html#PrfMac-com.google.crypto.tink.prf.Prf-int-">PrfMac(Prf, int)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PrfMac.html" title="class in com.google.crypto.tink.subtle">PrfMac</a></dt>
+<dd>
+<div class="block">Wrap <code>wrappedPrf </code> in a Mac primitive with the specified <code>tagSize</code></div>
 </dd>
 <dt><a href="com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">PrfSet</span></a> - Class in <a href="com/google/crypto/tink/prf/package-summary.html">com.google.crypto.tink.prf</a></dt>
 <dd>
@@ -3573,7 +3587,7 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCmac.html#verifyMac-byte:A-byte:A-">verifyMac(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCmac.html" title="class in com.google.crypto.tink.subtle">AesCmac</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/MacJce.html#verifyMac-byte:A-byte:A-">verifyMac(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/MacJce.html" title="class in com.google.crypto.tink.subtle">MacJce</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PrfMac.html#verifyMac-byte:A-byte:A-">verifyMac(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PrfMac.html" title="class in com.google.crypto.tink.subtle">PrfMac</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/Version.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Version</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
