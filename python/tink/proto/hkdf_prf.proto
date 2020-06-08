@@ -20,7 +20,6 @@ import "tink/proto/common.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option objc_class_prefix = "TINKPB";
 option go_package = "github.com/google/tink/proto/hkdf_prf_proto";
 
 message HkdfPrfParams {
