@@ -1,0 +1,45 @@
+load("@rules_proto_grpc//python:defs.bzl", "python_grpc_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//visibility:public"],
+)
+
+licenses(["notice"])
+
+python_grpc_library(
+    name = "testing_api_python_library",
+    deps = ["@tink_base//proto/testing:testing_api_proto"],
+)
+
+py_binary(
+    name = "testing_server",
+    srcs = ["testing_server.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":testing_api_python_library",
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+py_test(
+    name = "testing_server_test",
+    srcs = ["testing_server_test.py"],
+    data = [
+        ":testing_server",
+    ],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":testing_api_python_library",
+        requirement("absl-py"),
+        "@org_python_pypi_portpicker//:portpicker",
+        "@tink_py//tink/aead",
+    ],
+)
