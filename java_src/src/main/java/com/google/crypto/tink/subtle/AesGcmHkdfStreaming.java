@@ -173,16 +173,17 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
     return Random.randBytes(keySizeInBytes);
   }
 
-  private GCMParameterSpec paramsForSegment(byte[] prefix, int segmentNr, boolean last) {
+  private static GCMParameterSpec paramsForSegment(byte[] prefix, long segmentNr, boolean last)
+      throws GeneralSecurityException {
     ByteBuffer nonce = ByteBuffer.allocate(NONCE_SIZE_IN_BYTES);
     nonce.order(ByteOrder.BIG_ENDIAN);
     nonce.put(prefix);
-    nonce.putInt(segmentNr);
+    SubtleUtil.putAsUnsigedInt(nonce, segmentNr);
     nonce.put((byte) (last ? 1 : 0));
     return new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, nonce.array());
   }
 
-  private byte[] randomNonce() {
+  private static byte[] randomNonce() {
     return Random.randBytes(NONCE_PREFIX_IN_BYTES);
   }
 
@@ -201,8 +202,8 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
     private final SecretKeySpec keySpec;
     private final Cipher cipher;
     private final byte[] noncePrefix;
-    private ByteBuffer header;
-    private int encryptedSegments = 0;
+    private final ByteBuffer header;
+    private long encryptedSegments = 0;
 
     public AesGcmHkdfStreamEncrypter(byte[] aad) throws GeneralSecurityException {
       cipher = cipherInstance();

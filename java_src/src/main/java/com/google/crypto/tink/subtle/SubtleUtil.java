@@ -154,7 +154,7 @@ public class SubtleUtil {
   }
 
   /**
-   * Inserts {@param value} as unsigned into into {@param buffer}.
+   * Inserts {@code value} as unsigned into into {@code buffer}.
    *
    * <p>@throws GeneralSecurityException if not 0 <= value < 2^32.
    */
