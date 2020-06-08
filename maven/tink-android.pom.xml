@@ -63,5 +63,15 @@
 
   <properties>
     <java.version>1.7</java.version>
+
+    <androidx.annotation.version>1.1.0</androidx.annotation.version>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>androidx.annotation</groupId>
+      <artifactId>annotation</artifactId>
+      <version>${androidx.annotation.version}</version>
+    </dependency>
+  </dependencies>
 </project>

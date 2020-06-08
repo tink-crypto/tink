@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.integration.android;
 
-import android.annotation.TargetApi;
 import android.os.Build.VERSION_CODES;
+import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.Aead;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -35,7 +35,7 @@ import javax.crypto.spec.GCMParameterSpec;
  *
  * @since 1.0.0
  */
-@TargetApi(VERSION_CODES.M)
+@RequiresApi(VERSION_CODES.M)
 public final class AndroidKeystoreAesGcm implements Aead {
   // All instances of this class use a 12 byte IV and a 16 byte tag.
   private static final int IV_SIZE_IN_BYTES = 12;
