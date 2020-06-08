@@ -1,0 +1,23 @@
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+java_library(
+    name = "aead_factory",
+    srcs = ["AeadFactory.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "aes_gcm_factory",
+    srcs = ["AesGcmFactory.java"],
+    deps = [
+        ":aead_factory",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/subtle:aead",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
