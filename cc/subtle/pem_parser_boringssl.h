@@ -47,6 +47,16 @@ class PemParser {
   // SubtleUtilBoringSSL::EcKey.
   static util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>
   ParseEcPrivateKey(absl::string_view pem_serialized_key);
+
+  // Writes a given SubtleUtilBoringSSL::EcKey `ec_key` into a PEM serialized
+  // EC public key.
+  static util::StatusOr<std::string> WriteEcPublicKey(
+      const SubtleUtilBoringSSL::EcKey& ec_key);
+
+  // Writes a given SubtleUtilBoringSSL::EcKey `ec_key` into a PEM serialized
+  // EC private key.
+  static util::StatusOr<std::string> WriteEcPrivateKey(
+      const SubtleUtilBoringSSL::EcKey& ec_key);
 };
 
 }  // namespace subtle
