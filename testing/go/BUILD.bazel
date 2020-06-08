@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_binary", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 load("@rules_proto_grpc//go:defs.bzl", "go_grpc_library")
 
 package(
@@ -8,11 +8,6 @@ package(
 
 licenses(["notice"])
 
-proto_library(
-    name = "testing_api_proto",
-    srcs = ["testing_api.proto"],
-)
-
 go_grpc_library(
     name = "testing_api_go_grpc",
     importpath = "github.com/google/tink/proto/testing/testing_api_go_grpc",
@@ -21,18 +16,18 @@ go_grpc_library(
 
 go_library(
     name = "services",
-    importpath = "github.com/google/tink/testing/go/services",
     srcs = [
         "aead_service.go",
         "keyset_service.go",
     ],
+    importpath = "github.com/google/tink/testing/go/services",
     deps = [
         ":testing_api_go_grpc",
         "@com_github_golang_protobuf//proto:go_default_library",
         "@tink_go//aead:go_default_library",
-        "@tink_go//testkeyset:go_default_library",
         "@tink_go//keyset:go_default_library",
         "@tink_go//proto:tink_go_proto",
+        "@tink_go//testkeyset:go_default_library",
     ],
 )
 
