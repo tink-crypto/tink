@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 
 	subtleaead "github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/subtle/random"
@@ -118,7 +119,7 @@ func (a *AESGCMHKDF) deriveKey(salt, aad []byte) ([]byte, error) {
 // encrypting written data. The data is encrypted and flushed in segments of a given size.
 // Once all the data is written aesGCMHKDFWriter must be closed.
 type aesGCMHKDFWriter struct {
-	encryptedSegments int
+	encryptedSegments uint64
 	noncePrefix       []byte
 	cipher            cipher.AEAD
 	wr                io.Writer
@@ -186,7 +187,10 @@ func (w *aesGCMHKDFWriter) Write(p []byte) (int, error) {
 			break
 		}
 
-		nonce := generateSegmentNonce(w.noncePrefix, w.encryptedSegments, false)
+		nonce, err := generateSegmentNonce(w.noncePrefix, w.encryptedSegments, false)
+		if err != nil {
+			return 0, err
+		}
 
 		w.ct = w.cipher.Seal(w.ct[0:0], nonce, w.pt[:ptLim], nil)
 		if _, err := w.wr.Write(w.ct); err != nil {
@@ -204,7 +208,10 @@ func (w *aesGCMHKDFWriter) Close() error {
 		return nil
 	}
 
-	nonce := generateSegmentNonce(w.noncePrefix, w.encryptedSegments, true)
+	nonce, err := generateSegmentNonce(w.noncePrefix, w.encryptedSegments, true)
+	if err != nil {
+		return err
+	}
 
 	w.ct = w.cipher.Seal(w.ct[0:0], nonce, w.pt[0:w.ptPos], nil)
 	if _, err := w.wr.Write(w.ct); err != nil {
@@ -218,7 +225,7 @@ func (w *aesGCMHKDFWriter) Close() error {
 
 // aesGCMHKDFReader works as a wrapper around underlying io.Reader.
 type aesGCMHKDFReader struct {
-	decryptedSegments int
+	decryptedSegments uint64
 	noncePrefix       []byte
 	cipher            cipher.AEAD
 	underlyingReader  io.Reader
@@ -300,7 +307,11 @@ func (r *aesGCMHKDFReader) Read(p []byte) (int, error) {
 	} else {
 		segment = r.ctPos + n - 1
 	}
-	nonce := generateSegmentNonce(r.noncePrefix, r.decryptedSegments, lastSegment)
+	nonce, err := generateSegmentNonce(r.noncePrefix, r.decryptedSegments, lastSegment)
+	if err != nil {
+		return 0, nil
+	}
+
 	r.pt, err = r.cipher.Open(r.pt[0:0], nonce, r.ct[:segment], nil)
 	if err != nil {
 		return 0, err
@@ -333,7 +344,7 @@ func newCipher(key []byte) (cipher.AEAD, error) {
 	return ret, nil
 }
 
-func generateSegmentNonce(noncePrefix []byte, segmentNr int, last bool) []byte {
+func generateSegmentNonce(noncePrefix []byte, segmentNr uint64, last bool) ([]byte, error) {
 	var l byte
 	if last {
 		l = 1
@@ -343,8 +354,11 @@ func generateSegmentNonce(noncePrefix []byte, segmentNr int, last bool) []byte {
 	offs := 0
 	copy(nonce, noncePrefix)
 	offs += len(noncePrefix)
+	if segmentNr >= math.MaxUint32 {
+		return nil, errors.New("too many segments")
+	}
 	binary.BigEndian.PutUint32(nonce[offs:], uint32(segmentNr))
 	offs += 4
 	nonce[offs] = l
-	return nonce
+	return nonce, nil
 }
