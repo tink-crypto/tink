@@ -5,14 +5,6 @@ licenses(["notice"])
 package(default_visibility = ["//:__subpackages__"])
 
 android_library(
-    name = "android",
-    exports = [
-        ":android_keystore_aes_gcm",
-        ":android_keystore_kms_client",
-    ],
-)
-
-android_library(
     name = "android_keystore_kms_client",
     srcs = ["AndroidKeystoreKmsClient.java"],
     deps = [
@@ -68,5 +60,18 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+# Deprecated, will be removed soon.
+
+android_library(
+    name = "android",
+    exports = [
+        ":android_keyset_manager",
+        ":android_keystore_aes_gcm",
+        ":android_keystore_kms_client",
+        ":shared_pref_keyset_reader",
+        ":shared_pref_keyset_writer",
     ],
 )
