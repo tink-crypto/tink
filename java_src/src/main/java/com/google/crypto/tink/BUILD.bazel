@@ -133,8 +133,7 @@ java_library(
     ],
 )
 
-# Can't use android_library because JsonKeysetWriter needs Android API level 26.
-java_library(
+android_library(
     name = "json_keyset_writer-android",
     srcs = ["JsonKeysetWriter.java"],
     deps = [
@@ -191,8 +190,7 @@ java_library(
     ],
 )
 
-# Can't use android_library because JsonKeysetWriter needs Android API level 26.
-java_library(
+android_library(
     name = "json_keyset_reader-android",
     srcs = ["JsonKeysetReader.java"],
     deps = [
