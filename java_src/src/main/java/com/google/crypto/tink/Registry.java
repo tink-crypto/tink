@@ -34,21 +34,21 @@ import java.util.logging.Logger;
 /**
  * A global container of key managers and catalogues.
  *
- * <p>Registry maps catalogue names to instances of {@link Catalogue} and each supported key type to
- * a corresponding {@link KeyManager} object, which "understands" the key type (i.e., the KeyManager
- * can instantiate the primitive corresponding to given key, or can generate new keys of the
- * supported key type). It holds also a {@link PrimitiveWrapper} for each supported primitive,
- * so that it can wrap a set of primitives (corresponding to a keyset) into a single primitive.
+ * <p>Registry maps each supported key type to a corresponding {@link KeyManager} object, which
+ * "understands" the key type (i.e., the KeyManager can instantiate the primitive corresponding to
+ * given key, or can generate new keys of the supported key type). It holds also a {@link
+ * PrimitiveWrapper} for each supported primitive, so that it can wrap a set of primitives
+ * (corresponding to a keyset) into a single primitive.
  *
- * <p> Keeping KeyManagers for all primitives in a single Registry (rather than
- * having a separate KeyManager per primitive) enables modular construction of compound primitives
- * from "simple" ones, e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
+ * <p>Keeping KeyManagers for all primitives in a single Registry (rather than having a separate
+ * KeyManager per primitive) enables modular construction of compound primitives from "simple" ones,
+ * e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
  *
  * <p>Registry is initialized at startup, and is later used to instantiate primitives for given keys
  * or keysets. Note that regular users will usually not work directly with Registry, but rather via
- * {@link Config} and {@link KeysetHandle#getPrimitive()}-methods, which in the background register
- * and query the Registry for specific KeyManagers and PrimitiveWrappers. Registry is public though,
- * to enable configurations with custom catalogues, primitives or KeyManagers.
+ * {@link TinkConfig} and {@link KeysetHandle#getPrimitive(Class)}-methods, which in the background
+ * register and query the Registry for specific KeyManagers and PrimitiveWrappers. Registry is
+ * public though, to enable configurations with custom catalogues, primitives or KeyManagers.
  *
  * <p>To initialize the Registry with all key managers:
  *
@@ -62,8 +62,7 @@ import java.util.logging.Logger;
  * AeadConfig.register();
  * }</pre>
  *
- * <p>After the Registry has been initialized, one can use {@keysetHandle.getPrimitive} to get a
- * primitive. For example, to obtain an {@link Aead} primitive:
+ * <p>After the Registry has been initialized, one can use get a primitive as follows:
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -758,8 +757,8 @@ public final class Registry {
   }
 
   /**
-   * Method to derive a key, using the given {@param keyTemplate}, with the randomness as provided
-   * by the second argument.
+   * Method to derive a key, using the given {@code keyTemplate}, with the randomness as provided by
+   * the second argument.
    *
    * <p>This method is on purpose not in the public interface. Calling it twice using different key
    * templates and the same randomness can completely destroy any security in a system, so we
@@ -1051,4 +1050,6 @@ public final class Registry {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(keyData.getTypeUrl());
     return container.parseKey(keyData.getValue());
   }
+
+  private Registry() {}
 }
