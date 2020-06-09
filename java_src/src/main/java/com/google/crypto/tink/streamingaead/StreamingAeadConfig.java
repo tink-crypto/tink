@@ -16,13 +16,13 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods and constants for registering with the {@link Registry} all instances of {@link
- * com.google.crypto.tink.StreamingAead} key types supported in a particular release of Tink.
+ * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry} all
+ * instances of {@link com.google.crypto.tink.StreamingAead} key types supported in a particular
+ * release of Tink.
  *
  * <p>To register all StreamingAead key types provided in the latest Tink version one can do:
  *
@@ -57,7 +57,7 @@ public final class StreamingAeadConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle StreamingAead key types supported in Tink.
    *
    * @deprecated use {@link #register}
@@ -68,7 +68,7 @@ public final class StreamingAeadConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle StreamingAead key types supported in Tink.
    *
    * @since 1.2.0
