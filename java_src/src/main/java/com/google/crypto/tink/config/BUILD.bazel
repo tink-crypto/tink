@@ -1,8 +1,37 @@
 load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "tink_config",
+    srcs = ["TinkConfig.java"],
+    deps = [
+        "//proto:config_java_proto",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
+        "//src/main/java/com/google/crypto/tink/prf:prf_config",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
+    ],
+)
+
+android_library(
+    name = "tink_config-android",
+    srcs = ["TinkConfig.java"],
+    deps = [
+        "//proto:config_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config-android",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_config-android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_config-android",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config-android",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config-android",
+    ],
+)
+
+# Deprecated rules, will be removed soon
 
 filegroup(
     name = "srcs",
