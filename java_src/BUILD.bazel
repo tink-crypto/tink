@@ -2,7 +2,7 @@ load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 load("//tools:jar_jar.bzl", "jar_jar")
 
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 

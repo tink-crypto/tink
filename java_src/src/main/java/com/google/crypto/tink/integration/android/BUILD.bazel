@@ -2,7 +2,7 @@ load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 android_library(
     name = "android_keystore_kms_client",

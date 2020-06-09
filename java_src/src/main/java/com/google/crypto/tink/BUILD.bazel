@@ -5,7 +5,7 @@ load("@tink_base//tools:common.bzl", "template_rule")
 
 licenses(["notice"])
 
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 # Primitives
 

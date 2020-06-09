@@ -3,7 +3,7 @@ load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "streaming_aead_util",

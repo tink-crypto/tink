@@ -3,7 +3,7 @@ load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 licenses(["notice"])
 
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "keys_downloader",
