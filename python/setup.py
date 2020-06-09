@@ -107,17 +107,10 @@ def _patch_workspace(workspace_content):
   Returns:
     The workspace_content using http_archive for tink_base and tink_cc.
   """
-  # Add http_archive load
-  workspace_lines = workspace_content.split('\n')
-  http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
-                       '"http_archive")')
-  workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
-                                workspace_lines[1:])
-
   # This is run by pip from a temporary folder which breaks the WORKSPACE paths.
   # This replaces the paths with the latest http_archive.
-  # In order to override this with a local WORKSPACE use the TINK_BASE_PATH
-  # environment variable.
+  # In order to override this with a local WORKSPACE use the
+  # TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH environment variable.
 
   if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
     base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
@@ -129,6 +122,13 @@ def _patch_workspace(workspace_content):
                                workspace_content)
   else:
     # If not base is specified use the latest version from GitHub
+    # Add http_archive load
+    workspace_lines = workspace_content.split('\n')
+    http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
+                         '"http_archive")')
+    workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
+                                  workspace_lines[1:])
+
     base = ('local_repository(\n'
             '    name = "tink_base",\n'
             '    path = "..",\n'
@@ -193,10 +193,11 @@ class BuildBazelExtension(build_ext.build_ext):
       os.makedirs(self.build_temp)
 
     bazel_argv = [
-        bazel,
-        'build',
-        ext.bazel_target,
+        bazel, 'build', ext.bazel_target,
         '--compilation_mode=' + ('dbg' if self.debug else 'opt'),
+        '--incompatible_linkopts_to_linklibs'
+        # TODO(https://github.com/bazelbuild/bazel/issues/9254): Remove linkopts
+        # flag when issue is fixed.
     ]
     self.spawn(bazel_argv)
     ext_bazel_bin_path = os.path.join('bazel-bin', ext.relpath,
@@ -230,9 +231,9 @@ setuptools.setup(
     # PyPI package information.
     classifiers=[
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Libraries',
     ],
     license='Apache 2.0',
     keywords='tink cryptography',
-    build_dir='build',
 )
