@@ -139,4 +139,6 @@ public final class MacKeyTemplates {
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
+
+  private MacKeyTemplates() {}
 }
