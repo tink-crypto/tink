@@ -17,11 +17,12 @@ import os
 import subprocess
 import tempfile
 
-import tink
-from tink import cleartext_keyset_handle
-from tink import daead
-
 from typing import Text
+
+import tink
+from tink import daead
+from tink import testonly_cleartext_keyset_handle
+
 
 # All languages that have an Deterministic AEAD CLI.
 LANGUAGES = ('cc', 'go', 'java', 'python')
@@ -56,7 +57,7 @@ class CliDeterministicAead(daead.DeterministicAead):
       associated_data_filename = os.path.join(tmpdir, 'associated_data_file')
       output_filename = os.path.join(tmpdir, 'output_file')
       with open(keyset_filename, 'wb') as f:
-        cleartext_keyset_handle.write(
+        testonly_cleartext_keyset_handle.write(
             tink.BinaryKeysetWriter(f), self._keyset_handle)
       with open(input_filename, 'wb') as f:
         f.write(input_data)

@@ -17,11 +17,12 @@ import os
 import subprocess
 import tempfile
 
-import tink
-from tink import cleartext_keyset_handle
-from tink import hybrid
-
 from typing import Text
+
+import tink
+from tink import hybrid
+from tink import testonly_cleartext_keyset_handle
+
 
 # All languages that have a Hybrid Encryption CLI.
 LANGUAGES = ('cc', 'go', 'java', 'python')
@@ -60,7 +61,7 @@ class CliHybridEncrypt(hybrid.HybridEncrypt):
     with tempfile.TemporaryDirectory() as tmpdir:
       public_keyset_filename = os.path.join(tmpdir, 'public_keyset_file')
       with open(public_keyset_filename, 'wb') as f:
-        cleartext_keyset_handle.write(
+        testonly_cleartext_keyset_handle.write(
             tink.BinaryKeysetWriter(f), self._public_keyset_handle)
       plaintext_filename = os.path.join(tmpdir, 'plaintext_file')
       with open(plaintext_filename, 'wb') as f:
@@ -93,7 +94,7 @@ class CliHybridDecrypt(hybrid.HybridDecrypt):
     with tempfile.TemporaryDirectory() as tmpdir:
       private_keyset_filename = os.path.join(tmpdir, 'private_keyset_file')
       with open(private_keyset_filename, 'wb') as f:
-        cleartext_keyset_handle.write(
+        testonly_cleartext_keyset_handle.write(
             tink.BinaryKeysetWriter(f), self._private_keyset_handle)
       ciphertext_filename = os.path.join(tmpdir, 'ciphertext_file')
       with open(ciphertext_filename, 'wb') as f:

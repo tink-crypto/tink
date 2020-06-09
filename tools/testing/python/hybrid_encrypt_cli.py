@@ -30,8 +30,8 @@ from absl import flags
 from absl import logging
 import tink
 
-from tink import cleartext_keyset_handle
 from tink import hybrid
+from tink import testonly_cleartext_keyset_handle
 
 FLAGS = flags.FLAGS
 
@@ -50,7 +50,8 @@ def read_keyset(keyset_filename):
   """
   with open(keyset_filename, 'rb') as keyset_file:
     text = keyset_file.read()
-    keyset = cleartext_keyset_handle.read(tink.BinaryKeysetReader(text))
+    keyset = testonly_cleartext_keyset_handle.read(
+        tink.BinaryKeysetReader(text))
   return keyset
 
 

@@ -18,7 +18,7 @@ import subprocess
 import tempfile
 
 import tink
-from tink import cleartext_keyset_handle
+from tink import testonly_cleartext_keyset_handle
 from tink.proto import tink_pb2
 
 AEAD_KEY_TEMPLATES = ('AES128_GCM', 'AES256_GCM', 'AES128_CTR_HMAC_SHA256',
@@ -61,7 +61,8 @@ def generate_keyset(key_template) -> tink_pb2.Keyset:
 
 def generate_keyset_handle(key_template) -> tink.KeysetHandle:
   """Generates a keyset handle from a key templates."""
-  return cleartext_keyset_handle.from_keyset(generate_keyset(key_template))
+  return testonly_cleartext_keyset_handle.from_keyset(
+      generate_keyset(key_template))
 
 
 def public_keyset_handle(private_keyset_handle) -> tink.KeysetHandle:
@@ -70,7 +71,7 @@ def public_keyset_handle(private_keyset_handle) -> tink.KeysetHandle:
     cli_path = os.path.join(_tools_path(), _TINKEY_CLI_PATH)
     private_keyset_filename = os.path.join(tmpdir, 'private_keyset_file')
     with open(private_keyset_filename, 'wb') as f:
-      cleartext_keyset_handle.write(
+      testonly_cleartext_keyset_handle.write(
           tink.BinaryKeysetWriter(f), private_keyset_handle)
     public_keyset_filename = os.path.join(tmpdir, 'public_keyset_file')
     unused_return_value = subprocess.check_output([
@@ -82,5 +83,5 @@ def public_keyset_handle(private_keyset_handle) -> tink.KeysetHandle:
     ])
     with open(public_keyset_filename, 'rb') as f:
       public_keyset_data = f.read()
-    return cleartext_keyset_handle.read(
+    return testonly_cleartext_keyset_handle.read(
         tink.BinaryKeysetReader(public_keyset_data))

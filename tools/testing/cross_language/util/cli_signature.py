@@ -17,11 +17,12 @@ import os
 import subprocess
 import tempfile
 
-import tink
-from tink import cleartext_keyset_handle
-from tink import signature
-
 from typing import Text
+
+import tink
+from tink import signature
+from tink import testonly_cleartext_keyset_handle
+
 
 # All languages that have an AEAD CLI.
 LANGUAGES = ('cc', 'go', 'java', 'python')
@@ -60,7 +61,7 @@ class CliPublicKeySign(signature.PublicKeySign):
     with tempfile.TemporaryDirectory() as tmpdir:
       private_keyset_filename = os.path.join(tmpdir, 'private_keyset_file')
       with open(private_keyset_filename, 'wb') as f:
-        cleartext_keyset_handle.write(
+        testonly_cleartext_keyset_handle.write(
             tink.BinaryKeysetWriter(f), self._private_keyset_handle)
       message_filename = os.path.join(tmpdir, 'message_filename')
       with open(message_filename, 'wb') as f:
@@ -91,7 +92,7 @@ class CliPublicKeyVerify(signature.PublicKeyVerify):
     with tempfile.TemporaryDirectory() as tmpdir:
       public_keyset_filename = os.path.join(tmpdir, 'public_keyset_file')
       with open(public_keyset_filename, 'wb') as f:
-        cleartext_keyset_handle.write(
+        testonly_cleartext_keyset_handle.write(
             tink.BinaryKeysetWriter(f), self._public_keyset_handle)
       signature_filename = os.path.join(tmpdir, 'signature_file')
       with open(signature_filename, 'wb') as f:
