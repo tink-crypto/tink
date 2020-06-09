@@ -4,29 +4,18 @@ licenses(["notice"])
 
 package(default_visibility = ["//:__subpackages__"])
 
-filegroup(
-    name = "srcs",
-    srcs = glob(
-        [
-            "*.java",
-        ],
-    ),
-)
-
-# public interfaces
-
 java_library(
-    name = "gcpkms",
-    srcs = [
-        ":srcs",
-    ],
-    javacopts = JAVACOPTS_OSS,
+    name = "gcp_kms_client",
+    srcs = ["GcpKmsClient.java"],
     plugins = [
         ":auto_service_plugin",
     ],
     deps = [
-        "//src/main/java/com/google/crypto/tink",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        ":gcp_kms_aead",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:core",
+        "//src/main/java/com/google/crypto/tink:kms_client",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@maven//:com_google_api_client_google_api_client",
         "@maven//:com_google_apis_google_api_services_cloudkms",
         "@maven//:com_google_auto_service_auto_service_annotations",
@@ -36,11 +25,31 @@ java_library(
     ],
 )
 
+java_library(
+    name = "gcp_kms_aead",
+    srcs = ["GcpKmsAead.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "@maven//:com_google_apis_google_api_services_cloudkms",
+    ],
+)
+
 java_plugin(
     name = "auto_service_plugin",
     processor_class = "com.google.auto.service.processor.AutoServiceProcessor",
     deps = [
         "@maven//:com_google_auto_auto_common",
         "@maven//:com_google_auto_service_auto_service",
+    ],
+)
+
+# Deprecated rules, will be removed soon.
+
+java_library(
+    name = "gcpkms",
+    tags = ["avoid_dep"],
+    exports = [
+        ":gcp_kms_aead",
+        ":gcp_kms_client",
     ],
 )
