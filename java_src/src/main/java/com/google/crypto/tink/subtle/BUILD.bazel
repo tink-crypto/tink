@@ -4,14 +4,507 @@ licenses(["notice"])
 
 package(default_visibility = ["//:__subpackages__"])
 
-filegroup(
-    name = "srcs",
-    srcs = glob(
-        [
-            "*.java",
-        ],
-    ),
+java_library(
+    name = "aes_cmac",
+    srcs = ["AesCmac.java"],
+    deps = [
+        ":aes_util",
+        ":bytes",
+        ":subtle_util_cluster",
+        ":validators",
+        "//src/main/java/com/google/crypto/tink:mac",
+    ],
 )
+
+java_library(
+    name = "aes_ctr_hmac_streaming",
+    srcs = ["AesCtrHmacStreaming.java"],
+    deps = [
+        ":bytes",
+        ":hkdf",
+        ":nonce_based_streaming_aead_cluster",
+        ":random",
+        ":stream_segment_decrypter",
+        ":stream_segment_encrypter",
+        ":subtle_util_cluster",
+        ":validators",
+    ],
+)
+
+java_library(
+    name = "cha_cha20_poly1305",
+    srcs = ["ChaCha20Poly1305.java"],
+    deps = [
+        ":cha_cha20",
+        ":cha_cha20_base",
+        ":cha_cha20_poly1305_base",
+    ],
+)
+
+java_library(
+    name = "stream_segment_decrypter",
+    srcs = ["StreamSegmentDecrypter.java"],
+)
+
+java_library(
+    name = "aes_ctr_jce_cipher",
+    srcs = ["AesCtrJceCipher.java"],
+    deps = [
+        ":ind_cpa_cipher",
+        ":random",
+        ":subtle_util_cluster",
+        ":validators",
+    ],
+)
+
+java_library(
+    name = "x25519",
+    srcs = ["X25519.java"],
+    # TODO(thaidn): remove this export once java_src/src/test:testlib has been build cleaned.
+    exports = [
+        ":field25519",
+    ],
+    deps = [
+        ":curve25519",
+        ":field25519",
+        ":random",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+    ],
+)
+
+java_library(
+    name = "ecies_hkdf_sender_kem",
+    srcs = ["EciesHkdfSenderKem.java"],
+    deps = [
+        ":elliptic_curves",
+        ":hkdf",
+        ":immutable_byte_array",
+    ],
+)
+
+java_library(
+    name = "aes_util",
+    srcs = ["AesUtil.java"],
+)
+
+java_library(
+    name = "pem_key_type",
+    srcs = ["PemKeyType.java"],
+    deps = [
+        ":base64",
+        ":elliptic_curves",
+        ":enums",
+        ":subtle_util_cluster",
+    ],
+)
+
+java_library(
+    name = "aes_gcm_hkdf_streaming",
+    srcs = ["AesGcmHkdfStreaming.java"],
+    deps = [
+        ":hkdf",
+        ":nonce_based_streaming_aead_cluster",
+        ":random",
+        ":stream_segment_decrypter",
+        ":stream_segment_encrypter",
+        ":subtle_util_cluster",
+        ":validators",
+    ],
+)
+
+java_library(
+    name = "encrypt_then_authenticate",
+    srcs = ["EncryptThenAuthenticate.java"],
+    deps = [
+        ":aes_ctr_jce_cipher",
+        ":bytes",
+        ":ind_cpa_cipher",
+        ":prf_hmac_jce",
+        ":prf_mac",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:mac",
+    ],
+)
+
+java_library(
+    name = "bytes",
+    srcs = ["Bytes.java"],
+)
+
+java_library(
+    name = "immutable_byte_array",
+    srcs = ["ImmutableByteArray.java"],
+)
+
+java_library(
+    name = "elliptic_curves",
+    srcs = ["EllipticCurves.java"],
+    deps = [":subtle_util_cluster"],
+)
+
+java_library(
+    name = "ecies_aead_hkdf_dem_helper",
+    srcs = ["EciesAeadHkdfDemHelper.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:aead"],
+)
+
+java_library(
+    name = "rsa_ssa_pkcs1_verify_jce",
+    srcs = ["RsaSsaPkcs1VerifyJce.java"],
+    deps = [
+        ":bytes",
+        ":enums",
+        ":hex",
+        ":subtle_util_cluster",
+        ":validators",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+    ],
+)
+
+java_library(
+    name = "ecies_aead_hkdf_hybrid_encrypt",
+    srcs = ["EciesAeadHkdfHybridEncrypt.java"],
+    deps = [
+        ":ecies_aead_hkdf_dem_helper",
+        ":ecies_hkdf_sender_kem",
+        ":elliptic_curves",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+    ],
+)
+
+java_library(
+    name = "ecdsa_sign_jce",
+    srcs = ["EcdsaSignJce.java"],
+    deps = [
+        ":elliptic_curves",
+        ":enums",
+        ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+    ],
+)
+
+java_library(
+    name = "validators",
+    srcs = ["Validators.java"],
+    deps = [":enums"],
+)
+
+java_library(
+    name = "stream_segment_encrypter",
+    srcs = ["StreamSegmentEncrypter.java"],
+)
+
+java_library(
+    name = "aes_siv",
+    srcs = ["AesSiv.java"],
+    deps = [
+        ":aes_cmac",
+        ":aes_util",
+        ":bytes",
+        ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+    ],
+)
+
+java_library(
+    name = "ind_cpa_cipher",
+    srcs = ["IndCpaCipher.java"],
+)
+
+java_library(
+    name = "engine_wrapper",
+    srcs = ["EngineWrapper.java"],
+)
+
+java_library(
+    name = "prf_mac",
+    srcs = ["PrfMac.java"],
+    deps = [
+        ":bytes",
+        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "rsa_ssa_pss_verify_jce",
+    srcs = ["RsaSsaPssVerifyJce.java"],
+    deps = [
+        ":bytes",
+        ":enums",
+        ":subtle_util_cluster",
+        ":validators",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+    ],
+)
+
+java_library(
+    name = "random",
+    srcs = ["Random.java"],
+)
+
+java_library(
+    name = "cha_cha20_base",
+    srcs = ["ChaCha20Base.java"],
+    deps = [
+        ":bytes",
+        ":ind_cpa_cipher",
+        ":random",
+    ],
+)
+
+java_library(
+    name = "poly1305",
+    srcs = ["Poly1305.java"],
+    deps = [":bytes"],
+)
+
+java_library(
+    name = "aes_gcm_jce",
+    srcs = ["AesGcmJce.java"],
+    deps = [
+        ":random",
+        ":subtle_util_cluster",
+        ":validators",
+        "//src/main/java/com/google/crypto/tink:aead",
+    ],
+)
+
+java_library(
+    name = "hex",
+    srcs = ["Hex.java"],
+)
+
+java_library(
+    name = "ed25519_sign",
+    srcs = ["Ed25519Sign.java"],
+    deps = [
+        ":ed25519_cluster",
+        ":field25519",
+        ":random",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+    ],
+)
+
+java_library(
+    name = "ecies_hkdf_recipient_kem",
+    srcs = ["EciesHkdfRecipientKem.java"],
+    deps = [
+        ":elliptic_curves",
+        ":hkdf",
+    ],
+)
+
+java_library(
+    name = "enums",
+    srcs = ["Enums.java"],
+)
+
+java_library(
+    name = "aes_eax_jce",
+    srcs = ["AesEaxJce.java"],
+    deps = [
+        ":random",
+        ":subtle_util_cluster",
+        ":validators",
+        "//src/main/java/com/google/crypto/tink:aead",
+    ],
+)
+
+java_library(
+    name = "ed25519_verify",
+    srcs = ["Ed25519Verify.java"],
+    deps = [
+        ":ed25519_cluster",
+        ":field25519",
+        ":immutable_byte_array",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+    ],
+)
+
+java_library(
+    name = "cha_cha20_poly1305_base",
+    srcs = ["ChaCha20Poly1305Base.java"],
+    deps = [
+        ":cha_cha20_base",
+        ":poly1305",
+        "//src/main/java/com/google/crypto/tink:aead",
+    ],
+)
+
+java_library(
+    name = "x_cha_cha20",
+    srcs = ["XChaCha20.java"],
+    deps = [":cha_cha20_base"],
+)
+
+java_library(
+    name = "rsa_ssa_pkcs1_sign_jce",
+    srcs = ["RsaSsaPkcs1SignJce.java"],
+    deps = [
+        ":enums",
+        ":subtle_util_cluster",
+        ":validators",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+    ],
+)
+
+java_library(
+    name = "field25519",
+    srcs = ["Field25519.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/annotations:alpha"],
+)
+
+java_library(
+    name = "cha_cha20",
+    srcs = ["ChaCha20.java"],
+    deps = [":cha_cha20_base"],
+)
+
+java_library(
+    name = "ecdsa_verify_jce",
+    srcs = ["EcdsaVerifyJce.java"],
+    deps = [
+        ":elliptic_curves",
+        ":enums",
+        ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+    ],
+)
+
+java_library(
+    name = "rewindable_readable_byte_channel",
+    srcs = ["RewindableReadableByteChannel.java"],
+    deps = [
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+java_library(
+    name = "hkdf",
+    srcs = ["Hkdf.java"],
+    deps = [
+        ":bytes",
+        ":subtle_util_cluster",
+    ],
+)
+
+java_library(
+    name = "rsa_ssa_pss_sign_jce",
+    srcs = ["RsaSsaPssSignJce.java"],
+    deps = [
+        ":enums",
+        ":random",
+        ":subtle_util_cluster",
+        ":validators",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+    ],
+)
+
+java_library(
+    name = "base64",
+    srcs = ["Base64.java"],
+)
+
+java_library(
+    name = "prf_hmac_jce",
+    srcs = ["PrfHmacJce.java"],
+    deps = [
+        ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "kwp",
+    srcs = ["Kwp.java"],
+    deps = [
+        ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink:key_wrap",
+    ],
+)
+
+java_library(
+    name = "x_cha_cha20_poly1305",
+    srcs = ["XChaCha20Poly1305.java"],
+    deps = [
+        ":cha_cha20_base",
+        ":cha_cha20_poly1305_base",
+        ":x_cha_cha20",
+    ],
+)
+
+java_library(
+    name = "ecies_aead_hkdf_hybrid_decrypt",
+    srcs = ["EciesAeadHkdfHybridDecrypt.java"],
+    deps = [
+        ":ecies_aead_hkdf_dem_helper",
+        ":ecies_hkdf_recipient_kem",
+        ":elliptic_curves",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+    ],
+)
+
+java_library(
+    name = "curve25519",
+    srcs = ["Curve25519.java"],
+    deps = [
+        ":bytes",
+        ":field25519",
+        ":hex",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+    ],
+)
+
+java_library(
+    name = "nonce_based_streaming_aead_cluster",
+    srcs = [
+        "NonceBasedStreamingAead.java",
+        "StreamingAeadDecryptingChannel.java",
+        "StreamingAeadDecryptingStream.java",
+        "StreamingAeadEncryptingChannel.java",
+        "StreamingAeadEncryptingStream.java",
+        "StreamingAeadSeekableDecryptingChannel.java",
+    ],
+    deps = [
+        ":stream_segment_decrypter",
+        ":stream_segment_encrypter",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+    ],
+)
+
+java_library(
+    name = "subtle_util_cluster",
+    srcs = [
+        "EngineFactory.java",
+        "SubtleUtil.java",
+    ],
+    deps = [
+        ":engine_wrapper",
+        ":enums",
+        ":validators",
+    ],
+)
+
+java_library(
+    name = "ed25519_cluster",
+    srcs = [
+        "Ed25519.java",
+        "Ed25519Constants.java",
+    ],
+    deps = [
+        ":bytes",
+        ":curve25519",
+        ":field25519",
+        ":subtle_util_cluster",
+    ],
+)
+
+# Deprecated rules, will be deleted soon.
 
 # common subtle
 
@@ -113,6 +606,7 @@ java_library(
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
+        ":curve25519",
         ":subtle",
         ":x25519",
         "//src/main/java/com/google/crypto/tink:primitives",
@@ -175,21 +669,5 @@ java_library(
         ":subtle",
         "//src/main/java/com/google/crypto/tink:primitives",
         "@maven//:com_google_code_findbugs_jsr305",
-    ],
-)
-
-# x25519 subtle
-
-java_library(
-    name = "x25519",
-    srcs = [
-        "Curve25519.java",
-        "Field25519.java",
-        "X25519.java",
-    ],
-    javacopts = JAVACOPTS_OSS,
-    deps = [
-        ":subtle",
-        "//src/main/java/com/google/crypto/tink/annotations",
     ],
 )

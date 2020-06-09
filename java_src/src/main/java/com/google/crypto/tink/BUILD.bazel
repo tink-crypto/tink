@@ -128,7 +128,7 @@ java_library(
     deps = [
         ":keyset_writer",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@maven//:org_json_json",
     ],
 )
@@ -141,7 +141,7 @@ java_library(
         ":keyset_writer",
         ":keyset_writer-android",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@maven//:org_json_json",
     ],
 )
@@ -185,7 +185,7 @@ java_library(
         ":keyset_reader",
         ":util",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:org_json_json",
     ],
@@ -199,7 +199,7 @@ java_library(
         ":keyset_reader-android",
         ":util-android",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:org_json_json",
     ],
@@ -622,7 +622,7 @@ java_library(
     deps = full_protos + [
         ":primitives",
         "//src/main/java/com/google/crypto/tink/annotations",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@com_google_protobuf//:protobuf_java",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
@@ -655,7 +655,7 @@ java_library(
     deps = lite_protos + [
         ":primitives",
         "//src/main/java/com/google/crypto/tink/annotations",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
