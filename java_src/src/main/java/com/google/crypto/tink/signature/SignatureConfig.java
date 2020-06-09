@@ -16,14 +16,13 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods and constants for registering with the {@link Registry} all instances of {@link
- * com.google.crypto.tink.PublicKeySign} and {@link com.google.crypto.tink.PublicKeyVerify} key
- * types supported in a particular release of Tink.
+ * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry} all
+ * instances of {@link com.google.crypto.tink.PublicKeySign} and {@link
+ * com.google.crypto.tink.PublicKeyVerify} key types supported in a particular release of Tink.
  *
  * <p>To register all PublicKeySign and PublicKeyVerify key types provided in the latest Tink
  * version one can do:
@@ -71,7 +70,7 @@ public final class SignatureConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle PublicKeySign and PublicKeyVerify key types
    * supported in Tink.
    *
@@ -83,7 +82,7 @@ public final class SignatureConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle PublicKeySign and PublicKeyVerify key types
    * supported in Tink.
    *
