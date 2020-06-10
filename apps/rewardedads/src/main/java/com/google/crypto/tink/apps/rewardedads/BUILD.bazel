@@ -1,0 +1,17 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+java_library(
+    name = "rewarded_ads_verifier",
+    srcs = ["RewardedAdsVerifier.java"],
+    deps = [
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:org_json_json",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:enums",
+        "@tink_java//src/main/java/com/google/crypto/tink/util:keys_downloader",
+    ],
+)
