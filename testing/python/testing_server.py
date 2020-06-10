@@ -24,7 +24,7 @@ from absl import flags
 import grpc
 import tink
 from tink import aead
-from tink import testonly_cleartext_keyset_handle
+from tink import cleartext_keyset_handle
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
@@ -46,7 +46,7 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
       template.ParseFromString(request.template)
       keyset_handle = tink.new_keyset_handle(template)
       keyset = io.BytesIO()
-      testonly_cleartext_keyset_handle.write(
+      cleartext_keyset_handle.write(
           tink.BinaryKeysetWriter(keyset), keyset_handle)
       return testing_api_pb2.KeysetResponse(keyset=keyset.getvalue())
     except tink.TinkError as e:
@@ -61,7 +61,7 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
       context: grpc.ServicerContext) -> testing_api_pb2.CiphertextResponse:
     """Encrypts a message."""
     try:
-      keyset_handle = testonly_cleartext_keyset_handle.read(
+      keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
       p = keyset_handle.primitive(aead.Aead)
       ciphertext = p.encrypt(request.plaintext, request.associated_data)
@@ -74,7 +74,7 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
       context: grpc.ServicerContext) -> testing_api_pb2.PlaintextResponse:
     """Decrypts a message."""
     try:
-      keyset_handle = testonly_cleartext_keyset_handle.read(
+      keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
       p = keyset_handle.primitive(aead.Aead)
       plaintext = p.decrypt(request.ciphertext, request.associated_data)

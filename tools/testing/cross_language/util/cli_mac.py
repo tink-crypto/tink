@@ -20,8 +20,8 @@ import tempfile
 from typing import Text
 
 import tink
+from tink import cleartext_keyset_handle
 from tink import mac
-from tink import testonly_cleartext_keyset_handle
 
 
 # All languages that have an AEAD CLI.
@@ -53,7 +53,7 @@ class CliMac(mac.Mac):
     with tempfile.TemporaryDirectory() as tmpdir:
       keyset_filename = os.path.join(tmpdir, 'keyset_file')
       with open(keyset_filename, 'wb') as f:
-        testonly_cleartext_keyset_handle.write(
+        cleartext_keyset_handle.write(
             tink.BinaryKeysetWriter(f), self._keyset_handle)
       data_filename = os.path.join(tmpdir, 'data_file')
       with open(data_filename, 'wb') as f:
@@ -73,7 +73,7 @@ class CliMac(mac.Mac):
     with tempfile.TemporaryDirectory() as tmpdir:
       keyset_filename = os.path.join(tmpdir, 'keyset_file')
       with open(keyset_filename, 'wb') as f:
-        testonly_cleartext_keyset_handle.write(
+        cleartext_keyset_handle.write(
             tink.BinaryKeysetWriter(f), self._keyset_handle)
       data_filename = os.path.join(tmpdir, 'data_file')
       with open(data_filename, 'wb') as f:

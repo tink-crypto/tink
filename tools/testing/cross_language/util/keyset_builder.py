@@ -16,7 +16,7 @@
 import io
 import random
 import tink
-from tink import testonly_cleartext_keyset_handle
+from tink import cleartext_keyset_handle
 from tink.proto import tink_pb2
 from tools.testing.cross_language.util import cli_tinkey
 
@@ -53,7 +53,7 @@ class KeysetBuilder(object):
   def keyset_handle(self) -> tink.KeysetHandle:
     keyset_copy = tink_pb2.Keyset()
     keyset_copy.CopyFrom(self._keyset)
-    return testonly_cleartext_keyset_handle.from_keyset(keyset_copy)
+    return cleartext_keyset_handle.from_keyset(keyset_copy)
 
   def add_new_key(self, key_template: tink_pb2.KeyTemplate) -> int:
     """Generates a new key, adds it to the keyset, and returns its ID."""
@@ -101,7 +101,7 @@ class KeysetBuilder(object):
 def from_keyset_handle(keyset_handle: tink.KeysetHandle) -> KeysetBuilder:
   """Return a KeysetBuilder for a Keyset copied from a KeysetHandle."""
   keyset_buffer = io.BytesIO()
-  testonly_cleartext_keyset_handle.write(
+  cleartext_keyset_handle.write(
       tink.BinaryKeysetWriter(keyset_buffer), keyset_handle)
   keyset = tink_pb2.Keyset()
   keyset.ParseFromString(keyset_buffer.getvalue())

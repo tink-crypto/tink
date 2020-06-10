@@ -20,8 +20,8 @@ import tempfile
 from typing import Text
 
 import tink
+from tink import cleartext_keyset_handle
 from tink import daead
-from tink import testonly_cleartext_keyset_handle
 
 
 # All languages that have an Deterministic AEAD CLI.
@@ -57,7 +57,7 @@ class CliDeterministicAead(daead.DeterministicAead):
       associated_data_filename = os.path.join(tmpdir, 'associated_data_file')
       output_filename = os.path.join(tmpdir, 'output_file')
       with open(keyset_filename, 'wb') as f:
-        testonly_cleartext_keyset_handle.write(
+        cleartext_keyset_handle.write(
             tink.BinaryKeysetWriter(f), self._keyset_handle)
       with open(input_filename, 'wb') as f:
         f.write(input_data)
