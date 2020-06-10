@@ -85,13 +85,13 @@ public final class RewardedAdsVerifier {
 
   /**
    * Instance configured to talk to fetch keys from production environment (from {@link
-   * KeysDownloader#PUBLIC_KEYS_URL_PROD}).
+   * #PUBLIC_KEYS_URL_PROD}).
    */
   public static final KeysDownloader KEYS_DOWNLOADER_INSTANCE_PROD =
       new KeysDownloader(DEFAULT_BACKGROUND_EXECUTOR, DEFAULT_HTTP_TRANSPORT, PUBLIC_KEYS_URL_PROD);
   /**
    * Instance configured to talk to fetch keys from test environment (from {@link
-   * KeysDownloader#KEYS_URL_TEST}).
+   * #PUBLIC_KEYS_URL_TEST}).
    */
   public static final KeysDownloader KEYS_DOWNLOADER_INSTANCE_TEST =
       new KeysDownloader(DEFAULT_BACKGROUND_EXECUTOR, DEFAULT_HTTP_TRANSPORT, PUBLIC_KEYS_URL_TEST);

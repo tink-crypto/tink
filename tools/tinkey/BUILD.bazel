@@ -1,8 +1,9 @@
+load("@tink_java//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
-
-load("@tink_java//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 java_library(
     name = "libtinkey",
@@ -16,22 +17,33 @@ java_library(
     ),
     javacopts = JAVACOPTS_OSS,
     deps = [
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:args4j_args4j",
         "@tink_java//:awskms",
         "@tink_java//:cleartext_keyset_handle",
         "@tink_java//:gcpkms",
         "@tink_java//:subtle",
-        "@tink_java//src/main/java/com/google/crypto/tink",
-        "@tink_java//src/main/java/com/google/crypto/tink:primitives",
-        "@tink_java//src/main/java/com/google/crypto/tink/aead",
-        "@tink_java//src/main/java/com/google/crypto/tink/daead",
-        "@tink_java//src/main/java/com/google/crypto/tink/hybrid",
-        "@tink_java//src/main/java/com/google/crypto/tink/mac",
-        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/signature",
-        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead",
         "@tink_java//proto:tink_java_proto",
-        "@com_google_protobuf//:protobuf_javalite",
-        "@maven//:args4j_args4j",
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:gcp_kms_client",
+        "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:aws_kms_client",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:validators",
     ],
 )
 
@@ -45,14 +57,12 @@ java_binary(
     visibility = ["//testing:__subpackages__"],
     deps = [
         ":libtinkey",
-        "@tink_java//src/main/java/com/google/crypto/tink/config",
         "@maven//:args4j_args4j",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
     ],
 )
 
 # tests
-
-load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
 
 java_library(
     name = "generator_test",
@@ -62,11 +72,24 @@ java_library(
     ]),
     deps = [
         ":libtinkey",
-        "@tink_java//:testonly",
-        "@tink_java//:testutil",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:config",
+        "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:public_key_sign",
+        "@tink_java//src/main/java/com/google/crypto/tink:public_key_verify",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:random",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
     ],
 )
 

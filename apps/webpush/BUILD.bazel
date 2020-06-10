@@ -1,54 +1,17 @@
+load("@tink_java//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
-
-load("@tink_java//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
-
-java_library(
-    name = "webpush",
-    srcs = glob([
-        "src/main/**/*.java",
-    ]),
-    javacopts = JAVACOPTS_OSS,
-    deps = [
-        "@tink_java//:java",
-        "@tink_java//:subtle",
-    ],
-)
-
-# Maven Jars
-
-load("@tink_java//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
     name = "maven",
     doctitle = "Tink Cryptography API for Message Encryption for Web Push (RFC 8291)",
     root_packages = ["com.google.crypto.tink.apps.webpush"],
-    deps = [":webpush"],
-)
-
-# Tests
-
-load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
-
-java_library(
-    name = "generator_test",
-    testonly = 1,
-    srcs = glob([
-        "src/test/**/*.java",
-    ]),
     deps = [
-        ":webpush",
-        "@tink_java//:testonly",
-        "@maven//:junit_junit",
-    ],
-)
-
-gen_java_test_rules(
-    test_files = glob([
-        "src/test/**/*Test.java",
-    ]),
-    deps = [
-        ":generator_test",
+        "//webpush/src/main/java/com/google/crypto/tink/apps/webpush:web_push_constants",
+        "//webpush/src/main/java/com/google/crypto/tink/apps/webpush:web_push_hybrid_decrypt",
+        "//webpush/src/main/java/com/google/crypto/tink/apps/webpush:web_push_hybrid_encrypt",
+        "//webpush/src/main/java/com/google/crypto/tink/apps/webpush:web_push_util",
     ],
 )
