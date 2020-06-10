@@ -75,13 +75,13 @@ var activeTableTab = "activeTableTab";
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
 <li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
-<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
-<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
@@ -110,7 +110,9 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">DeterministicAeadConfig</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Static methods and constants for registering with the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="../../../../../com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink"><code>DeterministicAead</code></a> key types supported in a particular release of Tink.
+<div class="block">Static methods and constants for registering with the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all
+ instances of <a href="../../../../../com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink"><code>DeterministicAead</code></a> key types supported in a particular
+ release of Tink.
 
  <p>To register all DeterministicAead key types provided in the latest Tink version one can do:
 
@@ -118,7 +120,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  DeterministicAeadConfig.register();
  </code></pre>
 
- <p>For more information on how to obtain and use instances of DeterministicAead, see <a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadFactory.html" title="class in com.google.crypto.tink.daead"><code>DeterministicAeadFactory</code></a>.</div>
+ <p>For more information on how to obtain and use instances of DeterministicAead, see <a href="../../../../../com/google/crypto/tink/KeysetHandle.html#getPrimitive-java.lang.Class-"><code>KeysetHandle.getPrimitive(java.lang.Class&lt;P&gt;)</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.1.0</dd>
@@ -148,31 +150,18 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.RegistryConfig</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadConfig.html#LATEST">LATEST</a></span></code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;&nbsp;</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>register()</code></a></span></div>
+</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.RegistryConfig</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadConfig.html#TINK_1_1_0">TINK_1_1_0</a></span></code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;&nbsp;</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>register()</code></a></span></div>
+</div>
 </td>
-</tr>
-</table>
-</li>
-</ul>
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<ul class="blockList">
-<li class="blockList"><a name="constructor.summary">
-<!--   -->
-</a>
-<h3>Constructor Summary</h3>
-<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
-<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colOne" scope="col">Constructor and Description</th>
-</tr>
-<tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadConfig.html#DeterministicAeadConfig--">DeterministicAeadConfig</a></span>()</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -243,7 +232,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <h4>TINK_1_1_0</h4>
 <pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
 public static final&nbsp;com.google.crypto.tink.proto.RegistryConfig TINK_1_1_0</pre>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>register()</code></a></span></div>
 </li>
 </ul>
 <a name="LATEST">
@@ -254,28 +243,11 @@ public static final&nbsp;com.google.crypto.tink.proto.RegistryConfig TINK_1_1_0<
 <h4>LATEST</h4>
 <pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
 public static final&nbsp;com.google.crypto.tink.proto.RegistryConfig LATEST</pre>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <a href="../../../../../com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>register()</code></a></span></div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.2.0</dd>
 </dl>
-</li>
-</ul>
-</li>
-</ul>
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<ul class="blockList">
-<li class="blockList"><a name="constructor.detail">
-<!--   -->
-</a>
-<h3>Constructor Detail</h3>
-<a name="DeterministicAeadConfig--">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>DeterministicAeadConfig</h4>
-<pre>public&nbsp;DeterministicAeadConfig()</pre>
 </li>
 </ul>
 </li>
@@ -380,13 +352,13 @@ public static&nbsp;void&nbsp;init()
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
 <li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
-<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
-<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
