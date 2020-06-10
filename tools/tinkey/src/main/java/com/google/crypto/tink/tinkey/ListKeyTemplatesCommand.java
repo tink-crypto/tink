@@ -16,7 +16,9 @@
 
 package com.google.crypto.tink.tinkey;
 
-/** Creates a new {@link com.google.crypto.tink.proto.KeyTemplate}. */
+import com.google.crypto.tink.proto.KeyTemplate;
+
+/** Creates a new {@link KeyTemplate}. */
 public class ListKeyTemplatesCommand implements Command {
 
   @Override

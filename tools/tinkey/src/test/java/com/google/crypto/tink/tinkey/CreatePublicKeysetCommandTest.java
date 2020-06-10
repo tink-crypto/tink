@@ -28,10 +28,14 @@ import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.hybrid.HybridDecryptFactory;
+import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.signature.PublicKeySignFactory;
+import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
@@ -157,10 +161,10 @@ public class CreatePublicKeysetCommandTest {
 
   private void assertHybrid(KeysetReader privateReader, KeysetReader publicReader)
     throws Exception {
-    KeysetHandle privateHandle = CleartextKeysetHandle.read(privateReader);
-    HybridDecrypt decrypter = privateHandle.getPrimitive(HybridDecrypt.class);
-    KeysetHandle publicHandle = CleartextKeysetHandle.read(publicReader);
-    HybridEncrypt encrypter = publicHandle.getPrimitive(HybridEncrypt.class);
+    HybridDecrypt decrypter = HybridDecryptFactory.getPrimitive(
+        CleartextKeysetHandle.read(privateReader));
+    HybridEncrypt encrypter = HybridEncryptFactory.getPrimitive(
+        CleartextKeysetHandle.read(publicReader));
     byte[] message = Random.randBytes(10);
     byte[] contextInfo = Random.randBytes(20);
 
@@ -171,10 +175,10 @@ public class CreatePublicKeysetCommandTest {
   private void assertSignature(KeysetReader privateReader, KeysetReader publicReader)
     throws Exception {
     byte[] message = Random.randBytes(10);
-    KeysetHandle privateHandle = CleartextKeysetHandle.read(privateReader);
-    PublicKeySign signer = privateHandle.getPrimitive(PublicKeySign.class);
-    KeysetHandle publicHandle = CleartextKeysetHandle.read(publicReader);
-    PublicKeyVerify verifier = publicHandle.getPrimitive(PublicKeyVerify.class);
+    PublicKeySign signer = PublicKeySignFactory.getPrimitive(
+        CleartextKeysetHandle.read(privateReader));
+    PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(
+        CleartextKeysetHandle.read(publicReader));
 
     verifier.verify(signer.sign(message), message);
   }
