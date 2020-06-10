@@ -2,7 +2,7 @@ load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 licenses(["notice"])
 
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "hkdf_prf_key_manager",
@@ -13,8 +13,12 @@ java_library(
         "//proto:common_java_proto",
         "//proto:hkdf_prf_java_proto",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:core",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
         "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
         "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
         "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
@@ -68,7 +72,9 @@ java_library(
     deps = [
         ":prf_set",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:core",
+        "//src/main/java/com/google/crypto/tink:primitive_set",
+        "//src/main/java/com/google/crypto/tink:primitive_wrapper",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -82,8 +88,12 @@ java_library(
         "//proto:common_java_proto_lite",
         "//proto:hkdf_prf_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:core-android",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:key_template-android",
+        "//src/main/java/com/google/crypto/tink:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
         "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
         "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
         "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
@@ -120,7 +130,9 @@ java_library(
     deps = [
         ":prf_set",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:core-android",
+        "//src/main/java/com/google/crypto/tink:primitive_set-android",
+        "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
+        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
