@@ -75,13 +75,13 @@ var activeTableTab = "activeTableTab";
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
@@ -112,21 +112,20 @@ var activeTableTab = "activeTableTab";
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">A global container of key managers and catalogues.
 
- <p>Registry maps catalogue names to instances of <a href="../../../../com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><code>Catalogue</code></a> and each supported key type to
- a corresponding <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> object, which "understands" the key type (i.e., the KeyManager
- can instantiate the primitive corresponding to given key, or can generate new keys of the
- supported key type). It holds also a <a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink"><code>PrimitiveWrapper</code></a> for each supported primitive,
- so that it can wrap a set of primitives (corresponding to a keyset) into a single primitive.
+ <p>Registry maps each supported key type to a corresponding <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> object, which
+ "understands" the key type (i.e., the KeyManager can instantiate the primitive corresponding to
+ given key, or can generate new keys of the supported key type). It holds also a <a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink"><code>PrimitiveWrapper</code></a> for each supported primitive, so that it can wrap a set of primitives
+ (corresponding to a keyset) into a single primitive.
 
- <p> Keeping KeyManagers for all primitives in a single Registry (rather than
- having a separate KeyManager per primitive) enables modular construction of compound primitives
- from "simple" ones, e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
+ <p>Keeping KeyManagers for all primitives in a single Registry (rather than having a separate
+ KeyManager per primitive) enables modular construction of compound primitives from "simple" ones,
+ e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
 
  <p>Registry is initialized at startup, and is later used to instantiate primitives for given keys
  or keysets. Note that regular users will usually not work directly with Registry, but rather via
- <a href="../../../../com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><code>Config</code></a> and <code>KeysetHandle#getPrimitive()</code>-methods, which in the background register
- and query the Registry for specific KeyManagers and PrimitiveWrappers. Registry is public though,
- to enable configurations with custom catalogues, primitives or KeyManagers.
+ <code>TinkConfig</code> and <a href="../../../../com/google/crypto/tink/KeysetHandle.html#getPrimitive-java.lang.Class-"><code>KeysetHandle.getPrimitive(Class)</code></a>-methods, which in the background
+ register and query the Registry for specific KeyManagers and PrimitiveWrappers. Registry is
+ public though, to enable configurations with custom catalogues, primitives or KeyManagers.
 
  <p>To initialize the Registry with all key managers:
 
@@ -140,8 +139,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  AeadConfig.register();
  </code></pre>
 
- <p>After the Registry has been initialized, one can use  to get a
- primitive. For example, to obtain an <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> primitive:
+ <p>After the Registry has been initialized, one can use get a primitive as follows:
 
  <pre><code>
  KeysetHandle keysetHandle = ...;
@@ -157,23 +155,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<ul class="blockList">
-<li class="blockList"><a name="constructor.summary">
-<!--   -->
-</a>
-<h3>Constructor Summary</h3>
-<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
-<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colOne" scope="col">Constructor and Description</th>
-</tr>
-<tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#Registry--">Registry</a></span>()</code>&nbsp;</td>
-</tr>
-</table>
-</li>
-</ul>
 <!-- ========== METHOD SUMMARY =========== -->
 <ul class="blockList">
 <li class="blockList"><a name="method.summary">
@@ -423,23 +404,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="details">
 <ul class="blockList">
 <li class="blockList">
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<ul class="blockList">
-<li class="blockList"><a name="constructor.detail">
-<!--   -->
-</a>
-<h3>Constructor Detail</h3>
-<a name="Registry--">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>Registry</h4>
-<pre>public&nbsp;Registry()</pre>
-</li>
-</ul>
-</li>
-</ul>
 <!-- ============ METHOD DETAIL ========== -->
 <ul class="blockList">
 <li class="blockList"><a name="method.detail">
@@ -1120,13 +1084,13 @@ public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/Pr
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
