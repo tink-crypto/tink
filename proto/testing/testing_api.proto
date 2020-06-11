@@ -11,7 +11,7 @@
 // limitations under the License.
 syntax = "proto3";
 
-package third_party.tink.proto.testing;
+package tink_testing_api;
 
 option java_package = "com.google.crypto.tink.proto.testing";
 option java_multiple_files = true;
@@ -19,7 +19,7 @@ option java_multiple_files = true;
 // Service for Keyset operations.
 service Keyset {
   // Generates a new keyset from a template.
-  rpc Generate (GenerateKeysetRequest) returns (KeysetResponse) {}
+  rpc Generate(GenerateKeysetRequest) returns (KeysetResponse) {}
 }
 
 message GenerateKeysetRequest {
@@ -36,9 +36,9 @@ message KeysetResponse {
 // Service for AEAD encryption and decryption
 service Aead {
   // Encrypts a plaintext with the provided keyset
-  rpc Encrypt (AeadEncryptRequest) returns (CiphertextResponse) {}
+  rpc Encrypt(AeadEncryptRequest) returns (CiphertextResponse) {}
   // Decrypts a ciphertext with the provided keyset
-  rpc Decrypt (AeadDecryptRequest) returns (PlaintextResponse) {}
+  rpc Decrypt(AeadDecryptRequest) returns (PlaintextResponse) {}
 }
 
 message AeadEncryptRequest {
