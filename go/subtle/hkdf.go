@@ -27,23 +27,16 @@ const (
 	minTagSizeInBytes = uint32(10)
 )
 
-// Maximum tag size in bytes for each hash type
-var maxTagSizeInBytes = map[string]uint32{
-	"SHA1":   uint32(20),
-	"SHA256": uint32(32),
-	"SHA512": uint32(64),
-}
-
 var errHKDFInvalidInput = errors.New("HKDF: invalid input")
 
 // validateHKDFParams validates parameters of HKDF constructor.
 func validateHKDFParams(hash string, keySize uint32, tagSize uint32) error {
 	// validate tag size
-	maxTagSize, found := maxTagSizeInBytes[hash]
-	if !found {
-		return fmt.Errorf("invalid hash algorithm")
+	digestSize, err := GetHashDigestSize(hash)
+	if err != nil {
+		return err
 	}
-	if tagSize > 255*maxTagSize {
+	if tagSize > 255*digestSize {
 		return fmt.Errorf("tag size too big")
 	}
 	if tagSize < minTagSizeInBytes {

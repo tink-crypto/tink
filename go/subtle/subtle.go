@@ -28,6 +28,23 @@ import (
 
 var errNilHashFunc = errors.New("nil hash function")
 
+// hashDigestSize maps hash algorithms to their digest size in bytes.
+var hashDigestSize = map[string]uint32{
+	"SHA1":   uint32(20),
+	"SHA256": uint32(32),
+	"SHA384": uint32(48),
+	"SHA512": uint32(64),
+}
+
+// GetHashDigestSize returns the digest size of the specified hash algorithm.
+func GetHashDigestSize(hash string) (uint32, error) {
+	digestSize, ok := hashDigestSize[hash]
+	if !ok {
+		return 0, errors.New("invalid hash algorithm")
+	}
+	return digestSize, nil
+}
+
 // ConvertHashName converts different forms of a hash name to the
 // hash name that tink recognizes.
 func ConvertHashName(name string) string {
