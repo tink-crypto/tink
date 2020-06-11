@@ -32,6 +32,7 @@ import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -42,7 +43,9 @@ import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.DummyAead;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
@@ -56,6 +59,39 @@ import org.junit.runners.JUnit4;
 /** Tests for KeysetHandle. */
 @RunWith(JUnit4.class)
 public class KeysetHandleTest {
+  /**
+   * A KeyTypeManager for testing. It accepts AesGcmKeys and produces primitives as with the passed
+   * in factory.
+   */
+  public static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
+    public TestKeyTypeManager(PrimitiveFactory<?, AesGcmKey>... factories) {
+      super(AesGcmKey.class, factories);
+    }
+
+    @Override
+    public String getKeyType() {
+      return "type.googleapis.com/google.crypto.tink.AesGcmKey";
+    }
+
+    @Override
+    public int getVersion() {
+      return 1;
+    }
+
+    @Override
+    public KeyMaterialType keyMaterialType() {
+      return KeyMaterialType.SYMMETRIC;
+    }
+
+    @Override
+    public void validateKey(AesGcmKey keyProto) {}
+
+    @Override
+    public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
+      return AesGcmKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
+    }
+  }
+
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     Config.register(TinkConfig.TINK_1_0_0);
@@ -287,9 +323,8 @@ public class KeysetHandleTest {
     // always fails.
     KeyManager<Aead> manager =
         new KeyManagerImpl<>(
-            new KeyTypeManagerTest.TestKeyTypeManager(
-                new KeyTypeManagerTest.TestKeyTypeManager.PrimitiveFactory<Aead, AesGcmKey>(
-                    Aead.class) {
+            new TestKeyTypeManager(
+                new KeyTypeManager.PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
                   @Override
                   public Aead getPrimitive(AesGcmKey key) {
                     return new DummyAead();
