@@ -82,6 +82,15 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     with self.assertRaises(core.TinkError):
       plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
+  def test_ciphertext_too_short(self):
+    key_template = aead.aead_key_templates.AES256_GCM
+    keyset_handle = tink.new_keyset_handle(key_template)
+    remote_aead = keyset_handle.primitive(aead.Aead)
+    env_aead = aead.KmsEnvelopeAead(key_template, remote_aead)
+
+    with self.assertRaises(core.TinkError):
+      env_aead.decrypt(b'foo', b'some ad')
+
   def test_malformed_dek_length(self):
     key_template = aead.aead_key_templates.AES256_GCM
     keyset_handle = tink.new_keyset_handle(key_template)
