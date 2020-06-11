@@ -18,9 +18,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from typing import cast
 from absl.testing import absltest
 
-from typing import cast
 from tink.proto import tink_pb2
 import tink
 from tink import core

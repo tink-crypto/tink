@@ -21,8 +21,9 @@ from __future__ import print_function
 
 import io
 
-from absl.testing import absltest
 from typing import cast
+from absl.testing import absltest
+
 from tink.proto import tink_pb2
 import tink
 from tink import core

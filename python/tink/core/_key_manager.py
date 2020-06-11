@@ -19,8 +19,8 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
-import six
 from typing import Any, Generic, Text, Type, TypeVar
+import six
 
 from tink.proto import tink_pb2
 from tink.core import _tink_error
@@ -50,7 +50,7 @@ class KeyManager(Generic[P]):
   @abc.abstractmethod
   def primitive_class(self) -> Type[P]:
     """The class of the primitive it uses. Used for internal management."""
-    pass
+    raise NotImplementedError()
 
   @abc.abstractmethod
   def primitive(self, key_data: tink_pb2.KeyData) -> P:
@@ -63,12 +63,12 @@ class KeyManager(Generic[P]):
     Raises:
       tink.TinkError if getting the primitive fails.
     """
-    pass
+    raise NotImplementedError()
 
   @abc.abstractmethod
   def key_type(self) -> Text:
     """Returns the type_url identifying the key type handled by this manager."""
-    pass
+    raise NotImplementedError()
 
   @abc.abstractmethod
   def new_key_data(self,
@@ -82,7 +82,7 @@ class KeyManager(Generic[P]):
     Raises:
       tink.TinkError if the key generation fails.
     """
-    pass
+    raise NotImplementedError()
 
   def does_support(self, type_url: Text) -> bool:
     return self.key_type() == type_url
@@ -103,7 +103,7 @@ class PrivateKeyManager(KeyManager[P]):
     Raises:
       tink.TinkError if the key generation fails.
     """
-    pass
+    raise NotImplementedError()
 
 
 class KeyManagerCcToPyWrapper(KeyManager[P]):
