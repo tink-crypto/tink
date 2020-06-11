@@ -13,7 +13,6 @@ def tink_java_deps_init():
     javalite_protobuf_deps()
     maven_install(
         artifacts = [
-            "androidx.annotation:annotation:1.1.0",
             "args4j:args4j:2.33",
             "com.amazonaws:aws-java-sdk-core:1.11.625",
             "com.amazonaws:aws-java-sdk-kms:1.11.625",

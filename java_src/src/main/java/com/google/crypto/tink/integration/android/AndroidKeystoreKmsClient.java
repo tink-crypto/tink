@@ -17,10 +17,8 @@
 package com.google.crypto.tink.integration.android;
 
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import androidx.annotation.RequiresApi;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Validators;
@@ -37,7 +35,6 @@ import javax.crypto.KeyGenerator;
  *
  * @since 1.0.0
  */
-@RequiresApi(VERSION_CODES.M)
 public final class AndroidKeystoreKmsClient implements KmsClient {
   /** The prefix of all keys stored in Android Keystore. */
   public static final String PREFIX = "android-keystore://";
