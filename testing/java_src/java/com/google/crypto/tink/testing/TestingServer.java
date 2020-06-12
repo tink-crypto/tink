@@ -33,11 +33,11 @@ public final class TestingServer {
   public static void main(String[] args)
       throws InterruptedException, GeneralSecurityException, IOException {
 
-    if (args.length != 1) {
-      System.out.println("Usage: TestingServer <port>");
+    if ((args.length != 2) || !args[0].equals("--port")) {
+      System.out.println("Usage: TestingServer --port <port>");
       System.exit(1);
     }
-    int port = Integer.parseInt(args[0]);
+    int port = Integer.parseInt(args[1]);
 
     TinkConfig.register();
 
