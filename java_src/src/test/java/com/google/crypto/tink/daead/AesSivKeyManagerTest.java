@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -130,7 +131,7 @@ public class AesSivKeyManagerTest {
   public void createKey_multipleCallsCreateDifferentKeys() throws Exception {
     AesSivKeyFormat format = createAesSivKeyFormat(64);
     TreeSet<String> keys = new TreeSet<>();
-    AesSivKeyManager.KeyFactory<AesSivKeyFormat, AesSivKey> factory =
+    KeyTypeManager.KeyFactory<AesSivKeyFormat, AesSivKey> factory =
         new AesSivKeyManager().keyFactory();
     final int numKeys = 1000;
     for (int i = 0; i < numKeys; ++i) {
