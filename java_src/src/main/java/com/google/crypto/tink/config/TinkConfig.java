@@ -98,7 +98,9 @@ public final class TinkConfig {
   public static void register() throws GeneralSecurityException {
     DeterministicAeadConfig.register();
     HybridConfig.register(); // includes Aead and Mac
-    SignatureConfig.register();
     PrfConfig.register();
+    SignatureConfig.register();
+    StreamingAeadConfig.register();
+    // place holder for KeyDerivationConfig. DO NOT EDIT.
   }
 }
