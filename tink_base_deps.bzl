@@ -48,7 +48,7 @@ def tink_base_deps():
             name = "google_root_pem",
             executable = 0,
             urls = ["https://pki.goog/roots.pem"],
-            sha256 = "7f03c894282e3fc39105466a8ee5055ffd05e79dfd4010360117078afbfa68bd",
+            sha256 = "8edacf33722a013e976e086a291f5314e117e0aa44fa15422cbbd2cebd565af4",
         )
 
     # proto
