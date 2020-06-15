@@ -1321,7 +1321,13 @@ TEST_F(RegistryTest, AsymmetricGetWrongPrimitiveError) {
                        HasSubstr("not among supported primitives")));
 }
 
-TEST(PrivateKeyManagerImplTest, AsymmetricFactoryNewKeyFromMessage) {
+class PrivateKeyManagerImplTest : public testing::Test {
+  void SetUp() override {
+    Registry::Reset();
+  }
+};
+
+TEST_F(PrivateKeyManagerImplTest, AsymmetricFactoryNewKeyFromMessage) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
                   absl::make_unique<TestPrivateKeyTypeManager>(),
                   absl::make_unique<TestPublicKeyTypeManager>(), true)
@@ -1343,7 +1349,7 @@ TEST(PrivateKeyManagerImplTest, AsymmetricFactoryNewKeyFromMessage) {
               Eq(EcdsaSignatureEncoding::DER));
 }
 
-TEST(PrivateKeyManagerImplTest, AsymmetricNewKeyDisallowed) {
+TEST_F(PrivateKeyManagerImplTest, AsymmetricNewKeyDisallowed) {
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
                   absl::make_unique<TestPrivateKeyTypeManager>(),
                   absl::make_unique<TestPublicKeyTypeManager>(), true)

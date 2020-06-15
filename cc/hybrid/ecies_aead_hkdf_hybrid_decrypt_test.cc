@@ -204,6 +204,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
 
 TEST_F(EciesAeadHkdfHybridDecryptTest, testGettingHybridEncryptWithoutManager) {
   // Prepare an ECIES key.
+  Registry::Reset();
   auto ecies_key = test::GetEciesAesGcmHkdfTestKey(
       EllipticCurveType::NIST_P256,
       EcPointFormat::UNCOMPRESSED,
