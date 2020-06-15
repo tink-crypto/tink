@@ -4,8 +4,14 @@ This folder contains scripts to build binary and source wheels of the Tink
 Python package.
 
 ## Building the release
+
 In order to generate a release run `./tools/distribution/create_release.sh` from
-the `python/` folder. This will carry out the following three steps:
+the `python/` folder. Note that this requires [https://www.docker.com](Docker)
+to be installed, as it makes use of the
+[https://github.com/pypa/manylinux](pypa images) to build
+[https://www.python.org/dev/peps/pep-0599/](PEP 599) conform wheels.
+
+This will carry out the following three steps:
 
 *   Create binary wheels in a Docker container for Linux.
 *   Create a source distribution of the Python package.
@@ -30,10 +36,16 @@ source distribution is tested on the machine which the script is run.
 
 The output generated in the previous step can directly be used for upload to
 PyPI. It is recommended to first upload it to the
-[https://test.pypi.org/](test repository):
+[https://test.pypi.org](test repository):
 
 ```
 python3 -m twine upload --repository testpypi release/*
+```
+
+The package can then be installed using
+
+```
+pip3 install -i https://test.pypi.org/simple/ tink
 ```
 
 In order to upload it to the PyPI repository run
