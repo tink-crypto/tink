@@ -19,6 +19,7 @@ go_library(
     srcs = [
         "aead_service.go",
         "keyset_service.go",
+        "metadata_service.go",
     ],
     importpath = "github.com/google/tink/testing/go/services",
     deps = [

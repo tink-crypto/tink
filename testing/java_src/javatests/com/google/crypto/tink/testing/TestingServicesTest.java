@@ -27,7 +27,10 @@ import com.google.crypto.tink.proto.testing.CiphertextResponse;
 import com.google.crypto.tink.proto.testing.GenerateKeysetRequest;
 import com.google.crypto.tink.proto.testing.KeysetGrpc;
 import com.google.crypto.tink.proto.testing.KeysetResponse;
+import com.google.crypto.tink.proto.testing.MetadataGrpc;
 import com.google.crypto.tink.proto.testing.PlaintextResponse;
+import com.google.crypto.tink.proto.testing.ServerInfo;
+import com.google.crypto.tink.proto.testing.ServerInfoRequest;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
@@ -45,6 +48,7 @@ public final class TestingServicesTest {
   private ManagedChannel channel;
   KeysetGrpc.KeysetBlockingStub keysetStub;
   AeadGrpc.AeadBlockingStub aeadStub;
+  MetadataGrpc.MetadataBlockingStub metadataStub;
 
   @Before
   public void setUp() throws Exception {
@@ -53,6 +57,7 @@ public final class TestingServicesTest {
     server = InProcessServerBuilder
         .forName(serverName)
         .directExecutor()
+        .addService(new MetadataServiceImpl())
         .addService(new AeadServiceImpl())
         .addService(new KeysetServiceImpl())
         .build()
@@ -63,6 +68,7 @@ public final class TestingServicesTest {
         .build();
     keysetStub = KeysetGrpc.newBlockingStub(channel);
     aeadStub = AeadGrpc.newBlockingStub(channel);
+    metadataStub = MetadataGrpc.newBlockingStub(channel);
   }
 
   @After
@@ -172,5 +178,12 @@ public final class TestingServicesTest {
 
     PlaintextResponse decResponse = aeadDecrypt(aeadStub, badKeyset, ciphertext, associatedData);
     assertThat(decResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void getServerInfo_success() throws Exception {
+    ServerInfo response = metadataStub.getServerInfo(ServerInfoRequest.getDefaultInstance());
+    assertThat(response.getLanguage()).isEqualTo("java");
+    assertThat(response.getTinkVersion()).isNotEmpty();
   }
 }

@@ -20,6 +20,7 @@
 #include "proto/testing/testing_api.grpc.pb.h"
 #include "aead_impl.h"
 #include "keyset_impl.h"
+#include "metadata_impl.h"
 
 ABSL_FLAG(int, port, 23456, "the port");
 
@@ -33,6 +34,7 @@ void RunServer() {
   const int port = absl::GetFlag(FLAGS_port);
   std::string server_address = absl::StrCat("[::]:", port);
 
+  tink_testing_api::MetadataImpl metadata;
   tink_testing_api::KeysetImpl keyset;
   tink_testing_api::AeadImpl aead;
 
@@ -40,6 +42,7 @@ void RunServer() {
   builder.AddListeningPort(
       server_address, ::grpc::experimental::LocalServerCredentials(LOCAL_TCP));
 
+  builder.RegisterService(&metadata);
   builder.RegisterService(&keyset);
   builder.RegisterService(&aead);
 

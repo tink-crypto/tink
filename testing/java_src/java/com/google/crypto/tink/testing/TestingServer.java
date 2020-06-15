@@ -43,6 +43,7 @@ public final class TestingServer {
 
     System.out.println("Start server on port " + port);
     ServerBuilder.forPort(port)
+        .addService(new MetadataServiceImpl())
         .addService(new KeysetServiceImpl())
         .addService(new AeadServiceImpl())
         .build()

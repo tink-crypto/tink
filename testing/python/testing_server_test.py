@@ -37,6 +37,7 @@ class TestingServerTest(absltest.TestCase):
 
   _server = None
   _channel = None
+  _metadata_stub = None
   _keyset_stub = None
   _aead_stub = None
 
@@ -52,6 +53,7 @@ class TestingServerTest(absltest.TestCase):
     cls._channel = grpc.secure_channel('[::]:%d' % port,
                                        grpc.local_channel_credentials())
     grpc.channel_ready_future(cls._channel).result()
+    cls._metadata_stub = testing_api_pb2_grpc.MetadataStub(cls._channel)
     cls._keyset_stub = testing_api_pb2_grpc.KeysetStub(cls._channel)
     cls._aead_stub = testing_api_pb2_grpc.AeadStub(cls._channel)
 
@@ -101,6 +103,12 @@ class TestingServerTest(absltest.TestCase):
     logging.info('Error in response: %s', dec_response.err)
     self.assertNotEmpty(dec_response.err)
     self.assertEmpty(dec_response.plaintext)
+
+  def test_server_info(self):
+    request = testing_api_pb2.ServerInfoRequest()
+    response = self._metadata_stub.GetServerInfo(request)
+
+    self.assertEqual(response.language, 'python')
 
 if __name__ == '__main__':
   absltest.main()

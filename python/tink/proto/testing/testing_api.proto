@@ -16,6 +16,21 @@ package tink_testing_api;
 option java_package = "com.google.crypto.tink.proto.testing";
 option java_multiple_files = true;
 
+// Service providing metadata about the server.
+service Metadata {
+  // Returns some server information. A test may use this information to verify
+  // that it is talking to the right server.
+  rpc GetServerInfo (ServerInfoRequest) returns (ServerInfo) {}
+}
+
+message ServerInfoRequest {
+}
+
+message ServerInfo {
+  string tink_version = 1; // For example '1.4'
+  string language = 2;  // For example 'cc', 'java', 'go' or 'python'.
+}
+
 // Service for Keyset operations.
 service Keyset {
   // Generates a new keyset from a template.

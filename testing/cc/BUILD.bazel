@@ -14,6 +14,27 @@ cpp_grpc_library(
 )
 
 cc_library(
+    name = "metadata_impl",
+    srcs = ["metadata_impl.cc"],
+    hdrs = ["metadata_impl.h"],
+    deps = [
+        ":testing_api_cpp_library",
+        "@com_google_absl//absl/base:core_headers",
+        "@tink_cc//:tink_cc",
+    ],
+)
+
+cc_test(
+    name = "metadata_impl_test",
+    srcs = ["metadata_impl_test.cc"],
+    deps = [
+        ":metadata_impl",
+        ":testing_api_cpp_library",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "keyset_impl",
     srcs = ["keyset_impl.cc"],
     hdrs = ["keyset_impl.h"],
@@ -70,6 +91,7 @@ cc_binary(
     deps = [
         ":aead_impl",
         ":keyset_impl",
+        ":metadata_impl",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/flags:flag",

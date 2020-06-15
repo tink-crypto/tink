@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
@@ -120,5 +121,19 @@ func TestGenerateEncryptDecrypt(t *testing.T) {
 	}
 	if _, err := aeadDecrypt(ctx, aeadService, keyset, []byte("badCiphertext"), associatedData); err == nil {
 		t.Fatalf("aeadDecrypt of bad ciphertext succeeded unexpectedly.")
+	}
+}
+
+func TestServerInfo(t *testing.T) {
+	metadataService := &services.MetadataService{}
+	ctx := context.Background()
+
+	req := &pb.ServerInfoRequest{}
+	rsp, err := metadataService.GetServerInfo(ctx, req)
+	if err != nil {
+		t.Fatalf("GetServerInfo failed: %v", err)
+	}
+	if strings.Compare(rsp.GetLanguage(), "go") != 0 {
+		t.Fatalf("Expected language 'go', got: %v", rsp.GetLanguage())
 	}
 }

@@ -34,6 +34,16 @@ FLAGS = flags.FLAGS
 flags.DEFINE_integer('port', 10000, 'The port of the server.')
 
 
+class MetadataServicer(testing_api_pb2_grpc.MetadataServicer):
+  """A service with metadata about the server."""
+
+  def GetServerInfo(
+      self, request: testing_api_pb2.ServerInfoRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.ServerInfo:
+    """Generates a keyset."""
+    return testing_api_pb2.ServerInfo(language='python')
+
+
 class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
   """A service for testing Keyset operations."""
 
@@ -86,6 +96,8 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
 def main(unused_argv):
   aead.register()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
+  testing_api_pb2_grpc.add_MetadataServicer_to_server(
+      MetadataServicer(), server)
   testing_api_pb2_grpc.add_KeysetServicer_to_server(KeysetServicer(), server)
   testing_api_pb2_grpc.add_AeadServicer_to_server(AeadServicer(), server)
   server.add_secure_port('[::]:%d' % FLAGS.port,

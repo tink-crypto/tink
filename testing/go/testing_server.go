@@ -42,6 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create new grpcprod server: %v", err)
 	}
+	pbgrpc.RegisterMetadataServer(server, &services.MetadataService{})
 	pbgrpc.RegisterKeysetServer(server, &services.KeysetService{})
 	pbgrpc.RegisterAeadServer(server, &services.AeadService{})
 	server.Serve(lis)
