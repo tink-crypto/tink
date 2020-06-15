@@ -17,6 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -41,7 +42,7 @@ public final class Ed25519PrivateKeyManager
     super(
         Ed25519PrivateKey.class,
         Ed25519PublicKey.class,
-        new PrimitiveFactory<PublicKeySign, Ed25519PrivateKey>(PublicKeySign.class) {
+        new KeyTypeManager.PrimitiveFactory<PublicKeySign, Ed25519PrivateKey>(PublicKeySign.class) {
           @Override
           public PublicKeySign getPrimitive(Ed25519PrivateKey keyProto)
               throws GeneralSecurityException {

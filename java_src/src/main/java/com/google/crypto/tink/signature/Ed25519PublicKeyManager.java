@@ -35,7 +35,8 @@ class Ed25519PublicKeyManager extends KeyTypeManager<Ed25519PublicKey> {
   public Ed25519PublicKeyManager() {
     super(
         Ed25519PublicKey.class,
-        new PrimitiveFactory<PublicKeyVerify, Ed25519PublicKey>(PublicKeyVerify.class) {
+        new KeyTypeManager.PrimitiveFactory<PublicKeyVerify, Ed25519PublicKey>(
+            PublicKeyVerify.class) {
           @Override
           public PublicKeyVerify getPrimitive(Ed25519PublicKey keyProto) {
             return new Ed25519Verify(keyProto.getKeyValue().toByteArray());

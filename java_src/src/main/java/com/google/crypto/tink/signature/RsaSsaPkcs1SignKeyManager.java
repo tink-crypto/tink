@@ -17,6 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -36,7 +37,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -58,7 +58,8 @@ public final class RsaSsaPkcs1SignKeyManager
     super(
         RsaSsaPkcs1PrivateKey.class,
         RsaSsaPkcs1PublicKey.class,
-        new PrimitiveFactory<PublicKeySign, RsaSsaPkcs1PrivateKey>(PublicKeySign.class) {
+        new KeyTypeManager.PrimitiveFactory<PublicKeySign, RsaSsaPkcs1PrivateKey>(
+            PublicKeySign.class) {
           @Override
           public PublicKeySign getPrimitive(RsaSsaPkcs1PrivateKey keyProto)
               throws GeneralSecurityException {

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -50,7 +51,7 @@ public final class EcdsaSignKeyManager
     super(
         EcdsaPrivateKey.class,
         EcdsaPublicKey.class,
-        new PrimitiveFactory<PublicKeySign, EcdsaPrivateKey>(PublicKeySign.class) {
+        new KeyTypeManager.PrimitiveFactory<PublicKeySign, EcdsaPrivateKey>(PublicKeySign.class) {
           @Override
           public PublicKeySign getPrimitive(EcdsaPrivateKey key) throws GeneralSecurityException {
             ECPrivateKey privateKey =

@@ -40,7 +40,8 @@ class RsaSsaPssVerifyKeyManager extends KeyTypeManager<RsaSsaPssPublicKey> {
   public RsaSsaPssVerifyKeyManager() {
     super(
         RsaSsaPssPublicKey.class,
-        new PrimitiveFactory<PublicKeyVerify, RsaSsaPssPublicKey>(PublicKeyVerify.class) {
+        new KeyTypeManager.PrimitiveFactory<PublicKeyVerify, RsaSsaPssPublicKey>(
+            PublicKeyVerify.class) {
           @Override
           public PublicKeyVerify getPrimitive(RsaSsaPssPublicKey keyProto)
               throws GeneralSecurityException {
