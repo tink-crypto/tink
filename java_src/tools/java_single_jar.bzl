@@ -20,12 +20,10 @@ def _java_single_jar(ctx):
     _check_non_empty(ctx.attr.root_packages, "root_packages")
 
     inputs = depset()
-    source_jars = []
-    for dep in ctx.attr.deps:
-        inputs = depset(transitive = [inputs, dep[JavaInfo].transitive_runtime_deps])
-        source_jars += dep[JavaInfo].transitive_source_jars.to_list()
     if ctx.attr.source_jar:
-        inputs = depset(direct = source_jars)
+        inputs = depset(transitive = [dep[JavaInfo].transitive_source_jars for dep in ctx.attr.deps])
+    else:
+        inputs = depset(transitive = [dep[JavaInfo].transitive_runtime_deps for dep in ctx.attr.deps])
 
     args = ctx.actions.args()
     args.add_all("--sources", inputs)

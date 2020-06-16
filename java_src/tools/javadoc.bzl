@@ -10,7 +10,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Definition of javadoc_library. """
+"""
+Generates a Javadoc jar path/to/target/<name>.jar.
+
+Arguments:
+  srcs: source files to process. This might contain .java files or gen_rule that
+      generates source jars.
+  deps: targets that contain references to other types referenced in Javadoc. This can be the
+      java_library/android_library target(s) for the same sources
+  root_packages: Java packages to include in generated Javadoc. Any subpackages not listed in
+      exclude_packages will be included as well
+  exclude_packages: Java packages to exclude from generated Javadoc
+  android_api_level: If Android APIs are used, the API level to compile against to generate
+      Javadoc
+  doctitle: title for Javadoc's index.html. See javadoc -doctitle
+  bottom_text: text passed to javadoc's `-bottom` flag
+  external_javadoc_links: a list of URLs that are passed to Javadoc's `-linkoffline` flag
+"""
 
 def _check_non_empty(value, name):
     if not value:
@@ -104,20 +120,3 @@ javadoc_library = rule(
     outputs = {"jar": "%{name}.jar"},
     implementation = _javadoc_library,
 )
-"""
-Generates a Javadoc jar path/to/target/<name>.jar.
-
-Arguments:
-  srcs: source files to process. This might contain .java files or gen_rule that
-      generates source jars.
-  deps: targets that contain references to other types referenced in Javadoc. This can be the
-      java_library/android_library target(s) for the same sources
-  root_packages: Java packages to include in generated Javadoc. Any subpackages not listed in
-      exclude_packages will be included as well
-  exclude_packages: Java packages to exclude from generated Javadoc
-  android_api_level: If Android APIs are used, the API level to compile against to generate
-      Javadoc
-  doctitle: title for Javadoc's index.html. See javadoc -doctitle
-  bottom_text: text passed to javadoc's `-bottom` flag
-  external_javadoc_links: a list of URLs that are passed to Javadoc's `-linkoffline` flag
-"""
