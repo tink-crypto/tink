@@ -26,6 +26,7 @@ import com.google.protobuf.MessageLite;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -354,8 +355,8 @@ public final class Registry {
     if (catalogue == null) {
       throw new IllegalArgumentException("catalogue must be non-null.");
     }
-    if (catalogueMap.containsKey(catalogueName.toLowerCase())) {
-      Catalogue<?> existing = catalogueMap.get(catalogueName.toLowerCase());
+    if (catalogueMap.containsKey(catalogueName.toLowerCase(Locale.US))) {
+      Catalogue<?> existing = catalogueMap.get(catalogueName.toLowerCase(Locale.US));
       if (!catalogue.getClass().equals(existing.getClass())) {
         logger.warning(
             "Attempted overwrite of a catalogueName catalogue for name " + catalogueName);
@@ -363,7 +364,7 @@ public final class Registry {
             "catalogue for name " + catalogueName + " has been already registered");
       }
     }
-    catalogueMap.put(catalogueName.toLowerCase(), catalogue);
+    catalogueMap.put(catalogueName.toLowerCase(Locale.US), catalogue);
   }
 
   /**
@@ -378,25 +379,25 @@ public final class Registry {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
     }
-    Catalogue<?> catalogue = catalogueMap.get(catalogueName.toLowerCase());
+    Catalogue<?> catalogue = catalogueMap.get(catalogueName.toLowerCase(Locale.US));
     if (catalogue == null) {
       String error = String.format("no catalogue found for %s. ", catalogueName);
-      if (catalogueName.toLowerCase().startsWith("tinkaead")) {
+      if (catalogueName.toLowerCase(Locale.US).startsWith("tinkaead")) {
         error += "Maybe call AeadConfig.register().";
       }
-      if (catalogueName.toLowerCase().startsWith("tinkdeterministicaead")) {
+      if (catalogueName.toLowerCase(Locale.US).startsWith("tinkdeterministicaead")) {
         error += "Maybe call DeterministicAeadConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkstreamingaead")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tinkstreamingaead")) {
         error += "Maybe call StreamingAeadConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkhybriddecrypt")
-          || catalogueName.toLowerCase().startsWith("tinkhybridencrypt")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tinkhybriddecrypt")
+          || catalogueName.toLowerCase(Locale.US).startsWith("tinkhybridencrypt")) {
         error += "Maybe call HybridConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkmac")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tinkmac")) {
         error += "Maybe call MacConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkpublickeysign")
-          || catalogueName.toLowerCase().startsWith("tinkpublickeyverify")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tinkpublickeysign")
+          || catalogueName.toLowerCase(Locale.US).startsWith("tinkpublickeyverify")) {
         error += "Maybe call SignatureConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tink")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tink")) {
         error += "Maybe call TinkConfig.register().";
       }
       throw new GeneralSecurityException(error);
@@ -475,9 +476,7 @@ public final class Registry {
     }
     String typeUrl = manager.getKeyType();
     ensureKeyManagerInsertable(typeUrl, manager.getClass(), newKeyAllowed);
-    if (!keyManagerMap.containsKey(typeUrl)) {
-      keyManagerMap.put(typeUrl, createContainerFor(manager));
-    }
+    keyManagerMap.putIfAbsent(typeUrl, createContainerFor(manager));
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
   }
 
@@ -626,10 +625,9 @@ public final class Registry {
     if (primitiveWrapperMap.containsKey(classObject)) {
       @SuppressWarnings("unchecked") // We know that we only inserted objects of the correct type.
       PrimitiveWrapper<P> existingWrapper =
-          (PrimitiveWrapper<P>) (primitiveWrapperMap.get(classObject));
+          (PrimitiveWrapper<P>) primitiveWrapperMap.get(classObject);
       if (!wrapper.getClass().equals(existingWrapper.getClass())) {
-        logger.warning(
-            "Attempted overwrite of a registered SetWrapper for type " + classObject.toString());
+        logger.warning("Attempted overwrite of a registered SetWrapper for type " + classObject);
         throw new GeneralSecurityException(
             String.format(
                 "SetWrapper for primitive (%s) is already registered to be %s, "
