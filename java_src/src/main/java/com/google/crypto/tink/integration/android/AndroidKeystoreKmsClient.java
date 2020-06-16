@@ -25,6 +25,7 @@ import com.google.crypto.tink.subtle.Validators;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.Locale;
 import javax.crypto.KeyGenerator;
 
 /**
@@ -53,7 +54,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    * {@code uri}.
    */
   public AndroidKeystoreKmsClient(String uri) {
-    if (!uri.toLowerCase().startsWith(PREFIX)) {
+    if (!uri.toLowerCase(Locale.US).startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
     }
     this.keyUri = uri;
@@ -69,7 +70,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
     if (this.keyUri != null && this.keyUri.equals(uri)) {
       return true;
     }
-    return this.keyUri == null && uri.toLowerCase().startsWith(PREFIX);
+    return this.keyUri == null && uri.toLowerCase(Locale.US).startsWith(PREFIX);
   }
 
   /**

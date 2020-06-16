@@ -339,7 +339,7 @@ public final class AndroidKeysetManager {
       return read();
     } catch (IOException e) {
       // Not found, handle below.
-      Log.i(TAG, "cannot read keyset: " + e);
+      Log.w(TAG, "cannot read keyset: " + e);
     }
 
     // Not found.
@@ -368,7 +368,7 @@ public final class AndroidKeysetManager {
         // have the same privilege as the app, thus they can call Android Keystore to read or write
         // the encrypted keyset in the first place.
         // So it's okay to ignore the failure and try to read the keyset in cleartext.
-        Log.i(TAG, "cannot decrypt keyset: " + e);
+        Log.w(TAG, "cannot decrypt keyset: " + e);
       }
     }
     KeysetHandle handle = CleartextKeysetHandle.read(reader);
@@ -436,7 +436,7 @@ public final class AndroidKeysetManager {
       byte[] ciphertext = aead.encrypt(message, aad);
       byte[] decrypted = aead.decrypt(ciphertext, aad);
       if (decrypted.length != 0) {
-        Log.i(
+        Log.w(
             TAG,
             "cannot use Android Keystore: encryption/decryption of empty message and empty aad"
                 + " returns incorrect results");
@@ -450,7 +450,7 @@ public final class AndroidKeysetManager {
       ciphertext = aead.encrypt(message, aad);
       decrypted = aead.decrypt(ciphertext, aad);
       if (!Hex.encode(decrypted).equals(Hex.encode(message))) {
-        Log.i(
+        Log.w(
             TAG,
             "cannot use Android Keystore: encryption/decryption of non-empty message and empty"
                 + " aad returns incorrect results");
@@ -464,7 +464,7 @@ public final class AndroidKeysetManager {
       ciphertext = aead.encrypt(message, aad);
       decrypted = aead.decrypt(ciphertext, aad);
       if (!Hex.encode(decrypted).equals(Hex.encode(message))) {
-        Log.i(
+        Log.w(
             TAG,
             "cannot use Android Keystore: encryption/decryption of non-empty message and"
                 + " non-empty aad returns incorrect results");
@@ -475,7 +475,7 @@ public final class AndroidKeysetManager {
 
       return true;
     } catch (Exception ex) {
-      Log.i(TAG, "cannot use Android Keystore: " + ex);
+      Log.w(TAG, "cannot use Android Keystore: " + ex);
     }
 
     return false;
