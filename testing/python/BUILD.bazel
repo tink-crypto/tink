@@ -1,5 +1,5 @@
 load("@rules_proto_grpc//python:defs.bzl", "python_grpc_library")
-load("@rules_python//python:defs.bzl", "py_binary")
+load("@rules_python//python:defs.bzl", "py_library", "py_binary")
 load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
 package(
@@ -14,10 +14,9 @@ python_grpc_library(
     deps = ["@tink_base//proto/testing:testing_api_proto"],
 )
 
-py_binary(
-    name = "testing_server",
-    srcs = ["testing_server.py"],
-    python_version = "PY3",
+py_library(
+    name = "services",
+    srcs = ["services.py"],
     srcs_version = "PY3",
     deps = [
         ":testing_api_python_library",
@@ -29,17 +28,30 @@ py_binary(
 )
 
 py_test(
-    name = "testing_server_test",
-    srcs = ["testing_server_test.py"],
-    data = [
-        ":testing_server",
-    ],
+    name = "services_test",
+    srcs = ["services_test.py"],
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
+        ":services",
         ":testing_api_python_library",
         requirement("absl-py"),
-        "@org_python_pypi_portpicker//:portpicker",
         "@tink_py//tink/aead",
+    ],
+)
+
+py_binary(
+    name = "testing_server",
+    srcs = ["testing_server.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":services",
+        ":testing_api_python_library",
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink:tink_config",
     ],
 )

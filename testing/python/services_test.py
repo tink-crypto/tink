@@ -11,87 +11,108 @@
 # limitations under the License.
 """Tests for tink.tools.testing.python.testing_server."""
 
-import os
-import signal
-import subprocess
-import time
-
-from typing import Text
 from absl import logging
 from absl.testing import absltest
 import grpc
-import portpicker
 
 from tink import aead
+from tink import tink_config
+
 
 from proto.testing import testing_api_pb2
-from proto.testing import testing_api_pb2_grpc
+from google3.third_party.tink.testing.python import services
 
 
-def _server_path() -> Text:
-  dir_path = os.path.dirname(os.path.abspath(__file__))
-  return os.path.join(dir_path, 'testing_server')
+class DummyServicerContext(grpc.ServicerContext):
+
+  def is_active(self):
+    pass
+
+  def time_remaining(self):
+    pass
+
+  def cancel(self):
+    pass
+
+  def add_callback(self, callback):
+    pass
+
+  def invocation_metadata(self):
+    pass
+
+  def peer(self):
+    pass
+
+  def peer_identities(self):
+    pass
+
+  def peer_identity_key(self):
+    pass
+
+  def auth_context(self):
+    pass
+
+  def set_compression(self, compression):
+    pass
+
+  def send_initial_metadata(self, initial_metadata):
+    pass
+
+  def set_trailing_metadata(self, trailing_metadata):
+    pass
+
+  def abort(self, code, details):
+    pass
+
+  def abort_with_status(self, status):
+    pass
+
+  def set_code(self, code):
+    pass
+
+  def set_details(self, details):
+    pass
+
+  def disable_next_message_compression(self):
+    pass
 
 
-class TestingServerTest(absltest.TestCase):
-
-  _server = None
-  _channel = None
-  _metadata_stub = None
-  _keyset_stub = None
-  _aead_stub = None
+class ServicesTest(absltest.TestCase):
 
   @classmethod
   def setUpClass(cls):
     super().setUpClass()
-    port = portpicker.pick_unused_port()
-    cls._server = subprocess.Popen([
-        _server_path(), '-port', '%d' % port,
-    ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    logging.info('Server started on port %d with pid: %d.',
-                 port, cls._server.pid)
-    cls._channel = grpc.secure_channel('[::]:%d' % port,
-                                       grpc.local_channel_credentials())
-    grpc.channel_ready_future(cls._channel).result()
-    cls._metadata_stub = testing_api_pb2_grpc.MetadataStub(cls._channel)
-    cls._keyset_stub = testing_api_pb2_grpc.KeysetStub(cls._channel)
-    cls._aead_stub = testing_api_pb2_grpc.AeadStub(cls._channel)
-
-  @classmethod
-  def tearDownClass(cls):
-    cls._channel.close()
-    logging.info('Stopping server...')
-    cls._server.send_signal(signal.SIGINT)
-    time.sleep(2)
-    if cls._server.poll() is None:
-      cls._server.kill()
-    super().tearDownClass()
+    tink_config.register()
 
   def test_generate_encrypt_decrypt(self):
-    t = time.time()
+    keyset_servicer = services.KeysetServicer()
+    aead_servicer = services.AeadServicer()
+
     template = aead.aead_key_templates.AES128_GCM.SerializeToString()
     gen_request = testing_api_pb2.GenerateKeysetRequest(template=template)
-    gen_response = self._keyset_stub.Generate(gen_request)
+    gen_response = keyset_servicer.Generate(gen_request, DummyServicerContext())
     self.assertEmpty(gen_response.err)
     keyset = gen_response.keyset
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
     enc_request = testing_api_pb2.AeadEncryptRequest(
         keyset=keyset, plaintext=plaintext, associated_data=associated_data)
-    enc_response = self._aead_stub.Encrypt(enc_request)
+    enc_response = aead_servicer.Encrypt(enc_request, DummyServicerContext())
     self.assertEmpty(enc_response.err)
     ciphertext = enc_response.ciphertext
     dec_request = testing_api_pb2.AeadDecryptRequest(
         keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
-    dec_response = self._aead_stub.Decrypt(dec_request)
+    dec_response = aead_servicer.Decrypt(dec_request, DummyServicerContext())
     self.assertEmpty(dec_response.err)
     self.assertEqual(dec_response.plaintext, plaintext)
-    logging.info('Testing took %s s', time.time() - t)
 
   def test_generate_decrypt_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    aead_servicer = services.AeadServicer()
+
     template = aead.aead_key_templates.AES128_GCM.SerializeToString()
     gen_request = testing_api_pb2.GenerateKeysetRequest(template=template)
-    gen_response = self._keyset_stub.Generate(gen_request)
+    gen_response = keyset_servicer.Generate(gen_request, DummyServicerContext())
     self.assertEmpty(gen_response.err)
     keyset = gen_response.keyset
 
@@ -99,16 +120,17 @@ class TestingServerTest(absltest.TestCase):
     associated_data = b'associated_data'
     dec_request = testing_api_pb2.AeadDecryptRequest(
         keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
-    dec_response = self._aead_stub.Decrypt(dec_request)
+    dec_response = aead_servicer.Decrypt(dec_request, DummyServicerContext())
     logging.info('Error in response: %s', dec_response.err)
     self.assertNotEmpty(dec_response.err)
     self.assertEmpty(dec_response.plaintext)
 
   def test_server_info(self):
+    metadata_servicer = services.MetadataServicer()
     request = testing_api_pb2.ServerInfoRequest()
-    response = self._metadata_stub.GetServerInfo(request)
-
+    response = metadata_servicer.GetServerInfo(request, DummyServicerContext())
     self.assertEqual(response.language, 'python')
+
 
 if __name__ == '__main__':
   absltest.main()
