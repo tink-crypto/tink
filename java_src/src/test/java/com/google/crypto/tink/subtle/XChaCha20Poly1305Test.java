@@ -28,7 +28,6 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.HashSet;
-import javax.crypto.AEADBadTagException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -191,7 +190,7 @@ public class XChaCha20Poly1305Test {
         try {
           byte[] unused = aead.decrypt(modified, aad);
           fail("Decrypting modified ciphertext should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
         }
       }
@@ -219,7 +218,7 @@ public class XChaCha20Poly1305Test {
         try {
           byte[] unused = aead.decrypt(ciphertext, modified);
           fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
         }
       }

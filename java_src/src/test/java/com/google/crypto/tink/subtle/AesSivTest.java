@@ -24,7 +24,6 @@ import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
-import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -222,7 +221,7 @@ public class AesSivTest {
         try {
           byte[] unused = crypter.decryptDeterministically(modified, aad);
           fail("Decrypting modified ciphertext should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
         }
       }
@@ -264,7 +263,7 @@ public class AesSivTest {
         try {
           byte[] unused = crypter.decryptDeterministically(ciphertext, modified);
           fail("Decrypting modified aad should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
         }
       }

@@ -24,7 +24,6 @@ import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -161,7 +160,7 @@ public class AesEaxJceTest {
         try {
           byte[] unused = eax.decrypt(modified, aad);
           fail("Decrypting modified ciphertext should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
         }
       }
@@ -189,7 +188,7 @@ public class AesEaxJceTest {
         try {
           byte[] unused = eax.decrypt(ciphertext, modified);
           fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
         }
       }
@@ -244,7 +243,7 @@ public class AesEaxJceTest {
           byte[] badAad = new byte[] {1, 2, 3};
           byte[] unused = eax.decrypt(ciphertext, badAad);
           fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
         }
       }
@@ -258,7 +257,7 @@ public class AesEaxJceTest {
           byte[] badAad = new byte[] {1, 2, 3};
           byte[] unused = eax.decrypt(ciphertext, badAad);
           fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
         }
       }
