@@ -16,10 +16,12 @@ package com.google.crypto.tink.subtle.prf;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.crypto.tink.prf.Prf;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.util.TestUtil;
 import java.io.InputStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -307,5 +309,19 @@ public final class HkdfStreamingPrfTest {
     input.read(result);
 
     assertThat(Hkdf.computeHkdf("HmacSha384", ikm, salt, info, result.length)).isEqualTo(result);
+  }
+
+  @Test
+  public void testPrfUniformity() throws Exception {
+    for (int i = 0; i < HashType.values().length; i++) {
+      byte[] ikm = Random.randBytes(128);
+      byte[] salt = Random.randBytes(128);
+      byte[] message = Random.randBytes(1024);
+      Prf prf = PrfImpl.wrap(new HkdfStreamingPrf(HashType.SHA256, ikm, salt));
+      byte[] prBytes = prf.compute(message, message.length);
+      TestUtil.ztestUniformString(prBytes);
+      TestUtil.ztestAutocorrelationUniformString(prBytes);
+      TestUtil.ztestCrossCorrelationUniformStrings(prBytes, message);
+    }
   }
 }

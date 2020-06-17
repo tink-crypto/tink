@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.prf.Prf;
+import com.google.crypto.tink.util.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
@@ -88,6 +89,20 @@ public class PrfHmacJceTest {
       } catch (GeneralSecurityException e) {
         fail("Valid MAC, should not throw exception");
       }
+    }
+  }
+
+  @Test
+  public void testPrfUniformity() throws GeneralSecurityException {
+    for (MacTestVector t : HMAC_TEST_VECTORS) {
+      Prf prf = new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC"));
+      // We need a string of bytes identical in size to the tag output size for the given algorithm
+      // so we can test cross correlation. We're not actually validating the output contents of the
+      // HMAC in this function. Therefore - just feed the test tag into the HMAC.
+      byte[] prBytes = prf.compute(t.tag, t.tag.length);
+      TestUtil.ztestUniformString(prBytes);
+      TestUtil.ztestAutocorrelationUniformString(prBytes);
+      TestUtil.ztestCrossCorrelationUniformStrings(prBytes, t.tag);
     }
   }
 
