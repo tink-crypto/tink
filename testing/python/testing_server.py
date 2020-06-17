@@ -21,10 +21,10 @@ from concurrent import futures
 from absl import app
 from absl import flags
 import grpc
-from tink import tink_config
+from tink import aead
 from proto.testing import testing_api_pb2_grpc
 
-from google3.third_party.tink.testing.python import services
+import services
 
 FLAGS = flags.FLAGS
 
@@ -32,7 +32,7 @@ flags.DEFINE_integer('port', 10000, 'The port of the server.')
 
 
 def main(unused_argv):
-  tink_config.register()
+  aead.register()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
   testing_api_pb2_grpc.add_MetadataServicer_to_server(
       services.MetadataServicer(), server)

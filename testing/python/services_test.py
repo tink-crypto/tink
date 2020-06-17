@@ -16,11 +16,10 @@ from absl.testing import absltest
 import grpc
 
 from tink import aead
-from tink import tink_config
 
 
 from proto.testing import testing_api_pb2
-from google3.third_party.tink.testing.python import services
+import services
 
 
 class DummyServicerContext(grpc.ServicerContext):
@@ -82,7 +81,7 @@ class ServicesTest(absltest.TestCase):
   @classmethod
   def setUpClass(cls):
     super().setUpClass()
-    tink_config.register()
+    aead.register()
 
   def test_generate_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
