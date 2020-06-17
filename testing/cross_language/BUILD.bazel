@@ -1,0 +1,20 @@
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
+
+licenses(["notice"])
+
+py_test(
+    name = "aead_test",
+    srcs = ["aead_test.py"],
+    deps = [
+        "//util:supported_key_types",
+        "//util:testing_servers",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
