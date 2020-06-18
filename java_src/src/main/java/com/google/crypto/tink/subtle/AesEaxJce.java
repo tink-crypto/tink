@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -234,7 +235,7 @@ public final class AesEaxJce implements Aead {
       res = (byte) (res | (ciphertext[offset + i] ^ h[i] ^ n[i] ^ t[i]));
     }
     if (res != 0) {
-      throw new GeneralSecurityException("tag mismatch");
+      throw new AEADBadTagException("tag mismatch");
     }
     Cipher ctr = localCtrCipher.get();
     ctr.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(n));

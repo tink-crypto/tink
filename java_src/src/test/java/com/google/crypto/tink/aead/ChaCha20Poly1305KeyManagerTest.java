@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -116,7 +115,7 @@ public class ChaCha20Poly1305KeyManagerTest {
   @Test
   public void createKey_multipleCallsCreateDifferentKeys() throws Exception {
     TreeSet<String> keys = new TreeSet<>();
-    KeyTypeManager.KeyFactory<ChaCha20Poly1305KeyFormat, ChaCha20Poly1305Key> factory =
+    ChaCha20Poly1305KeyManager.KeyFactory<ChaCha20Poly1305KeyFormat, ChaCha20Poly1305Key> factory =
         new ChaCha20Poly1305KeyManager().keyFactory();
     final int numKeys = 1000;
     for (int i = 0; i < numKeys; ++i) {

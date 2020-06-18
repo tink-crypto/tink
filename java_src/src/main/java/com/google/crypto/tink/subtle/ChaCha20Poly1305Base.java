@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
+import javax.crypto.AEADBadTagException;
 
 /**
  * Abstract base class for class of ChaCha20Poly1305 and XChaCha20Poly1305, following RFC 8439
@@ -114,8 +115,8 @@ abstract class ChaCha20Poly1305Base implements Aead {
    * @param ciphertext with format {@code nonce || actual_ciphertext || tag}
    * @param associatedData associated authenticated data
    * @return plaintext if authentication is successful
-   * @throws GeneralSecurityException when ciphertext is shorter than nonce size + tag size or when
-   *     the tag is invalid
+   * @throws GeneralSecurityException when ciphertext is shorter than nonce size + tag size
+   * @throws AEADBadTagException when the tag is invalid
    */
   private byte[] decrypt(ByteBuffer ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
@@ -135,7 +136,11 @@ abstract class ChaCha20Poly1305Base implements Aead {
     if (aad == null) {
       aad = new byte[0];
     }
-    Poly1305.verifyMac(getMacKey(nonce), macDataRfc8439(aad, ciphertext), tag);
+    try {
+      Poly1305.verifyMac(getMacKey(nonce), macDataRfc8439(aad, ciphertext), tag);
+    } catch (GeneralSecurityException ex) {
+      throw new AEADBadTagException(ex.toString());
+    }
 
     // rewind to decrypt the ciphertext.
     ciphertext.position(firstPosition);

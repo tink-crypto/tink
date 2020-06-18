@@ -21,6 +21,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.Collection;
+import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -147,7 +148,7 @@ public final class AesSiv implements DeterministicAead {
     if (Bytes.equal(expectedIv, computedIv)) {
       return decryptedPt;
     } else {
-      throw new GeneralSecurityException("Integrity check failed.");
+      throw new AEADBadTagException("Integrity check failed.");
     }
   }
 }
