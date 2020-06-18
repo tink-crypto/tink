@@ -20,15 +20,14 @@ option java_multiple_files = true;
 service Metadata {
   // Returns some server information. A test may use this information to verify
   // that it is talking to the right server.
-  rpc GetServerInfo (ServerInfoRequest) returns (ServerInfo) {}
+  rpc GetServerInfo(ServerInfoRequest) returns (ServerInfo) {}
 }
 
-message ServerInfoRequest {
-}
+message ServerInfoRequest {}
 
 message ServerInfo {
-  string tink_version = 1; // For example '1.4'
-  string language = 2;  // For example 'cc', 'java', 'go' or 'python'.
+  string tink_version = 1;  // For example '1.4'
+  string language = 2;      // For example 'cc', 'java', 'go' or 'python'.
 }
 
 // Service for Keyset operations.
@@ -80,4 +79,44 @@ message PlaintextResponse {
     bytes plaintext = 1;
     string err = 2;
   }
+}
+
+// Service for Deterministic AEAD encryption and decryption
+service DeterministicAead {
+  // Encrypts a plaintext with the provided keyset
+  rpc EncryptDeterministically(AeadEncryptRequest)
+      returns (CiphertextResponse) {}
+  // Decrypts a ciphertext with the provided keyset
+  rpc DecryptDeterministically(AeadDecryptRequest) returns (PlaintextResponse) {
+  }
+}
+
+// Service to compute and verify MACs
+service Mac {
+  // Computes a MAC for given data
+  rpc ComputeMac(ComputeMacRequest) returns (MacResponse) {}
+  // Verifies the validity of the MAC value, no error means success
+  rpc VerifyMac(VerifyMacRequest) returns (EmptyResponse) {}
+}
+
+message ComputeMacRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes data = 2;
+}
+
+message MacResponse {
+  oneof result {
+    bytes mac_value = 1;
+    string err = 2;
+  }
+}
+
+message VerifyMacRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes mac_value = 2;
+  bytes data = 3;
+}
+
+message EmptyResponse {
+  string err = 2;
 }
