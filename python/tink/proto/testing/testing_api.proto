@@ -34,6 +34,8 @@ message ServerInfoResponse {
 service Keyset {
   // Generates a new keyset from a template.
   rpc Generate(KeysetGenerateRequest) returns (KeysetGenerateResponse) {}
+  // Generates a public-key keyset from a private-key keyset.
+  rpc Public(KeysetPublicRequest) returns (KeysetPublicResponse) {}
 }
 
 message KeysetGenerateRequest {
@@ -43,6 +45,17 @@ message KeysetGenerateRequest {
 message KeysetGenerateResponse {
   oneof result {
     bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+    string err = 2;
+  }
+}
+
+message KeysetPublicRequest {
+  bytes private_keyset = 1;  // serialized google.crypto.tink.Keyset.
+}
+
+message KeysetPublicResponse {
+  oneof result {
+    bytes public_keyset = 1;  // serialized google.crypto.tink.Keyset.
     string err = 2;
   }
 }
@@ -145,5 +158,69 @@ message VerifyMacRequest {
 }
 
 message VerifyMacResponse {
-  string err = 2;
+  string err = 1;
+}
+
+// Service to hybrid encrypt and decrypt
+service Hybrid {
+  // Encrypts plaintext binding context_info to the resulting ciphertext
+  rpc Encrypt(HybridEncryptRequest) returns (HybridEncryptResponse) {}
+  // Decrypts ciphertext verifying the integrity of context_info
+  rpc Decrypt(HybridDecryptRequest) returns (HybridDecryptResponse) {}
+}
+
+message HybridEncryptRequest {
+  bytes public_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes plaintext = 2;
+  bytes context_info = 3;
+}
+
+message HybridEncryptResponse {
+  oneof result {
+    bytes ciphertext = 1;
+    string err = 2;
+  }
+}
+
+message HybridDecryptRequest {
+  bytes private_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes ciphertext = 2;
+  bytes context_info = 3;
+}
+
+message HybridDecryptResponse {
+  oneof result {
+    bytes plaintext = 1;
+    string err = 2;
+  }
+}
+
+// Service to sign and verify signatures.
+service Signature {
+  // Computes the signature for data
+  rpc Sign(SignatureSignRequest) returns (SignatureSignResponse) {}
+  // Verifies that signature is a digital signature for data
+  rpc Verify(SignatureVerifyRequest) returns (SignatureVerifyResponse) {}
+}
+
+message SignatureSignRequest {
+  bytes private_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes data = 2;
+}
+
+message SignatureSignResponse {
+  oneof result {
+    bytes signature = 1;
+    string err = 2;
+  }
+}
+
+message SignatureVerifyRequest {
+  bytes public_keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes signature = 2;
+  bytes data = 3;
+}
+
+message SignatureVerifyResponse {
+  string err = 1;
 }

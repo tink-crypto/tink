@@ -53,3 +53,8 @@ func (s *KeysetService) Generate(ctx context.Context, req *pb.KeysetGenerateRequ
 	return &pb.KeysetGenerateResponse{
 		Result: &pb.KeysetGenerateResponse_Keyset{buf.Bytes()}}, nil
 }
+
+func (s *KeysetService) Public(ctx context.Context, req *pb.KeysetPublicRequest) (*pb.KeysetPublicResponse, error) {
+	return &pb.KeysetPublicResponse{
+		Result: &pb.KeysetPublicResponse_Err{"not yet implemented"}}, nil
+}
