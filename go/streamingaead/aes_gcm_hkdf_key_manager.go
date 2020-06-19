@@ -150,7 +150,7 @@ func (km *aesGCMHKDFKeyManager) validateParams(params *ghpb.AesGcmHkdfStreamingP
 	if params.HkdfHashType == commonpb.HashType_UNKNOWN_HASH {
 		return errors.New("unknown HKDF hash type")
 	}
-	if params.CiphertextSegmentSize < params.DerivedKeySize+subtle.NoncePrefixInBytes+subtle.TagSizeInBytes+2 {
+	if params.CiphertextSegmentSize < params.DerivedKeySize+subtle.AESGCMHKDFNoncePrefixInBytes+subtle.AESGCMHKDFTagSizeInBytes+2 {
 		return fmt.Errorf("ciphertext segment_size must be at least (derived_key_size + noncePrefixInBytes + " +
 			"tagSizeInBytes + 2")
 	}
