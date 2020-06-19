@@ -33,8 +33,8 @@ KeysetImpl::KeysetImpl() {}
 
 // Generates a new keyset with one key from a template.
 ::grpc::Status KeysetImpl::Generate(grpc::ServerContext* context,
-                                    const GenerateKeysetRequest* request,
-                                    KeysetResponse* response) {
+                                    const KeysetGenerateRequest* request,
+                                    KeysetGenerateResponse* response) {
   KeyTemplate key_template;
   if (!key_template.ParseFromString(request->template_())) {
     response->set_err("Could not parse the key template");

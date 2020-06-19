@@ -16,8 +16,8 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.Version;
 import com.google.crypto.tink.proto.testing.MetadataGrpc.MetadataImplBase;
-import com.google.crypto.tink.proto.testing.ServerInfo;
 import com.google.crypto.tink.proto.testing.ServerInfoRequest;
+import com.google.crypto.tink.proto.testing.ServerInfoResponse;
 import io.grpc.stub.StreamObserver;
 import java.security.GeneralSecurityException;
 
@@ -29,10 +29,9 @@ public final class MetadataServiceImpl extends MetadataImplBase {
 
   @Override
   public void getServerInfo(
-      ServerInfoRequest request, StreamObserver<ServerInfo> responseObserver) {
-    ServerInfo response;
-    response =
-        ServerInfo.newBuilder()
+      ServerInfoRequest request, StreamObserver<ServerInfoResponse> responseObserver) {
+    ServerInfoResponse response =
+        ServerInfoResponse.newBuilder()
             .setLanguage("java")
             .setTinkVersion(Version.TINK_VERSION)
             .build();

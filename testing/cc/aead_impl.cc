@@ -31,7 +31,7 @@ AeadImpl::AeadImpl() {}
 // Encrypts a message
 ::grpc::Status AeadImpl::Encrypt(grpc::ServerContext* context,
                                  const AeadEncryptRequest* request,
-                                 CiphertextResponse* response) {
+                                 AeadEncryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(reader_result.status().error_message());
@@ -62,7 +62,7 @@ AeadImpl::AeadImpl() {}
 // Decrypts a ciphertext
 ::grpc::Status AeadImpl::Decrypt(grpc::ServerContext* context,
                                  const AeadDecryptRequest* request,
-                                 PlaintextResponse* response) {
+                                 AeadDecryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(reader_result.status().error_message());

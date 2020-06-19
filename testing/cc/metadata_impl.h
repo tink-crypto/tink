@@ -33,7 +33,7 @@ class MetadataImpl final : public Metadata::Service {
   // Returns server info.
   grpc::Status GetServerInfo(grpc::ServerContext* context,
                              const ServerInfoRequest* request,
-                             ServerInfo* response) override;
+                             ServerInfoResponse* response) override;
 };
 
 }  // namespace tink_testing_api

@@ -32,11 +32,11 @@ class AeadImpl final : public Aead::Service {
 
   grpc::Status Encrypt(grpc::ServerContext* context,
                        const AeadEncryptRequest* request,
-                       CiphertextResponse* response) override;
+                       AeadEncryptResponse* response) override;
 
   grpc::Status Decrypt(grpc::ServerContext* context,
                        const AeadDecryptRequest* request,
-                       PlaintextResponse* response) override;
+                       AeadDecryptResponse* response) override;
 };
 
 }  // namespace tink_testing_api

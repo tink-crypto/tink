@@ -88,7 +88,7 @@ class ServicesTest(absltest.TestCase):
     aead_servicer = services.AeadServicer()
 
     template = aead.aead_key_templates.AES128_GCM.SerializeToString()
-    gen_request = testing_api_pb2.GenerateKeysetRequest(template=template)
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
     gen_response = keyset_servicer.Generate(gen_request, DummyServicerContext())
     self.assertEmpty(gen_response.err)
     keyset = gen_response.keyset
@@ -110,7 +110,7 @@ class ServicesTest(absltest.TestCase):
     aead_servicer = services.AeadServicer()
 
     template = aead.aead_key_templates.AES128_GCM.SerializeToString()
-    gen_request = testing_api_pb2.GenerateKeysetRequest(template=template)
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
     gen_response = keyset_servicer.Generate(gen_request, DummyServicerContext())
     self.assertEmpty(gen_response.err)
     keyset = gen_response.keyset

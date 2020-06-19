@@ -31,25 +31,25 @@ import (
 type KeysetService struct {
 }
 
-func (s *KeysetService) Generate(ctx context.Context, req *pb.GenerateKeysetRequest) (*pb.KeysetResponse, error) {
+func (s *KeysetService) Generate(ctx context.Context, req *pb.KeysetGenerateRequest) (*pb.KeysetGenerateResponse, error) {
 	template := &tinkpb.KeyTemplate{}
 	err := proto.Unmarshal(req.Template, template)
 	if err != nil {
-		return &pb.KeysetResponse{
-			Result: &pb.KeysetResponse_Err{err.Error()}}, nil
+		return &pb.KeysetGenerateResponse{
+			Result: &pb.KeysetGenerateResponse_Err{err.Error()}}, nil
 	}
 	handle, err := keyset.NewHandle(template)
 	if err != nil {
-		return &pb.KeysetResponse{
-			Result: &pb.KeysetResponse_Err{err.Error()}}, nil
+		return &pb.KeysetGenerateResponse{
+			Result: &pb.KeysetGenerateResponse_Err{err.Error()}}, nil
 	}
 	buf := new(bytes.Buffer)
 	writer := keyset.NewBinaryWriter(buf)
 	err = testkeyset.Write(handle, writer)
 	if err != nil {
-		return &pb.KeysetResponse{
-			Result: &pb.KeysetResponse_Err{err.Error()}}, nil
+		return &pb.KeysetGenerateResponse{
+			Result: &pb.KeysetGenerateResponse_Err{err.Error()}}, nil
 	}
-	return &pb.KeysetResponse{
-		Result: &pb.KeysetResponse_Keyset{buf.Bytes()}}, nil
+	return &pb.KeysetGenerateResponse{
+		Result: &pb.KeysetGenerateResponse_Keyset{buf.Bytes()}}, nil
 }

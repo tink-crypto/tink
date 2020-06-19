@@ -31,8 +31,8 @@ using ::crypto::tink::BinaryKeysetReader;
 using ::crypto::tink::CleartextKeysetHandle;
 using google::crypto::tink::KeyTemplate;
 using ::testing::IsEmpty;
-using tink_testing_api::GenerateKeysetRequest;
-using tink_testing_api::KeysetResponse;
+using tink_testing_api::KeysetGenerateRequest;
+using tink_testing_api::KeysetGenerateResponse;
 
 class KeysetImplTest : public ::testing::Test {
  protected:
@@ -42,11 +42,11 @@ class KeysetImplTest : public ::testing::Test {
 TEST_F(KeysetImplTest, GenerateSuccess) {
   tink_testing_api::KeysetImpl keyset;
   const KeyTemplate& key_template = AeadKeyTemplates::Aes128Eax();
-  GenerateKeysetRequest request;
+  KeysetGenerateRequest request;
   std::string templ;
   EXPECT_TRUE(key_template.SerializeToString(&templ));
   request.set_template_(templ);
-  KeysetResponse response;
+  KeysetGenerateResponse response;
 
   EXPECT_TRUE(keyset.Generate(nullptr, &request, &response).ok());
   EXPECT_THAT(response.err(), IsEmpty());
@@ -61,9 +61,9 @@ TEST_F(KeysetImplTest, GenerateSuccess) {
 TEST_F(KeysetImplTest, GenerateFail) {
   tink_testing_api::KeysetImpl keyset;
 
-  GenerateKeysetRequest request;
+  KeysetGenerateRequest request;
   request.set_template_("bad template");
-  KeysetResponse response;
+  KeysetGenerateResponse response;
   EXPECT_TRUE(keyset.Generate(nullptr, &request, &response).ok());
   EXPECT_THAT(response.err(), Not(IsEmpty()));
 }

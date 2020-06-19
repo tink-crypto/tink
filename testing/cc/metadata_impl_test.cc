@@ -25,12 +25,12 @@ namespace {
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using tink_testing_api::ServerInfoRequest;
-using tink_testing_api::ServerInfo;
+using tink_testing_api::ServerInfoResponse;
 
 TEST(MetadataImplTest, GetServerInfo) {
   tink_testing_api::MetadataImpl metadata;
   ServerInfoRequest request;
-  ServerInfo response;
+  ServerInfoResponse response;
   EXPECT_TRUE(metadata.GetServerInfo(nullptr, &request, &response).ok());
   EXPECT_THAT(response.language(), Eq("cc"));
   EXPECT_THAT(response.tink_version(), Not(IsEmpty()));

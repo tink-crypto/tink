@@ -29,15 +29,15 @@ import (
 )
 
 func genKeyset(ctx context.Context, keysetService *services.KeysetService, template []byte) ([]byte, error) {
-	genRequest := &pb.GenerateKeysetRequest{Template: template}
+	genRequest := &pb.KeysetGenerateRequest{Template: template}
 	genResponse, err := keysetService.Generate(ctx, genRequest)
 	if err != nil {
 		return nil, err
 	}
 	switch r := genResponse.Result.(type) {
-	case *pb.KeysetResponse_Keyset:
+	case *pb.KeysetGenerateResponse_Keyset:
 		return r.Keyset, nil
-	case *pb.KeysetResponse_Err:
+	case *pb.KeysetGenerateResponse_Err:
 		return nil, errors.New(r.Err)
 	default:
 		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)
@@ -55,9 +55,9 @@ func aeadEncrypt(ctx context.Context, aeadService *services.AeadService, keyset 
 		return nil, err
 	}
 	switch r := encResponse.Result.(type) {
-	case *pb.CiphertextResponse_Ciphertext:
+	case *pb.AeadEncryptResponse_Ciphertext:
 		return r.Ciphertext, nil
-	case *pb.CiphertextResponse_Err:
+	case *pb.AeadEncryptResponse_Err:
 		return nil, errors.New(r.Err)
 	default:
 		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)
@@ -75,9 +75,9 @@ func aeadDecrypt(ctx context.Context, aeadService *services.AeadService, keyset 
 		return nil, err
 	}
 	switch r := decResponse.Result.(type) {
-	case *pb.PlaintextResponse_Plaintext:
+	case *pb.AeadDecryptResponse_Plaintext:
 		return r.Plaintext, nil
-	case *pb.PlaintextResponse_Err:
+	case *pb.AeadDecryptResponse_Err:
 		return nil, errors.New(r.Err)
 	default:
 		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)

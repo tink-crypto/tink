@@ -26,7 +26,7 @@ MetadataImpl::MetadataImpl() {}
 // Returns server info.
 grpc::Status MetadataImpl::GetServerInfo(grpc::ServerContext* context,
                                          const ServerInfoRequest* request,
-                                         ServerInfo* response) {
+                                         ServerInfoResponse* response) {
   response->set_language("cc");
   response->set_tink_version(crypto::tink::Version::kTinkVersion);
   return ::grpc::Status::OK;

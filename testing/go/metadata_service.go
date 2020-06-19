@@ -24,8 +24,8 @@ import (
 type MetadataService struct {
 }
 
-func (s *MetadataService) GetServerInfo(ctx context.Context, req *pb.ServerInfoRequest) (*pb.ServerInfo, error) {
-	return &pb.ServerInfo{
+func (s *MetadataService) GetServerInfo(ctx context.Context, req *pb.ServerInfoRequest) (*pb.ServerInfoResponse, error) {
+	return &pb.ServerInfoResponse{
 		Language: "go",
 	}, nil
 }

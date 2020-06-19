@@ -20,9 +20,9 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.proto.testing.GenerateKeysetRequest;
+import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
+import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc.KeysetImplBase;
-import com.google.crypto.tink.proto.testing.KeysetResponse;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -40,8 +40,8 @@ public final class KeysetServiceImpl extends KeysetImplBase {
 
   @Override
   public void generate(
-      GenerateKeysetRequest request, StreamObserver<KeysetResponse> responseObserver) {
-    KeysetResponse response;
+      KeysetGenerateRequest request, StreamObserver<KeysetGenerateResponse> responseObserver) {
+    KeysetGenerateResponse response;
     try {
       com.google.crypto.tink.proto.KeyTemplate protoTemplate =
           com.google.crypto.tink.proto.KeyTemplate.parseFrom(
@@ -57,11 +57,11 @@ public final class KeysetServiceImpl extends KeysetImplBase {
       BinaryKeysetWriter.withOutputStream(keysetStream).write(keyset);
       keysetStream.close();
       response =
-          KeysetResponse.newBuilder()
+          KeysetGenerateResponse.newBuilder()
               .setKeyset(ByteString.copyFrom(keysetStream.toByteArray()))
               .build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      response = KeysetResponse.newBuilder().setErr(e.toString()).build();
+      response = KeysetGenerateResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
       responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
       return;

@@ -34,8 +34,8 @@ using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::tink_testing_api::AeadDecryptRequest;
 using ::tink_testing_api::AeadEncryptRequest;
-using ::tink_testing_api::CiphertextResponse;
-using ::tink_testing_api::PlaintextResponse;
+using ::tink_testing_api::AeadEncryptResponse;
+using ::tink_testing_api::AeadDecryptResponse;
 
 using crypto::tink::KeysetHandle;
 using google::crypto::tink::KeyTemplate;
@@ -67,7 +67,7 @@ TEST_F(AeadImplTest, EncryptDecryptSuccess) {
   enc_request.set_keyset(keyset);
   enc_request.set_plaintext("Plain text");
   enc_request.set_associated_data("ad");
-  CiphertextResponse enc_response;
+  AeadEncryptResponse enc_response;
 
   EXPECT_TRUE(aead.Encrypt(nullptr, &enc_request, &enc_response).ok());
   EXPECT_THAT(enc_response.err(), IsEmpty());
@@ -76,7 +76,7 @@ TEST_F(AeadImplTest, EncryptDecryptSuccess) {
   dec_request.set_keyset(keyset);
   dec_request.set_ciphertext(enc_response.ciphertext());
   dec_request.set_associated_data("ad");
-  PlaintextResponse dec_response;
+  AeadDecryptResponse dec_response;
 
   EXPECT_TRUE(aead.Decrypt(nullptr, &dec_request, &dec_response).ok());
   EXPECT_THAT(dec_response.err(), IsEmpty());
@@ -89,7 +89,7 @@ TEST_F(AeadImplTest, EncryptBadKeysetFail) {
   enc_request.set_keyset("bad keyset");
   enc_request.set_plaintext("Plain text");
   enc_request.set_associated_data("ad");
-  CiphertextResponse enc_response;
+  AeadEncryptResponse enc_response;
 
   EXPECT_TRUE(aead.Encrypt(nullptr, &enc_request, &enc_response).ok());
   EXPECT_THAT(enc_response.err(), Not(IsEmpty()));
@@ -102,7 +102,7 @@ TEST_F(AeadImplTest, DecryptBadCiphertextFail) {
   dec_request.set_keyset(keyset);
   dec_request.set_ciphertext("bad ciphertext");
   dec_request.set_associated_data("ad");
-  PlaintextResponse dec_response;
+  AeadDecryptResponse dec_response;
 
   EXPECT_TRUE(aead.Decrypt(nullptr, &dec_request, &dec_response).ok());
   EXPECT_THAT(dec_response.err(), Not(IsEmpty()));

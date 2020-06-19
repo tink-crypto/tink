@@ -32,8 +32,8 @@ class KeysetImpl final : public Keyset::Service {
 
   // Generates a new keyset with one key from a template.
   grpc::Status Generate(grpc::ServerContext* context,
-                        const GenerateKeysetRequest* request,
-                        KeysetResponse* response) override;
+                        const KeysetGenerateRequest* request,
+                        KeysetGenerateResponse* response) override;
 };
 
 }  // namespace tink_testing_api

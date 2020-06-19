@@ -32,17 +32,17 @@ class MetadataServicer(testing_api_pb2_grpc.MetadataServicer):
 
   def GetServerInfo(
       self, request: testing_api_pb2.ServerInfoRequest,
-      context: grpc.ServicerContext) -> testing_api_pb2.ServerInfo:
+      context: grpc.ServicerContext) -> testing_api_pb2.ServerInfoResponse:
     """Generates a keyset."""
-    return testing_api_pb2.ServerInfo(language='python')
+    return testing_api_pb2.ServerInfoResponse(language='python')
 
 
 class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
   """A service for testing Keyset operations."""
 
   def Generate(
-      self, request: testing_api_pb2.GenerateKeysetRequest,
-      context: grpc.ServicerContext) -> testing_api_pb2.KeysetResponse:
+      self, request: testing_api_pb2.KeysetGenerateRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.KeysetGenerateResponse:
     """Generates a keyset."""
     try:
       template = tink_pb2.KeyTemplate()
@@ -51,9 +51,9 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
       keyset = io.BytesIO()
       cleartext_keyset_handle.write(
           tink.BinaryKeysetWriter(keyset), keyset_handle)
-      return testing_api_pb2.KeysetResponse(keyset=keyset.getvalue())
+      return testing_api_pb2.KeysetGenerateResponse(keyset=keyset.getvalue())
     except tink.TinkError as e:
-      return testing_api_pb2.KeysetResponse(err=str(e))
+      return testing_api_pb2.KeysetGenerateResponse(err=str(e))
 
 
 class AeadServicer(testing_api_pb2_grpc.AeadServicer):
@@ -61,26 +61,26 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
 
   def Encrypt(
       self, request: testing_api_pb2.AeadEncryptRequest,
-      context: grpc.ServicerContext) -> testing_api_pb2.CiphertextResponse:
+      context: grpc.ServicerContext) -> testing_api_pb2.AeadEncryptResponse:
     """Encrypts a message."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
       p = keyset_handle.primitive(aead.Aead)
       ciphertext = p.encrypt(request.plaintext, request.associated_data)
-      return testing_api_pb2.CiphertextResponse(ciphertext=ciphertext)
+      return testing_api_pb2.AeadEncryptResponse(ciphertext=ciphertext)
     except tink.TinkError as e:
-      return testing_api_pb2.CiphertextResponse(err=str(e))
+      return testing_api_pb2.AeadEncryptResponse(err=str(e))
 
   def Decrypt(
       self, request: testing_api_pb2.AeadDecryptRequest,
-      context: grpc.ServicerContext) -> testing_api_pb2.PlaintextResponse:
+      context: grpc.ServicerContext) -> testing_api_pb2.AeadDecryptResponse:
     """Decrypts a message."""
     try:
       keyset_handle = cleartext_keyset_handle.read(
           tink.BinaryKeysetReader(request.keyset))
       p = keyset_handle.primitive(aead.Aead)
       plaintext = p.decrypt(request.ciphertext, request.associated_data)
-      return testing_api_pb2.PlaintextResponse(plaintext=plaintext)
+      return testing_api_pb2.AeadDecryptResponse(plaintext=plaintext)
     except tink.TinkError as e:
-      return testing_api_pb2.PlaintextResponse(err=str(e))
+      return testing_api_pb2.AeadDecryptResponse(err=str(e))

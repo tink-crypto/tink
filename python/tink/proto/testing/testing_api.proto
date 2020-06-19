@@ -20,12 +20,12 @@ option java_multiple_files = true;
 service Metadata {
   // Returns some server information. A test may use this information to verify
   // that it is talking to the right server.
-  rpc GetServerInfo(ServerInfoRequest) returns (ServerInfo) {}
+  rpc GetServerInfo(ServerInfoRequest) returns (ServerInfoResponse) {}
 }
 
 message ServerInfoRequest {}
 
-message ServerInfo {
+message ServerInfoResponse {
   string tink_version = 1;  // For example '1.4'
   string language = 2;      // For example 'cc', 'java', 'go' or 'python'.
 }
@@ -33,14 +33,14 @@ message ServerInfo {
 // Service for Keyset operations.
 service Keyset {
   // Generates a new keyset from a template.
-  rpc Generate(GenerateKeysetRequest) returns (KeysetResponse) {}
+  rpc Generate(KeysetGenerateRequest) returns (KeysetGenerateResponse) {}
 }
 
-message GenerateKeysetRequest {
+message KeysetGenerateRequest {
   bytes template = 1;  // serialized google.crypto.tink.KeyTemplate.
 }
 
-message KeysetResponse {
+message KeysetGenerateResponse {
   oneof result {
     bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
     string err = 2;
@@ -50,9 +50,9 @@ message KeysetResponse {
 // Service for AEAD encryption and decryption
 service Aead {
   // Encrypts a plaintext with the provided keyset
-  rpc Encrypt(AeadEncryptRequest) returns (CiphertextResponse) {}
+  rpc Encrypt(AeadEncryptRequest) returns (AeadEncryptResponse) {}
   // Decrypts a ciphertext with the provided keyset
-  rpc Decrypt(AeadDecryptRequest) returns (PlaintextResponse) {}
+  rpc Decrypt(AeadDecryptRequest) returns (AeadDecryptResponse) {}
 }
 
 message AeadEncryptRequest {
@@ -61,7 +61,7 @@ message AeadEncryptRequest {
   bytes associated_data = 3;
 }
 
-message CiphertextResponse {
+message AeadEncryptResponse {
   oneof result {
     bytes ciphertext = 1;
     string err = 2;
@@ -74,7 +74,7 @@ message AeadDecryptRequest {
   bytes associated_data = 3;
 }
 
-message PlaintextResponse {
+message AeadDecryptResponse {
   oneof result {
     bytes plaintext = 1;
     string err = 2;
@@ -84,19 +84,46 @@ message PlaintextResponse {
 // Service for Deterministic AEAD encryption and decryption
 service DeterministicAead {
   // Encrypts a plaintext with the provided keyset
-  rpc EncryptDeterministically(AeadEncryptRequest)
-      returns (CiphertextResponse) {}
+  rpc EncryptDeterministically(DeterministicAeadEncryptRequest)
+      returns (DeterministicAeadEncryptResponse) {}
   // Decrypts a ciphertext with the provided keyset
-  rpc DecryptDeterministically(AeadDecryptRequest) returns (PlaintextResponse) {
+  rpc DecryptDeterministically(DeterministicAeadEncryptResponse)
+    returns (DeterministicAeadDecryptResponse) {
+  }
+}
+
+message DeterministicAeadEncryptRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes plaintext = 2;
+  bytes associated_data = 3;
+}
+
+message DeterministicAeadEncryptResponse {
+  oneof result {
+    bytes ciphertext = 1;
+    string err = 2;
+  }
+}
+
+message DeterministicAeadDecryptRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes ciphertext = 2;
+  bytes associated_data = 3;
+}
+
+message DeterministicAeadDecryptResponse {
+  oneof result {
+    bytes plaintext = 1;
+    string err = 2;
   }
 }
 
 // Service to compute and verify MACs
 service Mac {
   // Computes a MAC for given data
-  rpc ComputeMac(ComputeMacRequest) returns (MacResponse) {}
+  rpc ComputeMac(ComputeMacRequest) returns (ComputeMacResponse) {}
   // Verifies the validity of the MAC value, no error means success
-  rpc VerifyMac(VerifyMacRequest) returns (EmptyResponse) {}
+  rpc VerifyMac(VerifyMacRequest) returns (VerifyMacResponse) {}
 }
 
 message ComputeMacRequest {
@@ -104,7 +131,7 @@ message ComputeMacRequest {
   bytes data = 2;
 }
 
-message MacResponse {
+message ComputeMacResponse {
   oneof result {
     bytes mac_value = 1;
     string err = 2;
@@ -117,6 +144,6 @@ message VerifyMacRequest {
   bytes data = 3;
 }
 
-message EmptyResponse {
+message VerifyMacResponse {
   string err = 2;
 }

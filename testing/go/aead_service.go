@@ -28,44 +28,44 @@ import (
 type AeadService struct {
 }
 
-func (s *AeadService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (*pb.CiphertextResponse, error) {
+func (s *AeadService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (*pb.AeadEncryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
-		return &pb.CiphertextResponse{
-			Result: &pb.CiphertextResponse_Err{err.Error()}}, nil
+		return &pb.AeadEncryptResponse{
+			Result: &pb.AeadEncryptResponse_Err{err.Error()}}, nil
 	}
 	cipher, err := aead.New(handle)
 	if err != nil {
-		return &pb.CiphertextResponse{
-			Result: &pb.CiphertextResponse_Err{err.Error()}}, nil
+		return &pb.AeadEncryptResponse{
+			Result: &pb.AeadEncryptResponse_Err{err.Error()}}, nil
 	}
 	ciphertext, err := cipher.Encrypt(req.Plaintext, req.AssociatedData)
 	if err != nil {
-		return &pb.CiphertextResponse{
-			Result: &pb.CiphertextResponse_Err{err.Error()}}, nil
+		return &pb.AeadEncryptResponse{
+			Result: &pb.AeadEncryptResponse_Err{err.Error()}}, nil
 	}
-	return &pb.CiphertextResponse{
-		Result: &pb.CiphertextResponse_Ciphertext{ciphertext}}, nil
+	return &pb.AeadEncryptResponse{
+		Result: &pb.AeadEncryptResponse_Ciphertext{ciphertext}}, nil
 }
 
-func (s *AeadService) Decrypt(ctx context.Context, req *pb.AeadDecryptRequest) (*pb.PlaintextResponse, error) {
+func (s *AeadService) Decrypt(ctx context.Context, req *pb.AeadDecryptRequest) (*pb.AeadDecryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
-		return &pb.PlaintextResponse{
-			Result: &pb.PlaintextResponse_Err{err.Error()}}, nil
+		return &pb.AeadDecryptResponse{
+			Result: &pb.AeadDecryptResponse_Err{err.Error()}}, nil
 	}
 	cipher, err := aead.New(handle)
 	if err != nil {
-		return &pb.PlaintextResponse{
-			Result: &pb.PlaintextResponse_Err{err.Error()}}, nil
+		return &pb.AeadDecryptResponse{
+			Result: &pb.AeadDecryptResponse_Err{err.Error()}}, nil
 	}
 	plaintext, err := cipher.Decrypt(req.Ciphertext, req.AssociatedData)
 	if err != nil {
-		return &pb.PlaintextResponse{
-			Result: &pb.PlaintextResponse_Err{err.Error()}}, nil
+		return &pb.AeadDecryptResponse{
+			Result: &pb.AeadDecryptResponse_Err{err.Error()}}, nil
 	}
-	return &pb.PlaintextResponse{
-		Result: &pb.PlaintextResponse_Plaintext{plaintext}}, nil
+	return &pb.AeadDecryptResponse{
+		Result: &pb.AeadDecryptResponse_Plaintext{plaintext}}, nil
 }

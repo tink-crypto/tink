@@ -19,10 +19,10 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.proto.testing.AeadDecryptRequest;
+import com.google.crypto.tink.proto.testing.AeadDecryptResponse;
 import com.google.crypto.tink.proto.testing.AeadEncryptRequest;
+import com.google.crypto.tink.proto.testing.AeadEncryptResponse;
 import com.google.crypto.tink.proto.testing.AeadGrpc.AeadImplBase;
-import com.google.crypto.tink.proto.testing.CiphertextResponse;
-import com.google.crypto.tink.proto.testing.PlaintextResponse;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Status;
@@ -39,8 +39,8 @@ public final class AeadServiceImpl extends AeadImplBase {
   /** Encrypts a message. */
   @Override
   public void encrypt(
-      AeadEncryptRequest request, StreamObserver<CiphertextResponse> responseObserver) {
-    CiphertextResponse response;
+      AeadEncryptRequest request, StreamObserver<AeadEncryptResponse> responseObserver) {
+    AeadEncryptResponse response;
     try {
       KeysetHandle keysetHandle =
           CleartextKeysetHandle.read(
@@ -50,9 +50,9 @@ public final class AeadServiceImpl extends AeadImplBase {
           aead.encrypt(
               request.getPlaintext().toByteArray(), request.getAssociatedData().toByteArray());
       response =
-          CiphertextResponse.newBuilder().setCiphertext(ByteString.copyFrom(ciphertext)).build();
+          AeadEncryptResponse.newBuilder().setCiphertext(ByteString.copyFrom(ciphertext)).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
-      response = CiphertextResponse.newBuilder().setErr(e.toString()).build();
+      response = AeadEncryptResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
       responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
       return;
@@ -64,8 +64,8 @@ public final class AeadServiceImpl extends AeadImplBase {
   /** Decrypts a message. */
   @Override
   public void decrypt(
-      AeadDecryptRequest request, StreamObserver<PlaintextResponse> responseObserver) {
-    PlaintextResponse response;
+      AeadDecryptRequest request, StreamObserver<AeadDecryptResponse> responseObserver) {
+    AeadDecryptResponse response;
     try {
       KeysetHandle keysetHandle =
           CleartextKeysetHandle.read(
@@ -75,9 +75,9 @@ public final class AeadServiceImpl extends AeadImplBase {
           aead.decrypt(
               request.getCiphertext().toByteArray(), request.getAssociatedData().toByteArray());
       response =
-          PlaintextResponse.newBuilder().setPlaintext(ByteString.copyFrom(plaintext)).build();
+          AeadDecryptResponse.newBuilder().setPlaintext(ByteString.copyFrom(plaintext)).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      response = PlaintextResponse.newBuilder().setErr(e.toString()).build();
+      response = AeadDecryptResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
       responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
       return;

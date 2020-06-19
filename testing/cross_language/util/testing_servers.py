@@ -97,7 +97,7 @@ def _keyset(keyset_handle: tink.KeysetHandle) -> bytes:
 
 def _new_keyset_handle(stub: testing_api_pb2_grpc.KeysetStub,
                        key_template: tink_pb2.KeyTemplate) -> tink.KeysetHandle:
-  gen_request = testing_api_pb2.GenerateKeysetRequest(
+  gen_request = testing_api_pb2.KeysetGenerateRequest(
       template=key_template.SerializeToString())
   gen_response = stub.Generate(gen_request)
   if gen_response.err:

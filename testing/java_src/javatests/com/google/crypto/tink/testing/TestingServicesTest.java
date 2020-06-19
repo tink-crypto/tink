@@ -21,16 +21,16 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.testing.AeadDecryptRequest;
+import com.google.crypto.tink.proto.testing.AeadDecryptResponse;
 import com.google.crypto.tink.proto.testing.AeadEncryptRequest;
+import com.google.crypto.tink.proto.testing.AeadEncryptResponse;
 import com.google.crypto.tink.proto.testing.AeadGrpc;
-import com.google.crypto.tink.proto.testing.CiphertextResponse;
-import com.google.crypto.tink.proto.testing.GenerateKeysetRequest;
+import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
+import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc;
-import com.google.crypto.tink.proto.testing.KeysetResponse;
 import com.google.crypto.tink.proto.testing.MetadataGrpc;
-import com.google.crypto.tink.proto.testing.PlaintextResponse;
-import com.google.crypto.tink.proto.testing.ServerInfo;
 import com.google.crypto.tink.proto.testing.ServerInfoRequest;
+import com.google.crypto.tink.proto.testing.ServerInfoResponse;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
@@ -77,15 +77,15 @@ public final class TestingServicesTest {
     assertThat(server.shutdown().awaitTermination(5, SECONDS)).isTrue();
   }
 
-  private static KeysetResponse generateKeyset(
+  private static KeysetGenerateResponse generateKeyset(
       KeysetGrpc.KeysetBlockingStub keysetStub, byte[] template) {
-    GenerateKeysetRequest genRequest =
-        GenerateKeysetRequest.newBuilder().setTemplate(ByteString.copyFrom(template)).build();
+    KeysetGenerateRequest genRequest =
+        KeysetGenerateRequest.newBuilder().setTemplate(ByteString.copyFrom(template)).build();
     return keysetStub.generate(genRequest);
   }
 
 
-  private static CiphertextResponse aeadEncrypt(
+  private static AeadEncryptResponse aeadEncrypt(
       AeadGrpc.AeadBlockingStub aeadStub, byte[] keyset, byte[] plaintext, byte[] associatedData) {
     AeadEncryptRequest encRequest =
         AeadEncryptRequest.newBuilder()
@@ -97,7 +97,7 @@ public final class TestingServicesTest {
 
   }
 
-  private static PlaintextResponse aeadDecrypt(
+  private static AeadDecryptResponse aeadDecrypt(
       AeadGrpc.AeadBlockingStub aeadStub, byte[] keyset, byte[] ciphertext, byte[] associatedData) {
     AeadDecryptRequest decRequest =
         AeadDecryptRequest.newBuilder()
@@ -115,15 +115,15 @@ public final class TestingServicesTest {
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
-    KeysetResponse keysetResponse = generateKeyset(keysetStub, template);
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    CiphertextResponse encResponse = aeadEncrypt(aeadStub, keyset, plaintext, associatedData);
+    AeadEncryptResponse encResponse = aeadEncrypt(aeadStub, keyset, plaintext, associatedData);
     assertThat(encResponse.getErr()).isEmpty();
     byte[] ciphertext = encResponse.getCiphertext().toByteArray();
 
-    PlaintextResponse decResponse = aeadDecrypt(aeadStub, keyset, ciphertext, associatedData);
+    AeadDecryptResponse decResponse = aeadDecrypt(aeadStub, keyset, ciphertext, associatedData);
     assertThat(decResponse.getErr()).isEmpty();
     byte[] output = decResponse.getPlaintext().toByteArray();
 
@@ -133,7 +133,7 @@ public final class TestingServicesTest {
   @Test
   public void generateKeyset_failsOnBadTemplate() throws Exception {
     byte[] badTemplate = "bad template".getBytes(UTF_8);
-    KeysetResponse genResponse = generateKeyset(keysetStub, badTemplate);
+    KeysetGenerateResponse genResponse = generateKeyset(keysetStub, badTemplate);
     assertThat(genResponse.getErr()).isNotEmpty();
   }
 
@@ -142,7 +142,7 @@ public final class TestingServicesTest {
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "aead_encrypt_fails_on_bad_keyset".getBytes(UTF_8);
-    CiphertextResponse encResponse = aeadEncrypt(aeadStub, badKeyset, plaintext, associatedData);
+    AeadEncryptResponse encResponse = aeadEncrypt(aeadStub, badKeyset, plaintext, associatedData);
     assertThat(encResponse.getErr()).isNotEmpty();
   }
 
@@ -152,11 +152,11 @@ public final class TestingServicesTest {
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "aead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
-    KeysetResponse keysetResponse = generateKeyset(keysetStub, template);
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    PlaintextResponse decResponse = aeadDecrypt(aeadStub, keyset, badCiphertext, associatedData);
+    AeadDecryptResponse decResponse = aeadDecrypt(aeadStub, keyset, badCiphertext, associatedData);
     assertThat(decResponse.getErr()).isNotEmpty();
   }
 
@@ -166,23 +166,24 @@ public final class TestingServicesTest {
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
-    KeysetResponse keysetResponse = generateKeyset(keysetStub, template);
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    CiphertextResponse encResponse = aeadEncrypt(aeadStub, keyset, plaintext, associatedData);
+    AeadEncryptResponse encResponse = aeadEncrypt(aeadStub, keyset, plaintext, associatedData);
     assertThat(encResponse.getErr()).isEmpty();
     byte[] ciphertext = encResponse.getCiphertext().toByteArray();
 
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
 
-    PlaintextResponse decResponse = aeadDecrypt(aeadStub, badKeyset, ciphertext, associatedData);
+    AeadDecryptResponse decResponse = aeadDecrypt(aeadStub, badKeyset, ciphertext, associatedData);
     assertThat(decResponse.getErr()).isNotEmpty();
   }
 
   @Test
   public void getServerInfo_success() throws Exception {
-    ServerInfo response = metadataStub.getServerInfo(ServerInfoRequest.getDefaultInstance());
+    ServerInfoResponse response =
+        metadataStub.getServerInfo(ServerInfoRequest.getDefaultInstance());
     assertThat(response.getLanguage()).isEqualTo("java");
     assertThat(response.getTinkVersion()).isNotEmpty();
   }
