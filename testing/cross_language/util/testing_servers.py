@@ -21,7 +21,7 @@ import os
 import subprocess
 import time
 
-from typing import Text
+from typing import List, Text
 from absl import logging
 import grpc
 import portpicker
@@ -56,6 +56,9 @@ _SERVER_PATHS = {
     ]
 }
 
+# location of the testing_server java binary, relative to testing_dir
+_JAVA_PATH = 'java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java'
+
 # All languages that have an testing server
 LANGUAGES = list(_SERVER_PATHS.keys())
 
@@ -73,6 +76,15 @@ def _server_path(lang: Text) -> Text:
     if os.path.exists(server_path):
       return server_path
   raise RuntimeError('Executable for lang %s not found' % lang)
+
+
+def _server_cmd(lang: Text, port: int) -> List[Text]:
+  server_path = _server_path(lang)
+  if lang == 'java' and server_path.endswith('.jar'):
+    java_path = os.path.join(os.environ.get('testing_dir'), _JAVA_PATH)
+    return [java_path, '-jar', server_path, '--port', '%d' % port]
+  else:
+    return [server_path, '--port', '%d' % port]
 
 
 def _keyset(keyset_handle: tink.KeysetHandle) -> bytes:
@@ -140,7 +152,7 @@ class _TestingServers():
     self._aead_stub = {}
     for lang in LANGUAGES:
       port = portpicker.pick_unused_port()
-      cmd = [_server_path(lang), '--port', '%d' % port]
+      cmd = _server_cmd(lang, port)
       logging.info('cmd = %s', cmd)
       self._server[lang] = subprocess.Popen(
           cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

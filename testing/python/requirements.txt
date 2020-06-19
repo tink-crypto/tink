@@ -1,2 +1,1 @@
 absl-py
-grpclib==0.3.1
