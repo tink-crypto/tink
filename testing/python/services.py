@@ -22,6 +22,8 @@ import grpc
 import tink
 from tink import aead
 from tink import cleartext_keyset_handle
+from tink import daead
+from tink import mac
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
@@ -57,7 +59,7 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
 
 
 class AeadServicer(testing_api_pb2_grpc.AeadServicer):
-  """A service for testing Aead encryption."""
+  """A service for testing AEAD encryption."""
 
   def Encrypt(
       self, request: testing_api_pb2.AeadEncryptRequest,
@@ -84,3 +86,69 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
       return testing_api_pb2.AeadDecryptResponse(plaintext=plaintext)
     except tink.TinkError as e:
       return testing_api_pb2.AeadDecryptResponse(err=str(e))
+
+
+class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):
+  """A service for testing Deterministic AEAD encryption."""
+
+  def EncryptDeterministically(
+      self, request: testing_api_pb2.DeterministicAeadEncryptRequest,
+      context: grpc.ServicerContext
+  ) -> testing_api_pb2.DeterministicAeadEncryptResponse:
+    """Encrypts a message."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(daead.DeterministicAead)
+      ciphertext = p.encrypt_deterministically(request.plaintext,
+                                               request.associated_data)
+      return testing_api_pb2.DeterministicAeadEncryptResponse(
+          ciphertext=ciphertext)
+    except tink.TinkError as e:
+      return testing_api_pb2.DeterministicAeadEncryptResponse(err=str(e))
+
+  def DecryptDeterministically(
+      self, request: testing_api_pb2.DeterministicAeadDecryptRequest,
+      context: grpc.ServicerContext
+  ) -> testing_api_pb2.DeterministicAeadDecryptResponse:
+    """Decrypts a message."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(daead.DeterministicAead)
+      plaintext = p.decrypt_deterministically(request.ciphertext,
+                                              request.associated_data)
+      return testing_api_pb2.DeterministicAeadDecryptResponse(
+          plaintext=plaintext)
+    except tink.TinkError as e:
+      return testing_api_pb2.DeterministicAeadDecryptResponse(err=str(e))
+
+
+class MacServicer(testing_api_pb2_grpc.MacServicer):
+  """A service for testing MACs."""
+
+  def ComputeMac(
+      self, request: testing_api_pb2.ComputeMacRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.ComputeMacResponse:
+    """Computes a MAC."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(mac.Mac)
+      mac_value = p.compute_mac(request.data)
+      return testing_api_pb2.ComputeMacResponse(mac_value=mac_value)
+    except tink.TinkError as e:
+      return testing_api_pb2.ComputeMacResponse(err=str(e))
+
+  def VerifyMac(
+      self, request: testing_api_pb2.VerifyMacRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.VerifyMacResponse:
+    """Verifies a MAC value."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(mac.Mac)
+      p.verify_mac(request.mac_value, request.data)
+      return testing_api_pb2.VerifyMacResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.VerifyMacResponse(err=str(e))

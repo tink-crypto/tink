@@ -24,6 +24,8 @@ py_library(
         "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/mac",
     ],
 )
 
@@ -37,6 +39,8 @@ py_test(
         ":testing_api_python_library",
         requirement("absl-py"),
         "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/mac",
     ],
 )
 
@@ -52,5 +56,7 @@ py_binary(
         "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/mac",
     ],
 )

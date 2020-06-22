@@ -16,6 +16,8 @@ from absl.testing import absltest
 import grpc
 
 from tink import aead
+from tink import daead
+from tink import mac
 
 
 from proto.testing import testing_api_pb2
@@ -78,10 +80,14 @@ class DummyServicerContext(grpc.ServicerContext):
 
 class ServicesTest(absltest.TestCase):
 
+  _ctx = DummyServicerContext()
+
   @classmethod
   def setUpClass(cls):
     super().setUpClass()
     aead.register()
+    daead.register()
+    mac.register()
 
   def test_generate_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
@@ -89,20 +95,20 @@ class ServicesTest(absltest.TestCase):
 
     template = aead.aead_key_templates.AES128_GCM.SerializeToString()
     gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
-    gen_response = keyset_servicer.Generate(gen_request, DummyServicerContext())
-    self.assertEmpty(gen_response.err)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
     enc_request = testing_api_pb2.AeadEncryptRequest(
         keyset=keyset, plaintext=plaintext, associated_data=associated_data)
-    enc_response = aead_servicer.Encrypt(enc_request, DummyServicerContext())
-    self.assertEmpty(enc_response.err)
+    enc_response = aead_servicer.Encrypt(enc_request, self._ctx)
+    self.assertEqual(enc_response.WhichOneof('result'), 'ciphertext')
     ciphertext = enc_response.ciphertext
     dec_request = testing_api_pb2.AeadDecryptRequest(
         keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
-    dec_response = aead_servicer.Decrypt(dec_request, DummyServicerContext())
-    self.assertEmpty(dec_response.err)
+    dec_response = aead_servicer.Decrypt(dec_request, self._ctx)
+    self.assertEqual(dec_response.WhichOneof('result'), 'plaintext')
     self.assertEqual(dec_response.plaintext, plaintext)
 
   def test_generate_decrypt_fail(self):
@@ -111,24 +117,109 @@ class ServicesTest(absltest.TestCase):
 
     template = aead.aead_key_templates.AES128_GCM.SerializeToString()
     gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
-    gen_response = keyset_servicer.Generate(gen_request, DummyServicerContext())
-    self.assertEmpty(gen_response.err)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
 
     ciphertext = b'some invalid ciphertext'
     associated_data = b'associated_data'
     dec_request = testing_api_pb2.AeadDecryptRequest(
         keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
-    dec_response = aead_servicer.Decrypt(dec_request, DummyServicerContext())
+    dec_response = aead_servicer.Decrypt(dec_request, self._ctx)
+    self.assertEqual(dec_response.WhichOneof('result'), 'err')
     logging.info('Error in response: %s', dec_response.err)
     self.assertNotEmpty(dec_response.err)
-    self.assertEmpty(dec_response.plaintext)
 
   def test_server_info(self):
     metadata_servicer = services.MetadataServicer()
     request = testing_api_pb2.ServerInfoRequest()
-    response = metadata_servicer.GetServerInfo(request, DummyServicerContext())
+    response = metadata_servicer.GetServerInfo(request, self._ctx)
     self.assertEqual(response.language, 'python')
+
+  def test_generate_encrypt_decrypt_deterministically(self):
+    keyset_servicer = services.KeysetServicer()
+    daead_servicer = services.DeterministicAeadServicer()
+
+    template_proto = daead.deterministic_aead_key_templates.AES256_SIV
+    template = template_proto.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+    plaintext = b'The quick brown fox jumps over the lazy dog'
+    associated_data = b'associated_data'
+    enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(
+        keyset=keyset, plaintext=plaintext, associated_data=associated_data)
+    enc_response = daead_servicer.EncryptDeterministically(enc_request,
+                                                           self._ctx)
+    self.assertEqual(enc_response.WhichOneof('result'), 'ciphertext')
+    enc_response2 = daead_servicer.EncryptDeterministically(enc_request,
+                                                            self._ctx)
+    self.assertEqual(enc_response2.WhichOneof('result'), 'ciphertext')
+    self.assertEqual(enc_response2.ciphertext, enc_response.ciphertext)
+    ciphertext = enc_response.ciphertext
+    dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
+        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+    dec_response = daead_servicer.DecryptDeterministically(dec_request,
+                                                           self._ctx)
+    self.assertEqual(dec_response.WhichOneof('result'), 'plaintext')
+    self.assertEqual(dec_response.plaintext, plaintext)
+
+  def test_generate_decrypt_deterministically_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    daead_servicer = services.DeterministicAeadServicer()
+
+    template_proto = daead.deterministic_aead_key_templates.AES256_SIV
+    template = template_proto.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+
+    ciphertext = b'some invalid ciphertext'
+    associated_data = b'associated_data'
+    dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
+        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+    dec_response = daead_servicer.DecryptDeterministically(dec_request,
+                                                           self._ctx)
+    self.assertEqual(dec_response.WhichOneof('result'), 'err')
+    logging.info('Error in response: %s', dec_response.err)
+    self.assertNotEmpty(dec_response.err)
+
+  def test_generate_compute_verify_mac(self):
+    keyset_servicer = services.KeysetServicer()
+    mac_servicer = services.MacServicer()
+
+    template = mac.mac_key_templates.HMAC_SHA256_128BITTAG.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+    data = b'The quick brown fox jumps over the lazy dog'
+    comp_request = testing_api_pb2.ComputeMacRequest(keyset=keyset, data=data)
+    comp_response = mac_servicer.ComputeMac(comp_request, self._ctx)
+    self.assertEqual(comp_response.WhichOneof('result'), 'mac_value')
+    mac_value = comp_response.mac_value
+    verify_request = testing_api_pb2.VerifyMacRequest(
+        keyset=keyset, mac_value=mac_value, data=data)
+    verify_response = mac_servicer.VerifyMac(verify_request, self._ctx)
+    self.assertEmpty(verify_response.err)
+
+  def test_generate_compute_verify_mac_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    mac_servicer = services.MacServicer()
+
+    template = mac.mac_key_templates.HMAC_SHA256_128BITTAG.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+
+    verify_request = testing_api_pb2.VerifyMacRequest(
+        keyset=keyset, mac_value=b'invalid mac_value', data=b'data')
+    verify_response = mac_servicer.VerifyMac(verify_request, self._ctx)
+    logging.info('Error in response: %s', verify_response.err)
+    self.assertNotEmpty(verify_response.err)
 
 
 if __name__ == '__main__':

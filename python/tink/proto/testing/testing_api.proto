@@ -100,7 +100,7 @@ service DeterministicAead {
   rpc EncryptDeterministically(DeterministicAeadEncryptRequest)
       returns (DeterministicAeadEncryptResponse) {}
   // Decrypts a ciphertext with the provided keyset
-  rpc DecryptDeterministically(DeterministicAeadEncryptResponse)
+  rpc DecryptDeterministically(DeterministicAeadDecryptRequest)
     returns (DeterministicAeadDecryptResponse) {
   }
 }
