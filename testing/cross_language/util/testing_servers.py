@@ -16,7 +16,6 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-import io
 import os
 import subprocess
 import time
@@ -33,6 +32,7 @@ import tink.aead
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
+from util import _primitives
 
 # Server paths are relative to os.environ['testing_dir'], which can be set by:
 # bazel test util:testing_servers_test --test_env testing_dir=/tmp/tink/testing
@@ -87,14 +87,6 @@ def _server_cmd(lang: Text, port: int) -> List[Text]:
     return [server_path, '--port', '%d' % port]
 
 
-def _keyset(keyset_handle: tink.KeysetHandle) -> bytes:
-  """Returns the keyset contained in the keyset_handle."""
-  keyset_buffer = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(keyset_buffer), keyset_handle)
-  return keyset_buffer.getvalue()
-
-
 def _new_keyset_handle(stub: testing_api_pb2_grpc.KeysetStub,
                        key_template: tink_pb2.KeyTemplate) -> tink.KeysetHandle:
   gen_request = testing_api_pb2.KeysetGenerateRequest(
@@ -104,41 +96,6 @@ def _new_keyset_handle(stub: testing_api_pb2_grpc.KeysetStub,
     raise tink.TinkError(gen_response.err)
   return cleartext_keyset_handle.read(
       tink.BinaryKeysetReader(gen_response.keyset))
-
-
-class _Aead(tink.aead.Aead):
-  """Wraps AEAD services stub into an Aead primitive."""
-
-  def __init__(self,
-               lang: Text,
-               stub: testing_api_pb2_grpc.AeadStub,
-               keyset_handle: tink.KeysetHandle) -> None:
-    self.lang = lang
-    self._stub = stub
-    self._keyset_handle = keyset_handle
-
-  def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
-    logging.info('encrypt in lang %s.', self.lang)
-    enc_request = testing_api_pb2.AeadEncryptRequest(
-        keyset=_keyset(self._keyset_handle),
-        plaintext=plaintext,
-        associated_data=associated_data)
-    enc_response = self._stub.Encrypt(enc_request)
-    if enc_response.err:
-      logging.info('error encrypt in %s: %s', self.lang, enc_response.err)
-      raise tink.TinkError(enc_response.err)
-    return enc_response.ciphertext
-
-  def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
-    logging.info('decrypt in lang %s.', self.lang)
-    dec_request = testing_api_pb2.AeadDecryptRequest(
-        keyset=_keyset(self._keyset_handle),
-        ciphertext=ciphertext, associated_data=associated_data)
-    dec_response = self._stub.Decrypt(dec_request)
-    if dec_response.err:
-      logging.info('error decrypt in %s: %s', self.lang, dec_response.err)
-      raise tink.TinkError(dec_response.err)
-    return dec_response.plaintext
 
 
 class _TestingServers():
@@ -230,7 +187,7 @@ def new_keyset_handle(
   return _new_keyset_handle(_ts.keyset_stub(lang), key_template)
 
 
-def aead(lang: Text, keyset_handle: tink.KeysetHandle) -> _Aead:
+def aead(lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.Aead:
   """Returns an AEAD primitive, implemented in lang."""
   global _ts
-  return _Aead(lang, _ts.aead_stub(lang), keyset_handle)
+  return _primitives.Aead(lang, _ts.aead_stub(lang), keyset_handle)

@@ -40,10 +40,25 @@ py_test(
 )
 
 py_library(
+    name = "_primitives",
+    srcs = ["_primitives.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":testing_api_python_library",
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        requirement("absl-py"),
+    ],
+)
+
+py_library(
     name = "testing_servers",
     srcs = ["testing_servers.py"],
     srcs_version = "PY3",
     deps = [
+        ":_primitives",
         ":testing_api_python_library",
         "@com_google_protobuf//:protobuf_python",
         "@tink_py//tink:cleartext_keyset_handle",
