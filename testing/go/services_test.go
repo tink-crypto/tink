@@ -25,7 +25,9 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/signature"
 	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
 	"github.com/google/tink/testing/go/services"
 )
@@ -42,7 +44,23 @@ func genKeyset(ctx context.Context, keysetService *services.KeysetService, templ
 	case *pb.KeysetGenerateResponse_Err:
 		return nil, errors.New(r.Err)
 	default:
-		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)
+		return nil, fmt.Errorf("genResponse.Result has unexpected type %T", r)
+	}
+}
+
+func pubKeyset(ctx context.Context, keysetService *services.KeysetService, privateKeyset []byte) ([]byte, error) {
+	request := &pb.KeysetPublicRequest{PrivateKeyset: privateKeyset}
+	response, err := keysetService.Public(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	switch r := response.Result.(type) {
+	case *pb.KeysetPublicResponse_PublicKeyset:
+		return r.PublicKeyset, nil
+	case *pb.KeysetPublicResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
 	}
 }
 
@@ -173,7 +191,7 @@ func TestGenerateEncryptDecryptDeterministically(t *testing.T) {
 
 	template, err := proto.Marshal(daead.AESSIVKeyTemplate())
 	if err != nil {
-		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+		t.Fatalf("proto.Marshal(daead.AESSIVKeyTemplate()) failed: %v", err)
 	}
 
 	keyset, err := genKeyset(ctx, keysetService, template)
@@ -248,7 +266,7 @@ func TestComputeVerifyMac(t *testing.T) {
 
 	template, err := proto.Marshal(mac.HMACSHA256Tag128KeyTemplate())
 	if err != nil {
-		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+		t.Fatalf("proto.Marshal(mac.HMACSHA256Tag128KeyTemplate()) failed: %v", err)
 	}
 
 	keyset, err := genKeyset(ctx, keysetService, template)
@@ -270,6 +288,167 @@ func TestComputeVerifyMac(t *testing.T) {
 	}
 	if err := verifyMAC(ctx, macService, keyset, []byte("badMacValue"), data); err == nil {
 		t.Fatalf("verifyMAC of bad MAC value succeeded unexpectedly.")
+	}
+}
+
+func hybridEncrypt(ctx context.Context, hybridService *services.HybridService, publicKeyset []byte, plaintext []byte, contextInfo []byte) ([]byte, error) {
+	encRequest := &pb.HybridEncryptRequest{
+		PublicKeyset: publicKeyset,
+		Plaintext:    plaintext,
+		ContextInfo:  contextInfo,
+	}
+	encResponse, err := hybridService.Encrypt(ctx, encRequest)
+	if err != nil {
+		return nil, err
+	}
+	switch r := encResponse.Result.(type) {
+	case *pb.HybridEncryptResponse_Ciphertext:
+		return r.Ciphertext, nil
+	case *pb.HybridEncryptResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)
+	}
+}
+
+func hybridDecrypt(ctx context.Context, hybridService *services.HybridService, privateKeyset []byte, ciphertext []byte, contextInfo []byte) ([]byte, error) {
+	decRequest := &pb.HybridDecryptRequest{
+		PrivateKeyset: privateKeyset,
+		Ciphertext:    ciphertext,
+		ContextInfo:   contextInfo,
+	}
+	decResponse, err := hybridService.Decrypt(ctx, decRequest)
+	if err != nil {
+		return nil, err
+	}
+	switch r := decResponse.Result.(type) {
+	case *pb.HybridDecryptResponse_Plaintext:
+		return r.Plaintext, nil
+	case *pb.HybridDecryptResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("decResponse.Result has unexpected type %T", r)
+	}
+}
+
+func TestHybridGenerateEncryptDecrypt(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	hybridService := &services.HybridService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(hybrid.ECIESHKDFAES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+
+	plaintext := []byte("The quick brown fox jumps over the lazy dog")
+	associatedData := []byte("Associated Data")
+	ciphertext, err := hybridEncrypt(ctx, hybridService, publicKeyset, plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("hybridEncrypt failed: %v", err)
+	}
+	output, err := hybridDecrypt(ctx, hybridService, privateKeyset, ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("hybridDecrypt failed: %v", err)
+	}
+	if bytes.Compare(output, plaintext) != 0 {
+		t.Fatalf("Decrypted ciphertext is %v, want %v", output, plaintext)
+	}
+
+	if _, err := pubKeyset(ctx, keysetService, []byte("badPrivateKeyset")); err == nil {
+		t.Fatalf("pubKeyset from bad private keyset succeeded unexpectedly.")
+	}
+	if _, err := hybridEncrypt(ctx, hybridService, []byte("badPublicKeyset"), plaintext, associatedData); err == nil {
+		t.Fatalf("hybridEncrypt with bad public keyset succeeded unexpectedly.")
+	}
+	if _, err := hybridDecrypt(ctx, hybridService, []byte("badPrivateKeyset"), ciphertext, associatedData); err == nil {
+		t.Fatalf("hybridDecrypt with bad private keyset succeeded unexpectedly.")
+	}
+	if _, err := hybridDecrypt(ctx, hybridService, privateKeyset, []byte("badCiphertext"), associatedData); err == nil {
+		t.Fatalf("hybridDecrypt of bad ciphertext succeeded unexpectedly.")
+	}
+}
+
+func signatureSign(ctx context.Context, signatureService *services.SignatureService, privateKeyset []byte, data []byte) ([]byte, error) {
+	encRequest := &pb.SignatureSignRequest{
+		PrivateKeyset: privateKeyset,
+		Data:          data,
+	}
+	response, err := signatureService.Sign(ctx, encRequest)
+	if err != nil {
+		return nil, err
+	}
+	switch r := response.Result.(type) {
+	case *pb.SignatureSignResponse_Signature:
+		return r.Signature, nil
+	case *pb.SignatureSignResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func signatureVerify(ctx context.Context, signatureService *services.SignatureService, publicKeyset []byte, signatureValue []byte, data []byte) error {
+	request := &pb.SignatureVerifyRequest{
+		PublicKeyset: publicKeyset,
+		Signature:    signatureValue,
+		Data:         data,
+	}
+	response, err := signatureService.Verify(ctx, request)
+	if err != nil {
+		return err
+	}
+	if response.Err != "" {
+		return errors.New(response.Err)
+	}
+	return nil
+}
+
+func TestSignatureSignVerify(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	signatureService := &services.SignatureService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(signature.ECDSAP256KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(signature.ECDSAP256KeyTemplate()) failed: %v", err)
+	}
+
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+
+	data := []byte("The quick brown fox jumps over the lazy dog")
+	signatureValue, err := signatureSign(ctx, signatureService, privateKeyset, data)
+	if err != nil {
+		t.Fatalf("signatureSign failed: %v", err)
+	}
+	if err := signatureVerify(ctx, signatureService, publicKeyset, signatureValue, data); err != nil {
+		t.Fatalf("signatureVerify failed: %v", err)
+	}
+
+	if _, err := signatureSign(ctx, signatureService, []byte("badPrivateKeyset"), data); err == nil {
+		t.Fatalf("signatureSign with bad private keyset succeeded unexpectedly.")
+	}
+	if err := signatureVerify(ctx, signatureService, publicKeyset, []byte("badSignature"), data); err == nil {
+		t.Fatalf("signatureVerify of bad signature succeeded unexpectedly.")
+	}
+	if err := signatureVerify(ctx, signatureService, []byte("badPublicKeyset"), signatureValue, data); err == nil {
+		t.Fatalf("signatureVerify of bad public keyset succeeded unexpectedly.")
 	}
 }
 

@@ -55,6 +55,24 @@ func (s *KeysetService) Generate(ctx context.Context, req *pb.KeysetGenerateRequ
 }
 
 func (s *KeysetService) Public(ctx context.Context, req *pb.KeysetPublicRequest) (*pb.KeysetPublicResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.PrivateKeyset))
+	privateHandle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.KeysetPublicResponse{
+			Result: &pb.KeysetPublicResponse_Err{err.Error()}}, nil
+	}
+	publicHandle, err := privateHandle.Public()
+	if err != nil {
+		return &pb.KeysetPublicResponse{
+			Result: &pb.KeysetPublicResponse_Err{err.Error()}}, nil
+	}
+	buf := new(bytes.Buffer)
+	writer := keyset.NewBinaryWriter(buf)
+	err = testkeyset.Write(publicHandle, writer)
+	if err != nil {
+		return &pb.KeysetPublicResponse{
+			Result: &pb.KeysetPublicResponse_Err{err.Error()}}, nil
+	}
 	return &pb.KeysetPublicResponse{
-		Result: &pb.KeysetPublicResponse_Err{"not yet implemented"}}, nil
+		Result: &pb.KeysetPublicResponse_PublicKeyset{buf.Bytes()}}, nil
 }

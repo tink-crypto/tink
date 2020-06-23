@@ -46,6 +46,8 @@ func main() {
 	pbgrpc.RegisterKeysetServer(server, &services.KeysetService{})
 	pbgrpc.RegisterAeadServer(server, &services.AeadService{})
 	pbgrpc.RegisterDeterministicAeadServer(server, &services.DeterministicAeadService{})
+	pbgrpc.RegisterHybridServer(server, &services.HybridService{})
 	pbgrpc.RegisterMacServer(server, &services.MacService{})
+	pbgrpc.RegisterSignatureServer(server, &services.SignatureService{})
 	server.Serve(lis)
 }

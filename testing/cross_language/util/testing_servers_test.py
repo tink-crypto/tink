@@ -77,8 +77,8 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       mac_primitive.verify_mac(b'foo', data)
 
-  def test_hybrid(self):
-    lang = 'python'
+  @parameterized.parameters(['go', 'python'])
+  def test_hybrid(self, lang):
     private_handle = testing_servers.new_keyset_handle(
         lang,
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
@@ -94,8 +94,8 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       dec_primitive.decrypt(b'foo', context_info)
 
-  def test_signature(self):
-    lang = 'python'
+  @parameterized.parameters(['go', 'python'])
+  def test_signature(self, lang):
     private_handle = testing_servers.new_keyset_handle(
         lang, signature.signature_key_templates.ED25519)
     public_handle = testing_servers.public_keyset_handle(lang, private_handle)

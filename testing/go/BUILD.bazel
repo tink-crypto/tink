@@ -19,9 +19,11 @@ go_library(
     srcs = [
         "aead_service.go",
         "daead_service.go",
+        "hybrid_service.go",
         "keyset_service.go",
         "mac_service.go",
         "metadata_service.go",
+        "signature_service.go",
     ],
     importpath = "github.com/google/tink/testing/go/services",
     deps = [
@@ -29,8 +31,10 @@ go_library(
         "@com_github_golang_protobuf//proto:go_default_library",
         "@tink_go//aead:go_default_library",
         "@tink_go//daead:go_default_library",
+        "@tink_go//hybrid:go_default_library",
         "@tink_go//keyset:go_default_library",
         "@tink_go//mac:go_default_library",
+        "@tink_go//signature:go_default_library",
         "@tink_go//proto:tink_go_proto",
         "@tink_go//testkeyset:go_default_library",
     ],
@@ -46,7 +50,9 @@ go_test(
         "@com_github_golang_protobuf//proto:go_default_library",
         "@tink_go//aead:go_default_library",
         "@tink_go//daead:go_default_library",
+        "@tink_go//hybrid:go_default_library",
         "@tink_go//mac:go_default_library",
+        "@tink_go//signature:go_default_library",
     ],
 )
 
