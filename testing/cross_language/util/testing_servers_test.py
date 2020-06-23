@@ -49,7 +49,7 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       aead_primitive.decrypt(b'foo', associated_data)
 
-  @parameterized.parameters(['go', 'python'])
+  @parameterized.parameters(['go', 'java', 'python'])
   def test_daead(self, lang):
     keyset_handle = testing_servers.new_keyset_handle(
         lang, daead.deterministic_aead_key_templates.AES256_SIV)
@@ -65,7 +65,7 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       daead_primitive.decrypt_deterministically(b'foo', associated_data)
 
-  @parameterized.parameters(['go', 'python'])
+  @parameterized.parameters(['go', 'java', 'python'])
   def test_mac(self, lang):
     keyset_handle = testing_servers.new_keyset_handle(
         lang, mac.mac_key_templates.HMAC_SHA256_128BITTAG)

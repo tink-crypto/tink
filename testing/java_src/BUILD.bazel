@@ -23,7 +23,9 @@ java_library(
     testonly = 1,
     srcs = [
         "java/com/google/crypto/tink/testing/AeadServiceImpl.java",
+        "java/com/google/crypto/tink/testing/DeterministicAeadServiceImpl.java",
         "java/com/google/crypto/tink/testing/KeysetServiceImpl.java",
+        "java/com/google/crypto/tink/testing/MacServiceImpl.java",
         "java/com/google/crypto/tink/testing/MetadataServiceImpl.java",
     ],
     javacopts = JAVACOPTS_OSS,
@@ -36,9 +38,9 @@ java_library(
         "@io_grpc_grpc_java//stub",
         "@tink_java//:cleartext_keyset_handle",
         "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "@tink_java//src/main/java/com/google/crypto/tink:core",
         "@tink_java//src/main/java/com/google/crypto/tink:primitives",
-        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
     ],
 )
 
@@ -81,5 +83,7 @@ java_test(
         "@maven//:junit_junit",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
     ],
 )

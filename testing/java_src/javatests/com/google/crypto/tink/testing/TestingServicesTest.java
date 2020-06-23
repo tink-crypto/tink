@@ -20,17 +20,29 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
+import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.testing.AeadDecryptRequest;
 import com.google.crypto.tink.proto.testing.AeadDecryptResponse;
 import com.google.crypto.tink.proto.testing.AeadEncryptRequest;
 import com.google.crypto.tink.proto.testing.AeadEncryptResponse;
 import com.google.crypto.tink.proto.testing.AeadGrpc;
+import com.google.crypto.tink.proto.testing.ComputeMacRequest;
+import com.google.crypto.tink.proto.testing.ComputeMacResponse;
+import com.google.crypto.tink.proto.testing.DeterministicAeadDecryptRequest;
+import com.google.crypto.tink.proto.testing.DeterministicAeadDecryptResponse;
+import com.google.crypto.tink.proto.testing.DeterministicAeadEncryptRequest;
+import com.google.crypto.tink.proto.testing.DeterministicAeadEncryptResponse;
+import com.google.crypto.tink.proto.testing.DeterministicAeadGrpc;
 import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
 import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc;
+import com.google.crypto.tink.proto.testing.MacGrpc;
 import com.google.crypto.tink.proto.testing.MetadataGrpc;
 import com.google.crypto.tink.proto.testing.ServerInfoRequest;
 import com.google.crypto.tink.proto.testing.ServerInfoResponse;
+import com.google.crypto.tink.proto.testing.VerifyMacRequest;
+import com.google.crypto.tink.proto.testing.VerifyMacResponse;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
@@ -46,9 +58,11 @@ import org.junit.runners.JUnit4;
 public final class TestingServicesTest {
   private Server server;
   private ManagedChannel channel;
+  MetadataGrpc.MetadataBlockingStub metadataStub;
   KeysetGrpc.KeysetBlockingStub keysetStub;
   AeadGrpc.AeadBlockingStub aeadStub;
-  MetadataGrpc.MetadataBlockingStub metadataStub;
+  DeterministicAeadGrpc.DeterministicAeadBlockingStub daeadStub;
+  MacGrpc.MacBlockingStub macStub;
 
   @Before
   public void setUp() throws Exception {
@@ -58,17 +72,21 @@ public final class TestingServicesTest {
         .forName(serverName)
         .directExecutor()
         .addService(new MetadataServiceImpl())
-        .addService(new AeadServiceImpl())
         .addService(new KeysetServiceImpl())
+        .addService(new AeadServiceImpl())
+        .addService(new DeterministicAeadServiceImpl())
+        .addService(new MacServiceImpl())
         .build()
         .start();
     channel = InProcessChannelBuilder
         .forName(serverName)
         .directExecutor()
         .build();
+    metadataStub = MetadataGrpc.newBlockingStub(channel);
     keysetStub = KeysetGrpc.newBlockingStub(channel);
     aeadStub = AeadGrpc.newBlockingStub(channel);
-    metadataStub = MetadataGrpc.newBlockingStub(channel);
+    daeadStub = DeterministicAeadGrpc.newBlockingStub(channel);
+    macStub = MacGrpc.newBlockingStub(channel);
   }
 
   @After
@@ -84,7 +102,6 @@ public final class TestingServicesTest {
     return keysetStub.generate(genRequest);
   }
 
-
   private static AeadEncryptResponse aeadEncrypt(
       AeadGrpc.AeadBlockingStub aeadStub, byte[] keyset, byte[] plaintext, byte[] associatedData) {
     AeadEncryptRequest encRequest =
@@ -94,7 +111,6 @@ public final class TestingServicesTest {
             .setAssociatedData(ByteString.copyFrom(associatedData))
             .build();
     return aeadStub.encrypt(encRequest);
-
   }
 
   private static AeadDecryptResponse aeadDecrypt(
@@ -106,7 +122,6 @@ public final class TestingServicesTest {
             .setAssociatedData(ByteString.copyFrom(associatedData))
             .build();
     return aeadStub.decrypt(decRequest);
-
   }
 
   @Test
@@ -178,6 +193,183 @@ public final class TestingServicesTest {
 
     AeadDecryptResponse decResponse = aeadDecrypt(aeadStub, badKeyset, ciphertext, associatedData);
     assertThat(decResponse.getErr()).isNotEmpty();
+  }
+
+  private static DeterministicAeadEncryptResponse daeadEncrypt(
+      DeterministicAeadGrpc.DeterministicAeadBlockingStub daeadStub,
+      byte[] keyset,
+      byte[] plaintext,
+      byte[] associatedData) {
+    DeterministicAeadEncryptRequest encRequest =
+        DeterministicAeadEncryptRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setPlaintext(ByteString.copyFrom(plaintext))
+            .setAssociatedData(ByteString.copyFrom(associatedData))
+            .build();
+    return daeadStub.encryptDeterministically(encRequest);
+  }
+
+  private static DeterministicAeadDecryptResponse daeadDecrypt(
+      DeterministicAeadGrpc.DeterministicAeadBlockingStub daeadStub,
+      byte[] keyset,
+      byte[] ciphertext,
+      byte[] associatedData) {
+    DeterministicAeadDecryptRequest decRequest =
+        DeterministicAeadDecryptRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setCiphertext(ByteString.copyFrom(ciphertext))
+            .setAssociatedData(ByteString.copyFrom(associatedData))
+            .build();
+    return daeadStub.decryptDeterministically(decRequest);
+  }
+
+  @Test
+  public void daeadGenerateEncryptDecryptDeterministically_success() throws Exception {
+    byte[] template = DeterministicAeadKeyTemplates.AES256_SIV.toByteArray();
+    byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    DeterministicAeadEncryptResponse encResponse =
+        daeadEncrypt(daeadStub, keyset, plaintext, associatedData);
+    assertThat(encResponse.getErr()).isEmpty();
+    byte[] ciphertext = encResponse.getCiphertext().toByteArray();
+
+    DeterministicAeadDecryptResponse decResponse =
+        daeadDecrypt(daeadStub, keyset, ciphertext, associatedData);
+    assertThat(decResponse.getErr()).isEmpty();
+    byte[] output = decResponse.getPlaintext().toByteArray();
+
+    assertThat(output).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void daeadEncryptDeterministically_failsOnBadKeyset() throws Exception {
+    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
+    byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    byte[] associatedData = "aead_encrypt_fails_on_bad_keyset".getBytes(UTF_8);
+    DeterministicAeadEncryptResponse encResponse =
+        daeadEncrypt(daeadStub, badKeyset, plaintext, associatedData);
+    assertThat(encResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void daeadDecryptDeterministically_failsOnBadCiphertext() throws Exception {
+    byte[] template = DeterministicAeadKeyTemplates.AES256_SIV.toByteArray();
+    byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
+    byte[] associatedData = "aead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    DeterministicAeadDecryptResponse decResponse =
+        daeadDecrypt(daeadStub, keyset, badCiphertext, associatedData);
+    assertThat(decResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void daeadDecryptDeterministically_failsOnBadKeyset() throws Exception {
+    byte[] template = DeterministicAeadKeyTemplates.AES256_SIV.toByteArray();
+    byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    DeterministicAeadEncryptResponse encResponse =
+        daeadEncrypt(daeadStub, keyset, plaintext, associatedData);
+    assertThat(encResponse.getErr()).isEmpty();
+    byte[] ciphertext = encResponse.getCiphertext().toByteArray();
+
+    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
+
+    DeterministicAeadDecryptResponse decResponse =
+        daeadDecrypt(daeadStub, badKeyset, ciphertext, associatedData);
+    assertThat(decResponse.getErr()).isNotEmpty();
+  }
+
+  private static ComputeMacResponse computeMac(
+      MacGrpc.MacBlockingStub macStub, byte[] keyset, byte[] data) {
+    ComputeMacRequest request =
+        ComputeMacRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setData(ByteString.copyFrom(data))
+            .build();
+    return macStub.computeMac(request);
+  }
+
+  private static VerifyMacResponse verifyMac(
+      MacGrpc.MacBlockingStub macStub, byte[] keyset, byte[] macValue, byte[] data) {
+    VerifyMacRequest request =
+        VerifyMacRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setMacValue(ByteString.copyFrom(macValue))
+            .setData(ByteString.copyFrom(data))
+            .build();
+    return macStub.verifyMac(request);
+  }
+
+  @Test
+  public void computeVerifyMac_success() throws Exception {
+    byte[] template = MacKeyTemplates.HMAC_SHA256_128BITTAG.toByteArray();
+    byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    ComputeMacResponse compResponse = computeMac(macStub, keyset, data);
+    assertThat(compResponse.getErr()).isEmpty();
+    byte[] macValue = compResponse.getMacValue().toByteArray();
+
+    VerifyMacResponse verifyResponse = verifyMac(macStub, keyset, macValue, data);
+    assertThat(verifyResponse.getErr()).isEmpty();
+  }
+
+  @Test
+  public void computeMac_failsOnBadKeyset() throws Exception {
+    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
+    byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+
+    ComputeMacResponse compResponse = computeMac(macStub, badKeyset, data);
+    assertThat(compResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void verifyMac_failsOnBadMacValue() throws Exception {
+    byte[] template = MacKeyTemplates.HMAC_SHA256_128BITTAG.toByteArray();
+    byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    VerifyMacResponse verifyResponse =
+        verifyMac(macStub, keyset, "bad mac_value".getBytes(UTF_8), data);
+    assertThat(verifyResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void verifyMac_failsOnBadKeyset() throws Exception {
+    byte[] template = MacKeyTemplates.HMAC_SHA256_128BITTAG.toByteArray();
+    byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    ComputeMacResponse compResponse = computeMac(macStub, keyset, data);
+    assertThat(compResponse.getErr()).isEmpty();
+    byte[] macValue = compResponse.getMacValue().toByteArray();
+
+    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
+    VerifyMacResponse verifyResponse = verifyMac(macStub, badKeyset, macValue, data);
+    assertThat(verifyResponse.getErr()).isNotEmpty();
   }
 
   @Test
