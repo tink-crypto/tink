@@ -18,7 +18,9 @@ go_library(
     name = "services",
     srcs = [
         "aead_service.go",
+        "daead_service.go",
         "keyset_service.go",
+        "mac_service.go",
         "metadata_service.go",
     ],
     importpath = "github.com/google/tink/testing/go/services",
@@ -26,7 +28,9 @@ go_library(
         ":testing_api_go_grpc",
         "@com_github_golang_protobuf//proto:go_default_library",
         "@tink_go//aead:go_default_library",
+        "@tink_go//daead:go_default_library",
         "@tink_go//keyset:go_default_library",
+        "@tink_go//mac:go_default_library",
         "@tink_go//proto:tink_go_proto",
         "@tink_go//testkeyset:go_default_library",
     ],
@@ -41,6 +45,8 @@ go_test(
         ":testing_api_go_grpc",
         "@com_github_golang_protobuf//proto:go_default_library",
         "@tink_go//aead:go_default_library",
+        "@tink_go//daead:go_default_library",
+        "@tink_go//mac:go_default_library",
     ],
 )
 

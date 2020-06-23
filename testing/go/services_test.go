@@ -24,6 +24,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/mac"
 	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
 	"github.com/google/tink/testing/go/services"
 )
@@ -121,6 +123,153 @@ func TestGenerateEncryptDecrypt(t *testing.T) {
 	}
 	if _, err := aeadDecrypt(ctx, aeadService, keyset, []byte("badCiphertext"), associatedData); err == nil {
 		t.Fatalf("aeadDecrypt of bad ciphertext succeeded unexpectedly.")
+	}
+}
+
+func daeadEncrypt(ctx context.Context, daeadService *services.DeterministicAeadService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
+	encRequest := &pb.DeterministicAeadEncryptRequest{
+		Keyset:         keyset,
+		Plaintext:      plaintext,
+		AssociatedData: associatedData,
+	}
+	encResponse, err := daeadService.EncryptDeterministically(ctx, encRequest)
+	if err != nil {
+		return nil, err
+	}
+	switch r := encResponse.Result.(type) {
+	case *pb.DeterministicAeadEncryptResponse_Ciphertext:
+		return r.Ciphertext, nil
+	case *pb.DeterministicAeadEncryptResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)
+	}
+}
+
+func daeadDecrypt(ctx context.Context, daeadService *services.DeterministicAeadService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
+	decRequest := &pb.DeterministicAeadDecryptRequest{
+		Keyset:         keyset,
+		Ciphertext:     ciphertext,
+		AssociatedData: associatedData,
+	}
+	decResponse, err := daeadService.DecryptDeterministically(ctx, decRequest)
+	if err != nil {
+		return nil, err
+	}
+	switch r := decResponse.Result.(type) {
+	case *pb.DeterministicAeadDecryptResponse_Plaintext:
+		return r.Plaintext, nil
+	case *pb.DeterministicAeadDecryptResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)
+	}
+}
+
+func TestGenerateEncryptDecryptDeterministically(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	daeadService := &services.DeterministicAeadService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(daead.AESSIVKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	plaintext := []byte("The quick brown fox jumps over the lazy dog")
+	associatedData := []byte("Associated Data")
+	ciphertext, err := daeadEncrypt(ctx, daeadService, keyset, plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("Aead Encrypt failed: %v", err)
+	}
+	output, err := daeadDecrypt(ctx, daeadService, keyset, ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("daeadDecrypt failed: %v", err)
+	}
+	if bytes.Compare(output, plaintext) != 0 {
+		t.Fatalf("Decrypted ciphertext is %v, want %v", output, plaintext)
+	}
+
+	if _, err := genKeyset(ctx, keysetService, []byte("badTemplate")); err == nil {
+		t.Fatalf("genKeyset from bad template succeeded unexpectedly.")
+	}
+	if _, err := daeadEncrypt(ctx, daeadService, []byte("badKeyset"), plaintext, associatedData); err == nil {
+		t.Fatalf("daeadEncrypt with bad keyset succeeded unexpectedly.")
+	}
+	if _, err := daeadDecrypt(ctx, daeadService, keyset, []byte("badCiphertext"), associatedData); err == nil {
+		t.Fatalf("daeadDecrypt of bad ciphertext succeeded unexpectedly.")
+	}
+}
+
+func computeMAC(ctx context.Context, macService *services.MacService, keyset []byte, data []byte) ([]byte, error) {
+	encRequest := &pb.ComputeMacRequest{
+		Keyset: keyset,
+		Data:   data,
+	}
+	response, err := macService.ComputeMac(ctx, encRequest)
+	if err != nil {
+		return nil, err
+	}
+	switch r := response.Result.(type) {
+	case *pb.ComputeMacResponse_MacValue:
+		return r.MacValue, nil
+	case *pb.ComputeMacResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func verifyMAC(ctx context.Context, macService *services.MacService, keyset []byte, macValue []byte, data []byte) error {
+	request := &pb.VerifyMacRequest{
+		Keyset:   keyset,
+		MacValue: macValue,
+		Data:     data,
+	}
+	response, err := macService.VerifyMac(ctx, request)
+	if err != nil {
+		return err
+	}
+	if response.Err != "" {
+		return errors.New(response.Err)
+	}
+	return nil
+}
+
+func TestComputeVerifyMac(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	macService := &services.MacService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(mac.HMACSHA256Tag128KeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	data := []byte("The quick brown fox jumps over the lazy dog")
+	macValue, err := computeMAC(ctx, macService, keyset, data)
+	if err != nil {
+		t.Fatalf("computeMAC failed: %v", err)
+	}
+	if err := verifyMAC(ctx, macService, keyset, macValue, data); err != nil {
+		t.Fatalf("verifyMAC failed: %v", err)
+	}
+
+	if _, err := computeMAC(ctx, macService, []byte("badKeyset"), data); err == nil {
+		t.Fatalf("computeMAC with bad keyset succeeded unexpectedly.")
+	}
+	if err := verifyMAC(ctx, macService, keyset, []byte("badMacValue"), data); err == nil {
+		t.Fatalf("verifyMAC of bad MAC value succeeded unexpectedly.")
 	}
 }
 

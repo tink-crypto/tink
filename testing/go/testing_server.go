@@ -45,5 +45,7 @@ func main() {
 	pbgrpc.RegisterMetadataServer(server, &services.MetadataService{})
 	pbgrpc.RegisterKeysetServer(server, &services.KeysetService{})
 	pbgrpc.RegisterAeadServer(server, &services.AeadService{})
+	pbgrpc.RegisterDeterministicAeadServer(server, &services.DeterministicAeadService{})
+	pbgrpc.RegisterMacServer(server, &services.MacService{})
 	server.Serve(lis)
 }

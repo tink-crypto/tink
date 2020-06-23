@@ -49,8 +49,8 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       aead_primitive.decrypt(b'foo', associated_data)
 
-  def test_daead(self):
-    lang = 'python'
+  @parameterized.parameters(['go', 'python'])
+  def test_daead(self, lang):
     keyset_handle = testing_servers.new_keyset_handle(
         lang, daead.deterministic_aead_key_templates.AES256_SIV)
     plaintext = b'The quick brown fox jumps over the lazy dog'
@@ -65,8 +65,8 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       daead_primitive.decrypt_deterministically(b'foo', associated_data)
 
-  def test_mac(self):
-    lang = 'python'
+  @parameterized.parameters(['go', 'python'])
+  def test_mac(self, lang):
     keyset_handle = testing_servers.new_keyset_handle(
         lang, mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     data = b'The quick brown fox jumps over the lazy dog'
