@@ -17,7 +17,9 @@ import grpc
 
 from tink import aead
 from tink import daead
+from tink import hybrid
 from tink import mac
+from tink import signature
 
 
 from proto.testing import testing_api_pb2
@@ -88,6 +90,8 @@ class ServicesTest(absltest.TestCase):
     aead.register()
     daead.register()
     mac.register()
+    hybrid.register()
+    signature.register()
 
   def test_generate_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()
@@ -220,6 +224,117 @@ class ServicesTest(absltest.TestCase):
     verify_response = mac_servicer.VerifyMac(verify_request, self._ctx)
     logging.info('Error in response: %s', verify_response.err)
     self.assertNotEmpty(verify_response.err)
+
+  def test_generate_hybrid_encrypt_decrypt(self):
+    keyset_servicer = services.KeysetServicer()
+    hybrid_servicer = services.HybridServicer()
+
+    tp = hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+    template = tp.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEmpty(gen_response.err)
+    private_keyset = gen_response.keyset
+
+    pub_request = testing_api_pb2.KeysetPublicRequest(
+        private_keyset=private_keyset)
+    pub_response = keyset_servicer.Public(pub_request, self._ctx)
+    self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
+    public_keyset = pub_response.public_keyset
+
+    plaintext = b'The quick brown fox jumps over the lazy dog'
+    context_info = b'context_info'
+    enc_request = testing_api_pb2.HybridEncryptRequest(
+        public_keyset=public_keyset,
+        plaintext=plaintext,
+        context_info=context_info)
+    enc_response = hybrid_servicer.Encrypt(enc_request, self._ctx)
+    self.assertEqual(enc_response.WhichOneof('result'), 'ciphertext')
+    ciphertext = enc_response.ciphertext
+
+    dec_request = testing_api_pb2.HybridDecryptRequest(
+        private_keyset=private_keyset,
+        ciphertext=ciphertext,
+        context_info=context_info)
+    dec_response = hybrid_servicer.Decrypt(dec_request, self._ctx)
+    self.assertEqual(dec_response.WhichOneof('result'), 'plaintext')
+    self.assertEqual(dec_response.plaintext, plaintext)
+
+  def test_generate_hybrid_encrypt_decrypt_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    hybrid_servicer = services.HybridServicer()
+
+    tp = hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+    template = tp.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    private_keyset = gen_response.keyset
+
+    dec_request = testing_api_pb2.HybridDecryptRequest(
+        private_keyset=private_keyset,
+        ciphertext=b'invalid ciphertext',
+        context_info=b'context_info')
+    dec_response = hybrid_servicer.Decrypt(dec_request, self._ctx)
+    self.assertEqual(dec_response.WhichOneof('result'), 'err')
+    self.assertNotEmpty(dec_response.err)
+
+  def test_sign_verify(self):
+    keyset_servicer = services.KeysetServicer()
+    signature_servicer = services.SignatureServicer()
+
+    template = signature.signature_key_templates.ECDSA_P256.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    private_keyset = gen_response.keyset
+
+    pub_request = testing_api_pb2.KeysetPublicRequest(
+        private_keyset=private_keyset)
+    pub_response = keyset_servicer.Public(pub_request, self._ctx)
+    self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
+    public_keyset = pub_response.public_keyset
+
+    data = b'The quick brown fox jumps over the lazy dog'
+
+    sign_request = testing_api_pb2.SignatureSignRequest(
+        private_keyset=private_keyset,
+        data=data)
+    sign_response = signature_servicer.Sign(sign_request, self._ctx)
+    self.assertEqual(sign_response.WhichOneof('result'), 'signature')
+    a_signature = sign_response.signature
+
+    verify_request = testing_api_pb2.SignatureVerifyRequest(
+        public_keyset=public_keyset,
+        signature=a_signature,
+        data=data)
+    verify_response = signature_servicer.Verify(verify_request, self._ctx)
+    self.assertEmpty(verify_response.err)
+
+  def test_sign_verify_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    signature_servicer = services.SignatureServicer()
+
+    template = signature.signature_key_templates.ECDSA_P256.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    self.assertEmpty(gen_response.err)
+    private_keyset = gen_response.keyset
+
+    pub_request = testing_api_pb2.KeysetPublicRequest(
+        private_keyset=private_keyset)
+    pub_response = keyset_servicer.Public(pub_request, self._ctx)
+    self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
+    public_keyset = pub_response.public_keyset
+
+    invalid_request = testing_api_pb2.SignatureVerifyRequest(
+        public_keyset=public_keyset,
+        signature=b'invalid signature',
+        data=b'The quick brown fox jumps over the lazy dog')
+    invalid_response = signature_servicer.Verify(invalid_request, self._ctx)
+    self.assertNotEmpty(invalid_response.err)
 
 
 if __name__ == '__main__':

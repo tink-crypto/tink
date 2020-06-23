@@ -23,7 +23,9 @@ from absl import flags
 import grpc
 from tink import aead
 from tink import daead
+from tink import hybrid
 from tink import mac
+from tink import signature
 
 from proto.testing import testing_api_pb2_grpc
 
@@ -37,7 +39,9 @@ flags.DEFINE_integer('port', 10000, 'The port of the server.')
 def main(unused_argv):
   aead.register()
   daead.register()
+  hybrid.register()
   mac.register()
+  signature.register()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
   testing_api_pb2_grpc.add_MetadataServicer_to_server(
       services.MetadataServicer(), server)
@@ -49,6 +53,10 @@ def main(unused_argv):
       services.DeterministicAeadServicer(), server)
   testing_api_pb2_grpc.add_MacServicer_to_server(
       services.MacServicer(), server)
+  testing_api_pb2_grpc.add_HybridServicer_to_server(
+      services.HybridServicer(), server)
+  testing_api_pb2_grpc.add_SignatureServicer_to_server(
+      services.SignatureServicer(), server)
   server.add_secure_port('[::]:%d' % FLAGS.port,
                          grpc.local_server_credentials())
   server.start()

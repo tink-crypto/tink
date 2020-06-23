@@ -23,7 +23,9 @@ import tink
 from tink import aead
 from tink import cleartext_keyset_handle
 from tink import daead
+from tink import hybrid
 from tink import mac
+from tink import signature
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
@@ -56,6 +58,22 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
       return testing_api_pb2.KeysetGenerateResponse(keyset=keyset.getvalue())
     except tink.TinkError as e:
       return testing_api_pb2.KeysetGenerateResponse(err=str(e))
+
+  def Public(
+      self, request: testing_api_pb2.KeysetPublicRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.KeysetPublicResponse:
+    """Generates a public-key keyset from a private-key keyset."""
+    try:
+      private_keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.private_keyset))
+      public_keyset_handle = private_keyset_handle.public_keyset_handle()
+      public_keyset = io.BytesIO()
+      cleartext_keyset_handle.write(
+          tink.BinaryKeysetWriter(public_keyset), public_keyset_handle)
+      return testing_api_pb2.KeysetPublicResponse(
+          public_keyset=public_keyset.getvalue())
+    except tink.TinkError as e:
+      return testing_api_pb2.KeysetPublicResponse(err=str(e))
 
 
 class AeadServicer(testing_api_pb2_grpc.AeadServicer):
@@ -152,3 +170,63 @@ class MacServicer(testing_api_pb2_grpc.MacServicer):
       return testing_api_pb2.VerifyMacResponse()
     except tink.TinkError as e:
       return testing_api_pb2.VerifyMacResponse(err=str(e))
+
+
+class HybridServicer(testing_api_pb2_grpc.HybridServicer):
+  """A service for testing hybrid encryption and decryption."""
+
+  def Encrypt(
+      self, request: testing_api_pb2.HybridEncryptRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.HybridEncryptResponse:
+    """Encrypts a message."""
+    try:
+      public_keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.public_keyset))
+      p = public_keyset_handle.primitive(hybrid.HybridEncrypt)
+      ciphertext = p.encrypt(request.plaintext, request.context_info)
+      return testing_api_pb2.HybridEncryptResponse(ciphertext=ciphertext)
+    except tink.TinkError as e:
+      return testing_api_pb2.HybridEncryptResponse(err=str(e))
+
+  def Decrypt(
+      self, request: testing_api_pb2.HybridDecryptRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.HybridDecryptResponse:
+    """Decrypts a message."""
+    try:
+      private_keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.private_keyset))
+      p = private_keyset_handle.primitive(hybrid.HybridDecrypt)
+      plaintext = p.decrypt(request.ciphertext, request.context_info)
+      return testing_api_pb2.HybridDecryptResponse(plaintext=plaintext)
+    except tink.TinkError as e:
+      return testing_api_pb2.HybridDecryptResponse(err=str(e))
+
+
+class SignatureServicer(testing_api_pb2_grpc.SignatureServicer):
+  """A service for testing signatures."""
+
+  def Sign(
+      self, request: testing_api_pb2.SignatureSignRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.SignatureSignResponse:
+    """Signs a message."""
+    try:
+      private_keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.private_keyset))
+      p = private_keyset_handle.primitive(signature.PublicKeySign)
+      signature_value = p.sign(request.data)
+      return testing_api_pb2.SignatureSignResponse(signature=signature_value)
+    except tink.TinkError as e:
+      return testing_api_pb2.SignatureSignResponse(err=str(e))
+
+  def Verify(
+      self, request: testing_api_pb2.SignatureVerifyRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.SignatureVerifyResponse:
+    """Verifies a signature."""
+    try:
+      public_keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.public_keyset))
+      p = public_keyset_handle.primitive(signature.PublicKeyVerify)
+      p.verify(request.signature, request.data)
+      return testing_api_pb2.SignatureVerifyResponse()
+    except tink.TinkError as e:
+      return testing_api_pb2.SignatureVerifyResponse(err=str(e))
