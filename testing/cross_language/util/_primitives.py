@@ -23,7 +23,12 @@ from absl import logging
 import tink
 from tink import aead
 from tink import cleartext_keyset_handle
+from tink import daead
+from tink import hybrid
+from tink import mac
+from tink import signature as tink_signature
 
+from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
 
@@ -36,8 +41,31 @@ def _keyset(keyset_handle: tink.KeysetHandle) -> bytes:
   return keyset_buffer.getvalue()
 
 
+def new_keyset_handle(stub: testing_api_pb2_grpc.KeysetStub,
+                      key_template: tink_pb2.KeyTemplate) -> tink.KeysetHandle:
+  gen_request = testing_api_pb2.KeysetGenerateRequest(
+      template=key_template.SerializeToString())
+  gen_response = stub.Generate(gen_request)
+  if gen_response.err:
+    raise tink.TinkError(gen_response.err)
+  return cleartext_keyset_handle.read(
+      tink.BinaryKeysetReader(gen_response.keyset))
+
+
+def public_keyset_handle(
+    stub: testing_api_pb2_grpc.KeysetStub,
+    private_keyset_handle: tink.KeysetHandle) -> tink.KeysetHandle:
+  request = testing_api_pb2.KeysetPublicRequest(
+      private_keyset=_keyset(private_keyset_handle))
+  response = stub.Public(request)
+  if response.err:
+    raise tink.TinkError(response.err)
+  return cleartext_keyset_handle.read(
+      tink.BinaryKeysetReader(response.public_keyset))
+
+
 class Aead(aead.Aead):
-  """Wraps AEAD services stub into an Aead primitive."""
+  """Wraps AEAD service stub into an Aead primitive."""
 
   def __init__(self,
                lang: Text,
@@ -69,3 +97,169 @@ class Aead(aead.Aead):
       logging.info('error decrypt in %s: %s', self.lang, dec_response.err)
       raise tink.TinkError(dec_response.err)
     return dec_response.plaintext
+
+
+class DeterministicAead(daead.DeterministicAead):
+  """Wraps DAEAD services stub into an DeterministicAead primitive."""
+
+  def __init__(self,
+               lang: Text,
+               stub: testing_api_pb2_grpc.DeterministicAeadStub,
+               keyset_handle: tink.KeysetHandle) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._keyset_handle = keyset_handle
+
+  def encrypt_deterministically(self, plaintext: bytes,
+                                associated_data: bytes) -> bytes:
+    """Encrypts."""
+    logging.info('encrypt in lang %s.', self.lang)
+    enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(
+        keyset=_keyset(self._keyset_handle),
+        plaintext=plaintext,
+        associated_data=associated_data)
+    enc_response = self._stub.EncryptDeterministically(enc_request)
+    if enc_response.err:
+      logging.info('error encrypt in %s: %s', self.lang, enc_response.err)
+      raise tink.TinkError(enc_response.err)
+    return enc_response.ciphertext
+
+  def decrypt_deterministically(self, ciphertext: bytes,
+                                associated_data: bytes) -> bytes:
+    """Decrypts."""
+    logging.info('decrypt in lang %s.', self.lang)
+    dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
+        keyset=_keyset(self._keyset_handle),
+        ciphertext=ciphertext, associated_data=associated_data)
+    dec_response = self._stub.DecryptDeterministically(dec_request)
+    if dec_response.err:
+      logging.info('error decrypt in %s: %s', self.lang, dec_response.err)
+      raise tink.TinkError(dec_response.err)
+    return dec_response.plaintext
+
+
+class Mac(mac.Mac):
+  """Wraps MAC service stub into an Mac primitive."""
+
+  def __init__(self,
+               lang: Text,
+               stub: testing_api_pb2_grpc.MacStub,
+               keyset_handle: tink.KeysetHandle) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._keyset_handle = keyset_handle
+
+  def compute_mac(self, data: bytes) -> bytes:
+    logging.info('compute_mac in lang %s.', self.lang)
+    request = testing_api_pb2.ComputeMacRequest(
+        keyset=_keyset(self._keyset_handle),
+        data=data)
+    response = self._stub.ComputeMac(request)
+    if response.err:
+      logging.info('error compute_mac in %s: %s', self.lang, response.err)
+      raise tink.TinkError(response.err)
+    return response.mac_value
+
+  def verify_mac(self, mac_value: bytes, data: bytes) -> None:
+    logging.info('verify_mac in lang %s.', self.lang)
+    request = testing_api_pb2.VerifyMacRequest(
+        keyset=_keyset(self._keyset_handle),
+        mac_value=mac_value,
+        data=data)
+    response = self._stub.VerifyMac(request)
+    if response.err:
+      logging.info('error verify_mac in %s: %s', self.lang, response.err)
+      raise tink.TinkError(response.err)
+
+
+class HybridEncrypt(hybrid.HybridEncrypt):
+  """Implements the HybridEncrypt primitive using a hybrid service stub."""
+
+  def __init__(self,
+               lang: Text,
+               stub: testing_api_pb2_grpc.HybridStub,
+               public_handle: tink.KeysetHandle) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._public_handle = public_handle
+
+  def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
+    logging.info('hybrid Sencrypt in lang %s.', self.lang)
+    enc_request = testing_api_pb2.HybridEncryptRequest(
+        public_keyset=_keyset(self._public_handle),
+        plaintext=plaintext,
+        context_info=context_info)
+    enc_response = self._stub.Encrypt(enc_request)
+    if enc_response.err:
+      logging.info('error encrypt in %s: %s', self.lang, enc_response.err)
+      raise tink.TinkError(enc_response.err)
+    return enc_response.ciphertext
+
+
+class HybridDecrypt(hybrid.HybridDecrypt):
+  """Implements the HybridDecrypt primitive using a hybrid service stub."""
+
+  def __init__(self,
+               lang: Text,
+               stub: testing_api_pb2_grpc.HybridStub,
+               private_handle: tink.KeysetHandle) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._private_handle = private_handle
+
+  def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
+    logging.info('decrypt in lang %s.', self.lang)
+    dec_request = testing_api_pb2.HybridDecryptRequest(
+        private_keyset=_keyset(self._private_handle),
+        ciphertext=ciphertext, context_info=context_info)
+    dec_response = self._stub.Decrypt(dec_request)
+    if dec_response.err:
+      logging.info('error hybriddecrypt in %s: %s', self.lang, dec_response.err)
+      raise tink.TinkError(dec_response.err)
+    return dec_response.plaintext
+
+
+class PublicKeySign(tink_signature.PublicKeySign):
+  """Implements the PublicKeySign primitive using a signature service stub."""
+
+  def __init__(self,
+               lang: Text,
+               stub: testing_api_pb2_grpc.SignatureStub,
+               private_handle: tink.KeysetHandle) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._private_handle = private_handle
+
+  def sign(self, data: bytes) -> bytes:
+    logging.info('compute_mac in lang %s.', self.lang)
+    request = testing_api_pb2.SignatureSignRequest(
+        private_keyset=_keyset(self._private_handle),
+        data=data)
+    response = self._stub.Sign(request)
+    if response.err:
+      logging.info('error signature sign in %s: %s', self.lang, response.err)
+      raise tink.TinkError(response.err)
+    return response.signature
+
+
+class PublicKeyVerify(tink_signature.PublicKeyVerify):
+  """Implements the PublicKeyVerify primitive using a signature service stub."""
+
+  def __init__(self,
+               lang: Text,
+               stub: testing_api_pb2_grpc.SignatureStub,
+               public_handle: tink.KeysetHandle) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._public_handle = public_handle
+
+  def verify(self, signature: bytes, data: bytes) -> None:
+    logging.info('signature verify in lang %s.', self.lang)
+    request = testing_api_pb2.SignatureVerifyRequest(
+        public_keyset=_keyset(self._public_handle),
+        signature=signature,
+        data=data)
+    response = self._stub.Verify(request)
+    if response.err:
+      logging.info('error signature verify in %s: %s', self.lang, response.err)
+      raise tink.TinkError(response.err)
