@@ -25,7 +25,7 @@ import java.security.InvalidAlgorithmParameterException;
 public final class AesGcmFactory implements AeadFactory {
   private final int keySizeInBytes;
 
-  AesGcmFactory(int keySizeInBytes) throws GeneralSecurityException {
+  public AesGcmFactory(int keySizeInBytes) throws GeneralSecurityException {
     this.keySizeInBytes = validateAesKeySize(keySizeInBytes);
   }
 
