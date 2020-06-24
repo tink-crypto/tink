@@ -12,12 +12,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Implementation of an AEAD Service.
-#include "aead_impl.h"
+// Implementation of an Deterministic AEAD Service.
+#include "deterministic_aead_impl.h"
 
-#include "tink/aead.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/deterministic_aead.h"
 #include "proto/testing/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
@@ -27,12 +27,13 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-AeadImpl::AeadImpl() {}
+DeterministicAeadImpl::DeterministicAeadImpl() {}
 
 // Encrypts a message
-::grpc::Status AeadImpl::Encrypt(grpc::ServerContext* context,
-                                 const AeadEncryptRequest* request,
-                                 AeadEncryptResponse* response) {
+::grpc::Status DeterministicAeadImpl::EncryptDeterministically(
+    grpc::ServerContext* context,
+    const DeterministicAeadEncryptRequest* request,
+    DeterministicAeadEncryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(reader_result.status().error_message());
@@ -44,13 +45,13 @@ AeadImpl::AeadImpl() {}
     response->set_err(handle_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  auto aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
-  if (!aead_result.ok()) {
-    response->set_err(aead_result.status().error_message());
+  auto daead_result = handle_result.ValueOrDie()
+                          ->GetPrimitive<crypto::tink::DeterministicAead>();
+  if (!daead_result.ok()) {
+    response->set_err(daead_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  auto encrypt_result = aead_result.ValueOrDie()->Encrypt(
+  auto encrypt_result = daead_result.ValueOrDie()->EncryptDeterministically(
       request->plaintext(), request->associated_data());
   if (!encrypt_result.ok()) {
     response->set_err(encrypt_result.status().error_message());
@@ -61,9 +62,10 @@ AeadImpl::AeadImpl() {}
 }
 
 // Decrypts a ciphertext
-::grpc::Status AeadImpl::Decrypt(grpc::ServerContext* context,
-                                 const AeadDecryptRequest* request,
-                                 AeadDecryptResponse* response) {
+::grpc::Status DeterministicAeadImpl::DecryptDeterministically(
+    grpc::ServerContext* context,
+    const DeterministicAeadDecryptRequest* request,
+    DeterministicAeadDecryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(reader_result.status().error_message());
@@ -75,13 +77,13 @@ AeadImpl::AeadImpl() {}
     response->set_err(handle_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  auto aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
-  if (!aead_result.ok()) {
-    response->set_err(aead_result.status().error_message());
+  auto daead_result = handle_result.ValueOrDie()
+                          ->GetPrimitive<crypto::tink::DeterministicAead>();
+  if (!daead_result.ok()) {
+    response->set_err(daead_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  auto decrypt_result = aead_result.ValueOrDie()->Decrypt(
+  auto decrypt_result = daead_result.ValueOrDie()->DecryptDeterministically(
       request->ciphertext(), request->associated_data());
   if (!decrypt_result.ok()) {
     response->set_err(decrypt_result.status().error_message());

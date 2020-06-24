@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Implementation of a server metadata serive.
+// Implementation of a server metadata service.
 #include "metadata_impl.h"
 #include "tink/version.h"
 

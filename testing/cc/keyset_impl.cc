@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Implementation of a Keyset Serive.
+// Implementation of a Keyset Service.
 #include "keyset_impl.h"
 
 #include "tink/binary_keyset_writer.h"

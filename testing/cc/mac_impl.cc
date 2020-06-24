@@ -12,12 +12,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Implementation of an AEAD Service.
-#include "aead_impl.h"
+// Implementation of a MAC Service.
+#include "mac_impl.h"
 
-#include "tink/aead.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/mac.h"
 #include "proto/testing/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
@@ -27,12 +27,12 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-AeadImpl::AeadImpl() {}
+MacImpl::MacImpl() {}
 
-// Encrypts a message
-::grpc::Status AeadImpl::Encrypt(grpc::ServerContext* context,
-                                 const AeadEncryptRequest* request,
-                                 AeadEncryptResponse* response) {
+// Computes a MAC
+::grpc::Status MacImpl::ComputeMac(grpc::ServerContext* context,
+                                   const ComputeMacRequest* request,
+                                   ComputeMacResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(reader_result.status().error_message());
@@ -44,26 +44,25 @@ AeadImpl::AeadImpl() {}
     response->set_err(handle_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  auto aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
-  if (!aead_result.ok()) {
-    response->set_err(aead_result.status().error_message());
+  auto mac_result =
+      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Mac>();
+  if (!mac_result.ok()) {
+    response->set_err(mac_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  auto encrypt_result = aead_result.ValueOrDie()->Encrypt(
-      request->plaintext(), request->associated_data());
-  if (!encrypt_result.ok()) {
-    response->set_err(encrypt_result.status().error_message());
+  auto compute_result = mac_result.ValueOrDie()->ComputeMac(request->data());
+  if (!compute_result.ok()) {
+    response->set_err(compute_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  response->set_ciphertext(encrypt_result.ValueOrDie());
+  response->set_mac_value(compute_result.ValueOrDie());
   return ::grpc::Status::OK;
 }
 
-// Decrypts a ciphertext
-::grpc::Status AeadImpl::Decrypt(grpc::ServerContext* context,
-                                 const AeadDecryptRequest* request,
-                                 AeadDecryptResponse* response) {
+// Verifies a MAC
+::grpc::Status MacImpl::VerifyMac(grpc::ServerContext* context,
+                                  const VerifyMacRequest* request,
+                                  VerifyMacResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(reader_result.status().error_message());
@@ -75,19 +74,18 @@ AeadImpl::AeadImpl() {}
     response->set_err(handle_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  auto aead_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
-  if (!aead_result.ok()) {
-    response->set_err(aead_result.status().error_message());
+  auto mac_result =
+      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Mac>();
+  if (!mac_result.ok()) {
+    response->set_err(mac_result.status().error_message());
     return ::grpc::Status::OK;
   }
-  auto decrypt_result = aead_result.ValueOrDie()->Decrypt(
-      request->ciphertext(), request->associated_data());
-  if (!decrypt_result.ok()) {
-    response->set_err(decrypt_result.status().error_message());
+  auto status =
+      mac_result.ValueOrDie()->VerifyMac(request->mac_value(), request->data());
+  if (!status.ok()) {
+    response->set_err(status.error_message());
     return ::grpc::Status::OK;
   }
-  response->set_plaintext(decrypt_result.ValueOrDie());
   return ::grpc::Status::OK;
 }
 

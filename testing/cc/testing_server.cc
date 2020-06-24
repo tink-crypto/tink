@@ -19,7 +19,9 @@
 #include "tink/config/tink_config.h"
 #include "proto/testing/testing_api.grpc.pb.h"
 #include "aead_impl.h"
+#include "deterministic_aead_impl.h"
 #include "keyset_impl.h"
+#include "mac_impl.h"
 #include "metadata_impl.h"
 
 ABSL_FLAG(int, port, 23456, "the port");
@@ -37,6 +39,8 @@ void RunServer() {
   tink_testing_api::MetadataImpl metadata;
   tink_testing_api::KeysetImpl keyset;
   tink_testing_api::AeadImpl aead;
+  tink_testing_api::DeterministicAeadImpl deterministic_aead;
+  tink_testing_api::MacImpl mac;
 
   grpc::ServerBuilder builder;
   builder.AddListeningPort(
@@ -45,6 +49,8 @@ void RunServer() {
   builder.RegisterService(&metadata);
   builder.RegisterService(&keyset);
   builder.RegisterService(&aead);
+  builder.RegisterService(&deterministic_aead);
+  builder.RegisterService(&mac);
 
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
   std::cout << "Server listening on " << server_address << std::endl;
