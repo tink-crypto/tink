@@ -178,7 +178,7 @@ ciphertext = aead_primitive.encrypt(plaintext, associated_data)
 ### Deterministic symmetric key encryption
 
 You can obtain and use a
-[DeterministicAEAD (Deterministic Authenticated Encryption with Associated Data](PRIMITIVES.md#deterministic-authenticated-encryption-with-associated-data)
+[DeterministicAEAD (Deterministic Authenticated Encryption with Associated Data)](PRIMITIVES.md#deterministic-authenticated-encryption-with-associated-data)
 primitive to encrypt or decrypt data:
 
 ```python

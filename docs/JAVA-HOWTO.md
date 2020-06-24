@@ -307,7 +307,7 @@ primitive (for example `Aead.class` for AEAD).
 ### Symmetric Key Encryption
 
 You can obtain and use an [AEAD (Authenticated Encryption with Associated
-Data](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive to
+Data)](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive to
 encrypt or decrypt data:
 
 ```java
@@ -333,7 +333,7 @@ encrypt or decrypt data:
 
 You can obtain and use a [DeterministicAEAD (Deterministic Authenticated
 Encryption with Associated
-Data](PRIMITIVES.md#deterministic-authenticated-encryption-with-associated-data)
+Data)](PRIMITIVES.md#deterministic-authenticated-encryption-with-associated-data)
 primitive to encrypt or decrypt data:
 
 ```java
