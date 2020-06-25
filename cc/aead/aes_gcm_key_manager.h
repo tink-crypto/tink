@@ -22,6 +22,8 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/aead/cord_aead.h"
+#include "tink/aead/internal/cord_aes_gcm_boringssl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/key_manager.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
@@ -42,7 +44,8 @@ namespace tink {
 
 class AesGcmKeyManager
     : public KeyTypeManager<google::crypto::tink::AesGcmKey,
-                            google::crypto::tink::AesGcmKeyFormat, List<Aead>> {
+                            google::crypto::tink::AesGcmKeyFormat,
+                            List<Aead, CordAead>> {
  public:
   class AeadFactory : public PrimitiveFactory<Aead> {
     crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
@@ -53,9 +56,20 @@ class AesGcmKeyManager
       return {std::move(aes_gcm_result.ValueOrDie())};
     }
   };
+  class CordAeadFactory : public PrimitiveFactory<CordAead> {
+    crypto::tink::util::StatusOr<std::unique_ptr<CordAead>> Create(
+        const google::crypto::tink::AesGcmKey& key) const override {
+      auto cord_aes_gcm_result = crypto::tink::CordAesGcmBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()));
+      if (!cord_aes_gcm_result.ok()) return cord_aes_gcm_result.status();
+      return {std::move(cord_aes_gcm_result.ValueOrDie())};
+    }
+  };
 
   AesGcmKeyManager()
-      : KeyTypeManager(absl::make_unique<AesGcmKeyManager::AeadFactory>()) {}
+      : KeyTypeManager(absl::make_unique<AesGcmKeyManager::AeadFactory>(),
+                       absl::make_unique<AesGcmKeyManager::CordAeadFactory>()) {
+  }
 
   // Returns the version of this key manager.
   uint32_t get_version() const override { return 0; }

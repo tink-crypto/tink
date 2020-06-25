@@ -640,6 +640,7 @@ tink_cc_library(
   DEPS
     absl::strings
     tink::core::aead
+    tink::aead::cord_aead
     tink::util::status
 )
 

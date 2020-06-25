@@ -141,6 +141,8 @@ cc_library(
         "//:aead",
         "//:core/key_type_manager",
         "//:key_manager",
+        "//aead:cord_aead",
+        "//aead/internal:cord_aes_gcm_boringssl",
         "//proto:aes_gcm_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:aes_gcm_boringssl",
@@ -421,6 +423,8 @@ cc_test(
     deps = [
         ":aes_gcm_key_manager",
         "//:aead",
+        "//aead:cord_aead",
+        "//aead/internal:cord_aes_gcm_boringssl",
         "//proto:aes_gcm_cc_proto",
         "//subtle:aead_test_util",
         "//util:istream_input_stream",

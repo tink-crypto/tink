@@ -38,5 +38,24 @@ crypto::tink::util::Status EncryptThenDecrypt(Aead* encrypter, Aead* decrypter,
   return util::OkStatus();
 }
 
+crypto::tink::util::Status EncryptThenDecrypt(CordAead* encrypter,
+                                              CordAead* decrypter,
+                                              absl::string_view message,
+                                              absl::string_view aad) {
+  absl::Cord message_cord = absl::Cord(message);
+  absl::Cord aad_cord = absl::Cord(aad);
+  StatusOr<absl::Cord> encryption_or =
+      encrypter->Encrypt(message_cord, aad_cord);
+  if (!encryption_or.status().ok()) return encryption_or.status();
+  StatusOr<absl::Cord> decryption_or =
+      decrypter->Decrypt(encryption_or.ValueOrDie(), aad_cord);
+  if (!decryption_or.status().ok()) return decryption_or.status();
+  if (decryption_or.ValueOrDie() != message) {
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+                                      "Message/Decryption mismatch");
+  }
+  return util::OkStatus();
+}
+
 }  // namespace tink
 }  // namespace crypto

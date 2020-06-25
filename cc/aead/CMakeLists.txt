@@ -128,6 +128,8 @@ tink_cc_library(
   SRCS
     aes_gcm_key_manager.h
   DEPS
+    tink::aead::cord_aead
+    tink::aead::internal::cord_aes_gcm_boringssl
     tink::core::aead
     tink::core::key_manager
     tink::core::key_type_manager
@@ -378,6 +380,8 @@ tink_cc_test(
   SRCS aes_gcm_key_manager_test.cc
   DEPS
     tink::aead::aes_gcm_key_manager
+    tink::aead::cord_aead
+    tink::aead::internal::cord_aes_gcm_boringssl
     tink::core::aead
     tink::subtle::aead_test_util
     tink::util::istream_input_stream

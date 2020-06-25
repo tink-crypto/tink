@@ -685,6 +685,7 @@ cc_library(
     deps = [
         ":test_util",
         "//:aead",
+        "//aead:cord_aead",
         "//util:status",
         "@com_google_absl//absl/strings",
     ],
