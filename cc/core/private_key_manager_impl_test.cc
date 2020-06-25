@@ -70,14 +70,14 @@ class ExamplePrivateKeyTypeManager
     return google::crypto::tink::KeyData::ASYMMETRIC_PRIVATE;
   }
 
-  MOCK_CONST_METHOD0(get_version, uint32_t());
+  MOCK_METHOD(uint32_t, get_version, (), (const, override));
 
   // We mock out ValidateKey and ValidateKeyFormat so that we can easily test
   // proper behavior in case they return an error.
-  MOCK_CONST_METHOD1(ValidateKey,
-                     crypto::tink::util::Status(const EcdsaPrivateKey& key));
-  MOCK_CONST_METHOD1(ValidateKeyFormat,
-                     crypto::tink::util::Status(const EcdsaKeyFormat& key));
+  MOCK_METHOD(crypto::tink::util::Status, ValidateKey,
+              (const EcdsaPrivateKey& key), (const, override));
+  MOCK_METHOD(crypto::tink::util::Status, ValidateKeyFormat,
+              (const EcdsaKeyFormat& key), (const, override));
 
   const std::string& get_key_type() const override { return kKeyType; }
 
@@ -119,12 +119,12 @@ class TestPublicKeyTypeManager
     return google::crypto::tink::KeyData::ASYMMETRIC_PRIVATE;
   }
 
-  MOCK_CONST_METHOD0(get_version, uint32_t());
+  MOCK_METHOD(uint32_t, get_version, (), (const, override));
 
   // We mock out ValidateKey and ValidateKeyFormat so that we can easily test
   // proper behavior in case they return an error.
-  MOCK_CONST_METHOD1(ValidateKey,
-                     crypto::tink::util::Status(const EcdsaPublicKey& key));
+  MOCK_METHOD(crypto::tink::util::Status, ValidateKey,
+              (const EcdsaPublicKey& key), (const, override));
 
   const std::string& get_key_type() const override { return kKeyType; }
 
