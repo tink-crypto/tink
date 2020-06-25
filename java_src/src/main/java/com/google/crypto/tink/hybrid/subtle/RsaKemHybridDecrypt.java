@@ -52,7 +52,6 @@ public final class RsaKemHybridDecrypt implements HybridDecrypt {
   public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
       throws GeneralSecurityException {
     int modSizeInBytes = RsaKem.bigIntSizeInBytes(recipientPrivateKey.getModulus());
-    System.out.println("Mod size in bytes: " + modSizeInBytes);
     if (ciphertext.length < modSizeInBytes) {
       throw new GeneralSecurityException(
           String.format(
