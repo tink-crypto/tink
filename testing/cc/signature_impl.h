@@ -12,8 +12,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_TESTING_SERIVCES_KEYSET_IMPL_H_
-#define TINK_TESTING_SERIVCES_KEYSET_IMPL_H_
+#ifndef TINK_TESTING_SIGNATURE_IMPL_H_
+#define TINK_TESTING_SIGNATURE_IMPL_H_
 
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/server_context.h>
@@ -23,24 +23,22 @@
 
 namespace tink_testing_api {
 
-// A Keyset Service.
-class KeysetImpl final : public Keyset::Service {
+// A Signature Service
+class SignatureImpl final : public Signature::Service {
  public:
-  KeysetImpl();
+  SignatureImpl();
 
-  ~KeysetImpl() override = default;
+  ~SignatureImpl() override = default;
 
-  // Generates a new keyset with one key from a template.
-  grpc::Status Generate(grpc::ServerContext* context,
-                        const KeysetGenerateRequest* request,
-                        KeysetGenerateResponse* response) override;
+  grpc::Status Sign(grpc::ServerContext* context,
+                    const SignatureSignRequest* request,
+                    SignatureSignResponse* response) override;
 
-  // Returns a public keyset for a given private keyset.
-  grpc::Status Public(grpc::ServerContext* context,
-                      const KeysetPublicRequest* request,
-                      KeysetPublicResponse* response) override;
+  grpc::Status Verify(grpc::ServerContext* context,
+                      const SignatureVerifyRequest* request,
+                      SignatureVerifyResponse* response) override;
 };
 
 }  // namespace tink_testing_api
 
-#endif  // TINK_TESTING_SERIVCES_KEYSET_IMPL_H_
+#endif  // TINK_TESTING_SIGNATURE_IMPL_H_

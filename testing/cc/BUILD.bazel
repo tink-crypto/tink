@@ -41,6 +41,7 @@ cc_library(
     deps = [
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
+        "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:binary_keyset_writer",
         "@tink_cc//:cleartext_keyset_handle",
         "@tink_cc//:keyset_handle",
@@ -55,8 +56,10 @@ cc_test(
         ":testing_api_cpp_library",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:binary_keyset_reader",
+        "@tink_cc//:binary_keyset_writer",
         "@tink_cc//aead:aead_key_templates",
         "@tink_cc//config:tink_config",
+        "@tink_cc//hybrid:hybrid_key_templates",
     ],
 )
 
@@ -137,15 +140,69 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "hybrid_impl",
+    srcs = ["hybrid_impl.cc"],
+    hdrs = ["hybrid_impl.h"],
+    deps = [
+        ":testing_api_cpp_library",
+        "@com_google_absl//absl/base:core_headers",
+        "@tink_cc",
+        "@tink_cc//:binary_keyset_reader",
+        "@tink_cc//:cleartext_keyset_handle",
+    ],
+)
+
+cc_test(
+    name = "hybrid_impl_test",
+    srcs = ["hybrid_impl_test.cc"],
+    deps = [
+        ":hybrid_impl",
+        ":testing_api_cpp_library",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//:binary_keyset_writer",
+        "@tink_cc//hybrid:hybrid_config",
+        "@tink_cc//hybrid:hybrid_key_templates",
+    ],
+)
+
+cc_library(
+    name = "signature_impl",
+    srcs = ["signature_impl.cc"],
+    hdrs = ["signature_impl.h"],
+    deps = [
+        ":testing_api_cpp_library",
+        "@com_google_absl//absl/base:core_headers",
+        "@tink_cc",
+        "@tink_cc//:binary_keyset_reader",
+        "@tink_cc//:cleartext_keyset_handle",
+    ],
+)
+
+cc_test(
+    name = "signature_impl_test",
+    srcs = ["signature_impl_test.cc"],
+    deps = [
+        ":signature_impl",
+        ":testing_api_cpp_library",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//:binary_keyset_writer",
+        "@tink_cc//signature:signature_config",
+        "@tink_cc//signature:signature_key_templates",
+    ],
+)
+
 cc_binary(
     name = "testing_server",
     srcs = ["testing_server.cc"],
     deps = [
         ":aead_impl",
         ":deterministic_aead_impl",
+        ":hybrid_impl",
         ":keyset_impl",
         ":mac_impl",
         ":metadata_impl",
+        ":signature_impl",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/flags:flag",

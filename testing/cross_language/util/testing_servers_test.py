@@ -77,7 +77,7 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       mac_primitive.verify_mac(b'foo', data)
 
-  @parameterized.parameters(['go', 'java', 'python'])
+  @parameterized.parameters(testing_servers.LANGUAGES)
   def test_hybrid(self, lang):
     private_handle = testing_servers.new_keyset_handle(
         lang,
@@ -94,7 +94,7 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       dec_primitive.decrypt(b'foo', context_info)
 
-  @parameterized.parameters(['go', 'java', 'python'])
+  @parameterized.parameters(testing_servers.LANGUAGES)
   def test_signature(self, lang):
     private_handle = testing_servers.new_keyset_handle(
         lang, signature.signature_key_templates.ED25519)

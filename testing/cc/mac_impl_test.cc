@@ -59,7 +59,7 @@ class MacImplTest : public ::testing::Test {
   static void SetUpTestSuite() { ASSERT_TRUE(MacConfig::Register().ok()); }
 };
 
-TEST_F(MacImplTest, EncryptDecryptSuccess) {
+TEST_F(MacImplTest, ComputeVerifySuccess) {
   tink_testing_api::MacImpl mac;
   std::string keyset = ValidKeyset();
   ComputeMacRequest comp_request;
@@ -80,7 +80,7 @@ TEST_F(MacImplTest, EncryptDecryptSuccess) {
   EXPECT_THAT(verify_response.err(), IsEmpty());
 }
 
-TEST_F(MacImplTest, EncryptBadKeysetFail) {
+TEST_F(MacImplTest, ComputeBadKeysetFail) {
   tink_testing_api::MacImpl mac;
   ComputeMacRequest comp_request;
   comp_request.set_keyset("bad keyset");
@@ -91,7 +91,7 @@ TEST_F(MacImplTest, EncryptBadKeysetFail) {
   EXPECT_THAT(comp_response.err(), Not(IsEmpty()));
 }
 
-TEST_F(MacImplTest, DecryptBadCiphertextFail) {
+TEST_F(MacImplTest, VerifyBadCiphertextFail) {
   tink_testing_api::MacImpl mac;
   std::string keyset = ValidKeyset();
   VerifyMacRequest verify_request;

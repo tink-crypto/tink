@@ -15,6 +15,7 @@
 // Implementation of a Keyset Service.
 #include "keyset_impl.h"
 
+#include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/keyset_handle.h"
@@ -22,6 +23,7 @@
 
 namespace tink_testing_api {
 
+using ::crypto::tink::BinaryKeysetReader;
 using ::crypto::tink::BinaryKeysetWriter;
 using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::KeysetHandle;
@@ -59,6 +61,44 @@ KeysetImpl::KeysetImpl() {}
     return ::grpc::Status::OK;
   }
   response->set_keyset(keyset.str());
+  return ::grpc::Status::OK;
+}
+
+// Returns a public keyset for a given private keyset.
+::grpc::Status KeysetImpl::Public(grpc::ServerContext* context,
+                                  const KeysetPublicRequest* request,
+                                  KeysetPublicResponse* response) {
+  auto reader_result = BinaryKeysetReader::New(request->private_keyset());
+  if (!reader_result.ok()) {
+    response->set_err(reader_result.status().error_message());
+    return ::grpc::Status::OK;
+  }
+  auto private_handle_result =
+      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+  if (!private_handle_result.ok()) {
+    response->set_err(private_handle_result.status().error_message());
+    return ::grpc::Status::OK;
+  }
+  auto public_handle_result =
+      private_handle_result.ValueOrDie()->GetPublicKeysetHandle();
+  if (!public_handle_result.ok()) {
+    response->set_err(public_handle_result.status().error_message());
+    return ::grpc::Status::OK;
+  }
+  std::stringbuf public_keyset;
+  auto writer_result =
+      BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&public_keyset));
+  if (!writer_result.ok()) {
+    response->set_err(writer_result.status().error_message());
+    return ::grpc::Status::OK;
+  }
+  auto status = CleartextKeysetHandle::Write(
+      writer_result.ValueOrDie().get(), *public_handle_result.ValueOrDie());
+  if (!status.ok()) {
+    response->set_err(status.error_message());
+    return ::grpc::Status::OK;
+  }
+  response->set_public_keyset(public_keyset.str());
   return ::grpc::Status::OK;
 }
 
