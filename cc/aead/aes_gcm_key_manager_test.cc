@@ -179,8 +179,8 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
           util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(aead_or.ValueOrDie().get(),
-                                 boring_ssl_aead_or.ValueOrDie().get(),
+  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                                 *boring_ssl_aead_or.ValueOrDie(),
                                  "message", "aad"),
               IsOk());
 }
@@ -201,8 +201,8 @@ TEST(AesGcmKeyManagerTest, CreateCordAead) {
           util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(aead_or.ValueOrDie().get(),
-                                 boring_ssl_aead_or.ValueOrDie().get(),
+  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                                 *boring_ssl_aead_or.ValueOrDie(),
                                  "message", "aad"),
               IsOk());
 }

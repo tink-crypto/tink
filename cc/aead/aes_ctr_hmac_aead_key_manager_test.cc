@@ -208,8 +208,8 @@ TEST(AesCtrHmacAeadKeyManagerTest, CreateAead) {
       key.hmac_key().params().tag_size());
   ASSERT_THAT(direct_aead_or.status(), IsOk());
 
-  EXPECT_THAT(EncryptThenDecrypt(aead_or.ValueOrDie().get(),
-                                 direct_aead_or.ValueOrDie().get(),
+  EXPECT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                                 *direct_aead_or.ValueOrDie(),
                                  "message", "aad"),
               IsOk());
 }

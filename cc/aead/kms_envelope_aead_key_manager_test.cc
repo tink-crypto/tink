@@ -163,8 +163,8 @@ TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAead) {
   ASSERT_THAT(direct_aead.status(), IsOk());
 
   EXPECT_THAT(
-      EncryptThenDecrypt(kms_aead.ValueOrDie().get(),
-                         direct_aead.ValueOrDie().get(), "plaintext", "aad"),
+      EncryptThenDecrypt(*kms_aead.ValueOrDie(),
+                         *direct_aead.ValueOrDie(), "plaintext", "aad"),
       IsOk());
 }
 
@@ -219,8 +219,8 @@ TEST_F(KmsEnvelopeAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
   ASSERT_THAT(direct_aead.status(), IsOk());
 
   EXPECT_THAT(
-      EncryptThenDecrypt(kms_aead.ValueOrDie().get(),
-                         direct_aead.ValueOrDie().get(), "plaintext", "aad"),
+      EncryptThenDecrypt(*kms_aead.ValueOrDie(),
+                         *direct_aead.ValueOrDie(), "plaintext", "aad"),
       IsOk());
 }
 

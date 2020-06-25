@@ -123,7 +123,7 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAead) {
 
   DummyAead direct_aead("prefix1:some_key1");
 
-  EXPECT_THAT(EncryptThenDecrypt(kms_aead.ValueOrDie().get(), &direct_aead,
+  EXPECT_THAT(EncryptThenDecrypt(*kms_aead.ValueOrDie(), direct_aead,
                                  "plaintext", "aad"),
               IsOk());
 }
@@ -156,7 +156,7 @@ TEST_F(KmsAeadKeyManagerCreateTest, CreateAeadUnboundKey) {
 
   DummyAead direct_aead("prefix2:some_key2");
 
-  EXPECT_THAT(EncryptThenDecrypt(kms_aead.ValueOrDie().get(), &direct_aead,
+  EXPECT_THAT(EncryptThenDecrypt(*kms_aead.ValueOrDie(), direct_aead,
                                  "plaintext", "aad"),
               IsOk());
 }
