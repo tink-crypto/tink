@@ -61,8 +61,8 @@ add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/cc/w
 
 http_archive(
   NAME boringssl
-  URL https://github.com/google/boringssl/archive/18637c5f37b87e57ebde0c40fe19c1560ec88813.zip
-  SHA256 bd923e59fca0d2b50db09af441d11c844c5e882a54c68943b7fc39a8cb5dd211
+  URL https://github.com/google/boringssl/archive/597b810379e126ae05d32c1d94b1a9464385acd0.zip
+  SHA256 c4e8414cb36e62d2fee451296cc864f7ad1a4670396c8a67e1ee77ae84cc4167
   CMAKE_SUBDIR src
 )
 
