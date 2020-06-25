@@ -24,9 +24,11 @@ java_library(
     srcs = [
         "java/com/google/crypto/tink/testing/AeadServiceImpl.java",
         "java/com/google/crypto/tink/testing/DeterministicAeadServiceImpl.java",
+        "java/com/google/crypto/tink/testing/HybridServiceImpl.java",
         "java/com/google/crypto/tink/testing/KeysetServiceImpl.java",
         "java/com/google/crypto/tink/testing/MacServiceImpl.java",
         "java/com/google/crypto/tink/testing/MetadataServiceImpl.java",
+        "java/com/google/crypto/tink/testing/SignatureServiceImpl.java",
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
@@ -85,5 +87,30 @@ java_test(
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+    ],
+)
+
+java_test(
+    name = "AsymmetricTestingServicesTest",
+    size = "small",
+    srcs = [
+        "javatests/com/google/crypto/tink/testing/AsymmetricTestingServicesTest.java",
+    ],
+    deps = [
+        ":testing_api_java_grpc",
+        ":testing_api_java_proto",
+        ":testing_services",
+        "@com_google_protobuf//:protobuf_java",
+        "@com_google_protobuf//:protobuf_java_util",
+        "@io_grpc_grpc_java//api",
+        "@io_grpc_grpc_java//core:inprocess",
+        "@io_grpc_grpc_java//protobuf",
+        "@io_grpc_grpc_java//stub",
+        "@io_grpc_grpc_java//testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
     ],
 )

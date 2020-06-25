@@ -47,7 +47,9 @@ public final class TestingServer {
         .addService(new KeysetServiceImpl())
         .addService(new AeadServiceImpl())
         .addService(new DeterministicAeadServiceImpl())
+        .addService(new HybridServiceImpl())
         .addService(new MacServiceImpl())
+        .addService(new SignatureServiceImpl())
         .build()
         .start()
         .awaitTermination();

@@ -14,6 +14,7 @@
 
 package com.google.crypto.tink.testing;
 
+import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
@@ -23,6 +24,8 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
 import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc.KeysetImplBase;
+import com.google.crypto.tink.proto.testing.KeysetPublicRequest;
+import com.google.crypto.tink.proto.testing.KeysetPublicResponse;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -62,6 +65,33 @@ public final class KeysetServiceImpl extends KeysetImplBase {
               .build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
       response = KeysetGenerateResponse.newBuilder().setErr(e.toString()).build();
+    } catch (IOException e) {
+      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
+      return;
+    }
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void public_(
+      KeysetPublicRequest request, StreamObserver<KeysetPublicResponse> responseObserver) {
+    KeysetPublicResponse response;
+    try {
+      KeysetHandle privateKeysetHandle =
+          CleartextKeysetHandle.read(
+              BinaryKeysetReader.withBytes(request.getPrivateKeyset().toByteArray()));
+      KeysetHandle publicKeysetHandle = privateKeysetHandle.getPublicKeysetHandle();
+      Keyset publicKeyset = CleartextKeysetHandle.getKeyset(publicKeysetHandle);
+      ByteArrayOutputStream publicKeysetStream = new ByteArrayOutputStream();
+      BinaryKeysetWriter.withOutputStream(publicKeysetStream).write(publicKeyset);
+      publicKeysetStream.close();
+      response =
+          KeysetPublicResponse.newBuilder()
+              .setPublicKeyset(ByteString.copyFrom(publicKeysetStream.toByteArray()))
+              .build();
+    } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
+      response = KeysetPublicResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
       responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
       return;
