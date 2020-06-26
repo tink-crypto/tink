@@ -18,18 +18,11 @@ import random
 import tink
 from tink import cleartext_keyset_handle
 from tink.proto import tink_pb2
-from tools.testing.cross_language.util import cli_tinkey
 
-
-_CHACHA20_POLY1305_KEY_TYPES = (
-    'type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key')
 _MAX_INT32 = 4294967295  # 2^32-1
 
 
 def _new_key_data(key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
-  if key_template.type_url == _CHACHA20_POLY1305_KEY_TYPES:
-    keyset = cli_tinkey.generate_keyset('CHACHA20_POLY1305')
-    return keyset.key[0].key_data
   return tink.core.Registry.new_key_data(key_template)
 
 

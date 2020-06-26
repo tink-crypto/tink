@@ -38,13 +38,6 @@ class KeysetBuilderTest(absltest.TestCase):
     ciphertext = p.encrypt(b'plaintext', b'ad')
     self.assertEqual(p.decrypt(ciphertext, b'ad'), b'plaintext')
 
-  def test_new_chacha_keyset_handle(self):
-    chacha_template = tink_pb2.KeyTemplate(
-        type_url=('type.googleapis.com/google.crypto.tink.' +
-                  'ChaCha20Poly1305Key'),
-        output_prefix_type=tink_pb2.TINK)
-    _ = keyset_builder.new_keyset_handle(chacha_template)
-
   def test_keyset_handle_conversion(self):
     keyset_handle1 = tink.new_keyset_handle(aead.aead_key_templates.AES128_GCM)
     p1 = keyset_handle1.primitive(aead.Aead)
