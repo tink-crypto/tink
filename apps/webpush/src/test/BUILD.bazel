@@ -24,6 +24,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:hex",
         "@tink_java//src/main/java/com/google/crypto/tink/subtle:random",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
     ],
 )
 
