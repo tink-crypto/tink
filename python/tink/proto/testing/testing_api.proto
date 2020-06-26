@@ -36,6 +36,10 @@ service Keyset {
   rpc Generate(KeysetGenerateRequest) returns (KeysetGenerateResponse) {}
   // Generates a public-key keyset from a private-key keyset.
   rpc Public(KeysetPublicRequest) returns (KeysetPublicResponse) {}
+  // Converts a Keyset from Binary to Json Format
+  rpc ToJson(KeysetToJsonRequest) returns (KeysetToJsonResponse) {}
+  // Converts a Keyset from Json to Binary Format
+  rpc FromJson(KeysetFromJsonRequest) returns (KeysetFromJsonResponse) {}
 }
 
 message KeysetGenerateRequest {
@@ -56,6 +60,28 @@ message KeysetPublicRequest {
 message KeysetPublicResponse {
   oneof result {
     bytes public_keyset = 1;  // serialized google.crypto.tink.Keyset.
+    string err = 2;
+  }
+}
+
+message KeysetToJsonRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+}
+
+message KeysetToJsonResponse {
+  oneof result {
+    string json_keyset = 1;
+    string err = 2;
+  }
+}
+
+message KeysetFromJsonRequest {
+  string json_keyset = 1;
+}
+
+message KeysetFromJsonResponse {
+  oneof result {
+    bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
     string err = 2;
   }
 }

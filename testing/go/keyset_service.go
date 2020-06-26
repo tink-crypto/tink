@@ -76,3 +76,13 @@ func (s *KeysetService) Public(ctx context.Context, req *pb.KeysetPublicRequest)
 	return &pb.KeysetPublicResponse{
 		Result: &pb.KeysetPublicResponse_PublicKeyset{buf.Bytes()}}, nil
 }
+
+func (s *KeysetService) ToJson(ctx context.Context, req *pb.KeysetToJsonRequest) (*pb.KeysetToJsonResponse, error) {
+	return &pb.KeysetToJsonResponse{
+		Result: &pb.KeysetToJsonResponse_Err{"not yet implemented"}}, nil
+}
+
+func (s *KeysetService) FromJson(ctx context.Context, req *pb.KeysetFromJsonRequest) (*pb.KeysetFromJsonResponse, error) {
+	return &pb.KeysetFromJsonResponse{
+		Result: &pb.KeysetFromJsonResponse_Err{"not yet implemented"}}, nil
+}
