@@ -12,56 +12,45 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package daead_test
+package hybrid_test
 
 import (
-	"bytes"
 	"log"
-	"testing"
 
-	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/testutil"
 )
 
 func Example() {
-	kh, err := keyset.NewHandle(daead.AESSIVKeyTemplate())
+	khPriv, err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	d, err := daead.New(kh)
+	khPub, err := khPriv.Public()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ct1, err := d.EncryptDeterministically([]byte("this data needs to be encrypted"), []byte("this data needs to be authenticated, but not encrypted"))
+	enc, err := hybrid.NewHybridEncrypt(khPub)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = d.DecryptDeterministically(ct1, []byte("this data needs to be authenticated, but not encrypted"))
+	ct, err := enc.Encrypt([]byte("this data needs to be encrypted"), []byte("context info"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ct2, err := d.EncryptDeterministically([]byte("this data needs to be encrypted"), []byte("this data needs to be authenticated, but not encrypted"))
+	dec, err := hybrid.NewHybridDecrypt(khPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if !bytes.Equal(ct1, ct2) {
-		log.Fatal("ct1 != ct2")
+	_, err = dec.Decrypt(ct, []byte("context info"))
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// Output:
-}
-
-func TestDeterministicAEADInit(t *testing.T) {
-	// Check for AES-SIV key manager.
-	_, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
 }

@@ -15,55 +15,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Package hcvault provides integration with the HashiCorp Vault (https://www.vaultproject.io/).
-// Below there is an example of how the integration code can be used:
-
-// package main
-//
-// import (
-// 	"fmt"
-// 	"log"
-//
-//  "github.com/google/tink/go/aead"
-//  "github.com/google/tink/go/core/registry"
-//  "github.com/google/tink/go/integration/hcvault"
-//  "github.com/google/tink/go/keyset"
-// )
-//
-// const (
-// 	keyURI = "hcvault://hcvault.corp.com:8200/transit/keys/key-1"
-// )
-//
-// func main() {
-//  tlsConf := getTLSConfig()
-//  token := getVaultToken()
-//  vaultClient, err := hcvault.NewClient(keyURI, tlsConf, token)
-// 	if err != nil {
-//    // handle error
-// 	}
-// 	registry.RegisterKMSClient(vaultClient)
-//
-// 	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-// 	kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
-// 	if err != nil {
-//    // handle error
-// 	}
-// 	a, err := aead.New(kh)
-// 	if err != nil {
-//    // handle error
-// 	}
-//
-// 	msg := "secret message"
-// 	ct, err := a.Encrypt([]byte(msg), nil)
-// 	if err != nil {
-//    // handle error
-// 	}
-//
-// 	pt, err := a.Decrypt(ct, nil)
-// 	if err != nil {
-//    // handle error
-// 	}
-// }
-
 package hcvault
 
 import (

@@ -16,49 +16,6 @@
 // primitives.
 //
 // To sign data using Tink you can use ECDSA or ED25519 key templates.
-//
-// Example:
-//
-//   package main
-//
-//   import (
-//       "fmt"
-//
-//       "github.com/google/tink/go/signature"
-//       "github.com/google/tink/go/keyset"
-//   )
-//
-//   func main() {
-//
-//       kh, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate()) // other key templates can also be used
-//       if err != nil {
-//           // handle the error
-//       }
-//
-//       s, err := signature.NewSigner(kh)
-//	     if err != nil {
-//		     // handle error
-//       }
-//
-//       a , err := s.Sign([]byte("this data needs to be signed"))
-//       if err != nil {
-//           // handle the error
-//       }
-//
-//       pubkh, err := kh.Public()
-//	     if err != nil {
-//           // handle the error
-//       }
-//
-//       v, err := signature.NewVerifier(pubkh)
-//	     if err != nil {
-//           // handle the error
-//       }
-//
-//       if err := v.Verify(a, []byte("this data needs to be signed")); err != nil {
-//           // handle the error
-//       }
-//   }
 package signature
 
 import (
