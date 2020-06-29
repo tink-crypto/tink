@@ -19,6 +19,7 @@ from absl.testing import parameterized
 import tink
 from tink import aead
 from tink import daead
+from tink import hybrid
 from tink import mac
 
 from tink.proto import common_pb2
@@ -34,26 +35,86 @@ TYPE_URL_TO_SUPPORTED_LANGUAGES = {
 SUCCEEDS_BUT_SHOULD_FAIL = [
     # TODO(b/159989251)
     # HMAC with SHA384 is accepted in go, but not in other langs.
-    ('HmacKey(32,10,2)', 'go'),
-    ('HmacKey(32,16,2)', 'go'),
-    ('HmacKey(32,20,2)', 'go'),
-    ('HmacKey(32,21,2)', 'go'),
-    ('HmacKey(32,24,2)', 'go'),
-    ('HmacKey(32,32,2)', 'go'),
-    ('HmacKey(32,33,2)', 'go'),
+    ('HmacKey(32,10,SHA384)', 'go'),
+    ('HmacKey(32,16,SHA384)', 'go'),
+    ('HmacKey(32,20,SHA384)', 'go'),
+    ('HmacKey(32,21,SHA384)', 'go'),
+    ('HmacKey(32,24,SHA384)', 'go'),
+    ('HmacKey(32,32,SHA384)', 'go'),
+    ('HmacKey(32,33,SHA384)', 'go'),
     # TODO(b/159990702) In Go key_size is ignored and the default of 64 is used.
     ('AesSivKey(15)', 'go'),
     ('AesSivKey(16)', 'go'),
     ('AesSivKey(24)', 'go'),
     ('AesSivKey(32)', 'go'),
     ('AesSivKey(96)', 'go'),
+    # TODO(b/160130375) In Go, ec_point_format = UNKNOWN_FORMAT is accepted.
+    ('EciesAeadHkdfPrivateKey(NIST_P256,UNKNOWN_FORMAT,SHA256,AesGcmKey(16))',
+     'go'),
+    # TODO(b/160130375) In Go, ec_point_format = UNKNOWN_HASH is accepted.
+    ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,UNKNOWN_HASH,AesGcmKey(16))',
+     'go'),
+    ('EciesAeadHkdfPrivateKey(NIST_P384,UNCOMPRESSED,UNKNOWN_HASH,AesGcmKey(16))',
+     'go'),
+    ('EciesAeadHkdfPrivateKey(NIST_P521,UNCOMPRESSED,UNKNOWN_HASH,AesGcmKey(16))',
+     'go'),
+    # TODO(b/160130470): In CC and Python Hybrid templates are not checked for
+    # valid AEAD params. (These params *are* checked when the key is used.)
+    ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
+     'cc'),
+    ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
+     'python')
 ]
 
 # Test cases that fail in a language but should succeed
-FAILS_BUT_SHOULD_SUCCEED = []
+FAILS_BUT_SHOULD_SUCCEED = [
+    # TODO(b/160134058) Java and Go do not accept templates with CURVE25519.
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA1,AesGcmKey(16))',
+     'java'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA1,AesGcmKey(16))',
+     'go'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA256,AesGcmKey(16))',
+     'java'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA256,AesGcmKey(16))',
+     'go'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA384,AesGcmKey(16))',
+     'java'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA384,AesGcmKey(16))',
+     'go'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA512,AesGcmKey(16))',
+     'java'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA512,AesGcmKey(16))',
+     'go'),
+    # TODO(b/160132617) Java does not accept templates with hash type SHA384.
+    ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA384,AesGcmKey(16))',
+     'java'),
+    ('EciesAeadHkdfPrivateKey(NIST_P384,UNCOMPRESSED,SHA384,AesGcmKey(16))',
+     'java'),
+    ('EciesAeadHkdfPrivateKey(NIST_P521,UNCOMPRESSED,SHA384,AesGcmKey(16))',
+     'java'),
+]
 
 HASH_TYPES = [
-    common_pb2.SHA1, common_pb2.SHA256, common_pb2.SHA384, common_pb2.SHA512
+    common_pb2.UNKNOWN_HASH,
+    common_pb2.SHA1,
+    common_pb2.SHA256,
+    common_pb2.SHA384,
+    common_pb2.SHA512
+]
+
+CURVE_TYPES = [
+    common_pb2.UNKNOWN_CURVE,
+    common_pb2.NIST_P256,
+    common_pb2.NIST_P384,
+    common_pb2.NIST_P521,
+    common_pb2.CURVE25519
+]
+
+EC_POINT_FORMATS = [
+    common_pb2.UNKNOWN_FORMAT,
+    common_pb2.UNCOMPRESSED,
+    common_pb2.COMPRESSED,
+    common_pb2.DO_NOT_USE_CRUNCHY_UNCOMPRESSED
 ]
 
 
@@ -78,7 +139,8 @@ def aes_ctr_hmac_aead_test_cases():
       tag_size = 16
       hash_type = common_pb2.SHA256
       yield ('AesCtrHmacAeadKey(%d,%d,%d,%d,%s)' %
-             (aes_key_size, iv_size, hmac_key_size, tag_size, hash_type),
+             (aes_key_size, iv_size, hmac_key_size, tag_size,
+              common_pb2.HashType.Name(hash_type)),
              aead.aead_key_templates.create_aes_ctr_hmac_aead_key_template(
                  aes_key_size=aes_key_size,
                  iv_size=iv_size,
@@ -91,7 +153,8 @@ def aes_ctr_hmac_aead_test_cases():
         aes_key_size = 32
         iv_size = 16
         yield ('AesCtrHmacAeadKey(%d,%d,%d,%d,%s)' %
-               (aes_key_size, iv_size, hmac_key_size, tag_size, hash_type),
+               (aes_key_size, iv_size, hmac_key_size, tag_size,
+                common_pb2.HashType.Name(hash_type)),
                aead.aead_key_templates.create_aes_ctr_hmac_aead_key_template(
                    aes_key_size=aes_key_size,
                    iv_size=iv_size,
@@ -104,13 +167,15 @@ def hmac_test_cases():
   for hmac_key_size in [15, 16, 24, 32, 64, 96]:
     tag_size = 16
     hash_type = common_pb2.SHA256
-    yield ('HmacKey(%d,%d,%s)' % (hmac_key_size, tag_size, hash_type),
+    yield ('HmacKey(%d,%d,%s)' % (hmac_key_size, tag_size,
+                                  common_pb2.HashType.Name(hash_type)),
            mac.mac_key_templates.create_hmac_key_template(
                hmac_key_size, tag_size, hash_type))
   for tag_size in [9, 10, 16, 20, 21, 24, 32, 33, 64, 65]:
     for hash_type in HASH_TYPES:
       hmac_key_size = 32
-      yield ('HmacKey(%d,%d,%s)' % (hmac_key_size, tag_size, hash_type),
+      yield ('HmacKey(%d,%d,%s)' % (hmac_key_size, tag_size,
+                                    common_pb2.HashType.Name(hash_type)),
              mac.mac_key_templates.create_hmac_key_template(
                  hmac_key_size, tag_size, hash_type))
 
@@ -122,10 +187,47 @@ def aes_siv_test_cases():
                key_size))
 
 
+def ecies_aead_hkdf_test_cases():
+  for curve_type in CURVE_TYPES:
+    for hash_type in HASH_TYPES:
+      ec_point_format = common_pb2.UNCOMPRESSED
+      dem_key_template = aead.aead_key_templates.AES128_GCM
+      yield ('EciesAeadHkdfPrivateKey(%s,%s,%s,AesGcmKey(16))' %
+             (common_pb2.EllipticCurveType.Name(curve_type),
+              common_pb2.EcPointFormat.Name(ec_point_format),
+              common_pb2.HashType.Name(hash_type)),
+             hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+                 curve_type, ec_point_format, hash_type, dem_key_template))
+  for ec_point_format in EC_POINT_FORMATS:
+    curve_type = common_pb2.NIST_P256
+    hash_type = common_pb2.SHA256
+    dem_key_template = aead.aead_key_templates.AES128_GCM
+    yield ('EciesAeadHkdfPrivateKey(%s,%s,%s,AesGcmKey(16))' %
+           (common_pb2.EllipticCurveType.Name(curve_type),
+            common_pb2.EcPointFormat.Name(ec_point_format),
+            common_pb2.HashType.Name(hash_type)),
+           hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+               curve_type, ec_point_format, hash_type, dem_key_template))
+  curve_type = common_pb2.NIST_P256
+  ec_point_format = common_pb2.UNCOMPRESSED
+  hash_type = common_pb2.SHA256
+  # Use invalid AEAD key template as DEM
+  # TODO(juerg): Once b/160130470 is fixed, increase test coverage to all
+  # aead templates.
+  dem_key_template = aead.aead_key_templates.create_aes_eax_key_template(15, 11)
+  yield ('EciesAeadHkdfPrivateKey(%s,%s,%s,AesEaxKey(15,11))' %
+         (common_pb2.EllipticCurveType.Name(curve_type),
+          common_pb2.EcPointFormat.Name(ec_point_format),
+          common_pb2.HashType.Name(hash_type)),
+         hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+             curve_type, ec_point_format, hash_type, dem_key_template))
+
+
 def setUpModule():
   aead.register()
   daead.register()
   mac.register()
+  hybrid.register()
   testing_servers.start()
 
 
@@ -140,7 +242,8 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
                       aes_gcm_test_cases(),
                       aes_ctr_hmac_aead_test_cases(),
                       hmac_test_cases(),
-                      aes_siv_test_cases()))
+                      aes_siv_test_cases(),
+                      ecies_aead_hkdf_test_cases()))
   def test_key_generation_consistency(self, name, template):
     supported_langs = TYPE_URL_TO_SUPPORTED_LANGUAGES[template.type_url]
     failures = 0
