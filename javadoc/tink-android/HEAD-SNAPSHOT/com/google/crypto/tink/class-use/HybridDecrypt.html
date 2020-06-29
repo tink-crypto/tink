@@ -82,10 +82,6 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.hybrid">com.google.crypto.tink.hybrid</a></td>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -94,79 +90,6 @@
 </li>
 <li class="blockList">
 <ul class="blockList">
-<li class="blockList"><a name="com.google.crypto.tink.hybrid">
-<!--   -->
-</a>
-<h3>Uses of <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a> in <a href="../../../../../com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></h3>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a> that return <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle)</code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(HybridDecrypt.class)</code> after registering the
-     <code>HybridDecryptWrapper</code> instead.</span></div>
-</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle,
-            <a href="../../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;keyManager)</code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(keyManager, HybridDecrypt.class)</code> after
-     registering the <code>HybridDecryptWrapper</code> instead.</span></div>
-</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;primitives)</code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a> that return types with arguments of type <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;</code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#getPrimitiveClass--">getPrimitiveClass</a></span>()</code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Method parameters in <a href="../../../../../com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a> with type arguments of type <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle,
-            <a href="../../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;keyManager)</code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(keyManager, HybridDecrypt.class)</code> after
-     registering the <code>HybridDecryptWrapper</code> instead.</span></div>
-</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></code></td>
-<td class="colLast"><span class="typeNameLabel">HybridDecryptWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a>&gt;&nbsp;primitives)</code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-</li>
 <li class="blockList"><a name="com.google.crypto.tink.subtle">
 <!--   -->
 </a>
