@@ -184,17 +184,3 @@ java_binary(
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
-
-py_library(
-    name = "supported_key_types",
-    testonly = 1,
-    srcs = ["supported_key_types.py"],
-    deps = [
-        "@tink_py//tink/aead",
-        "@tink_py//tink/daead",
-        "@tink_py//tink/hybrid",
-        "@tink_py//tink/mac",
-        "@tink_py//tink/proto:tink_py_pb2",
-        "@tink_py//tink/signature",
-    ],
-)
