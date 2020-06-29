@@ -1,6 +1,5 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
-load("//tools:jar_jar.bzl", "jar_jar")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -206,17 +205,14 @@ gen_maven_jar_rules(
     ]),
     root_packages = [
         "com.google.crypto.tink",
-        # The following package(s) will be shaded by the "tink-android-shaded" target.
+    ],
+    shaded_packages = [
+        # The following package(s) will be shaded, according to the rules
+        # specified in shading_rules.
         "com.google.protobuf",
     ],
-    deps = lite_proto_deps + android_deps + cleartext_android_deps + subtle_deps,
-)
-
-# Shade embedded packages to avoid dependency version conflicts in user projects.
-jar_jar(
-    name = "tink-android-shaded",
-    input_jar = ":tink-android",
-    rules = "jar_jar_rules.txt",
+    shading_rules = "jar_jar_rules.txt",
+    deps = lite_proto_deps + cleartext_android_deps + subtle_deps,
 )
 
 # TEST
