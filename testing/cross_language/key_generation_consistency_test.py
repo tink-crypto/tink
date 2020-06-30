@@ -42,12 +42,6 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
     ('HmacKey(32,24,SHA384)', 'go'),
     ('HmacKey(32,32,SHA384)', 'go'),
     ('HmacKey(32,33,SHA384)', 'go'),
-    # TODO(b/159990702) In Go key_size is ignored and the default of 64 is used.
-    ('AesSivKey(15)', 'go'),
-    ('AesSivKey(16)', 'go'),
-    ('AesSivKey(24)', 'go'),
-    ('AesSivKey(32)', 'go'),
-    ('AesSivKey(96)', 'go'),
     # TODO(b/160130375) In Go, ec_point_format = UNKNOWN_FORMAT is accepted.
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNKNOWN_FORMAT,SHA256,AesGcmKey(16))',
      'go'),

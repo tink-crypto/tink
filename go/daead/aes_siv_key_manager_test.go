@@ -102,6 +102,24 @@ func TestAESSIVNewKeyData(t *testing.T) {
 	}
 }
 
+func TestAESSIVNewKeyInvalid(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain AESSIV key manager: %s", err)
+	}
+	keyFormat := &aspb.AesSivKeyFormat{
+		KeySize: subtle.AESSIVKeySize - 1,
+	}
+	serializedKeyFormat, err := proto.Marshal(keyFormat)
+	if err != nil {
+		t.Errorf("proto.Marshal(keyFormat) = %v; want nil", err)
+	}
+	_, err = km.NewKey(serializedKeyFormat)
+	if err == nil {
+		t.Errorf("km.NewKey(serializedKeyFormat) = _, nil; want _, err")
+	}
+}
+
 func TestAESSIVDoesSupport(t *testing.T) {
 	km, err := registry.GetKeyManager(testutil.AESSIVTypeURL)
 	if err != nil {
