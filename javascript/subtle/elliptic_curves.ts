@@ -486,7 +486,7 @@ export async function generateKeyPair(
   const ephemeralKeyPair = await window.crypto.subtle.generateKey(
       params, /* extractable= */ true,
       algorithm == 'ECDH' ? ['deriveKey', 'deriveBits'] : ['sign', 'verify']);
-  return ephemeralKeyPair;
+  return ephemeralKeyPair as CryptoKeyPair;
 }
 
 export async function exportCryptoKey(cryptoKey: CryptoKey):
