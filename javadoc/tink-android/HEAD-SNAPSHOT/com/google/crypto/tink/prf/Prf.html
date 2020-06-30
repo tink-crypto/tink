@@ -48,8 +48,8 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li>Prev&nbsp;Class</li>
-<li><a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/prf/PrfConfig.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/prf/Prf.html" target="_top">Frames</a></li>
@@ -100,7 +100,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../../../com/google/crypto/tink/subtle/PrfHmacJce.html" title="class in com.google.crypto.tink.subtle">PrfHmacJce</a></dd>
+<dd><a href="../../../../../com/google/crypto/tink/subtle/PrfHmacJce.html" title="class in com.google.crypto.tink.subtle">PrfHmacJce</a>, <a href="../../../../../com/google/crypto/tink/subtle/prf/PrfImpl.html" title="class in com.google.crypto.tink.subtle.prf">PrfImpl</a></dd>
 </dl>
 <hr>
 <br>
@@ -169,7 +169,7 @@ public interface <span class="typeNameLabel">Prf</span></pre>
 <h4>compute</h4>
 <pre>byte[]&nbsp;compute(byte[]&nbsp;input,
                int&nbsp;outputLength)
-        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Computes the PRF selected by the underlying key on input and returns the first outputLength
  bytes.</div>
 <dl>
@@ -181,7 +181,7 @@ public interface <span class="typeNameLabel">Prf</span></pre>
      collision will occur with a probability less than 1:2^32. When in doubt, request a security
      review.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the algorithm fails or if the output of algorithm is less
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the algorithm fails or if the output of algorithm is less
      than outputLength.</dd>
 </dl>
 </li>
@@ -214,8 +214,8 @@ public interface <span class="typeNameLabel">Prf</span></pre>
 </div>
 <div class="subNav">
 <ul class="navList">
-<li>Prev&nbsp;Class</li>
-<li><a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../../com/google/crypto/tink/prf/PrfConfig.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/crypto/tink/prf/Prf.html" target="_top">Frames</a></li>

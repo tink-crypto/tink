@@ -85,6 +85,10 @@
 <td class="colFirst"><a href="#com.google.crypto.tink">com.google.crypto.tink</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.integration.android">com.google.crypto.tink.integration.android</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
 </tbody>
 </table>
 </li>
@@ -103,20 +107,20 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KmsClients.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KmsClients.html#get-java.lang.String-">get</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</code>
+<td class="colLast"><span class="typeNameLabel">KmsClients.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KmsClients.html#get-java.lang.String-">get</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</code>
 <div class="block">Returns the first <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> registered with <a href="../../../../../com/google/crypto/tink/KmsClients.html#add-com.google.crypto.tink.KmsClient-"><code>KmsClients.add(com.google.crypto.tink.KmsClient)</code></a> that supports <code>keyUri</code>.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KmsClients.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KmsClients.html#getAutoLoaded-java.lang.String-">getAutoLoaded</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</code>
-<div class="block">Returns the first <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> automatically loaded with <a href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html?is-external=true" title="class or interface in java.util"><code>ServiceLoader</code></a>
+<td class="colLast"><span class="typeNameLabel">KmsClients.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KmsClients.html#getAutoLoaded-java.lang.String-">getAutoLoaded</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</code>
+<div class="block">Returns the first <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> automatically loaded with <a href="https://docs.oracle.com/javase/7/docs/api/java/util/ServiceLoader.html?is-external=true" title="class or interface in java.util"><code>ServiceLoader</code></a>
  that supports <code>keyUri</code>.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KmsClient.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KmsClient.html#withCredentials-java.lang.String-">withCredentials</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;credentialPath)</code>
+<td class="colLast"><span class="typeNameLabel">KmsClient.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KmsClient.html#withCredentials-java.lang.String-">withCredentials</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;credentialPath)</code>
 <div class="block">Loads the credentials in <code>credentialPath</code>.</div>
 </td>
 </tr>
@@ -139,6 +143,48 @@
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><span class="typeNameLabel">KmsClients.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KmsClients.html#add-com.google.crypto.tink.KmsClient-">add</a></span>(<a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a>&nbsp;client)</code>
 <div class="block">Adds a client to the list of known <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a>-objects.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.integration.android">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a> in <a href="../../../../../com/google/crypto/tink/integration/android/package-summary.html">com.google.crypto.tink.integration.android</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../com/google/crypto/tink/integration/android/package-summary.html">com.google.crypto.tink.integration.android</a> that implement <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient</a></span></code>
+<div class="block">An implementation of <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> for <a
+ href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/integration/android/package-summary.html">com.google.crypto.tink.integration.android</a> that return <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AndroidKeystoreKmsClient.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html#withCredentials-java.lang.String-">withCredentials</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;unused)</code>
+<div class="block">Initializes a <a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> for Android Keystore.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AndroidKeystoreKmsClient.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html#withDefaultCredentials--">withDefaultCredentials</a></span>()</code>
+<div class="block">Initializes a <code>KmsClient</code> for Android Keystore.</div>
 </td>
 </tr>
 </tbody>

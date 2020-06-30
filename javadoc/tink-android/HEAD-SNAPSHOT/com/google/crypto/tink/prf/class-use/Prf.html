@@ -89,6 +89,10 @@
 <td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.subtle.prf">com.google.crypto.tink.subtle.prf</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
 </tbody>
 </table>
 </li>
@@ -106,7 +110,7 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><code>abstract <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang">Integer</a>,<a href="../../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>&gt;</code></td>
+<td class="colFirst"><code>abstract <a href="https://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang">Integer</a>,<a href="../../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>&gt;</code></td>
 <td class="colLast"><span class="typeNameLabel">PrfSet.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/prf/PrfSet.html#getPrfs--">getPrfs</a></span>()</code>
 <div class="block">A map of the PRFs represented by the keys in this keyset.</div>
 </td>
@@ -143,6 +147,26 @@
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/subtle/PrfMac.html#PrfMac-com.google.crypto.tink.prf.Prf-int-">PrfMac</a></span>(<a href="../../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>&nbsp;wrappedPrf,
       int&nbsp;tagSize)</code>
 <div class="block">Wrap <code>wrappedPrf </code> in a Mac primitive with the specified <code>tagSize</code></div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.subtle.prf">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a> in <a href="../../../../../../com/google/crypto/tink/subtle/prf/package-summary.html">com.google.crypto.tink.subtle.prf</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../../com/google/crypto/tink/subtle/prf/package-summary.html">com.google.crypto.tink.subtle.prf</a> that implement <a href="../../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/subtle/prf/PrfImpl.html" title="class in com.google.crypto.tink.subtle.prf">PrfImpl</a></span></code>
+<div class="block">Class that implements the Prf primitive by wrapping a StreamingPrf.</div>
 </td>
 </tr>
 </tbody>

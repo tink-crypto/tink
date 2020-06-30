@@ -85,6 +85,10 @@
 <td class="colFirst"><a href="#com.google.crypto.tink">com.google.crypto.tink</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.signature">com.google.crypto.tink.signature</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
 </tbody>
 </table>
 </li>
@@ -107,7 +111,7 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KeyTemplate.OutputPrefixType.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html#valueOf-java.lang.String-">valueOf</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name)</code>
+<td class="colLast"><span class="typeNameLabel">KeyTemplate.OutputPrefixType.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html#valueOf-java.lang.String-">valueOf</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name)</code>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
 </td>
 </tr>
@@ -129,9 +133,30 @@ the order they are declared.</div>
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KeyTemplate.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeyTemplate.html#create-java.lang.String-byte:A-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">create</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
+<td class="colLast"><span class="typeNameLabel">KeyTemplate.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeyTemplate.html#create-java.lang.String-byte:A-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">create</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
       byte[]&nbsp;value,
       <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a>&nbsp;outputPrefixType)</code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.signature">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a> in <a href="../../../../../com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a> with parameters of type <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">EcdsaSignKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/EcdsaSignKeyManager.html#createKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createKeyTemplate</a></span>(com.google.crypto.tink.proto.HashType&nbsp;hashType,
+                 com.google.crypto.tink.proto.EllipticCurveType&nbsp;curve,
+                 com.google.crypto.tink.proto.EcdsaSignatureEncoding&nbsp;encoding,
+                 <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a>&nbsp;prefixType)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>

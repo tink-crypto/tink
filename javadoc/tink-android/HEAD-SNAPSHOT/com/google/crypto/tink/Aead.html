@@ -100,7 +100,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../../com/google/crypto/tink/subtle/AesEaxJce.html" title="class in com.google.crypto.tink.subtle">AesEaxJce</a>, <a href="../../../../com/google/crypto/tink/subtle/AesGcmJce.html" title="class in com.google.crypto.tink.subtle">AesGcmJce</a>, <a href="../../../../com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a>, <a href="../../../../com/google/crypto/tink/subtle/EncryptThenAuthenticate.html" title="class in com.google.crypto.tink.subtle">EncryptThenAuthenticate</a>, <a href="../../../../com/google/crypto/tink/subtle/XChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">XChaCha20Poly1305</a></dd>
+<dd><a href="../../../../com/google/crypto/tink/subtle/AesEaxJce.html" title="class in com.google.crypto.tink.subtle">AesEaxJce</a>, <a href="../../../../com/google/crypto/tink/subtle/AesGcmJce.html" title="class in com.google.crypto.tink.subtle">AesGcmJce</a>, <a href="../../../../com/google/crypto/tink/integration/android/AndroidKeystoreAesGcm.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreAesGcm</a>, <a href="../../../../com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a>, <a href="../../../../com/google/crypto/tink/subtle/EncryptThenAuthenticate.html" title="class in com.google.crypto.tink.subtle">EncryptThenAuthenticate</a>, <a href="../../../../com/google/crypto/tink/aead/KmsEnvelopeAead.html" title="class in com.google.crypto.tink.aead">KmsEnvelopeAead</a>, <a href="../../../../com/google/crypto/tink/subtle/XChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">XChaCha20Poly1305</a></dd>
 </dl>
 <hr>
 <br>
@@ -172,7 +172,7 @@ var activeTableTab = "activeTableTab";
 <h4>encrypt</h4>
 <pre>byte[]&nbsp;encrypt(byte[]&nbsp;plaintext,
                byte[]&nbsp;associatedData)
-        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code> as associated authenticated data.
  The resulting ciphertext allows for checking authenticity and integrity of associated data
  (<code>associatedData</code>), but does not guarantee its secrecy.</div>
@@ -188,7 +188,7 @@ var activeTableTab = "activeTableTab";
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>resulting ciphertext</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -200,7 +200,7 @@ var activeTableTab = "activeTableTab";
 <h4>decrypt</h4>
 <pre>byte[]&nbsp;decrypt(byte[]&nbsp;ciphertext,
                byte[]&nbsp;associatedData)
-        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated authenticated data.
  The decryption verifies the authenticity and integrity of the associated data, but there are
  no guarantees wrt. secrecy of that data.</div>
@@ -213,7 +213,7 @@ var activeTableTab = "activeTableTab";
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>resulting plaintext</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
