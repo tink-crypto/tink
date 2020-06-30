@@ -212,7 +212,7 @@ gen_maven_jar_rules(
         "com.google.protobuf",
     ],
     shading_rules = "jar_jar_rules.txt",
-    deps = lite_proto_deps + cleartext_android_deps + subtle_deps,
+    deps = lite_proto_deps + android_deps + cleartext_android_deps + subtle_deps,
 )
 
 # TEST

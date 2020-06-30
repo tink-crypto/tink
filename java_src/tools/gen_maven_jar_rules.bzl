@@ -17,7 +17,7 @@ load("//tools:java_single_jar.bzl", "java_single_jar")
 load("//tools:javadoc.bzl", "javadoc_library")
 
 _EXTERNAL_JAVADOC_LINKS = [
-    "https://docs.oracle.com/javase/8/docs/api/",
+    "https://docs.oracle.com/javase/7/docs/api/",
     "https://developer.android.com/reference/",
 ]
 
