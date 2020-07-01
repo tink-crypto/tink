@@ -157,6 +157,42 @@ message DeterministicAeadDecryptResponse {
   }
 }
 
+// Service for Streaming AEAD encryption and decryption
+service StreamingAead {
+  // Encrypts a plaintext with the provided keyset
+  rpc Encrypt(StreamingAeadEncryptRequest)
+      returns (StreamingAeadEncryptResponse) {}
+  // Decrypts a ciphertext with the provided keyset
+  rpc Decrypt(StreamingAeadDecryptRequest)
+      returns (StreamingAeadDecryptResponse) {}
+}
+
+message StreamingAeadEncryptRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes plaintext = 2;
+  bytes associated_data = 3;
+}
+
+message StreamingAeadEncryptResponse {
+  oneof result {
+    bytes ciphertext = 1;
+    string err = 2;
+  }
+}
+
+message StreamingAeadDecryptRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  bytes ciphertext = 2;
+  bytes associated_data = 3;
+}
+
+message StreamingAeadDecryptResponse {
+  oneof result {
+    bytes plaintext = 1;
+    string err = 2;
+  }
+}
+
 // Service to compute and verify MACs
 service Mac {
   // Computes a MAC for given data
