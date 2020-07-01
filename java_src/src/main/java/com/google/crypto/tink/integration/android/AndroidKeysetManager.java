@@ -471,7 +471,7 @@ public final class AndroidKeysetManager {
         return false;
       }
 
-      AndroidKeystoreKmsClient.delete(randomKeyId);
+      new AndroidKeystoreKmsClient().deleteKey(randomKeyId);
 
       return true;
     } catch (Exception ex) {

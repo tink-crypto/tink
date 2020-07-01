@@ -12,6 +12,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:core-android",
         "//src/main/java/com/google/crypto/tink:primitives",
         "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
     ],
 )
 
