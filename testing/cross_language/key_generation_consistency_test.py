@@ -21,8 +21,10 @@ from tink import aead
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import signature
 
 from tink.proto import common_pb2
+from tink.proto import ecdsa_pb2
 from util import supported_key_types
 from util import testing_servers
 
@@ -47,7 +49,13 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
      'cc'),
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
-     'python')
+     'python'),
+    # TODO(b/160229580): RsaSsaPssPrivateKey Keys with negative salts can be
+    # generated but not used.
+    ('RsaSsaPssPrivateKey(SHA256,SHA256,-3,2048,65537)', 'cc'),
+    ('RsaSsaPssPrivateKey(SHA256,SHA256,-3,2048,65537)', 'java'),
+    ('RsaSsaPssPrivateKey(SHA256,SHA256,-3,2048,65537)', 'python'),
+
 ]
 
 # Test cases that fail in a language but should succeed
@@ -76,6 +84,11 @@ FAILS_BUT_SHOULD_SUCCEED = [
      'java'),
     ('EciesAeadHkdfPrivateKey(NIST_P521,UNCOMPRESSED,SHA384,AesGcmKey(16))',
      'java'),
+    # TODO(b/140101381) CC does not support Ecdsa with NIST_P384 and SHA384.
+    ('EcdsaPrivateKey(SHA384,NIST_P384,IEEE_P1363)', 'cc'),
+    ('EcdsaPrivateKey(SHA384,NIST_P384,IEEE_P1363)', 'python'),
+    ('EcdsaPrivateKey(SHA384,NIST_P384,DER)', 'cc'),
+    ('EcdsaPrivateKey(SHA384,NIST_P384,DER)', 'python'),
 ]
 
 HASH_TYPES = [
@@ -99,6 +112,12 @@ EC_POINT_FORMATS = [
     common_pb2.UNCOMPRESSED,
     common_pb2.COMPRESSED,
     common_pb2.DO_NOT_USE_CRUNCHY_UNCOMPRESSED
+]
+
+SIGNATURE_ENCODINGS = [
+    ecdsa_pb2.UNKNOWN_ENCODING,
+    ecdsa_pb2.IEEE_P1363,
+    ecdsa_pb2.DER
 ]
 
 
@@ -207,11 +226,88 @@ def ecies_aead_hkdf_test_cases():
              curve_type, ec_point_format, hash_type, dem_key_template))
 
 
+def ecdsa_test_cases():
+  for hash_type in HASH_TYPES:
+    for curve_type in CURVE_TYPES:
+      for signature_encoding in SIGNATURE_ENCODINGS:
+        yield ('EcdsaPrivateKey(%s,%s,%s)' %
+               (common_pb2.HashType.Name(hash_type),
+                common_pb2.EllipticCurveType.Name(curve_type),
+                ecdsa_pb2.EcdsaSignatureEncoding.Name(signature_encoding)),
+               signature.signature_key_templates.create_ecdsa_key_template(
+                   hash_type, curve_type, signature_encoding))
+
+
+def rsa_ssa_pkcs1_test_cases():
+  gen = signature.signature_key_templates.create_rsa_ssa_pkcs1_key_template
+  for hash_type in HASH_TYPES:
+    modulus_size = 2048
+    public_exponent = 65537
+    yield ('RsaSsaPkcs1PrivateKey(%s,%d,%d)' %
+           (common_pb2.HashType.Name(hash_type), modulus_size,
+            public_exponent),
+           gen(hash_type, modulus_size, public_exponent))
+  for modulus_size in [0, 2000, 3072, 4096]:
+    hash_type = common_pb2.SHA256
+    public_exponent = 65537
+    yield ('RsaSsaPkcs1PrivateKey(%s,%d,%d)' %
+           (common_pb2.HashType.Name(hash_type), modulus_size,
+            public_exponent),
+           gen(hash_type, modulus_size, public_exponent))
+  # TODO(b/160214390): Add tests for public_exponent, once this bug is resolved.
+
+
+def rsa_ssa_pss_test_cases():
+  gen = signature.signature_key_templates.create_rsa_ssa_pss_key_template
+  for hash_type in HASH_TYPES:
+    salt_length = 32
+    modulus_size = 2048
+    public_exponent = 65537
+    yield ('RsaSsaPssPrivateKey(%s,%s,%d,%d,%d)' %
+           (common_pb2.HashType.Name(hash_type),
+            common_pb2.HashType.Name(hash_type), salt_length, modulus_size,
+            public_exponent),
+           gen(hash_type, hash_type, salt_length, modulus_size,
+               public_exponent))
+  for salt_length in [-3, 0, 1, 16, 64]:
+    hash_type = common_pb2.SHA256
+    modulus_size = 2048
+    public_exponent = 65537
+    yield ('RsaSsaPssPrivateKey(%s,%s,%d,%d,%d)' %
+           (common_pb2.HashType.Name(hash_type),
+            common_pb2.HashType.Name(hash_type), salt_length, modulus_size,
+            public_exponent),
+           gen(hash_type, hash_type, salt_length, modulus_size,
+               public_exponent))
+  for modulus_size in [0, 2000, 3072, 4096]:
+    hash_type = common_pb2.SHA256
+    salt_length = 32
+    public_exponent = 65537
+    yield ('RsaSsaPssPrivateKey(%s,%s,%d,%d,%d)' %
+           (common_pb2.HashType.Name(hash_type),
+            common_pb2.HashType.Name(hash_type), salt_length, modulus_size,
+            public_exponent),
+           gen(hash_type, hash_type, salt_length, modulus_size,
+               public_exponent))
+  hash_type1 = common_pb2.SHA256
+  hash_type2 = common_pb2.SHA512
+  salt_length = 32
+  modulus_size = 2048
+  public_exponent = 65537
+  yield ('RsaSsaPssPrivateKey(%s,%s,%d,%d,%d)' %
+         (common_pb2.HashType.Name(hash_type1),
+          common_pb2.HashType.Name(hash_type2), salt_length, modulus_size,
+          public_exponent),
+         gen(hash_type1, hash_type2, salt_length, modulus_size,
+             public_exponent))
+
+
 def setUpModule():
   aead.register()
   daead.register()
   mac.register()
   hybrid.register()
+  signature.register()
   testing_servers.start()
 
 
@@ -227,7 +323,10 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
                       aes_ctr_hmac_aead_test_cases(),
                       hmac_test_cases(),
                       aes_siv_test_cases(),
-                      ecies_aead_hkdf_test_cases()))
+                      ecies_aead_hkdf_test_cases(),
+                      ecdsa_test_cases(),
+                      rsa_ssa_pkcs1_test_cases(),
+                      rsa_ssa_pss_test_cases()))
   def test_key_generation_consistency(self, name, template):
     supported_langs = TYPE_URL_TO_SUPPORTED_LANGUAGES[template.type_url]
     failures = 0
