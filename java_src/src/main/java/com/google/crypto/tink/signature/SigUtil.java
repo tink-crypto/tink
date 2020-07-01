@@ -108,6 +108,9 @@ final class SigUtil {
     if (params.getSigHash() != params.getMgf1Hash()) {
       throw new GeneralSecurityException("MGF1 hash is different from signature hash");
     }
+    if (params.getSaltLength() < 0) {
+      throw new GeneralSecurityException("salt length is negative");
+    }
   }
 
   /** Converts protobuf enum {@code HashType} to raw Java enum {@code Enums.HashType}. */
@@ -136,7 +139,7 @@ final class SigUtil {
       case NIST_P521:
         return EllipticCurves.CurveType.NIST_P521;
       default:
-        throw new GeneralSecurityException("unknown curve type: " + type);
+        throw new GeneralSecurityException("unknown curve type: " + type.name());
     }
   }
 
@@ -152,7 +155,7 @@ final class SigUtil {
       case DER:
         return EllipticCurves.EcdsaEncoding.DER;
       default:
-        throw new GeneralSecurityException("unknown ECDSA encoding: " + encoding);
+        throw new GeneralSecurityException("unknown ECDSA encoding: " + encoding.name());
     }
   }
 }

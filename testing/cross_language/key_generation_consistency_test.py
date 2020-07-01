@@ -50,12 +50,6 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
      'cc'),
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
      'python'),
-    # TODO(b/160229580): RsaSsaPssPrivateKey Keys with negative salts can be
-    # generated but not used.
-    ('RsaSsaPssPrivateKey(SHA256,SHA256,-3,2048,65537)', 'cc'),
-    ('RsaSsaPssPrivateKey(SHA256,SHA256,-3,2048,65537)', 'java'),
-    ('RsaSsaPssPrivateKey(SHA256,SHA256,-3,2048,65537)', 'python'),
-
 ]
 
 # Test cases that fail in a language but should succeed

@@ -136,6 +136,12 @@ TEST(RsaSsaPssVerifyKeyManagerTest, ValidateKeyFormatSmallModulusDisallowed) {
                        HasSubstr("only modulus size >= 2048")));
 }
 
+TEST(RsaSsaPssVerifyKeyManagerTest, NegativeSaltLengthFails) {
+  RsaSsaPssPublicKey key = CreateValidPublicKey();
+  key.mutable_params()->set_salt_length(-5);
+  EXPECT_THAT(RsaSsaPssVerifyKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
 TEST(RsaSsaPssSignKeyManagerTest, Create) {
   RsaSsaPssKeyFormat key_format =
       CreateKeyFormat(HashType::SHA256, HashType::SHA256, 32, 3072, RSA_F4);

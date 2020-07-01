@@ -30,7 +30,7 @@
 #include "proto/tink.pb.h"
 
 // TODO(quannguyen):
-//  + Validate salt length and possible e.
+//  + Validate possible e.
 namespace crypto {
 namespace tink {
 
@@ -91,6 +91,10 @@ Status RsaSsaPssVerifyKeyManager::ValidateParams(
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "MGF1 hash '%d' is different from signature hash '%d'",
                      params.mgf1_hash(), params.sig_hash());
+  }
+  if (params.salt_length() < 0) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "salt length is negative");
   }
   return Status::OK;
 }
