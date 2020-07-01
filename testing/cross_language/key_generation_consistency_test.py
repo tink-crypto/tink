@@ -42,16 +42,6 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
     ('HmacKey(32,24,SHA384)', 'go'),
     ('HmacKey(32,32,SHA384)', 'go'),
     ('HmacKey(32,33,SHA384)', 'go'),
-    # TODO(b/160130375) In Go, ec_point_format = UNKNOWN_FORMAT is accepted.
-    ('EciesAeadHkdfPrivateKey(NIST_P256,UNKNOWN_FORMAT,SHA256,AesGcmKey(16))',
-     'go'),
-    # TODO(b/160130375) In Go, ec_point_format = UNKNOWN_HASH is accepted.
-    ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,UNKNOWN_HASH,AesGcmKey(16))',
-     'go'),
-    ('EciesAeadHkdfPrivateKey(NIST_P384,UNCOMPRESSED,UNKNOWN_HASH,AesGcmKey(16))',
-     'go'),
-    ('EciesAeadHkdfPrivateKey(NIST_P521,UNCOMPRESSED,UNKNOWN_HASH,AesGcmKey(16))',
-     'go'),
     # TODO(b/160130470): In CC and Python Hybrid templates are not checked for
     # valid AEAD params. (These params *are* checked when the key is used.)
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
