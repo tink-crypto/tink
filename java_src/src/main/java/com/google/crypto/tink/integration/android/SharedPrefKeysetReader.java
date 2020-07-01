@@ -24,6 +24,8 @@ import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.protobuf.ExtensionRegistryLite;
+import java.io.CharConversionException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -60,19 +62,20 @@ public final class SharedPrefKeysetReader implements KeysetReader {
     }
   }
 
+  @SuppressWarnings("UnusedException")
   private byte[] readPref() throws IOException {
     try {
       String keysetHex = sharedPreferences.getString(keysetName, null /* default value */);
       if (keysetHex == null) {
-        throw new IOException(
+        throw new FileNotFoundException(
             String.format("can't read keyset; the pref value %s does not exist", keysetName));
       }
       return Hex.decode(keysetHex);
-    } catch (ClassCastException | IllegalArgumentException e) {
-      throw new IOException(
+    } catch (ClassCastException | IllegalArgumentException ex) {
+      // The original exception is swallowed to prevent leaked key material.
+      throw new CharConversionException(
           String.format(
-              "can't read keyset; the pref value %s is not a valid hex string", keysetName),
-          e);
+              "can't read keyset; the pref value %s is not a valid hex string", keysetName));
     }
   }
 
