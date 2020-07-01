@@ -456,8 +456,13 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html#AndroidKeystoreKmsClient-java.lang.String-">AndroidKeystoreKmsClient(String)</a></span> - Constructor for class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient</a></dt>
 <dd>
-<div class="block">Constructs an <a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html" title="class in com.google.crypto.tink.integration.android"><code>AndroidKeystoreKmsClient</code></a> that is bound to a single key identified by
- <code>uri</code>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">use <code>AndroidKeystoreKmsClient#Builder</code>.</span></div>
+</div>
+</dd>
+<dt><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html" title="class in com.google.crypto.tink.integration.android"><span class="typeNameLink">AndroidKeystoreKmsClient.Builder</span></a> - Class in <a href="com/google/crypto/tink/integration/android/package-summary.html">com.google.crypto.tink.integration.android</a></dt>
+<dd>
+<div class="block">Builder for AndroidKeystoreKmsClient</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#assertEnoughEncryptedKeyMaterial-com.google.crypto.tink.proto.EncryptedKeyset-">assertEnoughEncryptedKeyMaterial(EncryptedKeyset)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
 <dd>
@@ -489,9 +494,13 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#build--">build()</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager.Builder</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html#build--">build()</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient.Builder</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignaturePemKeysetReader.Builder.html#build--">build()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignaturePemKeysetReader.Builder.html" title="class in com.google.crypto.tink.signature">SignaturePemKeysetReader.Builder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#Builder--">Builder()</a></span> - Constructor for class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager.Builder</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html#Builder--">Builder()</a></span> - Constructor for class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient.Builder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Bytes.html#byteArrayToInt-byte:A-">byteArrayToInt(byte[])</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Bytes.html" title="class in com.google.crypto.tink.subtle">Bytes</a></dt>
 <dd>
@@ -793,6 +802,10 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#delete-int-">delete(int)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
 <dd>
 <div class="block">Deletes the key with <code>keyId</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html#deleteKey-java.lang.String-">deleteKey(String)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient</a></dt>
+<dd>
+<div class="block">Deletes a key in Android Keystore.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html#deriveKey-KeyFormatProtoT-java.io.InputStream-">deriveKey(KeyFormatProtoT, InputStream)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a></dt>
 <dd>
@@ -1332,7 +1345,9 @@
 <div class="block">Returns the first <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> registered with <a href="com/google/crypto/tink/KmsClients.html#add-com.google.crypto.tink.KmsClient-"><code>KmsClients.add(com.google.crypto.tink.KmsClient)</code></a> that supports <code>keyUri</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html#getAead-java.lang.String-">getAead(String)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Returns an <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> backed by a key in Android Keystore specified by <code>uri</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClient.html#getAead-java.lang.String-">getAead(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></dt>
 <dd>
 <div class="block">Gets an <code>Aead</code> backed by <code>keyUri</code>.</div>
@@ -3251,6 +3266,10 @@
 <h2 class="title">S</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.html#SECRET_KEY_LEN">SECRET_KEY_LEN</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html#setKeyStore-java.security.KeyStore-">setKeyStore(KeyStore)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient.Builder</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html#setKeyUri-java.lang.String-">setKeyUri(String)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient.Builder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html#setPrimary-int-">setPrimary(int)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></dt>
 <dd>
