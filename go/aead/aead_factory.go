@@ -95,7 +95,8 @@ func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 		ctNoPrefix := ct[prefixSize:]
 		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
-			for i := 0; i < len(entries); i++ {
+			// Attempt to decrypt with newer keys first because they more likely are the correct one.
+			for i := len(entries) - 1; i >= 0; i-- {
 				p, ok := (entries[i].Primitive).(tink.AEAD)
 				if !ok {
 					return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
@@ -111,7 +112,7 @@ func (a *wrappedAead) Decrypt(ct, ad []byte) ([]byte, error) {
 	// try raw keys
 	entries, err := a.ps.RawEntries()
 	if err == nil {
-		for i := 0; i < len(entries); i++ {
+		for i := len(entries) - 1; i >= 0; i-- {
 			p, ok := (entries[i].Primitive).(tink.AEAD)
 			if !ok {
 				return nil, fmt.Errorf("aead_factory: not an AEAD primitive")
