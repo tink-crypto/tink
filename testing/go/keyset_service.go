@@ -78,11 +78,35 @@ func (s *KeysetService) Public(ctx context.Context, req *pb.KeysetPublicRequest)
 }
 
 func (s *KeysetService) ToJson(ctx context.Context, req *pb.KeysetToJsonRequest) (*pb.KeysetToJsonResponse, error) {
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.KeysetToJsonResponse{
+			Result: &pb.KeysetToJsonResponse_Err{err.Error()}}, nil
+	}
+	buf := new(bytes.Buffer)
+	writer := keyset.NewJSONWriter(buf)
+	if err := testkeyset.Write(handle, writer); err != nil {
+		return &pb.KeysetToJsonResponse{
+			Result: &pb.KeysetToJsonResponse_Err{err.Error()}}, nil
+	}
 	return &pb.KeysetToJsonResponse{
-		Result: &pb.KeysetToJsonResponse_Err{"not yet implemented"}}, nil
+		Result: &pb.KeysetToJsonResponse_JsonKeyset{buf.String()}}, nil
 }
 
 func (s *KeysetService) FromJson(ctx context.Context, req *pb.KeysetFromJsonRequest) (*pb.KeysetFromJsonResponse, error) {
+	reader := keyset.NewJSONReader(bytes.NewBufferString(req.JsonKeyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.KeysetFromJsonResponse{
+			Result: &pb.KeysetFromJsonResponse_Err{err.Error()}}, nil
+	}
+	buf := new(bytes.Buffer)
+	writer := keyset.NewBinaryWriter(buf)
+	if err := testkeyset.Write(handle, writer); err != nil {
+		return &pb.KeysetFromJsonResponse{
+			Result: &pb.KeysetFromJsonResponse_Err{err.Error()}}, nil
+	}
 	return &pb.KeysetFromJsonResponse{
-		Result: &pb.KeysetFromJsonResponse_Err{"not yet implemented"}}, nil
+		Result: &pb.KeysetFromJsonResponse_Keyset{buf.Bytes()}}, nil
 }

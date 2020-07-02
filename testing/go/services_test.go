@@ -26,6 +26,7 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/hybrid"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/signature"
 	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
@@ -61,6 +62,112 @@ func pubKeyset(ctx context.Context, keysetService *services.KeysetService, priva
 		return nil, errors.New(r.Err)
 	default:
 		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func keysetFromJSON(ctx context.Context, keysetService *services.KeysetService, jsonKeyset string) ([]byte, error) {
+	request := &pb.KeysetFromJsonRequest{JsonKeyset: jsonKeyset}
+	response, err := keysetService.FromJson(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	switch r := response.Result.(type) {
+	case *pb.KeysetFromJsonResponse_Keyset:
+		return r.Keyset, nil
+	case *pb.KeysetFromJsonResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func keysetToJSON(ctx context.Context, keysetService *services.KeysetService, keyset []byte) (string, error) {
+	request := &pb.KeysetToJsonRequest{Keyset: keyset}
+	response, err := keysetService.ToJson(ctx, request)
+	if err != nil {
+		return "", err
+	}
+	switch r := response.Result.(type) {
+	case *pb.KeysetToJsonResponse_JsonKeyset:
+		return r.JsonKeyset, nil
+	case *pb.KeysetToJsonResponse_Err:
+		return "", errors.New(r.Err)
+	default:
+		return "", fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func TestFromJSON(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	ctx := context.Background()
+	jsonKeyset := `
+        {
+          "primaryKeyId": 42,
+          "key": [
+            {
+              "keyData": {
+                "typeUrl": "type.googleapis.com/google.crypto.tink.AesGcmKey",
+                "keyMaterialType": "SYMMETRIC",
+                "value": "GhCS/1+ejWpx68NfGt6ziYHd"
+              },
+              "outputPrefixType": "TINK",
+              "keyId": 42,
+              "status": "ENABLED"
+            }
+          ]
+        }`
+	keysetData, err := keysetFromJSON(ctx, keysetService, jsonKeyset)
+	if err != nil {
+		t.Fatalf("keysetFromJSON failed: %v", err)
+	}
+	reader := keyset.NewBinaryReader(bytes.NewReader(keysetData))
+	keyset, err := reader.Read()
+	if err != nil {
+		t.Fatalf("reader.Read() failed: %v", err)
+	}
+	if keyset.GetPrimaryKeyId() != 42 {
+		t.Fatalf("Got keyset.GetPrimaryKeyId() == %d, want 42", keyset.GetPrimaryKeyId())
+	}
+}
+
+func TestGenerateToFromJSON(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	jsonKeyset, err := keysetToJSON(ctx, keysetService, keyset)
+	if err != nil {
+		t.Fatalf("keysetToJSON failed: %v", err)
+	}
+	output, err := keysetFromJSON(ctx, keysetService, jsonKeyset)
+	if err != nil {
+		t.Fatalf("keysetFromJSON failed: %v", err)
+	}
+	if bytes.Compare(output, keyset) != 0 {
+		t.Fatalf("output is %v, want %v", output, keyset)
+	}
+}
+
+func TestKeysetFromJSONFail(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	ctx := context.Background()
+	if _, err := keysetFromJSON(ctx, keysetService, "bad JSON"); err == nil {
+		t.Fatalf("keysetFromJSON from bad JSON succeeded unexpectedly.")
+	}
+}
+
+func TestKeysetToJSONFail(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	ctx := context.Background()
+	if _, err := keysetToJSON(ctx, keysetService, []byte("badKeyset")); err == nil {
+		t.Fatalf("keysetToJSON with bad keyset succeeded unexpectedly.")
 	}
 }
 

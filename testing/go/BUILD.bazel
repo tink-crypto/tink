@@ -34,8 +34,8 @@ go_library(
         "@tink_go//hybrid:go_default_library",
         "@tink_go//keyset:go_default_library",
         "@tink_go//mac:go_default_library",
-        "@tink_go//signature:go_default_library",
         "@tink_go//proto:tink_go_proto",
+        "@tink_go//signature:go_default_library",
         "@tink_go//testkeyset:go_default_library",
     ],
 )
@@ -51,6 +51,7 @@ go_test(
         "@tink_go//aead:go_default_library",
         "@tink_go//daead:go_default_library",
         "@tink_go//hybrid:go_default_library",
+        "@tink_go//keyset:go_default_library",
         "@tink_go//mac:go_default_library",
         "@tink_go//signature:go_default_library",
     ],
