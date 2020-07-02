@@ -29,6 +29,7 @@ import (
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/signature"
+	"github.com/google/tink/go/streamingaead"
 	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
 	"github.com/google/tink/testing/go/services"
 )
@@ -171,7 +172,7 @@ func TestKeysetToJSONFail(t *testing.T) {
 	}
 }
 
-func aeadEncrypt(ctx context.Context, aeadService *services.AeadService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
+func aeadEncrypt(ctx context.Context, aeadService *services.AEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.AeadEncryptRequest{
 		Keyset:         keyset,
 		Plaintext:      plaintext,
@@ -191,7 +192,7 @@ func aeadEncrypt(ctx context.Context, aeadService *services.AeadService, keyset 
 	}
 }
 
-func aeadDecrypt(ctx context.Context, aeadService *services.AeadService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
+func aeadDecrypt(ctx context.Context, aeadService *services.AEADService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
 	decRequest := &pb.AeadDecryptRequest{
 		Keyset:         keyset,
 		Ciphertext:     ciphertext,
@@ -213,7 +214,7 @@ func aeadDecrypt(ctx context.Context, aeadService *services.AeadService, keyset 
 
 func TestGenerateEncryptDecrypt(t *testing.T) {
 	keysetService := &services.KeysetService{}
-	aeadService := &services.AeadService{}
+	aeadService := &services.AEADService{}
 	ctx := context.Background()
 
 	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
@@ -251,7 +252,7 @@ func TestGenerateEncryptDecrypt(t *testing.T) {
 	}
 }
 
-func daeadEncrypt(ctx context.Context, daeadService *services.DeterministicAeadService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
+func daeadEncrypt(ctx context.Context, daeadService *services.DeterministicAEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.DeterministicAeadEncryptRequest{
 		Keyset:         keyset,
 		Plaintext:      plaintext,
@@ -271,7 +272,7 @@ func daeadEncrypt(ctx context.Context, daeadService *services.DeterministicAeadS
 	}
 }
 
-func daeadDecrypt(ctx context.Context, daeadService *services.DeterministicAeadService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
+func daeadDecrypt(ctx context.Context, daeadService *services.DeterministicAEADService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
 	decRequest := &pb.DeterministicAeadDecryptRequest{
 		Keyset:         keyset,
 		Ciphertext:     ciphertext,
@@ -293,7 +294,7 @@ func daeadDecrypt(ctx context.Context, daeadService *services.DeterministicAeadS
 
 func TestGenerateEncryptDecryptDeterministically(t *testing.T) {
 	keysetService := &services.KeysetService{}
-	daeadService := &services.DeterministicAeadService{}
+	daeadService := &services.DeterministicAEADService{}
 	ctx := context.Background()
 
 	template, err := proto.Marshal(daead.AESSIVKeyTemplate())
@@ -328,6 +329,86 @@ func TestGenerateEncryptDecryptDeterministically(t *testing.T) {
 	}
 	if _, err := daeadDecrypt(ctx, daeadService, keyset, []byte("badCiphertext"), associatedData); err == nil {
 		t.Fatalf("daeadDecrypt of bad ciphertext succeeded unexpectedly.")
+	}
+}
+
+func streamingAEADEncrypt(ctx context.Context, streamingAEADService *services.StreamingAEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
+	encRequest := &pb.StreamingAeadEncryptRequest{
+		Keyset:         keyset,
+		Plaintext:      plaintext,
+		AssociatedData: associatedData,
+	}
+	encResponse, err := streamingAEADService.Encrypt(ctx, encRequest)
+	if err != nil {
+		return nil, err
+	}
+	switch r := encResponse.Result.(type) {
+	case *pb.StreamingAeadEncryptResponse_Ciphertext:
+		return r.Ciphertext, nil
+	case *pb.StreamingAeadEncryptResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)
+	}
+}
+
+func streamingAEADDecrypt(ctx context.Context, streamingAEADService *services.StreamingAEADService, keyset []byte, ciphertext []byte, associatedData []byte) ([]byte, error) {
+	decRequest := &pb.StreamingAeadDecryptRequest{
+		Keyset:         keyset,
+		Ciphertext:     ciphertext,
+		AssociatedData: associatedData,
+	}
+	decResponse, err := streamingAEADService.Decrypt(ctx, decRequest)
+	if err != nil {
+		return nil, err
+	}
+	switch r := decResponse.Result.(type) {
+	case *pb.StreamingAeadDecryptResponse_Plaintext:
+		return r.Plaintext, nil
+	case *pb.StreamingAeadDecryptResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("encResponse.Result has unexpected type %T", r)
+	}
+}
+
+func TestGenerateEncryptDecryptStreaming(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	streamingAEADService := &services.StreamingAEADService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(streamingaead.AES128GCMHKDF4KBKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(streamingaead.AES128GCMHKDF4KBKeyTemplate()) failed: %v", err)
+	}
+
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	plaintext := []byte("The quick brown fox jumps over the lazy dog")
+	associatedData := []byte("Associated Data")
+	ciphertext, err := streamingAEADEncrypt(ctx, streamingAEADService, keyset, plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("streamingAEADEncrypt failed: %v", err)
+	}
+	output, err := streamingAEADDecrypt(ctx, streamingAEADService, keyset, ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("streamingAEADDecrypt failed: %v", err)
+	}
+	if bytes.Compare(output, plaintext) != 0 {
+		t.Errorf("Decrypted ciphertext is %v, want %v", output, plaintext)
+	}
+
+	if _, err := genKeyset(ctx, keysetService, []byte("badTemplate")); err == nil {
+		t.Fatalf("genKeyset from bad template succeeded unexpectedly.")
+	}
+	if _, err := streamingAEADEncrypt(ctx, streamingAEADService, []byte("badKeyset"), plaintext, associatedData); err == nil {
+		t.Fatalf("streamingAEADEncrypt with bad keyset succeeded unexpectedly.")
+	}
+	if _, err := streamingAEADDecrypt(ctx, streamingAEADService, keyset, []byte("badCiphertext"), associatedData); err == nil {
+		t.Fatalf("streamingAEADDecrypt of bad ciphertext succeeded unexpectedly.")
 	}
 }
 

@@ -44,10 +44,11 @@ func main() {
 	}
 	pbgrpc.RegisterMetadataServer(server, &services.MetadataService{})
 	pbgrpc.RegisterKeysetServer(server, &services.KeysetService{})
-	pbgrpc.RegisterAeadServer(server, &services.AeadService{})
-	pbgrpc.RegisterDeterministicAeadServer(server, &services.DeterministicAeadService{})
+	pbgrpc.RegisterAeadServer(server, &services.AEADService{})
+	pbgrpc.RegisterDeterministicAeadServer(server, &services.DeterministicAEADService{})
 	pbgrpc.RegisterHybridServer(server, &services.HybridService{})
 	pbgrpc.RegisterMacServer(server, &services.MacService{})
 	pbgrpc.RegisterSignatureServer(server, &services.SignatureService{})
+	pbgrpc.RegisterStreamingAeadServer(server, &services.StreamingAEADService{})
 	server.Serve(lis)
 }

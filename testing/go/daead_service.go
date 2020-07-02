@@ -24,11 +24,11 @@ import (
 	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
 )
 
-// DeterministicAeadService implements the Aead testing service.
-type DeterministicAeadService struct {
+// DeterministicAEADService implements the DeterministicAead testing service.
+type DeterministicAEADService struct {
 }
 
-func (s *DeterministicAeadService) EncryptDeterministically(ctx context.Context, req *pb.DeterministicAeadEncryptRequest) (*pb.DeterministicAeadEncryptResponse, error) {
+func (s *DeterministicAEADService) EncryptDeterministically(ctx context.Context, req *pb.DeterministicAeadEncryptRequest) (*pb.DeterministicAeadEncryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
@@ -49,7 +49,7 @@ func (s *DeterministicAeadService) EncryptDeterministically(ctx context.Context,
 		Result: &pb.DeterministicAeadEncryptResponse_Ciphertext{ciphertext}}, nil
 }
 
-func (s *DeterministicAeadService) DecryptDeterministically(ctx context.Context, req *pb.DeterministicAeadDecryptRequest) (*pb.DeterministicAeadDecryptResponse, error) {
+func (s *DeterministicAEADService) DecryptDeterministically(ctx context.Context, req *pb.DeterministicAeadDecryptRequest) (*pb.DeterministicAeadDecryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {

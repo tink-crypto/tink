@@ -24,11 +24,11 @@ import (
 	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
 )
 
-// AeadService implements the Aead testing service.
-type AeadService struct {
+// AEADService implements the Aead testing service.
+type AEADService struct {
 }
 
-func (s *AeadService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (*pb.AeadEncryptResponse, error) {
+func (s *AEADService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (*pb.AeadEncryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
@@ -49,7 +49,7 @@ func (s *AeadService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (
 		Result: &pb.AeadEncryptResponse_Ciphertext{ciphertext}}, nil
 }
 
-func (s *AeadService) Decrypt(ctx context.Context, req *pb.AeadDecryptRequest) (*pb.AeadDecryptResponse, error) {
+func (s *AEADService) Decrypt(ctx context.Context, req *pb.AeadDecryptRequest) (*pb.AeadDecryptResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
 	if err != nil {
