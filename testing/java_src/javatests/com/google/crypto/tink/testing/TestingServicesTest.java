@@ -41,8 +41,14 @@ import com.google.crypto.tink.proto.testing.MacGrpc;
 import com.google.crypto.tink.proto.testing.MetadataGrpc;
 import com.google.crypto.tink.proto.testing.ServerInfoRequest;
 import com.google.crypto.tink.proto.testing.ServerInfoResponse;
+import com.google.crypto.tink.proto.testing.StreamingAeadDecryptRequest;
+import com.google.crypto.tink.proto.testing.StreamingAeadDecryptResponse;
+import com.google.crypto.tink.proto.testing.StreamingAeadEncryptRequest;
+import com.google.crypto.tink.proto.testing.StreamingAeadEncryptResponse;
+import com.google.crypto.tink.proto.testing.StreamingAeadGrpc;
 import com.google.crypto.tink.proto.testing.VerifyMacRequest;
 import com.google.crypto.tink.proto.testing.VerifyMacResponse;
+import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
@@ -62,6 +68,7 @@ public final class TestingServicesTest {
   KeysetGrpc.KeysetBlockingStub keysetStub;
   AeadGrpc.AeadBlockingStub aeadStub;
   DeterministicAeadGrpc.DeterministicAeadBlockingStub daeadStub;
+  StreamingAeadGrpc.StreamingAeadBlockingStub streamingAeadStub;
   MacGrpc.MacBlockingStub macStub;
 
   @Before
@@ -75,6 +82,7 @@ public final class TestingServicesTest {
         .addService(new KeysetServiceImpl())
         .addService(new AeadServiceImpl())
         .addService(new DeterministicAeadServiceImpl())
+        .addService(new StreamingAeadServiceImpl())
         .addService(new MacServiceImpl())
         .build()
         .start();
@@ -86,6 +94,7 @@ public final class TestingServicesTest {
     keysetStub = KeysetGrpc.newBlockingStub(channel);
     aeadStub = AeadGrpc.newBlockingStub(channel);
     daeadStub = DeterministicAeadGrpc.newBlockingStub(channel);
+    streamingAeadStub = StreamingAeadGrpc.newBlockingStub(channel);
     macStub = MacGrpc.newBlockingStub(channel);
   }
 
@@ -290,6 +299,104 @@ public final class TestingServicesTest {
 
     DeterministicAeadDecryptResponse decResponse =
         daeadDecrypt(daeadStub, badKeyset, ciphertext, associatedData);
+    assertThat(decResponse.getErr()).isNotEmpty();
+  }
+
+  private static StreamingAeadEncryptResponse streamingAeadEncrypt(
+      StreamingAeadGrpc.StreamingAeadBlockingStub streamingAeadStub,
+      byte[] keyset,
+      byte[] plaintext,
+      byte[] associatedData) {
+    StreamingAeadEncryptRequest encRequest =
+        StreamingAeadEncryptRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setPlaintext(ByteString.copyFrom(plaintext))
+            .setAssociatedData(ByteString.copyFrom(associatedData))
+            .build();
+    return streamingAeadStub.encrypt(encRequest);
+  }
+
+  private static StreamingAeadDecryptResponse streamingAeadDecrypt(
+      StreamingAeadGrpc.StreamingAeadBlockingStub streamingAeadStub,
+      byte[] keyset,
+      byte[] ciphertext,
+      byte[] associatedData) {
+    StreamingAeadDecryptRequest decRequest =
+        StreamingAeadDecryptRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setCiphertext(ByteString.copyFrom(ciphertext))
+            .setAssociatedData(ByteString.copyFrom(associatedData))
+            .build();
+    return streamingAeadStub.decrypt(decRequest);
+  }
+
+  @Test
+  public void streamingAeadGenerateEncryptDecrypt_success() throws Exception {
+    byte[] template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB.toByteArray();
+    byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    StreamingAeadEncryptResponse encResponse = streamingAeadEncrypt(
+        streamingAeadStub, keyset, plaintext, associatedData);
+    assertThat(encResponse.getErr()).isEmpty();
+    byte[] ciphertext = encResponse.getCiphertext().toByteArray();
+
+    StreamingAeadDecryptResponse decResponse = streamingAeadDecrypt(
+        streamingAeadStub, keyset, ciphertext, associatedData);
+    assertThat(decResponse.getErr()).isEmpty();
+    byte[] output = decResponse.getPlaintext().toByteArray();
+
+    assertThat(output).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void streamingAeadEncrypt_failsOnBadKeyset() throws Exception {
+    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
+    byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    byte[] associatedData = "streamingAead_encrypt_fails_on_bad_keyset".getBytes(UTF_8);
+    StreamingAeadEncryptResponse encResponse = streamingAeadEncrypt(
+        streamingAeadStub, badKeyset, plaintext, associatedData);
+    assertThat(encResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void streamingAeadDecrypt_failsOnBadCiphertext() throws Exception {
+    byte[] template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB.toByteArray();
+    byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
+    byte[] associatedData = "streamingAead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    StreamingAeadDecryptResponse decResponse = streamingAeadDecrypt(
+        streamingAeadStub, keyset, badCiphertext, associatedData);
+    assertThat(decResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void streamingAeadDecrypt_failsOnBadKeyset() throws Exception {
+    byte[] template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB.toByteArray();
+    byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    StreamingAeadEncryptResponse encResponse = streamingAeadEncrypt(
+        streamingAeadStub, keyset, plaintext, associatedData);
+    assertThat(encResponse.getErr()).isEmpty();
+    byte[] ciphertext = encResponse.getCiphertext().toByteArray();
+
+    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
+
+    StreamingAeadDecryptResponse decResponse = streamingAeadDecrypt(
+        streamingAeadStub, badKeyset, ciphertext, associatedData);
     assertThat(decResponse.getErr()).isNotEmpty();
   }
 

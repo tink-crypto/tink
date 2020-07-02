@@ -29,6 +29,7 @@ java_library(
         "java/com/google/crypto/tink/testing/MacServiceImpl.java",
         "java/com/google/crypto/tink/testing/MetadataServiceImpl.java",
         "java/com/google/crypto/tink/testing/SignatureServiceImpl.java",
+        "java/com/google/crypto/tink/testing/StreamingAeadServiceImpl.java",
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
@@ -87,6 +88,7 @@ java_test(
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
     ],
 )
 
