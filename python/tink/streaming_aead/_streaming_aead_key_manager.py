@@ -54,3 +54,17 @@ def from_cc_registry(
   return core.KeyManagerCcToPyWrapper(
       tink_bindings.StreamingAeadKeyManager.from_cc_registry(type_url),
       _streaming_aead.StreamingAead, _StreamingAeadCcToPyWrapper)
+
+
+def register() -> None:
+  """Registers all AEAD key managers and AEAD wrapper in the Registry."""
+  tink_bindings.register()
+  for ident in (
+      'AesCtrHmacStreamingKey',
+      'AesGcmHkdfStreamingKey',
+  ):
+    type_url = 'type.googleapis.com/google.crypto.tink.{}'.format(ident)
+    key_manager = core.KeyManagerCcToPyWrapper(
+        tink_bindings.StreamingAeadKeyManager.from_cc_registry(type_url),
+        _streaming_aead.StreamingAead, _StreamingAeadCcToPyWrapper)
+    core.Registry.register_key_manager(key_manager, new_key_allowed=True)

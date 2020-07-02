@@ -17,7 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 import io
-from typing import Text
+from typing import BinaryIO, Text
 from absl import logging
 
 import tink
@@ -27,6 +27,7 @@ from tink import daead
 from tink import hybrid
 from tink import mac
 from tink import signature as tink_signature
+from tink import streaming_aead
 
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
@@ -136,6 +137,45 @@ class DeterministicAead(daead.DeterministicAead):
       logging.info('error decrypt in %s: %s', self.lang, dec_response.err)
       raise tink.TinkError(dec_response.err)
     return dec_response.plaintext
+
+
+class StreamingAead(streaming_aead.StreamingAead):
+  """Wraps Streaming AEAD service stub into a StreamingAead primitive."""
+
+  def __init__(self,
+               lang: Text,
+               stub: testing_api_pb2_grpc.StreamingAeadStub,
+               keyset_handle: tink.KeysetHandle) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._keyset_handle = keyset_handle
+
+  def new_encrypting_stream(self, plaintext: BinaryIO,
+                            associated_data: bytes) -> BinaryIO:
+    logging.info('encrypt in lang %s.', self.lang)
+    logging.info('type(plaintext): %s', type(plaintext))
+    enc_request = testing_api_pb2.StreamingAeadEncryptRequest(
+        keyset=_keyset(self._keyset_handle),
+        plaintext=plaintext.read(),
+        associated_data=associated_data)
+    enc_response = self._stub.Encrypt(enc_request)
+    if enc_response.err:
+      logging.info('error encrypt in %s: %s', self.lang, enc_response.err)
+      raise tink.TinkError(enc_response.err)
+    return io.BytesIO(enc_response.ciphertext)
+
+  def new_decrypting_stream(self, ciphertext: BinaryIO,
+                            associated_data: bytes) -> BinaryIO:
+    logging.info('decrypt in lang %s.', self.lang)
+    logging.info('type(ciphertext): %s', type(ciphertext))
+    dec_request = testing_api_pb2.StreamingAeadDecryptRequest(
+        keyset=_keyset(self._keyset_handle),
+        ciphertext=ciphertext.read(), associated_data=associated_data)
+    dec_response = self._stub.Decrypt(dec_request)
+    if dec_response.err:
+      logging.info('error decrypt in %s: %s', self.lang, dec_response.err)
+      raise tink.TinkError(dec_response.err)
+    return io.BytesIO(dec_response.plaintext)
 
 
 class Mac(mac.Mac):

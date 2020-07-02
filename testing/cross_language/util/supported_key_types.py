@@ -20,6 +20,7 @@ from tink import daead
 from tink import hybrid
 from tink import mac
 from tink import signature
+from tink import streaming_aead
 
 from tink.proto import tink_pb2
 
@@ -32,20 +33,24 @@ AEAD_KEY_TYPES = [
     'AesGcmKey',
     'AesCtrHmacAeadKey',
     'ChaCha20Poly1305Key',
-    'XChaCha20Poly1305Key'
+    'XChaCha20Poly1305Key',
 ]
 DAEAD_KEY_TYPES = ['AesSivKey']
+STREAMING_AEAD_KEY_TYPES = [
+    'AesCtrHmacStreamingKey',
+    'AesGcmHkdfStreamingKey',
+]
 HYBRID_PRIVATE_KEY_TYPES = ['EciesAeadHkdfPrivateKey']
 MAC_KEY_TYPES = ['HmacKey']
 SIGNATURE_KEY_TYPES = [
     'EcdsaPrivateKey',
     'Ed25519PrivateKey',
     'RsaSsaPkcs1PrivateKey',
-    'RsaSsaPssPrivateKey'
+    'RsaSsaPssPrivateKey',
 ]
 ALL_KEY_TYPES = (
-    AEAD_KEY_TYPES + DAEAD_KEY_TYPES + HYBRID_PRIVATE_KEY_TYPES +
-    MAC_KEY_TYPES + SIGNATURE_KEY_TYPES)
+    AEAD_KEY_TYPES + DAEAD_KEY_TYPES + STREAMING_AEAD_KEY_TYPES +
+    HYBRID_PRIVATE_KEY_TYPES + MAC_KEY_TYPES + SIGNATURE_KEY_TYPES)
 
 # All languages that are supported by a KeyType
 SUPPORTED_LANGUAGES = {
@@ -55,6 +60,8 @@ SUPPORTED_LANGUAGES = {
     'ChaCha20Poly1305Key': ['java', 'go'],
     'XChaCha20Poly1305Key': ['cc', 'java', 'go', 'python'],
     'AesSivKey': ['cc', 'java', 'go', 'python'],
+    'AesCtrHmacStreamingKey': ['cc', 'java'],
+    'AesGcmHkdfStreamingKey': ['cc', 'java', 'go'],
     'EciesAeadHkdfPrivateKey': ['cc', 'java', 'go', 'python'],
     'HmacKey': ['cc', 'java', 'go', 'python'],
     'EcdsaPrivateKey': ['cc', 'java', 'go', 'python'],
@@ -71,6 +78,15 @@ KEY_TEMPLATE_NAMES = {
     'ChaCha20Poly1305Key': ['CHACHA20_POLY1305'],
     'XChaCha20Poly1305Key': ['XCHACHA20_POLY1305'],
     'AesSivKey': ['AES256_SIV'],
+    'AesCtrHmacStreamingKey': [
+        'AES128_CTR_HMAC_SHA256_4KB',
+        'AES256_CTR_HMAC_SHA256_4KB',
+    ],
+    'AesGcmHkdfStreamingKey': [
+        'AES128_GCM_HKDF_4KB',
+        'AES256_GCM_HKDF_4KB',
+        'AES256_GCM_HKDF_1MB',
+    ],
     'EciesAeadHkdfPrivateKey': [
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM',
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256'
@@ -123,6 +139,16 @@ KEY_TEMPLATE = {
         aead.aead_key_templates.XCHACHA20_POLY1305,
     'AES256_SIV':
         daead.deterministic_aead_key_templates.AES256_SIV,
+    'AES128_CTR_HMAC_SHA256_4KB':
+        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB,
+    'AES256_CTR_HMAC_SHA256_4KB':
+        streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB,
+    'AES128_GCM_HKDF_4KB':
+        streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB,
+    'AES256_GCM_HKDF_4KB':
+        streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB,
+    'AES256_GCM_HKDF_1MB':
+        streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_1MB,
     'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM':
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM,
     'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':

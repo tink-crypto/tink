@@ -11,9 +11,10 @@
 # limitations under the License.
 """Tests for tink.testing.cross_language.util.testing_server."""
 
+import io
+
 from absl.testing import absltest
 from absl.testing import parameterized
-
 
 import tink
 from tink import aead
@@ -21,21 +22,50 @@ from tink import daead
 from tink import hybrid
 from tink import mac
 from tink import signature
+from tink import streaming_aead
 
 from util import testing_servers
 
-
-def setUpModule():
-  testing_servers.start()
+_SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE
 
 
-def tearDownModule():
-  testing_servers.stop()
+class TestingServersConfigTest(absltest.TestCase):
+
+  def test_primitives(self):
+    self.assertEqual(
+        testing_servers._PRIMITIVE_STUBS.keys(),
+        _SUPPORTED_LANGUAGES.keys(),
+        msg=(
+            'The primitives specified as keys in '
+            'testing_servers._PRIMITIVE_STUBS must match the primitives '
+            ' specified as keys in '
+            'testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE.'
+        ))
+
+  def test_languages(self):
+    for primitive in _SUPPORTED_LANGUAGES:
+      languages = set(testing_servers.LANGUAGES)
+      supported_languages = set(_SUPPORTED_LANGUAGES[primitive])
+      self.assertContainsSubset(supported_languages, languages, msg=(
+          'The languages specified in '
+          'testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE must be a subset '
+          'of the languages specified in testing_servers.LANGUAGES.'
+      ))
 
 
 class TestingServersTest(parameterized.TestCase):
 
-  @parameterized.parameters(testing_servers.LANGUAGES)
+  @classmethod
+  def setUpClass(cls):
+    super(TestingServersTest, cls).setUpClass()
+    testing_servers.start()
+
+  @classmethod
+  def tearDownClass(cls):
+    testing_servers.stop()
+    super(TestingServersTest, cls).tearDownClass()
+
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['aead'])
   def test_aead(self, lang):
     keyset_handle = testing_servers.new_keyset_handle(
         lang, aead.aead_key_templates.AES128_GCM)
@@ -49,7 +79,7 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       aead_primitive.decrypt(b'foo', associated_data)
 
-  @parameterized.parameters(testing_servers.LANGUAGES)
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['daead'])
   def test_daead(self, lang):
     keyset_handle = testing_servers.new_keyset_handle(
         lang, daead.deterministic_aead_key_templates.AES256_SIV)
@@ -65,7 +95,26 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       daead_primitive.decrypt_deterministically(b'foo', associated_data)
 
-  @parameterized.parameters(testing_servers.LANGUAGES)
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['streaming_aead'])
+  def test_streaming_aead(self, lang):
+    keyset_handle = testing_servers.new_keyset_handle(
+        lang, streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB)
+    plaintext = b'The quick brown fox jumps over the lazy dog'
+    plaintext_stream = io.BytesIO(plaintext)
+    associated_data = b'associated_data'
+    streaming_aead_primitive = testing_servers.streaming_aead(
+        lang, keyset_handle)
+    ciphertext_stream = streaming_aead_primitive.new_encrypting_stream(
+        plaintext_stream, associated_data)
+    output_stream = streaming_aead_primitive.new_decrypting_stream(
+        ciphertext_stream, associated_data)
+    self.assertEqual(output_stream.read(), plaintext)
+
+    with self.assertRaises(tink.TinkError):
+      streaming_aead_primitive.new_decrypting_stream(io.BytesIO(b'foo'),
+                                                     associated_data)
+
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['mac'])
   def test_mac(self, lang):
     keyset_handle = testing_servers.new_keyset_handle(
         lang, mac.mac_key_templates.HMAC_SHA256_128BITTAG)
@@ -77,7 +126,7 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       mac_primitive.verify_mac(b'foo', data)
 
-  @parameterized.parameters(testing_servers.LANGUAGES)
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['hybrid'])
   def test_hybrid(self, lang):
     private_handle = testing_servers.new_keyset_handle(
         lang,
@@ -94,7 +143,7 @@ class TestingServersTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       dec_primitive.decrypt(b'foo', context_info)
 
-  @parameterized.parameters(testing_servers.LANGUAGES)
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['signature'])
   def test_signature(self, lang):
     private_handle = testing_servers.new_keyset_handle(
         lang, signature.signature_key_templates.ED25519)

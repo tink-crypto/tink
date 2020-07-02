@@ -20,6 +20,8 @@ from tink import mac
 from util import supported_key_types
 from util import testing_servers
 
+SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['mac']
+
 
 def setUpModule():
   mac.register()
@@ -43,7 +45,7 @@ class MacTest(parameterized.TestCase):
     ]
     unsupported_macs = [
         testing_servers.mac(lang, keyset_handle)
-        for lang in testing_servers.LANGUAGES
+        for lang in SUPPORTED_LANGUAGES
         if lang not in supported_langs
     ]
     for p in supported_macs:

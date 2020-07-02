@@ -20,6 +20,8 @@ from tink import hybrid
 from util import supported_key_types
 from util import testing_servers
 
+SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['hybrid']
+
 
 def setUpModule():
   hybrid.register()
@@ -44,7 +46,7 @@ class HybridEncryptionTest(parameterized.TestCase):
     ]
     unsupported_decs = [
         testing_servers.hybrid_decrypt(lang, private_handle)
-        for lang in testing_servers.LANGUAGES
+        for lang in SUPPORTED_LANGUAGES
         if lang not in supported_langs
     ]
     public_handle = private_handle.public_keyset_handle()

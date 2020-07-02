@@ -20,6 +20,9 @@ from tink import signature
 from util import supported_key_types
 from util import testing_servers
 
+SUPPORTED_LANGUAGES = (testing_servers
+                       .SUPPORTED_LANGUAGES_BY_PRIMITIVE['signature'])
+
 
 def setUpModule():
   signature.register()
@@ -43,7 +46,7 @@ class SignaturePythonTest(parameterized.TestCase):
     ]
     unsupported_signers = [
         testing_servers.public_key_sign(lang, private_handle)
-        for lang in testing_servers.LANGUAGES
+        for lang in SUPPORTED_LANGUAGES
         if lang not in supported_langs
     ]
     public_handle = private_handle.public_keyset_handle()

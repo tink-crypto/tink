@@ -19,6 +19,8 @@ from tink import daead
 from util import supported_key_types
 from util import testing_servers
 
+SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['daead']
+
 
 def setUpModule():
   daead.register()
@@ -43,7 +45,7 @@ class DeterministicAeadTest(parameterized.TestCase):
     self.assertNotEmpty(supported_daeads)
     unsupported_daeads = [
         testing_servers.deterministic_aead(lang, keyset_handle)
-        for lang in testing_servers.LANGUAGES
+        for lang in SUPPORTED_LANGUAGES
         if lang not in supported_langs
     ]
     plaintext = (

@@ -26,7 +26,6 @@ import grpc
 import portpicker
 
 import tink
-import tink.aead
 
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
@@ -55,11 +54,32 @@ _SERVER_PATHS = {
     ]
 }
 
+# All languages that have a testing server
+LANGUAGES = list(_SERVER_PATHS.keys())
+
 # location of the testing_server java binary, relative to testing_dir
 _JAVA_PATH = 'java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java'
 
-# All languages that have an testing server
-LANGUAGES = list(_SERVER_PATHS.keys())
+_PRIMITIVE_STUBS = {
+    'aead': testing_api_pb2_grpc.AeadStub,
+    'daead': testing_api_pb2_grpc.DeterministicAeadStub,
+    'streaming_aead': testing_api_pb2_grpc.StreamingAeadStub,
+    'hybrid': testing_api_pb2_grpc.HybridStub,
+    'mac': testing_api_pb2_grpc.MacStub,
+    'signature': testing_api_pb2_grpc.SignatureStub,
+}
+
+# All primitives.
+_PRIMITIVES = list(_PRIMITIVE_STUBS.keys())
+
+SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
+    'aead': ['cc', 'go', 'java', 'python'],
+    'daead': ['cc', 'go', 'java', 'python'],
+    'streaming_aead': ['cc', 'go', 'java'],
+    'hybrid': ['cc', 'go', 'java', 'python'],
+    'mac': ['cc', 'go', 'java', 'python'],
+    'signature': ['cc', 'go', 'java', 'python'],
+}
 
 
 def _server_path(lang: Text) -> Text:
@@ -96,6 +116,7 @@ class _TestingServers():
     self._keyset_stub = {}
     self._aead_stub = {}
     self._daead_stub = {}
+    self._streaming_aead_stub = {}
     self._hybrid_stub = {}
     self._mac_stub = {}
     self._signature_stub = {}
@@ -122,16 +143,11 @@ class _TestingServers():
           self._channel[lang])
       self._keyset_stub[lang] = testing_api_pb2_grpc.KeysetStub(
           self._channel[lang])
-      self._aead_stub[lang] = testing_api_pb2_grpc.AeadStub(
-          self._channel[lang])
-      self._daead_stub[lang] = testing_api_pb2_grpc.DeterministicAeadStub(
-          self._channel[lang])
-      self._hybrid_stub[lang] = testing_api_pb2_grpc.HybridStub(
-          self._channel[lang])
-      self._mac_stub[lang] = testing_api_pb2_grpc.MacStub(
-          self._channel[lang])
-      self._signature_stub[lang] = testing_api_pb2_grpc.SignatureStub(
-          self._channel[lang])
+    for primitive in _PRIMITIVES:
+      for lang in SUPPORTED_LANGUAGES_BY_PRIMITIVE[primitive]:
+        stub_name = '_%s_stub' % primitive
+        getattr(self, stub_name)[lang] = _PRIMITIVE_STUBS[primitive](
+            self._channel[lang])
 
   def keyset_stub(self, lang) -> testing_api_pb2_grpc.KeysetStub:
     return self._keyset_stub[lang]
@@ -141,6 +157,9 @@ class _TestingServers():
 
   def daead_stub(self, lang) -> testing_api_pb2_grpc.DeterministicAeadStub:
     return self._daead_stub[lang]
+
+  def streaming_aead_stub(self, lang) -> testing_api_pb2_grpc.StreamingAeadStub:
+    return self._streaming_aead_stub[lang]
 
   def hybrid_stub(self, lang) -> testing_api_pb2_grpc.HybridStub:
     return self._hybrid_stub[lang]
@@ -217,28 +236,37 @@ def aead(lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.Aead:
 def deterministic_aead(
     lang: Text,
     keyset_handle: tink.KeysetHandle) -> _primitives.DeterministicAead:
-  """Returns an AEAD primitive, implemented in lang."""
+  """Returns a DeterministicAEAD primitive, implemented in lang."""
   global _ts
   return _primitives.DeterministicAead(
       lang, _ts.daead_stub(lang), keyset_handle)
 
 
+def streaming_aead(
+    lang: Text,
+    key_handle: tink.KeysetHandle) -> _primitives.StreamingAead:
+  """Returns a StreamingAEAD primitive, implemented in lang."""
+  global _ts
+  return _primitives.StreamingAead(
+      lang, _ts.streaming_aead_stub(lang), key_handle)
+
+
 def hybrid_encrypt(
     lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.HybridEncrypt:
-  """Returns an AEAD primitive, implemented in lang."""
+  """Returns a HybridEncrypt  primitive, implemented in lang."""
   global _ts
   return _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), keyset_handle)
 
 
 def hybrid_decrypt(
     lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.HybridDecrypt:
-  """Returns an AEAD primitive, implemented in lang."""
+  """Returns a HybridDecrypt primitive, implemented in lang."""
   global _ts
   return _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), keyset_handle)
 
 
 def mac(lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.Mac:
-  """Returns an AEAD primitive, implemented in lang."""
+  """Returns a MAC primitive, implemented in lang."""
   global _ts
   return _primitives.Mac(lang, _ts.mac_stub(lang), keyset_handle)
 
