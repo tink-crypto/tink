@@ -23,9 +23,9 @@ tickets or emailing the maintainers at `tink-users@googlegroups.com`.
     Wycheproof](https://github.com/google/wycheproof), we found many security
     issues in popular providers. Tink provides countermeasures for most
     problems, and we've also helped upstream fix many issues. Still, there are
-    some issues in old providers that we cannot fix. We recommend use Tink with
-    the latest version of Conscrypt, Oracle JDK, OpenJDK or Bouncy Castle. If
-    you cannot use the latest version, you might want to avoid using ECDSA
+    some issues in old providers that we cannot fix. We recommend using Tink
+    with the latest version of Conscrypt, Oracle JDK, OpenJDK or Bouncy Castle.
+    If you cannot use the latest version, you might want to avoid using ECDSA
     (alternative: ED25519) or AES-GCM (alternatives: AES-EAX or
     AES-CTR-HMAC-AEAD).
 
