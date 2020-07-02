@@ -115,6 +115,35 @@ cc_test(
 )
 
 cc_library(
+    name = "streaming_aead_impl",
+    srcs = ["streaming_aead_impl.cc"],
+    hdrs = ["streaming_aead_impl.h"],
+    deps = [
+        ":testing_api_cpp_library",
+        "@com_google_absl//absl/base:core_headers",
+        "@tink_cc",
+        "@tink_cc//:binary_keyset_reader",
+        "@tink_cc//:cleartext_keyset_handle",
+        "@tink_cc//util:istream_input_stream",
+        "@tink_cc//util:ostream_output_stream",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_test(
+    name = "streaming_aead_impl_test",
+    srcs = ["streaming_aead_impl_test.cc"],
+    deps = [
+        ":streaming_aead_impl",
+        ":testing_api_cpp_library",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//:binary_keyset_writer",
+        "@tink_cc//streamingaead:streaming_aead_config",
+        "@tink_cc//streamingaead:streaming_aead_key_templates",
+    ],
+)
+
+cc_library(
     name = "mac_impl",
     srcs = ["mac_impl.cc"],
     hdrs = ["mac_impl.h"],
@@ -203,6 +232,7 @@ cc_binary(
         ":mac_impl",
         ":metadata_impl",
         ":signature_impl",
+        ":streaming_aead_impl",
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/flags:flag",

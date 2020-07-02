@@ -25,6 +25,7 @@
 #include "mac_impl.h"
 #include "metadata_impl.h"
 #include "signature_impl.h"
+#include "streaming_aead_impl.h"
 
 ABSL_FLAG(int, port, 23456, "the port");
 
@@ -45,6 +46,7 @@ void RunServer() {
   tink_testing_api::HybridImpl hybrid;
   tink_testing_api::MacImpl mac;
   tink_testing_api::SignatureImpl signature;
+  tink_testing_api::StreamingAeadImpl streaming_aead;
 
   grpc::ServerBuilder builder;
   builder.AddListeningPort(
@@ -57,6 +59,7 @@ void RunServer() {
   builder.RegisterService(&hybrid);
   builder.RegisterService(&mac);
   builder.RegisterService(&signature);
+  builder.RegisterService(&streaming_aead);
 
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
   std::cout << "Server listening on " << server_address << std::endl;
