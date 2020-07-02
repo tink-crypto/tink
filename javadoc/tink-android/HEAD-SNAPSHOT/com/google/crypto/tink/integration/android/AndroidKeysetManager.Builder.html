@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":42,"i3":10,"i4":10,"i5":10};
+var methods = {"i0":10,"i1":42,"i2":42,"i3":10,"i4":10,"i5":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -152,12 +152,16 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#build--">build</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#build--">build</a></span>()</code>
+<div class="block">Builds and returns a new <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android"><code>AndroidKeysetManager</code></a> with the specified options.</div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#doNotUseKeystore--">doNotUseKeystore</a></span>()</code>
-<div class="block">Does not use Android Keystore which might not work well in some phones.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Android Keystore can be disabled by not setting a master key URI.</span></div>
+</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -286,7 +290,9 @@ public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/androi
 <ul class="blockList">
 <li class="blockList">
 <h4>doNotUseKeystore</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager.Builder</a>&nbsp;doNotUseKeystore()</pre>
+<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager.Builder</a>&nbsp;doNotUseKeystore()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">Android Keystore can be disabled by not setting a master key URI.</span></div>
 <div class="block">Does not use Android Keystore which might not work well in some phones.
 
  <p><b>Warning:</b> When Android Keystore is disabled, keys are stored in cleartext. This
@@ -302,12 +308,12 @@ public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/androi
 <pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;build()
                            throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
                                   <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block">Builds and returns a new <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android"><code>AndroidKeysetManager</code></a> with the specified options.</div>
 <dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <a href="../../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> with the specified options.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code> - If a keyset is found but unusable.</dd>
+<dd><code>KeystoreException</code> - If a master key is found but unusable.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - If cannot read an existing keyset or generate a new one.</dd>
 </dl>
 </li>
 </ul>
