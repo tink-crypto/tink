@@ -39,6 +39,16 @@ class KeysetImpl final : public Keyset::Service {
   grpc::Status Public(grpc::ServerContext* context,
                       const KeysetPublicRequest* request,
                       KeysetPublicResponse* response) override;
+
+  // Converts a keyset from binary to JSON format.
+  grpc::Status ToJson(grpc::ServerContext* context,
+                      const KeysetToJsonRequest* request,
+                      KeysetToJsonResponse* response) override;
+
+  // Converts a keyset from JSON to binary format.
+  grpc::Status FromJson(grpc::ServerContext* context,
+                        const KeysetFromJsonRequest* request,
+                        KeysetFromJsonResponse* response) override;
 };
 
 }  // namespace tink_testing_api

@@ -34,11 +34,16 @@ using ::crypto::tink::BinaryKeysetWriter;
 using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::HybridKeyTemplates;
 using google::crypto::tink::KeyTemplate;
+using ::testing::Eq;
 using ::testing::IsEmpty;
+using tink_testing_api::KeysetFromJsonRequest;
+using tink_testing_api::KeysetFromJsonResponse;
 using tink_testing_api::KeysetGenerateRequest;
 using tink_testing_api::KeysetGenerateResponse;
 using tink_testing_api::KeysetPublicRequest;
 using tink_testing_api::KeysetPublicResponse;
+using tink_testing_api::KeysetToJsonRequest;
+using tink_testing_api::KeysetToJsonResponse;
 
 class KeysetImplTest : public ::testing::Test {
  protected:
@@ -113,6 +118,78 @@ TEST_F(KeysetImplTest, PublicFail) {
   request.set_private_keyset("bad keyset");
   KeysetPublicResponse response;
   EXPECT_TRUE(keyset.Public(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
+
+TEST_F(KeysetImplTest, FromJsonSuccess) {
+  tink_testing_api::KeysetImpl keyset;
+  std::string json_keyset = R""""(
+        {
+          "primaryKeyId": 42,
+          "key": [
+            {
+              "keyData": {
+                "typeUrl": "type.googleapis.com/google.crypto.tink.AesGcmKey",
+                "keyMaterialType": "SYMMETRIC",
+                "value": "AFakeTestKeyValue1234567"
+              },
+              "outputPrefixType": "TINK",
+              "keyId": 42,
+              "status": "ENABLED"
+            }
+          ]
+        })"""";
+  KeysetFromJsonRequest from_request;
+  from_request.set_json_keyset(json_keyset);
+  KeysetFromJsonResponse from_response;
+  EXPECT_TRUE(keyset.FromJson(nullptr, &from_request, &from_response).ok());
+  EXPECT_THAT(from_response.err(), IsEmpty());
+  std::string output = from_response.keyset();
+
+  auto reader_result = BinaryKeysetReader::New(from_response.keyset());
+  EXPECT_TRUE(reader_result.ok());
+  auto keyset_proto_result = reader_result.ValueOrDie()->Read();
+  EXPECT_TRUE(keyset_proto_result.ok());
+  EXPECT_THAT(keyset_proto_result.ValueOrDie()->primary_key_id(), Eq(42));
+}
+
+TEST_F(KeysetImplTest, ToFromJsonSuccess) {
+  tink_testing_api::KeysetImpl keyset;
+  std::string keyset_data = ValidPrivateKeyset();
+
+  KeysetToJsonRequest to_request;
+  to_request.set_keyset(keyset_data);
+  KeysetToJsonResponse to_response;
+  EXPECT_TRUE(keyset.ToJson(nullptr, &to_request, &to_response).ok());
+  EXPECT_THAT(to_response.err(), IsEmpty());
+  std::string json_keyset = to_response.json_keyset();
+
+  KeysetFromJsonRequest from_request;
+  from_request.set_json_keyset(json_keyset);
+  KeysetFromJsonResponse from_response;
+  EXPECT_TRUE(keyset.FromJson(nullptr, &from_request, &from_response).ok());
+  EXPECT_THAT(from_response.err(), IsEmpty());
+  std::string output = from_response.keyset();
+  EXPECT_THAT(from_response.keyset(), Eq(keyset_data));
+}
+
+TEST_F(KeysetImplTest, ToJsonFail) {
+  tink_testing_api::KeysetImpl keyset;
+
+  KeysetToJsonRequest request;
+  request.set_keyset("bad keyset");
+  KeysetToJsonResponse response;
+  EXPECT_TRUE(keyset.ToJson(nullptr, &request, &response).ok());
+  EXPECT_THAT(response.err(), Not(IsEmpty()));
+}
+
+TEST_F(KeysetImplTest, FromJsonFail) {
+  tink_testing_api::KeysetImpl keyset;
+
+  KeysetFromJsonRequest request;
+  request.set_json_keyset("bad json keyset");
+  KeysetFromJsonResponse response;
+  EXPECT_TRUE(keyset.FromJson(nullptr, &request, &response).ok());
   EXPECT_THAT(response.err(), Not(IsEmpty()));
 }
 
