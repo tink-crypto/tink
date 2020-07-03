@@ -75,6 +75,35 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
     except tink.TinkError as e:
       return testing_api_pb2.KeysetPublicResponse(err=str(e))
 
+  def ToJson(
+      self, request: testing_api_pb2.KeysetToJsonRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.KeysetToJsonResponse:
+    """Converts a keyset from binary to JSON format."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      json_keyset = io.StringIO()
+      cleartext_keyset_handle.write(
+          tink.JsonKeysetWriter(json_keyset), keyset_handle)
+      return testing_api_pb2.KeysetToJsonResponse(
+          json_keyset=json_keyset.getvalue())
+    except tink.TinkError as e:
+      return testing_api_pb2.KeysetToJsonResponse(err=str(e))
+
+  def FromJson(
+      self, request: testing_api_pb2.KeysetFromJsonRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.KeysetFromJsonResponse:
+    """Converts a keyset from JSON to binary format."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.JsonKeysetReader(request.json_keyset))
+      keyset = io.BytesIO()
+      cleartext_keyset_handle.write(
+          tink.BinaryKeysetWriter(keyset), keyset_handle)
+      return testing_api_pb2.KeysetFromJsonResponse(keyset=keyset.getvalue())
+    except tink.TinkError as e:
+      return testing_api_pb2.KeysetFromJsonResponse(err=str(e))
+
 
 class AeadServicer(testing_api_pb2_grpc.AeadServicer):
   """A service for testing AEAD encryption."""

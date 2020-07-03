@@ -15,6 +15,7 @@ from absl import logging
 from absl.testing import absltest
 import grpc
 
+import tink
 from tink import aead
 from tink import daead
 from tink import hybrid
@@ -92,6 +93,66 @@ class ServicesTest(absltest.TestCase):
     mac.register()
     hybrid.register()
     signature.register()
+
+  def test_from_json(self):
+    keyset_servicer = services.KeysetServicer()
+    json_keyset = """
+        {
+          "primaryKeyId": 42,
+          "key": [
+            {
+              "keyData": {
+                "typeUrl": "type.googleapis.com/google.crypto.tink.AesGcmKey",
+                "keyMaterialType": "SYMMETRIC",
+                "value": "AFakeTestKeyValue1234567"
+
+              },
+              "outputPrefixType": "TINK",
+              "keyId": 42,
+              "status": "ENABLED"
+            }
+          ]
+        }"""
+    request = testing_api_pb2.KeysetFromJsonRequest(json_keyset=json_keyset)
+    response = keyset_servicer.FromJson(request, self._ctx)
+    self.assertEqual(response.WhichOneof('result'), 'keyset')
+    keyset = tink.BinaryKeysetReader(response.keyset).read()
+    self.assertEqual(keyset.primary_key_id, 42)
+    self.assertLen(keyset.key, 1)
+
+  def test_from_json_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    request = testing_api_pb2.KeysetFromJsonRequest(json_keyset='bad json')
+    response = keyset_servicer.FromJson(request, self._ctx)
+    self.assertEqual(response.WhichOneof('result'), 'err')
+    self.assertNotEmpty(response.err)
+
+  def test_generate_to_from_json(self):
+    keyset_servicer = services.KeysetServicer()
+
+    template = aead.aead_key_templates.AES128_GCM.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+
+    tojson_request = testing_api_pb2.KeysetToJsonRequest(keyset=keyset)
+    tojson_response = keyset_servicer.ToJson(tojson_request, self._ctx)
+    self.assertEqual(tojson_response.WhichOneof('result'), 'json_keyset')
+    json_keyset = tojson_response.json_keyset
+
+    fromjson_request = testing_api_pb2.KeysetFromJsonRequest(
+        json_keyset=json_keyset)
+    fromjson_response = keyset_servicer.FromJson(fromjson_request, self._ctx)
+    self.assertEqual(fromjson_response.WhichOneof('result'), 'keyset')
+    self.assertEqual(fromjson_response.keyset, keyset)
+
+  def test_to_json_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    request = testing_api_pb2.KeysetToJsonRequest(keyset=b'bad keyset')
+    response = keyset_servicer.ToJson(request, self._ctx)
+    self.assertEqual(response.WhichOneof('result'), 'err')
+    self.assertNotEmpty(response.err)
 
   def test_generate_encrypt_decrypt(self):
     keyset_servicer = services.KeysetServicer()

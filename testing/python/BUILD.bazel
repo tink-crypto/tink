@@ -1,5 +1,5 @@
 load("@rules_proto_grpc//python:defs.bzl", "python_grpc_library")
-load("@rules_python//python:defs.bzl", "py_library", "py_binary")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
 package(
@@ -40,6 +40,7 @@ py_test(
         ":services",
         ":testing_api_python_library",
         requirement("absl-py"),
+        "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",
         "@tink_py//tink/hybrid",
