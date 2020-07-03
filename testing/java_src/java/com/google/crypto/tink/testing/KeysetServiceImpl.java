@@ -17,15 +17,21 @@ package com.google.crypto.tink.testing;
 import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.JsonKeysetWriter;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.proto.testing.KeysetFromJsonRequest;
+import com.google.crypto.tink.proto.testing.KeysetFromJsonResponse;
 import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
 import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc.KeysetImplBase;
 import com.google.crypto.tink.proto.testing.KeysetPublicRequest;
 import com.google.crypto.tink.proto.testing.KeysetPublicResponse;
+import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
+import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -92,6 +98,55 @@ public final class KeysetServiceImpl extends KeysetImplBase {
               .build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
       response = KeysetPublicResponse.newBuilder().setErr(e.toString()).build();
+    } catch (IOException e) {
+      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
+      return;
+    }
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void toJson(
+      KeysetToJsonRequest request, StreamObserver<KeysetToJsonResponse> responseObserver) {
+    KeysetToJsonResponse response;
+    try {
+      KeysetHandle keysetHandle =
+          CleartextKeysetHandle.read(
+              BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
+      Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
+      ByteArrayOutputStream jsonKeysetStream = new ByteArrayOutputStream();
+      JsonKeysetWriter.withOutputStream(jsonKeysetStream).write(keyset);
+      jsonKeysetStream.close();
+      response =
+          KeysetToJsonResponse.newBuilder().setJsonKeyset(jsonKeysetStream.toString()).build();
+    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
+      response = KeysetToJsonResponse.newBuilder().setErr(e.toString()).build();
+    } catch (IOException e) {
+      responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
+      return;
+    }
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void fromJson(
+      KeysetFromJsonRequest request, StreamObserver<KeysetFromJsonResponse> responseObserver) {
+    KeysetFromJsonResponse response;
+    try {
+      KeysetHandle keysetHandle =
+          CleartextKeysetHandle.read(JsonKeysetReader.withString(request.getJsonKeyset()));
+      Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
+      ByteArrayOutputStream keysetStream = new ByteArrayOutputStream();
+      BinaryKeysetWriter.withOutputStream(keysetStream).write(keyset);
+      keysetStream.close();
+      response =
+          KeysetFromJsonResponse.newBuilder()
+              .setKeyset(ByteString.copyFrom(keysetStream.toByteArray()))
+              .build();
+    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
+      response = KeysetFromJsonResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
       responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
       return;

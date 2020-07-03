@@ -18,10 +18,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.testing.AeadDecryptRequest;
 import com.google.crypto.tink.proto.testing.AeadDecryptResponse;
 import com.google.crypto.tink.proto.testing.AeadEncryptRequest;
@@ -34,9 +36,13 @@ import com.google.crypto.tink.proto.testing.DeterministicAeadDecryptResponse;
 import com.google.crypto.tink.proto.testing.DeterministicAeadEncryptRequest;
 import com.google.crypto.tink.proto.testing.DeterministicAeadEncryptResponse;
 import com.google.crypto.tink.proto.testing.DeterministicAeadGrpc;
+import com.google.crypto.tink.proto.testing.KeysetFromJsonRequest;
+import com.google.crypto.tink.proto.testing.KeysetFromJsonResponse;
 import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
 import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc;
+import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
+import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
 import com.google.crypto.tink.proto.testing.MacGrpc;
 import com.google.crypto.tink.proto.testing.MetadataGrpc;
 import com.google.crypto.tink.proto.testing.ServerInfoRequest;
@@ -109,6 +115,66 @@ public final class TestingServicesTest {
     KeysetGenerateRequest genRequest =
         KeysetGenerateRequest.newBuilder().setTemplate(ByteString.copyFrom(template)).build();
     return keysetStub.generate(genRequest);
+  }
+
+  private static KeysetToJsonResponse keysetToJson(
+      KeysetGrpc.KeysetBlockingStub keysetStub, byte[] keyset) {
+    KeysetToJsonRequest request =
+        KeysetToJsonRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).build();
+    return keysetStub.toJson(request);
+  }
+
+  private static KeysetFromJsonResponse keysetFromJson(
+      KeysetGrpc.KeysetBlockingStub keysetStub, String jsonKeyset) {
+    KeysetFromJsonRequest request =
+        KeysetFromJsonRequest.newBuilder().setJsonKeyset(jsonKeyset).build();
+    return keysetStub.fromJson(request);
+  }
+
+  @Test
+  public void toJson_success() throws Exception {
+    String jsonKeyset =
+        ""
+            + "{"
+            + "  \"primaryKeyId\": 42,"
+            + "  \"key\": ["
+            + "    {"
+            + "      \"keyData\": {"
+            + "        \"typeUrl\": \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
+            + "        \"keyMaterialType\": \"SYMMETRIC\","
+            + "        \"value\": \"AFakeTestKeyValue1234567\""
+            + "      },"
+            + "      \"outputPrefixType\": \"TINK\","
+            + "      \"keyId\": 42,"
+            + "      \"status\": \"ENABLED\""
+            + "    }"
+            + "  ]"
+            + "})";
+    KeysetFromJsonResponse fromResponse = keysetFromJson(keysetStub, jsonKeyset);
+    assertThat(fromResponse.getErr()).isEmpty();
+    byte[] output = fromResponse.getKeyset().toByteArray();
+
+    Keyset keyset = BinaryKeysetReader.withBytes(output).read();
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(42);
+  }
+
+  @Test
+  public void toFromJson_success() throws Exception {
+    byte[] template = AeadKeyTemplates.AES128_GCM.toByteArray();
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetToJsonResponse toResponse = keysetToJson(keysetStub, keyset);
+    assertThat(toResponse.getErr()).isEmpty();
+    String jsonKeyset = toResponse.getJsonKeyset();
+
+    KeysetFromJsonResponse fromResponse = keysetFromJson(keysetStub, jsonKeyset);
+    assertThat(fromResponse.getErr()).isEmpty();
+    byte[] output = fromResponse.getKeyset().toByteArray();
+
+    assertThat(output).isEqualTo(keyset);
   }
 
   private static AeadEncryptResponse aeadEncrypt(
