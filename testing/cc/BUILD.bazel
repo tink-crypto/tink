@@ -44,6 +44,8 @@ cc_library(
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:binary_keyset_writer",
         "@tink_cc//:cleartext_keyset_handle",
+        "@tink_cc//:json_keyset_reader",
+        "@tink_cc//:json_keyset_writer",
         "@tink_cc//:keyset_handle",
     ],
 )
@@ -57,6 +59,8 @@ cc_test(
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:binary_keyset_writer",
+        "@tink_cc//:json_keyset_reader",
+        "@tink_cc//:json_keyset_writer",
         "@tink_cc//aead:aead_key_templates",
         "@tink_cc//config:tink_config",
         "@tink_cc//hybrid:hybrid_key_templates",
