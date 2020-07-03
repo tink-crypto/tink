@@ -11,6 +11,12 @@ add_subdirectory(util)
 
 tink_module(core)
 
+# configuration settings for the build
+option(USE_ONLY_FIPS "Enables the FIPS only mode in Tink" OFF)
+if(USE_ONLY_FIPS)
+    add_definitions(-DTINK_USE_ONLY_FIPS)
+endif()
+
 # public libraries
 
 set(TINK_VERSION_H "${TINK_GENFILE_DIR}/tink/version.h")

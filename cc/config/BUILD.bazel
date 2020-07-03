@@ -32,6 +32,28 @@ cc_library(
     ],
 )
 
+config_setting(
+    name = "only_fips",
+    values = {"define": "use_only_fips=on"},
+)
+
+cc_library(
+    name = "tink_fips",
+    srcs = ["tink_fips.cc"],
+    hdrs = ["tink_fips.h"],
+    include_prefix = "tink/config",
+    defines = select({
+        "only_fips": ["TINK_USE_ONLY_FIPS"],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_google_absl//absl/base:core_headers",
+        "@boringssl//:crypto",
+        "//util:status",
+    ],
+)
+
 # tests
 
 cc_test(

@@ -27,6 +27,17 @@ tink_cc_library(
     tink::proto::config_cc_proto
 )
 
+tink_cc_library(
+  NAME tink_fips
+  SRCS
+    tink_fips.cc
+    tink_fips.h
+  DEPS
+    absl::base
+    crypto
+    tink::util::status
+)
+
 # tests
 
 tink_cc_test(
