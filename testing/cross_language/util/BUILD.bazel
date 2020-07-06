@@ -47,7 +47,6 @@ py_library(
     deps = [
         ":testing_api_python_library",
         "@com_google_protobuf//:protobuf_python",
-        "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",

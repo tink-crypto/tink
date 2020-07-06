@@ -39,23 +39,23 @@ class SignaturePythonTest(parameterized.TestCase):
       supported_key_types.test_cases(supported_key_types.SIGNATURE_KEY_TYPES))
   def test_encrypt_decrypt(self, key_template_name, supported_langs):
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
-    private_handle = testing_servers.new_keyset_handle('java', key_template)
+    private_keyset = testing_servers.new_keyset('java', key_template)
     supported_signers = [
-        testing_servers.public_key_sign(lang, private_handle)
+        testing_servers.public_key_sign(lang, private_keyset)
         for lang in supported_langs
     ]
     unsupported_signers = [
-        testing_servers.public_key_sign(lang, private_handle)
+        testing_servers.public_key_sign(lang, private_keyset)
         for lang in SUPPORTED_LANGUAGES
         if lang not in supported_langs
     ]
-    public_handle = private_handle.public_keyset_handle()
+    public_keyset = testing_servers.public_keyset('java', private_keyset)
     supported_verifiers = [
-        testing_servers.public_key_verify(lang, public_handle)
+        testing_servers.public_key_verify(lang, public_keyset)
         for lang in supported_langs
     ]
     unsupported_verifiers = [
-        testing_servers.public_key_verify(lang, public_handle)
+        testing_servers.public_key_verify(lang, public_keyset)
         for lang in testing_servers.LANGUAGES
         if lang not in supported_langs
     ]

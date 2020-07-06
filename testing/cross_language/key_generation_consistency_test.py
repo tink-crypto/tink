@@ -327,7 +327,7 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
     results = {}
     for lang in supported_langs:
       try:
-        _ = testing_servers.new_keyset_handle(lang, template)
+        _ = testing_servers.new_keyset(lang, template)
         if (name, lang) in SUCCEEDS_BUT_SHOULD_FAIL:
           failures += 1
         if (name, lang) in FAILS_BUT_SHOULD_SUCCEED:

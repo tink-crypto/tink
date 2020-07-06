@@ -43,13 +43,12 @@ class StreamingAeadPythonTest(parameterized.TestCase):
   def test_encrypt_decrypt(self, key_template_name, supported_langs):
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Use java to generate keys, as it supports all key types.
-    keyset_handle = testing_servers.new_keyset_handle('java', key_template)
+    keyset = testing_servers.new_keyset('java', key_template)
     supported_streaming_aeads = [
-        testing_servers.streaming_aead(lang, keyset_handle)
-        for lang in supported_langs
+        testing_servers.streaming_aead(lang, keyset) for lang in supported_langs
     ]
     unsupported_streaming_aeads = [
-        testing_servers.streaming_aead(lang, keyset_handle)
+        testing_servers.streaming_aead(lang, keyset)
         for lang in SUPPORTED_LANGUAGES
         if lang not in supported_langs
     ]

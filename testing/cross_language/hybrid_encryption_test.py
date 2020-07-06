@@ -39,23 +39,23 @@ class HybridEncryptionTest(parameterized.TestCase):
           supported_key_types.HYBRID_PRIVATE_KEY_TYPES))
   def test_encrypt_decrypt(self, key_template_name, supported_langs):
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
-    private_handle = testing_servers.new_keyset_handle('java', key_template)
+    private_keyset = testing_servers.new_keyset('java', key_template)
     supported_decs = [
-        testing_servers.hybrid_decrypt(lang, private_handle)
+        testing_servers.hybrid_decrypt(lang, private_keyset)
         for lang in supported_langs
     ]
     unsupported_decs = [
-        testing_servers.hybrid_decrypt(lang, private_handle)
+        testing_servers.hybrid_decrypt(lang, private_keyset)
         for lang in SUPPORTED_LANGUAGES
         if lang not in supported_langs
     ]
-    public_handle = private_handle.public_keyset_handle()
+    public_keyset = testing_servers.public_keyset('java', private_keyset)
     supported_encs = [
-        testing_servers.hybrid_encrypt(lang, public_handle)
+        testing_servers.hybrid_encrypt(lang, public_keyset)
         for lang in supported_langs
     ]
     unsupported_encs = [
-        testing_servers.hybrid_encrypt(lang, public_handle)
+        testing_servers.hybrid_encrypt(lang, public_keyset)
         for lang in testing_servers.LANGUAGES
         if lang not in supported_langs
     ]

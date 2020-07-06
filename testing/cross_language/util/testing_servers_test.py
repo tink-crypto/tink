@@ -67,11 +67,11 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['aead'])
   def test_aead(self, lang):
-    keyset_handle = testing_servers.new_keyset_handle(
-        lang, aead.aead_key_templates.AES128_GCM)
+    keyset = testing_servers.new_keyset(lang,
+                                        aead.aead_key_templates.AES128_GCM)
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
-    aead_primitive = testing_servers.aead(lang, keyset_handle)
+    aead_primitive = testing_servers.aead(lang, keyset)
     ciphertext = aead_primitive.encrypt(plaintext, associated_data)
     output = aead_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)
@@ -81,11 +81,11 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['daead'])
   def test_daead(self, lang):
-    keyset_handle = testing_servers.new_keyset_handle(
+    keyset = testing_servers.new_keyset(
         lang, daead.deterministic_aead_key_templates.AES256_SIV)
     plaintext = b'The quick brown fox jumps over the lazy dog'
     associated_data = b'associated_data'
-    daead_primitive = testing_servers.deterministic_aead(lang, keyset_handle)
+    daead_primitive = testing_servers.deterministic_aead(lang, keyset)
     ciphertext = daead_primitive.encrypt_deterministically(
         plaintext, associated_data)
     output = daead_primitive.decrypt_deterministically(
@@ -97,13 +97,12 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['streaming_aead'])
   def test_streaming_aead(self, lang):
-    keyset_handle = testing_servers.new_keyset_handle(
+    keyset = testing_servers.new_keyset(
         lang, streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB)
     plaintext = b'The quick brown fox jumps over the lazy dog'
     plaintext_stream = io.BytesIO(plaintext)
     associated_data = b'associated_data'
-    streaming_aead_primitive = testing_servers.streaming_aead(
-        lang, keyset_handle)
+    streaming_aead_primitive = testing_servers.streaming_aead(lang, keyset)
     ciphertext_stream = streaming_aead_primitive.new_encrypting_stream(
         plaintext_stream, associated_data)
     output_stream = streaming_aead_primitive.new_decrypting_stream(
@@ -116,10 +115,10 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['mac'])
   def test_mac(self, lang):
-    keyset_handle = testing_servers.new_keyset_handle(
+    keyset = testing_servers.new_keyset(
         lang, mac.mac_key_templates.HMAC_SHA256_128BITTAG)
     data = b'The quick brown fox jumps over the lazy dog'
-    mac_primitive = testing_servers.mac(lang, keyset_handle)
+    mac_primitive = testing_servers.mac(lang, keyset)
     mac_value = mac_primitive.compute_mac(data)
     mac_primitive.verify_mac(mac_value, data)
 
@@ -128,10 +127,10 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['hybrid'])
   def test_hybrid(self, lang):
-    private_handle = testing_servers.new_keyset_handle(
+    private_handle = testing_servers.new_keyset(
         lang,
         hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
-    public_handle = testing_servers.public_keyset_handle(lang, private_handle)
+    public_handle = testing_servers.public_keyset(lang, private_handle)
     enc_primitive = testing_servers.hybrid_encrypt(lang, public_handle)
     data = b'The quick brown fox jumps over the lazy dog'
     context_info = b'context'
@@ -145,9 +144,9 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['signature'])
   def test_signature(self, lang):
-    private_handle = testing_servers.new_keyset_handle(
+    private_handle = testing_servers.new_keyset(
         lang, signature.signature_key_templates.ED25519)
-    public_handle = testing_servers.public_keyset_handle(lang, private_handle)
+    public_handle = testing_servers.public_keyset(lang, private_handle)
     sign_primitive = testing_servers.public_key_sign(lang, private_handle)
     data = b'The quick brown fox jumps over the lazy dog'
     signature_value = sign_primitive.sign(data)

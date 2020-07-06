@@ -25,8 +25,6 @@ from absl import logging
 import grpc
 import portpicker
 
-import tink
-
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
@@ -211,78 +209,65 @@ def stop() -> None:
   _ts.stop()
 
 
-def new_keyset_handle(
-    lang: Text, key_template: tink_pb2.KeyTemplate) -> tink.KeysetHandle:
+def new_keyset(lang: Text, key_template: tink_pb2.KeyTemplate) -> bytes:
   """Returns a new KeysetHandle, implemented in lang."""
   global _ts
-  return _primitives.new_keyset_handle(_ts.keyset_stub(lang), key_template)
+  return _primitives.new_keyset(_ts.keyset_stub(lang), key_template)
 
 
-def public_keyset_handle(
-    lang: Text,
-    private_keyset_handle: tink.KeysetHandle) -> tink.KeysetHandle:
+def public_keyset(lang: Text, private_keyset: bytes) -> bytes:
   """Returns a public keyset handle, implemented in lang."""
   global _ts
-  return _primitives.public_keyset_handle(
-      _ts.keyset_stub(lang), private_keyset_handle)
+  return _primitives.public_keyset(_ts.keyset_stub(lang), private_keyset)
 
 
-def aead(lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.Aead:
+def aead(lang: Text, keyset: bytes) -> _primitives.Aead:
   """Returns an AEAD primitive, implemented in lang."""
   global _ts
-  return _primitives.Aead(lang, _ts.aead_stub(lang), keyset_handle)
+  return _primitives.Aead(lang, _ts.aead_stub(lang), keyset)
 
 
-def deterministic_aead(
-    lang: Text,
-    keyset_handle: tink.KeysetHandle) -> _primitives.DeterministicAead:
+def deterministic_aead(lang: Text,
+                       keyset: bytes) -> _primitives.DeterministicAead:
   """Returns a DeterministicAEAD primitive, implemented in lang."""
   global _ts
-  return _primitives.DeterministicAead(
-      lang, _ts.daead_stub(lang), keyset_handle)
+  return _primitives.DeterministicAead(lang, _ts.daead_stub(lang), keyset)
 
 
-def streaming_aead(
-    lang: Text,
-    key_handle: tink.KeysetHandle) -> _primitives.StreamingAead:
+def streaming_aead(lang: Text, key_handle: bytes) -> _primitives.StreamingAead:
   """Returns a StreamingAEAD primitive, implemented in lang."""
   global _ts
   return _primitives.StreamingAead(
       lang, _ts.streaming_aead_stub(lang), key_handle)
 
 
-def hybrid_encrypt(
-    lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.HybridEncrypt:
+def hybrid_encrypt(lang: Text, pub_keyset: bytes) -> _primitives.HybridEncrypt:
   """Returns a HybridEncrypt  primitive, implemented in lang."""
   global _ts
-  return _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), keyset_handle)
+  return _primitives.HybridEncrypt(lang, _ts.hybrid_stub(lang), pub_keyset)
 
 
-def hybrid_decrypt(
-    lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.HybridDecrypt:
+def hybrid_decrypt(lang: Text, priv_keyset: bytes) -> _primitives.HybridDecrypt:
   """Returns a HybridDecrypt primitive, implemented in lang."""
   global _ts
-  return _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), keyset_handle)
+  return _primitives.HybridDecrypt(lang, _ts.hybrid_stub(lang), priv_keyset)
 
 
-def mac(lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.Mac:
+def mac(lang: Text, keyset: bytes) -> _primitives.Mac:
   """Returns a MAC primitive, implemented in lang."""
   global _ts
-  return _primitives.Mac(lang, _ts.mac_stub(lang), keyset_handle)
+  return _primitives.Mac(lang, _ts.mac_stub(lang), keyset)
 
 
-def public_key_sign(
-    lang: Text, keyset_handle: tink.KeysetHandle) -> _primitives.PublicKeySign:
+def public_key_sign(lang: Text,
+                    priv_keyset: bytes) -> _primitives.PublicKeySign:
   """Returns an PublicKeySign primitive, implemented in lang."""
   global _ts
-  return _primitives.PublicKeySign(lang, _ts.signature_stub(lang),
-                                   keyset_handle)
+  return _primitives.PublicKeySign(lang, _ts.signature_stub(lang), priv_keyset)
 
 
-def public_key_verify(
-    lang: Text,
-    keyset_handle: tink.KeysetHandle) -> _primitives.PublicKeyVerify:
+def public_key_verify(lang: Text,
+                      pub_keyset: bytes) -> _primitives.PublicKeyVerify:
   """Returns an PublicKeyVerify primitive, implemented in lang."""
   global _ts
-  return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang),
-                                     keyset_handle)
+  return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), pub_keyset)
