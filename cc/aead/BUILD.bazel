@@ -68,6 +68,7 @@ cc_library(
         ":kms_envelope_aead_key_manager",
         ":xchacha20_poly1305_key_manager",
         "//config:config_util",
+        "//config:tink_fips",
         "//mac:mac_config",
         "//proto:config_cc_proto",
         "//util:status",

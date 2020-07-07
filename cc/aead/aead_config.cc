@@ -30,6 +30,7 @@
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
+#include "tink/config/tink_fips.h"
 
 using google::crypto::tink::RegistryConfig;
 
@@ -47,13 +48,20 @@ util::Status AeadConfig::Register() {
   auto status = MacConfig::Register();
   if (!status.ok()) return status;
 
-  // Register key managers.
+  // Register key managers which utilize the FIPS validated BoringCrypto
+  // implementations.
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesCtrHmacAeadKeyManager>(), true);
   if (!status.ok()) return status;
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), true);
   if (!status.ok()) return status;
+
+  if (kUseOnlyFips) {
+    return util::OkStatus();
+  }
+
+  // Register all the other key managers.
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmSivKeyManager>(), true);
   if (!status.ok()) return status;
@@ -73,6 +81,9 @@ util::Status AeadConfig::Register() {
   // Register primitive wrapper.
   return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
 }
+
+
+
 
 }  // namespace tink
 }  // namespace crypto

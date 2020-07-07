@@ -63,6 +63,7 @@ tink_cc_library(
     tink::aead::xchacha20_poly1305_key_manager
     tink::aead::aead_wrapper
     tink::config::config_util
+    tink::config::tink_fips
     tink::mac::mac_config
     tink::util::status
     tink::proto::config_cc_proto

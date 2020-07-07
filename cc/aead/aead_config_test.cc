@@ -16,6 +16,8 @@
 
 #include "tink/aead/aead_config.h"
 
+#include <list>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead.h"
@@ -24,9 +26,11 @@
 #include "tink/config.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
+#include "tink/config/tink_fips.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+
 
 namespace crypto {
 namespace tink {
@@ -55,6 +59,10 @@ TEST_F(AeadConfigTest, RegisterWorks) {
 // Tests that the AeadWrapper has been properly registered and we can wrap
 // primitives.
 TEST_F(AeadConfigTest, WrappersRegistered) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   ASSERT_TRUE(AeadConfig::Register().ok());
 
   google::crypto::tink::Keyset::Key key;
@@ -82,6 +90,47 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
   decryption_result =
       DummyAead("dummy").Decrypt(encryption_result.ValueOrDie(), "wrog");
   EXPECT_FALSE(decryption_result.status().ok());
+}
+
+// FIPS-only mode tests
+TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  EXPECT_THAT(AeadConfig::Register(), IsOk());
+
+  std::list<google::crypto::tink::KeyTemplate> non_fips_key_templates;
+  non_fips_key_templates.push_back(AeadKeyTemplates::Aes128Eax());
+  non_fips_key_templates.push_back(AeadKeyTemplates::Aes256Eax());
+  non_fips_key_templates.push_back(AeadKeyTemplates::Aes128GcmSiv());
+  non_fips_key_templates.push_back(AeadKeyTemplates::Aes256GcmSiv());
+  non_fips_key_templates.push_back(AeadKeyTemplates::XChaCha20Poly1305());
+
+  for (auto key_template : non_fips_key_templates) {
+    auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
+    EXPECT_THAT(new_keyset_handle_result.status(),
+                StatusIs(util::error::NOT_FOUND));
+  }
+}
+
+TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  EXPECT_THAT(AeadConfig::Register(), IsOk());
+
+  std::list<google::crypto::tink::KeyTemplate> fips_key_templates;
+  fips_key_templates.push_back(AeadKeyTemplates::Aes128Gcm());
+  fips_key_templates.push_back(AeadKeyTemplates::Aes256Gcm());
+  fips_key_templates.push_back(AeadKeyTemplates::Aes128CtrHmacSha256());
+  fips_key_templates.push_back(AeadKeyTemplates::Aes256CtrHmacSha256());
+
+  for (auto key_template : fips_key_templates) {
+    auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
+    EXPECT_THAT(new_keyset_handle_result.status(), IsOk());
+  }
 }
 
 }  // namespace
