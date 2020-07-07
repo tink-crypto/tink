@@ -52,6 +52,26 @@ def public_keyset(stub: testing_api_pb2_grpc.KeysetStub,
   return response.public_keyset
 
 
+def keyset_to_json(
+    stub: testing_api_pb2_grpc.KeysetStub,
+    keyset: bytes) -> Text:
+  request = testing_api_pb2.KeysetToJsonRequest(keyset=keyset)
+  response = stub.ToJson(request)
+  if response.err:
+    raise tink.TinkError(response.err)
+  return response.json_keyset
+
+
+def keyset_from_json(
+    stub: testing_api_pb2_grpc.KeysetStub,
+    json_keyset: Text) -> bytes:
+  request = testing_api_pb2.KeysetFromJsonRequest(json_keyset=json_keyset)
+  response = stub.FromJson(request)
+  if response.err:
+    raise tink.TinkError(response.err)
+  return response.keyset
+
+
 class Aead(aead.Aead):
   """Wraps AEAD service stub into an Aead primitive."""
 

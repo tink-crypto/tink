@@ -221,6 +221,16 @@ def public_keyset(lang: Text, private_keyset: bytes) -> bytes:
   return _primitives.public_keyset(_ts.keyset_stub(lang), private_keyset)
 
 
+def keyset_to_json(lang: Text, keyset: bytes) -> Text:
+  global _ts
+  return _primitives.keyset_to_json(_ts.keyset_stub(lang), keyset)
+
+
+def keyset_from_json(lang: Text, json_keyset: Text) -> bytes:
+  global _ts
+  return _primitives.keyset_from_json(_ts.keyset_stub(lang), json_keyset)
+
+
 def aead(lang: Text, keyset: bytes) -> _primitives.Aead:
   """Returns an AEAD primitive, implemented in lang."""
   global _ts
