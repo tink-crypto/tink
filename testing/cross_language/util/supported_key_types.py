@@ -70,6 +70,10 @@ SUPPORTED_LANGUAGES = {
     'RsaSsaPssPrivateKey': ['cc', 'java', 'python'],
 }
 
+SUPPORTED_LANGUAGES_PER_TYPE_URL = {
+    'type.googleapis.com/google.crypto.tink.' + name: langs
+    for name, langs in SUPPORTED_LANGUAGES.items()}
+
 # For each KeyType, a list of all KeyTemplate Names that must be supported.
 KEY_TEMPLATE_NAMES = {
     'AesEaxKey': ['AES128_EAX', 'AES256_EAX'],

@@ -49,6 +49,23 @@ py_test(
 )
 
 py_test(
+    name = "aead_consistency_test",
+    srcs = ["aead_consistency_test.py"],
+    deps = [
+        "//util:supported_key_types",
+        "//util:testing_servers",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/proto:aes_ctr_hmac_aead_py_pb2",
+        "@tink_py//tink/proto:aes_eax_py_pb2",
+        "@tink_py//tink/proto:aes_gcm_py_pb2",
+        "@tink_py//tink/proto:common_py_pb2",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
     name = "deterministic_aead_test",
     srcs = ["deterministic_aead_test.py"],
     deps = [
