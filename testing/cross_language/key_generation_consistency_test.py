@@ -130,51 +130,38 @@ def aes_gcm_test_cases():
 
 
 def aes_ctr_hmac_aead_test_cases():
+  def _test_case(aes_key_size=16, iv_size=16, hmac_key_size=16,
+                 tag_size=16, hash_type=common_pb2.SHA256):
+    return ('AesCtrHmacAeadKey(%d,%d,%d,%d,%s)' %
+            (aes_key_size, iv_size, hmac_key_size, tag_size,
+             common_pb2.HashType.Name(hash_type)),
+            aead.aead_key_templates.create_aes_ctr_hmac_aead_key_template(
+                aes_key_size=aes_key_size,
+                iv_size=iv_size,
+                hmac_key_size=hmac_key_size,
+                tag_size=tag_size,
+                hash_type=hash_type))
   for aes_key_size in [15, 16, 24, 32, 64, 96]:
     for iv_size in [11, 12, 16, 17, 24, 32]:
-      hmac_key_size = 32
-      tag_size = 16
-      hash_type = common_pb2.SHA256
-      yield ('AesCtrHmacAeadKey(%d,%d,%d,%d,%s)' %
-             (aes_key_size, iv_size, hmac_key_size, tag_size,
-              common_pb2.HashType.Name(hash_type)),
-             aead.aead_key_templates.create_aes_ctr_hmac_aead_key_template(
-                 aes_key_size=aes_key_size,
-                 iv_size=iv_size,
-                 hmac_key_size=hmac_key_size,
-                 tag_size=tag_size,
-                 hash_type=common_pb2.SHA256))
+      yield _test_case(aes_key_size=aes_key_size, iv_size=iv_size)
   for hmac_key_size in [15, 16, 24, 32, 64, 96]:
     for tag_size in [9, 10, 16, 20, 21, 24, 32, 33, 64, 65]:
       for hash_type in HASH_TYPES:
-        aes_key_size = 32
-        iv_size = 16
-        yield ('AesCtrHmacAeadKey(%d,%d,%d,%d,%s)' %
-               (aes_key_size, iv_size, hmac_key_size, tag_size,
-                common_pb2.HashType.Name(hash_type)),
-               aead.aead_key_templates.create_aes_ctr_hmac_aead_key_template(
-                   aes_key_size=aes_key_size,
-                   iv_size=iv_size,
-                   hmac_key_size=hmac_key_size,
-                   tag_size=tag_size,
-                   hash_type=hash_type))
+        yield _test_case(hmac_key_size=hmac_key_size, tag_size=tag_size,
+                         hash_type=hash_type)
 
 
 def hmac_test_cases():
-  for hmac_key_size in [15, 16, 24, 32, 64, 96]:
-    tag_size = 16
-    hash_type = common_pb2.SHA256
-    yield ('HmacKey(%d,%d,%s)' % (hmac_key_size, tag_size,
-                                  common_pb2.HashType.Name(hash_type)),
-           mac.mac_key_templates.create_hmac_key_template(
-               hmac_key_size, tag_size, hash_type))
+  def _test_case(key_size=32, tag_size=16, hash_type=common_pb2.SHA256):
+    return ('HmacKey(%d,%d,%s)' % (key_size, tag_size,
+                                   common_pb2.HashType.Name(hash_type)),
+            mac.mac_key_templates.create_hmac_key_template(
+                key_size, tag_size, hash_type))
+  for key_size in [15, 16, 24, 32, 64, 96]:
+    yield _test_case(key_size=key_size)
   for tag_size in [9, 10, 16, 20, 21, 24, 32, 33, 64, 65]:
     for hash_type in HASH_TYPES:
-      hmac_key_size = 32
-      yield ('HmacKey(%d,%d,%s)' % (hmac_key_size, tag_size,
-                                    common_pb2.HashType.Name(hash_type)),
-             mac.mac_key_templates.create_hmac_key_template(
-                 hmac_key_size, tag_size, hash_type))
+      yield _test_case(tag_size=tag_size, hash_type=hash_type)
 
 
 def aes_siv_test_cases():
