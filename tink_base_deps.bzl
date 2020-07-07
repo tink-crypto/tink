@@ -73,7 +73,7 @@ def tink_base_deps():
             sha256 = "db48eed61552e25d36fe051a65d2a329cc0fb08442627e8f13960c5ab087a44e",
             strip_prefix = "bazel-toolchains-3.2.0",
             urls = [
-                "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/3.2.0.tar.gz",
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/releases/download/3.2.0/bazel-toolchains-3.2.0.tar.gz",
                 "https://github.com/bazelbuild/bazel-toolchains/archive/3.2.0.tar.gz",
             ],
         )
