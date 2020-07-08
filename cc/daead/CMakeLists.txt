@@ -47,6 +47,7 @@ tink_cc_library(
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_wrapper
     tink::config::config_util
+    tink::config::tink_fips
     tink::mac::mac_config
     tink::util::status
     tink::proto::config_cc_proto
@@ -118,6 +119,7 @@ tink_cc_test(
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_config
     tink::daead::deterministic_aead_key_templates
+    tink::config::tink_fips
     tink::core::config
     tink::core::deterministic_aead
     tink::core::keyset_handle
