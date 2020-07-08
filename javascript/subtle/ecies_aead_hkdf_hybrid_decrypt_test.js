@@ -20,7 +20,7 @@ const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const DemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Registry = goog.require('tink.Registry');
+const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
 const {fromJsonWebKey: decrypterFromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_decrypt');
 const {fromJsonWebKey: encrypterFromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_encrypt');
 

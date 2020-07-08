@@ -11,15 +11,11 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+import {BinaryKeysetReader} from './binary_keyset_reader';
+import {BinaryKeysetWriter} from './binary_keyset_writer';
+import {KeysetHandle} from './keyset_handle';
+import {PbKeyset} from './proto';
 
-goog.module('tink.CleartextKeysetHandle');
-
-const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
-const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
-const KeysetHandle = goog.require('tink.KeysetHandle');
-const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
-
-/** @type {!BinaryKeysetWriter} */
 const binaryKeysetWriter = new BinaryKeysetWriter();
 
 /**
@@ -27,7 +23,7 @@ const binaryKeysetWriter = new BinaryKeysetWriter();
  *
  * @final
  */
-class CleartextKeysetHandle {
+export class CleartextKeysetHandle {
   /**
    * Creates a KeysetHandle from a JSPB array representation of a keyset. The
    * array is used in place and not cloned.
@@ -35,10 +31,8 @@ class CleartextKeysetHandle {
    * Note that JSPB is currently not open source, so this method can't be
    * either.
    *
-   * @param {!Array<*>} keysetJspbArray
-   * @return {!KeysetHandle}
    */
-  static fromJspbArray(keysetJspbArray) {
+  static fromJspbArray(keysetJspbArray: AnyDuringMigration[]): KeysetHandle {
     return new KeysetHandle(new PbKeyset(keysetJspbArray));
   }
 
@@ -48,10 +42,8 @@ class CleartextKeysetHandle {
    * Note that JSPB is currently not open source, so this method can't be
    * either.
    *
-   * @param {string} keysetJspbString
-   * @return {!KeysetHandle}
    */
-  static deserializeFromJspb(keysetJspbString) {
+  static deserializeFromJspb(keysetJspbString: string): KeysetHandle {
     return new KeysetHandle(PbKeyset.deserialize(keysetJspbString));
   }
 
@@ -61,34 +53,26 @@ class CleartextKeysetHandle {
    * Note that JSPB is currently not open source, so this method can't be
    * either.
    *
-   * @param {!KeysetHandle} keysetHandle
-   * @return {string}
    */
-  static serializeToJspb(keysetHandle) {
+  static serializeToJspb(keysetHandle: KeysetHandle): string {
     return keysetHandle.getKeyset().serialize();
   }
 
   /**
    * Serializes a KeysetHandle to binary.
    *
-   * @param {!KeysetHandle} keysetHandle
-   * @return {!Uint8Array}
    */
-  static serializeToBinary(keysetHandle) {
+  static serializeToBinary(keysetHandle: KeysetHandle): Uint8Array {
     return binaryKeysetWriter.write(keysetHandle.getKeyset());
   }
 
   /**
    * Creates a KeysetHandle from a binary representation of a keyset.
    *
-   * @param {!Uint8Array} keysetBinary
-   * @return {!KeysetHandle}
    */
-  static deserializeFromBinary(keysetBinary) {
+  static deserializeFromBinary(keysetBinary: Uint8Array): KeysetHandle {
     const reader = BinaryKeysetReader.withUint8Array(keysetBinary);
     const keysetFromReader = reader.read();
     return new KeysetHandle(keysetFromReader);
   }
 }
-
-exports = CleartextKeysetHandle;

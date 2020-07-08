@@ -15,11 +15,11 @@
 goog.module('tink.PrimitiveSetTest');
 goog.setTestOnly('tink.PrimitiveSetTest');
 
+const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const CryptoFormat = goog.require('tink.CryptoFormat');
-const PrimitiveSet = goog.require('tink.PrimitiveSet');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 describe('primitive set test', function() {
   /////////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,20 @@ describe('primitive set test', function() {
       primitiveSet.addPrimitive(primitive, key);
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownPrefixType());
+      return;
+    }
+    fail('An exception should be thrown.');
+  });
+
+  it('add primitive null primitive', function() {
+    const primitive = null;
+    const key = createKey();
+    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
+
+    try {
+      primitiveSet.addPrimitive(primitive, key);
+    } catch (e) {
+      expect(e.toString()).toBe(ExceptionText.addingNullPrimitive());
       return;
     }
     fail('An exception should be thrown.');

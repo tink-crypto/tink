@@ -11,23 +11,20 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
-goog.module('tink.KeysetWriter');
-
-const {PbEncryptedKeyset, PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {SecurityException} from '../exception/security_exception';
+import {KeysetWriter} from './keyset_writer';
 
 /**
- * KeysetWriter knows how to write a keyset or an encrypted keyset to some
- * storage system.
+ * KeysetWriter knows how to write a keyset or an encrypted keyset.
  *
- * @record
+ * @final
  */
-class KeysetWriter {
-  /**
-   * @param {!PbKeyset|!PbEncryptedKeyset} keyset
-   * @return {!Uint8Array}
-   */
-  write(keyset) {}
+export class BinaryKeysetWriter implements KeysetWriter {
+  /** @override */
+  write(keyset: AnyDuringMigration) {
+    if (!keyset) {
+      throw new SecurityException('keyset has to be non-null.');
+    }
+    return keyset.serializeBinary();
+  }
 }
-
-exports = KeysetWriter;

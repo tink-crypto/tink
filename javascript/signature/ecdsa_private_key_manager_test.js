@@ -17,11 +17,11 @@ goog.setTestOnly('tink.signature.EcdsaPrivateKeyManagerTest');
 
 const EcdsaPrivateKeyManager = goog.require('tink.signature.EcdsaPrivateKeyManager');
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
-const KeyManager = goog.require('tink.KeyManager');
+const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
 const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
 const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Registry = goog.require('tink.Registry');
+const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
 const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 const {assertExists, assertInstanceof} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
