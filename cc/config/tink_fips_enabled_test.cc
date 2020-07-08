@@ -47,7 +47,7 @@ class FipsCompatibleWithBoringCrypto {
 };
 
 TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
-  if (FIPS_mode()) {
+  if (!FIPS_mode()) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is available.";
   }
 
@@ -61,7 +61,7 @@ TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
 }
 
 TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
-  if (!FIPS_mode()) {
+  if (FIPS_mode()) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is not available.";
   }
 
@@ -73,7 +73,7 @@ TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
   // FIPS validated implementations are not allowed if BoringCrypto is not
   // available.
   EXPECT_THAT(CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
-              StatusIs(util::error::INTERNAL());
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace
