@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "openssl/evp.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -39,6 +40,9 @@ class AesCtrBoringSsl : public IndCpaCipher {
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext) const override;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
   static constexpr int kMinIvSizeInBytes = 12;

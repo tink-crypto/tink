@@ -26,6 +26,7 @@
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -33,7 +34,13 @@ namespace tink {
 namespace subtle {
 namespace {
 
-TEST(AesEaxBoringSslTest, testBasic) {
+using ::crypto::tink::test::StatusIs;
+
+TEST(AesEaxBoringSslTest, TestBasic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   size_t nonce_size = 12;
@@ -50,7 +57,11 @@ TEST(AesEaxBoringSslTest, testBasic) {
   EXPECT_EQ(pt.ValueOrDie(), message);
 }
 
-TEST(AesEaxBoringSslTest, testMessageSize) {
+TEST(AesEaxBoringSslTest, TestMessageSize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   size_t nonce_size = 12;
@@ -69,7 +80,11 @@ TEST(AesEaxBoringSslTest, testMessageSize) {
   }
 }
 
-TEST(AesEaxBoringSslTest, testAadSize) {
+TEST(AesEaxBoringSslTest, TestAadSize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   size_t nonce_size = 12;
@@ -88,7 +103,11 @@ TEST(AesEaxBoringSslTest, testAadSize) {
   }
 }
 
-TEST(AesEaxBoringSslTest, testLongNonce) {
+TEST(AesEaxBoringSslTest, TestLongNonce) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   size_t nonce_size = 16;
@@ -105,7 +124,11 @@ TEST(AesEaxBoringSslTest, testLongNonce) {
   EXPECT_EQ(pt.ValueOrDie(), message);
 }
 
-TEST(AesEaxBoringSslTest, testModification) {
+TEST(AesEaxBoringSslTest, TestModification) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   size_t nonce_size = 12;
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
@@ -134,7 +157,11 @@ TEST(AesEaxBoringSslTest, testModification) {
   }
 }
 
-TEST(AesEaxBoringSslTest, testInvalidKeySizes) {
+TEST(AesEaxBoringSslTest, TestInvalidKeySizes) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   size_t nonce_size = 12;
   for (int keysize = 0; keysize < 65; keysize++) {
     if (keysize == 16 || keysize == 32) {
@@ -146,7 +173,11 @@ TEST(AesEaxBoringSslTest, testInvalidKeySizes) {
   }
 }
 
-TEST(AesEaxBoringSslTest, testEmpty) {
+TEST(AesEaxBoringSslTest, TestEmpty) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   size_t nonce_size = 12;
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("bedcfb5a011ebc84600fcb296c15af0d"));
@@ -279,9 +310,29 @@ bool WycheproofTest(const rapidjson::Document &root) {
 }
 
 TEST(AesEaxBoringSslTest, TestVectors) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors("aes_eax_test.json");
   ASSERT_TRUE(WycheproofTest(*root));
+}
+
+TEST(AesEaxBoringSslTest, TestFipsOnly) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::AesEaxBoringSsl::New(key128, 16).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::AesEaxBoringSsl::New(key256, 16).status(),
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

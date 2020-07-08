@@ -23,6 +23,7 @@
 #include "absl/strings/string_view.h"
 #include "openssl/aead.h"
 #include "tink/aead.h"
+#include "tink/config/tink_fips.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -59,6 +60,9 @@ class AesGcmSivBoringSsl : public Aead {
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
 
  private:
   static constexpr int kIvSizeInBytes = 12;

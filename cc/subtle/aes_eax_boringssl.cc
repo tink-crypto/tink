@@ -28,6 +28,7 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -143,6 +144,9 @@ util::SecretData AesEaxBoringSsl::ComputeP() const {
 
 crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxBoringSsl::New(
     const util::SecretData& key, size_t nonce_size_in_bytes) {
+  auto status = CheckFipsCompatibility<AesEaxBoringSsl>();
+  if (!status.ok()) return status;
+
   if (!IsValidKeySize(key.size())) {
     return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
   }

@@ -27,6 +27,7 @@
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -34,7 +35,13 @@ namespace tink {
 namespace subtle {
 namespace {
 
+using ::crypto::tink::test::StatusIs;
+
 TEST(AesGcmSivBoringSslTest, Basic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto res = AesGcmSivBoringSsl::New(key);
@@ -55,6 +62,10 @@ TEST(AesGcmSivBoringSslTest, Basic) {
 }
 
 TEST(AesGcmSivBoringSslTest, Sizes) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto res = AesGcmSivBoringSsl::New(key);
@@ -84,6 +95,10 @@ TEST(AesGcmSivBoringSslTest, Sizes) {
 }
 
 TEST(AesGcmSivBoringSslTest, Modification) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmSivBoringSsl::New(key).ValueOrDie());
@@ -114,6 +129,10 @@ TEST(AesGcmSivBoringSslTest, Modification) {
 }
 
 TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   const util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmSivBoringSsl::New(key).ValueOrDie());
@@ -169,6 +188,10 @@ TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmSivBoringSslTest, MessageEmptyVersusNullStringView) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   const util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmSivBoringSsl::New(key).ValueOrDie());
@@ -205,6 +228,10 @@ TEST(AesGcmSivBoringSslTest, MessageEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmSivBoringSslTest, InvalidKeySizes) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   for (int keysize = 0; keysize < 65; keysize++) {
     if (keysize == 16 || keysize == 32) {
       continue;
@@ -268,9 +295,29 @@ bool WycheproofTest(const rapidjson::Document& root) {
 }
 
 TEST(AesGcmSivBoringSslTest, TestVectors) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors("aes_gcm_siv_test.json");
   ASSERT_TRUE(WycheproofTest(*root));
+}
+
+TEST(AesGcmSivBoringSslTest, TestFipsOnly) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::AesGcmSivBoringSsl::New(key128).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::AesGcmSivBoringSsl::New(key256).status(),
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace
