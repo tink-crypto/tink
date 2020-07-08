@@ -22,8 +22,8 @@ import (
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
+	"github.com/google/tink/go/tink"
 )
 
 var errInvalidKeyset = fmt.Errorf("keyset.Handle: invalid keyset")
@@ -121,6 +121,16 @@ func (h *Handle) String() string {
 		return ""
 	}
 	return proto.CompactTextString(info)
+}
+
+// KeysetInfo returns KeysetInfo representation of the managed keyset.
+// The result does not contain any sensitive key material.
+func (h *Handle) KeysetInfo() *tinkpb.KeysetInfo {
+	info, err := getKeysetInfo(h.ks)
+	if err != nil {
+		return nil
+	}
+	return info
 }
 
 // Write encrypts and writes the enclosing keyset.
