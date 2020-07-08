@@ -139,11 +139,15 @@ func (km *aesCTRHMACAEADKeyManager) TypeURL() string {
 
 // validateKey validates the given AesCtrHmacAeadKey proto.
 func (km *aesCTRHMACAEADKeyManager) validateKey(key *aeadpb.AesCtrHmacAeadKey) error {
-	err := keyset.ValidateKeyVersion(key.Version, aesCTRHMACAEADKeyVersion)
-	if err != nil {
+	if err := keyset.ValidateKeyVersion(key.Version, aesCTRHMACAEADKeyVersion); err != nil {
 		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
 	}
-
+	if err := keyset.ValidateKeyVersion(key.AesCtrKey.Version, aesCTRHMACAEADKeyVersion); err != nil {
+		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
+	}
+	if err := keyset.ValidateKeyVersion(key.HmacKey.Version, aesCTRHMACAEADKeyVersion); err != nil {
+		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
+	}
 	// Validate AesCtrKey.
 	keySize := uint32(len(key.AesCtrKey.KeyValue))
 	if err := subtle.ValidateAESKeySize(keySize); err != nil {

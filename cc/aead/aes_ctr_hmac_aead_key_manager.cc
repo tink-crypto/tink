@@ -102,6 +102,9 @@ Status AesCtrHmacAeadKeyManager::ValidateKey(
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
 
+  status = ValidateVersion(key.aes_ctr_key().version(), get_version());
+  if (!status.ok()) return status;
+
   // Validate AesCtrKey.
   auto aes_ctr_key = key.aes_ctr_key();
   uint32_t aes_key_size = aes_ctr_key.key_value().size();

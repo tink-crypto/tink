@@ -40,15 +40,6 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
     # TODO(b/159989251)
     # HMAC with SHA384 is accepted in go, but not in other langs.
     ('AesCtrHmacAeadKey(16,16,16,16,SHA384,0,0,0)', 'go'),
-    # TODO(b/160671041)
-    # CC does not validate AesCtr version in AesCtrHmacAeadKey.
-    # Java and Go do not validate AesCtr and HMAC version in AesCtrHmacAeadKey.
-    ('AesCtrHmacAeadKey(16,16,16,16,SHA256,0,1,0)', 'cc'),
-    ('AesCtrHmacAeadKey(16,16,16,16,SHA256,0,1,0)', 'java'),
-    ('AesCtrHmacAeadKey(16,16,16,16,SHA256,0,1,0)', 'go'),
-    ('AesCtrHmacAeadKey(16,16,16,16,SHA256,0,1,0)', 'python'),
-    ('AesCtrHmacAeadKey(16,16,16,16,SHA256,0,0,1)', 'java'),
-    ('AesCtrHmacAeadKey(16,16,16,16,SHA256,0,0,1)', 'go'),
 ]
 
 # Test cases that fail in a language but should succeed
