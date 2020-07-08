@@ -13,6 +13,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "openssl/crypto.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
@@ -45,7 +46,11 @@ class FipsCompatibleWithBoringCrypto {
       crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
 };
 
-TEST(TinkFipsTest, CompatibilityChecks) {
+TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
+  if (FIPS_mode()) {
+    GTEST_SKIP() << "Test only run if BoringCrypto module is available.";
+  }
+
   // In FIPS only mode compatibility checks should disallow algorithms
   // with the FipsCompatibility::kNone flag.
   EXPECT_THAT(CheckFipsCompatibility<FipsIncompatible>(),
@@ -53,6 +58,22 @@ TEST(TinkFipsTest, CompatibilityChecks) {
 
   // FIPS validated implementations should still be allowed.
   EXPECT_THAT(CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(), IsOk());
+}
+
+TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
+  if (!FIPS_mode()) {
+    GTEST_SKIP() << "Test only run if BoringCrypto module is not available.";
+  }
+
+  // In FIPS only mode compatibility checks should disallow algorithms
+  // with the FipsCompatibility::kNone flag.
+  EXPECT_THAT(CheckFipsCompatibility<FipsIncompatible>(),
+              StatusIs(util::error::INTERNAL));
+
+  // FIPS validated implementations are not allowed if BoringCrypto is not
+  // available.
+  EXPECT_THAT(CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
+              StatusIs(util::error::INTERNAL());
 }
 
 }  // namespace
