@@ -142,12 +142,12 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
 }
 
 // FIPS-only mode tests
-TEST_F(HybridConfigTest, RegisterFipsValidTemplates) {
+TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
   if (!kUseOnlyFips) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
-  EXPECT_THAT(AeadConfig::Register(), IsOk());
+  EXPECT_THAT(HybridConfig::Register(), IsOk());
 
   // Check that we can not retrieve non-FIPS keyset handle
   std::list<google::crypto::tink::KeyTemplate> non_fips_key_templates;
