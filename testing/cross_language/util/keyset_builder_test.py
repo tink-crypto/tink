@@ -9,7 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.tools.testing.cross_language.util.keyset_builder."""
+"""Tests for tink.testing.cross_language.util.keyset_builder."""
 
 from absl.testing import absltest
 # from absl.testing import parameterized
@@ -17,8 +17,7 @@ from absl.testing import absltest
 import tink
 from tink import aead
 
-from tink.proto import tink_pb2
-from tools.testing.cross_language.util import keyset_builder
+from util import keyset_builder
 
 
 def setUpModule():
@@ -27,22 +26,24 @@ def setUpModule():
 
 class KeysetBuilderTest(absltest.TestCase):
 
-  def test_new_keyset_handle(self):
-    keyset_handle = keyset_builder.new_keyset_handle(
-        aead.aead_key_templates.AES128_GCM)
-    keyset_info = keyset_handle.keyset_info()
-    self.assertLen(keyset_info.key_info, 1)
-    self.assertEqual(keyset_info.key_info[0].status, tink_pb2.ENABLED)
-
-    p = keyset_handle.primitive(aead.Aead)
-    ciphertext = p.encrypt(b'plaintext', b'ad')
-    self.assertEqual(p.decrypt(ciphertext, b'ad'), b'plaintext')
-
   def test_keyset_handle_conversion(self):
     keyset_handle1 = tink.new_keyset_handle(aead.aead_key_templates.AES128_GCM)
     p1 = keyset_handle1.primitive(aead.Aead)
     builder = keyset_builder.from_keyset_handle(keyset_handle1)
     keyset_handle2 = builder.keyset_handle()
+    p2 = keyset_handle2.primitive(aead.Aead)
+    ciphertext = p1.encrypt(b'plaintext', b'ad')
+    self.assertEqual(p2.decrypt(ciphertext, b'ad'), b'plaintext')
+
+  def test_keyset_conversion(self):
+    builder1 = keyset_builder.new_keyset_builder()
+    new_key_id = builder1.add_new_key(aead.aead_key_templates.AES128_GCM)
+    builder1.set_primary_key(new_key_id)
+    keyset = builder1.keyset()
+    keyset_handle1 = builder1.keyset_handle()
+    p1 = keyset_handle1.primitive(aead.Aead)
+    builder2 = keyset_builder.from_keyset(keyset)
+    keyset_handle2 = builder2.keyset_handle()
     p2 = keyset_handle2.primitive(aead.Aead)
     ciphertext = p1.encrypt(b'plaintext', b'ad')
     self.assertEqual(p2.decrypt(ciphertext, b'ad'), b'plaintext')

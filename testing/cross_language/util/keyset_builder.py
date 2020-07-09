@@ -40,13 +40,16 @@ class KeysetBuilder(object):
   The validity of the keyset is checked when creating a keyset_handle.
   """
 
-  def __init__(self, keyset: tink_pb2.Keyset):
-    self._keyset = keyset
+  def __init__(self, keyset_proto: tink_pb2.Keyset):
+    self._keyset = keyset_proto
 
   def keyset_handle(self) -> tink.KeysetHandle:
     keyset_copy = tink_pb2.Keyset()
     keyset_copy.CopyFrom(self._keyset)
     return cleartext_keyset_handle.from_keyset(keyset_copy)
+
+  def keyset(self) -> bytes:
+    return self._keyset.SerializeToString()
 
   def add_new_key(self, key_template: tink_pb2.KeyTemplate) -> int:
     """Generates a new key, adds it to the keyset, and returns its ID."""
@@ -91,23 +94,20 @@ class KeysetBuilder(object):
     raise tink.TinkError('key not found: %d' % key_id)
 
 
+def from_keyset(keyset: bytes) -> KeysetBuilder:
+  """Return a KeysetBuilder for a Keyset copied from a KeysetHandle."""
+  keyset_proto = tink_pb2.Keyset()
+  keyset_proto.ParseFromString(keyset)
+  return KeysetBuilder(keyset_proto)
+
+
 def from_keyset_handle(keyset_handle: tink.KeysetHandle) -> KeysetBuilder:
   """Return a KeysetBuilder for a Keyset copied from a KeysetHandle."""
   keyset_buffer = io.BytesIO()
   cleartext_keyset_handle.write(
       tink.BinaryKeysetWriter(keyset_buffer), keyset_handle)
-  keyset = tink_pb2.Keyset()
-  keyset.ParseFromString(keyset_buffer.getvalue())
-  return KeysetBuilder(keyset)
+  return from_keyset(keyset_buffer.getvalue())
 
 
 def new_keyset_builder() -> KeysetBuilder:
   return KeysetBuilder(tink_pb2.Keyset())
-
-
-def new_keyset_handle(key_template: tink_pb2.KeyTemplate) -> tink.KeysetHandle:
-  """Creates a keyset with a single new key and returns handle."""
-  builder = new_keyset_builder()
-  key_id = builder.add_new_key(key_template)
-  builder.set_primary_key(key_id)
-  return builder.keyset_handle()
