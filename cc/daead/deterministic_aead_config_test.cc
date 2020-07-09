@@ -97,7 +97,7 @@ TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
   EXPECT_THAT(decryption_result.ValueOrDie(), Eq("secret"));
 
   decryption_result = DummyDeterministicAead("dummy").DecryptDeterministically(
-      encryption_result.ValueOrDie(), "wrog");
+      encryption_result.ValueOrDie(), "wrong");
   EXPECT_FALSE(decryption_result.status().ok());
 }
 
@@ -106,14 +106,16 @@ TEST_F(DeterministicAeadConfigTest, RegisterFipsValidTemplates) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
-  EXPECT_THAT(AeadConfig::Register(), IsOk());
+  EXPECT_THAT(DeterministicAeadConfig::Register(), IsOk());
 
-  std::list<google::crypto::tink::KeyTemplate> fips_key_templates;
-  fips_key_templates.push_back(DeterministicAeadKeyTemplates::Aes256Siv());
+  // Check that we can not retrieve non-FIPS key handle
+  std::list<google::crypto::tink::KeyTemplate> non_fips_key_templates;
+  non_fips_key_templates.push_back(DeterministicAeadKeyTemplates::Aes256Siv());
 
-  for (auto key_template : fips_key_templates) {
+  for (auto key_template : non_fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
-    EXPECT_THAT(new_keyset_handle_result.status(), IsOk());
+    EXPECT_THAT(new_keyset_handle_result.status(),
+               StatusIs(util::error::NOT_FOUND));
   }
 }
 
