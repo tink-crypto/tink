@@ -78,6 +78,18 @@ py_test(
 )
 
 py_test(
+    name = "streaming_aead_test",
+    srcs = ["streaming_aead_test.py"],
+    deps = [
+        "//util:supported_key_types",
+        "//util:testing_servers",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/streaming_aead",
+    ],
+)
+
+py_test(
     name = "mac_test",
     srcs = ["mac_test.py"],
     deps = [

@@ -157,7 +157,6 @@ class StreamingAead(streaming_aead.StreamingAead):
   def new_encrypting_stream(self, plaintext: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     logging.info('encrypt in lang %s.', self.lang)
-    logging.info('type(plaintext): %s', type(plaintext))
     enc_request = testing_api_pb2.StreamingAeadEncryptRequest(
         keyset=self._keyset,
         plaintext=plaintext.read(),
@@ -171,7 +170,6 @@ class StreamingAead(streaming_aead.StreamingAead):
   def new_decrypting_stream(self, ciphertext: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     logging.info('decrypt in lang %s.', self.lang)
-    logging.info('type(ciphertext): %s', type(ciphertext))
     dec_request = testing_api_pb2.StreamingAeadDecryptRequest(
         keyset=self._keyset,
         ciphertext=ciphertext.read(),
