@@ -304,6 +304,7 @@ tink_cc_library(
     tink::signature::public_key_sign_wrapper
     tink::signature::public_key_verify_wrapper
     tink::config::config_util
+    tink::config::tink_fips
     tink::core::registry
     tink::util::status
     tink::proto::config_cc_proto
@@ -573,6 +574,7 @@ tink_cc_test(
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::signature_config
     tink::signature::signature_key_templates
+    tink::config::tink_fips
     tink::core::config
     tink::core::keyset_handle
     tink::core::public_key_sign

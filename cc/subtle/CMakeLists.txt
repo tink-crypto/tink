@@ -541,6 +541,7 @@ tink_cc_library(
     subtle_util_boringssl.cc
     subtle_util_boringssl.h
   DEPS
+    tink::config::tink_fips
     tink::subtle::common_enums
     tink::util::errors
     tink::util::secret_data

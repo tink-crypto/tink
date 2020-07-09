@@ -573,6 +573,7 @@ cc_library(
     include_prefix = "tink/subtle",
     deps = [
         ":common_enums",
+        "//config:tink_fips",
         "//util:errors",
         "//util:secret_data",
         "//util:status",

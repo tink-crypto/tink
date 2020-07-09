@@ -31,6 +31,7 @@
 #include "openssl/err.h"
 #include "openssl/mem.h"
 #include "openssl/rsa.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/secret_data.h"
@@ -510,11 +511,22 @@ util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
 // static
 util::Status SubtleUtilBoringSSL::ValidateRsaModulusSize(size_t modulus_size) {
   if (modulus_size < 2048) {
-    return ToStatusF(
+    return util::Status(
         util::error::INVALID_ARGUMENT,
-        "Modulus size is %u; only modulus size >= 2048-bit is supported",
-        modulus_size);
+        absl::StrCat("Modulus size is ", modulus_size,
+                     " only modulus size >= 2048-bit is supported"));
   }
+
+  // In FIPS only mode we check here if the modulus is 3072, as this is the
+  // only size which is covered by the FIPS validation and supported by Tink.
+  // See
+  // https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/3318
+  if (kUseOnlyFips && (modulus_size != 3072)) {
+    return util::Status(util::error::INTERNAL,
+                        absl::StrCat("Modulus size is ", modulus_size,
+                                     " only modulus size 3072 is supported "));
+  }
+
   return util::Status::OK;
 }
 
