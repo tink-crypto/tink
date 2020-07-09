@@ -19,9 +19,14 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
+from absl.testing import parameterized
+from tink.proto import aes_ctr_hmac_aead_pb2
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
+from tink.proto import common_pb2
 from tink.proto import tink_pb2
+from tink.proto import xchacha20_poly1305_pb2
+import tink
 from tink import aead
 from tink import core
 
@@ -30,47 +35,14 @@ def setUpModule():
   aead.register()
 
 
-class AeadKeyManagerTest(absltest.TestCase):
+class AeadKeyManagerTest(parameterized.TestCase):
 
-  def setUp(self):
-    super(AeadKeyManagerTest, self).setUp()
-    self.key_manager_eax = core.Registry.key_manager(
-        'type.googleapis.com/google.crypto.tink.AesEaxKey')
-    self.key_manager_gcm = core.Registry.key_manager(
-        'type.googleapis.com/google.crypto.tink.AesGcmKey')
-
-  def new_aes_eax_key_template(self, iv_size, key_size):
-    key_format = aes_eax_pb2.AesEaxKeyFormat()
-    key_format.params.iv_size = iv_size
-    key_format.key_size = key_size
-    key_template = tink_pb2.KeyTemplate()
-    key_template.type_url = ('type.googleapis.com/google.crypto.tink.AesEaxKey')
-    key_template.value = key_format.SerializeToString()
-    return key_template
-
-  def new_aes_gcm_key_template(self, key_size):
-    key_format = aes_gcm_pb2.AesGcmKeyFormat()
-    key_format.key_size = key_size
-    key_template = tink_pb2.KeyTemplate()
-    key_template.type_url = ('type.googleapis.com/google.crypto.tink.AesGcmKey')
-    key_template.value = key_format.SerializeToString()
-    return key_template
-
-  def test_primitive_class(self):
-    self.assertEqual(self.key_manager_eax.primitive_class(), aead.Aead)
-    self.assertEqual(self.key_manager_gcm.primitive_class(), aead.Aead)
-
-  def test_key_type(self):
-    self.assertEqual(self.key_manager_eax.key_type(),
-                     'type.googleapis.com/google.crypto.tink.AesEaxKey')
-    self.assertEqual(self.key_manager_gcm.key_type(),
-                     'type.googleapis.com/google.crypto.tink.AesGcmKey')
-
-  def test_new_key_data(self):
-    # AES EAX
-    key_template = self.new_aes_eax_key_template(12, 16)
-    key_data = self.key_manager_eax.new_key_data(key_template)
-    self.assertEqual(key_data.type_url, self.key_manager_eax.key_type())
+  def test_new_key_data_aes_eax(self):
+    key_template = aead.aead_key_templates.create_aes_eax_key_template(
+        key_size=16, iv_size=12)
+    key_manager = core.Registry.key_manager(key_template.type_url)
+    key_data = key_manager.new_key_data(key_template)
+    self.assertEqual(key_data.type_url, key_template.type_url)
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
     key = aes_eax_pb2.AesEaxKey()
     key.ParseFromString(key_data.value)
@@ -78,49 +50,101 @@ class AeadKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.params.iv_size, 12)
     self.assertLen(key.key_value, 16)
 
-    # AES GCM
-    key_template = self.new_aes_gcm_key_template(16)
-    key_data = self.key_manager_gcm.new_key_data(key_template)
-    self.assertEqual(key_data.type_url, self.key_manager_gcm.key_type())
+  def test_new_key_data_aes_gcm(self):
+    key_template = aead.aead_key_templates.create_aes_gcm_key_template(
+        key_size=16)
+    key_manager = core.Registry.key_manager(key_template.type_url)
+    key_data = key_manager.new_key_data(key_template)
+    self.assertEqual(key_data.type_url, key_template.type_url)
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
     key = aes_gcm_pb2.AesGcmKey()
     key.ParseFromString(key_data.value)
     self.assertEqual(key.version, 0)
     self.assertLen(key.key_value, 16)
 
-  def test_invalid_params_throw_exception(self):
-    key_template = self.new_aes_eax_key_template(9, 16)
-    with self.assertRaisesRegex(core.TinkError, 'Invalid IV size'):
-      self.key_manager_eax.new_key_data(key_template)
+  def test_new_key_data_aes_ctr_hmac_aead(self):
+    template = aead.aead_key_templates.create_aes_ctr_hmac_aead_key_template(
+        aes_key_size=16,
+        iv_size=12,
+        hmac_key_size=32,
+        tag_size=16,
+        hash_type=common_pb2.SHA256)
+    key_manager = core.Registry.key_manager(template.type_url)
+    key_data = key_manager.new_key_data(template)
+    self.assertEqual(key_data.type_url, template.type_url)
+    self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
+    key = aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKey()
+    key.ParseFromString(key_data.value)
+    self.assertEqual(key.version, 0)
+    self.assertEqual(key.aes_ctr_key.version, 0)
+    self.assertLen(key.aes_ctr_key.key_value, 16)
+    self.assertEqual(key.aes_ctr_key.params.iv_size, 12)
+    self.assertEqual(key.hmac_key.version, 0)
+    self.assertLen(key.hmac_key.key_value, 32)
+    self.assertEqual(key.hmac_key.params.tag_size, 16)
+    self.assertEqual(key.hmac_key.params.hash, common_pb2.SHA256)
 
-    key_template = self.new_aes_gcm_key_template(17)
-    with self.assertRaisesRegex(core.TinkError,
-                                'supported sizes: 16 or 32 bytes'):
-      self.key_manager_gcm.new_key_data(key_template)
+  def test_new_key_data_xchacha20_poly1305(self):
+    template = aead.aead_key_templates.XCHACHA20_POLY1305
+    key_manager = core.Registry.key_manager(template.type_url)
+    key_data = key_manager.new_key_data(template)
+    self.assertEqual(key_data.type_url, template.type_url)
+    self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
+    key = xchacha20_poly1305_pb2.XChaCha20Poly1305Key()
+    key.ParseFromString(key_data.value)
+    self.assertEqual(key.version, 0)
+    self.assertLen(key.key_value, 32)
 
-  def test_encrypt_decrypt(self):
-    # AES EAX
-    primitive = self.key_manager_eax.primitive(
-        self.key_manager_eax.new_key_data(
-            self.new_aes_eax_key_template(12, 16)))
+  def test_invalid_params_throw_exception_aes_eax(self):
+    template = aead.aead_key_templates.create_aes_eax_key_template(
+        key_size=16, iv_size=9)
+    with self.assertRaises(tink.TinkError):
+      tink.new_keyset_handle(template)
+
+  def test_invalid_params_throw_exception_aes_gcm(self):
+    template = aead.aead_key_templates.create_aes_gcm_key_template(
+        key_size=17)
+    with self.assertRaises(tink.TinkError):
+      tink.new_keyset_handle(template)
+
+  def test_invalid_params_throw_exception_aes_ctr_hmac_aead(self):
+    template = aead.aead_key_templates.create_aes_ctr_hmac_aead_key_template(
+        aes_key_size=42,
+        iv_size=16,
+        hmac_key_size=32,
+        tag_size=32,
+        hash_type=common_pb2.SHA256)
+    with self.assertRaises(tink.TinkError):
+      tink.new_keyset_handle(template)
+
+  @parameterized.parameters([
+      aead.aead_key_templates.AES128_EAX,
+      aead.aead_key_templates.AES256_EAX,
+      aead.aead_key_templates.AES128_GCM,
+      aead.aead_key_templates.AES256_GCM,
+      aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
+      aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
+      aead.aead_key_templates.XCHACHA20_POLY1305])
+  def test_encrypt_decrypt_success(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(aead.Aead)
     plaintext = b'plaintext'
     associated_data = b'associated_data'
     ciphertext = primitive.encrypt(plaintext, associated_data)
     self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
 
-    # AES GCM
-    primitive = self.key_manager_gcm.primitive(
-        self.key_manager_gcm.new_key_data(self.new_aes_gcm_key_template(16)))
-    plaintext = b'plaintext'
-    associated_data = b'associated_data'
-    ciphertext = primitive.encrypt(plaintext, associated_data)
-    self.assertEqual(primitive.decrypt(ciphertext, associated_data), plaintext)
-
-  def test_invalid_decrypt_raises_error(self):
-    primitive = self.key_manager_eax.primitive(
-        self.key_manager_eax.new_key_data(
-            self.new_aes_eax_key_template(12, 16)))
-    with self.assertRaisesRegex(core.TinkError, 'Ciphertext too short'):
+  @parameterized.parameters([
+      aead.aead_key_templates.AES128_EAX,
+      aead.aead_key_templates.AES256_EAX,
+      aead.aead_key_templates.AES128_GCM,
+      aead.aead_key_templates.AES256_GCM,
+      aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
+      aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
+      aead.aead_key_templates.XCHACHA20_POLY1305])
+  def test_invalid_decrypt_raises_error(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(aead.Aead)
+    with self.assertRaises(tink.TinkError):
       primitive.decrypt(b'invalid ciphertext', b'ad')
 
 
