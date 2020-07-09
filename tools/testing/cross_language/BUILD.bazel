@@ -13,19 +13,6 @@ filegroup(
 )
 
 sh_test(
-    name = "keyset_reader_writer_test",
-    size = "small",
-    srcs = [
-        "keyset_reader_writer_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing/cc:keyset_reader_writer_cli",
-        "//tinkey",
-    ],
-)
-
-sh_test(
     name = "version_test",
     size = "medium",
     srcs = [
