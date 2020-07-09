@@ -16,9 +16,12 @@
 
 #include "tink/hybrid/hybrid_config.h"
 
+#include <list>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/config.h"
+#include "tink/config/tink_fips.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_key_templates.h"
@@ -45,6 +48,10 @@ class HybridConfigTest : public ::testing::Test {
 };
 
 TEST_F(HybridConfigTest, Basic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   EciesAeadHkdfPrivateKeyManager().get_key_type())
                   .status(),
@@ -67,6 +74,10 @@ TEST_F(HybridConfigTest, Basic) {
 // Tests that the HybridEncryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   ASSERT_TRUE(HybridConfig::Register().ok());
 
   google::crypto::tink::Keyset::Key key;
@@ -98,6 +109,10 @@ TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
 // Tests that the HybridDecryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   ASSERT_TRUE(HybridConfig::Register().ok());
 
   google::crypto::tink::Keyset::Key key;
@@ -124,6 +139,41 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
                 ->Decrypt(absl::StrCat(prefix, encryption), "")
                 .ValueOrDie(),
             "secret");
+}
+
+// FIPS-only mode tests
+TEST_F(HybridConfigTest, RegisterFipsValidTemplates) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  EXPECT_THAT(AeadConfig::Register(), IsOk());
+
+  // Check that we can not retrieve non-FIPS keyset handle
+  std::list<google::crypto::tink::KeyTemplate> non_fips_key_templates;
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::
+          EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::EciesP256CompressedHkdfHmacSha256Aes128Gcm());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::
+          EciesP256HkdfHmacSha256Aes128GcmCompressedWithoutPrefix());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::EciesX25519HkdfHmacSha256Aes128CtrHmacSha256());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::EciesX25519HkdfHmacSha256Aes128Gcm());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::EciesX25519HkdfHmacSha256XChaCha20Poly1305());
+
+  for (auto key_template : non_fips_key_templates) {
+    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
+                StatusIs(util::error::NOT_FOUND));
+  }
 }
 
 }  // namespace

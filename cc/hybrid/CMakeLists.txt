@@ -12,6 +12,7 @@ tink_cc_library(
     tink::hybrid::hybrid_encrypt_wrapper
     tink::core::registry
     tink::config::config_util
+    tink::config::tink_fips
     tink::aead::aead_config
     tink::util::status
     tink::proto::config_cc_proto
@@ -215,6 +216,7 @@ tink_cc_test(
   DEPS
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
+    tink::config::tink_fips
     tink::core::config
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
