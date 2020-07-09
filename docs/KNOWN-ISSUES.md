@@ -3,6 +3,17 @@
 This doc lists known issues in Tink. Please report new issues by opening new
 tickets or emailing the maintainers at `tink-users@googlegroups.com`.
 
+## C++
+
+*   Before 1.4.0, AES-CTR-HMAC-AEAD keys and the
+    [EncryptThenAuthenticate](https://github.com/google/tink/blob/master/cc/subtle/encrypt_then_authenticate.cc)
+    subtle implementation may be vulnerable to chosen-ciphertext attacks. An
+    attacker can generate ciphertexts that bypass the HMAC verification if and
+    only if all of the following conditions are true:
+    -   Tink C++ is used on systems where `size_t` is a 32-bit integer. This is
+        usually the case on 32-bit machines.
+    -   The attacker can specify long (>= 2^29 bytes ~ 536MB) associated data.
+
 ## Java
 
 *   Tink supports Java 7 or newer. Please file a ticket if you want to support

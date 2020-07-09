@@ -31,6 +31,7 @@
 #include "tink/subtle/pem_parser_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
@@ -141,12 +142,18 @@ RsaSsaPssPrivateKey GetRsaSsaPssPrivateKeyProto(
   RsaSsaPssPrivateKey private_key_proto;
 
   private_key_proto.set_version(key_version);
-  private_key_proto.set_d(key_subtle->d);
-  private_key_proto.set_p(key_subtle->p);
-  private_key_proto.set_q(key_subtle->q);
-  private_key_proto.set_dp(key_subtle->dp);
-  private_key_proto.set_dq(key_subtle->dq);
-  private_key_proto.set_crt(key_subtle->crt);
+  private_key_proto.set_d(
+      std::string(util::SecretDataAsStringView(key_subtle->d)));
+  private_key_proto.set_p(
+      std::string(util::SecretDataAsStringView(key_subtle->p)));
+  private_key_proto.set_q(
+      std::string(util::SecretDataAsStringView(key_subtle->q)));
+  private_key_proto.set_dp(
+      std::string(util::SecretDataAsStringView(key_subtle->dp)));
+  private_key_proto.set_dq(
+      std::string(util::SecretDataAsStringView(key_subtle->dq)));
+  private_key_proto.set_crt(
+      std::string(util::SecretDataAsStringView(key_subtle->crt)));
 
   // Set public key parameters.
   RsaSsaPssPublicKey* public_key_proto = private_key_proto.mutable_public_key();

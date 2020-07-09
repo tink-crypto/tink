@@ -18,6 +18,7 @@
 
 #include "absl/memory/memory.h"
 #include "tink/config/config_util.h"
+#include "tink/config/tink_fips.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/mac/mac_wrapper.h"
@@ -38,16 +39,27 @@ const RegistryConfig& MacConfig::Latest() {
 
 // static
 util::Status MacConfig::Register() {
-  // Register key managers.
-  auto status = Registry::RegisterKeyTypeManager(
-      absl::make_unique<HmacKeyManager>(), true);
+  // Register primitive wrapper.
+  auto status =
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<MacWrapper>());
   if (!status.ok()) return status;
+
+  // Register key managers which utilize the FIPS validated BoringCrypto
+  // implementations.
+  status = Registry::RegisterKeyTypeManager(absl::make_unique<HmacKeyManager>(),
+                                            true);
+  if (!status.ok()) return status;
+
+  if (kUseOnlyFips) {
+    return util::OkStatus();
+  }
+
+  // CMac in BoringSSL is not FIPS validated.
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesCmacKeyManager>(), true);
   if (!status.ok()) return status;
 
-  // Register primitive wrapper.
-  return Registry::RegisterPrimitiveWrapper(absl::make_unique<MacWrapper>());
+  return util::OkStatus();
 }
 
 }  // namespace tink

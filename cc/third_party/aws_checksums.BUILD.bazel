@@ -1,0 +1,22 @@
+licenses(["notice"])  # Apache 2.0
+
+cc_library(
+    name = "aws_checksums",
+    srcs = glob([
+        "source/intel/*.c",
+        "source/*.c",
+    ]),
+    hdrs = glob([
+        "include/**/*.h"
+    ]),
+    includes = [
+        "include/",
+    ],
+    copts = [
+        "-O2" # Note there is some issue with the assembly implementation and GCC, therefore this should always be compiled with -O (https://github.com/awslabs/aws-checksums/issues/8)
+    ],
+    deps = [
+        "@aws_c_common",
+    ],
+    visibility = ["//visibility:public"],
+)

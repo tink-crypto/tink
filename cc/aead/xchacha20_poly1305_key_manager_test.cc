@@ -128,8 +128,8 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateAead) {
   ASSERT_THAT(direct_aead_or.status(), IsOk());
 
   ASSERT_THAT(
-      EncryptThenDecrypt(aead_or.ValueOrDie().get(),
-                         direct_aead_or.ValueOrDie().get(), "message", "aad"),
+      EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                         *direct_aead_or.ValueOrDie(), "message", "aad"),
       IsOk());
 }
 

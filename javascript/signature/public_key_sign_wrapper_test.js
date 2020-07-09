@@ -15,11 +15,11 @@
 goog.module('tink.signature.PublicKeySignWrapperTest');
 goog.setTestOnly('tink.signature.PublicKeySignWrapperTest');
 
-const CryptoFormat = goog.require('tink.CryptoFormat');
-const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
+const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
 const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
 const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper');
-const Random = goog.require('tink.subtle.Random');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('public key sign wrapper test', function() {

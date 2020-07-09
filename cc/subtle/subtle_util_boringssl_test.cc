@@ -33,6 +33,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
 #include "tink/subtle/wycheproof_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -327,11 +328,21 @@ TEST(CreatesNewRsaKeyPairTest, KeyIsWellFormed) {
                                                     &public_key),
               IsOk());
   auto n = std::move(SubtleUtilBoringSSL::str2bn(private_key.n).ValueOrDie());
-  auto d = std::move(SubtleUtilBoringSSL::str2bn(private_key.d).ValueOrDie());
-  auto p = std::move(SubtleUtilBoringSSL::str2bn(private_key.p).ValueOrDie());
-  auto q = std::move(SubtleUtilBoringSSL::str2bn(private_key.q).ValueOrDie());
-  auto dp = std::move(SubtleUtilBoringSSL::str2bn(private_key.dp).ValueOrDie());
-  auto dq = std::move(SubtleUtilBoringSSL::str2bn(private_key.dq).ValueOrDie());
+  auto d = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.d))
+          .ValueOrDie());
+  auto p = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.p))
+          .ValueOrDie());
+  auto q = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.q))
+          .ValueOrDie());
+  auto dp = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.dp))
+          .ValueOrDie());
+  auto dq = std::move(
+      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.dq))
+          .ValueOrDie());
   bssl::UniquePtr<BN_CTX> ctx(BN_CTX_new());
 
   // Check n = p * q.
@@ -440,7 +451,7 @@ TEST(CreateNewX25519KeyTest, KeyIsWellFormed) {
   EXPECT_EQ(ec_key.curve, EllipticCurveType::CURVE25519);
   EXPECT_EQ(ec_key.pub_x.length(), X25519_PUBLIC_VALUE_LEN);
   EXPECT_TRUE(ec_key.pub_y.empty());
-  EXPECT_EQ(ec_key.priv.length(), X25519_PRIVATE_KEY_LEN);
+  EXPECT_EQ(ec_key.priv.size(), X25519_PRIVATE_KEY_LEN);
 }
 
 TEST(CreateNewX25519KeyTest, GeneratesDifferentKeysEveryTime) {

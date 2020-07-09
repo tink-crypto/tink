@@ -202,55 +202,51 @@ class KeysetHandleTest(absltest.TestCase):
         aead_primitive.decrypt(
             aead_primitive.encrypt(b'message', b'aad'), b'aad'), b'message')
 
-  def test_primitive_fails_on_empty_keyset(self):
+  def test_init_fails_on_empty_keyset(self):
     keyset = tink_pb2.Keyset()
     keyset.key.extend([helper.fake_key(key_id=1, status=tink_pb2.DESTROYED)])
     keyset.primary_key_id = 1
-    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError, 'empty keyset'):
-      handle.primitive(aead.Aead)
+      _ = _keyset_handle(keyset)
 
-  def test_primitive_fails_on_key_without_keydata(self):
+  def test_init_fails_on_key_without_keydata(self):
     keyset = tink_pb2.Keyset()
     key = helper.fake_key(key_id=123)
     key.ClearField('key_data')
     keyset.key.extend([key])
     keyset.primary_key_id = 123
-    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError, 'key 123 has no key data'):
+      handle = _keyset_handle(keyset)
       handle.primitive(aead.Aead)
 
-  def test_primitive_fails_on_key_with_unknown_prefix(self):
+  def test_init_fails_on_key_with_unknown_prefix(self):
     keyset = tink_pb2.Keyset()
     keyset.key.extend([
         helper.fake_key(key_id=12, output_prefix_type=tink_pb2.UNKNOWN_PREFIX)
     ])
     keyset.primary_key_id = 12
-    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError, 'key 12 has unknown prefix'):
-      handle.primitive(aead.Aead)
+      _ = _keyset_handle(keyset)
 
-  def test_primitive_fails_on_key_with_unknown_status(self):
+  def test_init_fails_on_key_with_unknown_status(self):
     keyset = tink_pb2.Keyset()
     keyset.key.extend(
         [helper.fake_key(key_id=1234, status=tink_pb2.UNKNOWN_STATUS)])
     keyset.primary_key_id = 1234
-    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError, 'key 1234 has unknown status'):
-      handle.primitive(aead.Aead)
+      _ = _keyset_handle(keyset)
 
-  def test_primitive_fails_on_multiple_primary_keys(self):
+  def test_init_fails_on_multiple_primary_keys(self):
     keyset = tink_pb2.Keyset()
     keyset.key.extend(
         [helper.fake_key(key_id=12345),
          helper.fake_key(key_id=12345)])
     keyset.primary_key_id = 12345
-    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError,
                                 'keyset contains multiple primary keys'):
-      handle.primitive(aead.Aead)
+      _ = _keyset_handle(keyset)
 
-  def test_primitive_fails_without_primary_key_present(self):
+  def test_init_fails_without_primary_key_present(self):
     keyset = tink_pb2.Keyset()
     key = keyset.key.add()
     key.key_data.CopyFrom(
@@ -259,10 +255,9 @@ class KeysetHandleTest(absltest.TestCase):
     key.key_id = 2
     key.status = tink_pb2.ENABLED
     keyset.primary_key_id = 1
-    handle = _keyset_handle(keyset)
     with self.assertRaisesRegex(core.TinkError,
                                 'keyset does not contain a valid primary key'):
-      handle.primitive(aead.Aead)
+      _ = _keyset_handle(keyset)
 
   def test_primitive_fails_on_wrong_primitive_class(self):
     keyset = tink_pb2.Keyset()
@@ -300,7 +295,7 @@ class KeysetHandleTest(absltest.TestCase):
             aead_primitive2.encrypt(b'message', b'aad'), b'aad'), b'message')
 
   def test_keyset_info(self):
-    keyset = tink_pb2.Keyset(primary_key_id=2)
+    keyset = tink_pb2.Keyset(primary_key_id=1)
     keyset.key.extend([
         helper.fake_key(
             value=b'v1',
@@ -316,7 +311,7 @@ class KeysetHandleTest(absltest.TestCase):
             output_prefix_type=tink_pb2.RAW)
     ])
     handle = _keyset_handle(keyset)
-    expected_keyset_info = tink_pb2.KeysetInfo(primary_key_id=2)
+    expected_keyset_info = tink_pb2.KeysetInfo(primary_key_id=1)
     info1 = expected_keyset_info.key_info.add()
     info1.type_url = 't1'
     info1.status = tink_pb2.ENABLED

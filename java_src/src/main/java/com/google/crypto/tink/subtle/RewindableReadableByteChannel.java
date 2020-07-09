@@ -57,7 +57,6 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
    * read()-calls will be forwarded directly to the wrapped
    * channel (after the currently buffered bytes are read).
    */
-  @GuardedBy("this")
   public synchronized void disableRewinding() {
     this.canRewind = false;
   }
@@ -65,7 +64,6 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
   /**
    * Rewinds this buffer to the beginning (if rewinding is still enabled).
    */
-  @GuardedBy("this")
   public synchronized void rewind() throws IOException {
     if (!canRewind) {
       throw new IOException("Cannot rewind anymore.");
@@ -76,7 +74,6 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
   }
 
   @Override
-  @GuardedBy("this")
   public synchronized int read(ByteBuffer dst) throws IOException {
     if (directRead) {
       return baseChannel.read(dst);
@@ -148,7 +145,6 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
   }
 
   @Override
-  @GuardedBy("this")
   public synchronized void close() throws IOException {
     canRewind = false;
     directRead = true;
@@ -156,7 +152,6 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
   }
 
   @Override
-  @GuardedBy("this")
   public synchronized boolean isOpen() {
     return baseChannel.isOpen();
   }

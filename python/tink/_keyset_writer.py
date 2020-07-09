@@ -21,10 +21,10 @@ from __future__ import print_function
 
 import abc
 
+from typing import BinaryIO, TextIO
 # Special imports
 import six
 
-from typing import BinaryIO, TextIO
 from google.protobuf import json_format
 from tink.proto import tink_pb2
 from tink import core
@@ -37,12 +37,12 @@ class KeysetWriter(object):
   @abc.abstractmethod
   def write(self, keyset: tink_pb2.Keyset) -> None:
     """Tries to write a tink_pb2.Keyset to some storage system."""
-    pass
+    raise NotImplementedError()
 
   @abc.abstractmethod
   def write_encrypted(self, encrypted_keyset: tink_pb2.EncryptedKeyset) -> None:
     """Tries to write an tink_pb2.EncryptedKeyset to some storage system."""
-    pass
+    raise NotImplementedError()
 
 
 class JsonKeysetWriter(KeysetWriter):

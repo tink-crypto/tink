@@ -12,6 +12,7 @@
 
 """ Definition of gen_maven_jar_rules. """
 
+load("//tools:jar_jar.bzl", "jar_jar")
 load("//tools:java_single_jar.bzl", "java_single_jar")
 load("//tools:javadoc.bzl", "javadoc_library")
 
@@ -27,7 +28,10 @@ _TINK_PACKAGES = [
 def gen_maven_jar_rules(
         name,
         deps = [],
+        resources = [],
         root_packages = _TINK_PACKAGES,
+        shaded_packages = [],
+        shading_rules = "",
         exclude_packages = [],
         doctitle = "",
         android_api_level = 23,
@@ -41,7 +45,14 @@ def gen_maven_jar_rules(
         name.jar, a source package name-src.jar and a Javadoc package
         name-javadoc.jar.
       deps: A combination of the deps of java_single_jar and javadoc_library
+      resources: A list of resource files. Files must be stored in
+        src/main/resources. Mapping rules: src/main/resources/a/b/c.txt will be
+        copied to a/b/c.txt in the output jar.
       root_packages: See javadoc_library
+      shaded_packages: These packages will be shaded, according to the rules
+        specified in shading_rules.
+      shading_rules: The shading rules, must specified when shaded_packages is present.
+        Rules file format can be found at https://github.com/bazelbuild/bazel/blob/master/third_party/jarjar/java/com/tonicsystems/jarjar/help.txt.
       exclude_packages: See javadoc_library
       doctitle: See javadoc_library
       android_api_level: See javadoc_library
@@ -49,11 +60,26 @@ def gen_maven_jar_rules(
       external_javadoc_links: See javadoc_library
     """
 
-    java_single_jar(
-        name = name,
-        deps = deps,
-        root_packages = root_packages,
-    )
+    if shaded_packages:
+        unshaded_jar = name + "-unshaded"
+        java_single_jar(
+            name = unshaded_jar,
+            deps = deps,
+            resources = resources,
+            root_packages = root_packages + shaded_packages,
+        )
+        jar_jar(
+            name = name,
+            input_jar = unshaded_jar,
+            rules = shading_rules,
+        )
+    else:
+        java_single_jar(
+            name = name,
+            deps = deps,
+            resources = resources,
+            root_packages = root_packages,
+        )
 
     source_jar_name = name + "-src"
     java_single_jar(

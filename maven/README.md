@@ -2,14 +2,29 @@
 
 Tink Java has 4 Maven artifacts, all are in the `com.google.crypto.tink` group.
 
--   `tink`: this is the core of Tink built for server side apps. It only depends
-    on `org.json:json` and `com.google.protobuf:protobuf-java`.
--   `tink-android`: this is similar to `tink` but is built for Android apps. It
-    only depends on `com.google.protobuf:protobuf-lite`.
--   `tink-awskms`: this is a plugin for the `tink` artifact that integrates Tink
-    with AWS KMS.
--   `tink-gcpkms`: this is a plugin for the `tink` artifact that integrates Tink
-    with GCP KMS.
+### `tink`
+
+The core of Tink built for server-side applications. It only depends on
+[`org.json:json`](https://search.maven.org/artifact/org.json/json) and
+[`com.google.protobuf:protobuf-java`](https://search.maven.org/artifact/com.google.protobuf/protobuf-java).
+
+### `tink-android`
+
+Similar to `tink` but is built for Android applicationss.
+
+This build includes an embeded copy
+[`com.google.protobuf:protobuf-lite`](https://search.maven.org/artifact/com.google.protobuf/protobuf-javalite),
+which is renamed to be `com.google.crypto.tink.shaded.protobuf`. This is done to
+avoid dependency conflicts with other common dependencies that depend on a
+conflicting version (e.g.  Firebase).
+
+### `tink-awskms`
+
+A plugin for the `tink` artifact that integrates Tink with AWS KMS.
+
+### `tink-gcpkms`
+
+A plugin for the `tink` artifact that integrates Tink with GCP KMS.
 
 ## Publishing snapshots
 
@@ -20,8 +35,8 @@ Tink Java has 4 Maven artifacts, all are in the `com.google.crypto.tink` group.
 This command publishes latest snapshots to Maven, and their Javadocs to
 https://google.github.com/tink.
 
-Snapshots are also automatically published for every new commit to
-the master branch of https://github.com/google/tink.
+Snapshots are automatically published for every new commit to the master branch
+of https://github.com/google/tink.
 
 ## Testing snapshots
 

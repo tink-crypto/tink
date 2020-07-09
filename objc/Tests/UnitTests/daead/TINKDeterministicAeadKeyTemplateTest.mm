@@ -22,10 +22,8 @@
 
 #import "objc/TINKKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"
-#import "objc/util/TINKProtoHelpers.h"
-#import "proto/AesSiv.pbobjc.h"
-#import "proto/Common.pbobjc.h"
-#import "proto/Tink.pbobjc.h"
+#include "proto/common.pb.h"
+#include "proto/tink.pb.h"
 
 @interface TINKDeterministicAeadKeyTemplatesTest : XCTestCase
 @end
@@ -33,7 +31,7 @@
 @implementation TINKDeterministicAeadKeyTemplatesTest
 
 - (void)testAesSivKeyTemplates {
-  static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.AesSivKey";
+  static std::string const kTypeURL = "type.googleapis.com/google.crypto.tink.AesSivKey";
 
   NSError *error = nil;
   // AES-256 SIV
@@ -42,19 +40,9 @@
   XCTAssertNil(error);
   XCTAssertNotNil(tpl);
 
-  error = nil;
-  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyTemplate);
-
-  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
-  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
-  error = nil;
-  TINKPBAesSivKeyFormat *keyFormat = [TINKPBAesSivKeyFormat parseFromData:keyTemplate.value
-                                                                    error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(keyFormat);
-  XCTAssertTrue(64 == keyFormat.keySize);
+  XCTAssertTrue(tpl.ccKeyTemplate->type_url() == kTypeURL);
+  XCTAssertTrue(tpl.ccKeyTemplate->output_prefix_type() ==
+                google::crypto::tink::OutputPrefixType::TINK);
 }
 
 @end

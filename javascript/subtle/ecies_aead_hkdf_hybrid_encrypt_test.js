@@ -17,11 +17,11 @@ goog.setTestOnly('tink.subtle.EciesAeadHkdfHybridEncryptTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const EciesAeadHkdfHybridEncrypt = goog.require('tink.subtle.EciesAeadHkdfHybridEncrypt');
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const Random = goog.require('tink.subtle.Random');
-const Registry = goog.require('tink.Registry');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
+const {fromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_encrypt');
 
 describe('ecies aead hkdf hybrid encrypt test', function() {
   beforeEach(function() {
@@ -44,8 +44,7 @@ describe('ecies aead hkdf hybrid encrypt test', function() {
     const demHelper = new RegistryEciesAeadHkdfDemHelper(
         AeadKeyTemplates.aes128CtrHmacSha256());
 
-    await EciesAeadHkdfHybridEncrypt.newInstance(
-        publicKey, hkdfHash, pointFormat, demHelper);
+    await fromJsonWebKey(publicKey, hkdfHash, pointFormat, demHelper);
   });
 
   it('encrypt, different arguments', async function() {
@@ -58,14 +57,15 @@ describe('ecies aead hkdf hybrid encrypt test', function() {
     // Test the encryption for different HMAC algorithms and different types of
     // curves.
     for (let hkdfHash of hmacAlgorithms) {
-      for (let curve of Object.keys(EllipticCurves.CurveType)) {
-        const curveName =
-            EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
+      for (let curve
+               of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
+                   EllipticCurves.CurveType.P521]) {
+        const curveName = EllipticCurves.curveToString(curve);
         const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
         const publicKey =
             await EllipticCurves.exportCryptoKey(keyPair.publicKey);
 
-        const hybridEncrypt = await EciesAeadHkdfHybridEncrypt.newInstance(
+        const hybridEncrypt = await fromJsonWebKey(
             publicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
 
         const plaintext = Random.randBytes(15);

@@ -47,6 +47,7 @@ class KeysetHandle(object):
         ('KeysetHandle cannot be instantiated directly.'))
 
   def __init__(self, keyset: tink_pb2.Keyset):
+    _validate_keyset(keyset)
     self._keyset = keyset
 
   @classmethod

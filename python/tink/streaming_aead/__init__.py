@@ -27,4 +27,4 @@ StreamingAead = _streaming_aead.StreamingAead
 DecryptingStream = _decrypting_stream.DecryptingStream
 EncryptingStream = _encrypting_stream.EncryptingStream
 key_manager_from_cc_registry = _streaming_aead_key_manager.from_cc_registry
-
+register = _streaming_aead_key_manager.register

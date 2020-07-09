@@ -40,7 +40,8 @@ class EciesAeadHkdfPublicKeyManager extends KeyTypeManager<EciesAeadHkdfPublicKe
   public EciesAeadHkdfPublicKeyManager() {
     super(
         EciesAeadHkdfPublicKey.class,
-        new PrimitiveFactory<HybridEncrypt, EciesAeadHkdfPublicKey>(HybridEncrypt.class) {
+        new KeyTypeManager.PrimitiveFactory<HybridEncrypt, EciesAeadHkdfPublicKey>(
+            HybridEncrypt.class) {
           @Override
           public HybridEncrypt getPrimitive(EciesAeadHkdfPublicKey recipientKeyProto)
               throws GeneralSecurityException {

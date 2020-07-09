@@ -27,7 +27,6 @@
 #include "absl/strings/str_join.h"
 #include "absl/types/optional.h"
 #include "absl/synchronization/mutex.h"
-// placeholder for dllexport_macros.h
 #include "tink/catalogue.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"

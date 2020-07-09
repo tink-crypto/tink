@@ -15,12 +15,11 @@
 goog.module('tink.subtle.EciesHkdfKemRecipientTest');
 goog.setTestOnly('tink.subtle.EciesHkdfKemRecipientTest');
 
-const Bytes = goog.require('tink.subtle.Bytes');
-const EciesHkdfKemRecipient = goog.require('tink.subtle.EciesHkdfKemRecipient');
-const EciesHkdfKemSender = goog.require('tink.subtle.EciesHkdfKemSender');
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const Random = goog.require('tink.subtle.Random');
-
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const {EciesHkdfKemRecipient, fromJsonWebKey: recipientFromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_hkdf_kem_recipient');
+const {fromJsonWebKey: senderFromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_hkdf_kem_sender');
 
 describe('ecies hkdf kem recipient test', function() {
   beforeEach(function() {
@@ -37,8 +36,8 @@ describe('ecies hkdf kem recipient test', function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    const sender = await EciesHkdfKemSender.newInstance(publicKey);
-    const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
+    const sender = await senderFromJsonWebKey(publicKey);
+    const recipient = await recipientFromJsonWebKey(privateKey);
     for (let i = 1; i < 20; i++) {
       const keySizeInBytes = i;
       const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -61,8 +60,8 @@ describe('ecies hkdf kem recipient test', function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    const sender = await EciesHkdfKemSender.newInstance(publicKey);
-    const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
+    const sender = await senderFromJsonWebKey(publicKey);
+    const recipient = await recipientFromJsonWebKey(privateKey);
     const keySizeInBytes = 16;
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const hkdfHash = 'SHA-256';
@@ -95,7 +94,7 @@ describe('ecies hkdf kem recipient test', function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     try {
-      await EciesHkdfKemRecipient.newInstance(publicKey);
+      await recipientFromJsonWebKey(publicKey);
       fail('An exception should be thrown.');
     } catch (e) {
     }
@@ -118,7 +117,7 @@ describe('ecies hkdf kem recipient test', function() {
           Bytes.toBase64(new Uint8Array(xLength), /* opt_webSafe = */ true);
       let output;
       try {
-        const recipient = await EciesHkdfKemRecipient.newInstance(privateJwk);
+        const recipient = await recipientFromJsonWebKey(privateJwk);
         const hkdfInfo = Bytes.fromHex(testVector.hkdfInfo);
         const salt = Bytes.fromHex(testVector.salt);
         output = await recipient.decapsulate(
@@ -147,11 +146,13 @@ describe('ecies hkdf kem recipient test', function() {
   });
 
   it('encap decap, different params', async function() {
-    const curveTypes = Object.keys(EllipticCurves.CurveType);
+    const curveTypes = [
+      EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
+      EllipticCurves.CurveType.P521
+    ];
     const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
     for (let curve of curveTypes) {
-      const curveString =
-          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
+      const curveString = EllipticCurves.curveToString(curve);
       for (let hashType of hashTypes) {
         const keyPair =
             await EllipticCurves.generateKeyPair('ECDH', curveString);
@@ -162,13 +163,13 @@ describe('ecies hkdf kem recipient test', function() {
 
         const publicKey =
             await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-        const sender = await EciesHkdfKemSender.newInstance(publicKey);
+        const sender = await senderFromJsonWebKey(publicKey);
         const kemKeyToken = await sender.encapsulate(
             keySizeInBytes, pointFormat, hashType, hkdfInfo, hkdfSalt);
 
         const privateKey =
             await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-        const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
+        const recipient = await recipientFromJsonWebKey(privateKey);
         const key = await recipient.decapsulate(
             kemKeyToken['token'], keySizeInBytes, pointFormat, hashType,
             hkdfInfo, hkdfSalt);
@@ -180,17 +181,19 @@ describe('ecies hkdf kem recipient test', function() {
   });
 
   it('encap decap, modified token', async function() {
-    const curveTypes = Object.keys(EllipticCurves.CurveType);
+    const curveTypes = [
+      EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
+      EllipticCurves.CurveType.P521
+    ];
     const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
-    for (let crvId of curveTypes) {
-      const curve = EllipticCurves.CurveType[crvId];
+    for (let curve of curveTypes) {
       const curveString = EllipticCurves.curveToString(curve);
       for (let hashType of hashTypes) {
         const keyPair =
             await EllipticCurves.generateKeyPair('ECDH', curveString);
         const privateKey =
             await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-        const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
+        const recipient = await recipientFromJsonWebKey(privateKey);
         const keySizeInBytes = 32;
         const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
         const hkdfInfo = Random.randBytes(8);
@@ -219,7 +222,7 @@ describe('ecies hkdf kem recipient test', function() {
           Bytes.fromHex(testVector.privateKeyPoint));
       privateJwk['d'] = Bytes.toBase64(
           Bytes.fromHex(testVector.privateKeyValue), /* opt_webSafe = */ true);
-      const recipient = await EciesHkdfKemRecipient.newInstance(privateJwk);
+      const recipient = await recipientFromJsonWebKey(privateJwk);
       const hkdfInfo = Bytes.fromHex(testVector.hkdfInfo);
       const salt = Bytes.fromHex(testVector.salt);
       const output = await recipient.decapsulate(

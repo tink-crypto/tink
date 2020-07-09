@@ -1,0 +1,44 @@
+load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+# Tests
+
+java_library(
+    name = "generator_test",
+    testonly = 1,
+    srcs = glob([
+        "**/*.java",
+    ]),
+    deps = [
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:google_payments_public_keys_manager",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_constants",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_decrypt",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_encrypt",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_recipient",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_recipient_kem",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_sender",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_util",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:sender_intermediate_cert_factory",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:joda_time_joda_time",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+        "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:random",
+    ],
+)
+
+gen_java_test_rules(
+    test_files = glob([
+        "**/*Test.java",
+    ]),
+    deps = [
+        ":generator_test",
+    ],
+)

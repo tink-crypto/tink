@@ -20,10 +20,11 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+
+from typing import Text
 # Special imports
 import six
 
-from typing import Text
 
 from tink.proto import tink_pb2
 from tink import core
@@ -38,12 +39,12 @@ class KeysetReader(object):
   @abc.abstractmethod
   def read(self) -> tink_pb2.Keyset:
     """Reads and returns a (cleartext) tink_pb2.Keyset from its source."""
-    pass
+    raise NotImplementedError()
 
   @abc.abstractmethod
   def read_encrypted(self) -> tink_pb2.EncryptedKeyset:
     """Reads and returns an tink_pb2.EncryptedKeyset from its source."""
-    pass
+    raise NotImplementedError()
 
 
 class JsonKeysetReader(KeysetReader):

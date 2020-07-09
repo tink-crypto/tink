@@ -25,6 +25,7 @@
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -51,7 +52,8 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::CreateKey(
   // Build EcdsaPrivateKey.
   EcdsaPrivateKey ecdsa_private_key;
   ecdsa_private_key.set_version(get_version());
-  ecdsa_private_key.set_key_value(ec_key.priv);
+  ecdsa_private_key.set_key_value(
+      std::string(util::SecretDataAsStringView(ec_key.priv)));
   auto ecdsa_public_key = ecdsa_private_key.mutable_public_key();
   ecdsa_public_key->set_version(get_version());
   ecdsa_public_key->set_x(ec_key.pub_x);
@@ -68,7 +70,7 @@ EcdsaSignKeyManager::PublicKeySignFactory::Create(
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
   ec_key.pub_x = public_key.x();
   ec_key.pub_y = public_key.y();
-  ec_key.priv = ecdsa_private_key.key_value();
+  ec_key.priv = util::SecretDataFromStringView(ecdsa_private_key.key_value());
   auto result = subtle::EcdsaSignBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
       Enums::ProtoToSubtle(public_key.params().encoding()));

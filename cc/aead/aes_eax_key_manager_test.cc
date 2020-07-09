@@ -184,8 +184,8 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
           key_or.ValueOrDie().params().iv_size());
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(aead_or.ValueOrDie().get(),
-                                 boring_ssl_aead_or.ValueOrDie().get(),
+  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                                 *boring_ssl_aead_or.ValueOrDie(),
                                  "message", "aad"),
               IsOk());
 }

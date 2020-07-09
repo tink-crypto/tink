@@ -167,8 +167,8 @@ TEST(AesGcmSivKeyManagerTest, CreateAead) {
           util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(aead_or.ValueOrDie().get(),
-                                 boring_ssl_aead_or.ValueOrDie().get(),
+  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie().get(),
+                                 *boring_ssl_aead_or.ValueOrDie().get(),
                                  "message", "aad"),
               IsOk());
 }

@@ -79,7 +79,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
    * Constructs a new KeyTypeManager.
    *
    * <p>Takes an arbitrary number of {@link PrimitiveFactory} objects as input. These will be used
-   * and provided via {@link #createPrimitive} to the user.
+   * and provided via {@link #getPrimitive} to the user.
    *
    * @throws IllegalArgumentException if two of the passed in factories produce primitives of the
    *     same class.

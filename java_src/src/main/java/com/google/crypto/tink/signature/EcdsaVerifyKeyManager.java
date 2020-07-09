@@ -37,7 +37,8 @@ class EcdsaVerifyKeyManager extends KeyTypeManager<EcdsaPublicKey> {
   public EcdsaVerifyKeyManager() {
     super(
         EcdsaPublicKey.class,
-        new PrimitiveFactory<PublicKeyVerify, EcdsaPublicKey>(PublicKeyVerify.class) {
+        new KeyTypeManager.PrimitiveFactory<PublicKeyVerify, EcdsaPublicKey>(
+            PublicKeyVerify.class) {
           @Override
           public PublicKeyVerify getPrimitive(EcdsaPublicKey keyProto)
               throws GeneralSecurityException {

@@ -24,6 +24,7 @@
 #include "openssl/err.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -31,7 +32,13 @@ namespace tink {
 namespace subtle {
 namespace {
 
-TEST(XChacha20Poly1305BoringSslTest, testBasic) {
+using ::crypto::tink::test::StatusIs;
+
+TEST(XChacha20Poly1305BoringSslTest, TestBasic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
   auto res = XChacha20Poly1305BoringSsl::New(key);
@@ -48,7 +55,11 @@ TEST(XChacha20Poly1305BoringSslTest, testBasic) {
   EXPECT_EQ(pt.ValueOrDie(), message);
 }
 
-TEST(XChacha20Poly1305BoringSslTest, testModification) {
+TEST(XChacha20Poly1305BoringSslTest, TestModification) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
@@ -78,6 +89,10 @@ TEST(XChacha20Poly1305BoringSslTest, testModification) {
 
 void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
                              absl::string_view message) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   {  // AAD is a null string_view.
     const absl::string_view aad;
     auto pt_or_status = cipher->Decrypt(ct, aad);
@@ -99,7 +114,11 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
   }
 }
 
-TEST(XChacha20Poly1305BoringSslTest, testAadEmptyVersusNullStringView) {
+TEST(XChacha20Poly1305BoringSslTest, TestAadEmptyVersusNullStringView) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   const util::SecretData key =
       util::SecretDataFromStringView(test::HexDecodeOrDie(
           "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
@@ -128,7 +147,11 @@ TEST(XChacha20Poly1305BoringSslTest, testAadEmptyVersusNullStringView) {
   }
 }
 
-TEST(XChacha20Poly1305BoringSslTest, testMessageEmptyVersusNullStringView) {
+TEST(XChacha20Poly1305BoringSslTest, TestMessageEmptyVersusNullStringView) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   const util::SecretData key =
       util::SecretDataFromStringView(test::HexDecodeOrDie(
           "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
@@ -165,7 +188,11 @@ TEST(XChacha20Poly1305BoringSslTest, testMessageEmptyVersusNullStringView) {
   }
 }
 
-TEST(XChacha20Poly1305BoringSslTest, testBothMessageAndAadEmpty) {
+TEST(XChacha20Poly1305BoringSslTest, TestBothMessageAndAadEmpty) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   const util::SecretData key =
       util::SecretDataFromStringView(test::HexDecodeOrDie(
           "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
@@ -203,7 +230,11 @@ TEST(XChacha20Poly1305BoringSslTest, testBothMessageAndAadEmpty) {
   }
 }
 
-TEST(XChacha20Poly1305BoringSslTest, testInvalidKeySizes) {
+TEST(XChacha20Poly1305BoringSslTest, TestInvalidKeySizes) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   for (int keysize = 0; keysize < 65; keysize++) {
     if (keysize == 32) {
       continue;
@@ -212,6 +243,18 @@ TEST(XChacha20Poly1305BoringSslTest, testInvalidKeySizes) {
     auto cipher = XChacha20Poly1305BoringSsl::New(key);
     EXPECT_FALSE(cipher.ok());
   }
+}
+
+TEST(XChacha20Poly1305BoringSslTest, TestFipsOnly) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  auto xchacha20_poly1305_res = subtle::XChacha20Poly1305BoringSsl::New(key256);
+  EXPECT_THAT(xchacha20_poly1305_res.status(), StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

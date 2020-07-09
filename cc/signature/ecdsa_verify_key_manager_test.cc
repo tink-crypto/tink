@@ -24,6 +24,7 @@
 #include "tink/subtle/ecdsa_sign_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -167,7 +168,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
   ec_key.pub_x = public_key.x();
   ec_key.pub_y = public_key.y();
-  ec_key.priv = private_key.key_value();
+  ec_key.priv = util::SecretDataFromStringView(private_key.key_value());
 
   auto direct_signer_or = subtle::EcdsaSignBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
@@ -195,7 +196,7 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentPrivateKey) {
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
   ec_key.pub_x = public_key.x();
   ec_key.pub_y = public_key.y();
-  ec_key.priv = private_key.key_value();
+  ec_key.priv = util::SecretDataFromStringView(private_key.key_value());
 
   auto direct_signer_or = subtle::EcdsaSignBoringSsl::New(
       ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),

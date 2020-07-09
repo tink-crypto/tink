@@ -42,8 +42,6 @@ class EcdsaSignBoringSsl : public PublicKeySign {
   crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const override;
 
-  virtual ~EcdsaSignBoringSsl() {}
-
  private:
   EcdsaSignBoringSsl(bssl::UniquePtr<EC_KEY> key, const EVP_MD* hash,
                      EcdsaSignatureEncoding encoding);

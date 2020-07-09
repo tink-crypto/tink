@@ -15,16 +15,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from distutils import spawn
 import glob
 import os
 import posixpath
+import re
 import shutil
 import subprocess
 import sys
 
-from distutils import spawn
 import setuptools
 from setuptools.command import build_ext
+
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -105,40 +107,56 @@ def _patch_workspace(workspace_content):
   Returns:
     The workspace_content using http_archive for tink_base and tink_cc.
   """
-  # Add http_archive load
-  workspace_lines = workspace_content.split('\n')
-  http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
-                       '"http_archive")')
-  workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
-                                workspace_lines[1:])
+  # This is run by pip from a temporary folder which breaks the WORKSPACE paths.
+  # This replaces the paths with the latest http_archive.
+  # In order to override this with a local WORKSPACE use the
+  # TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH environment variable.
 
-  # Replace local with http archives
-  base = ('local_repository(\n'
-          '    name = "tink_base",\n'
-          '    path = "..",\n'
+  if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
+    base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
+    workspace_content = re.sub(r'(?<="tink_base",\n    path = ").*(?=\n)',
+                               base_path + '",  # Modified by setup.py',
+                               workspace_content)
+    workspace_content = re.sub(r'(?<="tink_cc",\n    path = ").*(?=\n)',
+                               base_path + '/cc' + '",  # Modified by setup.py',
+                               workspace_content)
+  else:
+    # If not base is specified use the latest version from GitHub
+    # Add http_archive load
+    workspace_lines = workspace_content.split('\n')
+    http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
+                         '"http_archive")')
+    workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
+                                  workspace_lines[1:])
+
+    base = ('local_repository(\n'
+            '    name = "tink_base",\n'
+            '    path = "..",\n'
+            ')\n')
+
+    cc = ('local_repository(\n'
+          '    name = "tink_cc",\n'
+          '    path = "../cc",\n'
           ')\n')
 
-  cc = ('local_repository(\n'
-        '    name = "tink_cc",\n'
-        '    path = "../cc",\n'
+    base_patched = (
+        '# Modified by setup.py\n'
+        'http_archive(\n'
+        '    name = "tink_base",\n'
+        '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
+        '    strip_prefix = "tink-master/",\n'
         ')\n')
 
-  base_http = (
-      'http_archive(\n'
-      '    name = "tink_base",\n'
-      '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
-      '    strip_prefix = "tink-master/",\n'
-      ')\n')
+    cc_patched = (
+        '# Modified by setup.py\n'
+        'http_archive(\n'
+        '    name = "tink_cc",\n'
+        '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
+        '    strip_prefix = "tink-master/cc",\n'
+        ')\n')
 
-  cc_http = (
-      'http_archive(\n'
-      '    name = "tink_cc",\n'
-      '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
-      '    strip_prefix = "tink-master/cc",\n'
-      ')\n')
-
-  workspace_content = workspace_content.replace(base, base_http)
-  workspace_content = workspace_content.replace(cc, cc_http)
+    workspace_content = workspace_content.replace(base, base_patched)
+    workspace_content = workspace_content.replace(cc, cc_patched)
   return workspace_content
 
 
@@ -175,10 +193,11 @@ class BuildBazelExtension(build_ext.build_ext):
       os.makedirs(self.build_temp)
 
     bazel_argv = [
-        bazel,
-        'build',
-        ext.bazel_target,
+        bazel, 'build', ext.bazel_target,
         '--compilation_mode=' + ('dbg' if self.debug else 'opt'),
+        '--incompatible_linkopts_to_linklibs'
+        # TODO(https://github.com/bazelbuild/bazel/issues/9254): Remove linkopts
+        # flag when issue is fixed.
     ]
     self.spawn(bazel_argv)
     ext_bazel_bin_path = os.path.join('bazel-bin', ext.relpath,
@@ -212,6 +231,7 @@ setuptools.setup(
     # PyPI package information.
     classifiers=[
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Libraries',
     ],
     license='Apache 2.0',

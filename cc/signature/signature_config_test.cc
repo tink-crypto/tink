@@ -16,10 +16,13 @@
 
 #include "tink/signature/signature_config.h"
 
+#include <list>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/config.h"
+#include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
@@ -39,6 +42,7 @@ using ::crypto::tink::test::DummyPublicKeySign;
 using ::crypto::tink::test::DummyPublicKeyVerify;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
+using ::testing::Not;
 
 class SignatureConfigTest : public ::testing::Test {
  protected:
@@ -120,6 +124,56 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
   ASSERT_TRUE(wrapped.ValueOrDie()
                   ->Verify(absl::StrCat(prefix, signature), "message")
                   .ok());
+}
+
+// FIPS-only mode tests
+TEST_F(SignatureConfigTest, RegisterNonFipsTemplates) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  EXPECT_THAT(SignatureConfig::Register(), IsOk());
+
+  std::list<google::crypto::tink::KeyTemplate> non_fips_key_templates;
+  non_fips_key_templates.push_back(SignatureKeyTemplates::Ed25519());
+  non_fips_key_templates.push_back(
+      SignatureKeyTemplates::Ed25519WithRawOutput());
+  // 4096-bit RSA is not validated.
+  non_fips_key_templates.push_back(
+      SignatureKeyTemplates::RsaSsaPkcs14096Sha512F4());
+  non_fips_key_templates.push_back(
+      SignatureKeyTemplates::RsaSsaPss4096Sha384Sha384F4());
+  non_fips_key_templates.push_back(
+      SignatureKeyTemplates::RsaSsaPss4096Sha512Sha512F4());
+
+  for (auto key_template : non_fips_key_templates) {
+    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
+                Not(IsOk()));
+  }
+}
+
+TEST_F(SignatureConfigTest, RegisterFipsValidTemplates) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  EXPECT_THAT(SignatureConfig::Register(), IsOk());
+
+  std::list<google::crypto::tink::KeyTemplate> fips_key_templates;
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP256());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP256Ieee());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Ieee());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP521());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP521Ieee());
+  fips_key_templates.push_back(
+      SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4());
+  fips_key_templates.push_back(
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4());
+
+  for (auto key_template : fips_key_templates) {
+    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(), IsOk());
+  }
 }
 
 }  // namespace

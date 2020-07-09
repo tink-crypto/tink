@@ -19,7 +19,7 @@
 #include "tink/util/status.h"
 
 #include "absl/strings/str_cat.h"
-// placeholder_google3_status_header, please ignore
+#include "absl/status/status.h"
 
 using ::std::ostream;
 
@@ -49,7 +49,17 @@ const Status& GetOk() {
 
 }  // namespace
 
-// placeholder_implicit_type_conversion, please ignore
+Status::Status(const ::absl::Status& status)
+    : code_(::crypto::tink::util::error::OK) {
+  if (status.ok()) return;
+  code_ = static_cast<::crypto::tink::util::error::Code>(status.code());
+  message_ = std::string(status.message());
+}
+
+Status::operator ::absl::Status() const {
+  if (ok()) return ::absl::OkStatus();
+  return ::absl::Status(static_cast<absl::StatusCode>(code_), message_);
+}
 
 Status::Status() : code_(::crypto::tink::util::error::OK), message_("") {
 }

@@ -67,7 +67,7 @@ class MacWrapper implements PrimitiveWrapper<Mac> {
         // clearly insecure, thus should be discouraged.
         throw new GeneralSecurityException("tag too short");
       }
-      byte[] prefix = Arrays.copyOfRange(mac, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+      byte[] prefix = Arrays.copyOf(mac, CryptoFormat.NON_RAW_PREFIX_SIZE);
       byte[] macNoPrefix = Arrays.copyOfRange(mac, CryptoFormat.NON_RAW_PREFIX_SIZE, mac.length);
       List<PrimitiveSet.Entry<Mac>> entries = primitives.getPrimitive(prefix);
       for (PrimitiveSet.Entry<Mac> entry : entries) {
@@ -80,7 +80,7 @@ class MacWrapper implements PrimitiveWrapper<Mac> {
           // If there is no exception, the MAC is valid and we can return.
           return;
         } catch (GeneralSecurityException e) {
-          logger.info("tag prefix matches a key, but cannot verify: " + e.toString());
+          logger.info("tag prefix matches a key, but cannot verify: " + e);
           // Ignored as we want to continue verification with the remaining keys.
         }
       }

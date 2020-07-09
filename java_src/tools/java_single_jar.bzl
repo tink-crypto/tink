@@ -20,12 +20,10 @@ def _java_single_jar(ctx):
     _check_non_empty(ctx.attr.root_packages, "root_packages")
 
     inputs = depset()
-    source_jars = []
-    for dep in ctx.attr.deps:
-        inputs = depset(transitive = [inputs, dep[JavaInfo].transitive_runtime_deps])
-        source_jars += dep[JavaInfo].transitive_source_jars.to_list()
     if ctx.attr.source_jar:
-        inputs = depset(direct = source_jars)
+        inputs = depset(transitive = [dep[JavaInfo].transitive_source_jars for dep in ctx.attr.deps])
+    else:
+        inputs = depset(transitive = [dep[JavaInfo].transitive_runtime_deps for dep in ctx.attr.deps])
 
     args = ctx.actions.args()
     args.add_all("--sources", inputs)
@@ -36,6 +34,18 @@ def _java_single_jar(ctx):
     args.set_param_file_format("multiline")
     args.add("--output", ctx.outputs.jar)
     args.add("--normalize")
+
+    resource_files = depset(
+        transitive = [resource.files for resource in ctx.attr.resources],
+    ).to_list()
+    args.add("--resources")
+    for resource_file in resource_files:
+        if not resource_file.path.startswith("src/main/resources"):
+            fail("resource %s must be stored in src/main/resources/" % resource_file.path)
+        relative_path = resource_file.path.replace("src/main/resources/", "")
+
+        # Map src/main/resources/a/b/c.txt to a/b/c.txt.
+        args.add(resource_file.path, format = "%s:" + relative_path)
 
     # Maybe compress code.
     if not ctx.attr.source_jar:
@@ -55,7 +65,7 @@ def _java_single_jar(ctx):
         args.add("--include_prefixes", p.replace(".", "/"))
 
     ctx.actions.run(
-        inputs = inputs,
+        inputs = inputs.to_list() + resource_files,
         outputs = [ctx.outputs.jar],
         arguments = [args],
         progress_message = "Merging into %s" % ctx.outputs.jar.short_path,
@@ -66,6 +76,10 @@ def _java_single_jar(ctx):
 java_single_jar = rule(
     attrs = {
         "deps": attr.label_list(providers = [JavaInfo]),
+        "resources": attr.label_list(
+            providers = [JavaInfo],
+            allow_files = True,
+        ),
         "_singlejar": attr.label(
             default = Label("@bazel_tools//tools/jdk:singlejar"),
             cfg = "host",
@@ -89,6 +103,9 @@ Args:
       exports) and runtime dependencies (runtime_deps) are collected.
       Resources are also collected. Native cc_library or java_wrap_cc
       dependencies are not.
+  resources: A combination of resource files. Files must be stored in
+      src/main/resources. Mapping rules: src/main/resources/a/b/c.txt will be
+      copied to a/b/c.txt in the output jar.
   compress: Whether to always deflate ("yes"), always store ("no"), or pass
       through unmodified ("preserve"). The default is "preserve", and is the
       most efficient option -- no extra work is done to inflate or deflate.

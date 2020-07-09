@@ -52,6 +52,15 @@ public class EcdsaVerifyJceTest {
         "../wycheproof/testvectors/ecdsa_secp384r1_sha512_test.json", EcdsaEncoding.DER);
     testWycheproofVectors(
         "../wycheproof/testvectors/ecdsa_secp521r1_sha512_test.json", EcdsaEncoding.DER);
+    testWycheproofVectors(
+        "../wycheproof/testvectors/ecdsa_secp256r1_sha256_p1363_test.json",
+        EcdsaEncoding.IEEE_P1363);
+    testWycheproofVectors(
+        "../wycheproof/testvectors/ecdsa_secp384r1_sha512_p1363_test.json",
+        EcdsaEncoding.IEEE_P1363);
+    testWycheproofVectors(
+        "../wycheproof/testvectors/ecdsa_secp521r1_sha512_p1363_test.json",
+        EcdsaEncoding.IEEE_P1363);
   }
 
   private static void testWycheproofVectors(String fileName, EcdsaEncoding encoding)
@@ -141,18 +150,42 @@ public class EcdsaVerifyJceTest {
   }
 
   @Test
-  public void testBasic() throws Exception {
+  public void testAgainstJCEInstance256() throws Exception {
     testAgainstJceSignatureInstance(EllipticCurves.getNistP256Params(), HashType.SHA256);
+  }
+
+  @Test
+  public void testAgainstJCEInstance384() throws Exception {
     testAgainstJceSignatureInstance(EllipticCurves.getNistP384Params(), HashType.SHA512);
+  }
+
+  @Test
+  public void testAgainstJCEInstance512() throws Exception {
     testAgainstJceSignatureInstance(EllipticCurves.getNistP521Params(), HashType.SHA512);
+  }
+
+  @Test
+  public void testSignVerify256() throws Exception {
     testSignVerify(EllipticCurves.getNistP256Params(), HashType.SHA256);
+  }
+
+  @Test
+  public void testSignVerify384() throws Exception {
     testSignVerify(EllipticCurves.getNistP384Params(), HashType.SHA512);
+  }
+
+  @Test
+  public void testSignVerify512() throws Exception {
     testSignVerify(EllipticCurves.getNistP521Params(), HashType.SHA512);
   }
 
   private static void testAgainstJceSignatureInstance(ECParameterSpec ecParams, HashType hash)
       throws Exception {
-    for (int i = 0; i < 100; i++) {
+    int numSignatures = 100;
+    if (TestUtil.isTsan()) {
+      numSignatures = 5;
+    }
+    for (int i = 0; i < numSignatures; i++) {
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();
@@ -173,7 +206,11 @@ public class EcdsaVerifyJceTest {
   }
 
   private static void testSignVerify(ECParameterSpec ecParams, HashType hash) throws Exception {
-    for (int i = 0; i < 100; i++) {
+    int numSignatures = 100;
+    if (TestUtil.isTsan()) {
+      numSignatures = 5;
+    }
+    for (int i = 0; i < numSignatures; i++) {
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();

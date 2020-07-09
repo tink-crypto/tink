@@ -28,6 +28,7 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -104,9 +105,9 @@ void AesEaxBoringSsl::MultiplyByX(const uint8_t in[kBlockSize],
   uint64_t in_low = BigEndianLoad64(in + 8);
   uint64_t out_high = (in_high << 1) ^ (in_low >> 63);
   // If the most significant bit is set then the result has to
-  // be reduced by x^128 + x^7 + x^4 + x^2 + x + 1.
-  // The representation of x^7 + x^4 + x^2 + x + 1 is 0x87.
-  uint64_t out_low = (in_low << 1) ^ (in_high >> 63 ? 0x87 : 0);
+  // be reduced by x^128 + x^7 + x^2 + x + 1.
+  // The representation of x^7 + x^2 + x + 1 is 0x87.
+  uint64_t out_low = (in_low << 1) ^ (0x87 & -(in_high >> 63));
   BigEndianStore64(out_high, out);
   BigEndianStore64(out_low, out + 8);
 }
@@ -143,6 +144,9 @@ util::SecretData AesEaxBoringSsl::ComputeP() const {
 
 crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxBoringSsl::New(
     const util::SecretData& key, size_t nonce_size_in_bytes) {
+  auto status = CheckFipsCompatibility<AesEaxBoringSsl>();
+  if (!status.ok()) return status;
+
   if (!IsValidKeySize(key.size())) {
     return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
   }

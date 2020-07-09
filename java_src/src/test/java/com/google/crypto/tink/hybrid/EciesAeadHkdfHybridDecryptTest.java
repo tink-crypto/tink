@@ -17,7 +17,7 @@
 package com.google.crypto.tink.hybrid;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
@@ -29,7 +29,6 @@ import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.CurveType;
-import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
@@ -51,14 +50,15 @@ public class EciesAeadHkdfHybridDecryptTest {
     Config.register(HybridConfig.TINK_1_0_0);
   }
 
-  private void testModifyDecrypt(CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+  private static void testEncryptDecrypt(CurveType curveType, KeyTemplate keyTemplate)
+      throws Exception {
     KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
     byte[] salt = Random.randBytes(8);
+    String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
     byte[] plaintext = Random.randBytes(4);
     byte[] context = Random.randBytes(4);
-    String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
     HybridEncrypt hybridEncrypt =
         new EciesAeadHkdfHybridEncrypt(
             recipientPublicKey,
@@ -75,70 +75,241 @@ public class EciesAeadHkdfHybridDecryptTest {
             new RegistryEciesAeadHkdfDemHelper(keyTemplate));
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
     byte[] decrypted = hybridDecrypt.decrypt(ciphertext, context);
-
     assertArrayEquals(plaintext, decrypted);
+  }
 
-    // Modifies ciphertext and makes sure that the decryption failed. This test implicitly checks
-    // the modification of public key and the raw ciphertext.
+  @Test
+  public void testEncryptDecryptP256CtrHmac() throws Exception {
+    testEncryptDecrypt(CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP384CtrHmac() throws Exception {
+    testEncryptDecrypt(CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP521CtrHmac() throws Exception {
+    testEncryptDecrypt(CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP256Gcm() throws Exception {
+    testEncryptDecrypt(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP384Gcm() throws Exception {
+    testEncryptDecrypt(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP512Gcm() throws Exception {
+    testEncryptDecrypt(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+  }
+
+  private static void testEncryptDecrypt_mutatedCiphertext_throws(
+      CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+    KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
+    ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
+    ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
+    byte[] salt = Random.randBytes(8);
+    String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
+    byte[] plaintext = Random.randBytes(4);
+    byte[] context = Random.randBytes(4);
+    HybridEncrypt hybridEncrypt =
+        new EciesAeadHkdfHybridEncrypt(
+            recipientPublicKey,
+            salt,
+            hmacAlgo,
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            new RegistryEciesAeadHkdfDemHelper(keyTemplate));
+    HybridDecrypt hybridDecrypt =
+        new EciesAeadHkdfHybridDecrypt(
+            recipientPrivateKey,
+            salt,
+            hmacAlgo,
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            new RegistryEciesAeadHkdfDemHelper(keyTemplate));
+    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
     for (BytesMutation mutation : TestUtil.generateMutations(ciphertext)) {
-      try {
-        hybridDecrypt.decrypt(mutation.value, context);
-        fail(
-            String.format(
-                "Invalid ciphertext, should have thrown exception: ciphertext = %s,context = %s,"
-                    + " description = %s",
-                Hex.encode(mutation.value), Hex.encode(context), mutation.description));
-      } catch (GeneralSecurityException expected) {
-        // Expected
+      assertThrows(
+          GeneralSecurityException.class, () -> hybridDecrypt.decrypt(mutation.value, context));
+      // The test takes too long in TSan, so we stop after the first case.
+      if (TestUtil.isTsan()) {
+        return;
       }
     }
+  }
 
-    // Modify context.
+  @Test
+  public void testEncryptDecryptP256CtrHmac_mutatedCiphertext_throws() throws Exception {
+    testEncryptDecrypt_mutatedCiphertext_throws(
+        CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP384CtrHmac_mutatedCiphertext_throws() throws Exception {
+    testEncryptDecrypt_mutatedCiphertext_throws(
+        CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP521CtrHmac_mutatedCiphertext_throws() throws Exception {
+    testEncryptDecrypt_mutatedCiphertext_throws(
+        CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP256Gcm_mutatedCiphertext_throws() throws Exception {
+    testEncryptDecrypt_mutatedCiphertext_throws(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP384Gcm_mutatedCiphertext_throws() throws Exception {
+    testEncryptDecrypt_mutatedCiphertext_throws(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP512Gcm_mutatedCiphertext_throws() throws Exception {
+    testEncryptDecrypt_mutatedCiphertext_throws(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+  }
+
+  private static void testEncryptDecrypt_mutatedContext_throws(
+      CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+    KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
+    ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
+    ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
+    byte[] salt = Random.randBytes(8);
+    String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
+    byte[] plaintext = Random.randBytes(4);
+    byte[] context = Random.randBytes(4);
+    HybridEncrypt hybridEncrypt =
+        new EciesAeadHkdfHybridEncrypt(
+            recipientPublicKey,
+            salt,
+            hmacAlgo,
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            new RegistryEciesAeadHkdfDemHelper(keyTemplate));
+    HybridDecrypt hybridDecrypt =
+        new EciesAeadHkdfHybridDecrypt(
+            recipientPrivateKey,
+            salt,
+            hmacAlgo,
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            new RegistryEciesAeadHkdfDemHelper(keyTemplate));
+    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
     for (BytesMutation mutation : TestUtil.generateMutations(context)) {
-      try {
-        hybridDecrypt.decrypt(ciphertext, mutation.value);
-        fail(
-            String.format(
-                "Invalid context, should have thrown exception: context = %s, ciphertext = %s,"
-                    + " description = %s",
-                Hex.encode(mutation.value), Hex.encode(ciphertext), mutation.description));
-      } catch (GeneralSecurityException expected) {
-        // Expected
+      // The test takes too long in TSan, so we stop after the first case.
+      assertThrows(
+          GeneralSecurityException.class, () -> hybridDecrypt.decrypt(ciphertext, mutation.value));
+      if (TestUtil.isTsan()) {
+        return;
       }
     }
+  }
 
-    // Modify salt.
-    // We exclude tests that modify the length of the salt, since the salt has fixed length and
-    // modifying the length may not be detected.
+  @Test
+  public void testEncryptDecryptP256CtrHmac_mutatedContext_throws() throws Exception {
+    testEncryptDecrypt_mutatedContext_throws(
+        CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP384CtrHmac_mutatedContext_throws() throws Exception {
+    testEncryptDecrypt_mutatedContext_throws(
+        CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP521CtrHmac_mutatedContext_throws() throws Exception {
+    testEncryptDecrypt_mutatedContext_throws(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP256Gcm_mutatedContext_throws() throws Exception {
+    testEncryptDecrypt_mutatedContext_throws(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP384Gcm_mutatedContext_throws() throws Exception {
+    testEncryptDecrypt_mutatedContext_throws(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP512Gcm_mutatedContext_throws() throws Exception {
+    testEncryptDecrypt_mutatedContext_throws(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+  }
+
+  private static void testEncryptDecrypt_mutatedSalt_throws(
+      CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+    KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
+    ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
+    ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
+    byte[] salt = Random.randBytes(8);
+    String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
+    byte[] plaintext = Random.randBytes(4);
+    byte[] context = Random.randBytes(4);
+    HybridEncrypt hybridEncrypt =
+        new EciesAeadHkdfHybridEncrypt(
+            recipientPublicKey,
+            salt,
+            hmacAlgo,
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            new RegistryEciesAeadHkdfDemHelper(keyTemplate));
+    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
+
     for (int bytes = 0; bytes < salt.length; bytes++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modifiedSalt = Arrays.copyOf(salt, salt.length);
         modifiedSalt[bytes] ^= (byte) (1 << bit);
-        hybridDecrypt =
+        HybridDecrypt hybridDecrypt =
             new EciesAeadHkdfHybridDecrypt(
                 recipientPrivateKey,
                 modifiedSalt,
                 hmacAlgo,
                 EllipticCurves.PointFormatType.UNCOMPRESSED,
                 new RegistryEciesAeadHkdfDemHelper(keyTemplate));
-        try {
-          hybridDecrypt.decrypt(ciphertext, context);
-          fail("Invalid salt, should have thrown exception");
-        } catch (GeneralSecurityException expected) {
-          // Expected
+        assertThrows(
+            GeneralSecurityException.class, () -> hybridDecrypt.decrypt(ciphertext, modifiedSalt));
+        // The test takes too long in TSan, so we stop after the first case.
+        if (TestUtil.isTsan()) {
+          return;
         }
       }
     }
   }
 
   @Test
-  public void testModifyDecrypt() throws Exception {
-    testModifyDecrypt(CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
-    testModifyDecrypt(CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
-    testModifyDecrypt(CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  public void testEncryptDecryptP256CtrHmac_mutatedSalt_throws() throws Exception {
+    testEncryptDecrypt_mutatedSalt_throws(
+        CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
 
-    testModifyDecrypt(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
-    testModifyDecrypt(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
-    testModifyDecrypt(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+  @Test
+  public void testEncryptDecryptP384CtrHmac_mutatedSalt_throws() throws Exception {
+    testEncryptDecrypt_mutatedSalt_throws(
+        CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP521CtrHmac_mutatedSalt_throws() throws Exception {
+    testEncryptDecrypt_mutatedSalt_throws(
+        CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+  }
+
+  @Test
+  public void testEncryptDecryptP256Gcm_mutatedSalt_throws() throws Exception {
+    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP384Gcm_mutatedSalt_throws() throws Exception {
+    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+  }
+
+  @Test
+  public void testEncryptDecryptP512Gcm_mutatedSalt_throws() throws Exception {
+    testEncryptDecrypt_mutatedSalt_throws(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
   }
 }

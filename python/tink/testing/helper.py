@@ -19,6 +19,7 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+import os
 from typing import Text
 
 from tink.proto import tink_pb2
@@ -28,6 +29,24 @@ from tink import daead
 from tink import hybrid
 from tink import mac
 from tink import signature as pk_signature
+
+
+def get_tink_src_path():
+  """Returns the path to the Tink root directory used for the test enviroment.
+
+     The path must be set in the TINK_SRC_PATH enviroment variable. If Bazel
+     is used the path is derived from the Bazel enviroment variables.
+  """
+  if 'TINK_SRC_PATH' in os.environ:
+    return os.environ['TINK_SRC_PATH']
+  elif 'TEST_SRCDIR' in os.environ:
+    # Bazel enviroment
+    return os.path.join(os.environ['TEST_SRCDIR'], 'tink_base')
+  else:
+    raise ValueError(
+        'Could not find path to Tink root directory. Make sure that '
+        'TINK_SRC_PATH is set.'
+    )
 
 
 def fake_key(value: bytes = b'fakevalue',

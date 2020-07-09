@@ -106,6 +106,12 @@ class FileObjectAdapterTest(absltest.TestCase):
 
     self.assertEqual(adapter.read(0), b'')
 
+  def test_read_negative_size_fails(self):
+    file_object = io.BytesIO(b'something')
+    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    with self.assertRaises(ValueError):
+      adapter.read(-1)
+
   def test_read_raises_blocking_error(self):
     file_object = mock.Mock()
     file_object.read = mock.Mock(side_effect=io.BlockingIOError(None, None))

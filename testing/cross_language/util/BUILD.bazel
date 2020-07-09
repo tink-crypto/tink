@@ -1,0 +1,127 @@
+load("@rules_proto_grpc//python:defs.bzl", "python_grpc_library")
+load("@rules_python//python:defs.bzl", "py_library")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//visibility:public"],
+)
+
+licenses(["notice"])
+
+python_grpc_library(
+    name = "testing_api_python_library",
+    deps = ["@tink_base//proto/testing:testing_api_proto"],
+)
+
+py_library(
+    name = "supported_key_types",
+    testonly = 1,
+    srcs = ["supported_key_types.py"],
+    deps = [
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/signature",
+        "@tink_py//tink/streaming_aead",
+    ],
+)
+
+py_test(
+    name = "supported_key_types_test",
+    srcs = ["supported_key_types_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":supported_key_types",
+        requirement("absl-py"),
+    ],
+)
+
+py_library(
+    name = "_primitives",
+    srcs = ["_primitives.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":testing_api_python_library",
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/signature",
+        "@tink_py//tink/streaming_aead",
+        requirement("absl-py"),
+    ],
+)
+
+py_library(
+    name = "testing_servers",
+    srcs = ["testing_servers.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_primitives",
+        ":testing_api_python_library",
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/signature",
+        "@tink_py//tink/streaming_aead",
+        requirement("absl-py"),
+        "@org_python_pypi_portpicker//:portpicker",
+    ],
+)
+
+py_test(
+    name = "testing_servers_test",
+    srcs = ["testing_servers_test.py"],
+    data = [
+        ":testing_servers",
+    ],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":testing_api_python_library",
+        requirement("absl-py"),
+        "@org_python_pypi_portpicker//:portpicker",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/signature",
+        "@tink_py//tink/streaming_aead",
+    ],
+)
+
+py_library(
+    name = "keyset_builder",
+    testonly = 1,
+    srcs = [
+        "keyset_builder.py",
+    ],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+    ],
+)
+
+py_test(
+    name = "keyset_builder_test",
+    srcs = ["keyset_builder_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":keyset_builder",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)

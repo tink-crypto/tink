@@ -1,3 +1,1 @@
-import {EncryptThenAuthenticate} from './encrypt_then_authenticate';
-
-export const aesCtrHmac = EncryptThenAuthenticate.newAesCtrHmac;
+export {aesCtrHmacFromRawKeys as fromRawKeys} from '../../subtle/encrypt_then_authenticate';

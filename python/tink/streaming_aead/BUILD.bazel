@@ -9,6 +9,7 @@ py_library(
     name = "streaming_aead",
     srcs = ["__init__.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         ":_decrypting_stream",
         ":_encrypting_stream",

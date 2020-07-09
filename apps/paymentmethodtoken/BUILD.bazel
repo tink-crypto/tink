@@ -1,81 +1,23 @@
+load("@tink_java//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
-
-load("@tink_java//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
-
-filegroup(
-    name = "srcs",
-    srcs = glob(
-        [
-            "src/main/**/*.java",
-        ],
-    ),
-)
-
-java_library(
-    name = "paymentmethodtoken",
-    srcs = [":srcs"],
-    javacopts = JAVACOPTS_OSS,
-    deps = [
-        "@tink_java//:java",
-        "@tink_java//:subtle",
-        "@maven//:com_google_http_client_google_http_client",
-        "@maven//:joda_time_joda_time",
-        "@maven//:org_json_json",
-    ],
-)
-
-java_binary(
-    name = "recipientkeygen",
-    srcs = glob([
-        "src/main/**/PaymentMethodTokenRecipientKeyGen.java",
-    ]),
-    javacopts = JAVACOPTS_OSS,
-    main_class = "com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenRecipientKeyGen",
-    deps = [
-        ":paymentmethodtoken",
-        "@tink_java//:java",
-        "@tink_java//:subtle",
-    ],
-)
-
-# Maven Jars
-
-load("@tink_java//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
     name = "maven",
     doctitle = "Tink Cryptography API for Google Payment Method Token",
     root_packages = ["com.google.crypto.tink.apps.paymentmethodtoken"],
-    deps = [":paymentmethodtoken"],
-)
-
-# Tests
-
-load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
-
-java_library(
-    name = "generator_test",
-    testonly = 1,
-    srcs = glob([
-        "src/test/**/*.java",
-    ]),
     deps = [
-        ":paymentmethodtoken",
-        "@tink_java//:testonly",
-        "@maven//:com_google_http_client_google_http_client",
-        "@maven//:joda_time_joda_time",
-        "@maven//:junit_junit",
-        "@maven//:org_json_json",
-    ],
-)
-
-gen_java_test_rules(
-    test_files = glob([
-        "src/test/**/*Test.java",
-    ]),
-    deps = [
-        ":generator_test",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:google_payments_public_keys_manager",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_constants",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_decrypt",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_hybrid_encrypt",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_recipient",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_recipient_kem",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_recipient_key_gen",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_sender",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:payment_method_token_util",
+        "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:sender_intermediate_cert_factory",
     ],
 )

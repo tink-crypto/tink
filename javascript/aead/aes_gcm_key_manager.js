@@ -15,12 +15,12 @@
 goog.module('tink.aead.AesGcmKeyManager');
 
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const AesGcm = goog.require('tink.subtle.AesGcm');
-const KeyManager = goog.require('tink.KeyManager');
-const Random = goog.require('tink.subtle.Random');
-const Registry = goog.require('tink.Registry');
+const aesGcm = goog.require('google3.third_party.tink.javascript.subtle.aes_gcm');
+const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Validators = goog.require('tink.subtle.Validators');
+const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
 const {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
@@ -126,7 +126,7 @@ class AesGcmKeyManager {
     const keyProto = AesGcmKeyManager.getKeyProto_(key);
     AesGcmKeyManager.validateKey_(keyProto);
 
-    return await AesGcm.newInstance(keyProto.getKeyValue_asU8());
+    return await aesGcm.fromRawKey(keyProto.getKeyValue_asU8());
   }
 
   /** @override */

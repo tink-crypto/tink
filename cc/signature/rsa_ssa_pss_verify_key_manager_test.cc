@@ -25,6 +25,7 @@
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/subtle/rsa_ssa_pss_sign_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -135,6 +136,12 @@ TEST(RsaSsaPssVerifyKeyManagerTest, ValidateKeyFormatSmallModulusDisallowed) {
                        HasSubstr("only modulus size >= 2048")));
 }
 
+TEST(RsaSsaPssVerifyKeyManagerTest, NegativeSaltLengthFails) {
+  RsaSsaPssPublicKey key = CreateValidPublicKey();
+  key.mutable_params()->set_salt_length(-5);
+  EXPECT_THAT(RsaSsaPssVerifyKeyManager().ValidateKey(key), Not(IsOk()));
+}
+
 TEST(RsaSsaPssSignKeyManagerTest, Create) {
   RsaSsaPssKeyFormat key_format =
       CreateKeyFormat(HashType::SHA256, HashType::SHA256, 32, 3072, RSA_F4);
@@ -148,12 +155,12 @@ TEST(RsaSsaPssSignKeyManagerTest, Create) {
   subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key_subtle;
   private_key_subtle.n = private_key.public_key().n();
   private_key_subtle.e = private_key.public_key().e();
-  private_key_subtle.d = private_key.d();
-  private_key_subtle.p = private_key.p();
-  private_key_subtle.q = private_key.q();
-  private_key_subtle.dp = private_key.dp();
-  private_key_subtle.dq = private_key.dq();
-  private_key_subtle.crt = private_key.crt();
+  private_key_subtle.d = util::SecretDataFromStringView(private_key.d());
+  private_key_subtle.p = util::SecretDataFromStringView(private_key.p());
+  private_key_subtle.q = util::SecretDataFromStringView(private_key.q());
+  private_key_subtle.dp = util::SecretDataFromStringView(private_key.dp());
+  private_key_subtle.dq = util::SecretDataFromStringView(private_key.dq());
+  private_key_subtle.crt = util::SecretDataFromStringView(private_key.crt());
 
   auto direct_signer_or = subtle::RsaSsaPssSignBoringSsl::New(
       private_key_subtle, {crypto::tink::subtle::HashType::SHA256,

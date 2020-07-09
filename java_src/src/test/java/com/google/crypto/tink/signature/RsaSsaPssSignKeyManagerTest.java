@@ -168,6 +168,18 @@ public class RsaSsaPssSignKeyManagerTest {
     }
   }
 
+  @Test
+  public void validateKeyFormat_negativeSaltLength_throws() throws Exception {
+    RsaSsaPssKeyFormat format =
+        createKeyFormat(HashType.SHA512, HashType.SHA512, -5, 3072, RSAKeyGenParameterSpec.F4);
+    try {
+      factory.validateKeyFormat(format);
+      fail();
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
   private static void checkConsistency(RsaSsaPssPrivateKey privateKey,
       RsaSsaPssKeyFormat keyFormat) {
     assertThat(privateKey.getPublicKey().getParams()).isEqualTo(keyFormat.getParams());

@@ -21,9 +21,9 @@
 #include "tink/crypto_format.h"
 #include "tink/util/status.h"
 #include "tink/util/test_keyset_handle.h"
-
-#import "proto/EciesAeadHkdf.pbobjc.h"
-#import "proto/Tink.pbobjc.h"
+#include "tink/util/test_util.h"
+#include "proto/ecies_aead_hkdf.pb.h"
+#include "proto/tink.pb.h"
 
 #import "objc/TINKConfig.h"
 #import "objc/TINKHybridConfig.h"
@@ -34,39 +34,38 @@
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
-#import "objc/util/TINKTestHelpers.h"
 
-using crypto::tink::TestKeysetHandle;
+using ::crypto::tink::TestKeysetHandle;
+using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddLegacyKey;
+using ::google::crypto::tink::EciesAeadHkdfPrivateKey;
+using ::google::crypto::tink::EcPointFormat;
+using ::google::crypto::tink::EllipticCurveType;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
 
 @interface TINKHybridDecryptFactoryTest : XCTestCase
 @end
 
-static TINKPBEciesAeadHkdfPrivateKey *getNewEciesPrivateKey() {
-  return TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurveType_NistP256,
-                                       TINKPBEcPointFormat_Uncompressed, TINKPBHashType_Sha256, 32);
+static EciesAeadHkdfPrivateKey getNewEciesPrivateKey() {
+  return crypto::tink::test::GetEciesAesGcmHkdfTestKey(
+      EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED, HashType::SHA256, 32);
 }
 
 @implementation TINKHybridDecryptFactoryTest
 
-- (void)testEncryptWith:(TINKPBKeyset *)publicKeyset andDecryptWith:(TINKPBKeyset *)privateKeyset {
-  NSError *error = nil;
-  std::string serializedKeyset = TINKPBSerializeToString(privateKeyset, &error);
-  XCTAssertNil(error);
-  google::crypto::tink::Keyset ccPrivateKeyset;
-  XCTAssertTrue(ccPrivateKeyset.ParseFromString(serializedKeyset));
+- (void)testEncryptWith:(Keyset *)publicKeyset andDecryptWith:(Keyset *)privateKeyset {
   TINKKeysetHandle *privateKeysetHandle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(ccPrivateKeyset)];
+      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(*privateKeyset)];
 
-  error = nil;
-  serializedKeyset = TINKPBSerializeToString(publicKeyset, &error);
-  XCTAssertNil(error);
-  google::crypto::tink::Keyset ccPublicKeyset;
-  XCTAssertTrue(ccPublicKeyset.ParseFromString(serializedKeyset));
   TINKKeysetHandle *publicKeysetHandle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(ccPublicKeyset)];
+      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(*publicKeyset)];
 
   // Get a HybridDecrypt primitive.
-  error = nil;
+  NSError *error = nil;
   id<TINKHybridDecrypt> hybridDecrypt =
       [TINKHybridDecryptFactory primitiveWithKeysetHandle:privateKeysetHandle error:&error];
   XCTAssertNotNil(hybridDecrypt);
@@ -126,56 +125,39 @@ static TINKPBEciesAeadHkdfPrivateKey *getNewEciesPrivateKey() {
   uint32_t keyId1 = 1;
   uint32_t keyId2 = 2;
   uint32_t keyId3 = 3;
-  TINKPBEciesAeadHkdfPrivateKey *eciesKey1 = getNewEciesPrivateKey();
-  TINKPBEciesAeadHkdfPrivateKey *eciesKey2 = getNewEciesPrivateKey();
-  TINKPBEciesAeadHkdfPrivateKey *eciesKey3 = getNewEciesPrivateKey();
+  EciesAeadHkdfPrivateKey eciesKey1 = getNewEciesPrivateKey();
+  EciesAeadHkdfPrivateKey eciesKey2 = getNewEciesPrivateKey();
+  EciesAeadHkdfPrivateKey eciesKey3 = getNewEciesPrivateKey();
 
-  NSString *privateKeyType = @"type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-  TINKPBKeyset_Key *tinkPrivateKey =
-      TINKCreateKey(privateKeyType, keyId1, eciesKey1, TINKPBOutputPrefixType_Tink,
-                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPrivate);
-  TINKPBKeyset_Key *rawPrivateKey =
-      TINKCreateKey(privateKeyType, keyId2, eciesKey2, TINKPBOutputPrefixType_Raw,
-                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPrivate);
-  TINKPBKeyset_Key *legacyPrivateKey =
-      TINKCreateKey(privateKeyType, keyId3, eciesKey3, TINKPBOutputPrefixType_Legacy,
-                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPrivate);
+  std::string privateKeyType = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  Keyset privateKeyset;
+  AddTinkKey(privateKeyType, keyId1, eciesKey1, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
+             &privateKeyset);
+  AddRawKey(privateKeyType, keyId2, eciesKey2, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE,
+            &privateKeyset);
+  AddLegacyKey(privateKeyType, keyId3, eciesKey3, KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PRIVATE, &privateKeyset);
 
-  NSString *publicKeyType = @"type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
-  TINKPBKeyset_Key *tinkPublicKey =
-      TINKCreateKey(publicKeyType, keyId1, eciesKey1.publicKey, TINKPBOutputPrefixType_Tink,
-                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPublic);
-  TINKPBKeyset_Key *rawPublicKey =
-      TINKCreateKey(publicKeyType, keyId2, eciesKey2.publicKey, TINKPBOutputPrefixType_Raw,
-                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPublic);
-  TINKPBKeyset_Key *legacyPublicKey =
-      TINKCreateKey(publicKeyType, keyId3, eciesKey3.publicKey, TINKPBOutputPrefixType_Legacy,
-                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPublic);
+  std::string publicKeyType = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
+  Keyset publicKeyset;
+  AddTinkKey(publicKeyType, keyId1, eciesKey1.public_key(), KeyStatusType::ENABLED,
+             KeyData::ASYMMETRIC_PUBLIC, &publicKeyset);
+  AddRawKey(publicKeyType, keyId2, eciesKey2.public_key(), KeyStatusType::ENABLED,
+            KeyData::ASYMMETRIC_PUBLIC, &publicKeyset);
+  AddLegacyKey(publicKeyType, keyId3, eciesKey3.public_key(), KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PUBLIC, &publicKeyset);
 
-  // Encrypt with tink and decrypt with tink.
-  TINKPBKeyset *privateKeyset = TINKCreateKeyset(tinkPrivateKey, rawPrivateKey, legacyPrivateKey);
-  TINKPBKeyset *publicKeyset = TINKCreateKeyset(tinkPublicKey, rawPublicKey, legacyPublicKey);
-  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
+  privateKeyset.set_primary_key_id(keyId1);
+  publicKeyset.set_primary_key_id(keyId3);
+  [self testEncryptWith:&publicKeyset andDecryptWith:&privateKeyset];
 
-  // Encrypt with raw and decrypt with raw.
-  privateKeyset = TINKCreateKeyset(rawPrivateKey, tinkPrivateKey, legacyPrivateKey);
-  publicKeyset = TINKCreateKeyset(rawPublicKey, tinkPublicKey, legacyPublicKey);
-  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
+  privateKeyset.set_primary_key_id(keyId2);
+  publicKeyset.set_primary_key_id(keyId3);
+  [self testEncryptWith:&publicKeyset andDecryptWith:&privateKeyset];
 
-  // Encrypt with legacy and decrypt with legacy
-  privateKeyset = TINKCreateKeyset(legacyPrivateKey, tinkPrivateKey, rawPrivateKey);
-  publicKeyset = TINKCreateKeyset(legacyPublicKey, tinkPublicKey, rawPublicKey);
-  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
-
-  // Encrypt with tink as primary, decrypt with raw as primary.
-  publicKeyset = TINKCreateKeyset(tinkPublicKey, legacyPublicKey, rawPublicKey);
-  privateKeyset = TINKCreateKeyset(rawPrivateKey, tinkPrivateKey, legacyPrivateKey);
-  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
-
-  // Encrypt with raw as primary, decrypt with tink as primary.
-  publicKeyset = TINKCreateKeyset(rawPublicKey, tinkPublicKey, legacyPublicKey);
-  privateKeyset = TINKCreateKeyset(tinkPrivateKey, rawPrivateKey, legacyPrivateKey);
-  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
+  privateKeyset.set_primary_key_id(keyId3);
+  publicKeyset.set_primary_key_id(keyId1);
+  [self testEncryptWith:&publicKeyset andDecryptWith:&privateKeyset];
 }
 
 @end

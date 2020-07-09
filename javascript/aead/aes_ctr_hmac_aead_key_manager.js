@@ -15,12 +15,12 @@
 goog.module('tink.aead.AesCtrHmacAeadKeyManager');
 
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
-const KeyManager = goog.require('tink.KeyManager');
-const Random = goog.require('tink.subtle.Random');
-const Registry = goog.require('tink.Registry');
+const {aesCtrHmacFromRawKeys} = goog.require('google3.third_party.tink.javascript.subtle.encrypt_then_authenticate');
+const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Validators = goog.require('tink.subtle.Validators');
+const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
 const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbHashType, PbHmacKey, PbHmacKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
@@ -242,7 +242,7 @@ class AesCtrHmacAeadKeyManager {
         hashType = 'UNKNOWN HASH';
     }
 
-    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+    const aead = await aesCtrHmacFromRawKeys(
         aesCtrKey.getKeyValue_asU8(), aesCtrKey.getParams().getIvSize(),
         hashType, hmacKey.getKeyValue_asU8(), hmacKey.getParams().getTagSize());
 

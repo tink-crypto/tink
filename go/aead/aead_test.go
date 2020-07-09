@@ -15,13 +15,40 @@
 package aead_test
 
 import (
+	"log"
 	"testing"
 
+	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testutil"
 )
 
-func TestAeadInit(t *testing.T) {
+func Example() {
+	kh, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	a, err := aead.New(kh)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ct, err := a.Encrypt([]byte("this data needs to be encrypted"), []byte("this data needs to be authenticated, but not encrypted"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = a.Decrypt(ct, []byte("this data needs to be authenticated, but not encrypted"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Output:
+}
+
+func TestAEADInit(t *testing.T) {
 	// Check for AES-GCM key manager.
 	_, err := registry.GetKeyManager(testutil.AESGCMTypeURL)
 	if err != nil {

@@ -1,0 +1,73 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+load("@rules_proto_grpc//go:defs.bzl", "go_grpc_library")
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
+
+licenses(["notice"])
+
+go_grpc_library(
+    name = "testing_api_go_grpc",
+    importpath = "github.com/google/tink/proto/testing/testing_api_go_grpc",
+    deps = ["@tink_base//proto/testing:testing_api_proto"],
+)
+
+go_library(
+    name = "services",
+    srcs = [
+        "aead_service.go",
+        "daead_service.go",
+        "hybrid_service.go",
+        "keyset_service.go",
+        "mac_service.go",
+        "metadata_service.go",
+        "signature_service.go",
+        "streaming_aead_service.go",
+    ],
+    importpath = "github.com/google/tink/testing/go/services",
+    deps = [
+        ":testing_api_go_grpc",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@tink_go//aead:go_default_library",
+        "@tink_go//daead:go_default_library",
+        "@tink_go//hybrid:go_default_library",
+        "@tink_go//keyset:go_default_library",
+        "@tink_go//mac:go_default_library",
+        "@tink_go//proto:tink_go_proto",
+        "@tink_go//signature:go_default_library",
+        "@tink_go//streamingaead:go_default_library",
+        "@tink_go//testkeyset:go_default_library",
+    ],
+)
+
+go_test(
+    name = "services_test",
+    size = "small",
+    srcs = ["services_test.go"],
+    deps = [
+        ":services",
+        ":testing_api_go_grpc",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@tink_go//aead:go_default_library",
+        "@tink_go//daead:go_default_library",
+        "@tink_go//hybrid:go_default_library",
+        "@tink_go//keyset:go_default_library",
+        "@tink_go//mac:go_default_library",
+        "@tink_go//signature:go_default_library",
+        "@tink_go//streamingaead:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "testing_server",
+    srcs = [
+        "testing_server.go",
+    ],
+    deps = [
+        ":services",
+        ":testing_api_go_grpc",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
+)

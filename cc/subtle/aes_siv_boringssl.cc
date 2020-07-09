@@ -21,6 +21,7 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/aes.h"
+#include "openssl/mem.h"
 #include "tink/deterministic_aead.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -96,12 +97,13 @@ void AesSivBoringSsl::EncryptBlock(const uint8_t in[kBlockSize],
 
 // static
 void AesSivBoringSsl::MultiplyByX(uint8_t block[kBlockSize]) {
-  // Cast to signed makes the left shift produce either 0x00 or 0xff.
-  uint8_t carry = *reinterpret_cast<int8_t*>(&block[0]) >> 7;
+  // Carry over 0x87 if msb is 1 0x00 if msb is 0.
+  uint8_t carry = 0x87 & -(block[0] >> 7);
   for (size_t i = 0; i < kBlockSize - 1; ++i) {
     block[i] = (block[i] << 1) | (block[i + 1] >> 7);
   }
-  block[kBlockSize - 1] = (block[kBlockSize - 1] << 1) ^ (carry & 0x87);
+  block[kBlockSize - 1] =
+      (block[kBlockSize - 1] << 1) ^ carry;
 }
 
 // static
@@ -226,12 +228,7 @@ util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
   S2v(absl::MakeSpan(reinterpret_cast<const uint8_t*>(additional_data.data()),
                      additional_data.size()),
       absl::MakeSpan(pt), s2v);
-  // Compare the siv from the ciphertext with the recomputed siv
-  uint8_t diff = 0;
-  for (int i = 0; i < kBlockSize; ++i) {
-    diff |= siv[i] ^ s2v[i];
-  }
-  if (diff != 0) {
+  if (CRYPTO_memcmp(siv, s2v, kBlockSize) != 0) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid ciphertext");
   }
   return std::string(reinterpret_cast<const char*>(pt.data()), plaintext_size);

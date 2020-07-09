@@ -31,7 +31,6 @@
 #import "objc/TINKSignatureKeyTemplate.h"
 #import "objc/aead/TINKAeadInternal.h"
 #import "objc/util/TINKStrings.h"
-#import "proto/Tink.pbobjc.h"
 
 #include "tink/binary_keyset_reader.h"
 #include "tink/util/status.h"
@@ -41,6 +40,7 @@
 
 using ::crypto::tink::test::AddRawKey;
 using ::crypto::tink::test::AddTinkKey;
+using ::google::crypto::tink::EncryptedKeyset;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
@@ -57,7 +57,7 @@ static NSString *const kGoodKeysetName = @"com.google.crypto.tink.goodKeyset";
 static NSString *const kBadKeysetName = @"com.google.crypto.tink.badKeyset";
 static NSString *const kNonExistentKeysetName = @"com.google.crypto.tink.noSuchKeyset";
 
-static TINKPBKeyset *gKeyset;
+static Keyset *gKeyset;
 
 @interface TINKKeysetHandleTest : XCTestCase
 @end
@@ -65,25 +65,22 @@ static TINKPBKeyset *gKeyset;
 @implementation TINKKeysetHandleTest
 
 + (void)setUp {
-  google::crypto::tink::Keyset ccKeyset;
+  gKeyset = new Keyset();
   google::crypto::tink::Keyset::Key ccKey;
 
   crypto::tink::test::AddTinkKey("some key type", 42, ccKey,
                                  google::crypto::tink::KeyStatusType::ENABLED,
-                                 google::crypto::tink::KeyData::SYMMETRIC, &ccKeyset);
+                                 google::crypto::tink::KeyData::SYMMETRIC, gKeyset);
   crypto::tink::test::AddRawKey("some other key type", 711, ccKey,
                                 google::crypto::tink::KeyStatusType::ENABLED,
-                                google::crypto::tink::KeyData::SYMMETRIC, &ccKeyset);
-  ccKeyset.set_primary_key_id(42);
+                                google::crypto::tink::KeyData::SYMMETRIC, gKeyset);
+  gKeyset->set_primary_key_id(42);
 
-  std::string serializedKeyset = ccKeyset.SerializeAsString();
+  std::string serializedKeyset = gKeyset->SerializeAsString();
   gGoodSerializedKeyset = TINKStringToNSData(serializedKeyset);
 
   NSError *error = nil;
-  gKeyset = [TINKPBKeyset
-      parseFromData:[NSData dataWithBytes:serializedKeyset.data() length:serializedKeyset.length()]
-              error:&error];
-  XCTAssertNotNil(gKeyset);
+  XCTAssertTrue(gKeyset != nil);
   XCTAssertNil(error);
 
   gBadSerializedKeyset = TINKStringToNSData("some weird string");
@@ -130,15 +127,21 @@ static TINKPBKeyset *gKeyset;
       std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
   TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
 
-  NSData *keysetCiphertext = [aead encrypt:gKeyset.data withAdditionalData:[NSData data] error:nil];
+  std::string serializedKeyset = gKeyset->SerializeAsString();
+  NSData *serializedKeysetData = [[NSData alloc] initWithBytes:serializedKeyset.data()
+                                                        length:serializedKeyset.size()];
+  NSData *keysetCiphertext = [aead encrypt:serializedKeysetData
+                        withAdditionalData:[NSData data]
+                                     error:nil];
 
   XCTAssertNotNil(keysetCiphertext);
 
-  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
-  encryptedKeyset.encryptedKeyset = keysetCiphertext;
+  EncryptedKeyset encryptedKeyset;
+  encryptedKeyset.set_encrypted_keyset(NSDataToTINKString(keysetCiphertext));
 
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+  TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc]
+      initWithSerializedKeyset:TINKStringToNSData(encryptedKeyset.SerializeAsString())
+                         error:nil];
 
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:nil];
@@ -146,8 +149,8 @@ static TINKPBKeyset *gKeyset;
   std::string output;
   crypto::tink::TestKeysetHandle::GetKeyset(*handle.ccKeysetHandle).SerializeToString(&output);
 
-  XCTAssertTrue(
-      [gKeyset.data isEqualToData:[NSData dataWithBytes:output.data() length:output.size()]]);
+  XCTAssertTrue([serializedKeysetData isEqualToData:[NSData dataWithBytes:output.data()
+                                                                   length:output.size()]]);
 }
 
 - (void)testWrongAead_Binary {
@@ -155,13 +158,20 @@ static TINKPBKeyset *gKeyset;
       std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
   TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
 
-  NSData *keysetCiphertext = [aead encrypt:gKeyset.data withAdditionalData:[NSData data] error:nil];
+  std::string serializedKeyset = gKeyset->SerializeAsString();
+  NSData *serializedKeysetData = [[NSData alloc] initWithBytes:serializedKeyset.data()
+                                                        length:serializedKeyset.size()];
 
-  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
-  encryptedKeyset.encryptedKeyset = keysetCiphertext;
+  NSData *keysetCiphertext = [aead encrypt:serializedKeysetData
+                        withAdditionalData:[NSData data]
+                                     error:nil];
 
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+  EncryptedKeyset encryptedKeyset;
+  encryptedKeyset.set_encrypted_keyset(NSDataToTINKString(keysetCiphertext));
+
+  TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc]
+      initWithSerializedKeyset:TINKStringToNSData(encryptedKeyset.SerializeAsString())
+                         error:nil];
 
   auto ccWrongAead =
       std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("wrong aead"));
@@ -197,13 +207,14 @@ static TINKPBKeyset *gKeyset;
   auto ccAead =
       std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
   TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
-  NSString *keysetCiphertext = @"totally wrong ciphertext";
+  NSData *keysetCiphertext = [@"totally wrong ciphertext" dataUsingEncoding:NSUTF8StringEncoding];
 
-  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
-  encryptedKeyset.encryptedKeyset = [keysetCiphertext dataUsingEncoding:NSUTF8StringEncoding];
+  EncryptedKeyset encryptedKeyset;
+  encryptedKeyset.set_encrypted_keyset(NSDataToTINKString(keysetCiphertext));
 
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+  TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc]
+      initWithSerializedKeyset:TINKStringToNSData(encryptedKeyset.SerializeAsString())
+                         error:nil];
   NSError *error = nil;
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:&error];
@@ -231,15 +242,21 @@ static TINKPBKeyset *gKeyset;
       std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
   TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
 
-  NSData *keysetCiphertext = [aead encrypt:gKeyset.data withAdditionalData:[NSData data] error:nil];
+  std::string serializedKeyset = gKeyset->SerializeAsString();
+  NSData *serializedKeysetData = [[NSData alloc] initWithBytes:serializedKeyset.data()
+                                                        length:serializedKeyset.size()];
+  NSData *keysetCiphertext = [aead encrypt:serializedKeysetData
+                        withAdditionalData:[NSData data]
+                                     error:nil];
 
   XCTAssertNotNil(keysetCiphertext);
 
-  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
-  encryptedKeyset.encryptedKeyset = keysetCiphertext;
+  EncryptedKeyset encryptedKeyset;
+  encryptedKeyset.set_encrypted_keyset(NSDataToTINKString(keysetCiphertext));
 
-  TINKBinaryKeysetReader *reader =
-      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+  TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc]
+      initWithSerializedKeyset:TINKStringToNSData(encryptedKeyset.SerializeAsString())
+                         error:nil];
 
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:nil];

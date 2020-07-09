@@ -16,8 +16,6 @@
 
 package com.google.crypto.tink.integration.android;
 
-import android.annotation.TargetApi;
-import android.os.Build.VERSION_CODES;
 import com.google.crypto.tink.Aead;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -35,7 +33,6 @@ import javax.crypto.spec.GCMParameterSpec;
  *
  * @since 1.0.0
  */
-@TargetApi(VERSION_CODES.M)
 public final class AndroidKeystoreAesGcm implements Aead {
   // All instances of this class use a 12 byte IV and a 16 byte tag.
   private static final int IV_SIZE_IN_BYTES = 12;
@@ -46,6 +43,14 @@ public final class AndroidKeystoreAesGcm implements Aead {
   public AndroidKeystoreAesGcm(String keyId) throws GeneralSecurityException, IOException {
     KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
     keyStore.load(null /* param */);
+    key = (SecretKey) keyStore.getKey(keyId, null /* password */);
+    if (key == null) {
+      throw new InvalidKeyException("Keystore cannot load the key with ID: " + keyId);
+    }
+  }
+
+  /** This is for testing only */
+  AndroidKeystoreAesGcm(String keyId, KeyStore keyStore) throws GeneralSecurityException {
     key = (SecretKey) keyStore.getKey(keyId, null /* password */);
     if (key == null) {
       throw new InvalidKeyException("Keystore cannot load the key with ID: " + keyId);

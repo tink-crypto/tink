@@ -54,7 +54,8 @@ def read_keyset(keyset_filename):
   """
   with open(keyset_filename, 'rb') as keyset_file:
     text = keyset_file.read()
-    keyset = cleartext_keyset_handle.read(tink.BinaryKeysetReader(text))
+    keyset = cleartext_keyset_handle.read(
+        tink.BinaryKeysetReader(text))
   return keyset
 
 

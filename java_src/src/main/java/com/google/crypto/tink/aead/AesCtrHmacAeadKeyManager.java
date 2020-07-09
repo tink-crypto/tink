@@ -79,6 +79,8 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
   @Override
   public void validateKey(AesCtrHmacAeadKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), getVersion());
+    new AesCtrKeyManager().validateKey(key.getAesCtrKey());
+    new HmacKeyManager().validateKey(key.getHmacKey());
   }
 
   @Override

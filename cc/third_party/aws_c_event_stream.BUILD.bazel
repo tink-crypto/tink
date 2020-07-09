@@ -1,0 +1,19 @@
+licenses(["notice"])  # Apache 2.0
+
+cc_library(
+    name = "aws_c_event_stream",
+    srcs = glob([
+        "source/*.c",
+    ]),
+    hdrs = glob([
+        "include/**/*.h"
+    ]),
+    includes = [
+        "include/",
+    ],
+    deps = [
+        "@aws_c_common",
+        "@aws_checksums"
+    ],
+    visibility = ["//visibility:public"],
+)

@@ -60,17 +60,34 @@ func (km *aesSIVKeyManager) Primitive(serializedKey []byte) (interface{}, error)
 	return ret, nil
 }
 
-// NewKey creates a new key, ignoring the specification in the given serialized key format
-// because the key size and other params are fixed.
+// NewKey creates a new key. serializedKeyFormat is not required, because there is only one
+// valid key format.
 func (km *aesSIVKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
-	return km.newAesSivKey(), nil
+	if serializedKeyFormat != nil {
+		keyFormat := new(aspb.AesSivKeyFormat)
+		if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+			return nil, fmt.Errorf("aes_siv_key_manager: invalid key format")
+		}
+		if keyFormat.KeySize != subtle.AESSIVKeySize {
+			return nil, fmt.Errorf("aes_siv_key_manager: keyFormat.KeySize != %d", subtle.AESSIVKeySize)
+		}
+	}
+	keyValue := random.GetRandomBytes(subtle.AESSIVKeySize)
+	key := &aspb.AesSivKey{
+		Version:  aesSIVKeyVersion,
+		KeyValue: keyValue,
+	}
+	return key, nil
 }
 
-// NewKeyData creates a new KeyData, ignoring the specification in the given serialized key format
-// because the key size and other params are fixed.
+// NewKeyData creates a new KeyData. serializedKeyFormat is not required, because there is only one
+// valid key format.
 // It should be used solely by the key management API.
 func (km *aesSIVKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
-	key := km.newAesSivKey()
+	key, err := km.NewKey(serializedKeyFormat)
+	if err != nil {
+		return nil, err
+	}
 	serializedKey, err := proto.Marshal(key)
 	if err != nil {
 		return nil, err
@@ -103,13 +120,4 @@ func (km *aesSIVKeyManager) validateKey(key *aspb.AesSivKey) error {
 		return fmt.Errorf("aes_siv_key_manager: keySize != %d", subtle.AESSIVKeySize)
 	}
 	return nil
-}
-
-// newAesSivKey creates a new AesSivKey.
-func (km *aesSIVKeyManager) newAesSivKey() *aspb.AesSivKey {
-	keyValue := random.GetRandomBytes(subtle.AESSIVKeySize)
-	return &aspb.AesSivKey{
-		Version:  aesSIVKeyVersion,
-		KeyValue: keyValue,
-	}
 }

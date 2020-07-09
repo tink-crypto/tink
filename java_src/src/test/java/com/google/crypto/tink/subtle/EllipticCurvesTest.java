@@ -549,6 +549,10 @@ public class EllipticCurvesTest {
 
   @Test
   public void testComputeSharedSecretWithWycheproofTestVectors() throws Exception {
+    if (TestUtil.isTsan()) {
+      return;
+    }
+
     // NOTE(bleichen): Instead of ecdh_test.json it might be easier to use the
     //   files ecdh_<curve>_ecpoint.json, which encode the public key point just as DER
     //   encoded bitsequence.

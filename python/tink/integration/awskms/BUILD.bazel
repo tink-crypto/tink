@@ -33,6 +33,7 @@ py_test(
     ],
     deps = [
         ":awskms",
+        "//tink/testing:helper",
         requirement("absl-py"),
     ],
 )
@@ -46,6 +47,7 @@ py_test(
     ],
     deps = [
         ":awskms",
+        "//tink/testing:helper",
         requirement("absl-py"),
     ],
 )

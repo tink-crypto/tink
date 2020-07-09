@@ -16,13 +16,13 @@
 
 package com.google.crypto.tink.daead;
 
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods and constants for registering with the {@link Registry} all instances of {@link
- * com.google.crypto.tink.DeterministicAead} key types supported in a particular release of Tink.
+ * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry} all
+ * instances of {@link com.google.crypto.tink.DeterministicAead} key types supported in a particular
+ * release of Tink.
  *
  * <p>To register all DeterministicAead key types provided in the latest Tink version one can do:
  *
@@ -31,23 +31,21 @@ import java.security.GeneralSecurityException;
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of DeterministicAead, see {@link
- * DeterministicAeadFactory}.
+ * com.google.crypto.tink.KeysetHandle#getPrimitive}.
  *
  * @since 1.1.0
  */
 public final class DeterministicAeadConfig {
   public static final String AES_SIV_TYPE_URL = new AesSivKeyManager().getKeyType();
 
-  /** @deprecated */
-  @Deprecated
-  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
+  /** @deprecated use {@link #register} */
+  @Deprecated public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /**
-   * @deprecated
+   * @deprecated use {@link #register}
    * @since 1.2.0
    */
-  @Deprecated
-  public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
+  @Deprecated public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 
   static {
     try {
@@ -58,7 +56,7 @@ public final class DeterministicAeadConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle DeterministicAead key types supported in
    * Tink.
    *
@@ -73,7 +71,7 @@ public final class DeterministicAeadConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle DeterministicAead key types supported in
    * Tink.
    *
@@ -83,4 +81,6 @@ public final class DeterministicAeadConfig {
     AesSivKeyManager.register(/* newKeyAllowed = */ true);
     DeterministicAeadWrapper.register();
   }
+
+  private DeterministicAeadConfig() {}
 }

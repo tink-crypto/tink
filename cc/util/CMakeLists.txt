@@ -50,6 +50,7 @@ tink_cc_library(
     status.h
   DEPS
     absl::base
+    absl::status
     absl::strings
   PUBLIC
 )
@@ -180,6 +181,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
     tink::util::buffer
+    tink::util::secret_data
     absl::core_headers
     absl::memory
     absl::strings

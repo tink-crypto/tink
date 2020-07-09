@@ -14,10 +14,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "gtest/gtest.h"
 #include "tink/util/errors.h"
+
+#include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
-// placeholder_google3_status_header, please ignore
 
 namespace crypto {
 namespace tink {
@@ -41,7 +42,15 @@ TEST(ErrorsTest, ToStatusFTest) {
   EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
 }
 
-// placeholder_status_conversion_test, please ignore
+TEST(ErrorsTest, ToAbslStatus) {
+  crypto::tink::util::Status tink_status(util::error::INVALID_ARGUMENT,
+                                         "error");
+  ::absl::Status g3_status(tink_status);
+  EXPECT_FALSE(g3_status.ok());
+  EXPECT_EQ(g3_status.message(), "error");
+
+  EXPECT_EQ(::absl::Status(crypto::tink::util::OkStatus()), ::absl::OkStatus());
+}
 
 }  // namespace
 }  // namespace tink

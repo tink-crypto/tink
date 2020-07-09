@@ -31,3 +31,6 @@ NSData* TINKStringToNSData(std::string s);
 
 /** Converts a absl::string_view to NSData. */
 NSData* TINKStringViewToNSData(absl::string_view s);
+
+/** Converts a NSData to a std::string. */
+std::string NSDataToTINKString(NSData* data);

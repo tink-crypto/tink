@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
@@ -29,6 +30,8 @@ import java.util.regex.Pattern;
  * @since 1.0.0
  */
 public final class Validators {
+  private Validators() {}
+
   private static final String TYPE_URL_PREFIX = "type.googleapis.com/";
   /**
    * To reach 128-bit security strength, RSA's modulus must be at least 3072-bit while 2048-bit RSA
@@ -113,7 +116,7 @@ public final class Validators {
    */
   public static void validateNotExists(File f) throws IOException {
     if (f.exists()) {
-      throw new IOException(String.format("%s exists, please choose another file\n", f.toString()));
+      throw new IOException(String.format("%s exists, please choose another file\n", f));
     }
   }
 
@@ -121,18 +124,17 @@ public final class Validators {
   public static void validateExists(File f) throws IOException {
     if (!f.exists()) {
       throw new IOException(
-          String.format("Error: %s doesn't exist, please choose another file\n", f.toString()));
+          String.format("Error: %s doesn't exist, please choose another file\n", f));
     }
   }
 
   /**
    * Validates that {@code kmsKeyUri} starts with {@code expectedPrefix}, and removes the prefix.
    *
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if {@code kmsKeyUri} is invalid.
    */
-  public static String validateKmsKeyUriAndRemovePrefix(String expectedPrefix, String kmsKeyUri)
-      throws IllegalArgumentException {
-    if (!kmsKeyUri.toLowerCase().startsWith(expectedPrefix)) {
+  public static String validateKmsKeyUriAndRemovePrefix(String expectedPrefix, String kmsKeyUri) {
+    if (!kmsKeyUri.toLowerCase(Locale.US).startsWith(expectedPrefix)) {
       throw new IllegalArgumentException(
           String.format("key URI must start with %s", expectedPrefix));
     }

@@ -14,15 +14,15 @@
 
 goog.module('tink.signature.EcdsaPrivateKeyManager');
 
-const Bytes = goog.require('tink.subtle.Bytes');
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
-const EcdsaSign = goog.require('tink.subtle.EcdsaSign');
+const ecdsaSign = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_sign');
 const EcdsaUtil = goog.require('tink.signature.EcdsaUtil');
-const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
-const KeyManager = goog.require('tink.KeyManager');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
+const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
 const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Util = goog.require('tink.Util');
+const Util = goog.require('google3.third_party.tink.javascript.internal.util');
 const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
@@ -189,12 +189,12 @@ class EcdsaPrivateKeyManager {
         keyProto, EcdsaPrivateKeyManager.VERSION_,
         EcdsaPublicKeyManager.VERSION);
 
-    const recepientPrivateKey = EcdsaUtil.getJsonWebKeyFromProto(keyProto);
+    const recipientPrivateKey = EcdsaUtil.getJsonWebKeyFromProto(keyProto);
     const params =
         /** @type {!PbEcdsaParams} */ (keyProto.getPublicKey().getParams());
     const hash = Util.hashTypeProtoToString(params.getHashType());
     const encoding = EcdsaUtil.encodingTypeProtoToEnum(params.getEncoding());
-    return await EcdsaSign.newInstance(recepientPrivateKey, hash, encoding);
+    return await ecdsaSign.fromJsonWebKey(recipientPrivateKey, hash, encoding);
   }
 
   /** @override */

@@ -16,6 +16,7 @@
 
 #include "tink/subtle/encrypt_then_authenticate.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -66,7 +67,12 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
   std::string ciphertext(ct.ValueOrDie());
   std::string toAuthData(additional_data);
   toAuthData.append(ciphertext);
-  uint64_t aad_size_in_bits = additional_data.size() * 8;
+  uint64_t aad_size_in_bytes = additional_data.size();
+  uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
+  if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "additional data too long");
+  }
   toAuthData.append(longToBigEndianStr(aad_size_in_bits));
   auto tag = mac_->ComputeMac(toAuthData);
   if (!tag.ok()) {
@@ -92,7 +98,12 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
                             .substr(0, ciphertext.size() - tag_size_);
   std::string toAuthData(additional_data);
   toAuthData.append(payload);
-  uint64_t aad_size_in_bits = additional_data.size() * 8;
+  uint64_t aad_size_in_bytes = additional_data.size();
+  uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
+  if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "additional data too long");
+  }
   toAuthData.append(longToBigEndianStr(aad_size_in_bits));
   auto verified = mac_->VerifyMac(
       ciphertext.substr(ciphertext.size() - tag_size_, tag_size_), toAuthData);

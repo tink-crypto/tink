@@ -15,9 +15,12 @@
 package signature_test
 
 import (
+	"log"
 	"testing"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/testutil"
 )
 
@@ -33,4 +36,37 @@ func TestSignatureInit(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
+}
+
+func Example() {
+	kh, err := keyset.NewHandle(signature.ECDSAP256KeyTemplate()) // Other key templates can also be used.
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s, err := signature.NewSigner(kh)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	a, err := s.Sign([]byte("this data needs to be signed"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pubkh, err := kh.Public()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	v, err := signature.NewVerifier(pubkh)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := v.Verify(a, []byte("this data needs to be signed")); err != nil {
+		log.Fatal(err)
+	}
+
+	// Output:
 }

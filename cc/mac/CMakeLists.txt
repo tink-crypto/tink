@@ -26,6 +26,7 @@ tink_cc_library(
     tink::mac::hmac_key_manager
     tink::mac::mac_wrapper
     tink::config::config_util
+    tink::config::tink_fips
     tink::core::registry
     tink::util::status
     tink::proto::config_cc_proto
@@ -136,6 +137,7 @@ tink_cc_test(
     tink::mac::hmac_key_manager
     tink::mac::mac_config
     tink::mac::mac_key_templates
+    tink::config::tink_fips
     tink::core::config
     tink::core::keyset_handle
     tink::core::mac

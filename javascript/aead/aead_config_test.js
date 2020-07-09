@@ -20,9 +20,9 @@ const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
-const KeysetHandle = goog.require('tink.KeysetHandle');
-const Random = goog.require('tink.subtle.Random');
-const Registry = goog.require('tink.Registry');
+const {KeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
 const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('aead config test', function() {

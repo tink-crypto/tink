@@ -15,38 +15,6 @@
 // Package aead provides implementations of the AEAD primitive.
 //
 // AEAD encryption assures the confidentiality and authenticity of the data. This primitive is CPA secure.
-//
-// Example:
-//
-//   package main
-//
-//   import (
-//       "fmt"
-//
-//       "github.com/google/tink/go/aead"
-//       "github.com/google/tink/go/keyset"
-//   )
-//
-//   func main() {
-//
-//       kh, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
-//       if err != nil {
-//           // handle the error
-//       }
-//
-//       a := aead.New(kh)
-//
-//       ct , err := a.Encrypt([]byte("this data needs to be encrypted"), []byte("associated data"))
-//       if err != nil {
-//           // handle error
-//       }
-//
-//       pt, err := a.Decrypt(ct, []byte("associated data"))
-//       if err != nil {
-//           //handle error
-//       }
-//
-//   }
 package aead
 
 import (

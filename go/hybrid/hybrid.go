@@ -27,38 +27,6 @@
 // context, but should be bound to the resulting ciphertext, i.e. the
 // ciphertext allows for checking the integrity of contextInfo (but there are
 // no guarantees wrt. the secrecy or authenticity of contextInfo).
-//
-// Example:
-//
-//   package main
-//
-//   import (
-//       "github.com/google/tink/go/hybrid"
-//       "github.com/google/tink/go/core/registry"
-//       "github.com/google/tink/go/keyset"
-//   )
-//
-//   func main() {
-//
-//       kh , err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
-//       if err != nil {
-//           //handle error
-//       }
-//       h := hybrid.NewHybridEncrypt(kh)
-//
-//       ct, err = h.Encrypt([]byte("secret message"), []byte("context info"))
-//       if err != nil {
-//           // handle error
-//       }
-//
-//       khd , err := keyset.NewHandle( .....); /// get a handle on the decryption key material
-//       hd := hybrid.NewHybridDecrypt(khd)
-//
-//       pt, err := hd.Decrypt(ct, []byte("context info"))
-//       if err != nil {
-//           // handle error
-//       }
-//   }
 package hybrid
 
 import (

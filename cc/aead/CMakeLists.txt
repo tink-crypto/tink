@@ -63,6 +63,7 @@ tink_cc_library(
     tink::aead::xchacha20_poly1305_key_manager
     tink::aead::aead_wrapper
     tink::config::config_util
+    tink::config::tink_fips
     tink::mac::mac_config
     tink::util::status
     tink::proto::config_cc_proto
@@ -128,6 +129,8 @@ tink_cc_library(
   SRCS
     aes_gcm_key_manager.h
   DEPS
+    tink::aead::cord_aead
+    tink::aead::internal::cord_aes_gcm_boringssl
     tink::core::aead
     tink::core::key_manager
     tink::core::key_type_manager
@@ -378,6 +381,8 @@ tink_cc_test(
   SRCS aes_gcm_key_manager_test.cc
   DEPS
     tink::aead::aes_gcm_key_manager
+    tink::aead::cord_aead
+    tink::aead::internal::cord_aes_gcm_boringssl
     tink::core::aead
     tink::subtle::aead_test_util
     tink::util::istream_input_stream

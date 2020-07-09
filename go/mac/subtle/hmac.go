@@ -32,13 +32,6 @@ const (
 	minTagSizeInBytes = uint32(10)
 )
 
-// Maximum tag size in bytes for each hash type
-var maxTagSizeInBytes = map[string]uint32{
-	"SHA1":   uint32(20),
-	"SHA256": uint32(32),
-	"SHA512": uint32(64),
-}
-
 var errHMACInvalidInput = errors.New("HMAC: invalid input")
 
 // HMAC implementation of interface tink.MAC
@@ -68,11 +61,11 @@ func NewHMAC(hashAlg string, key []byte, tagSize uint32) (*HMAC, error) {
 // ValidateHMACParams validates parameters of HMAC constructor.
 func ValidateHMACParams(hash string, keySize uint32, tagSize uint32) error {
 	// validate tag size
-	maxTagSize, found := maxTagSizeInBytes[hash]
-	if !found {
-		return fmt.Errorf("invalid hash algorithm")
+	digestSize, err := subtle.GetHashDigestSize(hash)
+	if err != nil {
+		return err
 	}
-	if tagSize > maxTagSize {
+	if tagSize > digestSize {
 		return fmt.Errorf("tag size too big")
 	}
 	if tagSize < minTagSizeInBytes {

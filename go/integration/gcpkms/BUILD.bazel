@@ -23,7 +23,10 @@ go_library(
 
 go_test(
     name = "go_default_test",
-    srcs = ["gcp_kms_aead_test.go"],
+    srcs = [
+        "gcp_kms_aead_test.go",
+        "gcp_kms_client_test.go",
+    ],
     data = [
         "@tink_base//testdata:credentials",
         "@tink_base//testdata:ecies_keysets",

@@ -29,6 +29,9 @@ cc_library(
         "aws-cpp-sdk-core/source/utils/crypto/factory/**/*.cpp",
         "aws-cpp-sdk-kms/include/**/*.h",
         "aws-cpp-sdk-kms/source/**/*.cpp",
+        "aws-cpp-sdk-core/source/monitoring/*.cpp",
+        "aws-cpp-sdk-core/source/net/linux-shared/*.cpp",
+        "aws-cpp-sdk-core/source/utils/crypto/openssl/*.cpp",
     ]),
     hdrs = [
         "aws-cpp-sdk-core/include/aws/core/SDKConfig.h",
@@ -40,16 +43,20 @@ cc_library(
     # These must be in sync with version of aws_cpp_sdk in WORKSPACE.
     defines = [
         "AWS_SDK_VERSION_MAJOR=1",
-        "AWS_SDK_VERSION_MINOR=4",
-        "AWS_SDK_VERSION_PATCH=80",
+        "AWS_SDK_VERSION_MINOR=7",
+        "AWS_SDK_VERSION_PATCH=345",
         "ENABLE_CURL_CLIENT",
-        "ENABLE_NO_ENCRYPTION",
+        "ENABLE_OPENSSL_ENCRYPTION", # This is needed for UUID generation
+        "OPENSSL_IS_BORINGSSL",
         "PLATFORM_LINUX",
     ],
     visibility = ["//visibility:public"],
     strip_include_prefix = "aws-cpp-sdk-core/include",
     deps = [
+        "@aws_c_common",
+        "@aws_c_event_stream",
         "@curl",
+        "@boringssl//:crypto",
     ],
 )
 

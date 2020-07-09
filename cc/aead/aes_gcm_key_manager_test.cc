@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead.h"
+#include "tink/aead/internal/cord_aes_gcm_boringssl.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
@@ -178,8 +179,30 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
           util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(aead_or.ValueOrDie().get(),
-                                 boring_ssl_aead_or.ValueOrDie().get(),
+  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                                 *boring_ssl_aead_or.ValueOrDie(),
+                                 "message", "aad"),
+              IsOk());
+}
+
+TEST(AesGcmKeyManagerTest, CreateCordAead) {
+  AesGcmKeyFormat format;
+  format.set_key_size(32);
+  StatusOr<AesGcmKey> key_or = AesGcmKeyManager().CreateKey(format);
+  ASSERT_THAT(key_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<CordAead>> aead_or =
+      AesGcmKeyManager().GetPrimitive<CordAead>(key_or.ValueOrDie());
+
+  ASSERT_THAT(aead_or.status(), IsOk());
+
+  StatusOr<std::unique_ptr<CordAead>> boring_ssl_aead_or =
+      crypto::tink::CordAesGcmBoringSsl::New(
+          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
+  ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
+
+  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                                 *boring_ssl_aead_or.ValueOrDie(),
                                  "message", "aad"),
               IsOk());
 }

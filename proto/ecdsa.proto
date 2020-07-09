@@ -18,18 +18,18 @@
 syntax = "proto3";
 
 package google.crypto.tink;
+
 import "proto/common.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option objc_class_prefix = "TINKPB";
 option go_package = "github.com/google/tink/proto/ecdsa_go_proto";
 
 enum EcdsaSignatureEncoding {
   UNKNOWN_ENCODING = 0;
-  // The signature's format is r || s, where r and s are zero-padded and have the same size in
-  // bytes as the order of the curve. For example, for NIST P-256 curve, r and s are zero-padded to
-  // 32 bytes.
+  // The signature's format is r || s, where r and s are zero-padded and have
+  // the same size in bytes as the order of the curve. For example, for NIST
+  // P-256 curve, r and s are zero-padded to 32 bytes.
   IEEE_P1363 = 1;
   // The signature is encoded using ASN.1
   // (https://tools.ietf.org/html/rfc5480#appendix-A):

@@ -1,42 +1,78 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 licenses(["notice"])
 
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
-filegroup(
-    name = "srcs",
-    srcs = glob(
-        [
-            "*.java",
-        ],
-    ),
-)
-
-# public interfaces
-
-java_library(
-    name = "protos",
-    exports = [
-        "//proto:tink_java_proto_lite",
+android_library(
+    name = "android_keystore_kms_client",
+    srcs = ["AndroidKeystoreKmsClient.java"],
+    deps = [
+        ":android_keystore_aes_gcm",
+        "//src/main/java/com/google/crypto/tink:core-android",
+        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
     ],
 )
 
 android_library(
-    name = "android",
-    srcs = [
-        ":srcs",
-    ],
-    javacopts = JAVACOPTS_OSS,
-    visibility = ["//visibility:public"],
+    name = "android_keystore_aes_gcm",
+    srcs = ["AndroidKeystoreAesGcm.java"],
     deps = [
-        ":protos",
-        "//src/main/java/com/google/crypto/tink:android",
-        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
+        "//src/main/java/com/google/crypto/tink:primitives",
+    ],
+)
+
+android_library(
+    name = "shared_pref_keyset_writer",
+    srcs = ["SharedPrefKeysetWriter.java"],
+    deps = [
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:core-android",
         "//src/main/java/com/google/crypto/tink/subtle",
-        "//src/main/java/com/google/crypto/tink/subtle:aead",
+    ],
+)
+
+android_library(
+    name = "shared_pref_keyset_reader",
+    srcs = ["SharedPrefKeysetReader.java"],
+    deps = [
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:core-android",
+        "//src/main/java/com/google/crypto/tink/subtle",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "android_keyset_manager",
+    srcs = ["AndroidKeysetManager.java"],
+    deps = [
+        ":android_keystore_kms_client",
+        ":shared_pref_keyset_reader",
+        ":shared_pref_keyset_writer",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle-android",
+        "//src/main/java/com/google/crypto/tink:key_template-android",
+        "//src/main/java/com/google/crypto/tink:keyset_reader-android",
+        "//src/main/java/com/google/crypto/tink:keyset_writer-android",
+        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+# Deprecated, will be removed soon.
+
+android_library(
+    name = "android",
+    exports = [
+        ":android_keyset_manager",
+        ":android_keystore_aes_gcm",
+        ":android_keystore_kms_client",
+        ":shared_pref_keyset_reader",
+        ":shared_pref_keyset_writer",
     ],
 )

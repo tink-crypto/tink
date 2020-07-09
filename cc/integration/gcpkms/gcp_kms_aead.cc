@@ -67,6 +67,9 @@ StatusOr<std::string> GcpKmsAead::Encrypt(
 
   EncryptResponse resp;
   ClientContext context;
+  context.AddMetadata("x-goog-request-params",
+                      absl::StrCat("name=", key_name_));
+
   auto status =  kms_stub_->Encrypt(&context, req, &resp);
 
   if (status.ok()) return resp.ciphertext();
@@ -83,6 +86,9 @@ StatusOr<std::string> GcpKmsAead::Decrypt(
 
   DecryptResponse resp;
   ClientContext context;
+  context.AddMetadata("x-goog-request-params",
+                      absl::StrCat("name=", key_name_));
+
   auto status =  kms_stub_->Decrypt(&context, req, &resp);
 
   if (status.ok()) return resp.plaintext();

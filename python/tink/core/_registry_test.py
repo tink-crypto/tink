@@ -43,6 +43,12 @@ class DummyKeyManager(core.KeyManager):
     return tink_pb2.KeyData(type_url=key_template.type_url)
 
 
+class UnsupportedKeyManager(DummyKeyManager):
+
+  def does_support(self, type_url):
+    return False
+
+
 class DummyPrivateKeyManager(core.PrivateKeyManager):
 
   def __init__(self, type_url):
@@ -119,6 +125,10 @@ class RegistryTest(absltest.TestCase):
   def test_register_same_key_manager_twice(self):
     self.reg.register_key_manager(DummyKeyManager('dummy_type_url', aead.Aead))
     self.reg.register_key_manager(DummyKeyManager('dummy_type_url', aead.Aead))
+
+  def test_register_unsupported_key_manager_fails(self):
+    with self.assertRaises(core.TinkError):
+      self.reg.register_key_manager(UnsupportedKeyManager('unsupported'))
 
   def test_key_manager_replace_fails(self):
     self.reg.register_key_manager(DummyKeyManager('dummy_type_url', aead.Aead))

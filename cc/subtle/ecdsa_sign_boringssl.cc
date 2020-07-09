@@ -99,8 +99,7 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
   }
 
   bssl::UniquePtr<BIGNUM> priv_key(
-      BN_bin2bn(reinterpret_cast<const unsigned char*>(ec_key.priv.data()),
-                ec_key.priv.size(), nullptr));
+      BN_bin2bn(ec_key.priv.data(), ec_key.priv.size(), nullptr));
   if (!EC_KEY_set_private_key(key.get(), priv_key.get())) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         absl::StrCat("Invalid private key: ",

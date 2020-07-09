@@ -20,11 +20,9 @@
 
 #include "tink/util/status.h"
 #include "tink/util/test_keyset_handle.h"
+#include "tink/util/test_util.h"
+#include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
-
-#import "proto/Common.pbobjc.h"
-#import "proto/EciesAeadHkdf.pbobjc.h"
-#import "proto/Tink.pbobjc.h"
 
 #import "objc/TINKConfig.h"
 #import "objc/TINKHybridConfig.h"
@@ -33,18 +31,25 @@
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
-#import "objc/util/TINKTestHelpers.h"
 
-using crypto::tink::TestKeysetHandle;
+using ::crypto::tink::TestKeysetHandle;
+using ::crypto::tink::test::AddTinkKey;
+using ::crypto::tink::test::AddRawKey;
+using ::crypto::tink::test::AddLegacyKey;
+using ::google::crypto::tink::EciesAeadHkdfPublicKey;
+using ::google::crypto::tink::EcPointFormat;
+using ::google::crypto::tink::EllipticCurveType;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeyStatusType;
 
 @interface TINKHybridEncryptFactoryTest : XCTestCase
 @end
 
-static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
-  TINKPBEciesAeadHkdfPrivateKey *eciesKey =
-      TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurveType_NistP256,
-                                    TINKPBEcPointFormat_Uncompressed, TINKPBHashType_Sha256, 32);
-  return eciesKey.publicKey;
+static EciesAeadHkdfPublicKey getNewEciesPublicKey() {
+  return crypto::tink::test::GetEciesAesGcmHkdfTestKey(
+      EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED, HashType::SHA256, 32).public_key();
 }
 
 @implementation TINKHybridEncryptFactoryTest
@@ -68,50 +73,35 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
 
 - (void)testPrimitiveWithKeyset {
   // Prepare a Keyset.
-  TINKPBKeyset *keyset = [[TINKPBKeyset alloc] init];
-  NSString *keyType = @"type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
+  Keyset publicKeyset;
+  std::string publicKeyType = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
 
-  uint32_t key_id_1 = 1234543;
-  TINKAddTinkKey(keyType, key_id_1, getNewEciesPublicKey(), TINKPBKeyStatusType_Enabled,
-                 TINKPBKeyData_KeyMaterialType_AsymmetricPublic, keyset);
+  uint32_t keyId1 = 1234543;
+  uint32_t keyId2 = 726329;
+  uint32_t keyId3 = 7213743;
+  EciesAeadHkdfPublicKey eciesKey1 = getNewEciesPublicKey();
+  EciesAeadHkdfPublicKey eciesKey2 = getNewEciesPublicKey();
+  EciesAeadHkdfPublicKey eciesKey3 = getNewEciesPublicKey();
 
-  uint32_t key_id_2 = 726329;
-  TINKAddRawKey(keyType, key_id_2, getNewEciesPublicKey(), TINKPBKeyStatusType_Enabled,
-                TINKPBKeyData_KeyMaterialType_AsymmetricPublic, keyset);
+  AddTinkKey(publicKeyType, keyId1, eciesKey1, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
+             &publicKeyset);
+  AddRawKey(publicKeyType, keyId2, eciesKey2, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
+            &publicKeyset);
+  AddLegacyKey(publicKeyType, keyId3, eciesKey3, KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
+               &publicKeyset);
 
-  uint32_t key_id_3 = 7213743;
-  TINKAddTinkKey(keyType, key_id_3, getNewEciesPublicKey(), TINKPBKeyStatusType_Enabled,
-                 TINKPBKeyData_KeyMaterialType_AsymmetricPublic, keyset);
-  XCTAssertEqual(keyset.keyArray_Count, 3);
-
-  keyset.primaryKeyId = key_id_3;
-
-  // Initialize the registry.
-  NSError *error = nil;
-  TINKHybridConfig *hybridConfig = [[TINKHybridConfig alloc] initWithError:&error];
-  XCTAssertNotNil(hybridConfig);
-  XCTAssertNil(error);
-
-  XCTAssertTrue([TINKConfig registerConfig:hybridConfig error:&error]);
-  XCTAssertNil(error);
-
-  std::string serializedKeyset = TINKPBSerializeToString(keyset, &error);
-  XCTAssertNil(error);
-
-  google::crypto::tink::Keyset ccKeyset;
-  XCTAssertTrue(ccKeyset.ParseFromString(serializedKeyset));
-
+  publicKeyset.set_primary_key_id(keyId3);
   // Create a KeysetHandle and use it with the factory.
   TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(ccKeyset)];
+      initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(publicKeyset)];
   XCTAssertNotNil(keysetHandle);
 
   // Get a HybridEncrypt primitive.
-  error = nil;
+  NSError *error = nil;
   id<TINKHybridEncrypt> primitive =
       [TINKHybridEncryptFactory primitiveWithKeysetHandle:keysetHandle error:&error];
-  XCTAssertNotNil(primitive);
   XCTAssertNil(error);
+  XCTAssertNotNil(primitive);
 
   // Test the resulting HybridEncrypt-instance.
   NSData *plaintext = [@"some plaintext" dataUsingEncoding:NSUTF8StringEncoding];

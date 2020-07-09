@@ -16,9 +16,13 @@ java_binary(
     ],
     deps = [
         "@maven//:args4j_args4j",
-        "@tink_java//:cleartext_keyset_handle",
-        "@tink_java//:java",
-        "@tink_java//:subtle",
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
     ],
 )
 

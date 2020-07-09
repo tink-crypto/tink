@@ -1,0 +1,69 @@
+load("@rules_proto_grpc//python:defs.bzl", "python_grpc_library")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//visibility:public"],
+)
+
+licenses(["notice"])
+
+python_grpc_library(
+    name = "testing_api_python_library",
+    deps = ["@tink_base//proto/testing:testing_api_proto"],
+)
+
+py_library(
+    name = "services",
+    srcs = ["services.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":testing_api_python_library",
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/signature",
+    ],
+)
+
+py_test(
+    name = "services_test",
+    srcs = ["services_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":services",
+        ":testing_api_python_library",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/signature",
+    ],
+)
+
+py_binary(
+    name = "testing_server",
+    srcs = ["testing_server.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":services",
+        ":testing_api_python_library",
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/signature",
+    ],
+)

@@ -102,6 +102,7 @@ tink_cc_library(
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::ecdsa_cc_proto
@@ -203,6 +204,7 @@ tink_cc_library(
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -250,6 +252,7 @@ tink_cc_library(
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::common_cc_proto
@@ -274,6 +277,7 @@ tink_cc_library(
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::common_cc_proto
@@ -300,6 +304,7 @@ tink_cc_library(
     tink::signature::public_key_sign_wrapper
     tink::signature::public_key_verify_wrapper
     tink::config::config_util
+    tink::config::tink_fips
     tink::core::registry
     tink::util::status
     tink::proto::config_cc_proto
@@ -321,6 +326,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::keyset_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::common_cc_proto
@@ -409,6 +415,7 @@ tink_cc_test(
     tink::subtle::ecdsa_sign_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::enums
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -445,6 +452,7 @@ tink_cc_test(
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
@@ -464,6 +472,7 @@ tink_cc_test(
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
@@ -524,6 +533,7 @@ tink_cc_test(
     tink::core::public_key_verify
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -545,6 +555,7 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -563,6 +574,7 @@ tink_cc_test(
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::signature_config
     tink::signature::signature_key_templates
+    tink::config::tink_fips
     tink::core::config
     tink::core::keyset_handle
     tink::core::public_key_sign
@@ -606,6 +618,7 @@ tink_cc_test(
     tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::keyset_util
+    tink::util::secret_data
     tink::util::status
     tink::util::test_util
     tink::proto::common_cc_proto

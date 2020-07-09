@@ -16,14 +16,14 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods and constants for registering with the {@link Registry} all instances of {@link
- * com.google.crypto.tink.Aead} key types supported in a particular release of Tink.
+ * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry} all
+ * instances of {@link com.google.crypto.tink.Aead} key types supported in a particular release of
+ * Tink.
  *
  * <p>To register all Aead key types provided in the latest Tink version one can do:
  *
@@ -46,18 +46,17 @@ public final class AeadConfig {
   public static final String XCHACHA20_POLY1305_TYPE_URL =
       new XChaCha20Poly1305KeyManager().getKeyType();
 
-  /** @deprecated */
+  /** @deprecated use {@link #register} */
   @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
 
   /**
-   * @deprecated
+   * @deprecated use {@link #register}
    * @since 1.1.0
    */
   @Deprecated public static final RegistryConfig TINK_1_1_0 = TINK_1_0_0;
 
   /**
-   * * @deprecated
-   *
+   * @deprecated use {@link #register}
    * @since 1.2.0
    */
   @Deprecated public static final RegistryConfig LATEST = TINK_1_0_0;
@@ -71,7 +70,7 @@ public final class AeadConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} and {@link com.google.crypto.tink.KeyManager} needed to
    * handle Aead key types supported in Tink.
    *
@@ -86,7 +85,7 @@ public final class AeadConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} and {@link com.google.crypto.tink.KeyManager} needed to
    * handle Aead key types supported in Tink.
    *
@@ -120,4 +119,6 @@ public final class AeadConfig {
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     register();
   }
+
+  private AeadConfig() {}
 }

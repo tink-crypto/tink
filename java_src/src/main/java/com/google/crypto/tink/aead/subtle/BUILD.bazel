@@ -1,0 +1,27 @@
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+
+licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
+
+java_library(
+    name = "aead_factory",
+    srcs = ["AeadFactory.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "aes_gcm_factory",
+    srcs = ["AesGcmFactory.java"],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":aead_factory",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)

@@ -18,6 +18,7 @@
 
 #include "absl/memory/memory.h"
 #include "tink/config/config_util.h"
+#include "tink/config/tink_fips.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/daead/deterministic_aead_wrapper.h"
 #include "tink/registry.h"
@@ -37,7 +38,13 @@ const RegistryConfig& DeterministicAeadConfig::Latest() {
 
 // static
 util::Status DeterministicAeadConfig::Register() {
-  // Register key manager.
+  // Currently there are no FIPS-validated deterministic AEAD key managers
+  // available, therefore none will be registered in FIPS only mode.
+  if (kUseOnlyFips) {
+    return util::OkStatus();
+  }
+
+  // Register non-FIPS key managers.
   auto status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesSivKeyManager>(), true);
   if (!status.ok()) return status;

@@ -52,7 +52,7 @@ public final class EncryptThenAuthenticate implements Aead {
       throws GeneralSecurityException {
     IndCpaCipher cipher = new AesCtrJceCipher(aesCtrKey, ivSize);
     SecretKeySpec hmacKeySpec = new SecretKeySpec(hmacKey, "HMAC");
-    Mac hmac = new MacJce(hmacAlgorithm, hmacKeySpec, tagSize);
+    Mac hmac = new PrfMac(new PrfHmacJce(hmacAlgorithm, hmacKeySpec), tagSize);
     return new EncryptThenAuthenticate(cipher, hmac, tagSize);
   }
 

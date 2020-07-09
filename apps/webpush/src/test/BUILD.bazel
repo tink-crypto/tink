@@ -1,0 +1,38 @@
+load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+# Tests
+
+java_library(
+    name = "generator_test",
+    testonly = 1,
+    srcs = glob([
+        "**/*.java",
+    ]),
+    deps = [
+        "//webpush/src/main/java/com/google/crypto/tink/apps/webpush:web_push_constants",
+        "//webpush/src/main/java/com/google/crypto/tink/apps/webpush:web_push_hybrid_decrypt",
+        "//webpush/src/main/java/com/google/crypto/tink/apps/webpush:web_push_hybrid_encrypt",
+        "//webpush/src/main/java/com/google/crypto/tink/apps/webpush:web_push_util",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:random",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
+    ],
+)
+
+gen_java_test_rules(
+    test_files = glob([
+        "**/*Test.java",
+    ]),
+    deps = [
+        ":generator_test",
+    ],
+)

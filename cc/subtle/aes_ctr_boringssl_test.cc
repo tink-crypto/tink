@@ -24,6 +24,7 @@
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -31,7 +32,15 @@ namespace tink {
 namespace subtle {
 namespace {
 
-TEST(AesCtrBoringSslTest, testEncryptDecrypt) {
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+
+TEST(AesCtrBoringSslTest, TestEncryptDecrypt) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   int iv_size = 12;
@@ -47,7 +56,12 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt) {
   EXPECT_EQ(pt.ValueOrDie(), message);
 }
 
-TEST(AesCtrBoringSslTest, testEncryptDecrypt_randomMessage) {
+TEST(AesCtrBoringSslTest, TestEncryptDecrypt_randomMessage) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   int iv_size = 12;
@@ -65,7 +79,12 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt_randomMessage) {
   }
 }
 
-TEST(AesCtrBoringSslTest, testEncryptDecrypt_randomKey_randomMessage) {
+TEST(AesCtrBoringSslTest, TestEncryptDecrypt_randomKey_randomMessage) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   for (int i = 0; i < 256; i++) {
     util::SecretData key = Random::GetRandomKeyBytes(16);
     int iv_size = 12;
@@ -82,7 +101,12 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt_randomKey_randomMessage) {
   }
 }
 
-TEST(AesCtrBoringSslTest, testEncryptDecrypt_invalidIvSize) {
+TEST(AesCtrBoringSslTest, TestEncryptDecrypt_invalidIvSize) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   int iv_size = 11;
@@ -94,7 +118,12 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt_invalidIvSize) {
   EXPECT_FALSE(res2.ok()) << res2.status();
 }
 
-TEST(AesCtrBoringSslTest, testNistTestVector) {
+TEST(AesCtrBoringSslTest, TestNistTestVector) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   // NIST SP 800-38A pp 55.
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("2b7e151628aed2a6abf7158809cf4f3c"));
@@ -110,7 +139,12 @@ TEST(AesCtrBoringSslTest, testNistTestVector) {
   EXPECT_EQ(pt.ValueOrDie(), message);
 }
 
-TEST(AesCtrBoringSslTest, testMultipleEncrypt) {
+TEST(AesCtrBoringSslTest, TestMultipleEncrypt) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = Random::GetRandomKeyBytes(16);
   int iv_size = 12;
   auto res = AesCtrBoringSsl::New(key, iv_size);
@@ -120,6 +154,38 @@ TEST(AesCtrBoringSslTest, testMultipleEncrypt) {
   auto ct1 = cipher->Encrypt(message);
   auto ct2 = cipher->Encrypt(message);
   EXPECT_NE(ct1.ValueOrDie(), ct2.ValueOrDie());
+}
+
+TEST(AesCtrBoringSslTest, TestFipsOnly) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::AesCtrBoringSsl::New(key128, 16).status(), IsOk());
+  EXPECT_THAT(subtle::AesCtrBoringSsl::New(key256, 16).status(), IsOk());
+}
+
+TEST(AesCtrBoringSslTest, TestFipsFailWithoutBoringCrypto) {
+  if (!kUseOnlyFips || FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::AesCtrBoringSsl::New(key128, 16).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::AesCtrBoringSsl::New(key256, 16).status(),
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

@@ -15,9 +15,12 @@
 package mac_test
 
 import (
+	"log"
 	"testing"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testutil"
 )
 
@@ -30,4 +33,27 @@ func TestMacInit(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
+}
+
+func Example() {
+	kh, err := keyset.NewHandle(mac.HMACSHA256Tag256KeyTemplate())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	m, err := mac.New(kh)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mac, err := m.ComputeMAC([]byte("this data needs to be MACed"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if m.VerifyMAC(mac, []byte("this data needs to be MACed")); err != nil {
+		log.Fatal(err)
+	}
+
+	// Output:
 }

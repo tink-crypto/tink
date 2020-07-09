@@ -15,9 +15,9 @@
 goog.module('tink.subtle.AesCtrTest');
 goog.setTestOnly('tink.subtle.AesCtrTest');
 
-const AesCtr = goog.require('tink.subtle.AesCtr');
-const Bytes = goog.require('tink.subtle.Bytes');
-const Random = goog.require('tink.subtle.Random');
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const {fromRawKey: aesCtrFromRawKey} = goog.require('google3.third_party.tink.javascript.subtle.aes_ctr');
 
 describe('aes ctr test', function() {
   beforeEach(function() {
@@ -36,7 +36,7 @@ describe('aes ctr test', function() {
     const key = Random.randBytes(16);
     for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);
-      const cipher = await AesCtr.newInstance(key, 16);
+      const cipher = await aesCtrFromRawKey(key, 16);
       let ciphertext = await cipher.encrypt(msg);
       let plaintext = await cipher.decrypt(ciphertext);
       expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
@@ -44,7 +44,7 @@ describe('aes ctr test', function() {
   });
 
   it('probabilistic encryption', async function() {
-    const cipher = await AesCtr.newInstance(Random.randBytes(16), 16);
+    const cipher = await aesCtrFromRawKey(Random.randBytes(16), 16);
     const msg = Random.randBytes(20);
     const results = new Set();
     for (let i = 0; i < 100; i++) {
@@ -56,7 +56,7 @@ describe('aes ctr test', function() {
 
   it('constructor', async function() {
     try {
-      await AesCtr.newInstance(Random.randBytes(16), 11);  // IV size too short
+      await aesCtrFromRawKey(Random.randBytes(16), 11);  // IV size too short
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -64,7 +64,7 @@ describe('aes ctr test', function() {
               'SecurityException: invalid IV length, must be at least 12 and at most 16');
     }
     try {
-      await AesCtr.newInstance(Random.randBytes(16), 17);  // IV size too long
+      await aesCtrFromRawKey(Random.randBytes(16), 17);  // IV size too long
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -72,7 +72,7 @@ describe('aes ctr test', function() {
               'SecurityException: invalid IV length, must be at least 12 and at most 16');
     }
     try {
-      await AesCtr.newInstance(
+      await aesCtrFromRawKey(
           Random.randBytes(24), 12);  // 192-bit keys not supported
       fail('Should throw an exception.');
     } catch (e) {
@@ -83,7 +83,7 @@ describe('aes ctr test', function() {
 
   it('constructor, invalid iv sizes', async function() {
     try {
-      await AesCtr.newInstance(Random.randBytes(16), NaN);
+      await aesCtrFromRawKey(Random.randBytes(16), NaN);
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -91,7 +91,7 @@ describe('aes ctr test', function() {
     }
 
     try {
-      await AesCtr.newInstance(Random.randBytes(16), 12.5);
+      await aesCtrFromRawKey(Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -99,7 +99,7 @@ describe('aes ctr test', function() {
     }
 
     try {
-      await AesCtr.newInstance(Random.randBytes(16), 0);
+      await aesCtrFromRawKey(Random.randBytes(16), 0);
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -128,7 +128,7 @@ describe('aes ctr test', function() {
       const iv = Bytes.fromHex(testVector['iv']);
       const msg = Bytes.fromHex(testVector['message']);
       const ciphertext = Bytes.fromHex(testVector['ciphertext']);
-      const aesctr = await AesCtr.newInstance(key, iv.length);
+      const aesctr = await aesCtrFromRawKey(key, iv.length);
       const plaintext = await aesctr.decrypt(Bytes.concat(iv, ciphertext));
       expect(Bytes.toHex(plaintext)).toBe(Bytes.toHex(msg));
     }

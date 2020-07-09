@@ -26,6 +26,7 @@ import com.google.protobuf.MessageLite;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -34,21 +35,21 @@ import java.util.logging.Logger;
 /**
  * A global container of key managers and catalogues.
  *
- * <p>Registry maps catalogue names to instances of {@link Catalogue} and each supported key type to
- * a corresponding {@link KeyManager} object, which "understands" the key type (i.e., the KeyManager
- * can instantiate the primitive corresponding to given key, or can generate new keys of the
- * supported key type). It holds also a {@link PrimitiveWrapper} for each supported primitive,
- * so that it can wrap a set of primitives (corresponding to a keyset) into a single primitive.
+ * <p>Registry maps each supported key type to a corresponding {@link KeyManager} object, which
+ * "understands" the key type (i.e., the KeyManager can instantiate the primitive corresponding to
+ * given key, or can generate new keys of the supported key type). It holds also a {@link
+ * PrimitiveWrapper} for each supported primitive, so that it can wrap a set of primitives
+ * (corresponding to a keyset) into a single primitive.
  *
- * <p> Keeping KeyManagers for all primitives in a single Registry (rather than
- * having a separate KeyManager per primitive) enables modular construction of compound primitives
- * from "simple" ones, e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
+ * <p>Keeping KeyManagers for all primitives in a single Registry (rather than having a separate
+ * KeyManager per primitive) enables modular construction of compound primitives from "simple" ones,
+ * e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
  *
  * <p>Registry is initialized at startup, and is later used to instantiate primitives for given keys
  * or keysets. Note that regular users will usually not work directly with Registry, but rather via
- * {@link Config} and {@link KeysetHandle#getPrimitive()}-methods, which in the background register
- * and query the Registry for specific KeyManagers and PrimitiveWrappers. Registry is public though,
- * to enable configurations with custom catalogues, primitives or KeyManagers.
+ * {@link TinkConfig} and {@link KeysetHandle#getPrimitive(Class)}-methods, which in the background
+ * register and query the Registry for specific KeyManagers and PrimitiveWrappers. Registry is
+ * public though, to enable configurations with custom catalogues, primitives or KeyManagers.
  *
  * <p>To initialize the Registry with all key managers:
  *
@@ -62,8 +63,7 @@ import java.util.logging.Logger;
  * AeadConfig.register();
  * }</pre>
  *
- * <p>After the Registry has been initialized, one can use {@keysetHandle.getPrimitive} to get a
- * primitive. For example, to obtain an {@link Aead} primitive:
+ * <p>After the Registry has been initialized, one can use get a primitive as follows:
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -355,8 +355,8 @@ public final class Registry {
     if (catalogue == null) {
       throw new IllegalArgumentException("catalogue must be non-null.");
     }
-    if (catalogueMap.containsKey(catalogueName.toLowerCase())) {
-      Catalogue<?> existing = catalogueMap.get(catalogueName.toLowerCase());
+    if (catalogueMap.containsKey(catalogueName.toLowerCase(Locale.US))) {
+      Catalogue<?> existing = catalogueMap.get(catalogueName.toLowerCase(Locale.US));
       if (!catalogue.getClass().equals(existing.getClass())) {
         logger.warning(
             "Attempted overwrite of a catalogueName catalogue for name " + catalogueName);
@@ -364,7 +364,7 @@ public final class Registry {
             "catalogue for name " + catalogueName + " has been already registered");
       }
     }
-    catalogueMap.put(catalogueName.toLowerCase(), catalogue);
+    catalogueMap.put(catalogueName.toLowerCase(Locale.US), catalogue);
   }
 
   /**
@@ -379,25 +379,25 @@ public final class Registry {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
     }
-    Catalogue<?> catalogue = catalogueMap.get(catalogueName.toLowerCase());
+    Catalogue<?> catalogue = catalogueMap.get(catalogueName.toLowerCase(Locale.US));
     if (catalogue == null) {
       String error = String.format("no catalogue found for %s. ", catalogueName);
-      if (catalogueName.toLowerCase().startsWith("tinkaead")) {
+      if (catalogueName.toLowerCase(Locale.US).startsWith("tinkaead")) {
         error += "Maybe call AeadConfig.register().";
       }
-      if (catalogueName.toLowerCase().startsWith("tinkdeterministicaead")) {
+      if (catalogueName.toLowerCase(Locale.US).startsWith("tinkdeterministicaead")) {
         error += "Maybe call DeterministicAeadConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkstreamingaead")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tinkstreamingaead")) {
         error += "Maybe call StreamingAeadConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkhybriddecrypt")
-          || catalogueName.toLowerCase().startsWith("tinkhybridencrypt")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tinkhybriddecrypt")
+          || catalogueName.toLowerCase(Locale.US).startsWith("tinkhybridencrypt")) {
         error += "Maybe call HybridConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkmac")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tinkmac")) {
         error += "Maybe call MacConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkpublickeysign")
-          || catalogueName.toLowerCase().startsWith("tinkpublickeyverify")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tinkpublickeysign")
+          || catalogueName.toLowerCase(Locale.US).startsWith("tinkpublickeyverify")) {
         error += "Maybe call SignatureConfig.register().";
-      } else if (catalogueName.toLowerCase().startsWith("tink")) {
+      } else if (catalogueName.toLowerCase(Locale.US).startsWith("tink")) {
         error += "Maybe call TinkConfig.register().";
       }
       throw new GeneralSecurityException(error);
@@ -476,9 +476,7 @@ public final class Registry {
     }
     String typeUrl = manager.getKeyType();
     ensureKeyManagerInsertable(typeUrl, manager.getClass(), newKeyAllowed);
-    if (!keyManagerMap.containsKey(typeUrl)) {
-      keyManagerMap.put(typeUrl, createContainerFor(manager));
-    }
+    keyManagerMap.putIfAbsent(typeUrl, createContainerFor(manager));
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
   }
 
@@ -627,10 +625,9 @@ public final class Registry {
     if (primitiveWrapperMap.containsKey(classObject)) {
       @SuppressWarnings("unchecked") // We know that we only inserted objects of the correct type.
       PrimitiveWrapper<P> existingWrapper =
-          (PrimitiveWrapper<P>) (primitiveWrapperMap.get(classObject));
+          (PrimitiveWrapper<P>) primitiveWrapperMap.get(classObject);
       if (!wrapper.getClass().equals(existingWrapper.getClass())) {
-        logger.warning(
-            "Attempted overwrite of a registered SetWrapper for type " + classObject.toString());
+        logger.warning("Attempted overwrite of a registered SetWrapper for type " + classObject);
         throw new GeneralSecurityException(
             String.format(
                 "SetWrapper for primitive (%s) is already registered to be %s, "
@@ -758,8 +755,8 @@ public final class Registry {
   }
 
   /**
-   * Method to derive a key, using the given {@param keyTemplate}, with the randomness as provided
-   * by the second argument.
+   * Method to derive a key, using the given {@code keyTemplate}, with the randomness as provided by
+   * the second argument.
    *
    * <p>This method is on purpose not in the public interface. Calling it twice using different key
    * templates and the same randomness can completely destroy any security in a system, so we
@@ -1051,4 +1048,6 @@ public final class Registry {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(keyData.getTypeUrl());
     return container.parseKey(keyData.getValue());
   }
+
+  private Registry() {}
 }

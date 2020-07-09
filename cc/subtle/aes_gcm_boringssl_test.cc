@@ -24,10 +24,12 @@
 #include "absl/strings/str_cat.h"
 #include "openssl/err.h"
 #include "include/rapidjson/document.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -35,9 +37,16 @@ namespace tink {
 namespace subtle {
 namespace {
 
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
 TEST(AesGcmBoringSslTest, testBasic) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto res = AesGcmBoringSsl::New(key);
@@ -54,6 +63,11 @@ TEST(AesGcmBoringSslTest, testBasic) {
 }
 
 TEST(AesGcmBoringSslTest, testModification) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
@@ -83,6 +97,11 @@ TEST(AesGcmBoringSslTest, testModification) {
 
 void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
                              absl::string_view message) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   {  // AAD is a null string_view.
     const absl::string_view aad;
     auto pt_or_status = cipher->Decrypt(ct, aad);
@@ -105,6 +124,11 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
 }
 
 TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   const util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
@@ -133,6 +157,11 @@ TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   const util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
@@ -169,6 +198,11 @@ TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmBoringSslTest, testBothMessageAndAadEmpty) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   const util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
@@ -206,6 +240,11 @@ TEST(AesGcmBoringSslTest, testBothMessageAndAadEmpty) {
 }
 
 TEST(AesGcmBoringSslTest, testInvalidKeySizes) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   for (int keysize = 0; keysize < 65; keysize++) {
     util::SecretData key(keysize, 'x');
     auto cipher = AesGcmBoringSsl::New(key);
@@ -279,9 +318,46 @@ bool WycheproofTest(const rapidjson::Document &root) {
 }
 
 TEST(AesGcmBoringSslTest, TestVectors) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors("aes_gcm_test.json");
   ASSERT_TRUE(WycheproofTest(*root));
+}
+
+TEST(AesGcmBoringSslTest, TestFipsOnly) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key128).status(), IsOk());
+  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key256).status(), IsOk());
+}
+
+TEST(AesGcmBoringSslTest, TestFipsFailWithoutBoringCrypto) {
+  if (!kUseOnlyFips || FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key128).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key256).status(),
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

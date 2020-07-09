@@ -43,8 +43,6 @@ def tink_java_deps_init():
     )
     android_sdk_repository(
         name = "androidsdk",
-        # Tink uses features in Android Keystore that are only supported at this
-        # level or newer.
-        # See https://developer.android.com/training/articles/keystore.html.
-        api_level = 23,  # M
+        # Tink uses some APIs that only supported at this level.
+        api_level = 26,  # Oreo
     )

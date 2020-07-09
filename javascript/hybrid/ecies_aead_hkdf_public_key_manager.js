@@ -14,14 +14,14 @@
 
 goog.module('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 
-const EciesAeadHkdfHybridEncrypt = goog.require('tink.subtle.EciesAeadHkdfHybridEncrypt');
+const encrypt = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_encrypt');
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const KeyManager = goog.require('tink.KeyManager');
+const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Util = goog.require('tink.Util');
+const Util = goog.require('google3.third_party.tink.javascript.internal.util');
 const {PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
@@ -76,7 +76,7 @@ class EciesAeadHkdfPublicKeyManager {
         Util.hashTypeProtoToString(params.getKemParams().getHkdfHashType());
     const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
 
-    return await EciesAeadHkdfHybridEncrypt.newInstance(
+    return await encrypt.fromJsonWebKey(
         recepientPublicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
 

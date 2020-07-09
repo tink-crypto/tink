@@ -1,0 +1,35 @@
+load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+# Tests
+
+java_library(
+    name = "generator_test",
+    testonly = 1,
+    srcs = glob([
+        "**/*.java",
+    ]),
+    deps = [
+        "//rewardedads/src/main/java/com/google/crypto/tink/apps/rewardedads:rewarded_ads_verifier",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:enums",
+        "@tink_java//src/main/java/com/google/crypto/tink/util:keys_downloader",
+    ],
+)
+
+gen_java_test_rules(
+    test_files = glob([
+        "**/*Test.java",
+    ]),
+    deps = [
+        ":generator_test",
+    ],
+)

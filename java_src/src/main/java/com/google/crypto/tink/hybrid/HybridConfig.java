@@ -16,15 +16,14 @@
 
 package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods and constants for registering with the {@link Registry} all instances of {@link
- * com.google.crypto.tink.HybridEncrypt} and {@link com.google.crypto.tink.HybridDecrypt} key types
- * supported in a particular release of Tink.
+ * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry} all
+ * instances of {@link com.google.crypto.tink.HybridEncrypt} and {@link
+ * com.google.crypto.tink.HybridDecrypt} key types supported in a particular release of Tink.
  *
  * <p>To register all HybridEncrypt and HybridDecrypt key types provided in the latest Tink version
  * one can do:
@@ -67,7 +66,7 @@ public final class HybridConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle HybridDecrypt and HybridEncrypt key types
    * supported in Tink.
    *
@@ -83,7 +82,7 @@ public final class HybridConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle HybridDecrypt and HybridEncrypt key types
    * supported in Tink.
    *

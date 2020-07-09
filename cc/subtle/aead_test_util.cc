@@ -23,13 +23,33 @@ namespace tink {
 
 using ::crypto::tink::util::StatusOr;
 
-crypto::tink::util::Status EncryptThenDecrypt(Aead* encrypter, Aead* decrypter,
+crypto::tink::util::Status EncryptThenDecrypt(const Aead& encrypter,
+                                              const Aead& decrypter,
                                               absl::string_view message,
                                               absl::string_view aad) {
-  StatusOr<std::string> encryption_or = encrypter->Encrypt(message, aad);
+  StatusOr<std::string> encryption_or = encrypter.Encrypt(message, aad);
   if (!encryption_or.status().ok()) return encryption_or.status();
   StatusOr<std::string> decryption_or =
-      decrypter->Decrypt(encryption_or.ValueOrDie(), aad);
+      decrypter.Decrypt(encryption_or.ValueOrDie(), aad);
+  if (!decryption_or.status().ok()) return decryption_or.status();
+  if (decryption_or.ValueOrDie() != message) {
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+                                      "Message/Decryption mismatch");
+  }
+  return util::OkStatus();
+}
+
+crypto::tink::util::Status EncryptThenDecrypt(const CordAead& encrypter,
+                                              const CordAead& decrypter,
+                                              absl::string_view message,
+                                              absl::string_view aad) {
+  absl::Cord message_cord = absl::Cord(message);
+  absl::Cord aad_cord = absl::Cord(aad);
+  StatusOr<absl::Cord> encryption_or =
+      encrypter.Encrypt(message_cord, aad_cord);
+  if (!encryption_or.status().ok()) return encryption_or.status();
+  StatusOr<absl::Cord> decryption_or =
+      decrypter.Decrypt(encryption_or.ValueOrDie(), aad_cord);
   if (!decryption_or.status().ok()) return decryption_or.status();
   if (decryption_or.ValueOrDie() != message) {
     return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,

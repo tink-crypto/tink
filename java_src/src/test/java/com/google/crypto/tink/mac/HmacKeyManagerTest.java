@@ -27,7 +27,8 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
-import com.google.crypto.tink.subtle.MacJce;
+import com.google.crypto.tink.subtle.PrfHmacJce;
+import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
@@ -234,8 +235,10 @@ public class HmacKeyManagerTest {
     HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 19, HashType.SHA1));
     Mac managerMac = manager.getPrimitive(validKey, Mac.class);
     Mac directMac =
-        new MacJce(
-            "HMACSHA1", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"), 19);
+        new PrfMac(
+            new PrfHmacJce(
+                "HMACSHA1", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC")),
+            19);
     byte[] message = Random.randBytes(50);
     managerMac.verifyMac(directMac.computeMac(message), message);
   }
@@ -245,8 +248,10 @@ public class HmacKeyManagerTest {
     HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 29, HashType.SHA256));
     Mac managerMac = manager.getPrimitive(validKey, Mac.class);
     Mac directMac =
-        new MacJce(
-            "HMACSHA256", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"), 29);
+        new PrfMac(
+            new PrfHmacJce(
+                "HMACSHA256", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC")),
+            29);
     byte[] message = Random.randBytes(50);
     managerMac.verifyMac(directMac.computeMac(message), message);
   }
@@ -256,8 +261,10 @@ public class HmacKeyManagerTest {
     HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 33, HashType.SHA512));
     Mac managerMac = manager.getPrimitive(validKey, Mac.class);
     Mac directMac =
-        new MacJce(
-            "HMACSHA512", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"), 33);
+        new PrfMac(
+            new PrfHmacJce(
+                "HMACSHA512", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC")),
+            33);
     byte[] message = Random.randBytes(50);
     managerMac.verifyMac(directMac.computeMac(message), message);
   }

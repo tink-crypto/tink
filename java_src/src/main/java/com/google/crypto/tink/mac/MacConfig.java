@@ -16,13 +16,13 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods and constants for registering with the {@link Registry} all instances of {@link
- * com.google.crypto.tink.Mac} key types supported in a particular release of Tink.
+ * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry} all
+ * instances of {@link com.google.crypto.tink.Mac} key types supported in a particular release of
+ * Tink.
  *
  * <p>To register all Mac key types provided in the latest Tink version one can do:
  *
@@ -30,30 +30,28 @@ import java.security.GeneralSecurityException;
  * MacConfig.register();
  * }</pre>
  *
- * <p>For more information on how to obtain and use instances of Mac, see {@link MacFactory}.
+ * <p>For more information on how to obtain and use instances of Mac, see {@link
+ * com.google.crypto.tink.KeysetHandle#getPrimitive}.
  *
  * @since 1.0.0
  */
 public final class MacConfig {
   public static final String HMAC_TYPE_URL = new HmacKeyManager().getKeyType();
 
-  /** @deprecated */
-  @Deprecated
-  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
+  /** @deprecated use {@link #register} */
+  @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
 
   /**
-   * @deprecated
+   * @deprecated use {@link #register}
    * @since 1.1.0
    */
-  @Deprecated
-  public static final RegistryConfig TINK_1_1_0 = TINK_1_0_0;
+  @Deprecated public static final RegistryConfig TINK_1_1_0 = TINK_1_0_0;
 
   /**
-   * @deprecated
+   * @deprecated use {@link #register}
    * @since 1.2.0
    */
-  @Deprecated
-  public static final RegistryConfig LATEST = TINK_1_0_0;
+  @Deprecated public static final RegistryConfig LATEST = TINK_1_0_0;
 
   static {
     try {
@@ -64,7 +62,7 @@ public final class MacConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} and {@link com.google.crypto.tink.KeyManager} needed to
    * handle Mac key types supported in Tink.
    *
@@ -76,7 +74,7 @@ public final class MacConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of {@link
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} and {@link com.google.crypto.tink.KeyManager} needed to
    * handle Mac key types supported in Tink.
    *
@@ -89,7 +87,8 @@ public final class MacConfig {
   }
 
   /**
-   * Registers with the {@code Registry} all Mac key types released with the latest version of Tink.
+   * Registers with the {@code com.google.crypto.tink.Registry} all Mac key types released with the
+   * latest version of Tink.
    *
    * <p>Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
    * which allows for usage of existing keys forbids generation of new key material.
@@ -100,4 +99,6 @@ public final class MacConfig {
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     register();
   }
+
+  private MacConfig() {}
 }

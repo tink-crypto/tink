@@ -17,12 +17,12 @@ package hybrid
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/hybrid/subtle"
 	"github.com/google/tink/go/keyset"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	eahpb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -171,11 +171,11 @@ func checkECIESAEADHKDFParams(params *eahpb.EciesAeadHkdfParams) error {
 	if err != nil {
 		return err
 	}
-	if strings.Compare(params.KemParams.HkdfHashType.String(), "HashType_UNKNOWN_HASH") == 0 {
+	if params.KemParams.HkdfHashType == commonpb.HashType_UNKNOWN_HASH {
 		return errors.New("hash unsupported for HMAC")
 	}
 
-	if strings.Compare(params.EcPointFormat.String(), "EcPointFormat_UNKNOWN_FORMAT") == 0 {
+	if params.EcPointFormat == commonpb.EcPointFormat_UNKNOWN_FORMAT {
 		return errors.New("unknown EC point format")
 	}
 	km, err := registry.GetKeyManager(params.DemParams.AeadDem.TypeUrl)

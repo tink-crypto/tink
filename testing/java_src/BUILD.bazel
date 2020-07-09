@@ -1,0 +1,121 @@
+load("@tink_java//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+load("@io_grpc_grpc_java//:java_grpc_library.bzl", "java_grpc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+java_proto_library(
+    name = "testing_api_java_proto",
+    testonly = 1,
+    deps = ["@tink_base//proto/testing:testing_api_proto"],
+)
+
+java_grpc_library(
+    name = "testing_api_java_grpc",
+    testonly = 1,
+    srcs = ["@tink_base//proto/testing:testing_api_proto"],
+    deps = [":testing_api_java_proto"],
+)
+
+java_library(
+    name = "testing_services",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/AeadServiceImpl.java",
+        "java/com/google/crypto/tink/testing/DeterministicAeadServiceImpl.java",
+        "java/com/google/crypto/tink/testing/HybridServiceImpl.java",
+        "java/com/google/crypto/tink/testing/KeysetServiceImpl.java",
+        "java/com/google/crypto/tink/testing/MacServiceImpl.java",
+        "java/com/google/crypto/tink/testing/MetadataServiceImpl.java",
+        "java/com/google/crypto/tink/testing/SignatureServiceImpl.java",
+        "java/com/google/crypto/tink/testing/StreamingAeadServiceImpl.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":testing_api_java_grpc",
+        ":testing_api_java_proto",
+        "@com_google_protobuf//:protobuf_java",
+        "@io_grpc_grpc_java//api",
+        "@io_grpc_grpc_java//protobuf",
+        "@io_grpc_grpc_java//stub",
+        "@tink_java//:cleartext_keyset_handle",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:core",
+        "@tink_java//src/main/java/com/google/crypto/tink:primitives",
+    ],
+)
+
+java_binary(
+    name = "testing_server",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/TestingServer.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    main_class = "com.google.crypto.tink.testing.TestingServer",
+    runtime_deps = [
+        "@io_grpc_grpc_java//netty",
+    ],
+    deps = [
+        ":testing_services",
+        "@io_grpc_grpc_java//api",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+    ],
+)
+
+java_test(
+    name = "TestingServicesTest",
+    size = "small",
+    srcs = [
+        "javatests/com/google/crypto/tink/testing/TestingServicesTest.java",
+    ],
+    deps = [
+        ":testing_api_java_grpc",
+        ":testing_api_java_proto",
+        ":testing_services",
+        "@com_google_protobuf//:protobuf_java",
+        "@com_google_protobuf//:protobuf_java_util",
+        "@io_grpc_grpc_java//api",
+        "@io_grpc_grpc_java//core:inprocess",
+        "@io_grpc_grpc_java//protobuf",
+        "@io_grpc_grpc_java//stub",
+        "@io_grpc_grpc_java//testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:core",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
+    ],
+)
+
+java_test(
+    name = "AsymmetricTestingServicesTest",
+    size = "small",
+    srcs = [
+        "javatests/com/google/crypto/tink/testing/AsymmetricTestingServicesTest.java",
+    ],
+    deps = [
+        ":testing_api_java_grpc",
+        ":testing_api_java_proto",
+        ":testing_services",
+        "@com_google_protobuf//:protobuf_java",
+        "@com_google_protobuf//:protobuf_java_util",
+        "@io_grpc_grpc_java//api",
+        "@io_grpc_grpc_java//core:inprocess",
+        "@io_grpc_grpc_java//protobuf",
+        "@io_grpc_grpc_java//stub",
+        "@io_grpc_grpc_java//testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
+    ],
+)

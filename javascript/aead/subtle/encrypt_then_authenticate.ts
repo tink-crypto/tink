@@ -1,1 +1,1 @@
-export {default as EncryptThenAuthenticate} from 'goog:tink.subtle.EncryptThenAuthenticate';  // from //third_party/tink/javascript/subtle:aead
+export {EncryptThenAuthenticate} from '../../subtle/encrypt_then_authenticate';

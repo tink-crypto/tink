@@ -65,6 +65,8 @@ import org.json.JSONObject;
  * Builder also allows you to customize other properties.
  */
 public final class RewardedAdsVerifier {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   /** Default HTTP transport used by this class. */
   private static final NetHttpTransport DEFAULT_HTTP_TRANSPORT =
       new NetHttpTransport.Builder().build();
@@ -85,13 +87,13 @@ public final class RewardedAdsVerifier {
 
   /**
    * Instance configured to talk to fetch keys from production environment (from {@link
-   * KeysDownloader#PUBLIC_KEYS_URL_PROD}).
+   * #PUBLIC_KEYS_URL_PROD}).
    */
   public static final KeysDownloader KEYS_DOWNLOADER_INSTANCE_PROD =
       new KeysDownloader(DEFAULT_BACKGROUND_EXECUTOR, DEFAULT_HTTP_TRANSPORT, PUBLIC_KEYS_URL_PROD);
   /**
    * Instance configured to talk to fetch keys from test environment (from {@link
-   * KeysDownloader#KEYS_URL_TEST}).
+   * #PUBLIC_KEYS_URL_TEST}).
    */
   public static final KeysDownloader KEYS_DOWNLOADER_INSTANCE_TEST =
       new KeysDownloader(DEFAULT_BACKGROUND_EXECUTOR, DEFAULT_HTTP_TRANSPORT, PUBLIC_KEYS_URL_TEST);
@@ -130,9 +132,7 @@ public final class RewardedAdsVerifier {
           "signature and key id must be the last two query parameters");
     }
     byte[] tbsData =
-        queryString
-            .substring(0, i - 1 /* i - 1 instead of i because of & */)
-            .getBytes(Charset.forName("UTF-8"));
+        queryString.substring(0, i - 1 /* i - 1 instead of i because of & */).getBytes(UTF_8);
 
     String sigAndKeyId = queryString.substring(i);
     i = sigAndKeyId.indexOf(KEY_ID_PARAM_NAME);
@@ -174,7 +174,7 @@ public final class RewardedAdsVerifier {
   /** Builder for RewardedAdsVerifier. */
   public static class Builder {
     private final List<VerifyingPublicKeysProvider> verifyingPublicKeysProviders =
-        new ArrayList<VerifyingPublicKeysProvider>();
+        new ArrayList<>();
 
     public Builder() {}
 
