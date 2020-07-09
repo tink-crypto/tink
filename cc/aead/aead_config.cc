@@ -48,6 +48,10 @@ util::Status AeadConfig::Register() {
   auto status = MacConfig::Register();
   if (!status.ok()) return status;
 
+  // Register primitive wrapper.
+  status = Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
+  if (!status.ok()) return status;
+
   // Register key managers which utilize the FIPS validated BoringCrypto
   // implementations.
   status = Registry::RegisterKeyTypeManager(
@@ -78,8 +82,7 @@ util::Status AeadConfig::Register() {
       absl::make_unique<KmsEnvelopeAeadKeyManager>(), true);
   if (!status.ok()) return status;
 
-  // Register primitive wrapper.
-  return Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
+  return util::OkStatus();
 }
 
 
