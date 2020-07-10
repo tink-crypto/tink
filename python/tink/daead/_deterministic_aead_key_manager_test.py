@@ -19,8 +19,10 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
+
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
+import tink
 from tink import core
 from tink import daead
 
@@ -31,23 +33,11 @@ def setUpModule():
 
 class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
-  def setUp(self):
-    super(DeterministicAeadKeyManagerTest, self).setUp()
-    self.key_manager = core.Registry.key_manager(
-        'type.googleapis.com/google.crypto.tink.AesSivKey')
-
-  def test_primitive_class(self):
-    self.assertEqual(self.key_manager.primitive_class(),
-                     daead.DeterministicAead)
-
-  def test_key_type(self):
-    self.assertEqual(self.key_manager.key_type(),
-                     'type.googleapis.com/google.crypto.tink.AesSivKey')
-
   def test_new_key_data(self):
     key_template = daead.deterministic_aead_key_templates.AES256_SIV
-    key_data = self.key_manager.new_key_data(key_template)
-    self.assertEqual(key_data.type_url, self.key_manager.key_type())
+    key_manager = core.Registry.key_manager(key_template.type_url)
+    key_data = key_manager.new_key_data(key_template)
+    self.assertEqual(key_data.type_url, key_manager.key_type())
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
     key = aes_siv_pb2.AesSivKey()
     key.ParseFromString(key_data.value)
@@ -59,12 +49,12 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
                     .create_aes_siv_key_template(63))
     with self.assertRaisesRegex(core.TinkError,
                                 'Invalid key size'):
-      self.key_manager.new_key_data(key_template)
+      tink.new_keyset_handle(key_template)
 
   def test_encrypt_decrypt(self):
-    daead_primitive = self.key_manager.primitive(
-        self.key_manager.new_key_data(
-            daead.deterministic_aead_key_templates.AES256_SIV))
+    keyset_handle = tink.new_keyset_handle(
+        daead.deterministic_aead_key_templates.AES256_SIV)
+    daead_primitive = keyset_handle.primitive(daead.DeterministicAead)
     plaintext = b'plaintext'
     associated_data = b'associated_data'
     ciphertext = daead_primitive.encrypt_deterministically(
@@ -72,6 +62,14 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
     self.assertEqual(
         daead_primitive.decrypt_deterministically(ciphertext, associated_data),
         plaintext)
+
+  def test_invalid_decrypt_raises_error(self):
+    keyset_handle = tink.new_keyset_handle(
+        daead.deterministic_aead_key_templates.AES256_SIV)
+    daead_primitive = keyset_handle.primitive(daead.DeterministicAead)
+    with self.assertRaises(core.TinkError):
+      daead_primitive.decrypt_deterministically(
+          b'bad ciphertext', b'associated_data')
 
 
 if __name__ == '__main__':
