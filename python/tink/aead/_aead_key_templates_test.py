@@ -22,6 +22,7 @@ from absl.testing import absltest
 from tink.proto import aes_ctr_hmac_aead_pb2
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
+from tink.proto import aes_gcm_siv_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink import aead
@@ -88,6 +89,34 @@ class AeadKeyTemplatesTest(absltest.TestCase):
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
     key_format = aes_gcm_pb2.AesGcmKeyFormat()
+    key_format.ParseFromString(template.value)
+    self.assertEqual(42, key_format.key_size)
+
+  def test_aes128_gcm_siv(self):
+    template = aead.aead_key_templates.AES128_GCM_SIV
+    self.assertEqual('type.googleapis.com/google.crypto.tink.AesGcmSivKey',
+                     template.type_url)
+    self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
+    key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat()
+    key_format.ParseFromString(template.value)
+    self.assertEqual(16, key_format.key_size)
+
+  def test_aes256_gcm_siv(self):
+    template = aead.aead_key_templates.AES256_GCM_SIV
+    self.assertEqual('type.googleapis.com/google.crypto.tink.AesGcmSivKey',
+                     template.type_url)
+    self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
+    key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat()
+    key_format.ParseFromString(template.value)
+    self.assertEqual(32, key_format.key_size)
+
+  def test_create_aes_gcm_siv_key_template(self):
+    template = aead.aead_key_templates.create_aes_gcm_siv_key_template(
+        key_size=42)
+    self.assertEqual('type.googleapis.com/google.crypto.tink.AesGcmSivKey',
+                     template.type_url)
+    self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
+    key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat()
     key_format.ParseFromString(template.value)
     self.assertEqual(42, key_format.key_size)
 

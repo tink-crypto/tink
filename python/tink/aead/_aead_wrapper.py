@@ -19,9 +19,8 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from absl import logging
-
 from typing import Type
+from absl import logging
 
 from tink import core
 from tink.aead import _aead

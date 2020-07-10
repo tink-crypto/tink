@@ -28,11 +28,14 @@ from __future__ import print_function
 from tink.proto import aes_ctr_hmac_aead_pb2
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
+from tink.proto import aes_gcm_siv_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 
 _AES_EAX_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.AesEaxKey'
 _AES_GCM_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.AesGcmKey'
+_AES_GCM_SIV_KEY_TYPE_URL = (
+    'type.googleapis.com/google.crypto.tink.AesGcmSivKey')
 _AES_CTR_HMAC_AEAD_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey')
 _CHACHA20_POLY1305_KEY_TYPE_URL = (
@@ -65,6 +68,17 @@ def create_aes_gcm_key_template(key_size: int) -> tink_pb2.KeyTemplate:
   return key_template
 
 
+def create_aes_gcm_siv_key_template(key_size: int) -> tink_pb2.KeyTemplate:
+  """Creates an AES GCM SIV KeyTemplate, and fills in its values."""
+  key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat()
+  key_format.key_size = key_size
+  key_template = tink_pb2.KeyTemplate()
+  key_template.value = key_format.SerializeToString()
+  key_template.type_url = _AES_GCM_SIV_KEY_TYPE_URL
+  key_template.output_prefix_type = tink_pb2.TINK
+  return key_template
+
+
 def create_aes_ctr_hmac_aead_key_template(
     aes_key_size: int, iv_size: int, hmac_key_size: int, tag_size: int,
     hash_type: common_pb2.HashType) -> tink_pb2.KeyTemplate:
@@ -86,6 +100,8 @@ AES128_EAX = create_aes_eax_key_template(key_size=16, iv_size=16)
 AES256_EAX = create_aes_eax_key_template(key_size=32, iv_size=16)
 AES128_GCM = create_aes_gcm_key_template(key_size=16)
 AES256_GCM = create_aes_gcm_key_template(key_size=32)
+AES128_GCM_SIV = create_aes_gcm_siv_key_template(key_size=16)
+AES256_GCM_SIV = create_aes_gcm_siv_key_template(key_size=32)
 AES128_CTR_HMAC_SHA256 = create_aes_ctr_hmac_aead_key_template(
     aes_key_size=16,
     iv_size=16,

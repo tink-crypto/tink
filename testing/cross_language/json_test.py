@@ -82,8 +82,10 @@ class JsonTest(parameterized.TestCase):
   @parameterized.parameters(
       supported_key_types.test_cases(supported_key_types.ALL_KEY_TYPES))
   def test_to_from_json(self, key_template_name, supported_langs):
+    self.assertNotEmpty(supported_langs)
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
-    keyset = testing_servers.new_keyset('java', key_template)
+    # Take the first supported language to generate the keyset.
+    keyset = testing_servers.new_keyset(supported_langs[0], key_template)
     for to_lang in supported_langs:
       json_keyset = testing_servers.keyset_to_json(to_lang, keyset)
       for from_lang in supported_langs:

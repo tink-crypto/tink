@@ -36,8 +36,10 @@ class DeterministicAeadTest(parameterized.TestCase):
   @parameterized.parameters(
       supported_key_types.test_cases(supported_key_types.DAEAD_KEY_TYPES))
   def test_encrypt_decrypt(self, key_template_name, supported_langs):
+    self.assertNotEmpty(supported_langs)
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
-    keyset = testing_servers.new_keyset('java', key_template)
+    # Take the first supported language to generate the keyset.
+    keyset = testing_servers.new_keyset(supported_langs[0], key_template)
     supported_daeads = [
         testing_servers.deterministic_aead(lang, keyset)
         for lang in supported_langs

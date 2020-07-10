@@ -31,6 +31,7 @@ ALL_LANGUAGES = ['cc', 'java', 'go', 'python']
 AEAD_KEY_TYPES = [
     'AesEaxKey',
     'AesGcmKey',
+    'AesGcmSivKey',
     'AesCtrHmacAeadKey',
     'ChaCha20Poly1305Key',
     'XChaCha20Poly1305Key',
@@ -56,6 +57,7 @@ ALL_KEY_TYPES = (
 SUPPORTED_LANGUAGES = {
     'AesEaxKey': ['cc', 'java', 'python'],
     'AesGcmKey': ['cc', 'java', 'go', 'python'],
+    'AesGcmSivKey': ['cc', 'python'],
     'AesCtrHmacAeadKey': ['cc', 'java', 'go', 'python'],
     'ChaCha20Poly1305Key': ['java', 'go'],
     'XChaCha20Poly1305Key': ['cc', 'java', 'go', 'python'],
@@ -78,6 +80,7 @@ SUPPORTED_LANGUAGES_PER_TYPE_URL = {
 KEY_TEMPLATE_NAMES = {
     'AesEaxKey': ['AES128_EAX', 'AES256_EAX'],
     'AesGcmKey': ['AES128_GCM', 'AES256_GCM'],
+    'AesGcmSivKey': ['AES128_GCM_SIV', 'AES256_GCM_SIV'],
     'AesCtrHmacAeadKey': ['AES128_CTR_HMAC_SHA256', 'AES256_CTR_HMAC_SHA256'],
     'ChaCha20Poly1305Key': ['CHACHA20_POLY1305'],
     'XChaCha20Poly1305Key': ['XCHACHA20_POLY1305'],
@@ -130,6 +133,10 @@ KEY_TEMPLATE = {
         aead.aead_key_templates.AES128_GCM,
     'AES256_GCM':
         aead.aead_key_templates.AES256_GCM,
+    'AES128_GCM_SIV':
+        aead.aead_key_templates.AES128_GCM_SIV,
+    'AES256_GCM_SIV':
+        aead.aead_key_templates.AES256_GCM_SIV,
     'AES128_CTR_HMAC_SHA256':
         aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
     'AES256_CTR_HMAC_SHA256':
