@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "tink/mac.h"
+#include "tink/config/tink_fips.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -41,6 +42,9 @@ class AesCmacBoringSsl : public Mac {
   // Returns Status::OK if 'mac' is correct, and a non-OK-Status otherwise.
   crypto::tink::util::Status VerifyMac(absl::string_view mac,
                                        absl::string_view data) const override;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
 
  private:
   // CMAC key sizes in bytes.

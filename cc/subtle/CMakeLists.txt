@@ -156,6 +156,7 @@ tink_cc_library(
   DEPS
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::mac
     tink::util::secret_data
     tink::util::status
@@ -172,6 +173,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::mac
     tink::util::errors
     tink::util::secret_data
@@ -813,10 +815,12 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::aes_cmac_boringssl
+    tink::config::tink_fips
     tink::core::mac
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
 )
 
@@ -826,10 +830,12 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::hmac_boringssl
+    tink::config::tink_fips
     tink::core::mac
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
 )
 

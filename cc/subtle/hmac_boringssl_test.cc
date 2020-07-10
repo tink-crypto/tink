@@ -20,16 +20,20 @@
 
 #include "gtest/gtest.h"
 #include "tink/mac.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
+
+using ::crypto::tink::test::StatusIs;
 
 class HmacBoringSslTest : public ::testing::Test {
  public:
@@ -51,6 +55,11 @@ class HmacBoringSslTest : public ::testing::Test {
 };
 
 TEST_F(HmacBoringSslTest, testBasic) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   size_t tag_size = 16;
@@ -82,6 +91,11 @@ TEST_F(HmacBoringSslTest, testBasic) {
 }
 
 TEST_F(HmacBoringSslTest, testModification) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, 16, key);
@@ -102,6 +116,11 @@ TEST_F(HmacBoringSslTest, testModification) {
 }
 
 TEST_F(HmacBoringSslTest, testTruncation) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, 20, key);
@@ -120,6 +139,11 @@ TEST_F(HmacBoringSslTest, testTruncation) {
 }
 
 TEST_F(HmacBoringSslTest, testInvalidKeySizes) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+  }
+
   size_t tag_size = 16;
 
   for (int keysize = 0; keysize < 65; keysize++) {
@@ -133,6 +157,26 @@ TEST_F(HmacBoringSslTest, testInvalidKeySizes) {
   }
 }
 
+TEST_F(HmacBoringSslTest, TestFipsFailWithoutBoringCrypto) {
+  if (!kUseOnlyFips || FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA1, 16, key128).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA256, 16, key128).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA384, 16, key128).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA512, 16, key128).status(),
+              StatusIs(util::error::INTERNAL));
+}
 // TODO(bleichen): Stuff to test
 //  - Generate test vectors and share with Wycheproof.
 //  - Tag size wrong for construction

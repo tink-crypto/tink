@@ -40,6 +40,9 @@ namespace subtle {
 util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(HashType hash_type,
                                                         uint32_t tag_size,
                                                         util::SecretData key) {
+  auto status = CheckFipsCompatibility<HmacBoringSsl>();
+  if (!status.ok()) return status;
+
   util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
   if (!res.ok()) {
     return res.status();

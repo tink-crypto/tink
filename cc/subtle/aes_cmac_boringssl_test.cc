@@ -19,11 +19,13 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "tink/config/tink_fips.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -31,10 +33,16 @@ namespace tink {
 namespace subtle {
 namespace {
 
+using ::crypto::tink::test::StatusIs;
+
 constexpr uint32_t kTagSize = 16;
 constexpr uint32_t kSmallTagSize = 10;
 
 TEST(AesCmacBoringSslTest, Basic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);
@@ -63,6 +71,10 @@ TEST(AesCmacBoringSslTest, Basic) {
 }
 
 TEST(AesCmacBoringSslTest, Modification) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);
@@ -83,6 +95,10 @@ TEST(AesCmacBoringSslTest, Modification) {
 }
 
 TEST(AesCmacBoringSslTest, Truncation) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);
@@ -101,6 +117,10 @@ TEST(AesCmacBoringSslTest, Truncation) {
 }
 
 TEST(AesCmacBoringSslTest, BasicSmallTag) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kSmallTagSize);
@@ -129,6 +149,10 @@ TEST(AesCmacBoringSslTest, BasicSmallTag) {
 }
 
 TEST(AesCmacBoringSslTest, ModificationSmallTag) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kSmallTagSize);
@@ -149,6 +173,10 @@ TEST(AesCmacBoringSslTest, ModificationSmallTag) {
 }
 
 TEST(AesCmacBoringSslTest, TruncationOrAdditionSmallTag) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"));
   auto cmac_result = AesCmacBoringSsl::New(key, kSmallTagSize);
@@ -173,6 +201,10 @@ TEST(AesCmacBoringSslTest, TruncationOrAdditionSmallTag) {
 }
 
 TEST(AesCmacBoringSslTest, InvalidKeySizes) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   for (int keysize = 0; keysize < 65; keysize++) {
     util::SecretData key(keysize, 'x');
     auto cmac_result = AesCmacBoringSsl::New(key, kTagSize);
@@ -185,6 +217,10 @@ TEST(AesCmacBoringSslTest, InvalidKeySizes) {
 }
 
 TEST(AesCmacBoringSslTest, InvalidTagSizes) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   for (int tagsize = 0; tagsize < 65; tagsize++) {
     util::SecretData key(32, 'x');
     auto cmac_result = AesCmacBoringSsl::New(key, tagsize);
@@ -216,6 +252,10 @@ class AesCmacBoringSslTestVectorTest
 };
 
 TEST_P(AesCmacBoringSslTestVectorTest, RfcTestVectors) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   // Test vectors from RFC 4493.
   std::string key("2b7e151628aed2a6abf7158809cf4f3c");
   std::string data(
@@ -232,6 +272,21 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_pair(40, "dfa66747de9ae63030ca32611497c827"),
         std::make_pair(64, "51f0bebf7e3b9d92fc49741779363cfe")));
 
+TEST(AesCmacBoringSslTest, TestFipsOnly) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::AesCmacBoringSsl::New(key128, 16).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::AesCmacBoringSsl::New(key256, 16).status(),
+              StatusIs(util::error::INTERNAL));
+}
 }  // namespace
 }  // namespace subtle
 }  // namespace tink
