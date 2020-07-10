@@ -16,12 +16,14 @@
 
 #include "tink/streamingaead/streaming_aead_config.h"
 
+#include <list>
 #include <sstream>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/config.h"
+#include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/streaming_aead.h"
@@ -46,6 +48,10 @@ class StreamingAeadConfigTest : public ::testing::Test {
 };
 
 TEST_F(StreamingAeadConfigTest, Basic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesGcmHkdfStreamingKeyManager().get_key_type())
                   .status(),
@@ -68,6 +74,10 @@ TEST_F(StreamingAeadConfigTest, Basic) {
 // Tests that the StreamingAeadWrapper has been properly registered
 // and we can wrap primitives.
 TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   ASSERT_TRUE(StreamingAeadConfig::Register().ok());
 
   google::crypto::tink::Keyset::Key key;
@@ -84,6 +94,33 @@ TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
 
   auto primitive_result = Registry::Wrap(std::move(primitive_set));
   ASSERT_TRUE(primitive_result.ok()) << primitive_result.status();
+}
+
+// FIPS-only mode tests
+TEST_F(StreamingAeadConfigTest, RegisterNonFipsTemplates) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  EXPECT_THAT(StreamingAeadConfig::Register(), IsOk());
+
+  // Check that we can not retrieve non-FIPS keyset handle
+  std::list<google::crypto::tink::KeyTemplate> non_fips_key_templates;
+  non_fips_key_templates.push_back(
+      StreamingAeadKeyTemplates::Aes128CtrHmacSha256Segment4KB());
+  non_fips_key_templates.push_back(
+      StreamingAeadKeyTemplates::Aes128GcmHkdf4KB());
+  non_fips_key_templates.push_back(
+      StreamingAeadKeyTemplates::Aes256CtrHmacSha256Segment4KB());
+  non_fips_key_templates.push_back(
+      StreamingAeadKeyTemplates::Aes256GcmHkdf1MB());
+  non_fips_key_templates.push_back(
+      StreamingAeadKeyTemplates::Aes256GcmHkdf4KB());
+
+  for (auto key_template : non_fips_key_templates) {
+    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
+                StatusIs(util::error::NOT_FOUND));
+  }
 }
 
 }  // namespace

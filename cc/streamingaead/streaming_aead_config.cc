@@ -18,6 +18,7 @@
 
 #include "absl/memory/memory.h"
 #include "tink/config/config_util.h"
+#include "tink/config/tink_fips.h"
 #include "tink/registry.h"
 #include "tink/streamingaead/aes_ctr_hmac_streaming_key_manager.h"
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
@@ -37,8 +38,17 @@ const RegistryConfig& StreamingAeadConfig::Latest() {
 
 // static
 util::Status StreamingAeadConfig::Register() {
-  // Register key managers.
-  auto status = Registry::RegisterKeyTypeManager(
+  // Register primitive wrapper.
+  auto status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<StreamingAeadWrapper>());
+
+  // Currently there are no streaming encryption key managers which only use
+  // FIPS-validated implementations, therefore none will be registered in
+  if (kUseOnlyFips) {
+    return util::OkStatus();
+  }
+
+  status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmHkdfStreamingKeyManager>(), true);
   if (!status.ok()) return status;
 
@@ -46,9 +56,7 @@ util::Status StreamingAeadConfig::Register() {
       absl::make_unique<AesCtrHmacStreamingKeyManager>(), true);
   if (!status.ok()) return status;
 
-  // Register primitive wrapper.
-  return Registry::RegisterPrimitiveWrapper(
-      absl::make_unique<StreamingAeadWrapper>());
+  return util::OkStatus();
 }
 
 }  // namespace tink

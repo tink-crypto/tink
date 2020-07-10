@@ -31,6 +31,7 @@ tink_cc_library(
   DEPS
     absl::memory
     tink::config::config_util
+    tink::config::tink_fips
     tink::core::registry
     tink::proto::config_cc_proto
     tink::streamingaead::aes_ctr_hmac_streaming_key_manager
@@ -267,6 +268,7 @@ tink_cc_test(
   SRCS streaming_aead_config_test.cc
   DEPS
     absl::memory
+    tink::config::tink_fips
     tink::core::config
     tink::core::keyset_handle
     tink::core::registry
