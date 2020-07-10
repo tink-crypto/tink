@@ -11,51 +11,48 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-import {SecurityException} from '../exception/security_exception';
-import * as Bytes from '../subtle/bytes';
-import * as EllipticCurves from '../subtle/elliptic_curves';
 
-import {PbEllipticCurveType, PbHashType, PbKeyset, PbKeyStatusType, PbOutputPrefixType, PbPointFormat} from './proto';
+goog.module('tink.Util');
 
-/**
- * A type representing the constructor function for a given class. Unlike
- * TypeScript's built-in `new` types, this works with abstract classes. It is
- * used to describe the relationship between a primitive type object and its
- * instances.
- */
-export type Constructor<T> = Function&{prototype: T};
+const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
+const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+const {PbEllipticCurveType, PbHashType, PbKeyStatusType, PbKeyset, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Validates the given key and throws SecurityException if it is invalid.
  *
+ * @param {!PbKeyset.Key} key
  */
-export function validateKey(key: PbKeyset.Key) {
+const validateKey = function(key) {
   if (!key) {
     throw new SecurityException('Key should be non null.');
   }
   if (!key.getKeyData()) {
-    throw new SecurityException(
-        'Key data are missing for key ' + key.getKeyId() + '.');
+    throw new SecurityException('Key data are missing for key '
+        + key.getKeyId() + '.');
   }
   if (key.getOutputPrefixType() === PbOutputPrefixType.UNKNOWN_PREFIX) {
-    throw new SecurityException(
-        'Key ' + key.getKeyId() + ' has unknown output prefix type.');
+    throw new SecurityException('Key ' + key.getKeyId() +
+        ' has unknown output prefix type.');
   }
   if (key.getStatus() === PbKeyStatusType.UNKNOWN_STATUS) {
-    throw new SecurityException(
-        'Key ' + key.getKeyId() + ' has unknown status.');
+    throw new SecurityException('Key ' + key.getKeyId() +
+        ' has unknown status.');
   }
-}
+};
 
 /**
  * Validates the given keyset and throws SecurityException if it is invalid.
  *
+ * @param {!PbKeyset} keyset
  */
-export function validateKeyset(keyset: PbKeyset) {
+const validateKeyset = function(keyset) {
   if (!keyset || !keyset.getKeyList() || keyset.getKeyList().length < 1) {
     throw new SecurityException(
         'Keyset should be non null and must contain at least one key.');
   }
+
   let hasPrimary = false;
   const numberOfKeys = keyset.getKeyList().length;
   for (let i = 0; i < numberOfKeys; i++) {
@@ -69,12 +66,12 @@ export function validateKeyset(keyset: PbKeyset) {
       hasPrimary = true;
     }
   }
+
   if (!hasPrimary) {
-    throw new SecurityException(
-        'Primary key has to be in the keyset and ' +
+    throw new SecurityException('Primary key has to be in the keyset and ' +
         'has to be enabled.');
   }
-}
+};
 
 // Functions which are useful for implementation of
 // private and public EC keys.
@@ -86,9 +83,11 @@ export function validateKeyset(keyset: PbKeyset) {
  * keyValue values in proto might either have some leading zeros or the leading
  * zeros might be missing.
  *
+ * @param {!Uint8Array} bigEndianNumber
+ * @param {number} sizeInBytes
+ * @return {!Uint8Array}
  */
-export function bigEndianNumberToCorrectLength(
-    bigEndianNumber: Uint8Array, sizeInBytes: number): Uint8Array {
+const bigEndianNumberToCorrectLength = function(bigEndianNumber, sizeInBytes) {
   const numberLen = bigEndianNumber.length;
   if (numberLen < sizeInBytes) {
     const zeros = new Uint8Array(sizeInBytes - numberLen);
@@ -104,10 +103,13 @@ export function bigEndianNumberToCorrectLength(
     return bigEndianNumber.slice(numberLen - sizeInBytes, numberLen);
   }
   return bigEndianNumber;
-}
+};
 
-export function curveTypeProtoToSubtle(curveTypeProto: PbEllipticCurveType):
-    EllipticCurves.CurveType {
+/**
+ * @param {!PbEllipticCurveType} curveTypeProto
+ * @return {!EllipticCurves.CurveType}
+ */
+const curveTypeProtoToSubtle = function(curveTypeProto) {
   switch (curveTypeProto) {
     case PbEllipticCurveType.NIST_P256:
       return EllipticCurves.CurveType.P256;
@@ -118,9 +120,13 @@ export function curveTypeProtoToSubtle(curveTypeProto: PbEllipticCurveType):
     default:
       throw new SecurityException('Unknown curve type.');
   }
-}
+};
 
-export function hashTypeProtoToString(hashTypeProto: PbHashType): string {
+/**
+ * @param {!PbHashType} hashTypeProto
+ * @return {string}
+ */
+const hashTypeProtoToString = function(hashTypeProto) {
   switch (hashTypeProto) {
     case PbHashType.SHA1:
       return 'SHA-1';
@@ -131,10 +137,13 @@ export function hashTypeProtoToString(hashTypeProto: PbHashType): string {
     default:
       throw new SecurityException('Unknown hash type.');
   }
-}
+};
 
-export function pointFormatProtoToSubtle(pointFormatProto: PbPointFormat):
-    EllipticCurves.PointFormatType {
+/**
+ * @param {!PbPointFormat} pointFormatProto
+ * @return {!EllipticCurves.PointFormatType}
+ */
+const pointFormatProtoToSubtle = function(pointFormatProto) {
   switch (pointFormatProto) {
     case PbPointFormat.UNCOMPRESSED:
       return EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -145,4 +154,13 @@ export function pointFormatProtoToSubtle(pointFormatProto: PbPointFormat):
     default:
       throw new SecurityException('Unknown point format.');
   }
-}
+};
+
+exports = {
+  bigEndianNumberToCorrectLength,
+  curveTypeProtoToSubtle,
+  hashTypeProtoToString,
+  pointFormatProtoToSubtle,
+  validateKey,
+  validateKeyset,
+};

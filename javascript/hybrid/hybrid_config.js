@@ -19,7 +19,7 @@ const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPr
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');
 const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
+const Registry = goog.require('tink.Registry');
 
 // Static methods and constants for registering with the Registry all instances
 // of key types for hybrid encryption and decryption supported in a particular

@@ -18,10 +18,10 @@ const encrypt = goog.require('google3.third_party.tink.javascript.subtle.ecies_a
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
+const KeyManager = goog.require('tink.KeyManager');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
+const Util = goog.require('tink.Util');
 const {PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**

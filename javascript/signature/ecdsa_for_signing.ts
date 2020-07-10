@@ -1,7 +1,6 @@
+import Registry from 'goog:tink.Registry'; // from //third_party/tink/javascript:registry_legacy
 import EcdsaPrivateKeyManager from 'goog:tink.signature.EcdsaPrivateKeyManager'; // from //third_party/tink/javascript/signature:ecdsa_key_managers
 import SignatureKeyTemplates from 'goog:tink.signature.SignatureKeyTemplates'; // from //third_party/tink/javascript/signature:key_templates
-
-import * as Registry from '../internal/registry';
 
 export function register() {
   Registry.registerKeyManager(new EcdsaPrivateKeyManager());

@@ -19,7 +19,7 @@ const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
+const Util = goog.require('tink.Util');
 const {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 const {assertExists} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 

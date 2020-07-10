@@ -11,11 +11,12 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-import {SecurityException} from '../exception/security_exception';
 
-import {CryptoFormat} from './crypto_format';
-import {PbKeyset, PbKeyStatusType, PbOutputPrefixType} from './proto';
-import {Constructor} from './util';
+goog.module('tink.PrimitiveSet');
+
+const CryptoFormat = goog.require('tink.CryptoFormat');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+const {PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
  * Auxiliary class for PrimitiveSet
@@ -24,26 +25,50 @@ import {Constructor} from './util';
  * @template P
  * @final
  */
-export class Entry<P> {
-  constructor(
-      private readonly primitive: P, private readonly identifier: Uint8Array,
-      private readonly keyStatus: PbKeyStatusType,
-      private readonly outputPrefixType: PbOutputPrefixType) {}
-
-  getPrimitive(): P {
-    return this.primitive;
+class Entry {
+  /**
+   * @param {!P} primitive
+   * @param {!Uint8Array} identifier
+   * @param {!PbKeyStatusType} keyStatus
+   * @param {!PbOutputPrefixType} outputPrefixType
+   */
+  constructor(primitive, identifier, keyStatus, outputPrefixType) {
+    /** @const @private {!P} */
+    this.primitive_ = primitive;
+    /** @const @private {!Uint8Array} */
+    this.identifier_ = identifier;
+    /** @const @private {!PbKeyStatusType} */
+    this.status_ = keyStatus;
+    /** @const @private {!PbOutputPrefixType} */
+    this.outputPrefixType_ = outputPrefixType;
   }
 
-  getIdentifier(): Uint8Array {
-    return this.identifier;
+  /**
+   * @return {!P}
+   */
+  getPrimitive() {
+    return this.primitive_;
   }
 
-  getKeyStatus(): PbKeyStatusType {
-    return this.keyStatus;
+  /**
+   * @return {!Uint8Array}
+   */
+  getIdentifier() {
+    return this.identifier_;
   }
 
-  getOutputPrefixType(): PbOutputPrefixType {
-    return this.outputPrefixType;
+  /**
+   * @return {!PbKeyStatusType}
+   */
+  getKeyStatus() {
+    return this.status_;
+  }
+
+  /**
+   * @return {!PbOutputPrefixType}
+   */
+  getOutputPrefixType() {
+    return this.outputPrefixType_;
   }
 }
 
@@ -65,62 +90,83 @@ export class Entry<P> {
  * PrimitiveSet is a public class to allow its use in implementations of custom
  * primitives.
  *
+ * @template P
  * @final
  */
-export class PrimitiveSet<P> {
-  private primary_: Entry<P>|null = null;
-
-  // Keys have to be stored as strings as two Uint8Arrays holding the same
-  // digits are still different objects.
-  private readonly identifierToPrimitivesMap_: Map<string, Array<Entry<P>>>;
-
-  constructor(private readonly primitiveType: Constructor<P>) {
+class PrimitiveSet {
+  /**
+   * @param {!Object} primitiveType
+   */
+  constructor(primitiveType) {
+    /**
+     * @private {!Object}
+     */
+    this.primitiveType_ = primitiveType;
+    /**
+     * @private {?Entry<P>}
+     */
+    this.primary_ = null;
+    // Keys have to be stored as strings as two Uint8Arrays holding the same
+    // digits are still different objects.
+    /**
+     * @private {!Map<string, !Array<!Entry<P>>>}
+     */
     this.identifierToPrimitivesMap_ = new Map();
   }
 
   /**
    * Returns the type of primitives contained in this set.
    *
+   * @return {!Object}
    */
-  getPrimitiveType(): Constructor<P> {
-    return this.primitiveType;
+  getPrimitiveType() {
+    return this.primitiveType_;
   }
 
   /**
    * Creates an entry in the primitive table and returns it.
    *
+   * @param {!P} primitive
+   * @param {!PbKeyset.Key} key
    *
+   * @return {!Entry<P>}
    */
-  addPrimitive(primitive: P, key: PbKeyset.Key): Entry<P> {
+  addPrimitive(primitive, key) {
     if (!primitive) {
       throw new SecurityException('Primitive has to be non null.');
     }
     if (!key) {
       throw new SecurityException('Key has to be non null.');
     }
+
     const identifier = CryptoFormat.getOutputPrefix(key);
-    const entry = new Entry(
-        primitive, identifier, key.getStatus(), key.getOutputPrefixType());
+    const entry = new Entry(primitive, identifier, key.getStatus(),
+        key.getOutputPrefixType());
+
     this.addPrimitiveToMap_(entry);
+
     return entry;
   }
 
   /**
    * Returns the entry with the primary primitive.
    *
+   * @return {?Entry<P>}
    */
-  getPrimary(): Entry<P>|null {
+  getPrimary() {
     return this.primary_;
   }
 
   /**
    * Sets given Entry as the primary one.
    *
+   * @param {!Entry<P>} primitive
    */
-  setPrimary(primitive: Entry<P>) {
+  setPrimary(primitive) {
     if (!primitive) {
       throw new SecurityException('Primary cannot be set to null.');
     }
+
     if (primitive.getKeyStatus() != PbKeyStatusType.ENABLED) {
       throw new SecurityException('Primary has to be enabled.');
     }
@@ -140,24 +186,29 @@ export class PrimitiveSet<P> {
           'Primary cannot be set to an entry which is ' +
           'not held by this primitive set.');
     }
+
     this.primary_ = primitive;
   }
 
   /**
    * Returns all primitives using RAW prefix.
    *
+   * @return {!Array<!Entry<P>>}
    */
-  getRawPrimitives(): Array<Entry<P>> {
+  getRawPrimitives() {
     return this.getPrimitives(CryptoFormat.RAW_PREFIX);
   }
 
   /**
    * Returns the entries with primitive identified with identifier.
    *
+   * @param {!Uint8Array} identifier
    *
+   * @return {!Array<!Entry<P>>}
    */
-  getPrimitives(identifier: Uint8Array): Array<Entry<P>> {
+  getPrimitives(identifier) {
     const result = this.getPrimitivesFromMap_(identifier);
+
     if (!result) {
       return [];
     } else {
@@ -168,10 +219,12 @@ export class PrimitiveSet<P> {
   /**
    * Returns a set of primitives which corresponds to the given identifier.
    *
+   * @private
+   * @param {!Uint8Array|string} identifier
    *
+   * @return {!Array<!Entry<P>>|undefined}
    */
-  private getPrimitivesFromMap_(identifier: Uint8Array|
-                                string): Array<Entry<P>>|undefined {
+  getPrimitivesFromMap_(identifier) {
     if (identifier instanceof Uint8Array) {
       identifier = [...identifier].toString();
     }
@@ -181,11 +234,15 @@ export class PrimitiveSet<P> {
   /**
    * Add primitive to map.
    *
+   * @private
+   * @param {!Entry<P>} entry
    */
-  private addPrimitiveToMap_(entry: Entry<P>) {
+  addPrimitiveToMap_(entry) {
     const identifier = entry.getIdentifier();
     const id = [...identifier].toString();
-    const existing = this.getPrimitivesFromMap_(id);
+
+    let existing = this.getPrimitivesFromMap_(id);
+
     if (!existing) {
       this.identifierToPrimitivesMap_.set(id, [entry]);
     } else {
@@ -194,3 +251,8 @@ export class PrimitiveSet<P> {
     }
   }
 }
+
+exports = {
+  Entry,
+  PrimitiveSet,
+};

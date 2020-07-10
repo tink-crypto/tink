@@ -18,7 +18,7 @@ const EcdsaPrivateKeyManager = goog.require('tink.signature.EcdsaPrivateKeyManag
 const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
 const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper');
 const PublicKeyVerifyWrapper = goog.require('tink.signature.PublicKeyVerifyWrapper');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
+const Registry = goog.require('tink.Registry');
 
 // Static methods and constants for registering with the Registry all instances
 // of key types for digital signature supported in a particular release of Tink.

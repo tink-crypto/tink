@@ -15,10 +15,10 @@
 goog.module('tink.aead.AeadWrapper');
 
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const {PrimitiveWrapper} = goog.require('google3.third_party.tink.javascript.internal.primitive_wrapper');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
+const CryptoFormat = goog.require('tink.CryptoFormat');
+const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
+const Registry = goog.require('tink.Registry');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

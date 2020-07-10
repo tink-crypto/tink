@@ -16,10 +16,10 @@ goog.module('tink.signature.EcdsaPublicKeyManager');
 
 const EcdsaUtil = goog.require('tink.signature.EcdsaUtil');
 const ecdsaVerify = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_verify');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
+const KeyManager = goog.require('tink.KeyManager');
 const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
+const Util = goog.require('tink.Util');
 const {PbEcdsaParams, PbEcdsaPublicKey, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**

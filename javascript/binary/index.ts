@@ -1,7 +1,8 @@
-import {BinaryKeysetReader} from '../internal/binary_keyset_reader';
-import {KeysetHandle, readNoSecret} from '../internal/keyset_handle';
+import BinaryKeysetReader from 'goog:tink.BinaryKeysetReader'; // from //third_party/tink/javascript:binary_reader
+import KeysetHandle from 'goog:tink.KeysetHandle'; // from //third_party/tink/javascript:keyset_handle_legacy
 
 export function deserializeNoSecretKeyset(
     serializedKeyset: Uint8Array): KeysetHandle {
-  return readNoSecret(BinaryKeysetReader.withUint8Array(serializedKeyset));
+  return KeysetHandle.readNoSecret(
+      BinaryKeysetReader.withUint8Array(serializedKeyset));
 }

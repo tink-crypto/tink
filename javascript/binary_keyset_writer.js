@@ -11,23 +11,27 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-import {PbEncryptedKeyset, PbKeyset} from './proto';
+
+goog.module('tink.BinaryKeysetWriter');
+
+const KeysetWriter = goog.require('tink.KeysetWriter');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+
 
 /**
- * KeysetReader knows how to read a keyset or an encrypted keyset from some
- * source.
+ * KeysetWriter knows how to write a keyset or an encrypted keyset.
  *
+ * @implements {KeysetWriter}
+ * @final
  */
-export interface KeysetReader {
-  /**
-   * Reads and returns a (cleartext) Keyset object from the underlying source.
-   *
-   */
-  read(): PbKeyset;
-
-  /**
-   * Reads and returns an EncryptedKeyset from the underlying source.
-   *
-   */
-  readEncrypted(): PbEncryptedKeyset;
+class BinaryKeysetWriter {
+  /** @override */
+  write(keyset) {
+    if (!keyset) {
+      throw new SecurityException('keyset has to be non-null.');
+    }
+    return keyset.serializeBinary();
+  }
 }
+
+exports = BinaryKeysetWriter;

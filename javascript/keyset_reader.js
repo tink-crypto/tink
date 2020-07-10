@@ -11,27 +11,31 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-import * as PrimitiveSet from './primitive_set';
-import {Constructor} from './util';
+
+goog.module('tink.KeysetReader');
+
+const {PbEncryptedKeyset, PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**
- * Basic interface for wrapping a primitive.
+ * KeysetReader knows how to read a keyset or an encrypted keyset from some
+ * source.
  *
- * A PrimitiveSet can be wrapped by a single primitive in order to fulfil a
- * cryptographic task. This is done by the PrimitiveWrapper. Whenever a new
- * primitive type is added to Tink, the user should define a new
- * PrimitiveWrapper and register it with the Registry.
+ * @record
  */
-export interface PrimitiveWrapper<P> {
+class KeysetReader {
   /**
-   * Wraps a PrimitiveSet and returns a single instance.
+   * Reads and returns a (cleartext) Keyset object from the underlying source.
    *
+   * @return {!PbKeyset}
    */
-  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<P>): P;
+  read() {}
 
   /**
-   * Returns the type of the managed primitive. Used for internal management.
+   * Reads and returns an EncryptedKeyset from the underlying source.
    *
+   * @return {!PbEncryptedKeyset}
    */
-  getPrimitiveType(): Constructor<P>;
+  readEncrypted() {}
 }
+
+exports = KeysetReader;

@@ -22,11 +22,11 @@ const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManage
 const {EncryptThenAuthenticate} = goog.require('google3.third_party.tink.javascript.subtle.encrypt_then_authenticate');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
+const KeyManager = goog.require('tink.KeyManager');
 const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const {PrimitiveWrapper} = goog.require('google3.third_party.tink.javascript.internal.primitive_wrapper');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
+const PrimitiveSet = goog.require('tink.PrimitiveSet');
+const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
+const Registry = goog.require('tink.Registry');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
