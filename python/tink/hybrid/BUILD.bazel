@@ -53,6 +53,7 @@ py_test(
     deps = [
         ":hybrid",
         requirement("absl-py"),
+        "//tink:tink_python",
         "//tink/aead",
         "//tink/core",
         "//tink/proto:aes_gcm_py_pb2",

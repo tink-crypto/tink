@@ -54,6 +54,7 @@ py_test(
         ":signature",
         requirement("absl-py"),
         "//tink:tink_config",
+        "//tink:tink_python",
         "//tink/core",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",

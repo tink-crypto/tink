@@ -19,11 +19,13 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from absl.testing import absltest
 from typing import cast
+from absl.testing import absltest
+from absl.testing import parameterized
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
+import tink
 from tink import aead
 from tink import core
 from tink import hybrid
@@ -33,43 +35,12 @@ def setUpModule():
   hybrid.register()
 
 
-def _hybrid_decrypt_key_manager() -> core.PrivateKeyManager:
-  key_manager = core.Registry.key_manager(
-      'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey')
-  if not isinstance(key_manager, core.PrivateKeyManager):
-    raise core.TinkError('key_manager is not a PrivateKeyManager')
-  return key_manager
-
-
-def _hybrid_encrypt_key_manager() -> core.KeyManager:
-  return core.Registry.key_manager(
-      'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
-
-
-class HybridKeyManagerTest(absltest.TestCase):
-
-  def test_hybrid_decrypt_primitive_class(self):
-    self.assertEqual(_hybrid_decrypt_key_manager().primitive_class(),
-                     hybrid.HybridDecrypt)
-
-  def test_hybrid_encrypt_primitive_class(self):
-    self.assertEqual(_hybrid_encrypt_key_manager().primitive_class(),
-                     hybrid.HybridEncrypt)
-
-  def test_hybrid_decrypt_key_type(self):
-    self.assertEqual(
-        _hybrid_decrypt_key_manager().key_type(),
-        'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey')
-
-  def test_hybrid_encrypt_key_type(self):
-    self.assertEqual(
-        _hybrid_encrypt_key_manager().key_type(),
-        'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey')
+class HybridKeyManagerTest(parameterized.TestCase):
 
   def test_new_key_data(self):
-    key_manager = _hybrid_decrypt_key_manager()
-    key_data = key_manager.new_key_data(
-        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+    tmpl = hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+    key_manager = core.Registry.key_manager(tmpl.type_url)
+    key_data = key_manager.new_key_data(tmpl)
     self.assertEqual(key_data.type_url, key_manager.key_type())
     self.assertEqual(key_data.key_material_type,
                      tink_pb2.KeyData.ASYMMETRIC_PRIVATE)
@@ -79,16 +50,17 @@ class HybridKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.public_key.params.kem_params.curve_type,
                      common_pb2.NIST_P256)
 
-  def test_new_key_data_invalid_params_throw_exception(self):
+  def test_new_keyset_handle_invalid_params_throw_exception(self):
+    templates = hybrid.hybrid_key_templates
+    key_template = templates.create_ecies_aead_hkdf_key_template(
+        curve_type=cast(common_pb2.EllipticCurveType, 100),
+        ec_point_format=common_pb2.UNCOMPRESSED,
+        hash_type=common_pb2.SHA256,
+        dem_key_template=aead.aead_key_templates.AES128_GCM)
     with self.assertRaises(core.TinkError):
-      _hybrid_decrypt_key_manager().new_key_data(
-          hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
-              curve_type=cast(common_pb2.EllipticCurveType, 100),
-              ec_point_format=common_pb2.UNCOMPRESSED,
-              hash_type=common_pb2.SHA256,
-              dem_key_template=aead.aead_key_templates.AES128_GCM))
+      tink.new_keyset_handle(key_template)
 
-  def test_new_key_data_on_public_key_manager_fails(self):
+  def test_new_keyset_hanlde_on_public_key_fails(self):
     key_format = ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat()
     key_template = tink_pb2.KeyTemplate()
     key_template.type_url = (
@@ -96,26 +68,28 @@ class HybridKeyManagerTest(absltest.TestCase):
     key_template.value = key_format.SerializeToString()
     key_template.output_prefix_type = tink_pb2.TINK
     with self.assertRaises(core.TinkError):
-      key_manager = _hybrid_encrypt_key_manager()
-      key_manager.new_key_data(key_template)
+      tink.new_keyset_handle(key_template)
 
-  def test_encrypt_decrypt(self):
-    decrypt_key_manager = _hybrid_decrypt_key_manager()
-    encrypt_key_manager = _hybrid_encrypt_key_manager()
-    key_data = decrypt_key_manager.new_key_data(
-        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
-    public_key_data = decrypt_key_manager.public_key_data(key_data)
-    hybrid_enc = encrypt_key_manager.primitive(public_key_data)
+  @parameterized.parameters([
+      hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM, hybrid
+      .hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256
+  ])
+  def test_encrypt_decrypt(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
+    hybrid_enc = public_handle.primitive(hybrid.HybridEncrypt)
     ciphertext = hybrid_enc.encrypt(b'some plaintext', b'some context info')
-    hybrid_dec = decrypt_key_manager.primitive(key_data)
+    hybrid_dec = private_handle.primitive(hybrid.HybridDecrypt)
     self.assertEqual(hybrid_dec.decrypt(ciphertext, b'some context info'),
                      b'some plaintext')
 
-  def test_decrypt_fails(self):
-    decrypt_key_manager = _hybrid_decrypt_key_manager()
-    key_data = decrypt_key_manager.new_key_data(
-        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
-    hybrid_dec = decrypt_key_manager.primitive(key_data)
+  @parameterized.parameters([
+      hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM, hybrid
+      .hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256
+  ])
+  def test_decrypt_fails(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    hybrid_dec = private_handle.primitive(hybrid.HybridDecrypt)
     with self.assertRaises(core.TinkError):
       hybrid_dec.decrypt(b'bad ciphertext', b'some context info')
 

@@ -19,10 +19,12 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
+from absl.testing import parameterized
 
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
 from tink.proto import tink_pb2
+import tink
 from tink import core
 from tink import signature
 
@@ -31,57 +33,14 @@ def setUpModule():
   signature.register()
 
 
-def _sign_key_manager() -> core.PrivateKeyManager:
-  key_manager = core.Registry.key_manager(
-      'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey')
-  if not isinstance(key_manager, core.PrivateKeyManager):
-    raise core.TinkError('key_manager is not a PrivateKeyManager')
-  return key_manager
+class PublicKeySignKeyManagerTest(parameterized.TestCase):
 
-
-def _verify_key_manager() -> core.KeyManager:
-  return core.Registry.key_manager(
-      'type.googleapis.com/google.crypto.tink.EcdsaPublicKey')
-
-
-def new_ecdsa_key_template(hash_type, curve_type, encoding, public=True):
-  params = ecdsa_pb2.EcdsaParams(
-      hash_type=hash_type, curve=curve_type, encoding=encoding)
-  key_format = ecdsa_pb2.EcdsaKeyFormat(params=params)
-  key_template = tink_pb2.KeyTemplate()
-  if public:
-    append = 'EcdsaPublicKey'
-  else:
-    append = 'EcdsaPrivateKey'
-  key_template.type_url = 'type.googleapis.com/google.crypto.tink.' + append
-  key_template.value = key_format.SerializeToString()
-  return key_template
-
-
-class PublicKeySignKeyManagerTest(absltest.TestCase):
-
-  def setUp(self):
-    super(PublicKeySignKeyManagerTest, self).setUp()
-    self.key_manager_sign = _sign_key_manager()
-    self.key_manager_verify = _verify_key_manager()
-
-  def test_primitive_class(self):
-    self.assertEqual(self.key_manager_sign.primitive_class(),
-                     signature.PublicKeySign)
-    self.assertEqual(self.key_manager_verify.primitive_class(),
-                     signature.PublicKeyVerify)
-
-  def test_key_type(self):
-    self.assertEqual(self.key_manager_sign.key_type(),
-                     'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey')
-    self.assertEqual(self.key_manager_verify.key_type(),
-                     'type.googleapis.com/google.crypto.tink.EcdsaPublicKey')
-
-  def test_new_key_data(self):
-    key_template = new_ecdsa_key_template(
-        common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER, public=False)
-    key_data = self.key_manager_sign.new_key_data(key_template)
-    self.assertEqual(key_data.type_url, self.key_manager_sign.key_type())
+  def test_new_key_data_ecdsa(self):
+    template = signature.signature_key_templates.create_ecdsa_key_template(
+        common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER)
+    key_manager = core.Registry.key_manager(template.type_url)
+    key_data = key_manager.new_key_data(template)
+    self.assertEqual(key_data.type_url, template.type_url)
     key = ecdsa_pb2.EcdsaPrivateKey()
     key.ParseFromString(key_data.value)
     public_key = key.public_key
@@ -92,47 +51,65 @@ class PublicKeySignKeyManagerTest(absltest.TestCase):
     self.assertEqual(public_key.params.encoding, ecdsa_pb2.DER)
     self.assertLen(key.key_value, 32)
 
-  def test_new_public_key_data_fails(self):
-    key_template = new_ecdsa_key_template(
-        common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER, public=True)
+  def test_new_public_keyset_handle_fails(self):
+    params = ecdsa_pb2.EcdsaParams(
+        hash_type=common_pb2.SHA256,
+        curve=common_pb2.NIST_P256,
+        encoding=ecdsa_pb2.DER)
+    key_format = ecdsa_pb2.EcdsaKeyFormat(params=params)
+    template = tink_pb2.KeyTemplate()
+    template.type_url = 'type.googleapis.com/google.crypto.tink.EcdsaPublicKey'
+    template.value = key_format.SerializeToString()
     with self.assertRaises(core.TinkError):
-      self.key_manager_verify.new_key_data(key_template)
+      tink.new_keyset_handle(template)
 
-  def test_sign_verify_success(self):
-    priv_key = self.key_manager_sign.new_key_data(
-        new_ecdsa_key_template(
-            common_pb2.SHA256,
-            common_pb2.NIST_P256,
-            ecdsa_pb2.DER,
-            public=False))
-    pub_key = self.key_manager_sign.public_key_data(priv_key)
-
-    verifier = self.key_manager_verify.primitive(pub_key)
-    signer = self.key_manager_sign.primitive(priv_key)
+  @parameterized.parameters([
+      signature.signature_key_templates.ECDSA_P256,
+      signature.signature_key_templates.ECDSA_P384,
+      signature.signature_key_templates.ECDSA_P521,
+      signature.signature_key_templates.ECDSA_P256_IEEE_P1363,
+      signature.signature_key_templates.ECDSA_P384_IEEE_P1363,
+      signature.signature_key_templates.ECDSA_P521_IEEE_P1363,
+      signature.signature_key_templates.ED25519,
+      signature.signature_key_templates.RSA_SSA_PKCS1_3072_SHA256_F4,
+      signature.signature_key_templates.RSA_SSA_PKCS1_4096_SHA512_F4,
+      signature.signature_key_templates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4,
+      signature.signature_key_templates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4,
+  ])
+  def test_sign_verify_success(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
+    verifier = public_handle.primitive(signature.PublicKeyVerify)
+    signer = private_handle.primitive(signature.PublicKeySign)
 
     data = b'data'
     data_signature = signer.sign(data)
-
-    # Starts with a DER sequence
-    self.assertEqual(bytearray(data_signature)[0], 0x30)
-
     verifier.verify(data_signature, data)
 
-  def test_verify_wrong(self):
-    key_template = new_ecdsa_key_template(
-        common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER, public=False)
-    priv_key = self.key_manager_sign.new_key_data(key_template)
-    pub_key = self.key_manager_sign.public_key_data(priv_key)
+  @parameterized.parameters([
+      signature.signature_key_templates.ECDSA_P256,
+      signature.signature_key_templates.ECDSA_P384,
+      signature.signature_key_templates.ECDSA_P521,
+      signature.signature_key_templates.ECDSA_P256_IEEE_P1363,
+      signature.signature_key_templates.ECDSA_P384_IEEE_P1363,
+      signature.signature_key_templates.ECDSA_P521_IEEE_P1363,
+      signature.signature_key_templates.ED25519,
+      signature.signature_key_templates.RSA_SSA_PKCS1_3072_SHA256_F4,
+      signature.signature_key_templates.RSA_SSA_PKCS1_4096_SHA512_F4,
+      signature.signature_key_templates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4,
+      signature.signature_key_templates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4,
+  ])
+  def test_verify_wrong_fails(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
+    verifier = public_handle.primitive(signature.PublicKeyVerify)
+    signer = private_handle.primitive(signature.PublicKeySign)
 
-    signer = self.key_manager_sign.primitive(priv_key)
-    verifier = self.key_manager_verify.primitive(pub_key)
-
-    data = b'data'
     with self.assertRaises(core.TinkError):
-      verifier.verify(signer.sign(data), b'wrongdata')
+      verifier.verify(signer.sign(b'data'), b'wrongdata')
 
     with self.assertRaises(core.TinkError):
-      verifier.verify(b'wrongsignature', data)
+      verifier.verify(b'wrongsignature', b'data')
 
 
 if __name__ == '__main__':
