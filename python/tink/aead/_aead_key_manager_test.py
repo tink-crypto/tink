@@ -23,6 +23,7 @@ from absl.testing import parameterized
 from tink.proto import aes_ctr_hmac_aead_pb2
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
+from tink.proto import aes_gcm_siv_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink.proto import xchacha20_poly1305_pb2
@@ -84,6 +85,18 @@ class AeadKeyManagerTest(parameterized.TestCase):
     self.assertEqual(key.hmac_key.params.tag_size, 16)
     self.assertEqual(key.hmac_key.params.hash, common_pb2.SHA256)
 
+  def test_new_key_data_aes_gcm_siv(self):
+    key_template = aead.aead_key_templates.create_aes_gcm_siv_key_template(
+        key_size=16)
+    key_manager = core.Registry.key_manager(key_template.type_url)
+    key_data = key_manager.new_key_data(key_template)
+    self.assertEqual(key_data.type_url, key_template.type_url)
+    self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
+    key = aes_gcm_siv_pb2.AesGcmSivKey()
+    key.ParseFromString(key_data.value)
+    self.assertEqual(key.version, 0)
+    self.assertLen(key.key_value, 16)
+
   def test_new_key_data_xchacha20_poly1305(self):
     template = aead.aead_key_templates.XCHACHA20_POLY1305
     key_manager = core.Registry.key_manager(template.type_url)
@@ -122,6 +135,8 @@ class AeadKeyManagerTest(parameterized.TestCase):
       aead.aead_key_templates.AES256_EAX,
       aead.aead_key_templates.AES128_GCM,
       aead.aead_key_templates.AES256_GCM,
+      aead.aead_key_templates.AES128_GCM_SIV,
+      aead.aead_key_templates.AES256_GCM_SIV,
       aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
       aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
       aead.aead_key_templates.XCHACHA20_POLY1305])
@@ -138,6 +153,8 @@ class AeadKeyManagerTest(parameterized.TestCase):
       aead.aead_key_templates.AES256_EAX,
       aead.aead_key_templates.AES128_GCM,
       aead.aead_key_templates.AES256_GCM,
+      aead.aead_key_templates.AES128_GCM_SIV,
+      aead.aead_key_templates.AES256_GCM_SIV,
       aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
       aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
       aead.aead_key_templates.XCHACHA20_POLY1305])
