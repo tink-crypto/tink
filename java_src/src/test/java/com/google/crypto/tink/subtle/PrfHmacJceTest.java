@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.prf.Prf;
-import com.google.crypto.tink.util.TestUtil;
+import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;

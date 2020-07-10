@@ -21,7 +21,7 @@ import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.util.TestUtil;
+import com.google.crypto.tink.testing.TestUtil;
 import java.io.InputStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;

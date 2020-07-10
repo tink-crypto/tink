@@ -185,7 +185,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "//src/main/java/com/google/crypto/tink/util:keys_downloader",
-        "//src/main/java/com/google/crypto/tink/util:test_util",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_kms",

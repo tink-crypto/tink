@@ -15,11 +15,6 @@ java_library(
     ],
 )
 
-java_library(
-    name = "test_util",
-    srcs = ["TestUtil.java"],
-)
-
 android_library(
     name = "keys_downloader-android",
     srcs = ["KeysDownloader.java"],
