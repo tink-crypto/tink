@@ -26,6 +26,7 @@ import (
 	"golang.org/x/crypto/ed25519"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
+	subtledaead "github.com/google/tink/go/daead/subtle"
 	subtlehybrid "github.com/google/tink/go/hybrid/subtle"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
@@ -33,7 +34,6 @@ import (
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
 
-	subtedaead "github.com/google/tink/go/daead/subtle"
 	cmacpb "github.com/google/tink/go/proto/aes_cmac_go_proto"
 	aescmacprfpb "github.com/google/tink/go/proto/aes_cmac_prf_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
@@ -146,7 +146,7 @@ func NewTestAESGCMKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkp
 
 // NewTestAESSIVKeyset creates a new Keyset containing an AesSivKey.
 func NewTestAESSIVKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
-	keyValue := random.GetRandomBytes(subtedaead.AESSIVKeySize)
+	keyValue := random.GetRandomBytes(subtledaead.AESSIVKeySize)
 	key := &aspb.AesSivKey{
 		Version:  AESSIVKeyVersion,
 		KeyValue: keyValue,
