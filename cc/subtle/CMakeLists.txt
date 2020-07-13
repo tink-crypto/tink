@@ -496,6 +496,7 @@ tink_cc_library(
   DEPS
     tink::subtle::random
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::deterministic_aead
     tink::util::errors
     tink::util::secret_data

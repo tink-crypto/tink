@@ -47,6 +47,9 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitializeAesKey(
 // static
 crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>>
 AesSivBoringSsl::New(const util::SecretData& key) {
+  auto status = CheckFipsCompatibility<AesSivBoringSsl>();
+  if (!status.ok()) return status;
+
   if (!IsValidKeySizeInBytes(key.size())) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
   }

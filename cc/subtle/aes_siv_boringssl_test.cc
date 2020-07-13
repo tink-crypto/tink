@@ -24,6 +24,7 @@
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -31,7 +32,12 @@ namespace tink {
 namespace subtle {
 namespace {
 
+using ::crypto::tink::test::StatusIs;
+
 TEST(AesSivBoringSslTest, testCarryComputation) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   uint8_t value = 0;
   for (int i = 0; i < 256; i++) {
     uint8_t carry = *reinterpret_cast<int8_t*>(&value) >> 7;
@@ -45,6 +51,9 @@ TEST(AesSivBoringSslTest, testCarryComputation) {
 }
 
 TEST(AesSivBoringSslTest, testEncryptDecrypt) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
@@ -61,6 +70,9 @@ TEST(AesSivBoringSslTest, testEncryptDecrypt) {
 }
 
 TEST(AesSivBoringSslTest, testNullPtrStringView) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
@@ -91,6 +103,9 @@ TEST(AesSivBoringSslTest, testNullPtrStringView) {
 
 // Only 64 byte key sizes are supported.
 TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   util::SecretData keymaterial =
       util::SecretDataFromStringView(test::HexDecodeOrDie(
           "198371900187498172316311acf81d238ff7619873a61983d619c87b63a1987f"
@@ -111,6 +126,9 @@ TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
 
 // Checks a range of message sizes.
 TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
@@ -138,6 +156,9 @@ TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
 
 // Checks a range of aad sizes.
 TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
@@ -156,6 +177,9 @@ TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
 }
 
 TEST(AesSivBoringSslTest, testDecryptModification) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
@@ -234,9 +258,28 @@ void WycheproofTest(const rapidjson::Document &root) {
 }
 
 TEST(AesSivBoringSslTest, TestVectors) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors("aes_siv_cmac_test.json");
   WycheproofTest(*root);
+}
+
+TEST(AesEaxBoringSslTest, TestFipsOnly) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+
+  util::SecretData key128 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+
+  EXPECT_THAT(subtle::AesSivBoringSsl::New(key128).status(),
+              StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::AesSivBoringSsl::New(key256).status(),
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

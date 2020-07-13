@@ -523,6 +523,7 @@ cc_library(
         ":random",
         ":subtle_util_boringssl",
         "//:deterministic_aead",
+        "//config:tink_fips",
         "//util:errors",
         "//util:secret_data",
         "//util:status",
