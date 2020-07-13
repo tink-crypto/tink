@@ -34,18 +34,17 @@
 namespace crypto {
 namespace tink {
 
-namespace tinkutil = crypto::tink::util;
 
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeysetInfo;
-using tinkutil::Enums;
+using util::Enums;
 
 namespace {
 
 // Helpers for transoforming Keyset-protos to  JSON strings.
-tinkutil::Status ToJson(const KeyData& key_data,
+util::Status ToJson(const KeyData& key_data,
                         rapidjson::Value* json_key_data,
                         rapidjson::Document::AllocatorType* allocator) {
   rapidjson::Value type_url(rapidjson::kStringType);
@@ -63,10 +62,10 @@ tinkutil::Status ToJson(const KeyData& key_data,
   key_value.SetString(base64_string.c_str(), *allocator);
   json_key_data->AddMember("value", key_value, *allocator);
 
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::Status ToJson(const Keyset::Key& key,
+util::Status ToJson(const Keyset::Key& key,
                         rapidjson::Value* json_key,
                         rapidjson::Document::AllocatorType* allocator) {
   rapidjson::Value key_id(rapidjson::kNumberType);
@@ -86,10 +85,10 @@ tinkutil::Status ToJson(const Keyset::Key& key,
   auto status = ToJson(key.key_data(), &json_key_data, allocator);
   if (!status.ok()) return status;
   json_key->AddMember("keyData", json_key_data, *allocator);
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::StatusOr<std::string> ToJsonString(const Keyset& keyset) {
+util::StatusOr<std::string> ToJsonString(const Keyset& keyset) {
   rapidjson::Document json_doc(rapidjson::kObjectType);
   auto& allocator = json_doc.GetAllocator();
 
@@ -111,7 +110,7 @@ tinkutil::StatusOr<std::string> ToJsonString(const Keyset& keyset) {
   return std::string(string_buffer.GetString());
 }
 
-tinkutil::Status ToJson(const KeysetInfo::KeyInfo& key_info,
+util::Status ToJson(const KeysetInfo::KeyInfo& key_info,
                         rapidjson::Value* json_key_info,
                         rapidjson::Document::AllocatorType* allocator) {
   rapidjson::Value type_url(rapidjson::kStringType);
@@ -130,10 +129,10 @@ tinkutil::Status ToJson(const KeysetInfo::KeyInfo& key_info,
   prefix_type.SetString(Enums::OutputPrefixName(key_info.output_prefix_type()),
                         *allocator);
   json_key_info->AddMember("outputPrefixType", prefix_type, *allocator);
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::Status ToJson(const KeysetInfo& keyset_info,
+util::Status ToJson(const KeysetInfo& keyset_info,
                         rapidjson::Value* json_keyset_info,
                         rapidjson::Document::AllocatorType* allocator) {
   rapidjson::Value primary_key_id(rapidjson::kNumberType);
@@ -148,10 +147,10 @@ tinkutil::Status ToJson(const KeysetInfo& keyset_info,
     key_info_array.PushBack(json_key_info, *allocator);
   }
   json_keyset_info->AddMember("keyInfo", key_info_array, *allocator);
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::StatusOr<std::string> ToJsonString(const EncryptedKeyset& keyset) {
+util::StatusOr<std::string> ToJsonString(const EncryptedKeyset& keyset) {
   rapidjson::Document json_doc(rapidjson::kObjectType);
   auto& allocator = json_doc.GetAllocator();
 
@@ -174,23 +173,23 @@ tinkutil::StatusOr<std::string> ToJsonString(const EncryptedKeyset& keyset) {
   return std::string(string_buffer.GetString());
 }
 
-tinkutil::Status WriteData(absl::string_view data, std::ostream* destination) {
+util::Status WriteData(absl::string_view data, std::ostream* destination) {
   (*destination) << data;
   if (destination->fail()) {
-    return tinkutil::Status(tinkutil::error::UNKNOWN,
+    return util::Status(util::error::UNKNOWN,
                             "Error writing to the destination stream.");
   }
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
 }  // anonymous namespace
 
 
 //  static
-tinkutil::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
+util::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
     std::unique_ptr<std::ostream> destination_stream) {
   if (destination_stream == nullptr) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "destination_stream must be non-null.");
   }
   std::unique_ptr<JsonKeysetWriter> writer(
@@ -198,13 +197,13 @@ tinkutil::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
   return std::move(writer);
 }
 
-tinkutil::Status JsonKeysetWriter::Write(const Keyset& keyset) {
+util::Status JsonKeysetWriter::Write(const Keyset& keyset) {
   auto json_string_result = ToJsonString(keyset);
   if (!json_string_result.ok()) return json_string_result.status();
   return WriteData(json_string_result.ValueOrDie(), destination_stream_.get());
 }
 
-tinkutil::Status JsonKeysetWriter::Write(
+util::Status JsonKeysetWriter::Write(
     const EncryptedKeyset& encrypted_keyset) {
   auto json_string_result = ToJsonString(encrypted_keyset);
   if (!json_string_result.ok()) return json_string_result.status();

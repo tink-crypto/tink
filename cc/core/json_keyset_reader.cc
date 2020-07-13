@@ -31,7 +31,6 @@
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
-namespace tinkutil = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
@@ -46,30 +45,30 @@ namespace {
 
 
 // Helpers for validating and parsing JSON strings with EncryptedKeyset-protos.
-tinkutil::Status ValidateEncryptedKeyset(const rapidjson::Document& json_doc) {
+util::Status ValidateEncryptedKeyset(const rapidjson::Document& json_doc) {
   if (!json_doc.HasMember("encryptedKeyset") ||
       !json_doc["encryptedKeyset"].IsString() ||
       (json_doc.HasMember("keysetInfo") &&
        !json_doc["keysetInfo"].IsObject())) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON EncryptedKeyset");
   }
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::Status ValidateKeysetInfo(const rapidjson::Value& json_value) {
+util::Status ValidateKeysetInfo(const rapidjson::Value& json_value) {
   if (!json_value.HasMember("primaryKeyId") ||
       !json_value["primaryKeyId"].IsUint() ||
       !json_value.HasMember("keyInfo") ||
       !json_value["keyInfo"].IsArray() ||
       json_value["keyInfo"].Size() < 1) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON KeysetInfo");
   }
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
+util::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
   if (!json_value.HasMember("typeUrl") ||
       !json_value["typeUrl"].IsString() ||
       !json_value.HasMember("status") ||
@@ -78,13 +77,13 @@ tinkutil::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
       !json_value["keyId"].IsUint() ||
       !json_value.HasMember("outputPrefixType") ||
       !json_value["outputPrefixType"].IsString()) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON KeyInfo");
   }
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::StatusOr<std::unique_ptr<KeysetInfo::KeyInfo>>
+util::StatusOr<std::unique_ptr<KeysetInfo::KeyInfo>>
 KeyInfoFromJson(const rapidjson::Value& json_value) {
   auto status = ValidateKeyInfo(json_value);
   if (!status.ok()) return status;
@@ -98,7 +97,7 @@ KeyInfoFromJson(const rapidjson::Value& json_value) {
   return std::move(key_info);
 }
 
-tinkutil::StatusOr<std::unique_ptr<KeysetInfo>>
+util::StatusOr<std::unique_ptr<KeysetInfo>>
 KeysetInfoFromJson(const rapidjson::Value& json_value) {
   auto status = ValidateKeysetInfo(json_value);
   if (!status.ok()) return status;
@@ -112,14 +111,14 @@ KeysetInfoFromJson(const rapidjson::Value& json_value) {
   return std::move(keyset_info);
 }
 
-tinkutil::StatusOr<std::unique_ptr<EncryptedKeyset>>
+util::StatusOr<std::unique_ptr<EncryptedKeyset>>
 EncryptedKeysetFromJson(const rapidjson::Document& json_doc) {
   auto status = ValidateEncryptedKeyset(json_doc);
   if (!status.ok()) return status;
   std::string enc_keyset;
   if (!absl::Base64Unescape(
           json_doc["encryptedKeyset"].GetString(), &enc_keyset)) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON EncryptedKeyset");
   }
   auto encrypted_keyset = absl::make_unique<EncryptedKeyset>();
@@ -137,19 +136,19 @@ EncryptedKeysetFromJson(const rapidjson::Document& json_doc) {
 }
 
 // Helpers for validating and parsing JSON strings with Keyset-protos.
-tinkutil::Status ValidateKeyset(const rapidjson::Document& json_doc) {
+util::Status ValidateKeyset(const rapidjson::Document& json_doc) {
   if (!json_doc.HasMember("primaryKeyId") ||
       !json_doc["primaryKeyId"].IsUint() ||
       !json_doc.HasMember("key") ||
       !json_doc["key"].IsArray() ||
       json_doc["key"].Size() < 1) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON Keyset");
   }
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::Status ValidateKey(const rapidjson::Value& json_value) {
+util::Status ValidateKey(const rapidjson::Value& json_value) {
   if (!json_value.HasMember("keyData") ||
       !json_value["keyData"].IsObject() ||
       !json_value.HasMember("status") ||
@@ -158,32 +157,32 @@ tinkutil::Status ValidateKey(const rapidjson::Value& json_value) {
       !json_value["keyId"].IsUint() ||
       !json_value.HasMember("outputPrefixType") ||
       !json_value["outputPrefixType"].IsString()) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON Key");
   }
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::Status ValidateKeyData(const rapidjson::Value& json_value) {
+util::Status ValidateKeyData(const rapidjson::Value& json_value) {
   if (!json_value.HasMember("typeUrl") ||
       !json_value["typeUrl"].IsString() ||
       !json_value.HasMember("value") ||
       !json_value["value"].IsString() ||
       !json_value.HasMember("keyMaterialType") ||
       !json_value["keyMaterialType"].IsString()) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON KeyData");
   }
-  return tinkutil::Status::OK;
+  return util::Status::OK;
 }
 
-tinkutil::StatusOr<std::unique_ptr<KeyData>>
+util::StatusOr<std::unique_ptr<KeyData>>
 KeyDataFromJson(const rapidjson::Value& json_value) {
   auto status = ValidateKeyData(json_value);
   if (!status.ok()) return status;
   std::string value_field;
   if (!absl::Base64Unescape(json_value["value"].GetString(), &value_field)) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON KeyData");
   }
   auto key_data = absl::make_unique<KeyData>();
@@ -194,7 +193,7 @@ KeyDataFromJson(const rapidjson::Value& json_value) {
   return std::move(key_data);
 }
 
-tinkutil::StatusOr<std::unique_ptr<Keyset::Key>>
+util::StatusOr<std::unique_ptr<Keyset::Key>>
 KeyFromJson(const rapidjson::Value& json_value) {
   auto status = ValidateKey(json_value);
   if (!status.ok()) return status;
@@ -210,7 +209,7 @@ KeyFromJson(const rapidjson::Value& json_value) {
   return std::move(key);
 }
 
-tinkutil::StatusOr<std::unique_ptr<Keyset>>
+util::StatusOr<std::unique_ptr<Keyset>>
 KeysetFromJson(const rapidjson::Document& json_doc) {
   auto status = ValidateKeyset(json_doc);
   if (!status.ok()) return status;
@@ -228,10 +227,10 @@ KeysetFromJson(const rapidjson::Document& json_doc) {
 
 
 //  static
-tinkutil::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
+util::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
     std::unique_ptr<std::istream> keyset_stream) {
   if (keyset_stream == nullptr) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                             "keyset_stream must be non-null.");
   }
   std::unique_ptr<KeysetReader> reader(
@@ -240,13 +239,13 @@ tinkutil::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
 }
 
 //  static
-tinkutil::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
+util::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
     absl::string_view serialized_keyset) {
   std::unique_ptr<KeysetReader> reader(new JsonKeysetReader(serialized_keyset));
   return std::move(reader);
 }
 
-tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
+util::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
   std::string serialized_keyset_from_stream;
   std::string* serialized_keyset;
   if (keyset_stream_ == nullptr) {
@@ -258,7 +257,7 @@ tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
   }
   rapidjson::Document json_doc(rapidjson::kObjectType);
   if (json_doc.Parse(serialized_keyset->c_str()).HasParseError()) {
-    return ToStatusF(tinkutil::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid JSON Keyset: Error (offset %u): %s",
                      json_doc.GetErrorOffset(),
                      rapidjson::GetParseError_En(json_doc.GetParseError()));
@@ -266,7 +265,7 @@ tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
   return KeysetFromJson(json_doc);
 }
 
-tinkutil::StatusOr<std::unique_ptr<EncryptedKeyset>>
+util::StatusOr<std::unique_ptr<EncryptedKeyset>>
 JsonKeysetReader::ReadEncrypted() {
   std::string serialized_keyset_from_stream;
   std::string* serialized_keyset;
@@ -279,7 +278,7 @@ JsonKeysetReader::ReadEncrypted() {
   }
   rapidjson::Document json_doc;
   if (json_doc.Parse(serialized_keyset->c_str()).HasParseError()) {
-    return ToStatusF(tinkutil::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid JSON EncryptedKeyset: Error (offset %u): %s",
                      json_doc.GetErrorOffset(),
                      rapidjson::GetParseError_En(json_doc.GetParseError()));
