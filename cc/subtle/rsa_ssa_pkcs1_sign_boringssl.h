@@ -23,6 +23,7 @@
 #include "openssl/base.h"
 #include "openssl/ec.h"
 #include "openssl/rsa.h"
+#include "tink/config/tink_fips.h"
 #include "tink/public_key_sign.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -47,6 +48,9 @@ class RsaSsaPkcs1SignBoringSsl : public PublicKeySign {
       absl::string_view data) const override;
 
   ~RsaSsaPkcs1SignBoringSsl() override = default;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
   RsaSsaPkcs1SignBoringSsl(bssl::UniquePtr<RSA> private_key,

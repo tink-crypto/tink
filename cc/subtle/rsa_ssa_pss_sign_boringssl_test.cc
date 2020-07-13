@@ -30,6 +30,7 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
+
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::IsEmpty;
@@ -51,6 +52,10 @@ class RsaPssSignBoringsslTest : public ::testing::Test {
 };
 
 TEST_F(RsaPssSignBoringsslTest, EncodesPss) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test not run in FIPS-only mode";
+  }
+
   SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
                                               /*mgf1_hash=*/HashType::SHA256,
                                               /*salt_length=*/32};
@@ -70,6 +75,10 @@ TEST_F(RsaPssSignBoringsslTest, EncodesPss) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, EncodesPssWithSeparateHashes) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test not run in FIPS-only mode";
+  }
+
   SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
                                               /*mgf1_hash=*/HashType::SHA1,
                                               /*salt_length=*/32};
@@ -89,6 +98,10 @@ TEST_F(RsaPssSignBoringsslTest, EncodesPssWithSeparateHashes) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsInvalidPaddingHash) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test not run in FIPS-only mode";
+  }
+
   SubtleUtilBoringSSL::RsaSsaPssParams params{
       /*sig_hash=*/HashType::SHA256, /*mgf1_hash=*/HashType::UNKNOWN_HASH,
       /*salt_length=*/0};
@@ -97,6 +110,10 @@ TEST_F(RsaPssSignBoringsslTest, RejectsInvalidPaddingHash) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsUnsafePaddingHash) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test not run in FIPS-only mode";
+  }
+
   SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA1,
                                               /*mgf1_hash=*/HashType::SHA1,
                                               /*salt_length=*/0};
@@ -105,6 +122,10 @@ TEST_F(RsaPssSignBoringsslTest, RejectsUnsafePaddingHash) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsInvalidCrtParams) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test not run in FIPS-only mode";
+  }
+
   SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
                                               /*mgf1_hash=*/HashType::SHA256,
                                               /*salt_length=*/32};
@@ -131,6 +152,56 @@ TEST_F(RsaPssSignBoringsslTest, RejectsInvalidCrtParams) {
     auto signer_or = RsaSsaPssSignBoringSsl::New(key, params);
     EXPECT_THAT(signer_or.status(), StatusIs(util::error::INVALID_ARGUMENT));
   }
+}
+
+// FIPS-only mode test
+TEST_F(RsaPssSignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
+  if (!kUseOnlyFips || FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
+  }
+
+  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                              /*mgf1_hash=*/HashType::SHA256,
+                                              /*salt_length=*/32};
+  EXPECT_THAT(RsaSsaPssSignBoringSsl::New(private_key_, params).status(),
+              StatusIs(util::error::INTERNAL));
+}
+
+TEST_F(RsaPssSignBoringsslTest, TestRestrictedFipsModuli) {
+  if (!kUseOnlyFips || !FIPS_mode()) {
+    GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
+  }
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
+                  4096, rsa_f4_.get(), &private_key, &public_key),
+              IsOk());
+
+  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                              /*mgf1_hash=*/HashType::SHA256,
+                                              /*salt_length=*/32};
+  EXPECT_THAT(RsaSsaPssSignBoringSsl::New(private_key, params).status(),
+              StatusIs(util::error::INTERNAL));
+}
+
+TEST_F(RsaPssSignBoringsslTest, TestAllowedFipsModuli) {
+  if (!kUseOnlyFips || !FIPS_mode()) {
+    GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
+  }
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
+                  3072, rsa_f4_.get(), &private_key, &public_key),
+              IsOk());
+
+  SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
+                                              /*mgf1_hash=*/HashType::SHA256,
+                                              /*salt_length=*/32};
+  EXPECT_THAT(RsaSsaPssSignBoringSsl::New(private_key, params).status(),
+              IsOk());
 }
 
 }  // namespace

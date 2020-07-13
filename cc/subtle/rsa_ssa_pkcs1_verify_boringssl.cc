@@ -33,6 +33,9 @@ util::StatusOr<std::unique_ptr<RsaSsaPkcs1VerifyBoringSsl>>
 RsaSsaPkcs1VerifyBoringSsl::New(
     const SubtleUtilBoringSSL::RsaPublicKey& pub_key,
     const SubtleUtilBoringSSL::RsaSsaPkcs1Params& params) {
+  auto status = CheckFipsCompatibility<RsaSsaPkcs1VerifyBoringSsl>();
+  if (!status.ok()) return status;
+
   // Check hash.
   auto hash_status =
       SubtleUtilBoringSSL::ValidateSignatureHash(params.hash_type);

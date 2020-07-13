@@ -224,6 +224,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_verify
     tink::util::errors
     tink::util::status
@@ -240,6 +241,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::util::errors
     tink::util::status
@@ -257,6 +259,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_verify
     tink::util::errors
     tink::util::status
@@ -273,6 +276,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::util::errors
     tink::util::status
@@ -1074,12 +1078,15 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::wycheproof_util
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     absl::strings
+    crypto
     rapidjson
 )
 
@@ -1090,8 +1097,10 @@ tink_cc_test(
     tink::subtle::rsa_ssa_pss_sign_boringssl
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::util::test_matchers
     absl::strings
+    crypto
 )
 
 tink_cc_test(
@@ -1102,12 +1111,15 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::wycheproof_util
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     absl::strings
+    crypto
     rapidjson
 )
 
@@ -1118,8 +1130,10 @@ tink_cc_test(
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::util::test_matchers
     absl::strings
+    crypto
 )
 
 tink_cc_test(

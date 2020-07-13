@@ -34,6 +34,9 @@ namespace subtle {
 util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPkcs1SignBoringSsl::New(
     const SubtleUtilBoringSSL::RsaPrivateKey& private_key,
     const SubtleUtilBoringSSL::RsaSsaPkcs1Params& params) {
+  auto status = CheckFipsCompatibility<RsaSsaPkcs1SignBoringSsl>();
+  if (!status.ok()) return status;
+
   // Check hash.
   util::Status sig_hash_valid =
       SubtleUtilBoringSSL::ValidateSignatureHash(params.hash_type);

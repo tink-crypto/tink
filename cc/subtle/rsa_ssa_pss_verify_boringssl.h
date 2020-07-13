@@ -24,6 +24,7 @@
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
 #include "tink/public_key_verify.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -47,6 +48,9 @@ class RsaSsaPssVerifyBoringSsl : public PublicKeyVerify {
                                     absl::string_view data) const override;
 
   ~RsaSsaPssVerifyBoringSsl() override = default;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
   RsaSsaPssVerifyBoringSsl(bssl::UniquePtr<RSA> rsa, const EVP_MD* sig_hash,
