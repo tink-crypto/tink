@@ -179,7 +179,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, TestAllowedFipsModuli) {
               IsOk());
 
   SubtleUtilBoringSSL::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
-  EXPECT_THAT(RsaSsaPkcs1SignBoringSsl::New(private_key_, params).status(),
+  EXPECT_THAT(RsaSsaPkcs1SignBoringSsl::New(private_key, params).status(),
               IsOk());
 }
 

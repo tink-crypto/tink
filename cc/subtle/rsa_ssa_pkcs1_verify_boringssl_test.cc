@@ -266,11 +266,19 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs12048SHA256) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA256) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
+  }
   ASSERT_TRUE(TestSignatures("rsa_signature_3072_sha256_test.json",
                              /*allow_skipping=*/false));
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA512) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
+  }
   ASSERT_TRUE(TestSignatures("rsa_signature_3072_sha512_test.json",
                              /*allow_skipping=*/false));
 }

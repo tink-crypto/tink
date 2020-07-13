@@ -281,6 +281,10 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, WycheproofRsaPss2048Sha25632) {
 }
 
 TEST_F(RsaSsaPssVerifyBoringSslTest, WycheproofRsaPss3072Sha25632) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
+  }
   ASSERT_TRUE(TestSignatures("rsa_pss_3072_sha256_mgf1_32_test.json",
                              /*allow_skipping=*/false));
 }
