@@ -10,9 +10,12 @@ tickets or emailing the maintainers at `tink-users@googlegroups.com`.
     subtle implementation may be vulnerable to chosen-ciphertext attacks. An
     attacker can generate ciphertexts that bypass the HMAC verification if and
     only if all of the following conditions are true:
+
     -   Tink C++ is used on systems where `size_t` is a 32-bit integer. This is
         usually the case on 32-bit machines.
     -   The attacker can specify long (>= 2^29 bytes ~ 536MB) associated data.
+
+    This issue was reported by Quan Nguyen of Snap security team.
 
 ## Java
 
@@ -75,3 +78,12 @@ tickets or emailing the maintainers at `tink-users@googlegroups.com`.
     this violates the CCA2 property for this interface, although the ciphertext
     will still decrypt to the correct DEK. When using this interface one should
     not rely on that for each DEK there only exists a single *encrypted DEK*.
+
+## Streaming AEAD - potential integer overflow issues
+
+*   Streaming AEAD implementations encrypt the plaintext in segments. Tink uses
+    a 4-byte segment counter. When encrypting a stream consisting of more than
+    2^32 segments, the segment counter might overflow and lead to leakage of key
+    material or plaintext. This problem was found in the Java and Go
+    implementations of the AES-GCM-HKDF-Streaming key type, and has been fixed
+    since 1.4.0.
