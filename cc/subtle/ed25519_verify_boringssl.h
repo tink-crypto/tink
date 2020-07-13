@@ -21,6 +21,7 @@
 #include <string>
 
 #include "absl/strings/string_view.h"
+#include "tink/config/tink_fips.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/statusor.h"
 
@@ -36,6 +37,9 @@ class Ed25519VerifyBoringSsl : public PublicKeyVerify {
   // Verifies that 'signature' is a digital signature for 'data'.
   crypto::tink::util::Status Verify(absl::string_view signature,
                                     absl::string_view data) const override;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
 
  private:
   const std::string public_key_;

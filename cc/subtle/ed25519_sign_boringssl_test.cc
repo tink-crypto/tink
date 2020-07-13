@@ -29,6 +29,7 @@
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -36,9 +37,15 @@ namespace tink {
 namespace subtle {
 namespace {
 
+using ::crypto::tink::test::StatusIs;
+
 class Ed25519SignBoringSslTest : public ::testing::Test {};
 
 TEST_F(Ed25519SignBoringSslTest, testBasicSign) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
+  }
+
   // Generate a new key pair.
   uint8_t out_public_key[ED25519_PUBLIC_KEY_LEN];
   uint8_t out_private_key[ED25519_PRIVATE_KEY_LEN];
@@ -89,6 +96,10 @@ TEST_F(Ed25519SignBoringSslTest, testBasicSign) {
 }
 
 TEST_F(Ed25519SignBoringSslTest, testInvalidPrivateKeys) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
+  }
+
   for (int keysize = 0; keysize < 128; keysize++) {
     if (keysize == ED25519_PRIVATE_KEY_LEN) {
       // Valid key size.
@@ -100,6 +111,10 @@ TEST_F(Ed25519SignBoringSslTest, testInvalidPrivateKeys) {
 }
 
 TEST_F(Ed25519SignBoringSslTest, testMessageEmptyVersusNullStringView) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
+  }
+
   // Generate a new key pair.
   uint8_t out_public_key[ED25519_PUBLIC_KEY_LEN];
   uint8_t out_private_key[ED25519_PRIVATE_KEY_LEN];
@@ -153,6 +168,10 @@ struct TestVector {
 };
 
 TEST_F(Ed25519SignBoringSslTest, testWithTestVectors) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
+  }
+
   // These test vectors are taken from:
   // https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-02#section-6.
   TestVector ed25519_vectors[] = {
@@ -304,6 +323,21 @@ TEST_F(Ed25519SignBoringSslTest, testWithTestVectors) {
     auto status = verifier->Verify(signature, v.message);
     EXPECT_TRUE(status.ok()) << status;
   }
+}
+
+TEST_F(Ed25519SignBoringSslTest, testFipsMode) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Test assumes kOnlyUseFips.";
+  }
+
+  // Generate a new key pair.
+  uint8_t out_public_key[ED25519_PUBLIC_KEY_LEN];
+  util::SecretData private_key(ED25519_PRIVATE_KEY_LEN);
+  ED25519_keypair(out_public_key, private_key.data());
+
+  // Create a new signer.
+  EXPECT_THAT(Ed25519SignBoringSsl::New(private_key).status(),
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

@@ -106,6 +106,7 @@ tink_cc_library(
     ed25519_sign_boringssl.h
   DEPS
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::util::errors
     tink::util::secret_data
@@ -123,6 +124,7 @@ tink_cc_library(
     ed25519_verify_boringssl.h
   DEPS
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_verify
     tink::util::errors
     tink::util::statusor
@@ -192,6 +194,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::util::errors
     tink::util::status
@@ -208,6 +211,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_verify
     tink::util::errors
     tink::util::status
@@ -1013,6 +1017,7 @@ tink_cc_test(
     tink::core::public_key_verify
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
 )
 
@@ -1029,6 +1034,7 @@ tink_cc_test(
     tink::core::public_key_verify
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     absl::strings
     rapidjson
@@ -1047,6 +1053,7 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     crypto
     absl::strings
@@ -1066,6 +1073,7 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     crypto
     absl::strings

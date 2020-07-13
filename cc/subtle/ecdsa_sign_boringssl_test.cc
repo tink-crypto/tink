@@ -27,6 +27,7 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {
@@ -34,10 +35,16 @@ namespace tink {
 namespace subtle {
 namespace {
 
+using ::crypto::tink::test::StatusIs;
+
 class EcdsaSignBoringSslTest : public ::testing::Test {
 };
 
 TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
+  }
   subtle::EcdsaSignatureEncoding encodings[2] = {
       EcdsaSignatureEncoding::DER, EcdsaSignatureEncoding::IEEE_P1363};
   for (EcdsaSignatureEncoding encoding : encodings) {
@@ -75,6 +82,10 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testEncodingsMismatch) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
+  }
   subtle::EcdsaSignatureEncoding encodings[2] = {
       EcdsaSignatureEncoding::DER, EcdsaSignatureEncoding::IEEE_P1363};
   for (EcdsaSignatureEncoding encoding : encodings) {
@@ -102,6 +113,10 @@ TEST_F(EcdsaSignBoringSslTest, testEncodingsMismatch) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
+  }
   EllipticCurveType curves[3] = {EllipticCurveType::NIST_P256,
                                  EllipticCurveType::NIST_P384,
                                  EllipticCurveType::NIST_P521};
@@ -130,6 +145,10 @@ TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
+  }
   auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256)
                     .ValueOrDie();
   auto signer_result = EcdsaSignBoringSsl::New(ec_key, HashType::SHA1,
@@ -138,6 +157,32 @@ TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
 }
 
 // TODO(bleichen): add Wycheproof tests.
+
+// FIPS-only mode test
+TEST_F(EcdsaSignBoringSslTest, TestFipsFailWithoutBoringCrypto) {
+  if (!kUseOnlyFips || FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
+  }
+
+  auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256)
+                    .ValueOrDie();
+  EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
+                                      EcdsaSignatureEncoding::DER).status(),
+              StatusIs(util::error::INTERNAL));
+
+  ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P384)
+                    .ValueOrDie();
+  EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
+                                      EcdsaSignatureEncoding::DER).status(),
+              StatusIs(util::error::INTERNAL));
+
+  ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P521)
+                    .ValueOrDie();
+  EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
+                                      EcdsaSignatureEncoding::DER).status(),
+              StatusIs(util::error::INTERNAL));
+}
 
 }  // namespace
 }  // namespace subtle

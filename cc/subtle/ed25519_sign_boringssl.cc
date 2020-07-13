@@ -34,6 +34,9 @@ namespace subtle {
 // static
 util::StatusOr<std::unique_ptr<PublicKeySign>> Ed25519SignBoringSsl::New(
     util::SecretData private_key) {
+  auto status = CheckFipsCompatibility<Ed25519SignBoringSsl>();
+  if (!status.ok()) return status;
+
   if (private_key.size() != ED25519_PRIVATE_KEY_LEN) {
     return util::Status(
         util::error::INVALID_ARGUMENT,

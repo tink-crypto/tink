@@ -20,6 +20,7 @@
 #include <memory>
 #include <utility>
 
+#include "tink/config/tink_fips.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -36,6 +37,9 @@ class Ed25519SignBoringSsl : public PublicKeySign {
   // Computes the signature for 'data'.
   crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const override;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
 
  private:
   explicit Ed25519SignBoringSsl(util::SecretData private_key)

@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/public_key_sign.h"
@@ -41,6 +42,9 @@ class EcdsaSignBoringSsl : public PublicKeySign {
   // Computes the signature for 'data'.
   crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const override;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
   EcdsaSignBoringSsl(bssl::UniquePtr<EC_KEY> key, const EVP_MD* hash,
