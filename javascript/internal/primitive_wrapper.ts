@@ -11,10 +11,8 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
-goog.module('tink.PrimitiveWrapper');
-
-const PrimitiveSet = goog.require('tink.PrimitiveSet');
+import * as PrimitiveSet from './primitive_set';
+import {Constructor} from './util';
 
 /**
  * Basic interface for wrapping a primitive.
@@ -23,25 +21,17 @@ const PrimitiveSet = goog.require('tink.PrimitiveSet');
  * cryptographic task. This is done by the PrimitiveWrapper. Whenever a new
  * primitive type is added to Tink, the user should define a new
  * PrimitiveWrapper and register it with the Registry.
- *
- * @template P
- * @record
  */
-class PrimitiveWrapper {
+export interface PrimitiveWrapper<P> {
   /**
    * Wraps a PrimitiveSet and returns a single instance.
    *
-   * @param {!PrimitiveSet.PrimitiveSet<P>} primitiveSet
-   * @return {!P}
    */
-  wrap(primitiveSet) {}
+  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<P>): P;
 
   /**
    * Returns the type of the managed primitive. Used for internal management.
    *
-   * @return {!Object}
    */
-  getPrimitiveType() {}
+  getPrimitiveType(): Constructor<P>;
 }
-
-exports = PrimitiveWrapper;

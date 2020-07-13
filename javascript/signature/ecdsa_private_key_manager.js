@@ -19,10 +19,10 @@ const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager
 const ecdsaSign = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_sign');
 const EcdsaUtil = goog.require('tink.signature.EcdsaUtil');
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const KeyManager = goog.require('tink.KeyManager');
+const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
 const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Util = goog.require('tink.Util');
+const Util = goog.require('google3.third_party.tink.javascript.internal.util');
 const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 /**

@@ -14,10 +14,10 @@
 
 goog.module('tink.hybrid.HybridDecryptWrapper');
 
-const CryptoFormat = goog.require('tink.CryptoFormat');
+const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
 const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
-const PrimitiveSet = goog.require('tink.PrimitiveSet');
-const PrimitiveWrapper = goog.require('tink.PrimitiveWrapper');
+const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
+const {PrimitiveWrapper} = goog.require('google3.third_party.tink.javascript.internal.primitive_wrapper');
 const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

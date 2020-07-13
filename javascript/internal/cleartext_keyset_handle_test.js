@@ -15,8 +15,8 @@
 goog.module('tink.CleartextKeysetHandleTest');
 goog.setTestOnly();
 
-const CleartextKeysetHandle = goog.require('tink.CleartextKeysetHandle');
-const KeysetHandle = goog.require('tink.KeysetHandle');
+const {CleartextKeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.cleartext_keyset_handle');
+const {KeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
 const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
 const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 

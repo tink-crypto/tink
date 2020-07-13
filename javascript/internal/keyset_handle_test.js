@@ -15,22 +15,22 @@
 goog.module('tink.KeysetHandleTest');
 goog.setTestOnly('tink.KeysetHandleTest');
 
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const BinaryKeysetReader = goog.require('tink.BinaryKeysetReader');
-const BinaryKeysetWriter = goog.require('tink.BinaryKeysetWriter');
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const CleartextKeysetHandle = goog.require('tink.CleartextKeysetHandle');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
+const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
+const {BinaryKeysetReader} = goog.require('google3.third_party.tink.javascript.internal.binary_keyset_reader');
+const {BinaryKeysetWriter} = goog.require('google3.third_party.tink.javascript.internal.binary_keyset_writer');
+const {CleartextKeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.cleartext_keyset_handle');
 const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const KeyManager = goog.require('tink.KeyManager');
-const KeysetHandle = goog.require('tink.KeysetHandle');
+const {KeysetHandle, generateNew, read, readNoSecret} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
 const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Registry = goog.require('tink.Registry');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {PbKeyData, PbKeyMaterialType, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
 
 describe('keyset handle test', function() {
@@ -83,13 +83,13 @@ describe('keyset handle test', function() {
   // tests for read method
   it('read', async function() {
     const keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
-    const keysetHandle = await KeysetHandle.generateNew(keyTemplate);
+    const keysetHandle = await generateNew(keyTemplate);
     const serializedKeyset =
         CleartextKeysetHandle.serializeToBinary(keysetHandle);
     const keysetReader = new BinaryKeysetReader(serializedKeyset);
     const aead = await keysetHandle.getPrimitive(Aead);
     try {
-      await KeysetHandle.read(keysetReader, aead);
+      await read(keysetReader, aead);
     } catch (e) {
       expect(e.toString())
           .toBe(
@@ -103,7 +103,7 @@ describe('keyset handle test', function() {
   // tests for generateNew method
   it('generate new', async function() {
     const keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
-    const keysetHandle = await KeysetHandle.generateNew(keyTemplate);
+    const keysetHandle = await generateNew(keyTemplate);
     const keyset = keysetHandle.getKeyset();
     expect(1).toBe(keyset.getKeyList().length);
 
@@ -528,7 +528,7 @@ describe('keyset handle test', function() {
       const reader =
           BinaryKeysetReader.withUint8Array(keyset.serializeBinary());
       try {
-        KeysetHandle.readNoSecret(reader);
+        readNoSecret(reader);
         fail('An exception should be thrown.');
       } catch (e) {
         expect(e.toString())
@@ -552,7 +552,7 @@ describe('keyset handle test', function() {
     keyset.setPrimaryKeyId(1);
 
     const reader = BinaryKeysetReader.withUint8Array(keyset.serializeBinary());
-    const keysetHandle = KeysetHandle.readNoSecret(reader);
+    const keysetHandle = readNoSecret(reader);
 
     expect(keysetHandle.getKeyset()).toEqual(keyset);
   });

@@ -11,32 +11,21 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+import {SecurityException} from '../exception/security_exception';
 
-goog.module('tink.BinaryKeysetReader');
-
-const KeysetReader = goog.require('tink.KeysetReader');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {KeysetReader} from './keyset_reader';
+import {PbEncryptedKeyset, PbKeyset} from './proto';
 
 /**
  * BinaryKeysetReader knows how to read a keyset or an encrypted keyset
  * serialized to binary format.
  *
- * @implements {KeysetReader}
  * @final
  */
-class BinaryKeysetReader {
-  /** @param {!Uint8Array} serializedKeyset */
-  constructor(serializedKeyset) {
-    /** @const @private {!Uint8Array} */
-    this.serializedKeyset_ = serializedKeyset;
-  }
+export class BinaryKeysetReader implements KeysetReader {
+  constructor(private readonly serializedKeyset: Uint8Array) {}
 
-  /**
-   * @param {!Uint8Array} serializedKeyset
-   * @return {!BinaryKeysetReader}
-   */
-  static withUint8Array(serializedKeyset) {
+  static withUint8Array(serializedKeyset: Uint8Array): BinaryKeysetReader {
     if (!serializedKeyset) {
       throw new SecurityException('Serialized keyset has to be non-null.');
     }
@@ -45,9 +34,9 @@ class BinaryKeysetReader {
 
   /** @override */
   read() {
-    let /** !PbKeyset */ keyset;
+    let keyset: PbKeyset;
     try {
-      keyset = PbKeyset.deserializeBinary(this.serializedKeyset_);
+      keyset = PbKeyset.deserializeBinary(this.serializedKeyset);
     } catch (e) {
       throw new SecurityException(
           'Could not parse the given serialized proto as a keyset proto.');
@@ -60,9 +49,7 @@ class BinaryKeysetReader {
   }
 
   /** @override */
-  readEncrypted() {
+  readEncrypted(): PbEncryptedKeyset {
     throw new SecurityException('Not implemented yet.');
   }
 }
-
-exports = BinaryKeysetReader;

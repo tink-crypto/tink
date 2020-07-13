@@ -1,5 +1,6 @@
-import Registry from 'goog:tink.Registry'; // from //third_party/tink/javascript:registry_legacy
 import PublicKeySignWrapper from 'goog:tink.signature.PublicKeySignWrapper'; // from //third_party/tink/javascript/signature:wrappers
+
+import * as Registry from '../internal/registry';
 
 export function register() {
   Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());

@@ -11,23 +11,13 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
-goog.module('tink.KeysetWriter');
-
-const {PbEncryptedKeyset, PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {PbEncryptedKeyset, PbKeyset} from './proto';
 
 /**
  * KeysetWriter knows how to write a keyset or an encrypted keyset to some
  * storage system.
  *
- * @record
  */
-class KeysetWriter {
-  /**
-   * @param {!PbKeyset|!PbEncryptedKeyset} keyset
-   * @return {!Uint8Array}
-   */
-  write(keyset) {}
+export interface KeysetWriter {
+  write(keyset: PbKeyset|PbEncryptedKeyset): Uint8Array;
 }
-
-exports = KeysetWriter;
