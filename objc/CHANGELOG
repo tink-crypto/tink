@@ -1,3 +1,7 @@
+Version 1.4.0
+==================================
+Obj-C protobufs removed.
+
 Version 1.4.0-rc2
 ==================================
 No changes to the Obj-C implementation since 1.4.0-rc1.
