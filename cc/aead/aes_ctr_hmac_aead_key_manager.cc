@@ -19,6 +19,7 @@
 #include <map>
 
 #include "absl/base/casts.h"
+#include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/key_manager.h"
 #include "tink/mac.h"
@@ -144,22 +145,26 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
   }
   auto params = hmac_key_format.params();
   if (params.tag_size() < kMinTagSizeInBytes) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid HmacParams: tag_size %d is too small.",
-                     params.tag_size());
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        absl::StrCat("Invalid HmacParams: tag_size ",
+                                     params.tag_size(),
+                                     " is too small."));
   }
   std::map<HashType, uint32_t> max_tag_size = {
       {HashType::SHA1, 20}, {HashType::SHA256, 32}, {HashType::SHA512, 64}};
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid HmacParams: HashType '%s' not supported.",
-                     Enums::HashName(params.hash()));
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        absl::StrCat("Invalid HmacParams: HashType '",
+                                     Enums::HashName(params.hash()),
+                                     "' not supported."));
   } else {
     if (params.tag_size() > max_tag_size[params.hash()]) {
-      return ToStatusF(
-          util::error::INVALID_ARGUMENT,
-          "Invalid HmacParams: tag_size %d is too big for HashType '%s'.",
-          params.tag_size(), Enums::HashName(params.hash()));
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          absl::StrCat("Invalid HmacParams: tag_size ",
+                                       params.tag_size(),
+                                       " is too big for HashType '",
+                                       Enums::HashName(params.hash()),
+                                       "'."));
     }
   }
 

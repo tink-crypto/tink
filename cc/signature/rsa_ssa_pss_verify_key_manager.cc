@@ -16,6 +16,7 @@
 
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
@@ -88,9 +89,12 @@ Status RsaSsaPssVerifyKeyManager::ValidateParams(
   //
   //  - Conscrypt/BouncyCastle do not support different hashes.
   if (params.mgf1_hash() != params.sig_hash()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "MGF1 hash '%d' is different from signature hash '%d'",
-                     params.mgf1_hash(), params.sig_hash());
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        absl::StrCat("MGF1 hash '",
+                                     params.mgf1_hash(),
+                                     "' is different from signature hash '",
+                                     params.sig_hash(),
+                                     "'"));
   }
   if (params.salt_length() < 0) {
     return util::Status(util::error::INVALID_ARGUMENT,
