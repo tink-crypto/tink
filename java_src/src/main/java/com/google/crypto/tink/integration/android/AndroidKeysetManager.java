@@ -105,27 +105,29 @@ import javax.annotation.concurrent.GuardedBy;
  * generated. If the master key already exists but is unusable, a {@link KeyStoreException} is
  * thrown.
  *
+ * <p>This class is thread-safe.
+ *
  * @since 1.0.0
  */
 public final class AndroidKeysetManager {
   private static final String TAG = AndroidKeysetManager.class.getSimpleName();
-  private final KeysetReader reader;
   private final KeysetWriter writer;
   private final Aead masterKey;
-  private final KeyTemplate keyTemplate;
 
   @GuardedBy("this")
   private KeysetManager keysetManager;
 
   private AndroidKeysetManager(Builder builder) throws GeneralSecurityException, IOException {
-    reader = builder.reader;
     writer = builder.writer;
     masterKey = builder.masterKey;
-    keyTemplate = builder.keyTemplate;
-    keysetManager = readOrGenerateNewKeyset();
+    keysetManager = builder.keysetManager;
   }
 
-  /** A builder for {@link AndroidKeysetManager}. */
+  /**
+   * A builder for {@link AndroidKeysetManager}.
+   *
+   * <p>This class is thread-safe.
+   */
   public static final class Builder {
     private KeysetReader reader = null;
     private KeysetWriter writer = null;
@@ -134,6 +136,9 @@ public final class AndroidKeysetManager {
     private boolean useKeystore = true;
     private KeyTemplate keyTemplate = null;
     private KeyStore keyStore = null;
+
+    @GuardedBy("this")
+    private KeysetManager keysetManager;
 
     public Builder() {}
 
@@ -218,11 +223,102 @@ public final class AndroidKeysetManager {
      * @throws KeystoreException If a master key is found but unusable.
      * @throws GeneralSecurityException If cannot read an existing keyset or generate a new one.
      */
-    public AndroidKeysetManager build() throws GeneralSecurityException, IOException {
+    public synchronized AndroidKeysetManager build() throws GeneralSecurityException, IOException {
       if (masterKeyUri != null) {
-        masterKey = readOrGenerateNewMasterKey(masterKeyUri, keyStore);
+        masterKey = readOrGenerateNewMasterKey();
       }
+      this.keysetManager = readOrGenerateNewKeyset();
+
       return new AndroidKeysetManager(this);
+    }
+
+    private Aead readOrGenerateNewMasterKey() throws GeneralSecurityException {
+      if (!isAtLeastM()) {
+        Log.w(TAG, "Android Keystore requires at least Android M");
+        return null;
+      }
+
+      AndroidKeystoreKmsClient client;
+      if (keyStore != null) {
+        client = new AndroidKeystoreKmsClient.Builder().setKeyStore(keyStore).build();
+      } else {
+        client = new AndroidKeystoreKmsClient();
+      }
+
+      boolean existed = client.hasKey(masterKeyUri);
+      if (!existed) {
+        try {
+          AndroidKeystoreKmsClient.generateNewAeadKey(masterKeyUri);
+        } catch (GeneralSecurityException ex) {
+          Log.w(TAG, "cannot use Android Keystore, it'll be disabled", ex);
+          return null;
+        }
+      }
+
+      try {
+        return client.getAead(masterKeyUri);
+      } catch (GeneralSecurityException | ProviderException ex) {
+        // Throw the exception if the key exists but is unusable. We can't recover by generating a
+        // new
+        // key because there might be existing encrypted data under the unusable key.
+        // Users can provide a master key that is stored in StrongBox, which may throw a
+        // ProviderException if there's any problem with it.
+        if (existed) {
+          throw new KeyStoreException(
+              String.format("the master key %s exists but is unusable", masterKeyUri), ex);
+        }
+        // Otherwise swallow the exception if the key doesn't exist yet. We can recover by disabling
+        // Keystore.
+        Log.w(TAG, "cannot use Android Keystore, it'll be disabled", ex);
+      }
+
+      return null;
+    }
+
+    private KeysetManager readOrGenerateNewKeyset() throws GeneralSecurityException, IOException {
+      try {
+        return read();
+      } catch (FileNotFoundException ex) {
+        // Not found, handle below.
+        Log.w(TAG, "keyset not found, will generate a new one", ex);
+      }
+
+      // Not found.
+      if (keyTemplate != null) {
+        KeysetManager manager = KeysetManager.withEmptyKeyset().add(keyTemplate);
+        int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
+        manager = manager.setPrimary(keyId);
+        if (masterKey != null) {
+          manager.getKeysetHandle().write(writer, masterKey);
+        } else {
+          CleartextKeysetHandle.write(manager.getKeysetHandle(), writer);
+        }
+        return manager;
+      }
+      throw new GeneralSecurityException("cannot read or generate keyset");
+    }
+
+    private KeysetManager read() throws GeneralSecurityException, IOException {
+      if (masterKey != null) {
+        try {
+          return KeysetManager.withKeysetHandle(KeysetHandle.read(reader, masterKey));
+        } catch (InvalidProtocolBufferException | GeneralSecurityException ex) {
+          // Swallow the exception and attempt to read the keyset in cleartext.
+          // This edge case may happen when either
+          //   - the keyset was generated on a pre M phone which is then upgraded to M or newer, or
+          //   - the keyset was generated with Keystore being disabled, then Keystore is enabled.
+          // By ignoring the security failure here, an adversary with write access to private
+          // preferences can replace an encrypted keyset (that it cannot read or write) with a
+          // cleartext value that it controls. This does not introduce new security risks because to
+          // overwrite the encrypted keyset in private preferences of an app, said adversaries must
+          // have the same privilege as the app, thus they can call Android Keystore to read or
+          // write
+          // the encrypted keyset in the first place.
+          Log.w(TAG, "cannot decrypt keyset: ", ex);
+        }
+      }
+
+      return KeysetManager.withKeysetHandle(CleartextKeysetHandle.read(reader));
     }
   }
 
@@ -351,47 +447,6 @@ public final class AndroidKeysetManager {
     return shouldUseKeystore();
   }
 
-  private KeysetManager readOrGenerateNewKeyset() throws GeneralSecurityException, IOException {
-    try {
-      return read();
-    } catch (FileNotFoundException ex) {
-      // Not found, handle below.
-      Log.w(TAG, "keyset not found, will generate a new one", ex);
-    }
-
-    // Not found.
-    if (keyTemplate != null) {
-      KeysetManager manager = KeysetManager.withEmptyKeyset().add(keyTemplate);
-      int keyId = manager.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId();
-      manager = manager.setPrimary(keyId);
-      write(manager);
-      return manager;
-    }
-    throw new GeneralSecurityException("cannot read or generate keyset");
-  }
-
-  private KeysetManager read() throws GeneralSecurityException, IOException {
-    if (shouldUseKeystore()) {
-      try {
-        return KeysetManager.withKeysetHandle(KeysetHandle.read(reader, masterKey));
-      } catch (InvalidProtocolBufferException | GeneralSecurityException ex) {
-        // Swallow the exception and attempt to read the keyset in cleartext.
-        // This edge case may happen when either
-        //   - the keyset was generated on a pre M phone which is then upgraded to M or newer, or
-        //   - the keyset was generated with Keystore being disabled, then Keystore is enabled.
-        // By ignoring the security failure here, an adversary with write access to private
-        // preferences can replace an encrypted keyset (that it cannot read or write) with a
-        // cleartext value that it controls. This does not introduce new security risks because to
-        // overwrite the encrypted keyset in private preferences of an app, said adversaries must
-        // have the same privilege as the app, thus they can call Android Keystore to read or write
-        // the encrypted keyset in the first place.
-        Log.w(TAG, "cannot decrypt keyset: ", ex);
-      }
-    }
-
-    return KeysetManager.withKeysetHandle(CleartextKeysetHandle.read(reader));
-  }
-
   private void write(KeysetManager manager) throws GeneralSecurityException {
     try {
       if (shouldUseKeystore()) {
@@ -425,48 +480,5 @@ public final class AndroidKeysetManager {
 
   private static boolean isAtLeastM() {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
-  }
-
-  private static Aead readOrGenerateNewMasterKey(String keyId, KeyStore keyStore)
-      throws GeneralSecurityException {
-    if (!isAtLeastM()) {
-      Log.w(TAG, "Android Keystore requires at least Android M");
-      return null;
-    }
-
-    AndroidKeystoreKmsClient client;
-    if (keyStore != null) {
-      client = new AndroidKeystoreKmsClient.Builder().setKeyStore(keyStore).build();
-    } else {
-      client = new AndroidKeystoreKmsClient();
-    }
-
-    boolean existed = client.hasKey(keyId);
-    if (!existed) {
-      try {
-        AndroidKeystoreKmsClient.generateNewAeadKey(keyId);
-      } catch (GeneralSecurityException ex) {
-        Log.w(TAG, "cannot use Android Keystore, it'll be disabled", ex);
-        return null;
-      }
-    }
-
-    try {
-      return client.getAead(keyId);
-    } catch (GeneralSecurityException | ProviderException ex) {
-      // Throw the exception if the key exists but is unusable. We can't recover by generating a new
-      // key because there might be existing encrypted data under the unusable key.
-      // Users can provide a master key that is stored in StrongBox, which may throw a
-      // ProviderException if there's any problem with it.
-      if (existed) {
-        throw new KeyStoreException(
-            String.format("the master key %s exists but is unusable", keyId), ex);
-      }
-      // Otherwise swallow the exception if the key doesn't exist yet. We can recover by disabling
-      // Keystore.
-      Log.w(TAG, "cannot use Android Keystore, it'll be disabled", ex);
-    }
-
-    return null;
   }
 }
