@@ -171,7 +171,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  <p>The master key URI must start with <code>android-keystore://</code>. The remaining of the URI is
  used as a key ID when calling Android Keystore. If the master key doesn't exist, a fresh one is
  generated. If the master key already exists but is unusable, a <a href="https://docs.oracle.com/javase/7/docs/api/java/security/KeyStoreException.html?is-external=true" title="class or interface in java.security"><code>KeyStoreException</code></a> is
- thrown.</div>
+ thrown.
+
+ <p>This class is thread-safe.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.0.0</dd>
