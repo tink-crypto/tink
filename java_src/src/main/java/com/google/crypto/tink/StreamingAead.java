@@ -150,9 +150,9 @@ public interface StreamingAead {
    *       <li>{@code long size()} Returns the size of the plaintext. TODO: Decide whether the
    *           result should be authenticated)
    *       <li>{@code SeekableByteChannel truncate(long size)} throws {@link
-   *           NonWritableChannelException} because the channel is read-only.
-   *       <li>{@code int write(ByteBuffer src)} throws {@link NonWritableChannelException} because
-   *           the channel is read-only.
+   *           java.nio.channels.NonWritableChannelException } because the channel is read-only.
+   *       <li>{@code int write(ByteBuffer src)} throws {@link
+   *           java.nio.channels.NonWritableChannelException } because the channel is read-only.
    *       <li>{@code close()} closes the channel
    *       <li>{@code isOpen()}
    *     </ul>

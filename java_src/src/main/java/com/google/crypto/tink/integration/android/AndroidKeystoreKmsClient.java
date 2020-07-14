@@ -57,7 +57,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    * Constructs an {@link AndroidKeystoreKmsClient} that is bound to a single key identified by
    * {@code uri}.
    *
-   * @deprecated use {@link AndroidKeystoreKmsClient#Builder}.
+   * @deprecated use {@link AndroidKeystoreKmsClient.Builder}.
    */
   @Deprecated
   public AndroidKeystoreKmsClient(String uri) {
