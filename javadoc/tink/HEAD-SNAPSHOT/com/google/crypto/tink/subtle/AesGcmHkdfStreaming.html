@@ -486,9 +486,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
            the interface with read(ByteBuffer dst, long position) to avoid race conditions?
        <li><code>long size()</code> Returns the size of the plaintext. TODO: Decide whether the
            result should be authenticated)
-       <li><code>SeekableByteChannel truncate(long size)</code> throws <code>NonWritableChannelException</code> because the channel is read-only.
-       <li><code>int write(ByteBuffer src)</code> throws <code>NonWritableChannelException</code> because
-           the channel is read-only.
+       <li><code>SeekableByteChannel truncate(long size)</code> throws <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/NonWritableChannelException.html?is-external=true" title="class or interface in java.nio.channels"><code>NonWritableChannelException</code></a> because the channel is read-only.
+       <li><code>int write(ByteBuffer src)</code> throws <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/NonWritableChannelException.html?is-external=true" title="class or interface in java.nio.channels"><code>NonWritableChannelException</code></a> because the channel is read-only.
        <li><code>close()</code> closes the channel
        <li><code>isOpen()</code>
      </ul></dd>
