@@ -19,12 +19,11 @@ tickets or emailing the maintainers at `tink-users@googlegroups.com`.
 
 ## Java
 
-*   Tink supports Java 7 or newer. Please file a ticket if you want to support
-    Java 6.
+*   Tink supports Java 8 or newer. Java 7 support was removed since 1.4.0.
 
-*   Tink is built on top of Java security providers, but, via [Project
-    Wycheproof](https://github.com/google/wycheproof), we found many security
-    issues in popular providers. Tink provides countermeasures for most
+*   Tink is built on top of Java security providers, but, via
+    [Project Wycheproof](https://github.com/google/wycheproof), we found many
+    security issues in popular providers. Tink provides countermeasures for most
     problems, and we've also helped upstream fix many issues. Still, there are
     some issues in old providers that we cannot fix. We recommend use Tink with
     the latest version of Conscrypt, Oracle JDK, OpenJDK or Bouncy Castle. If

@@ -1,4 +1,3 @@
-load("@tink_java//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 load("@tink_java//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
 
 package(default_visibility = ["//:__subpackages__"])
@@ -15,7 +14,6 @@ java_library(
             "src/main/java/com/google/crypto/tink/tinkey/Tinkey.java",
         ],
     ),
-    javacopts = JAVACOPTS_OSS,
     runtime_deps = [
         # Tinkey automatically loads these KMS clients at runtime.
         "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
@@ -55,7 +53,6 @@ java_binary(
     srcs = [
         "src/main/java/com/google/crypto/tink/tinkey/Tinkey.java",
     ],
-    javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.tinkey.Tinkey",
     visibility = ["//testing:__subpackages__"],
     deps = [

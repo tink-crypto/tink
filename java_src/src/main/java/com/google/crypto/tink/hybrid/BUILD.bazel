@@ -1,4 +1,3 @@
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
 licenses(["notice"])
@@ -371,7 +370,6 @@ java_library(
     srcs = [
         ":srcs",
     ],
-    javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = full_protos + [
         "//src/main/java/com/google/crypto/tink",
@@ -388,7 +386,6 @@ java_library(
     srcs = [
         ":srcs",
     ],
-    javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = lite_protos + [
         "//src/main/java/com/google/crypto/tink:android",

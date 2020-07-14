@@ -61,7 +61,7 @@
   </scm>
 
   <properties>
-    <java.version>1.7</java.version>
+    <java.version>1.8</java.version>
 
     <aws-java-sdk-core.version>1.11.563</aws-java-sdk-core.version>
     <aws-java-sdk-kms.version>1.11.563</aws-java-sdk-kms.version>

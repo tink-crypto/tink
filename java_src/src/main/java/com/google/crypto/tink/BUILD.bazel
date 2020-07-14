@@ -1,4 +1,3 @@
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 load("@tink_base//:tink_version.bzl", "TINK_VERSION_LABEL")
 load("@tink_base//tools:common.bzl", "template_rule")
@@ -587,7 +586,6 @@ PRIMITIVES_SRCS = [
 java_library(
     name = "primitives",
     srcs = PRIMITIVES_SRCS,
-    javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
 )
 
@@ -648,7 +646,6 @@ java_library(
             "TextFormatKeysetWriters.java",
         ],
     ) + [":version_java"],
-    javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = lite_protos + [
         ":primitives",
@@ -676,7 +673,6 @@ java_library(
     srcs = [
         ":cleartext_keyset_handle_srcs",
     ],
-    javacopts = JAVACOPTS_OSS,
     deps = lite_protos + [
         ":android",
         "@com_google_protobuf//:protobuf_javalite",

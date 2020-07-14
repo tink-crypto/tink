@@ -1,5 +1,3 @@
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
-
 licenses(["notice"])
 
 package(
@@ -10,7 +8,6 @@ package(
 java_library(
     name = "test_util",
     srcs = ["TestUtil.java"],
-    javacopts = JAVACOPTS_OSS,
     visibility = ["//visibility:public"],
     deps = [
         "//proto:aes_ctr_hmac_aead_java_proto",
@@ -50,7 +47,6 @@ java_library(
 java_library(
     name = "test_util-android",
     srcs = ["TestUtil.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         "//proto:aes_ctr_hmac_aead_java_proto_lite",
         "//proto:aes_ctr_hmac_streaming_java_proto_lite",
@@ -89,7 +85,6 @@ java_library(
 java_library(
     name = "streaming_test_util",
     srcs = ["StreamingTestUtil.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         ":test_util",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
@@ -101,7 +96,6 @@ java_library(
 java_library(
     name = "streaming_test_util-android",
     srcs = ["StreamingTestUtil.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         ":test_util-android",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
@@ -113,7 +107,6 @@ java_library(
 java_library(
     name = "key_type_manager_test_util",
     srcs = ["KeyTypeManagerTestUtil.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
@@ -125,7 +118,6 @@ java_library(
 java_library(
     name = "key_type_manager_test_util-android",
     srcs = ["KeyTypeManagerTestUtil.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
@@ -137,7 +129,6 @@ java_library(
 java_library(
     name = "wycheproof_test_util",
     srcs = ["WycheproofTestUtil.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         ":test_util",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
@@ -149,7 +140,6 @@ java_library(
 java_library(
     name = "wycheproof_test_util-android",
     srcs = ["WycheproofTestUtil.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         ":test_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",

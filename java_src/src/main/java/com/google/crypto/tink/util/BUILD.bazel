@@ -1,5 +1,4 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 licenses(["notice"])
 
@@ -41,7 +40,6 @@ java_library(
     srcs = [
         ":srcs",
     ],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_http_client_google_http_client",

@@ -1,12 +1,9 @@
-load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
-
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "prf",
-    javacopts = JAVACOPTS_OSS,
     exports = [
         ":hkdf_streaming_prf",
         ":streaming_prf",
@@ -16,7 +13,6 @@ java_library(
 java_library(
     name = "streaming_prf",
     srcs = ["StreamingPrf.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -35,7 +31,6 @@ java_library(
 java_library(
     name = "hkdf_streaming_prf",
     srcs = ["HkdfStreamingPrf.java"],
-    javacopts = JAVACOPTS_OSS,
     deps = [
         ":streaming_prf",
         "//src/main/java/com/google/crypto/tink/subtle",
