@@ -21,6 +21,7 @@
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/mac.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/nonce_based_streaming_aead.h"
 #include "tink/subtle/stream_segment_decrypter.h"
@@ -84,6 +85,9 @@ class AesCtrHmacStreaming : public NonceBasedStreamingAead {
 
   static util::StatusOr<std::unique_ptr<AesCtrHmacStreaming>> New(
       Params params);
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
 
  protected:
   util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> NewSegmentEncrypter(

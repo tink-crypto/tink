@@ -20,6 +20,7 @@
 #include <memory>
 #include <utility>
 
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/nonce_based_streaming_aead.h"
 #include "tink/util/secret_data.h"
@@ -41,6 +42,9 @@ class AesGcmHkdfStreaming : public NonceBasedStreamingAead {
 
   static util::StatusOr<std::unique_ptr<AesGcmHkdfStreaming>> New(
       Params params);
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
 
  protected:
   util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> NewSegmentEncrypter(

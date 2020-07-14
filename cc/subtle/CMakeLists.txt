@@ -367,6 +367,7 @@ tink_cc_library(
     tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::input_stream
     tink::core::output_stream
     tink::util::errors
@@ -393,6 +394,7 @@ tink_cc_library(
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::mac
     tink::util::errors
     tink::util::secret_data

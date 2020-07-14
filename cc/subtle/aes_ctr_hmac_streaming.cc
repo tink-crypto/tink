@@ -113,7 +113,10 @@ static util::Status Validate(const AesCtrHmacStreaming::Params& params) {
 // static
 util::StatusOr<std::unique_ptr<AesCtrHmacStreaming>> AesCtrHmacStreaming::New(
     Params params) {
-  auto status = Validate(params);
+  auto status = CheckFipsCompatibility<AesCtrHmacStreaming>();
+  if (!status.ok()) return status;
+
+  status = Validate(params);
   if (!status.ok()) return status;
   return {absl::WrapUnique(new AesCtrHmacStreaming(std::move(params)))};
 }

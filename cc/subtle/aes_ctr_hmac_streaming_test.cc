@@ -53,6 +53,9 @@ AesCtrHmacStreaming::Params ValidParams() {
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, Basic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   for (int ikm_size : {16, 32}) {
     for (HashType hkdf_algo : {SHA1, SHA256, SHA512}) {
       for (int key_size : {16, 32}) {
@@ -121,6 +124,9 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, Basic) {
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptLongPlaintext) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   std::string associated_data = "associated data";
 
@@ -137,6 +143,9 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptLongPlaintext) {
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptNullCtBuffer) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   std::string associated_data = "associated data";
 
@@ -152,6 +161,9 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptNullCtBuffer) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, Basic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   for (int ikm_size : {16, 32}) {
     for (HashType hkdf_algo : {SHA1, SHA256, SHA512}) {
       for (int key_size : {16, 32}) {
@@ -232,6 +244,9 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, Basic) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, AlreadyInit) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   std::string associated_data = "associated data";
 
@@ -250,6 +265,9 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, AlreadyInit) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, InitWrongHeaderSize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   std::string associated_data = "associated data";
 
@@ -268,6 +286,9 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, InitWrongHeaderSize) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, InitCorruptedHeader) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   std::string associated_data = "associated data";
 
@@ -286,6 +307,9 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, InitCorruptedHeader) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNotInit) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   std::string associated_data = "associated data";
 
@@ -306,6 +330,9 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNotInit) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptLongCiphertext) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   std::string associated_data = "associated data";
 
@@ -327,6 +354,9 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptLongCiphertext) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNullPtBuffer) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   std::string associated_data = "associated data";
 
@@ -347,6 +377,9 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNullPtBuffer) {
 }
 
 TEST(AesCtrHmacStreamingTest, Basic) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   for (int ikm_size : {16, 32}) {
     for (HashType hkdf_algo : {SHA1, SHA256, SHA512}) {
       for (int key_size : {16, 32}) {
@@ -396,11 +429,17 @@ TEST(AesCtrHmacStreamingTest, Basic) {
 }
 
 TEST(ValidateTest, ValidParams) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(), IsOk());
 }
 
 TEST(ValidateTest, WrongIkm) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.ikm = Random::GetRandomKeyBytes(16);
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
@@ -409,6 +448,9 @@ TEST(ValidateTest, WrongIkm) {
 }
 
 TEST(ValidateTest, WrongHkdfAlgo) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.hkdf_algo = SHA384;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
@@ -417,6 +459,9 @@ TEST(ValidateTest, WrongHkdfAlgo) {
 }
 
 TEST(ValidateTest, WrongKeySize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.ikm = Random::GetRandomKeyBytes(64);
   params.key_size = 64;
@@ -426,6 +471,9 @@ TEST(ValidateTest, WrongKeySize) {
 }
 
 TEST(ValidateTest, WrongCtSegmentSize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.ciphertext_segment_size = 10;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
@@ -439,6 +487,9 @@ TEST(ValidateTest, WrongCtSegmentSize) {
 }
 
 TEST(ValidateTest, WrongCtOffset) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.ciphertext_offset = -10;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
@@ -447,6 +498,9 @@ TEST(ValidateTest, WrongCtOffset) {
 }
 
 TEST(ValidateTest, WrongTagSize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.tag_size = 5;
   ASSERT_THAT(
@@ -473,11 +527,25 @@ TEST(ValidateTest, WrongTagSize) {
 }
 
 TEST(ValidateTest, WrongTagAlgo) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.tag_algo = SHA384;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
               StatusIs(util::error::INVALID_ARGUMENT,
                        HasSubstr("unsupported tag_algo")));
+}
+
+// FIPS only mode tests
+TEST(AesCtrHmacStreamingTest, TestFipsOnly) {
+  if (!kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
+  AesCtrHmacStreaming::Params params = ValidParams();
+
+  EXPECT_THAT(AesCtrHmacStreaming::New(std::move(params)).status(),
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

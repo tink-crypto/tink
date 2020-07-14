@@ -60,7 +60,10 @@ util::Status Validate(const AesGcmHkdfStreaming::Params& params) {
 
 util::StatusOr<std::unique_ptr<AesGcmHkdfStreaming>> AesGcmHkdfStreaming::New(
     Params params) {
-  auto status = Validate(params);
+  auto status = CheckFipsCompatibility<AesGcmHkdfStreaming>();
+  if (!status.ok()) return status;
+
+  status = Validate(params);
   if (!status.ok()) return status;
   return {absl::WrapUnique(new AesGcmHkdfStreaming(std::move(params)))};
 }
