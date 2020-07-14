@@ -120,13 +120,13 @@ deploy_library() {
   local javadoc="$5"
   local pom_file="$6"
 
-  local library_file="$(echo_output_file "${workspace_dir}" "${library}")"
-  local src_jar_file="$(echo_output_file "${workspace_dir}" "${src_jar}")"
-  local javadoc_file="$(echo_output_file "${workspace_dir}" "${javadoc}")"
-
   (
     print_and_do cd "${workspace_dir}"
     print_and_do bazel build "${library}" "${src_jar}" "${javadoc}"
+
+    local library_file="$(echo_output_file "." "${library}")"
+    local src_jar_file="$(echo_output_file "." "${src_jar}")"
+    local javadoc_file="$(echo_output_file "." "${javadoc}")"
 
     # Update the version
     do_if_not_dry_run sed -i \
