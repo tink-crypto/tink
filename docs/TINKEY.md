@@ -5,7 +5,14 @@ decrypt keysets with master keys residing in a remote key management service
 (KMS). Out of the box it supports AWS KMS and Google Cloud KMS. Adding support
 for other KMS is easy, and doesn't require modifying Tinkey.
 
-## Build
+## Install with Homebrew
+
+```sh
+brew tap google/tink https://github.com/google/tink
+brew install tinkey
+```
+
+## Build from source
 
 -   Install [Bazel](https://docs.bazel.build/versions/master/install.html)
 
