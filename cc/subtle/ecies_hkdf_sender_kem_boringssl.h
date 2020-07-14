@@ -20,6 +20,7 @@
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -86,6 +87,9 @@ class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
       HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
       uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
 
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
+
  private:
   EciesHkdfNistPCurveSendKemBoringSsl(EllipticCurveType curve,
                                       const std::string& pubx,
@@ -115,6 +119,9 @@ class EciesHkdfX25519SendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
   crypto::tink::util::StatusOr<std::unique_ptr<const KemKey>> GenerateKey(
       HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
       uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
 
  private:
   explicit EciesHkdfX25519SendKemBoringSsl(

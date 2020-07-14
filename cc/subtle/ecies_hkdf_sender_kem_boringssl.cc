@@ -55,6 +55,9 @@ util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
 EciesHkdfNistPCurveSendKemBoringSsl::New(subtle::EllipticCurveType curve,
                                          const std::string& pubx,
                                          const std::string& puby) {
+  auto status = CheckFipsCompatibility<EciesHkdfNistPCurveSendKemBoringSsl>();
+  if (!status.ok()) return status;
+
   auto status_or_ec_point =
       SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
   if (!status_or_ec_point.ok()) return status_or_ec_point.status();
@@ -122,6 +125,9 @@ util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
 EciesHkdfX25519SendKemBoringSsl::New(subtle::EllipticCurveType curve,
                                      const std::string& pubx,
                                      const std::string& puby) {
+  auto status = CheckFipsCompatibility<EciesHkdfX25519SendKemBoringSsl>();
+  if (!status.ok()) return status;
+
   if (curve != CURVE25519) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "curve is not CURVE25519");

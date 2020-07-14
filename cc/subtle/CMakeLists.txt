@@ -58,6 +58,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::util::errors
     tink::util::secret_data
     tink::util::status
@@ -76,6 +77,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -781,6 +783,7 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
 )
 
@@ -795,6 +798,7 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
 )
 
