@@ -19,11 +19,21 @@ from absl.testing import parameterized
 import tink
 from tink import streaming_aead
 
+from util import keyset_builder
 from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = (testing_servers
                        .SUPPORTED_LANGUAGES_BY_PRIMITIVE['streaming_aead'])
+
+# About 49KB.
+LONG_PLAINTEXT = b' '.join(b'%d' % i for i in range(10000))
+
+
+def key_rotation_test_cases():
+  for enc_lang in SUPPORTED_LANGUAGES:
+    for dec_lang in SUPPORTED_LANGUAGES:
+      yield (enc_lang, dec_lang)
 
 
 def setUpModule():
@@ -54,10 +64,11 @@ class StreamingAeadPythonTest(parameterized.TestCase):
         if lang not in supported_langs
     ]
     for p in supported_streaming_aeads:
-      plaintext = (
+      desc = (
           b'This is some plaintext message to be encrypted using key_template '
           b'%s using %s for encryption.'
           % (key_template_name.encode('utf8'), p.lang.encode('utf8')))
+      plaintext = desc + LONG_PLAINTEXT
       associated_data = (
           b'Some associated data for %s using %s for encryption.' %
           (key_template_name.encode('utf8'), p.lang.encode('utf8')))
@@ -80,6 +91,88 @@ class StreamingAeadPythonTest(parameterized.TestCase):
         plaintext_stream = io.BytesIO(b'plaintext')
         ciphertext_result_stream = p.new_encrypting_stream(
             plaintext_stream, b'associated_data')
+
+  @parameterized.parameters(key_rotation_test_cases())
+  def test_key_rotation(self, enc_lang, dec_lang):
+    # Do a key rotation from an old key to a new key.
+    # Encryption and decryption are done in languages enc_lang and dec_lang.
+    builder = keyset_builder.new_keyset_builder()
+    older_key_id = builder.add_new_key(
+        streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB)
+    builder.set_primary_key(older_key_id)
+    enc1 = testing_servers.streaming_aead(enc_lang, builder.keyset())
+    dec1 = testing_servers.streaming_aead(dec_lang, builder.keyset())
+    newer_key_id = builder.add_new_key(
+        streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB)
+    enc2 = testing_servers.streaming_aead(enc_lang, builder.keyset())
+    dec2 = testing_servers.streaming_aead(dec_lang, builder.keyset())
+
+    builder.set_primary_key(newer_key_id)
+    enc3 = testing_servers.streaming_aead(enc_lang, builder.keyset())
+    dec3 = testing_servers.streaming_aead(dec_lang, builder.keyset())
+
+    builder.disable_key(older_key_id)
+    enc4 = testing_servers.streaming_aead(enc_lang, builder.keyset())
+    dec4 = testing_servers.streaming_aead(dec_lang, builder.keyset())
+
+    self.assertNotEqual(older_key_id, newer_key_id)
+    # 1 encrypts with the older key. So 1, 2 and 3 can decrypt it, but not 4.
+    plaintext = LONG_PLAINTEXT
+    ad = b'associated_data'
+    ciphertext1 = enc1.new_encrypting_stream(io.BytesIO(plaintext), ad).read()
+    self.assertEqual(
+        dec1.new_decrypting_stream(io.BytesIO(ciphertext1), ad).read(),
+        plaintext)
+    self.assertEqual(
+        dec2.new_decrypting_stream(io.BytesIO(ciphertext1), ad).read(),
+        plaintext)
+    self.assertEqual(
+        dec3.new_decrypting_stream(io.BytesIO(ciphertext1), ad).read(),
+        plaintext)
+    with self.assertRaises(tink.TinkError):
+      _ = dec4.new_decrypting_stream(io.BytesIO(ciphertext1), ad).read()
+
+    # 2 encrypts with the older key. So 1, 2 and 3 can decrypt it, but not 4.
+    ciphertext2 = enc2.new_encrypting_stream(io.BytesIO(plaintext), ad).read()
+    self.assertEqual(
+        dec1.new_decrypting_stream(io.BytesIO(ciphertext2), ad).read(),
+        plaintext)
+    self.assertEqual(
+        dec2.new_decrypting_stream(io.BytesIO(ciphertext2), ad).read(),
+        plaintext)
+    self.assertEqual(
+        dec3.new_decrypting_stream(io.BytesIO(ciphertext2), ad).read(),
+        plaintext)
+    with self.assertRaises(tink.TinkError):
+      _ = dec4.new_decrypting_stream(io.BytesIO(ciphertext2), ad).read()
+
+    # 3 encrypts with the newer key. So 2, 3 and 4 can decrypt it, but not 1.
+    ciphertext3 = enc3.new_encrypting_stream(io.BytesIO(plaintext), ad).read()
+    with self.assertRaises(tink.TinkError):
+      _ = dec1.new_decrypting_stream(io.BytesIO(ciphertext3), ad).read()
+    self.assertEqual(
+        dec2.new_decrypting_stream(io.BytesIO(ciphertext3), ad).read(),
+        plaintext)
+    self.assertEqual(
+        dec3.new_decrypting_stream(io.BytesIO(ciphertext3), ad).read(),
+        plaintext)
+    self.assertEqual(
+        dec4.new_decrypting_stream(io.BytesIO(ciphertext3), ad).read(),
+        plaintext)
+
+    # 4 encrypts with the newer key. So 2, 3 and 4 can decrypt it, but not 1.
+    ciphertext4 = enc4.new_encrypting_stream(io.BytesIO(plaintext), ad).read()
+    with self.assertRaises(tink.TinkError):
+      _ = dec1.new_decrypting_stream(io.BytesIO(ciphertext4), ad).read()
+    self.assertEqual(
+        dec2.new_decrypting_stream(io.BytesIO(ciphertext4), ad).read(),
+        plaintext)
+    self.assertEqual(
+        dec3.new_decrypting_stream(io.BytesIO(ciphertext4), ad).read(),
+        plaintext)
+    self.assertEqual(
+        dec4.new_decrypting_stream(io.BytesIO(ciphertext4), ad).read(),
+        plaintext)
 
 if __name__ == '__main__':
   absltest.main()

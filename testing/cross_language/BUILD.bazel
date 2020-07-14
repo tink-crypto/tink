@@ -85,6 +85,7 @@ py_test(
     name = "streaming_aead_test",
     srcs = ["streaming_aead_test.py"],
     deps = [
+        "//util:keyset_builder",
         "//util:supported_key_types",
         "//util:testing_servers",
         requirement("absl-py"),
