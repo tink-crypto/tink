@@ -96,7 +96,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
 <li>
 <ul class="inheritance">
 <li>com.google.crypto.tink.subtle.AesGcmHkdfStreaming</li>
@@ -113,7 +113,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public final class <span class="typeNameLabel">AesGcmHkdfStreaming</span>
-extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
+extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Streaming encryption using <code>AES-GCM</code> with <code>HKDF</code> as key derivation function.
 
  <p>Each ciphertext uses a new AES-GCM key that is derived from the key derivation key, a randomly
@@ -153,7 +153,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#AesGcmHkdfStreaming-byte:A-java.lang.String-int-int-int-">AesGcmHkdfStreaming</a></span>(byte[]&nbsp;ikm,
-                   <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;hkdfAlg,
+                   <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;hkdfAlg,
                    int&nbsp;keySizeInBytes,
                    int&nbsp;ciphertextSegmentSize,
                    int&nbsp;firstSegmentOffset)</code>
@@ -206,13 +206,13 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#getPlaintextSegmentSize--">getPlaintextSegmentSize</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i7" class="rowColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">ReadableByteChannel</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newDecryptingChannel-java.nio.channels.ReadableByteChannel-byte:A-">newDecryptingChannel</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">ReadableByteChannel</a>&nbsp;ciphertextChannel,
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">ReadableByteChannel</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newDecryptingChannel-java.nio.channels.ReadableByteChannel-byte:A-">newDecryptingChannel</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">ReadableByteChannel</a>&nbsp;ciphertextChannel,
                     byte[]&nbsp;associatedData)</code>&nbsp;</td>
 </tr>
 <tr id="i8" class="altColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newDecryptingStream-java.io.InputStream-byte:A-">newDecryptingStream</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;ciphertextStream,
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newDecryptingStream-java.io.InputStream-byte:A-">newDecryptingStream</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;ciphertextStream,
                    byte[]&nbsp;associatedData)</code>
 <div class="block">Returns a wrapper around <code>ciphertextSource</code>, such that any read-operation
  via the wrapper results in AEAD-decryption of the underlying ciphertext,
@@ -220,15 +220,15 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i9" class="rowColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/WritableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">WritableByteChannel</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newEncryptingChannel-java.nio.channels.WritableByteChannel-byte:A-">newEncryptingChannel</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/WritableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">WritableByteChannel</a>&nbsp;ciphertextChannel,
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/WritableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">WritableByteChannel</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newEncryptingChannel-java.nio.channels.WritableByteChannel-byte:A-">newEncryptingChannel</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/WritableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">WritableByteChannel</a>&nbsp;ciphertextChannel,
                     byte[]&nbsp;associatedData)</code>
 <div class="block">Returns a WritableByteChannel for plaintext.</div>
 </td>
 </tr>
 <tr id="i10" class="altColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newEncryptingStream-java.io.OutputStream-byte:A-">newEncryptingStream</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a>&nbsp;ciphertext,
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newEncryptingStream-java.io.OutputStream-byte:A-">newEncryptingStream</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a>&nbsp;ciphertext,
                    byte[]&nbsp;associatedData)</code>
 <div class="block">Returns a wrapper around <code>ciphertextDestination</code>, such that any write-operation via
  the wrapper results in AEAD-encryption of the written data, using <code>associatedData</code>
@@ -236,8 +236,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i11" class="rowColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newSeekableDecryptingChannel-java.nio.channels.SeekableByteChannel-byte:A-">newSeekableDecryptingChannel</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;ciphertextSource,
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#newSeekableDecryptingChannel-java.nio.channels.SeekableByteChannel-byte:A-">newSeekableDecryptingChannel</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;ciphertextSource,
                             byte[]&nbsp;associatedData)</code>
 <div class="block">Returns a SeekableByteChannel that allows to access the plaintext.</div>
 </td>
@@ -255,8 +255,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
 </ul>
 </li>
 </ul>
@@ -279,11 +279,11 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AesGcmHkdfStreaming</h4>
 <pre>public&nbsp;AesGcmHkdfStreaming(byte[]&nbsp;ikm,
-                           <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;hkdfAlg,
+                           <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;hkdfAlg,
                            int&nbsp;keySizeInBytes,
                            int&nbsp;ciphertextSegmentSize,
                            int&nbsp;firstSegmentOffset)
-                    throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/InvalidAlgorithmParameterException.html?is-external=true" title="class or interface in java.security">InvalidAlgorithmParameterException</a></pre>
+                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/InvalidAlgorithmParameterException.html?is-external=true" title="class or interface in java.security">InvalidAlgorithmParameterException</a></pre>
 <div class="block">Initializes a streaming primitive with a key derivation key and encryption parameters.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -294,7 +294,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dd><code>firstSegmentOffset</code> - the offset of the first ciphertext segment. That means the first
      segment has size ciphertextSegmentSize - getHeaderLength() - firstSegmentOffset</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/InvalidAlgorithmParameterException.html?is-external=true" title="class or interface in java.security">InvalidAlgorithmParameterException</a></code> - if ikm is too short, the key size not supported or
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/InvalidAlgorithmParameterException.html?is-external=true" title="class or interface in java.security">InvalidAlgorithmParameterException</a></code> - if ikm is too short, the key size not supported or
      ciphertextSegmentSize is to short.</dd>
 </dl>
 </li>
@@ -314,10 +314,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>newStreamSegmentEncrypter</h4>
 <pre>public&nbsp;com.google.crypto.tink.subtle.AesGcmHkdfStreaming.AesGcmHkdfStreamEncrypter&nbsp;newStreamSegmentEncrypter(byte[]&nbsp;aad)
-                                                                                                      throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                                                                                      throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -328,10 +328,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>newStreamSegmentDecrypter</h4>
 <pre>public&nbsp;com.google.crypto.tink.subtle.AesGcmHkdfStreaming.AesGcmHkdfStreamDecrypter&nbsp;newStreamSegmentDecrypter()
-                                                                                                      throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                                                                                      throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -406,10 +406,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>newEncryptingChannel</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/WritableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">WritableByteChannel</a>&nbsp;newEncryptingChannel(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/WritableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">WritableByteChannel</a>&nbsp;ciphertextChannel,
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/WritableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">WritableByteChannel</a>&nbsp;newEncryptingChannel(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/WritableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">WritableByteChannel</a>&nbsp;ciphertextChannel,
                                                 byte[]&nbsp;associatedData)
-                                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
-                                                <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                                <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newEncryptingChannel-java.nio.channels.WritableByteChannel-byte:A-">StreamingAead</a></code></span></div>
 <div class="block">Returns a WritableByteChannel for plaintext.  Any data written to the returned
  channel will be encrypted and the resulting ciphertext written to the provided
@@ -422,8 +422,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dd><code>associatedData</code> - data associated with the plaintext. This data is authenticated
      but not encrypted. It must be passed into the decryption.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -433,16 +433,16 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>newDecryptingChannel</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">ReadableByteChannel</a>&nbsp;newDecryptingChannel(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">ReadableByteChannel</a>&nbsp;ciphertextChannel,
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">ReadableByteChannel</a>&nbsp;newDecryptingChannel(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">ReadableByteChannel</a>&nbsp;ciphertextChannel,
                                                 byte[]&nbsp;associatedData)
-                                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
-                                                <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                                <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newDecryptingChannel-java.nio.channels.ReadableByteChannel-byte:A-">newDecryptingChannel</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink">StreamingAead</a></code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -452,10 +452,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>newSeekableDecryptingChannel</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;newSeekableDecryptingChannel(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;ciphertextSource,
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;newSeekableDecryptingChannel(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels">SeekableByteChannel</a>&nbsp;ciphertextSource,
                                                         byte[]&nbsp;associatedData)
-                                                 throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
-                                                        <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                                        <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newSeekableDecryptingChannel-java.nio.channels.SeekableByteChannel-byte:A-">StreamingAead</a></code></span></div>
 <div class="block">Returns a SeekableByteChannel that allows to access the plaintext.
 
@@ -468,7 +468,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dd><code>ciphertextSource</code> - the ciphertext</dd>
 <dd><code>associatedData</code> - the data associated with the ciphertext.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd><a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels"><code>SeekableByteChannel</code></a> that allows random read access to the plaintext. The
+<dd><a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels"><code>SeekableByteChannel</code></a> that allows random read access to the plaintext. The
      following methods of SeekableByteChannel are implemented:
      <ul>
        <li><code>long position()</code> Returns the channel's position in the plaintext.
@@ -482,19 +482,19 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
            ciphertext chunk.) A call to this function attempts to fill dst, but it may return
            fewer bytes than requested, e.g. if the underlying ciphertextSource does not provide
            the requested number of bytes or if the plaintext ended.
-           <p>Throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io"><code>IOException</code></a> if a MAC verification failed. TODO: Should we extend
+           <p>Throws <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io"><code>IOException</code></a> if a MAC verification failed. TODO: Should we extend
            the interface with read(ByteBuffer dst, long position) to avoid race conditions?
        <li><code>long size()</code> Returns the size of the plaintext. TODO: Decide whether the
            result should be authenticated)
-       <li><code>SeekableByteChannel truncate(long size)</code> throws <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/NonWritableChannelException.html?is-external=true" title="class or interface in java.nio.channels"><code>NonWritableChannelException</code></a> because the channel is read-only.
-       <li><code>int write(ByteBuffer src)</code> throws <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/NonWritableChannelException.html?is-external=true" title="class or interface in java.nio.channels"><code>NonWritableChannelException</code></a> because the channel is read-only.
+       <li><code>SeekableByteChannel truncate(long size)</code> throws <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/NonWritableChannelException.html?is-external=true" title="class or interface in java.nio.channels"><code>NonWritableChannelException</code></a> because the channel is read-only.
+       <li><code>int write(ByteBuffer src)</code> throws <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/NonWritableChannelException.html?is-external=true" title="class or interface in java.nio.channels"><code>NonWritableChannelException</code></a> because the channel is read-only.
        <li><code>close()</code> closes the channel
        <li><code>isOpen()</code>
      </ul></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the header of the ciphertext is corrupt or if
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the header of the ciphertext is corrupt or if
      associatedData is not correct.</dd>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code> - if an IOException occurred while reading from ciphertextDestination.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code> - if an IOException occurred while reading from ciphertextDestination.</dd>
 </dl>
 </li>
 </ul>
@@ -504,10 +504,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>newEncryptingStream</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a>&nbsp;newEncryptingStream(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a>&nbsp;ciphertext,
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a>&nbsp;newEncryptingStream(<a href="https://docs.oracle.com/javase/8/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io">OutputStream</a>&nbsp;ciphertext,
                                         byte[]&nbsp;associatedData)
-                                 throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
-                                        <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                        <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newEncryptingStream-java.io.OutputStream-byte:A-">StreamingAead</a></code></span></div>
 <div class="block">Returns a wrapper around <code>ciphertextDestination</code>, such that any write-operation via
  the wrapper results in AEAD-encryption of the written data, using <code>associatedData</code>
@@ -517,8 +517,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newEncryptingStream-java.io.OutputStream-byte:A-">newEncryptingStream</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink">StreamingAead</a></code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -528,10 +528,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <ul class="blockListLast">
 <li class="blockList">
 <h4>newDecryptingStream</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;newDecryptingStream(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;ciphertextStream,
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;newDecryptingStream(<a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;ciphertextStream,
                                        byte[]&nbsp;associatedData)
-                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
-                                       <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                       <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newDecryptingStream-java.io.InputStream-byte:A-">StreamingAead</a></code></span></div>
 <div class="block">Returns a wrapper around <code>ciphertextSource</code>, such that any read-operation
  via the wrapper results in AEAD-decryption of the underlying ciphertext,
@@ -547,8 +547,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newDecryptingStream-java.io.InputStream-byte:A-">newDecryptingStream</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink">StreamingAead</a></code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>

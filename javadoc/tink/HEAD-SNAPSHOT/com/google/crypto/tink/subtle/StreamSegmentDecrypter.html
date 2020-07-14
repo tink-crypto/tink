@@ -129,16 +129,16 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#decryptSegment-java.nio.ByteBuffer-int-boolean-java.nio.ByteBuffer-">decryptSegment</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;ciphertext,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#decryptSegment-java.nio.ByteBuffer-int-boolean-java.nio.ByteBuffer-">decryptSegment</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;ciphertext,
               int&nbsp;segmentNr,
               boolean&nbsp;isLastSegment,
-              <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;plaintext)</code>
+              <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;plaintext)</code>
 <div class="block">Decrypts a ciphetext segment.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#init-java.nio.ByteBuffer-byte:A-">init</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;header,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#init-java.nio.ByteBuffer-byte:A-">init</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;header,
     byte[]&nbsp;aad)</code>&nbsp;</td>
 </tr>
 </table>
@@ -162,12 +162,12 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>init</h4>
-<pre>void&nbsp;init(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;header,
+<pre>void&nbsp;init(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;header,
           byte[]&nbsp;aad)
-   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+   throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -177,11 +177,11 @@ var activeTableTab = "activeTableTab";
 <ul class="blockListLast">
 <li class="blockList">
 <h4>decryptSegment</h4>
-<pre>void&nbsp;decryptSegment(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;ciphertext,
+<pre>void&nbsp;decryptSegment(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;ciphertext,
                     int&nbsp;segmentNr,
                     boolean&nbsp;isLastSegment,
-                    <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;plaintext)
-             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                    <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;plaintext)
+             throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Decrypts a ciphetext segment.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -190,7 +190,7 @@ var activeTableTab = "activeTableTab";
      last segment is encrypted (or authenticated) differently to detect truncated ciphertext.</dd>
 <dd><code>plaintext</code> - the decrypted plaintext.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if ciphertext was not a valid ciphertext for the given
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if ciphertext was not a valid ciphertext for the given
      segment.</dd>
 </dl>
 </li>
