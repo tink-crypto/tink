@@ -142,10 +142,10 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#doesSupport-java.lang.String-">doesSupport</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#doesSupport-java.lang.String-">doesSupport</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#getKeyType--">getKeyType</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
@@ -162,7 +162,7 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt;</code></td>
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeyManager.html#getPrimitiveClass--">getPrimitiveClass</a></span>()</code>
 <div class="block">Returns the primitive class object of the P.</div>
 </td>
@@ -212,14 +212,14 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>getPrimitive</h4>
 <pre><a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&nbsp;getPrimitive(com.google.protobuf.ByteString&nbsp;serializedKey)
-        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Constructs an instance of P for the key given in <code>serializedKey</code>, which must be a
  serialized key protocol buffer handled by this manager.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the new constructed P</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the key given in <code>serializedKey</code> is corrupted or not
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the key given in <code>serializedKey</code> is corrupted or not
      supported</dd>
 </dl>
 </li>
@@ -231,13 +231,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>getPrimitive</h4>
 <pre><a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&nbsp;getPrimitive(com.google.protobuf.MessageLite&nbsp;key)
-        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+        throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Constructs an instance of P for the key given in <code>key</code>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the new constructed P</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the key given in <code>key</code> is corrupted or not supported</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the key given in <code>key</code> is corrupted or not supported</dd>
 </dl>
 </li>
 </ul>
@@ -248,14 +248,14 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>newKey</h4>
 <pre>com.google.protobuf.MessageLite&nbsp;newKey(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)
-                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Generates a new key according to specification in <code>serializedKeyFormat</code>, which must be a
  serialized key format protocol buffer handled by this manager.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the new generated key</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the specified format is wrong or not supported</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the specified format is wrong or not supported</dd>
 </dl>
 </li>
 </ul>
@@ -266,13 +266,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>newKey</h4>
 <pre>com.google.protobuf.MessageLite&nbsp;newKey(com.google.protobuf.MessageLite&nbsp;keyFormat)
-                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Generates a new key according to specification in <code>keyFormat</code>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the new generated key</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the specified format is wrong or not supported</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the specified format is wrong or not supported</dd>
 </dl>
 </li>
 </ul>
@@ -282,7 +282,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>doesSupport</h4>
-<pre>boolean&nbsp;doesSupport(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</pre>
+<pre>boolean&nbsp;doesSupport(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>true iff this KeyManager supports key type identified by <code>typeUrl</code>.</dd>
@@ -295,7 +295,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getKeyType</h4>
-<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getKeyType()</pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getKeyType()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the type URL that identifies the key type of keys managed by this KeyManager.</dd>
@@ -321,7 +321,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getPrimitiveClass</h4>
-<pre><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt;&nbsp;getPrimitiveClass()</pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt;&nbsp;getPrimitiveClass()</pre>
 <div class="block">Returns the primitive class object of the P. Should be implemented as <code>return P.class;</code>
  when implementing a key manager for primitive {$code P}.</div>
 <dl>
@@ -337,7 +337,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>newKeyData</h4>
 <pre>com.google.crypto.tink.proto.KeyData&nbsp;newKeyData(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)
-                                         throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+                                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Generates a new <code>KeyData</code> according to specification in <code>serializedkeyFormat</code>.
 
  <p>This should be used solely by <a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><code>KeysetManager</code></a>.</div>
@@ -345,7 +345,7 @@ var activeTableTab = "activeTableTab";
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the new generated key</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the specified format is wrong or not supported</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the specified format is wrong or not supported</dd>
 </dl>
 </li>
 </ul>
