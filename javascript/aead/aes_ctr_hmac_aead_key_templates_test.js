@@ -15,8 +15,8 @@
 goog.module('tink.aead.AesCtrHmacAeadKeyTemplatesTest');
 goog.setTestOnly('tink.aead.AesCtrHmacAeadKeyTemplatesTest');
 
-const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
-const AesCtrHmacAeadKeyTemplates = goog.require('tink.aead.AesCtrHmacAeadKeyTemplates');
+const {AesCtrHmacAeadKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_manager');
+const {AesCtrHmacAeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_templates');
 const {PbAesCtrHmacAeadKeyFormat, PbHashType, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('aes ctr hmac aead key templates test', function() {

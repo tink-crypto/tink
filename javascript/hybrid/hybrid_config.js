@@ -14,7 +14,7 @@
 
 goog.module('tink.hybrid.HybridConfig');
 
-const AeadConfig = goog.require('tink.aead.AeadConfig');
+const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
 const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');

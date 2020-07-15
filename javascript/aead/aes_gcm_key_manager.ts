@@ -12,52 +12,44 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.aead.AesGcmKeyManager');
+import {SecurityException} from '../exception/security_exception';
+import * as KeyManager from '../internal/key_manager';
+import {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData, PbMessage} from '../internal/proto';
+import * as Registry from '../internal/registry';
+import * as aesGcm from '../subtle/aes_gcm';
+import * as Random from '../subtle/random';
+import * as Validators from '../subtle/validators';
 
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const aesGcm = goog.require('google3.third_party.tink.javascript.subtle.aes_gcm');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
-const {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {Aead} from './internal/aead';
+
+const VERSION = 0;
 
 /**
  * @final
- * @implements {KeyManager.KeyFactory}
  */
-class AesGcmKeyFactory {
+class AesGcmKeyFactory implements KeyManager.KeyFactory {
   /** @override */
-  newKey(keyFormat) {
+  newKey(keyFormat: AnyDuringMigration) {
     const keyFormatProto = AesGcmKeyFactory.getKeyFormatProto_(keyFormat);
-
     AesGcmKeyFactory.validateKeyFormat_(keyFormatProto);
-
-    const key = new PbAesGcmKey()
+    const key = (new PbAesGcmKey())
                     .setKeyValue(Random.randBytes(keyFormatProto.getKeySize()))
-                    .setVersion(AesGcmKeyManager.VERSION_);
-
+                    .setVersion(VERSION);
     return key;
   }
 
   /** @override */
-  newKeyData(serializedKeyFormat) {
-    const key = /** @type {!PbAesGcmKey} */ (this.newKey(serializedKeyFormat));
+  newKeyData(serializedKeyFormat: AnyDuringMigration) {
+    const key = (this.newKey(serializedKeyFormat));
     const keyData =
-        new PbKeyData()
+        (new PbKeyData())
             .setTypeUrl(AesGcmKeyManager.KEY_TYPE)
             .setValue(key.serializeBinary())
             .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
-
     return keyData;
   }
 
-  /**
-   * @private
-   * @param {!PbAesGcmKeyFormat} keyFormat
-   */
-  static validateKeyFormat_(keyFormat) {
+  private static validateKeyFormat_(keyFormat: PbAesGcmKeyFormat) {
     Validators.validateAesKeySize(keyFormat.getKeySize());
   }
 
@@ -65,29 +57,21 @@ class AesGcmKeyFactory {
    * The input keyFormat is either deserialized (in case that the input is
    * Uint8Array) or checked to be an AesGcmKeyFormat-proto (otherwise).
    *
-   * @private
-   * @param {!PbMessage|!Uint8Array} keyFormat
-   * @return {!PbAesGcmKeyFormat}
    */
-  static getKeyFormatProto_(keyFormat) {
+  private static getKeyFormatProto_(keyFormat: PbMessage|
+                                    Uint8Array): PbAesGcmKeyFormat {
     if (keyFormat instanceof Uint8Array) {
       return AesGcmKeyFactory.deserializeKeyFormat_(keyFormat);
+    } else if (keyFormat instanceof PbAesGcmKeyFormat) {
+      return keyFormat;
     } else {
-      if (keyFormat instanceof PbAesGcmKeyFormat) {
-        return keyFormat;
-      } else {
-        throw new SecurityException('Expected AesGcmKeyFormat-proto');
-      }
+      throw new SecurityException('Expected AesGcmKeyFormat-proto');
     }
   }
 
-  /**
-   * @private
-   * @param {!Uint8Array} keyFormat
-   * @return {!PbAesGcmKeyFormat}
-   */
-  static deserializeKeyFormat_(keyFormat) {
-    let /** !PbAesGcmKeyFormat */ keyFormatProto;
+  private static deserializeKeyFormat_(keyFormat: Uint8Array):
+      PbAesGcmKeyFormat {
+    let keyFormatProto: PbAesGcmKeyFormat;
     try {
       keyFormatProto = PbAesGcmKeyFormat.deserializeBinary(keyFormat);
     } catch (e) {
@@ -105,32 +89,33 @@ class AesGcmKeyFactory {
 }
 
 /**
- * @implements {KeyManager.KeyManager<Aead>}
  * @final
  */
-class AesGcmKeyManager {
-  /** @package Visible for testing. */
+export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
+  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration = Aead;
+  static KEY_TYPE: string = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
+  private readonly keyFactory_: AesGcmKeyFactory;
+
+  /** Visible for testing. */
   constructor() {
-    /** @const @private {!AesGcmKeyFactory} */
     this.keyFactory_ = new AesGcmKeyFactory();
   }
 
   /** @override */
-  async getPrimitive(primitiveType, key) {
+  async getPrimitive(
+      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
     if (primitiveType != this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-
     const keyProto = AesGcmKeyManager.getKeyProto_(key);
     AesGcmKeyManager.validateKey_(keyProto);
-
     return await aesGcm.fromRawKey(keyProto.getKeyValue_asU8());
   }
 
   /** @override */
-  doesSupport(keyType) {
+  doesSupport(keyType: AnyDuringMigration) {
     return keyType === this.getKeyType();
   }
 
@@ -146,7 +131,7 @@ class AesGcmKeyManager {
 
   /** @override */
   getVersion() {
-    return AesGcmKeyManager.VERSION_;
+    return VERSION;
   }
 
   /** @override */
@@ -154,53 +139,40 @@ class AesGcmKeyManager {
     return this.keyFactory_;
   }
 
-  /**
-   * @private
-   * @param {!PbAesGcmKey} key
-   */
-  static validateKey_(key) {
+  private static validateKey_(key: PbAesGcmKey) {
     Validators.validateAesKeySize(key.getKeyValue().length);
-    Validators.validateVersion(key.getVersion(), AesGcmKeyManager.VERSION_);
+    Validators.validateVersion(key.getVersion(), VERSION);
   }
 
   /**
    * The input key is either deserialized (in case that the input is
    * KeyData-proto) or checked to be an AesGcmKey-proto (otherwise).
    *
-   * @private
-   * @param {!PbMessage|!PbKeyData} keyMaterial
-   * @return {!PbAesGcmKey}
    */
-  static getKeyProto_(keyMaterial) {
+  private static getKeyProto_(keyMaterial: PbMessage|PbKeyData): PbAesGcmKey {
     if (keyMaterial instanceof PbKeyData) {
       return AesGcmKeyManager.getKeyProtoFromKeyData_(keyMaterial);
+    } else if (keyMaterial instanceof PbAesGcmKey) {
+      return keyMaterial;
     } else {
-      if (keyMaterial instanceof PbAesGcmKey) {
-        return keyMaterial;
-      } else {
-        throw new SecurityException(
-            'Key type is not supported. ' +
-            'This key manager supports ' + AesGcmKeyManager.KEY_TYPE + '.');
-      }
+      throw new SecurityException(
+          'Key type is not supported. ' +
+          'This key manager supports ' + AesGcmKeyManager.KEY_TYPE + '.');
     }
   }
 
   /**
    * It validates the key type and returns a deserialized AesGcmKey-proto.
    *
-   * @private
-   * @param {!PbKeyData} keyData
-   * @return {!PbAesGcmKey}
    */
-  static getKeyProtoFromKeyData_(keyData) {
+  private static getKeyProtoFromKeyData_(keyData: PbKeyData): PbAesGcmKey {
     if (keyData.getTypeUrl() != AesGcmKeyManager.KEY_TYPE) {
       throw new SecurityException(
           'Key type ' + keyData.getTypeUrl() +
           ' is not supported. This key manager supports ' +
           AesGcmKeyManager.KEY_TYPE + '.');
     }
-
-    let /** PbAesGcmKey */ deserializedKey;
+    let deserializedKey: PbAesGcmKey;
     try {
       deserializedKey = PbAesGcmKey.deserializeBinary(keyData.getValue());
     } catch (e) {
@@ -213,7 +185,6 @@ class AesGcmKeyManager {
           'Could not parse the input as a ' +
           'serialized proto of ' + AesGcmKeyManager.KEY_TYPE + ' key.');
     }
-
     return deserializedKey;
   }
 
@@ -221,14 +192,3 @@ class AesGcmKeyManager {
     Registry.registerKeyManager(new AesGcmKeyManager());
   }
 }
-
-/** @const @private {!Object} */
-AesGcmKeyManager.SUPPORTED_PRIMITIVE_ = Aead;
-
-/** @const @public {string} */
-AesGcmKeyManager.KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
-
-/** @const @private {number} */
-AesGcmKeyManager.VERSION_ = 0;
-
-exports = AesGcmKeyManager;

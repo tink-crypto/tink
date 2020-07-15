@@ -14,7 +14,7 @@
 
 goog.module('tink.hybrid.HybridKeyTemplates');
 
-const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
+const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
 const {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 

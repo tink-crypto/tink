@@ -15,8 +15,8 @@
 goog.module('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
 goog.setTestOnly('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
 
-const AeadConfig = goog.require('tink.aead.AeadConfig');
-const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
+const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
+const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');

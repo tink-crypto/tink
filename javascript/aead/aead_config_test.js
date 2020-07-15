@@ -15,11 +15,11 @@
 goog.module('tink.aead.AeadConfigTest');
 goog.setTestOnly('tink.aead.AeadConfigTest');
 
+const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
+const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const AeadConfig = goog.require('tink.aead.AeadConfig');
-const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
-const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
+const {AesCtrHmacAeadKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_manager');
+const {AesGcmKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_gcm_key_manager');
 const {KeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');

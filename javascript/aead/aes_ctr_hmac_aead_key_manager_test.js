@@ -15,10 +15,10 @@
 goog.module('tink.aead.AesCtrHmacAeadKeyManagerTest');
 goog.setTestOnly('tink.aead.AesCtrHmacAeadKeyManagerTest');
 
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
-const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
+const {AesCtrHmacAeadKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_manager');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
 const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';

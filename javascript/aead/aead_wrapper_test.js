@@ -15,13 +15,13 @@
 goog.module('tink.aead.AeadWrapperTest');
 goog.setTestOnly('tink.aead.AeadWrapperTest');
 
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const AeadWrapper = goog.require('tink.aead.AeadWrapper');
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
 const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+const {AeadWrapper} = goog.require('google3.third_party.tink.javascript.aead.aead_wrapper');
+const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
+const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 describe('aead wrapper test', function() {
   it('new aead primitive set without primary', async function() {

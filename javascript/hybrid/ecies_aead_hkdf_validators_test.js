@@ -15,7 +15,7 @@
 goog.module('tink.hybrid.EciesAeadHkdfValidatorsTest');
 goog.setTestOnly('tink.hybrid.EciesAeadHkdfValidatorsTest');
 
-const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
+const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');

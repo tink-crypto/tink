@@ -15,7 +15,7 @@
 goog.module('tink.aead.AeadKeyTemplatesTest');
 goog.setTestOnly('tink.aead.AeadKeyTemplatesTest');
 
-const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
+const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
 const {PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('aead key templates test', function() {

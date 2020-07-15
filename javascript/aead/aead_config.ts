@@ -12,12 +12,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.aead.AeadConfig');
-
-const AeadWrapper = goog.require('tink.aead.AeadWrapper');
-const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
-const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
-
+import {AeadWrapper} from './aead_wrapper';
+import {AesCtrHmacAeadKeyManager} from './aes_ctr_hmac_aead_key_manager';
+import {AesGcmKeyManager} from './aes_gcm_key_manager';
 
 /**
  * Static methods and constants for registering with the Registry all instances
@@ -31,7 +28,12 @@ const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
  *
  * @final
  */
-class AeadConfig {
+export class AeadConfig {
+  private static readonly CONFIG_NAME_: string = 'TINK_AEAD';
+  static PRIMITIVE_NAME: string = 'Aead';
+  static AES_CTR_HMAC_AEAD_TYPE_URL: string;
+  static AES_GCM_TYPE_URL: string;
+
   /**
    * Registers key managers for all Aead key types from the current Tink
    * release.
@@ -43,14 +45,5 @@ class AeadConfig {
     AeadWrapper.register();
   }
 }
-
-/** @const @private {string} */
-AeadConfig.CONFIG_NAME_ = 'TINK_AEAD';
-/** @const {string} */
-AeadConfig.PRIMITIVE_NAME = 'Aead';
-/** @const {string} */
 AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.KEY_TYPE;
-/** @const {string} */
 AeadConfig.AES_GCM_TYPE_URL = AesGcmKeyManager.KEY_TYPE;
-
-exports = AeadConfig;
