@@ -15,26 +15,14 @@
 package subtle_test
 
 import (
-	"bytes"
 	"encoding/hex"
-	"fmt"
-	"io"
 	"testing"
 
 	"github.com/google/tink/go/streamingaead/subtle"
 )
 
 func TestEncryptDecrypt(t *testing.T) {
-	ikm, err := hex.DecodeString("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff")
-	if err != nil {
-		t.Fatal(err)
-	}
-	aad, err := hex.DecodeString("aabbccddeeff")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	tcs := []struct {
+	testCases := []struct {
 		name               string
 		keySizeInBytes     int
 		segmentSize        int
@@ -203,7 +191,7 @@ func TestEncryptDecrypt(t *testing.T) {
 			chunkSize:          1,
 		},
 	}
-	for _, tc := range tcs {
+	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			cipher, err := subtle.NewAESGCMHKDF(ikm, "SHA256", tc.keySizeInBytes, tc.segmentSize, tc.firstSegmentOffset)
 			if err != nil {
@@ -316,73 +304,4 @@ func TestModifiedCiphertext(t *testing.T) {
 			}
 		}
 	})
-}
-
-// encrypt generates a random plaintext of size plaintextSize and encrypts it using the cipher.
-// Upon success this function returns the actual plaintext and ciphertext bytes.
-func encrypt(cipher *subtle.AESGCMHKDF, aad []byte, plaintextSize int) ([]byte, []byte, error) {
-	pt := make([]byte, plaintextSize)
-	for i := range pt {
-		pt[i] = byte(i % 253)
-	}
-
-	ctBuf := &bytes.Buffer{}
-	w, err := cipher.NewEncryptingWriter(ctBuf, aad)
-	if err != nil {
-		return nil, nil, fmt.Errorf("cannot create an encrypt writer: %v", err)
-	}
-	n, err := w.Write(pt)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error writing to an encrypt writer: %v", err)
-	}
-	if n != len(pt) {
-		return nil, nil, fmt.Errorf("unexpected number of bytes written. Got=%d;want=%d", n, len(pt))
-	}
-	if err := w.Close(); err != nil {
-		return nil, nil, fmt.Errorf("error closing writer: %v", err)
-	}
-	return pt, ctBuf.Bytes(), err
-}
-
-// decrypt decrypts ciphertext ct using the cipher and validates that it's the same as the original plaintext pt.
-func decrypt(cipher *subtle.AESGCMHKDF, aad, pt, ct []byte, chunkSize int) error {
-	r, err := cipher.NewDecryptingReader(bytes.NewBuffer(ct), aad)
-	if err != nil {
-		return fmt.Errorf("cannot create an encrypt reader: %v", err)
-	}
-
-	var (
-		chunk     = make([]byte, chunkSize)
-		decrypted = 0
-		eof       = false
-	)
-	for !eof {
-		n, err := r.Read(chunk)
-		if err != nil && err != io.EOF {
-			return fmt.Errorf("error reading chunk: %v", err)
-		}
-		eof = err == io.EOF
-		got := chunk[:n]
-		want := pt[decrypted : decrypted+n]
-		if !bytes.Equal(got, want) {
-			return fmt.Errorf("decrypted data doesn't match. Got=%s;want=%s", hex.EncodeToString(got), hex.EncodeToString(want))
-		}
-		decrypted += n
-	}
-	if decrypted != len(pt) {
-		return fmt.Errorf("number of decrypted bytes doesn't match. Got=%d;want=%d", decrypted, len(pt))
-	}
-	return nil
-}
-
-func segmentPos(segmentSize, firstSegmentOffset, headerLen, segmentNr int) (int, int) {
-	start := segmentSize * segmentNr
-	end := start + segmentSize
-
-	firstSegmentDiff := firstSegmentOffset + headerLen
-	if start > 0 {
-		start -= firstSegmentDiff
-	}
-	end -= firstSegmentDiff
-	return start + headerLen, end + headerLen
 }
