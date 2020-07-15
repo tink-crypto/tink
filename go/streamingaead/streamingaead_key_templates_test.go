@@ -40,6 +40,12 @@ func TestAESGCMHKDFKeyTemplates(t *testing.T) {
 			ciphertextSegmentSize: 4096,
 		},
 		{
+			name:                  "AES128GCMHKDF1MBKeyTemplate",
+			tmpl:                  streamingaead.AES128GCMHKDF1MBKeyTemplate(),
+			keySize:               16,
+			ciphertextSegmentSize: 1048576,
+		},
+		{
 			name:                  "AES256GCMHKDF4KBKeyTemplate",
 			tmpl:                  streamingaead.AES256GCMHKDF4KBKeyTemplate(),
 			keySize:               32,

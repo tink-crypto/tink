@@ -35,6 +35,15 @@ func AES128GCMHKDF4KBKeyTemplate() *tinkpb.KeyTemplate {
 	return newAESGCMHKDFKeyTemplate(16, commonpb.HashType_SHA256, 16, 4096)
 }
 
+// AES128GCMHKDF1MBKeyTemplate is a KeyTemplate that generates an AES-GCM key with the following parameters:
+//   - Main key size: 16 bytes
+//   - HKDF algo: HMAC-SHA256
+//   - Size of AES-GCM derived keys: 16 bytes
+//   - Ciphertext segment size: 1048576 bytes (1 MB)
+func AES128GCMHKDF1MBKeyTemplate() *tinkpb.KeyTemplate {
+	return newAESGCMHKDFKeyTemplate(16, commonpb.HashType_SHA256, 16, 1048576)
+}
+
 // AES256GCMHKDF4KBKeyTemplate is a KeyTemplate that generates an AES-GCM key with the following parameters:
 //   - Main key size: 32 bytes
 //   - HKDF algo: HMAC-SHA256
