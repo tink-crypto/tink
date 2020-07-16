@@ -13,32 +13,40 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/prf_config.h"
 
+#include "tink/config/tink_fips.h"
 #include "tink/prf/aes_cmac_prf_key_manager.h"
 #include "tink/prf/hkdf_prf_key_manager.h"
 #include "tink/prf/hmac_prf_key_manager.h"
 #include "tink/prf/prf_set_wrapper.h"
 #include "tink/registry.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {
 
 crypto::tink::util::Status PrfConfig::Register() {
-  auto status = Registry::RegisterKeyTypeManager(
-      absl::make_unique<HkdfPrfKeyManager>(), true);
-  if (!status.ok()) {
-    return status;
-  }
+  // Register primitive wrapper.
+  auto status =
+      Registry::RegisterPrimitiveWrapper(absl::make_unique<PrfSetWrapper>());
+  if (!status.ok()) return status;
+
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<HmacPrfKeyManager>(), true);
-  if (!status.ok()) {
-    return status;
-  }
+  if (!status.ok()) return status;
+
+  // When using FIPS only mode do not register other key managers.
+  if (kUseOnlyFips) return util::OkStatus();
+
+  status = Registry::RegisterKeyTypeManager(
+      absl::make_unique<HkdfPrfKeyManager>(), true);
+  if (!status.ok()) return status;
+
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesCmacPrfKeyManager>(), true);
   if (!status.ok()) {
     return status;
   }
-  return Registry::RegisterPrimitiveWrapper(absl::make_unique<PrfSetWrapper>());
+  return util::OkStatus();
 }
 
 }  // namespace tink

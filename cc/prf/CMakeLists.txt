@@ -36,6 +36,7 @@ tink_cc_library(
     tink::prf::hkdf_prf_key_manager
     tink::prf::hmac_prf_key_manager
     tink::prf::prf_set_wrapper
+    tink::config::tink_fips
     tink::core::registry
     tink::util::status
     tink::proto::tink_cc_proto
@@ -223,5 +224,22 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
+    gmock
+)
+
+tink_cc_test(
+  NAME prf_config_test
+  SRCS prf_config_test.cc
+  DEPS
+    tink::prf::hmac_prf_key_manager
+    tink::prf::prf_config
+    tink::prf::prf_key_templates
+    tink::prf::prf_set
+    tink::core::config
+    tink::core::registry
+    tink::config::tink_fips
+    tink::util::status
+    tink::util::test_matchers
+    tink::util::test_util
     gmock
 )
