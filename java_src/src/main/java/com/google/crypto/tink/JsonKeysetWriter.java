@@ -79,6 +79,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
   public void write(Keyset keyset) throws IOException {
     try {
       outputStream.write(toJson(keyset).toString(4).getBytes(UTF_8));
+      outputStream.write(System.lineSeparator().getBytes(UTF_8));
     } catch (JSONException e) {
       throw new IOException(e);
     } finally {
@@ -90,6 +91,7 @@ public final class JsonKeysetWriter implements KeysetWriter {
   public void write(EncryptedKeyset keyset) throws IOException {
     try {
       outputStream.write(toJson(keyset).toString(4).getBytes(UTF_8));
+      outputStream.write(System.lineSeparator().getBytes(UTF_8));
     } catch (JSONException e) {
       throw new IOException(e);
     } finally {
