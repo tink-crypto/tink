@@ -27,7 +27,6 @@ tink_cc_library(
   DEPS
     tink::subtle::prf::streaming_prf
     crypto
-    tink::config::tink_fips
     tink::core::input_stream
     tink::subtle::subtle
     tink::subtle::subtle_util

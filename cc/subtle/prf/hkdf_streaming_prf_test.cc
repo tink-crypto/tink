@@ -31,7 +31,6 @@ namespace {
 
 using ::crypto::tink::test::HexDecodeOrDie;
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 using ::testing::Ge;
 using ::testing::Ne;
@@ -43,9 +42,6 @@ using ::testing::SizeIs;
 // These should be satisfied for any streaming prf which generates enough
 // output.
 TEST(HkdfStreamingPrf, Basic) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA512, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -59,9 +55,6 @@ TEST(HkdfStreamingPrf, Basic) {
 }
 
 TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA512, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -80,9 +73,6 @@ TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
 }
 
 TEST(HkdfStreamingPrf, SameInputTwice) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA512, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -107,9 +97,6 @@ TEST(HkdfStreamingPrf, SameInputTwice) {
 
 // Tests that after Backing up the full stream, we get back the same data.
 TEST(HkdfStreamingPrf, BackupFullStream) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -140,9 +127,6 @@ TEST(HkdfStreamingPrf, BackupFullStream) {
 
 // Tests that after Backing up half the stream, we get back the same data.
 TEST(HkdfStreamingPrf, BackupHalf) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -175,9 +159,6 @@ TEST(HkdfStreamingPrf, BackupHalf) {
 
 // Tests that after Position is correct initially (i.e., 0).
 TEST(HkdfStreamingPrf, PositionOneRead) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -190,9 +171,6 @@ TEST(HkdfStreamingPrf, PositionOneRead) {
 
 // Tests that after Position is correct after a single read.
 TEST(HkdfStreamingPrf, PositionSingleRead) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -208,9 +186,6 @@ TEST(HkdfStreamingPrf, PositionSingleRead) {
 
 // Tests that after Position is correct after a two reads.
 TEST(HkdfStreamingPrf, PositionTwoReads) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -231,9 +206,6 @@ TEST(HkdfStreamingPrf, PositionTwoReads) {
 
 // Tests that we can backup the first read completely.
 TEST(HkdfStreamingPrf, BackupSingleRead) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -250,9 +222,6 @@ TEST(HkdfStreamingPrf, BackupSingleRead) {
 
 // Tests that we can backup the second read completely.
 TEST(HkdfStreamingPrf, BackupSecondRead) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -274,9 +243,6 @@ TEST(HkdfStreamingPrf, BackupSecondRead) {
 
 // Tests that we can partially backup and position is correct.
 TEST(HkdfStreamingPrf, PartialBackup) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA256, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -297,9 +263,6 @@ TEST(HkdfStreamingPrf, PartialBackup) {
 // HKDF Specific tests =========================================================
 // Tests which only apply for Hkdf.
 TEST(HkdfStreamingPrf, ExhaustInput) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   auto streaming_prf_or = HkdfStreamingPrf::New(
       SHA512, util::SecretDataFromStringView("key0123456"), "salt");
   ASSERT_THAT(streaming_prf_or.status(), IsOk());
@@ -318,9 +281,6 @@ TEST(HkdfStreamingPrf, ExhaustInput) {
 // These test are Hkdf specific. We test with the test vectors from RFC 5869 and
 // compare with our implementation.
 TEST(HkdfStreamingPrf, TestVector1) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   // https://tools.ietf.org/html/rfc5869#appendix-A.1
   HashType hash = SHA256;
   util::SecretData ikm = util::SecretDataFromStringView(
@@ -354,9 +314,6 @@ crypto::tink::util::StatusOr<std::string> ComputeWithHkdfStreamingPrf(
 }
 
 TEST(HkdfStreamingPrf, TestVector2) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   // https://tools.ietf.org/html/rfc5869#appendix-A.2
   HashType hash = SHA256;
   util::SecretData ikm = util::SecretDataFromStringView(
@@ -392,9 +349,6 @@ TEST(HkdfStreamingPrf, TestVector2) {
 }
 
 TEST(HkdfStreamingPrf, TestVector3) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   // https://tools.ietf.org/html/rfc5869#appendix-A.3
   HashType hash = SHA256;
   util::SecretData ikm = util::SecretDataFromStringView(
@@ -413,9 +367,6 @@ TEST(HkdfStreamingPrf, TestVector3) {
 }
 
 TEST(HkdfStreamingPrf, TestVector4) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   // https://tools.ietf.org/html/rfc5869#appendix-A.4
   HashType hash = SHA1;
   util::SecretData ikm =
@@ -434,9 +385,6 @@ TEST(HkdfStreamingPrf, TestVector4) {
 }
 
 TEST(HkdfStreamingPrf, TestVector5) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   // https://tools.ietf.org/html/rfc5869#appendix-A.5
   HashType hash = SHA1;
   util::SecretData ikm = util::SecretDataFromStringView(
@@ -472,9 +420,6 @@ TEST(HkdfStreamingPrf, TestVector5) {
 }
 
 TEST(HkdfStreamingPrf, TestVector6) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   // https://tools.ietf.org/html/rfc5869#appendix-A.6
   HashType hash = SHA1;
   util::SecretData ikm = util::SecretDataFromStringView(
@@ -493,9 +438,6 @@ TEST(HkdfStreamingPrf, TestVector6) {
 }
 
 TEST(HkdfStreamingPrf, TestVector7) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   // https://tools.ietf.org/html/rfc5869#appendix-A.7
   HashType hash = SHA1;
   util::SecretData ikm = util::SecretDataFromStringView(
@@ -515,9 +457,6 @@ TEST(HkdfStreamingPrf, TestVector7) {
 }
 
 TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
   HashType hash = SHA1;
   util::SecretData ikm = Random::GetRandomKeyBytes(123);
   std::string salt = Random::GetRandomBytes(234);
@@ -536,19 +475,6 @@ TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
               Eq(util::SecretDataAsStringView(compute_hkdf_result)));
 }
 
-TEST(HkdfStreamingPrf, TestFipsOnly) {
-  if (!kUseOnlyFips) {
-    GTEST_SKIP() << "Only supported in FIPS-only mode";
-  }
-
-  HashType hash = SHA1;
-  util::SecretData ikm = Random::GetRandomKeyBytes(123);
-  std::string salt = Random::GetRandomBytes(234);
-  std::string info = Random::GetRandomBytes(345);
-
-  EXPECT_THAT(HkdfStreamingPrf::New(hash, std::move(ikm), salt).status(),
-              StatusIs(util::error::INTERNAL));
-}
 }  // namespace
 }  // namespace subtle
 }  // namespace tink
