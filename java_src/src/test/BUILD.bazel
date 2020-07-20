@@ -79,6 +79,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_key_manager",
         "//src/main/java/com/google/crypto/tink/aead/subtle:aead_factory",
         "//src/main/java/com/google/crypto/tink/aead/subtle:aes_gcm_factory",
+        "//src/main/java/com/google/crypto/tink/aead/subtle:aes_gcm_siv",
         "//src/main/java/com/google/crypto/tink/config:tink_config",
         "//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
@@ -192,6 +193,7 @@ java_library(
         "@maven//:com_google_http_client_google_http_client",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
         "@maven//:org_json_json",
         "@maven//:org_mockito_mockito_core",
     ],
@@ -208,12 +210,15 @@ gen_java_test_rules(
     default_test_size = "small",
     # these tests are excluded when testing with bazel test ... or on Kokoro
     manual_tests = [
+        # TODO(b/161508252): enable this.
+        "java/com/google/crypto/tink/aead/subtle/AesGcmSivTest",
         "java/com/google/crypto/tink/subtle/AesGcmJceTest",
         "java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest",
         # b/112019120
         "java/com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJceTest",
     ],
     medium_tests = [
+        "java/com/google/crypto/tink/aead/subtle/AesGcmSivTest",
         "java/com/google/crypto/tink/subtle/AesCtrHmacStreamingTest",
         "java/com/google/crypto/tink/subtle/AesGcmJceTest",
         "java/com/google/crypto/tink/hybrid/EciesAeadHkdfHybridDecryptTest",
