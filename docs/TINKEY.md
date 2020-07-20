@@ -147,7 +147,7 @@ tinkey create-keyset --key-template AES128_GCM --out encrypted-keyset.cfg \
     `credentials.json`
 
 ```shell
-tinkey create-keyset --in encrypted-keyset.cfg \
+tinkey list-keyset --in encrypted-keyset.cfg \
 --master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 --credential credential.json
 ```
