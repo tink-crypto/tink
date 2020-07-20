@@ -23,6 +23,7 @@
 #include "openssl/base.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/streaming_prf.h"
+#include "tink/config/tink_fips.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -37,6 +38,9 @@ class HkdfStreamingPrf : public StreamingPrf {
 
   std::unique_ptr<InputStream> ComputePrf(
       absl::string_view input) const override;
+
+  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
+      crypto::tink::FipsCompatibility::kNotFips;
 
  private:
   HkdfStreamingPrf(const EVP_MD* hash, util::SecretData secret,
