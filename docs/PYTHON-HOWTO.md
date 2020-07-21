@@ -5,13 +5,30 @@ This document presents instructions and Python code snippets for common tasks in
 
 ## Setup instructions
 
-The Tink Python implementation is a wrapper around the C++ implementation using
-[pybind11](https://github.com/pybind/pybind11). It is therefore necessary to
-compile the project before the Python implementation is ready to use.
+The simplest way is to install a binary release from
+[PyPi](https://pypi.org/project/tink/):
+
+```shell
+pip install tink
+```
+
+Currently, this includes binary wheels for:
+
+*   Linux: Python 3.7, Python 3.8
+*   MacOs: Python 3.7, Python 3.8
+
+## Building from source
+
+Tink currently supports two build systems for the use with Python:
+
+*   [Bazel](https://bazel.build/)
+*   Setuptools to create a Python package
+
+Note that in both cases you will require [Bazel](https://bazel.build/), as it is
+used to compile the wrapper around the C++ implementation which uses
+[pybind11](https://github.com/pybind/pybind11).
 
 ### Build with Bazel
-
-[Bazel](https://bazel.io) is used to build and test Tink.
 
 To build the Python implementation:
 
