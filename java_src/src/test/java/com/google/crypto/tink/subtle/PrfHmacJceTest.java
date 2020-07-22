@@ -51,7 +51,8 @@ public class PrfHmacJceTest {
     }
   }
 
-  // Test data from http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#testing.
+  // Test data from http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#testing
+  // and https://tools.ietf.org/html/rfc4231.
   private static final MacTestVector[] HMAC_TEST_VECTORS = {
     new MacTestVector(
         "HMACSHA1",
@@ -67,6 +68,11 @@ public class PrfHmacJceTest {
             + "587e8dc909dd56fd0468805f834039b345f855cfe19c44b55af241fff3ffcd8045cd5c288e6c4e284c3720570b"
             + "58e4d47b8feeedc52fd1401f698a209fccfa3b4c0d9a797b046a2759f82a54c41ccd7b5f592b",
         "05d1243e6465ed9620c9aec1c351a186"),
+    new MacTestVector(
+        "HMACSHA384",
+        "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+        "4869205468657265",
+        "afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59cfaea9ea9076ede7f4af152e8b2fa9cb6"),
     new MacTestVector(
         "HMACSHA512",
         "726374c4b8df517510db9159b730f93431e0cd468d4f3821eab0edb93abd0fba46ab4f1ef35d54fec3d85fa89e"
@@ -248,6 +254,7 @@ public class PrfHmacJceTest {
   public void testPrfAllowsSmallTagSizeCompute() throws Exception {
     testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA1");
     testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA256");
+    testThrowExceptionIfTagSizeIsTooSmall("HMACSHA384");
     testPrfNoExceptionIfTagSizeIsTooSmall("HMACSHA512");
   }
 
@@ -273,9 +280,11 @@ public class PrfHmacJceTest {
   public void testThrowExceptionIfTagSizeIsTooLarge() throws Exception {
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA1", 21);
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA256", 33);
+    testThrowExceptionIfTagSizeIsTooLarge("HMACSHA384", 49);
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA512", 65);
     testPrfThrowsExceptionIfTagSizeIsTooLarge("HMACSHA1", 21);
     testPrfThrowsExceptionIfTagSizeIsTooLarge("HMACSHA256", 33);
+    testPrfThrowsExceptionIfTagSizeIsTooLarge("HMACSHA384", 49);
     testPrfThrowsExceptionIfTagSizeIsTooLarge("HMACSHA512", 65);
   }
 

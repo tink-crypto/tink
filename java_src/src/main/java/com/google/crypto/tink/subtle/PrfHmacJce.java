@@ -66,6 +66,9 @@ public final class PrfHmacJce implements Prf {
       case "HMACSHA256":
         maxOutputLength = 32;
         break;
+      case "HMACSHA384":
+        maxOutputLength = 48;
+        break;
       case "HMACSHA512":
         maxOutputLength = 64;
         break;
