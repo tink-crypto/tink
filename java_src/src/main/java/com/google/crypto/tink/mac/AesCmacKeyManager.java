@@ -24,7 +24,8 @@ import com.google.crypto.tink.proto.AesCmacKey;
 import com.google.crypto.tink.proto.AesCmacKeyFormat;
 import com.google.crypto.tink.proto.AesCmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.AesCmac;
+import com.google.crypto.tink.subtle.PrfAesCmac;
+import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
@@ -43,7 +44,8 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
         new PrimitiveFactory<Mac, AesCmacKey>(Mac.class) {
           @Override
           public Mac getPrimitive(AesCmacKey key) throws GeneralSecurityException {
-            return new AesCmac(key.getKeyValue().toByteArray(), key.getParams().getTagSize());
+            return new PrfMac(
+                new PrfAesCmac(key.getKeyValue().toByteArray()), key.getParams().getTagSize());
           }
         });
   }

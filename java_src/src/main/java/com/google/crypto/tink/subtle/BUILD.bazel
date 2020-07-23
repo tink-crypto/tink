@@ -3,14 +3,15 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 java_library(
-    name = "aes_cmac",
-    srcs = ["AesCmac.java"],
+    name = "prf_aes_cmac",
+    srcs = ["PrfAesCmac.java"],
     deps = [
         ":aes_util",
         ":bytes",
         ":subtle_util_cluster",
         ":validators",
-        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -197,9 +198,9 @@ java_library(
     name = "aes_siv",
     srcs = ["AesSiv.java"],
     deps = [
-        ":aes_cmac",
         ":aes_util",
         ":bytes",
+        ":prf_aes_cmac",
         ":subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
     ],
@@ -568,8 +569,8 @@ java_library(
 java_library(
     name = "mac",
     srcs = [
-        "AesCmac.java",
         "AesUtil.java",
+        "PrfAesCmac.java",
         "PrfHmacJce.java",
         "PrfMac.java",
     ],

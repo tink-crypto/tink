@@ -29,7 +29,7 @@ import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link AesCmac}. */
 @RunWith(JUnit4.class)
-public class AesCmacTest {
+public class PrfAesCmacTest {
   private static class MacTestVector {
     String algName;
     public byte[] key;
@@ -68,7 +68,7 @@ public class AesCmacTest {
   @Test
   public void testMacTestVectors() throws Exception {
     for (MacTestVector t : CMAC_TEST_VECTORS) {
-      Mac mac = new AesCmac(t.key, t.tag.length);
+      Mac mac = new PrfMac(new PrfAesCmac(t.key), t.tag.length);
       assertArrayEquals(t.tag, mac.computeMac(t.message));
       try {
         mac.verifyMac(t.tag, t.message);
@@ -81,7 +81,7 @@ public class AesCmacTest {
   @Test
   public void testTagTruncation() throws Exception {
     for (MacTestVector t : CMAC_TEST_VECTORS) {
-      Mac mac = new AesCmac(t.key, t.tag.length);
+      Mac mac = new PrfMac(new PrfAesCmac(t.key), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -94,7 +94,7 @@ public class AesCmacTest {
     }
     // Test with random keys.
     for (MacTestVector t : CMAC_TEST_VECTORS) {
-      Mac mac = new AesCmac(Random.randBytes(t.key.length), t.tag.length);
+      Mac mac = new PrfMac(new PrfAesCmac(Random.randBytes(t.key.length)), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -110,7 +110,7 @@ public class AesCmacTest {
   @Test
   public void testBitFlipMessage() throws Exception {
     for (MacTestVector t : CMAC_TEST_VECTORS) {
-      Mac mac = new AesCmac(t.key, t.tag.length);
+      Mac mac = new PrfMac(new PrfAesCmac(t.key), t.tag.length);
       for (int b = 0; b < t.message.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedMessage = Arrays.copyOf(t.message, t.message.length);
@@ -126,7 +126,7 @@ public class AesCmacTest {
     }
     // Test with random keys.
     for (MacTestVector t : CMAC_TEST_VECTORS) {
-      Mac mac = new AesCmac(Random.randBytes(t.key.length), t.tag.length);
+      Mac mac = new PrfMac(new PrfAesCmac(Random.randBytes(t.key.length)), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -142,7 +142,7 @@ public class AesCmacTest {
   @Test
   public void testBitFlipTag() throws Exception {
     for (MacTestVector t : CMAC_TEST_VECTORS) {
-      Mac mac = new AesCmac(t.key, t.tag.length);
+      Mac mac = new PrfMac(new PrfAesCmac(t.key), t.tag.length);
       for (int b = 0; b < t.tag.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
@@ -158,7 +158,7 @@ public class AesCmacTest {
     }
     // Test with random keys.
     for (MacTestVector t : CMAC_TEST_VECTORS) {
-      Mac mac = new AesCmac(Random.randBytes(t.key.length), t.tag.length);
+      Mac mac = new PrfMac(new PrfAesCmac(Random.randBytes(t.key.length)), t.tag.length);
       for (int b = 0; b < t.tag.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
@@ -176,9 +176,9 @@ public class AesCmacTest {
 
   @Test
   public void testThrowExceptionIfTagSizeIsTooSmall() throws Exception {
-    for (int i = 0; i < AesCmac.MIN_TAG_SIZE_IN_BYTES; i++) {
+    for (int i = 0; i < PrfMac.MIN_TAG_SIZE_IN_BYTES; i++) {
       try {
-        new AesCmac(Random.randBytes(16), i);
+        new PrfMac(new PrfAesCmac(Random.randBytes(16)), i);
         fail("Expected InvalidAlgorithmParameterException");
       } catch (InvalidAlgorithmParameterException ex) {
         // expected.
@@ -189,7 +189,7 @@ public class AesCmacTest {
   @Test
   public void testThrowExceptionIfTagSizeIsTooLarge() throws Exception {
     try {
-      new AesCmac(Random.randBytes(16), 17);
+      new PrfMac(new PrfAesCmac(Random.randBytes(16)), 17);
       fail("Expected InvalidAlgorithmParameterException");
     } catch (InvalidAlgorithmParameterException ex) {
       // expected.
