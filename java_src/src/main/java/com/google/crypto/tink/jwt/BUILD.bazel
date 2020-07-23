@@ -15,3 +15,8 @@ java_library(
     name = "jwt",
     srcs = ["Jwt.java"],
 )
+
+java_library(
+    name = "jwt_names",
+    srcs = ["JwtNames.java"],
+)
