@@ -187,6 +187,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "//src/main/java/com/google/crypto/tink/util:keys_downloader",
+        "//third_party/tink/java_src/src/main/java/com/google/crypto/tink/jwt:jwt_names",
+        "//third_party/tink/java_src/src/main/java/com/google/crypto/tink/jwt:to_be_signed_jwt",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_kms",

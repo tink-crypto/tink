@@ -20,3 +20,14 @@ java_library(
     name = "jwt_names",
     srcs = ["JwtNames.java"],
 )
+
+java_library(
+    name = "to_be_signed_jwt",
+    srcs = ["ToBeSignedJwt.java"],
+    deps = [
+        ":jwt_names",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:org_json_json",
+    ],
+)
