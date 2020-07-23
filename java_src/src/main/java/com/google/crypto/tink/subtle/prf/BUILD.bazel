@@ -29,6 +29,14 @@ java_library(
 )
 
 java_library(
+    name = "singleton_prf_set",
+    srcs = ["SingletonPrfSet.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+    ],
+)
+
+java_library(
     name = "hkdf_streaming_prf",
     srcs = ["HkdfStreamingPrf.java"],
     deps = [
