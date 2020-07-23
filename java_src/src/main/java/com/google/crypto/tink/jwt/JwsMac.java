@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.jose;
+package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -25,9 +25,19 @@ import java.security.GeneralSecurityException;
  */
 @Immutable
 public interface JwsMac {
-  /** Computes a MAC and encodes a JWT in JWS compact serialization format. */
-  String computeMacThenEncode(Jwt payload) throws GeneralSecurityException;
+  /** Computes a MAC over a JWT and and encodes it in JWS compact serialization format. */
+  String computeMac(Jwt token) throws GeneralSecurityException;
 
-  /** Verifies a MAC and decodes a JWT in JWS compact serialization format. */
-  Jwt verifyMacThenDecode(String compact) throws GeneralSecurityException;
+  /**
+   * Verifies and decodes a JWT in JWS compact serialization format.
+   *
+   * <p>The decoded JWT is expected to contains the headers and claims in {@code expectedJwt}. For
+   * example, if {@code expectedJwt} contains an {@code iss} claim, the decoded JWT must contain an
+   * identical claim. {@code expectedJwt} can contain custom claims. If a header or a claim is
+   * present in {@code expectedJwt}, the decoded JWT must also contain the same header or claim.
+   *
+   * <p>If the decoded JWT contains timestamp claims such as {@code exp}, {@code iat} or {@code
+   * nbf}, they will also be validated.
+   */
+  Jwt verifyMac(String compact, Jwt expectedJwt) throws GeneralSecurityException;
 }

@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.jose;
+package com.google.crypto.tink.jwt;
 
 /** A JWT is a string representing a set of claims as a JSON object, as described in RFC 7519. */
 public final class Jwt {
