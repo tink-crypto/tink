@@ -13,7 +13,7 @@
 <ul>
 <li><a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink" target="classFrame"><span class="interfaceName">Aead</span></a></li>
 <li><a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead" target="classFrame">AeadConfig</a></li>
-<li><a href="com/google/crypto/tink/aead/AeadFactory.html" title="class in com.google.crypto.tink.aead" target="classFrame">AeadFactory</a></li>
+<li><a href="com/google/crypto/tink/aead/subtle/AeadFactory.html" title="interface in com.google.crypto.tink.aead.subtle" target="classFrame"><span class="interfaceName">AeadFactory</span></a></li>
 <li><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead" target="classFrame">AeadKeyTemplates</a></li>
 <li><a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead" target="classFrame">AeadWrapper</a></li>
 <li><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac" target="classFrame">AesCmacKeyManager</a></li>
@@ -24,13 +24,16 @@
 <li><a href="com/google/crypto/tink/aead/AesCtrKeyManager.html" title="class in com.google.crypto.tink.aead" target="classFrame">AesCtrKeyManager</a></li>
 <li><a href="com/google/crypto/tink/subtle/AesEaxJce.html" title="class in com.google.crypto.tink.subtle" target="classFrame">AesEaxJce</a></li>
 <li><a href="com/google/crypto/tink/aead/AesEaxKeyManager.html" title="class in com.google.crypto.tink.aead" target="classFrame">AesEaxKeyManager</a></li>
+<li><a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html" title="class in com.google.crypto.tink.aead.subtle" target="classFrame">AesGcmFactory</a></li>
 <li><a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html" title="class in com.google.crypto.tink.subtle" target="classFrame">AesGcmHkdfStreaming</a></li>
 <li><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead" target="classFrame">AesGcmHkdfStreamingKeyManager</a></li>
 <li><a href="com/google/crypto/tink/subtle/AesGcmJce.html" title="class in com.google.crypto.tink.subtle" target="classFrame">AesGcmJce</a></li>
 <li><a href="com/google/crypto/tink/aead/AesGcmKeyManager.html" title="class in com.google.crypto.tink.aead" target="classFrame">AesGcmKeyManager</a></li>
+<li><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle" target="classFrame">AesGcmSiv</a></li>
 <li><a href="com/google/crypto/tink/subtle/AesSiv.html" title="class in com.google.crypto.tink.subtle" target="classFrame">AesSiv</a></li>
 <li><a href="com/google/crypto/tink/daead/AesSivKeyManager.html" title="class in com.google.crypto.tink.daead" target="classFrame">AesSivKeyManager</a></li>
 <li><a href="com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations" target="classFrame">Alpha</a></li>
+<li><a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html" title="class in com.google.crypto.tink.integration.awskms" target="classFrame">AwsKmsAead</a></li>
 <li><a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle" target="classFrame">Base64</a></li>
 <li><a href="com/google/crypto/tink/BinaryKeysetReader.html" title="class in com.google.crypto.tink" target="classFrame">BinaryKeysetReader</a></li>
 <li><a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink" target="classFrame">BinaryKeysetWriter</a></li>
@@ -76,6 +79,8 @@
 <li><a href="com/google/crypto/tink/subtle/EngineWrapper.TSignature.html" title="class in com.google.crypto.tink.subtle" target="classFrame">EngineWrapper.TSignature</a></li>
 <li><a href="com/google/crypto/tink/subtle/Enums.html" title="class in com.google.crypto.tink.subtle" target="classFrame">Enums</a></li>
 <li><a href="com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle" target="classFrame">Enums.HashType</a></li>
+<li><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html" title="class in com.google.crypto.tink.integration.gcpkms" target="classFrame">GcpKmsAead</a></li>
+<li><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms" target="classFrame">GcpKmsClient</a></li>
 <li><a href="com/google/crypto/tink/subtle/Hex.html" title="class in com.google.crypto.tink.subtle" target="classFrame">Hex</a></li>
 <li><a href="com/google/crypto/tink/subtle/Hkdf.html" title="class in com.google.crypto.tink.subtle" target="classFrame">Hkdf</a></li>
 <li><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf" target="classFrame">HkdfPrfKeyManager</a></li>
@@ -83,11 +88,9 @@
 <li><a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac" target="classFrame">HmacKeyManager</a></li>
 <li><a href="com/google/crypto/tink/hybrid/HybridConfig.html" title="class in com.google.crypto.tink.hybrid" target="classFrame">HybridConfig</a></li>
 <li><a href="com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink" target="classFrame"><span class="interfaceName">HybridDecrypt</span></a></li>
-<li><a href="com/google/crypto/tink/hybrid/HybridDecryptConfig.html" title="class in com.google.crypto.tink.hybrid" target="classFrame">HybridDecryptConfig</a></li>
 <li><a href="com/google/crypto/tink/hybrid/HybridDecryptFactory.html" title="class in com.google.crypto.tink.hybrid" target="classFrame">HybridDecryptFactory</a></li>
 <li><a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid" target="classFrame">HybridDecryptWrapper</a></li>
 <li><a href="com/google/crypto/tink/HybridEncrypt.html" title="interface in com.google.crypto.tink" target="classFrame"><span class="interfaceName">HybridEncrypt</span></a></li>
-<li><a href="com/google/crypto/tink/hybrid/HybridEncryptConfig.html" title="class in com.google.crypto.tink.hybrid" target="classFrame">HybridEncryptConfig</a></li>
 <li><a href="com/google/crypto/tink/hybrid/HybridEncryptFactory.html" title="class in com.google.crypto.tink.hybrid" target="classFrame">HybridEncryptFactory</a></li>
 <li><a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html" title="class in com.google.crypto.tink.hybrid" target="classFrame">HybridKeyTemplates</a></li>
 <li><a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle" target="classFrame">ImmutableByteArray</a></li>
@@ -125,6 +128,7 @@
 <li><a href="com/google/crypto/tink/prf/PrfConfig.html" title="class in com.google.crypto.tink.prf" target="classFrame">PrfConfig</a></li>
 <li><a href="com/google/crypto/tink/subtle/PrfHmacJce.html" title="class in com.google.crypto.tink.subtle" target="classFrame">PrfHmacJce</a></li>
 <li><a href="com/google/crypto/tink/subtle/prf/PrfImpl.html" title="class in com.google.crypto.tink.subtle.prf" target="classFrame">PrfImpl</a></li>
+<li><a href="com/google/crypto/tink/prf/PrfKeyTemplates.html" title="class in com.google.crypto.tink.prf" target="classFrame">PrfKeyTemplates</a></li>
 <li><a href="com/google/crypto/tink/subtle/PrfMac.html" title="class in com.google.crypto.tink.subtle" target="classFrame">PrfMac</a></li>
 <li><a href="com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf" target="classFrame">PrfSet</a></li>
 <li><a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf" target="classFrame">PrfSetWrapper</a></li>
@@ -135,15 +139,15 @@
 <li><a href="com/google/crypto/tink/PrivateKeyManagerImpl.html" title="class in com.google.crypto.tink" target="classFrame">PrivateKeyManagerImpl</a></li>
 <li><a href="com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink" target="classFrame">PrivateKeyTypeManager</a></li>
 <li><a href="com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink" target="classFrame"><span class="interfaceName">PublicKeySign</span></a></li>
-<li><a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature" target="classFrame">PublicKeySignConfig</a></li>
 <li><a href="com/google/crypto/tink/signature/PublicKeySignFactory.html" title="class in com.google.crypto.tink.signature" target="classFrame">PublicKeySignFactory</a></li>
 <li><a href="com/google/crypto/tink/signature/PublicKeySignWrapper.html" title="class in com.google.crypto.tink.signature" target="classFrame">PublicKeySignWrapper</a></li>
 <li><a href="com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink" target="classFrame"><span class="interfaceName">PublicKeyVerify</span></a></li>
-<li><a href="com/google/crypto/tink/signature/PublicKeyVerifyConfig.html" title="class in com.google.crypto.tink.signature" target="classFrame">PublicKeyVerifyConfig</a></li>
 <li><a href="com/google/crypto/tink/signature/PublicKeyVerifyFactory.html" title="class in com.google.crypto.tink.signature" target="classFrame">PublicKeyVerifyFactory</a></li>
 <li><a href="com/google/crypto/tink/subtle/Random.html" title="class in com.google.crypto.tink.subtle" target="classFrame">Random</a></li>
 <li><a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink" target="classFrame">Registry</a></li>
 <li><a href="com/google/crypto/tink/subtle/RewindableReadableByteChannel.html" title="class in com.google.crypto.tink.subtle" target="classFrame">RewindableReadableByteChannel</a></li>
+<li><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridDecrypt.html" title="class in com.google.crypto.tink.hybrid.subtle" target="classFrame">RsaKemHybridDecrypt</a></li>
+<li><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridEncrypt.html" title="class in com.google.crypto.tink.hybrid.subtle" target="classFrame">RsaKemHybridEncrypt</a></li>
 <li><a href="com/google/crypto/tink/subtle/RsaSsaPkcs1SignJce.html" title="class in com.google.crypto.tink.subtle" target="classFrame">RsaSsaPkcs1SignJce</a></li>
 <li><a href="com/google/crypto/tink/signature/RsaSsaPkcs1SignKeyManager.html" title="class in com.google.crypto.tink.signature" target="classFrame">RsaSsaPkcs1SignKeyManager</a></li>
 <li><a href="com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJce.html" title="class in com.google.crypto.tink.subtle" target="classFrame">RsaSsaPkcs1VerifyJce</a></li>
@@ -154,6 +158,7 @@
 <li><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature" target="classFrame">SignatureKeyTemplates</a></li>
 <li><a href="com/google/crypto/tink/signature/SignaturePemKeysetReader.html" title="class in com.google.crypto.tink.signature" target="classFrame">SignaturePemKeysetReader</a></li>
 <li><a href="com/google/crypto/tink/signature/SignaturePemKeysetReader.Builder.html" title="class in com.google.crypto.tink.signature" target="classFrame">SignaturePemKeysetReader.Builder</a></li>
+<li><a href="com/google/crypto/tink/subtle/prf/SingletonPrfSet.html" title="class in com.google.crypto.tink.subtle.prf" target="classFrame">SingletonPrfSet</a></li>
 <li><a href="com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink" target="classFrame"><span class="interfaceName">StreamingAead</span></a></li>
 <li><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead" target="classFrame">StreamingAeadConfig</a></li>
 <li><a href="com/google/crypto/tink/streamingaead/StreamingAeadFactory.html" title="class in com.google.crypto.tink.streamingaead" target="classFrame">StreamingAeadFactory</a></li>
@@ -164,6 +169,8 @@
 <li><a href="com/google/crypto/tink/subtle/StreamSegmentEncrypter.html" title="interface in com.google.crypto.tink.subtle" target="classFrame"><span class="interfaceName">StreamSegmentEncrypter</span></a></li>
 <li><a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle" target="classFrame">SubtleUtil</a></li>
 <li><a href="com/google/crypto/tink/config/TinkConfig.html" title="class in com.google.crypto.tink.config" target="classFrame">TinkConfig</a></li>
+<li><a href="com/google/crypto/tink/jwt/ToBeSignedJwt.html" title="class in com.google.crypto.tink.jwt" target="classFrame">ToBeSignedJwt</a></li>
+<li><a href="com/google/crypto/tink/jwt/ToBeSignedJwt.Builder.html" title="class in com.google.crypto.tink.jwt" target="classFrame">ToBeSignedJwt.Builder</a></li>
 <li><a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle" target="classFrame">Validators</a></li>
 <li><a href="com/google/crypto/tink/Version.html" title="class in com.google.crypto.tink" target="classFrame">Version</a></li>
 <li><a href="com/google/crypto/tink/subtle/X25519.html" title="class in com.google.crypto.tink.subtle" target="classFrame">X25519</a></li>

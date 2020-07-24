@@ -90,6 +90,18 @@
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.aead.subtle">com.google.crypto.tink.aead.subtle</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.integration.awskms">com.google.crypto.tink.integration.awskms</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.integration.gcpkms">com.google.crypto.tink.integration.gcpkms</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -169,24 +181,6 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
-<td class="colLast"><span class="typeNameLabel">AeadFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle)</code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(Aead.class)</code> after registering the <code>AeadWrapper</code> instead.</span></div>
-</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
-<td class="colLast"><span class="typeNameLabel">AeadFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle,
-            <a href="../../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&gt;&nbsp;keyManager)</code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(keyManager, Aead.class)</code> after registering the
-     <code>AeadWrapper</code> instead.</span></div>
-</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&gt;&nbsp;pset)</code>&nbsp;</td>
 </tr>
@@ -213,16 +207,6 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
-<td class="colLast"><span class="typeNameLabel">AeadFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;keysetHandle,
-            <a href="../../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;<a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&gt;&nbsp;keyManager)</code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(keyManager, Aead.class)</code> after registering the
-     <code>AeadWrapper</code> instead.</span></div>
-</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadWrapper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&gt;&nbsp;pset)</code>&nbsp;</td>
 </tr>
@@ -237,6 +221,101 @@
 <tr class="altColor">
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/KmsEnvelopeAead.html#KmsEnvelopeAead-com.google.crypto.tink.proto.KeyTemplate-com.google.crypto.tink.Aead-">KmsEnvelopeAead</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;dekTemplate,
                <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;remote)</code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.aead.subtle">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a> in <a href="../../../../../com/google/crypto/tink/aead/subtle/package-summary.html">com.google.crypto.tink.aead.subtle</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../com/google/crypto/tink/aead/subtle/package-summary.html">com.google.crypto.tink.aead.subtle</a> that implement <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></span></code>
+<div class="block">This primitive implements AES-GCM-SIV (as defined in RFC 8452) using JCE.</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/aead/subtle/package-summary.html">com.google.crypto.tink.aead.subtle</a> that return <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AesGcmFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/subtle/AesGcmFactory.html#createAead-byte:A-">createAead</a></span>(byte[]&nbsp;symmetricKey)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AeadFactory.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/subtle/AeadFactory.html#createAead-byte:A-">createAead</a></span>(byte[]&nbsp;symmetricKey)</code>
+<div class="block">Creates a new <code>Aead</code>-primitive that uses the key material given in <code>symmetricKey</code>,
+ which must be of length <a href="../../../../../com/google/crypto/tink/aead/subtle/AeadFactory.html#getKeySizeInBytes--"><code>AeadFactory.getKeySizeInBytes()</code></a>.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.integration.awskms">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a> in <a href="../../../../../com/google/crypto/tink/integration/awskms/package-summary.html">com.google.crypto.tink.integration.awskms</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../com/google/crypto/tink/integration/awskms/package-summary.html">com.google.crypto.tink.integration.awskms</a> that implement <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/integration/awskms/AwsKmsAead.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsAead</a></span></code>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> that forwards encryption/decryption requests to a key in <a
+ href="https://aws.amazon.com/kms/">AWS KMS</a>.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.integration.gcpkms">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a> in <a href="../../../../../com/google/crypto/tink/integration/gcpkms/package-summary.html">com.google.crypto.tink.integration.gcpkms</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../com/google/crypto/tink/integration/gcpkms/package-summary.html">com.google.crypto.tink.integration.gcpkms</a> that implement <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsAead</a></span></code>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> that forwards encryption/decryption requests to a key in <a
+ href="https://cloud.google.com/kms/">Google Cloud KMS</a>.</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/integration/gcpkms/package-summary.html">com.google.crypto.tink.integration.gcpkms</a> that return <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
+<td class="colLast"><span class="typeNameLabel">GcpKmsClient.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#getAead-java.lang.String-">getAead</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;uri)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>
