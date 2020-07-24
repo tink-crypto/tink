@@ -23,20 +23,20 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/streamingaead/subtle"
 	"github.com/google/tink/go/testutil"
-	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
+	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_streaming_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-var aesGCMHKDFKeySizes = []uint32{16, 32}
+var aesCTRHMACKeySizes = []uint32{16, 32}
 
-func TestAESGCMHKDFGetPrimitiveBasic(t *testing.T) {
-	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACGetPrimitiveBasic(t *testing.T) {
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
-	for _, keySize := range aesGCMHKDFKeySizes {
-		key := testutil.NewAESGCMHKDFKey(testutil.AESGCMHKDFKeyVersion, keySize, keySize, commonpb.HashType_SHA256, 4096)
+	for _, keySize := range aesCTRHMACKeySizes {
+		key := testutil.NewAESCTRHMACKey(testutil.AESCTRHMACKeyVersion, keySize, commonpb.HashType_SHA256, keySize, commonpb.HashType_SHA256, 16, 4096)
 		serializedKey, err := proto.Marshal(key)
 		if err != nil {
 			t.Errorf("failed to marshal key: %s", err)
@@ -45,19 +45,19 @@ func TestAESGCMHKDFGetPrimitiveBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
-		if err := validatePrimitive(p, key); err != nil {
+		if err := validateAESCTRHMACPrimitive(p, key); err != nil {
 			t.Errorf("%s", err)
 		}
 	}
 }
 
-func TestAESGCMHKDFGetPrimitiveWithInvalidInput(t *testing.T) {
-	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACGetPrimitiveWithInvalidInput(t *testing.T) {
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
 
-	testKeys := genInvalidAESGCMHKDFKeys()
+	testKeys := genInvalidAESCTRHMACKeys()
 	for i := 0; i < len(testKeys); i++ {
 		serializedKey, err := proto.Marshal(testKeys[i])
 		if err != nil {
@@ -76,12 +76,12 @@ func TestAESGCMHKDFGetPrimitiveWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestAESGCMHKDFNewKeyMultipleTimes(t *testing.T) {
-	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACNewKeyMultipleTimes(t *testing.T) {
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
-	format := testutil.NewAESGCMHKDFKeyFormat(32, 32, commonpb.HashType_SHA256, 4096)
+	format := testutil.NewAESCTRHMACKeyFormat(32, commonpb.HashType_SHA256, 32, commonpb.HashType_SHA256, 16, 4096)
 	serializedFormat, err := proto.Marshal(format)
 	if err != nil {
 		t.Errorf("failed to marshal key: %s", err)
@@ -105,18 +105,13 @@ func TestAESGCMHKDFNewKeyMultipleTimes(t *testing.T) {
 	}
 }
 
-func TestAESGCMHKDFNewKeyBasic(t *testing.T) {
-	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACNewKeyBasic(t *testing.T) {
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
-	for _, keySize := range aesGCMHKDFKeySizes {
-		format := testutil.NewAESGCMHKDFKeyFormat(
-			keySize,
-			keySize,
-			commonpb.HashType_SHA256,
-			4096,
-		)
+	for _, keySize := range aesCTRHMACKeySizes {
+		format := testutil.NewAESCTRHMACKeyFormat(keySize, commonpb.HashType_SHA256, keySize, commonpb.HashType_SHA256, 16, 4096)
 		serializedFormat, err := proto.Marshal(format)
 		if err != nil {
 			t.Errorf("failed to marshal key: %s", err)
@@ -125,20 +120,20 @@ func TestAESGCMHKDFNewKeyBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
-		key := m.(*gcmhkdfpb.AesGcmHkdfStreamingKey)
-		if err := validateAESGCMHKDFKey(key, format); err != nil {
+		key := m.(*ctrhmacpb.AesCtrHmacStreamingKey)
+		if err := validateAESCTRHMACKey(key, format); err != nil {
 			t.Errorf("%s", err)
 		}
 	}
 }
 
-func TestAESGCMHKDFNewKeyWithInvalidInput(t *testing.T) {
-	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACNewKeyWithInvalidInput(t *testing.T) {
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
 	// bad format
-	badFormats := genInvalidAESGCMHKDFKeyFormats()
+	badFormats := genInvalidAESCTRHMACKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
 		serializedFormat, err := proto.Marshal(badFormats[i])
 		if err != nil {
@@ -158,18 +153,13 @@ func TestAESGCMHKDFNewKeyWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestAESGCMHKDFNewKeyDataBasic(t *testing.T) {
-	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACNewKeyDataBasic(t *testing.T) {
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
-	for _, keySize := range aesGCMHKDFKeySizes {
-		format := testutil.NewAESGCMHKDFKeyFormat(
-			keySize,
-			keySize,
-			commonpb.HashType_SHA256,
-			4096,
-		)
+	for _, keySize := range aesCTRHMACKeySizes {
+		format := testutil.NewAESCTRHMACKeyFormat(keySize, commonpb.HashType_SHA256, keySize, commonpb.HashType_SHA256, 16, 4096)
 		serializedFormat, err := proto.Marshal(format)
 		if err != nil {
 			t.Errorf("failed to marshal key: %s", err)
@@ -178,28 +168,28 @@ func TestAESGCMHKDFNewKeyDataBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
-		if keyData.TypeUrl != testutil.AESGCMHKDFTypeURL {
+		if keyData.TypeUrl != testutil.AESCTRHMACTypeURL {
 			t.Errorf("incorrect type url")
 		}
 		if keyData.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
 			t.Errorf("incorrect key material type")
 		}
-		key := new(gcmhkdfpb.AesGcmHkdfStreamingKey)
+		key := new(ctrhmacpb.AesCtrHmacStreamingKey)
 		if err := proto.Unmarshal(keyData.Value, key); err != nil {
 			t.Errorf("incorrect key value")
 		}
-		if err := validateAESGCMHKDFKey(key, format); err != nil {
+		if err := validateAESCTRHMACKey(key, format); err != nil {
 			t.Errorf("%s", err)
 		}
 	}
 }
 
-func TestAESGCMHKDFNewKeyDataWithInvalidInput(t *testing.T) {
-	km, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACNewKeyDataWithInvalidInput(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
-	badFormats := genInvalidAESGCMHKDFKeyFormats()
+	badFormats := genInvalidAESCTRHMACKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
 		serializedFormat, err := proto.Marshal(badFormats[i])
 		if err != nil {
@@ -219,54 +209,57 @@ func TestAESGCMHKDFNewKeyDataWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestAESGCMHKDFDoesSupport(t *testing.T) {
-	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACDoesSupport(t *testing.T) {
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
-	if !keyManager.DoesSupport(testutil.AESGCMHKDFTypeURL) {
-		t.Errorf("AESGCMHKDFKeyManager must support %s", testutil.AESGCMHKDFTypeURL)
+	if !keyManager.DoesSupport(testutil.AESCTRHMACTypeURL) {
+		t.Errorf("AESCTRHMACKeyManager must support %s", testutil.AESCTRHMACTypeURL)
 	}
 	if keyManager.DoesSupport("some bad type") {
-		t.Errorf("AESGCMHKDFKeyManager must support only %s", testutil.AESGCMHKDFTypeURL)
+		t.Errorf("AESCTRHMACKeyManager must support only %s", testutil.AESCTRHMACTypeURL)
 	}
 }
 
-func TestAESGCMHKDFTypeURL(t *testing.T) {
-	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
+func TestAESCTRHMACTypeURL(t *testing.T) {
+	keyManager, err := registry.GetKeyManager(testutil.AESCTRHMACTypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
+		t.Errorf("cannot obtain AES-CTR-HMAC key manager: %s", err)
 	}
-	if keyManager.TypeURL() != testutil.AESGCMHKDFTypeURL {
+	if keyManager.TypeURL() != testutil.AESCTRHMACTypeURL {
 		t.Errorf("incorrect key type")
 	}
 }
 
-func genInvalidAESGCMHKDFKeys() []proto.Message {
+func genInvalidAESCTRHMACKeys() []proto.Message {
 	return []proto.Message{
-		// not a AESGCMHKDFKey
-		testutil.NewAESGCMHKDFKeyFormat(32, 32, commonpb.HashType_SHA256, 4096),
+		// not a AESCTRHMACKey
+		testutil.NewAESCTRHMACKeyFormat(32, commonpb.HashType_SHA256, 32, commonpb.HashType_SHA256, 16, 4096),
+
 		// bad key size
-		testutil.NewAESGCMHKDFKey(testutil.AESGCMKeyVersion, 17, 16, commonpb.HashType_SHA256, 4096),
-		testutil.NewAESGCMHKDFKey(testutil.AESGCMKeyVersion, 16, 17, commonpb.HashType_SHA256, 4096),
-		testutil.NewAESGCMHKDFKey(testutil.AESGCMKeyVersion, 33, 33, commonpb.HashType_SHA256, 4096),
+		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion, 17, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
+		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion, 16, commonpb.HashType_SHA256, 17, commonpb.HashType_SHA256, 16, 4096),
+		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion, 33, commonpb.HashType_SHA256, 33, commonpb.HashType_SHA256, 16, 4096),
+
 		// bad version
-		testutil.NewAESGCMHKDFKey(testutil.AESGCMKeyVersion+1, 16, 16, commonpb.HashType_SHA256, 4096),
+		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion+1, 16, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
 	}
 }
 
-func genInvalidAESGCMHKDFKeyFormats() []proto.Message {
+func genInvalidAESCTRHMACKeyFormats() []proto.Message {
 	return []proto.Message{
 		// not AESGCMKeyFormat
-		testutil.NewAESGCMHKDFKey(testutil.AESGCMKeyVersion, 16, 16, commonpb.HashType_SHA256, 16),
+		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion, 16, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
+
 		// invalid key size
-		testutil.NewAESGCMHKDFKeyFormat(17, 16, commonpb.HashType_SHA256, 4096),
-		testutil.NewAESGCMHKDFKeyFormat(16, 17, commonpb.HashType_SHA256, 4096),
-		testutil.NewAESGCMHKDFKeyFormat(33, 33, commonpb.HashType_SHA256, 4096),
+		testutil.NewAESCTRHMACKeyFormat(17, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
+		testutil.NewAESCTRHMACKeyFormat(16, commonpb.HashType_SHA256, 17, commonpb.HashType_SHA256, 16, 4096),
+		testutil.NewAESCTRHMACKeyFormat(33, commonpb.HashType_SHA256, 33, commonpb.HashType_SHA256, 16, 4096),
 	}
 }
 
-func validateAESGCMHKDFKey(key *gcmhkdfpb.AesGcmHkdfStreamingKey, format *gcmhkdfpb.AesGcmHkdfStreamingKeyFormat) error {
+func validateAESCTRHMACKey(key *ctrhmacpb.AesCtrHmacStreamingKey, format *ctrhmacpb.AesCtrHmacStreamingKeyFormat) error {
 	if uint32(len(key.KeyValue)) != format.KeySize {
 		return fmt.Errorf("incorrect key size")
 	}
@@ -283,21 +276,23 @@ func validateAESGCMHKDFKey(key *gcmhkdfpb.AesGcmHkdfStreamingKey, format *gcmhkd
 		return fmt.Errorf("incorrect HKDF hash type")
 	}
 	// try to encrypt and decrypt
-	p, err := subtle.NewAESGCMHKDF(
+	p, err := subtle.NewAESCTRHMAC(
 		key.KeyValue,
 		key.Params.HkdfHashType.String(),
 		int(key.Params.DerivedKeySize),
+		key.Params.HmacParams.Hash.String(),
+		int(key.Params.HmacParams.TagSize),
 		int(key.Params.CiphertextSegmentSize),
 		0,
 	)
 	if err != nil {
 		return fmt.Errorf("invalid key")
 	}
-	return validatePrimitive(p, key)
+	return validateAESCTRHMACPrimitive(p, key)
 }
 
-func validatePrimitive(p interface{}, key *gcmhkdfpb.AesGcmHkdfStreamingKey) error {
-	cipher := p.(*subtle.AESGCMHKDF)
+func validateAESCTRHMACPrimitive(p interface{}, key *ctrhmacpb.AesCtrHmacStreamingKey) error {
+	cipher := p.(*subtle.AESCTRHMAC)
 	if !bytes.Equal(cipher.MainKey, key.KeyValue) {
 		return fmt.Errorf("main key and primitive don't match")
 	}

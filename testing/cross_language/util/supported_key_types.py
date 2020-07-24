@@ -62,7 +62,7 @@ SUPPORTED_LANGUAGES = {
     'ChaCha20Poly1305Key': ['java', 'go'],
     'XChaCha20Poly1305Key': ['cc', 'java', 'go', 'python'],
     'AesSivKey': ['cc', 'java', 'go', 'python'],
-    'AesCtrHmacStreamingKey': ['cc', 'java'],
+    'AesCtrHmacStreamingKey': ['cc', 'java', 'go'],
     'AesGcmHkdfStreamingKey': ['cc', 'java', 'go'],
     'EciesAeadHkdfPrivateKey': ['cc', 'java', 'go', 'python'],
     'HmacKey': ['cc', 'java', 'go', 'python'],

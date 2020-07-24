@@ -117,4 +117,9 @@ const (
 	AESGCMHKDFKeyVersion = 0
 	// AESGCMHKDFTypeURL is the type URL of AES-GCM-HKDF keys that Tink supports.
 	AESGCMHKDFTypeURL = "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey"
+
+	// AESCTRHMACKeyVersion is the maximum version of AES-CTR-HMAC keys that Tink supports.
+	AESCTRHMACKeyVersion = 0
+	// AESCTRHMACTypeURL is the type URL of AES-CTR-HMAC keys that Tink supports.
+	AESCTRHMACTypeURL = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey"
 )
