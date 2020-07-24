@@ -1,0 +1,92 @@
+licenses(["notice"])
+
+java_test(
+    name = "CreatePublicKeysetCommandTest",
+    size = "small",
+    srcs = ["CreatePublicKeysetCommandTest.java"],
+    data = [
+        "@tink_base//testdata:credentials",
+    ],
+    deps = [
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:create_public_keyset_command",
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:config",
+        "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:public_key_sign",
+        "@tink_java//src/main/java/com/google/crypto/tink:public_key_verify",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:random",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
+    ],
+)
+
+java_test(
+    name = "CreateKeysetCommandTest",
+    size = "small",
+    srcs = ["CreateKeysetCommandTest.java"],
+    data = [
+        "@tink_base//testdata:credentials",
+    ],
+    deps = [
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:create_keyset_command",
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:config",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
+    ],
+)
+
+java_test(
+    name = "AddKeyCommandTest",
+    size = "small",
+    srcs = ["AddKeyCommandTest.java"],
+    data = [
+        "@tink_base//testdata:credentials",
+    ],
+    deps = [
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:add_key_command",
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:config",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
+    ],
+)
+
+java_test(
+    name = "RotateKeysetCommandTest",
+    size = "small",
+    srcs = ["RotateKeysetCommandTest.java"],
+    data = [
+        "@tink_base//testdata:credentials",
+    ],
+    deps = [
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:rotate_keyset_command",
+        "//tinkey/src/main/java/com/google/crypto/tink/tinkey:tinkey_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:config",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
+    ],
+)
