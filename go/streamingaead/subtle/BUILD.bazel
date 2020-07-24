@@ -3,6 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = [
+        "aes_ctr_hmac.go",
         "aes_gcm_hkdf.go",
         "subtle.go",
     ],
@@ -10,6 +11,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//aead/subtle:go_default_library",
+        "//mac/subtle:go_default_library",
         "//streamingaead/subtle/noncebased:go_default_library",
         "//subtle:go_default_library",
         "//subtle/random:go_default_library",
@@ -19,6 +21,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
+        "aes_ctr_hmac_test.go",
         "aes_gcm_hkdf_test.go",
         "subtle_test.go",
     ],
