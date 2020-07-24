@@ -17,6 +17,12 @@ Currently, this includes binary wheels for:
 *   Linux: Python 3.7, Python 3.8
 *   MacOs: Python 3.7, Python 3.8
 
+### Common setup issues
+
+*   If you get an error regarding the root certs when using the GCP KMS
+    integration, you will have to install the
+    [root certs](https://github.com/googleapis/google-cloud-cpp/blob/master/google/cloud/bigtable/examples/README.md#configure-grpc-root-certificates).
+
 ## Building from source
 
 Tink currently supports two build systems for the use with Python:
