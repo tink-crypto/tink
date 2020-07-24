@@ -35,7 +35,7 @@ java_binary(
     deps = [
         ":cli_util",
         ":compare_keysets",
-        "@tink_java//:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
     ],
