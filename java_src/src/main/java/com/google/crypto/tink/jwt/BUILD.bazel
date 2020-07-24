@@ -14,6 +14,13 @@ java_library(
 java_library(
     name = "jwt",
     srcs = ["Jwt.java"],
+    deps = [
+        ":jwt_expired_exception",
+        ":jwt_names",
+        ":jwt_not_before_exception",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:org_json_json",
+    ],
 )
 
 java_library(
@@ -30,4 +37,14 @@ java_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:org_json_json",
     ],
+)
+
+java_library(
+    name = "jwt_not_before_exception",
+    srcs = ["JwtNotBeforeException.java"],
+)
+
+java_library(
+    name = "jwt_expired_exception",
+    srcs = ["JwtExpiredException.java"],
 )
