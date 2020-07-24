@@ -21,7 +21,7 @@ import (
 	"github.com/google/tink/go/streamingaead/subtle"
 )
 
-func TestEncryptDecrypt(t *testing.T) {
+func TestAESGCMHKDFEncryptDecrypt(t *testing.T) {
 	testCases := []struct {
 		name               string
 		keySizeInBytes     int
@@ -210,7 +210,7 @@ func TestEncryptDecrypt(t *testing.T) {
 	}
 }
 
-func TestModifiedCiphertext(t *testing.T) {
+func TestAESGCMHKDFModifiedCiphertext(t *testing.T) {
 	ikm, err := hex.DecodeString("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff")
 	if err != nil {
 		t.Fatal(err)

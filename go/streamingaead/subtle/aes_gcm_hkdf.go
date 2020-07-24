@@ -17,65 +17,34 @@ package subtle
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
-	"math"
 
 	subtleaead "github.com/google/tink/go/aead/subtle"
+	"github.com/google/tink/go/streamingaead/subtle/noncebased"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 )
 
 const (
-	// AESGCMHKDFNonceSizeInBytes is the size of the IVs for GCM.
+	// AESGCMHKDFNonceSizeInBytes is the size of the nonces used for GCM.
 	AESGCMHKDFNonceSizeInBytes = 12
 
-	// AESGCMHKDFNoncePrefixInBytes is the nonce, which has the format:
-	//
-	//   nonce_prefix || ctr || last_block.
-	//
-	// The nonce_prefix is constant for the whole file.
-	//
-	// The ctr is a 32 bit ctr.
-	//
-	// last_block is 1 if this is the last block of the file and 0 otherwise.
-	AESGCMHKDFNoncePrefixInBytes = 7
+	// AESGCMHKDFNoncePrefixSizeInBytes is the size of the randomly generated
+	// nonce prefix.
+	AESGCMHKDFNoncePrefixSizeInBytes = 7
 
 	// AESGCMHKDFTagSizeInBytes is the size of the tags of each ciphertext
 	// segment.
 	AESGCMHKDFTagSizeInBytes = 16
 )
 
-// AESGCMHKDF implements streaming encryption using AES-GCM with HKDF as the
-// key derivation function.
+// AESGCMHKDF implements streaming AEAD encryption using AES-GCM.
 //
-// Each ciphertext uses a new AES-GCM key that is derived from the key
-// derivation key, a randomly chosen salt of the same size as the key and a
-// nonce prefix.
-//
-// The format of a ciphertext is:
-//
-//   header || segment_0 || segment_1 || ... || segment_k.
-//
-// The format of header is:
-//
-//   headerLength || salt || prefix
-//
-// headerLength is 1 byte determining the size of the header and can be
-// obtained via HeaderLength(). In principle headerLength is redundant
-// information, since the length of the header can be determined from the key
-// size.
-//
-// salt is a salt used in the key derivation.
-//
-// prefix is the prefix of the nonce.
-//
-// segment_i is the i-th segment of the ciphertext. The size of segment_1 ..
-// segment_{k-1} is ciphertextSegmentSize. segment_0 is shorter, so that
-// segment_0 plus additional data of size firstCiphertextSegmentOffset (e.g.
-// the header) aligns with ciphertextSegmentSize.
+// Each ciphertext uses a new AES-GCM key. These keys are derived using HKDF
+// and are derived from the key derivation key, a randomly chosen salt of the
+// same size as the key and a nonce prefix.
 type AESGCMHKDF struct {
 	MainKey                      []byte
 	hkdfAlg                      string
@@ -90,7 +59,7 @@ type AESGCMHKDF struct {
 //
 // mainKey is an input keying material used to derive sub keys.
 //
-// hkdfAlg is a JCE MAC algorithm name, e.g., HmacSha256, used for the HKDF key
+// hkdfAlg is a MAC algorithm name, e.g., HmacSha256, used for the HKDF key
 // derivation.
 //
 // keySizeInBytes argument is a key size of the sub keys.
@@ -98,9 +67,6 @@ type AESGCMHKDF struct {
 // ciphertextSegmentSize argument is the size of ciphertext segments.
 //
 // firstSegmentOffset argument is the offset of the first ciphertext segment.
-// That means the first segment has size:
-//
-//   ciphertextSegmentSize - HeaderLength() - firstSegmentOffset
 func NewAESGCMHKDF(
 	mainKey []byte,
 	hkdfAlg string,
@@ -114,7 +80,7 @@ func NewAESGCMHKDF(
 	if err := subtleaead.ValidateAESKeySize(uint32(keySizeInBytes)); err != nil {
 		return nil, err
 	}
-	headerLen := 1 + keySizeInBytes + AESGCMHKDFNoncePrefixInBytes
+	headerLen := 1 + keySizeInBytes + AESGCMHKDFNoncePrefixSizeInBytes
 	if ciphertextSegmentSize <= firstSegmentOffset+headerLen+AESGCMHKDFTagSizeInBytes {
 		return nil, errors.New("ciphertextSegmentSize too small")
 	}
@@ -134,7 +100,7 @@ func NewAESGCMHKDF(
 
 // HeaderLength returns the length of the encryption header.
 func (a *AESGCMHKDF) HeaderLength() int {
-	return 1 + a.keySizeInBytes + AESGCMHKDFNoncePrefixInBytes
+	return 1 + a.keySizeInBytes + AESGCMHKDFNoncePrefixSizeInBytes
 }
 
 // deriveKey returns a key derived from the given main key using salt and aad
@@ -156,24 +122,15 @@ func (a *AESGCMHKDF) newCipher(key []byte) (cipher.AEAD, error) {
 	return aesGCMCipher, nil
 }
 
-func (a *AESGCMHKDF) generateSegmentNonce(noncePrefix []byte, segmentNr uint64, last bool) ([]byte, error) {
-	if segmentNr >= math.MaxUint32 {
-		return nil, errors.New("too many segments")
-	}
+type aesGCMHKDFSegmentEncrypter struct {
+	noncebased.SegmentEncrypter
+	cipher cipher.AEAD
+}
 
-	var l byte
-	if last {
-		l = 1
-	}
-
-	nonce := make([]byte, AESGCMHKDFNonceSizeInBytes)
-	offset := 0
-	copy(nonce, noncePrefix)
-	offset += len(noncePrefix)
-	binary.BigEndian.PutUint32(nonce[offset:], uint32(segmentNr))
-	offset += 4
-	nonce[offset] = l
-	return nonce, nil
+func (e aesGCMHKDFSegmentEncrypter) EncryptSegment(segment, nonce []byte) ([]byte, error) {
+	result := make([]byte, len(segment))
+	result = e.cipher.Seal(result[0:0], nonce, segment, nil)
+	return result, nil
 }
 
 // aesGCMHKDFWriter works as a wrapper around underlying io.Writer, which is
@@ -181,17 +138,7 @@ func (a *AESGCMHKDF) generateSegmentNonce(noncePrefix []byte, segmentNr uint64, 
 // in segments of a given size.  Once all the data is written aesGCMHKDFWriter
 // must be closed.
 type aesGCMHKDFWriter struct {
-	aesGCMHKDF        *AESGCMHKDF
-	encryptedSegments uint64
-	noncePrefix       []byte
-	cipher            cipher.AEAD
-	wr                io.Writer
-
-	pt    []byte
-	ptPos int
-	ct    []byte
-
-	closed bool
+	*noncebased.Writer
 }
 
 // NewEncryptingWriter returns a wrapper around underlying io.Writer, such that
@@ -201,7 +148,7 @@ type aesGCMHKDFWriter struct {
 // for decryption.
 func (a *AESGCMHKDF) NewEncryptingWriter(w io.Writer, aad []byte) (io.WriteCloser, error) {
 	salt := random.GetRandomBytes(uint32(a.keySizeInBytes))
-	noncePrefix := random.GetRandomBytes(AESGCMHKDFNoncePrefixInBytes)
+	noncePrefix := random.GetRandomBytes(AESGCMHKDFNoncePrefixSizeInBytes)
 
 	dkey, err := a.deriveKey(salt, aad)
 	if err != nil {
@@ -221,75 +168,38 @@ func (a *AESGCMHKDF) NewEncryptingWriter(w io.Writer, aad []byte) (io.WriteClose
 		return nil, err
 	}
 
-	return &aesGCMHKDFWriter{
-		aesGCMHKDF:  a,
-		noncePrefix: noncePrefix,
-		cipher:      cipher,
-		wr:          w,
-
-		pt: make([]byte, a.plaintextSegmentSize),
-	}, nil
-}
-
-// Write encrypts passed data and passes the encrypted data to the underlying
-// writer.
-func (w *aesGCMHKDFWriter) Write(p []byte) (int, error) {
-	if w.closed {
-		return 0, errors.New("write on closed writer")
-	}
-
-	pos := 0
-	for {
-		ptLim := len(w.pt)
-		if w.encryptedSegments == 0 {
-			ptLim = len(w.pt) - w.aesGCMHKDF.firstCiphertextSegmentOffset
-		}
-		n := copy(w.pt[w.ptPos:ptLim], p[pos:])
-		w.ptPos += n
-		pos += n
-		if pos == len(p) {
-			break
-		}
-
-		nonce, err := w.aesGCMHKDF.generateSegmentNonce(w.noncePrefix, w.encryptedSegments, false)
-		if err != nil {
-			return 0, err
-		}
-
-		w.ct = w.cipher.Seal(w.ct[0:0], nonce, w.pt[:ptLim], nil)
-		if _, err := w.wr.Write(w.ct); err != nil {
-			return pos, err
-		}
-		w.ptPos = 0
-		w.encryptedSegments++
-	}
-	return pos, nil
-}
-
-// Close encrypts the remaining data, flushes it to the underlying writer and
-// closes this writer.
-func (w *aesGCMHKDFWriter) Close() error {
-	if w.closed {
-		return nil
-	}
-
-	nonce, err := w.aesGCMHKDF.generateSegmentNonce(w.noncePrefix, w.encryptedSegments, true)
+	nw, err := noncebased.NewWriter(noncebased.WriterParams{
+		W:                            w,
+		SegmentEncrypter:             aesGCMHKDFSegmentEncrypter{cipher: cipher},
+		NonceSize:                    AESGCMHKDFNonceSizeInBytes,
+		NoncePrefix:                  noncePrefix,
+		PlaintextSegmentSize:         a.plaintextSegmentSize,
+		FirstCiphertextSegmentOffset: a.firstCiphertextSegmentOffset,
+	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	w.ct = w.cipher.Seal(w.ct[0:0], nonce, w.pt[0:w.ptPos], nil)
-	if _, err := w.wr.Write(w.ct); err != nil {
-		return err
+	return &aesGCMHKDFWriter{Writer: nw}, nil
+}
+
+type aesGCMHKDFSegmentDecrypter struct {
+	noncebased.SegmentDecrypter
+	cipher cipher.AEAD
+}
+
+func (d aesGCMHKDFSegmentDecrypter) DecryptSegment(segment, nonce []byte) ([]byte, error) {
+	result := make([]byte, 0, len(segment))
+	result, err := d.cipher.Open(result, nonce, segment, nil)
+	if err != nil {
+		return nil, err
 	}
-	w.ptPos = 0
-	w.encryptedSegments++
-	w.closed = true
-	return nil
+	return result, nil
 }
 
 // aesGCMHKDFReader works as a wrapper around underlying io.Reader.
 type aesGCMHKDFReader struct {
+	*noncebased.Reader
 	aesGCMHKDF        *AESGCMHKDF
 	decryptedSegments uint64
 	noncePrefix       []byte
@@ -319,7 +229,7 @@ func (a *AESGCMHKDF) NewDecryptingReader(r io.Reader, aad []byte) (io.Reader, er
 		return nil, fmt.Errorf("cannot read salt: %v", err)
 	}
 
-	noncePrefix := make([]byte, AESGCMHKDFNoncePrefixInBytes)
+	noncePrefix := make([]byte, AESGCMHKDFNoncePrefixSizeInBytes)
 	if _, err := io.ReadFull(r, noncePrefix); err != nil {
 		return nil, fmt.Errorf("cannot read noncePrefix: %v", err)
 	}
@@ -334,64 +244,17 @@ func (a *AESGCMHKDF) NewDecryptingReader(r io.Reader, aad []byte) (io.Reader, er
 		return nil, err
 	}
 
-	return &aesGCMHKDFReader{
-		aesGCMHKDF:       a,
-		noncePrefix:      noncePrefix,
-		cipher:           cipher,
-		underlyingReader: r,
-
-		// Allocate an extra byte to detect last segment.
-		ct: make([]byte, a.ciphertextSegmentSize+1),
-	}, nil
-}
-
-// Read decrypts data from underlying reader and passes it to p.
-func (r *aesGCMHKDFReader) Read(p []byte) (int, error) {
-	if r.ptPos < len(r.pt) {
-		n := copy(p, r.pt[r.ptPos:])
-		r.ptPos += n
-		return n, nil
-	}
-
-	ctLim := len(r.ct)
-	if r.decryptedSegments == 0 {
-		ctLim -= r.aesGCMHKDF.firstCiphertextSegmentOffset
-	}
-
-	n, err := io.ReadFull(r.underlyingReader, r.ct[r.ctPos:ctLim])
-	if err != nil && err != io.ErrUnexpectedEOF {
-		return 0, err
-	}
-	var (
-		lastSegment bool
-		segment     int
-	)
+	nr, err := noncebased.NewReader(noncebased.ReaderParams{
+		R:                            r,
+		SegmentDecrypter:             aesGCMHKDFSegmentDecrypter{cipher: cipher},
+		NonceSize:                    AESGCMHKDFNonceSizeInBytes,
+		NoncePrefix:                  noncePrefix,
+		CiphertextSegmentSize:        a.ciphertextSegmentSize,
+		FirstCiphertextSegmentOffset: a.firstCiphertextSegmentOffset,
+	})
 	if err != nil {
-		lastSegment = true
-		segment = r.ctPos + n
-	} else {
-		segment = r.ctPos + n - 1
-	}
-	nonce, err := r.aesGCMHKDF.generateSegmentNonce(r.noncePrefix, r.decryptedSegments, lastSegment)
-	if err != nil {
-		return 0, nil
+		return nil, err
 	}
 
-	r.pt, err = r.cipher.Open(r.pt[0:0], nonce, r.ct[:segment], nil)
-	if err != nil {
-		return 0, err
-	}
-
-	// Copy 1 byte remainder to the beginning of ct.
-	if !lastSegment {
-		r.ct[0] = r.ct[segment]
-		r.ctPos = 1
-	}
-
-	r.decryptedSegments++
-	r.ptPos = 0
-
-	n = copy(p, r.pt)
-	r.ptPos = n
-	return n, nil
+	return &aesGCMHKDFReader{Reader: nr}, nil
 }
