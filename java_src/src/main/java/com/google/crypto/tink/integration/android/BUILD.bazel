@@ -9,10 +9,10 @@ android_library(
     srcs = ["AndroidKeystoreKmsClient.java"],
     deps = [
         ":android_keystore_aes_gcm",
-        "//src/main/java/com/google/crypto/tink:core-android",
-        "//src/main/java/com/google/crypto/tink:primitives",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:kms_client",
         "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
     ],
 )
 
@@ -20,7 +20,7 @@ android_library(
     name = "android_keystore_aes_gcm",
     srcs = ["AndroidKeystoreAesGcm.java"],
     deps = [
-        "//src/main/java/com/google/crypto/tink:primitives",
+        "//src/main/java/com/google/crypto/tink:aead",
     ],
 )
 
@@ -29,8 +29,8 @@ android_library(
     srcs = ["SharedPrefKeysetWriter.java"],
     deps = [
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:core-android",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:keyset_writer-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
     ],
 )
 
@@ -39,8 +39,8 @@ android_library(
     srcs = ["SharedPrefKeysetReader.java"],
     deps = [
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink:core-android",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink:keyset_reader-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -61,18 +61,5 @@ android_library(
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_code_findbugs_jsr305",
-    ],
-)
-
-# Deprecated, will be removed soon.
-
-android_library(
-    name = "android",
-    exports = [
-        ":android_keyset_manager",
-        ":android_keystore_aes_gcm",
-        ":android_keystore_kms_client",
-        ":shared_pref_keyset_reader",
-        ":shared_pref_keyset_writer",
     ],
 )

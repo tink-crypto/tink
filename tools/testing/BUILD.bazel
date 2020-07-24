@@ -49,7 +49,7 @@ java_binary(
     ],
     main_class = "com.google.crypto.tink.testing.VersionCli",
     deps = [
-        "@tink_java//src/main/java/com/google/crypto/tink:core",
+        "@tink_java//src/main/java/com/google/crypto/tink:version",
     ],
 )
 
