@@ -25,14 +25,3 @@ set -x
 cd git*/tink-release
 
 source ./kokoro/run_tests.sh
-
-# Run all manual tests.
-(
-  cd java_src
-  time bazel test \
-    --strategy=TestRunner=standalone \
-    --test_timeout 10000 \
-    --test_output=all \
-    //src/test:java/com/google/crypto/tink/subtle/AesGcmJceTest \
-    //src/test:java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest
-)
