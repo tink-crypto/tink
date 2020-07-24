@@ -94,6 +94,42 @@ java_library(
 )
 
 java_library(
+    name = "aes_cmac_prf_key_manager",
+    srcs = ["AesCmacPrfKeyManager.java"],
+    deps = [
+        ":prf_set",
+        "//proto:aes_cmac_prf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:singleton_prf_set",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "aes_cmac_prf_key_manager-android",
+    srcs = ["AesCmacPrfKeyManager.java"],
+    deps = [
+        ":prf_set",
+        "//proto:aes_cmac_prf_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:key_template-android",
+        "//src/main/java/com/google/crypto/tink:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:singleton_prf_set",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+java_library(
     name = "prf_key_templates-android",
     srcs = ["PrfKeyTemplates.java"],
     deps = [

@@ -35,6 +35,24 @@ java_test(
 )
 
 java_test(
+    name = "AesCmacPrfKeyManagerTest",
+    size = "small",
+    srcs = ["AesCmacPrfKeyManagerTest.java"],
+    deps = [
+        "//proto:aes_cmac_prf_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "HkdfPrfKeyManagerTest",
     size = "small",
     srcs = ["HkdfPrfKeyManagerTest.java"],
