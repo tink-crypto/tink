@@ -48,3 +48,23 @@ java_library(
     name = "jwt_expired_exception",
     srcs = ["JwtExpiredException.java"],
 )
+
+java_library(
+    name = "jwt_validator",
+    srcs = ["JwtValidator.java"],
+    deps = [
+        ":jwt",
+        ":jwt_expired_exception",
+        ":jwt_invalid_exception",
+        ":jwt_names",
+        ":jwt_not_before_exception",
+        ":to_be_signed_jwt",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_library(
+    name = "jwt_invalid_exception",
+    srcs = ["JwtInvalidException.java"],
+)

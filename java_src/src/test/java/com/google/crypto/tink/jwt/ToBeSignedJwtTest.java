@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import java.time.Instant;
+import java.util.Optional;
 import org.json.JSONArray;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,19 +60,6 @@ public final class ToBeSignedJwtTest {
     ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
 
     assertThat(token.getHeader(JwtNames.HEADER_ALGORITHM)).isNull();
-  }
-
-  @Test
-  public void setAlgorithm_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().setAlgorithm("HS256").build();
-
-    assertThat(token.getHeader(JwtNames.HEADER_ALGORITHM)).isEqualTo("HS256");
-  }
-
-  @Test
-  public void setAlgorithm_badAlgorithm_shouldThrow() throws Exception {
-    assertThrows(
-        IllegalArgumentException.class, () -> new ToBeSignedJwt.Builder().setAlgorithm("blah"));
   }
 
   @Test
@@ -291,20 +279,34 @@ public final class ToBeSignedJwtTest {
   }
 
   @Test
-  public void compact_noAlgorithm_shouldThrow() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
-
-    assertThrows(IllegalStateException.class, token::compact);
-  }
-
-  @Test
   public void compact_success() throws Exception {
     // The encoded header -- the part before the first dot -- is copied from
     // https://tools.ietf.org/html/rfc7797#section-4.1.
     String expectedToken = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJibGFoIn0";
-    ToBeSignedJwt token =
-        new ToBeSignedJwt.Builder().setAlgorithm("HS256").setJwtId("blah").build();
+    ToBeSignedJwt token = new ToBeSignedJwt.Builder().setJwtId("blah").build();
+    String compact = token.compact("HS256", Optional.empty());
 
-    assertThat(token.compact()).isEqualTo(expectedToken);
+    assertThat(compact).isEqualTo(expectedToken);
+  }
+
+  @Test
+  public void compact_keyId_success() throws Exception {
+    ToBeSignedJwt expectedToken = new ToBeSignedJwt.Builder().setJwtId("blah").build();
+    String compact = expectedToken.compact("HS256", Optional.of("123"));
+    ToBeSignedJwt computedToken = new ToBeSignedJwt.Builder(compact).build();
+
+    assertThat(computedToken.getHeader(JwtNames.HEADER_ALGORITHM)).isEqualTo("HS256");
+    assertThat(computedToken.getHeader(JwtNames.HEADER_KEY_ID)).isEqualTo("123");
+  }
+
+  @Test
+  public void compact_doNotOverwriteKeyId_success() throws Exception {
+    ToBeSignedJwt expectedToken =
+        new ToBeSignedJwt.Builder().setKeyId("123").setJwtId("blah").build();
+    String compact = expectedToken.compact("HS256", Optional.of("456"));
+    ToBeSignedJwt computedToken = new ToBeSignedJwt.Builder(compact).build();
+
+    assertThat(computedToken.getHeader(JwtNames.HEADER_ALGORITHM)).isEqualTo("HS256");
+    assertThat(computedToken.getHeader(JwtNames.HEADER_KEY_ID)).isEqualTo("123");
   }
 }

@@ -18,6 +18,10 @@ import com.google.crypto.tink.subtle.Base64;
 import com.google.errorprone.annotations.Immutable;
 import java.nio.charset.Charset;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,12 +55,23 @@ public final class ToBeSignedJwt {
       payload = new JSONObject();
     }
 
-    Builder(ToBeSignedJwt token) {
+    Builder(String compact) {
+      String[] parts = compact.split("\\.");
+      if (parts.length != 2) {
+        throw new IllegalArgumentException(
+            "invalid compact JWT; must contain exactly 1 dot, but got " + compact);
+      }
+
       try {
-        header = new JSONObject(token.header.toString());
-        payload = new JSONObject(token.payload.toString());
+        this.header = new JSONObject(new String(Base64.urlSafeDecode(parts[0]), UTF_8));
       } catch (JSONException ex) {
-        throw new IllegalArgumentException(ex);
+        throw new IllegalArgumentException("invalid JWT header: " + ex);
+      }
+
+      try {
+        this.payload = new JSONObject(new String(Base64.urlSafeDecode(parts[1]), UTF_8));
+      } catch (JSONException ex) {
+        throw new IllegalArgumentException("invalid JWT payload: " + ex);
       }
     }
 
@@ -227,14 +242,6 @@ public final class ToBeSignedJwt {
   // These getter methods are not public because we don't want users to accidentally get claims or
   // headers from untrusted JWTs.
 
-  JSONObject getHeader() {
-    return header;
-  }
-
-  JSONObject getPayload() {
-    return payload;
-  }
-
   String getHeader(String name) {
     try {
       return header.getString(name);
@@ -243,12 +250,46 @@ public final class ToBeSignedJwt {
     }
   }
 
+  JSONObject getHeader() {
+    return header;
+  }
+
+  JSONObject getPayload() {
+    return payload;
+  }
+
   Object getClaim(String name) {
     try {
       return payload.get(name);
     } catch (JSONException ex) {
       return null;
     }
+  }
+
+  String getAlgorithm() {
+    try {
+      return header.getString(JwtNames.HEADER_ALGORITHM);
+    } catch (JSONException ex) {
+      throw new IllegalStateException("an alg header is required, but not found", ex);
+    }
+  }
+
+  List<String> getAudiences() {
+    JSONArray audiences = (JSONArray) getClaim(JwtNames.CLAIM_AUDIENCE);
+    if (audiences == null) {
+      return null;
+    }
+
+    List<String> result = new ArrayList<>(audiences.length());
+    for (int i = 0; i < audiences.length(); i++) {
+      try {
+        result.add(audiences.getString(i));
+      } catch (JSONException ex) {
+        throw new IllegalStateException("invalid audience", ex);
+      }
+    }
+
+    return Collections.unmodifiableList(result);
   }
 
   private Instant getInstant(String name) {
@@ -271,13 +312,30 @@ public final class ToBeSignedJwt {
     return getInstant(JwtNames.CLAIM_ISSUED_AT);
   }
 
-  /** Serializes the token in the JWS compact serialization format. */
-  String compact() {
-    if (this.getHeader(JwtNames.HEADER_ALGORITHM) == null) {
-      throw new IllegalStateException("algorithm is required");
+  /**
+   * Serializes the token in the JWS compact serialization format, described in
+   * https://tools.ietf.org/html/rfc7515#section-3.1.
+   *
+   * <p>If no key ID was set (using {@link Builder#setKeyId}), and {@code keyId} is present, the key
+   * ID will be set to {@code keyId}.
+   */
+  String compact(String alg, Optional<String> keyId) {
+    JSONObject copy;
+
+    try {
+      copy = new JSONObject(this.header.toString());
+      copy.put(JwtNames.HEADER_ALGORITHM, alg);
+
+      String existingKeyId = this.getHeader(JwtNames.HEADER_KEY_ID);
+      if (existingKeyId == null && keyId.isPresent()) {
+        copy.put(JwtNames.HEADER_KEY_ID, keyId.get());
+      }
+    } catch (JSONException ex) {
+      // Should never happen.
+      throw new IllegalStateException(ex);
     }
 
-    String headerStr = Base64.urlSafeEncode(this.header.toString().getBytes(UTF_8));
+    String headerStr = Base64.urlSafeEncode(copy.toString().getBytes(UTF_8));
     String payloadStr = Base64.urlSafeEncode(this.payload.toString().getBytes(UTF_8));
     return headerStr + "." + payloadStr;
   }
