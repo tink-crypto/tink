@@ -1,0 +1,49 @@
+licenses(["notice"])
+
+java_test(
+    name = "RsaKemTest",
+    size = "small",
+    srcs = ["RsaKemTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaKemHybridEncryptTest",
+    size = "medium",
+    srcs = ["RsaKemHybridEncryptTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/aead/subtle:aes_gcm_factory",
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem",
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem_hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem_hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaKemHybridDecryptTest",
+    size = "medium",
+    srcs = ["RsaKemHybridDecryptTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/aead/subtle:aes_gcm_factory",
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem",
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem_hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem_hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

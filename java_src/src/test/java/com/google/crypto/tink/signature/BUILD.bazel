@@ -1,0 +1,370 @@
+licenses(["notice"])
+
+java_test(
+    name = "PublicKeySignIntegrationTest",
+    size = "small",
+    srcs = ["PublicKeySignIntegrationTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "SigUtilTest",
+    size = "small",
+    srcs = ["SigUtilTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//src/main/java/com/google/crypto/tink/signature:sig_util",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaSsaPkcs1SignKeyManagerTest",
+    size = "large",
+    srcs = ["RsaSsaPkcs1SignKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:rsa_ssa_pkcs1_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:sig_util",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaSsaPkcs1VerifyKeyManagerTest",
+    size = "large",
+    srcs = ["RsaSsaPkcs1VerifyKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:rsa_ssa_pkcs1_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaSsaPssSignKeyManagerTest",
+    size = "large",
+    srcs = ["RsaSsaPssSignKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:rsa_ssa_pss_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:sig_util",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PublicKeyVerifyWrapperTest",
+    size = "small",
+    srcs = ["PublicKeyVerifyWrapperTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:public_key_sign_factory",
+        "//src/main/java/com/google/crypto/tink/signature:public_key_verify_wrapper",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "EcdsaSignKeyManagerTest",
+    size = "small",
+    srcs = ["EcdsaSignKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PublicKeyVerifyFactoryTest",
+    size = "small",
+    srcs = ["PublicKeyVerifyFactoryTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:public_key_sign_factory",
+        "//src/main/java/com/google/crypto/tink/signature:public_key_verify_factory",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "SignaturePemKeysetReaderTest",
+    size = "small",
+    srcs = ["SignaturePemKeysetReaderTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:rsa_ssa_pss_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:keyset_reader",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:signature_pem_keyset_reader",
+        "//src/main/java/com/google/crypto/tink/subtle:pem_key_type",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "SignatureConfigTest",
+    size = "small",
+    srcs = ["SignatureConfigTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaSsaPssVerifyKeyManagerTest",
+    size = "large",
+    srcs = ["RsaSsaPssVerifyKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:rsa_ssa_pss_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PublicKeySignFactoryTest",
+    size = "small",
+    srcs = ["PublicKeySignFactoryTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:public_key_sign_factory",
+        "//src/main/java/com/google/crypto/tink/signature:public_key_verify_factory",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Ed25519PublicKeyManagerTest",
+    size = "small",
+    srcs = ["Ed25519PublicKeyManagerTest.java"],
+    deps = [
+        "//proto:ed25519_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_private_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_public_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PublicKeyVerifyIntegrationTest",
+    size = "small",
+    srcs = ["PublicKeyVerifyIntegrationTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PublicKeySignWrapperTest",
+    size = "small",
+    srcs = ["PublicKeySignWrapperTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:public_key_sign_wrapper",
+        "//src/main/java/com/google/crypto/tink/signature:public_key_verify_factory",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "EcdsaVerifyKeyManagerTest",
+    size = "small",
+    srcs = ["EcdsaVerifyKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:sig_util",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Ed25519PrivateKeyManagerTest",
+    size = "small",
+    srcs = ["Ed25519PrivateKeyManagerTest.java"],
+    deps = [
+        "//proto:ed25519_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_private_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:ed25519_verify",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "SignatureKeyTemplatesTest",
+    size = "small",
+    srcs = ["SignatureKeyTemplatesTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:ecdsa_java_proto",
+        "//proto:rsa_ssa_pkcs1_java_proto",
+        "//proto:rsa_ssa_pss_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_private_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:junit_junit",
+    ],
+)

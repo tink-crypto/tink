@@ -555,6 +555,11 @@ template_rule(
     },
 )
 
+java_library(
+    name = "version",
+    srcs = [":version_java"],
+)
+
 # Deprecated rules, will be removed soon.
 
 full_protos = [

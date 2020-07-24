@@ -1,0 +1,13 @@
+licenses(["notice"])
+
+java_test(
+    name = "KeysDownloaderTest",
+    size = "small",
+    srcs = ["KeysDownloaderTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/util:keys_downloader",
+        "@maven//:com_google_api_client_google_api_client",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:junit_junit",
+    ],
+)

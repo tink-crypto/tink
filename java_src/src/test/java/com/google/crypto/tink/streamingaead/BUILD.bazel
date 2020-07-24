@@ -1,0 +1,137 @@
+licenses(["notice"])
+
+java_test(
+    name = "StreamingAeadIntegrationTest",
+    size = "small",
+    srcs = ["StreamingAeadIntegrationTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "StreamingAeadKeyTemplatesTest",
+    size = "small",
+    srcs = ["StreamingAeadKeyTemplatesTest.java"],
+    deps = [
+        "//proto:aes_ctr_hmac_streaming_java_proto",
+        "//proto:aes_gcm_hkdf_streaming_java_proto",
+        "//proto:common_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key_manager",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_key_manager",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "StreamingAeadUtilTest",
+    size = "small",
+    srcs = ["StreamingAeadUtilTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "StreamingAeadFactoryTest",
+    size = "small",
+    srcs = ["StreamingAeadFactoryTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_factory",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "StreamingAeadWrapperTest",
+    size = "small",
+    srcs = ["StreamingAeadWrapperTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_wrapper",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesGcmHkdfStreamingKeyManagerTest",
+    size = "small",
+    srcs = ["AesGcmHkdfStreamingKeyManagerTest.java"],
+    deps = [
+        "//proto:aes_gcm_hkdf_streaming_java_proto",
+        "//proto:common_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesCtrHmacStreamingKeyManagerTest",
+    size = "small",
+    srcs = ["AesCtrHmacStreamingKeyManagerTest.java"],
+    deps = [
+        "//proto:aes_ctr_hmac_streaming_java_proto",
+        "//proto:common_java_proto",
+        "//proto:hmac_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key_manager",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "StreamingAeadConfigTest",
+    size = "small",
+    srcs = ["StreamingAeadConfigTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

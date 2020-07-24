@@ -1,0 +1,637 @@
+licenses(["notice"])
+
+java_test(
+    name = "Ed25519SignTest",
+    size = "small",
+    srcs = ["Ed25519SignTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:ed25519_sign",
+        "//src/main/java/com/google/crypto/tink/subtle:ed25519_verify",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "EcdsaVerifyJceTest",
+    size = "small",
+    srcs = ["EcdsaVerifyJceTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "EcdsaSignJceTest",
+    size = "small",
+    srcs = ["EcdsaSignJceTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaSsaPssVerifyJceTest",
+    size = "small",
+    srcs = ["RsaSsaPssVerifyJceTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "BytesTest",
+    size = "small",
+    srcs = ["BytesTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "EngineFactoryTest",
+    size = "small",
+    srcs = ["EngineFactoryTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Ed25519VerifyTest",
+    size = "small",
+    srcs = ["Ed25519VerifyTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:ed25519_verify",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "HkdfTest",
+    size = "small",
+    srcs = ["HkdfTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:hkdf",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AeadThreadSafetyTest",
+    size = "small",
+    srcs = ["AeadThreadSafetyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/subtle:encrypt_then_authenticate",
+        "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:x_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Ed25519Test",
+    size = "small",
+    srcs = ["Ed25519Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:ed25519_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:field25519",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaSsaPkcs1SignJceTest",
+    size = "large",
+    srcs = ["RsaSsaPkcs1SignJceTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_sign_jce",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaSsaPssSignJceTest",
+    size = "large",
+    srcs = ["RsaSsaPssSignJceTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_sign_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesEaxJceTest",
+    size = "small",
+    srcs = ["AesEaxJceTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "DaeadThreadSafetyTest",
+    size = "small",
+    srcs = ["DaeadThreadSafetyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesGcmHkdfStreamingTest",
+    size = "large",
+    srcs = ["AesGcmHkdfStreamingTest.java"],
+    tags = ["notsan"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_hkdf_streaming",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ValidatorsTest",
+    size = "small",
+    srcs = ["ValidatorsTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "EncryptThenAuthenticateTest",
+    size = "small",
+    srcs = ["EncryptThenAuthenticateTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/subtle:encrypt_then_authenticate",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "SubtleUtilTest",
+    size = "small",
+    srcs = ["SubtleUtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesSivTest",
+    size = "small",
+    srcs = ["AesSivTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_util",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "PrfHmacJceTest",
+    size = "small",
+    srcs = ["PrfHmacJceTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "KwpTest",
+    size = "small",
+    srcs = ["KwpTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_wrap",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:kwp",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "ImmutableByteArrayTest",
+    size = "small",
+    srcs = ["ImmutableByteArrayTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:immutable_byte_array",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ChaCha20Poly1305Test",
+    size = "small",
+    srcs = ["ChaCha20Poly1305Test.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    tags = ["notsan"],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "AesGcmJceTest",
+    size = "medium",
+    srcs = ["AesGcmJceTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    tags = ["notsan"],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "PrfAesCmacTest",
+    size = "small",
+    srcs = ["PrfAesCmacTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "StreamingAeadThreadSafetyTest",
+    size = "small",
+    srcs = ["StreamingAeadThreadSafetyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_hkdf_streaming",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RsaSsaPkcs1VerifyJceTest",
+    size = "small",
+    srcs = ["RsaSsaPkcs1VerifyJceTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "AesCtrJceCipherTest",
+    size = "small",
+    srcs = ["AesCtrJceCipherTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "XChaCha20Test",
+    size = "small",
+    srcs = ["XChaCha20Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:cha_cha20",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:x_cha_cha20",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Field25519Test",
+    size = "small",
+    srcs = ["Field25519Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:field25519",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "XChaCha20Poly1305Test",
+    size = "large",
+    srcs = ["XChaCha20Poly1305Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:x_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RewindableReadableByteChannelTest",
+    size = "small",
+    srcs = ["RewindableReadableByteChannelTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:rewindable_readable_byte_channel",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ChaCha20Test",
+    size = "small",
+    srcs = ["ChaCha20Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:cha_cha20",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PemKeyTypeTest",
+    size = "small",
+    srcs = ["PemKeyTypeTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:pem_key_type",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "EllipticCurvesTest",
+    size = "small",
+    srcs = ["EllipticCurvesTest.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
+
+java_test(
+    name = "AesCtrHmacStreamingTest",
+    size = "medium",
+    srcs = ["AesCtrHmacStreamingTest.java"],
+    tags = ["notsan"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Poly1305Test",
+    size = "small",
+    srcs = ["Poly1305Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:poly1305",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesUtilTest",
+    size = "small",
+    srcs = ["AesUtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:aes_util",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "SignatureThreadSafetyTest",
+    size = "small",
+    srcs = ["SignatureThreadSafetyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:ed25519_sign",
+        "//src/main/java/com/google/crypto/tink/subtle:ed25519_verify",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "X25519Test",
+    size = "small",
+    srcs = ["X25519Test.java"],
+    data = [
+        "@wycheproof//testvectors:all",
+    ],
+    runtime_deps = [
+        "@maven//:org_json_json",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "@maven//:junit_junit",
+        "@maven//:org_json_json",
+    ],
+)
