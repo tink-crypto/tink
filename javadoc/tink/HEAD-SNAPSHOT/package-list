@@ -6,8 +6,6 @@ com.google.crypto.tink.config
 com.google.crypto.tink.daead
 com.google.crypto.tink.hybrid
 com.google.crypto.tink.hybrid.subtle
-com.google.crypto.tink.integration.awskms
-com.google.crypto.tink.integration.gcpkms
 com.google.crypto.tink.jwt
 com.google.crypto.tink.mac
 com.google.crypto.tink.prf
