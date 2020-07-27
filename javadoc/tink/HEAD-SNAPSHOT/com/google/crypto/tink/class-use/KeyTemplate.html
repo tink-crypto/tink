@@ -333,8 +333,48 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AesCmacPrfKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#aes256CmacTemplate--">aes256CmacTemplate</a></span>()</code>
+<div class="block">Returns a <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of AES-CMAC keys with the following
+ parameters:
+
+ 
+   Key size: 32 bytes
+   Prefix type: <code>KeyTemplate.OutputPrefixType#RAW</code>
+ 
+
+ .</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">HkdfPrfKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/HkdfPrfKeyManager.html#hkdfSha256Template--">hkdfSha256Template</a></span>()</code>
 <div class="block">Generates a <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> for HKDF-PRF keys with the following parameters.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">HmacPrfKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/HmacPrfKeyManager.html#hmacSha256Template--">hmacSha256Template</a></span>()</code>
+<div class="block">Returns a <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of HMAC keys with the following
+ parameters:
+
+ 
+   Key size: 32 bytes
+   Hash function: SHA256
+   Prefix type: <code>KeyTemplate.OutputPrefixType#RAW</code>
+ </div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">HmacPrfKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/HmacPrfKeyManager.html#hmacSha512Template--">hmacSha512Template</a></span>()</code>
+<div class="block">Returns a <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of HMAC keys with the following
+ parameters:
+
+ 
+   Key size: 64 bytes
+   Hash function: SHA512
+   Prefix type: <code>KeyTemplate.OutputPrefixType#RAW</code>
+ </div>
 </td>
 </tr>
 </tbody>
