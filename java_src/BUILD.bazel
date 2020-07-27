@@ -83,8 +83,6 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem",
         "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem_hybrid_decrypt",
         "//src/main/java/com/google/crypto/tink/hybrid/subtle:rsa_kem_hybrid_encrypt",
-        "//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_aead",
-        "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_names",
         "//src/main/java/com/google/crypto/tink/jwt:to_be_signed_jwt",
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key_manager",
@@ -260,8 +258,6 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/integration/android:android_keystore_kms_client",
         "//src/main/java/com/google/crypto/tink/integration/android:shared_pref_keyset_reader",
         "//src/main/java/com/google/crypto/tink/integration/android:shared_pref_keyset_writer",
-        "//src/main/java/com/google/crypto/tink/jwt:jwt_names",
-        "//src/main/java/com/google/crypto/tink/jwt:to_be_signed_jwt",
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key_manager-android",
         "//src/main/java/com/google/crypto/tink/mac:hmac_key_manager-android",
         "//src/main/java/com/google/crypto/tink/mac:mac_config-android",
@@ -343,5 +339,29 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
         "//src/main/java/com/google/crypto/tink/subtle/prf:singleton_prf_set",
         "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
+    ],
+)
+
+gen_maven_jar_rules(
+    name = "tink-awskms",
+    doctitle = "Tink Cryptography API with AWS KMS",
+    root_packages = [
+        "com.google.crypto.tink",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_aead",
+        "//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
+    ],
+)
+
+gen_maven_jar_rules(
+    name = "tink-gcpkms",
+    doctitle = "Tink Cryptography API with Google Cloud KMS",
+    root_packages = [
+        "com.google.crypto.tink",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_aead",
+        "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
     ],
 )
