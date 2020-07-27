@@ -28,9 +28,13 @@ java_library(
     srcs = ["PrfKeyTemplates.java"],
     visibility = ["//visibility:public"],
     deps = [
+        ":aes_cmac_prf_key_manager",
         ":hkdf_prf_key_manager",
+        ":hmac_prf_key_manager",
+        "//proto:aes_cmac_prf_java_proto",
         "//proto:common_java_proto",
         "//proto:hkdf_prf_java_proto",
+        "//proto:hmac_prf_java_proto",
         "//proto:tink_java_proto",
     ],
 )
@@ -39,7 +43,9 @@ java_library(
     name = "prf_config",
     srcs = ["PrfConfig.java"],
     deps = [
+        ":aes_cmac_prf_key_manager",
         ":hkdf_prf_key_manager",
+        ":hmac_prf_key_manager",
         ":prf_set_wrapper",
     ],
 )
@@ -171,9 +177,13 @@ java_library(
     name = "prf_key_templates-android",
     srcs = ["PrfKeyTemplates.java"],
     deps = [
+        ":aes_cmac_prf_key_manager-android",
         ":hkdf_prf_key_manager-android",
+        ":hmac_prf_key_manager-android",
+        "//proto:aes_cmac_prf_java_proto_lite",
         "//proto:common_java_proto_lite",
         "//proto:hkdf_prf_java_proto_lite",
+        "//proto:hmac_prf_java_proto_lite",
         "//proto:tink_java_proto_lite",
     ],
 )
@@ -182,7 +192,9 @@ java_library(
     name = "prf_config-android",
     srcs = ["PrfConfig.java"],
     deps = [
+        ":aes_cmac_prf_key_manager-android",
         ":hkdf_prf_key_manager-android",
+        ":hmac_prf_key_manager-android",
         ":prf_set_wrapper-android",
     ],
 )

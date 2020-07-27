@@ -157,26 +157,30 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
   }
 
   /**
-   * @return A {@link KeyTemplate} that generates new instances of HMAC keys with the following
-   *     parameters:
-   *     <ul>
-   *       <li>Key size: 32 bytes
-   *       <li>Hash function: SHA256
-   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
-   *     </ul>
+   * Returns a {@link KeyTemplate} that generates new instances of HMAC keys with the following
+   * parameters:
+   *
+   * <ul>
+   *   <li>Key size: 32 bytes
+   *   <li>Hash function: SHA256
+   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
+   * </ul>
+   *
    */
   public static final KeyTemplate hmacSha256Template() {
     return createTemplate(32, HashType.SHA256);
   }
 
   /**
-   * @return A {@link KeyTemplate} that generates new instances of HMAC keys with the following
-   *     parameters:
-   *     <ul>
-   *       <li>Key size: 64 bytes
-   *       <li>Hash function: SHA512
-   *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
-   *     </ul>
+   * Returns a {@link KeyTemplate} that generates new instances of HMAC keys with the following
+   * parameters:
+   *
+   * <ul>
+   *   <li>Key size: 64 bytes
+   *   <li>Hash function: SHA512
+   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
+   * </ul>
+   *
    */
   public static final KeyTemplate hmacSha512Template() {
     return createTemplate(64, HashType.SHA512);
