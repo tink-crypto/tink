@@ -1,4 +1,3 @@
 com.google.crypto.tink
-com.google.crypto.tink.annotations
 com.google.crypto.tink.integration.gcpkms
 com.google.crypto.tink.subtle
