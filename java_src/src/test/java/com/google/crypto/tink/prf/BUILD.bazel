@@ -53,6 +53,27 @@ java_test(
 )
 
 java_test(
+    name = "HmacPrfKeyManagerTest",
+    size = "small",
+    srcs = ["HmacPrfKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:hmac_prf_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "HkdfPrfKeyManagerTest",
     size = "small",
     srcs = ["HkdfPrfKeyManagerTest.java"],
