@@ -131,16 +131,10 @@
  instances of <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> key types supported in a particular release of
  Tink.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/aead/AeadFactory.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">AeadFactory</span></a> - Class in <a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a></dt>
+<dt><a href="com/google/crypto/tink/aead/subtle/AeadFactory.html" title="interface in com.google.crypto.tink.aead.subtle"><span class="typeNameLink">AeadFactory</span></a> - Interface in <a href="com/google/crypto/tink/aead/subtle/package-summary.html">com.google.crypto.tink.aead.subtle</a></dt>
 <dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(Aead.class)</code> after registering the <code>AeadWrapper</code> instead.</span></div>
-</div>
+<div class="block">Provides AEAD instances with a specific raw key.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadFactory.html#AeadFactory--">AeadFactory()</a></span> - Constructor for class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadFactory.html" title="class in com.google.crypto.tink.aead">AeadFactory</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">AeadKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -305,6 +299,18 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html#aes256CmacTemplate--">aes256CmacTemplate()</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac">AesCmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#aes256CmacTemplate--">aes256CmacTemplate()</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">AesCmacPrfKeyManager</a></dt>
+<dd>
+<div class="block">Returns a <a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of AES-CMAC keys with the following
+ parameters:
+
+ 
+   Key size: 32 bytes
+   Prefix type: <code>KeyTemplate.OutputPrefixType#RAW</code>
+ 
+
+ .</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#aes256CtrHmacSha2561MBTemplate--">aes256CtrHmacSha2561MBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html#aes256CtrHmacSha2564KBTemplate--">aes256CtrHmacSha2564KBTemplate()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesCtrHmacStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesCtrHmacStreamingKeyManager</a></dt>
@@ -332,6 +338,10 @@
    OutputPrefixType: TINK
  </div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfKeyTemplates.html#AES_CMAC_PRF">AES_CMAC_PRF</a></span> - Static variable in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfKeyTemplates.html" title="class in com.google.crypto.tink.prf">PrfKeyTemplates</a></dt>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#AES_CTR_HMAC_AEAD_TYPE_URL">AES_CTR_HMAC_AEAD_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL">AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadConfig</a></dt>
@@ -347,6 +357,10 @@
 <dt><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">AesCmacKeyManager</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
 <dd>
 <div class="block">This key manager generates new <code>AesCmacKey</code> keys and produces new instances of <code>AesCmac</code>.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">AesCmacPrfKeyManager</span></a> - Class in <a href="com/google/crypto/tink/prf/package-summary.html">com.google.crypto.tink.prf</a></dt>
+<dd>
+<div class="block">This key manager generates new <code>AesCmacKeyPrf</code> keys and produces new instances of <code>AesCmacPrf</code>.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">AesCtrHmacAeadKeyManager</span></a> - Class in <a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a></dt>
 <dd>
@@ -386,6 +400,12 @@
 <dd>
 <div class="block">This key manager generates new <code>AesEaxKey</code> keys and produces new instances of <code>AesEaxJce</code>.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html" title="class in com.google.crypto.tink.aead.subtle"><span class="typeNameLink">AesGcmFactory</span></a> - Class in <a href="com/google/crypto/tink/aead/subtle/package-summary.html">com.google.crypto.tink.aead.subtle</a></dt>
+<dd>
+<div class="block">An <a href="com/google/crypto/tink/aead/subtle/AeadFactory.html" title="interface in com.google.crypto.tink.aead.subtle"><code>AeadFactory</code></a> that creates new instances of AES-GCM from raw keys</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html#AesGcmFactory-int-">AesGcmFactory(int)</a></span> - Constructor for class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">AesGcmHkdfStreaming</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">Streaming encryption using <code>AES-GCM</code> with <code>HKDF</code> as key derivation function.</div>
@@ -409,6 +429,12 @@
 <dd>
 <div class="block">This key manager generates new <code>AesGcmKey</code> keys and produces new instances of <code>AesGcmJce</code>.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle"><span class="typeNameLink">AesGcmSiv</span></a> - Class in <a href="com/google/crypto/tink/aead/subtle/package-summary.html">com.google.crypto.tink.aead.subtle</a></dt>
+<dd>
+<div class="block">This primitive implements AES-GCM-SIV (as defined in RFC 8452) using JCE.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html#AesGcmSiv-byte:A-">AesGcmSiv(byte[])</a></span> - Constructor for class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/AesSiv.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">AesSiv</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">AES-SIV, as described in <a href="https://tools.ietf.org/html/rfc5297">RFC 5297</a>.</div>
@@ -568,6 +594,8 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a> - package com.google.crypto.tink.aead</dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/aead/subtle/package-summary.html">com.google.crypto.tink.aead.subtle</a> - package com.google.crypto.tink.aead.subtle</dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/annotations/package-summary.html">com.google.crypto.tink.annotations</a> - package com.google.crypto.tink.annotations</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/config/package-summary.html">com.google.crypto.tink.config</a> - package com.google.crypto.tink.config</dt>
@@ -575,6 +603,8 @@
 <dt><a href="com/google/crypto/tink/daead/package-summary.html">com.google.crypto.tink.daead</a> - package com.google.crypto.tink.daead</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a> - package com.google.crypto.tink.hybrid</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/hybrid/subtle/package-summary.html">com.google.crypto.tink.hybrid.subtle</a> - package com.google.crypto.tink.hybrid.subtle</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/integration/android/package-summary.html">com.google.crypto.tink.integration.android</a> - package com.google.crypto.tink.integration.android</dt>
 <dd>&nbsp;</dd>
@@ -647,6 +677,13 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Config.html#Config--">Config()</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink">Config</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.html#create-java.lang.String-byte:A-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">create(String, byte[], KeyTemplate.OutputPrefixType)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AeadFactory.html#createAead-byte:A-">createAead(byte[])</a></span> - Method in interface com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AeadFactory.html" title="interface in com.google.crypto.tink.aead.subtle">AeadFactory</a></dt>
+<dd>
+<div class="block">Creates a new <code>Aead</code>-primitive that uses the key material given in <code>symmetricKey</code>,
+ which must be of length <a href="com/google/crypto/tink/aead/subtle/AeadFactory.html#getKeySizeInBytes--"><code>AeadFactory.getKeySizeInBytes()</code></a>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html#createAead-byte:A-">createAead(byte[])</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#createAesCtrHmacAeadKeyTemplate-int-int-int-int-com.google.crypto.tink.proto.HashType-">createAesCtrHmacAeadKeyTemplate(int, int, int, int, HashType)</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
@@ -751,6 +788,10 @@
 <div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated authenticated data.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/KmsEnvelopeAead.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/KmsEnvelopeAead.html" title="class in com.google.crypto.tink.aead">KmsEnvelopeAead</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridDecrypt.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridDecrypt.html" title="class in com.google.crypto.tink.hybrid.subtle">RsaKemHybridDecrypt</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/HybridDecrypt.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></dt>
 <dd>
@@ -1176,6 +1217,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/KmsEnvelopeAead.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/KmsEnvelopeAead.html" title="class in com.google.crypto.tink.aead">KmsEnvelopeAead</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridEncrypt.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridEncrypt.html" title="class in com.google.crypto.tink.hybrid.subtle">RsaKemHybridEncrypt</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/HybridEncrypt.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/HybridEncrypt.html" title="interface in com.google.crypto.tink">HybridEncrypt</a></dt>
 <dd>
 <div class="block">Encryption operation: encrypts <code>plaintext</code> binding <code>contextInfo</code> to the resulting
@@ -1495,6 +1540,12 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#getKeysetInfo--">getKeysetInfo()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AeadFactory.html#getKeySizeInBytes--">getKeySizeInBytes()</a></span> - Method in interface com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AeadFactory.html" title="interface in com.google.crypto.tink.aead.subtle">AeadFactory</a></dt>
+<dd>
+<div class="block">Returns the size of the AEAD key in bytes.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html#getKeySizeInBytes--">getKeySizeInBytes()</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html" title="class in com.google.crypto.tink.aead">AesCtrHmacAeadKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesCtrKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesCtrKeyManager.html" title="class in com.google.crypto.tink.aead">AesCtrKeyManager</a></dt>
@@ -1527,7 +1578,11 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">AesCmacPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -1578,25 +1633,16 @@
 <dd>
 <div class="block">A map of the PRFs represented by the keys in this keyset.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/prf/SingletonPrfSet.html#getPrfs--">getPrfs()</a></span> - Method in class com.google.crypto.tink.subtle.prf.<a href="com/google/crypto/tink/subtle/prf/SingletonPrfSet.html" title="class in com.google.crypto.tink.subtle.prf">SingletonPrfSet</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getPrimary--">getPrimary()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSet.html#getPrimaryId--">getPrimaryId()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a></dt>
 <dd>
 <div class="block">Returns the primary ID of the keyset.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive(KeysetHandle)</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadFactory.html" title="class in com.google.crypto.tink.aead">AeadFactory</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(Aead.class)</code> after registering the <code>AeadWrapper</code> instead.</span></div>
-</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive(KeysetHandle, KeyManager&lt;Aead&gt;)</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadFactory.html" title="class in com.google.crypto.tink.aead">AeadFactory</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(keyManager, Aead.class)</code> after registering the
-     <code>AeadWrapper</code> instead.</span></div>
-</div>
-</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/prf/SingletonPrfSet.html#getPrimaryId--">getPrimaryId()</a></span> - Method in class com.google.crypto.tink.subtle.prf.<a href="com/google/crypto/tink/subtle/prf/SingletonPrfSet.html" title="class in com.google.crypto.tink.subtle.prf">SingletonPrfSet</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive(KeysetHandle)</a></span> - Static method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadFactory.html" title="class in com.google.crypto.tink.daead">DeterministicAeadFactory</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -1906,7 +1952,11 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">AesCmacPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -1945,6 +1995,12 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Hkdf.html#Hkdf--">Hkdf()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Hkdf.html" title="class in com.google.crypto.tink.subtle">Hkdf</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfKeyTemplates.html#HKDF_SHA256">HKDF_SHA256</a></span> - Static variable in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfKeyTemplates.html" title="class in com.google.crypto.tink.prf">PrfKeyTemplates</a></dt>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+<div class="block">Generates a <code>KeyTemplate</code> for a <code>HkdfPrfKey</code> key with
+ the following parameters.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">HkdfPrfKeyManager</span></a> - Class in <a href="com/google/crypto/tink/prf/package-summary.html">com.google.crypto.tink.prf</a></dt>
 <dd>
 <div class="block">This key manager generates new <code>HkdfPrfKey</code> keys and produces new instances of <code>HkdfStreamingPrf</code> and <code>HkdfPrf</code>.</div>
@@ -1983,6 +2039,10 @@
    OutputPrefixType: TINK
  </div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfKeyTemplates.html#HMAC_SHA256_PRF">HMAC_SHA256_PRF</a></span> - Static variable in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfKeyTemplates.html" title="class in com.google.crypto.tink.prf">PrfKeyTemplates</a></dt>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA512_256BITTAG">HMAC_SHA512_256BITTAG</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
@@ -2007,6 +2067,10 @@
    OutputPrefixType: TINK
  </div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfKeyTemplates.html#HMAC_SHA512_PRF">HMAC_SHA512_PRF</a></span> - Static variable in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfKeyTemplates.html" title="class in com.google.crypto.tink.prf">PrfKeyTemplates</a></dt>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacConfig.html#HMAC_TYPE_URL">HMAC_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac">MacConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">HmacKeyManager</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
@@ -2015,14 +2079,42 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#HmacKeyManager--">HmacKeyManager()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">HmacPrfKeyManager</span></a> - Class in <a href="com/google/crypto/tink/prf/package-summary.html">com.google.crypto.tink.prf</a></dt>
+<dd>
+<div class="block">This key manager generates new <code>HmacPrfKey</code> keys and produces new instances of <code>PrfHmacJce</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#HmacPrfKeyManager--">HmacPrfKeyManager()</a></span> - Constructor for class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha256HalfDigestTemplate--">hmacSha256HalfDigestTemplate()</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha256Template--">hmacSha256Template()</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#hmacSha256Template--">hmacSha256Template()</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
+<dd>
+<div class="block">Returns a <a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of HMAC keys with the following
+ parameters:
+
+ 
+   Key size: 32 bytes
+   Hash function: SHA256
+   Prefix type: <code>KeyTemplate.OutputPrefixType#RAW</code>
+ </div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha512HalfDigestTemplate--">hmacSha512HalfDigestTemplate()</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha512Template--">hmacSha512Template()</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#hmacSha512Template--">hmacSha512Template()</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
+<dd>
+<div class="block">Returns a <a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of HMAC keys with the following
+ parameters:
+
+ 
+   Key size: 64 bytes
+   Hash function: SHA512
+   Prefix type: <code>KeyTemplate.OutputPrefixType#RAW</code>
+ </div>
+</dd>
 <dt><a href="com/google/crypto/tink/hybrid/HybridConfig.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridConfig</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
 <dd>
 <div class="block">Static methods and constants for registering with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all
@@ -2034,16 +2126,6 @@
 <dd>
 <div class="block">Interface for hybrid decryption.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/hybrid/HybridDecryptConfig.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridDecryptConfig</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><code>Config</code></a> and <a href="com/google/crypto/tink/hybrid/HybridConfig.html" title="class in com.google.crypto.tink.hybrid"><code>HybridConfig</code></a></span></div>
-</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridDecryptConfig.html#HybridDecryptConfig--">HybridDecryptConfig()</a></span> - Constructor for class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridDecryptConfig.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptConfig</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/hybrid/HybridDecryptFactory.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridDecryptFactory</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -2063,16 +2145,6 @@
 <dd>
 <div class="block">Interface for hybrid encryption.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/hybrid/HybridEncryptConfig.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridEncryptConfig</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><code>Config</code></a> and <a href="com/google/crypto/tink/hybrid/HybridConfig.html" title="class in com.google.crypto.tink.hybrid"><code>HybridConfig</code></a></span></div>
-</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptConfig.html#HybridEncryptConfig--">HybridEncryptConfig()</a></span> - Constructor for class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptConfig.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptConfig</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/hybrid/HybridEncryptFactory.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridEncryptFactory</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -2245,7 +2317,11 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">AesCmacPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -2298,7 +2374,11 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">AesCmacPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -2657,7 +2737,11 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">AesCmacPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey(ByteString)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
 <dd>&nbsp;</dd>
@@ -2726,6 +2810,13 @@
 <dt><a href="com/google/crypto/tink/subtle/prf/PrfImpl.html" title="class in com.google.crypto.tink.subtle.prf"><span class="typeNameLink">PrfImpl</span></a> - Class in <a href="com/google/crypto/tink/subtle/prf/package-summary.html">com.google.crypto.tink.subtle.prf</a></dt>
 <dd>
 <div class="block">Class that implements the Prf primitive by wrapping a StreamingPrf.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/prf/PrfKeyTemplates.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">PrfKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/prf/package-summary.html">com.google.crypto.tink.prf</a></dt>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">use the key template methods in the key managers, e.g.,
+     HkdfPrfKeyManager.hkdfSha256Template().</span></div>
+</div>
 </dd>
 <dt><a href="com/google/crypto/tink/subtle/PrfMac.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">PrfMac</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
@@ -2802,16 +2893,6 @@
 <dd>
 <div class="block">Interface for public key signing.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeySignConfig</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><code>Config</code></a> and <a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature"><code>SignatureConfig</code></a></span></div>
-</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignConfig.html#PublicKeySignConfig--">PublicKeySignConfig()</a></span> - Constructor for class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature">PublicKeySignConfig</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/signature/PublicKeySignFactory.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeySignFactory</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -2831,16 +2912,6 @@
 <dd>
 <div class="block">Interface for public key signing.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/signature/PublicKeyVerifyConfig.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeyVerifyConfig</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html" title="class in com.google.crypto.tink"><code>Config</code></a> and <a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature"><code>SignatureConfig</code></a></span></div>
-</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeyVerifyConfig.html#PublicKeyVerifyConfig--">PublicKeyVerifyConfig()</a></span> - Constructor for class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeyVerifyConfig.html" title="class in com.google.crypto.tink.signature">PublicKeyVerifyConfig</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/signature/PublicKeyVerifyFactory.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeyVerifyFactory</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -3021,7 +3092,11 @@
 <div class="block">Tries to register with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><code>Catalogue</code></a> and <a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> needed to
  handle Mac key types supported in Tink.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#register-boolean-">register(boolean)</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">AesCmacPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#register-boolean-">register(boolean)</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#register-boolean-">register(boolean)</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfConfig.html#register--">register()</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfConfig.html" title="class in com.google.crypto.tink.prf">PrfConfig</a></dt>
 <dd>
@@ -3113,34 +3188,10 @@
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
 </div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridDecryptConfig.html#registerStandardKeyTypes--">registerStandardKeyTypes()</a></span> - Static method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridDecryptConfig.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptConfig</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html#register-com.google.crypto.tink.proto.RegistryConfig-"><code>Config.register(com.google.crypto.tink.proto.RegistryConfig)</code></a></span></div>
-</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptConfig.html#registerStandardKeyTypes--">registerStandardKeyTypes()</a></span> - Static method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptConfig.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptConfig</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html#register-com.google.crypto.tink.proto.RegistryConfig-"><code>Config.register(com.google.crypto.tink.proto.RegistryConfig)</code></a></span></div>
-</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacConfig.html#registerStandardKeyTypes--">registerStandardKeyTypes()</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac">MacConfig</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/mac/MacConfig.html#register--"><code>MacConfig.register()</code></a></span></div>
-</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignConfig.html#registerStandardKeyTypes--">registerStandardKeyTypes()</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature">PublicKeySignConfig</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html#register-com.google.crypto.tink.proto.RegistryConfig-"><code>Config.register(com.google.crypto.tink.proto.RegistryConfig)</code></a></span></div>
-</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeyVerifyConfig.html#registerStandardKeyTypes--">registerStandardKeyTypes()</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeyVerifyConfig.html" title="class in com.google.crypto.tink.signature">PublicKeyVerifyConfig</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html#register-com.google.crypto.tink.proto.RegistryConfig-"><code>Config.register(com.google.crypto.tink.proto.RegistryConfig)</code></a></span></div>
 </div>
 </dd>
 <dt><a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Registry</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
@@ -3229,6 +3280,20 @@
  
    Signature hash: SHA512.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridDecrypt.html" title="class in com.google.crypto.tink.hybrid.subtle"><span class="typeNameLink">RsaKemHybridDecrypt</span></a> - Class in <a href="com/google/crypto/tink/hybrid/subtle/package-summary.html">com.google.crypto.tink.hybrid.subtle</a></dt>
+<dd>
+<div class="block">Hybrid encryption with RSA-KEM as defined in Shoup's ISO standard proposal as KEM, and AEAD as
+ DEM and HKDF as KDF.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridDecrypt.html#RsaKemHybridDecrypt-java.security.interfaces.RSAPrivateKey-java.lang.String-byte:A-com.google.crypto.tink.aead.subtle.AeadFactory-">RsaKemHybridDecrypt(RSAPrivateKey, String, byte[], AeadFactory)</a></span> - Constructor for class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridDecrypt.html" title="class in com.google.crypto.tink.hybrid.subtle">RsaKemHybridDecrypt</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridEncrypt.html" title="class in com.google.crypto.tink.hybrid.subtle"><span class="typeNameLink">RsaKemHybridEncrypt</span></a> - Class in <a href="com/google/crypto/tink/hybrid/subtle/package-summary.html">com.google.crypto.tink.hybrid.subtle</a></dt>
+<dd>
+<div class="block">Hybrid encryption with RSA-KEM as defined in Shoup's ISO standard proposal as KEM, and AEAD as
+ DEM and HKDF as KDF.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridEncrypt.html#RsaKemHybridEncrypt-java.security.interfaces.RSAPublicKey-java.lang.String-byte:A-com.google.crypto.tink.aead.subtle.AeadFactory-">RsaKemHybridEncrypt(RSAPublicKey, String, byte[], AeadFactory)</a></span> - Constructor for class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridEncrypt.html" title="class in com.google.crypto.tink.hybrid.subtle">RsaKemHybridEncrypt</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/RsaSsaPkcs1SignJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">RsaSsaPkcs1SignJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">RsaSsaPkcs1 (i.e.</div>
@@ -3348,6 +3413,12 @@
 <dd>
 <div class="block">Builder for SignaturePemKeysetReader</div>
 </dd>
+<dt><a href="com/google/crypto/tink/subtle/prf/SingletonPrfSet.html" title="class in com.google.crypto.tink.subtle.prf"><span class="typeNameLink">SingletonPrfSet</span></a> - Class in <a href="com/google/crypto/tink/subtle/prf/package-summary.html">com.google.crypto.tink.subtle.prf</a></dt>
+<dd>
+<div class="block">SingletonPrfSet wraps a single Prf into a PrfSet.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/prf/SingletonPrfSet.html#SingletonPrfSet-com.google.crypto.tink.prf.Prf-">SingletonPrfSet(Prf)</a></span> - Constructor for class com.google.crypto.tink.subtle.prf.<a href="com/google/crypto/tink/subtle/prf/SingletonPrfSet.html" title="class in com.google.crypto.tink.subtle.prf">SingletonPrfSet</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#staticKeyType--">staticKeyType()</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">StreamingAead</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
@@ -3593,7 +3664,11 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#validateKey-com.google.crypto.tink.proto.HmacKey-">validateKey(HmacKey)</a></span> - Method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#validateKey-com.google.crypto.tink.proto.AesCmacPrfKey-">validateKey(AesCmacPrfKey)</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">AesCmacPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#validateKey-com.google.crypto.tink.proto.HkdfPrfKey-">validateKey(HkdfPrfKey)</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#validateKey-com.google.crypto.tink.proto.HmacPrfKey-">validateKey(HmacPrfKey)</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HmacPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html#validateKey-com.google.crypto.tink.proto.EcdsaPrivateKey-">validateKey(EcdsaPrivateKey)</a></span> - Method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/EcdsaSignKeyManager.html" title="class in com.google.crypto.tink.signature">EcdsaSignKeyManager</a></dt>
 <dd>&nbsp;</dd>
