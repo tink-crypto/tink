@@ -16,7 +16,7 @@
 ROOT_DIR="$TEST_SRCDIR/tools"
 CC_PRF_SET_CLI="$ROOT_DIR/testing/cc/prf_set_cli_cc"
 GO_PRF_SET_CLI="$ROOT_DIR/testing/go/prf_set_cli_go"
-#JAVA_PRF_SET_CLI="$ROOT_DIR/testing/prf_set_cli_java"
+JAVA_PRF_SET_CLI="$ROOT_DIR/testing/prf_set_cli_java"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
 
 source $TEST_UTIL || exit 1
@@ -75,10 +75,8 @@ prf_set_basic_test() {
 #############################################################################
 ##### Run the actual tests.
 
-# TODO(sschmieg): Uncomment when Tinkey learns about these keys:
-#KEY_TEMPLATES=(HMAC_SHA256_PRF HMAC_SHA512_PRF HKDF_SHA256_PRF AES_CMAC_PRF)
-KEY_TEMPLATES=(HKDF_SHA256)
-PRF_CLIS=($CC_PRF_SET_CLI $GO_PRF_SET_CLI)
+KEY_TEMPLATES=(HMAC_SHA256_PRF HMAC_SHA512_PRF HKDF_SHA256 AES_CMAC_PRF)
+PRF_CLIS=($CC_PRF_SET_CLI $JAVA_PRF_SET_CLI $GO_PRF_SET_CLI)
 OUTPUT_LENGTHS=(1 2 5 10 16 17 20 32 33 48 64 65 100 256 512 1024)
 prf_set_basic_test "${PRF_CLIS[*]}" "${OUTPUT_LENGTHS[*]}" \
     "${KEY_TEMPLATES[*]}"

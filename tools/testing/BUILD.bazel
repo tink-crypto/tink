@@ -144,6 +144,21 @@ java_binary(
 )
 
 java_binary(
+    name = "prf_set_cli_java",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/PrfSetCli.java",
+    ],
+    main_class = "com.google.crypto.tink.testing.PrfSetCli",
+    deps = [
+        ":cli_util",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
+    ],
+)
+
+java_binary(
     name = "public_key_sign_cli_java",
     testonly = 1,
     srcs = [
