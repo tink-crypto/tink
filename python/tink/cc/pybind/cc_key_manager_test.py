@@ -18,14 +18,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from absl.testing import absltest
 from typing import cast
+from absl.testing import absltest
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_siv_pb2
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
+from tink.proto import hmac_prf_pb2
 from tink.proto import tink_pb2
 from tink import aead
 from tink import hybrid
@@ -250,6 +251,64 @@ class MacKeyManagerTest(absltest.TestCase):
     with self.assertRaisesRegex(tink_bindings.StatusNotOk,
                                 'verification failed'):
       mac.verify_mac(b'0123456789ABCDEF', b'data')
+
+
+class PrfSetKeyManagerTest(absltest.TestCase):
+
+  def setUp(self):
+    super(PrfSetKeyManagerTest, self).setUp()
+    self.key_manager = tink_bindings.PrfSetKeyManager.from_cc_registry(
+        'type.googleapis.com/google.crypto.tink.HmacPrfKey')
+
+  def new_hmac_prf_key_template(self, hash_type, key_size):
+    key_format = hmac_prf_pb2.HmacPrfKeyFormat()
+    key_format.params.hash = hash_type
+    key_format.key_size = key_size
+    key_format.version = 0
+    key_template = tink_pb2.KeyTemplate()
+    key_template.type_url = 'type.googleapis.com/google.crypto.tink.HmacPrfKey'
+    key_template.value = key_format.SerializeToString()
+    return key_template.SerializeToString()
+
+  def test_key_type(self):
+    self.assertEqual(self.key_manager.key_type(),
+                     'type.googleapis.com/google.crypto.tink.HmacPrfKey')
+
+  def test_new_key_data(self):
+    key_template = self.new_hmac_prf_key_template(
+        hash_type=common_pb2.SHA256, key_size=16)
+    key_data = tink_pb2.KeyData()
+    key_data.ParseFromString(self.key_manager.new_key_data(key_template))
+    self.assertEqual(key_data.type_url, self.key_manager.key_type())
+    key = hmac_pb2.HmacKey()
+    key.ParseFromString(key_data.value)
+    self.assertEqual(key.version, 0)
+    self.assertEqual(key.params.hash, common_pb2.SHA256)
+    self.assertLen(key.key_value, 16)
+
+  def test_invalid_params_throw_exception(self):
+    key_template = self.new_hmac_prf_key_template(
+        hash_type=common_pb2.SHA256, key_size=7)
+    with self.assertRaises(tink_bindings.StatusNotOk):
+      self.key_manager.new_key_data(key_template)
+
+  def test_prf_success(self):
+    prfset = self.key_manager.primitive(
+        self.key_manager.new_key_data(
+            self.new_hmac_prf_key_template(
+                hash_type=common_pb2.SHA256, key_size=16)))
+    output = prfset.compute_primary(b'input_data', output_length=31)
+    self.assertLen(output, 31)
+    self.assertEqual(
+        prfset.compute_primary(b'input_data', output_length=31), output)
+
+  def test_prf_bad_output_length(self):
+    prfset = self.key_manager.primitive(
+        self.key_manager.new_key_data(
+            self.new_hmac_prf_key_template(
+                hash_type=common_pb2.SHA256, key_size=16)))
+    with self.assertRaises(tink_bindings.StatusNotOk):
+      _ = prfset.compute_primary(b'input_data', output_length=12345)
 
 
 class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
