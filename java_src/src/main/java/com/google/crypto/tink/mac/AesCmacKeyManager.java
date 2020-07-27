@@ -93,7 +93,7 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
 
   private static void validateSize(int size) throws GeneralSecurityException {
     if (size != KEY_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("AesCmacKey size wrong, must be 16 bytes");
+      throw new GeneralSecurityException("AesCmacKey size wrong, must be 32 bytes");
     }
   }
 
