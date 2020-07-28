@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -137,8 +136,7 @@ public final class ToBeSignedJwt {
     /**
      * Sets the ID of the key used to sign or authenticate the JWT.
      *
-     * <p>JWT supports arbitrary key IDs, but Tink only support integer-based. If a key ID is set
-     * with this method, Tink will use it. Otherwise Tink might set its own key ID.
+     * <p>While Tink ignores this ID, other implementations might require it.
      */
     public Builder setKeyId(String value) {
       return setHeader(JwtNames.HEADER_KEY_ID, value);
@@ -315,21 +313,13 @@ public final class ToBeSignedJwt {
   /**
    * Serializes the token in the JWS compact serialization format, described in
    * https://tools.ietf.org/html/rfc7515#section-3.1.
-   *
-   * <p>If no key ID was set (using {@link Builder#setKeyId}), and {@code keyId} is present, the key
-   * ID will be set to {@code keyId}.
    */
-  String compact(String alg, Optional<String> keyId) {
+  String compact(String alg) {
     JSONObject copy;
 
     try {
       copy = new JSONObject(this.header.toString());
       copy.put(JwtNames.HEADER_ALGORITHM, alg);
-
-      String existingKeyId = this.getHeader(JwtNames.HEADER_KEY_ID);
-      if (existingKeyId == null && keyId.isPresent()) {
-        copy.put(JwtNames.HEADER_KEY_ID, keyId.get());
-      }
     } catch (JSONException ex) {
       // Should never happen.
       throw new IllegalStateException(ex);
