@@ -16,6 +16,7 @@ py_library(
         "//tink/daead",
         "//tink/hybrid",
         "//tink/mac",
+        "//tink/prf",
         "//tink/signature",
     ],
 )
