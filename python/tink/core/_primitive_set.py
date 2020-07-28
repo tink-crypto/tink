@@ -28,7 +28,7 @@ from tink.core import _tink_error
 
 P = TypeVar('P')
 Entry = collections.namedtuple(
-    'Entry', 'primitive, identifier, status, output_prefix_type')
+    'Entry', 'primitive, identifier, status, output_prefix_type, key_id')
 
 
 def new_primitive_set(primitive_class):
@@ -80,7 +80,8 @@ class PrimitiveSet(Generic[P]):
               self._primitive_class))
     identifier = _crypto_format.output_prefix(key)
 
-    entry = Entry(primitive, identifier, key.status, key.output_prefix_type)
+    entry = Entry(primitive, identifier, key.status, key.output_prefix_type,
+                  key.key_id)
     entries = self._primitives.setdefault(identifier, [])
     entries.append(entry)
     return entry
