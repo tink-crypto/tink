@@ -121,12 +121,12 @@ proto_library(
 )
 
 # -----------------------------------------------
-# JWS hmac
+# JWT hmac
 # -----------------------------------------------
 proto_library(
-    name = "jws_hmac_proto",
+    name = "jwt_hmac_proto",
     srcs = [
-        "jws_hmac.proto",
+        "jwt_hmac.proto",
     ],
     visibility = ["//visibility:public"],
     deps = [":common_proto"],
