@@ -295,8 +295,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/jwt/ToBeSignedJwt.Builder.html" title="class in com.google.crypto.tink.jwt">ToBeSignedJwt.Builder</a>&nbsp;setKeyId(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;value)</pre>
 <div class="block">Sets the ID of the key used to sign or authenticate the JWT.
 
- <p>JWT supports arbitrary key IDs, but Tink only support integer-based. If a key ID is set
- with this method, Tink will use it. Otherwise Tink might set its own key ID.</div>
+ <p>While Tink ignores this ID, other implementations might require it.</div>
 </li>
 </ul>
 <a name="setIssuer-java.lang.String-">
