@@ -139,13 +139,12 @@ class PrimitiveSetTest(absltest.TestCase):
     primitive_set = core.new_primitive_set(mac.Mac)
     key = helper.fake_key()
     key.ClearField('output_prefix_type')
-    with self.assertRaisesRegex(core.TinkError, 'invalid OutputPrefixType'):
+    with self.assertRaises(core.TinkError):
       primitive_set.add_primitive(helper.FakeMac(), key)
 
   def test_add_wrong_primitive_fails(self):
     primitive_set = core.new_primitive_set(aead.Aead)
-    with self.assertRaisesRegex(core.TinkError,
-                                'The primitive is not an instance of '):
+    with self.assertRaises(core.TinkError):
       primitive_set.add_primitive(helper.FakeMac(), helper.fake_key())
 
   def test_primitive_class(self):

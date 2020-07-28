@@ -57,18 +57,18 @@ class PrimitiveSet(Generic[P]):
   def primitive_class(self) -> Type[P]:
     return self._primitive_class
 
-  def primitive_from_identifier(self, identifier: bytes) -> List[P]:
+  def primitive_from_identifier(self, identifier: bytes) -> List[Entry]:
     """Returns a copy of the list of entries for a given identifier."""
     # Copy the list so that if the user modifies the list, it does not affect
     # the internal data structure.
     return self._primitives.get(identifier, [])[:]
 
-  def primitive(self, key: tink_pb2.Keyset.Key) -> List[P]:
-    """Returns a copy of the list of primitives for a given identifier."""
+  def primitive(self, key: tink_pb2.Keyset.Key) -> List[Entry]:
+    """Returns a copy of the list of entries for a given key."""
     return self.primitive_from_identifier(_crypto_format.output_prefix(key))
 
-  def raw_primitives(self) -> List[P]:
-    """Returns a copy of the list of primitives for a given identifier."""
+  def raw_primitives(self) -> List[Entry]:
+    """Returns a copy of the list of entries of keys with raw prefix."""
     # All raw keys have the same identifier, which is just b''.
     return self.primitive_from_identifier(_crypto_format.RAW_PREFIX)
 
