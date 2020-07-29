@@ -18,6 +18,9 @@ from __future__ import division
 from __future__ import print_function
 
 from tink.prf import _prf_set
+from tink.prf import _prf_set_key_manager
+from tink.prf import _prf_set_key_templates as prf_set_key_templates
 
 Prf = _prf_set.Prf
 PrfSet = _prf_set.PrfSet
+register = _prf_set_key_manager.register

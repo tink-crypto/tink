@@ -12,6 +12,8 @@ py_library(
     visibility = ["//visibility:public"],
     deps = [
         ":_prf_set",
+        ":_prf_set_key_manager",
+        ":_prf_set_key_templates",
     ],
 )
 
@@ -20,6 +22,34 @@ py_library(
     srcs = ["_prf_set.py"],
     srcs_version = "PY3",
     deps = [requirement("six")],
+)
+
+py_library(
+    name = "_prf_set_key_manager",
+    srcs = ["_prf_set_key_manager.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_prf_set",
+        ":_prf_set_wrapper",
+        "//tink/cc/pybind:tink_bindings",
+        "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_prf_set_key_manager_test",
+    srcs = ["_prf_set_key_manager_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":prf",
+        requirement("absl-py"),
+        "//tink:tink_python",
+        "//tink/core",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:hkdf_prf_py_pb2",
+        "//tink/proto:hmac_prf_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
 )
 
 py_library(
@@ -44,5 +74,17 @@ py_test(
         "//tink/core",
         "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "_prf_set_key_templates",
+    srcs = ["_prf_set_key_templates.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:hkdf_prf_py_pb2",
+        "//tink/proto:hmac_prf_py_pb2",
+        "//tink/proto:tink_py_pb2",
     ],
 )
