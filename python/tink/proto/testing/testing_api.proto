@@ -286,3 +286,40 @@ message SignatureVerifyRequest {
 message SignatureVerifyResponse {
   string err = 1;
 }
+
+// Service for PrfSet computation
+service PrfSet {
+  // Returns the key ids and the primary key id in the keyset.
+  rpc KeyIds(PrfSetKeyIdsRequest) returns (PrfSetKeyIdsResponse) {}
+  // Computes the output of the PRF with the given key_id in the PrfSet.
+  rpc Compute(PrfSetComputeRequest) returns (PrfSetComputeResponse) {}
+}
+
+message PrfSetKeyIdsRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+}
+
+message PrfSetKeyIdsResponse {
+  message Output {
+    uint32 primary_key_id = 1;
+    repeated uint32 key_id = 2;
+  }
+  oneof result {
+    Output output = 1;
+    string err = 2;
+  }
+}
+
+message PrfSetComputeRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+  uint32 key_id = 2;
+  bytes input_data = 3;
+  int32 output_length = 4;
+}
+
+message PrfSetComputeResponse {
+  oneof result {
+    bytes output = 1;
+    string err = 2;
+  }
+}
