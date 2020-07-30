@@ -25,6 +25,7 @@ from tink import cleartext_keyset_handle
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import prf
 from tink import signature
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
@@ -259,3 +260,36 @@ class SignatureServicer(testing_api_pb2_grpc.SignatureServicer):
       return testing_api_pb2.SignatureVerifyResponse()
     except tink.TinkError as e:
       return testing_api_pb2.SignatureVerifyResponse(err=str(e))
+
+
+class PrfSetServicer(testing_api_pb2_grpc.PrfSetServicer):
+  """A service for testing PrfSet."""
+
+  def KeyIds(
+      self, request: testing_api_pb2.PrfSetKeyIdsRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.PrfSetKeyIdsResponse:
+    """Returns all key IDs and the primary key ID."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(prf.PrfSet)
+      prfs = p.all()
+      response = testing_api_pb2.PrfSetKeyIdsResponse()
+      response.output.primary_key_id = p.primary_id()
+      response.output.key_id.extend(prfs.keys())
+      return response
+    except tink.TinkError as e:
+      return testing_api_pb2.PrfSetKeyIdsResponse(err=str(e))
+
+  def Compute(
+      self, request: testing_api_pb2.PrfSetComputeRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.PrfSetComputeResponse:
+    """Computes the output of one PRF."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      f = keyset_handle.primitive(prf.PrfSet).all()[request.key_id]
+      return testing_api_pb2.PrfSetComputeResponse(
+          output=f.compute(request.input_data, request.output_length))
+    except tink.TinkError as e:
+      return testing_api_pb2.PrfSetComputeResponse(err=str(e))
