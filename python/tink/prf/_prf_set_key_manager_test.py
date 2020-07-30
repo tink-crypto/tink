@@ -52,6 +52,7 @@ class PrfSetKeyManagerTest(parameterized.TestCase):
       tink.new_keyset_handle(template)
 
   @parameterized.parameters([
+      prf.prf_set_key_templates.AES_CMAC,
       prf.prf_set_key_templates.HMAC_SHA256,
       prf.prf_set_key_templates.HMAC_SHA512,
       prf.prf_set_key_templates.HKDF_SHA256
@@ -59,20 +60,21 @@ class PrfSetKeyManagerTest(parameterized.TestCase):
   def test_compute_success(self, template):
     keyset_handle = tink.new_keyset_handle(template)
     primitive = keyset_handle.primitive(prf.PrfSet)
-    output = primitive.primary().compute(b'input_data', output_length=31)
-    self.assertLen(output, 31)
+    output = primitive.primary().compute(b'input_data', output_length=15)
+    self.assertLen(output, 15)
     self.assertEqual(
-        primitive.primary().compute(b'input_data', output_length=31), output)
+        primitive.primary().compute(b'input_data', output_length=15), output)
     self.assertNotEqual(
-        primitive.primary().compute(b'some_other_data', output_length=31),
+        primitive.primary().compute(b'some_other_data', output_length=15),
         output)
     prfs = primitive.all()
     self.assertLen(prfs, 1)
     self.assertEqual(
-        prfs[primitive.primary_id()].compute(b'input_data', output_length=31),
+        prfs[primitive.primary_id()].compute(b'input_data', output_length=15),
         output)
 
   @parameterized.parameters([
+      prf.prf_set_key_templates.AES_CMAC,
       prf.prf_set_key_templates.HMAC_SHA256,
       prf.prf_set_key_templates.HMAC_SHA512,
       prf.prf_set_key_templates.HKDF_SHA256

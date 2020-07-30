@@ -23,14 +23,28 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+from tink.proto import aes_cmac_prf_pb2
 from tink.proto import common_pb2
 from tink.proto import hkdf_prf_pb2
 from tink.proto import hmac_prf_pb2
 from tink.proto import tink_pb2
 
+_AES_CMAC_PRF_KEY_TYPE_URL = (
+    'type.googleapis.com/google.crypto.tink.AesCmacPrfKey')
 _HMAC_PRF_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.HmacPrfKey'
 _HKDF_PRF_KEY_TYPE_URL = 'type.googleapis.com/google.crypto.tink.HkdfPrfKey'
-# TODO(juerg): Add AesCmacPrfKey.
+
+
+def _create_aes_cmac_key_template(key_size: int) -> tink_pb2.KeyTemplate:
+  """Creates an AES CMAC PRF KeyTemplate, and fills in its values."""
+  key_format = aes_cmac_prf_pb2.AesCmacPrfKeyFormat()
+  key_format.key_size = key_size
+  key_format.version = 0
+  key_template = tink_pb2.KeyTemplate()
+  key_template.value = key_format.SerializeToString()
+  key_template.type_url = _AES_CMAC_PRF_KEY_TYPE_URL
+  key_template.output_prefix_type = tink_pb2.RAW
+  return key_template
 
 
 def _create_hmac_key_template(
@@ -61,6 +75,7 @@ def _create_hkdf_key_template(
   return key_template
 
 
+AES_CMAC = _create_aes_cmac_key_template(key_size=32)
 HMAC_SHA256 = _create_hmac_key_template(
     key_size=32, hash_type=common_pb2.SHA256)
 HMAC_SHA512 = _create_hmac_key_template(

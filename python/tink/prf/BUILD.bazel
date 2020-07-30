@@ -82,6 +82,7 @@ py_library(
     srcs = ["_prf_set_key_templates.py"],
     srcs_version = "PY3",
     deps = [
+        "//tink/proto:aes_cmac_prf_py_pb2",
         "//tink/proto:common_py_pb2",
         "//tink/proto:hkdf_prf_py_pb2",
         "//tink/proto:hmac_prf_py_pb2",

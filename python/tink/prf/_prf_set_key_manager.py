@@ -57,8 +57,8 @@ class PrfSetCcToPyWrapper(_prf_set.PrfSet):
 def register() -> None:
   """Registers all PrfSet key managers and PrfSet wrapper in the Registry."""
   tink_bindings.register()
-  # TODO(juerg): Add AesCmacPrfKey.
   for ident in (
+      'AesCmacPrfKey',
       'HmacPrfKey',
       'HkdfPrfKey',
   ):

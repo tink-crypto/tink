@@ -6,18 +6,18 @@ licenses(["notice"])
 
 py_proto_library(
     name = "common_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "common.proto",
     ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "tink_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "tink.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
     ],
@@ -25,94 +25,94 @@ py_proto_library(
 
 py_proto_library(
     name = "config_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "config.proto",
-    ]
+    ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "aes_siv_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_siv.proto",
-    ]
+    ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "rsa_ssa_pkcs1_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "rsa_ssa_pkcs1.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "rsa_ssa_pss_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "rsa_ssa_pss.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "ecdsa_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "ecdsa.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "ed25519_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "ed25519.proto",
-    ]
+    ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "aes_cmac_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_cmac.proto",
-    ]
+    ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "hmac_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "hmac.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
-        ":common_py_pb2"
-    ]
+        ":common_py_pb2",
+    ],
 )
 
 py_proto_library(
     name = "aes_ctr_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_ctr.proto",
-    ]
+    ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "aes_ctr_hmac_aead_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_ctr_hmac_aead.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":aes_ctr_py_pb2",
         ":hmac_py_pb2",
@@ -121,127 +121,135 @@ py_proto_library(
 
 py_proto_library(
     name = "aes_gcm_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_gcm.proto",
-    ]
+    ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "aes_gcm_siv_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_gcm_siv.proto",
-    ]
+    ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "aes_ctr_hmac_streaming_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_ctr_hmac_streaming.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
         ":hmac_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "aes_gcm_hkdf_streaming_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_gcm_hkdf_streaming.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "aes_eax_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "aes_eax.proto",
     ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "chacha20_poly1305_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "chacha20_poly1305.proto",
     ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "kms_aead_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "kms_aead.proto",
     ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "kms_envelope_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "kms_envelope.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":tink_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "ecies_aead_hkdf_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "ecies_aead_hkdf.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
         ":tink_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "xchacha20_poly1305_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "xchacha20_poly1305.proto",
     ],
+    visibility = ["//visibility:public"],
+)
+
+py_proto_library(
+    name = "aes_cmac_prf_py_pb2",
+    srcs = [
+        "aes_cmac_prf.proto",
+    ],
+    visibility = ["//visibility:public"],
 )
 
 py_proto_library(
     name = "hmac_prf_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "hmac_prf.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "hkdf_prf_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "hkdf_prf.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":common_py_pb2",
-    ]
+    ],
 )
 
 py_proto_library(
     name = "prf_based_deriver_py_pb2",
-    visibility = ["//visibility:public"],
     srcs = [
         "prf_based_deriver.proto",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":tink_py_pb2",
-    ]
+    ],
 )
