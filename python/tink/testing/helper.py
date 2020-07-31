@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-from typing import Text
+from typing import Text, Mapping
 
 from tink.proto import tink_pb2
 from tink import aead
@@ -28,6 +28,7 @@ from tink import core
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import prf
 from tink import signature as pk_signature
 
 
@@ -166,3 +167,34 @@ class FakePublicKeyVerify(pk_signature.PublicKeyVerify):
   def verify(self, signature: bytes, data: bytes):
     if signature != data + b'|' + self._name.encode():
       raise core.TinkError('invalid signature ' + signature.decode())
+
+
+class FakePrf(prf.Prf):
+  """A fake Prf implementation."""
+
+  def __init__(self, name: Text = 'FakePrf'):
+    self._name = name
+
+  def compute(self, input_data: bytes, output_length: int) -> bytes:
+    if output_length > 32:
+      raise core.TinkError('invalid output_length')
+    output = (
+        input_data + b'|' + self._name.encode() + b'|' +
+        b''.join([b'*' for _ in range(output_length)]))
+    return output[:output_length]
+
+
+class FakePrfSet(prf.PrfSet):
+  """A fake PrfSet implementation that contains exactly one Prf."""
+
+  def __init__(self, name: Text = 'FakePrf'):
+    self._prf = FakePrf(name)
+
+  def primary_id(self) -> int:
+    return 0
+
+  def all(self) -> Mapping[int, prf.Prf]:
+    return {0: self._prf}
+
+  def primary(self) -> prf.Prf:
+    return self._prf

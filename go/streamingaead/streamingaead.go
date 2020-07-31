@@ -28,4 +28,8 @@ func init() {
 	if err := registry.RegisterKeyManager(&aesGCMHKDFKeyManager{}); err != nil {
 		panic(fmt.Sprintf("streamingaead.init() failed: %v", err))
 	}
+
+	if err := registry.RegisterKeyManager(&aesCTRHMACKeyManager{}); err != nil {
+		panic(fmt.Sprintf("streamingaead.init() failed: %v", err))
+	}
 }

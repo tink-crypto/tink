@@ -1,6 +1,6 @@
-import AesGcmKeyManager from 'goog:tink.aead.AesGcmKeyManager'; // from //third_party/tink/javascript/aead:aes_gcm_key_manager
-import AesGcmKeyTemplates from 'goog:tink.aead.AesGcmKeyTemplates'; // from //third_party/tink/javascript/aead:aes_gcm_key_templates
 import * as Registry from '../internal/registry';
+import {AesGcmKeyManager} from './aes_gcm_key_manager';
+import {AesGcmKeyTemplates} from './aes_gcm_key_templates';
 
 export function register() {
   Registry.registerKeyManager(new AesGcmKeyManager());

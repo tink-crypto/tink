@@ -1,0 +1,45 @@
+licenses(["notice"])
+
+java_test(
+    name = "HkdfStreamingPrfTest",
+    size = "small",
+    srcs = ["HkdfStreamingPrfTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:hkdf",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PrfImplTest",
+    size = "small",
+    srcs = ["PrfImplTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "SingletonPrfSetTest",
+    size = "small",
+    srcs = ["SingletonPrfSetTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:singleton_prf_set",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

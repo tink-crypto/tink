@@ -29,11 +29,20 @@ java_library(
 )
 
 java_library(
+    name = "singleton_prf_set",
+    srcs = ["SingletonPrfSet.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+    ],
+)
+
+java_library(
     name = "hkdf_streaming_prf",
     srcs = ["HkdfStreamingPrf.java"],
     deps = [
         ":streaming_prf",
-        "//src/main/java/com/google/crypto/tink/subtle",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

@@ -32,9 +32,10 @@ def register_status_not_ok_type(status_not_ok_type):
 
 def use_tink_errors(func):
   """Transforms StatusNotOk errors into TinkErrors."""
-  def wrapper(*args):
+
+  def wrapper(*args, **kwargs):
     try:
-      return func(*args)
+      return func(*args, **kwargs)
     except KNOWN_STATUS_NOT_OK_TYPES as e:
       raise TinkError(e)
   return wrapper

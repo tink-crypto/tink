@@ -38,13 +38,3 @@ java_plugin(
         "@maven//:com_google_auto_service_auto_service",
     ],
 )
-
-# Deprecated rules, will be removed soon.
-
-java_library(
-    name = "awskms",
-    exports = [
-        ":aws_kms_aead",
-        ":aws_kms_client",
-    ],
-)

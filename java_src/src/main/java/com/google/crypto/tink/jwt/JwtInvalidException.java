@@ -12,9 +12,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.jose;
+package com.google.crypto.tink.jwt;
 
-/** A JWT is a string representing a set of claims as a JSON object, as described in RFC 7519. */
-public final class Jwt {
-  private Jwt() {}
+import java.security.GeneralSecurityException;
+
+/** This error is thrown when one of the headers or one of the claims is invalid. */
+public final class JwtInvalidException extends GeneralSecurityException {
+
+  public JwtInvalidException(String message) {
+    super(message);
+  }
 }

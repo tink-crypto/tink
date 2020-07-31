@@ -1,0 +1,104 @@
+licenses(["notice"])
+
+package(default_testonly = 1)
+
+java_test(
+    name = "DeterministicAeadWrapperTest",
+    size = "small",
+    srcs = ["DeterministicAeadWrapperTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_wrapper",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "DeterministicAeadConfigTest",
+    size = "small",
+    srcs = ["DeterministicAeadConfigTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesSivKeyManagerTest",
+    size = "small",
+    srcs = ["AesSivKeyManagerTest.java"],
+    deps = [
+        "//proto:aes_siv_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "DeterministicAeadKeyTemplatesTest",
+    size = "small",
+    srcs = ["DeterministicAeadKeyTemplatesTest.java"],
+    deps = [
+        "//proto:aes_siv_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "DeterministicAeadFactoryTest",
+    size = "small",
+    srcs = ["DeterministicAeadFactoryTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_factory",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "DeterministicAeadIntegrationTest",
+    size = "small",
+    srcs = ["DeterministicAeadIntegrationTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
+        "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:junit_junit",
+    ],
+)

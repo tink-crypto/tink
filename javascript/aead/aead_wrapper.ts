@@ -12,37 +12,25 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.aead.AeadWrapper');
+import {SecurityException} from '../exception/security_exception';
+import {CryptoFormat} from '../internal/crypto_format';
+import * as PrimitiveSet from '../internal/primitive_set';
+import {PrimitiveWrapper} from '../internal/primitive_wrapper';
+import {PbKeyStatusType} from '../internal/proto';
+import * as Registry from '../internal/registry';
+import {Constructor} from '../internal/util';
 
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const {PrimitiveWrapper} = goog.require('google3.third_party.tink.javascript.internal.primitive_wrapper');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const {PbKeyStatusType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {Aead} from './internal/aead';
 
 /**
  * @final
  */
-class WrappedAead extends Aead {
-  /**
-   * @param {!PrimitiveSet.PrimitiveSet} aeadSet
-   */
+class WrappedAead implements Aead {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
-  constructor(aeadSet) {
-    super();
-    /** @private @const {!PrimitiveSet.PrimitiveSet} */
-    this.aeadSet_ = aeadSet;
-  }
+  constructor(private readonly aeadSet: PrimitiveSet.PrimitiveSet<Aead>) {}
 
-  /**
-   * @param {!PrimitiveSet.PrimitiveSet} aeadSet
-   *
-   * @return {!Aead}
-   */
-  static newAead(aeadSet) {
+  static newAead(aeadSet: PrimitiveSet.PrimitiveSet<Aead>): Aead {
     if (!aeadSet) {
       throw new SecurityException('Primitive set has to be non-null.');
     }
@@ -55,15 +43,19 @@ class WrappedAead extends Aead {
   /**
    * @override
    */
-  async encrypt(plaintext, opt_associatedData) {
+  async encrypt(plaintext: Uint8Array, opt_associatedData?: Uint8Array|null):
+      Promise<Uint8Array> {
     if (!plaintext) {
       throw new SecurityException('Plaintext has to be non-null.');
     }
-    const primitive = this.aeadSet_.getPrimary().getPrimitive();
+    const primary = this.aeadSet.getPrimary()
+    if (!primary) {
+      throw new SecurityException('Primary has to be non-null.');
+    }
+    const primitive = primary.getPrimitive();
     const encryptedText =
         await primitive.encrypt(plaintext, opt_associatedData);
-    const keyId = this.aeadSet_.getPrimary().getIdentifier();
-
+    const keyId = primary.getIdentifier();
     const ciphertext = new Uint8Array(keyId.length + encryptedText.length);
     ciphertext.set(keyId, 0);
     ciphertext.set(encryptedText, keyId.length);
@@ -73,30 +65,27 @@ class WrappedAead extends Aead {
   /**
    * @override
    */
-  async decrypt(ciphertext, opt_associatedData) {
+  async decrypt(ciphertext: Uint8Array, opt_associatedData?: Uint8Array|null):
+      Promise<Uint8Array> {
     if (!ciphertext) {
       throw new SecurityException('Ciphertext has to be non-null.');
     }
-
     if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
       const keyId = ciphertext.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-      const entries = await this.aeadSet_.getPrimitives(keyId);
-
+      const entries = await this.aeadSet.getPrimitives(keyId);
       const rawCiphertext = ciphertext.subarray(
           CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
-      let /** @type {!Uint8Array} */ decryptedText;
+      let decryptedText: Uint8Array|undefined;
       try {
         decryptedText = await this.tryDecryption_(
             entries, rawCiphertext, opt_associatedData);
       } catch (e) {
       }
-
       if (decryptedText) {
         return decryptedText;
       }
     }
-
-    const entries = await this.aeadSet_.getRawPrimitives();
+    const entries = await this.aeadSet.getRawPrimitives();
     const decryptedText =
         await this.tryDecryption_(entries, ciphertext, opt_associatedData);
     return decryptedText;
@@ -107,14 +96,11 @@ class WrappedAead extends Aead {
    * returns the ciphertext decrypted by first primitive which succeed. It
    * throws an exception if no entry succeeds.
    *
-   * @private
-   * @param {!Array<!PrimitiveSet.Entry>} entriesArray
-   * @param {!Uint8Array} ciphertext
-   * @param {?Uint8Array=} opt_associatedData
    *
-   * @return {!Promise<!Uint8Array>}
    */
-  async tryDecryption_(entriesArray, ciphertext, opt_associatedData) {
+  private async tryDecryption_(
+      entriesArray: Array<PrimitiveSet.Entry<Aead>>, ciphertext: Uint8Array,
+      opt_associatedData?: Uint8Array|null): Promise<Uint8Array> {
     const entriesArrayLength = entriesArray.length;
     for (let i = 0; i < entriesArrayLength; i++) {
       if (entriesArray[i].getKeyStatus() != PbKeyStatusType.ENABLED) {
@@ -134,23 +120,18 @@ class WrappedAead extends Aead {
   }
 }
 
-/**
- * @implements {PrimitiveWrapper<Aead>}
- */
-class AeadWrapper {
-  constructor() {}
-
+export class AeadWrapper implements PrimitiveWrapper<Aead> {
   /**
    * @override
    */
-  wrap(primitiveSet) {
+  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<Aead>): Aead {
     return WrappedAead.newAead(primitiveSet);
   }
 
   /**
    * @override
    */
-  getPrimitiveType() {
+  getPrimitiveType(): Constructor<Aead> {
     return Aead;
   }
 
@@ -158,5 +139,3 @@ class AeadWrapper {
     Registry.registerPrimitiveWrapper(new AeadWrapper());
   }
 }
-
-exports = AeadWrapper;

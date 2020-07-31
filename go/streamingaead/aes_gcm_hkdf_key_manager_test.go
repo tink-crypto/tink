@@ -28,14 +28,14 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-var keySizes = []uint32{16, 32}
+var aesGCMHKDFKeySizes = []uint32{16, 32}
 
 func TestAESGCMHKDFGetPrimitiveBasic(t *testing.T) {
 	keyManager, err := registry.GetKeyManager(testutil.AESGCMHKDFTypeURL)
 	if err != nil {
 		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
 	}
-	for _, keySize := range keySizes {
+	for _, keySize := range aesGCMHKDFKeySizes {
 		key := testutil.NewAESGCMHKDFKey(testutil.AESGCMHKDFKeyVersion, keySize, keySize, commonpb.HashType_SHA256, 4096)
 		serializedKey, err := proto.Marshal(key)
 		if err != nil {
@@ -110,7 +110,7 @@ func TestAESGCMHKDFNewKeyBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
 	}
-	for _, keySize := range keySizes {
+	for _, keySize := range aesGCMHKDFKeySizes {
 		format := testutil.NewAESGCMHKDFKeyFormat(
 			keySize,
 			keySize,
@@ -163,7 +163,7 @@ func TestAESGCMHKDFNewKeyDataBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain AES-GCM-HKDF key manager: %s", err)
 	}
-	for _, keySize := range keySizes {
+	for _, keySize := range aesGCMHKDFKeySizes {
 		format := testutil.NewAESGCMHKDFKeyFormat(
 			keySize,
 			keySize,

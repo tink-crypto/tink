@@ -28,7 +28,9 @@ public final class PrfConfig {
    * com.google.crypto.tink.KeyManager} needed to handle Prf key types supported in Tink.
    */
   public static void register() throws GeneralSecurityException {
+    AesCmacPrfKeyManager.register(/*newKeyAllowed=*/ true);
     HkdfPrfKeyManager.register(/*newKeyAllowed=*/ true);
+    HmacPrfKeyManager.register(/*newKeyAllowed=*/ true);
     PrfSetWrapper.register();
   }
 

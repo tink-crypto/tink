@@ -35,7 +35,7 @@ java_binary(
     deps = [
         ":cli_util",
         ":compare_keysets",
-        "@tink_java//:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
     ],
@@ -49,7 +49,7 @@ java_binary(
     ],
     main_class = "com.google.crypto.tink.testing.VersionCli",
     deps = [
-        "@tink_java//src/main/java/com/google/crypto/tink:core",
+        "@tink_java//src/main/java/com/google/crypto/tink:version",
     ],
 )
 
@@ -140,6 +140,21 @@ java_binary(
         ":cli_util",
         "@tink_java//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+    ],
+)
+
+java_binary(
+    name = "prf_set_cli_java",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/PrfSetCli.java",
+    ],
+    main_class = "com.google.crypto.tink.testing.PrfSetCli",
+    deps = [
+        ":cli_util",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
     ],
 )
 

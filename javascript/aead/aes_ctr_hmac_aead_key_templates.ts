@@ -12,17 +12,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.aead.AesCtrHmacAeadKeyTemplates');
+import {PbAesCtrHmacAeadKeyFormat, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyTemplate, PbOutputPrefixType} from '../internal/proto';
 
-const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
-const {PbAesCtrHmacAeadKeyFormat, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyTemplate, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {AesCtrHmacAeadKeyManager} from './aes_ctr_hmac_aead_key_manager';
 
 /**
  * Pre-generated KeyTemplates for AES CTR HMAC AEAD keys.
  *
  * @final
  */
-class AesCtrHmacAeadKeyTemplates {
+export class AesCtrHmacAeadKeyTemplates {
   /**
    * Returns a KeyTemplate that generates new instances of AesCtrHmacAeadKey
    * with the following parameters:
@@ -33,16 +32,19 @@ class AesCtrHmacAeadKeyTemplates {
    *    HMAC hash function: SHA256
    *    OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes128CtrHmacSha256() {
+  static aes128CtrHmacSha256(): PbKeyTemplate {
     return AesCtrHmacAeadKeyTemplates.newAesCtrHmacSha256KeyTemplate_(
-        /* aesKeySize = */ 16,
-        /* ivSize = */ 16,
-        /* hmacKeySize = */ 32,
-        /* tagSize = */ 16);
+        16,
+        /* aesKeySize = */
+        16,
+        /* ivSize = */
+        32,
+        /* hmacKeySize = */
+        16);
   }
 
+  /* tagSize = */
   /**
    * Returns a KeyTemplate that generates new instances of AesCtrHmacAeadKey
    * with the following parameters:
@@ -53,54 +55,45 @@ class AesCtrHmacAeadKeyTemplates {
    *    HMAC hash function: SHA256
    *    OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes256CtrHmacSha256() {
+  static aes256CtrHmacSha256(): PbKeyTemplate {
     return AesCtrHmacAeadKeyTemplates.newAesCtrHmacSha256KeyTemplate_(
-        /* aesKeySize = */ 32,
-        /* ivSize = */ 16,
-        /* hmacKeySize = */ 32,
-        /* tagSize = */ 32);
+        32,
+        /* aesKeySize = */
+        16,
+        /* ivSize = */
+        32,
+        /* hmacKeySize = */
+        32);
   }
 
-  /**
-   * @private
-   *
-   * @param {number} aesKeySize
-   * @param {number} ivSize
-   * @param {number} hmacKeySize
-   * @param {number} tagSize
-   *
-   * @return {!PbKeyTemplate}
-   */
-  static newAesCtrHmacSha256KeyTemplate_(
-      aesKeySize, ivSize, hmacKeySize, tagSize) {
+  /* tagSize = */
+  private static newAesCtrHmacSha256KeyTemplate_(
+      aesKeySize: number, ivSize: number, hmacKeySize: number,
+      tagSize: number): PbKeyTemplate {
     // Define AES CTR key format.
-    const aesCtrKeyFormat = new PbAesCtrKeyFormat()
+    const aesCtrKeyFormat = (new PbAesCtrKeyFormat())
                                 .setKeySize(aesKeySize)
                                 .setParams(new PbAesCtrParams());
-    aesCtrKeyFormat.getParams().setIvSize(ivSize);
+    aesCtrKeyFormat.getParams()!.setIvSize(ivSize);
 
     // Define HMAC key format.
-    const hmacKeyFormat = new PbHmacKeyFormat()
+    const hmacKeyFormat = (new PbHmacKeyFormat())
                               .setKeySize(hmacKeySize)
                               .setParams(new PbHmacParams());
-    hmacKeyFormat.getParams().setTagSize(tagSize);
-    hmacKeyFormat.getParams().setHash(PbHashType.SHA256);
+    hmacKeyFormat.getParams()!.setTagSize(tagSize);
+    hmacKeyFormat.getParams()!.setHash(PbHashType.SHA256);
 
     // Define AES CTR HMAC AEAD key format.
-    const keyFormat = new PbAesCtrHmacAeadKeyFormat()
+    const keyFormat = (new PbAesCtrHmacAeadKeyFormat())
                           .setAesCtrKeyFormat(aesCtrKeyFormat)
                           .setHmacKeyFormat(hmacKeyFormat);
 
     // Define key template.
-    const keyTemplate = new PbKeyTemplate()
+    const keyTemplate = (new PbKeyTemplate())
                             .setTypeUrl(AesCtrHmacAeadKeyManager.KEY_TYPE)
                             .setOutputPrefixType(PbOutputPrefixType.TINK)
                             .setValue(keyFormat.serializeBinary());
-
     return keyTemplate;
   }
 }
-
-exports = AesCtrHmacAeadKeyTemplates;

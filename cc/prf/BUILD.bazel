@@ -43,6 +43,7 @@ cc_library(
         ":hmac_prf_key_manager",
         ":prf_set_wrapper",
         "//:registry",
+        "//config:tink_fips",
         "//proto:tink_cc_proto",
         "//util:status",
     ],
@@ -241,6 +242,24 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "prf_config_test",
+    srcs = ["prf_config_test.cc"],
+    deps = [
+        ":hmac_prf_key_manager",
+        ":prf_config",
+        ":prf_key_templates",
+        ":prf_set",
+        "//:config",
+        "//:registry",
+        "//config:tink_fips",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

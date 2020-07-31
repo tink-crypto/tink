@@ -1,0 +1,23 @@
+load("@rules_python//python:defs.bzl", "py_library")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+py_library(
+    name = "prf",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":_prf_set",
+    ],
+)
+
+py_library(
+    name = "_prf_set",
+    srcs = ["_prf_set.py"],
+    srcs_version = "PY3",
+    deps = [requirement("six")],
+)

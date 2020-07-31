@@ -1,0 +1,97 @@
+licenses(["notice"])
+
+java_test(
+    name = "PrfKeyTemplatesTest",
+    size = "small",
+    srcs = ["PrfKeyTemplatesTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:hkdf_prf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PrfSetWrapperTest",
+    size = "small",
+    srcs = ["PrfSetWrapperTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:primitive_set",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/prf:prf_config",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set_wrapper",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AesCmacPrfKeyManagerTest",
+    size = "small",
+    srcs = ["AesCmacPrfKeyManagerTest.java"],
+    deps = [
+        "//proto:aes_cmac_prf_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HmacPrfKeyManagerTest",
+    size = "small",
+    srcs = ["HmacPrfKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:hmac_prf_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HkdfPrfKeyManagerTest",
+    size = "small",
+    srcs = ["HkdfPrfKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:hkdf_prf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/prf:hkdf_prf_key_manager",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
+        "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

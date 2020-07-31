@@ -23,7 +23,7 @@ namespace tink {
 ///////////////////////////////////////////////////////////////////////////////
 // Pre-generated KeyTemplate for Prf key types. One can use these templates
 // to generate new KeysetHandle object with fresh keys.
-// To generate a new keyset that contains a single AesGcmKey, one can do:
+// To generate a new keyset that contains a single HkdfPrfKey, one can do:
 //
 //   auto handle_result =
 //       KeysetHandle::GenerateNew(PrfKeyTemplates::HkdfSha256());

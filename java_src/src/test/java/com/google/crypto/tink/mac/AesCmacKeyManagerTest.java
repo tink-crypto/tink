@@ -25,7 +25,8 @@ import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.proto.AesCmacKey;
 import com.google.crypto.tink.proto.AesCmacKeyFormat;
 import com.google.crypto.tink.proto.AesCmacParams;
-import com.google.crypto.tink.subtle.AesCmac;
+import com.google.crypto.tink.subtle.PrfAesCmac;
+import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -218,7 +219,9 @@ public class AesCmacKeyManagerTest {
     AesCmacKey validKey = manager.keyFactory().createKey(makeAesCmacKeyFormat(32, 16));
     Mac managerMac = manager.getPrimitive(validKey, Mac.class);
     Mac directMac =
-        new AesCmac(validKey.getKeyValue().toByteArray(), validKey.getParams().getTagSize());
+        new PrfMac(
+            new PrfAesCmac(validKey.getKeyValue().toByteArray()),
+            validKey.getParams().getTagSize());
     byte[] message = Random.randBytes(50);
     managerMac.verifyMac(directMac.computeMac(message), message);
   }

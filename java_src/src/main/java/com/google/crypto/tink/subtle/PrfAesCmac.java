@@ -16,7 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.prf.Prf;
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
@@ -27,38 +28,36 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * An implementation of CMAC following <a href="https://tools.ietf.org/html/rfc4493">RFC 4493</a>.
  */
-public final class AesCmac implements Mac {
-  static final int MIN_TAG_SIZE_IN_BYTES = 10;
+@Immutable
+public final class PrfAesCmac implements Prf {
 
+  @SuppressWarnings("Immutable")
   private final SecretKey keySpec;
-  private final int tagSizeInBytes;
+
+  @SuppressWarnings("Immutable")
   private byte[] subKey1;
+
+  @SuppressWarnings("Immutable")
   private byte[] subKey2;
 
   private static Cipher instance() throws GeneralSecurityException {
     return EngineFactory.CIPHER.getInstance("AES/ECB/NoPadding");
   }
 
-  public AesCmac(final byte[] key, int tagSizeInBytes) throws GeneralSecurityException {
+  public PrfAesCmac(final byte[] key) throws GeneralSecurityException {
     Validators.validateAesKeySize(key.length);
 
-    if (tagSizeInBytes < MIN_TAG_SIZE_IN_BYTES) {
-      throw new InvalidAlgorithmParameterException(
-          "tag size too small, min is " + MIN_TAG_SIZE_IN_BYTES + " bytes");
-    }
-    if (tagSizeInBytes > AesUtil.BLOCK_SIZE) {
-      throw new InvalidAlgorithmParameterException(
-          "tag size too large, max is " + AesUtil.BLOCK_SIZE + " bytes");
-    }
-
     keySpec = new SecretKeySpec(key, "AES");
-    this.tagSizeInBytes = tagSizeInBytes;
     generateSubKeys();
   }
 
   // https://tools.ietf.org/html/rfc4493#section-2.4
   @Override
-  public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
+  public byte[] compute(final byte[] data, int outputLength) throws GeneralSecurityException {
+    if (outputLength > AesUtil.BLOCK_SIZE) {
+      throw new InvalidAlgorithmParameterException(
+          "outputLength too large, max is " + AesUtil.BLOCK_SIZE + " bytes");
+    }
     Cipher aes = instance();
     aes.init(Cipher.ENCRYPT_MODE, keySpec);
 
@@ -94,16 +93,8 @@ public final class AesCmac implements Mac {
     y = Bytes.xor(mLast, x);
 
     // Step 7
-    byte[] tag = new byte[tagSizeInBytes];
-    System.arraycopy(aes.doFinal(y), 0, tag, 0, tagSizeInBytes);
-    return tag;
-  }
-
-  @Override
-  public void verifyMac(final byte[] mac, byte[] data) throws GeneralSecurityException {
-    if (!Bytes.equal(mac, this.computeMac(data))) {
-      throw new GeneralSecurityException("invalid MAC");
-    }
+    byte[] output = Arrays.copyOf(aes.doFinal(y), outputLength);
+    return output;
   }
 
   // https://tools.ietf.org/html/rfc4493#section-2.3

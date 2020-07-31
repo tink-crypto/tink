@@ -30,6 +30,7 @@ def tink_java_deps_init():
             "org.json:json:20170516",
             "joda-time:joda-time:2.10.3",
             "junit:junit:4.13",
+            "org.conscrypt:conscrypt-openjdk-uber:2.4.0",
             "org.mockito:mockito-core:2.23.0",
             "org.ow2.asm:asm:7.0",
             "org.ow2.asm:asm-commons:7.0",

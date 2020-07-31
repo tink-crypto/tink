@@ -16,9 +16,9 @@ goog.module('tink.RegistryTest');
 goog.setTestOnly('tink.RegistryTest');
 
 const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const AeadConfig = goog.require('tink.aead.AeadConfig');
-const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
+const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
+const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
+const {AesCtrHmacAeadKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_manager');
 const {EncryptThenAuthenticate} = goog.require('google3.third_party.tink.javascript.subtle.encrypt_then_authenticate');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
 const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');

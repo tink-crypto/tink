@@ -152,7 +152,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
@@ -169,60 +170,10 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@com_google_protobuf//:protobuf_javalite",
-    ],
-)
-
-# Deprecated rules, will be removed soon
-
-filegroup(
-    name = "srcs",
-    srcs = glob(
-        [
-            "*.java",
-        ],
-    ),
-)
-
-full_protos = [
-    "//proto:aes_cmac_java_proto",
-    "//proto:common_java_proto",
-    "//proto:config_java_proto",
-    "//proto:hmac_java_proto",
-    "//proto:tink_java_proto",
-]
-
-lite_protos = [
-    "//proto:aes_cmac_java_proto_lite",
-    "//proto:common_java_proto_lite",
-    "//proto:config_java_proto_lite",
-    "//proto:hmac_java_proto_lite",
-    "//proto:tink_java_proto_lite",
-]
-
-java_library(
-    name = "mac",
-    srcs = [":srcs"],
-    visibility = ["//visibility:public"],
-    deps = full_protos + [
-        "//src/main/java/com/google/crypto/tink",
-        "//src/main/java/com/google/crypto/tink/subtle",
-        "//src/main/java/com/google/crypto/tink/subtle:mac",
-        "@com_google_protobuf//:protobuf_javalite",
-    ],
-)
-
-java_library(
-    name = "android",
-    srcs = [":srcs"],
-    visibility = ["//visibility:public"],
-    deps = lite_protos + [
-        "//src/main/java/com/google/crypto/tink:android",
-        "//src/main/java/com/google/crypto/tink/subtle",
-        "//src/main/java/com/google/crypto/tink/subtle:mac",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )

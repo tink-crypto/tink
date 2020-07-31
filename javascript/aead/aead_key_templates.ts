@@ -12,11 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.aead.AeadKeyTemplates');
+import {PbKeyTemplate} from '../internal/proto';
 
-const AesCtrHmacAeadKeyTemplates = goog.require('tink.aead.AesCtrHmacAeadKeyTemplates');
-const AesGcmKeyTemplates = goog.require('tink.aead.AesGcmKeyTemplates');
-const {PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {AesCtrHmacAeadKeyTemplates} from './aes_ctr_hmac_aead_key_templates';
+import {AesGcmKeyTemplates} from './aes_gcm_key_templates';
 
 /**
  * Pre-generated KeyTemplates for Aead keys.
@@ -31,7 +30,7 @@ const {PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.intern
  *
  * @final
  */
-class AeadKeyTemplates {
+export class AeadKeyTemplates {
   /**
    * Returns a KeyTemplate that generates new instances of AesCtrHmacAeadKey
    * with the following parameters:
@@ -42,9 +41,8 @@ class AeadKeyTemplates {
    *    HMAC hash function: SHA256
    *    OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes128CtrHmacSha256() {
+  static aes128CtrHmacSha256(): PbKeyTemplate {
     return AesCtrHmacAeadKeyTemplates.aes128CtrHmacSha256();
   }
 
@@ -58,9 +56,8 @@ class AeadKeyTemplates {
    *    HMAC hash function: SHA256
    *    OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes256CtrHmacSha256() {
+  static aes256CtrHmacSha256(): PbKeyTemplate {
     return AesCtrHmacAeadKeyTemplates.aes256CtrHmacSha256();
   }
 
@@ -70,9 +67,8 @@ class AeadKeyTemplates {
    *    key size: 16 bytes
    *    OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes128Gcm() {
+  static aes128Gcm(): PbKeyTemplate {
     return AesGcmKeyTemplates.aes128Gcm();
   }
 
@@ -82,9 +78,8 @@ class AeadKeyTemplates {
    *    key size: 32 bytes
    *    OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes256Gcm() {
+  static aes256Gcm(): PbKeyTemplate {
     return AesGcmKeyTemplates.aes256Gcm();
   }
 
@@ -94,11 +89,8 @@ class AeadKeyTemplates {
    *     key size: 32 bytes
    *     OutputPrefixType: RAW
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes256GcmNoPrefix() {
+  static aes256GcmNoPrefix(): PbKeyTemplate {
     return AesGcmKeyTemplates.aes256GcmNoPrefix();
   }
 }
-
-exports = AeadKeyTemplates;

@@ -12,29 +12,29 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.aead.AesGcmKeyTemplates');
+import {PbAesGcmKeyFormat, PbKeyTemplate, PbOutputPrefixType} from '../internal/proto';
 
-const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
-const {PbAesGcmKeyFormat, PbKeyTemplate, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {AesGcmKeyManager} from './aes_gcm_key_manager';
 
 /**
  * Pre-generated KeyTemplates for AES GCM keys.
  *
  * @final
  */
-class AesGcmKeyTemplates {
+export class AesGcmKeyTemplates {
   /**
    * Returns a KeyTemplate that generates new instances of AesGcmKey
    * with the following parameters:
    *    key size: 16 bytes
    *    OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes128Gcm() {
+  static aes128Gcm(): PbKeyTemplate {
     return AesGcmKeyTemplates.newAesGcmKeyTemplate_(
-        /* keySize = */ 16,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+        /* keySize = */
+        16,
+        /* outputPrefixType = */
+        PbOutputPrefixType.TINK);
   }
 
   /**
@@ -43,12 +43,13 @@ class AesGcmKeyTemplates {
    *    key size: 32 bytes
    *    OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes256Gcm() {
+  static aes256Gcm(): PbKeyTemplate {
     return AesGcmKeyTemplates.newAesGcmKeyTemplate_(
-        /* keySize = */ 32,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+        /* keySize = */
+        32,
+        /* outputPrefixType = */
+        PbOutputPrefixType.TINK);
   }
 
   /**
@@ -57,34 +58,25 @@ class AesGcmKeyTemplates {
    *     key size: 32 bytes
    *     OutputPrefixType: RAW
    *
-   * @return {!PbKeyTemplate}
    */
-  static aes256GcmNoPrefix() {
+  static aes256GcmNoPrefix(): PbKeyTemplate {
     return AesGcmKeyTemplates.newAesGcmKeyTemplate_(
-        /* keySize = */ 32,
-        /* outputPrefixType = */ PbOutputPrefixType.RAW);
+        /* keySize = */
+        32,
+        /* outputPrefixType = */
+        PbOutputPrefixType.RAW);
   }
 
-  /**
-   * @private
-   *
-   * @param {number} keySize
-   * @param {!PbOutputPrefixType} outputPrefixType
-   *
-   * @return {!PbKeyTemplate}
-   */
-  static newAesGcmKeyTemplate_(keySize, outputPrefixType) {
+  private static newAesGcmKeyTemplate_(
+      keySize: number, outputPrefixType: PbOutputPrefixType): PbKeyTemplate {
     // Define AES GCM key format.
-    const keyFormat = new PbAesGcmKeyFormat().setKeySize(keySize);
+    const keyFormat = (new PbAesGcmKeyFormat()).setKeySize(keySize);
 
     // Define key template.
-    const keyTemplate = new PbKeyTemplate()
+    const keyTemplate = (new PbKeyTemplate())
                             .setTypeUrl(AesGcmKeyManager.KEY_TYPE)
                             .setOutputPrefixType(outputPrefixType)
                             .setValue(keyFormat.serializeBinary());
-
     return keyTemplate;
   }
 }
-
-exports = AesGcmKeyTemplates;

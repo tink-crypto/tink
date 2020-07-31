@@ -20,11 +20,9 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
-
+from typing import Generic, Type, TypeVar
 # Special imports
 import six
-
-from typing import Generic, Type, TypeVar
 
 from tink.core import _primitive_set
 

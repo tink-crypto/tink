@@ -35,6 +35,7 @@ tink_pybind_library(
         "@tink_cc//:public_key_sign",
         "@tink_cc//:public_key_verify",
         "@tink_cc//:streaming_aead",
+        "@tink_cc//prf:prf_set",
     ],
 )
 
@@ -51,6 +52,7 @@ py_test(
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
+        "//tink/proto:hmac_prf_py_pb2",
         "//tink/proto:hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
@@ -251,6 +253,18 @@ tink_pybind_library(
 )
 
 tink_pybind_library(
+    name = "prf_set",
+    srcs = ["prf_set.cc"],
+    hdrs = ["prf_set.h"],
+    deps = [
+        ":status_casters",
+        "@pybind11",
+        "@tink_cc//prf:prf_set",
+        "@tink_cc//util:status",
+    ],
+)
+
+tink_pybind_library(
     name = "public_key_sign",
     srcs = ["public_key_sign.cc"],
     hdrs = ["public_key_sign.h"],
@@ -315,6 +329,7 @@ tink_pybind_extension(
         ":input_stream_adapter",
         ":mac",
         ":output_stream_adapter",
+        ":prf_set",
         ":public_key_sign",
         ":public_key_verify",
         ":python_file_object_adapter",
@@ -331,6 +346,7 @@ tink_pybind_extension(
         "@tink_cc//:streaming_aead",
         "@tink_cc//integration/awskms:aws_kms_client",
         "@tink_cc//integration/gcpkms:gcp_kms_client",
+        "@tink_cc//prf:prf_set",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
     ],
@@ -352,6 +368,7 @@ tink_pybind_extension(
         ":input_stream_adapter",
         ":mac",
         ":output_stream_adapter",
+        ":prf_set",
         ":public_key_sign",
         ":public_key_verify",
         ":python_file_object_adapter",
@@ -369,6 +386,7 @@ tink_pybind_extension(
         "@tink_cc//:streaming_aead",
         "@tink_cc//integration/awskms:aws_kms_client",
         "@tink_cc//integration/gcpkms:gcp_kms_client",
+        "@tink_cc//prf:prf_set",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
     ],

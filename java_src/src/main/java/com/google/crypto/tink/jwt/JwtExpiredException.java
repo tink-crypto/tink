@@ -12,22 +12,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.jose;
+package com.google.crypto.tink.jwt;
 
-import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 
-/**
- * Interface for JSON Web Signature (JWS) Message Authentication Code (MAC), as described in RFC
- * 7515.
- *
- * <h3>Security guarantees: similar to {@link com.google.crypto.tink.Mac}.</h3>
- */
-@Immutable
-public interface JwsMac {
-  /** Computes a MAC and encodes a JWT in JWS compact serialization format. */
-  String computeMacThenEncode(Jwt payload) throws GeneralSecurityException;
+/** This error is thrown when the JWT is expired. */
+public final class JwtExpiredException extends GeneralSecurityException {
 
-  /** Verifies a MAC and decodes a JWT in JWS compact serialization format. */
-  Jwt verifyMacThenDecode(String compact) throws GeneralSecurityException;
+  public JwtExpiredException(String message) {
+    super(message);
+  }
 }

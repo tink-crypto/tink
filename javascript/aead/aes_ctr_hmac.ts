@@ -1,6 +1,6 @@
-import AesCtrHmacAeadKeyManager from 'goog:tink.aead.AesCtrHmacAeadKeyManager'; // from //third_party/tink/javascript/aead:aes_ctr_hmac_aead_key_manager
-import AesCtrHmacAeadKeyTemplates from 'goog:tink.aead.AesCtrHmacAeadKeyTemplates'; // from //third_party/tink/javascript/aead:aes_ctr_hmac_aead_key_templates
 import * as Registry from '../internal/registry';
+import {AesCtrHmacAeadKeyManager} from './aes_ctr_hmac_aead_key_manager';
+import {AesCtrHmacAeadKeyTemplates} from './aes_ctr_hmac_aead_key_templates';
 
 export function register() {
   Registry.registerKeyManager(new AesCtrHmacAeadKeyManager());

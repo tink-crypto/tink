@@ -24,6 +24,7 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/mac.h"
+#include "tink/prf/prf_set.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/streaming_aead.h"
@@ -79,6 +80,8 @@ void PybindRegisterCcKeyManager(pybind11::module* module) {
   py_thin_wrappers::WrapCcKeyManager<Mac>(
       m, "MacKeyManager", "Key Manager for MAC (message authentication code).",
       "mac");
+  py_thin_wrappers::WrapCcKeyManager<PrfSet>(
+      m, "PrfSetKeyManager", "Key Manager for PrfSet.", "prf_set");
   py_thin_wrappers::WrapCcKeyManager<PublicKeySign>(
       m, "PublicKeySignKeyManager", "Key Manager for Public Key signing.",
       "public_key_sign")

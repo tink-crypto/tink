@@ -134,6 +134,15 @@ class HelperTest(absltest.TestCase):
                                 'failed to decrypt ciphertext'):
       dec.decrypt(b'wrong ciphertext', b'context_info')
 
+  def test_fake_prf_set_success(self):
+    prf_set = helper.FakePrfSet('Name')
+    output_primary = prf_set.primary().compute(b'input', output_length=31)
+    self.assertLen(output_primary, 31)
+    prfs = prf_set.all()
+    self.assertLen(prfs, 1)
+    output = prfs[0].compute(b'input', output_length=31)
+    self.assertLen(output, 31)
+
 
 if __name__ == '__main__':
   absltest.main()

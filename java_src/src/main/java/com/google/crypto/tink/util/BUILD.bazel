@@ -23,26 +23,3 @@ android_library(
         "@maven//:joda_time_joda_time",
     ],
 )
-
-# Deprecated, will be removed.
-
-filegroup(
-    name = "srcs",
-    srcs = glob(
-        [
-            "*.java",
-        ],
-    ),
-)
-
-java_library(
-    name = "util",
-    srcs = [
-        ":srcs",
-    ],
-    deps = [
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_http_client_google_http_client",
-        "@maven//:joda_time_joda_time",
-    ],
-)

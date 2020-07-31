@@ -1,0 +1,289 @@
+licenses(["notice"])
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "promote_key_command",
+    srcs = ["PromoteKeyCommand.java"],
+    deps = [
+        ":command",
+        ":key_id_options",
+        ":tinkey_util",
+    ],
+)
+
+java_library(
+    name = "enable_key_command",
+    srcs = ["EnableKeyCommand.java"],
+    deps = [
+        ":command",
+        ":key_id_options",
+        ":tinkey_util",
+    ],
+)
+
+java_library(
+    name = "convert_keyset_options",
+    srcs = ["ConvertKeysetOptions.java"],
+    deps = [
+        ":out_options",
+        ":tinkey_util",
+        "@maven//:args4j_args4j",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)
+
+java_library(
+    name = "tinkey",
+    srcs = ["Tinkey.java"],
+    deps = [
+        ":tinkey_commands",
+        "@maven//:args4j_args4j",
+        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+    ],
+)
+
+java_library(
+    name = "tinkey_commands",
+    srcs = ["TinkeyCommands.java"],
+    deps = [
+        ":add_key_command",
+        ":command",
+        ":convert_keyset_command",
+        ":create_keyset_command",
+        ":create_public_keyset_command",
+        ":delete_key_command",
+        ":destroy_key_command",
+        ":disable_key_command",
+        ":enable_key_command",
+        ":list_key_templates_command",
+        ":list_keyset_command",
+        ":promote_key_command",
+        ":rotate_keyset_command",
+        "@maven//:args4j_args4j",
+    ],
+)
+
+java_library(
+    name = "key_template_handler",
+    srcs = ["KeyTemplateHandler.java"],
+    deps = [
+        ":tinkey_util",
+        "@maven//:args4j_args4j",
+        "@tink_java//proto:tink_java_proto",
+    ],
+)
+
+java_library(
+    name = "out_options",
+    srcs = ["OutOptions.java"],
+    deps = [
+        ":in_options",
+        ":output_stream_handler",
+        ":tinkey_util",
+        "@maven//:args4j_args4j",
+    ],
+)
+
+java_library(
+    name = "rotate_keyset_command",
+    srcs = ["RotateKeysetCommand.java"],
+    deps = [
+        ":add_rotate_options",
+        ":command",
+        ":tinkey_util",
+        "@tink_java//proto:tink_java_proto",
+    ],
+)
+
+java_library(
+    name = "tinkey_util",
+    srcs = ["TinkeyUtil.java"],
+    runtime_deps = [
+        # Tinkey automatically loads these KMS clients at runtime.
+        "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
+        "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
+    ],
+    deps = [
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
+    ],
+)
+
+java_library(
+    name = "key_id_options",
+    srcs = ["KeyIdOptions.java"],
+    deps = [
+        ":out_options",
+        "@maven//:args4j_args4j",
+    ],
+)
+
+java_library(
+    name = "convert_keyset_command",
+    srcs = ["ConvertKeysetCommand.java"],
+    deps = [
+        ":command",
+        ":convert_keyset_options",
+        ":tinkey_util",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+    ],
+)
+
+java_library(
+    name = "in_options",
+    srcs = ["InOptions.java"],
+    deps = [
+        ":input_stream_handler",
+        ":tinkey_util",
+        "@maven//:args4j_args4j",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)
+
+java_library(
+    name = "create_public_keyset_command",
+    srcs = ["CreatePublicKeysetCommand.java"],
+    deps = [
+        ":command",
+        ":out_options",
+        ":tinkey_util",
+        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "@tink_java//src/main/java/com/google/crypto/tink:keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+    ],
+)
+
+java_library(
+    name = "add_key_command",
+    srcs = ["AddKeyCommand.java"],
+    deps = [
+        ":add_rotate_options",
+        ":command",
+        ":tinkey_util",
+        "@tink_java//proto:tink_java_proto",
+    ],
+)
+
+java_library(
+    name = "list_keyset_command",
+    srcs = ["ListKeysetCommand.java"],
+    deps = [
+        ":command",
+        ":in_options",
+        ":tinkey_util",
+        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+    ],
+)
+
+java_library(
+    name = "delete_key_command",
+    srcs = ["DeleteKeyCommand.java"],
+    deps = [
+        ":command",
+        ":key_id_options",
+        ":tinkey_util",
+    ],
+)
+
+java_library(
+    name = "destroy_key_command",
+    srcs = ["DestroyKeyCommand.java"],
+    deps = [
+        ":command",
+        ":key_id_options",
+        ":tinkey_util",
+    ],
+)
+
+java_library(
+    name = "input_stream_handler",
+    srcs = ["InputStreamHandler.java"],
+    deps = [
+        "@maven//:args4j_args4j",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)
+
+java_library(
+    name = "command",
+    srcs = ["Command.java"],
+)
+
+java_library(
+    name = "create_keyset_command",
+    srcs = ["CreateKeysetCommand.java"],
+    deps = [
+        ":command",
+        ":create_keyset_options",
+        ":tinkey_util",
+        "@tink_java//proto:tink_java_proto",
+    ],
+)
+
+java_library(
+    name = "disable_key_command",
+    srcs = ["DisableKeyCommand.java"],
+    deps = [
+        ":command",
+        ":key_id_options",
+        ":tinkey_util",
+    ],
+)
+
+java_library(
+    name = "add_rotate_options",
+    srcs = ["AddRotateOptions.java"],
+    deps = [
+        ":key_template_handler",
+        ":out_options",
+        "@maven//:args4j_args4j",
+        "@tink_java//proto:tink_java_proto",
+    ],
+)
+
+java_library(
+    name = "output_stream_handler",
+    srcs = ["OutputStreamHandler.java"],
+    deps = [
+        "@maven//:args4j_args4j",
+        "@tink_java//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)
+
+java_library(
+    name = "list_key_templates_command",
+    srcs = ["ListKeyTemplatesCommand.java"],
+    deps = [
+        ":command",
+        ":tinkey_util",
+    ],
+)
+
+java_library(
+    name = "create_keyset_options",
+    srcs = ["CreateKeysetOptions.java"],
+    deps = [
+        ":key_template_handler",
+        ":out_options",
+        "@maven//:args4j_args4j",
+        "@tink_java//proto:tink_java_proto",
+    ],
+)

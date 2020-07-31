@@ -6,12 +6,3 @@ java_library(
     name = "alpha",
     srcs = ["Alpha.java"],
 )
-
-# Deprecated rules, will be deleted soon
-
-java_library(
-    name = "annotations",
-    srcs = glob([
-        "*.java",
-    ]),
-)

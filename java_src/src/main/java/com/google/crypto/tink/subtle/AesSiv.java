@@ -45,7 +45,7 @@ public final class AesSiv implements DeterministicAead {
   };
 
   /** The internal AesCmac object for S2V */
-  private final AesCmac cmacForS2V;
+  private final PrfAesCmac cmacForS2V;
 
   /** The key used for the CTR encryption */
   private final byte[] aesCtrKey;
@@ -58,7 +58,7 @@ public final class AesSiv implements DeterministicAead {
 
     byte[] k1 = Arrays.copyOfRange(key, 0, key.length / 2);
     this.aesCtrKey = Arrays.copyOfRange(key, key.length / 2, key.length);
-    this.cmacForS2V = new AesCmac(k1, AesUtil.BLOCK_SIZE);
+    this.cmacForS2V = new PrfAesCmac(k1);
   }
 
   /**
@@ -71,10 +71,10 @@ public final class AesSiv implements DeterministicAead {
   private byte[] s2v(final byte[]... s) throws GeneralSecurityException {
     if (s.length == 0) {
       // Should never happen with AES-SIV, but we include this for completeness.
-      return cmacForS2V.computeMac(BLOCK_ONE);
+      return cmacForS2V.compute(BLOCK_ONE, AesUtil.BLOCK_SIZE);
     }
 
-    byte[] result = cmacForS2V.computeMac(BLOCK_ZERO);
+    byte[] result = cmacForS2V.compute(BLOCK_ZERO, AesUtil.BLOCK_SIZE);
     for (int i = 0; i < s.length - 1; i++) {
       final byte[] currBlock;
       if (s[i] == null) {
@@ -82,7 +82,7 @@ public final class AesSiv implements DeterministicAead {
       } else {
         currBlock = s[i];
       }
-      result = Bytes.xor(AesUtil.dbl(result), cmacForS2V.computeMac(currBlock));
+      result = Bytes.xor(AesUtil.dbl(result), cmacForS2V.compute(currBlock, AesUtil.BLOCK_SIZE));
     }
     byte[] lastBlock = s[s.length - 1];
     if (lastBlock.length >= 16) {
@@ -90,7 +90,7 @@ public final class AesSiv implements DeterministicAead {
     } else {
       result = Bytes.xor(AesUtil.cmacPad(lastBlock), AesUtil.dbl(result));
     }
-    return cmacForS2V.computeMac(result);
+    return cmacForS2V.compute(result, AesUtil.BLOCK_SIZE);
   }
 
   @Override

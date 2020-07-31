@@ -214,6 +214,17 @@ py_proto_library(
 )
 
 py_proto_library(
+    name = "hmac_prf_py_pb2",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "hmac_prf.proto",
+    ],
+    deps = [
+        ":common_py_pb2",
+    ]
+)
+
+py_proto_library(
     name = "hkdf_prf_py_pb2",
     visibility = ["//visibility:public"],
     srcs = [

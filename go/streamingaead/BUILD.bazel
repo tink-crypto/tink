@@ -7,6 +7,7 @@ licenses(["notice"])  # keep
 go_library(
     name = "go_default_library",
     srcs = [
+        "aes_ctr_hmac_key_manager.go",
         "aes_gcm_hkdf_key_manager.go",
         "decrypt_reader.go",
         "streamingaead.go",
@@ -20,8 +21,11 @@ go_library(
         "//core/primitiveset:go_default_library",
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
+        "//mac/subtle:go_default_library",
+        "//proto:aes_ctr_hmac_streaming_go_proto",
         "//proto:aes_gcm_hkdf_streaming_go_proto",
         "//proto:common_go_proto",
+        "//proto:hmac_go_proto",
         "//proto:tink_go_proto",
         "//streamingaead/subtle:go_default_library",
         "//subtle/random:go_default_library",
@@ -33,6 +37,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
+        "aes_ctr_hmac_key_manager_test.go",
         "aes_gcm_hkdf_key_manager_test.go",
         "streamingaead_factory_test.go",
         "streamingaead_key_templates_test.go",
@@ -44,6 +49,7 @@ go_test(
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
         "//mac:go_default_library",
+        "//proto:aes_ctr_hmac_streaming_go_proto",
         "//proto:aes_gcm_hkdf_streaming_go_proto",
         "//proto:common_go_proto",
         "//proto:tink_go_proto",

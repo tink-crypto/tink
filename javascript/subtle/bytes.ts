@@ -52,7 +52,7 @@ export function concat(...var_args: Uint8Array[]): Uint8Array {
  * @static
  */
 export function fromNumber(value: number): Uint8Array {
-  if (isNaN(value) || value % 1 !== 0) {
+  if (Number.isNaN(value) || value % 1 !== 0) {
     throw new InvalidArgumentsException('cannot convert non-integer value');
   }
   if (value < 0) {
