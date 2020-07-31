@@ -16,7 +16,11 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
+import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.prf.PrfConfig;
+import com.google.crypto.tink.signature.SignatureConfig;
+import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -25,7 +29,12 @@ import org.kohsuke.args4j.CmdLineParser;
  */
 public final class Tinkey {
   public static void main(String[] args) throws Exception {
-    TinkConfig.register();
+    DeterministicAeadConfig.register();
+    HybridConfig.register(); // includes Aead and Mac
+    PrfConfig.register();
+    SignatureConfig.register();
+    StreamingAeadConfig.register();
+    // place holder for KeyderivationConfig. DO NOT EDIT.
     TinkeyCommands commands = new TinkeyCommands();
     CmdLineParser parser = new CmdLineParser(commands);
 

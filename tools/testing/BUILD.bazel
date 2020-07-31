@@ -14,6 +14,11 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
     ],
 )
 
@@ -152,8 +157,8 @@ java_binary(
     main_class = "com.google.crypto.tink.testing.PrfSetCli",
     deps = [
         ":cli_util",
-        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@tink_java//src/main/java/com/google/crypto/tink/testing:test_util",
     ],
 )
