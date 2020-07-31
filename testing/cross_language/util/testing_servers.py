@@ -78,7 +78,7 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'hybrid': ['cc', 'go', 'java', 'python'],
     'mac': ['cc', 'go', 'java', 'python'],
     'signature': ['cc', 'go', 'java', 'python'],
-    'prf': ['java', 'go', 'python'],
+    'prf': ['cc', 'java', 'go', 'python'],
 }
 
 

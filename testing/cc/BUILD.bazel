@@ -225,6 +225,32 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "prf_set_impl",
+    srcs = ["prf_set_impl.cc"],
+    hdrs = ["prf_set_impl.h"],
+    deps = [
+        ":testing_api_cpp_library",
+        "@com_google_absl//absl/base:core_headers",
+        "@tink_cc",
+        "@tink_cc//:binary_keyset_reader",
+        "@tink_cc//:cleartext_keyset_handle",
+    ],
+)
+
+cc_test(
+    name = "prf_set_impl_test",
+    srcs = ["prf_set_impl_test.cc"],
+    deps = [
+        ":prf_set_impl",
+        ":testing_api_cpp_library",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//:binary_keyset_writer",
+        "@tink_cc//prf:prf_config",
+        "@tink_cc//prf:prf_key_templates",
+    ],
+)
+
 cc_binary(
     name = "testing_server",
     srcs = ["testing_server.cc"],

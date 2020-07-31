@@ -77,9 +77,9 @@ SUPPORTED_LANGUAGES = {
     'Ed25519PrivateKey': ['cc', 'java', 'go', 'python'],
     'RsaSsaPkcs1PrivateKey': ['cc', 'java', 'python'],
     'RsaSsaPssPrivateKey': ['cc', 'java', 'python'],
-    'AesCmacPrfKey': ['java', 'go', 'python'],
-    'HmacPrfKey': ['java', 'go', 'python'],
-    'HkdfPrfKey': ['java', 'go', 'python'],
+    'AesCmacPrfKey': ['cc', 'java', 'go', 'python'],
+    'HmacPrfKey': ['cc', 'java', 'go', 'python'],
+    'HkdfPrfKey': ['cc', 'java', 'go', 'python'],
 }
 
 SUPPORTED_LANGUAGES_PER_TYPE_URL = {
