@@ -72,6 +72,7 @@ java_binary(
     deps = [
         ":testing_services",
         "@io_grpc_grpc_java//api",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
     ],
 )

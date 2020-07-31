@@ -20,6 +20,8 @@ import com.google.crypto.tink.config.TinkConfig;
 import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.Security;
+import org.conscrypt.Conscrypt;
 
 /**
  * Starts a server with Tink testing services.
@@ -39,6 +41,7 @@ public final class TestingServer {
     }
     int port = Integer.parseInt(args[1]);
 
+    installConscrypt();
     TinkConfig.register();
 
     System.out.println("Start server on port " + port);
@@ -55,5 +58,14 @@ public final class TestingServer {
         .build()
         .start()
         .awaitTermination();
+  }
+
+  private static void installConscrypt() {
+    try {
+      Conscrypt.checkAvailability();
+      Security.addProvider(Conscrypt.newProvider());
+    } catch (Throwable cause) {
+      throw new IllegalStateException("Cannot test AesGcmSiv without Conscrypt Provider", cause);
+    }
   }
 }
