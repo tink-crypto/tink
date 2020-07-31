@@ -65,6 +65,7 @@ _PRIMITIVE_STUBS = {
     'hybrid': testing_api_pb2_grpc.HybridStub,
     'mac': testing_api_pb2_grpc.MacStub,
     'signature': testing_api_pb2_grpc.SignatureStub,
+    'prf': testing_api_pb2_grpc.PrfSetStub,
 }
 
 # All primitives.
@@ -77,6 +78,7 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'hybrid': ['cc', 'go', 'java', 'python'],
     'mac': ['cc', 'go', 'java', 'python'],
     'signature': ['cc', 'go', 'java', 'python'],
+    'prf': ['go', 'python'],
 }
 
 
@@ -118,6 +120,7 @@ class _TestingServers():
     self._hybrid_stub = {}
     self._mac_stub = {}
     self._signature_stub = {}
+    self._prf_stub = {}
     for lang in LANGUAGES:
       port = portpicker.pick_unused_port()
       cmd = _server_cmd(lang, port)
@@ -167,6 +170,9 @@ class _TestingServers():
 
   def signature_stub(self, lang) -> testing_api_pb2_grpc.SignatureStub:
     return self._signature_stub[lang]
+
+  def prf_stub(self, lang) -> testing_api_pb2_grpc.PrfSetStub:
+    return self._prf_stub[lang]
 
   def metadata_stub(self, lang) -> testing_api_pb2_grpc.MetadataStub:
     return self._metadata_stub[lang]
@@ -281,3 +287,9 @@ def public_key_verify(lang: Text,
   """Returns an PublicKeyVerify primitive, implemented in lang."""
   global _ts
   return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), pub_keyset)
+
+
+def prf_set(lang: Text, keyset: bytes) -> _primitives.PrfSet:
+  """Returns an PrfSet primitive, implemented in lang."""
+  global _ts
+  return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)

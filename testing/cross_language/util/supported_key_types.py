@@ -19,6 +19,7 @@ from tink import aead
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import prf
 from tink import signature
 from tink import streaming_aead
 
@@ -49,9 +50,15 @@ SIGNATURE_KEY_TYPES = [
     'RsaSsaPkcs1PrivateKey',
     'RsaSsaPssPrivateKey',
 ]
+PRF_KEY_TYPES = [
+    'AesCmacPrfKey',
+    'HmacPrfKey',
+    'HkdfPrfKey',
+]
 ALL_KEY_TYPES = (
     AEAD_KEY_TYPES + DAEAD_KEY_TYPES + STREAMING_AEAD_KEY_TYPES +
-    HYBRID_PRIVATE_KEY_TYPES + MAC_KEY_TYPES + SIGNATURE_KEY_TYPES)
+    HYBRID_PRIVATE_KEY_TYPES + MAC_KEY_TYPES + SIGNATURE_KEY_TYPES +
+    PRF_KEY_TYPES)
 
 # All languages that are supported by a KeyType
 SUPPORTED_LANGUAGES = {
@@ -70,6 +77,9 @@ SUPPORTED_LANGUAGES = {
     'Ed25519PrivateKey': ['cc', 'java', 'go', 'python'],
     'RsaSsaPkcs1PrivateKey': ['cc', 'java', 'python'],
     'RsaSsaPssPrivateKey': ['cc', 'java', 'python'],
+    'AesCmacPrfKey': ['go', 'python'],
+    'HmacPrfKey': ['go', 'python'],
+    'HkdfPrfKey': ['go', 'python'],
 }
 
 SUPPORTED_LANGUAGES_PER_TYPE_URL = {
@@ -99,28 +109,24 @@ KEY_TEMPLATE_NAMES = {
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256'
     ],
     'HmacKey': [
-        'HMAC_SHA256_128BITTAG',
-        'HMAC_SHA256_256BITTAG',
-        'HMAC_SHA512_256BITTAG',
-        'HMAC_SHA512_512BITTAG'
+        'HMAC_SHA256_128BITTAG', 'HMAC_SHA256_256BITTAG',
+        'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG'
     ],
     'EcdsaPrivateKey': [
-        'ECDSA_P256',
-        'ECDSA_P384',
-        'ECDSA_P521',
-        'ECDSA_P256_IEEE_P1363',
-        'ECDSA_P384_IEEE_P1363',
-        'ECDSA_P521_IEEE_P1363'
+        'ECDSA_P256', 'ECDSA_P384', 'ECDSA_P521', 'ECDSA_P256_IEEE_P1363',
+        'ECDSA_P384_IEEE_P1363', 'ECDSA_P521_IEEE_P1363'
     ],
     'Ed25519PrivateKey': ['ED25519'],
     'RsaSsaPkcs1PrivateKey': [
-        'RSA_SSA_PKCS1_3072_SHA256_F4',
-        'RSA_SSA_PKCS1_4096_SHA512_F4'
+        'RSA_SSA_PKCS1_3072_SHA256_F4', 'RSA_SSA_PKCS1_4096_SHA512_F4'
     ],
     'RsaSsaPssPrivateKey': [
         'RSA_SSA_PSS_3072_SHA256_SHA256_32_F4',
         'RSA_SSA_PSS_4096_SHA512_SHA512_64_F4'
-    ]
+    ],
+    'AesCmacPrfKey': ['AES_CMAC_PRF'],
+    'HmacPrfKey': ['HMAC_PRF_SHA256', 'HMAC_PRF_SHA512'],
+    'HkdfPrfKey': ['HKDF_PRF_SHA256'],
 }
 
 # KeyTemplate (as Protobuf) for each KeyTemplate name.
@@ -194,7 +200,15 @@ KEY_TEMPLATE = {
     'RSA_SSA_PSS_3072_SHA256_SHA256_32_F4':
         signature.signature_key_templates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4,
     'RSA_SSA_PSS_4096_SHA512_SHA512_64_F4':
-        signature.signature_key_templates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4
+        signature.signature_key_templates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4,
+    'AES_CMAC_PRF':
+        prf.prf_key_templates.AES_CMAC,
+    'HMAC_PRF_SHA256':
+        prf.prf_key_templates.HMAC_SHA256,
+    'HMAC_PRF_SHA512':
+        prf.prf_key_templates.HMAC_SHA512,
+    'HKDF_PRF_SHA256':
+        prf.prf_key_templates.HKDF_SHA256,
 }
 
 
