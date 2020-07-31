@@ -99,6 +99,7 @@ java_test(
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
     ],
 )

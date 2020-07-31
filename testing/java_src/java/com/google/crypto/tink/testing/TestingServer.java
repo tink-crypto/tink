@@ -50,6 +50,7 @@ public final class TestingServer {
         .addService(new StreamingAeadServiceImpl())
         .addService(new HybridServiceImpl())
         .addService(new MacServiceImpl())
+        .addService(new PrfSetServiceImpl())
         .addService(new SignatureServiceImpl())
         .build()
         .start()
