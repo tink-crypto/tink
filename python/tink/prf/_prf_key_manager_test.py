@@ -33,7 +33,7 @@ def setUpModule():
 class PrfSetKeyManagerTest(parameterized.TestCase):
 
   def test_new_key_data_success(self):
-    key_template = prf.prf_set_key_templates._create_hmac_key_template(
+    key_template = prf.prf_key_templates._create_hmac_key_template(
         key_size=32, hash_type=common_pb2.SHA256)
     key_manager = core.Registry.key_manager(key_template.type_url)
     key_data = key_manager.new_key_data(key_template)
@@ -46,16 +46,14 @@ class PrfSetKeyManagerTest(parameterized.TestCase):
     self.assertLen(key.key_value, 32)
 
   def test_invalid_params_throw_exception(self):
-    template = prf.prf_set_key_templates._create_hmac_key_template(
+    template = prf.prf_key_templates._create_hmac_key_template(
         key_size=7, hash_type=common_pb2.SHA256)
     with self.assertRaises(tink.TinkError):
       tink.new_keyset_handle(template)
 
   @parameterized.parameters([
-      prf.prf_set_key_templates.AES_CMAC,
-      prf.prf_set_key_templates.HMAC_SHA256,
-      prf.prf_set_key_templates.HMAC_SHA512,
-      prf.prf_set_key_templates.HKDF_SHA256
+      prf.prf_key_templates.AES_CMAC, prf.prf_key_templates.HMAC_SHA256,
+      prf.prf_key_templates.HMAC_SHA512, prf.prf_key_templates.HKDF_SHA256
   ])
   def test_compute_success(self, template):
     keyset_handle = tink.new_keyset_handle(template)
@@ -74,10 +72,8 @@ class PrfSetKeyManagerTest(parameterized.TestCase):
         output)
 
   @parameterized.parameters([
-      prf.prf_set_key_templates.AES_CMAC,
-      prf.prf_set_key_templates.HMAC_SHA256,
-      prf.prf_set_key_templates.HMAC_SHA512,
-      prf.prf_set_key_templates.HKDF_SHA256
+      prf.prf_key_templates.AES_CMAC, prf.prf_key_templates.HMAC_SHA256,
+      prf.prf_key_templates.HMAC_SHA512, prf.prf_key_templates.HKDF_SHA256
   ])
   def test_output_too_long_raises_error(self, template):
     keyset_handle = tink.new_keyset_handle(template)

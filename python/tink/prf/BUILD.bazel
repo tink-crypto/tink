@@ -11,9 +11,9 @@ py_library(
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
+        ":_prf_key_manager",
+        ":_prf_key_templates",
         ":_prf_set",
-        ":_prf_set_key_manager",
-        ":_prf_set_key_templates",
     ],
 )
 
@@ -25,8 +25,8 @@ py_library(
 )
 
 py_library(
-    name = "_prf_set_key_manager",
-    srcs = ["_prf_set_key_manager.py"],
+    name = "_prf_key_manager",
+    srcs = ["_prf_key_manager.py"],
     srcs_version = "PY3",
     deps = [
         ":_prf_set",
@@ -37,8 +37,8 @@ py_library(
 )
 
 py_test(
-    name = "_prf_set_key_manager_test",
-    srcs = ["_prf_set_key_manager_test.py"],
+    name = "_prf_key_manager_test",
+    srcs = ["_prf_key_manager_test.py"],
     srcs_version = "PY3",
     deps = [
         ":prf",
@@ -78,8 +78,8 @@ py_test(
 )
 
 py_library(
-    name = "_prf_set_key_templates",
-    srcs = ["_prf_set_key_templates.py"],
+    name = "_prf_key_templates",
+    srcs = ["_prf_key_templates.py"],
     srcs_version = "PY3",
     deps = [
         "//tink/proto:aes_cmac_prf_py_pb2",

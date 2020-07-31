@@ -402,7 +402,7 @@ class ServicesTest(absltest.TestCase):
   def test_compute_prf(self):
     keyset_servicer = services.KeysetServicer()
     prf_set_servicer = services.PrfSetServicer()
-    template = prf.prf_set_key_templates.HMAC_SHA256.SerializeToString()
+    template = prf.prf_key_templates.HMAC_SHA256.SerializeToString()
     gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
     gen_response = keyset_servicer.Generate(gen_request, self._ctx)
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
@@ -434,7 +434,7 @@ class ServicesTest(absltest.TestCase):
   def test_compute_prf_fail(self):
     keyset_servicer = services.KeysetServicer()
     prf_set_servicer = services.PrfSetServicer()
-    template = prf.prf_set_key_templates.HMAC_SHA256.SerializeToString()
+    template = prf.prf_key_templates.HMAC_SHA256.SerializeToString()
     gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
     gen_response = keyset_servicer.Generate(gen_request, self._ctx)
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
