@@ -27,6 +27,7 @@ java_library(
         "java/com/google/crypto/tink/testing/KeysetServiceImpl.java",
         "java/com/google/crypto/tink/testing/MacServiceImpl.java",
         "java/com/google/crypto/tink/testing/MetadataServiceImpl.java",
+        "java/com/google/crypto/tink/testing/PrfSetServiceImpl.java",
         "java/com/google/crypto/tink/testing/SignatureServiceImpl.java",
         "java/com/google/crypto/tink/testing/StreamingAeadServiceImpl.java",
     ],
@@ -54,6 +55,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink:streaming_aead",
         "@tink_java//src/main/java/com/google/crypto/tink:version",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_set",
     ],
 )
 
