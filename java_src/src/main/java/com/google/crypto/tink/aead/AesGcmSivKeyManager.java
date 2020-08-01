@@ -33,16 +33,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Logger;
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
 /**
  * This key manager generates new {@code AesGcmSivKey} keys and produces new instances of {@code
  * AesGcmSiv}.
  */
 public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
-  private static final Logger logger = Logger.getLogger(AesGcmSivKeyManager.class.getName());
-
   AesGcmSivKeyManager() {
     super(
         AesGcmSivKey.class,
@@ -124,14 +122,18 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
     };
   }
 
-  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+  private static boolean canUseAesGcmSive() {
     try {
       Cipher.getInstance("AES/GCM-SIV/NoPadding");
+      return true;
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
+      return false;
+    }
+  }
+
+  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (canUseAesGcmSive()) {
       Registry.registerKeyManager(new AesGcmSivKeyManager(), newKeyAllowed);
-    } catch (NoSuchAlgorithmException ex) {
-      logger.warning(
-          "Not registering AesGcmSiv KeyManager. This is most likely because a Provider for"
-              + " 'AES/GCM-SIV/NoPadding' cannot be found.");
     }
   }
 
