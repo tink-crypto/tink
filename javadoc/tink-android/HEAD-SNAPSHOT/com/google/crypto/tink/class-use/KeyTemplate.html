@@ -185,15 +185,39 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">AesGcmKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesGcmKeyManager.html#aes128GcmTemplate--">aes128GcmTemplate</a></span>()</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">AesGcmSivKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesGcmSivKeyManager.html#aes128GcmSivTemplate--">aes128GcmSivTemplate</a></span>()</code>
+<div class="block">Creates and returns a <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of AES-GCM-SIV with the
+ following parameters:
+
+ 
+   Key size: 16 bytes
+   Prefix type: <code>KeyTemplate.OutputPrefixType#TINK</code>
+ </div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">AesCtrHmacAeadKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html#aes256CtrHmacSha256Template--">aes256CtrHmacSha256Template</a></span>()</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">AesGcmKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesGcmKeyManager.html#aes128GcmTemplate--">aes128GcmTemplate</a></span>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AesCtrHmacAeadKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html#aes256CtrHmacSha256Template--">aes256CtrHmacSha256Template</a></span>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AesEaxKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesEaxKeyManager.html#aes256EaxTemplate--">aes256EaxTemplate</a></span>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AesGcmSivKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesGcmSivKeyManager.html#aes256GcmSivTemplate--">aes256GcmSivTemplate</a></span>()</code>
+<div class="block">Creates and returns a <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of AES-GCM-SIV with the
+ following parameters:
+
+ 
+   Key size: 32 bytes
+   Prefix type: <code>KeyTemplate.OutputPrefixType#TINK</code>
+ </div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
@@ -209,11 +233,35 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">AesGcmKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesGcmKeyManager.html#rawAes128GcmTemplate--">rawAes128GcmTemplate</a></span>()</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">AesGcmSivKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesGcmSivKeyManager.html#rawAes128GcmSivTemplate--">rawAes128GcmSivTemplate</a></span>()</code>
+<div class="block">Creates and returns a <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of AES-GCM with the
+ following parameters:
+
+ 
+   Key size: 16 bytes
+   Prefix type: <code>KeyTemplate.OutputPrefixType#RAW</code> (no prefix)
+ </div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AesGcmKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesGcmKeyManager.html#rawAes128GcmTemplate--">rawAes128GcmTemplate</a></span>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AesEaxKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesEaxKeyManager.html#rawAes256EaxTemplate--">rawAes256EaxTemplate</a></span>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
+<td class="colLast"><span class="typeNameLabel">AesGcmSivKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AesGcmSivKeyManager.html#rawAes256GcmSivTemplate--">rawAes256GcmSivTemplate</a></span>()</code>
+<div class="block">Creates and returns a <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that generates new instances of AES-GCM-SIV with the
+ following parameters:
+
+ 
+   Key size: 32 bytes
+   Prefix type: <code>KeyTemplate.OutputPrefixType#RAW</code> (no prefix)
+ </div>
+</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
