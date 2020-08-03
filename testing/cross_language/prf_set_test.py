@@ -22,7 +22,6 @@ from tink import prf
 from util import keyset_builder
 from util import supported_key_types
 from util import testing_servers
-from google3.pyglib.function_utils import memoize
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['prf']
 
@@ -38,7 +37,6 @@ def test_cases_with_output_length():
       yield (key_template_name, output_length, supported_langs)
 
 
-@memoize.Memoize()
 def gen_keyset(key_template_name: Text) -> bytes:
   builder = keyset_builder.new_keyset_builder()
   primary_key_id = builder.add_new_key(
@@ -47,7 +45,6 @@ def gen_keyset(key_template_name: Text) -> bytes:
   return builder.keyset()
 
 
-@memoize.Memoize()
 def gen_keyset_with_2_prfs() -> bytes:
   builder = keyset_builder.new_keyset_builder()
   builder.add_new_key(prf.prf_key_templates.HMAC_SHA256)

@@ -261,6 +261,7 @@ cc_binary(
         ":keyset_impl",
         ":mac_impl",
         ":metadata_impl",
+        ":prf_set_impl",
         ":signature_impl",
         ":streaming_aead_impl",
         ":testing_api_cpp_library",
