@@ -20,7 +20,7 @@ from util import testing_servers
 
 
 def setUpModule():
-  testing_servers.start()
+  testing_servers.start('json')
 
 
 def tearDownModule():

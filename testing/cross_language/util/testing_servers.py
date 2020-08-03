@@ -109,8 +109,9 @@ def _server_cmd(lang: Text, port: int) -> List[Text]:
 class _TestingServers():
   """TestingServers starts up testing gRPC servers and returns service stubs."""
 
-  def __init__(self):
+  def __init__(self, test_name: Text):
     self._server = {}
+    self._output_file = {}
     self._channel = {}
     self._metadata_stub = {}
     self._keyset_stub = {}
@@ -125,8 +126,22 @@ class _TestingServers():
       port = portpicker.pick_unused_port()
       cmd = _server_cmd(lang, port)
       logging.info('cmd = %s', cmd)
+      try:
+        output_dir = os.environ['TEST_UNDECLARED_OUTPUTS_DIR']
+      except KeyError:
+        raise RuntimeError(
+            'Could not start %s server, TEST_UNDECLARED_OUTPUTS_DIR environment'
+            'variable must be set')
+      output_file = '%s-%s-%s' % (test_name, lang, 'server.log')
+      output_path = os.path.join(output_dir, output_file)
+      logging.info('writing server output to %s', output_path)
+      try:
+        self._output_file[lang] = open(output_path, 'w+')
+      except IOError:
+        logging.info('unable to open server output file %s', output_path)
+        raise RuntimeError('Could not start %s server' % lang)
       self._server[lang] = subprocess.Popen(
-          cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+          cmd, stdout=self._output_file[lang], stderr=subprocess.STDOUT)
       logging.info('%s server started on port %d with pid: %d.',
                    lang, port, self._server[lang].pid)
       self._channel[lang] = grpc.secure_channel(
@@ -189,16 +204,18 @@ class _TestingServers():
       if self._server[lang].poll() is None:
         logging.info('Killing server %s.', lang)
         self._server[lang].kill()
+    for lang in LANGUAGES:
+      self._output_file[lang].close()
     logging.info('All servers stopped.')
 
 
 _ts = None
 
 
-def start() -> None:
+def start(output_files_prefix: Text) -> None:
   """Starts all servers."""
   global _ts
-  _ts = _TestingServers()
+  _ts = _TestingServers(output_files_prefix)
 
   for lang in LANGUAGES:
     response = _ts.metadata_stub(lang).GetServerInfo(

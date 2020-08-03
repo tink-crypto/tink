@@ -39,7 +39,7 @@ def key_rotation_test_cases():
 
 def setUpModule():
   mac.register()
-  testing_servers.start()
+  testing_servers.start('mac')
 
 
 def tearDownModule():

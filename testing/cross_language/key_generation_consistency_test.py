@@ -289,7 +289,7 @@ def setUpModule():
   mac.register()
   hybrid.register()
   signature.register()
-  testing_servers.start()
+  testing_servers.start('key_generation_consistency')
 
 
 def tearDownModule():

@@ -59,7 +59,7 @@ class TestingServersTest(parameterized.TestCase):
   @classmethod
   def setUpClass(cls):
     super(TestingServersTest, cls).setUpClass()
-    testing_servers.start()
+    testing_servers.start('testing_server')
 
   @classmethod
   def tearDownClass(cls):

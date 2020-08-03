@@ -58,7 +58,7 @@ def gen_keyset_with_2_prfs() -> bytes:
 
 def setUpModule():
   prf.register()
-  testing_servers.start()
+  testing_servers.start('prf_set')
 
 
 def tearDownModule():

@@ -26,7 +26,7 @@ SUPPORTED_LANGUAGES = (testing_servers
 
 def setUpModule():
   signature.register()
-  testing_servers.start()
+  testing_servers.start('signature')
 
 
 def tearDownModule():
