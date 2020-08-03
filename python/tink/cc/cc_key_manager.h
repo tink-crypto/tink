@@ -34,7 +34,7 @@ namespace tink {
  * CcKeyManager is a thin wrapper of KeyManager in
  * third_party/tink/cc/key_manager.h
  * It only implements the methods currently needed in Python, and slightly
- * changes the interface to ease usage of CLIF.
+ * changes the interface to ease usage of pybind.
  */
 template<class P>
 class CcKeyManager {

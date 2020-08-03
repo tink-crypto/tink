@@ -23,7 +23,7 @@ namespace crypto {
 namespace tink {
 
 // Adapts a Python file object for use in C++.
-// This is CLIFed and implemented in Python.
+// This is wrapped with pybind and implemented in Python.
 class PythonFileObjectAdapter {
  public:
   // Writes 'data' to the underlying Python file object and returns the number
