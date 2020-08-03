@@ -217,13 +217,24 @@ def start(output_files_prefix: Text) -> None:
   global _ts
   _ts = _TestingServers(output_files_prefix)
 
+  versions = {}
   for lang in LANGUAGES:
     response = _ts.metadata_stub(lang).GetServerInfo(
         testing_api_pb2.ServerInfoRequest())
     if lang != response.language:
       raise ValueError(
           'lang = %s != response.language = %s' % (lang, response.language))
-    logging.info('server_info:\n%s', response)
+    if response.tink_version:
+      versions[lang] = response.tink_version
+    else:
+      logging.warning('server in lang %s has no tink version.', lang)
+  unique_versions = list(set(versions.values()))
+  if not unique_versions:
+    raise ValueError('tink version unknown')
+  if len(unique_versions) > 1:
+    raise ValueError('tink_version in testing servers are inconsistent: %s' %
+                     versions)
+  logging.info('Tink version: %s', unique_versions[0])
 
 
 def stop() -> None:
