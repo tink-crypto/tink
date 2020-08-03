@@ -10,20 +10,6 @@ filegroup(
 )
 
 sh_test(
-    name = "version_test",
-    size = "medium",
-    srcs = [
-        "version_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:version_cli_java",
-        "//testing/cc:version_cli_cc",
-        "@tink_base//:tink_version",
-    ],
-)
-
-sh_test(
     name = "aead_envelope_test",
     size = "medium",
     srcs = [
