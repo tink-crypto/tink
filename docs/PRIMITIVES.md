@@ -5,14 +5,15 @@ so-called _primitives_, which provide an abstract representation of the provided
 functionality. Tink primitives encompass the following cryptographic operations
 and are supported via the corresponding interfaces:
 
-**Primitive**                                        | **Interfaces**
----------------------------------------------------- | ------------------------------
-Authenticated Encryption with Associated Data (AEAD) | AEAD
-*Streaming* AEAD                                     | StreamingAEAD
-*Deterministic* AEAD                                 | DeterministicAEAD
-Message Authentication Code (MAC)                    | MAC
-Hybrid encryption                                    | HybridEncrypt, HybridDecrypt
-Digital signatures                                   | PublicKeySign, PublicKeyVerify
+| **Primitive**                                       | **Interfaces**                 |
+| --------------------------------------------------- | ------------------------------ |
+| Authenticated Encryption with Associated Data (AEAD)| AEAD                           |
+| *Streaming* AEAD                                    | StreamingAEAD                  |
+| *Deterministic* AEAD                                | DeterministicAEAD              |
+| Message Authentication Code (MAC)                   | MAC                            |
+| Pseudo Random Function Family (PRF)                 | Prf, PrfSet                    |
+| Hybrid encryption                                   | HybridEncrypt, HybridDecrypt   |
+| Digital signatures                                  | PublicKeySign, PublicKeyVerify |
 
 The interface names above correspond with the Java implementation. Other
 language implementations may have modified interface names due to differing
@@ -32,6 +33,7 @@ AEAD               | yes      | yes     | yes      | yes    | yes
 Streaming AEAD     | yes      | yes     | no       | yes    | no
 Deterministic AEAD | yes      | yes     | yes      | yes    | yes
 MAC                | yes      | yes     | yes      | yes    | yes
+PRF                | yes      | yes     | no       | yes    | no
 Digital signatures | yes      | yes     | yes      | yes    | yes
 Hybrid encryption  | yes      | yes     | yes      | yes    | yes
 
@@ -41,25 +43,27 @@ JavaScript is currently under development.
 
 #### Java
 
-Primitive          | Java Implementations
------------------- | ---------------------------------------------------------------------------------
-AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305
-Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
-Deterministic AEAD | AES-SIV
-MAC                | HMAC-SHA2, AES-CMAC
-Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
-Hybrid Encryption  | ECIES with AEAD and HKDF
+| Primitive          | Java Implementations                                                              |
+| ------------------ | --------------------------------------------------------------------------------- |
+| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305 |
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                                    |
+| Deterministic AEAD | AES-SIV                                                                           |
+| MAC                | HMAC-SHA2, AES-CMAC                                                               |
+| PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC                                                    |
+| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS                       |
+| Hybrid Encryption  | ECIES with AEAD and HKDF                                                          |
 
 #### C++
 
-Primitive          | C++ Implementations
------------------- | -----------------------------------------------------------------------------
-AEAD               | AES-GCM, AES-GCM-SIV, AES-CTR-HMAC, AES-EAX, KMS Envelope, CHACHA20-POLY1305, XCHACHA20-POLY1305
-Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
-Deterministic AEAD | AES-SIV
-MAC                | HMAC-SHA2, AES-CMAC
-Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
-Hybrid Encryption  | ECIES with AEAD and HKDF
+| Primitive          | C++ Implementations                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------ |
+| AEAD               | AES-GCM, AES-GCM-SIV, AES-CTR-HMAC, AES-EAX, KMS Envelope, CHACHA20-POLY1305, XCHACHA20-POLY1305 |
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                                                   |
+| Deterministic AEAD | AES-SIV                                                                                          |
+| MAC                | HMAC-SHA2, AES-CMAC                                                                              |
+| PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC                                                                   |
+| Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS                                      |
+| Hybrid Encryption  | ECIES with AEAD and HKDF                                                                         |
 
 #### Objective-C
 
@@ -73,14 +77,15 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 
 #### Go
 
-Primitive          | Go Implementations
------------------- | ------------------------------------------------------------------------
-AEAD               | AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305
-Streaming AEAD     | AES-GCM-HKDF-STREAMING
-Deterministic AEAD | AES-SIV
-MAC                | HMAC-SHA2, AES-CMAC
-Digital Signatures | ECDSA over NIST curves, Ed25519
-Hybrid Encryption  | ECIES with AEAD and HKDF
+| Primitive          | Go Implementations                                                       |
+| ------------------ | ------------------------------------------------------------------------ |
+| AEAD               | AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305 |
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING                                                   |
+| Deterministic AEAD | AES-SIV                                                                  |
+| MAC                | HMAC-SHA2, AES-CMAC                                                      |
+| PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC                                           |
+| Digital Signatures | ECDSA over NIST curves, Ed25519                                          |
+| Hybrid Encryption  | ECIES with AEAD and HKDF                                                 |
 
 #### Python
 
@@ -211,6 +216,41 @@ Minimal properties:
   not targeting a specific key, but any key from a set of up to 2<sup>32</sup>
   keys)
 - at least 80-bit authentication strength
+
+## Pseudo Random Function Families {#prfset}
+
+The PRF set primitive allows to redact data in a deterministic fashion, for
+example personal identifiable information or internal IDs, or to come up with a
+user ID from user information without revealing said information in the ID. This
+allows someone with access to the output of the PRF without access to the key do
+some types of analysis, while limiting others.
+
+Note that while in theory PRFs can be used in other ways, for example for
+encryption or message authentication, the corresponding primitives should only
+be used for these use cases.
+
+WARNING: Since PRFs operate deterministically on their input, using a PRF to
+redact will not automatically provide anonymity, but only provide pseudonymity.
+It is an important tool to build privacy aware systems, but has to be used
+carefully.
+
+Minimal properties:
+
+-   without knowledge of the key the PRF is indistinguishable from a random
+    function
+-   at least 128-bit security, also in multi-user scenarios (when an attacker is
+    not targeting a specific key, but any key from a set of up to 2<sup>32</sup>
+    keys)
+-   at least 16 byte of output available
+
+WARNING: While HMAC-SHA-2 and HKDF-SHA-2 behave like a cryptographically secure
+hash function if the key is revealed, and still provide some protection against
+revealing the input, AES-CMAC is only secure as long as the key is secure.
+
+Since Tink operates on key sets, this primitive exposes a corresponding set of
+PRFs instead of a single PRF. The PRFs are indexed by a 32 bit key id. This can
+be used to rotate the key used to redact a piece of information, without losing
+the previous association.
 
 ## Hybrid Encryption
 
