@@ -20,7 +20,11 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
+import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.prf.PrfConfig;
+import com.google.crypto.tink.signature.SignatureConfig;
+import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,7 +63,12 @@ public class CliUtil {
    * In case of errors throws an exception.
    */
   public static void initTink() throws GeneralSecurityException {
-    TinkConfig.register();
+    DeterministicAeadConfig.register();
+    HybridConfig.register(); // includes Aead and Mac
+    PrfConfig.register();
+    SignatureConfig.register();
+    StreamingAeadConfig.register();
+    // place holder for KeyderivationConfig. DO NOT EDIT.
   }
 
   /**

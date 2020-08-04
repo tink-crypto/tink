@@ -38,7 +38,7 @@ def key_rotation_test_cases():
 
 def setUpModule():
   streaming_aead.register()
-  testing_servers.start()
+  testing_servers.start('streaming_aead')
 
 
 def tearDownModule():

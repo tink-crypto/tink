@@ -65,6 +65,7 @@ _PRIMITIVE_STUBS = {
     'hybrid': testing_api_pb2_grpc.HybridStub,
     'mac': testing_api_pb2_grpc.MacStub,
     'signature': testing_api_pb2_grpc.SignatureStub,
+    'prf': testing_api_pb2_grpc.PrfSetStub,
 }
 
 # All primitives.
@@ -77,6 +78,7 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'hybrid': ['cc', 'go', 'java', 'python'],
     'mac': ['cc', 'go', 'java', 'python'],
     'signature': ['cc', 'go', 'java', 'python'],
+    'prf': ['cc', 'java', 'go', 'python'],
 }
 
 
@@ -107,8 +109,9 @@ def _server_cmd(lang: Text, port: int) -> List[Text]:
 class _TestingServers():
   """TestingServers starts up testing gRPC servers and returns service stubs."""
 
-  def __init__(self):
+  def __init__(self, test_name: Text):
     self._server = {}
+    self._output_file = {}
     self._channel = {}
     self._metadata_stub = {}
     self._keyset_stub = {}
@@ -118,12 +121,27 @@ class _TestingServers():
     self._hybrid_stub = {}
     self._mac_stub = {}
     self._signature_stub = {}
+    self._prf_stub = {}
     for lang in LANGUAGES:
       port = portpicker.pick_unused_port()
       cmd = _server_cmd(lang, port)
       logging.info('cmd = %s', cmd)
+      try:
+        output_dir = os.environ['TEST_UNDECLARED_OUTPUTS_DIR']
+      except KeyError:
+        raise RuntimeError(
+            'Could not start %s server, TEST_UNDECLARED_OUTPUTS_DIR environment'
+            'variable must be set')
+      output_file = '%s-%s-%s' % (test_name, lang, 'server.log')
+      output_path = os.path.join(output_dir, output_file)
+      logging.info('writing server output to %s', output_path)
+      try:
+        self._output_file[lang] = open(output_path, 'w+')
+      except IOError:
+        logging.info('unable to open server output file %s', output_path)
+        raise RuntimeError('Could not start %s server' % lang)
       self._server[lang] = subprocess.Popen(
-          cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+          cmd, stdout=self._output_file[lang], stderr=subprocess.STDOUT)
       logging.info('%s server started on port %d with pid: %d.',
                    lang, port, self._server[lang].pid)
       self._channel[lang] = grpc.secure_channel(
@@ -168,6 +186,9 @@ class _TestingServers():
   def signature_stub(self, lang) -> testing_api_pb2_grpc.SignatureStub:
     return self._signature_stub[lang]
 
+  def prf_stub(self, lang) -> testing_api_pb2_grpc.PrfSetStub:
+    return self._prf_stub[lang]
+
   def metadata_stub(self, lang) -> testing_api_pb2_grpc.MetadataStub:
     return self._metadata_stub[lang]
 
@@ -183,24 +204,37 @@ class _TestingServers():
       if self._server[lang].poll() is None:
         logging.info('Killing server %s.', lang)
         self._server[lang].kill()
+    for lang in LANGUAGES:
+      self._output_file[lang].close()
     logging.info('All servers stopped.')
 
 
 _ts = None
 
 
-def start() -> None:
+def start(output_files_prefix: Text) -> None:
   """Starts all servers."""
   global _ts
-  _ts = _TestingServers()
+  _ts = _TestingServers(output_files_prefix)
 
+  versions = {}
   for lang in LANGUAGES:
     response = _ts.metadata_stub(lang).GetServerInfo(
         testing_api_pb2.ServerInfoRequest())
     if lang != response.language:
       raise ValueError(
           'lang = %s != response.language = %s' % (lang, response.language))
-    logging.info('server_info:\n%s', response)
+    if response.tink_version:
+      versions[lang] = response.tink_version
+    else:
+      logging.warning('server in lang %s has no tink version.', lang)
+  unique_versions = list(set(versions.values()))
+  if not unique_versions:
+    raise ValueError('tink version unknown')
+  if len(unique_versions) > 1:
+    raise ValueError('tink_version in testing servers are inconsistent: %s' %
+                     versions)
+  logging.info('Tink version: %s', unique_versions[0])
 
 
 def stop() -> None:
@@ -281,3 +315,9 @@ def public_key_verify(lang: Text,
   """Returns an PublicKeyVerify primitive, implemented in lang."""
   global _ts
   return _primitives.PublicKeyVerify(lang, _ts.signature_stub(lang), pub_keyset)
+
+
+def prf_set(lang: Text, keyset: bytes) -> _primitives.PrfSet:
+  """Returns an PrfSet primitive, implemented in lang."""
+  global _ts
+  return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)

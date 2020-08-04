@@ -49,7 +49,7 @@ FAILS_BUT_SHOULD_SUCCEED = [
 
 def setUpModule():
   aead.register()
-  testing_servers.start()
+  testing_servers.start('aead_consistency')
 
 
 def tearDownModule():

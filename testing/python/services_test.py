@@ -20,6 +20,7 @@ from tink import aead
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import prf
 from tink import signature
 
 
@@ -92,6 +93,7 @@ class ServicesTest(absltest.TestCase):
     daead.register()
     mac.register()
     hybrid.register()
+    prf.register()
     signature.register()
 
   def test_from_json(self):
@@ -396,6 +398,62 @@ class ServicesTest(absltest.TestCase):
         data=b'The quick brown fox jumps over the lazy dog')
     invalid_response = signature_servicer.Verify(invalid_request, self._ctx)
     self.assertNotEmpty(invalid_response.err)
+
+  def test_compute_prf(self):
+    keyset_servicer = services.KeysetServicer()
+    prf_set_servicer = services.PrfSetServicer()
+    template = prf.prf_key_templates.HMAC_SHA256.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+
+    key_ids_request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=keyset)
+    key_ids_response = prf_set_servicer.KeyIds(key_ids_request, self._ctx)
+    self.assertEqual(key_ids_response.WhichOneof('result'), 'output')
+    self.assertLen(key_ids_response.output.key_id, 1)
+    self.assertEqual(key_ids_response.output.key_id[0],
+                     key_ids_response.output.primary_key_id)
+
+    output_length = 31
+    compute_request = testing_api_pb2.PrfSetComputeRequest(
+        keyset=keyset,
+        key_id=key_ids_response.output.primary_key_id,
+        input_data=b'input_data',
+        output_length=output_length)
+    compute_response = prf_set_servicer.Compute(compute_request, self._ctx)
+    self.assertEqual(compute_response.WhichOneof('result'), 'output')
+    self.assertLen(compute_response.output, output_length)
+
+  def test_key_ids_prf_fail(self):
+    prf_set_servicer = services.PrfSetServicer()
+    invalid_key_ids_response = prf_set_servicer.KeyIds(
+        testing_api_pb2.PrfSetKeyIdsRequest(keyset=b'badkeyset'), self._ctx)
+    self.assertNotEmpty(invalid_key_ids_response.err)
+
+  def test_compute_prf_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    prf_set_servicer = services.PrfSetServicer()
+    template = prf.prf_key_templates.HMAC_SHA256.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+    key_ids_request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=keyset)
+    key_ids_response = prf_set_servicer.KeyIds(key_ids_request, self._ctx)
+    self.assertEqual(key_ids_response.WhichOneof('result'), 'output')
+    primary_key_id = key_ids_response.output.primary_key_id
+
+    invalid_output_length = 123456
+    invalid_compute_request = testing_api_pb2.PrfSetComputeRequest(
+        keyset=keyset,
+        key_id=primary_key_id,
+        input_data=b'input_data',
+        output_length=invalid_output_length)
+    invalid_compute_response = prf_set_servicer.Compute(invalid_compute_request,
+                                                        self._ctx)
+    self.assertEqual(invalid_compute_response.WhichOneof('result'), 'err')
+    self.assertNotEmpty(invalid_compute_response.err)
 
 
 if __name__ == '__main__':

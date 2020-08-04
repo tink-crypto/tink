@@ -20,16 +20,16 @@ import "tink/proto/common.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/proto/jws_hmac_go_proto";
+option go_package = "github.com/google/tink/proto/jwt_hmac_go_proto";
 
-// key_type: type.googleapis.com/google.crypto.tink.JwsHmacKey
-message JwsHmacKey {
+// key_type: type.googleapis.com/google.crypto.tink.JwtHmacKey
+message JwtHmacKey {
   uint32 version = 1;
   HashType hash_type = 2;
   bytes key_value = 3;
 }
 
-message JwsHmacKeyFormat {
+message JwtHmacKeyFormat {
   uint32 version = 1;
   HashType hash_type = 2;
   uint32 key_size = 3;

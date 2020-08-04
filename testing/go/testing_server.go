@@ -48,6 +48,7 @@ func main() {
 	pbgrpc.RegisterDeterministicAeadServer(server, &services.DeterministicAEADService{})
 	pbgrpc.RegisterHybridServer(server, &services.HybridService{})
 	pbgrpc.RegisterMacServer(server, &services.MacService{})
+	pbgrpc.RegisterPrfSetServer(server, &services.PrfSetService{})
 	pbgrpc.RegisterSignatureServer(server, &services.SignatureService{})
 	pbgrpc.RegisterStreamingAeadServer(server, &services.StreamingAEADService{})
 	server.Serve(lis)

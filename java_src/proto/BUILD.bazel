@@ -126,13 +126,13 @@ java_lite_proto_library(
 )
 
 java_proto_library(
-    name = "jws_hmac_java_proto",
-    deps = ["@tink_base//proto:jws_hmac_proto"],
+    name = "jwt_hmac_java_proto",
+    deps = ["@tink_base//proto:jwt_hmac_proto"],
 )
 
 java_lite_proto_library(
-    name = "jws_hmac_java_proto_lite",
-    deps = ["@tink_base//proto:jws_hmac_proto"],
+    name = "jwt_hmac_java_proto_lite",
+    deps = ["@tink_base//proto:jwt_hmac_proto"],
 )
 
 java_proto_library(

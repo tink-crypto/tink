@@ -22,6 +22,23 @@ java_library(
 )
 
 java_library(
+    name = "aes_gcm_siv_key_manager",
+    srcs = ["AesGcmSivKeyManager.java"],
+    deps = [
+        "//proto:aes_gcm_siv_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead/subtle:aes_gcm_siv",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+java_library(
     name = "aead_key_templates",
     srcs = ["AeadKeyTemplates.java"],
     deps = [
@@ -210,6 +227,7 @@ java_library(
         ":aes_ctr_hmac_aead_key_manager",
         ":aes_eax_key_manager",
         ":aes_gcm_key_manager",
+        ":aes_gcm_siv_key_manager",
         ":cha_cha20_poly1305_key_manager",
         ":kms_aead_key_manager",
         ":kms_envelope_aead_key_manager",
@@ -232,6 +250,23 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "aes_gcm_siv_key_manager-android",
+    srcs = ["AesGcmSivKeyManager.java"],
+    deps = [
+        "//proto:aes_gcm_siv_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_template-android",
+        "//src/main/java/com/google/crypto/tink:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink/aead/subtle:aes_gcm_siv",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
@@ -427,6 +462,7 @@ android_library(
         ":aes_ctr_hmac_aead_key_manager-android",
         ":aes_eax_key_manager-android",
         ":aes_gcm_key_manager-android",
+        ":aes_gcm_siv_key_manager-android",
         ":cha_cha20_poly1305_key_manager-android",
         ":kms_aead_key_manager-android",
         ":kms_envelope_aead_key_manager-android",

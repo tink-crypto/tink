@@ -27,6 +27,7 @@ java_library(
         "java/com/google/crypto/tink/testing/KeysetServiceImpl.java",
         "java/com/google/crypto/tink/testing/MacServiceImpl.java",
         "java/com/google/crypto/tink/testing/MetadataServiceImpl.java",
+        "java/com/google/crypto/tink/testing/PrfSetServiceImpl.java",
         "java/com/google/crypto/tink/testing/SignatureServiceImpl.java",
         "java/com/google/crypto/tink/testing/StreamingAeadServiceImpl.java",
     ],
@@ -54,6 +55,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink:streaming_aead",
         "@tink_java//src/main/java/com/google/crypto/tink:version",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_set",
     ],
 )
 
@@ -70,6 +72,7 @@ java_binary(
     deps = [
         ":testing_services",
         "@io_grpc_grpc_java//api",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
     ],
 )
@@ -99,6 +102,7 @@ java_test(
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
     ],
 )

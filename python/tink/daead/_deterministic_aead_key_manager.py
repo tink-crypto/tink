@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python wrapper of the CLIF-wrapped C++ Deterministic AEAD key manager."""
+"""Python wrapper of the wrapped C++ Deterministic AEAD key manager."""
 
 from __future__ import absolute_import
 from __future__ import division

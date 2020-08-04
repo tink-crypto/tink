@@ -25,7 +25,7 @@ SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['hybrid']
 
 def setUpModule():
   hybrid.register()
-  testing_servers.start()
+  testing_servers.start('hybrid')
 
 
 def tearDownModule():

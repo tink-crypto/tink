@@ -25,6 +25,7 @@ from tink import aead
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import prf
 from tink import signature
 
 from proto.testing import testing_api_pb2_grpc
@@ -41,6 +42,7 @@ def main(unused_argv):
   daead.register()
   hybrid.register()
   mac.register()
+  prf.register()
   signature.register()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
   testing_api_pb2_grpc.add_MetadataServicer_to_server(
@@ -53,6 +55,8 @@ def main(unused_argv):
       services.DeterministicAeadServicer(), server)
   testing_api_pb2_grpc.add_MacServicer_to_server(
       services.MacServicer(), server)
+  testing_api_pb2_grpc.add_PrfSetServicer_to_server(services.PrfSetServicer(),
+                                                    server)
   testing_api_pb2_grpc.add_HybridServicer_to_server(
       services.HybridServicer(), server)
   testing_api_pb2_grpc.add_SignatureServicer_to_server(

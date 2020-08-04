@@ -69,6 +69,7 @@ class TinkeyUtil {
         PrfKeyTemplates.class,
         SignatureKeyTemplates.class,
         StreamingAeadKeyTemplates.class,
+        // place holder for KeyderivationKeyTemplates. DO NOT EDIT.
       };
 
   /** Creates a {@code KeysetReader} that can read the keyset in the right {@code inFormat}. */

@@ -110,7 +110,7 @@ class KeyManagerCcToPyWrapper(KeyManager[P]):
   """Transforms C++ KeyManager into a Python KeyManager."""
 
   def __init__(self,
-               cc_key_manager: Any,  # A cliffed CcKeyManager<P> instance
+               cc_key_manager: Any,  # A pybinded CcKeyManager<P> instance
                primitive_class: Type[P],
                primitive_py_wrapper: Type[P]):
     self._cc_key_manager = cc_key_manager
@@ -139,7 +139,7 @@ class PrivateKeyManagerCcToPyWrapper(PrivateKeyManager[P]):
   """Transforms C++ KeyManager into a Python KeyManager."""
 
   def __init__(self,
-               cc_key_manager: Any,  # A cliffed CcKeyManager<P> instance
+               cc_key_manager: Any,  # A pybinded CcKeyManager<P> instance
                primitive_class: Type[P],
                primitive_py_wrapper: Type[P]):
     self._cc_key_manager = cc_key_manager

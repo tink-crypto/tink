@@ -28,6 +28,7 @@ import (
 	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/streamingaead"
 	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
@@ -637,6 +638,88 @@ func TestSignatureSignVerify(t *testing.T) {
 	}
 	if err := signatureVerify(ctx, signatureService, []byte("badPublicKeyset"), signatureValue, data); err == nil {
 		t.Fatalf("signatureVerify of bad public keyset succeeded unexpectedly.")
+	}
+}
+
+func prfSetKeyIds(ctx context.Context, prfSetService *services.PrfSetService, keyset []byte) (uint32, []uint32, error) {
+	request := &pb.PrfSetKeyIdsRequest{
+		Keyset: keyset,
+	}
+	response, err := prfSetService.KeyIds(ctx, request)
+	if err != nil {
+		return 0, nil, err
+	}
+	switch r := response.Result.(type) {
+	case *pb.PrfSetKeyIdsResponse_Output_:
+		return r.Output.PrimaryKeyId, r.Output.KeyId, nil
+	case *pb.PrfSetKeyIdsResponse_Err:
+		return 0, nil, errors.New(r.Err)
+	default:
+		return 0, nil, fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func prfSetCompute(ctx context.Context, prfSetService *services.PrfSetService, keyset []byte, keyID uint32, inputData []byte, outputLength int) ([]byte, error) {
+	request := &pb.PrfSetComputeRequest{
+		Keyset:       keyset,
+		KeyId:        keyID,
+		InputData:    inputData,
+		OutputLength: int32(outputLength),
+	}
+	response, err := prfSetService.Compute(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	switch r := response.Result.(type) {
+	case *pb.PrfSetComputeResponse_Output:
+		return r.Output, nil
+	case *pb.PrfSetComputeResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func TestComputePrf(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	prfSetService := &services.PrfSetService{}
+	ctx := context.Background()
+	template, err := proto.Marshal(prf.HMACSHA256PRFKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(prf.HMACSHA256PRFKeyTemplate()) failed: %v", err)
+	}
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	primaryKeyID, keyIDs, err := prfSetKeyIds(ctx, prfSetService, keyset)
+	if err != nil {
+		t.Fatalf("prfSetKeyIds failed: %v", err)
+	}
+	if len(keyIDs) != 1 || keyIDs[0] != primaryKeyID {
+		t.Fatalf("expected keyIDs = {primaryKeyID}, but go %v", keyIDs)
+	}
+	inputData := []byte("inputData")
+	outputLength := 15
+	output, err := prfSetCompute(ctx, prfSetService, keyset, primaryKeyID, inputData, outputLength)
+	if err != nil {
+		t.Fatalf("prfSetCompute failed: %v", err)
+	}
+	if len(output) != outputLength {
+		t.Fatalf("expected output of length %d, but got length %d (%x)", outputLength, len(output), output)
+	}
+	badOutputLength := 123456
+	if _, err := prfSetCompute(ctx, prfSetService, keyset, primaryKeyID, inputData, badOutputLength); err == nil {
+		t.Fatalf("prfSetCompute with bad outputLength succeeded unexpectedly.")
+	}
+}
+
+func TestPrfKeyIdsFail(t *testing.T) {
+	prfSetService := &services.PrfSetService{}
+	ctx := context.Background()
+	if _, _, err := prfSetKeyIds(ctx, prfSetService, []byte("badKeyset")); err == nil {
+		t.Fatalf("prfSetKeyIds with bad keyset succeeded unexpectedly.")
 	}
 }
 

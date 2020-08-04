@@ -26,6 +26,7 @@ option go_package = "github.com/google/tink/proto/aes_gcm_siv_go_proto";
 // Thus, accept no params.
 message AesGcmSivKeyFormat {
   uint32 key_size = 2;
+  uint32 version = 1;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.AesGcmSivKey

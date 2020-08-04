@@ -21,6 +21,7 @@ from tink import aead
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import prf
 from tink import signature
 from tink import streaming_aead
 
@@ -58,7 +59,7 @@ class TestingServersTest(parameterized.TestCase):
   @classmethod
   def setUpClass(cls):
     super(TestingServersTest, cls).setUpClass()
-    testing_servers.start()
+    testing_servers.start('testing_server')
 
   @classmethod
   def tearDownClass(cls):
@@ -155,6 +156,19 @@ class TestingServersTest(parameterized.TestCase):
 
     with self.assertRaises(tink.TinkError):
       verify_primitive.verify(b'foo', data)
+
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['prf'])
+  def test_prf(self, lang):
+    keyset = testing_servers.new_keyset(lang,
+                                        prf.prf_key_templates.HMAC_SHA256)
+    input_data = b'The quick brown fox jumps over the lazy dog'
+    prf_set_primitive = testing_servers.prf_set(lang, keyset)
+    output = prf_set_primitive.primary().compute(input_data, output_length=15)
+    self.assertLen(output, 15)
+
+    with self.assertRaises(tink.TinkError):
+      prf_set_primitive.primary().compute(input_data, output_length=123456)
+
 
 if __name__ == '__main__':
   absltest.main()

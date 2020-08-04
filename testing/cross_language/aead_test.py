@@ -37,7 +37,7 @@ def key_rotation_test_cases():
 
 def setUpModule():
   aead.register()
-  testing_servers.start()
+  testing_servers.start('aead')
 
 
 def tearDownModule():

@@ -23,6 +23,7 @@ import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.prf.PrfKeyTemplates;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.testing.AeadDecryptRequest;
 import com.google.crypto.tink.proto.testing.AeadDecryptResponse;
@@ -45,6 +46,11 @@ import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
 import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
 import com.google.crypto.tink.proto.testing.MacGrpc;
 import com.google.crypto.tink.proto.testing.MetadataGrpc;
+import com.google.crypto.tink.proto.testing.PrfSetComputeRequest;
+import com.google.crypto.tink.proto.testing.PrfSetComputeResponse;
+import com.google.crypto.tink.proto.testing.PrfSetGrpc;
+import com.google.crypto.tink.proto.testing.PrfSetKeyIdsRequest;
+import com.google.crypto.tink.proto.testing.PrfSetKeyIdsResponse;
 import com.google.crypto.tink.proto.testing.ServerInfoRequest;
 import com.google.crypto.tink.proto.testing.ServerInfoResponse;
 import com.google.crypto.tink.proto.testing.StreamingAeadDecryptRequest;
@@ -76,6 +82,7 @@ public final class TestingServicesTest {
   DeterministicAeadGrpc.DeterministicAeadBlockingStub daeadStub;
   StreamingAeadGrpc.StreamingAeadBlockingStub streamingAeadStub;
   MacGrpc.MacBlockingStub macStub;
+  PrfSetGrpc.PrfSetBlockingStub prfSetStub;
 
   @Before
   public void setUp() throws Exception {
@@ -90,6 +97,7 @@ public final class TestingServicesTest {
         .addService(new DeterministicAeadServiceImpl())
         .addService(new StreamingAeadServiceImpl())
         .addService(new MacServiceImpl())
+        .addService(new PrfSetServiceImpl())
         .build()
         .start();
     channel = InProcessChannelBuilder
@@ -102,6 +110,7 @@ public final class TestingServicesTest {
     daeadStub = DeterministicAeadGrpc.newBlockingStub(channel);
     streamingAeadStub = StreamingAeadGrpc.newBlockingStub(channel);
     macStub = MacGrpc.newBlockingStub(channel);
+    prfSetStub = PrfSetGrpc.newBlockingStub(channel);
   }
 
   @After
@@ -543,6 +552,94 @@ public final class TestingServicesTest {
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
     VerifyMacResponse verifyResponse = verifyMac(macStub, badKeyset, macValue, data);
     assertThat(verifyResponse.getErr()).isNotEmpty();
+  }
+
+  private static PrfSetKeyIdsResponse keyIds(
+      PrfSetGrpc.PrfSetBlockingStub prfSetStub, byte[] keyset) {
+    PrfSetKeyIdsRequest request =
+        PrfSetKeyIdsRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .build();
+    return prfSetStub.keyIds(request);
+  }
+
+  private static PrfSetComputeResponse computePrf(
+      PrfSetGrpc.PrfSetBlockingStub prfSetStub,
+      byte[] keyset,
+      int keyId,
+      byte[] inputData,
+      int outputLength) {
+    PrfSetComputeRequest request =
+        PrfSetComputeRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setKeyId(keyId)
+            .setInputData(ByteString.copyFrom(inputData))
+            .setOutputLength(outputLength)
+            .build();
+    return prfSetStub.compute(request);
+  }
+
+  @Test
+  public void computePrf_success() throws Exception {
+    byte[] template = PrfKeyTemplates.HMAC_SHA256_PRF.toByteArray();
+    byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    int outputLength = 15;
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    PrfSetKeyIdsResponse keyIdsResponse = keyIds(prfSetStub, keyset);
+    assertThat(keyIdsResponse.getErr()).isEmpty();
+    int primaryKeyId = keyIdsResponse.getOutput().getPrimaryKeyId();
+
+    PrfSetComputeResponse computeResponse = computePrf(
+        prfSetStub, keyset, primaryKeyId, inputData, outputLength);
+    assertThat(computeResponse.getErr()).isEmpty();
+    assertThat(computeResponse.getOutput().size()).isEqualTo(outputLength);
+  }
+
+  @Test
+  public void prfKeyIds_failsOnBadKeyset() throws Exception {
+    byte[] badKeyset = "bad keyset".getBytes(UTF_8);
+
+    PrfSetKeyIdsResponse keyIdsResponse = keyIds(prfSetStub, badKeyset);
+    assertThat(keyIdsResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void computePrf_failsOnUnknownKeyId() throws Exception {
+    byte[] template = PrfKeyTemplates.HMAC_SHA256_PRF.toByteArray();
+    byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    int outputLength = 15;
+    int badKeyId = 123456789;
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    PrfSetComputeResponse computeResponse = computePrf(
+        prfSetStub, keyset, badKeyId, inputData, outputLength);
+    assertThat(computeResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void computePrf_failsOnBadOutputLength() throws Exception {
+    byte[] template = PrfKeyTemplates.HMAC_SHA256_PRF.toByteArray();
+    byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
+    int outputLength = 12345;
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    PrfSetKeyIdsResponse keyIdsResponse = keyIds(prfSetStub, keyset);
+    assertThat(keyIdsResponse.getErr()).isEmpty();
+    int primaryKeyId = keyIdsResponse.getOutput().getPrimaryKeyId();
+
+    PrfSetComputeResponse computeResponse = computePrf(
+        prfSetStub, keyset, primaryKeyId, inputData, outputLength);
+    assertThat(computeResponse.getErr()).isNotEmpty();
   }
 
   @Test

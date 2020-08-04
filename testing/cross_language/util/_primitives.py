@@ -17,7 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 import io
-from typing import BinaryIO, Text
+from typing import BinaryIO, Mapping, Text
 from absl import logging
 
 import tink
@@ -25,6 +25,7 @@ from tink import aead
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import prf
 from tink import signature as tink_signature
 from tink import streaming_aead
 
@@ -290,3 +291,66 @@ class PublicKeyVerify(tink_signature.PublicKeyVerify):
     if response.err:
       logging.info('error signature verify in %s: %s', self.lang, response.err)
       raise tink.TinkError(response.err)
+
+
+class _Prf(prf.Prf):
+  """Implements a Prf from a PrfSet service stub."""
+
+  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.PrfSetStub,
+               keyset: bytes, key_id: int) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._keyset = keyset
+    self._key_id = key_id
+
+  def compute(self, input_data: bytes, output_length: int) -> bytes:
+    logging.info('Compute PRF in lang %s.', self.lang)
+    request = testing_api_pb2.PrfSetComputeRequest(
+        keyset=self._keyset,
+        key_id=self._key_id,
+        input_data=input_data,
+        output_length=output_length)
+    response = self._stub.Compute(request)
+    if response.err:
+      logging.info('Error compute PRF in %s: %s', self.lang, response.err)
+      raise tink.TinkError(response.err)
+    return response.output
+
+
+class PrfSet(prf.PrfSet):
+  """Implements a PrfSet from a PrfSet service stub."""
+
+  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.PrfSetStub,
+               keyset: bytes) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._keyset = keyset
+    self._key_ids_initialized = False
+    self._primary_key_id = None
+    self._prfs = None
+
+  def _initialize_key_ids(self) -> None:
+    if not self._key_ids_initialized:
+      logging.info('Get PrfSet key IDs in lang %s.', self.lang)
+      request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=self._keyset)
+      response = self._stub.KeyIds(request)
+      if response.err:
+        logging.info('Error PrfSet KeyIds in %s: %s', self.lang, response.err)
+        raise tink.TinkError(response.err)
+      self._primary_key_id = response.output.primary_key_id
+      self._prfs = {}
+      for key_id in response.output.key_id:
+        self._prfs[key_id] = _Prf(self.lang, self._stub, self._keyset, key_id)
+      self._key_ids_initialized = True
+
+  def primary_id(self) -> int:
+    self._initialize_key_ids()
+    return self._primary_key_id
+
+  def all(self) -> Mapping[int, prf.Prf]:
+    self._initialize_key_ids()
+    return self._prfs.copy()
+
+  def primary(self) -> prf.Prf:
+    self._initialize_key_ids()
+    return self._prfs[self._primary_key_id]

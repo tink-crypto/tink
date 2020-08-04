@@ -17,7 +17,10 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+from tink.prf import _prf_key_manager
+from tink.prf import _prf_key_templates as prf_key_templates
 from tink.prf import _prf_set
 
 Prf = _prf_set.Prf
 PrfSet = _prf_set.PrfSet
+register = _prf_key_manager.register
