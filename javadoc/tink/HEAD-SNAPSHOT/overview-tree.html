@@ -150,6 +150,11 @@
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">ImmutableByteArray</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink"><span class="typeNameLink">JsonKeysetReader</span></a> (implements com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>)</li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink"><span class="typeNameLink">JsonKeysetWriter</span></a> (implements com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>)</li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/Jwt.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">Jwt</span></a></li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtHmac.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtHmac</span></a> (implements com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtMac.html" title="interface in com.google.crypto.tink.jwt">JwtMac</a>)</li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtMacConfig.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtMacConfig</span></a></li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtValidator.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtValidator</span></a></li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtValidator.Builder</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerImpl.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyManagerImpl</span></a>&lt;PrimitiveT,KeyProtoT&gt; (implements com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;)
 <ul>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyManagerImpl.html" title="class in com.google.crypto.tink"><span class="typeNameLink">PrivateKeyManagerImpl</span></a>&lt;PrimitiveT,KeyProtoT,PublicKeyProtoT&gt; (implements com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink">PrivateKeyManager</a>&lt;P&gt;)</li>
@@ -176,6 +181,7 @@
 <li type="circle">com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">HkdfPrfKeyManager</span></a></li>
 <li type="circle">com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">HmacKeyManager</span></a></li>
 <li type="circle">com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html" title="class in com.google.crypto.tink.prf"><span class="typeNameLink">HmacPrfKeyManager</span></a></li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtHmacKeyManager.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtHmacKeyManager</span></a></li>
 <li type="circle">com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/KmsAeadKeyManager.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">KmsAeadKeyManager</span></a></li>
 <li type="circle">com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManager.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">KmsEnvelopeAeadKeyManager</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink"><span class="typeNameLink">PrivateKeyTypeManager</span></a>&lt;KeyProtoT,PublicKeyProtoT&gt;
@@ -234,6 +240,21 @@
 <li type="circle">com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead"><span class="typeNameLink">StreamingAeadKeyTemplates</span></a></li>
 <li type="circle">com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html" title="class in com.google.crypto.tink.streamingaead"><span class="typeNameLink">StreamingAeadWrapper</span></a> (implements com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;P&gt;)</li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">SubtleUtil</span></a></li>
+<li type="circle">java.lang.<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Throwable</span></a> (implements java.io.<a href="https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html?is-external=true" title="class or interface in java.io">Serializable</a>)
+<ul>
+<li type="circle">java.lang.<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Exception</span></a>
+<ul>
+<li type="circle">java.security.<a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security"><span class="typeNameLink">GeneralSecurityException</span></a>
+<ul>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtExpiredException.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtExpiredException</span></a></li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtInvalidException.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtInvalidException</span></a></li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtNotBeforeException.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtNotBeforeException</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li type="circle">com.google.crypto.tink.config.<a href="com/google/crypto/tink/config/TinkConfig.html" title="class in com.google.crypto.tink.config"><span class="typeNameLink">TinkConfig</span></a></li>
 <li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/ToBeSignedJwt.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">ToBeSignedJwt</span></a></li>
 <li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/ToBeSignedJwt.Builder.html" title="class in com.google.crypto.tink.jwt"><span class="typeNameLink">ToBeSignedJwt.Builder</span></a></li>
@@ -255,6 +276,7 @@
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">HybridDecrypt</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/HybridEncrypt.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">HybridEncrypt</span></a></li>
 <li type="circle">com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/IndCpaCipher.html" title="interface in com.google.crypto.tink.subtle"><span class="typeNameLink">IndCpaCipher</span></a></li>
+<li type="circle">com.google.crypto.tink.jwt.<a href="com/google/crypto/tink/jwt/JwtMac.html" title="interface in com.google.crypto.tink.jwt"><span class="typeNameLink">JwtMac</span></a></li>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">KeyManager</span></a>&lt;P&gt;
 <ul>
 <li type="circle">com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PrivateKeyManager</span></a>&lt;P&gt;</li>

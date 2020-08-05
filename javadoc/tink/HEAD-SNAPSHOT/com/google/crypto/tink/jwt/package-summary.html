@@ -74,6 +74,24 @@
 <div class="contentContainer">
 <ul class="blockList">
 <li class="blockList">
+<table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Interface Summary table, listing interfaces, and an explanation">
+<caption><span>Interface Summary</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Interface</th>
+<th class="colLast" scope="col">Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtMac.html" title="interface in com.google.crypto.tink.jwt">JwtMac</a></td>
+<td class="colLast">
+<div class="block">Interface for authenticating and verifying JWT with JWS MAC, as described in RFC 7519 and RFC
+ 7515.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList">
 <table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Class Summary table, listing classes, and an explanation">
 <caption><span>Class Summary</span><span class="tabEnd">&nbsp;</span></caption>
 <tr>
@@ -81,6 +99,44 @@
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tbody>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/Jwt.html" title="class in com.google.crypto.tink.jwt">Jwt</a></td>
+<td class="colLast">
+<div class="block">A read-only implementation of <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a>
+ (JWT).</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtHmac.html" title="class in com.google.crypto.tink.jwt">JwtHmac</a></td>
+<td class="colLast">
+<div class="block">An implementation of <a href="../../../../../com/google/crypto/tink/jwt/JwtMac.html" title="interface in com.google.crypto.tink.jwt"><code>JwtMac</code></a> using HMAC.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtHmacKeyManager.html" title="class in com.google.crypto.tink.jwt">JwtHmacKeyManager</a></td>
+<td class="colLast">
+<div class="block">This key manager generates new <code>JwtHmacKey</code> keys and produces new instances of <a href="../../../../../com/google/crypto/tink/jwt/JwtHmac.html" title="class in com.google.crypto.tink.jwt"><code>JwtHmac</code></a>.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtMacConfig.html" title="class in com.google.crypto.tink.jwt">JwtMacConfig</a></td>
+<td class="colLast">
+<div class="block">Static methods and constants for registering with the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all
+ instances of <a href="../../../../../com/google/crypto/tink/jwt/JwtMac.html" title="interface in com.google.crypto.tink.jwt"><code>JwtMac</code></a> key types supported in a particular release of Tink.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.html" title="class in com.google.crypto.tink.jwt">JwtValidator</a></td>
+<td class="colLast">
+<div class="block">A set of expected claims and headers to validate against another JWT.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtValidator.Builder.html" title="class in com.google.crypto.tink.jwt">JwtValidator.Builder</a></td>
+<td class="colLast">
+<div class="block">Builder for JwtValidator</div>
+</td>
+</tr>
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/ToBeSignedJwt.html" title="class in com.google.crypto.tink.jwt">ToBeSignedJwt</a></td>
 <td class="colLast">
@@ -92,6 +148,35 @@
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/ToBeSignedJwt.Builder.html" title="class in com.google.crypto.tink.jwt">ToBeSignedJwt.Builder</a></td>
 <td class="colLast">
 <div class="block">Builder for ToBeSignedJwt</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList">
+<table class="typeSummary" border="0" cellpadding="3" cellspacing="0" summary="Exception Summary table, listing exceptions, and an explanation">
+<caption><span>Exception Summary</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Exception</th>
+<th class="colLast" scope="col">Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtExpiredException.html" title="class in com.google.crypto.tink.jwt">JwtExpiredException</a></td>
+<td class="colLast">
+<div class="block">This error is thrown when the JWT is expired.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtInvalidException.html" title="class in com.google.crypto.tink.jwt">JwtInvalidException</a></td>
+<td class="colLast">
+<div class="block">This error is thrown when one of the headers or one of the claims is invalid.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/jwt/JwtNotBeforeException.html" title="class in com.google.crypto.tink.jwt">JwtNotBeforeException</a></td>
+<td class="colLast">
+<div class="block">This error is thrown when the JWT can't be used yet.</div>
 </td>
 </tr>
 </tbody>
