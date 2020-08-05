@@ -16,6 +16,8 @@ from __future__ import division
 from __future__ import print_function
 
 import io
+import os
+import tempfile
 
 from absl.testing import absltest
 from tink.proto import aes_ctr_hmac_streaming_pb2
@@ -126,6 +128,28 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     ct_source = TestBytesObject(ct_destination.getvalue())
     with saead_primitive.new_decrypting_stream(ct_source, aad) as ds:
       self.assertEqual(ds.read(), plaintext)
+
+  def test_encrypt_decrypt_tempfile(self):
+    saead_primitive = self.key_manager_ctr.primitive(
+        self.key_manager_ctr.new_key_data(
+            streaming_aead.streaming_aead_key_templates
+            .AES128_CTR_HMAC_SHA256_4KB))
+    plaintext = b'plaintext'
+    aad = b'associated_data'
+
+    ciphertext_dest = tempfile.NamedTemporaryFile('wb', delete=False)
+    encryptedfile_name = ciphertext_dest.name
+    with saead_primitive.new_encrypting_stream(ciphertext_dest, aad) as es:
+      n = es.write(plaintext)
+    self.assertTrue(ciphertext_dest.closed)
+    self.assertLen(plaintext, n)
+
+    ciphertext_src = open(encryptedfile_name, 'rb')
+    with saead_primitive.new_decrypting_stream(ciphertext_src, aad) as ds:
+      output = ds.read()
+    self.assertTrue(ciphertext_src.closed)
+    os.unlink(encryptedfile_name)
+    self.assertEqual(output, plaintext)
 
   def test_encrypt_decrypt_wrong_aad(self):
     saead_primitive = self.key_manager_ctr.primitive(
