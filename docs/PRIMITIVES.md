@@ -33,7 +33,7 @@ AEAD               | yes      | yes     | yes      | yes    | yes
 Streaming AEAD     | yes      | yes     | no       | yes    | no
 Deterministic AEAD | yes      | yes     | yes      | yes    | yes
 MAC                | yes      | yes     | yes      | yes    | yes
-PRF                | yes      | yes     | no       | yes    | no
+PRF                | yes      | yes     | no       | yes    | yes
 Digital signatures | yes      | yes     | yes      | yes    | yes
 Hybrid encryption  | yes      | yes     | yes      | yes    | yes
 
@@ -94,6 +94,7 @@ Primitive          | Python Implementations
 AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, CHACHA20-POLY1305, XCHACHA20-POLY1305
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2
+PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC
 Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
 Hybrid Encryption  | ECIES with AEAD and HKDF
 
