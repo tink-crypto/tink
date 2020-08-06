@@ -48,8 +48,8 @@ class EncryptingStream(io.BufferedIOBase):
   will not be called, and the ciphertext will not be complete.
   """
 
-  def __init__(self, stream_aead, ciphertext_destination: BinaryIO,
-               associated_data: bytes):
+  def __init__(self, stream_aead: tink_bindings.StreamingAead,
+               ciphertext_destination: BinaryIO, associated_data: bytes):
     """Create a new EncryptingStream.
 
     Args:

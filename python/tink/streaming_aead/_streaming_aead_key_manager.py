@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import typing
 from typing import Text, BinaryIO
+import six
 
 from tink import core
 from tink.cc.pybind import tink_bindings
@@ -29,7 +30,7 @@ from tink.streaming_aead import _streaming_aead
 class _StreamingAeadCcToPyWrapper(_streaming_aead.StreamingAead):
   """Transforms C++ StreamingAead into a Python primitive."""
 
-  def __init__(self, cc_streaming_aead):
+  def __init__(self, cc_streaming_aead: tink_bindings.StreamingAead):
     self._cc_streaming_aead = cc_streaming_aead
 
   @core.use_tink_errors
@@ -58,6 +59,8 @@ def from_cc_registry(
 
 def register() -> None:
   """Registers all AEAD key managers and AEAD wrapper in the Registry."""
+  if six.PY2:
+    raise NotImplementedError('StreamingAEAD requires Python 3.')
   tink_bindings.register()
   for ident in (
       'AesCtrHmacStreamingKey',

@@ -18,6 +18,7 @@ from __future__ import print_function
 import io
 import os
 import tempfile
+from typing import BinaryIO, cast
 
 from absl.testing import absltest
 from tink.proto import aes_ctr_hmac_streaming_pb2
@@ -66,8 +67,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
         self.key_manager_ctr.key_type(),
         'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey')
 
-  def test_new_key_data(self):
-    # AES GCM HKDF
+  def test_new_aes_gcm_hkdf_key_data(self):
     key_template = streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB
     key_data = self.key_manager_gcm.new_key_data(key_template)
     self.assertEqual(key_data.type_url, self.key_manager_gcm.key_type())
@@ -80,7 +80,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.params.derived_key_size, 16)
     self.assertEqual(key.params.ciphertext_segment_size, 4096)
 
-    # AES CTR HMAC
+  def test_new_aes_ctr_hmac_key_data(self):
     key_template = streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB
     key_data = self.key_manager_ctr.new_key_data(key_template)
     self.assertEqual(key_data.type_url, self.key_manager_ctr.key_type())
@@ -95,15 +95,14 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.params.hmac_params.tag_size, 32)
     self.assertEqual(key.params.ciphertext_segment_size, 4096)
 
-  def test_invalid_params_throw_exception(self):
-    # AES GCM HKDF
+  def test_invalid_aes_gcm_hkdf_params_throw_exception(self):
     key_template = streaming_aead.streaming_aead_key_templates.create_aes_gcm_hkdf_streaming_key_template(
         63, common_pb2.HashType.SHA1, 65, 55)
     with self.assertRaisesRegex(core.TinkError,
                                 'key_size must not be smaller than'):
       self.key_manager_gcm.new_key_data(key_template)
 
-    # AES CTR HKDF
+  def test_invalid_aes_ctr_hmac_params_throw_exception(self):
     key_template = streaming_aead.streaming_aead_key_templates.create_aes_ctr_hmac_streaming_key_template(
         63, common_pb2.HashType.SHA1, 65, common_pb2.HashType.SHA256, 55, 2)
     with self.assertRaisesRegex(core.TinkError,
@@ -137,7 +136,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     plaintext = b'plaintext'
     aad = b'associated_data'
 
-    ciphertext_dest = tempfile.NamedTemporaryFile('wb', delete=False)
+    ciphertext_dest = cast(BinaryIO,
+                           tempfile.NamedTemporaryFile('wb', delete=False))
     encryptedfile_name = ciphertext_dest.name
     with saead_primitive.new_encrypting_stream(ciphertext_dest, aad) as es:
       n = es.write(plaintext)

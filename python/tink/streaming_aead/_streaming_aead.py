@@ -17,11 +17,10 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+from typing import BinaryIO
 
 # Special imports
 import six
-
-from typing import BinaryIO
 
 
 @six.add_metaclass(abc.ABCMeta)

@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import io
 import sys
+from typing import cast, BinaryIO
 
 from absl.testing import absltest
 from absl.testing.absltest import mock
@@ -54,8 +55,11 @@ class TestBytesObject(io.BytesIO):
     pass
 
 
-def get_encrypting_stream(ciphertext_destination, aad):
-  return streaming_aead.EncryptingStream(None, ciphertext_destination, aad)
+# We use the same return type as StreamingAead.new_decrypting_stream
+def get_encrypting_stream(ciphertext_destination: BinaryIO,
+                          aad: bytes) -> BinaryIO:
+  s = streaming_aead.EncryptingStream(None, ciphertext_destination, aad)
+  return cast(BinaryIO, s)
 
 
 class EncryptingStreamTest(absltest.TestCase):
@@ -87,7 +91,7 @@ class EncryptingStreamTest(absltest.TestCase):
   def test_write_non_bytes(self):
     with io.BytesIO() as f, get_encrypting_stream(f, B_AAD_) as es:
       with self.assertRaisesRegex(TypeError, 'bytes-like object is required'):
-        es.write('This is a string, not a bytes object')
+        es.write(cast(bytes, 'This is a string, not a bytes object'))
 
   def test_textiowrapper_compatibility(self):
     """A test that checks the TextIOWrapper works as expected.
@@ -153,13 +157,17 @@ class EncryptingStreamTest(absltest.TestCase):
 
   def test_position(self):
     with io.BytesIO() as f:
-      with get_encrypting_stream(f, B_ASSOC_) as es:
+      # Cast is needed since read1 is not part of BinaryIO.
+      with cast(streaming_aead.EncryptingStream,
+                get_encrypting_stream(f, B_ASSOC_)) as es:
         es.write(b'Hello world' + B_X80)
         self.assertEqual(es.position(), 12)
 
   def test_position_works_closed(self):
     with io.BytesIO() as f:
-      es = get_encrypting_stream(f, B_ASSOC_)
+      # Cast is needed since position is not part of BinaryIO.
+      es = cast(streaming_aead.EncryptingStream,
+                get_encrypting_stream(f, B_ASSOC_))
 
       es.write(b'Hello world' + B_X80)
       es.close()
@@ -188,13 +196,13 @@ class EncryptingStreamTest(absltest.TestCase):
     and will result in an invalid ciphertext. The ciphertext_destination file
     object itself should in most cases still be closed when garbage collected.
     """
-    f = io.BytesIO()
+    ciphertext_destination = io.BytesIO()
     with self.assertRaisesRegex(ValueError, 'raised inside'):
-      with get_encrypting_stream(f, B_ASSOC_) as es:
+      with get_encrypting_stream(ciphertext_destination, B_ASSOC_) as es:
         es.write(b'some message' + B_X80)
         raise ValueError('Error raised inside context manager')
 
-    self.assertFalse(f.closed)
+    self.assertFalse(ciphertext_destination.closed)
 
 
 if __name__ == '__main__':

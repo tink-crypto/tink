@@ -38,8 +38,8 @@ class DecryptingStream(io.BufferedIOBase):
   Closing this wrapper also closes the underlying object.
   """
 
-  def __init__(self, stream_aead, ciphertext_source: BinaryIO,
-               associated_data: bytes):
+  def __init__(self, stream_aead: tink_bindings.StreamingAead,
+               ciphertext_source: BinaryIO, associated_data: bytes):
     """Create a new DecryptingStream.
 
     Args:
@@ -146,6 +146,7 @@ class DecryptingStream(io.BufferedIOBase):
     return self._readinto(b, read1=True)
 
   def _read(self, size: int, read1: bool) -> bytes:
+    """Implements read and read1."""
     self._check_not_closed()
 
     if size is None:
