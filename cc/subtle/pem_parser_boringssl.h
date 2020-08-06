@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_SUBTLE_PEM_BORINGSSL_H_
-#define TINK_SUBTLE_PEM_BORINGSSL_H_
+#ifndef TINK_SUBTLE_PEM_PARSER_BORINGSSL_H_
+#define TINK_SUBTLE_PEM_PARSER_BORINGSSL_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -62,4 +62,4 @@ class PemParser {
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
-#endif  // TINK_SUBTLE_PEM_BORINGSSL_H_
+#endif  // TINK_SUBTLE_PEM_PARSER_BORINGSSL_H_

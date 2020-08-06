@@ -11,8 +11,8 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_PRF_PRF_H_
-#define TINK_PRF_PRF_H_
+#ifndef TINK_SUBTLE_PRF_STREAMING_PRF_H_
+#define TINK_SUBTLE_PRF_STREAMING_PRF_H_
 
 #include <memory>
 
@@ -42,4 +42,4 @@ class StreamingPrf {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PRF_PRF_H_
+#endif  // TINK_SUBTLE_PRF_STREAMING_PRF_H_

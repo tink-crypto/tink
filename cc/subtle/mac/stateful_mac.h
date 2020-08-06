@@ -53,4 +53,4 @@ class StatefulMacFactory {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_SUBTLE_MAC_INTERFACE_H_
+#endif  // TINK_SUBTLE_MAC_STATEFUL_MAC_H_

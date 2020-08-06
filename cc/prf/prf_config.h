@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_PRF_HKDF_PRF_CONFIG_H_
-#define TINK_PRF_HKDF_PRF_CONFIG_H_
+#ifndef TINK_PRF_PRF_CONFIG_H_
+#define TINK_PRF_PRF_CONFIG_H_
 
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
@@ -35,4 +35,4 @@ class PrfConfig {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PRF_HKDF_PRF_CONFIG_H_
+#endif  // TINK_PRF_PRF_CONFIG_H_

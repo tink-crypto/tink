@@ -42,4 +42,4 @@ class CordAeadWrapper : public PrimitiveWrapper<CordAead> {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_AEAD_AEAD_CORD_WRAPPER_H_
+#endif  // TINK_AEAD_CORD_AEAD_WRAPPER_H_

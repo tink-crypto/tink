@@ -12,8 +12,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_MOCK_AEAD_H_
-#define TINK_MOCK_AEAD_H_
+#ifndef TINK_AEAD_MOCK_AEAD_H_
+#define TINK_AEAD_MOCK_AEAD_H_
 
 #include "gmock/gmock.h"
 #include "tink/aead.h"
@@ -35,4 +35,4 @@ class MockAead : public Aead {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_MOCK_AEAD_H_
+#endif  // TINK_AEAD_MOCK_AEAD_H_

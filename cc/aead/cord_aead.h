@@ -62,4 +62,4 @@ class CordAead {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_AEAD_AEAD_CORD_H_
+#endif  // TINK_AEAD_CORD_AEAD_H_
