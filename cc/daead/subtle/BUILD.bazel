@@ -1,1 +1,33 @@
+package(default_visibility = ["//:__subpackages__"])
+
 licenses(["notice"])
+
+cc_library(
+    name = "aead_or_daead",
+    srcs = ["aead_or_daead.cc"],
+    hdrs = ["aead_or_daead.h"],
+    include_prefix = "tink/daead/subtle",
+    visibility = [
+        "//third_party/tink/cc/hybrid:__subpackages__",
+    ],
+    deps = [
+        "//:aead",
+        "//:deterministic_aead",
+        "@com_google_absl//absl/functional:bind_front",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/types:variant",
+    ],
+)
+
+cc_test(
+    name = "aead_or_daead_test",
+    size = "small",
+    srcs = ["aead_or_daead_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aead_or_daead",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
