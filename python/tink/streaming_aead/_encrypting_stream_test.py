@@ -30,9 +30,21 @@ B_AAD_ = b'aa' + B_X80
 B_ASSOC_ = b'asso' + B_X80
 
 
+class FakeOutputStreamAdapter(object):
+
+  def __init__(self, destination):
+    self._destination = destination
+
+  def write(self, data):
+    return self._destination.write(data)
+
+  def close(self):
+    self._destination.close()
+
+
 def fake_get_output_stream_adapter(self, cc_primitive, aad, destination):
   del cc_primitive, aad, self  # unused
-  return destination
+  return FakeOutputStreamAdapter(destination)
 
 
 class TestBytesObject(io.BytesIO):
