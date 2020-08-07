@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import * as ecdsaForSigning from './ecdsa_for_signing';
 import * as ecdsaForVerifying from './ecdsa_for_verifying';
 import * as signWrapper from './sign_wrapper';

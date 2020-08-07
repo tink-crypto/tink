@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import EcdsaPrivateKeyManager from 'goog:tink.signature.EcdsaPrivateKeyManager'; // from //third_party/tink/javascript/signature:ecdsa_key_managers
 import SignatureKeyTemplates from 'goog:tink.signature.SignatureKeyTemplates'; // from //third_party/tink/javascript/signature:key_templates
 

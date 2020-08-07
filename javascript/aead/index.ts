@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import * as aesCtrHmac from './aes_ctr_hmac';
 import * as aesGcm from './aes_gcm';
 import * as wrapper from './wrapper';

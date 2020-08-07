@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import * as Registry from '../internal/registry';
 import {AesGcmKeyManager} from './aes_gcm_key_manager';
 import {AesGcmKeyTemplates} from './aes_gcm_key_templates';
