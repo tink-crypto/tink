@@ -590,12 +590,6 @@ implementation satisfies security properties of the corresponding primitive
 interface, so it is up to the implementer and the user of the custom
 implementation ensure the required properties are met.
 
-**TIP**: For a working example, please check out the
-[AES-CBC-HMAC](https://github.com/thaidn/tink-examples/blob/master/timestamper/src/main/java/com/timestamper/AesCbcHmacKeyManager.java)
-implementation of the AEAD primitive in the
-[timestamper](https://github.com/thaidn/tink-examples/tree/master/timestamper)
-example.
-
 The main cryptographic operations offered by Tink are accessible via so-called
 _primitives_, which are interfaces that represent corresponding cryptographic
 functionalities. While Tink comes with several standard implementations of

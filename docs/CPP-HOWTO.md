@@ -12,8 +12,8 @@ supported. This implies that you need to build your binary from scratch.
 ### Bazel
 
 Using Tink in projects built with Bazel is straighforward and is the recommended
-approach. For an example, see [this project which specifies Tink as a dependency
-in a Bazel WORKSPACE file](https://github.com/thaidn/tink-examples).
+approach. For reference, see [the C++
+examples](https://github.com/google/tink/tree/master/examples/cc).
 
 ### CMake
 

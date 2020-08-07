@@ -7,9 +7,6 @@ encrypt and decrypt using Hybrid encryption.
 It demonstrates the basic steps of using Tink, namely loading key material,
 obtaining a primitive, and using the primitive to do crypto.
 
-Moreover, since this app shares the same Bazel WORKSPACE with Tink, its BUILD
-file can directly depend on Tink.
-
 ## Build and Run
 
 ### Bazel

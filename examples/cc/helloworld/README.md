@@ -7,9 +7,6 @@ Data)](../../../docs/PRIMITIVES.md#authenticated-encryption-with-associated-data
 It demonstrates the basic steps of using Tink, namely loading key material,
 obtaining a primitive, and using the primitive to do crypto.
 
-Moreover, since this app shares the same Bazel WORKSPACE with Tink, its BUILD
-file can directly depend on Tink.
-
 ## Build and Run
 
 ### Bazel
@@ -25,7 +22,3 @@ echo "some plaintext" > foo.txt
     decrypt bar.encrypted "some aad" foo-decrypted.txt
 cat foo-decrypted.txt
 ```
-
-TODO: copy this app to
-[tink-examples](https://github.com/thaidn/tink-examples/tree/master/helloworld/)
-and add instructions on how to build it there.

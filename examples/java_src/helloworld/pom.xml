@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
 
   <name>Tink for Java HelloWorld</name>
-  <url>https://github.com/thaidn/tink-examples/helloworld/java</url>
+  <url>https://github.com/google/tink/tree/master/examples/java_src/helloworld</url>
 
   <repositories>
     <repository>
