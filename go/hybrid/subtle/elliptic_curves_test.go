@@ -480,7 +480,7 @@ func TestPointEncode(t *testing.T) {
 			X: x,
 			Y: y,
 		}
-		encodedpoint, err := pointEncode(tEC2[i].Curve, tEC2[i].pointFormat, p)
+		encodedpoint, err := PointEncode(tEC2[i].Curve, tEC2[i].pointFormat, p)
 		if err != nil {
 			t.Errorf("error in point encoding in test case %d : %v", i, err)
 		}
@@ -503,7 +503,7 @@ func TestPointDecode(t *testing.T) {
 		if err != nil {
 			t.Errorf("error reading encoded point in test case %d", i)
 		}
-		pt, err := pointDecode(tEC2[i].Curve, tEC2[i].pointFormat, e)
+		pt, err := PointDecode(tEC2[i].Curve, tEC2[i].pointFormat, e)
 		if err != nil {
 			t.Errorf("error in point decoding in test case %d: %v", i, err)
 		}
@@ -595,7 +595,7 @@ func TestVectors(t *testing.T) {
 					if checkFlag(t, test.Flags, []string{"CompressedPoint"}) {
 						ptFormat = "COMPRESSED"
 					}
-					pt, errPub = pointDecode(curve, ptFormat, p)
+					pt, errPub = PointDecode(curve, ptFormat, p)
 					pubKey = &ECPublicKey{
 						Curve: curve,
 						Point: *pt,

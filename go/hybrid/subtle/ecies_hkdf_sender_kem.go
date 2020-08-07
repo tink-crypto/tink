@@ -40,7 +40,7 @@ func (s *ECIESHKDFSenderKem) encapsulate(hashAlg string, salt []byte, info []byt
 		return nil, err
 	}
 
-	sdata, err := pointEncode(pub.Curve, pointFormat, pub.Point)
+	sdata, err := PointEncode(pub.Curve, pointFormat, pub.Point)
 	if err != nil {
 		return nil, err
 	}

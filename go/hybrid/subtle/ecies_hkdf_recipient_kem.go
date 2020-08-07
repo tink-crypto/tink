@@ -24,7 +24,7 @@ type ECIESHKDFRecipientKem struct {
 
 // decapsulate uses the KEM to generate a new HKDF-based key.
 func (s *ECIESHKDFRecipientKem) decapsulate(kem []byte, hashAlg string, salt []byte, info []byte, keySize uint32, pointFormat string) ([]byte, error) {
-	pubPoint, err := pointDecode(s.recipientPrivateKey.PublicKey.Curve, pointFormat, kem)
+	pubPoint, err := PointDecode(s.recipientPrivateKey.PublicKey.Curve, pointFormat, kem)
 	if err != nil {
 		return nil, err
 	}

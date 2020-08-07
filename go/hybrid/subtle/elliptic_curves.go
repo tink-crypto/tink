@@ -93,8 +93,8 @@ func encodingSizeInBytes(c elliptic.Curve, p string) (int, error) {
 
 }
 
-// pointEncode encodes a point into the format specified.
-func pointEncode(c elliptic.Curve, pFormat string, pt ECPoint) ([]byte, error) {
+// PointEncode encodes a point into the format specified.
+func PointEncode(c elliptic.Curve, pFormat string, pt ECPoint) ([]byte, error) {
 	if !c.IsOnCurve(pt.X, pt.Y) {
 		return nil, errors.New("curve check failed")
 	}
@@ -132,8 +132,8 @@ func pointEncode(c elliptic.Curve, pFormat string, pt ECPoint) ([]byte, error) {
 
 }
 
-// pointDecode decodes a encoded point to return an ECPoint
-func pointDecode(c elliptic.Curve, pFormat string, e []byte) (*ECPoint, error) {
+// PointDecode decodes a encoded point to return an ECPoint
+func PointDecode(c elliptic.Curve, pFormat string, e []byte) (*ECPoint, error) {
 	cSize := fieldSizeInBytes(c)
 	x, y := new(big.Int), new(big.Int)
 	switch pFormat {
