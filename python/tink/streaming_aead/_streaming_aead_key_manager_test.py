@@ -27,21 +27,14 @@ from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink import core
 from tink import streaming_aead
-from tink import tink_config
+from tink.testing import bytes_io
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
 
 
-class TestBytesObject(io.BytesIO):
-  """A BytesIO object that does not close."""
-
-  def close(self):
-    pass
-
-
 def setUpModule():
-  tink_config.register()
+  streaming_aead.register()
 
 
 class StreamingAeadKeyManagerTest(absltest.TestCase):
@@ -118,15 +111,19 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     aad = b'associated_data' + B_X80
 
     # Encrypt
-    ct_destination = TestBytesObject()
+    ct_destination = bytes_io.BytesIOWithValueAfterClose()
     with saead_primitive.new_encrypting_stream(ct_destination, aad) as es:
       self.assertLen(plaintext, es.write(plaintext))
-    self.assertNotEqual(ct_destination.getvalue(), plaintext)
+    # context manager closes es, which also closes ciphertext_dest
+    self.assertTrue(ct_destination.closed)
 
     # Decrypt
-    ct_source = TestBytesObject(ct_destination.getvalue())
+    ct_source = io.BytesIO(ct_destination.value_after_close())
     with saead_primitive.new_decrypting_stream(ct_source, aad) as ds:
-      self.assertEqual(ds.read(), plaintext)
+      output = ds.read()
+    # context manager closes ds, which also closes ct_source
+    self.assertTrue(ct_source.closed)
+    self.assertEqual(output, plaintext)
 
   def test_encrypt_decrypt_tempfile(self):
     saead_primitive = self.key_manager_ctr.primitive(
@@ -160,13 +157,13 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     aad = b'associated_data' + B_X80
 
     # Encrypt
-    ct_destination = TestBytesObject()
+    ct_destination = bytes_io.BytesIOWithValueAfterClose()
     with saead_primitive.new_encrypting_stream(ct_destination, aad) as es:
       self.assertLen(plaintext, es.write(plaintext))
-    self.assertNotEqual(ct_destination.getvalue(), plaintext)
+    self.assertNotEqual(ct_destination.value_after_close(), plaintext)
 
     # Decrypt
-    ct_source = TestBytesObject(ct_destination.getvalue())
+    ct_source = io.BytesIO(ct_destination.value_after_close())
     with saead_primitive.new_decrypting_stream(ct_source, b'bad ' + aad) as ds:
       with self.assertRaises(core.TinkError):
         ds.read()

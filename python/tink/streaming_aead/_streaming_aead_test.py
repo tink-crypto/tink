@@ -21,7 +21,7 @@ import io
 from absl.testing import absltest
 
 from tink import streaming_aead
-from tink import tink_config
+from tink.testing import bytes_io
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -30,14 +30,7 @@ B_TEST_AAD_ = b'test aa' + B_X80
 
 
 def setUpModule():
-  tink_config.register()
-
-
-class TestBytesObject(io.BytesIO):
-  """A BytesIO object that does not close."""
-
-  def close(self):
-    pass
+  streaming_aead.register()
 
 
 class StreamingAeadTest(absltest.TestCase):
@@ -58,19 +51,19 @@ class StreamingAeadTest(absltest.TestCase):
     primitive = self.get_primitive()
 
     # Use the primitive to get an encrypting stream.
-    with TestBytesObject() as f:
-      with primitive.new_encrypting_stream(f, B_AAD_) as es:
-        es.write(b'some data' + B_X80)
+    f = bytes_io.BytesIOWithValueAfterClose()
+    with primitive.new_encrypting_stream(f, B_AAD_) as es:
+      es.write(b'some data' + B_X80)
 
-      ciphertext = f.getvalue()
-      self.assertNotEmpty(ciphertext)
+    ciphertext = f.value_after_close()
+    self.assertNotEmpty(ciphertext)
 
   def test_get_two_encrypting_streams(self):
     """Test that multiple EncryptingStreams can be obtained from a primitive."""
     primitive = self.get_primitive()
 
-    f1 = TestBytesObject()
-    f2 = TestBytesObject()
+    f1 = bytes_io.BytesIOWithValueAfterClose()
+    f2 = bytes_io.BytesIOWithValueAfterClose()
 
     with primitive.new_encrypting_stream(f1, B_AAD_) as es:
       es.write(b'some data' + B_X80)
@@ -78,8 +71,8 @@ class StreamingAeadTest(absltest.TestCase):
     with primitive.new_encrypting_stream(f2, b'another aad' + B_X80) as es:
       es.write(b'some other data' + B_X80)
 
-    self.assertNotEmpty(f1.getvalue())
-    self.assertNotEmpty(f2.getvalue())
+    self.assertNotEmpty(f1.value_after_close())
+    self.assertNotEmpty(f2.value_after_close())
 
   def test_encrypting_textiowrapper(self):
     """A test that checks the TextIOWrapper works as expected.
@@ -90,8 +83,8 @@ class StreamingAeadTest(absltest.TestCase):
     """
     primitive = self.get_primitive()
 
-    file_1 = TestBytesObject()
-    file_2 = TestBytesObject()
+    file_1 = bytes_io.BytesIOWithValueAfterClose()
+    file_2 = bytes_io.BytesIOWithValueAfterClose()
 
     with primitive.new_encrypting_stream(file_1, B_AAD_) as es:
       with io.TextIOWrapper(es) as wrapper:
@@ -100,47 +93,46 @@ class StreamingAeadTest(absltest.TestCase):
     with primitive.new_encrypting_stream(file_2, B_AAD_) as es:
       es.write(b'some data')
 
-    self.assertEqual(len(file_1.getvalue()), len(file_2.getvalue()))
+    self.assertEqual(len(file_1.value_after_close()),
+                     len(file_2.value_after_close()))
 
   def test_round_trip(self):
     primitive = self.get_primitive()
 
-    f = TestBytesObject()
+    f = bytes_io.BytesIOWithValueAfterClose()
 
     original_plaintext = b'some data' + B_X80
 
     with primitive.new_encrypting_stream(f, B_TEST_AAD_) as es:
       es.write(original_plaintext)
 
-    f.seek(0)
-
-    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
-      read_plaintext = ds.read()
+    with io.BytesIO(f.value_after_close()) as f2:
+      with primitive.new_decrypting_stream(f2, B_TEST_AAD_) as ds:
+        read_plaintext = ds.read()
 
     self.assertEqual(read_plaintext, original_plaintext)
 
   def test_round_trip_textiowrapper_single_line(self):
     """Read and write a single line through a TextIOWrapper."""
     primitive = self.get_primitive()
-    f = TestBytesObject()
+    f = bytes_io.BytesIOWithValueAfterClose()
 
     original_plaintext = b'One-line string.'.decode('utf-8')
     with primitive.new_encrypting_stream(f, B_TEST_AAD_) as es:
       with io.TextIOWrapper(es) as wrapper:
         wrapper.write(original_plaintext)
 
-    f.seek(0)
-
-    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
-      with io.TextIOWrapper(ds) as wrapper:
-        read_plaintext = wrapper.read()
+    with io.BytesIO(f.value_after_close()) as f2:
+      with primitive.new_decrypting_stream(f2, B_TEST_AAD_) as ds:
+        with io.TextIOWrapper(ds) as wrapper:
+          read_plaintext = wrapper.read()
 
     self.assertEqual(original_plaintext, read_plaintext)
 
   def test_round_trip_decrypt_textiowrapper(self):
     """Write bytes to EncryptingStream, then decrypt through TextIOWrapper."""
     primitive = self.get_primitive()
-    f = TestBytesObject()
+    f = bytes_io.BytesIOWithValueAfterClose()
     original_plaintext = '''some
     data
     on multiple lines.'''
@@ -148,17 +140,17 @@ class StreamingAeadTest(absltest.TestCase):
     with primitive.new_encrypting_stream(f, B_TEST_AAD_) as es:
       es.write(original_plaintext.encode('utf-8'))
 
-    f.seek(0)
-    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
-      with io.TextIOWrapper(ds) as wrapper:
-        data = wrapper.read()
+    with io.BytesIO(f.value_after_close()) as f2:
+      with primitive.new_decrypting_stream(f2, B_TEST_AAD_) as ds:
+        with io.TextIOWrapper(ds) as wrapper:
+          data = wrapper.read()
 
     self.assertEqual(data, original_plaintext)
 
   def test_round_trip_encrypt_textiowrapper(self):
     """Encrypt with TextIOWrapper, then decrypt direct bytes."""
     primitive = self.get_primitive()
-    f = TestBytesObject()
+    f = bytes_io.BytesIOWithValueAfterClose()
     original_plaintext = b'''some
     data
     on multiple lines.'''.decode('utf-8')
@@ -167,16 +159,16 @@ class StreamingAeadTest(absltest.TestCase):
       with io.TextIOWrapper(es) as wrapper:
         wrapper.write(original_plaintext)
 
-    f.seek(0)
-    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
-      data = ds.read().decode('utf-8')
+    with io.BytesIO(f.value_after_close()) as f2:
+      with primitive.new_decrypting_stream(f2, B_TEST_AAD_) as ds:
+        data = ds.read().decode('utf-8')
 
     self.assertEqual(data, original_plaintext)
 
   def test_round_trip_encrypt_decrypt_textiowrapper(self):
     """Use TextIOWrapper for both encryption and decryption."""
     primitive = self.get_primitive()
-    f = TestBytesObject()
+    f = bytes_io.BytesIOWithValueAfterClose()
     original_plaintext = b'''some
     data
     on multiple lines.'''.decode('utf-8')
@@ -185,10 +177,10 @@ class StreamingAeadTest(absltest.TestCase):
       with io.TextIOWrapper(es) as wrapper:
         wrapper.write(original_plaintext)
 
-    f.seek(0)
-    with primitive.new_decrypting_stream(f, B_TEST_AAD_) as ds:
-      with io.TextIOWrapper(ds) as wrapper:
-        data = wrapper.read()
+    with io.BytesIO(f.value_after_close()) as f2:
+      with primitive.new_decrypting_stream(f2, B_TEST_AAD_) as ds:
+        with io.TextIOWrapper(ds) as wrapper:
+          data = wrapper.read()
 
     self.assertEqual(data, original_plaintext)
 

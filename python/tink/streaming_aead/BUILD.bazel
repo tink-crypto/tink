@@ -39,6 +39,7 @@ py_test(
         requirement("absl-py"),
         requirement("six"),
         "//tink/cc/pybind:tink_bindings",
+        "//tink/testing:bytes_io",
     ],
 )
 
@@ -96,12 +97,12 @@ py_test(
     deps = [
         ":streaming_aead",
         requirement("absl-py"),
-        "//tink:tink_config",
         "//tink/cc/pybind:tink_bindings",
         "//tink/core",
         "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
         "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
         "//tink/proto:tink_py_pb2",
+        "//tink/testing:bytes_io",
     ],
 )
 
@@ -142,5 +143,6 @@ py_test(
         requirement("absl-py"),
         "//tink:tink_config",
         "//tink/cc/pybind:tink_bindings",
+        "//tink/testing:bytes_io",
     ],
 )

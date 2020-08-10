@@ -24,6 +24,7 @@ from absl.testing import absltest
 from absl.testing.absltest import mock
 
 from tink import streaming_aead
+from tink.testing import bytes_io
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -46,13 +47,6 @@ class FakeOutputStreamAdapter(object):
 def fake_get_output_stream_adapter(self, cc_primitive, aad, destination):
   del cc_primitive, aad, self  # unused
   return FakeOutputStreamAdapter(destination)
-
-
-class TestBytesObject(io.BytesIO):
-  """A BytesIO object that does not close."""
-
-  def close(self):
-    pass
 
 
 # We use the same return type as StreamingAead.new_decrypting_stream
@@ -81,11 +75,11 @@ class EncryptingStreamTest(absltest.TestCase):
       get_encrypting_stream(f, B_AAD_)
 
   def test_write(self):
-    f = TestBytesObject()
+    f = bytes_io.BytesIOWithValueAfterClose()
     with get_encrypting_stream(f, B_AAD_) as es:
       es.write(b'Hello world!' + B_X80)
-
-    self.assertEqual(b'Hello world!' + B_X80, f.getvalue())
+    self.assertTrue(f.closed)
+    self.assertEqual(b'Hello world!' + B_X80, f.value_after_close())
 
   @absltest.skipIf(sys.version_info[0] == 2, 'Python 2 strings are bytes')
   def test_write_non_bytes(self):
@@ -100,8 +94,8 @@ class EncryptingStreamTest(absltest.TestCase):
     through TextIOWrapper's encoding. The two ciphertexts should have the same
     length.
     """
-    file_1 = TestBytesObject()
-    file_2 = TestBytesObject()
+    file_1 = bytes_io.BytesIOWithValueAfterClose()
+    file_2 = bytes_io.BytesIOWithValueAfterClose()
 
     with get_encrypting_stream(file_1, B_AAD_) as es:
       with io.TextIOWrapper(es) as wrapper:
@@ -110,7 +104,8 @@ class EncryptingStreamTest(absltest.TestCase):
     with get_encrypting_stream(file_2, B_AAD_) as es:
       es.write(b'some data')
 
-    self.assertEqual(len(file_1.getvalue()), len(file_2.getvalue()))
+    self.assertEqual(len(file_1.value_after_close()),
+                     len(file_2.value_after_close()))
 
   def test_flush(self):
     with io.BytesIO() as f, get_encrypting_stream(f, B_ASSOC_) as es:

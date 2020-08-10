@@ -1,0 +1,47 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Implements a variant of BytesIO that lets you read the value after close().
+
+This class can be used when an interface that writes to a stream and closes it
+in the end need to be transformed into a function that returns a value.
+
+An example is the implementation of normal AEAD encryption interface using
+the streaming AEAD encryption interface.
+"""
+
+from __future__ import absolute_import
+from __future__ import division
+# Placeholder for import for type annotations
+from __future__ import print_function
+
+import io
+
+
+class BytesIOWithValueAfterClose(io.BytesIO):
+  """A BytesIO that lets you read the written value after close()."""
+
+  def __init__(self, initial_bytes=None):
+    self._finalvalue = None
+    if initial_bytes:
+      super(BytesIOWithValueAfterClose, self).__init__(initial_bytes)
+    else:
+      super(BytesIOWithValueAfterClose, self).__init__()
+
+  def close(self) -> None:
+    if not self.closed:
+      self._value_after_close = self.getvalue()
+    super(BytesIOWithValueAfterClose, self).close()
+
+  def value_after_close(self) -> bytes:
+    if not self.closed:
+      raise ValueError("call to value_after_close before close()")
+    return self._value_after_close

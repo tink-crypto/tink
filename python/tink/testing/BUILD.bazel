@@ -10,13 +10,13 @@ py_library(
     srcs = ["helper.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink/proto:tink_py_pb2",
         "//tink/aead",
         "//tink/core",
         "//tink/daead",
         "//tink/hybrid",
         "//tink/mac",
         "//tink/prf",
+        "//tink/proto:tink_py_pb2",
         "//tink/signature",
     ],
 )
@@ -29,5 +29,24 @@ py_test(
         ":helper",
         requirement("absl-py"),
         "//tink/core",
+    ],
+)
+
+py_library(
+    name = "bytes_io",
+    srcs = ["bytes_io.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/cc/pybind:tink_bindings",
+    ],
+)
+
+py_test(
+    name = "bytes_io_test",
+    srcs = ["bytes_io_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":bytes_io",
+        requirement("absl-py"),
     ],
 )
