@@ -1,0 +1,41 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#include "tink/jwt/jwt_names.h"
+
+namespace crypto {
+namespace tink {
+
+util::Status JwtNames::validate(absl::string_view name) {
+  if (isRegisteredName(name)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("claim '%s' is invalid because it's a registered name; "
+                        "use the corresponding setter method.",
+                        name));
+  }
+
+  return util::Status::OK;
+}
+
+bool JwtNames::isRegisteredName(absl::string_view name) {
+  return name == claim_issuer_ || name == claim_subject_ ||
+         name == claim_audience_ || name == claim_expiration_ ||
+         name == claim_not_before_ || name == claim_issued_at_ ||
+         name == claim_jwt_id_;
+}
+
+}  // namespace tink
+}  // namespace crypto
