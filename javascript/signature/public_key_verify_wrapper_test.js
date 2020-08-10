@@ -9,12 +9,12 @@ goog.setTestOnly('tink.signature.PublicKeyVerifyWrapperTest');
 
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
 const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
-const PublicKeySignWrapper = goog.require('tink.signature.PublicKeySignWrapper');
-const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
-const PublicKeyVerifyWrapper = goog.require('tink.signature.PublicKeyVerifyWrapper');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const {PublicKeySignWrapper} = goog.require('google3.third_party.tink.javascript.signature.public_key_sign_wrapper');
+const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
+const {PublicKeyVerifyWrapper} = goog.require('google3.third_party.tink.javascript.signature.public_key_verify_wrapper');
+const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
 
 describe('public key verify wrapper test', function() {
   it('verify, with empty signature', async function() {

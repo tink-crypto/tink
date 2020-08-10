@@ -4,90 +4,64 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.EcdsaUtil');
+import {SecurityException} from '../exception/security_exception';
+import {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding as PbEcdsaSignatureEncodingType} from '../internal/proto';
+import * as Util from '../internal/util';
+import * as EllipticCurves from '../subtle/elliptic_curves';
+import * as Validators from '../subtle/validators';
 
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
-const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
-const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding: PbEcdsaSignatureEncodingType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-
-/**
- * @package
- * @param {!PbEcdsaKeyFormat} keyFormat
- */
-const validateKeyFormat = function(keyFormat) {
+export function validateKeyFormat(keyFormat: PbEcdsaKeyFormat) {
   const params = keyFormat.getParams();
   if (!params) {
     throw new SecurityException('Invalid key format - missing params.');
   }
   validateParams(params);
-};
+}
 
-/**
- * @package
- * @param {!PbEcdsaPrivateKey} key
- * @param {number} privateKeyManagerVersion
- * @param {number} publicKeyManagerVersion
- */
-const validatePrivateKey = function(
-    key, privateKeyManagerVersion, publicKeyManagerVersion) {
+export function validatePrivateKey(
+    key: PbEcdsaPrivateKey, privateKeyManagerVersion: number,
+    publicKeyManagerVersion: number) {
   Validators.validateVersion(key.getVersion(), privateKeyManagerVersion);
-
   if (!key.getKeyValue()) {
     throw new SecurityException(
         'Invalid private key - missing private key value.');
   }
-
   const publicKey = key.getPublicKey();
   if (!publicKey) {
     throw new SecurityException(
         'Invalid private key - missing public key information.');
   }
   validatePublicKey(publicKey, publicKeyManagerVersion);
-};
+}
 
-/**
- * @package
- * @param {!PbEcdsaPublicKey} key
- * @param {number} publicKeyManagerVersion
- */
-const validatePublicKey = function(key, publicKeyManagerVersion) {
+export function validatePublicKey(
+    key: PbEcdsaPublicKey, publicKeyManagerVersion: number) {
   Validators.validateVersion(key.getVersion(), publicKeyManagerVersion);
-
   const params = key.getParams();
   if (!params) {
     throw new SecurityException('Invalid public key - missing params.');
   }
   validateParams(params);
-
   if (!key.getX() || !key.getY()) {
     throw new SecurityException(
         'Invalid public key - missing value of X or Y.');
   }
-};
+}
 
-/**
- * @package
- * @param {!PbEcdsaParams} params
- */
-const validateParams = function(params) {
+export function validateParams(params: PbEcdsaParams) {
   if (params.getEncoding() === PbEcdsaSignatureEncodingType.UNKNOWN_ENCODING) {
     throw new SecurityException(
         'Invalid public key - missing signature encoding.');
   }
-
   const hash = Util.hashTypeProtoToString(params.getHashType());
   const curve = EllipticCurves.curveToString(
       Util.curveTypeProtoToSubtle(params.getCurve()));
   Validators.validateEcdsaParams(curve, hash);
-};
+}
 
-/**
- * @param {!PbEcdsaSignatureEncodingType} encodingTypeProto
- * @return {!EllipticCurves.EcdsaSignatureEncodingType}
- */
-const encodingTypeProtoToEnum = function(encodingTypeProto) {
+export function encodingTypeProtoToEnum(
+    encodingTypeProto: PbEcdsaSignatureEncodingType):
+    EllipticCurves.EcdsaSignatureEncodingType {
   switch (encodingTypeProto) {
     case PbEcdsaSignatureEncodingType.DER:
       return EllipticCurves.EcdsaSignatureEncodingType.DER;
@@ -96,43 +70,34 @@ const encodingTypeProtoToEnum = function(encodingTypeProto) {
     default:
       throw new SecurityException('Unknown ECDSA signature encoding type.');
   }
-};
+}
 
 /**
  * WARNING: This method assumes that the given key proto is valid.
  *
- * @package
- * @param {!PbEcdsaPrivateKey|!PbEcdsaPublicKey} key
- * @return {!webCrypto.JsonWebKey}
  */
-const getJsonWebKeyFromProto = function(key) {
-  let /** @type {!PbEcdsaPublicKey} */ publicKey;
-  let /** @type {!Uint8Array} */ d;
+export function getJsonWebKeyFromProto(key: PbEcdsaPrivateKey|
+                                       PbEcdsaPublicKey): JsonWebKey {
+  let publicKey: PbEcdsaPublicKey;
+  let d: Uint8Array|null = null;
   if (key instanceof PbEcdsaPrivateKey) {
-    publicKey = /** @type{!PbEcdsaPublicKey} */ (key.getPublicKey());
+    publicKey = (key.getPublicKey() as PbEcdsaPublicKey);
   } else {
     publicKey = key;
   }
-
-  const curveType =
-      Util.curveTypeProtoToSubtle(publicKey.getParams().getCurve());
+  const params = publicKey.getParams();
+  if (!params) {
+    throw new SecurityException('Params not set');
+  }
+  const curveType = Util.curveTypeProtoToSubtle(params.getCurve());
   const expectedLength = EllipticCurves.fieldSizeInBytes(curveType);
-  let x = Util.bigEndianNumberToCorrectLength(
+  const x = Util.bigEndianNumberToCorrectLength(
       publicKey.getX_asU8(), expectedLength);
-  let y = Util.bigEndianNumberToCorrectLength(
+  const y = Util.bigEndianNumberToCorrectLength(
       publicKey.getY_asU8(), expectedLength);
   if (key instanceof PbEcdsaPrivateKey) {
     d = Util.bigEndianNumberToCorrectLength(
         key.getKeyValue_asU8(), expectedLength);
   }
   return EllipticCurves.getJsonWebKey(curveType, x, y, d);
-};
-
-exports = {
-  encodingTypeProtoToEnum,
-  validateKeyFormat,
-  validateParams,
-  validatePublicKey,
-  validatePrivateKey,
-  getJsonWebKeyFromProto,
-};
+}

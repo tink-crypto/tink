@@ -8,13 +8,13 @@ goog.module('tink.signature.EcdsaPublicKeyManagerTest');
 goog.setTestOnly('tink.signature.EcdsaPublicKeyManagerTest');
 
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
+const Util = goog.require('google3.third_party.tink.javascript.internal.util');
+const {EcdsaPublicKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_public_key_manager');
+const {Mac} = goog.require('google3.third_party.tink.javascript.mac.index');
+const {PbEcdsaParams, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
 const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
-const {PbEcdsaParams, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
 const VERSION = 0;

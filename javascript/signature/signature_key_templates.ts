@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.SignatureKeyTemplates');
+import {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbOutputPrefixType} from '../internal/proto';
 
-const SignatureConfig = goog.require('tink.signature.SignatureConfig');
-const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import * as SignatureConfig from './signature_config';
 
 /**
  * Pre-generated KeyTemplates for keys for digital signatures.
@@ -22,7 +21,7 @@ const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaSignatureEncoding, PbEllipticCurv
  *
  * @final
  */
-class SignatureKeyTemplates {
+export class SignatureKeyTemplates {
   /**
    * Returns a KeyTemplate that generates new instances of
    * EcdsaPrivateKey with the following parameters:
@@ -31,14 +30,17 @@ class SignatureKeyTemplates {
    *  Signature encoding: DER (this is the encoding that Java uses)
    *  OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static ecdsaP256() {
+  static ecdsaP256(): PbKeyTemplate {
     return createEcdsaKeyTemplate(
-        /* curveType = */ PbEllipticCurveType.NIST_P256,
-        /* hashType = */ PbHashType.SHA256,
-        /* encoding = */ PbEcdsaSignatureEncoding.DER,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+        /* curveType = */
+        PbEllipticCurveType.NIST_P256,
+        /* hashType = */
+        PbHashType.SHA256,
+        /* encoding = */
+        PbEcdsaSignatureEncoding.DER,
+        /* outputPrefixType = */
+        PbOutputPrefixType.TINK);
   }
 
   /**
@@ -49,14 +51,17 @@ class SignatureKeyTemplates {
    *  Signature encoding: DER (this is the encoding that Java uses)
    *  OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static ecdsaP384() {
+  static ecdsaP384(): PbKeyTemplate {
     return createEcdsaKeyTemplate(
-        /* curveType = */ PbEllipticCurveType.NIST_P384,
-        /* hashType = */ PbHashType.SHA512,
-        /* encoding = */ PbEcdsaSignatureEncoding.DER,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+        /* curveType = */
+        PbEllipticCurveType.NIST_P384,
+        /* hashType = */
+        PbHashType.SHA512,
+        /* encoding = */
+        PbEcdsaSignatureEncoding.DER,
+        /* outputPrefixType = */
+        PbOutputPrefixType.TINK);
   }
 
   /**
@@ -67,14 +72,17 @@ class SignatureKeyTemplates {
    *  Signature encoding: DER (this is the encoding that Java uses).
    *  OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static ecdsaP521() {
+  static ecdsaP521(): PbKeyTemplate {
     return createEcdsaKeyTemplate(
-        /* curveType = */ PbEllipticCurveType.NIST_P521,
-        /* hashType = */ PbHashType.SHA512,
-        /* encoding = */ PbEcdsaSignatureEncoding.DER,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+        /* curveType = */
+        PbEllipticCurveType.NIST_P521,
+        /* hashType = */
+        PbHashType.SHA512,
+        /* encoding = */
+        PbEcdsaSignatureEncoding.DER,
+        /* outputPrefixType = */
+        PbOutputPrefixType.TINK);
   }
 
   /**
@@ -85,14 +93,17 @@ class SignatureKeyTemplates {
    *  Signature encoding: IEEE_P1363 (this is the encoding that WebCrypto uses)
    *  OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static ecdsaP256IeeeEncoding() {
+  static ecdsaP256IeeeEncoding(): PbKeyTemplate {
     return createEcdsaKeyTemplate(
-        /* curveType = */ PbEllipticCurveType.NIST_P256,
-        /* hashType = */ PbHashType.SHA256,
-        /* encoding = */ PbEcdsaSignatureEncoding.IEEE_P1363,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+        /* curveType = */
+        PbEllipticCurveType.NIST_P256,
+        /* hashType = */
+        PbHashType.SHA256,
+        /* encoding = */
+        PbEcdsaSignatureEncoding.IEEE_P1363,
+        /* outputPrefixType = */
+        PbOutputPrefixType.TINK);
   }
 
   /**
@@ -103,14 +114,17 @@ class SignatureKeyTemplates {
    *  Signature encoding: IEEE_P1363 (this is the encoding that WebCrypto uses)
    *  OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static ecdsaP384IeeeEncoding() {
+  static ecdsaP384IeeeEncoding(): PbKeyTemplate {
     return createEcdsaKeyTemplate(
-        /* curveType = */ PbEllipticCurveType.NIST_P384,
-        /* hashType = */ PbHashType.SHA512,
-        /* encoding = */ PbEcdsaSignatureEncoding.IEEE_P1363,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+        /* curveType = */
+        PbEllipticCurveType.NIST_P384,
+        /* hashType = */
+        PbHashType.SHA512,
+        /* encoding = */
+        PbEcdsaSignatureEncoding.IEEE_P1363,
+        /* outputPrefixType = */
+        PbOutputPrefixType.TINK);
   }
 
   /**
@@ -121,41 +135,36 @@ class SignatureKeyTemplates {
    *  Signature encoding: IEEE_P1363 (this is the encoding that WebCrypto uses)
    *  OutputPrefixType: TINK
    *
-   * @return {!PbKeyTemplate}
    */
-  static ecdsaP521IeeeEncoding() {
+  static ecdsaP521IeeeEncoding(): PbKeyTemplate {
     return createEcdsaKeyTemplate(
-        /* curveType = */ PbEllipticCurveType.NIST_P521,
-        /* hashType = */ PbHashType.SHA512,
-        /* encoding = */ PbEcdsaSignatureEncoding.IEEE_P1363,
-        /* outputPrefixType = */ PbOutputPrefixType.TINK);
+        /* curveType = */
+        PbEllipticCurveType.NIST_P521,
+        /* hashType = */
+        PbHashType.SHA512,
+        /* encoding = */
+        PbEcdsaSignatureEncoding.IEEE_P1363,
+        /* outputPrefixType = */
+        PbOutputPrefixType.TINK);
   }
 }
 
-/**
- * @param {!PbEllipticCurveType} curveType
- * @param {!PbHashType} hashType
- * @param {!PbEcdsaSignatureEncoding} encoding
- * @param {!PbOutputPrefixType} outputPrefixType
- *
- * @return {!PbKeyTemplate}
- */
-const createEcdsaKeyTemplate = function(
-    curveType, hashType, encoding, outputPrefixType) {
+function createEcdsaKeyTemplate(
+    curveType: PbEllipticCurveType, hashType: PbHashType,
+    encoding: PbEcdsaSignatureEncoding,
+    outputPrefixType: PbOutputPrefixType): PbKeyTemplate {
   // key format
   const keyFormat = new PbEcdsaKeyFormat();
-  const params =
-      new PbEcdsaParams().setCurve(curveType).setHashType(hashType).setEncoding(
-          encoding);
+  const params = (new PbEcdsaParams())
+                     .setCurve(curveType)
+                     .setHashType(hashType)
+                     .setEncoding(encoding);
   keyFormat.setParams(params);
 
   // key template
-  const keyTemplate = new PbKeyTemplate()
+  const keyTemplate = (new PbKeyTemplate())
                           .setTypeUrl(SignatureConfig.ECDSA_PRIVATE_KEY_TYPE)
                           .setValue(keyFormat.serializeBinary())
                           .setOutputPrefixType(outputPrefixType);
-
   return keyTemplate;
-};
-
-exports = SignatureKeyTemplates;
+}

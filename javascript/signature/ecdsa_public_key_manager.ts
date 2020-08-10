@@ -4,66 +4,69 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.EcdsaPublicKeyManager');
+import {SecurityException} from '../exception/security_exception';
+import * as KeyManager from '../internal/key_manager';
+import {PbEcdsaParams, PbEcdsaPublicKey, PbKeyData, PbMessage} from '../internal/proto';
+import * as Util from '../internal/util';
+import * as ecdsaVerify from '../subtle/ecdsa_verify';
 
-const EcdsaUtil = goog.require('tink.signature.EcdsaUtil');
-const ecdsaVerify = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_verify');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
-const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
-const {PbEcdsaParams, PbEcdsaPublicKey, PbKeyData, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import * as EcdsaUtil from './ecdsa_util';
+import {PublicKeyVerify} from './internal/public_key_verify';
 
 /**
- * @implements {KeyManager.KeyFactory}
  * @final
  */
-class EcdsaPublicKeyFactory {
+class EcdsaPublicKeyFactory implements KeyManager.KeyFactory {
   /** @override */
-  newKey(keyFormat) {
+  newKey(keyFormat: AnyDuringMigration): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EcdsaPrivateKeyManager to generate new keys.');
   }
 
   /** @override */
-  newKeyData(serializedKeyFormat) {
+  newKeyData(serializedKeyFormat: AnyDuringMigration): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EcdsaPrivateKeyManager to generate new keys.');
   }
 }
 
-
 /**
- * @implements {KeyManager.KeyManager<PublicKeyVerify>}
  * @final
  */
-class EcdsaPublicKeyManager {
+export class EcdsaPublicKeyManager implements
+    KeyManager.KeyManager<PublicKeyVerify> {
+  static KEY_TYPE: string =
+      'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
+  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration =
+      PublicKeyVerify;
+  static VERSION: number = 0;
+  keyFactory: AnyDuringMigration;
+
   constructor() {
     this.keyFactory = new EcdsaPublicKeyFactory();
   }
 
   /** @override */
-  async getPrimitive(primitiveType, key) {
+  async getPrimitive(
+      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
     if (primitiveType !== this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-
     const keyProto = EcdsaPublicKeyManager.getKeyProto_(key);
     EcdsaUtil.validatePublicKey(keyProto, this.getVersion());
-
     const jwk = EcdsaUtil.getJsonWebKeyFromProto(keyProto);
-    const params = /** @type{!PbEcdsaParams} */ (keyProto.getParams());
+    const params = (keyProto.getParams() as PbEcdsaParams);
     const hash = Util.hashTypeProtoToString(params.getHashType());
     const encoding = EcdsaUtil.encodingTypeProtoToEnum(params.getEncoding());
-    return await ecdsaVerify.fromJsonWebKey(jwk, hash, encoding);
+    return ecdsaVerify.fromJsonWebKey(jwk, hash, encoding);
   }
 
   /** @override */
-  doesSupport(keyType) {
+  doesSupport(keyType: AnyDuringMigration) {
     return keyType === this.getKeyType();
   }
 
@@ -87,12 +90,8 @@ class EcdsaPublicKeyManager {
     return this.keyFactory;
   }
 
-  /**
-   * @private
-   * @param {!PbKeyData|!PbMessage} keyMaterial
-   * @return {!PbEcdsaPublicKey}
-   */
-  static getKeyProto_(keyMaterial) {
+  private static getKeyProto_(keyMaterial: PbKeyData|
+                              PbMessage): PbEcdsaPublicKey {
     if (keyMaterial instanceof PbKeyData) {
       return EcdsaPublicKeyManager.getKeyProtoFromKeyData_(keyMaterial);
     }
@@ -104,19 +103,13 @@ class EcdsaPublicKeyManager {
         EcdsaPublicKeyManager.KEY_TYPE + '.');
   }
 
-  /**
-   * @private
-   * @param {!PbKeyData} keyData
-   * @return {!PbEcdsaPublicKey}
-   */
-  static getKeyProtoFromKeyData_(keyData) {
+  private static getKeyProtoFromKeyData_(keyData: PbKeyData): PbEcdsaPublicKey {
     if (keyData.getTypeUrl() !== EcdsaPublicKeyManager.KEY_TYPE) {
       throw new SecurityException(
           'Key type ' + keyData.getTypeUrl() + ' is not supported. This key ' +
           'manager supports ' + EcdsaPublicKeyManager.KEY_TYPE + '.');
     }
-
-    let /** !PbEcdsaPublicKey */ key;
+    let key: PbEcdsaPublicKey;
     try {
       key = PbEcdsaPublicKey.deserializeBinary(keyData.getValue());
     } catch (e) {
@@ -132,13 +125,3 @@ class EcdsaPublicKeyManager {
     return key;
   }
 }
-
-/** @const @public {string} */
-EcdsaPublicKeyManager.KEY_TYPE =
-    'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
-/** @const @private {!Object} */
-EcdsaPublicKeyManager.SUPPORTED_PRIMITIVE_ = PublicKeyVerify;
-/** @const @package {number} */
-EcdsaPublicKeyManager.VERSION = 0;
-
-exports = EcdsaPublicKeyManager;

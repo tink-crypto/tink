@@ -7,16 +7,16 @@
 goog.module('tink.signature.SignatureConfigTest');
 goog.setTestOnly('tink.signature.SignatureConfigTest');
 
-const EcdsaPrivateKeyManager = goog.require('tink.signature.EcdsaPrivateKeyManager');
-const EcdsaPublicKeyManager = goog.require('tink.signature.EcdsaPublicKeyManager');
+const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+const SignatureConfig = goog.require('google3.third_party.tink.javascript.signature.signature_config');
+const {EcdsaPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_private_key_manager');
+const {EcdsaPublicKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_public_key_manager');
 const {KeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
+const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
 const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
 const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const SignatureConfig = goog.require('tink.signature.SignatureConfig');
-const SignatureKeyTemplates = goog.require('tink.signature.SignatureKeyTemplates');
-const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const {SignatureKeyTemplates} = goog.require('google3.third_party.tink.javascript.signature.signature_key_templates');
 
 describe('signature config test', function() {
   beforeEach(function() {
