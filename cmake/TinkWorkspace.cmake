@@ -92,3 +92,13 @@ http_archive(
   SHA256 9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564
   CMAKE_SUBDIR cmake
 )
+
+# Import externally built aws-sdk::core and aws-sdk::kms
+# aws-sdk-cpp-1.8.24 should be located in the same folder as tink.
+set(AWS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../aws-sdk-cpp-1.8.24")
+add_library(aws-sdk::core STATIC IMPORTED)
+add_library(aws-sdk::kms  STATIC IMPORTED)
+set_target_properties(aws-sdk::core PROPERTIES IMPORTED_LOCATION ${AWS_SRC_DIR}/build/aws-cpp-sdk-core/libaws-cpp-sdk-core.a)
+set_target_properties(aws-sdk::kms  PROPERTIES IMPORTED_LOCATION ${AWS_SRC_DIR}/build/aws-cpp-sdk-kms/libaws-cpp-sdk-kms.a)
+set(AWS_INCLUDE_DIRS ${AWS_SRC_DIR}/aws-cpp-sdk-kms/include ${AWS_SRC_DIR}/aws-cpp-sdk-core/include)
+list(APPEND TINK_INCLUDE_DIRS "${AWS_INCLUDE_DIRS}")

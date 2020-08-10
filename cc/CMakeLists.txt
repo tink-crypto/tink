@@ -2,6 +2,7 @@ add_subdirectory(aead)
 add_subdirectory(config)
 add_subdirectory(daead)
 add_subdirectory(hybrid)
+add_subdirectory(integration/awskms)
 add_subdirectory(mac)
 add_subdirectory(prf)
 add_subdirectory(signature)
@@ -103,6 +104,9 @@ set(TINK_PUBLIC_API_DEPS
   tink::aead::aead_config
   tink::aead::aead_factory
   tink::aead::aead_key_templates
+  tink::awskms::aws_crypto
+  tink::awskms::aws_kms_aead
+  tink::awskms::aws_kms_client
   tink::config::tink_config
   tink::daead::deterministic_aead_config
   tink::daead::deterministic_aead_factory
