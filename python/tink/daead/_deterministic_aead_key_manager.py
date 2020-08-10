@@ -26,7 +26,7 @@ from tink.daead import _deterministic_aead_wrapper
 
 
 class _DeterministicAeadCcToPyWrapper(_deterministic_aead.DeterministicAead):
-  """Transforms cliffed C++ DeterministicAead into a Python primitive."""
+  """Transforms C++ DeterministicAead into a Python primitive."""
 
   def __init__(self, cc_deterministic_aead):
     self._deterministic_aead = cc_deterministic_aead
