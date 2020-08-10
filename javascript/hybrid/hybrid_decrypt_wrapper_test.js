@@ -8,14 +8,14 @@ goog.module('tink.hybrid.HybridDecryptWrapperTest');
 goog.setTestOnly('tink.hybrid.HybridDecryptWrapperTest');
 
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
-const HybridDecryptWrapper = goog.require('tink.hybrid.HybridDecryptWrapper');
-const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const HybridEncryptWrapper = goog.require('tink.hybrid.HybridEncryptWrapper');
 const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+const {HybridDecryptWrapper} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_decrypt_wrapper');
+const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
+const {HybridEncryptWrapper} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_encrypt_wrapper');
+const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
 
 describe('hybrid decrypt wrapper test', function() {
   it('decrypt, invalid ciphertext', async function() {

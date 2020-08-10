@@ -10,7 +10,7 @@ goog.setTestOnly('tink.hybrid.EciesAeadHkdfPublicKeyManagerTest');
 const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
 const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
+const {EciesAeadHkdfPublicKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_public_key_manager');
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');

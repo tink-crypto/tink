@@ -9,8 +9,8 @@ goog.setTestOnly('tink.hybrid.EciesAeadHkdfPrivateKeyManagerTest');
 
 const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
 const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
-const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
+const {EciesAeadHkdfPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_private_key_manager');
+const {EciesAeadHkdfPublicKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_public_key_manager');
 const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
 const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import HybridEncryptWrapper from 'goog:tink.hybrid.HybridEncryptWrapper'; // from //third_party/tink/javascript/hybrid:hybrid_wrappers
 import * as Registry from '../internal/registry';
+import {HybridEncryptWrapper} from './hybrid_encrypt_wrapper';
 
 export function register() {
   Registry.registerPrimitiveWrapper(new HybridEncryptWrapper());

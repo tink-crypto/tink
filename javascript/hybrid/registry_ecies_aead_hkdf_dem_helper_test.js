@@ -11,7 +11,7 @@ const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead
 const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
+const {RegistryEciesAeadHkdfDemHelper} = goog.require('google3.third_party.tink.javascript.hybrid.registry_ecies_aead_hkdf_dem_helper');
 
 describe('registry ecies aead hkdf dem helper test', function() {
   beforeEach(function() {

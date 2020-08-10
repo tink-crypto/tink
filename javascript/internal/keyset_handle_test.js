@@ -8,7 +8,7 @@ goog.module('tink.KeysetHandleTest');
 goog.setTestOnly('tink.KeysetHandleTest');
 
 const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const HybridConfig = goog.require('tink.hybrid.HybridConfig');
+const HybridConfig = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_config');
 const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');

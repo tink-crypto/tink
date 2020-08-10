@@ -8,8 +8,8 @@ goog.module('tink.hybrid.HybridKeyTemplatesTest');
 goog.setTestOnly('tink.hybrid.HybridKeyTemplatesTest');
 
 const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
-const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
+const {EciesAeadHkdfPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_private_key_manager');
+const {HybridKeyTemplates} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_key_templates');
 const {PbEciesAeadHkdfKeyFormat, PbEllipticCurveType, PbHashType, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
 
 describe('hybrid key templates test', function() {

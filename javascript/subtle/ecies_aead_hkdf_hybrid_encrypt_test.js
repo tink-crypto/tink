@@ -12,7 +12,7 @@ const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aea
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
+const {RegistryEciesAeadHkdfDemHelper} = goog.require('google3.third_party.tink.javascript.hybrid.registry_ecies_aead_hkdf_dem_helper');
 const {fromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_encrypt');
 
 describe('ecies aead hkdf hybrid encrypt test', function() {

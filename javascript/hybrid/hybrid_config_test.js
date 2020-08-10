@@ -7,12 +7,12 @@
 goog.module('tink.hybrid.HybridConfigTest');
 goog.setTestOnly('tink.hybrid.HybridConfigTest');
 
-const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
-const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
-const HybridConfig = goog.require('tink.hybrid.HybridConfig');
+const {EciesAeadHkdfPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_private_key_manager');
+const {EciesAeadHkdfPublicKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_public_key_manager');
+const HybridConfig = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_config');
 const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
 const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
+const {HybridKeyTemplates} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_key_templates');
 const {KeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');

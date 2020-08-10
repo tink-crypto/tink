@@ -9,7 +9,7 @@ goog.setTestOnly('tink.subtle.EciesAeadHkdfHybridDecryptTest');
 
 const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
 const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const DemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
+const {RegistryEciesAeadHkdfDemHelper: DemHelper} = goog.require('google3.third_party.tink.javascript.hybrid.registry_ecies_aead_hkdf_dem_helper');
 const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
 const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
 const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');

@@ -4,76 +4,84 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.hybrid.EciesAeadHkdfPublicKeyManager');
+import {SecurityException} from '../exception/security_exception';
+import * as KeyManager from '../internal/key_manager';
+import {PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate, PbMessage} from '../internal/proto';
+import * as Util from '../internal/util';
+import * as eciesAeadHkdfHybridEncrypt from '../subtle/ecies_aead_hkdf_hybrid_encrypt';
 
-const encrypt = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_encrypt');
-const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
-const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
-const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
-const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
-const {PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import * as EciesAeadHkdfUtil from './ecies_aead_hkdf_util';
+import * as EciesAeadHkdfValidators from './ecies_aead_hkdf_validators';
+import {HybridEncrypt} from './internal/hybrid_encrypt';
+import {RegistryEciesAeadHkdfDemHelper} from './registry_ecies_aead_hkdf_dem_helper';
 
 /**
- * @implements {KeyManager.KeyFactory}
  * @final
  */
-class EciesAeadHkdfPublicKeyFactory {
+class EciesAeadHkdfPublicKeyFactory implements KeyManager.KeyFactory {
   /** @override */
-  newKey(keyFormat) {
+  newKey(keyFormat: AnyDuringMigration): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EciesAeadHkdfPrivateKeyManager to generate new keys.');
   }
 
   /** @override */
-  newKeyData(serializedKeyFormat) {
+  newKeyData(serializedKeyFormat: AnyDuringMigration): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EciesAeadHkdfPrivateKeyManager to generate new keys.');
   }
 }
 
-
 /**
- * @implements {KeyManager.KeyManager<HybridEncrypt>}
  * @final
  */
-class EciesAeadHkdfPublicKeyManager {
+export class EciesAeadHkdfPublicKeyManager implements
+    KeyManager.KeyManager<HybridEncrypt> {
+  static KEY_TYPE: string =
+      'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
+  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration =
+      HybridEncrypt;
+  static VERSION: number = 0;
+  keyFactory: AnyDuringMigration;
+
   constructor() {
     this.keyFactory = new EciesAeadHkdfPublicKeyFactory();
   }
 
   /** @override */
-  async getPrimitive(primitiveType, key) {
+  async getPrimitive(
+      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
     if (primitiveType !== this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-
     const keyProto = EciesAeadHkdfPublicKeyManager.getKeyProto_(key);
     EciesAeadHkdfValidators.validatePublicKey(keyProto, this.getVersion());
-
     const recepientPublicKey = EciesAeadHkdfUtil.getJsonWebKeyFromProto(keyProto);
-    const params = /** @type{!PbEciesAeadHkdfParams} */ (keyProto.getParams());
-    const keyTemplate =
-        /** @type {!PbKeyTemplate} */ (params.getDemParams().getAeadDem());
+    const params = (keyProto.getParams() as PbEciesAeadHkdfParams);
+    const demParams = params.getDemParams();
+    if (!demParams) {
+      throw new SecurityException('DEM params not set');
+    }
+    const keyTemplate = (demParams.getAeadDem() as PbKeyTemplate);
     const demHelper = new RegistryEciesAeadHkdfDemHelper(keyTemplate);
     const pointFormat =
         Util.pointFormatProtoToSubtle(params.getEcPointFormat());
-    const hkdfHash =
-        Util.hashTypeProtoToString(params.getKemParams().getHkdfHashType());
-    const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
-
-    return await encrypt.fromJsonWebKey(
+    const kemParams = params.getKemParams();
+    if (!kemParams) {
+      throw new SecurityException('KEM params not set');
+    }
+    const hkdfHash = Util.hashTypeProtoToString(kemParams.getHkdfHashType());
+    const hkdfSalt = kemParams.getHkdfSalt_asU8();
+    return eciesAeadHkdfHybridEncrypt.fromJsonWebKey(
         recepientPublicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
 
   /** @override */
-  doesSupport(keyType) {
+  doesSupport(keyType: AnyDuringMigration) {
     return keyType === this.getKeyType();
   }
 
@@ -97,12 +105,8 @@ class EciesAeadHkdfPublicKeyManager {
     return this.keyFactory;
   }
 
-  /**
-   * @private
-   * @param {!PbKeyData|!PbMessage} keyMaterial
-   * @return {!PbEciesAeadHkdfPublicKey}
-   */
-  static getKeyProto_(keyMaterial) {
+  private static getKeyProto_(keyMaterial: PbKeyData|
+                              PbMessage): PbEciesAeadHkdfPublicKey {
     if (keyMaterial instanceof PbKeyData) {
       return EciesAeadHkdfPublicKeyManager.getKeyProtoFromKeyData_(keyMaterial);
     }
@@ -114,19 +118,14 @@ class EciesAeadHkdfPublicKeyManager {
         EciesAeadHkdfPublicKeyManager.KEY_TYPE + '.');
   }
 
-  /**
-   * @private
-   * @param {!PbKeyData} keyData
-   * @return {!PbEciesAeadHkdfPublicKey}
-   */
-  static getKeyProtoFromKeyData_(keyData) {
+  private static getKeyProtoFromKeyData_(keyData: PbKeyData):
+      PbEciesAeadHkdfPublicKey {
     if (keyData.getTypeUrl() !== EciesAeadHkdfPublicKeyManager.KEY_TYPE) {
       throw new SecurityException(
           'Key type ' + keyData.getTypeUrl() + ' is not supported. This key ' +
           'manager supports ' + EciesAeadHkdfPublicKeyManager.KEY_TYPE + '.');
     }
-
-    let /** PbEciesAeadHkdfPublicKey */ key;
+    let key: PbEciesAeadHkdfPublicKey;
     try {
       key = PbEciesAeadHkdfPublicKey.deserializeBinary(keyData.getValue());
     } catch (e) {
@@ -142,13 +141,3 @@ class EciesAeadHkdfPublicKeyManager {
     return key;
   }
 }
-
-/** @const @public {string} */
-EciesAeadHkdfPublicKeyManager.KEY_TYPE =
-    'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
-/** @const @private {!Object} */
-EciesAeadHkdfPublicKeyManager.SUPPORTED_PRIMITIVE_ = HybridEncrypt;
-/** @const @package {number} */
-EciesAeadHkdfPublicKeyManager.VERSION = 0;
-
-exports = EciesAeadHkdfPublicKeyManager;
