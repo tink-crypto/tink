@@ -107,7 +107,7 @@ class MacWrapperTest(absltest.TestCase):
     pset.set_primary(new_entry)
     wrapped_mac = core.Registry.wrap(pset)
 
-    with self.assertRaisesRegex(core.TinkError, 'invalid MAC'):
+    with self.assertRaises(core.TinkError):
       wrapped_mac.verify_mac(unknown_tag, b'data')
 
 

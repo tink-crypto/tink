@@ -129,7 +129,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset.set_primary(new_entry)
     wrapped_aead = core.Registry.wrap(pset)
 
-    with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
+    with self.assertRaises(core.TinkError):
       wrapped_aead.decrypt(unknown_ciphertext, b'associated_data')
 
   def test_decrypt_wrong_associated_data_fails(self):
@@ -140,7 +140,7 @@ class AeadWrapperTest(absltest.TestCase):
     wrapped_aead = core.Registry.wrap(pset)
 
     ciphertext = wrapped_aead.encrypt(b'plaintext', b'associated_data')
-    with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
+    with self.assertRaises(core.TinkError):
       wrapped_aead.decrypt(ciphertext, b'wrong_associated_data')
 
 

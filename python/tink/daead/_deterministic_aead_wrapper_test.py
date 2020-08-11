@@ -141,7 +141,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset.set_primary(new_entry)
     wrapped_daead = core.Registry.wrap(pset)
 
-    with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
+    with self.assertRaises(core.TinkError):
       wrapped_daead.decrypt_deterministically(unknown_ciphertext,
                                               b'associated_data')
 
@@ -154,7 +154,7 @@ class AeadWrapperTest(absltest.TestCase):
 
     ciphertext = wrapped_daead.encrypt_deterministically(
         b'plaintext', b'associated_data')
-    with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
+    with self.assertRaises(core.TinkError):
       wrapped_daead.decrypt_deterministically(ciphertext,
                                               b'wrong_associated_data')
 

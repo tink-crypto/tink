@@ -69,7 +69,7 @@ class PublicKeySignWrapperTest(parameterized.TestCase):
 
     wrapped_pk_verify.verify(data_signature, b'data')
 
-    with self.assertRaisesRegex(core.TinkError, 'invalid signature'):
+    with self.assertRaises(core.TinkError):
       wrapped_pk_verify.verify(data_signature, b'invalid')
 
 

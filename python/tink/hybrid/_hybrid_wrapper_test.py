@@ -150,7 +150,7 @@ class HybridWrapperTest(absltest.TestCase):
 
     wrapped_dec = core.Registry.wrap(dec_pset)
 
-    with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
+    with self.assertRaises(core.TinkError):
       wrapped_dec.decrypt(unknown_ciphertext, b'context_info')
 
   def test_decrypt_wrong_associated_data_fails(self):
@@ -164,7 +164,7 @@ class HybridWrapperTest(absltest.TestCase):
     wrapped_enc = core.Registry.wrap(enc_pset)
 
     ciphertext = wrapped_enc.encrypt(b'plaintext', b'context_info')
-    with self.assertRaisesRegex(core.TinkError, 'Decryption failed'):
+    with self.assertRaises(core.TinkError):
       wrapped_dec.decrypt(ciphertext, b'wrong_context_info')
 
 

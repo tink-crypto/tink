@@ -47,8 +47,7 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
   def test_invalid_params_throw_exception(self):
     key_template = (daead.deterministic_aead_key_templates
                     .create_aes_siv_key_template(63))
-    with self.assertRaisesRegex(core.TinkError,
-                                'Invalid key size'):
+    with self.assertRaises(core.TinkError):
       tink.new_keyset_handle(key_template)
 
   def test_encrypt_decrypt(self):
