@@ -184,19 +184,6 @@ class DecryptingStreamTest(absltest.TestCase):
     with self.assertRaisesRegex(ValueError, 'closed'):
       ds.isatty()
 
-  def test_position(self):
-    f = io.BytesIO(B_SOMETHING_)
-    # Cast is needed since position is not part of BinaryIO.
-    ds = cast(streaming_aead.DecryptingStream, get_decrypting_stream(f, B_AAD_))
-
-    self.assertEqual(ds.position(), 0)
-    ds.read(4)
-    self.assertEqual(ds.position(), 4)
-    ds.read(4)
-    self.assertEqual(ds.position(), 8)
-    ds.close()
-    self.assertEqual(ds.position(), 8)
-
   def test_inquiries(self):
     f = io.BytesIO(B_SOMETHING_)
     ds = get_decrypting_stream(f, B_AAD_)

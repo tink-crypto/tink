@@ -33,8 +33,6 @@ class DecryptingStream(io.BufferedIOBase):
 
   It reads the ciphertext from the wrapped file-like object, and decrypts it.
 
-  The additional method position() returns the number of read plaintext bytes.
-
   Closing this wrapper also closes the underlying object.
   """
 
@@ -51,7 +49,6 @@ class DecryptingStream(io.BufferedIOBase):
     """
     super(DecryptingStream, self).__init__()
     self._closed = False
-    self._bytes_read = 0
     self._ciphertext_source = ciphertext_source
 
     # Create FileObjectAdapter
@@ -162,7 +159,6 @@ class DecryptingStream(io.BufferedIOBase):
         raise io.BlockingIOError(errno.EAGAIN,
                                  'No data available at the moment.')
       else:
-        self._bytes_read += len(data)
         return data
     except core.TinkError as e:
       # We are checking if the exception was raised because of C++
@@ -198,12 +194,6 @@ class DecryptingStream(io.BufferedIOBase):
     """Internal: raise a ValueError if file is closed."""
     if self.closed:
       raise ValueError('I/O operation on closed file.' if msg is None else msg)
-
-  ### Positioning ###
-
-  def position(self) -> int:
-    """Returns total number of read plaintext bytes."""
-    return self._bytes_read
 
   ### Flush and close ###
 

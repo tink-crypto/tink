@@ -35,9 +35,6 @@ class EncryptingStream(io.BufferedIOBase):
   It encrypts any data written to it, and writes the ciphertext to the wrapped
   object.
 
-  The additional method position() returns the number of written plaintext
-  bytes.
-
   Writes to an EncryptingStream may be partial - it is important to check the
   return value of write().
 
@@ -62,7 +59,6 @@ class EncryptingStream(io.BufferedIOBase):
     """
     super(EncryptingStream, self).__init__()
     self._closed = False
-    self._bytes_written = 0
 
     # Create FileObjectAdapter
     if not ciphertext_destination.writable():
@@ -112,8 +108,6 @@ class EncryptingStream(io.BufferedIOBase):
     if written < 0:
       raise core.TinkError('Number of written bytes was negative')
 
-    self._bytes_written += written
-
     if written < len(b):
       raise io.BlockingIOError(errno.EAGAIN,
                                'Write could not complete without blocking.',
@@ -144,12 +138,6 @@ class EncryptingStream(io.BufferedIOBase):
     """Internal: raise a ValueError if file is closed."""
     if self.closed:
       raise ValueError('I/O operation on closed file.' if msg is None else msg)
-
-  ### Positioning ###
-
-  def position(self) -> int:
-    """Returns total number of written plaintext bytes."""
-    return self._bytes_written
 
   ### Flush and close ###
 

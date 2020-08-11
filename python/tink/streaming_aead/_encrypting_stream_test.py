@@ -150,26 +150,6 @@ class EncryptingStreamTest(absltest.TestCase):
       self.assertFalse(es.readable())
       self.assertFalse(es.seekable())
 
-  def test_position(self):
-    with io.BytesIO() as f:
-      # Cast is needed since read1 is not part of BinaryIO.
-      with cast(streaming_aead.EncryptingStream,
-                get_encrypting_stream(f, B_ASSOC_)) as es:
-        es.write(b'Hello world' + B_X80)
-        self.assertEqual(es.position(), 12)
-
-  def test_position_works_closed(self):
-    with io.BytesIO() as f:
-      # Cast is needed since position is not part of BinaryIO.
-      es = cast(streaming_aead.EncryptingStream,
-                get_encrypting_stream(f, B_ASSOC_))
-
-      es.write(b'Hello world' + B_X80)
-      es.close()
-
-      self.assertTrue(es.closed)
-      self.assertEqual(es.position(), 12)
-
   def test_blocking_io(self):
 
     class OnlyWritesFirstFiveBytes(io.BytesIO):

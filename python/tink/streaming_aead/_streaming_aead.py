@@ -77,8 +77,6 @@ class StreamingAead(object):
       Other methods, including read() and seek(), raise io.UnsupportedOperation.
       Closing the wrapper also closes the ciphertext_destination.
 
-      The wrapper also supports the position() method, which returns the number
-      of written plaintext bytes.
     Raises:
       tink.TinkError if the creation fails.
     """
