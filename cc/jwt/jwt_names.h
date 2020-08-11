@@ -30,20 +30,20 @@ namespace tink {
 class JwtNames {
  public:
   // Claims
-  inline static const char* claim_issuer_ = "iss";
-  inline static const char* claim_subject_ = "sub";
-  inline static const char* claim_audience_ = "aud";
-  inline static const char* claim_expiration_ = "exp";
-  inline static const char* claim_not_before_ = "nbf";
-  inline static const char* claim_issued_at_ = "iat";
-  inline static const char* claim_jwt_id_ = "jti";
+  static constexpr absl::string_view kClaimIssuer = "iss";
+  static constexpr absl::string_view kClaimSubject = "sub";
+  static constexpr absl::string_view kClaimAudience = "aud";
+  static constexpr absl::string_view kClaimExpiration = "exp";
+  static constexpr absl::string_view kClaimNotBefore = "nbf";
+  static constexpr absl::string_view kClaimIssuedAt = "iat";
+  static constexpr absl::string_view kClaimJwtId = "jti";
 
   // Supported protected headers, as described in
   // https://tools.ietf.org/html/rfc7515#section-4.1
-  inline static const char* header_algorithm_ = "alg";
-  inline static const char* header_key_id_ = "kid";
-  inline static const char* header_type_ = "typ";
-  inline static const char* header_content_type_ = "cty";
+  static constexpr absl::string_view kHeaderAlgorithm = "alg";
+  static constexpr absl::string_view kHeaderKeyId = "kid";
+  static constexpr absl::string_view kHeaderType = "typ";
+  static constexpr absl::string_view kHeaderContentType = "cty";
 
   virtual ~JwtNames() {}
 

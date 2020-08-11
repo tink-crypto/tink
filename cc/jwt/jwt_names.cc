@@ -31,10 +31,10 @@ util::Status JwtNames::validate(absl::string_view name) {
 }
 
 bool JwtNames::isRegisteredName(absl::string_view name) {
-  return name == claim_issuer_ || name == claim_subject_ ||
-         name == claim_audience_ || name == claim_expiration_ ||
-         name == claim_not_before_ || name == claim_issued_at_ ||
-         name == claim_jwt_id_;
+  return name == kClaimIssuer || name == kClaimSubject ||
+         name == kClaimAudience || name == kClaimExpiration ||
+         name == kClaimNotBefore || name == kClaimIssuedAt ||
+         name == kClaimJwtId;
 }
 
 }  // namespace tink
