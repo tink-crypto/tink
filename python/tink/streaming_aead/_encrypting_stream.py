@@ -28,25 +28,19 @@ from tink.cc.pybind import tink_bindings
 from tink.util import file_object_adapter
 
 
-class EncryptingStream(io.RawIOBase):
+class RawEncryptingStream(io.RawIOBase):
   """A file-like object which wraps writes to an underlying file-like object.
 
   It encrypts any data written to it, and writes the ciphertext to the wrapped
   object.
 
-  Writes to an EncryptingStream may be partial - it is important to check the
-  return value of write().
-
   The close() method indicates that the message is complete, and will write a
-  final ciphertext block to signify end of message. The context manager will
-  only call this close() method on a normal exit - if an exception is raised
-  inside the context manager which causes it to exit early, the close() method
-  will not be called, and the ciphertext will not be complete.
+  final ciphertext block to signify end of message.
   """
 
   def __init__(self, stream_aead: tink_bindings.StreamingAead,
                ciphertext_destination: BinaryIO, associated_data: bytes):
-    """Create a new EncryptingStream.
+    """Create a new RawEncryptingStream.
 
     Args:
       stream_aead: C++ StreamingAead primitive from which a C++ EncryptingStream
@@ -56,7 +50,7 @@ class EncryptingStream(io.RawIOBase):
       associated_data: The associated data to use for encryption. This must
         match the associated_data used for decryption.
     """
-    super(EncryptingStream, self).__init__()
+    super(RawEncryptingStream, self).__init__()
     if not ciphertext_destination.writable():
       raise ValueError('ciphertext_destination must be writable')
     cc_ciphertext_destination = file_object_adapter.FileObjectAdapter(
@@ -108,7 +102,7 @@ class EncryptingStream(io.RawIOBase):
       return
     self.flush()
     self._close_output_stream_adapter()
-    super(EncryptingStream, self).close()
+    super(RawEncryptingStream, self).close()
 
   def writable(self) -> bool:
     """Return True if the stream supports writing."""

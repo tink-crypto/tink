@@ -16,15 +16,11 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from tink.streaming_aead import _decrypting_stream
-from tink.streaming_aead import _encrypting_stream
 from tink.streaming_aead import _streaming_aead
 from tink.streaming_aead import _streaming_aead_key_manager
 from tink.streaming_aead import _streaming_aead_key_templates as streaming_aead_key_templates
 
 
 StreamingAead = _streaming_aead.StreamingAead
-DecryptingStream = _decrypting_stream.DecryptingStream
-EncryptingStream = _encrypting_stream.EncryptingStream
 key_manager_from_cc_registry = _streaming_aead_key_manager.from_cc_registry
 register = _streaming_aead_key_manager.register

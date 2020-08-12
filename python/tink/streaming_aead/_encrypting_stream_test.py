@@ -23,7 +23,7 @@ from typing import cast, BinaryIO
 from absl.testing import absltest
 from absl.testing.absltest import mock
 
-from tink import streaming_aead
+from tink.streaming_aead import _encrypting_stream
 from tink.testing import bytes_io
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
@@ -52,8 +52,9 @@ def fake_get_output_stream_adapter(self, cc_primitive, aad, destination):
 # We use the same return type as StreamingAead.new_decrypting_stream
 def get_encrypting_stream(ciphertext_destination: BinaryIO,
                           aad: bytes) -> BinaryIO:
-  s = streaming_aead.EncryptingStream(None, ciphertext_destination, aad)
-  return cast(BinaryIO, io.BufferedWriter(s))
+  raw = _encrypting_stream.RawEncryptingStream(
+      None, ciphertext_destination, aad)
+  return cast(BinaryIO, io.BufferedWriter(raw))
 
 
 class EncryptingStreamTest(absltest.TestCase):
@@ -64,7 +65,7 @@ class EncryptingStreamTest(absltest.TestCase):
     # avoid the need for a Streaming AEAD primitive.
     self.addCleanup(mock.patch.stopall)
     mock.patch.object(
-        streaming_aead.EncryptingStream,
+        _encrypting_stream.RawEncryptingStream,
         '_get_output_stream_adapter',
         new=fake_get_output_stream_adapter).start()
 

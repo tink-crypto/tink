@@ -27,7 +27,7 @@ from tink.cc.pybind import tink_bindings
 from tink.util import file_object_adapter
 
 
-class DecryptingStream(io.RawIOBase):
+class RawDecryptingStream(io.RawIOBase):
   """A file-like object which decrypts reads from an underlying object.
 
   It reads the ciphertext from the wrapped file-like object, and decrypts it.
@@ -37,7 +37,7 @@ class DecryptingStream(io.RawIOBase):
 
   def __init__(self, stream_aead: tink_bindings.StreamingAead,
                ciphertext_source: BinaryIO, associated_data: bytes):
-    """Create a new DecryptingStream.
+    """Create a new RawDecryptingStream.
 
     Args:
       stream_aead: C++ StreamingAead primitive from which a C++ DecryptingStream
@@ -46,7 +46,7 @@ class DecryptingStream(io.RawIOBase):
         will be read.
       associated_data: The associated data to use for decryption.
     """
-    super(DecryptingStream, self).__init__()
+    super(RawDecryptingStream, self).__init__()
     self._ciphertext_source = ciphertext_source
 
     if not ciphertext_source.readable():
@@ -131,7 +131,7 @@ class DecryptingStream(io.RawIOBase):
     if self.closed:  # pylint:disable=using-constant-test
       return
     self._ciphertext_source.close()
-    super(DecryptingStream, self).close()
+    super(RawDecryptingStream, self).close()
 
   def readable(self) -> bool:
     """Return True if the stream can be read from."""

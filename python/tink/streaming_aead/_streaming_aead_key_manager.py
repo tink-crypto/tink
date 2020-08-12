@@ -36,17 +36,17 @@ class _StreamingAeadCcToPyWrapper(_streaming_aead.StreamingAead):
 
   def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
-    stream = _encrypting_stream.EncryptingStream(self._cc_streaming_aead,
+    raw = _encrypting_stream.RawEncryptingStream(self._cc_streaming_aead,
                                                  ciphertext_destination,
                                                  associated_data)
-    return typing.cast(BinaryIO, io.BufferedWriter(stream))
+    return typing.cast(BinaryIO, io.BufferedWriter(raw))
 
   def new_decrypting_stream(self, ciphertext_source: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
-    stream = _decrypting_stream.DecryptingStream(self._cc_streaming_aead,
+    raw = _decrypting_stream.RawDecryptingStream(self._cc_streaming_aead,
                                                  ciphertext_source,
                                                  associated_data)
-    return typing.cast(BinaryIO, io.BufferedReader(stream))
+    return typing.cast(BinaryIO, io.BufferedReader(raw))
 
 
 def from_cc_registry(
