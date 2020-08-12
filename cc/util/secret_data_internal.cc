@@ -14,17 +14,19 @@
 
 #include "tink/util/secret_data_internal.h"
 
-// placeholder for sanitization_functions include, please ignore
+#include "production/crash_analysis/reporting/public/sanitization/make_unique_secure.h"
 
 namespace crypto {
 namespace tink {
 namespace util {
 namespace internal {
 
-void TrackSensitiveMemory(void*, std::size_t) {}
+void TrackSensitiveMemory(void* ptr, std::size_t size) {
+  crash_analysis::reporting::sanitization::TrackRegion(ptr, size);
+}
 
-void UntrackAndSanitizeSensitiveMemory(void* ptr, std::size_t n) {
-  SafeZeroMemory(static_cast<char*>(ptr), n);
+void UntrackAndSanitizeSensitiveMemory(void* ptr, std::size_t size) {
+  crash_analysis::reporting::sanitization::SanitizeAndUntrackRegion(ptr, size);
 }
 
 }  // namespace internal

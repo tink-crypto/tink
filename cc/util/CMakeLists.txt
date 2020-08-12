@@ -373,7 +373,6 @@ tink_cc_test(
 tink_cc_library(
   NAME secret_data_internal
   SRCS
-    secret_data_internal.cc
     secret_data_internal.h
   DEPS
     absl::base

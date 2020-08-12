@@ -18,6 +18,7 @@
 #include <memory>
 #include <type_traits>
 
+// placeholder for sanitization_functions include, please ignore
 #include "absl/base/attributes.h"
 
 namespace crypto {
@@ -25,11 +26,11 @@ namespace tink {
 namespace util {
 namespace internal {
 
-// Functions to track sensitive memory locations.
-// Used to sanitize the memory whenever needed.
-// Tracking is not currently implemented for open-source Tink.
-void TrackSensitiveMemory(void* ptr, std::size_t size);
-void UntrackAndSanitizeSensitiveMemory(void* ptr, std::size_t size);
+inline void SafeZeroMemory(volatile char* ptr, std::size_t size) {
+  while (size--) {
+    *ptr++ = 0;
+  }
+}
 
 template <typename T>
 struct SanitizingAllocator {
@@ -41,13 +42,11 @@ struct SanitizingAllocator {
       const SanitizingAllocator<U>&) noexcept {}
 
   ABSL_MUST_USE_RESULT T* allocate(std::size_t n) {
-    T* ptr = std::allocator<T>().allocate(n);
-    TrackSensitiveMemory(ptr, n * sizeof(T));
-    return ptr;
+    return std::allocator<T>().allocate(n);
   }
 
   void deallocate(T* ptr, std::size_t n) noexcept {
-    UntrackAndSanitizeSensitiveMemory(ptr, n * sizeof(T));
+    SafeZeroMemory(reinterpret_cast<char*>(ptr), n * sizeof(T));
     std::allocator<T>().deallocate(ptr, n);
   }
 
@@ -63,12 +62,6 @@ struct SanitizingDeleter {
     SanitizingAllocator<T>().deallocate(ptr, 1);
   }
 };
-
-inline void SafeZeroMemory(volatile char* ptr, std::size_t size) {
-  while (size--) {
-    *ptr++ = 0;
-  }
-}
 
 }  // namespace internal
 }  // namespace util

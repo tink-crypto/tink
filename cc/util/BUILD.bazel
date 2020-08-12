@@ -27,7 +27,6 @@ cc_library(
 
 cc_library(
     name = "secret_data_internal",
-    srcs = ["secret_data_internal.cc"],
     hdrs = ["secret_data_internal.h"],
     include_prefix = "tink/util",
     deps = [
