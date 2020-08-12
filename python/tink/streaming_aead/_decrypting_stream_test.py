@@ -43,7 +43,11 @@ class FakeInputStreamAdapter(object):
         size = 100
       return self._adapter.read(size)
     except EOFError:
-      raise tink_bindings.StatusNotOk(11, 'EOF')
+      not_ok = tink_bindings.StatusNotOk()
+      not_ok.status = tink_bindings.Status(
+          tink_bindings.ErrorCode.OUT_OF_RANGE,
+          'Reached end of stream.')
+      raise not_ok
 
   def read1(self, size=-1):
     del size  # unused

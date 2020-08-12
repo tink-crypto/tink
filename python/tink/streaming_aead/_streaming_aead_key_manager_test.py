@@ -125,6 +125,23 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     self.assertTrue(ct_source.closed)
     self.assertEqual(output, plaintext)
 
+  def test_read_after_eof_returns_empty_bytes(self):
+    saead_primitive = self.key_manager_ctr.primitive(
+        self.key_manager_ctr.new_key_data(
+            streaming_aead.streaming_aead_key_templates
+            .AES128_CTR_HMAC_SHA256_4KB))
+    plaintext = b'plaintext' + B_X80
+    aad = b'associated_data' + B_X80
+
+    ct_destination = bytes_io.BytesIOWithValueAfterClose()
+    with saead_primitive.new_encrypting_stream(ct_destination, aad) as es:
+      self.assertLen(plaintext, es.write(plaintext))
+
+    ct_source = io.BytesIO(ct_destination.value_after_close())
+    with saead_primitive.new_decrypting_stream(ct_source, aad) as ds:
+      _ = ds.read()
+      self.assertEqual(ds.read(100), b'')
+
   def test_encrypt_decrypt_tempfile(self):
     saead_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(

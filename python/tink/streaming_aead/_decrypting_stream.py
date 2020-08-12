@@ -165,7 +165,8 @@ class DecryptingStream(io.BufferedIOBase):
       # OUT_OF_RANGE status, which signals EOF.
       wrapped_e = e.args[0]
       if (isinstance(wrapped_e, tink_bindings.StatusNotOk) and
-          wrapped_e.args[0] == tink_bindings.ErrorCode.OUT_OF_RANGE):
+          (wrapped_e.status.error_code() ==
+           tink_bindings.ErrorCode.OUT_OF_RANGE)):
         return b''
       else:
         raise e
