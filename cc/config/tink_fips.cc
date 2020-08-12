@@ -28,7 +28,7 @@ crypto::tink::util::Status ChecksFipsCompatibility(
     case FipsCompatibility::kNotFips:
       if (kUseOnlyFips) {
         return util::Status(util::error::INTERNAL,
-                            "Primitive not available in FIPS only mode");
+                            "Primitive not available in FIPS only mode.");
       } else {
         return util::OkStatus();
       }
@@ -43,6 +43,9 @@ crypto::tink::util::Status ChecksFipsCompatibility(
       } else {
         return util::OkStatus();
       }
+    default:
+      util::Status(util::error::INTERNAL,
+                   "Could not determine FIPS status.");
   }
 }
 
