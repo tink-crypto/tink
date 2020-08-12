@@ -19,16 +19,15 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-import errno
 import io
-from typing import BinaryIO
+from typing import BinaryIO, Optional
 
 from tink import core
 from tink.cc.pybind import tink_bindings
 from tink.util import file_object_adapter
 
 
-class DecryptingStream(io.BufferedIOBase):
+class DecryptingStream(io.RawIOBase):
   """A file-like object which decrypts reads from an underlying object.
 
   It reads the ciphertext from the wrapped file-like object, and decrypts it.
@@ -48,15 +47,12 @@ class DecryptingStream(io.BufferedIOBase):
       associated_data: The associated data to use for decryption.
     """
     super(DecryptingStream, self).__init__()
-    self._closed = False
     self._ciphertext_source = ciphertext_source
 
-    # Create FileObjectAdapter
     if not ciphertext_source.readable():
       raise ValueError('ciphertext_source must be readable')
     cc_ciphertext_source = file_object_adapter.FileObjectAdapter(
         ciphertext_source)
-    # Get InputStreamAdapter of C++ DecryptingStream
     self._input_stream_adapter = self._get_input_stream_adapter(
         stream_aead, associated_data, cc_ciphertext_source)
 
@@ -67,97 +63,36 @@ class DecryptingStream(io.BufferedIOBase):
     return tink_bindings.new_cc_decrypting_stream(
         cc_primitive, aad, source)
 
-  ### Reading ###
+  @core.use_tink_errors
+  def _read_from_input_stream_adapter(self, size: int) -> bytes:
+    """Implemented as a separate method to ensure correct error transform."""
+    return self._input_stream_adapter.read1(size)
 
-  def read(self, size: int = -1) -> bytes:
-    """Read and return up to size bytes.
-
-    Multiple reads may be issued to the underlying object.
+  def read(self, size=-1) -> Optional[bytes]:
+    """Read and return up to size bytes, where size is an int.
 
     Args:
-      size: Maximum number of bytes to read. If the argument is omitted, None,
-        or negative, data is read and returned until EOF or if the read call
-        would block in non-blocking mode.
+      size: Maximum number of bytes to read. As a convenience, if size is
+      unspecified or -1, all bytes until EOF are returned.
 
     Returns:
       Bytes read. An empty bytes object is returned if the stream is already at
-      EOF.
+      EOF. None is returned if no data is available at the moment.
 
     Raises:
-      BlockingIOError if no data is available at the moment.
       TinkError if there was a permanent error.
     """
-    return self._read(size, read1=False)
-
-  def read1(self, size: int = -1) -> bytes:
-    """Read and return up to size bytes.
-
-    At most one read will be issued to the underlying object.
-
-    Args:
-      size: Maximum number of bytes to read. If the argument is omitted, None,
-        or negative, an arbitrary number of bytes are returned.
-
-    Returns:
-      Bytes read. An empty bytes object is returned if the stream is already at
-      EOF.
-
-    Raises:
-      BlockingIOError if no data is available at the moment.
-      TinkError if there was a permanent error.
-    """
-    return self._read(size, read1=True)
-
-  def readinto(self, b: bytearray) -> int:
-    """Read bytes into a pre-allocated bytes-like object b.
-
-    Multiple reads may be issued to the underlying object.
-
-    Args:
-      b: Bytes-like object to which data will be read.
-
-    Returns:
-      Number of bytes read. If 0 is returned it means EOF is reached.
-
-    Raises:
-      BlockingIOError if no data is available at the moment.
-      TinkError if there was a permanent error.
-    """
-    return self._readinto(b, read1=False)
-
-  def readinto1(self, b: bytearray) -> int:
-    """Read bytes into a pre-allocated bytes-like object b.
-
-    At most one read will be issued to the underlying object.
-
-    Args:
-      b: Bytes-like object to which data will be read.
-
-    Returns:
-      Number of bytes read. If 0 is returned it means EOF is reached.
-
-    Raises:
-      BlockingIOError if no data is available at the moment.
-      TinkError if there was a permanent error.
-    """
-    return self._readinto(b, read1=True)
-
-  def _read(self, size: int, read1: bool) -> bytes:
-    """Implements read and read1."""
-    self._check_not_closed()
-
+    if self.closed:  # pylint:disable=using-constant-test
+      raise ValueError('read on closed file.')
     if size is None:
       size = -1
-
+    if size < 0:
+      return self.readall()
     try:
-      if read1:
-        data = self._read1_with_tink_error(size)
-      else:
-        data = self._read_with_tink_error(size)
-
+      data = self._read_from_input_stream_adapter(size)
       if not data:
-        raise io.BlockingIOError(errno.EAGAIN,
-                                 'No data available at the moment.')
+        # No data is available at the moment, but EOF is not reached yet.
+        return None
       else:
         return data
     except core.TinkError as e:
@@ -171,66 +106,33 @@ class DecryptingStream(io.BufferedIOBase):
       else:
         raise e
 
-  # TODO(b/141344377) use the implementation in parent class
-  def _readinto(self, b: bytearray, read1: bool) -> int:
-    data = self._read(len(b), read1)
+  def readinto(self, b: bytearray) -> Optional[int]:
+    """Read bytes into a pre-allocated bytes-like object b.
+
+    Args:
+      b: Bytes-like object to which data will be read.
+
+    Returns:
+      Number of bytes read. It returns 0 if EOF is reached, and None if no data
+      is available at the moment.
+
+    Raises:
+      TinkError if there was a permanent error.
+    """
+    data = self.read(len(b))
+    if data is None:
+      return None
     n = len(data)
     b[:n] = data
     return n
 
-  @core.use_tink_errors
-  def _read_with_tink_error(self, size: int) -> bytes:
-    """Implemented as a separate method to ensure correct error transform."""
-    return self._input_stream_adapter.read(size)
-
-  @core.use_tink_errors
-  def _read1_with_tink_error(self, size: int) -> bytes:
-    """Implemented as a separate method to ensure correct error transform."""
-    return self._input_stream_adapter.read1(size)
-
-  ### Internal ###
-
-  # TODO(b/141344377) use parent class _checkClosed() instead
-  def _check_not_closed(self, msg=None):
-    """Internal: raise a ValueError if file is closed."""
-    if self.closed:
-      raise ValueError('I/O operation on closed file.' if msg is None else msg)
-
-  ### Flush and close ###
-
-  def flush(self) -> None:
-    """This has no effect because the stream is read-only."""
-    self._check_not_closed()
-
   def close(self) -> None:
-    """Close the stream.
-
-    This has no effect on a closed stream.
-    """
-    if self.closed:
+    """Close the stream. Has no effect on a closed stream."""
+    if self.closed:  # pylint:disable=using-constant-test
       return
     self._ciphertext_source.close()
-    self._closed = True
-
-  ### Inquiries ###
+    super(DecryptingStream, self).close()
 
   def readable(self) -> bool:
-    """Indicates whether object was opened for reading.
-
-    Returns:
-      Whether object was opened for reading.
-
-    If False, read() will raise UnsupportedOperation.
-    """
+    """Return True if the stream can be read from."""
     return True
-
-  @property
-  def closed(self) -> bool:
-    """Indicates if the file has been closed.
-
-    Returns:
-      True if and only if the file has been closed.
-
-    For backwards compatibility, this is a property, not a predicate.
-    """
-    return self._closed

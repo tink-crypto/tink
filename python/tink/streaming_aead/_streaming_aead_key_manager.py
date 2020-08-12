@@ -16,6 +16,7 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+import io
 import typing
 from typing import Text, BinaryIO
 import six
@@ -33,21 +34,19 @@ class _StreamingAeadCcToPyWrapper(_streaming_aead.StreamingAead):
   def __init__(self, cc_streaming_aead: tink_bindings.StreamingAead):
     self._cc_streaming_aead = cc_streaming_aead
 
-  @core.use_tink_errors
   def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     stream = _encrypting_stream.EncryptingStream(self._cc_streaming_aead,
                                                  ciphertext_destination,
                                                  associated_data)
-    return typing.cast(BinaryIO, stream)
+    return typing.cast(BinaryIO, io.BufferedWriter(stream))
 
-  @core.use_tink_errors
   def new_decrypting_stream(self, ciphertext_source: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
     stream = _decrypting_stream.DecryptingStream(self._cc_streaming_aead,
                                                  ciphertext_source,
                                                  associated_data)
-    return typing.cast(BinaryIO, stream)
+    return typing.cast(BinaryIO, io.BufferedReader(stream))
 
 
 def from_cc_registry(

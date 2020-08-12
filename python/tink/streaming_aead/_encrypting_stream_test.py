@@ -53,7 +53,7 @@ def fake_get_output_stream_adapter(self, cc_primitive, aad, destination):
 def get_encrypting_stream(ciphertext_destination: BinaryIO,
                           aad: bytes) -> BinaryIO:
   s = streaming_aead.EncryptingStream(None, ciphertext_destination, aad)
-  return cast(BinaryIO, s)
+  return cast(BinaryIO, io.BufferedWriter(s))
 
 
 class EncryptingStreamTest(absltest.TestCase):
@@ -150,34 +150,19 @@ class EncryptingStreamTest(absltest.TestCase):
       self.assertFalse(es.readable())
       self.assertFalse(es.seekable())
 
-  def test_blocking_io(self):
+  def test_context_manager_exception_closes_dest_file(self):
+    """Tests that exceptional exits trigger normal file closure.
 
-    class OnlyWritesFirstFiveBytes(io.BytesIO):
-
-      def write(self, buffer):
-        buffer = buffer[:5]
-        n = super(OnlyWritesFirstFiveBytes, self).write(buffer)
-        return n
-
-    with OnlyWritesFirstFiveBytes() as f:
-      with get_encrypting_stream(f, B_ASSOC_) as es:
-        with self.assertRaisesRegex(io.BlockingIOError, 'could not complete'):
-          es.write(b'Hello world!' + B_X80)
-
-  def test_context_manager_exception_close(self):
-    """Tests that exceptional exits do not trigger normal file closure.
-
-    Instead, the file will be closed without a proper final ciphertext block,
-    and will result in an invalid ciphertext. The ciphertext_destination file
-    object itself should in most cases still be closed when garbage collected.
+    Any other behaviour seems to be difficult to implement, since standard
+    file wrappers (such as io.BufferedWriter, or io.TextIOWrapper) will always
+    close the wrapped file, even if an error was raised.
     """
     ciphertext_destination = io.BytesIO()
     with self.assertRaisesRegex(ValueError, 'raised inside'):
       with get_encrypting_stream(ciphertext_destination, B_ASSOC_) as es:
         es.write(b'some message' + B_X80)
         raise ValueError('Error raised inside context manager')
-
-    self.assertFalse(ciphertext_destination.closed)
+    self.assertTrue(ciphertext_destination.closed)
 
 
 if __name__ == '__main__':

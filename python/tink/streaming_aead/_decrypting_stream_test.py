@@ -62,7 +62,7 @@ def fake_get_input_stream_adapter(self, cc_primitive, aad, source):
 # We use the same return type as StreamingAead.new_decrypting_stream
 def get_decrypting_stream(ciphertext_source: BinaryIO, aad: bytes) -> BinaryIO:
   s = streaming_aead.DecryptingStream(None, ciphertext_source, aad)
-  return cast(BinaryIO, s)
+  return cast(BinaryIO, io.BufferedReader(s))
 
 
 class DecryptingStreamTest(absltest.TestCase):
@@ -93,14 +93,14 @@ class DecryptingStreamTest(absltest.TestCase):
   def test_read1(self):
     f = io.BytesIO(B_SOMETHING_)
     # Cast is needed since read1 is not part of BinaryIO.
-    ds = cast(streaming_aead.DecryptingStream, get_decrypting_stream(f, B_AAD_))
+    ds = cast(io.BufferedReader, get_decrypting_stream(f, B_AAD_))
 
     self.assertEqual(ds.read1(9), b'some')
 
   def test_readinto(self):
     f = io.BytesIO(B_SOMETHING_)
     # Cast is needed since readinto is not part of BinaryIO.
-    ds = cast(streaming_aead.DecryptingStream, get_decrypting_stream(f, B_AAD_))
+    ds = cast(io.BufferedReader, get_decrypting_stream(f, B_AAD_))
 
     b = bytearray(9)
     self.assertEqual(ds.readinto(b), 9)
@@ -109,7 +109,7 @@ class DecryptingStreamTest(absltest.TestCase):
   def test_readinto1(self):
     f = io.BytesIO(B_SOMETHING_)
     # Cast is needed since readinto1 is not part of BinaryIO.
-    ds = cast(streaming_aead.DecryptingStream, get_decrypting_stream(f, B_AAD_))
+    ds = cast(io.BufferedReader, get_decrypting_stream(f, B_AAD_))
 
     b = bytearray(9)
     self.assertEqual(ds.readinto1(b), 4)
@@ -127,15 +127,6 @@ class DecryptingStreamTest(absltest.TestCase):
 
     self.assertEqual(ds.read(), b'')
 
-  def test_read_no_data_available(self):
-    f = mock.Mock()
-    f.read = mock.Mock(return_value=None)
-    f.readable = mock.Mock(return_value=True)
-    ds = get_decrypting_stream(f, B_AAD_)
-
-    with self.assertRaises(io.BlockingIOError):
-      ds.read(5)
-
   def test_unsupported_operation(self):
     f = io.BytesIO(B_SOMETHING_)
     ds = get_decrypting_stream(f, B_AAD_)
@@ -152,14 +143,6 @@ class DecryptingStreamTest(absltest.TestCase):
       ds.writelines([b'data'])
     with self.assertRaises(io.UnsupportedOperation):
       ds.fileno()
-
-  def test_unsupported_detach(self):
-    f = io.BytesIO(B_SOMETHING_)
-    # Cast is needed since detach is not part of BinaryIO.
-    ds = cast(streaming_aead.DecryptingStream, get_decrypting_stream(f, B_AAD_))
-
-    with self.assertRaises(io.UnsupportedOperation):
-      ds.detach()
 
   def test_closed(self):
     f = io.BytesIO(B_SOMETHING_)
