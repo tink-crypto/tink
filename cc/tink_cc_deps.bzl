@@ -18,7 +18,7 @@ def tink_cc_deps():
             sha256 = "83be4b9b919c3fe7574e49782ab924d5ac59f266f1e93c4e5fddf8a5fca43361",
         )
 
-    if not native.existing_rule("boring_ssl"):
+    if not native.existing_rule("boringssl"):
         # Commit from 2020-06-23
         http_archive(
             name = "boringssl",

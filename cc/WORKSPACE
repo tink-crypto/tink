@@ -1,5 +1,11 @@
 workspace(name = "tink_cc")
 
+# Use this repository if you want to build the FIPS module for BoringSSL
+# local_repository(
+#   name = "boringssl",
+#   path = "third_party/boringssl_fips/",
+# )
+
 local_repository(
     name = "tink_base",
     path = "..",

@@ -87,3 +87,25 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "tink_fips_test",
+    size = "small",
+    srcs = select({
+        "only_fips": ["tink_fips_enabled_test.cc"],
+        "//conditions:default": ["tink_fips_disabled_test.cc"],
+    }),
+    tags = [
+        "fips",
+    ],
+    deps = [
+        ":tink_fips",
+        "//aead:aead_config",
+        "//aead:aead_key_templates",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

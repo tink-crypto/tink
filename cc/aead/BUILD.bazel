@@ -334,6 +334,9 @@ cc_test(
     size = "small",
     srcs = ["aead_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    tags = [
+        "fips",
+    ],
     deps = [
         ":aead_config",
         ":aead_key_templates",

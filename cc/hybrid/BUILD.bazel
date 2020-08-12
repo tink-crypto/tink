@@ -241,6 +241,9 @@ cc_test(
     size = "small",
     srcs = ["hybrid_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    tags = [
+        "fips",
+    ],
     deps = [
         ":hybrid_config",
         ":hybrid_key_templates",

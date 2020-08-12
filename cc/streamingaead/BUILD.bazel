@@ -295,6 +295,9 @@ cc_test(
     name = "streaming_aead_config_test",
     size = "small",
     srcs = ["streaming_aead_config_test.cc"],
+    tags = [
+        "fips",
+    ],
     deps = [
         ":aes_ctr_hmac_streaming_key_manager",
         ":aes_gcm_hkdf_streaming_key_manager",

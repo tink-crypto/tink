@@ -133,6 +133,9 @@ cc_test(
     size = "small",
     srcs = ["deterministic_aead_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    tags = [
+        "fips",
+    ],
     deps = [
         ":aes_siv_key_manager",
         ":deterministic_aead_config",

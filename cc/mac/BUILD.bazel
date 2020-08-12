@@ -149,6 +149,9 @@ cc_test(
     size = "small",
     srcs = ["mac_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    tags = [
+        "fips",
+    ],
     deps = [
         ":hmac_key_manager",
         ":mac_config",

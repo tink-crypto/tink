@@ -640,6 +640,9 @@ cc_test(
     size = "small",
     srcs = ["signature_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    tags = [
+        "fips",
+    ],
     deps = [
         ":rsa_ssa_pss_sign_key_manager",
         ":rsa_ssa_pss_verify_key_manager",
