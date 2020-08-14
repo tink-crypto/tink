@@ -396,7 +396,7 @@ TEST(CreatesNewRsaKeyPairTest, GeneratesDifferentKeysEveryTime) {
     const auto& left = generated_keys[i];
     const auto& right = generated_keys[i + 1];
 
-    // The only fieldthat should be equal.
+    // The only field that should be equal.
     ASSERT_EQ(left.e, right.e);
 
     ASSERT_NE(left.n, right.n);
@@ -408,6 +408,62 @@ TEST(CreatesNewRsaKeyPairTest, GeneratesDifferentKeysEveryTime) {
     ASSERT_NE(left.dq, right.dq);
     ASSERT_NE(left.crt, right.crt);
   }
+}
+
+// Checks if a BIGNUM is equal to a string value.
+bool BignumEqualsString(const BIGNUM* bn, absl::string_view data) {
+  std::string converted =
+      SubtleUtilBoringSSL::bn2str(bn, BN_num_bytes(bn)).ValueOrDie();
+  return converted == data;
+}
+
+// Checks if a BIGNUM is equal to a SecretData value.
+bool BignumEqualsSecretData(const BIGNUM* bn, const util::SecretData& data) {
+  return BignumEqualsString(bn, util::SecretDataAsStringView(data));
+}
+
+TEST(CopiesRsaKeysTest, CopiesRsaPrivateKey) {
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), RSA_F4);
+
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
+                                                    &public_key),
+              IsOk());
+
+  auto rsa_result =
+      SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(private_key);
+  EXPECT_TRUE(rsa_result.ok());
+  bssl::UniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
+
+  EXPECT_TRUE(BignumEqualsString(rsa->e, private_key.e));
+
+  EXPECT_TRUE(BignumEqualsString(rsa->n, private_key.n));
+  EXPECT_TRUE(BignumEqualsSecretData(rsa->d, private_key.d));
+
+  EXPECT_TRUE(BignumEqualsSecretData(rsa->p, private_key.p));
+  EXPECT_TRUE(BignumEqualsSecretData(rsa->q, private_key.q));
+}
+
+TEST(CopiesRsaKeysTest, CopiesRsaPublicKey) {
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), RSA_F4);
+
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
+                                                    &public_key),
+              IsOk());
+
+  auto rsa_result =
+      SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(public_key);
+  EXPECT_TRUE(rsa_result.ok());
+  bssl::UniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
+
+  EXPECT_TRUE(BignumEqualsString(rsa->e, public_key.e));
+
+  EXPECT_TRUE(BignumEqualsString(rsa->n, public_key.n));
 }
 
 TEST(CreatesNewEd25519KeyPairTest, BoringSSLPrivateKeySuffix) {

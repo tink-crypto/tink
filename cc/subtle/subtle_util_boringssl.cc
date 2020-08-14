@@ -695,6 +695,92 @@ util::Status SubtleUtilBoringSSL::CopyCrtParams(
 }
 
 // static
+util::StatusOr<bssl::UniquePtr<RSA>>
+SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(
+    const SubtleUtilBoringSSL::RsaPrivateKey &rsa_key) {
+  auto status_or_n = SubtleUtilBoringSSL::str2bn(rsa_key.n);
+  if (!status_or_n.ok()) {
+    return status_or_n.status();
+  }
+
+  auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
+      BN_num_bits(status_or_n.ValueOrDie().get()));
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
+
+  // Check RSA's public exponent
+  auto exponent_status =
+      SubtleUtilBoringSSL::ValidateRsaPublicExponent(rsa_key.e);
+  if (!exponent_status.ok()) return exponent_status;
+
+  bssl::UniquePtr<RSA> rsa(RSA_new());
+  if (rsa.get() == nullptr) {
+    return util::Status(util::error::INTERNAL,
+                        "BoringSsl RSA allocation error");
+  }
+  util::Status status = SubtleUtilBoringSSL::CopyKey(rsa_key, rsa.get());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = SubtleUtilBoringSSL::CopyPrimeFactors(rsa_key, rsa.get());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = SubtleUtilBoringSSL::CopyCrtParams(rsa_key, rsa.get());
+  if (!status.ok()) {
+    return status;
+  }
+
+  if (RSA_check_key(rsa.get()) == 0 || RSA_check_fips(rsa.get()) == 0) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        absl::StrCat("Could not load RSA key: ",
+                                     SubtleUtilBoringSSL::GetErrors()));
+  }
+
+  return rsa;
+}
+
+// static
+util::StatusOr<bssl::UniquePtr<RSA>>
+SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(
+    const SubtleUtilBoringSSL::RsaPublicKey &key) {
+  auto status_or_n = SubtleUtilBoringSSL::str2bn(key.n);
+  if (!status_or_n.ok()) {
+    return status_or_n.status();
+  }
+
+  auto status_or_e = SubtleUtilBoringSSL::str2bn(key.e);
+  if (!status_or_e.ok()) {
+    return status_or_e.status();
+  }
+
+  auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
+      BN_num_bits(status_or_n.ValueOrDie().get()));
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
+
+  bssl::UniquePtr<RSA> rsa(RSA_new());
+  if (rsa.get() == nullptr) {
+    return util::Status(util::error::INTERNAL,
+                        "BoringSsl RSA allocation error");
+  }
+
+  // The value d is null for a public RSA key.
+  if (1 != RSA_set0_key(rsa.get(), status_or_n.ValueOrDie().get(),
+                        status_or_e.ValueOrDie().get(), /*d=*/nullptr)) {
+    return util::Status(util::error::INTERNAL, "Could not set RSA key.");
+  }
+  status_or_n.ValueOrDie().release();
+  status_or_e.ValueOrDie().release();
+
+  return rsa;
+}
+
+// static
 const EVP_CIPHER *SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
     uint32_t size_in_bytes) {
   switch (size_in_bytes) {

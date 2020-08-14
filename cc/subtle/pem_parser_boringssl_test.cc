@@ -15,11 +15,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/subtle/pem_parser_boringssl.h"
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -212,6 +214,114 @@ Y1tq2L9R0u5wyIAA6W/TQGASEcHR6wsydzgGUGtHsA==
     },
 });
 
+// Holds test vectors for the PemParser. The original private-key pem text was
+// taken from
+// google3/third_party/tink/java_src/src/test/java/com/google/crypto/tink/subtle/PemKeyTypeTest.java.
+// The components and public-key PEM version were extracted using
+//
+// $ openssl rsa -in <pem file> -pubout -text
+struct RsaKeyTestVector {
+  // RSA parameters.
+  absl::string_view modulus_hex_str;
+  absl::string_view public_exponent_hex_str;
+
+  absl::string_view private_exponent_hex_str;
+  absl::string_view p_hex_str;
+  absl::string_view q_hex_str;
+  absl::string_view dp_hex_str;
+  absl::string_view dq_hex_str;
+  absl::string_view coefficient_hex_str;
+
+  // PEM forms.
+  absl::string_view public_pem;
+  absl::string_view private_pem;
+};
+
+constexpr std::initializer_list<RsaKeyTestVector> kRsaKeyTestVectors = {
+    {/*.modulus_hex_str=*/
+     "00bc067ea9038c24b063cac6146b26793499cc8a93985208596b9700acd4e51a580413316"
+     "cc5acc5b499d4781421ba9b0d8af75ae56b6179d5a7fc2098f2fc4d366a6a4166b15f2254"
+     "db1cb3ce5dd4ab80bd8bd5adb5df34b602c319d4d004299c06e5e2437fd626e284c29eeb7"
+     "9d1820b830b706072efa2fd1c8898d1eaaf39fb9f54ce7671ea2b5512a4290d3ec58bb416"
+     "39a19be6630b1c27059b9a32505bebc6f42b301f9fb2cf2b624c1b6598702bbeaed38b5fd"
+     "9941d661ff6adca65ffb251d1f314bced0861fa30ec676e2129e5acba03a6cb7594f93c60"
+     "cef9b2aeee45edc6aadd31f841ee1f37fd63ccff3cebbb018a3d631b3d498a79348704bb4"
+     "19f",
+     /*.public_exponent_hex_str=*/"010001",
+     /*.private_exponent_hex_str=*/
+     "718b1a81c5faa34d4175fa17ea7cd944c27b9a5376f052ca6d064b0a13a6263a707b86a54"
+     "0da0ca9fb1b2b483cf60b1c2a872504d5cb8f5f4e8a1ac54236ca09ca4950254b873f9c2e"
+     "952e9fb859ed17595f50320e5a33e295d86b88eff5138b7d3ee55c0d9eacecad6f39b8c95"
+     "f9340906a1ffa9e6dc7e7418bdb7d28539897297c7da5358867e60dfe8c76fbf5a6a4c064"
+     "e0f6af1bf3c9640cbee007aea3be81017b726d088b69957b844f951fac323ff3e79fd67da"
+     "f32a3dce862320ab0f4a78255f740f7381396ab8d55f80c1b38a149f2418a2747795b44b1"
+     "4092fa17d215ae0e33c78997471ab971628b897776a80bbdee7eddf60eca6cecba50f3228"
+     "1",
+     /*.p_hex_str=*/
+     "00e3f152467849f4c2d87f5a6506453878b7547996b14067966e336399e2be6a8c2ea8f06"
+     "5251f05e8bdcde4733d7084523432f3aad6b75990efadbedbce91cb097ce2b85dfa22fd3c"
+     "a12a86198d76d31009531351f07246937cd7b1d81d3675f8afd759d1279edb1306e12f757"
+     "baf368e265fb429775b1b4d16d88a7b009f00c7",
+     /*.q_hex_str=*/
+     "00d32b57f3d29f741c33ccf95d98b93b4efd56af0f9bc98f9089d8761ecccf65e0ba7feeb"
+     "fbef8fce3bb38a4a5f9614d47a28f137238518ab47f0a12912dc951b1d540632bc570338b"
+     "17ee4f866767b7ba98ac6a057f1a2b27101ee584e9e82d4a83f31ef14d11f1d9105dc38e3"
+     "052a506982ff3679e760c7ad186f361284c9069",
+     /*.dp_hex_str=*/
+     "00c536bf9694f077c2350a4aad69756e5c9351953959f67d295c033e43a0385b7b19cbb4e"
+     "1edf21f6cb4fb7492782fe76c30197d54ec1d0a7329cbcb7be607a2017d79b3462beb25ea"
+     "d50e33a3dc0f58a1614fed4151a5ad8661d744d9d4bc8fe9304a443d7fe823671ce6abe71"
+     "bb206a38a73f72e8143e4251885159b42784f75",
+     /*.dq_hex_str=*/
+     "367023116147e807e936bb466cbbbbd5662bf59f617af9beba3a8a60f04dbb26cf0d72000"
+     "e7c63bd55a389969c0e807caa24964fc8c304adf95e20613adb7e6b08ddbb732a47fd91ab"
+     "0ead83a99eac57b74a235edd6062a5845b62b1fc16f5ae130c16fafff25355b1096b0379e"
+     "3a45569e05ab068c267ff358ac3ad55553f99",
+     /*.coefficient_hex_str=*/
+     "3a47030f3e868a1457f0290ae5e8e1a95fef23f9b8d90b20d8e75d138c94bc01e9922d601"
+     "26a8af6c7142ebb32ced086b52cf1fa5dd389bce61bf6c66ec4c9d47cd08a8b5aad7d9f48"
+     "202003cc19bdce05d1e41b568e60c43aec44a23031282bd46ac47ea77ddf2b8a303a784e2"
+     "7c73f9e0dd5b5f93e7be71361c2db675130d4",
+     /*.public_pem=*/
+     R"(-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvAZ+qQOMJLBjysYUayZ5
+NJnMipOYUghZa5cArNTlGlgEEzFsxazFtJnUeBQhupsNivda5WthedWn/CCY8vxN
+NmpqQWaxXyJU2xyzzl3Uq4C9i9Wttd80tgLDGdTQBCmcBuXiQ3/WJuKEwp7redGC
+C4MLcGBy76L9HIiY0eqvOfufVM52ceorVRKkKQ0+xYu0Fjmhm+ZjCxwnBZuaMlBb
+68b0KzAfn7LPK2JMG2WYcCu+rtOLX9mUHWYf9q3KZf+yUdHzFLztCGH6MOxnbiEp
+5ay6A6bLdZT5PGDO+bKu7kXtxqrdMfhB7h83/WPM/zzruwGKPWMbPUmKeTSHBLtB
+nwIDAQAB
+-----END PUBLIC KEY-----)",
+     /*.private_pem=*/
+     R"(-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC8Bn6pA4wksGPK
+xhRrJnk0mcyKk5hSCFlrlwCs1OUaWAQTMWzFrMW0mdR4FCG6mw2K91rla2F51af8
+IJjy/E02ampBZrFfIlTbHLPOXdSrgL2L1a213zS2AsMZ1NAEKZwG5eJDf9Ym4oTC
+nut50YILgwtwYHLvov0ciJjR6q85+59UznZx6itVEqQpDT7Fi7QWOaGb5mMLHCcF
+m5oyUFvrxvQrMB+fss8rYkwbZZhwK76u04tf2ZQdZh/2rcpl/7JR0fMUvO0IYfow
+7GduISnlrLoDpst1lPk8YM75sq7uRe3Gqt0x+EHuHzf9Y8z/POu7AYo9Yxs9SYp5
+NIcEu0GfAgMBAAECggEAcYsagcX6o01BdfoX6nzZRMJ7mlN28FLKbQZLChOmJjpw
+e4alQNoMqfsbK0g89gscKoclBNXLj19OihrFQjbKCcpJUCVLhz+cLpUun7hZ7RdZ
+X1AyDloz4pXYa4jv9ROLfT7lXA2erOytbzm4yV+TQJBqH/qebcfnQYvbfShTmJcp
+fH2lNYhn5g3+jHb79aakwGTg9q8b88lkDL7gB66jvoEBe3JtCItplXuET5UfrDI/
+8+ef1n2vMqPc6GIyCrD0p4JV90D3OBOWq41V+AwbOKFJ8kGKJ0d5W0SxQJL6F9IV
+rg4zx4mXRxq5cWKLiXd2qAu97n7d9g7KbOy6UPMigQKBgQDj8VJGeEn0wth/WmUG
+RTh4t1R5lrFAZ5ZuM2OZ4r5qjC6o8GUlHwXovc3kcz1whFI0MvOq1rdZkO+tvtvO
+kcsJfOK4Xfoi/TyhKoYZjXbTEAlTE1HwckaTfNex2B02dfiv11nRJ57bEwbhL3V7
+rzaOJl+0KXdbG00W2Ip7AJ8AxwKBgQDTK1fz0p90HDPM+V2YuTtO/VavD5vJj5CJ
+2HYezM9l4Lp/7r+++PzjuzikpflhTUeijxNyOFGKtH8KEpEtyVGx1UBjK8VwM4sX
+7k+GZ2e3upisagV/GisnEB7lhOnoLUqD8x7xTRHx2RBdw44wUqUGmC/zZ552DHrR
+hvNhKEyQaQKBgQDFNr+WlPB3wjUKSq1pdW5ck1GVOVn2fSlcAz5DoDhbexnLtOHt
+8h9stPt0kngv52wwGX1U7B0KcynLy3vmB6IBfXmzRivrJerVDjOj3A9YoWFP7UFR
+pa2GYddE2dS8j+kwSkQ9f+gjZxzmq+cbsgajinP3LoFD5CUYhRWbQnhPdQKBgDZw
+IxFhR+gH6Ta7Rmy7u9VmK/WfYXr5vro6imDwTbsmzw1yAA58Y71Vo4mWnA6AfKok
+lk/IwwSt+V4gYTrbfmsI3btzKkf9kasOrYOpnqxXt0ojXt1gYqWEW2Kx/Bb1rhMM
+Fvr/8lNVsQlrA3njpFVp4FqwaMJn/zWKw61VVT+ZAoGAOkcDDz6GihRX8CkK5ejh
+qV/vI/m42Qsg2OddE4yUvAHpki1gEmqK9scULrsyztCGtSzx+l3TibzmG/bGbsTJ
+1HzQiotarX2fSCAgA8wZvc4F0eQbVo5gxDrsRKIwMSgr1GrEfqd93yuKMDp4TifH
+P54N1bX5PnvnE2HC22dRMNQ=
+-----END PRIVATE KEY-----)"}};
+
 class PemParserTest : public ::testing::Test {
  public:
   PemParserTest() : rsa_(RSA_new()) {}
@@ -324,6 +434,47 @@ TEST_F(PemParserTest, ReadRsaPrivatekey) {
   EXPECT_EQ(
       util::SecretDataAsStringView(key->crt),
       SubtleUtilBoringSSL::bn2str(crt_bn, BN_num_bytes(crt_bn)).ValueOrDie());
+}
+
+TEST_F(PemParserTest, WriteRsaPrivateKey) {
+  for (const RsaKeyTestVector& test_vector : kRsaKeyTestVectors) {
+    SubtleUtilBoringSSL::RsaPrivateKey key;
+    key.n = absl::HexStringToBytes(test_vector.modulus_hex_str);
+    key.e = absl::HexStringToBytes(test_vector.public_exponent_hex_str);
+
+    key.d = util::SecretDataFromStringView(
+        absl::HexStringToBytes(test_vector.private_exponent_hex_str));
+    key.p = util::SecretDataFromStringView(
+        absl::HexStringToBytes(test_vector.p_hex_str));
+    key.q = util::SecretDataFromStringView(
+        absl::HexStringToBytes(test_vector.q_hex_str));
+    key.dp = util::SecretDataFromStringView(
+        absl::HexStringToBytes(test_vector.dp_hex_str));
+    key.dq = util::SecretDataFromStringView(
+        absl::HexStringToBytes(test_vector.dq_hex_str));
+    key.crt = util::SecretDataFromStringView(
+        absl::HexStringToBytes(test_vector.coefficient_hex_str));
+
+    auto pem_result = PemParser::WriteRsaPrivateKey(key);
+    EXPECT_TRUE(pem_result.ok());
+
+    EXPECT_EQ(absl::StripAsciiWhitespace(pem_result.ValueOrDie()),
+              test_vector.private_pem);
+  }
+}
+
+TEST_F(PemParserTest, WriteRsaPublicKey) {
+  for (const RsaKeyTestVector& test_vector : kRsaKeyTestVectors) {
+    SubtleUtilBoringSSL::RsaPublicKey key;
+    key.n = absl::HexStringToBytes(test_vector.modulus_hex_str);
+    key.e = absl::HexStringToBytes(test_vector.public_exponent_hex_str);
+
+    auto pem_result = PemParser::WriteRsaPublicKey(key);
+    EXPECT_TRUE(pem_result.ok());
+
+    EXPECT_EQ(absl::StripAsciiWhitespace(pem_result.ValueOrDie()),
+              test_vector.public_pem);
+  }
 }
 
 TEST_F(PemParserTest, ReadRsaPublicKeyInvalid) {

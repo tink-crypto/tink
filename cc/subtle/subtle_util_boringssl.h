@@ -233,6 +233,14 @@ class SubtleUtilBoringSSL {
   // Copies the CRT params and dp, dq into the RSA key.
   static util::Status CopyCrtParams(const RsaPrivateKey &key, RSA *rsa);
 
+  // Creates a BoringSSL RSA key from an RsaPrivateKey.
+  static util::StatusOr<bssl::UniquePtr<RSA>> BoringSslRsaFromRsaPrivateKey(
+      const RsaPrivateKey &key);
+
+  // Creates a BoringSSL RSA key from an RsaPublicKey.
+  static util::StatusOr<bssl::UniquePtr<RSA>> BoringSslRsaFromRsaPublicKey(
+      const RsaPublicKey &key);
+
   // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
   static const EVP_CIPHER *GetAesCtrCipherForKeySize(uint32_t size_in_bytes);
 

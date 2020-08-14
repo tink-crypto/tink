@@ -269,6 +269,46 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   return rsa_private_key;
 }
 
+util::StatusOr<std::string> PemParser::WriteRsaPublicKey(
+    const SubtleUtilBoringSSL::RsaPublicKey& rsa_key) {
+  auto rsa_statusor =
+      SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(rsa_key);
+  if (!rsa_statusor.ok()) {
+    return rsa_statusor.status();
+  }
+
+  bssl::UniquePtr<RSA> rsa = std::move(rsa_statusor).ValueOrDie();
+  bssl::UniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
+  if (!PEM_write_bio_RSA_PUBKEY(bio.get(), rsa.get())) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "failed to write openssl RSA key to write bio");
+  }
+  return ConvertBioToString(bio.get());
+}
+
+util::StatusOr<std::string> PemParser::WriteRsaPrivateKey(
+    const SubtleUtilBoringSSL::RsaPrivateKey& rsa_key) {
+  auto rsa_statusor =
+      SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(rsa_key);
+  if (!rsa_statusor.ok()) {
+    return rsa_statusor.status();
+  }
+
+  bssl::UniquePtr<RSA> rsa = std::move(rsa_statusor).ValueOrDie();
+  bssl::UniquePtr<EVP_PKEY> evp(EVP_PKEY_new());
+  EVP_PKEY_set1_RSA(evp.get(), rsa.get());
+
+  bssl::UniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
+  if (!PEM_write_bio_PrivateKey(bio.get(), evp.get(),
+                                /*enc=*/nullptr, /*kstr=*/nullptr,
+                                /*klen=*/0,
+                                /*cb=*/nullptr, /*u=*/nullptr)) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "failed to write openssl RSA key to write bio");
+  }
+  return ConvertBioToString(bio.get());
+}
+
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>
 PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
   return util::Status(util::error::UNIMPLEMENTED,

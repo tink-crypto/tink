@@ -38,6 +38,16 @@ class PemParser {
   static util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::RsaPrivateKey>>
   ParseRsaPrivateKey(absl::string_view pem_serialized_key);
 
+  // Writes a given SubtleUtilBoringSSL::RsaPublicKey `rsa_key` into a PEM
+  // serialized RSA public key.
+  static util::StatusOr<std::string> WriteRsaPublicKey(
+      const SubtleUtilBoringSSL::RsaPublicKey& rsa_key);
+
+  // Writes a given SubtleUtilBoringSSL::RsaPrivateKey `rsa_key` into a PEM
+  // serialized RSA private key.
+  static util::StatusOr<std::string> WriteRsaPrivateKey(
+      const SubtleUtilBoringSSL::RsaPrivateKey& rsa_key);
+
   // Parses a given PEM serialized EC public key `pem_serialized_key` into a
   // SubtleUtilBoringSSL::EcKey.
   static util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>

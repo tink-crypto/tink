@@ -1295,7 +1295,7 @@ cc_test(
 
 cc_test(
     name = "rsa_ssa_pss_sign_boringssl_test",
-    size = "small",
+    size = "medium",
     srcs = ["rsa_ssa_pss_sign_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     tags = [
@@ -1344,7 +1344,7 @@ cc_test(
 
 cc_test(
     name = "rsa_ssa_pkcs1_sign_boringssl_test",
-    size = "small",
+    size = "medium",
     srcs = ["rsa_ssa_pkcs1_sign_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     tags = [
@@ -1427,7 +1427,7 @@ cc_test(
 
 cc_test(
     name = "subtle_util_boringssl_test",
-    size = "small",
+    size = "medium",
     srcs = ["subtle_util_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     data = [

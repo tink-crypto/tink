@@ -45,45 +45,16 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPssSignBoringSsl::New(
   auto mgf1_hash = SubtleUtilBoringSSL::EvpHash(params.mgf1_hash);
   if (!mgf1_hash.ok()) return mgf1_hash.status();
 
-  // Check RSA's modulus.
-  auto status_or_n = SubtleUtilBoringSSL::str2bn(private_key.n);
-  if (!status_or_n.ok()) return status_or_n.status();
-  auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      BN_num_bits(status_or_n.ValueOrDie().get()));
-  if (!modulus_status.ok()) return modulus_status;
-
-  // Check RSA's public exponent
-  auto exponent_status = SubtleUtilBoringSSL::ValidateRsaPublicExponent(
-      private_key.e);
-  if (!exponent_status.ok()) return exponent_status;
-
-  bssl::UniquePtr<RSA> rsa(RSA_new());
-  if (rsa == nullptr) {
-    return util::Status(util::error::INTERNAL, "Could not initialize RSA.");
+  // The RSA modulus and exponent are checked as part of the conversion to
+  // bssl::UniquePtr<RSA>.
+  auto rsa = SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(private_key);
+  if (!rsa.ok()) {
+    return rsa.status();
   }
 
-  {
-    auto st = SubtleUtilBoringSSL::CopyKey(private_key, rsa.get());
-    if (!st.ok()) return st;
-  }
-  {
-    auto st = SubtleUtilBoringSSL::CopyPrimeFactors(private_key, rsa.get());
-    if (!st.ok()) return st;
-  }
-  {
-    auto st = SubtleUtilBoringSSL::CopyCrtParams(private_key, rsa.get());
-    if (!st.ok()) return st;
-  }
-
-  if (RSA_check_key(rsa.get()) == 0 || RSA_check_fips(rsa.get()) == 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("Could not load RSA key: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
-  }
-
-  return {absl::WrapUnique(
-      new RsaSsaPssSignBoringSsl(std::move(rsa), sig_hash.ValueOrDie(),
-                                 mgf1_hash.ValueOrDie(), params.salt_length))};
+  return {absl::WrapUnique(new RsaSsaPssSignBoringSsl(
+      std::move(rsa).ValueOrDie(), sig_hash.ValueOrDie(),
+      mgf1_hash.ValueOrDie(), params.salt_length))};
 }
 
 RsaSsaPssSignBoringSsl::RsaSsaPssSignBoringSsl(bssl::UniquePtr<RSA> private_key,
