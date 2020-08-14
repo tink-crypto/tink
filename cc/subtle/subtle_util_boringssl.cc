@@ -531,6 +531,27 @@ util::Status SubtleUtilBoringSSL::ValidateRsaModulusSize(size_t modulus_size) {
 }
 
 // static
+util::Status SubtleUtilBoringSSL::ValidateRsaPublicExponent(
+    absl::string_view exponent) {
+  auto status_or_e = subtle::SubtleUtilBoringSSL::str2bn(exponent);
+  if (!status_or_e.ok()) return status_or_e.status();
+  auto e = status_or_e.ValueOrDie().get();
+  if (!BN_is_odd(e)) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "Public exponent must be odd.");
+  }
+
+  if (BN_cmp_word(e, 65536) <= 0) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "Public exponent must be greater than 65536.");
+  }
+
+  return util::Status::OK;
+}
+
+// static
 std::string SubtleUtilBoringSSL::GetErrors() {
   std::string ret;
   ERR_print_errors_cb(

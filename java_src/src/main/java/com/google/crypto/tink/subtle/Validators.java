@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Locale;
@@ -110,6 +111,29 @@ public final class Validators {
               "Modulus size is %d; only modulus size >= 2048-bit is supported", modulusSize));
     }
   }
+
+  /**
+   * Validates whether {@code publicExponent} is odd and greater than 65536.
+   *
+   * <p>The primes p and q are chosen such that (p-1)(q-1) is relatively prime to the public
+   * exponent. Therefore, the public exponent must be odd. Furthermore, choosing a public exponent
+   * which is not greater than 65536 can lead to weak instantiations of RSA. A public exponent which
+   * is odd and greater than 65536 conforms to the requirements set by NIST FIPS 186-4
+   * (Appendix B.3.1).
+   *
+   * @throws GeneralSecurityException if {@code publicExponent} is even or not greater than 65536.
+   */
+  public static void validateRsaPublicExponent(
+      BigInteger publicExponent) throws GeneralSecurityException {
+    if (!publicExponent.testBit(0)) {
+      throw new GeneralSecurityException("Public exponent must be odd.");
+    }
+
+    if (publicExponent.compareTo(BigInteger.valueOf(65536)) <= 0) {
+      throw new GeneralSecurityException("Public exponent must be greater than 65536.");
+    }
+  }
+
 
   /*
    * @throws IOException if {@code f} exists.

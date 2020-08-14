@@ -23,6 +23,7 @@ import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -143,6 +144,27 @@ public class ValidatorsTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
+    }
+  }
+
+  @Test
+  public void testValidateRsaPublicExponent() throws Exception {
+    try {
+      Validators.validateRsaPublicExponent(BigInteger.valueOf(65537));
+    } catch (GeneralSecurityException e) {
+      // Letting the exception pass through on failure
+    }
+    try {
+      Validators.validateRsaPublicExponent(BigInteger.valueOf(65535));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // Expected
+    }
+    try {
+      Validators.validateRsaPublicExponent(BigInteger.valueOf(65538));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // Expected
     }
   }
 

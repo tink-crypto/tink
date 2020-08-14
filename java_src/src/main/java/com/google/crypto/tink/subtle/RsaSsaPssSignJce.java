@@ -43,6 +43,7 @@ public final class RsaSsaPssSignJce implements PublicKeySign {
       throws GeneralSecurityException {
     Validators.validateSignatureHash(sigHash);
     Validators.validateRsaModulusSize(priv.getModulus().bitLength());
+    Validators.validateRsaPublicExponent(priv.getPublicExponent());
     this.privateKey = priv;
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
     this.publicKey =

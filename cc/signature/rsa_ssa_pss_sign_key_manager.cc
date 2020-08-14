@@ -135,6 +135,9 @@ Status RsaSsaPssSignKeyManager::ValidateKeyFormat(
   auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
       key_format.modulus_size_in_bits());
   if (!modulus_status.ok()) return modulus_status;
+  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
+      key_format.public_exponent());
+  if (!exponent_status.ok()) return exponent_status;
   return RsaSsaPssVerifyKeyManager().ValidateParams(key_format.params());
 }
 

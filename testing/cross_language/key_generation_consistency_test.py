@@ -235,7 +235,13 @@ def rsa_ssa_pkcs1_test_cases():
            (common_pb2.HashType.Name(hash_type), modulus_size,
             public_exponent),
            gen(hash_type, modulus_size, public_exponent))
-  # TODO(b/160214390): Add tests for public_exponent, once this bug is resolved.
+  for public_exponent in [0, 1, 2, 3, 65536, 65537, 65538]:
+    hash_type = common_pb2.SHA256
+    modulus_size = 2048
+    yield ('RsaSsaPkcs1PrivateKey(%s,%d,%d)' %
+           (common_pb2.HashType.Name(hash_type), modulus_size,
+            public_exponent),
+           gen(hash_type, modulus_size, public_exponent))
 
 
 def rsa_ssa_pss_test_cases():
@@ -281,6 +287,17 @@ def rsa_ssa_pss_test_cases():
           public_exponent),
          gen(hash_type1, hash_type2, salt_length, modulus_size,
              public_exponent))
+
+  for public_exponent in [0, 1, 2, 3, 65536, 65537, 65538]:
+    hash_type = common_pb2.SHA256
+    salt_length = 32
+    modulus_size = 2048
+    yield ('RsaSsaPssPrivateKey(%s,%s,%d,%d,%d)' %
+           (common_pb2.HashType.Name(hash_type),
+            common_pb2.HashType.Name(hash_type), salt_length, modulus_size,
+            public_exponent),
+           gen(hash_type, hash_type, salt_length, modulus_size,
+               public_exponent))
 
 
 def setUpModule():

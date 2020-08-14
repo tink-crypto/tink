@@ -84,6 +84,7 @@ class RsaSsaPssVerifyKeyManager extends KeyTypeManager<RsaSsaPssPublicKey> {
   public void validateKey(RsaSsaPssPublicKey pubKey) throws GeneralSecurityException {
     Validators.validateVersion(pubKey.getVersion(), getVersion());
     Validators.validateRsaModulusSize(new BigInteger(1, pubKey.getN().toByteArray()).bitLength());
+    Validators.validateRsaPublicExponent(new BigInteger(1, pubKey.getE().toByteArray()));
     SigUtil.validateRsaSsaPssParams(pubKey.getParams());
   }
 }

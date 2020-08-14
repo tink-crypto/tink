@@ -76,12 +76,16 @@ public class RsaSsaPkcs1VerifyJceTest {
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
+        // Do not perform the Wycheproof test if the RSA public exponent is small.
+        if (WycheproofTestUtil.checkFlags(testcase, "SmallPublicKey")) {
+          continue;
+        }
         String tcId =
             String.format(
                 "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
-        RsaSsaPkcs1VerifyJce verifier;
         RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(x509keySpec);
-        verifier = new RsaSsaPkcs1VerifyJce(pubKey, hash);
+
+        RsaSsaPkcs1VerifyJce verifier = new RsaSsaPkcs1VerifyJce(pubKey, hash);
         byte[] msg = getMessage(testcase);
         byte[] sig = Hex.decode(testcase.getString("sig"));
         String result = testcase.getString("result");

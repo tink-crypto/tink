@@ -17,6 +17,7 @@
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 
 #include "absl/strings/string_view.h"
+#include "absl/strings/str_cat.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -69,6 +70,9 @@ Status RsaSsaPkcs1VerifyKeyManager::ValidateKey(
   auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
       BN_num_bits(status_or_n.ValueOrDie().get()));
   if (!modulus_status.ok()) return modulus_status;
+  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
+      key.e());
+  if (!exponent_status.ok()) return exponent_status;
   return ValidateParams(key.params());
 }
 

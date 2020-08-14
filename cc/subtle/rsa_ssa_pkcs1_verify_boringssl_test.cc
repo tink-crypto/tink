@@ -262,7 +262,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs12048SHA256) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
   ASSERT_TRUE(TestSignatures("rsa_signature_2048_sha256_test.json",
-                             /*allow_skipping=*/false));
+                             /*allow_skipping=*/true));
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA256) {
@@ -271,7 +271,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA256) {
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
   ASSERT_TRUE(TestSignatures("rsa_signature_3072_sha256_test.json",
-                             /*allow_skipping=*/false));
+                             /*allow_skipping=*/true));
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA512) {
@@ -280,7 +280,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA512) {
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
   ASSERT_TRUE(TestSignatures("rsa_signature_3072_sha512_test.json",
-                             /*allow_skipping=*/false));
+                             /*allow_skipping=*/true));
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs14096SHA512) {
@@ -288,7 +288,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs14096SHA512) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
   ASSERT_TRUE(TestSignatures("rsa_signature_4096_sha512_test.json",
-                             /*allow_skipping=*/false));
+                             /*allow_skipping=*/true));
 }
 
 // FIPS-only mode test

@@ -38,6 +38,7 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
       throws GeneralSecurityException {
     Validators.validateSignatureHash(hash);
     Validators.validateRsaModulusSize(pubKey.getModulus().bitLength());
+    Validators.validateRsaPublicExponent(pubKey.getPublicExponent());
     this.publicKey = pubKey;
     this.hash = hash;
   }

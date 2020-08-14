@@ -52,6 +52,11 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPssSignBoringSsl::New(
       BN_num_bits(status_or_n.ValueOrDie().get()));
   if (!modulus_status.ok()) return modulus_status;
 
+  // Check RSA's public exponent
+  auto exponent_status = SubtleUtilBoringSSL::ValidateRsaPublicExponent(
+      private_key.e);
+  if (!exponent_status.ok()) return exponent_status;
+
   bssl::UniquePtr<RSA> rsa(RSA_new());
   if (rsa == nullptr) {
     return util::Status(util::error::INTERNAL, "Could not initialize RSA.");

@@ -56,6 +56,12 @@ RsaSsaPssVerifyBoringSsl::New(
   auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
       BN_num_bits(status_or_n.ValueOrDie().get()));
   if (!modulus_status.ok()) return modulus_status;
+
+  // Check RSA's public exponent
+  auto exponent_status = SubtleUtilBoringSSL::ValidateRsaPublicExponent(
+      pub_key.e);
+  if (!exponent_status.ok()) return exponent_status;
+
   bssl::UniquePtr<RSA> rsa(RSA_new());
   if (rsa.get() == nullptr) {
     return util::Status(util::error::INTERNAL,

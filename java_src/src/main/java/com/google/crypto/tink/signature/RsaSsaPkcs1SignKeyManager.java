@@ -136,6 +136,8 @@ public final class RsaSsaPkcs1SignKeyManager
     Validators.validateVersion(privKey.getVersion(), getVersion());
     Validators.validateRsaModulusSize(
         new BigInteger(1, privKey.getPublicKey().getN().toByteArray()).bitLength());
+    Validators.validateRsaPublicExponent(
+        new BigInteger(1, privKey.getPublicKey().getE().toByteArray()));
     SigUtil.validateRsaSsaPkcs1Params(privKey.getPublicKey().getParams());
   }
 
@@ -147,6 +149,8 @@ public final class RsaSsaPkcs1SignKeyManager
           throws GeneralSecurityException {
         SigUtil.validateRsaSsaPkcs1Params(keyFormat.getParams());
         Validators.validateRsaModulusSize(keyFormat.getModulusSizeInBits());
+        Validators.validateRsaPublicExponent(
+            new BigInteger(1, keyFormat.getPublicExponent().toByteArray()));
       }
 
       @Override

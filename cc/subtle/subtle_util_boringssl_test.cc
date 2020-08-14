@@ -520,6 +520,33 @@ TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {
       Not(IsOk()));
 }
 
+static const std::vector<BN_ULONG>* public_exponent_fail_tests =
+    new std::vector<BN_ULONG>({2, 3, 4, 65536, 65538});
+
+TEST(SubtleUtilBoringSSLTest, ValidateRsaPublicExponent) {
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+  bssl::UniquePtr<BIGNUM> e_bn(BN_new());
+
+  for (const BN_ULONG test : *public_exponent_fail_tests) {
+    BN_set_word(e_bn.get(), test);
+    auto e_str = SubtleUtilBoringSSL::bn2str(e_bn.get(),
+                                             BN_num_bytes(e_bn.get()));
+    EXPECT_TRUE(e_str.ok());
+    ASSERT_THAT(
+      SubtleUtilBoringSSL::ValidateRsaPublicExponent(e_str.ValueOrDie()),
+      Not(IsOk()));
+  }
+
+  BN_set_word(e_bn.get(), RSA_F4);
+  auto e_str = SubtleUtilBoringSSL::bn2str(e_bn.get(),
+                                           BN_num_bytes(e_bn.get()));
+  EXPECT_TRUE(e_str.ok());
+  ASSERT_THAT(
+      SubtleUtilBoringSSL::ValidateRsaPublicExponent(e_str.ValueOrDie()),
+      IsOk());
+}
+
 TEST(SublteUtilBoringSSLTest, GetCipherForKeySize) {
   EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(16),
             EVP_aes_128_ctr());

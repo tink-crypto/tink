@@ -30,8 +30,6 @@
 #include "proto/rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"
 
-// TODO(quannguyen):
-//  + Validate possible e.
 namespace crypto {
 namespace tink {
 
@@ -69,6 +67,9 @@ Status RsaSsaPssVerifyKeyManager::ValidateKey(
   auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
       BN_num_bits(status_or_n.ValueOrDie().get()));
   if (!modulus_status.ok()) return modulus_status;
+  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
+      key.e());
+  if (!exponent_status.ok()) return exponent_status;
   return ValidateParams(key.params());
 }
 
