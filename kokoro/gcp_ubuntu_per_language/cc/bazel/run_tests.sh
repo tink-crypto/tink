@@ -17,8 +17,17 @@ if (( $? != 0 || NUM_MATCHES != 1)); then
   exit 1
 fi
 
-LOCAL_FIPS_REPOSITORY="local_repository(\n  name = \"boringssl\",\n  path = \"third_party\/boringssl_fips\/\",\n)"
-sed -i '/'"${APPEND_AFTER}"'/a\\n'"${LOCAL_FIPS_REPOSITORY}" WORKSPACE
+mapfile LOCAL_FIPS_REPOSITORY <<EOM
+local_repository(
+  name = "boringssl",
+  path = "third_party/boringssl_fips",
+)
+EOM
 
-bazel build --define=use_only_fips=on
-bazel test ... --define=use_only_fips=on --test_tag_filters=fips
+printf -v INSERT_TEXT '\\n%s' "${LOCAL_FIPS_REPOSITORY[@]//$'\n'/}"
+sed -i.bak "/${APPEND_AFTER}/a \\${INSERT_TEXT}" WORKSPACE
+
+bazel build --define=use_only_fips=on -- ...
+bazel test --define=use_only_fips=on --test_tag_filters=fips -- ...
+
+mv WORKSPACE.bak WORKSPACE
