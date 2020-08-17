@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.aead.AeadKeyTemplatesTest');
-goog.setTestOnly('tink.aead.AeadKeyTemplatesTest');
+import 'jasmine';
 
-const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const {PbKeyTemplate} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {PbKeyTemplate} from '../internal/proto';
+
+import {AeadKeyTemplates} from './aead_key_templates';
 
 describe('aead key templates test', function() {
   it('aes128 ctr hmac sha256', function() {

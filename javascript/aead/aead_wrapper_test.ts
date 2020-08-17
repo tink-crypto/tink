@@ -4,16 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.aead.AeadWrapperTest');
-goog.setTestOnly('tink.aead.AeadWrapperTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const {AeadWrapper} = goog.require('google3.third_party.tink.javascript.aead.aead_wrapper');
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
-const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+import {SecurityException} from '../exception/security_exception';
+import {CryptoFormat} from '../internal/crypto_format';
+import * as PrimitiveSet from '../internal/primitive_set';
+import {PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../internal/proto';
+import * as Bytes from '../subtle/bytes';
+import {assertExists} from '../testing/internal/test_utils';
+
+import {AeadWrapper} from './aead_wrapper';
+import {Aead} from './internal/aead';
 
 describe('aead wrapper test', function() {
   it('new aead primitive set without primary', async function() {
@@ -44,7 +45,7 @@ describe('aead wrapper test', function() {
 
     // Ciphertext should begin with primary key output prefix.
     expect(ciphertext.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE))
-        .toEqual(primitiveSet.getPrimary().getIdentifier());
+        .toEqual(assertExists(primitiveSet.getPrimary()).getIdentifier());
   });
 
   it('decrypt bad ciphertext', async function() {
@@ -88,7 +89,7 @@ describe('aead wrapper test', function() {
     const key =
         createKey(keyId, PbOutputPrefixType.LEGACY, /* enabled = */ true);
     const entry =
-        primitiveSet.addPrimitive(new DummyAead(Uint8Array[0xFF]), key);
+        primitiveSet.addPrimitive(new DummyAead(new Uint8Array([0xFF])), key);
     primitiveSet.setPrimary(entry);
     const aead2 = new AeadWrapper().wrap(primitiveSet);
 
@@ -173,33 +174,24 @@ describe('aead wrapper test', function() {
  * @final
  */
 class ExceptionText {
-  /** @return {string} */
-  static nullPrimitiveSet() {
+  static nullPrimitiveSet(): string {
     return 'SecurityException: Primitive set has to be non-null.';
   }
 
-  /** @return {string} */
-  static primitiveSetWithoutPrimary() {
+  static primitiveSetWithoutPrimary(): string {
     return 'SecurityException: Primary has to be non-null.';
   }
 
-  /** @return {string} */
-  static cannotBeDecrypted() {
+  static cannotBeDecrypted(): string {
     return 'SecurityException: Decryption failed for the given ciphertext.';
   }
 }
 
-/**
- * Function for creating keys for testing purposes.
- *
- * @param {number} keyId
- * @param {!PbOutputPrefixType} outputPrefix
- * @param {boolean} enabled
- *
- * @return {!PbKeysetKey}
- */
-const createKey = function(keyId, outputPrefix, enabled) {
-  let key = new PbKeysetKey();
+/** Function for creating keys for testing purposes. */
+function createKey(
+    keyId: number, outputPrefix: PbOutputPrefixType,
+    enabled: boolean): PbKeysetKey {
+  const key = new PbKeysetKey();
 
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
@@ -211,7 +203,7 @@ const createKey = function(keyId, outputPrefix, enabled) {
   key.setKeyId(keyId);
 
   return key;
-};
+}
 
 /**
  * Creates a primitive set with 'numberOfPrimitives' primitives. The keys
@@ -219,17 +211,14 @@ const createKey = function(keyId, outputPrefix, enabled) {
  * [1, ..., numberOfPrimitives] and the primitive corresponding to key with id
  * 'numberOfPrimitives' is set to be primary whenever opt_withPrimary is set to
  * true (where true is the default value).
- *
- * @param {boolean=} opt_withPrimary
- *
- * @return {!PrimitiveSet.PrimitiveSet}
  */
-const createPrimitiveSet = function(opt_withPrimary = true) {
+function createPrimitiveSet(opt_withPrimary: boolean = true):
+    PrimitiveSet.PrimitiveSet<Aead> {
   const numberOfPrimitives = 5;
 
-  const primitiveSet = new PrimitiveSet.PrimitiveSet(DummyAead);
+  const primitiveSet = new PrimitiveSet.PrimitiveSet<DummyAead>(DummyAead);
   for (let i = 1; i < numberOfPrimitives; i++) {
-    let /** @type {!PbOutputPrefixType} */ outputPrefix;
+    let outputPrefix: PbOutputPrefixType;
     switch (i % 3) {
       case 0:
         outputPrefix = PbOutputPrefixType.TINK;
@@ -253,24 +242,17 @@ const createPrimitiveSet = function(opt_withPrimary = true) {
   }
 
   return primitiveSet;
-};
+}
 
-/**
- * @final
- */
+/** @final */
 class DummyAead extends Aead {
-  /**
-   * @param {!Uint8Array} primitiveIdentifier
-   */
-  constructor(primitiveIdentifier) {
+  constructor(private readonly primitiveIdentifier: Uint8Array) {
     super();
-    /** @private @const {!Uint8Array} */
-    this.primitiveIdentifier_ = primitiveIdentifier;
   }
 
   /** @override*/
-  async encrypt(plaintext, opt_associatedData) {
-    const result = Bytes.concat(plaintext, this.primitiveIdentifier_);
+  async encrypt(plaintext: Uint8Array, opt_associatedData?: Uint8Array) {
+    const result = Bytes.concat(plaintext, this.primitiveIdentifier);
     if (opt_associatedData) {
       return Bytes.concat(result, opt_associatedData);
     }
@@ -278,7 +260,7 @@ class DummyAead extends Aead {
   }
 
   /** @override*/
-  async decrypt(ciphertext, opt_associatedData) {
+  async decrypt(ciphertext: Uint8Array, opt_associatedData?: Uint8Array) {
     if (opt_associatedData) {
       const aad = ciphertext.subarray(
           ciphertext.length - opt_associatedData.length, ciphertext.length);
@@ -290,14 +272,13 @@ class DummyAead extends Aead {
     }
 
     const primitiveIdentifier = ciphertext.subarray(
-        ciphertext.length - this.primitiveIdentifier_.length,
-        ciphertext.length);
+        ciphertext.length - this.primitiveIdentifier.length, ciphertext.length);
     if ([...primitiveIdentifier].toString() !=
-        [...this.primitiveIdentifier_].toString()) {
+        [...this.primitiveIdentifier].toString()) {
       throw new SecurityException(ExceptionText.cannotBeDecrypted());
     }
 
     return ciphertext.subarray(
-        0, ciphertext.length - this.primitiveIdentifier_.length);
+        0, ciphertext.length - this.primitiveIdentifier.length);
   }
 }

@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.aead.AesCtrHmacAeadKeyManagerTest');
-goog.setTestOnly('tink.aead.AesCtrHmacAeadKeyManagerTest');
+import 'jasmine';
 
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const {AesCtrHmacAeadKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_manager');
-const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
-const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData} from '../internal/proto';
+import {Mac} from '../mac';
+import * as Random from '../subtle/random';
+import {assertExists} from '../testing/internal/test_utils';
+
+import {AesCtrHmacAeadKeyManager} from './aes_ctr_hmac_aead_key_manager';
+import {Aead} from './internal/aead';
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
 const VERSION = 0;
@@ -19,72 +20,71 @@ const VERSION = 0;
 /////////////////////////////////////////////////////////////////////////////
 // Helper functions for tests
 
-/**
- * creates new AesCtrHmacAeadKeyFormat with allowed parameters
- * @return {!PbAesCtrHmacAeadKeyFormat}
- */
-const createTestKeyFormat = function() {
+/** creates new AesCtrHmacAeadKeyFormat with allowed parameters */
+function createTestKeyFormat(): PbAesCtrHmacAeadKeyFormat {
   const KEY_SIZE = 16;
   const IV_SIZE = 12;
   const TAG_SIZE = 16;
 
 
-  let keyFormat = new PbAesCtrHmacAeadKeyFormat().setAesCtrKeyFormat(
-      new PbAesCtrKeyFormat());
-  keyFormat.getAesCtrKeyFormat().setKeySize(KEY_SIZE);
-  keyFormat.getAesCtrKeyFormat().setParams(new PbAesCtrParams());
-  keyFormat.getAesCtrKeyFormat().getParams().setIvSize(IV_SIZE);
+  const keyFormat = new PbAesCtrHmacAeadKeyFormat();
+  const aesCtrKeyFormat = new PbAesCtrKeyFormat();
+  aesCtrKeyFormat.setKeySize(KEY_SIZE);
+  const aesCtrParams = new PbAesCtrParams();
+  aesCtrParams.setIvSize(IV_SIZE);
+  aesCtrKeyFormat.setParams(aesCtrParams);
+  keyFormat.setAesCtrKeyFormat(aesCtrKeyFormat);
 
   // set HMAC key
-  keyFormat.setHmacKeyFormat(new PbHmacKeyFormat());
-  keyFormat.getHmacKeyFormat().setKeySize(KEY_SIZE);
-  keyFormat.getHmacKeyFormat().setParams(new PbHmacParams());
-  keyFormat.getHmacKeyFormat().getParams().setHash(PbHashType.SHA1);
-  keyFormat.getHmacKeyFormat().getParams().setTagSize(TAG_SIZE);
+  const hmacKeyFormat = new PbHmacKeyFormat();
+  hmacKeyFormat.setKeySize(KEY_SIZE);
+  const hmacParams = new PbHmacParams();
+  hmacParams.setHash(PbHashType.SHA1);
+  hmacParams.setTagSize(TAG_SIZE);
+  hmacKeyFormat.setParams(hmacParams);
+  keyFormat.setHmacKeyFormat(hmacKeyFormat);
 
   return keyFormat;
-};
+}
 
-/**
- * creates new AesCtrHmacAeadKey with allowed parameters
- * @return {!PbAesCtrHmacAeadKey}
- */
-const createTestKey = function() {
+/** creates new AesCtrHmacAeadKey with allowed parameters */
+function createTestKey(): PbAesCtrHmacAeadKey {
   const KEY_SIZE = 16;
   const IV_SIZE = 12;
   const TAG_SIZE = 16;
 
 
-  let key =
-      new PbAesCtrHmacAeadKey().setVersion(0).setAesCtrKey(new PbAesCtrKey());
-  key.getAesCtrKey().setVersion(0);
-  key.getAesCtrKey().setParams(new PbAesCtrParams());
-  key.getAesCtrKey().getParams().setIvSize(IV_SIZE);
-  key.getAesCtrKey().setKeyValue(Random.randBytes(KEY_SIZE));
+  const key = new PbAesCtrHmacAeadKey();
+  key.setVersion(0);
+  const aesCtrKey = new PbAesCtrKey();
+  aesCtrKey.setVersion(0);
+  const aesCtrParams = new PbAesCtrParams();
+  aesCtrParams.setIvSize(IV_SIZE);
+  aesCtrKey.setParams(aesCtrParams);
+  aesCtrKey.setKeyValue(Random.randBytes(KEY_SIZE));
+  key.setAesCtrKey(aesCtrKey);
 
   // set HMAC key
-  key.setHmacKey(new PbHmacKey());
-  key.getHmacKey().setVersion(0);
-  key.getHmacKey().setParams(new PbHmacParams());
-  key.getHmacKey().getParams().setHash(PbHashType.SHA1);
-  key.getHmacKey().getParams().setTagSize(TAG_SIZE);
-  key.getHmacKey().setKeyValue(Random.randBytes(KEY_SIZE));
+  const hmacKey = new PbHmacKey();
+  hmacKey.setVersion(0);
+  const hmacParams = new PbHmacParams();
+  hmacParams.setHash(PbHashType.SHA1);
+  hmacParams.setTagSize(TAG_SIZE);
+  hmacKey.setParams(hmacParams);
+  hmacKey.setKeyValue(Random.randBytes(KEY_SIZE));
+  key.setHmacKey(hmacKey);
 
   return key;
-};
+}
 
-/**
- * creates new PbKeyData with allowed parameters
- * @return {!PbKeyData}
- */
-const createTestKeyData = function() {
-  let keyData = new PbKeyData()
-                    .setTypeUrl(KEY_TYPE)
-                    .setValue(createTestKey().serializeBinary())
-                    .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
-
+/** creates new PbKeyData with allowed parameters */
+function createTestKeyData(): PbKeyData {
+  const keyData = new PbKeyData()
+                      .setTypeUrl(KEY_TYPE)
+                      .setValue(createTestKey().serializeBinary())
+                      .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
   return keyData;
-};
+}
 
 describe('aes ctr hmac aead key manager test', function() {
   /////////////////////////////////////////////////////////////////////////////
@@ -124,11 +124,11 @@ describe('aes ctr hmac aead key manager test', function() {
 
   // newKey method -- bad parametrs of AES CTR KEY format
   it('new key not supported aes ctr key size', async function() {
-    const /** number */ keySize = 11;
+    const keySize: number = 11;
     const manager = new AesCtrHmacAeadKeyManager();
 
-    let keyFormat = createTestKeyFormat();
-    keyFormat.getAesCtrKeyFormat().setKeySize(keySize);
+    const keyFormat = createTestKeyFormat();
+    keyFormat.getAesCtrKeyFormat()?.setKeySize(keySize);
 
     try {
       manager.getKeyFactory().newKey(keyFormat);
@@ -141,16 +141,16 @@ describe('aes ctr hmac aead key manager test', function() {
     }
     fail('An exception should be thrown.');
   });
-
   it('new key iv size out of range', async function() {
-    const /** Array<number> */ ivSizeOutOfRange = [10, 18];
+    const ivSizeOutOfRange: number[] = [10, 18];
     const manager = new AesCtrHmacAeadKeyManager();
 
-    let keyFormat = createTestKeyFormat();
+    const keyFormat = createTestKeyFormat();
 
     const ivSizeOutOfRangeLength = ivSizeOutOfRange.length;
     for (let i = 0; i < ivSizeOutOfRangeLength; i++) {
-      keyFormat.getAesCtrKeyFormat().getParams().setIvSize(ivSizeOutOfRange[i]);
+      keyFormat.getAesCtrKeyFormat()?.getParams()?.setIvSize(
+          ivSizeOutOfRange[i]);
       try {
         manager.getKeyFactory().newKey(keyFormat);
       } catch (e) {
@@ -166,11 +166,11 @@ describe('aes ctr hmac aead key manager test', function() {
 
   // newKey method -- bad parametrs of HMAC KEY format
   it('new key small hmac key size', async function() {
-    const /** number */ keySize = 11;
+    const keySize: number = 11;
     const manager = new AesCtrHmacAeadKeyManager();
 
-    let keyFormat = createTestKeyFormat();
-    keyFormat.getHmacKeyFormat().setKeySize(keySize);
+    const keyFormat = createTestKeyFormat();
+    keyFormat.getHmacKeyFormat()?.setKeySize(keySize);
 
     try {
       manager.getKeyFactory().newKey(keyFormat);
@@ -187,8 +187,8 @@ describe('aes ctr hmac aead key manager test', function() {
   it('new key hash type unsupported', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
 
-    let keyFormat = createTestKeyFormat();
-    keyFormat.getHmacKeyFormat().getParams().setHash(PbHashType.UNKNOWN_HASH);
+    const keyFormat = createTestKeyFormat();
+    keyFormat.getHmacKeyFormat()?.getParams()?.setHash(PbHashType.UNKNOWN_HASH);
 
     try {
       manager.getKeyFactory().newKey(keyFormat);
@@ -203,8 +203,8 @@ describe('aes ctr hmac aead key manager test', function() {
     const SMALL_TAG_SIZE = 8;
     const manager = new AesCtrHmacAeadKeyManager();
 
-    let keyFormat = createTestKeyFormat();
-    keyFormat.getHmacKeyFormat().getParams().setTagSize(SMALL_TAG_SIZE);
+    const keyFormat = createTestKeyFormat();
+    keyFormat.getHmacKeyFormat()?.getParams()?.setTagSize(SMALL_TAG_SIZE);
 
     try {
       manager.getKeyFactory().newKey(keyFormat);
@@ -226,12 +226,13 @@ describe('aes ctr hmac aead key manager test', function() {
     ];
     const manager = new AesCtrHmacAeadKeyManager();
 
-    let keyFormat = createTestKeyFormat();
+    const keyFormat = createTestKeyFormat();
 
     const tagSizesLength = tagSizes.length;
     for (let i = 0; i < tagSizesLength; i++) {
-      keyFormat.getHmacKeyFormat().getParams().setHash(tagSizes[i]['hashType']);
-      keyFormat.getHmacKeyFormat().getParams().setTagSize(
+      keyFormat.getHmacKeyFormat()?.getParams()?.setHash(
+          tagSizes[i]['hashType']);
+      keyFormat.getHmacKeyFormat()?.getParams()?.setTagSize(
           tagSizes[i]['tagSize']);
       try {
         manager.getKeyFactory().newKey(keyFormat);
@@ -251,25 +252,23 @@ describe('aes ctr hmac aead key manager test', function() {
 
     const keyFormat = createTestKeyFormat();
 
-    const key = /** @type {!PbAesCtrHmacAeadKey}*/ (
-        manager.getKeyFactory().newKey(keyFormat));
+    const key = manager.getKeyFactory().newKey(keyFormat);
 
     // testing AES CTR key
-    expect(key.getAesCtrKey().getKeyValue().length)
-        .toBe(keyFormat.getAesCtrKeyFormat().getKeySize());
-    expect(key.getAesCtrKey().getVersion()).toBe(0);
-    expect(key.getAesCtrKey().getParams().getIvSize())
-        .toBe(keyFormat.getAesCtrKeyFormat().getParams().getIvSize());
-
+    expect(key.getAesCtrKey()?.getKeyValue().length)
+        .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
+    expect(key.getAesCtrKey()?.getVersion()).toBe(0);
+    expect(key.getAesCtrKey()?.getParams()?.getIvSize())
+        .toBe(keyFormat.getAesCtrKeyFormat()?.getParams()?.getIvSize());
 
     // testing HMAC key
-    expect(key.getHmacKey().getKeyValue().length)
-        .toBe(keyFormat.getHmacKeyFormat().getKeySize());
-    expect(key.getHmacKey().getVersion()).toBe(0);
-    expect(key.getHmacKey().getParams().getHash())
-        .toBe(keyFormat.getHmacKeyFormat().getParams().getHash());
-    expect(key.getHmacKey().getParams().getTagSize())
-        .toBe(keyFormat.getHmacKeyFormat().getParams().getTagSize());
+    expect(key.getHmacKey()?.getKeyValue()?.length)
+        .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
+    expect(key.getHmacKey()?.getVersion()).toBe(0);
+    expect(key.getHmacKey()?.getParams()?.getHash())
+        .toBe(keyFormat.getHmacKeyFormat()?.getParams()?.getHash());
+    expect(key.getHmacKey()?.getParams()?.getTagSize())
+        .toBe(keyFormat.getHmacKeyFormat()?.getParams()?.getTagSize());
   });
 
   it('new key via serialized format proto', async function() {
@@ -278,25 +277,24 @@ describe('aes ctr hmac aead key manager test', function() {
     const keyFormat = createTestKeyFormat();
     const serializedKeyFormat = keyFormat.serializeBinary();
 
-    const key = /** @type {!PbAesCtrHmacAeadKey} */ (
-        manager.getKeyFactory().newKey(serializedKeyFormat));
+    const key = manager.getKeyFactory().newKey(serializedKeyFormat);
 
     // testing AES CTR key
-    expect(key.getAesCtrKey().getKeyValue().length)
-        .toBe(keyFormat.getAesCtrKeyFormat().getKeySize());
-    expect(key.getAesCtrKey().getVersion()).toBe(0);
-    expect(key.getAesCtrKey().getParams().getIvSize())
-        .toBe(keyFormat.getAesCtrKeyFormat().getParams().getIvSize());
+    expect(key.getAesCtrKey()?.getKeyValue().length)
+        .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
+    expect(key.getAesCtrKey()?.getVersion()).toBe(0);
+    expect(key.getAesCtrKey()?.getParams()?.getIvSize())
+        .toBe(keyFormat.getAesCtrKeyFormat()?.getParams()?.getIvSize());
 
 
     // testing HMAC key
-    expect(key.getHmacKey().getKeyValue().length)
-        .toBe(keyFormat.getHmacKeyFormat().getKeySize());
-    expect(key.getHmacKey().getVersion()).toBe(0);
-    expect(key.getHmacKey().getParams().getHash())
-        .toBe(keyFormat.getHmacKeyFormat().getParams().getHash());
-    expect(key.getHmacKey().getParams().getTagSize())
-        .toBe(keyFormat.getHmacKeyFormat().getParams().getTagSize());
+    expect(key.getHmacKey()?.getKeyValue()?.length)
+        .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
+    expect(key.getHmacKey()?.getVersion()).toBe(0);
+    expect(key.getHmacKey()?.getParams()?.getHash())
+        .toBe(keyFormat.getHmacKeyFormat()?.getParams()?.getHash());
+    expect(key.getHmacKey()?.getParams()?.getTagSize())
+        .toBe(keyFormat.getHmacKeyFormat()?.getParams()?.getTagSize());
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -336,10 +334,10 @@ describe('aes ctr hmac aead key manager test', function() {
 
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
-    expect(key.getAesCtrKey().getKeyValue().length)
-        .toBe(keyFormat.getAesCtrKeyFormat().getKeySize());
-    expect(key.getHmacKey().getKeyValue().length)
-        .toBe(keyFormat.getHmacKeyFormat().getKeySize());
+    expect(key.getAesCtrKey()?.getKeyValue().length)
+        .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
+    expect(key.getHmacKey()?.getKeyValue()?.length)
+        .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -347,7 +345,7 @@ describe('aes ctr hmac aead key manager test', function() {
 
   it('get primitive unsupported key data type', async function() {
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let keyData = createTestKeyData().setTypeUrl('bad type url');
+    const keyData = createTestKeyData().setTypeUrl('bad type url');
 
     try {
       await aeadKeyManager.getPrimitive(Aead, keyData);
@@ -363,7 +361,7 @@ describe('aes ctr hmac aead key manager test', function() {
 
   it('get primitive unsupported key type', async function() {
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let key = new PbAesCtrKey();
+    const key = new PbAesCtrKey();
 
     try {
       await aeadKeyManager.getPrimitive(Aead, key);
@@ -380,9 +378,9 @@ describe('aes ctr hmac aead key manager test', function() {
   it('get primitive bad version', async function() {
     const version = 1;
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    const key: PbAesCtrHmacAeadKey = createTestKey();
 
-    key.getAesCtrKey().setVersion(version);
+    key.getAesCtrKey()?.setVersion(version);
 
     try {
       await aeadKeyManager.getPrimitive(Aead, key);
@@ -399,9 +397,9 @@ describe('aes ctr hmac aead key manager test', function() {
   it('get primitive short aes ctr key', async function() {
     const keySize = 5;
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    const key: PbAesCtrHmacAeadKey = createTestKey();
 
-    key.getAesCtrKey().setKeyValue(new Uint8Array(keySize));
+    key.getAesCtrKey()?.setKeyValue(new Uint8Array(keySize));
 
     try {
       await aeadKeyManager.getPrimitive(Aead, key);
@@ -416,13 +414,13 @@ describe('aes ctr hmac aead key manager test', function() {
   });
 
   it('get primitive aes ctr key small iv size', async function() {
-    const /** Array<number> */ ivSizeOutOfRange = [9, 19];
+    const ivSizeOutOfRange: number[] = [9, 19];
     const manager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    const key: PbAesCtrHmacAeadKey = createTestKey();
 
     const ivSizeOutOfRangeLength = ivSizeOutOfRange.length;
     for (let i = 0; i < ivSizeOutOfRangeLength; i++) {
-      key.getAesCtrKey().getParams().setIvSize(ivSizeOutOfRange[i]);
+      key.getAesCtrKey()?.getParams()?.setIvSize(ivSizeOutOfRange[i]);
       try {
         await manager.getPrimitive(Aead, key);
       } catch (e) {
@@ -439,9 +437,9 @@ describe('aes ctr hmac aead key manager test', function() {
   it('get primitive short hmac key', async function() {
     const keySize = 5;
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    const key: PbAesCtrHmacAeadKey = createTestKey();
 
-    key.getHmacKey().setKeyValue(new Uint8Array(keySize));
+    key.getHmacKey()?.setKeyValue(new Uint8Array(keySize));
 
     try {
       await aeadKeyManager.getPrimitive(Aead, key);
@@ -457,9 +455,9 @@ describe('aes ctr hmac aead key manager test', function() {
 
   it('get primitive hmac key unsupported hash type', async function() {
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    const key: PbAesCtrHmacAeadKey = createTestKey();
 
-    key.getHmacKey().getParams().setHash(PbHashType.UNKNOWN_HASH);
+    key.getHmacKey()?.getParams()?.setHash(PbHashType.UNKNOWN_HASH);
 
     try {
       await aeadKeyManager.getPrimitive(Aead, key);
@@ -473,9 +471,9 @@ describe('aes ctr hmac aead key manager test', function() {
   it('get primitive hmac key small tag size', async function() {
     const SMALL_TAG_SIZE = 9;
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    const key: PbAesCtrHmacAeadKey = createTestKey();
 
-    key.getHmacKey().getParams().setTagSize(SMALL_TAG_SIZE);
+    key.getHmacKey()?.getParams()?.setTagSize(SMALL_TAG_SIZE);
 
     try {
       await aeadKeyManager.getPrimitive(Aead, key);
@@ -497,12 +495,13 @@ describe('aes ctr hmac aead key manager test', function() {
     ];
     const manager = new AesCtrHmacAeadKeyManager();
 
-    let /** PbAesCtrHmacAeadKey */ key = createTestKey();
+    const key: PbAesCtrHmacAeadKey = createTestKey();
 
     const tagSizesLength = tagSizes.length;
     for (let i = 0; i < tagSizesLength; i++) {
-      key.getHmacKey().getParams().setHash(tagSizes[i]['hashType']);
-      key.getHmacKey().getParams().setTagSize(tagSizes[i]['tagSize']);
+      const params = assertExists(key.getHmacKey()?.getParams());
+      params.setHash(tagSizes[i]['hashType']);
+      params.setTagSize(tagSizes[i]['tagSize']);
       try {
         await manager.getPrimitive(Aead, key);
       } catch (e) {
@@ -523,7 +522,7 @@ describe('aes ctr hmac aead key manager test', function() {
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
 
-    const /** Aead */ primitive = await aeadKeyManager.getPrimitive(Aead, key);
+    const primitive: Aead = await aeadKeyManager.getPrimitive(Aead, key);
     const ciphertext = await primitive.encrypt(plaintext, aad);
     const decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 
@@ -536,8 +535,7 @@ describe('aes ctr hmac aead key manager test', function() {
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
 
-    const /** Aead */ primitive =
-        await aeadKeyManager.getPrimitive(Aead, keyData);
+    const primitive: Aead = await aeadKeyManager.getPrimitive(Aead, keyData);
     const ciphertext = await primitive.encrypt(plaintext, aad);
     const decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 

@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.aead.AesGcmKeyManagerTest');
-goog.setTestOnly('tink.aead.AesGcmKeyManagerTest');
+import 'jasmine';
 
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const {AesGcmKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_gcm_key_manager');
-const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
-const {PbAesCtrKey, PbAesCtrKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {PbAesCtrKey, PbAesCtrKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData} from '../internal/proto';
+import {Mac} from '../mac';
+import * as Random from '../subtle/random';
+
+import {AesGcmKeyManager} from './aes_gcm_key_manager';
+import {Aead} from './internal/aead';
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
 const VERSION = 0;
@@ -70,8 +70,7 @@ describe('aes gcm key manager test', function() {
 
     const keyFormat = createTestKeyFormat();
 
-    const key =
-        /** @type {!PbAesGcmKey}*/ (manager.getKeyFactory().newKey(keyFormat));
+    const key = manager.getKeyFactory().newKey(keyFormat);
 
     expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
   });
@@ -82,8 +81,7 @@ describe('aes gcm key manager test', function() {
     const keyFormat = createTestKeyFormat();
     const serializedKeyFormat = keyFormat.serializeBinary();
 
-    const key = /** @type {!PbAesGcmKey} */ (
-        manager.getKeyFactory().newKey(serializedKeyFormat));
+    const key = manager.getKeyFactory().newKey(serializedKeyFormat);
 
     expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
   });
@@ -157,7 +155,7 @@ describe('aes gcm key manager test', function() {
         continue;
       }
 
-      const /** !PbAesGcmKey */ key = createTestKey(keySize);
+      const key: PbAesGcmKey = createTestKey(keySize);
       try {
         await manager.getPrimitive(PRIMITIVE, key);
         fail('An exception should be thrown');
@@ -197,7 +195,7 @@ describe('aes gcm key manager test', function() {
     const key = createTestKey();
 
     // Get the primitive from key manager.
-    const /** Aead */ primitive = await manager.getPrimitive(PRIMITIVE, key);
+    const primitive: Aead = await manager.getPrimitive(PRIMITIVE, key);
 
     // Test the returned primitive.
     const plaintext = Random.randBytes(8);
@@ -213,8 +211,7 @@ describe('aes gcm key manager test', function() {
     const keyData = createTestKeyData();
 
     // Get primitive.
-    const /** Aead */ primitive =
-        await manager.getPrimitive(PRIMITIVE, keyData);
+    const primitive: Aead = await manager.getPrimitive(PRIMITIVE, keyData);
 
     // Test the returned primitive.
     const plaintext = Random.randBytes(8);
@@ -253,33 +250,21 @@ describe('aes gcm key manager test', function() {
 // Helper functions for tests
 
 class ExceptionText {
-  /** @return {string} */
-  static unsupportedPrimitive() {
+  static unsupportedPrimitive(): string {
     return 'SecurityException: Requested primitive type which is not supported ' +
         'by this key manager.';
   }
 
-  /**
-   * @param {number} keySize
-   * @return {string}
-   */
-  static unsupportedKeySize(keySize) {
+  static unsupportedKeySize(keySize: number): string {
     return 'InvalidArgumentsException: unsupported AES key size: ' + keySize;
   }
 
-  /**
-   * @return {string}
-   */
-  static versionOutOfBounds() {
+  static versionOutOfBounds(): string {
     return 'SecurityException: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
-  /**
-   * @param {string=} opt_unsupportedKeyType
-   * @return {string}
-   */
-  static unsupportedKeyType(opt_unsupportedKeyType) {
+  static unsupportedKeyType(opt_unsupportedKeyType?: string): string {
     const prefix = 'SecurityException: Key type';
     const suffix =
         'is not supported. This key manager supports ' + KEY_TYPE + '.';
@@ -291,10 +276,7 @@ class ExceptionText {
     }
   }
 
-  /**
-   * @return {string}
-   */
-  static invalidSerializedKey() {
+  static invalidSerializedKey(): string {
     return 'SecurityException: Could not parse the input as a serialized proto of ' +
         KEY_TYPE + ' key.';
   }
@@ -304,45 +286,28 @@ class ExceptionText {
         KEY_TYPE + ' key format.';
   }
 
-  /**
-   * @return {string}
-   */
-  static invalidKeyFormat() {
+  static invalidKeyFormat(): string {
     return 'SecurityException: Expected AesGcmKeyFormat-proto';
   }
 }
 
-
-/**
- * @param {number=} opt_keySize
- *
- * @return {!PbAesGcmKeyFormat}
- */
-const createTestKeyFormat = function(opt_keySize = 16) {
+function createTestKeyFormat(opt_keySize: number = 16): PbAesGcmKeyFormat {
   const keyFormat = new PbAesGcmKeyFormat().setKeySize(opt_keySize);
   return keyFormat;
-};
+}
 
-/**
- * @param {number=} opt_keySize
- * @return {!PbAesGcmKey}
- */
-const createTestKey = function(opt_keySize = 16) {
+function createTestKey(opt_keySize: number = 16): PbAesGcmKey {
   const key = new PbAesGcmKey().setVersion(0).setKeyValue(
       Random.randBytes(opt_keySize));
 
   return key;
-};
+}
 
-/**
- * @param {number=} opt_keySize
- * @return {!PbKeyData}
- */
-const createTestKeyData = function(opt_keySize) {
+function createTestKeyData(opt_keySize?: number): PbKeyData {
   const keyData = new PbKeyData()
                       .setTypeUrl(KEY_TYPE)
                       .setValue(createTestKey(opt_keySize).serializeBinary())
                       .setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
 
   return keyData;
-};
+}

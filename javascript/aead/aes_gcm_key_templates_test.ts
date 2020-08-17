@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.aead.AesGcmKeyTemplatesTest');
-goog.setTestOnly('tink.aead.AesGcmKeyTemplatesTest');
+import 'jasmine';
 
-const {AesGcmKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_gcm_key_manager');
-const {AesGcmKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aes_gcm_key_templates');
-const {PbAesGcmKeyFormat, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {PbAesGcmKeyFormat, PbOutputPrefixType} from '../internal/proto';
+
+import {AesGcmKeyManager} from './aes_gcm_key_manager';
+import {AesGcmKeyTemplates} from './aes_gcm_key_templates';
 
 describe('aes gcm key templates test', function() {
   it('aes128 gcm', function() {

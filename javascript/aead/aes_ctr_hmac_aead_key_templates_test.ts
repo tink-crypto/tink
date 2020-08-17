@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.aead.AesCtrHmacAeadKeyTemplatesTest');
-goog.setTestOnly('tink.aead.AesCtrHmacAeadKeyTemplatesTest');
+import 'jasmine';
 
-const {AesCtrHmacAeadKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_manager');
-const {AesCtrHmacAeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_templates');
-const {PbAesCtrHmacAeadKeyFormat, PbHashType, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {PbAesCtrHmacAeadKeyFormat, PbHashType, PbOutputPrefixType} from '../internal/proto';
+
+import {AesCtrHmacAeadKeyManager} from './aes_ctr_hmac_aead_key_manager';
+import {AesCtrHmacAeadKeyTemplates} from './aes_ctr_hmac_aead_key_templates';
 
 describe('aes ctr hmac aead key templates test', function() {
   it('aes128 ctr hmac sha256', function() {
@@ -36,14 +36,14 @@ describe('aes ctr hmac aead key templates test', function() {
 
     // Test AesCtrKeyFormat.
     const aesCtrKeyFormat = keyFormat.getAesCtrKeyFormat();
-    expect(aesCtrKeyFormat.getKeySize()).toBe(expectedAesKeySize);
-    expect(aesCtrKeyFormat.getParams().getIvSize()).toBe(expectedIvSize);
+    expect(aesCtrKeyFormat!.getKeySize()).toBe(expectedAesKeySize);
+    expect(aesCtrKeyFormat!.getParams()!.getIvSize()).toBe(expectedIvSize);
 
     // Test HmacKeyFormat.
     const hmacKeyFormat = keyFormat.getHmacKeyFormat();
-    expect(hmacKeyFormat.getKeySize()).toBe(expectedHmacKeySize);
-    expect(hmacKeyFormat.getParams().getTagSize()).toBe(expectedTagSize);
-    expect(hmacKeyFormat.getParams().getHash()).toBe(expectedHashFunction);
+    expect(hmacKeyFormat!.getKeySize()).toBe(expectedHmacKeySize);
+    expect(hmacKeyFormat!.getParams()!.getTagSize()).toBe(expectedTagSize);
+    expect(hmacKeyFormat!.getParams()!.getHash()).toBe(expectedHashFunction);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
@@ -73,14 +73,14 @@ describe('aes ctr hmac aead key templates test', function() {
 
     // Test AesCtrKeyFormat.
     const aesCtrKeyFormat = keyFormat.getAesCtrKeyFormat();
-    expect(aesCtrKeyFormat.getKeySize()).toBe(expectedAesKeySize);
-    expect(aesCtrKeyFormat.getParams().getIvSize()).toBe(expectedIvSize);
+    expect(aesCtrKeyFormat!.getKeySize()).toBe(expectedAesKeySize);
+    expect(aesCtrKeyFormat!.getParams()!.getIvSize()).toBe(expectedIvSize);
 
     // Test HmacKeyFormat.
     const hmacKeyFormat = keyFormat.getHmacKeyFormat();
-    expect(hmacKeyFormat.getKeySize()).toBe(expectedHmacKeySize);
-    expect(hmacKeyFormat.getParams().getTagSize()).toBe(expectedTagSize);
-    expect(hmacKeyFormat.getParams().getHash()).toBe(expectedHashFunction);
+    expect(hmacKeyFormat!.getKeySize()).toBe(expectedHmacKeySize);
+    expect(hmacKeyFormat!.getParams()!.getTagSize()).toBe(expectedTagSize);
+    expect(hmacKeyFormat!.getParams()!.getHash()).toBe(expectedHashFunction);
 
     // Test that the template works with AesCtrHmacAeadKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
