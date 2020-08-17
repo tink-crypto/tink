@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.hybrid.HybridKeyTemplatesTest');
-goog.setTestOnly('tink.hybrid.HybridKeyTemplatesTest');
+import 'jasmine';
 
-const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const {EciesAeadHkdfPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_private_key_manager');
-const {HybridKeyTemplates} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_key_templates');
-const {PbEciesAeadHkdfKeyFormat, PbEllipticCurveType, PbHashType, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {AeadKeyTemplates} from '../aead/aead_key_templates';
+import {PbEciesAeadHkdfKeyFormat, PbEllipticCurveType, PbHashType, PbOutputPrefixType, PbPointFormat} from '../internal/proto';
+
+import {EciesAeadHkdfPrivateKeyManager} from './ecies_aead_hkdf_private_key_manager';
+import {HybridKeyTemplates} from './hybrid_key_templates';
 
 describe('hybrid key templates test', function() {
   it('ecies p256 hkdf hmac sha256 aes128 gcm', function() {
@@ -34,16 +34,16 @@ describe('hybrid key templates test', function() {
     const keyFormat =
         PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
-    expect(params.getEcPointFormat()).toBe(expectedPointFormat);
+    expect(params!.getEcPointFormat()).toBe(expectedPointFormat);
 
     // Test KEM params.
-    const kemParams = params.getKemParams();
-    expect(kemParams.getCurveType()).toBe(expectedCurve);
-    expect(kemParams.getHkdfHashType()).toBe(expectedHkdfHashFunction);
+    const kemParams = params!.getKemParams();
+    expect(kemParams!.getCurveType()).toBe(expectedCurve);
+    expect(kemParams!.getHkdfHashType()).toBe(expectedHkdfHashFunction);
 
     // Test DEM params.
-    const demParams = params.getDemParams();
-    expect(demParams.getAeadDem()).toEqual(expectedAeadTemplate);
+    const demParams = params!.getDemParams();
+    expect(demParams!.getAeadDem()).toEqual(expectedAeadTemplate);
 
     // Test that the template works with EciesAeadHkdfPrivateKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
@@ -71,16 +71,16 @@ describe('hybrid key templates test', function() {
     const keyFormat =
         PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
-    expect(params.getEcPointFormat()).toBe(expectedPointFormat);
+    expect(params!.getEcPointFormat()).toBe(expectedPointFormat);
 
     // Test KEM params.
-    const kemParams = params.getKemParams();
-    expect(kemParams.getCurveType()).toBe(expectedCurve);
-    expect(kemParams.getHkdfHashType()).toBe(expectedHkdfHashFunction);
+    const kemParams = params!.getKemParams();
+    expect(kemParams!.getCurveType()).toBe(expectedCurve);
+    expect(kemParams!.getHkdfHashType()).toBe(expectedHkdfHashFunction);
 
     // Test DEM params.
-    const demParams = params.getDemParams();
-    expect(demParams.getAeadDem()).toEqual(expectedAeadTemplate);
+    const demParams = params!.getDemParams();
+    expect(demParams!.getAeadDem()).toEqual(expectedAeadTemplate);
 
     // Test that the template works with EciesAeadHkdfPrivateKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());

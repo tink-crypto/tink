@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.hybrid.RegistryEciesAeadHkdfDemHelperTest');
-goog.setTestOnly('tink.hybrid.RegistryEciesAeadHkdfDemHelperTest');
+import 'jasmine';
 
-const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
-const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {RegistryEciesAeadHkdfDemHelper} = goog.require('google3.third_party.tink.javascript.hybrid.registry_ecies_aead_hkdf_dem_helper');
+import {AeadConfig} from '../aead/aead_config';
+import {AeadKeyTemplates} from '../aead/aead_key_templates';
+import * as Registry from '../internal/registry';
+import * as Random from '../subtle/random';
+
+import {RegistryEciesAeadHkdfDemHelper} from './registry_ecies_aead_hkdf_dem_helper';
 
 describe('registry ecies aead hkdf dem helper test', function() {
   beforeEach(function() {
@@ -47,8 +47,8 @@ describe('registry ecies aead hkdf dem helper test', function() {
 
     // Test that if the value is changed to invalid key format than the DEM
     // helper throws an exception.
-    for (let template of templates) {
-      for (let invalidKeyFormat of invalidKeyFormats) {
+    for (const template of templates) {
+      for (const invalidKeyFormat of invalidKeyFormats) {
         template.setValue(invalidKeyFormat);
 
         try {
@@ -124,7 +124,7 @@ describe('registry ecies aead hkdf dem helper test', function() {
       AeadKeyTemplates.aes256CtrHmacSha256(), AeadKeyTemplates.aes256Gcm()
     ];
 
-    for (let template of templates) {
+    for (const template of templates) {
       const helper = new RegistryEciesAeadHkdfDemHelper(template);
       // Compute some demKey of size corresponding to the template.
       // The result of getDemKeySizeInBytes is the expected one for the given
@@ -148,29 +148,17 @@ describe('registry ecies aead hkdf dem helper test', function() {
 
 // Helper classes and functions
 class ExceptionText {
-  /**
-   * @param {string} typeUrl
-   * @return {string}
-   */
-  static unsupportedTypeUrl(typeUrl) {
+  static unsupportedTypeUrl(typeUrl: string): string {
     return 'SecurityException: Key type URL ' + typeUrl + ' is not supported.';
   }
 
-  /**
-   * @param {string} keyType
-   * @return {string}
-   */
-  static invalidKeyFormat(keyType) {
+  static invalidKeyFormat(keyType: string): string {
     return 'SecurityException: Could not parse the given Uint8Array as ' +
         'a serialized proto of ' + keyType + '.';
   }
 
-  /**
-   * @param {number} expectedKeyLength
-   * @param {number} actualKeyLength
-   * @return {string}
-   */
-  static invalidKeyLength(expectedKeyLength, actualKeyLength) {
+  static invalidKeyLength(expectedKeyLength: number, actualKeyLength: number):
+      string {
     return 'SecurityException: Key is not of the correct length, expected length: ' +
         expectedKeyLength + ', but got key of length: ' + actualKeyLength + '.';
   }

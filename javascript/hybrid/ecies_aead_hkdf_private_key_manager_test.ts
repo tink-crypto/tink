@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.hybrid.EciesAeadHkdfPrivateKeyManagerTest');
-goog.setTestOnly('tink.hybrid.EciesAeadHkdfPrivateKeyManagerTest');
+import 'jasmine';
 
-const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
-const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const {EciesAeadHkdfPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_private_key_manager');
-const {EciesAeadHkdfPublicKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_public_key_manager');
-const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
-const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {PbAesCtrKeyFormat, PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {assertExists, assertInstanceof} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
+import {AeadConfig} from '../aead/aead_config';
+import {AeadKeyTemplates} from '../aead/aead_key_templates';
+import * as KeyManager from '../internal/key_manager';
+import {PbAesCtrKeyFormat, PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} from '../internal/proto';
+import * as Registry from '../internal/registry';
+import * as Random from '../subtle/random';
+import {assertExists, assertInstanceof} from '../testing/internal/test_utils';
+
+import {EciesAeadHkdfPrivateKeyManager} from './ecies_aead_hkdf_private_key_manager';
+import {EciesAeadHkdfPublicKeyManager} from './ecies_aead_hkdf_public_key_manager';
+import {HybridDecrypt} from './internal/hybrid_decrypt';
+import {HybridEncrypt} from './internal/hybrid_encrypt';
 
 const PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';
@@ -95,28 +95,28 @@ describe('ecies aead hkdf private key manager test', function() {
 
     // unknown point format
     const invalidFormat = createKeyFormat();
-    invalidFormat.getParams().setEcPointFormat(PbPointFormat.UNKNOWN_FORMAT);
+    invalidFormat.getParams()?.setEcPointFormat(PbPointFormat.UNKNOWN_FORMAT);
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownPointFormat());
     }
-    invalidFormat.getParams().setEcPointFormat(PbPointFormat.UNCOMPRESSED);
+    invalidFormat.getParams()?.setEcPointFormat(PbPointFormat.UNCOMPRESSED);
 
     // missing KEM params
-    invalidFormat.getParams().setKemParams(null);
+    invalidFormat.getParams()?.setKemParams(null);
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
-    invalidFormat.getParams().setKemParams(createKemParams());
+    invalidFormat.getParams()?.setKemParams(createKemParams());
 
     // unsupported AEAD template
     const templateTypeUrl = 'UNSUPPORTED_KEY_TYPE_URL';
-    invalidFormat.getParams().getDemParams().getAeadDem().setTypeUrl(
+    invalidFormat.getParams()?.getDemParams()?.getAeadDem()?.setTypeUrl(
         templateTypeUrl);
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
@@ -130,12 +130,10 @@ describe('ecies aead hkdf private key manager test', function() {
   it('new key, via key format', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const manager = new EciesAeadHkdfPrivateKeyManager();
+    for (const keyFormat of keyFormats) {
+      const key = await manager.getKeyFactory().newKey(keyFormat);
 
-    for (let keyFormat of keyFormats) {
-      const key = /** @type{!PbEciesAeadHkdfPrivateKey} */ (
-          await manager.getKeyFactory().newKey(keyFormat));
-
-      expect(key.getPublicKey().getParams()).toEqual(keyFormat.getParams());
+      expect(key.getPublicKey()?.getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
@@ -162,18 +160,16 @@ describe('ecies aead hkdf private key manager test', function() {
   it('new key data, from valid key format', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const manager = new EciesAeadHkdfPrivateKeyManager();
-
-    for (let keyFormat of keyFormats) {
+    for (const keyFormat of keyFormats) {
       const serializedKeyFormat = keyFormat.serializeBinary();
-      const keyData = /** @type{!PbKeyData} */ (
-          await manager.getKeyFactory().newKeyData(serializedKeyFormat));
-
+      const keyData =
+          await manager.getKeyFactory().newKeyData(serializedKeyFormat);
       expect(keyData.getTypeUrl()).toBe(PRIVATE_KEY_TYPE);
       expect(keyData.getKeyMaterialType()).toBe(PRIVATE_KEY_MATERIAL_TYPE);
 
       const key =
           PbEciesAeadHkdfPrivateKey.deserializeBinary(keyData.getValue());
-      expect(key.getPublicKey().getParams()).toEqual(keyFormat.getParams());
+      expect(key.getPublicKey()?.getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
@@ -184,8 +180,7 @@ describe('ecies aead hkdf private key manager test', function() {
 
     const privateKey = new Uint8Array([0, 1]);  // not a serialized private key
     try {
-      const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (
-          manager.getKeyFactory());
+      const factory = manager.getKeyFactory();
       factory.getPublicKeyData(privateKey);
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
@@ -195,11 +190,8 @@ describe('ecies aead hkdf private key manager test', function() {
   it('get public key data, should work', async function() {
     const keyFormat = createKeyFormat();
     const manager = new EciesAeadHkdfPrivateKeyManager();
-
-    const privateKey = /** @type{!PbEciesAeadHkdfPrivateKey} */ (
-        await manager.getKeyFactory().newKey(keyFormat));
-    const factory =
-        /** @type {!KeyManager.PrivateKeyFactory} */ (manager.getKeyFactory());
+    const privateKey = await manager.getKeyFactory().newKey(keyFormat);
+    const factory = manager.getKeyFactory();
     const publicKeyData =
         factory.getPublicKeyData(privateKey.serializeBinary());
 
@@ -208,11 +200,11 @@ describe('ecies aead hkdf private key manager test', function() {
     const publicKey =
         PbEciesAeadHkdfPublicKey.deserializeBinary(publicKeyData.getValue());
     expect(publicKey.getVersion())
-        .toEqual(privateKey.getPublicKey().getVersion());
+        .toEqual(privateKey.getPublicKey()?.getVersion());
     expect(publicKey.getParams())
-        .toEqual(privateKey.getPublicKey().getParams());
-    expect(publicKey.getX()).toEqual(privateKey.getPublicKey().getX());
-    expect(publicKey.getY()).toEqual(privateKey.getPublicKey().getY());
+        .toEqual(privateKey.getPublicKey()?.getParams());
+    expect(publicKey.getX()).toEqual(privateKey.getPublicKey()?.getX());
+    expect(publicKey.getY()).toEqual(privateKey.getPublicKey()?.getY());
   });
 
   it('get primitive, unsupported primitive type', async function() {
@@ -246,7 +238,7 @@ describe('ecies aead hkdf private key manager test', function() {
 
   it('get primitive, unsupported key type', async function() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
-    let key = new PbEciesAeadHkdfPublicKey();
+    const key = new PbEciesAeadHkdfPublicKey();
 
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
@@ -280,18 +272,18 @@ describe('ecies aead hkdf private key manager test', function() {
         PbEciesAeadHkdfPrivateKey);
 
     // missing KEM params
-    key.getPublicKey().getParams().setKemParams(null);
+    key.getPublicKey()?.getParams()?.setKemParams(null);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
-    key.getPublicKey().getParams().setKemParams(createKemParams());
+    key.getPublicKey()?.getParams()?.setKemParams(createKemParams());
 
     // unsupported AEAD key template type URL
     const templateTypeUrl = 'UNSUPPORTED_KEY_TYPE_URL';
-    key.getPublicKey().getParams().getDemParams().getAeadDem().setTypeUrl(
+    key.getPublicKey()?.getParams()?.getDemParams()?.getAeadDem()?.setTypeUrl(
         templateTypeUrl);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
@@ -327,15 +319,14 @@ describe('ecies aead hkdf private key manager test', function() {
     const privateKeyManager = new EciesAeadHkdfPrivateKeyManager();
     const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
 
-    for (let keyFormat of keyFormats) {
+    for (const keyFormat of keyFormats) {
       const key = assertInstanceof(
           await privateKeyManager.getKeyFactory().newKey(keyFormat),
           PbEciesAeadHkdfPrivateKey);
-
-      const /** !HybridEncrypt */ hybridEncrypt =
+      const hybridEncrypt: HybridEncrypt =
           assertExists(await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, assertExists(key.getPublicKey())));
-      const /** !HybridDecrypt */ hybridDecrypt =
+      const hybridDecrypt: HybridDecrypt =
           assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, key));
 
@@ -352,18 +343,16 @@ describe('ecies aead hkdf private key manager test', function() {
     const privateKeyManager = new EciesAeadHkdfPrivateKeyManager();
     const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
 
-    for (let keyFormat of keyFormats) {
+    for (const keyFormat of keyFormats) {
       const serializedKeyFormat = keyFormat.serializeBinary();
       const keyData = await privateKeyManager.getKeyFactory().newKeyData(
           serializedKeyFormat);
-      const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (
-          privateKeyManager.getKeyFactory());
+      const factory = privateKeyManager.getKeyFactory();
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
-
-      const /** !HybridEncrypt */ hybridEncrypt =
+      const hybridEncrypt: HybridEncrypt =
           assertExists(await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData));
-      const /** !HybridDecrypt */ hybridDecrypt =
+      const hybridDecrypt: HybridDecrypt =
           assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, keyData));
 
@@ -398,34 +387,26 @@ describe('ecies aead hkdf private key manager test', function() {
 
 // Helper classes and functions
 class ExceptionText {
-  /** @return {string} */
-  static nullKeyFormat() {
+  static nullKeyFormat(): string {
     return 'SecurityException: Key format has to be non-null.';
   }
 
-  /** @return {string} */
-  static invalidSerializedKeyFormat() {
+  static invalidSerializedKeyFormat(): string {
     return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
   }
 
-  /** @return {string} */
-  static unsupportedPrimitive() {
+  static unsupportedPrimitive(): string {
     return 'SecurityException: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
-  /** @return {string} */
-  static unsupportedKeyFormat() {
+  static unsupportedKeyFormat(): string {
     return 'SecurityException: Expected ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
   }
 
-  /**
-   * @param {string=} opt_requestedKeyType
-   * @return {string}
-   */
-  static unsupportedKeyType(opt_requestedKeyType) {
+  static unsupportedKeyType(opt_requestedKeyType?: string): string {
     const prefix = 'SecurityException: Key type';
     const suffix =
         'is not supported. This key manager supports ' + PRIVATE_KEY_TYPE + '.';
@@ -436,64 +417,46 @@ class ExceptionText {
     }
   }
 
-  /** @return {string} */
-  static versionOutOfBounds() {
+  static versionOutOfBounds(): string {
     return 'SecurityException: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
-  /** @return {string} */
-  static invalidKeyFormatMissingParams() {
+  static invalidKeyFormatMissingParams(): string {
     return 'SecurityException: Invalid key format - missing key params.';
   }
 
-  /** @return {string} */
-  static unknownPointFormat() {
+  static unknownPointFormat(): string {
     return 'SecurityException: Invalid key params - unknown EC point format.';
   }
 
-  /** @return {string} */
-  static missingKemParams() {
+  static missingKemParams(): string {
     return 'SecurityException: Invalid params - missing KEM params.';
   }
 
-  /**
-   * @param {string} templateTypeUrl
-   * @return {string}
-   */
-  static unsupportedKeyTemplate(templateTypeUrl) {
+  static unsupportedKeyTemplate(templateTypeUrl: string): string {
     return 'SecurityException: Invalid DEM params - ' + templateTypeUrl +
         ' template is not supported by ECIES AEAD HKDF.';
   }
 
-  /** @return {string} */
-  static invalidSerializedKey() {
+  static invalidSerializedKey(): string {
     return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key-proto.';
   }
 }
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- *
- * @return {!PbEciesHkdfKemParams}
- */
-const createKemParams = function(
-    opt_curveType = PbEllipticCurveType.NIST_P256,
-    opt_hashType = PbHashType.SHA256) {
+function createKemParams(
+    opt_curveType: PbEllipticCurveType = PbEllipticCurveType.NIST_P256,
+    opt_hashType: PbHashType = PbHashType.SHA256): PbEciesHkdfKemParams {
   const kemParams = new PbEciesHkdfKemParams()
                         .setCurveType(opt_curveType)
                         .setHkdfHashType(opt_hashType);
 
   return kemParams;
-};
+}
 
-/**
- * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @return {!PbEciesAeadDemParams}
- */
-const createDemParams = function(opt_keyTemplate) {
+function createDemParams(opt_keyTemplate?: PbKeyTemplate):
+    PbEciesAeadDemParams {
   if (!opt_keyTemplate) {
     opt_keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
   }
@@ -501,45 +464,34 @@ const createDemParams = function(opt_keyTemplate) {
   const demParams = new PbEciesAeadDemParams().setAeadDem(opt_keyTemplate);
 
   return demParams;
-};
+}
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
- *
- * @return {!PbEciesAeadHkdfParams}
- */
-const createKeyParams = function(
-    opt_curveType, opt_hashType, opt_keyTemplate,
-    opt_pointFormat = PbPointFormat.UNCOMPRESSED) {
+function createKeyParams(
+    opt_curveType?: PbEllipticCurveType, opt_hashType?: PbHashType,
+    opt_keyTemplate?: PbKeyTemplate,
+    opt_pointFormat: PbPointFormat =
+        PbPointFormat.UNCOMPRESSED): PbEciesAeadHkdfParams {
   const params = new PbEciesAeadHkdfParams()
                      .setKemParams(createKemParams(opt_curveType, opt_hashType))
                      .setDemParams(createDemParams(opt_keyTemplate))
                      .setEcPointFormat(opt_pointFormat);
 
   return params;
-};
+}
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
- *
- * @return {!PbEciesAeadHkdfKeyFormat}
- */
-const createKeyFormat = function(
-    opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat) {
+function createKeyFormat(
+    opt_curveType?: PbEllipticCurveType, opt_hashType?: PbHashType,
+    opt_keyTemplate?: PbKeyTemplate,
+    opt_pointFormat?: PbPointFormat): PbEciesAeadHkdfKeyFormat {
   const keyFormat = new PbEciesAeadHkdfKeyFormat().setParams(createKeyParams(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
   return keyFormat;
-};
+}
 
-// Create set of key formats with all possible predefined/supported parameters.
-/** @return {!Array<!PbEciesAeadHkdfKeyFormat>} */
-const createTestSetOfKeyFormats = function() {
+/**
+ * Create set of key formats with all possible predefined/supported parameters.
+ */
+function createTestSetOfKeyFormats(): PbEciesAeadHkdfKeyFormat[] {
   const curveTypes = [
     PbEllipticCurveType.NIST_P256, PbEllipticCurveType.NIST_P384,
     PbEllipticCurveType.NIST_P521
@@ -550,12 +502,11 @@ const createTestSetOfKeyFormats = function() {
     AeadKeyTemplates.aes256CtrHmacSha256()
   ];
   const pointFormats = [PbPointFormat.UNCOMPRESSED];
-
-  const /** !Array<!PbEciesAeadHkdfKeyFormat> */ keyFormats = [];
-  for (let curve of curveTypes) {
-    for (let hkdfHash of hashTypes) {
-      for (let keyTemplate of keyTemplates) {
-        for (let pointFormat of pointFormats) {
+  const keyFormats: PbEciesAeadHkdfKeyFormat[] = [];
+  for (const curve of curveTypes) {
+    for (const hkdfHash of hashTypes) {
+      for (const keyTemplate of keyTemplates) {
+        for (const pointFormat of pointFormats) {
           const keyFormat =
               createKeyFormat(curve, hkdfHash, keyTemplate, pointFormat);
           keyFormats.push(keyFormat);
@@ -564,4 +515,4 @@ const createTestSetOfKeyFormats = function() {
     }
   }
   return keyFormats;
-};
+}

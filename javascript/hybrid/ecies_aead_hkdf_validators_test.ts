@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.hybrid.EciesAeadHkdfValidatorsTest');
-goog.setTestOnly('tink.hybrid.EciesAeadHkdfValidatorsTest');
+import 'jasmine';
 
-const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EciesAeadHkdfValidators = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_validators');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
-const {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {assertExists} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
+import {AeadKeyTemplates} from '../aead/aead_key_templates';
+import {PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyTemplate, PbPointFormat} from '../internal/proto';
+import * as Util from '../internal/util';
+import * as Bytes from '../subtle/bytes';
+import * as EllipticCurves from '../subtle/elliptic_curves';
+import {assertExists} from '../testing/internal/test_utils';
+
+import * as EciesAeadHkdfValidators from './ecies_aead_hkdf_validators';
 
 
 describe('ecies aead hkdf validators test', function() {
@@ -40,7 +40,7 @@ describe('ecies aead hkdf validators test', function() {
 
   it('validate params, invalid kem params, unknown hash type', function() {
     const invalidParams = createParams();
-    invalidParams.getKemParams().setHkdfHashType(PbHashType.UNKNOWN_HASH);
+    invalidParams.getKemParams()?.setHkdfHashType(PbHashType.UNKNOWN_HASH);
 
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
@@ -52,7 +52,7 @@ describe('ecies aead hkdf validators test', function() {
 
   it('validate params, invalid kem params, unknown curve type', function() {
     const invalidParams = createParams();
-    invalidParams.getKemParams().setCurveType(
+    invalidParams.getKemParams()?.setCurveType(
         PbEllipticCurveType.UNKNOWN_CURVE);
 
     try {
@@ -76,7 +76,7 @@ describe('ecies aead hkdf validators test', function() {
 
   it('validate params, invalid dem params, missing aead template', function() {
     const invalidParams = createParams();
-    invalidParams.getDemParams().setAeadDem(null);
+    invalidParams.getDemParams()?.setAeadDem(null);
 
     try {
       EciesAeadHkdfValidators.validateParams(invalidParams);
@@ -90,7 +90,8 @@ describe('ecies aead hkdf validators test', function() {
      function() {
        const unsupportedTypeUrl = 'UNSUPPORTED_KEY_TYPE_URL';
        const invalidParams = createParams();
-       invalidParams.getDemParams().getAeadDem().setTypeUrl(unsupportedTypeUrl);
+       invalidParams.getDemParams()?.getAeadDem()?.setTypeUrl(
+           unsupportedTypeUrl);
 
        try {
          EciesAeadHkdfValidators.validateParams(invalidParams);
@@ -112,31 +113,27 @@ describe('ecies aead hkdf validators test', function() {
       expect(e.toString()).toBe(ExceptionText.unknownPointFormat());
     }
   });
-
   it('validate params, different valid values', function() {
-    const curves = Object.keys(PbEllipticCurveType);
-    const hashTypes = Object.keys(PbHashType);
-    const keyTemplates =
-        [AeadKeyTemplates.aes128CtrHmacSha256(), AeadKeyTemplates.aes128Gcm()];
-    const pointFormats = Object.keys(PbPointFormat);
-
-    for (let curveId of curves) {
-      const curve = PbEllipticCurveType[curveId];
-      if (curve === PbEllipticCurveType.UNKNOWN_CURVE ||
-          curve === PbEllipticCurveType.CURVE25519) {
-        continue;
-      }
-      for (let hashTypeId of hashTypes) {
-        const hashType = PbHashType[hashTypeId];
-        if (hashType === PbHashType.UNKNOWN_HASH) {
-          continue;
-        }
-        for (let keyTemplate of keyTemplates) {
-          for (let pointFormatId of pointFormats) {
-            const pointFormat = PbPointFormat[pointFormatId];
-            if (pointFormat === PbPointFormat.UNKNOWN_FORMAT) {
-              continue;
-            }
+    for (const curve
+             of [PbEllipticCurveType.NIST_P256,
+                 PbEllipticCurveType.NIST_P384,
+                 PbEllipticCurveType.NIST_P521,
+    ]) {
+      for (const hashType
+               of [PbHashType.SHA1,
+                   PbHashType.SHA384,
+                   PbHashType.SHA256,
+                   PbHashType.SHA512,
+      ]) {
+        for (const keyTemplate
+                 of [AeadKeyTemplates.aes128CtrHmacSha256(),
+                     AeadKeyTemplates.aes128Gcm(),
+        ]) {
+          for (const pointFormat
+                   of [PbPointFormat.UNCOMPRESSED,
+                       PbPointFormat.COMPRESSED,
+                       PbPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
+          ]) {
             const params =
                 createParams(curve, hashType, keyTemplate, pointFormat);
             EciesAeadHkdfValidators.validateParams(params);
@@ -163,17 +160,17 @@ describe('ecies aead hkdf validators test', function() {
 
     // Check that also params were checked.
     // Test missing DEM params.
-    invalidKeyFormat.getParams().setDemParams(null);
+    invalidKeyFormat.getParams()?.setDemParams(null);
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.missingDemParams());
     }
-    invalidKeyFormat.getParams().setDemParams(createDemParams());
+    invalidKeyFormat.getParams()?.setDemParams(createDemParams());
 
     // Test UNKNOWN_HASH in KEM params.
-    invalidKeyFormat.getParams().getKemParams().setHkdfHashType(
+    invalidKeyFormat.getParams()?.getKemParams()?.setHkdfHashType(
         PbHashType.UNKNOWN_HASH);
     try {
       EciesAeadHkdfValidators.validateKeyFormat(invalidKeyFormat);
@@ -231,17 +228,17 @@ describe('ecies aead hkdf validators test', function() {
 
     // Check that also params were checked.
     // Test missing DEM params.
-    invalidPublicKey.getParams().setDemParams(null);
+    invalidPublicKey.getParams()?.setDemParams(null);
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.missingDemParams());
     }
-    invalidPublicKey.getParams().setDemParams(createDemParams());
+    invalidPublicKey.getParams()?.setDemParams(createDemParams());
 
     // Test UNKNOWN_HASH in KEM params.
-    invalidPublicKey.getParams().getKemParams().setHkdfHashType(
+    invalidPublicKey.getParams()?.getKemParams()?.setHkdfHashType(
         PbHashType.UNKNOWN_HASH);
     try {
       EciesAeadHkdfValidators.validatePublicKey(invalidPublicKey, 0);
@@ -276,7 +273,7 @@ describe('ecies aead hkdf validators test', function() {
 
   it('validate private key, invalid public key', async function() {
     const invalidPrivateKey = await createPrivateKey();
-    invalidPrivateKey.getPublicKey().setParams(null);
+    invalidPrivateKey.getPublicKey()?.setParams(null);
     try {
       EciesAeadHkdfValidators.validatePrivateKey(invalidPrivateKey, 0, 0);
       fail('An exception should be thrown.');
@@ -306,102 +303,73 @@ describe('ecies aead hkdf validators test', function() {
 
 // Helper classes and functions
 class ExceptionText {
-  /** @return {string} */
-  static missingFormatParams() {
+  static missingFormatParams(): string {
     return 'SecurityException: Invalid key format - missing key params.';
   }
 
-  /** @return {string} */
-  static missingKeyParams() {
+  static missingKeyParams(): string {
     return 'SecurityException: Invalid public key - missing key params.';
   }
 
-  /** @return {string} */
-  static unknownPointFormat() {
+  static unknownPointFormat(): string {
     return 'SecurityException: Invalid key params - unknown EC point format.';
   }
 
-  /** @return {string} */
-  static missingKemParams() {
+  static missingKemParams(): string {
     return 'SecurityException: Invalid params - missing KEM params.';
   }
 
-  /** @return {string} */
-  static unknownHashType() {
+  static unknownHashType(): string {
     return 'SecurityException: Invalid KEM params - unknown hash type.';
   }
 
-  /** @return {string} */
-  static unknownCurveType() {
+  static unknownCurveType(): string {
     return 'SecurityException: Invalid KEM params - unknown curve type.';
   }
 
-  /** @return {string} */
-  static missingDemParams() {
+  static missingDemParams(): string {
     return 'SecurityException: Invalid params - missing DEM params.';
   }
 
-  /** @return {string} */
-  static missingAeadTemplate() {
+  static missingAeadTemplate(): string {
     return 'SecurityException: Invalid DEM params - missing AEAD key template.';
   }
 
-  /**
-   * @param {string} templateTypeUrl
-   * @return {string}
-   */
-  static unsupportedKeyTemplate(templateTypeUrl) {
+  static unsupportedKeyTemplate(templateTypeUrl: string): string {
     return 'SecurityException: Invalid DEM params - ' + templateTypeUrl +
         ' template is not supported by ECIES AEAD HKDF.';
   }
 
-  /** @return {string} */
-  static missingXY() {
+  static missingXY(): string {
     return 'SecurityException: Invalid public key - missing value of X or Y.';
   }
 
-  /** @return {string} */
-  static missingPublicKey() {
+  static missingPublicKey(): string {
     return 'SecurityException: Invalid private key - missing public key information.';
   }
 
-  /** @return {string} */
-  static missingPrivateKeyValue() {
+  static missingPrivateKeyValue(): string {
     return 'SecurityException: Invalid private key - missing private key value.';
   }
 
-  /**
-   * @param {number} version
-   * @return {string}
-   */
-  static versionOutOfBounds(version) {
+  static versionOutOfBounds(version: number): string {
     return 'SecurityException: Version is out of bound, must be between 0 and ' +
         version + '.';
   }
 }
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- *
- * @return {!PbEciesHkdfKemParams}
- */
-const createKemParams = function(
-    opt_curveType = PbEllipticCurveType.NIST_P256,
-    opt_hashType = PbHashType.SHA256) {
+function createKemParams(
+    opt_curveType: PbEllipticCurveType = PbEllipticCurveType.NIST_P256,
+    opt_hashType: PbHashType = PbHashType.SHA256): PbEciesHkdfKemParams {
   const kemParams = new PbEciesHkdfKemParams()
                         .setCurveType(opt_curveType)
                         .setHkdfHashType(opt_hashType);
 
   return kemParams;
-};
+}
 
-/**
- * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- *
- * @return {!PbEciesAeadDemParams}
- */
-const createDemParams = function(opt_keyTemplate) {
+function createDemParams(opt_keyTemplate?: PbKeyTemplate):
+    PbEciesAeadDemParams {
   if (!opt_keyTemplate) {
     opt_keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
   }
@@ -409,38 +377,25 @@ const createDemParams = function(opt_keyTemplate) {
   const demParams = new PbEciesAeadDemParams().setAeadDem(opt_keyTemplate);
 
   return demParams;
-};
+}
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
- *
- * @return {!PbEciesAeadHkdfParams}
- */
-const createParams = function(
-    opt_curveType, opt_hashType, opt_keyTemplate,
-    opt_pointFormat = PbPointFormat.UNCOMPRESSED) {
+function createParams(
+    opt_curveType?: PbEllipticCurveType, opt_hashType?: PbHashType,
+    opt_keyTemplate?: PbKeyTemplate,
+    opt_pointFormat: PbPointFormat =
+        PbPointFormat.UNCOMPRESSED): PbEciesAeadHkdfParams {
   const params = new PbEciesAeadHkdfParams()
                      .setKemParams(createKemParams(opt_curveType, opt_hashType))
                      .setDemParams(createDemParams(opt_keyTemplate))
                      .setEcPointFormat(opt_pointFormat);
 
   return params;
-};
+}
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
- *
- * @return {!Promise<!PbEciesAeadHkdfPrivateKey>}
- */
-const createPrivateKey = async function(
-    opt_curveType = PbEllipticCurveType.NIST_P256, opt_hashType,
-    opt_keyTemplate, opt_pointFormat) {
+async function createPrivateKey(
+    opt_curveType: PbEllipticCurveType = PbEllipticCurveType.NIST_P256,
+    opt_hashType?: PbHashType, opt_keyTemplate?: PbKeyTemplate,
+    opt_pointFormat?: PbPointFormat): Promise<PbEciesAeadHkdfPrivateKey> {
   const curveSubtleType = Util.curveTypeProtoToSubtle(opt_curveType);
   const curveName = EllipticCurves.curveToString(curveSubtleType);
 
@@ -449,10 +404,10 @@ const createPrivateKey = async function(
           opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
   const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
   const jsonPublicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-  publicKeyProto.setX(
-      Bytes.fromBase64(jsonPublicKey['x'], /* opt_webSafe = */ true));
-  publicKeyProto.setY(
-      Bytes.fromBase64(jsonPublicKey['y'], /* opt_webSafe = */ true));
+  publicKeyProto.setX(Bytes.fromBase64(
+      assertExists(jsonPublicKey['x']), /* opt_webSafe = */ true));
+  publicKeyProto.setY(Bytes.fromBase64(
+      assertExists(jsonPublicKey['y']), /* opt_webSafe = */ true));
 
 
   const privateKeyProto =
@@ -460,23 +415,17 @@ const createPrivateKey = async function(
           publicKeyProto);
   const jsonPrivateKey =
       await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-  privateKeyProto.setKeyValue(
-      Bytes.fromBase64(jsonPrivateKey['d'], /* opt_webSafe = */ true));
+  privateKeyProto.setKeyValue(Bytes.fromBase64(
+      assertExists(jsonPrivateKey['d']), /* opt_webSafe = */ true));
 
   return privateKeyProto;
-};
+}
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
- * @param {!PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
- *
- * @return {!Promise<!PbEciesAeadHkdfPublicKey>}
- */
-const createPublicKey = async function(
-    opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat) {
+async function createPublicKey(
+    opt_curveType?: PbEllipticCurveType, opt_hashType?: PbHashType,
+    opt_keyTemplate?: PbKeyTemplate,
+    opt_pointFormat?: PbPointFormat): Promise<PbEciesAeadHkdfPublicKey> {
   const key = await createPrivateKey(
       opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat);
   return assertExists(key.getPublicKey());
-};
+}

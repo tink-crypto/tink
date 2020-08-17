@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.hybrid.HybridDecryptWrapperTest');
-goog.setTestOnly('tink.hybrid.HybridDecryptWrapperTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {HybridDecryptWrapper} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_decrypt_wrapper');
-const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
-const {HybridEncryptWrapper} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_encrypt_wrapper');
-const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+import {SecurityException} from '../exception/security_exception';
+import * as PrimitiveSet from '../internal/primitive_set';
+import {PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../internal/proto';
+import * as Bytes from '../subtle/bytes';
+import * as Random from '../subtle/random';
+
+import {HybridDecryptWrapper} from './hybrid_decrypt_wrapper';
+import {HybridEncryptWrapper} from './hybrid_encrypt_wrapper';
+import {HybridDecrypt} from './internal/hybrid_decrypt';
+import {HybridEncrypt} from './internal/hybrid_encrypt';
 
 describe('hybrid decrypt wrapper test', function() {
   it('decrypt, invalid ciphertext', async function() {
@@ -175,31 +175,24 @@ describe('hybrid decrypt wrapper test', function() {
 
 /** @final */
 class ExceptionText {
-  /** @return {string} */
-  static nullPrimitiveSet() {
+  static nullPrimitiveSet(): string {
     return 'SecurityException: Primitive set has to be non-null.';
   }
-  /** @return {string} */
-  static cannotBeDecrypted() {
+
+  static cannotBeDecrypted(): string {
     return 'SecurityException: Decryption failed for the given ciphertext.';
   }
-  /** @return {string} */
-  static nullCiphertext() {
+
+  static nullCiphertext(): string {
     return 'SecurityException: Ciphertext has to be non-null.';
   }
 }
 
-/**
- * Function for creating keys for testing purposes.
- *
- * @param {number} keyId
- * @param {!PbOutputPrefixType} outputPrefix
- * @param {boolean} enabled
- *
- * @return {!PbKeysetKey}
- */
-const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
-  let key = new PbKeysetKey();
+/** Function for creating keys for testing purposes. */
+function createDummyKeysetKey(
+    keyId: number, outputPrefix: PbOutputPrefixType,
+    enabled: boolean): PbKeysetKey {
+  const key = new PbKeysetKey();
 
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
@@ -211,7 +204,7 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
   key.setKeyId(keyId);
 
   return key;
-};
+}
 
 /**
  * Creates a primitive sets for HybridEncrypt and HybridDecrypt with
@@ -219,18 +212,19 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
  * have ids from the set [1, ..., numberOfPrimitives] and the primitive
  * corresponding to key with id 'numberOfPrimitives' is set to be primary
  * whenever opt_withPrimary is set to true (where true is the default value).
- *
- * @param {boolean=} opt_withPrimary
- * @return {{encryptPrimitiveSet:!PrimitiveSet.PrimitiveSet,
- *     decryptPrimitiveSet:!PrimitiveSet.PrimitiveSet}}
  */
-const createDummyPrimitiveSets = function(opt_withPrimary = true) {
+function createDummyPrimitiveSets(opt_withPrimary: boolean = true): {
+  encryptPrimitiveSet: PrimitiveSet.PrimitiveSet<DummyHybridEncrypt>,
+  decryptPrimitiveSet: PrimitiveSet.PrimitiveSet<DummyHybridDecrypt>
+} {
   const numberOfPrimitives = 5;
 
-  const encryptPrimitiveSet = new PrimitiveSet.PrimitiveSet(DummyHybridEncrypt);
-  const decryptPrimitiveSet = new PrimitiveSet.PrimitiveSet(DummyHybridDecrypt);
+  const encryptPrimitiveSet =
+      new PrimitiveSet.PrimitiveSet<DummyHybridEncrypt>(DummyHybridEncrypt);
+  const decryptPrimitiveSet =
+      new PrimitiveSet.PrimitiveSet<DummyHybridDecrypt>(DummyHybridDecrypt);
   for (let i = 1; i < numberOfPrimitives; i++) {
-    let /** @type {!PbOutputPrefixType} */ outputPrefix;
+    let outputPrefix: PbOutputPrefixType;
     switch (i % 3) {
       case 0:
         outputPrefix = PbOutputPrefixType.TINK;
@@ -266,20 +260,17 @@ const createDummyPrimitiveSets = function(opt_withPrimary = true) {
     'encryptPrimitiveSet': encryptPrimitiveSet,
     'decryptPrimitiveSet': decryptPrimitiveSet
   };
-};
+}
 
-/**
- * @final
- */
+/** @final */
 class DummyHybridEncrypt extends HybridEncrypt {
-  /** @param {!Uint8Array} ciphertextSuffix */
-  constructor(ciphertextSuffix) {
+  constructor(private ciphertextSuffix: Uint8Array) {
     super();
-    this.ciphertextSuffix_ = ciphertextSuffix;
   }
+
   /** @override */
-  async encrypt(plaintext, opt_contextInfo) {
-    const ciphertext = Bytes.concat(plaintext, this.ciphertextSuffix_);
+  async encrypt(plaintext: Uint8Array, opt_contextInfo?: Uint8Array) {
+    const ciphertext = Bytes.concat(plaintext, this.ciphertextSuffix);
     if (opt_contextInfo) {
       return Bytes.concat(ciphertext, opt_contextInfo);
     }
@@ -287,18 +278,14 @@ class DummyHybridEncrypt extends HybridEncrypt {
   }
 }
 
-/**
- * @final
- */
+/** @final */
 class DummyHybridDecrypt extends HybridDecrypt {
-  /** @param {!Uint8Array} ciphertextSuffix */
-  constructor(ciphertextSuffix) {
+  constructor(private ciphertextSuffix: Uint8Array) {
     super();
-    this.ciphertextSuffix_ = ciphertextSuffix;
   }
 
   /** @override */
-  async decrypt(ciphertext, opt_contextInfo) {
+  async decrypt(ciphertext: Uint8Array, opt_contextInfo?: Uint8Array) {
     if (opt_contextInfo) {
       const infoLength = opt_contextInfo.length;
       const contextInfo =
@@ -309,10 +296,10 @@ class DummyHybridDecrypt extends HybridDecrypt {
       ciphertext = ciphertext.slice(0, ciphertext.length - infoLength);
     }
     const plaintext =
-        ciphertext.slice(0, ciphertext.length - this.ciphertextSuffix_.length);
+        ciphertext.slice(0, ciphertext.length - this.ciphertextSuffix.length);
     const suffix = ciphertext.slice(
-        ciphertext.length - this.ciphertextSuffix_.length, ciphertext.length);
-    if ([...suffix].toString() === [...this.ciphertextSuffix_].toString()) {
+        ciphertext.length - this.ciphertextSuffix.length, ciphertext.length);
+    if ([...suffix].toString() === [...this.ciphertextSuffix].toString()) {
       return plaintext;
     }
     throw new SecurityException(ExceptionText.cannotBeDecrypted());

@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.hybrid.HybridConfigTest');
-goog.setTestOnly('tink.hybrid.HybridConfigTest');
+import 'jasmine';
 
-const {EciesAeadHkdfPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_private_key_manager');
-const {EciesAeadHkdfPublicKeyManager} = goog.require('google3.third_party.tink.javascript.hybrid.ecies_aead_hkdf_public_key_manager');
-const HybridConfig = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_config');
-const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
-const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const {HybridKeyTemplates} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_key_templates');
-const {KeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {KeysetHandle} from '../internal/keyset_handle';
+import {PbKeyData, PbKeyset, PbKeyStatusType, PbKeyTemplate, PbOutputPrefixType} from '../internal/proto';
+import * as Registry from '../internal/registry';
+import * as Random from '../subtle/random';
+
+import {EciesAeadHkdfPrivateKeyManager} from './ecies_aead_hkdf_private_key_manager';
+import {EciesAeadHkdfPublicKeyManager} from './ecies_aead_hkdf_public_key_manager';
+import * as HybridConfig from './hybrid_config';
+import {HybridKeyTemplates} from './hybrid_key_templates';
+import {HybridDecrypt} from './internal/hybrid_decrypt';
+import {HybridEncrypt} from './internal/hybrid_encrypt';
 
 describe('hybrid config test', function() {
   beforeEach(function() {
@@ -64,25 +64,17 @@ describe('hybrid config test', function() {
       HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm(),
       HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128CtrHmacSha256()
     ];
-    // The following function adds all templates in uncompiled tests, thus if
-    // a new template is added without updating HybridConfig correctly then at
-    // least the uncompiled tests should fail.
-    // But the templates are included also above as the following function does
-    // not add anything to the list in compiled code.
-    templates =
-        templates.concat(getListOfTemplatesFromHybridKeyTemplatesClass());
-
-    for (let template of templates) {
+    for (const template of templates) {
       const privateKeyData = await Registry.newKeyData(template);
       const privateKeysetHandle = createKeysetHandleFromKeyData(privateKeyData);
       const hybridDecrypt =
-          await privateKeysetHandle.getPrimitive(HybridDecrypt);
+          await privateKeysetHandle.getPrimitive<HybridDecrypt>(HybridDecrypt);
 
       const publicKeyData = Registry.getPublicKeyData(
           privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
       const publicKeysetHandle = createKeysetHandleFromKeyData(publicKeyData);
       const hybridEncrypt =
-          await publicKeysetHandle.getPrimitive(HybridEncrypt);
+          await publicKeysetHandle.getPrimitive<HybridEncrypt>(HybridEncrypt);
 
       const plaintext = new Uint8Array(Random.randBytes(10));
       const contextInfo = new Uint8Array(Random.randBytes(8));
@@ -106,11 +98,8 @@ const ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE =
 /**
  * Creates a keyset containing only the key given by keyData and returns it
  * wrapped in a KeysetHandle.
- *
- * @param {!PbKeyData} keyData
- * @return {!KeysetHandle}
  */
-const createKeysetHandleFromKeyData = function(keyData) {
+function createKeysetHandleFromKeyData(keyData: PbKeyData): KeysetHandle {
   const keyId = 1;
   const key = new PbKeyset.Key()
                   .setKeyData(keyData)
@@ -122,34 +111,4 @@ const createKeysetHandleFromKeyData = function(keyData) {
   keyset.addKey(key);
   keyset.setPrimaryKeyId(keyId);
   return new KeysetHandle(keyset);
-};
-
-/**
- * Returns all templates from HybridKeyTemplates class.
- *
- * WARNING: This function works only in uncompiled code. Once the code is
- * compiled it returns only empty set due to optimizations which are run.
- * Namely
- *   - after compilation the methods are no longer methods of HybridKeyTemplates
- *       class, and
- *   - every method which is not referenced in this file or in the code used by
- *       these tests are considered as dead code and removed.
- *
- * @return {!Array<!PbKeyTemplate>}
- */
-const getListOfTemplatesFromHybridKeyTemplatesClass = function() {
-  let templates = [];
-  for (let propertyName of Object.getOwnPropertyNames(HybridKeyTemplates)) {
-    // Only public methods (i.e. not ending with '_') without arguments (i.e.
-    // function.length == 0) generate key templates.
-    const property = HybridKeyTemplates[propertyName];
-    if (typeof property === 'function' && property.length === 0 &&
-        propertyName[propertyName.length - 1] != '_') {
-      const template = property();
-      if (template instanceof PbKeyTemplate) {
-        templates = templates.concat([template]);
-      }
-    }
-  }
-  return templates;
-};
+}
