@@ -4,17 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.EcdsaPublicKeyManagerTest');
-goog.setTestOnly('tink.signature.EcdsaPublicKeyManagerTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
-const {EcdsaPublicKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_public_key_manager');
-const {Mac} = goog.require('google3.third_party.tink.javascript.mac.index');
-const {PbEcdsaParams, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
+import {PbEcdsaParams, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} from '../internal/proto';
+import * as Registry from '../internal/registry';
+import * as Util from '../internal/util';
+import {Mac} from '../mac';
+import * as Bytes from '../subtle/bytes';
+import * as EllipticCurves from '../subtle/elliptic_curves';
+import {assertExists} from '../testing/internal/test_utils';
+
+import {EcdsaPublicKeyManager} from './ecdsa_public_key_manager';
+import {PublicKeyVerify} from './internal/public_key_verify';
 
 const KEY_TYPE = 'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
 const VERSION = 0;
@@ -82,8 +83,7 @@ describe('ecdsa public key manager test', function() {
 
   it('get primitive, unsupported key type', async function() {
     const manager = new EcdsaPublicKeyManager();
-    let key = new PbEcdsaParams();
-
+    const key = new PbEcdsaParams();
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -122,27 +122,27 @@ describe('ecdsa public key manager test', function() {
     const key = await createKey();
 
     // Unknown encoding.
-    key.getParams().setEncoding(PbEcdsaSignatureEncoding.UNKNOWN_ENCODING);
+    key.getParams()?.setEncoding(PbEcdsaSignatureEncoding.UNKNOWN_ENCODING);
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownEncoding());
     }
-    key.getParams().setEncoding(PbEcdsaSignatureEncoding.DER);
+    key.getParams()?.setEncoding(PbEcdsaSignatureEncoding.DER);
 
     // Unknown hash.
-    key.getParams().setHashType(PbHashType.UNKNOWN_HASH);
+    key.getParams()?.setHashType(PbHashType.UNKNOWN_HASH);
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownHash());
     }
-    key.getParams().setHashType(PbHashType.SHA256);
+    key.getParams()?.setHashType(PbHashType.SHA256);
 
     // Unknown curve.
-    key.getParams().setCurve(PbEllipticCurveType.UNKNOWN_CURVE);
+    key.getParams()?.setCurve(PbEllipticCurveType.UNKNOWN_CURVE);
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -151,7 +151,7 @@ describe('ecdsa public key manager test', function() {
     }
 
     // Bad hash + curve combinations.
-    key.getParams().setCurve(PbEllipticCurveType.NIST_P384);
+    key.getParams()?.setCurve(PbEllipticCurveType.NIST_P384);
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -160,8 +160,7 @@ describe('ecdsa public key manager test', function() {
           .toBe(
               'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
-
-    key.getParams().setCurve(PbEllipticCurveType.NIST_P521);
+    key.getParams()?.setCurve(PbEllipticCurveType.NIST_P521);
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -216,8 +215,7 @@ describe('ecdsa public key manager test', function() {
   it('get primitive, from key', async function() {
     const manager = new EcdsaPublicKeyManager();
     const keys = await createTestSetOfKeys();
-
-    for (let key of keys) {
+    for (const key of keys) {
       await manager.getPrimitive(PRIMITIVE, key);
     }
   });
@@ -225,8 +223,7 @@ describe('ecdsa public key manager test', function() {
   it('get primitive, from key data', async function() {
     const manager = new EcdsaPublicKeyManager();
     const keyDatas = await createTestSetOfKeyDatas();
-
-    for (let key of keyDatas) {
+    for (const key of keyDatas) {
       await manager.getPrimitive(PRIMITIVE, key);
     }
   });
@@ -251,30 +248,23 @@ describe('ecdsa public key manager test', function() {
 
   it('get version', function() {
     const manager = new EcdsaPublicKeyManager();
-
     expect(manager.getVersion()).toBe(VERSION);
   });
 });
 
 // Helper classes and functions
 class ExceptionText {
-  /** @return {string} */
-  static notSupported() {
+  static notSupported(): string {
     return 'SecurityException: This operation is not supported for public keys. ' +
         'Use EcdsaPrivateKeyManager to generate new keys.';
   }
 
-  /** @return {string} */
-  static unsupportedPrimitive() {
+  static unsupportedPrimitive(): string {
     return 'SecurityException: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
-  /**
-   * @param {string=} opt_requestedKeyType
-   * @return {string}
-   */
-  static unsupportedKeyType(opt_requestedKeyType) {
+  static unsupportedKeyType(opt_requestedKeyType?: string): string {
     const prefix = 'SecurityException: Key type';
     const suffix =
         'is not supported. This key manager supports ' + KEY_TYPE + '.';
@@ -285,45 +275,37 @@ class ExceptionText {
     }
   }
 
-  /** @return {string} */
-  static versionOutOfBounds() {
+  static versionOutOfBounds(): string {
     return 'SecurityException: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
-  /** @return {string} */
-  static unknownEncoding() {
+  static unknownEncoding(): string {
     return 'SecurityException: Invalid public key - missing signature encoding.';
   }
 
-  /** @return {string} */
-  static unknownHash() {
+  static unknownHash(): string {
     return 'SecurityException: Unknown hash type.';
   }
 
-  /** @return {string} */
-  static unknownCurve() {
+  static unknownCurve(): string {
     return 'SecurityException: Unknown curve type.';
   }
 
-  /** @return {string} */
-  static missingParams() {
+  static missingParams(): string {
     return 'SecurityException: Invalid public key - missing params.';
   }
 
-  /** @return {string} */
-  static missingXY() {
+  static missingXY(): string {
     return 'SecurityException: Invalid public key - missing value of X or Y.';
   }
 
-  /** @return {string} */
-  static invalidSerializedKey() {
+  static invalidSerializedKey(): string {
     return 'SecurityException: Input cannot be parsed as ' + KEY_TYPE +
         ' key-proto.';
   }
 
-  /** @return {!Array<string>} */
-  static webCryptoErrors() {
+  static webCryptoErrors(): string[] {
     return [
       'DataError',
       // Firefox
@@ -332,53 +314,37 @@ class ExceptionText {
   }
 }
 
-/**
- * @param {!PbEllipticCurveType} curveType
- * @param {!PbHashType} hashType
- * @param {!PbEcdsaSignatureEncoding} encoding
- *
- * @return {!PbEcdsaParams}
- */
-const createParams = function(curveType, hashType, encoding) {
-  const params =
-      new PbEcdsaParams().setCurve(curveType).setHashType(hashType).setEncoding(
-          encoding);
-
+function createParams(
+    curveType: PbEllipticCurveType, hashType: PbHashType,
+    encoding: PbEcdsaSignatureEncoding): PbEcdsaParams {
+  const params = (new PbEcdsaParams())
+                     .setCurve(curveType)
+                     .setHashType(hashType)
+                     .setEncoding(encoding);
   return params;
-};
+}
 
-
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- * @param {!PbEcdsaSignatureEncoding=} opt_encoding (default: DER)
- *
- * @return {!Promise<!PbEcdsaPublicKey>}
- */
-const createKey = async function(
-    opt_curveType = PbEllipticCurveType.NIST_P256,
-    opt_hashType = PbHashType.SHA256,
-    opt_encoding = PbEcdsaSignatureEncoding.DER) {
+async function createKey(
+    opt_curveType: PbEllipticCurveType = PbEllipticCurveType.NIST_P256,
+    opt_hashType: PbHashType = PbHashType.SHA256,
+    opt_encoding: PbEcdsaSignatureEncoding =
+        PbEcdsaSignatureEncoding.DER): Promise<PbEcdsaPublicKey> {
   const curveSubtleType = Util.curveTypeProtoToSubtle(opt_curveType);
   const curveName = EllipticCurves.curveToString(curveSubtleType);
-
-  const key = new PbEcdsaPublicKey().setVersion(0).setParams(
-      createParams(opt_curveType, opt_hashType, opt_encoding));
-
+  const key =
+      (new PbEcdsaPublicKey())
+          .setVersion(0)
+          .setParams(createParams(opt_curveType, opt_hashType, opt_encoding));
   const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
   const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-  key.setX(Bytes.fromBase64(publicKey['x'], /* opt_webSafe = */ true));
-  key.setY(Bytes.fromBase64(publicKey['y'], /* opt_webSafe = */ true));
-
+  key.setX(
+      Bytes.fromBase64(assertExists(publicKey['x']), /* opt_webSafe = */ true));
+  key.setY(
+      Bytes.fromBase64(assertExists(publicKey['y']), /* opt_webSafe = */ true));
   return key;
-};
+}
 
-/**
- * @param {!PbEcdsaPublicKey} key
- *
- * @return {!PbKeyData}
- */
-const createKeyDataFromKey = function(key) {
+function createKeyDataFromKey(key: PbEcdsaPublicKey): PbKeyData {
   const keyData =
       new PbKeyData()
           .setTypeUrl(KEY_TYPE)
@@ -386,26 +352,18 @@ const createKeyDataFromKey = function(key) {
           .setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
 
   return keyData;
-};
+}
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- * @param {!PbEcdsaSignatureEncoding=} opt_encoding (default: DER)
- *
- * @return {!Promise<!PbKeyData>}
- */
-const createKeyData =
-    async function(opt_curveType, opt_hashType, opt_encoding) {
+async function createKeyData(
+    opt_curveType?: PbEllipticCurveType, opt_hashType?: PbHashType,
+    opt_encoding?: PbEcdsaSignatureEncoding): Promise<PbKeyData> {
   const key = await createKey(opt_curveType, opt_hashType, opt_encoding);
   return createKeyDataFromKey(key);
-};
-
+}
 
 // Create set of keys with all possible predefined/supported parameters.
-/** @return {!Promise<!Array<!PbEcdsaPublicKey>>} */
-const createTestSetOfKeys = async function() {
-  const /** !Array<!PbEcdsaPublicKey> */ keys = [];
+async function createTestSetOfKeys(): Promise<PbEcdsaPublicKey[]> {
+  const keys: PbEcdsaPublicKey[] = [];
   keys.push(await createKey(
       PbEllipticCurveType.NIST_P256, PbHashType.SHA256,
       PbEcdsaSignatureEncoding.DER));
@@ -425,19 +383,17 @@ const createTestSetOfKeys = async function() {
       PbEllipticCurveType.NIST_P521, PbHashType.SHA512,
       PbEcdsaSignatureEncoding.IEEE_P1363));
   return keys;
-};
+}
 
 // Create set of keyData protos with keys of all possible predefined/supported
 // parameters.
-/** @return {!Promise<!Array<!PbKeyData>>} */
-const createTestSetOfKeyDatas = async function() {
+async function createTestSetOfKeyDatas(): Promise<PbKeyData[]> {
   const keys = await createTestSetOfKeys();
-
-  const /** !Array<!PbKeyData> */ keyDatas = [];
-  for (let key of keys) {
+  const keyDatas: PbKeyData[] = [];
+  for (const key of keys) {
     const keyData = await createKeyDataFromKey(key);
     keyDatas.push(keyData);
   }
 
   return keyDatas;
-};
+}

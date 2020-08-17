@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.PublicKeyVerifyWrapperTest');
-goog.setTestOnly('tink.signature.PublicKeyVerifyWrapperTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {PublicKeySignWrapper} = goog.require('google3.third_party.tink.javascript.signature.public_key_sign_wrapper');
-const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
-const {PublicKeyVerifyWrapper} = goog.require('google3.third_party.tink.javascript.signature.public_key_verify_wrapper');
-const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
+import * as PrimitiveSet from '../internal/primitive_set';
+import {PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../internal/proto';
+import * as Bytes from '../subtle/bytes';
+import * as Random from '../subtle/random';
+
+import {PublicKeySign} from './internal/public_key_sign';
+import {PublicKeyVerify} from './internal/public_key_verify';
+import {PublicKeySignWrapper} from './public_key_sign_wrapper';
+import {PublicKeyVerifyWrapper} from './public_key_verify_wrapper';
 
 describe('public key verify wrapper test', function() {
   it('verify, with empty signature', async function() {
@@ -108,18 +108,11 @@ describe('public key verify wrapper test', function() {
   });
 });
 
-/**
- * Function for creating keys for testing purposes.
- *
- * @param {number} keyId
- * @param {!PbOutputPrefixType} outputPrefix
- * @param {boolean} enabled
- *
- * @return {!PbKeysetKey}
- */
-const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
-  let key = new PbKeysetKey();
-
+/** Function for creating keys for testing purposes. */
+function createDummyKeysetKey(
+    keyId: number, outputPrefix: PbOutputPrefixType,
+    enabled: boolean): PbKeysetKey {
+  const key = new PbKeysetKey();
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
   } else {
@@ -130,7 +123,7 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
   key.setKeyId(keyId);
 
   return key;
-};
+}
 
 /**
  * Creates a primitive sets for PublicKeySign and PublicKeyVerify with
@@ -138,19 +131,19 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
  * have ids from the set [1, ..., numberOfPrimitives] and the primitive
  * corresponding to key with id 'numberOfPrimitives' is set to be primary
  * whenever opt_withPrimary is set to true (where true is the default value).
- *
- * @param {boolean=} opt_withPrimary
- * @return {{publicPrimitiveSet:!PrimitiveSet.PrimitiveSet,
- *     privatePrimitiveSet:!PrimitiveSet.PrimitiveSet}}
  */
-const createDummyPrimitiveSets = function(opt_withPrimary = true) {
+function createDummyPrimitiveSets(opt_withPrimary: boolean = true): {
+  publicPrimitiveSet: PrimitiveSet.PrimitiveSet<DummyPublicKeyVerify>,
+  privatePrimitiveSet: PrimitiveSet.PrimitiveSet<DummyPublicKeySign>,
+} {
   const numberOfPrimitives = 5;
 
   const publicPrimitiveSet =
-      new PrimitiveSet.PrimitiveSet(DummyPublicKeyVerify);
-  const privatePrimitiveSet = new PrimitiveSet.PrimitiveSet(DummyPublicKeySign);
+      new PrimitiveSet.PrimitiveSet<DummyPublicKeyVerify>(DummyPublicKeyVerify);
+  const privatePrimitiveSet =
+      new PrimitiveSet.PrimitiveSet<DummyPublicKeySign>(DummyPublicKeySign);
   for (let i = 1; i < numberOfPrimitives; i++) {
-    let /** @type {!PbOutputPrefixType} */ outputPrefix;
+    let outputPrefix: PbOutputPrefixType;
     switch (i % 3) {
       case 0:
         outputPrefix = PbOutputPrefixType.TINK;
@@ -186,35 +179,28 @@ const createDummyPrimitiveSets = function(opt_withPrimary = true) {
     'publicPrimitiveSet': publicPrimitiveSet,
     'privatePrimitiveSet': privatePrimitiveSet
   };
-};
+}
 
-/**
- * @final
- */
+/** @final */
 class DummyPublicKeySign extends PublicKeySign {
-  /** @param {!Uint8Array} signatureSuffix */
-  constructor(signatureSuffix) {
+  constructor(private signatureSuffix: Uint8Array) {
     super();
-    this.signatureSuffix_ = signatureSuffix;
   }
+
   /** @override */
-  async sign(data) {
-    return Bytes.concat(data, this.signatureSuffix_);
+  async sign(data: Uint8Array) {
+    return Bytes.concat(data, this.signatureSuffix);
   }
 }
 
-/**
- * @final
- */
+/** @final */
 class DummyPublicKeyVerify extends PublicKeyVerify {
-  /** @param {!Uint8Array} signatureSuffix */
-  constructor(signatureSuffix) {
+  constructor(private signatureSuffix: Uint8Array) {
     super();
-    this.signatureSuffix_ = signatureSuffix;
   }
 
   /** @override */
-  async verify(signature, data) {
-    return Bytes.isEqual(Bytes.concat(data, this.signatureSuffix_), signature);
+  async verify(signature: Uint8Array, data: Uint8Array) {
+    return Bytes.isEqual(Bytes.concat(data, this.signatureSuffix), signature);
   }
 }

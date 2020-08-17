@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.SignatureConfigTest');
-goog.setTestOnly('tink.signature.SignatureConfigTest');
+import 'jasmine';
 
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const SignatureConfig = goog.require('google3.third_party.tink.javascript.signature.signature_config');
-const {EcdsaPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_private_key_manager');
-const {EcdsaPublicKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_public_key_manager');
-const {KeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
-const {PbKeyData, PbKeyStatusType, PbKeyTemplate, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
-const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {SignatureKeyTemplates} = goog.require('google3.third_party.tink.javascript.signature.signature_key_templates');
+import {KeysetHandle} from '../internal/keyset_handle';
+import {PbKeyData, PbKeyset, PbKeyStatusType, PbKeyTemplate, PbOutputPrefixType} from '../internal/proto';
+import * as Registry from '../internal/registry';
+import * as Random from '../subtle/random';
+
+import {EcdsaPrivateKeyManager} from './ecdsa_private_key_manager';
+import {EcdsaPublicKeyManager} from './ecdsa_public_key_manager';
+import {PublicKeySign} from './internal/public_key_sign';
+import {PublicKeyVerify} from './internal/public_key_verify';
+import * as SignatureConfig from './signature_config';
+import {SignatureKeyTemplates} from './signature_key_templates';
 
 describe('signature config test', function() {
   beforeEach(function() {
@@ -63,26 +63,17 @@ describe('signature config test', function() {
       SignatureKeyTemplates.ecdsaP521IeeeEncoding(),
 
     ];
-    // The following function adds all templates in uncompiled tests, thus if
-    // a new template is added without updating SignatureConfig correctly then
-    // at least the uncompiled tests should fail. But the templates are included
-    // also above as the following function does not add anything to the list in
-    // compiled code.
-    templates =
-        templates.concat(getListOfTemplatesFromSignatureKeyTemplatesClass());
-
-    for (let template of templates) {
+    for (const template of templates) {
       const privateKeyData = await Registry.newKeyData(template);
       const privateKeysetHandle = createKeysetHandleFromKeyData(privateKeyData);
       const publicKeySign =
-          await privateKeysetHandle.getPrimitive(PublicKeySign);
-
+          await privateKeysetHandle.getPrimitive<PublicKeySign>(PublicKeySign);
       const publicKeyData = Registry.getPublicKeyData(
           privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
       const publicKeysetHandle = createKeysetHandleFromKeyData(publicKeyData);
       const publicKeyVerify =
-          await publicKeysetHandle.getPrimitive(PublicKeyVerify);
-
+          await publicKeysetHandle.getPrimitive<PublicKeyVerify>(
+              PublicKeyVerify);
       const data = Random.randBytes(10);
       const signature = await publicKeySign.sign(data);
       const isValid = await publicKeyVerify.verify(signature, data);
@@ -103,50 +94,16 @@ const ECDSA_PRIVATE_KEY_TYPE =
 /**
  * Creates a keyset containing only the key given by keyData and returns it
  * wrapped in a KeysetHandle.
- *
- * @param {!PbKeyData} keyData
- * @return {!KeysetHandle}
  */
-const createKeysetHandleFromKeyData = function(keyData) {
+function createKeysetHandleFromKeyData(keyData: PbKeyData): KeysetHandle {
   const keyId = 1;
   const key = new PbKeyset.Key()
                   .setKeyData(keyData)
                   .setStatus(PbKeyStatusType.ENABLED)
                   .setKeyId(keyId)
                   .setOutputPrefixType(PbOutputPrefixType.TINK);
-
   const keyset = new PbKeyset();
   keyset.addKey(key);
   keyset.setPrimaryKeyId(keyId);
   return new KeysetHandle(keyset);
-};
-
-/**
- * Returns all templates from SignatureKeyTemplates class.
- *
- * WARNING: This function works only in uncompiled code. Once the code is
- * compiled it returns only empty set due to optimizations which are run.
- * Namely
- *   - after compilation the methods are no longer methods of
- *     SignatureKeyTemplates class, and
- *   - every method which is not referenced in this file or in the code used by
- *       these tests are considered as dead code and removed.
- *
- * @return {!Array<!PbKeyTemplate>}
- */
-const getListOfTemplatesFromSignatureKeyTemplatesClass = function() {
-  let templates = [];
-  for (let propertyName of Object.getOwnPropertyNames(SignatureKeyTemplates)) {
-    // Only public methods (i.e. not ending with '_') without arguments (i.e.
-    // function.length == 0) generate key templates.
-    const property = SignatureKeyTemplates[propertyName];
-    if (typeof property === 'function' && property.length === 0 &&
-        propertyName[propertyName.length - 1] != '_') {
-      const template = property();
-      if (template instanceof PbKeyTemplate) {
-        templates = templates.concat([template]);
-      }
-    }
-  }
-  return templates;
-};
+}

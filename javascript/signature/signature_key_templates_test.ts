@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.SignatureKeyTemplatesTest');
-goog.setTestOnly('tink.signature.SignatureKeyTemplatesTest');
+import 'jasmine';
 
-const {EcdsaPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_private_key_manager');
-const {PbEcdsaKeyFormat, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {SignatureKeyTemplates} = goog.require('google3.third_party.tink.javascript.signature.signature_key_templates');
+import {PbEcdsaKeyFormat, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbOutputPrefixType} from '../internal/proto';
+
+import {EcdsaPrivateKeyManager} from './ecdsa_private_key_manager';
+import {SignatureKeyTemplates} from './signature_key_templates';
 
 describe('signature key templates test', function() {
   it('ecdsa p256', function() {
@@ -32,11 +32,11 @@ describe('signature key templates test', function() {
     const keyFormat =
         PbEcdsaKeyFormat.deserializeBinary(keyTemplate.getValue());
     const params = keyFormat.getParams();
-    expect(params.getEncoding()).toBe(expectedEncoding);
+    expect(params!.getEncoding()).toBe(expectedEncoding);
 
     // Test key params.
-    expect(params.getCurve()).toBe(expectedCurve);
-    expect(params.getHashType()).toBe(expectedHashFunction);
+    expect(params!.getCurve()).toBe(expectedCurve);
+    expect(params!.getHashType()).toBe(expectedHashFunction);
 
     // Test that the template works with EcdsaPrivateKeyManager.
     manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());

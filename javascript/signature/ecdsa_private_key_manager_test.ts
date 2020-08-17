@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.EcdsaPrivateKeyManagerTest');
-goog.setTestOnly('tink.signature.EcdsaPrivateKeyManagerTest');
+import 'jasmine';
 
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {EcdsaPrivateKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_private_key_manager');
-const {EcdsaPublicKeyManager} = goog.require('google3.third_party.tink.javascript.signature.ecdsa_public_key_manager');
-const {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
-const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {assertExists, assertInstanceof} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
+import * as KeyManager from '../internal/key_manager';
+import {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} from '../internal/proto';
+import * as Registry from '../internal/registry';
+import * as Random from '../subtle/random';
+import {assertExists, assertInstanceof} from '../testing/internal/test_utils';
+
+import {EcdsaPrivateKeyManager} from './ecdsa_private_key_manager';
+import {EcdsaPublicKeyManager} from './ecdsa_public_key_manager';
+import {PublicKeySign} from './internal/public_key_sign';
+import {PublicKeyVerify} from './internal/public_key_verify';
 
 const PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey';
@@ -80,7 +80,7 @@ describe('ecdsa private key manager test', function() {
 
     // Unknown encoding.
     const invalidFormat = createKeyFormat();
-    invalidFormat.getParams().setEncoding(
+    invalidFormat.getParams()?.setEncoding(
         PbEcdsaSignatureEncoding.UNKNOWN_ENCODING);
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
@@ -88,20 +88,20 @@ describe('ecdsa private key manager test', function() {
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownEncoding());
     }
-    invalidFormat.getParams().setEncoding(PbEcdsaSignatureEncoding.DER);
+    invalidFormat.getParams()?.setEncoding(PbEcdsaSignatureEncoding.DER);
 
     // Unknown hash.
-    invalidFormat.getParams().setHashType(PbHashType.UNKNOWN_HASH);
+    invalidFormat.getParams()?.setHashType(PbHashType.UNKNOWN_HASH);
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownHash());
     }
-    invalidFormat.getParams().setHashType(PbHashType.SHA256);
+    invalidFormat.getParams()?.setHashType(PbHashType.SHA256);
 
     // Unknown curve.
-    invalidFormat.getParams().setCurve(PbEllipticCurveType.UNKNOWN_CURVE);
+    invalidFormat.getParams()?.setCurve(PbEllipticCurveType.UNKNOWN_CURVE);
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
@@ -110,7 +110,7 @@ describe('ecdsa private key manager test', function() {
     }
 
     // Bad hash + curve combinations.
-    invalidFormat.getParams().setCurve(PbEllipticCurveType.NIST_P384);
+    invalidFormat.getParams()?.setCurve(PbEllipticCurveType.NIST_P384);
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
@@ -119,8 +119,7 @@ describe('ecdsa private key manager test', function() {
           .toBe(
               'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
-
-    invalidFormat.getParams().setCurve(PbEllipticCurveType.NIST_P521);
+    invalidFormat.getParams()?.setCurve(PbEllipticCurveType.NIST_P521);
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
@@ -134,12 +133,10 @@ describe('ecdsa private key manager test', function() {
   it('new key, via key format', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const manager = new EcdsaPrivateKeyManager();
+    for (const keyFormat of keyFormats) {
+      const key = await manager.getKeyFactory().newKey(keyFormat);
 
-    for (let keyFormat of keyFormats) {
-      const key = /** @type{!PbEcdsaPrivateKey} */ (
-          await manager.getKeyFactory().newKey(keyFormat));
-
-      expect(key.getPublicKey().getParams()).toEqual(keyFormat.getParams());
+      expect(key.getPublicKey()?.getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
@@ -166,17 +163,15 @@ describe('ecdsa private key manager test', function() {
   it('new key data, from valid key format', async function() {
     const keyFormats = createTestSetOfKeyFormats();
     const manager = new EcdsaPrivateKeyManager();
-
-    for (let keyFormat of keyFormats) {
+    for (const keyFormat of keyFormats) {
       const serializedKeyFormat = keyFormat.serializeBinary();
-      const keyData = /** @type{!PbKeyData} */ (
-          await manager.getKeyFactory().newKeyData(serializedKeyFormat));
-
+      const keyData =
+          await manager.getKeyFactory().newKeyData(serializedKeyFormat);
       expect(keyData.getTypeUrl()).toBe(PRIVATE_KEY_TYPE);
       expect(keyData.getKeyMaterialType()).toBe(PRIVATE_KEY_MATERIAL_TYPE);
 
       const key = PbEcdsaPrivateKey.deserializeBinary(keyData.getValue());
-      expect(key.getPublicKey().getParams()).toEqual(keyFormat.getParams());
+      expect(key.getPublicKey()?.getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
@@ -187,8 +182,7 @@ describe('ecdsa private key manager test', function() {
 
     const privateKey = new Uint8Array([0, 1]);  // not a serialized private key
     try {
-      const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (
-          manager.getKeyFactory());
+      const factory = manager.getKeyFactory();
       factory.getPublicKeyData(privateKey);
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
@@ -198,11 +192,8 @@ describe('ecdsa private key manager test', function() {
   it('get public key data, should work', async function() {
     const keyFormat = createKeyFormat();
     const manager = new EcdsaPrivateKeyManager();
-
-    const privateKey = /** @type{!PbEcdsaPrivateKey} */ (
-        await manager.getKeyFactory().newKey(keyFormat));
-    const factory =
-        /** @type {!KeyManager.PrivateKeyFactory} */ (manager.getKeyFactory());
+    const privateKey = await manager.getKeyFactory().newKey(keyFormat);
+    const factory = (manager.getKeyFactory());
     const publicKeyData =
         factory.getPublicKeyData(privateKey.serializeBinary());
 
@@ -211,11 +202,11 @@ describe('ecdsa private key manager test', function() {
     const publicKey =
         PbEcdsaPublicKey.deserializeBinary(publicKeyData.getValue());
     expect(publicKey.getVersion())
-        .toEqual(privateKey.getPublicKey().getVersion());
+        .toEqual(privateKey.getPublicKey()?.getVersion());
     expect(publicKey.getParams())
-        .toEqual(privateKey.getPublicKey().getParams());
-    expect(publicKey.getX()).toEqual(privateKey.getPublicKey().getX());
-    expect(publicKey.getY()).toEqual(privateKey.getPublicKey().getY());
+        .toEqual(privateKey.getPublicKey()?.getParams());
+    expect(publicKey.getX()).toEqual(privateKey.getPublicKey()?.getX());
+    expect(publicKey.getY()).toEqual(privateKey.getPublicKey()?.getY());
   });
 
   it('get primitive, unsupported primitive type', async function() {
@@ -249,7 +240,7 @@ describe('ecdsa private key manager test', function() {
 
   it('get primitive, unsupported key type', async function() {
     const manager = new EcdsaPrivateKeyManager();
-    let key = new PbEcdsaPublicKey();
+    const key = new PbEcdsaPublicKey();
 
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
@@ -282,7 +273,7 @@ describe('ecdsa private key manager test', function() {
         await manager.getKeyFactory().newKey(keyFormat), PbEcdsaPrivateKey);
 
     // Unknown encoding.
-    key.getPublicKey().getParams().setEncoding(
+    key.getPublicKey()?.getParams()?.setEncoding(
         PbEcdsaSignatureEncoding.UNKNOWN_ENCODING);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
@@ -290,20 +281,21 @@ describe('ecdsa private key manager test', function() {
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownEncoding());
     }
-    key.getPublicKey().getParams().setEncoding(PbEcdsaSignatureEncoding.DER);
+    key.getPublicKey()?.getParams()?.setEncoding(PbEcdsaSignatureEncoding.DER);
 
     // Unknown hash.
-    key.getPublicKey().getParams().setHashType(PbHashType.UNKNOWN_HASH);
+    key.getPublicKey()?.getParams()?.setHashType(PbHashType.UNKNOWN_HASH);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.unknownHash());
     }
-    key.getPublicKey().getParams().setHashType(PbHashType.SHA256);
+    key.getPublicKey()?.getParams()?.setHashType(PbHashType.SHA256);
 
     // Unknown curve.
-    key.getPublicKey().getParams().setCurve(PbEllipticCurveType.UNKNOWN_CURVE);
+    key.getPublicKey()?.getParams()?.setCurve(
+        PbEllipticCurveType.UNKNOWN_CURVE);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -312,7 +304,7 @@ describe('ecdsa private key manager test', function() {
     }
 
     // Bad hash + curve combinations.
-    key.getPublicKey().getParams().setCurve(PbEllipticCurveType.NIST_P384);
+    key.getPublicKey()?.getParams()?.setCurve(PbEllipticCurveType.NIST_P384);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -321,8 +313,7 @@ describe('ecdsa private key manager test', function() {
           .toBe(
               'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
     }
-
-    key.getPublicKey().getParams().setCurve(PbEllipticCurveType.NIST_P521);
+    key.getPublicKey()?.getParams()?.setCurve(PbEllipticCurveType.NIST_P521);
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -357,16 +348,14 @@ describe('ecdsa private key manager test', function() {
     const keyFormats = createTestSetOfKeyFormats();
     const privateKeyManager = new EcdsaPrivateKeyManager();
     const publicKeyManager = new EcdsaPublicKeyManager();
-
-    for (let keyFormat of keyFormats) {
+    for (const keyFormat of keyFormats) {
       const key = assertInstanceof(
           await privateKeyManager.getKeyFactory().newKey(keyFormat),
           PbEcdsaPrivateKey);
-
-      const /** !PublicKeyVerify */ publicKeyVerify =
+      const publicKeyVerify: PublicKeyVerify =
           assertExists(await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, assertExists(key.getPublicKey())));
-      const /** !PublicKeySign */ publicKeySign =
+      const publicKeySign: PublicKeySign =
           assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, key));
 
@@ -383,18 +372,17 @@ describe('ecdsa private key manager test', function() {
     const privateKeyManager = new EcdsaPrivateKeyManager();
     const publicKeyManager = new EcdsaPublicKeyManager();
 
-    for (let keyFormat of keyFormats) {
+    for (const keyFormat of keyFormats) {
       const serializedKeyFormat = keyFormat.serializeBinary();
       const keyData = await privateKeyManager.getKeyFactory().newKeyData(
           serializedKeyFormat);
-      const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (
-          privateKeyManager.getKeyFactory());
+      const factory = privateKeyManager.getKeyFactory();
       const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
 
-      const /** !PublicKeyVerify */ publicKeyVerify =
+      const publicKeyVerify: PublicKeyVerify =
           assertExists(await publicKeyManager.getPrimitive(
               PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData));
-      const /** !PublicKeySign */ publicKeySign =
+      const publicKeySign: PublicKeySign =
           assertExists(await privateKeyManager.getPrimitive(
               PRIVATE_KEY_MANAGER_PRIMITIVE, keyData));
 
@@ -429,34 +417,26 @@ describe('ecdsa private key manager test', function() {
 
 // Helper classes and functions
 class ExceptionText {
-  /** @return {string} */
-  static nullKeyFormat() {
+  static nullKeyFormat(): string {
     return 'SecurityException: Key format has to be non-null.';
   }
 
-  /** @return {string} */
-  static invalidSerializedKeyFormat() {
+  static invalidSerializedKeyFormat(): string {
     return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
   }
 
-  /** @return {string} */
-  static unsupportedPrimitive() {
+  static unsupportedPrimitive(): string {
     return 'SecurityException: Requested primitive type which is not supported by ' +
         'this key manager.';
   }
 
-  /** @return {string} */
-  static unsupportedKeyFormat() {
+  static unsupportedKeyFormat(): string {
     return 'SecurityException: Expected ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
   }
 
-  /**
-   * @param {string=} opt_requestedKeyType
-   * @return {string}
-   */
-  static unsupportedKeyType(opt_requestedKeyType) {
+  static unsupportedKeyType(opt_requestedKeyType?: string): string {
     const prefix = 'SecurityException: Key type';
     const suffix =
         'is not supported. This key manager supports ' + PRIVATE_KEY_TYPE + '.';
@@ -467,74 +447,58 @@ class ExceptionText {
     }
   }
 
-  /** @return {string} */
-  static unknownEncoding() {
+  static unknownEncoding(): string {
     return 'SecurityException: Invalid public key - missing signature encoding.';
   }
 
-  /** @return {string} */
-  static unknownHash() {
+  static unknownHash(): string {
     return 'SecurityException: Unknown hash type.';
   }
 
-  /** @return {string} */
-  static unknownCurve() {
+  static unknownCurve(): string {
     return 'SecurityException: Unknown curve type.';
   }
 
-  /** @return {string} */
-  static versionOutOfBounds() {
+  static versionOutOfBounds(): string {
     return 'SecurityException: Version is out of bound, must be between 0 and ' +
         VERSION + '.';
   }
 
-  /** @return {string} */
-  static invalidKeyFormatMissingParams() {
+  static invalidKeyFormatMissingParams(): string {
     return 'SecurityException: Invalid key format - missing params.';
   }
 
-  /** @return {string} */
-  static invalidSerializedKey() {
+  static invalidSerializedKey(): string {
     return 'SecurityException: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key-proto.';
   }
 }
 
-/**
- * @param {!PbEllipticCurveType} curveType
- * @param {!PbHashType} hashType
- * @param {!PbEcdsaSignatureEncoding} encoding
- *
- * @return {!PbEcdsaParams}
- */
-const createParams = function(curveType, hashType, encoding) {
+function createParams(
+    curveType: PbEllipticCurveType, hashType: PbHashType,
+    encoding: PbEcdsaSignatureEncoding): PbEcdsaParams {
   const params =
       new PbEcdsaParams().setCurve(curveType).setHashType(hashType).setEncoding(
           encoding);
 
   return params;
-};
+}
 
-/**
- * @param {!PbEllipticCurveType=} opt_curveType (default: NIST_P256)
- * @param {!PbHashType=} opt_hashType (default: SHA256)
- * @param {!PbEcdsaSignatureEncoding=} opt_encodingType (default: DER)
- *
- * @return {!PbEcdsaKeyFormat}
- */
-const createKeyFormat = function(
-    opt_curveType = PbEllipticCurveType.NIST_P256,
-    opt_hashType = PbHashType.SHA256,
-    opt_encodingType = PbEcdsaSignatureEncoding.DER) {
+function createKeyFormat(
+    opt_curveType: PbEllipticCurveType = PbEllipticCurveType.NIST_P256,
+    opt_hashType: PbHashType = PbHashType.SHA256,
+    opt_encodingType: PbEcdsaSignatureEncoding =
+        PbEcdsaSignatureEncoding.DER): PbEcdsaKeyFormat {
   const keyFormat = new PbEcdsaKeyFormat().setParams(
       createParams(opt_curveType, opt_hashType, opt_encodingType));
   return keyFormat;
-};
+}
 
-// Create set of key formats with all possible predefined/supported parameters.
-/** @return {!Array<!PbEcdsaKeyFormat>} */
-const createTestSetOfKeyFormats = function() {
-  const /** !Array<!PbEcdsaKeyFormat> */ keyFormats = [];
+/**
+ * Create set of key formats with all possible predefined/supported parameters.
+ */
+function createTestSetOfKeyFormats(): PbEcdsaKeyFormat[] {
+  const keyFormats: PbEcdsaKeyFormat[] = [];
   keyFormats.push(createKeyFormat(
       PbEllipticCurveType.NIST_P256, PbHashType.SHA256,
       PbEcdsaSignatureEncoding.DER));
@@ -554,4 +518,4 @@ const createTestSetOfKeyFormats = function() {
       PbEllipticCurveType.NIST_P521, PbHashType.SHA512,
       PbEcdsaSignatureEncoding.IEEE_P1363));
   return keyFormats;
-};
+}

@@ -4,15 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.signature.PublicKeySignWrapperTest');
-goog.setTestOnly('tink.signature.PublicKeySignWrapperTest');
+import 'jasmine';
 
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
-const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {PublicKeySignWrapper} = goog.require('google3.third_party.tink.javascript.signature.public_key_sign_wrapper');
-const {PublicKeySign} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_sign');
+import {CryptoFormat} from '../internal/crypto_format';
+import * as PrimitiveSet from '../internal/primitive_set';
+import {PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../internal/proto';
+import * as Random from '../subtle/random';
+import {assertExists} from '../testing/internal/test_utils';
+
+import {PublicKeySign} from './internal/public_key_sign';
+import {PublicKeySignWrapper} from './public_key_sign_wrapper';
 
 describe('public key sign wrapper test', function() {
   it('new public key sign, primitive set without primary', function() {
@@ -43,7 +44,7 @@ describe('public key sign wrapper test', function() {
 
     // Signature should begin with primary key output prefix.
     expect(signature.subarray(0, CryptoFormat.NON_RAW_PREFIX_SIZE))
-        .toEqual(primitiveSet.getPrimary().getIdentifier());
+        .toEqual(assertExists(primitiveSet.getPrimary()).getIdentifier());
   });
 });
 
@@ -52,31 +53,24 @@ describe('public key sign wrapper test', function() {
  * @final
  */
 class ExceptionText {
-  /** @return {string} */
-  static nullPrimitiveSet() {
+  static nullPrimitiveSet(): string {
     return 'CustomError: Primitive set has to be non-null.';
   }
-  /** @return {string} */
-  static primitiveSetWithoutPrimary() {
+
+  static primitiveSetWithoutPrimary(): string {
     return 'CustomError: Primary has to be non-null.';
   }
-  /** @return {string} */
-  static nullPlaintext() {
+
+  static nullPlaintext(): string {
     return 'CustomError: Plaintext has to be non-null.';
   }
 }
 
-/**
- * Function for creating keys for testing purposes.
- *
- * @param {number} keyId
- * @param {!PbOutputPrefixType} outputPrefix
- * @param {boolean} enabled
- *
- * @return {!PbKeysetKey}
- */
-const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
-  let key = new PbKeysetKey();
+/** Function for creating keys for testing purposes. */
+function createDummyKeysetKey(
+    keyId: number, outputPrefix: PbOutputPrefixType,
+    enabled: boolean): PbKeysetKey {
+  const key = new PbKeysetKey();
 
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
@@ -88,7 +82,7 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
   key.setKeyId(keyId);
 
   return key;
-};
+}
 
 /**
  * Creates a primitive set with 'numberOfPrimitives' primitives. The keys
@@ -96,16 +90,14 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
  * [1, ..., numberOfPrimitives] and the primitive corresponding to key with id
  * 'numberOfPrimitives' is set to be primary whenever opt_withPrimary is set to
  * true (where true is the default value).
- *
- * @param {boolean=} opt_withPrimary (default: true)
- * @return {!PrimitiveSet.PrimitiveSet}
  */
-const createDummyPrimitiveSet = function(opt_withPrimary = true) {
+function createDummyPrimitiveSet(opt_withPrimary: boolean = true):
+    PrimitiveSet.PrimitiveSet<DummyPublicKeySign> {
   const numberOfPrimitives = 5;
-
-  const primitiveSet = new PrimitiveSet.PrimitiveSet(DummyPublicKeySign);
+  const primitiveSet =
+      new PrimitiveSet.PrimitiveSet<DummyPublicKeySign>(DummyPublicKeySign);
   for (let i = 1; i < numberOfPrimitives; i++) {
-    let /** @type {!PbOutputPrefixType} */ outputPrefix;
+    let outputPrefix: PbOutputPrefixType;
     switch (i % 3) {
       case 0:
         outputPrefix = PbOutputPrefixType.TINK;
@@ -131,14 +123,12 @@ const createDummyPrimitiveSet = function(opt_withPrimary = true) {
   }
 
   return primitiveSet;
-};
+}
 
-/**
- * @final
- */
+/** @final */
 class DummyPublicKeySign extends PublicKeySign {
   /** @override */
-  async sign(data) {
+  async sign(data: Uint8Array) {
     return data;
   }
 }
