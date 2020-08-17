@@ -15,6 +15,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import io
 from absl.testing import absltest
 from tink.testing import bytes_io
 
@@ -52,6 +53,73 @@ class BytesIoTest(absltest.TestCase):
     f.close()
     self.assertEqual(f.value_after_close(), b'foobar')
 
+
+class SlowBytesIOTest(absltest.TestCase):
+
+  def test_read(self):
+    with bytes_io.SlowBytesIO(b'The quick brown fox') as f:
+      with self.assertRaises(io.BlockingIOError):
+        f.read(10)
+      self.assertEqual(b'The q', f.read(10))
+      self.assertEqual(b'uick ', f.read(10))
+      with self.assertRaises(io.BlockingIOError):
+        f.read(10)
+      self.assertEqual(b'brown', f.read(10))
+      self.assertEqual(b' fox', f.read(10))
+      with self.assertRaises(io.BlockingIOError):
+        f.read(10)
+      self.assertEqual(b'', f.read(10))
+    self.assertTrue(f.closed)
+
+  def test_read_no_argument(self):
+    with bytes_io.SlowBytesIO(b'The quick brown fox') as f:
+      self.assertEqual(b'The quick brown fox', f.read())
+      self.assertEqual(b'', f.read())
+
+  def test_read_minus_one(self):
+    with bytes_io.SlowBytesIO(b'The quick brown fox') as f:
+      self.assertEqual(b'The quick brown fox', f.read(-1))
+      self.assertEqual(b'', f.read(-1))
+
+
+class SlowReadableRawBytesTest(absltest.TestCase):
+
+  def test_read(self):
+    with bytes_io.SlowReadableRawBytes(b'The quick brown fox') as f:
+      self.assertIsNone(f.read(10))
+      self.assertEqual(b'The q', f.read(10))
+      self.assertEqual(b'uick ', f.read(10))
+      self.assertIsNone(f.read(10))
+      self.assertEqual(b'brown', f.read(10))
+      self.assertEqual(b' fox', f.read(10))
+      self.assertIsNone(f.read(10))
+      self.assertEqual(b'', f.read(10))
+    self.assertTrue(f.closed)
+
+  # Note that the documentation of readall(), read() and read(-1) is wrong:
+  # https://docs.python.org/2/library/io.html#io.RawIOBase.readall.
+  # readall does multiple reads, but it stops as soon as it can't read any data.
+  # The documentation says that it reads until it reaches EOF.
+  def test_readall(self):
+    with bytes_io.SlowReadableRawBytes(b'The quick brown fox') as f:
+      self.assertIsNone(None, f.readall())
+      self.assertEqual(b'The quick ', f.readall())
+      self.assertEqual(b'brown fox', f.readall())
+      self.assertEqual(b'', f.readall())
+
+  def test_read_no_argument(self):
+    with bytes_io.SlowReadableRawBytes(b'The quick brown fox') as f:
+      self.assertIsNone(None, f.read())
+      self.assertEqual(b'The quick ', f.read())
+      self.assertEqual(b'brown fox', f.read())
+      self.assertEqual(b'', f.read())
+
+  def test_read_minus_one(self):
+    with bytes_io.SlowReadableRawBytes(b'The quick brown fox') as f:
+      self.assertIsNone(None, f.read(-1))
+      self.assertEqual(b'The quick ', f.read(-1))
+      self.assertEqual(b'brown fox', f.read(-1))
+      self.assertEqual(b'', f.read(-1))
 
 if __name__ == '__main__':
   absltest.main()

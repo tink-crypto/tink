@@ -23,7 +23,9 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+import errno
 import io
+from typing import Optional
 
 
 class BytesIOWithValueAfterClose(io.BytesIO):
@@ -43,5 +45,48 @@ class BytesIOWithValueAfterClose(io.BytesIO):
 
   def value_after_close(self) -> bytes:
     if not self.closed:
-      raise ValueError("call to value_after_close before close()")
+      raise ValueError('call to value_after_close before close()')
     return self._value_after_close
+
+
+class SlowBytesIO(io.BytesIO):
+  """A readable BytesIO that raised BlockingIOError on some calls to read."""
+
+  def __init__(self, data: bytes):
+    super(SlowBytesIO, self).__init__(data)
+    self._state = -1
+
+  def read(self, size: int = -1) -> bytes:
+    if size > 0:
+      self._state += 1
+      if self._state % 3 == 0:   # block on every third call.
+        raise io.BlockingIOError(
+            errno.EAGAIN,
+            'write could not complete without blocking', 0)
+      # read at most 5 bytes.
+      return super(SlowBytesIO, self).read(min(size, 5))
+    return super(SlowBytesIO, self).read(size)
+
+
+class SlowReadableRawBytes(io.RawIOBase):
+  """A readable io.RawIOBase stream that only sometimes returns data."""
+
+  def __init__(self, data: bytes):
+    super(SlowReadableRawBytes, self).__init__()
+    self._bytes_io = io.BytesIO(data)
+    self._state = -1
+
+  def readinto(self, b: bytearray) -> Optional[int]:
+    try:
+      self._state += 1
+      if self._state % 3 == 0:   # return None on every third call.
+        return None
+      # read at most 5 bytes
+      q = self._bytes_io.read(5)
+      b[:len(q)] = q
+      return len(q)
+    except io.BlockingIOError:
+      raise ValueError('io.BytesIO should not raise BlockingIOError')
+
+  def readable(self):
+    return True
