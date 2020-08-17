@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.EllipticCurvesTest');
-goog.setTestOnly('tink.subtle.EllipticCurvesTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const wycheproofEcdhTestVectors = goog.require('tink.subtle.wycheproofEcdhTestVectors');
+import {assertExists} from '../testing/internal/test_utils';
+
+import * as Bytes from './bytes';
+import * as EllipticCurves from './elliptic_curves';
+import * as Random from './random';
+import {WYCHEPROOF_ECDH_TEST_VECTORS} from './wycheproof_ecdh_test_vectors';
 
 describe('elliptic curves test', function() {
   beforeEach(function() {
@@ -34,9 +35,9 @@ describe('elliptic curves test', function() {
   });
 
   it('wycheproof, wycheproof webcrypto', async function() {
-    for (let testGroup of wycheproofEcdhTestVectors['testGroups']) {
+    for (const testGroup of WYCHEPROOF_ECDH_TEST_VECTORS['testGroups']) {
       let errors = '';
-      for (let test of testGroup['tests']) {
+      for (const test of testGroup['tests']) {
         errors += await runWycheproofTest(test);
       }
       if (errors !== '') {
@@ -51,7 +52,7 @@ describe('elliptic curves test', function() {
       EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
       EllipticCurves.CurveType.P521
     ];
-    for (let curve of curveTypes) {
+    for (const curve of curveTypes) {
       const curveTypeString = EllipticCurves.curveToString(curve);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
@@ -66,7 +67,7 @@ describe('elliptic curves test', function() {
       EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
       EllipticCurves.CurveType.P521
     ];
-    for (let curve of curveTypes) {
+    for (const curve of curveTypes) {
       const curveTypeString = EllipticCurves.curveToString(curve);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
@@ -82,7 +83,7 @@ describe('elliptic curves test', function() {
       EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
       EllipticCurves.CurveType.P521
     ];
-    for (let curve of curveTypes) {
+    for (const curve of curveTypes) {
       const curveTypeString = EllipticCurves.curveToString(curve);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
@@ -108,7 +109,7 @@ describe('elliptic curves test', function() {
       EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
       EllipticCurves.CurveType.P521
     ];
-    for (let curve of curveTypes) {
+    for (const curve of curveTypes) {
       const curveTypeString = EllipticCurves.curveToString(curve);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
@@ -130,8 +131,8 @@ describe('elliptic curves test', function() {
   // Test that when JSON ECDH web key is imported and exported it gives the same
   // key as the original one.
   it('import export json key e c d h', async function() {
-    for (let testKey of TEST_KEYS) {
-      const jwk = /** @type {!JsonWebKey} */ ({
+    for (const testKey of TEST_KEYS) {
+      const jwk: JsonWebKey = ({
         'kty': 'EC',
         'crv': testKey.curve,
         'x': Bytes.toBase64(Bytes.fromHex(testKey.x), true),
@@ -157,8 +158,8 @@ describe('elliptic curves test', function() {
   // Test that when JSON ECDSA web key is imported and exported it gives the
   // same key as the original one.
   it('import export json key e c d s a', async function() {
-    for (let testKey of TEST_KEYS) {
-      const jwk = /** @type {!JsonWebKey} */ ({
+    for (const testKey of TEST_KEYS) {
+      const jwk: JsonWebKey = ({
         'kty': 'EC',
         'crv': testKey.curve,
         'x': Bytes.toBase64(Bytes.fromHex(testKey.x), true),
@@ -261,7 +262,7 @@ describe('elliptic curves test', function() {
     const point = new Uint8Array(10);
     const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
 
-    for (let curve
+    for (const curve
              of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
                  EllipticCurves.CurveType.P521]) {
       const curveTypeString = EllipticCurves.curveToString(curve);
@@ -291,14 +292,13 @@ describe('elliptic curves test', function() {
 
   it('point encode decode', function() {
     const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
-    for (let curveType
+    for (const curveType
              of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
                  EllipticCurves.CurveType.P521]) {
       const curveTypeString = EllipticCurves.curveToString(curveType);
       const x = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
       const y = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
-
-      const point = /** @type {!JsonWebKey} */ ({
+      const point: JsonWebKey = ({
         'kty': 'EC',
         'crv': curveTypeString,
         'x': Bytes.toBase64(x, /* websafe = */ true),
@@ -307,7 +307,7 @@ describe('elliptic curves test', function() {
       });
 
       const encodedPoint =
-          EllipticCurves.pointEncode(point['crv'], format, point);
+          EllipticCurves.pointEncode(assertExists(point['crv']), format, point);
       const decodedPoint =
           EllipticCurves.pointDecode(curveTypeString, format, encodedPoint);
 
@@ -316,14 +316,14 @@ describe('elliptic curves test', function() {
   });
 
   it('ecdsa der2 ieee', function() {
-    for (let test of ECDSA_IEEE_DER_TEST_VECTORS) {
+    for (const test of ECDSA_IEEE_DER_TEST_VECTORS) {
       expect(EllipticCurves.ecdsaDer2Ieee(test.der, test.ieee.length))
           .toEqual(test.ieee);
     }
   });
 
   it('ecdsa der2 ieee with invalid signatures', function() {
-    for (let test of INVALID_DER_ECDSA_SIGNATURES) {
+    for (const test of INVALID_DER_ECDSA_SIGNATURES) {
       try {
         EllipticCurves.ecdsaDer2Ieee(
             Bytes.fromHex(test), 1 /* ieeeLength, ignored */);
@@ -335,13 +335,13 @@ describe('elliptic curves test', function() {
   });
 
   it('ecdsa ieee2 der', function() {
-    for (let test of ECDSA_IEEE_DER_TEST_VECTORS) {
+    for (const test of ECDSA_IEEE_DER_TEST_VECTORS) {
       expect(EllipticCurves.ecdsaIeee2Der(test.ieee)).toEqual(test.der);
     }
   });
 
   it('is valid der ecdsa signature', function() {
-    for (let test of INVALID_DER_ECDSA_SIGNATURES) {
+    for (const test of INVALID_DER_ECDSA_SIGNATURES) {
       expect(EllipticCurves.isValidDerEcdsaSignature(Bytes.fromHex(test)))
           .toBe(false);
     }
@@ -351,11 +351,14 @@ describe('elliptic curves test', function() {
 /**
  * Runs the test with test vector given as an input and returns either empty
  * string or a text describing the failure.
- *
- * @param {!Object} test - JSON object with test data
- * @return {!Promise<string>}
  */
-const runWycheproofTest = async function(test) {
+async function runWycheproofTest(test: {
+  'tcId': number,
+  'public': JsonWebKey,
+  'private': JsonWebKey,
+  'shared': string,
+  'result': string,
+}): Promise<string> {
   try {
     const privateKey =
         await EllipticCurves.importPrivateKey('ECDH', test['private']);
@@ -392,32 +395,18 @@ const runWycheproofTest = async function(test) {
   }
   // If the test passes return an empty string.
   return '';
-};
+}
 
 class TestKey {
-  /**
-   * @param {string} curve
-   * @param {string} x
-   * @param {string} y
-   * @param {string=} opt_d
-   */
-  constructor(curve, x, y, opt_d) {
-    /** @const {string} */
-    this.curve = curve;
-    /** @const {string} */
-    this.x = x;
-    /** @const {string} */
-    this.y = y;
-    /** @const {string|undefined} */
-    this.d = opt_d;
-  }
+  constructor(
+      readonly curve: string, readonly x: string, readonly y: string,
+      readonly d?: string) {}
 }
 
 // This set of keys was generated by Java version of Tink.
 // It contains one private and one public key for each curve type supported by
 // Tink.
-/** @type {!Array<!TestKey>} */
-const TEST_KEYS = [
+const TEST_KEYS: TestKey[] = [
   new TestKey(
       /* curve = */ 'P-256',
       /* x = */
@@ -463,20 +452,15 @@ const TEST_KEYS = [
 ];
 
 class EcdsaIeeeDerTestVector {
-  /**
-   * @param {string} ieee
-   * @param {string} der
-   */
-  constructor(ieee, der) {
-    /** @const {!Uint8Array} */
+  ieee: Uint8Array;
+  der: Uint8Array;
+
+  constructor(ieee: string, der: string) {
     this.ieee = Bytes.fromHex(ieee);
-    /** @const {!Uint8Array} */
     this.der = Bytes.fromHex(der);
   }
 }
-
-/** @type {!Array<!EcdsaIeeeDerTestVector>} */
-const ECDSA_IEEE_DER_TEST_VECTORS = [
+const ECDSA_IEEE_DER_TEST_VECTORS: EcdsaIeeeDerTestVector[] = [
   new EcdsaIeeeDerTestVector(  // normal case, short-form length
       '0102030405060708090a0b0c0d0e0f100102030405060708090a0b0c0d0e0f10',
       '302402100102030405060708090a0b0c0d0e0f1002100102030405060708090a0b0c0d0e0f10'),
@@ -497,8 +481,7 @@ const ECDSA_IEEE_DER_TEST_VECTORS = [
       '3006020100020100'),
 ];
 
-/** @type {!Array<string>} */
-const INVALID_DER_ECDSA_SIGNATURES = [
+const INVALID_DER_ECDSA_SIGNATURES: string[] = [
   '2006020101020101',    // 1st byte is not 0x30 (SEQUENCE tag)
   '3006050101020101',    // 3rd byte is not 0x02 (INTEGER tag)
   '3006020101050101',    // 6th byte is not 0x02 (INTEGER tag)

@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.EncryptThenAuthenticateTest');
-goog.setTestOnly('tink.subtle.EncryptThenAuthenticateTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {aesCtrHmacFromRawKeys} = goog.require('google3.third_party.tink.javascript.subtle.encrypt_then_authenticate');
+import * as Bytes from './bytes';
+import {aesCtrHmacFromRawKeys} from './encrypt_then_authenticate';
+import * as Random from './random';
 
 describe('encrypt then authenticate test', function() {
   beforeEach(function() {

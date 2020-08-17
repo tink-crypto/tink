@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.AesCtrTest');
-goog.setTestOnly('tink.subtle.AesCtrTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {fromRawKey: aesCtrFromRawKey} = goog.require('google3.third_party.tink.javascript.subtle.aes_ctr');
+import {fromRawKey as aesCtrFromRawKey} from './aes_ctr';
+import * as Bytes from './bytes';
+import * as Random from './random';
 
 describe('aes ctr test', function() {
   beforeEach(function() {

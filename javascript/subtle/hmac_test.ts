@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.HmacTest');
-goog.setTestOnly('tink.subtle.HmacTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {fromRawKey: hmacFromRawKey} = goog.require('google3.third_party.tink.javascript.subtle.hmac');
+import * as Bytes from './bytes';
+import {fromRawKey as hmacFromRawKey} from './hmac';
+import * as Random from './random';
 
 describe('hmac test', function() {
   it('basic', async function() {

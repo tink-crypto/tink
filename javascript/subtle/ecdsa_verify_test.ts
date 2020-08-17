@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.EcdsaVerifyTest');
-goog.setTestOnly('tink.subtle.EcdsaVerifyTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Validators = goog.require('google3.third_party.tink.javascript.subtle.validators');
-const wycheproofEcdsaTestVectors = goog.require('tink.subtle.wycheproofEcdsaTestVectors');
-const ecdsaSign = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_sign');
-const ecdsaVerify = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_verify');
-const {PublicKeyVerify} = goog.require('google3.third_party.tink.javascript.signature.internal.public_key_verify');
+import {PublicKeyVerify} from '../signature/internal/public_key_verify';
+
+import * as Bytes from './bytes';
+import * as ecdsaSign from './ecdsa_sign';
+import * as ecdsaVerify from './ecdsa_verify';
+import * as EllipticCurves from './elliptic_curves';
+import * as Random from './random';
+import * as Validators from './validators';
+import {WYCHEPROOF_ECDSA_TEST_VECTORS} from './wycheproof_ecdsa_test_vectors';
 
 describe('ecdsa verify test', function() {
   beforeEach(function() {
@@ -142,7 +142,7 @@ describe('ecdsa verify test', function() {
   });
 
   it('wycheproof', async function() {
-    for (let testGroup of wycheproofEcdsaTestVectors['testGroups']) {
+    for (const testGroup of WYCHEPROOF_ECDSA_TEST_VECTORS['testGroups']) {
       try {
         Validators.validateEcdsaParams(
             testGroup['jwk']['crv'], testGroup['sha']);
@@ -153,7 +153,7 @@ describe('ecdsa verify test', function() {
       const verifier =
           await ecdsaVerify.fromJsonWebKey(testGroup['jwk'], testGroup['sha']);
       let errors = '';
-      for (let test of testGroup['tests']) {
+      for (const test of testGroup['tests']) {
         errors += await runWycheproofTest(verifier, test);
       }
       if (errors !== '') {
@@ -166,12 +166,11 @@ describe('ecdsa verify test', function() {
 /**
  * Runs the test with test vector given as an input and returns either empty
  * string or a text describing the failure.
- *
- * @param {!PublicKeyVerify} verifier
- * @param {!Object} test - JSON object with test data
- * @return {!Promise<string>}
  */
-const runWycheproofTest = async function(verifier, test) {
+async function runWycheproofTest(
+    verifier: PublicKeyVerify,
+    test: {'tcId': number, 'msg': string, 'sig': string, 'result': string}):
+    Promise<string> {
   try {
     const sig = Bytes.fromHex(test['sig']);
     const msg = Bytes.fromHex(test['msg']);
@@ -193,4 +192,4 @@ const runWycheproofTest = async function(verifier, test) {
   }
   // If the test passes return an empty string.
   return '';
-};
+}

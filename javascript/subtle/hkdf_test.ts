@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.HkdfTest');
-goog.setTestOnly('tink.subtle.HkdfTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const Hkdf = goog.require('google3.third_party.tink.javascript.subtle.hkdf');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
+import * as Bytes from './bytes';
+import * as Hkdf from './hkdf';
+import * as Random from './random';
 
 describe('hkdf test', function() {
   it('constructor', async function() {

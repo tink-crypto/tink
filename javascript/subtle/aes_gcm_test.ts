@@ -4,19 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.AesGcmTest');
-goog.setTestOnly('tink.subtle.AesGcmTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {fromRawKey: aesGcmFromRawKey} = goog.require('google3.third_party.tink.javascript.subtle.aes_gcm');
+import {fromRawKey as aesGcmFromRawKey} from './aes_gcm';
+import * as Bytes from './bytes';
+import * as Random from './random';
 
-/**
- * Asserts that an exception is the result of a Web Crypto error.
- *
- * @param {*} exception A thrown exception.
- */
-function assertCryptoError(exception) {
+/** Asserts that an exception is the result of a Web Crypto error. */
+function assertCryptoError(exception: unknown) {
   const message = String(exception);
   expect(message.startsWith('SecurityException: OperationError')).toBe(true);
 }

@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.EciesAeadHkdfHybridDecryptTest');
-goog.setTestOnly('tink.subtle.EciesAeadHkdfHybridDecryptTest');
+import 'jasmine';
 
-const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
-const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const {RegistryEciesAeadHkdfDemHelper: DemHelper} = goog.require('google3.third_party.tink.javascript.hybrid.registry_ecies_aead_hkdf_dem_helper');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {fromJsonWebKey: decrypterFromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_decrypt');
-const {fromJsonWebKey: encrypterFromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_aead_hkdf_hybrid_encrypt');
+import {AeadConfig} from '../aead/aead_config';
+import {AeadKeyTemplates} from '../aead/aead_key_templates';
+import {RegistryEciesAeadHkdfDemHelper as DemHelper} from '../hybrid/registry_ecies_aead_hkdf_dem_helper';
+import * as Registry from '../internal/registry';
+
+import {fromJsonWebKey as decrypterFromJsonWebKey} from './ecies_aead_hkdf_hybrid_decrypt';
+import {fromJsonWebKey as encrypterFromJsonWebKey} from './ecies_aead_hkdf_hybrid_encrypt';
+import * as EllipticCurves from './elliptic_curves';
+import * as Random from './random';
 
 describe('ecies aead hkdf hybrid decrypt test', function() {
   beforeEach(function() {
@@ -110,8 +110,8 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
 
     // Test the encryption for different HMAC algorithms and different types of
     // curves.
-    for (let hkdfHash of hmacAlgorithms) {
-      for (let curve of curves) {
+    for (const hkdfHash of hmacAlgorithms) {
+      for (const curve of curves) {
         const curveName = EllipticCurves.curveToString(curve);
         const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
         const privateKey =

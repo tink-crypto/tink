@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.EcdsaSignTest');
-goog.setTestOnly('tink.subtle.EcdsaSignTest');
+import 'jasmine';
 
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {fromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecdsa_sign');
+import {fromJsonWebKey} from './ecdsa_sign';
+import * as EllipticCurves from './elliptic_curves';
+import * as Random from './random';
 
 describe('ecdsa sign test', function() {
   beforeEach(function() {

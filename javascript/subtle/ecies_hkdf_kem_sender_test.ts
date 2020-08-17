@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.subtle.EciesHkdfKemSenderTest');
-goog.setTestOnly('tink.subtle.EciesHkdfKemSenderTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {EciesHkdfKemSender, fromJsonWebKey} = goog.require('google3.third_party.tink.javascript.subtle.ecies_hkdf_kem_sender');
+import * as Bytes from './bytes';
+import {EciesHkdfKemSender, fromJsonWebKey} from './ecies_hkdf_kem_sender';
+import * as EllipticCurves from './elliptic_curves';
+import * as Random from './random';
 
 describe('ecies hkdf kem sender test', function() {
   it('encapsulate, always generate random key', async function() {
@@ -70,7 +69,7 @@ describe('ecies hkdf kem sender test', function() {
   });
 
   it('new instance, invalid public key', async function() {
-    for (let curve
+    for (const curve
              of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
                  EllipticCurves.CurveType.P521]) {
       const crvString = EllipticCurves.curveToString(curve);
